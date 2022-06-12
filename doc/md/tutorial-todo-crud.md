@@ -39,13 +39,13 @@ func (Todo) Fields() []ent.Field {
 			Default(time.Now).
 			Immutable(),
 		field.Enum("status").
-            NamedValues(
-                "InProgress", "IN_PROGRESS",
-                "Completed", "COMPLETED",
-            ).
-            Annotations(
-                entgql.OrderField("STATUS")
-            ),
+			NamedValues(
+				"InProgress", "IN_PROGRESS",
+				"Completed", "COMPLETED",
+			).
+			Annotations(
+				entgql.OrderField("STATUS"),
+			),
 			Default("in_progress"),
 		field.Int("priority").
 			Default(0),
