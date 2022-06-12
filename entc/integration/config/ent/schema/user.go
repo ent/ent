@@ -44,7 +44,8 @@ func (User) Fields() []ent.Field {
 			Optional().
 			Annotations(entsql.Annotation{
 				Size: 128,
-			}).Comment(`Comment line1
+			}).Comment(`Name of the user.
+Comment line1
 Comment line2`),
 		field.String("label").
 			Optional(),

@@ -19,7 +19,7 @@ type User struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// Name holds the value of the "name" field.
+	// Name of the user.
 	// Comment line1
 	// Comment line2
 	Name string `json:"name,omitempty"`

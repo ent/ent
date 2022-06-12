@@ -29,8 +29,7 @@ type Card struct {
 	Balance float64 `json:"balance,omitempty"`
 	// Number holds the value of the "number" field.
 	Number string `json:"-"`
-	// Name holds the value of the "name" field.
-	// Exact name written on card
+	// Name exactly as written on card.
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CardQuery when eager-loading is set.
@@ -43,7 +42,7 @@ type Card struct {
 
 // CardEdges holds the relations/edges for other nodes in the graph.
 type CardEdges struct {
-	// Owner holds the value of the owner edge.
+	// Owner of the card. O2O inverse edge
 	Owner *User `json:"owner,omitempty"`
 	// Spec holds the value of the spec edge.
 	Spec []*Spec `json:"spec,omitempty"`
