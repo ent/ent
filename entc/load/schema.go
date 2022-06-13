@@ -73,6 +73,7 @@ type Edge struct {
 	Required    bool                   `json:"required,omitempty"`
 	StorageKey  *edge.StorageKey       `json:"storage_key,omitempty"`
 	Annotations map[string]interface{} `json:"annotations,omitempty"`
+	Comment     string                 `json:"comment,omitempty"`
 }
 
 // Index represents an ent.Index that was loaded from a complied user package.
@@ -97,6 +98,7 @@ func NewEdge(ed *edge.Descriptor) *Edge {
 		RefName:     ed.RefName,
 		Through:     ed.Through,
 		StorageKey:  ed.StorageKey,
+		Comment:     ed.Comment,
 		Annotations: make(map[string]interface{}),
 	}
 	for _, at := range ed.Annotations {

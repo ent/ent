@@ -83,7 +83,7 @@ func (Card) Fields() []ent.Field {
 		field.Time("created_at").
 			Default(time.Now),
 		field.String("in_hook").
-			Comment("A mandatory field that is set by the hook"),
+			Comment("InHook is a mandatory field that is set by the hook."),
 	}
 }
 

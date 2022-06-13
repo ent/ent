@@ -19,7 +19,6 @@ type User struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// Version holds the value of the "version" field.
 	// Unix time of when the latest update occurred
 	Version int64 `json:"version,omitempty"`
 	// Status holds the value of the "status" field.

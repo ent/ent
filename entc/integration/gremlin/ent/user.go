@@ -50,7 +50,7 @@ type User struct {
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
-	// Card holds the value of the card edge.
+	// Cards associated with this user. O2O edge
 	Card *Card `json:"card,omitempty"`
 	// Pets holds the value of the pets edge.
 	Pets []*Pet `json:"pets,omitempty"`

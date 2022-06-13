@@ -24,6 +24,7 @@ type Descriptor struct {
 	Required    bool                   // required on creation.
 	StorageKey  *StorageKey            // optional storage-key configuration.
 	Annotations []schema.Annotation    // edge annotations.
+	Comment     string                 // edge comment.
 }
 
 // To defines an association edge between two vertices.
@@ -98,7 +99,8 @@ func (b *assocBuilder) Through(name string, t interface{}) *assocBuilder {
 }
 
 // Comment used to put annotations on the schema.
-func (b *assocBuilder) Comment(string) *assocBuilder {
+func (b *assocBuilder) Comment(c string) *assocBuilder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -165,7 +167,8 @@ func (b *inverseBuilder) StructTag(s string) *inverseBuilder {
 }
 
 // Comment used to put annotations on the schema.
-func (b *inverseBuilder) Comment(string) *inverseBuilder {
+func (b *inverseBuilder) Comment(c string) *inverseBuilder {
+	b.desc.Comment = c
 	return b
 }
 

@@ -26,7 +26,7 @@ type Tweet struct {
 type TweetEdges struct {
 	// LikedUsers holds the value of the liked_users edge.
 	LikedUsers []*User `json:"liked_users,omitempty"`
-	// User holds the value of the user edge.
+	// The uniqueness is enforced on the edge schema
 	User []*User `json:"user,omitempty"`
 	// Likes holds the value of the likes edge.
 	Likes []*TweetLike `json:"likes,omitempty"`

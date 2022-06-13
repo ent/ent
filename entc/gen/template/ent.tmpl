@@ -59,7 +59,7 @@ type {{ $.Name }} struct {
 // {{ $.Name }}Edges holds the relations/edges for other nodes in the graph.
 type {{ $.Name }}Edges struct {
 	{{- range $e := . }}
-		// {{ $e.StructField }} holds the value of the {{ $e.Name }} edge.
+		{{- template "model/edgecomment" $e }}
 		{{ $e.StructField }} {{ if not $e.Unique }}[]{{ end }}*{{ $e.Type.Name }} {{ with $e.StructTag }}`{{ . }}`{{ end }}
 	{{- end }}
 	// loadedTypes holds the information for reporting if a
@@ -207,11 +207,23 @@ func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 
 {{/* A template for setting the field comment. */}}
 {{- define "model/fieldcomment" }}
-	// {{ $.StructField }} holds the value of the "{{ $.Name }}" field.
 	{{- if $.Comment }}
 		{{- range $line := split $.Comment "\n" }}
 			// {{ $line }}
 		{{- end }}
+	{{- else }}
+		// {{ $.StructField }} holds the value of the "{{ $.Name }}" field.
+	{{- end }}
+{{- end }}
+
+{{/* A template for setting the edge comment. */}}
+{{- define "model/edgecomment" }}
+	{{- if $.Comment }}
+		{{- range $line := split $.Comment "\n" }}
+			// {{ $line }}
+		{{- end }}
+	{{- else }}
+		// {{ $.StructField }} holds the value of the {{ $.Name }} edge.
 	{{- end }}
 {{- end }}
 
