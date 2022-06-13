@@ -228,11 +228,11 @@ func Versioned(t *testing.T, drv sql.ExecQuerier, client *versioned.Client) {
 		template.Must(template.New("name").Parse(`{{ range .Changes }}{{ printf "%s;\n" .Cmd }}{{ end }}`)),
 	)
 	require.NoError(t, err)
-	opts := []schema.MigrateOption{schema.WithDir(dir), schema.WithGlobalUniqueID(true), schema.WithFormatter(format)}
+	opts := []schema.MigrateOption{schema.WithDir(dir), schema.WithDeterministicGlobalUniqueID(), schema.WithFormatter(format)}
 
 	// Compared to empty database.
 	require.NoError(t, client.Schema.NamedDiff(ctx, "first", opts...))
-	require.Equal(t, 1, countFiles(t, dir))
+	require.Equal(t, 2, countFiles(t, dir))
 
 	// Apply the migrations.
 	fs, err := dir.Files()
@@ -249,7 +249,7 @@ func Versioned(t *testing.T, drv sql.ExecQuerier, client *versioned.Client) {
 
 	// Diff again - there should not be a new file.
 	require.NoError(t, client.Schema.NamedDiff(ctx, "second", opts...))
-	require.Equal(t, 1, countFiles(t, dir))
+	require.Equal(t, 2, countFiles(t, dir))
 }
 
 func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv2.Client) {

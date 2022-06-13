@@ -74,11 +74,11 @@ func (gr *Group) Update() *GroupUpdateOne {
 // Unwrap unwraps the Group entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (gr *Group) Unwrap() *Group {
-	tx, ok := gr.config.driver.(*txDriver)
+	_tx, ok := gr.config.driver.(*txDriver)
 	if !ok {
 		panic("versioned: Group is not a transactional entity")
 	}
-	gr.config.driver = tx.drv
+	gr.config.driver = _tx.drv
 	return gr
 }
 

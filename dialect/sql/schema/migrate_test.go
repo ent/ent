@@ -6,13 +6,17 @@ package schema
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+	"text/template"
 	"time"
 
 	"ariga.io/atlas/sql/migrate"
 	"ariga.io/atlas/sql/schema"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -80,7 +84,7 @@ func TestMigrate_Diff(t *testing.T) {
 	m, err := NewMigrate(db, WithDir(d))
 	require.NoError(t, err)
 	require.NoError(t, m.Diff(context.Background(), &Table{Name: "users"}))
-	v := time.Now().Format("20060102150405")
+	v := time.Now().UTC().Format("20060102150405")
 	requireFileEqual(t, filepath.Join(p, v+"_changes.up.sql"), "-- create \"users\" table\nCREATE TABLE `users` (, PRIMARY KEY ());\n")
 	requireFileEqual(t, filepath.Join(p, v+"_changes.down.sql"), "-- reverse: create \"users\" table\nDROP TABLE `users`;\n")
 	require.NoFileExists(t, filepath.Join(p, "atlas.sum"))
@@ -97,6 +101,82 @@ func TestMigrate_Diff(t *testing.T) {
 	require.FileExists(t, filepath.Join(p, "atlas.sum"))
 	require.NoError(t, d.WriteFile("tmp.sql", nil))
 	require.ErrorIs(t, m.Diff(context.Background(), &Table{Name: "users"}), migrate.ErrChecksumMismatch)
+
+	// Test type store.
+	idCol := []*Column{{Name: "id", Type: field.TypeInt, Increment: true}}
+	p = t.TempDir()
+	d, err = migrate.NewLocalDir(p)
+	require.NoError(t, err)
+	f, err := migrate.NewTemplateFormatter(
+		template.Must(template.New("").Parse("{{ .Name }}.sql")),
+		template.Must(template.New("").Parse(
+			`{{ range .Changes }}{{ printf "%s;\n" .Cmd }}{{ end }}`,
+		)),
+	)
+	require.NoError(t, err)
+
+	// If using global unique ID and versioned migrations,
+	// consent for the file based type store has to be given explicitly.
+	_, err = NewMigrate(db, WithDir(d), WithGlobalUniqueID(true))
+	require.ErrorIs(t, err, errConsent)
+	require.Contains(t, err.Error(), "WithDeterministicGlobalUniqueID")
+	require.Contains(t, err.Error(), "WithGlobalUniqueID")
+	require.Contains(t, err.Error(), "WithDir")
+
+	m, err = NewMigrate(db, WithFormatter(f), WithDir(d), WithDeterministicGlobalUniqueID(), WithSumFile())
+	require.NoError(t, err)
+	require.IsType(t, &dirTypeStore{}, m.typeStore)
+	require.NoError(t, m.Diff(context.Background(),
+		&Table{Name: "users", Columns: idCol, PrimaryKey: idCol},
+		&Table{Name: "groups", Columns: idCol, PrimaryKey: idCol},
+	))
+	requireFileEqual(t, filepath.Join(p, ".ent_types"), `["users","groups"]`)
+	changesSQL := strings.Join([]string{
+		"CREATE TABLE `users` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT);",
+		"CREATE TABLE `groups` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT);",
+		fmt.Sprintf("INSERT INTO sqlite_sequence (name, seq) VALUES (\"groups\", %d);", 1<<32),
+		"CREATE TABLE `ent_types` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT, `type` text NOT NULL);",
+		"CREATE UNIQUE INDEX `ent_types_type_key` ON `ent_types` (`type`);",
+		"INSERT INTO `ent_types` (`type`) VALUES ('users'), ('groups');", "",
+	}, "\n")
+	requireFileEqual(t, filepath.Join(p, "changes.sql"), changesSQL)
+
+	// Adding another node will result in a new entry to the TypeTable (without actually creating it).
+	_, err = db.ExecContext(context.Background(), changesSQL, nil, nil)
+	require.NoError(t, err)
+	require.NoError(t, m.NamedDiff(context.Background(), "changes_2", &Table{Name: "pets", Columns: idCol, PrimaryKey: idCol}))
+	requireFileEqual(t, filepath.Join(p, ".ent_types"), `["users","groups","pets"]`)
+	requireFileEqual(t,
+		filepath.Join(p, "changes_2.sql"), strings.Join([]string{
+			"CREATE TABLE `pets` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT);",
+			fmt.Sprintf("INSERT INTO sqlite_sequence (name, seq) VALUES (\"pets\", %d);", 2<<32),
+			"INSERT INTO `ent_types` (`type`) VALUES ('pets');", "",
+		}, "\n"))
+
+	// Checksum will be updated as well.
+	require.NoError(t, migrate.Validate(d))
+
+	// Running diff against an existing database without having a types file yet
+	// will result in the types file respect the "old" order of pk allocations.
+	for _, stmt := range []string{
+		"DELETE FROM `ent_types`;",
+		"INSERT INTO `ent_types` (`type`) VALUES ('groups'), ('users');", // switched allocations
+	} {
+		_, err = db.ExecContext(context.Background(), stmt)
+		require.NoError(t, err)
+	}
+	p = t.TempDir()
+	d, err = migrate.NewLocalDir(p)
+	require.NoError(t, err)
+	m, err = NewMigrate(db, WithFormatter(f), WithDir(d), WithDeterministicGlobalUniqueID())
+	require.NoError(t, err)
+
+	require.NoError(t, m.Diff(context.Background(),
+		&Table{Name: "users", Columns: idCol, PrimaryKey: idCol},
+		&Table{Name: "groups", Columns: idCol, PrimaryKey: idCol},
+	))
+	requireFileEqual(t, filepath.Join(p, ".ent_types"), `["groups","users"]`)
+	require.NoFileExists(t, filepath.Join(p, "changes.sql"))
 }
 
 func requireFileEqual(t *testing.T, name, contents string) {
