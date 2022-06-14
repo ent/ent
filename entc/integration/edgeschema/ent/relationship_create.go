@@ -161,7 +161,7 @@ func (rc *RelationshipCreate) sqlSave(ctx context.Context) (*Relationship, error
 	_node, _spec := rc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, rc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
-			err = &ConstraintError{err.Error(), err}
+			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
@@ -259,7 +259,7 @@ func (rcb *RelationshipCreateBulk) Save(ctx context.Context) ([]*Relationship, e
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, rcb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
-							err = &ConstraintError{err.Error(), err}
+							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
 				}

@@ -996,7 +996,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 	_node, _spec := ftc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
-			err = &ConstraintError{err.Error(), err}
+			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
@@ -4509,7 +4509,7 @@ func (ftcb *FieldTypeCreateBulk) Save(ctx context.Context) ([]*FieldType, error)
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, ftcb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
-							err = &ConstraintError{err.Error(), err}
+							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
 				}

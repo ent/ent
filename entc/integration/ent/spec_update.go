@@ -203,7 +203,7 @@ func (su *SpecUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{spec.Label}
 		} else if sqlgraph.IsConstraintError(err) {
-			err = &ConstraintError{err.Error(), err}
+			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return 0, err
 	}
@@ -422,7 +422,7 @@ func (suo *SpecUpdateOne) sqlSave(ctx context.Context) (_node *Spec, err error) 
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{spec.Label}
 		} else if sqlgraph.IsConstraintError(err) {
-			err = &ConstraintError{err.Error(), err}
+			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}

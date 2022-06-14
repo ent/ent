@@ -211,7 +211,7 @@ func (mu *MediaUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{media.Label}
 		} else if sqlgraph.IsConstraintError(err) {
-			err = &ConstraintError{err.Error(), err}
+			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return 0, err
 	}
@@ -439,7 +439,7 @@ func (muo *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{media.Label}
 		} else if sqlgraph.IsConstraintError(err) {
-			err = &ConstraintError{err.Error(), err}
+			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}

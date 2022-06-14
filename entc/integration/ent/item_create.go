@@ -156,7 +156,7 @@ func (ic *ItemCreate) sqlSave(ctx context.Context) (*Item, error) {
 	_node, _spec := ic.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ic.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
-			err = &ConstraintError{err.Error(), err}
+			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
@@ -410,7 +410,7 @@ func (icb *ItemCreateBulk) Save(ctx context.Context) ([]*Item, error) {
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, icb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
-							err = &ConstraintError{err.Error(), err}
+							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
 				}

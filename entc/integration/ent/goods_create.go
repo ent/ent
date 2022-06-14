@@ -108,7 +108,7 @@ func (gc *GoodsCreate) sqlSave(ctx context.Context) (*Goods, error) {
 	_node, _spec := gc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, gc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
-			err = &ConstraintError{err.Error(), err}
+			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
@@ -286,7 +286,7 @@ func (gcb *GoodsCreateBulk) Save(ctx context.Context) ([]*Goods, error) {
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, gcb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
-							err = &ConstraintError{err.Error(), err}
+							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
 				}

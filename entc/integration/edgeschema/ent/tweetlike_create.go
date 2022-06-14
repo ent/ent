@@ -163,7 +163,7 @@ func (tlc *TweetLikeCreate) sqlSave(ctx context.Context) (*TweetLike, error) {
 	_node, _spec := tlc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, tlc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
-			err = &ConstraintError{err.Error(), err}
+			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
@@ -261,7 +261,7 @@ func (tlcb *TweetLikeCreateBulk) Save(ctx context.Context) ([]*TweetLike, error)
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, tlcb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
-							err = &ConstraintError{err.Error(), err}
+							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
 				}

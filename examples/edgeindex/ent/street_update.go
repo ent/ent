@@ -186,7 +186,7 @@ func (su *StreetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{street.Label}
 		} else if sqlgraph.IsConstraintError(err) {
-			err = &ConstraintError{err.Error(), err}
+			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return 0, err
 	}
@@ -388,7 +388,7 @@ func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (_node *Street, err err
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{street.Label}
 		} else if sqlgraph.IsConstraintError(err) {
-			err = &ConstraintError{err.Error(), err}
+			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
