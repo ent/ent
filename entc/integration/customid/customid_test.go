@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"net"
 	"strconv"
+	"strings"
 	"testing"
 
 	"entgo.io/ent/dialect"
@@ -18,6 +19,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent"
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/doc"
+	"entgo.io/ent/entc/integration/customid/ent/intsid"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 	"entgo.io/ent/entc/integration/customid/ent/token"
 	"entgo.io/ent/entc/integration/customid/ent/user"
@@ -115,6 +117,27 @@ func CustomID(t *testing.T, client *ent.Client) {
 	require.Equal(t, lnk.ID, chd.QueryLinks().OnlyX(ctx).ID)
 	require.Equal(t, lnk.ID, blb.QueryLinks().OnlyX(ctx).ID)
 	require.Len(t, client.Blob.Query().IDsX(ctx), 3)
+
+	iSid := client.IntSid.Create().SaveX(ctx)
+	require.Equal(t, sid.ID("1"), iSid.ID)
+	iSidChildID := sid.ID("100")
+	iSidChild := client.IntSid.Create().SetID(iSidChildID).SetParent(iSid).SaveX(ctx)
+	require.Equal(t, iSidChildID, iSidChild.ID)
+	require.Equal(t, iSid.ID, iSidChild.QueryParent().OnlyX(ctx).ID)
+	iSidBulk := make([]*ent.IntSidCreate, 2)
+	iSidBulk[0] = client.IntSid.Create().SetParent(iSid)
+	iSidBulk[1] = client.IntSid.Create().SetParent(iSid)
+	isChildren := client.IntSid.CreateBulk(iSidBulk...).SaveX(ctx)
+	if strings.HasPrefix(t.Name(), "TestPostgres/") {
+		require.Equal(t, sid.ID("2"), isChildren[0].ID)
+		require.Equal(t, sid.ID("3"), isChildren[1].ID)
+	} else {
+		require.Equal(t, sid.ID("101"), isChildren[0].ID)
+		require.Equal(t, sid.ID("102"), isChildren[1].ID)
+	}
+	iSidArray := client.IntSid.Query().Where(intsid.ID(iSid.ID)).WithChildren().AllX(ctx)
+	require.Equal(t, 1, len(iSidArray))
+	require.Equal(t, 3, len(iSidArray[0].Edges.Children))
 
 	pedro := client.Pet.Create().SetID("pedro").SetOwner(a8m).SaveX(ctx)
 	require.Equal(t, a8m.ID, pedro.QueryOwner().OnlyIDX(ctx))
