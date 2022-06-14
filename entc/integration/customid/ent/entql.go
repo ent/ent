@@ -486,7 +486,7 @@ func (aq *AccountQuery) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns a Filter implementation to apply filters on the AccountQuery builder.
 func (aq *AccountQuery) Filter() *AccountFilter {
-	return &AccountFilter{aq.config, aq}
+	return &AccountFilter{config: aq.config, predicateAdder: aq}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -496,13 +496,13 @@ func (m *AccountMutation) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns an entql.Where implementation to apply filters on the AccountMutation builder.
 func (m *AccountMutation) Filter() *AccountFilter {
-	return &AccountFilter{m.config, m}
+	return &AccountFilter{config: m.config, predicateAdder: m}
 }
 
 // AccountFilter provides a generic filtering capability at runtime for AccountQuery.
 type AccountFilter struct {
-	config
 	predicateAdder
+	config
 }
 
 // Where applies the entql predicate on the query filter.
@@ -545,7 +545,7 @@ func (bq *BlobQuery) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns a Filter implementation to apply filters on the BlobQuery builder.
 func (bq *BlobQuery) Filter() *BlobFilter {
-	return &BlobFilter{bq.config, bq}
+	return &BlobFilter{config: bq.config, predicateAdder: bq}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -555,13 +555,13 @@ func (m *BlobMutation) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns an entql.Where implementation to apply filters on the BlobMutation builder.
 func (m *BlobMutation) Filter() *BlobFilter {
-	return &BlobFilter{m.config, m}
+	return &BlobFilter{config: m.config, predicateAdder: m}
 }
 
 // BlobFilter provides a generic filtering capability at runtime for BlobQuery.
 type BlobFilter struct {
-	config
 	predicateAdder
+	config
 }
 
 // Where applies the entql predicate on the query filter.
@@ -623,7 +623,7 @@ func (cq *CarQuery) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns a Filter implementation to apply filters on the CarQuery builder.
 func (cq *CarQuery) Filter() *CarFilter {
-	return &CarFilter{cq.config, cq}
+	return &CarFilter{config: cq.config, predicateAdder: cq}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -633,13 +633,13 @@ func (m *CarMutation) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns an entql.Where implementation to apply filters on the CarMutation builder.
 func (m *CarMutation) Filter() *CarFilter {
-	return &CarFilter{m.config, m}
+	return &CarFilter{config: m.config, predicateAdder: m}
 }
 
 // CarFilter provides a generic filtering capability at runtime for CarQuery.
 type CarFilter struct {
-	config
 	predicateAdder
+	config
 }
 
 // Where applies the entql predicate on the query filter.
@@ -692,7 +692,7 @@ func (dq *DeviceQuery) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns a Filter implementation to apply filters on the DeviceQuery builder.
 func (dq *DeviceQuery) Filter() *DeviceFilter {
-	return &DeviceFilter{dq.config, dq}
+	return &DeviceFilter{config: dq.config, predicateAdder: dq}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -702,13 +702,13 @@ func (m *DeviceMutation) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns an entql.Where implementation to apply filters on the DeviceMutation builder.
 func (m *DeviceMutation) Filter() *DeviceFilter {
-	return &DeviceFilter{m.config, m}
+	return &DeviceFilter{config: m.config, predicateAdder: m}
 }
 
 // DeviceFilter provides a generic filtering capability at runtime for DeviceQuery.
 type DeviceFilter struct {
-	config
 	predicateAdder
+	config
 }
 
 // Where applies the entql predicate on the query filter.
@@ -760,7 +760,7 @@ func (dq *DocQuery) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns a Filter implementation to apply filters on the DocQuery builder.
 func (dq *DocQuery) Filter() *DocFilter {
-	return &DocFilter{dq.config, dq}
+	return &DocFilter{config: dq.config, predicateAdder: dq}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -770,13 +770,13 @@ func (m *DocMutation) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns an entql.Where implementation to apply filters on the DocMutation builder.
 func (m *DocMutation) Filter() *DocFilter {
-	return &DocFilter{m.config, m}
+	return &DocFilter{config: m.config, predicateAdder: m}
 }
 
 // DocFilter provides a generic filtering capability at runtime for DocQuery.
 type DocFilter struct {
-	config
 	predicateAdder
+	config
 }
 
 // Where applies the entql predicate on the query filter.
@@ -833,7 +833,7 @@ func (gq *GroupQuery) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns a Filter implementation to apply filters on the GroupQuery builder.
 func (gq *GroupQuery) Filter() *GroupFilter {
-	return &GroupFilter{gq.config, gq}
+	return &GroupFilter{config: gq.config, predicateAdder: gq}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -843,13 +843,13 @@ func (m *GroupMutation) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns an entql.Where implementation to apply filters on the GroupMutation builder.
 func (m *GroupMutation) Filter() *GroupFilter {
-	return &GroupFilter{m.config, m}
+	return &GroupFilter{config: m.config, predicateAdder: m}
 }
 
 // GroupFilter provides a generic filtering capability at runtime for GroupQuery.
 type GroupFilter struct {
-	config
 	predicateAdder
+	config
 }
 
 // Where applies the entql predicate on the query filter.
@@ -887,7 +887,7 @@ func (miq *MixinIDQuery) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns a Filter implementation to apply filters on the MixinIDQuery builder.
 func (miq *MixinIDQuery) Filter() *MixinIDFilter {
-	return &MixinIDFilter{miq.config, miq}
+	return &MixinIDFilter{config: miq.config, predicateAdder: miq}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -897,13 +897,13 @@ func (m *MixinIDMutation) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns an entql.Where implementation to apply filters on the MixinIDMutation builder.
 func (m *MixinIDMutation) Filter() *MixinIDFilter {
-	return &MixinIDFilter{m.config, m}
+	return &MixinIDFilter{config: m.config, predicateAdder: m}
 }
 
 // MixinIDFilter provides a generic filtering capability at runtime for MixinIDQuery.
 type MixinIDFilter struct {
-	config
 	predicateAdder
+	config
 }
 
 // Where applies the entql predicate on the query filter.
@@ -937,7 +937,7 @@ func (nq *NoteQuery) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns a Filter implementation to apply filters on the NoteQuery builder.
 func (nq *NoteQuery) Filter() *NoteFilter {
-	return &NoteFilter{nq.config, nq}
+	return &NoteFilter{config: nq.config, predicateAdder: nq}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -947,13 +947,13 @@ func (m *NoteMutation) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns an entql.Where implementation to apply filters on the NoteMutation builder.
 func (m *NoteMutation) Filter() *NoteFilter {
-	return &NoteFilter{m.config, m}
+	return &NoteFilter{config: m.config, predicateAdder: m}
 }
 
 // NoteFilter provides a generic filtering capability at runtime for NoteQuery.
 type NoteFilter struct {
-	config
 	predicateAdder
+	config
 }
 
 // Where applies the entql predicate on the query filter.
@@ -1010,7 +1010,7 @@ func (oq *OtherQuery) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns a Filter implementation to apply filters on the OtherQuery builder.
 func (oq *OtherQuery) Filter() *OtherFilter {
-	return &OtherFilter{oq.config, oq}
+	return &OtherFilter{config: oq.config, predicateAdder: oq}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1020,13 +1020,13 @@ func (m *OtherMutation) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns an entql.Where implementation to apply filters on the OtherMutation builder.
 func (m *OtherMutation) Filter() *OtherFilter {
-	return &OtherFilter{m.config, m}
+	return &OtherFilter{config: m.config, predicateAdder: m}
 }
 
 // OtherFilter provides a generic filtering capability at runtime for OtherQuery.
 type OtherFilter struct {
-	config
 	predicateAdder
+	config
 }
 
 // Where applies the entql predicate on the query filter.
@@ -1050,7 +1050,7 @@ func (pq *PetQuery) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns a Filter implementation to apply filters on the PetQuery builder.
 func (pq *PetQuery) Filter() *PetFilter {
-	return &PetFilter{pq.config, pq}
+	return &PetFilter{config: pq.config, predicateAdder: pq}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1060,13 +1060,13 @@ func (m *PetMutation) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns an entql.Where implementation to apply filters on the PetMutation builder.
 func (m *PetMutation) Filter() *PetFilter {
-	return &PetFilter{m.config, m}
+	return &PetFilter{config: m.config, predicateAdder: m}
 }
 
 // PetFilter provides a generic filtering capability at runtime for PetQuery.
 type PetFilter struct {
-	config
 	predicateAdder
+	config
 }
 
 // Where applies the entql predicate on the query filter.
@@ -1146,7 +1146,7 @@ func (rq *RevisionQuery) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns a Filter implementation to apply filters on the RevisionQuery builder.
 func (rq *RevisionQuery) Filter() *RevisionFilter {
-	return &RevisionFilter{rq.config, rq}
+	return &RevisionFilter{config: rq.config, predicateAdder: rq}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1156,13 +1156,13 @@ func (m *RevisionMutation) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns an entql.Where implementation to apply filters on the RevisionMutation builder.
 func (m *RevisionMutation) Filter() *RevisionFilter {
-	return &RevisionFilter{m.config, m}
+	return &RevisionFilter{config: m.config, predicateAdder: m}
 }
 
 // RevisionFilter provides a generic filtering capability at runtime for RevisionQuery.
 type RevisionFilter struct {
-	config
 	predicateAdder
+	config
 }
 
 // Where applies the entql predicate on the query filter.
@@ -1186,7 +1186,7 @@ func (sq *SessionQuery) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns a Filter implementation to apply filters on the SessionQuery builder.
 func (sq *SessionQuery) Filter() *SessionFilter {
-	return &SessionFilter{sq.config, sq}
+	return &SessionFilter{config: sq.config, predicateAdder: sq}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1196,13 +1196,13 @@ func (m *SessionMutation) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns an entql.Where implementation to apply filters on the SessionMutation builder.
 func (m *SessionMutation) Filter() *SessionFilter {
-	return &SessionFilter{m.config, m}
+	return &SessionFilter{config: m.config, predicateAdder: m}
 }
 
 // SessionFilter provides a generic filtering capability at runtime for SessionQuery.
 type SessionFilter struct {
-	config
 	predicateAdder
+	config
 }
 
 // Where applies the entql predicate on the query filter.
@@ -1240,7 +1240,7 @@ func (tq *TokenQuery) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns a Filter implementation to apply filters on the TokenQuery builder.
 func (tq *TokenQuery) Filter() *TokenFilter {
-	return &TokenFilter{tq.config, tq}
+	return &TokenFilter{config: tq.config, predicateAdder: tq}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1250,13 +1250,13 @@ func (m *TokenMutation) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns an entql.Where implementation to apply filters on the TokenMutation builder.
 func (m *TokenMutation) Filter() *TokenFilter {
-	return &TokenFilter{m.config, m}
+	return &TokenFilter{config: m.config, predicateAdder: m}
 }
 
 // TokenFilter provides a generic filtering capability at runtime for TokenQuery.
 type TokenFilter struct {
-	config
 	predicateAdder
+	config
 }
 
 // Where applies the entql predicate on the query filter.
@@ -1299,7 +1299,7 @@ func (uq *UserQuery) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns a Filter implementation to apply filters on the UserQuery builder.
 func (uq *UserQuery) Filter() *UserFilter {
-	return &UserFilter{uq.config, uq}
+	return &UserFilter{config: uq.config, predicateAdder: uq}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1309,13 +1309,13 @@ func (m *UserMutation) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns an entql.Where implementation to apply filters on the UserMutation builder.
 func (m *UserMutation) Filter() *UserFilter {
-	return &UserFilter{m.config, m}
+	return &UserFilter{config: m.config, predicateAdder: m}
 }
 
 // UserFilter provides a generic filtering capability at runtime for UserQuery.
 type UserFilter struct {
-	config
 	predicateAdder
+	config
 }
 
 // Where applies the entql predicate on the query filter.
