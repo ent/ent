@@ -155,7 +155,7 @@ func (tq *TaskQuery) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns a Filter implementation to apply filters on the TaskQuery builder.
 func (tq *TaskQuery) Filter() *TaskFilter {
-	return &TaskFilter{tq.config, tq}
+	return &TaskFilter{config: tq.config, predicateAdder: tq}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -165,13 +165,13 @@ func (m *TaskMutation) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns an entql.Where implementation to apply filters on the TaskMutation builder.
 func (m *TaskMutation) Filter() *TaskFilter {
-	return &TaskFilter{m.config, m}
+	return &TaskFilter{config: m.config, predicateAdder: m}
 }
 
 // TaskFilter provides a generic filtering capability at runtime for TaskQuery.
 type TaskFilter struct {
-	config
 	predicateAdder
+	config
 }
 
 // Where applies the entql predicate on the query filter.
@@ -243,7 +243,7 @@ func (tq *TeamQuery) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns a Filter implementation to apply filters on the TeamQuery builder.
 func (tq *TeamQuery) Filter() *TeamFilter {
-	return &TeamFilter{tq.config, tq}
+	return &TeamFilter{config: tq.config, predicateAdder: tq}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -253,13 +253,13 @@ func (m *TeamMutation) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns an entql.Where implementation to apply filters on the TeamMutation builder.
 func (m *TeamMutation) Filter() *TeamFilter {
-	return &TeamFilter{m.config, m}
+	return &TeamFilter{config: m.config, predicateAdder: m}
 }
 
 // TeamFilter provides a generic filtering capability at runtime for TeamQuery.
 type TeamFilter struct {
-	config
 	predicateAdder
+	config
 }
 
 // Where applies the entql predicate on the query filter.
@@ -316,7 +316,7 @@ func (uq *UserQuery) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns a Filter implementation to apply filters on the UserQuery builder.
 func (uq *UserQuery) Filter() *UserFilter {
-	return &UserFilter{uq.config, uq}
+	return &UserFilter{config: uq.config, predicateAdder: uq}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -326,13 +326,13 @@ func (m *UserMutation) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns an entql.Where implementation to apply filters on the UserMutation builder.
 func (m *UserMutation) Filter() *UserFilter {
-	return &UserFilter{m.config, m}
+	return &UserFilter{config: m.config, predicateAdder: m}
 }
 
 // UserFilter provides a generic filtering capability at runtime for UserQuery.
 type UserFilter struct {
-	config
 	predicateAdder
+	config
 }
 
 // Where applies the entql predicate on the query filter.

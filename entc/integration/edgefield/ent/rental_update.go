@@ -258,7 +258,7 @@ func (ru *RentalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{rental.Label}
 		} else if sqlgraph.IsConstraintError(err) {
-			err = &ConstraintError{err.Error(), err}
+			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return 0, err
 	}
@@ -529,7 +529,7 @@ func (ruo *RentalUpdateOne) sqlSave(ctx context.Context) (_node *Rental, err err
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{rental.Label}
 		} else if sqlgraph.IsConstraintError(err) {
-			err = &ConstraintError{err.Error(), err}
+			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
