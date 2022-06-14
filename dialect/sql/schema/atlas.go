@@ -652,7 +652,6 @@ const entTypes = ".ent_types"
 // This behaviour is enabled automatically when using versioned migrations.
 type dirTypeStore struct {
 	dir migrate.Dir
-	// newTypes []string // store types added in this run
 }
 
 // load the types from the types file.

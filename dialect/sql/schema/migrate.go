@@ -197,11 +197,11 @@ func (m *Migrate) NamedDiff(ctx context.Context, name string, tables ...*Table) 
 			return err
 		}
 		m.fileTypeRanges = m.typeRanges
-		dbExists, err := m.tableExist(ctx, m, TypeTable)
+		ex, err := m.tableExist(ctx, m, TypeTable)
 		if err != nil {
 			return err
 		}
-		if dbExists {
+		if ex {
 			m.dbTypeRanges, err = (&dbTypeStore{m}).load(ctx, m)
 			if err != nil {
 				return err
@@ -221,7 +221,7 @@ func (m *Migrate) NamedDiff(ctx context.Context, name string, tables ...*Table) 
 		if len(newTypes) > 0 {
 			plan.Changes = append(plan.Changes, &migrate.Change{
 				Cmd:     m.atTypeRangeSQL(newTypes...),
-				Comment: fmt.Sprintf(`add pk ranges for %s tables`, strings.Join(newTypes, ",")),
+				Comment: fmt.Sprintf("add pk ranges for %s tables", strings.Join(newTypes, ",")),
 			})
 		}
 	}
