@@ -233,7 +233,7 @@ func Versioned(t *testing.T, drv sql.ExecQuerier, client *versioned.Client) {
 	require.NoError(t, err)
 	opts := []schema.MigrateOption{
 		schema.WithDir(dir),
-		schema.WithDeterministicGlobalUniqueID(),
+		schema.WithUniversalID(),
 		schema.WithFormatter(format),
 	}
 

@@ -273,7 +273,7 @@ func WithSumFile() MigrateOption {
 	}
 }
 
-// WithDeterministicGlobalUniqueID instructs atlas to use a file based type store when
+// WithUniversalID instructs atlas to use a file based type store when
 // global unique ids are enabled. For more information see the setupAtlas method on Migrate.
 //
 // ATTENTION:
@@ -281,7 +281,7 @@ func WithSumFile() MigrateOption {
 // dynamically when computing the diff between a deployed database and the current schema. In cases where there
 // exist multiple deployments, the allocated ranges for the same type might be different from each other,
 // depending on when the deployment took part.
-func WithDeterministicGlobalUniqueID() MigrateOption {
+func WithUniversalID() MigrateOption {
 	return func(m *Migrate) {
 		m.universalID = true
 		m.atlas.typeStoreConsent = true
@@ -315,7 +315,7 @@ type (
 	}
 )
 
-var errConsent = errors.New("sql/schema: use WithDeterministicGlobalUniqueID() instead of WithGlobalUniqueID(true) and WithDir(): ") // TODO(masseelch): add link to docs here
+var errConsent = errors.New("sql/schema: use WithUniversalID() instead of WithGlobalUniqueID(true) when using WithDir(): https://entgo.io/docs/migrate#universal-ids")
 
 func (m *Migrate) setupAtlas() error {
 	// Using one of the Atlas options, opt-in to Atlas migration.
@@ -351,7 +351,7 @@ func (m *Migrate) setupAtlas() error {
 		// If global unique ids and a migration directory is given, enable the file based type store for pk ranges.
 		m.typeStore = &dirTypeStore{dir: m.atlas.dir}
 		// To guard the user against a possible bug due to backward incompatibility, the file based type store must
-		// be enabled by an option. For more information see the comment of WithDeterministicGlobalUniqueID function.
+		// be enabled by an option. For more information see the comment of WithUniversalID function.
 		if !m.atlas.typeStoreConsent {
 			return errConsent
 		}

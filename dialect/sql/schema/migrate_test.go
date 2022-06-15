@@ -119,11 +119,11 @@ func TestMigrate_Diff(t *testing.T) {
 	// consent for the file based type store has to be given explicitly.
 	_, err = NewMigrate(db, WithDir(d), WithGlobalUniqueID(true))
 	require.ErrorIs(t, err, errConsent)
-	require.Contains(t, err.Error(), "WithDeterministicGlobalUniqueID")
+	require.Contains(t, err.Error(), "WithUniversalID")
 	require.Contains(t, err.Error(), "WithGlobalUniqueID")
 	require.Contains(t, err.Error(), "WithDir")
 
-	m, err = NewMigrate(db, WithFormatter(f), WithDir(d), WithDeterministicGlobalUniqueID(), WithSumFile())
+	m, err = NewMigrate(db, WithFormatter(f), WithDir(d), WithUniversalID(), WithSumFile())
 	require.NoError(t, err)
 	require.IsType(t, &dirTypeStore{}, m.typeStore)
 	require.NoError(t, m.Diff(context.Background(),
@@ -183,7 +183,7 @@ func TestMigrate_Diff(t *testing.T) {
 	p = t.TempDir()
 	d, err = migrate.NewLocalDir(p)
 	require.NoError(t, err)
-	m, err = NewMigrate(db, WithFormatter(f), WithDir(d), WithDeterministicGlobalUniqueID())
+	m, err = NewMigrate(db, WithFormatter(f), WithDir(d), WithUniversalID())
 	require.NoError(t, err)
 
 	require.NoError(t, m.Diff(context.Background(),

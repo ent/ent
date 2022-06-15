@@ -81,9 +81,11 @@ To enable the Universal-IDs support for your project, pass the `WithGlobalUnique
 
 :::note
 Be aware, that `WithGlobalUniqueID` and [versioned migration](versioned-migrations.md) files are not working together.
-After understanding the 
-[risks](https://github.com/ent/ent/blob/8eeb23ce56bcb6ac4ee0354a6c847558586c9a46/dialect/sql/schema/atlas.go#L276-L283), 
-you can use `WithDeterministicGlobalUniqueID` instead.
+When using `WithGlobalUniqueID`, the allocated ranges are computed dynamically when creating the diff between a deployed 
+database and the current schema. In cases where multiple deployments exist, the allocated ranges for the same type might 
+be different from each other, depending on when the deployment took part. If you only have one deployment or all 
+deployments have the exact same data in the `ent_types` table, you can use `WithUniversalID` instead. This will enable a
+file based type range store instead of a database-table as source of truth.
 :::
 
 ```go
