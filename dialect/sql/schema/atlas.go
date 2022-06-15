@@ -9,6 +9,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"io/fs"
+	"io/ioutil"
 	"sort"
 	"strings"
 
@@ -271,16 +273,32 @@ func WithSumFile() MigrateOption {
 	}
 }
 
+// WithUniversalID instructs atlas to use a file based type store when
+// global unique ids are enabled. For more information see the setupAtlas method on Migrate.
+//
+// ATTENTION:
+// The file based PK range store is not backward compatible, since the allocated ranges were computed
+// dynamically when computing the diff between a deployed database and the current schema. In cases where there
+// exist multiple deployments, the allocated ranges for the same type might be different from each other,
+// depending on when the deployment took part.
+func WithUniversalID() MigrateOption {
+	return func(m *Migrate) {
+		m.universalID = true
+		m.atlas.typeStoreConsent = true
+	}
+}
+
 type (
 	// atlasOptions describes the options for atlas.
 	atlasOptions struct {
-		enabled bool
-		diff    []DiffHook
-		apply   []ApplyHook
-		skip    ChangeKind
-		dir     migrate.Dir
-		fmt     migrate.Formatter
-		genSum  bool
+		enabled          bool
+		diff             []DiffHook
+		apply            []ApplyHook
+		skip             ChangeKind
+		dir              migrate.Dir
+		fmt              migrate.Formatter
+		genSum           bool
+		typeStoreConsent bool
 	}
 
 	// atBuilder must be implemented by the different drivers in
@@ -293,8 +311,11 @@ type (
 		atIncrementC(*schema.Table, *schema.Column)
 		atIncrementT(*schema.Table, int64)
 		atIndex(*Index, *schema.Table, *schema.Index) error
+		atTypeRangeSQL(t ...string) string
 	}
 )
+
+var errConsent = errors.New("sql/schema: use WithUniversalID() instead of WithGlobalUniqueID(true) when using WithDir(): https://entgo.io/docs/migrate#universal-ids")
 
 func (m *Migrate) setupAtlas() error {
 	// Using one of the Atlas options, opt-in to Atlas migration.
@@ -325,6 +346,16 @@ func (m *Migrate) setupAtlas() error {
 	}
 	if m.atlas.dir != nil && m.atlas.fmt == nil {
 		m.atlas.fmt = sqltool.GolangMigrateFormatter
+	}
+	if m.universalID && m.atlas.dir != nil {
+		// If global unique ids and a migration directory is given, enable the file based type store for pk ranges.
+		m.typeStore = &dirTypeStore{dir: m.atlas.dir}
+		// To guard the user against a possible bug due to backward incompatibility, the file based type store must
+		// be enabled by an option. For more information see the comment of WithUniversalID function.
+		if !m.atlas.typeStoreConsent {
+			return errConsent
+		}
+		m.atlas.diff = append(m.atlas.diff, m.ensureTypeTable)
 	}
 	return nil
 }
@@ -537,6 +568,54 @@ func (m *Migrate) aIndexes(b atBuilder, t1 *Table, t2 *schema.Table) error {
 	return nil
 }
 
+func (m *Migrate) ensureTypeTable(next Differ) Differ {
+	return DiffFunc(func(current, desired *schema.Schema) ([]schema.Change, error) {
+		// If there is a types table but no types file yet, the user most likely
+		// switched from online migration to migration files.
+		if len(m.dbTypeRanges) == 0 {
+			var (
+				at = schema.NewTable(TypeTable)
+				et = NewTable(TypeTable).
+					AddPrimary(&Column{Name: "id", Type: field.TypeUint, Increment: true}).
+					AddColumn(&Column{Name: "type", Type: field.TypeString, Unique: true})
+			)
+			m.atTable(et, at)
+			if err := m.aColumns(m, et, at); err != nil {
+				return nil, err
+			}
+			if err := m.aIndexes(m, et, at); err != nil {
+				return nil, err
+			}
+			desired.Tables = append(desired.Tables, at)
+		}
+		// If there is a drift between the types stored in the database and the ones stored in the file,
+		// stop diffing, as this is potentially destructive. This will most likely happen on the first diffing
+		// after moving from online-migration to versioned migrations if the "old" ent types are not in sync with
+		// the deterministic ones computed by the new engine.
+		if len(m.dbTypeRanges) > 0 && len(m.fileTypeRanges) > 0 && !equal(m.fileTypeRanges, m.dbTypeRanges) {
+			return nil, fmt.Errorf(
+				"type allocation range drift detected: %v <> %v: see %s for more information",
+				m.dbTypeRanges, m.fileTypeRanges,
+				"https://entgo.io/docs/versioned-migrations#moving-from-auto-migration-to-versioned-migrations",
+			)
+		}
+		changes, err := next.Diff(current, desired)
+		if err != nil {
+			return nil, err
+		}
+		if len(m.dbTypeRanges) > 0 && len(m.fileTypeRanges) == 0 {
+			// Override the types file created in the diff process with the "old" allocated types ranges.
+			if err := m.typeStore.(*dirTypeStore).save(m.dbTypeRanges); err != nil {
+				return nil, err
+			}
+			// Change the type range allocations since they will be added to the migration files when
+			// writing the migration plan to migration files.
+			m.typeRanges = m.dbTypeRanges
+		}
+		return changes, nil
+	})
+}
+
 func setAtChecks(t1 *Table, t2 *schema.Table) {
 	if check := t1.Annotation.Check; check != "" {
 		t2.AddChecks(&schema.Check{
@@ -573,4 +652,63 @@ func descIndexes(idx *Index) map[string]bool {
 		descs[column] = desc
 	}
 	return descs
+}
+
+const entTypes = ".ent_types"
+
+// dirTypeStore stores and read pk information from a text file stored alongside generated versioned migrations.
+// This behaviour is enabled automatically when using versioned migrations.
+type dirTypeStore struct {
+	dir migrate.Dir
+}
+
+const atlasDirective = "atlas:sum ignore\n"
+
+// load the types from the types file.
+func (s *dirTypeStore) load(context.Context, dialect.ExecQuerier) ([]string, error) {
+	f, err := s.dir.Open(entTypes)
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return nil, fmt.Errorf("reading types file: %w", err)
+	}
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, nil
+	}
+	defer f.Close()
+	c, err := ioutil.ReadAll(f)
+	if err != nil {
+		return nil, fmt.Errorf("reading types file: %w", err)
+	}
+	return strings.Split(strings.TrimPrefix(string(c), atlasDirective), ","), nil
+}
+
+// add a new type entry to the types file.
+func (s *dirTypeStore) add(ctx context.Context, conn dialect.ExecQuerier, t string) error {
+	ts, err := s.load(ctx, conn)
+	if err != nil {
+		return fmt.Errorf("adding type %q: %w", t, err)
+	}
+	return s.save(append(ts, t))
+}
+
+// save takes the given allocation range and writes them to the types file.
+// The types file will be overridden.
+func (s *dirTypeStore) save(ts []string) error {
+	if err := s.dir.WriteFile(entTypes, []byte(atlasDirective+strings.Join(ts, ","))); err != nil {
+		return fmt.Errorf("writing types file: %w", err)
+	}
+	return nil
+}
+
+var _ typeStore = (*dirTypeStore)(nil)
+
+func equal(s1, s2 []string) bool {
+	if len(s1) != len(s2) {
+		return false
+	}
+	for i := range s1 {
+		if s1[i] != s2[i] {
+			return false
+		}
+	}
+	return true
 }

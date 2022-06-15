@@ -6,13 +6,17 @@ package schema
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+	"text/template"
 	"time"
 
 	"ariga.io/atlas/sql/migrate"
 	"ariga.io/atlas/sql/schema"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -80,7 +84,7 @@ func TestMigrate_Diff(t *testing.T) {
 	m, err := NewMigrate(db, WithDir(d))
 	require.NoError(t, err)
 	require.NoError(t, m.Diff(context.Background(), &Table{Name: "users"}))
-	v := time.Now().Format("20060102150405")
+	v := time.Now().UTC().Format("20060102150405")
 	requireFileEqual(t, filepath.Join(p, v+"_changes.up.sql"), "-- create \"users\" table\nCREATE TABLE `users` (, PRIMARY KEY ());\n")
 	requireFileEqual(t, filepath.Join(p, v+"_changes.down.sql"), "-- reverse: create \"users\" table\nDROP TABLE `users`;\n")
 	require.NoFileExists(t, filepath.Join(p, "atlas.sum"))
@@ -97,6 +101,106 @@ func TestMigrate_Diff(t *testing.T) {
 	require.FileExists(t, filepath.Join(p, "atlas.sum"))
 	require.NoError(t, d.WriteFile("tmp.sql", nil))
 	require.ErrorIs(t, m.Diff(context.Background(), &Table{Name: "users"}), migrate.ErrChecksumMismatch)
+
+	// Test type store.
+	idCol := []*Column{{Name: "id", Type: field.TypeInt, Increment: true}}
+	p = t.TempDir()
+	d, err = migrate.NewLocalDir(p)
+	require.NoError(t, err)
+	f, err := migrate.NewTemplateFormatter(
+		template.Must(template.New("").Parse("{{ .Name }}.sql")),
+		template.Must(template.New("").Parse(
+			`{{ range .Changes }}{{ printf "%s;\n" .Cmd }}{{ end }}`,
+		)),
+	)
+	require.NoError(t, err)
+
+	// If using global unique ID and versioned migrations,
+	// consent for the file based type store has to be given explicitly.
+	_, err = NewMigrate(db, WithDir(d), WithGlobalUniqueID(true))
+	require.ErrorIs(t, err, errConsent)
+	require.Contains(t, err.Error(), "WithUniversalID")
+	require.Contains(t, err.Error(), "WithGlobalUniqueID")
+	require.Contains(t, err.Error(), "WithDir")
+
+	m, err = NewMigrate(db, WithFormatter(f), WithDir(d), WithUniversalID(), WithSumFile())
+	require.NoError(t, err)
+	require.IsType(t, &dirTypeStore{}, m.typeStore)
+	require.NoError(t, m.Diff(context.Background(),
+		&Table{Name: "users", Columns: idCol, PrimaryKey: idCol},
+		&Table{Name: "groups", Columns: idCol, PrimaryKey: idCol},
+	))
+	requireFileEqual(t, filepath.Join(p, ".ent_types"), atlasDirective+"users,groups")
+	changesSQL := strings.Join([]string{
+		"CREATE TABLE `users` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT);",
+		"CREATE TABLE `groups` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT);",
+		fmt.Sprintf("INSERT INTO sqlite_sequence (name, seq) VALUES (\"groups\", %d);", 1<<32),
+		"CREATE TABLE `ent_types` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT, `type` text NOT NULL);",
+		"CREATE UNIQUE INDEX `ent_types_type_key` ON `ent_types` (`type`);",
+		"INSERT INTO `ent_types` (`type`) VALUES ('users'), ('groups');", "",
+	}, "\n")
+	requireFileEqual(t, filepath.Join(p, "changes.sql"), changesSQL)
+
+	// types file cannot be part of the sum file.
+	require.FileExists(t, filepath.Join(p, "atlas.sum"))
+	sum, err := os.ReadFile(filepath.Join(p, "atlas.sum"))
+	require.NoError(t, err)
+	require.NotContains(t, string(sum), ".ent_types")
+
+	// Adding another node will result in a new entry to the TypeTable (without actually creating it).
+	_, err = db.ExecContext(context.Background(), changesSQL, nil, nil)
+	require.NoError(t, err)
+	require.NoError(t, m.NamedDiff(context.Background(), "changes_2", &Table{Name: "pets", Columns: idCol, PrimaryKey: idCol}))
+	requireFileEqual(t, filepath.Join(p, ".ent_types"), atlasDirective+"users,groups,pets")
+	requireFileEqual(t,
+		filepath.Join(p, "changes_2.sql"), strings.Join([]string{
+			"CREATE TABLE `pets` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT);",
+			fmt.Sprintf("INSERT INTO sqlite_sequence (name, seq) VALUES (\"pets\", %d);", 2<<32),
+			"INSERT INTO `ent_types` (`type`) VALUES ('pets');", "",
+		}, "\n"))
+
+	// types file cannot be part of the sum file.
+	require.FileExists(t, filepath.Join(p, "atlas.sum"))
+	sum, err = os.ReadFile(filepath.Join(p, "atlas.sum"))
+	require.NoError(t, err)
+	require.NotContains(t, string(sum), ".ent_types")
+
+	// Checksum will be updated as well.
+	require.NoError(t, migrate.Validate(d))
+
+	// Running diff against an existing database without having a types file yet
+	// will result in the types file respect the "old" order of pk allocations.
+	switchAllocs := func(one, two string) {
+		for _, stmt := range []string{
+			"DELETE FROM `ent_types`;",
+			fmt.Sprintf("INSERT INTO `ent_types` (`type`) VALUES ('%s'), ('%s');", one, two),
+		} {
+			_, err = db.ExecContext(context.Background(), stmt)
+			require.NoError(t, err)
+		}
+	}
+	switchAllocs("groups", "users")
+	p = t.TempDir()
+	d, err = migrate.NewLocalDir(p)
+	require.NoError(t, err)
+	m, err = NewMigrate(db, WithFormatter(f), WithDir(d), WithUniversalID())
+	require.NoError(t, err)
+
+	require.NoError(t, m.Diff(context.Background(),
+		&Table{Name: "users", Columns: idCol, PrimaryKey: idCol},
+		&Table{Name: "groups", Columns: idCol, PrimaryKey: idCol},
+	))
+	requireFileEqual(t, filepath.Join(p, ".ent_types"), atlasDirective+"groups,users")
+	require.NoFileExists(t, filepath.Join(p, "changes.sql"))
+
+	// Drifts in the types file and types database will be detected,
+	switchAllocs("users", "groups")
+	require.ErrorContains(t, m.Diff(context.Background()), fmt.Sprintf(
+		"type allocation range drift detected: %v <> %v: see %s for more information",
+		[]string{"users", "groups"},
+		[]string{"groups", "users"},
+		"https://entgo.io/docs/versioned-migrations#moving-from-auto-migration-to-versioned-migrations",
+	))
 }
 
 func requireFileEqual(t *testing.T, name, contents string) {
