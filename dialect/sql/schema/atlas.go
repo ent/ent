@@ -7,10 +7,10 @@ package schema
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/fs"
+	"io/ioutil"
 	"sort"
 	"strings"
 
@@ -588,6 +588,17 @@ func (m *Migrate) ensureTypeTable(next Differ) Differ {
 			}
 			desired.Tables = append(desired.Tables, at)
 		}
+		// If there is a drift between the types stored in the database and the ones stored in the file,
+		// stop diffing, as this is potentially destructive. This will most likely happen on the first diffing
+		// after moving from online-migration to versioned migrations if the "old" ent types are not in sync with
+		// the deterministic ones computed by the new engine.
+		if len(m.dbTypeRanges) > 0 && len(m.fileTypeRanges) > 0 && !equal(m.fileTypeRanges, m.dbTypeRanges) {
+			return nil, fmt.Errorf(
+				"type allocation range drift detected: %v <> %v: see %s for more information",
+				m.dbTypeRanges, m.fileTypeRanges,
+				"https://entgo.io/docs/versioned-migrations#moving-from-auto-migration-to-versioned-migrations",
+			)
+		}
 		changes, err := next.Diff(current, desired)
 		if err != nil {
 			return nil, err
@@ -651,6 +662,8 @@ type dirTypeStore struct {
 	dir migrate.Dir
 }
 
+const atlasDirective = "atlas:sum ignore\n"
+
 // load the types from the types file.
 func (s *dirTypeStore) load(context.Context, dialect.ExecQuerier) ([]string, error) {
 	f, err := s.dir.Open(entTypes)
@@ -660,11 +673,12 @@ func (s *dirTypeStore) load(context.Context, dialect.ExecQuerier) ([]string, err
 	if errors.Is(err, fs.ErrNotExist) {
 		return nil, nil
 	}
-	var ts []string
-	if err := json.NewDecoder(f).Decode(&ts); err != nil {
-		return nil, fmt.Errorf("decoding types: %w", err)
+	defer f.Close()
+	c, err := ioutil.ReadAll(f)
+	if err != nil {
+		return nil, fmt.Errorf("reading types file: %w", err)
 	}
-	return ts, nil
+	return strings.Split(strings.TrimPrefix(string(c), atlasDirective), ","), nil
 }
 
 // add a new type entry to the types file.
@@ -679,14 +693,22 @@ func (s *dirTypeStore) add(ctx context.Context, conn dialect.ExecQuerier, t stri
 // save takes the given allocation range and writes them to the types file.
 // The types file will be overridden.
 func (s *dirTypeStore) save(ts []string) error {
-	b, err := json.Marshal(ts)
-	if err != nil {
-		return fmt.Errorf("encoding types: %w", err)
-	}
-	if err := s.dir.WriteFile(entTypes, b); err != nil {
+	if err := s.dir.WriteFile(entTypes, []byte(atlasDirective+strings.Join(ts, ","))); err != nil {
 		return fmt.Errorf("writing types file: %w", err)
 	}
 	return nil
 }
 
 var _ typeStore = (*dirTypeStore)(nil)
+
+func equal(s1, s2 []string) bool {
+	if len(s1) != len(s2) {
+		return false
+	}
+	for i := range s1 {
+		if s1[i] != s2[i] {
+			return false
+		}
+	}
+	return true
+}

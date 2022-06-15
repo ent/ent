@@ -130,7 +130,7 @@ func TestMigrate_Diff(t *testing.T) {
 		&Table{Name: "users", Columns: idCol, PrimaryKey: idCol},
 		&Table{Name: "groups", Columns: idCol, PrimaryKey: idCol},
 	))
-	requireFileEqual(t, filepath.Join(p, ".ent_types"), `["users","groups"]`)
+	requireFileEqual(t, filepath.Join(p, ".ent_types"), atlasDirective+"users,groups")
 	changesSQL := strings.Join([]string{
 		"CREATE TABLE `users` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT);",
 		"CREATE TABLE `groups` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT);",
@@ -141,17 +141,29 @@ func TestMigrate_Diff(t *testing.T) {
 	}, "\n")
 	requireFileEqual(t, filepath.Join(p, "changes.sql"), changesSQL)
 
+	// types file cannot be part of the sum file.
+	require.FileExists(t, filepath.Join(p, "atlas.sum"))
+	sum, err := os.ReadFile(filepath.Join(p, "atlas.sum"))
+	require.NoError(t, err)
+	require.NotContains(t, string(sum), ".ent_types")
+
 	// Adding another node will result in a new entry to the TypeTable (without actually creating it).
 	_, err = db.ExecContext(context.Background(), changesSQL, nil, nil)
 	require.NoError(t, err)
 	require.NoError(t, m.NamedDiff(context.Background(), "changes_2", &Table{Name: "pets", Columns: idCol, PrimaryKey: idCol}))
-	requireFileEqual(t, filepath.Join(p, ".ent_types"), `["users","groups","pets"]`)
+	requireFileEqual(t, filepath.Join(p, ".ent_types"), atlasDirective+"users,groups,pets")
 	requireFileEqual(t,
 		filepath.Join(p, "changes_2.sql"), strings.Join([]string{
 			"CREATE TABLE `pets` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT);",
 			fmt.Sprintf("INSERT INTO sqlite_sequence (name, seq) VALUES (\"pets\", %d);", 2<<32),
 			"INSERT INTO `ent_types` (`type`) VALUES ('pets');", "",
 		}, "\n"))
+
+	// types file cannot be part of the sum file.
+	require.FileExists(t, filepath.Join(p, "atlas.sum"))
+	sum, err = os.ReadFile(filepath.Join(p, "atlas.sum"))
+	require.NoError(t, err)
+	require.NotContains(t, string(sum), ".ent_types")
 
 	// Checksum will be updated as well.
 	require.NoError(t, migrate.Validate(d))
@@ -175,7 +187,7 @@ func TestMigrate_Diff(t *testing.T) {
 		&Table{Name: "users", Columns: idCol, PrimaryKey: idCol},
 		&Table{Name: "groups", Columns: idCol, PrimaryKey: idCol},
 	))
-	requireFileEqual(t, filepath.Join(p, ".ent_types"), `["groups","users"]`)
+	requireFileEqual(t, filepath.Join(p, ".ent_types"), atlasDirective+"groups,users")
 	require.NoFileExists(t, filepath.Join(p, "changes.sql"))
 }
 
