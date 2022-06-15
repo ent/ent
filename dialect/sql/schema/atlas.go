@@ -583,6 +583,9 @@ func (m *Migrate) ensureTypeTable(next Differ) Differ {
 			if err := m.aColumns(m, et, at); err != nil {
 				return nil, err
 			}
+			if err := m.aIndexes(m, et, at); err != nil {
+				return nil, err
+			}
 			desired.Tables = append(desired.Tables, at)
 		}
 		changes, err := next.Diff(current, desired)
@@ -590,12 +593,6 @@ func (m *Migrate) ensureTypeTable(next Differ) Differ {
 			return nil, err
 		}
 		if len(m.dbTypeRanges) > 0 && len(m.fileTypeRanges) == 0 {
-			// Check if all types added by the diff process are present in the "old" types table.
-			for _, t := range m.typeRanges {
-				if indexOf(m.dbTypeRanges, t) < 0 {
-					return nil, fmt.Errorf("unexpected missing type range for %q", t)
-				}
-			}
 			// Override the types file created in the diff process with the "old" allocated types ranges.
 			if err := m.typeStore.(*dirTypeStore).save(m.dbTypeRanges); err != nil {
 				return nil, err

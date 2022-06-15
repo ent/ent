@@ -67,7 +67,10 @@ func TestMySQL(t *testing.T) {
 			require.NoError(t, err, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []interface{}{}, new(sql.Result)))
 			require.NoError(t, root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS versioned_migrate", []interface{}{}, new(sql.Result)))
 			defer root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []interface{}{}, new(sql.Result))
-			Versioned(t, drv, versioned.NewClient(versioned.Driver(drv)))
+			vdrv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/versioned_migrate?parseTime=True", port))
+			require.NoError(t, err, "connecting to versioned migrate database")
+			defer vdrv.Close()
+			Versioned(t, vdrv, versioned.NewClient(versioned.Driver(vdrv)))
 		})
 	}
 }
@@ -228,7 +231,11 @@ func Versioned(t *testing.T, drv sql.ExecQuerier, client *versioned.Client) {
 		template.Must(template.New("name").Parse(`{{ range .Changes }}{{ printf "%s;\n" .Cmd }}{{ end }}`)),
 	)
 	require.NoError(t, err)
-	opts := []schema.MigrateOption{schema.WithDir(dir), schema.WithDeterministicGlobalUniqueID(), schema.WithFormatter(format)}
+	opts := []schema.MigrateOption{
+		schema.WithDir(dir),
+		schema.WithDeterministicGlobalUniqueID(),
+		schema.WithFormatter(format),
+	}
 
 	// Compared to empty database.
 	require.NoError(t, client.Schema.NamedDiff(ctx, "first", opts...))
@@ -242,7 +249,7 @@ func Versioned(t *testing.T, drv sql.ExecQuerier, client *versioned.Client) {
 		for sc.Scan() {
 			if sc.Text() != "" {
 				_, err := drv.ExecContext(ctx, sc.Text())
-				require.NoError(t, err)
+				require.NoError(t, err, sc.Text())
 			}
 		}
 	}
