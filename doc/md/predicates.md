@@ -89,19 +89,16 @@ client.Pet.
 
 Custom predicates can be useful if you want to write your own dialect-specific logic or to control the executed queries.
 
-For example, if you want to use builtin sql functions such as a `DATE()` function to a `WHERE` statement.
-It can be achieved by using either `P()` or `ExprP()`.
+For example, in order to use built-in SQL functions such as `DATE()`, use one of the following options:
 
-1. `P()`
-
-Using `P()` gives more flexibility in how you arrange the strings.
+1. Pass a dialect-aware predicate function using the `sql.P` option:
 
 ```go
-Select("id").
-From(Table("users")).
-Where(P(func(b *Builder) {
-    b.WriteString("DATE(").Ident("last_login_at").WriteString(") >= ").Arg("2022-05-03")
-}))
+users := client.User.Query().
+	Select("id").
+	Where(P(func(b *Builder) {
+		b.WriteString("DATE(").Ident("last_login_at").WriteByte(')').WriteOp(OpGTE).Arg(value)
+	}))
 ```
 
 The above code will produce the following SQL query:
@@ -110,39 +107,40 @@ The above code will produce the following SQL query:
 SELECT `id` FROM `users` WHERE DATE(`last_login_at`) >= ?
 ```
 
-2. `ExprP()`
-
-The same thing can be achieved with
+2. Inline a predicate expression using the `ExprP()` option:
 
 ```go
 users := client.User.Query().
-    Where(func(s *ent.Selector) {
-        s.Where(sql.ExprP("DATE(last_login_at >= ?", dateVar))		
-    }).
-    AllX(ctx)
+	Select("id").
+	Where(func(s *sql.Selector) {
+		s.Where(sql.ExprP("DATE(last_login_at >= ?", value))
+	}).
+	AllX(ctx)
 ```
 
-The above code will produce the following SQL query:
+But note that `last_login_at` is now hardcoded, unlike the option number 1. 
+
+The above code will produce the same SQL query:
 
 ```sql
-SELECT `users`.`id`, `users`.`last_login_at` FROM users WHERE DATE(last_login_at) >= ?;
+SELECT `id` FROM `users` WHERE DATE(`last_login_at`) >= ?
 ```
 
 You may also perform a more complex sql query, for example `DATE_ADD()`
 
 ```go
-events := r.ent.Event.Query().
-    Where(func(s *entsql.Selector) {
-        s.Where(entsql.ExprP("DATE_ADD(date, INTERVAL duration MINUTE) BETWEEN ? AND ?", startDateVar, endDateVar))
-    }).
-    AllX(ctx)
+events := client.Event.Query().
+	Where(func(s *sql.Selector) {
+		s.Where(sql.ExprP("DATE_ADD(date, INTERVAL duration MINUTE) BETWEEN ? AND ?", start, end))
+	}).
+	AllX(ctx)
 ```
 
 The above code will produce the following SQL query:
 
 ```sql
 SELECT `events`.`id`, `events`.`date`, `events`.`duration` 
-FROM events WHERE DATE_ADD(date, INTERVAL duration MINUTE) BETWEEN ? AND ?;
+FROM events WHERE DATE_ADD(date, INTERVAL duration MINUTE) BETWEEN ? AND ?
 ```
 
 #### Get all pets of users 1, 2 and 3
