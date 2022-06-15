@@ -15,6 +15,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.13
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/modern-go/reflect2 v1.0.2
+	github.com/neo4j/neo4j-go-driver/v4 v4.4.2
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/spf13/cobra v1.4.0
 	github.com/stretchr/objx v0.2.0 // indirect
