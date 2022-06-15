@@ -79,6 +79,13 @@ the object ID to be unique.
 
 To enable the Universal-IDs support for your project, pass the `WithGlobalUniqueID` option to the migration.
 
+:::note
+Be aware, that `WithGlobalUniqueID` and [versioned migration](versioned-migrations.md) files are not working together.
+After understanding the 
+[risks](https://github.com/ent/ent/blob/8eeb23ce56bcb6ac4ee0354a6c847558586c9a46/dialect/sql/schema/atlas.go#L276-L283), 
+you can use `WithDeterministicGlobalUniqueID` instead.
+:::
+
 ```go
 package main
 

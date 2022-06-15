@@ -170,13 +170,16 @@ func TestMigrate_Diff(t *testing.T) {
 
 	// Running diff against an existing database without having a types file yet
 	// will result in the types file respect the "old" order of pk allocations.
-	for _, stmt := range []string{
-		"DELETE FROM `ent_types`;",
-		"INSERT INTO `ent_types` (`type`) VALUES ('groups'), ('users');", // switched allocations
-	} {
-		_, err = db.ExecContext(context.Background(), stmt)
-		require.NoError(t, err)
+	switchAllocs := func(one, two string) {
+		for _, stmt := range []string{
+			"DELETE FROM `ent_types`;",
+			fmt.Sprintf("INSERT INTO `ent_types` (`type`) VALUES ('%s'), ('%s');", one, two),
+		} {
+			_, err = db.ExecContext(context.Background(), stmt)
+			require.NoError(t, err)
+		}
 	}
+	switchAllocs("groups", "users")
 	p = t.TempDir()
 	d, err = migrate.NewLocalDir(p)
 	require.NoError(t, err)
@@ -189,6 +192,15 @@ func TestMigrate_Diff(t *testing.T) {
 	))
 	requireFileEqual(t, filepath.Join(p, ".ent_types"), atlasDirective+"groups,users")
 	require.NoFileExists(t, filepath.Join(p, "changes.sql"))
+
+	// Drifts in the types file and types database will be detected,
+	switchAllocs("users", "groups")
+	require.ErrorContains(t, m.Diff(context.Background()), fmt.Sprintf(
+		"type allocation range drift detected: %v <> %v: see %s for more information",
+		[]string{"users", "groups"},
+		[]string{"groups", "users"},
+		"https://entgo.io/docs/versioned-migrations#moving-from-auto-migration-to-versioned-migrations",
+	))
 }
 
 func requireFileEqual(t *testing.T, name, contents string) {
