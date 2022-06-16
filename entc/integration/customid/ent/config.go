@@ -34,6 +34,7 @@ type hooks struct {
 	Device   []ent.Hook
 	Doc      []ent.Hook
 	Group    []ent.Hook
+	IntSid   []ent.Hook
 	MixinID  []ent.Hook
 	Note     []ent.Hook
 	Other    []ent.Hook

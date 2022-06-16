@@ -28,6 +28,9 @@ type Doc func(*sql.Selector)
 // Group is the predicate function for group builders.
 type Group func(*sql.Selector)
 
+// IntSid is the predicate function for intsid builders.
+type IntSid func(*sql.Selector)
+
 // MixinID is the predicate function for mixinid builders.
 type MixinID func(*sql.Selector)
 

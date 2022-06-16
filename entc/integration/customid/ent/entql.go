@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/device"
 	"entgo.io/ent/entc/integration/customid/ent/doc"
 	"entgo.io/ent/entc/integration/customid/ent/group"
+	"entgo.io/ent/entc/integration/customid/ent/intsid"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
 	"entgo.io/ent/entc/integration/customid/ent/note"
 	"entgo.io/ent/entc/integration/customid/ent/other"
@@ -31,7 +32,7 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 14)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 15)}
 	graph.Nodes[0] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   account.Table,
@@ -117,6 +118,18 @@ var schemaGraph = func() *sqlgraph.Schema {
 	}
 	graph.Nodes[6] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
+			Table:   intsid.Table,
+			Columns: intsid.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt64,
+				Column: intsid.FieldID,
+			},
+		},
+		Type:   "IntSid",
+		Fields: map[string]*sqlgraph.FieldSpec{},
+	}
+	graph.Nodes[7] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
 			Table:   mixinid.Table,
 			Columns: mixinid.Columns,
 			ID: &sqlgraph.FieldSpec{
@@ -130,7 +143,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			mixinid.FieldMixinField: {Type: field.TypeString, Column: mixinid.FieldMixinField},
 		},
 	}
-	graph.Nodes[7] = &sqlgraph.Node{
+	graph.Nodes[8] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   note.Table,
 			Columns: note.Columns,
@@ -144,7 +157,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			note.FieldText: {Type: field.TypeString, Column: note.FieldText},
 		},
 	}
-	graph.Nodes[8] = &sqlgraph.Node{
+	graph.Nodes[9] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   other.Table,
 			Columns: other.Columns,
@@ -156,7 +169,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Type:   "Other",
 		Fields: map[string]*sqlgraph.FieldSpec{},
 	}
-	graph.Nodes[9] = &sqlgraph.Node{
+	graph.Nodes[10] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   pet.Table,
 			Columns: pet.Columns,
@@ -168,7 +181,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Type:   "Pet",
 		Fields: map[string]*sqlgraph.FieldSpec{},
 	}
-	graph.Nodes[10] = &sqlgraph.Node{
+	graph.Nodes[11] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   revision.Table,
 			Columns: revision.Columns,
@@ -180,7 +193,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Type:   "Revision",
 		Fields: map[string]*sqlgraph.FieldSpec{},
 	}
-	graph.Nodes[11] = &sqlgraph.Node{
+	graph.Nodes[12] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   session.Table,
 			Columns: session.Columns,
@@ -192,7 +205,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Type:   "Session",
 		Fields: map[string]*sqlgraph.FieldSpec{},
 	}
-	graph.Nodes[12] = &sqlgraph.Node{
+	graph.Nodes[13] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   token.Table,
 			Columns: token.Columns,
@@ -206,7 +219,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			token.FieldBody: {Type: field.TypeString, Column: token.FieldBody},
 		},
 	}
-	graph.Nodes[13] = &sqlgraph.Node{
+	graph.Nodes[14] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
@@ -325,6 +338,30 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		"Group",
 		"User",
+	)
+	graph.MustAddE(
+		"parent",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   intsid.ParentTable,
+			Columns: []string{intsid.ParentColumn},
+			Bidi:    true,
+		},
+		"IntSid",
+		"IntSid",
+	)
+	graph.MustAddE(
+		"children",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   intsid.ChildrenTable,
+			Columns: []string{intsid.ChildrenColumn},
+			Bidi:    false,
+		},
+		"IntSid",
+		"IntSid",
 	)
 	graph.MustAddE(
 		"parent",
@@ -881,6 +918,74 @@ func (f *GroupFilter) WhereHasUsersWith(preds ...predicate.User) {
 }
 
 // addPredicate implements the predicateAdder interface.
+func (isq *IntSidQuery) addPredicate(pred func(s *sql.Selector)) {
+	isq.predicates = append(isq.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the IntSidQuery builder.
+func (isq *IntSidQuery) Filter() *IntSidFilter {
+	return &IntSidFilter{config: isq.config, predicateAdder: isq}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *IntSidMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the IntSidMutation builder.
+func (m *IntSidMutation) Filter() *IntSidFilter {
+	return &IntSidFilter{config: m.config, predicateAdder: m}
+}
+
+// IntSidFilter provides a generic filtering capability at runtime for IntSidQuery.
+type IntSidFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *IntSidFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[6].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql int64 predicate on the id field.
+func (f *IntSidFilter) WhereID(p entql.Int64P) {
+	f.Where(p.Field(intsid.FieldID))
+}
+
+// WhereHasParent applies a predicate to check if query has an edge parent.
+func (f *IntSidFilter) WhereHasParent() {
+	f.Where(entql.HasEdge("parent"))
+}
+
+// WhereHasParentWith applies a predicate to check if query has an edge parent with a given conditions (other predicates).
+func (f *IntSidFilter) WhereHasParentWith(preds ...predicate.IntSid) {
+	f.Where(entql.HasEdgeWith("parent", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// WhereHasChildren applies a predicate to check if query has an edge children.
+func (f *IntSidFilter) WhereHasChildren() {
+	f.Where(entql.HasEdge("children"))
+}
+
+// WhereHasChildrenWith applies a predicate to check if query has an edge children with a given conditions (other predicates).
+func (f *IntSidFilter) WhereHasChildrenWith(preds ...predicate.IntSid) {
+	f.Where(entql.HasEdgeWith("children", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// addPredicate implements the predicateAdder interface.
 func (miq *MixinIDQuery) addPredicate(pred func(s *sql.Selector)) {
 	miq.predicates = append(miq.predicates, pred)
 }
@@ -909,7 +1014,7 @@ type MixinIDFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *MixinIDFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[6].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[7].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -959,7 +1064,7 @@ type NoteFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *NoteFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[7].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[8].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -1032,7 +1137,7 @@ type OtherFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *OtherFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[8].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[9].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -1072,7 +1177,7 @@ type PetFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *PetFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[9].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[10].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -1168,7 +1273,7 @@ type RevisionFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *RevisionFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[10].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[11].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -1208,7 +1313,7 @@ type SessionFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *SessionFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[11].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[12].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -1262,7 +1367,7 @@ type TokenFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TokenFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[12].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[13].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -1321,7 +1426,7 @@ type UserFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[13].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[14].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
