@@ -96,9 +96,10 @@ For example, in order to use built-in SQL functions such as `DATE()`, use one of
 ```go
 users := client.User.Query().
 	Select("id").
-	Where(P(func(b *Builder) {
+	Where(sql.P(func(b *sql.Builder) {
 		b.WriteString("DATE(").Ident("last_login_at").WriteByte(')').WriteOp(OpGTE).Arg(value)
-	}))
+	})).
+	AllX(ctx)
 ```
 
 The above code will produce the following SQL query:
