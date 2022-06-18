@@ -12,6 +12,14 @@ ariga.io/atlas v0.4.3-0.20220610112612-85980c775013 h1:LBT0bq4tu/btdF/x2V0aoV421
 ariga.io/atlas v0.4.3-0.20220610112612-85980c775013/go.mod h1:0eSMrFg/pqF2qZ+bjM3yRvlzKROYaLbKbSVaU0RKr5g=
 ariga.io/atlas v0.4.3-0.20220615084302-e90a7f969cbd h1:S/RPkFUkVqIH3abJWE5tP3QyqPjat/bAzXSdT7lZokU=
 ariga.io/atlas v0.4.3-0.20220615084302-e90a7f969cbd/go.mod h1:10hc2LWRcvk2SFtdakSD6YKm5wp9DmzcOb6aepwYiG4=
+ariga.io/atlas v0.4.3-0.20220616123828-f49dc1606f5d h1:D0FZaUL2O3mF0woUaIOMPM+ZOEG0c6HHKLQtiSnHdfc=
+ariga.io/atlas v0.4.3-0.20220616123828-f49dc1606f5d/go.mod h1:10hc2LWRcvk2SFtdakSD6YKm5wp9DmzcOb6aepwYiG4=
+ariga.io/atlas v0.4.3-0.20220617100653-978072ec4b7c h1:ypk8tHWTzw9yopVAr1BIX8J/B1tn+xWzAOms0V5aPco=
+ariga.io/atlas v0.4.3-0.20220617100653-978072ec4b7c/go.mod h1:10hc2LWRcvk2SFtdakSD6YKm5wp9DmzcOb6aepwYiG4=
+ariga.io/atlas v0.4.3-0.20220617134927-7a446d64aa57 h1:9ottVsBEdIvaEGkn8c5V/hx0zkAn9A3F2mGq8upL5l0=
+ariga.io/atlas v0.4.3-0.20220617134927-7a446d64aa57/go.mod h1:10hc2LWRcvk2SFtdakSD6YKm5wp9DmzcOb6aepwYiG4=
+ariga.io/atlas v0.4.3-0.20220618160942-1080fa97c763 h1:WhS0COXnLACMTcosfmEVtuwgeuqvjObsE1i9joPx7Qs=
+ariga.io/atlas v0.4.3-0.20220618160942-1080fa97c763/go.mod h1:10hc2LWRcvk2SFtdakSD6YKm5wp9DmzcOb6aepwYiG4=
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/DATA-DOG/go-sqlmock v1.5.0 h1:Shsta01QNfFxHCfpW6YH2STWB0MudeXXEWMr20OEh60=

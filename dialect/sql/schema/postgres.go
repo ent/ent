@@ -87,7 +87,7 @@ func (d *Postgres) setRange(ctx context.Context, conn dialect.ExecQuerier, t *Ta
 	if len(t.PrimaryKey) == 1 {
 		pk = t.PrimaryKey[0].Name
 	}
-	return conn.Exec(ctx, fmt.Sprintf("ALTER TABLE %s ALTER COLUMN %s RESTART WITH %d", t.Name, pk, value), []interface{}{}, nil)
+	return conn.Exec(ctx, fmt.Sprintf("ALTER TABLE %q ALTER COLUMN %q RESTART WITH %d", t.Name, pk, value), []interface{}{}, nil)
 }
 
 // table loads the current table description from the database.
