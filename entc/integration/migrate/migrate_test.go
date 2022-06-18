@@ -242,9 +242,9 @@ func Versioned(t *testing.T, drv sql.ExecQuerier, client *versioned.Client) {
 	require.Equal(t, 2, countFiles(t, dir))
 
 	// Apply the migrations.
-	fs, err := dir.Files()
+	files, err := dir.Files()
 	require.NoError(t, err)
-	for _, f := range fs {
+	for _, f := range files {
 		sc := bufio.NewScanner(f)
 		for sc.Scan() {
 			if sc.Text() != "" {
@@ -263,13 +263,22 @@ func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv
 	ctx := context.Background()
 
 	// Run migration and execute queries on v1.
-	require.NoError(t, clientv1.Schema.Create(ctx, migratev1.WithGlobalUniqueID(true), schema.WithAtlas(true)))
+	require.NoError(t, clientv1.Schema.Create(ctx, migratev1.WithGlobalUniqueID(true), schema.WithAtlas(false)))
 	SanityV1(t, dialect, clientv1)
+	require.NoError(t, clientv1.Schema.Create(ctx, migratev1.WithGlobalUniqueID(true), schema.WithAtlas(true)))
+
+	// Ensure migration to Atlas works with global unique ids.
+	// Create 2 records, delete first one, and create another two after migration.
+	// This way, we ensure that Atlas migration does not affect the PK starting point.
+	c1 := clientv1.Conversion.Create().SaveX(ctx)
+	clientv1.Conversion.Create().ExecX(ctx)
+	clientv1.Conversion.DeleteOne(c1).ExecX(ctx)
 
 	// Run migration and execute queries on v2.
 	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithAtlas(true), schema.WithDiffHook(renameTokenColumn), schema.WithApplyHook(fillNulls(dialect))))
 	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithAtlas(true)), "should not create additional resources on multiple runs")
 	SanityV2(t, dialect, clientv2)
+	clientv2.Conversion.CreateBulk(clientv2.Conversion.Create(), clientv2.Conversion.Create(), clientv2.Conversion.Create()).ExecX(ctx)
 
 	u := clientv2.User.Create().SetAge(1).SetName("foo").SetNickname("nick_foo").SetPhone("phone").SaveX(ctx)
 	idRange(t, clientv2.Car.Create().SetOwner(u).SaveX(ctx).ID, 0, 1<<32)

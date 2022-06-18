@@ -175,7 +175,7 @@ func (Car) Edges() []ent.Edge {
 		edge.From("owner", User.Type).
 			Ref("car").
 			Unique().
-			// Make a M20 edge from nullable to required.
+			// Make the M20 edge from nullable to required edge.
 			// Requires column and foreign-key migration.
 			Required(),
 	}
