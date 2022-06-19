@@ -88,7 +88,11 @@ func (fd *FileDelete) sqlExec(ctx context.Context) (int, error) {
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, fd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, fd.driver, _spec)
+	if err != nil && sqlgraph.IsConstraintError(err) {
+		err = &ConstraintError{msg: err.Error(), wrap: err}
+	}
+	return affected, err
 }
 
 // FileDeleteOne is the builder for deleting a single File entity.

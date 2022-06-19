@@ -84,7 +84,11 @@ func (ugd *UserGroupDelete) sqlExec(ctx context.Context) (int, error) {
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, ugd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, ugd.driver, _spec)
+	if err != nil && sqlgraph.IsConstraintError(err) {
+		err = &ConstraintError{msg: err.Error(), wrap: err}
+	}
+	return affected, err
 }
 
 // UserGroupDeleteOne is the builder for deleting a single UserGroup entity.

@@ -2343,6 +2343,28 @@ func TestIsConstraintError(t *testing.T) {
 			expectedUnique:     false,
 		},
 		{
+			name: "MySQL FK",
+			errMessage: "Error 1451: Cannot delete or update a parent row: a foreign key constraint " +
+				"fails (`test`.`groups`, CONSTRAINT `groups_group_infos_info` FOREIGN KEY (`group_info`) REFERENCES `group_infos` (`id`))",
+			expectedConstraint: true,
+			expectedFK:         true,
+			expectedUnique:     false,
+		},
+		{
+			name:               "SQLite FK",
+			errMessage:         `FOREIGN KEY constraint failed`,
+			expectedConstraint: true,
+			expectedFK:         true,
+			expectedUnique:     false,
+		},
+		{
+			name:               "Postgres FK",
+			errMessage:         `pq: update or delete on table "group_infos" violates foreign key constraint "groups_group_infos_info" on table "groups"`,
+			expectedConstraint: true,
+			expectedFK:         true,
+			expectedUnique:     false,
+		},
+		{
 			name:               "MySQL Unique",
 			errMessage:         `insert node to table "file_types": UNIQUE constraint failed: file_types.name ent: constraint failed: insert node to table "file_types": UNIQUE constraint failed: file_types.name`,
 			expectedConstraint: true,
