@@ -88,7 +88,11 @@ func (bd *BlobDelete) sqlExec(ctx context.Context) (int, error) {
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, bd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, bd.driver, _spec)
+	if err != nil && sqlgraph.IsConstraintError(err) {
+		err = &ConstraintError{msg: err.Error(), wrap: err}
+	}
+	return affected, err
 }
 
 // BlobDeleteOne is the builder for deleting a single Blob entity.

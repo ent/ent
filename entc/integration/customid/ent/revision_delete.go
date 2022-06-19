@@ -88,7 +88,11 @@ func (rd *RevisionDelete) sqlExec(ctx context.Context) (int, error) {
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, rd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, rd.driver, _spec)
+	if err != nil && sqlgraph.IsConstraintError(err) {
+		err = &ConstraintError{msg: err.Error(), wrap: err}
+	}
+	return affected, err
 }
 
 // RevisionDeleteOne is the builder for deleting a single Revision entity.

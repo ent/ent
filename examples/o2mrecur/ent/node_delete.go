@@ -88,7 +88,11 @@ func (nd *NodeDelete) sqlExec(ctx context.Context) (int, error) {
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, nd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, nd.driver, _spec)
+	if err != nil && sqlgraph.IsConstraintError(err) {
+		err = &ConstraintError{msg: err.Error(), wrap: err}
+	}
+	return affected, err
 }
 
 // NodeDeleteOne is the builder for deleting a single Node entity.

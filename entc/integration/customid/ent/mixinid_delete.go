@@ -88,7 +88,11 @@ func (mid *MixinIDDelete) sqlExec(ctx context.Context) (int, error) {
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, mid.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, mid.driver, _spec)
+	if err != nil && sqlgraph.IsConstraintError(err) {
+		err = &ConstraintError{msg: err.Error(), wrap: err}
+	}
+	return affected, err
 }
 
 // MixinIDDeleteOne is the builder for deleting a single MixinID entity.

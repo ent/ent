@@ -88,7 +88,11 @@ func (md *MediaDelete) sqlExec(ctx context.Context) (int, error) {
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, md.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, md.driver, _spec)
+	if err != nil && sqlgraph.IsConstraintError(err) {
+		err = &ConstraintError{msg: err.Error(), wrap: err}
+	}
+	return affected, err
 }
 
 // MediaDeleteOne is the builder for deleting a single Media entity.

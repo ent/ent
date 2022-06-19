@@ -88,7 +88,11 @@ func (id *InfoDelete) sqlExec(ctx context.Context) (int, error) {
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, id.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, id.driver, _spec)
+	if err != nil && sqlgraph.IsConstraintError(err) {
+		err = &ConstraintError{msg: err.Error(), wrap: err}
+	}
+	return affected, err
 }
 
 // InfoDeleteOne is the builder for deleting a single Info entity.

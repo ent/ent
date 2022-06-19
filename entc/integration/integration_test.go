@@ -867,6 +867,11 @@ func Delete(t *testing.T, client *ent.Client) {
 	affected, err = client.Node.Delete().Exec(ctx)
 	require.NoError(err)
 	require.Equal(3, affected)
+
+	info := client.GroupInfo.Create().SetDesc("group info").SaveX(ctx)
+	client.Group.Create().SetInfo(info).SetName("GitHub").SetExpire(time.Now().Add(time.Hour)).ExecX(ctx)
+	err = client.GroupInfo.DeleteOne(info).Exec(ctx)
+	require.True(ent.IsConstraintError(err))
 }
 
 func Relation(t *testing.T, client *ent.Client) {

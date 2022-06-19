@@ -84,7 +84,11 @@ func (ud *UserDelete) sqlExec(ctx context.Context) (int, error) {
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, ud.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, ud.driver, _spec)
+	if err != nil && sqlgraph.IsConstraintError(err) {
+		err = &ConstraintError{msg: err.Error(), wrap: err}
+	}
+	return affected, err
 }
 
 // UserDeleteOne is the builder for deleting a single User entity.

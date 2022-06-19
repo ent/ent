@@ -88,7 +88,11 @@ func (ctd *CustomTypeDelete) sqlExec(ctx context.Context) (int, error) {
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, ctd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, ctd.driver, _spec)
+	if err != nil && sqlgraph.IsConstraintError(err) {
+		err = &ConstraintError{msg: err.Error(), wrap: err}
+	}
+	return affected, err
 }
 
 // CustomTypeDeleteOne is the builder for deleting a single CustomType entity.
