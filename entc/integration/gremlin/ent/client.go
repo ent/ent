@@ -197,6 +197,11 @@ func (c *Client) Dialect() string {
 	return c.driver.Dialect()
 }
 
+// Driver returns the underlying driver.
+func (c *Client) Driver() dialect.Driver {
+	return c.driver
+}
+
 // CardClient is a client for the Card schema.
 type CardClient struct {
 	config

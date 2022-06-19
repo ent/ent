@@ -104,7 +104,7 @@ func (f CreateFunc) Create(ctx context.Context, tables ...*Table) error {
 	return f(ctx, tables...)
 }
 
-// Migrate runs the migrations logic for the SQL dialects.
+// Migrate runs the migration logic for the SQL dialects.
 type Migrate struct {
 	sqlDialect
 	universalID     bool          // global unique ids.
