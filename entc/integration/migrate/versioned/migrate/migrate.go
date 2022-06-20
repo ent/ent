@@ -32,9 +32,6 @@ var (
 	// and therefore, it's recommended to enable this option to get more
 	// flexibility in the schema changes.
 	WithDropIndex = schema.WithDropIndex
-	// WithFixture sets the foreign-key renaming option to the migration when upgrading
-	// ent from v0.1.0 (issue-#285). Defaults to false.
-	WithFixture = schema.WithFixture
 	// WithForeignKeys enables creating foreign-key in schema DDL. This defaults to true.
 	WithForeignKeys = schema.WithForeignKeys
 )
@@ -49,11 +46,16 @@ func NewSchema(drv dialect.Driver) *Schema { return &Schema{drv: drv} }
 
 // Create creates all schema resources.
 func (s *Schema) Create(ctx context.Context, opts ...schema.MigrateOption) error {
+	return Create(ctx, s, Tables, opts...)
+}
+
+// Create creates all table resources using the given schema driver.
+func Create(ctx context.Context, s *Schema, tables []*schema.Table, opts ...schema.MigrateOption) error {
 	migrate, err := schema.NewMigrate(s.drv, opts...)
 	if err != nil {
 		return fmt.Errorf("ent/migrate: %w", err)
 	}
-	return migrate.Create(ctx, Tables...)
+	return migrate.Create(ctx, tables...)
 }
 
 // Diff creates a migration file containing the statements to resolve the diff
@@ -83,13 +85,5 @@ func (s *Schema) NamedDiff(ctx context.Context, name string, opts ...schema.Migr
 // 	}
 //
 func (s *Schema) WriteTo(ctx context.Context, w io.Writer, opts ...schema.MigrateOption) error {
-	drv := &schema.WriteDriver{
-		Writer: w,
-		Driver: s.drv,
-	}
-	migrate, err := schema.NewMigrate(drv, opts...)
-	if err != nil {
-		return fmt.Errorf("ent/migrate: %w", err)
-	}
-	return migrate.Create(ctx, Tables...)
+	return Create(ctx, &Schema{drv: &schema.WriteDriver{Writer: w, Driver: s.drv}}, Tables, opts...)
 }
