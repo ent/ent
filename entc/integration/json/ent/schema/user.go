@@ -6,6 +6,9 @@ package schema
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
+	"net"
 	"net/http"
 	"net/url"
 
@@ -38,6 +41,8 @@ func (User) Fields() []ent.Field {
 			Optional(),
 		field.Strings("strings").
 			Optional(),
+		field.JSON("addr", Addr{}).
+			Optional(),
 	}
 }
 
@@ -49,4 +54,48 @@ type T struct {
 	T  *T       `json:"t,omitempty"`
 	Li []int    `json:"li,omitempty"`
 	Ls []string `json:"ls,omitempty"`
+}
+
+type Addr struct{ net.Addr }
+
+func (a *Addr) UnmarshalJSON(data []byte) error {
+	var types struct {
+		TCP *net.TCPAddr `json:"tcp,omitempty"`
+		UDP *net.UDPAddr `json:"udp,omitempty"`
+	}
+	if err := json.Unmarshal(data, &types); err != nil {
+		return err
+	}
+	switch {
+	case types.TCP != nil && types.UDP != nil:
+		return errors.New("TCP and UDP addresses are mutually exclusive")
+	case types.TCP != nil:
+		a.Addr = types.TCP
+	case types.UDP != nil:
+		a.Addr = types.UDP
+	}
+	return nil
+}
+
+func (a Addr) MarshalJSON() ([]byte, error) {
+	var types struct {
+		TCP *net.TCPAddr `json:"tcp,omitempty"`
+		UDP *net.UDPAddr `json:"udp,omitempty"`
+	}
+	switch a := a.Addr.(type) {
+	case *net.TCPAddr:
+		types.TCP = a
+	case *net.UDPAddr:
+		types.UDP = a
+	default:
+		return nil, fmt.Errorf("unsupported address type: %T", a)
+	}
+	return json.Marshal(types)
+}
+
+func (a Addr) String() string {
+	if a.Addr == nil {
+		return ""
+	}
+	return a.Addr.String()
 }

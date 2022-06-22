@@ -82,7 +82,7 @@ var (
 		{
 			Name: "meta",
 			Format: func(t *Type) string {
-				return fmt.Sprintf("%s/%s.go", t.Package(), t.Package())
+				return fmt.Sprintf("%[1]s/%[1]s.go", t.PackageDir())
 			},
 			ExtendPatterns: []string{
 				"meta/additional/*",
@@ -182,15 +182,21 @@ var (
 		"dialect/sql/create/additional/*",
 		"dialect/sql/create_bulk/additional/*",
 		"dialect/sql/model/additional/*",
+		"dialect/sql/model/edges/*",
+		"dialect/sql/model/edges/fields/additional/*",
 		"dialect/sql/model/fields/*",
 		"dialect/sql/select/additional/*",
 		"dialect/sql/predicate/edge/*/*",
 		"dialect/sql/query/additional/*",
+		"dialect/sql/query/all/nodes/*",
 		"dialect/sql/query/from/*",
 		"dialect/sql/query/path/*",
 		"import/additional/*",
 		"model/additional/*",
 		"model/comment/additional/*",
+		"model/edges/fields/additional/*",
+		"tx/additional/*",
+		"tx/additional/*/*",
 		"update/additional/*",
 		"query/additional/*",
 	}
@@ -225,7 +231,8 @@ func initTemplates() {
 // provide additional functionality for ent extensions.
 type Template struct {
 	*template.Template
-	FuncMap template.FuncMap
+	FuncMap   template.FuncMap
+	condition func(*Graph) bool
 }
 
 // NewTemplate creates an empty template with the standard codegen functions.
@@ -245,6 +252,12 @@ func (t *Template) Funcs(funcMap template.FuncMap) *Template {
 			t.FuncMap[name] = f
 		}
 	}
+	return t
+}
+
+// SkipIf allows registering a function to determine if the template needs to be skipped or not.
+func (t *Template) SkipIf(cond func(*Graph) bool) *Template {
+	t.condition = cond
 	return t
 }
 
@@ -405,7 +418,7 @@ func (d *Dependency) defaultName() (string, error) {
 }
 
 func pkgf(s string) func(t *Type) string {
-	return func(t *Type) string { return fmt.Sprintf(s, t.Package()) }
+	return func(t *Type) string { return fmt.Sprintf(s, t.PackageDir()) }
 }
 
 // match reports if the given name matches the extended pattern.

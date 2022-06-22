@@ -18,7 +18,10 @@ func TestCmd(t *testing.T) {
 	cmd := exec.Command("go", "run", "entgo.io/ent/cmd/ent", "init", "User")
 	stderr := bytes.NewBuffer(nil)
 	cmd.Stderr = stderr
-	require.NoError(t, cmd.Run(), stderr.String())
+	require.NoError(t, cmd.Run())
+	require.Zero(t, stderr.String())
+	cmd = exec.Command("go", "run", "entgo.io/ent/cmd/ent", "init", "User")
+	require.Error(t, cmd.Run())
 
 	_, err := os.Stat("ent/generate.go")
 	require.NoError(t, err)
@@ -28,7 +31,8 @@ func TestCmd(t *testing.T) {
 	cmd = exec.Command("go", "run", "entgo.io/ent/cmd/ent", "generate", "./ent/schema")
 	stderr = bytes.NewBuffer(nil)
 	cmd.Stderr = stderr
-	require.NoError(t, cmd.Run(), stderr.String())
+	require.NoError(t, cmd.Run())
+	require.Zero(t, stderr.String())
 
 	_, err = os.Stat("ent/user.go")
 	require.NoError(t, err)

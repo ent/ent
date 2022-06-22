@@ -84,12 +84,27 @@ var (
 		Description: "Allows users to attach custom modifiers to queries",
 	}
 
+	// FeatureExecQuery provides a feature-flag for exposing the ExecContext/QueryContext methods of the underlying SQL drivers.
+	FeatureExecQuery = Feature{
+		Name:        "sql/execquery",
+		Stage:       Experimental,
+		Default:     false,
+		Description: "Allows users to execute statements using the ExecContext/QueryContext methods of the underlying driver",
+	}
+
 	// FeatureUpsert provides a feature-flag for adding upsert (ON CONFLICT) capabilities to create builders.
 	FeatureUpsert = Feature{
 		Name:        "sql/upsert",
 		Stage:       Experimental,
 		Default:     false,
 		Description: "Allows users to configure the `ON CONFLICT`/`ON DUPLICATE KEY` clause for `INSERT` statements",
+	}
+
+	FeatureVersionedMigration = Feature{
+		Name:        "sql/versioned-migration",
+		Stage:       Experimental,
+		Default:     false,
+		Description: "Allows users to work with versioned migrations / migration files",
 	}
 
 	// AllFeatures holds a list of all feature-flags.
@@ -100,7 +115,9 @@ var (
 		FeatureSchemaConfig,
 		FeatureLock,
 		FeatureModifier,
+		FeatureExecQuery,
 		FeatureUpsert,
+		FeatureVersionedMigration,
 	}
 )
 

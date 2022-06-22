@@ -43,7 +43,7 @@ func (Group) Fields() []ent.Field {
 			Positive().
 			Default(10),
 		field.String("name").
-			Comment("field with multiple validators").
+			Comment("Name field with multiple validators").
 			Match(regexp.MustCompile("[a-zA-Z_]+$")).
 			Validate(func(s string) error {
 				if strings.ToLower(s) == s {

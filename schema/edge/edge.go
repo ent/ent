@@ -12,17 +12,19 @@ import (
 
 // A Descriptor for edge configuration.
 type Descriptor struct {
-	Tag         string              // struct tag.
-	Type        string              // edge type.
-	Name        string              // edge name.
-	Field       string              // edge field name (e.g. foreign-key).
-	RefName     string              // ref name; inverse only.
-	Ref         *Descriptor         // edge reference; to/from of the same type.
-	Unique      bool                // unique edge.
-	Inverse     bool                // inverse edge.
-	Required    bool                // required on creation.
-	StorageKey  *StorageKey         // optional storage-key configuration.
-	Annotations []schema.Annotation // edge annotations.
+	Tag         string                 // struct tag.
+	Type        string                 // edge type.
+	Name        string                 // edge name.
+	Field       string                 // edge field name (e.g. foreign-key).
+	RefName     string                 // ref name; inverse only.
+	Ref         *Descriptor            // edge reference; to/from of the same type.
+	Through     *struct{ N, T string } // through type and name.
+	Unique      bool                   // unique edge.
+	Inverse     bool                   // inverse edge.
+	Required    bool                   // required on creation.
+	StorageKey  *StorageKey            // optional storage-key configuration.
+	Annotations []schema.Annotation    // edge annotations.
+	Comment     string                 // edge comment.
 }
 
 // To defines an association edge between two vertices.
@@ -47,7 +49,7 @@ type assocBuilder struct {
 	desc *Descriptor
 }
 
-// Unique sets the edge type to be unique. Basically, it's limited the ent to be one of the two:
+// Unique sets the edge type to be unique. Basically, it limits the edge to be one of the two:
 // one2one or one2many. one2one applied if the inverse-edge is also unique.
 func (b *assocBuilder) Unique() *assocBuilder {
 	b.desc.Unique = true
@@ -86,8 +88,19 @@ func (b *assocBuilder) Field(f string) *assocBuilder {
 	return b
 }
 
+// Through allows setting an "edge schema" to interact explicitly with M2M edges.
+//
+//	edge.To("friends", User.Type).
+//		Through("friendships", Friendship.Type)
+//
+func (b *assocBuilder) Through(name string, t interface{}) *assocBuilder {
+	b.desc.Through = &struct{ N, T string }{N: name, T: typ(t)}
+	return b
+}
+
 // Comment used to put annotations on the schema.
-func (b *assocBuilder) Comment(string) *assocBuilder {
+func (b *assocBuilder) Comment(c string) *assocBuilder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -133,7 +146,7 @@ func (b *inverseBuilder) Ref(ref string) *inverseBuilder {
 	return b
 }
 
-// Unique sets the edge type to be unique. Basically, it's limited the ent to be one of the two:
+// Unique sets the edge type to be unique. Basically, it limits the edge to be one of the two:
 // one2one or one2many. one2one applied if the inverse-edge is also unique.
 func (b *inverseBuilder) Unique() *inverseBuilder {
 	b.desc.Unique = true
@@ -154,7 +167,8 @@ func (b *inverseBuilder) StructTag(s string) *inverseBuilder {
 }
 
 // Comment used to put annotations on the schema.
-func (b *inverseBuilder) Comment(string) *inverseBuilder {
+func (b *inverseBuilder) Comment(c string) *inverseBuilder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -170,6 +184,17 @@ func (b *inverseBuilder) Comment(string) *inverseBuilder {
 //
 func (b *inverseBuilder) Field(f string) *inverseBuilder {
 	b.desc.Field = f
+	return b
+}
+
+// Through allows setting an "edge schema" to interact explicitly with M2M edges.
+//
+//	edge.From("liked_users", User.Type).
+//		Ref("liked_tweets").
+//		Through("likes", TweetLike.Type)
+//
+func (b *inverseBuilder) Through(name string, t interface{}) *inverseBuilder {
+	b.desc.Through = &struct{ N, T string }{N: name, T: typ(t)}
 	return b
 }
 

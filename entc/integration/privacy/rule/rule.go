@@ -107,6 +107,19 @@ func FilterTeamRule() privacy.QueryRule {
 	})
 }
 
+// FilterUsesDep is a filter query rule that uses its injected dependency using type-assertion.
+func FilterUsesDep() privacy.QueryRule {
+	return privacy.FilterFunc(func(ctx context.Context, f privacy.Filter) error {
+		u, ok := f.(*ent.UserFilter)
+		if !ok {
+			return privacy.Denyf("unexpected filter type %T", f)
+		}
+		// Access the dependency after the type is resolved.
+		_ = u.HTTPClient
+		return privacy.Skip
+	})
+}
+
 // DenyIfStatusChangedByOther is a mutation rule that returns a deny decision if the
 // task status was changed by someone that is not the owner of the task, or an admin.
 func DenyIfStatusChangedByOther() privacy.MutationRule {
@@ -116,7 +129,7 @@ func DenyIfStatusChangedByOther() privacy.MutationRule {
 			return privacy.Skip
 		}
 		view, ok := viewer.FromContext(ctx).(*viewer.UserViewer)
-		// Skip if the the viewer is an admin (or an app).
+		// Skip if the viewer is an admin (or an app).
 		if !ok || view.Admin() {
 			return privacy.Skip
 		}
@@ -141,7 +154,7 @@ func DenyIfStatusChangedByOther() privacy.MutationRule {
 func AllowIfViewerInTheSameTeam() privacy.MutationRule {
 	policy := privacy.TaskMutationRuleFunc(func(ctx context.Context, m *ent.TaskMutation) error {
 		view, ok := viewer.FromContext(ctx).(*viewer.UserViewer)
-		// Skip if the the viewer is an admin (or an app).
+		// Skip if the viewer is an admin (or an app).
 		if !ok || view.Admin() {
 			return privacy.Skip
 		}
@@ -184,7 +197,7 @@ func SetMutationLogFunc(f func(string, ...interface{})) func(string, ...interfac
 	return logf
 }
 
-// LogPlanetMutationHook returns a hook logging planet mutations.
+// LogTaskMutationHook returns a hook logging planet mutations.
 func LogTaskMutationHook() ent.Hook {
 	return func(next ent.Mutator) ent.Mutator {
 		return hook.TaskFunc(func(ctx context.Context, m *ent.TaskMutation) (ent.Value, error) {

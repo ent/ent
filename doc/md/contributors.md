@@ -99,6 +99,31 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/grevych"><img src="https://avatars.githubusercontent.com/u/3792003?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Gerardo Reyes</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=grevych" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/naormatania"><img src="https://avatars.githubusercontent.com/u/6978437?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Naor Matania</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=naormatania" title="Code">💻</a></td>
   </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/idc77"><img src="https://avatars.githubusercontent.com/u/87644834?v=4?s=100" width="100px;" alt=""/><br /><sub><b>idc77</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=idc77" title="Documentation">📖</a></td>
+    <td align="center"><a href="http://ethanhur.me"><img src="https://avatars.githubusercontent.com/u/8033896?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sungyun Hur</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=HurSungYun" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/peanut-cc"><img src="https://avatars.githubusercontent.com/u/55480838?v=4?s=100" width="100px;" alt=""/><br /><sub><b>peanut-pg</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=peanut-cc" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/m3hm3t"><img src="https://avatars.githubusercontent.com/u/22320354?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mehmet Yılmaz</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=m3hm3t" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/Laconty"><img src="https://avatars.githubusercontent.com/u/17760166?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Roman Maklakov</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=Laconty" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/genevieve"><img src="https://avatars.githubusercontent.com/u/12158641?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Genevieve</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=genevieve" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/cjraa"><img src="https://avatars.githubusercontent.com/u/62199269?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Clarence</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=cjraa" title="Code">💻</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://www.linkedin.com/in/iamnande/"><img src="https://avatars.githubusercontent.com/u/7806510?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nicholas Anderson</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=iamnande" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/hezhizhen"><img src="https://avatars.githubusercontent.com/u/7611700?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Zhizhen He</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=hezhizhen" title="Code">💻</a></td>
+    <td align="center"><a href="https://pedro.dev.br"><img src="https://avatars.githubusercontent.com/u/1251151?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Pedro Henrique</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=crossworth" title="Code">💻</a></td>
+    <td align="center"><a href="https://2jp.de"><img src="https://avatars.githubusercontent.com/u/7414374?v=4?s=100" width="100px;" alt=""/><br /><sub><b>MrParano1d</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=MrParano1d" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/tprebs"><img src="https://avatars.githubusercontent.com/u/6523587?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Thomas Prebble</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=tprebs" title="Code">💻</a></td>
+    <td align="center"><a href="https://huytq.com"><img src="https://avatars.githubusercontent.com/u/5723282?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Huy TQ</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=imhuytq" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/maorlipchuk"><img src="https://avatars.githubusercontent.com/u/7034637?v=4?s=100" width="100px;" alt=""/><br /><sub><b>maorlipchuk</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=maorlipchuk" title="Code">💻</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://mobcov.hatenadiary.org/"><img src="https://avatars.githubusercontent.com/u/121048?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Motonori Iwata</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=iwata" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/CharlesGe129"><img src="https://avatars.githubusercontent.com/u/20162173?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Charles Ge</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=CharlesGe129" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/thmeitz"><img src="https://avatars.githubusercontent.com/u/92851940?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Thomas Meitz</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=thmeitz" title="Code">💻</a> <a href="https://github.com/ent/ent/commits?author=thmeitz" title="Documentation">📖</a></td>
+    <td align="center"><a href="http://justinjohnson.org"><img src="https://avatars.githubusercontent.com/u/181567?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Justin Johnson</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=booleangate" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/hax10"><img src="https://avatars.githubusercontent.com/u/85743468?v=4?s=100" width="100px;" alt=""/><br /><sub><b>hax10</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=hax10" title="Code">💻</a></td>
+  </tr>
 </table>
 
 <!-- markdownlint-restore -->

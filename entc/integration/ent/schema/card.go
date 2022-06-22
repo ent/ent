@@ -67,7 +67,7 @@ func (Card) Fields() []ent.Field {
 			}),
 		field.String("name").
 			Optional().
-			Comment("Exact name written on card").
+			Comment("Name exactly as written on card.").
 			NotEmpty().
 			Annotations(&template.Extension{
 				Type: "string",
@@ -79,7 +79,7 @@ func (Card) Fields() []ent.Field {
 func (Card) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("owner", User.Type).
-			Comment("O2O inverse edge").
+			Comment("Owner of the card. O2O inverse edge").
 			Ref("card").
 			Unique(),
 		edge.From("spec", Spec.Type).

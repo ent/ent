@@ -307,7 +307,7 @@ ex, err := entoas.NewExtension(
 In this post we announced `entoas`, the official integration of the former `elk` OpenAPI Specification generation into
 Ent. This feature connects between Ent's code-generation capabilities and OpenAPI/Swagger's rich tooling ecosystem. 
 
-Have questions? Need help with getting started? Feel free to [join our Slack channel](https://entgo.io/docs/slack/).
+Have questions? Need help with getting started? Feel free to join our [Discord server](https://discord.gg/qZmPgTE6RX) or [Slack channel](https://entgo.io/docs/slack/).
 
 :::note For more Ent news and updates:
 

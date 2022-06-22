@@ -7,4 +7,8 @@ in the LICENSE file in the root directory of this source tree.
 {{/* gotype: entgo.io/ent/entc/gen.Graph */}}
 
 {{/* custom globals and helpers for sql dialects */}}
-{{ define "dialect/sql/globals" }}{{ end }}
+{{ define "dialect/sql/globals" }}
+
+// queryHook describes an internal hook for the different sqlAll methods.
+type queryHook func(context.Context, *sqlgraph.QuerySpec)
+{{ end }}

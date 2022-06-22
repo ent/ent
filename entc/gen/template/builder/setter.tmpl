@@ -14,6 +14,7 @@ in the LICENSE file in the root directory of this source tree.
 {{- if or (hasSuffix $builder "Update") (hasSuffix $builder "UpdateOne") }}
 	{{ $updater = true }}
 	{{ $fields = $.MutableFields }}
+{{- else if $.HasCompositeID }}
 {{- else if $.ID.UserDefined }}
 	{{ $fields = append $fields $.ID }}
 {{- end }}
@@ -31,7 +32,7 @@ in the LICENSE file in the root directory of this source tree.
 		return {{ $receiver }}
 	}
 
-	{{/* Avoid generting nillable setters for nillable types. */}}
+	{{/* Avoid generating nillable setters for nillable types. */}}
 	{{ if and (not $f.Type.Nillable) (or $f.Optional $f.Default) (not (and $updater $f.UpdateDefault)) }}
 		{{ $nillableFunc := print "SetNillable" $f.StructField }}
 		// {{ $nillableFunc }} sets the "{{ $f.Name }}" field if the given value is not nil.
@@ -62,7 +63,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{ end }}
 {{ end }}
 
-{{ range $e := $.Edges }}
+{{ range $e := $.EdgesWithID }}
 	{{ $op := "add" }}{{ $idsFunc := $e.MutationAdd }}{{ if $e.Unique }}{{ $op = "set" }}{{ $idsFunc = $e.MutationSet }}{{ end }}
 	{{/* Check if this setter was already defined by the field-setters (e.g. edge-field with the same name). */}}
 	{{ $withSetter := not $e.HasFieldSetter }}

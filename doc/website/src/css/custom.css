@@ -549,7 +549,7 @@ li.navSearchWrapper.reactNavSearchWrapper {
   margin-top: 0;
 }
 
-header ul, ol {
+header ul, header ol {
   margin-bottom: 0;
 }
 
@@ -848,6 +848,7 @@ html[data-theme='dark'] .navbar__logo {
 
 :root {
   --site-primary-hue-saturation: 217, 73%, 78%;
+  --ifm-footer-title-color: white;
 }
 
 div[class^='announcementBar_'] {

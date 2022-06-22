@@ -14,7 +14,7 @@ in the LICENSE file in the root directory of this source tree.
 
 import (
 	{{ range $n := $.Nodes }}
-		"{{ $.Config.Package }}/{{ $n.Package }}"
+		{{ $n.PackageAlias }} "{{ $.Config.Package }}/{{ $n.PackageDir }}"
 	{{- end }}
 
 	"entgo.io/ent/dialect/entsql"
@@ -38,8 +38,8 @@ var (
 				{{- with $c.Size }} Size: {{ . }},{{ end }}
 				{{- with $c.Attr }} Attr: "{{ . }}",{{ end }}
 				{{- with $c.Enums }} Enums: []string{ {{ range $e := . }}"{{ $e }}",{{ end }} },{{ end }}
-				{{- if not (isNil $c.Default) }} Default: {{ $c.Default }},{{ end }}
-				{{- if ne (len $c.Collation) 0 }} Collation: {{ $c.Collation }},{{ end }}
+				{{- if not (isNil $c.Default) }} Default: {{ quote $c.Default }},{{ end }}
+				{{- if $c.Collation }} Collation: "{{ $c.Collation }}",{{ end }}
 				{{- with $c.SchemaType }} SchemaType: map[string]string{ {{ range $k, $v := . }}"{{ $k }}": "{{ $v }}",{{ end }}}{{ end }}},
 			{{- end }}
 		}
@@ -112,6 +112,31 @@ var (
 														{{ $columns }}[{{ $i }}].Name: {{ index $ant.PrefixColumns $k }},
 													{{ end }}
 												{{- end }}
+											{{- end }}
+										},
+									{{- end }}
+									{{- with $ant.Desc }}
+										Desc: {{ . }},
+									{{- end }}
+									{{- with $keys := keys $ant.DescColumns }}
+										DescColumns: map[string]bool{
+										{{- range $k := $keys }}
+											{{- /* Use the column reference instead of using raw string. */}}
+											{{- range $i, $c := $t.Columns }}
+												{{- if eq $k $c.Name }}
+													{{ $columns }}[{{ $i }}].Name: {{ index $ant.DescColumns $k }},
+												{{ end }}
+											{{- end }}
+										{{- end }}
+										},
+									{{- end }}
+									{{- with $ant.Type }}
+										Type: "{{ . }}",
+									{{- end }}
+									{{- with $keys := keys $ant.Types }}
+										Types: map[string]string{
+											{{- range $k := $keys }}
+												"{{ $k }}": "{{ index $ant.Types $k }}",
 											{{- end }}
 										},
 									{{- end }}

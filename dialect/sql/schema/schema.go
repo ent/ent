@@ -173,6 +173,96 @@ func (t *Table) fk(symbol string) (*ForeignKey, bool) {
 	return nil, false
 }
 
+// CopyTables returns a deep-copy of the given tables. This utility function is
+// useful for copying the generated schema tables (i.e. migrate.Tables) before
+// running schema migration when there is a need for execute multiple migrations
+// concurrently. e.g. running parallel unit-tests using the generated enttest package.
+func CopyTables(tables []*Table) ([]*Table, error) {
+	var (
+		copyT  = make([]*Table, len(tables))
+		byName = make(map[string]*Table)
+	)
+	for i, t := range tables {
+		copyT[i] = &Table{
+			Name:        t.Name,
+			Columns:     make([]*Column, len(t.Columns)),
+			Indexes:     make([]*Index, len(t.Indexes)),
+			ForeignKeys: make([]*ForeignKey, len(t.ForeignKeys)),
+		}
+		for j, c := range t.Columns {
+			cc := *c
+			// SchemaType and Enums are read-only fields.
+			cc.indexes = nil
+			cc.foreign = nil
+			copyT[i].Columns[j] = &cc
+		}
+		if at := t.Annotation; at != nil {
+			cat := *at
+			copyT[i].Annotation = &cat
+		}
+		byName[t.Name] = copyT[i]
+	}
+	for i, t := range tables {
+		ct := copyT[i]
+		for _, c := range t.PrimaryKey {
+			cc, ok := ct.column(c.Name)
+			if !ok {
+				return nil, fmt.Errorf("sql/schema: missing primary key column %q", c.Name)
+			}
+			ct.PrimaryKey = append(ct.PrimaryKey, cc)
+		}
+		for j, idx := range t.Indexes {
+			cidx := &Index{
+				Name:    idx.Name,
+				Unique:  idx.Unique,
+				Columns: make([]*Column, len(idx.Columns)),
+			}
+			if at := idx.Annotation; at != nil {
+				cat := *at
+				cidx.Annotation = &cat
+			}
+			for k, c := range idx.Columns {
+				cc, ok := ct.column(c.Name)
+				if !ok {
+					return nil, fmt.Errorf("sql/schema: missing index column %q", c.Name)
+				}
+				cidx.Columns[k] = cc
+			}
+			ct.Indexes[j] = cidx
+		}
+		for j, fk := range t.ForeignKeys {
+			cfk := &ForeignKey{
+				Symbol:     fk.Symbol,
+				OnUpdate:   fk.OnUpdate,
+				OnDelete:   fk.OnDelete,
+				Columns:    make([]*Column, len(fk.Columns)),
+				RefColumns: make([]*Column, len(fk.RefColumns)),
+			}
+			for k, c := range fk.Columns {
+				cc, ok := ct.column(c.Name)
+				if !ok {
+					return nil, fmt.Errorf("sql/schema: missing foreign-key column %q", c.Name)
+				}
+				cfk.Columns[k] = cc
+			}
+			cref, ok := byName[fk.RefTable.Name]
+			if !ok {
+				return nil, fmt.Errorf("sql/schema: missing foreign-key ref-table %q", fk.RefTable.Name)
+			}
+			cfk.RefTable = cref
+			for k, c := range fk.RefColumns {
+				cc, ok := cref.column(c.Name)
+				if !ok {
+					return nil, fmt.Errorf("sql/schema: missing foreign-key ref-column %q", c.Name)
+				}
+				cfk.RefColumns[k] = cc
+			}
+			ct.ForeignKeys[j] = cfk
+		}
+	}
+	return copyT, nil
+}
+
 // Column schema definition for SQL dialects.
 type Column struct {
 	Name       string            // column name.
@@ -409,9 +499,6 @@ const (
 
 // ConstName returns the constant name of a reference option. It's used by entc for printing the constant name in templates.
 func (r ReferenceOption) ConstName() string {
-	if r == NoAction {
-		return ""
-	}
 	return strings.ReplaceAll(strings.Title(strings.ToLower(string(r))), " ", "")
 }
 
@@ -558,6 +645,7 @@ func addChecks(t *sql.TableBuilder, ant *entsql.Annotation) {
 		}
 		sort.Strings(names)
 		for _, name := range names {
+			name := name
 			t.Checks(func(b *sql.Builder) {
 				b.WriteString("CONSTRAINT ").Ident(name).WriteString(" CHECK " + checkExpr(checks[name]))
 			})

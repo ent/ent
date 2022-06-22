@@ -73,12 +73,13 @@ What have we added since our initial announcement?
 ### Getting Started
 
 - To help everyone get started with the Ent + gRPC integration, we have published an official [Ent + gRPC Tutorial](https://entgo.io/docs/grpc-intro) (and a complimentary [GitHub repo](https://github.com/rotemtam/ent-grpc-example)).
-- Do you need help getting started with the integration or have some other question? [Join us on Slack](https://entgo.io/docs/slack).
+- Do you need help getting started with the integration or have some other question? [Join us on Slack](https://entgo.io/docs/slack) or our [Discord server](https://discord.gg/qZmPgTE6RX).
 
 :::note For more Ent news and updates:
 
 - Subscribe to our [Newsletter](https://www.getrevue.co/profile/ent)
 - Follow us on [Twitter](https://twitter.com/entgo_io)
 - Join us on #ent on the [Gophers Slack](https://entgo.io/docs/slack)
+- Join us on the [Ent Discord Server](https://discord.gg/qZmPgTE6RX)
 
 :::

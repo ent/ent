@@ -5,23 +5,35 @@
 package migrate
 
 import (
+	"bufio"
 	"context"
+	"errors"
 	"fmt"
+	"io/fs"
 	"math"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
+	"text/template"
 
+	"ariga.io/atlas/sql/sqltool"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/entc/integration/migrate/entv1"
 	migratev1 "entgo.io/ent/entc/integration/migrate/entv1/migrate"
 	userv1 "entgo.io/ent/entc/integration/migrate/entv1/user"
 	"entgo.io/ent/entc/integration/migrate/entv2"
 	"entgo.io/ent/entc/integration/migrate/entv2/conversion"
+	"entgo.io/ent/entc/integration/migrate/entv2/customtype"
 	migratev2 "entgo.io/ent/entc/integration/migrate/entv2/migrate"
+	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
+	"entgo.io/ent/entc/integration/migrate/versioned"
 
+	"ariga.io/atlas/sql/migrate"
+	atlas "ariga.io/atlas/sql/schema"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
@@ -41,6 +53,7 @@ func TestMySQL(t *testing.T) {
 
 			drv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/migrate?parseTime=True", port))
 			require.NoError(t, err, "connecting to migrate database")
+			defer drv.Close()
 
 			clientv1 := entv1.NewClient(entv1.Driver(drv))
 			clientv2 := entv2.NewClient(entv2.Driver(drv))
@@ -48,6 +61,16 @@ func TestMySQL(t *testing.T) {
 			if version == "8" {
 				CheckConstraint(t, clientv2)
 			}
+			NicknameSearch(t, clientv2)
+			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_name = ? AND column_name = ?")
+
+			require.NoError(t, err, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []interface{}{}, new(sql.Result)))
+			require.NoError(t, root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS versioned_migrate", []interface{}{}, new(sql.Result)))
+			defer root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []interface{}{}, new(sql.Result))
+			vdrv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/versioned_migrate?parseTime=True", port))
+			require.NoError(t, err, "connecting to versioned migrate database")
+			defer vdrv.Close()
+			Versioned(t, vdrv, versioned.NewClient(versioned.Driver(vdrv)))
 		})
 	}
 }
@@ -77,6 +100,15 @@ func TestPostgres(t *testing.T) {
 			clientv2 := entv2.NewClient(entv2.Driver(drv))
 			V1ToV2(t, drv.Dialect(), clientv1, clientv2)
 			CheckConstraint(t, clientv2)
+			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_name = $1 AND column_name = $2")
+
+			vdrv, err := sql.Open(dialect.Postgres, dsn+" dbname=versioned_migrate")
+			require.NoError(t, err, "connecting to versioned migrate database")
+			defer vdrv.Close()
+			require.NoError(t, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []interface{}{}, new(sql.Result)))
+			require.NoError(t, root.Exec(ctx, "CREATE DATABASE versioned_migrate", []interface{}{}, new(sql.Result)))
+			defer root.Exec(ctx, "DROP DATABASE versioned_migrate", []interface{}{}, new(sql.Result))
+			Versioned(t, vdrv, versioned.NewClient(versioned.Driver(vdrv)))
 		})
 	}
 }
@@ -88,16 +120,53 @@ func TestSQLite(t *testing.T) {
 
 	ctx := context.Background()
 	client := entv2.NewClient(entv2.Driver(drv))
-	require.NoError(t, client.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true)), migratev2.WithDropIndex(true))
+	require.NoError(
+		t,
+		client.Schema.Create(
+			ctx,
+			migratev2.WithGlobalUniqueID(true),
+			migratev2.WithDropIndex(true),
+			migratev2.WithDropColumn(true),
+			schema.WithDiffHook(renameTokenColumn),
+			schema.WithDiffHook(func(next schema.Differ) schema.Differ {
+				return schema.DiffFunc(func(current, desired *atlas.Schema) ([]atlas.Change, error) {
+					// Example to hook into the diff process.
+					changes, err := next.Diff(current, desired)
+					if err != nil {
+						return nil, err
+					}
+					// After diff, you can filter
+					// changes or return new ones.
+					return changes, nil
+				})
+			}),
+			schema.WithApplyHook(func(next schema.Applier) schema.Applier {
+				return schema.ApplyFunc(func(ctx context.Context, conn dialect.ExecQuerier, plan *migrate.Plan) error {
+					// Example to hook into the apply process, or implement
+					// a custom applier. For example, write to a file.
+					//
+					//	for _, c := range plan.Changes {
+					//		fmt.Printf("%s: %s", c.Comment, c.Cmd)
+					//		if err := conn.Exec(ctx, c.Cmd, c.Args, nil); err != nil {
+					//			return err
+					//		}
+					//	}
+					//
+					return next.Apply(ctx, conn, plan)
+				})
+			}),
+		),
+	)
 
 	SanityV2(t, drv.Dialect(), client)
-	idRange(t, client.Car.Create().SaveX(ctx).ID, 0, 1<<32)
+	u := client.User.Create().SetAge(1).SetName("x").SetNickname("x'").SetPhone("y").SaveX(ctx)
+	idRange(t, client.Car.Create().SetOwner(u).SaveX(ctx).ID, 0, 1<<32)
 	idRange(t, client.Conversion.Create().SaveX(ctx).ID, 1<<32-1, 2<<32)
 	idRange(t, client.CustomType.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
 	idRange(t, client.Group.Create().SaveX(ctx).ID, 3<<32-1, 4<<32)
 	idRange(t, client.Media.Create().SaveX(ctx).ID, 4<<32-1, 5<<32)
 	idRange(t, client.Pet.Create().SaveX(ctx).ID, 5<<32-1, 6<<32)
-	idRange(t, client.User.Create().SetAge(1).SetName("x").SetNickname("x'").SetPhone("y").SaveX(ctx).ID, 6<<32-1, 7<<32)
+	idRange(t, u.ID, 6<<32-1, 7<<32)
 
 	// Override the default behavior of LIKE in SQLite.
 	// https://www.sqlite.org/pragma.html#pragma_case_sensitive_like
@@ -106,6 +175,11 @@ func TestSQLite(t *testing.T) {
 	EqualFold(t, client)
 	ContainsFold(t, client)
 	CheckConstraint(t, client)
+
+	vdrv, err := sql.Open("sqlite3", "file:versioned_ent?mode=memory&cache=shared&_fk=1")
+	require.NoError(t, err)
+	defer vdrv.Close()
+	Versioned(t, vdrv, versioned.NewClient(versioned.Driver(vdrv)))
 }
 
 func TestStorageKey(t *testing.T) {
@@ -114,23 +188,104 @@ func TestStorageKey(t *testing.T) {
 	require.Equal(t, "user_friend_id2", migratev2.FriendsTable.ForeignKeys[1].Symbol)
 }
 
+func Versioned(t *testing.T, drv sql.ExecQuerier, client *versioned.Client) {
+	ctx := context.Background()
+
+	p := t.TempDir()
+	dir, err := migrate.NewLocalDir(p)
+	require.NoError(t, err)
+	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir)))
+	require.Equal(t, 2, countFiles(t, dir))
+
+	p = t.TempDir()
+	dir, err = migrate.NewLocalDir(p)
+	require.NoError(t, err)
+	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir), schema.WithFormatter(sqltool.GooseFormatter)))
+	require.Equal(t, 1, countFiles(t, dir))
+
+	p = t.TempDir()
+	dir, err = migrate.NewLocalDir(p)
+	require.NoError(t, err)
+	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir), schema.WithFormatter(sqltool.FlywayFormatter)))
+	require.Equal(t, 2, countFiles(t, dir))
+
+	p = t.TempDir()
+	dir, err = migrate.NewLocalDir(p)
+	require.NoError(t, err)
+	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir), schema.WithFormatter(sqltool.LiquibaseFormatter)))
+	require.Equal(t, 1, countFiles(t, dir))
+
+	p = t.TempDir()
+	dir, err = migrate.NewLocalDir(p)
+	require.NoError(t, err)
+	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir), schema.WithSumFile()))
+	require.Equal(t, 3, countFiles(t, dir))
+	require.FileExists(t, filepath.Join(p, "atlas.sum"))
+
+	// GlobalUniqueID with drift check.
+	p = t.TempDir()
+	dir, err = migrate.NewLocalDir(p)
+	require.NoError(t, err)
+	format, err := migrate.NewTemplateFormatter(
+		template.Must(template.New("name").Parse("{{ .Name }}.sql")),
+		template.Must(template.New("name").Parse(`{{ range .Changes }}{{ printf "%s;\n" .Cmd }}{{ end }}`)),
+	)
+	require.NoError(t, err)
+	opts := []schema.MigrateOption{
+		schema.WithDir(dir),
+		schema.WithUniversalID(),
+		schema.WithFormatter(format),
+	}
+
+	// Compared to empty database.
+	require.NoError(t, client.Schema.NamedDiff(ctx, "first", opts...))
+	require.Equal(t, 2, countFiles(t, dir))
+
+	// Apply the migrations.
+	files, err := dir.Files()
+	require.NoError(t, err)
+	for _, f := range files {
+		sc := bufio.NewScanner(f)
+		for sc.Scan() {
+			if sc.Text() != "" {
+				_, err := drv.ExecContext(ctx, sc.Text())
+				require.NoError(t, err, sc.Text())
+			}
+		}
+	}
+
+	// Diff again - there should not be a new file.
+	require.NoError(t, client.Schema.NamedDiff(ctx, "second", opts...))
+	require.Equal(t, 2, countFiles(t, dir))
+}
+
 func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv2.Client) {
 	ctx := context.Background()
 
 	// Run migration and execute queries on v1.
-	require.NoError(t, clientv1.Schema.Create(ctx, migratev1.WithGlobalUniqueID(true)))
+	require.NoError(t, clientv1.Schema.Create(ctx, migratev1.WithGlobalUniqueID(true), schema.WithAtlas(false)))
 	SanityV1(t, dialect, clientv1)
+	require.NoError(t, clientv1.Schema.Create(ctx, migratev1.WithGlobalUniqueID(true), schema.WithAtlas(true)))
+
+	// Ensure migration to Atlas works with global unique ids.
+	// Create 2 records, delete first one, and create another two after migration.
+	// This way, we ensure that Atlas migration does not affect the PK starting point.
+	c1 := clientv1.Conversion.Create().SaveX(ctx)
+	clientv1.Conversion.Create().ExecX(ctx)
+	clientv1.Conversion.DeleteOne(c1).ExecX(ctx)
 
 	// Run migration and execute queries on v2.
-	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true)))
-	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true)), "should not create additional resources on multiple runs")
+	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithAtlas(true), schema.WithDiffHook(renameTokenColumn), schema.WithApplyHook(fillNulls(dialect))))
+	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithAtlas(true)), "should not create additional resources on multiple runs")
 	SanityV2(t, dialect, clientv2)
+	clientv2.Conversion.CreateBulk(clientv2.Conversion.Create(), clientv2.Conversion.Create(), clientv2.Conversion.Create()).ExecX(ctx)
 
-	idRange(t, clientv2.Car.Create().SaveX(ctx).ID, 0, 1<<32)
+	u := clientv2.User.Create().SetAge(1).SetName("foo").SetNickname("nick_foo").SetPhone("phone").SaveX(ctx)
+	idRange(t, clientv2.Car.Create().SetOwner(u).SaveX(ctx).ID, 0, 1<<32)
 	idRange(t, clientv2.Conversion.Create().SaveX(ctx).ID, 1<<32-1, 2<<32)
 	// Since "users" created in the migration of v1, it will occupy the range of 1<<32-1 ... 2<<32-1,
 	// even though they are ordered differently in the migration of v2 (groups, pets, users).
-	idRange(t, clientv2.User.Create().SetAge(1).SetName("foo").SetNickname("nick_foo").SetPhone("phone").SaveX(ctx).ID, 3<<32-1, 4<<32)
+	idRange(t, u.ID, 3<<32-1, 4<<32)
 	idRange(t, clientv2.Group.Create().SaveX(ctx).ID, 4<<32-1, 5<<32)
 	idRange(t, clientv2.Media.Create().SaveX(ctx).ID, 5<<32-1, 6<<32)
 	idRange(t, clientv2.Pet.Create().SaveX(ctx).ID, 6<<32-1, 7<<32)
@@ -217,6 +372,9 @@ func SanityV1(t *testing.T, dbdialect string, client *entv1.Client) {
 
 func SanityV2(t *testing.T, dbdialect string, client *entv2.Client) {
 	ctx := context.Background()
+	for _, u := range client.User.Query().AllX(ctx) {
+		require.NotEmpty(t, u.NewToken, "old_token column should be renamed to new_token")
+	}
 	if dbdialect != dialect.SQLite {
 		require.True(t, client.User.Query().ExistX(ctx), "table 'users' should contain rows after running the migration")
 		users := client.User.Query().Select(user.FieldCreatedAt).AllX(ctx)
@@ -308,6 +466,21 @@ func CheckConstraint(t *testing.T, client *entv2.Client) {
 	require.Error(t, err)
 }
 
+func NicknameSearch(t *testing.T, client *entv2.Client) {
+	ctx := context.Background()
+	names := client.User.Query().
+		Where(func(s *sql.Selector) {
+			s.Where(sql.P(func(b *sql.Builder) {
+				b.WriteString("MATCH(").Ident(user.FieldNickname).WriteString(") AGAINST(").Arg("nick_bar | nick_foo").WriteString(")")
+			}))
+		}).
+		Unique(true).
+		Order(entv2.Asc(user.FieldNickname)).
+		Select(user.FieldNickname).
+		StringsX(ctx)
+	require.Equal(t, []string{"nick_bar", "nick_foo"}, names)
+}
+
 func EqualFold(t *testing.T, client *entv2.Client) {
 	ctx := context.Background()
 	t.Log("testing equal-fold on sql specific dialects")
@@ -325,6 +498,74 @@ func ContainsFold(t *testing.T, client *entv2.Client) {
 	require.Equal(t, 1, client.User.Query().Where(user.NameContainsFold("Raki")).CountX(ctx))
 }
 
+func TimePrecision(t *testing.T, drv *sql.Driver, query string) {
+	ctx := context.Background()
+	rows, err := drv.QueryContext(ctx, query, customtype.Table, customtype.FieldTz0)
+	require.NoError(t, err)
+	p, err := sql.ScanInt(rows)
+	require.NoError(t, err)
+	require.Zerof(t, p, "custom_types field %q", customtype.FieldTz0)
+	require.NoError(t, rows.Close())
+	rows, err = drv.QueryContext(ctx, query, customtype.Table, customtype.FieldTz3)
+	require.NoError(t, err)
+	p, err = sql.ScanInt(rows)
+	require.NoError(t, err)
+	require.Equalf(t, 3, p, "custom_types field %q", customtype.FieldTz3)
+	require.NoError(t, rows.Close())
+}
+
 func idRange(t *testing.T, id, l, h int) {
 	require.Truef(t, id > l && id < h, "id %s should be between %d to %d", id, l, h)
+}
+
+func countFiles(t *testing.T, d migrate.Dir) int {
+	files, err := fs.ReadDir(d, "")
+	require.NoError(t, err)
+	return len(files)
+}
+
+func renameTokenColumn(next schema.Differ) schema.Differ {
+	return schema.DiffFunc(func(current, desired *atlas.Schema) ([]atlas.Change, error) {
+		// Example to hook into the diff process.
+		changes, err := next.Diff(current, desired)
+		if err != nil {
+			return nil, err
+		}
+		for _, c := range changes {
+			m, ok := c.(*atlas.ModifyTable)
+			if !ok || m.T.Name != user.Table {
+				continue
+			}
+			changes := atlas.Changes(m.Changes)
+			switch i, j := changes.IndexDropColumn("old_token"), changes.IndexAddColumn("new_token"); {
+			case i != -1 && j != -1:
+				rename := &atlas.RenameColumn{From: changes[i].(*atlas.DropColumn).C, To: changes[j].(*atlas.AddColumn).C}
+				changes.RemoveIndex(i, j)
+				m.Changes = append(changes, rename)
+			case i != -1 || j != -1:
+				return nil, errors.New("old_token and new_token must be present or absent")
+			}
+		}
+		return changes, nil
+	})
+}
+
+func fillNulls(dbdialect string) schema.ApplyHook {
+	return func(next schema.Applier) schema.Applier {
+		return schema.ApplyFunc(func(ctx context.Context, conn dialect.ExecQuerier, plan *migrate.Plan) error {
+			// There are three ways to UPDATE the NULL values to "Unknown" in this stage.
+			// Append a custom migrate.Change to the plan, execute an SQL statement directly
+			// on the dialect.ExecQuerier, or use the ent.Client used by the project.
+			drv := sql.NewDriver(dbdialect, sql.Conn{ExecQuerier: conn.(*sql.Tx)})
+			client := entv2.NewClient(entv2.Driver(drv))
+			if err := client.User.
+				Update().
+				SetDropOptional("Unknown").
+				Where(predicate.User(userv1.DropOptionalIsNil())).
+				Exec(ctx); err != nil {
+				return fmt.Errorf("fix default values to uppercase: %w", err)
+			}
+			return next.Apply(ctx, conn, plan)
+		})
+	}
 }

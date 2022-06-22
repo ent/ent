@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"log"
 
+	"entgo.io/ent/dialect/sql/schema"
+
 	"entgo.io/ent/examples/traversal/ent"
 	"entgo.io/ent/examples/traversal/ent/group"
 	"entgo.io/ent/examples/traversal/ent/pet"
@@ -25,7 +27,7 @@ func Example_Traversal() {
 	defer client.Close()
 	ctx := context.Background()
 	// Run the auto migration tool.
-	if err := client.Schema.Create(ctx); err != nil {
+	if err := client.Schema.Create(ctx, schema.WithAtlas(true)); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
 	if err := Gen(ctx, client); err != nil {

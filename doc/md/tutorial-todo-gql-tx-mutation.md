@@ -30,13 +30,13 @@ we follow these steps:
 1\. Edit the `cmd/todo/main.go` and add to the GraphQL server initialization the `entgql.Transactioner` handler as
 follows:
 
-```diff
+```diff title="cmd/todo/main.go"
 srv := handler.NewDefaultServer(todo.NewSchema(client))
 +srv.Use(entgql.Transactioner{TxOpener: client})
 ```
 
 2\. Then, in the GraphQL mutations, use the client from context as follows:
-```diff
+```diff title="todo.resolvers.go"
 func (mutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (*ent.Todo, error) {
 +	client := ent.FromContext(ctx)
 +	return client.Todo.

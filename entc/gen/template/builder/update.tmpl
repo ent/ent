@@ -14,8 +14,8 @@ in the LICENSE file in the root directory of this source tree.
 {{ template "import" $ }}
 
 import (
-	{{- range $path := $.SiblingImports }}
-		"{{ $path }}"
+	{{- range $import := $.SiblingImports }}
+		{{ $import.Alias }} "{{ $import.Path }}"
 	{{- end }}
 )
 
@@ -197,9 +197,15 @@ func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name
 			}
 			mut = {{ $receiver }}.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, {{ $mutation }}); err != nil {
+		v, err := mut.Mutate(ctx, {{ $mutation }})
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*{{ $.Name }})
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from {{ $.MutationName }}", v)
+		}
+		node = nv
 	}
 	return node, err
 }
@@ -256,7 +262,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 {{ $receiver := receiver $builder }}
 {{ $mutation := print $receiver ".mutation" }}
 
-{{ range $e := $.Edges }}
+{{ range $e := $.EdgesWithID }}
 	{{ $func := $e.MutationClear }}
 	// {{ $func }} clears {{ if $e.Unique }}the "{{ $e.Name }}" edge{{ else }}all "{{ $e.Name }}" edges{{ end }} to the {{ $e.Type.Name }} entity.
 	func ({{ $receiver }} *{{ $builder }}) {{ $func }}() *{{ $builder }} {

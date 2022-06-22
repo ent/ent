@@ -414,6 +414,31 @@ func TestBuilder(t *testing.T) {
 		{
 			input: Dialect(dialect.Postgres).
 				Update("users").
+				Add("rank", 10).
+				Where(
+					Or(
+						EQ("rank", Select("rank").From(Table("ranks")).Where(EQ("name", "foo"))),
+						GT("score", Select("score").From(Table("scores")).Where(GT("count", 0))),
+					),
+				),
+			wantQuery: `UPDATE "users" SET "rank" = COALESCE("users"."rank", 0) + $1 WHERE "rank" = (SELECT "rank" FROM "ranks" WHERE "name" = $2) OR "score" > (SELECT "score" FROM "scores" WHERE "count" > $3)`,
+			wantArgs:  []interface{}{10, "foo", 0},
+		},
+		{
+			input: Update("users").
+				Add("rank", 10).
+				Where(
+					Or(
+						EQ("rank", Select("rank").From(Table("ranks")).Where(EQ("name", "foo"))),
+						GT("score", Select("score").From(Table("scores")).Where(GT("count", 0))),
+					),
+				),
+			wantQuery: "UPDATE `users` SET `rank` = COALESCE(`users`.`rank`, 0) + ? WHERE `rank` = (SELECT `rank` FROM `ranks` WHERE `name` = ?) OR `score` > (SELECT `score` FROM `scores` WHERE `count` > ?)",
+			wantArgs:  []interface{}{10, "foo", 0},
+		},
+		{
+			input: Dialect(dialect.Postgres).
+				Update("users").
 				Set("name", "foo").
 				Set("age", 10).
 				Where(P().EQ("name", "foo")),
@@ -1264,6 +1289,14 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"bar"},
 		},
 		{
+			input:     SelectExpr(Raw("1")),
+			wantQuery: "SELECT 1",
+		},
+		{
+			input:     Select("*").From(SelectExpr(Raw("1")).As("s")),
+			wantQuery: "SELECT * FROM (SELECT 1) AS `s`",
+		},
+		{
 			input: func() Querier {
 				builder := Dialect(dialect.Postgres)
 				t1 := builder.Table("groups")
@@ -1495,8 +1528,8 @@ func TestBuilder(t *testing.T) {
 						EQ("active", true),
 					),
 				),
-			wantQuery: `SELECT * FROM "users" WHERE ((name = $1 AND name = $2) AND "name" = $3) AND ("id" IN (SELECT "owner_id" FROM "pets" WHERE "name" = $4) AND "active" = $5)`,
-			wantArgs:  []interface{}{"pedro", "pedro", "pedro", "luna", true},
+			wantQuery: `SELECT * FROM "users" WHERE ((name = $1 AND name = $2) AND "name" = $3) AND ("id" IN (SELECT "owner_id" FROM "pets" WHERE "name" = $4) AND "active")`,
+			wantArgs:  []interface{}{"pedro", "pedro", "pedro", "luna"},
 		},
 		{
 			input: func() Querier {
@@ -1552,6 +1585,40 @@ func TestSelector_OrderByExpr(t *testing.T) {
 	require.Equal(t, []interface{}{28, 1, 2}, args)
 }
 
+func TestSelector_SelectExpr(t *testing.T) {
+	query, args := SelectExpr(
+		Expr("?", "a"),
+		ExprFunc(func(b *Builder) {
+			b.Ident("first_name").WriteOp(OpAdd).Ident("last_name")
+		}),
+		ExprFunc(func(b *Builder) {
+			b.WriteString("COALESCE(").Ident("age").Comma().Arg(0).WriteByte(')')
+		}),
+		Expr("?", "b"),
+	).From(Table("users")).Query()
+	require.Equal(t, "SELECT ?, `first_name` + `last_name`, COALESCE(`age`, ?), ? FROM `users`", query)
+	require.Equal(t, []interface{}{"a", 0, "b"}, args)
+
+	query, args = Dialect(dialect.Postgres).
+		Select("name").
+		AppendSelectExpr(
+			Expr("age + $1", 1),
+			ExprFunc(func(b *Builder) {
+				b.Nested(func(b *Builder) {
+					b.WriteString("similarity(").Ident("name").Comma().Arg("A").WriteByte(')')
+					b.WriteOp(OpAdd)
+					b.WriteString("similarity(").Ident("desc").Comma().Arg("D").WriteByte(')')
+				})
+				b.WriteString(" AS s")
+			}),
+			Expr("rank + $4", 10),
+		).
+		From(Table("users")).
+		Query()
+	require.Equal(t, `SELECT "name", age + $1, (similarity("name", $2) + similarity("desc", $3)) AS s, rank + $4 FROM "users"`, query)
+	require.Equal(t, []interface{}{1, "A", "D", 10}, args)
+}
+
 func TestSelector_Union(t *testing.T) {
 	query, args := Dialect(dialect.Postgres).
 		Select("*").
@@ -1578,8 +1645,8 @@ func TestSelector_Union(t *testing.T) {
 				),
 		).
 		Query()
-	require.Equal(t, `SELECT * FROM "users" WHERE "active" = $1 UNION SELECT * FROM "old_users1" WHERE "is_active" = $2 AND "age" > $3 UNION ALL SELECT * FROM "old_users2" WHERE "is_active" = $4 AND "age" < $5`, query)
-	require.Equal(t, []interface{}{true, true, 20, "true", 18}, args)
+	require.Equal(t, `SELECT * FROM "users" WHERE "active" UNION SELECT * FROM "old_users1" WHERE "is_active" AND "age" > $1 UNION ALL SELECT * FROM "old_users2" WHERE "is_active" = $2 AND "age" < $3`, query)
+	require.Equal(t, []interface{}{20, "true", 18}, args)
 
 	t1, t2, t3 := Table("files"), Table("files"), Table("path")
 	n := Queries{
@@ -1606,8 +1673,8 @@ func TestSelector_Union(t *testing.T) {
 			From(t3),
 	}
 	query, args = n.Query()
-	require.Equal(t, "WITH RECURSIVE `path`(`id`, `name`, `parent_id`) AS (SELECT `files`.`id`, `files`.`name`, `files`.`parent_id` FROM `files` WHERE `files`.`parent_id` IS NULL AND `files`.`deleted` = ? UNION ALL SELECT `files`.`id`, `files`.`name`, `files`.`parent_id` FROM `files` JOIN `path` AS `t1` ON `files`.`parent_id` = `t1`.`id` WHERE `files`.`deleted` = ?) SELECT `t1`.`id`, `t1`.`name`, `t1`.`parent_id` FROM `path` AS `t1`", query)
-	require.Equal(t, []interface{}{false, false}, args)
+	require.Equal(t, "WITH RECURSIVE `path`(`id`, `name`, `parent_id`) AS (SELECT `files`.`id`, `files`.`name`, `files`.`parent_id` FROM `files` WHERE `files`.`parent_id` IS NULL AND NOT `files`.`deleted` UNION ALL SELECT `files`.`id`, `files`.`name`, `files`.`parent_id` FROM `files` JOIN `path` AS `t1` ON `files`.`parent_id` = `t1`.`id` WHERE NOT `files`.`deleted`) SELECT `t1`.`id`, `t1`.`name`, `t1`.`parent_id` FROM `path` AS `t1`", query)
+	require.Nil(t, args)
 }
 
 func TestBuilderContext(t *testing.T) {
@@ -1711,7 +1778,7 @@ func TestSelector_UnionOrderBy(t *testing.T) {
 		Union(Select("*").From(Table("old_users1"))).
 		OrderBy(table.C("whatever")).
 		Query()
-	require.Equal(t, `SELECT * FROM "users" WHERE "active" = $1 UNION SELECT * FROM "old_users1" ORDER BY "users"."whatever"`, query)
+	require.Equal(t, `SELECT * FROM "users" WHERE "active" UNION SELECT * FROM "old_users1" ORDER BY "users"."whatever"`, query)
 }
 
 func TestUpdateBuilder_SetExpr(t *testing.T) {
@@ -1899,8 +1966,7 @@ func TestReusePredicates(t *testing.T) {
 	}{
 		{
 			p:         EQ("active", false),
-			wantQuery: `SELECT * FROM "users" WHERE "active" = $1`,
-			wantArgs:  []interface{}{false},
+			wantQuery: `SELECT * FROM "users" WHERE NOT "active"`,
 		},
 		{
 			p: Or(
@@ -1920,8 +1986,8 @@ func TestReusePredicates(t *testing.T) {
 					In("id", Select("oid").From(Table("history"))),
 				),
 			),
-			wantQuery: `SELECT * FROM "users" WHERE "active" = $1 AND "name" LIKE $2 AND "name" LIKE $3 AND ("id" IN (SELECT "oid" FROM "audit") OR "id" IN (SELECT "oid" FROM "history"))`,
-			wantArgs:  []interface{}{true, "foo%", "%bar"},
+			wantQuery: `SELECT * FROM "users" WHERE "active" AND "name" LIKE $1 AND "name" LIKE $2 AND ("id" IN (SELECT "oid" FROM "audit") OR "id" IN (SELECT "oid" FROM "history"))`,
+			wantArgs:  []interface{}{"foo%", "%bar"},
 		},
 		{
 			p: func() *Predicate {
@@ -1950,4 +2016,56 @@ func TestReusePredicates(t *testing.T) {
 		require.Equal(t, tt.wantQuery, query)
 		require.Equal(t, tt.wantArgs, args)
 	}
+}
+
+func TestBoolPredicates(t *testing.T) {
+	t1, t2 := Table("users"), Table("posts")
+	query, args := Select().
+		From(t1).
+		Join(t2).
+		On(t1.C("id"), t2.C("author_id")).
+		Where(
+			And(
+				EQ(t1.C("active"), true),
+				NEQ(t2.C("deleted"), true),
+			),
+		).
+		Query()
+	require.Nil(t, args)
+	require.Equal(t, "SELECT * FROM `users` JOIN `posts` AS `t1` ON `users`.`id` = `t1`.`author_id` WHERE `users`.`active` AND NOT `t1`.`deleted`", query)
+}
+
+func TestWindowFunction(t *testing.T) {
+	posts := Table("posts")
+	base := Select(posts.Columns("id", "content", "author_id")...).
+		From(posts).
+		Where(EQ("active", true))
+	with := With("active_posts").
+		As(base).
+		With("selected_posts").
+		As(
+			Select().
+				AppendSelect("*").
+				AppendSelectExprAs(
+					RowNumber().PartitionBy("author_id").OrderBy("id").OrderExpr(Expr("f(`s`)")),
+					"row_number",
+				).
+				From(Table("active_posts")),
+		)
+	query, args := Select("*").From(Table("selected_posts")).Where(LTE("row_number", 2)).Prefix(with).Query()
+	require.Equal(t, "WITH `active_posts` AS (SELECT `posts`.`id`, `posts`.`content`, `posts`.`author_id` FROM `posts` WHERE `active`), `selected_posts` AS (SELECT *, (ROW_NUMBER() OVER (PARTITION BY `author_id` ORDER BY `id`, f(`s`))) AS `row_number` FROM `active_posts`) SELECT * FROM `selected_posts` WHERE `row_number` <= ?", query)
+	require.Equal(t, []interface{}{2}, args)
+}
+
+func TestSelector_UnqualifiedColumns(t *testing.T) {
+	t1, t2 := Table("t1"), Table("t2")
+	s := Select(t1.C("a"), t2.C("b"))
+	require.Equal(t, []string{"`t1`.`a`", "`t2`.`b`"}, s.SelectedColumns())
+	require.Equal(t, []string{"a", "b"}, s.UnqualifiedColumns())
+
+	d := Dialect(dialect.Postgres)
+	t1, t2 = d.Table("t1"), d.Table("t2")
+	s = d.Select(t1.C("a"), t2.C("b"))
+	require.Equal(t, []string{`"t1"."a"`, `"t2"."b"`}, s.SelectedColumns())
+	require.Equal(t, []string{"a", "b"}, s.UnqualifiedColumns())
 }

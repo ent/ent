@@ -64,7 +64,7 @@ type Annotation struct {
 	//
 	Size int64 `json:"size,omitempty"`
 
-	// Incremental defines the autoincremental behavior of a column. For example:
+	// Incremental defines the auto-incremental behavior of a column. For example:
 	//
 	//  incrementalEnabled := true
 	//  entsql.Annotation{
@@ -139,11 +139,11 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	if s := ant.Size; s != 0 {
 		a.Size = s
 	}
-	if s := ant.Incremental; s != nil {
-		a.Incremental = s
+	if i := ant.Incremental; i != nil {
+		a.Incremental = i
 	}
-	if s := ant.OnDelete; s != "" {
-		a.OnDelete = s
+	if od := ant.OnDelete; od != "" {
+		a.OnDelete = od
 	}
 	if c := ant.Check; c != "" {
 		a.Check = c
@@ -190,7 +190,7 @@ type IndexAnnotation struct {
 	//
 	Prefix uint
 
-	// PrefixColumns defines column prefixes for a multi column index.
+	// PrefixColumns defines column prefixes for a multi-column index.
 	// In MySQL, the following annotation maps to:
 	//
 	//	index.Fields("c1", "c2", "c3").
@@ -202,6 +202,52 @@ type IndexAnnotation struct {
 	//	CREATE INDEX `table_c1_c2_c3` ON `table`(`c1`(100), `c2`(200), `c3`)
 	//
 	PrefixColumns map[string]uint
+
+	// Desc defines the DESC clause for a single column index.
+	// In MySQL, the following annotation maps to:
+	//
+	//	index.Fields("column").
+	//		Annotation(entsql.Desc())
+	//
+	//	CREATE INDEX `table_column` ON `table`(`column` DESC)
+	//
+	Desc bool
+
+	// DescColumns defines the DESC clause for columns in a multi column index.
+	// In MySQL, the following annotation maps to:
+	//
+	//	index.Fields("c1", "c2", "c3").
+	//		Annotation(
+	//			entsql.DescColumns("c1", "c2"),
+	//		)
+	//
+	//	CREATE INDEX `table_c1_c2_c3` ON `table`(`c1` DESC, `c2` DESC, `c3`)
+	//
+	DescColumns map[string]bool
+
+	// Type defines the type of the index.
+	// In MySQL, the following annotation maps to:
+	//
+	//	index.Fields("c1").
+	//		Annotation(
+	//			entsql.IndexType("FULLTEXT"),
+	//		)
+	//
+	//	CREATE FULLTEXT INDEX `table_c1` ON `table`(`c1`)
+	//
+	Type string
+
+	// Types is like the Type option but allows mapping an index-type per dialect.
+	//
+	//	index.Fields("c1").
+	//		Annotation(
+	//			entsql.IndexTypes(map[string]string{
+	//				dialect.MySQL:		"FULLTEXT",
+	//				dialect.Postgres:	"GIN",
+	//			}),
+	//		)
+	//
+	Types map[string]string
 }
 
 // Prefix returns a new index annotation with a single string column index.
@@ -237,6 +283,68 @@ func PrefixColumn(name string, prefix uint) *IndexAnnotation {
 	}
 }
 
+// Desc returns a new index annotation with the DESC clause for a
+// single column index. In MySQL, the following annotation maps to:
+//
+//	index.Fields("column").
+//		Annotation(entsql.Desc())
+//
+//	CREATE INDEX `table_column` ON `table`(`column` DESC)
+//
+func Desc() *IndexAnnotation {
+	return &IndexAnnotation{
+		Desc: true,
+	}
+}
+
+// DescColumns returns a new index annotation with the DESC clause attached to
+// the columns in the index. In MySQL, the following annotation maps to:
+//
+//	index.Fields("c1", "c2", "c3").
+//		Annotation(
+//			entsql.DescColumns("c1", "c2"),
+//		)
+//
+//	CREATE INDEX `table_c1_c2_c3` ON `table`(`c1` DESC, `c2` DESC, `c3`)
+//
+func DescColumns(names ...string) *IndexAnnotation {
+	ant := &IndexAnnotation{
+		DescColumns: make(map[string]bool, len(names)),
+	}
+	for i := range names {
+		ant.DescColumns[names[i]] = true
+	}
+	return ant
+}
+
+// Type defines the type of the index.
+// In MySQL, the following annotation maps to:
+//
+//	index.Fields("c1").
+//		Annotation(
+//			entsql.IndexType("FULLTEXT"),
+//		)
+//
+//	CREATE FULLTEXT INDEX `table_c1` ON `table`(`c1`)
+//
+func IndexType(t string) *IndexAnnotation {
+	return &IndexAnnotation{Type: t}
+}
+
+// Types is like the Type option but allows mapping an index-type per dialect.
+//
+//	index.Fields("c1").
+//		Annotations(
+//			entsql.IndexTypes(map[string]string{
+//				dialect.MySQL:    "FULLTEXT",
+//				dialect.Postgres: "GIN",
+//			}),
+//		)
+//
+func IndexTypes(types map[string]string) *IndexAnnotation {
+	return &IndexAnnotation{Types: types}
+}
+
 // Name describes the annotation name.
 func (IndexAnnotation) Name() string {
 	return "EntSQLIndexes"
@@ -265,6 +373,23 @@ func (a IndexAnnotation) Merge(other schema.Annotation) schema.Annotation {
 		for column, prefix := range ant.PrefixColumns {
 			a.PrefixColumns[column] = prefix
 		}
+	}
+	if ant.Desc {
+		a.Desc = ant.Desc
+	}
+	if ant.DescColumns != nil {
+		if a.DescColumns == nil {
+			a.DescColumns = make(map[string]bool)
+		}
+		for column, desc := range ant.DescColumns {
+			a.DescColumns[column] = desc
+		}
+	}
+	if ant.Type != "" {
+		a.Type = ant.Type
+	}
+	if ant.Types != nil {
+		a.Types = ant.Types
 	}
 	return a
 }

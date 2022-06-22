@@ -14,8 +14,8 @@ in the LICENSE file in the root directory of this source tree.
 {{ template "import" $ }}
 
 import (
-	{{- range $path := $.SiblingImports }}
-		"{{ $path }}"
+	{{- range $import := $.SiblingImports }}
+		{{ $import.Alias }} "{{ $import.Path }}"
 	{{- end }}
 )
 
@@ -27,13 +27,15 @@ import (
 {{- end }}
 type {{ $.Name }} struct {
 	config {{ template "model/omittags" $ }}
-	// ID of the ent.
-	{{- if $.ID.Comment }}
-		{{- range $line := split $.ID.Comment "\n" }}
-			// {{ $line }}
+	{{- if $.HasOneFieldID }}
+		// ID of the ent.
+		{{- if $.ID.Comment }}
+			{{- range $line := split $.ID.Comment "\n" }}
+				// {{ $line }}
+			{{- end }}
 		{{- end }}
+		ID {{ $.ID.Type }} {{ with $.Annotations.Fields.StructTag.id }}`{{ . }}`{{ else }}`{{ $.ID.StructTag }}`{{ end }}
 	{{- end }}
-	ID {{ $.ID.Type }} {{ with $.Annotations.Fields.StructTag.id }}`{{ . }}`{{ else }}`{{ $.ID.StructTag }}`{{ end }}
 	{{- range $f := $.Fields }}
 		{{- $tag := $f.StructTag }}{{ with $tags := $.Annotations.Fields.StructTag }}{{ with index $tags $f.Name }}{{ $tag = . }}{{ end }}{{ end }}
 		{{- template "model/fieldcomment" $f }}
@@ -50,19 +52,21 @@ type {{ $.Name }} struct {
 		{{- xtemplate $tmpl . }}
 	{{- end }}
 	{{- /* Additional fields to add by the user. */}}
-	{{ template "model/fields/additional" $ }}
+	{{- template "model/fields/additional" $ }}
 }
 
 {{- with $.Edges }}
 // {{ $.Name }}Edges holds the relations/edges for other nodes in the graph.
 type {{ $.Name }}Edges struct {
 	{{- range $e := . }}
-		// {{ $e.StructField }} holds the value of the {{ $e.Name }} edge.
+		{{- template "model/edgecomment" $e }}
 		{{ $e.StructField }} {{ if not $e.Unique }}[]{{ end }}*{{ $e.Type.Name }} {{ with $e.StructTag }}`{{ . }}`{{ end }}
 	{{- end }}
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [{{ len . }}]bool
+	{{- /* Additional fields to add by the user. */}}
+	{{- template "model/edges/fields/additional" $ }}
 }
 
 {{- range $i, $e := . }}
@@ -107,11 +111,11 @@ func ({{ $receiver }} *{{ $.Name }}) Update() *{{ $.UpdateOneName }} {
 // Unwrap unwraps the {{ $.Name }} entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func ({{ $receiver }} *{{ $.Name }}) Unwrap() *{{ $.Name }} {
-	tx, ok := {{ $receiver }}.config.driver.(*txDriver)
+	_tx, ok := {{ $receiver }}.config.driver.(*txDriver)
 	if !ok {
 		panic("{{ $pkg }}: {{ $.Name }} is not a transactional entity")
 	}
-	{{ $receiver }}.config.driver = tx.drv
+	{{ $receiver }}.config.driver = _tx.drv
 	return {{ $receiver }}
 }
 
@@ -143,15 +147,20 @@ func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 	func ({{ $receiver }} *{{ $.Name }}) String() string {
 		var builder strings.Builder
 		builder.WriteString("{{ $.Name }}(")
-		builder.WriteString(fmt.Sprintf("id=%v", {{ $receiver }}.ID))
+		{{- if $.HasOneFieldID }}
+			builder.WriteString(fmt.Sprintf("id=%v{{ if $.Fields }}, {{ end }}", {{ $receiver }}.ID))
+		{{- end }}
 		{{- range $i, $f := $.Fields }}
+			{{- if ne $i 0 }}
+				builder.WriteString(", ")
+			{{- end }}
 			{{- if $f.Sensitive }}
-				builder.WriteString(", {{ $f.Name }}={{ print "<sensitive>" }}")
+				builder.WriteString("{{ $f.Name }}={{ print "<sensitive>" }}")
 			{{- else }}
 				{{- $sf := printf "%s.%s" $receiver $f.StructField }}
 				{{- if $f.Nillable }}
 					if v := {{ $sf }}; v != nil {
-						builder.WriteString(", {{ $f.Name }}=")
+						builder.WriteString("{{ $f.Name }}=")
 						{{- if and $f.IsTime (not $f.HasGoType) }}
 							builder.WriteString(v.Format(time.ANSIC))
 						{{- else if and $f.IsString (not $f.HasGoType) }}
@@ -161,7 +170,7 @@ func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 						{{- end }}
 					}
 				{{- else }}
-					builder.WriteString(", {{ $f.Name }}=")
+					builder.WriteString("{{ $f.Name }}=")
 					{{- if and $f.IsTime (not $f.HasGoType) }}
 						builder.WriteString({{ $sf }}.Format(time.ANSIC))
 					{{- else if and $f.IsString (not $f.HasGoType) }}
@@ -198,15 +207,27 @@ func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 
 {{/* A template for setting the field comment. */}}
 {{- define "model/fieldcomment" }}
-	// {{ $.StructField }} holds the value of the "{{ $.Name }}" field.
 	{{- if $.Comment }}
 		{{- range $line := split $.Comment "\n" }}
 			// {{ $line }}
 		{{- end }}
+	{{- else }}
+		// {{ $.StructField }} holds the value of the "{{ $.Name }}" field.
 	{{- end }}
 {{- end }}
 
-{{/* A template for adding additional methods or helpers for the generated model.*/}}
+{{/* A template for setting the edge comment. */}}
+{{- define "model/edgecomment" }}
+	{{- if $.Comment }}
+		{{- range $line := split $.Comment "\n" }}
+			// {{ $line }}
+		{{- end }}
+	{{- else }}
+		// {{ $.StructField }} holds the value of the {{ $.Name }} edge.
+	{{- end }}
+{{- end }}
+
+{{/* A template for adding additional methods or helpers for the generated model. */}}
 {{ define "model/additional" }}
 	{{- with $tmpls := matchTemplate "model/additional/*"  }}
 		{{- range $tmpl := $tmpls }}
@@ -215,6 +236,21 @@ func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 	{{- end }}
 
 	{{- with $tmpls := matchTemplate (printf "dialect/%s/model/additional/*" $.Storage) }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
+{{ end }}
+
+{{/* A template for adding additional fields for the Edges object of the generated model. */}}
+{{ define "model/edges/fields/additional" }}
+	{{- with $tmpls := matchTemplate "model/edges/fields/additional/*"  }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
+
+	{{- with $tmpls := matchTemplate (printf "dialect/%s/model/edges/fields/additional/*" $.Storage) }}
 		{{- range $tmpl := $tmpls }}
 			{{- xtemplate $tmpl $ }}
 		{{- end }}

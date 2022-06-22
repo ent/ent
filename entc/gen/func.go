@@ -41,7 +41,7 @@ var (
 		"aggregate":     aggregate,
 		"primitives":    primitives,
 		"singular":      rules.Singularize,
-		"quote":         strconv.Quote,
+		"quote":         quote,
 		"base":          filepath.Base,
 		"keys":          keys,
 		"join":          join,
@@ -72,6 +72,14 @@ var (
 	rules    = ruleset()
 	acronyms = make(map[string]struct{})
 )
+
+// quote only strings.
+func quote(v interface{}) interface{} {
+	if s, ok := v.(string); ok {
+		return strconv.Quote(s)
+	}
+	return v
+}
 
 // fieldOps returns all predicate operations for a given field.
 func fieldOps(f *Field) (ops []Op) {

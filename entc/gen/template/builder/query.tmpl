@@ -14,8 +14,8 @@ in the LICENSE file in the root directory of this source tree.
 {{ template "import" $ }}
 
 import (
-	{{- range $path := $.SiblingImports }}
-		"{{ $path }}"
+	{{- range $import := $.SiblingImports }}
+		{{ $import.Alias }} "{{ $import.Path }}"
 	{{- end }}
 )
 
@@ -120,31 +120,33 @@ func ({{ $receiver }} *{{ $builder }}) FirstX(ctx context.Context) *{{ $.Name }}
 	return node
 }
 
-// FirstID returns the first {{ $.Name }} ID from the query. 
-// Returns a *NotFoundError when no {{ $.Name }} ID was found.
-func ({{ $receiver }} *{{ $builder }}) FirstID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
-	var ids []{{ $.ID.Type }}
-	if ids, err = {{ $receiver }}.Limit(1).IDs(ctx); err != nil {
-		return
+{{ if $.HasOneFieldID }}
+	// FirstID returns the first {{ $.Name }} ID from the query.
+	// Returns a *NotFoundError when no {{ $.Name }} ID was found.
+	func ({{ $receiver }} *{{ $builder }}) FirstID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
+		var ids []{{ $.ID.Type }}
+		if ids, err = {{ $receiver }}.Limit(1).IDs(ctx); err != nil {
+			return
+		}
+		if len(ids) == 0 {
+			err = &NotFoundError{ {{ $.Package }}.Label}
+			return
+		}
+		return ids[0], nil
 	}
-	if len(ids) == 0 {
-		err = &NotFoundError{ {{ $.Package }}.Label}
-		return
+	
+	// FirstIDX is like FirstID, but panics if an error occurs.
+	func ({{ $receiver }} *{{ $builder }}) FirstIDX(ctx context.Context) {{ $.ID.Type }} {
+		id, err := {{ $receiver }}.FirstID(ctx)
+		if err != nil && !IsNotFound(err) {
+			panic(err)
+		}
+		return id
 	}
-	return ids[0], nil
-}
-
-// FirstIDX is like FirstID, but panics if an error occurs.
-func ({{ $receiver }} *{{ $builder }}) FirstIDX(ctx context.Context) {{ $.ID.Type }} {
-	id, err := {{ $receiver }}.FirstID(ctx)
-	if err != nil && !IsNotFound(err) {
-		panic(err)
-	}
-	return id
-}
+{{ end }}
 
 // Only returns a single {{ $.Name }} entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one {{ $.Name }} entity is not found.
+// Returns a *NotSingularError when more than one {{ $.Name }} entity is found.
 // Returns a *NotFoundError when no {{ $.Name }} entities are found.
 func ({{ $receiver }} *{{ $builder }}) Only(ctx context.Context) (*{{ $.Name }}, error) {
 	nodes, err := {{ $receiver }}.Limit(2).All(ctx)
@@ -170,33 +172,35 @@ func ({{ $receiver }} *{{ $builder }}) OnlyX(ctx context.Context) *{{ $.Name }} 
 	return node
 }
 
-// OnlyID is like Only, but returns the only {{ $.Name }} ID in the query.
-// Returns a *NotSingularError when exactly one {{ $.Name }} ID is not found.
-// Returns a *NotFoundError when no entities are found.
-func ({{ $receiver }} *{{ $builder }}) OnlyID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
-	var ids []{{ $.ID.Type }}
-	if ids, err = {{ $receiver }}.Limit(2).IDs(ctx); err != nil {
+{{ if $.HasOneFieldID }}
+	// OnlyID is like Only, but returns the only {{ $.Name }} ID in the query.
+	// Returns a *NotSingularError when more than one {{ $.Name }} ID is found.
+	// Returns a *NotFoundError when no entities are found.
+	func ({{ $receiver }} *{{ $builder }}) OnlyID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
+		var ids []{{ $.ID.Type }}
+		if ids, err = {{ $receiver }}.Limit(2).IDs(ctx); err != nil {
+			return
+		}
+		switch len(ids) {
+		case 1:
+			id = ids[0]
+		case 0:
+			err = &NotFoundError{ {{ $.Package }}.Label}
+		default:
+			err = &NotSingularError{ {{ $.Package }}.Label}
+		}
 		return
 	}
-	switch len(ids) {
-	case 1:
-		id = ids[0]
-	case 0:
-		err = &NotFoundError{ {{ $.Package }}.Label}
-	default:
-		err = &NotSingularError{ {{ $.Package }}.Label}
+	
+	// OnlyIDX is like OnlyID, but panics if an error occurs.
+	func ({{ $receiver }} *{{ $builder }}) OnlyIDX(ctx context.Context) {{ $.ID.Type }} {
+		id, err := {{ $receiver }}.OnlyID(ctx)
+		if err != nil {
+			panic(err)
+		}
+		return id
 	}
-	return
-}
-
-// OnlyIDX is like OnlyID, but panics if an error occurs.
-func ({{ $receiver }} *{{ $builder }}) OnlyIDX(ctx context.Context) {{ $.ID.Type }} {
-	id, err := {{ $receiver }}.OnlyID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
-}
+{{ end }}
 
 // All executes the query and returns a list of {{ plural $.Name }}.
 func ({{ $receiver }} *{{ $builder }}) All(ctx context.Context) ([]*{{ $.Name }}, error) {
@@ -215,23 +219,25 @@ func ({{ $receiver }} *{{ $builder }}) AllX(ctx context.Context) []*{{ $.Name }}
 	return nodes
 }
 
-// IDs executes the query and returns a list of {{ $.Name }} IDs.
-func ({{ $receiver }} *{{ $builder }}) IDs(ctx context.Context) ([]{{ $.ID.Type }}, error) {
-	var ids []{{ $.ID.Type }}
-	if err := {{ $receiver }}.Select({{ $.Package }}.FieldID).Scan(ctx, &ids); err != nil {
-		return nil, err
+{{ if $.HasOneFieldID }}
+	// IDs executes the query and returns a list of {{ $.Name }} IDs.
+	func ({{ $receiver }} *{{ $builder }}) IDs(ctx context.Context) ([]{{ $.ID.Type }}, error) {
+		var ids []{{ $.ID.Type }}
+		if err := {{ $receiver }}.Select({{ $.Package }}.FieldID).Scan(ctx, &ids); err != nil {
+			return nil, err
+		}
+		return ids, nil
 	}
-	return ids, nil
-}
-
-// IDsX is like IDs, but panics if an error occurs.
-func ({{ $receiver }} *{{ $builder }}) IDsX(ctx context.Context) []{{ $.ID.Type }} {
-	ids, err := {{ $receiver }}.IDs(ctx)
-	if err != nil {
-		panic(err)
+	
+	// IDsX is like IDs, but panics if an error occurs.
+	func ({{ $receiver }} *{{ $builder }}) IDsX(ctx context.Context) []{{ $.ID.Type }} {
+		ids, err := {{ $receiver }}.IDs(ctx)
+		if err != nil {
+			panic(err)
+		}
+		return ids
 	}
-	return ids
-}
+{{ end }}
 
 // Count returns the count of the given query.
 func ({{ $receiver }} *{{ $builder }}) Count(ctx context.Context) (int, error) {
@@ -285,6 +291,7 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 		// clone intermediate query.
 		{{ $.Storage }}: {{ $receiver }}.{{ $.Storage }}.Clone(),
 		path: {{ $receiver }}.path,
+		unique: {{ $receiver }}.unique,
 	}
 }
 
@@ -323,15 +330,17 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 //
 {{- end }}
 func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *{{ $groupBuilder }} {
-	group := &{{ $groupBuilder }}{config: {{ $receiver }}.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev {{ $.Storage.Builder }}, err error) {
+	grbuild := &{{ $groupBuilder }}{config: {{ $receiver }}.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev {{ $.Storage.Builder }}, err error) {
 		if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return {{ $receiver }}.{{ $.Storage }}Query(ctx), nil
 	}
-	return group
+	grbuild.label = {{ $.Package }}.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 {{ $selectBuilder := pascal $.Name | printf "%sSelect" }}
@@ -354,7 +363,10 @@ func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *
 {{- end }}
 func ({{ $receiver }} *{{ $builder }}) Select(fields ...string) *{{ $selectBuilder }} {
 	{{ $receiver }}.fields = append({{ $receiver }}.fields, fields...)
-	return &{{ $selectBuilder }}{ {{ $builder }}: {{ $receiver }} }
+	selbuild := &{{ $selectBuilder }}{ {{ $builder }}: {{ $receiver }} }
+	selbuild.label = {{ $.Package }}.Label
+	selbuild.flds, selbuild.scan = &{{ $receiver }}.fields, selbuild.Scan
+	return selbuild
 }
 
 func ({{ $receiver }} *{{ $builder }}) prepareQuery(ctx context.Context) error {
@@ -404,6 +416,7 @@ func ({{ $receiver }} *{{ $builder }}) prepareQuery(ctx context.Context) error {
 // {{ $groupBuilder }} is the group-by builder for {{ $.Name }} entities.
 type {{ $groupBuilder }} struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -427,66 +440,6 @@ func ({{ $groupReceiver }} *{{ $groupBuilder }}) Scan(ctx context.Context, v int
 	return {{ $groupReceiver }}.{{ $.Storage }}Scan(ctx, v)
 }
 
-// ScanX is like Scan, but panics if an error occurs.
-func ({{ $groupReceiver }} *{{ $groupBuilder }}) ScanX(ctx context.Context, v interface{}) {
-	if err := {{ $groupReceiver }}.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-{{ range $t := primitives }}
-	{{ $plural := pascal $t | plural }}
-	// {{ $plural }} returns list of {{ plural $t }} from group-by. 
-	// It is only allowed when executing a group-by query with one field.
-	func ({{ $groupReceiver }} *{{ $groupBuilder }}) {{ $plural }}(ctx context.Context) ([]{{ $t }}, error) {
-		if len({{ $groupReceiver }}.fields) > 1 {
-			return nil, errors.New("{{ $pkg }}: {{ $groupBuilder }}.{{ $plural }} is not achievable when grouping more than 1 field")
-		}
-		var v []{{ $t }}
-		if err := {{ $groupReceiver }}.Scan(ctx, &v); err != nil {
-			return nil, err
-		}
-		return v, nil
-	}
-
-	// {{ $plural }}X is like {{ $plural }}, but panics if an error occurs.
-	func ({{ $groupReceiver }} *{{ $groupBuilder }}) {{ $plural }}X(ctx context.Context) []{{ $t }} {
-		v, err := {{ $groupReceiver }}.{{ $plural }}(ctx)
-		if err != nil {
-			panic(err)
-		}
-		return v
-	}
-
-	{{ $singular := pascal $t -}}
-	// {{ $singular }} returns a single {{ $t }} from a group-by query.
-	// It is only allowed when executing a group-by query with one field.
-	func ({{ $groupReceiver }} *{{ $groupBuilder }}) {{ $singular }}(ctx context.Context) (_ {{ $t }}, err error) {
-		var v []{{ $t }}
-		if v, err = {{ $groupReceiver }}.{{ $plural }}(ctx); err != nil {
-			return
-		}
-		switch len(v) {
-		case 1:
-			return v[0], nil
-		case 0:
-			err = &NotFoundError{ {{ $.Package }}.Label}
-		default:
-			err = fmt.Errorf("{{ $pkg }}: {{ $groupBuilder }}.{{ $plural }} returned %d results when one was expected", len(v))
-		}
-		return
-	}
-
-	// {{ $singular }}X is like {{ $singular }}, but panics if an error occurs.
-	func ({{ $groupReceiver }} *{{ $groupBuilder }}) {{ $singular }}X(ctx context.Context) {{ $t }} {
-		v, err := {{ $groupReceiver }}.{{ $singular }}(ctx)
-		if err != nil {
-			panic(err)
-		}
-		return v
-	}
-{{ end }}
-
 {{ with extend $ "Builder" $groupBuilder }}
 	{{ $tmpl := printf "dialect/%s/group" $.Storage }}
 	{{ xtemplate $tmpl . }}
@@ -499,10 +452,10 @@ func ({{ $groupReceiver }} *{{ $groupBuilder }}) ScanX(ctx context.Context, v in
 // {{ $selectBuilder }} is the builder for selecting fields of {{ pascal $.Name }} entities.
 type {{ $selectBuilder }} struct {
 	*{{ $builder }}
+	selector
 	// intermediate query (i.e. traversal path).
 	{{ $.Storage }} {{ $.Storage.Builder }}
 }
-
 
 // Scan applies the selector query and scans the result into the given value.
 func ({{ $selectReceiver }} *{{ $selectBuilder }}) Scan(ctx context.Context, v interface{}) error {
@@ -512,64 +465,6 @@ func ({{ $selectReceiver }} *{{ $selectBuilder }}) Scan(ctx context.Context, v i
 	{{ $selectReceiver }}.{{ $.Storage }} = {{ $selectReceiver }}.{{ $builder }}.{{ $.Storage }}Query(ctx)
 	return {{ $selectReceiver }}.{{ $.Storage }}Scan(ctx, v)
 }
-
-// ScanX is like Scan, but panics if an error occurs.
-func ({{ $selectReceiver }} *{{ $selectBuilder }}) ScanX(ctx context.Context, v interface{}) {
-	if err := {{ $selectReceiver }}.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-{{ range $t := primitives }}
-	{{ $plural := pascal $t | plural }}
-	// {{ $plural }} returns list of {{ plural $t }} from a selector. It is only allowed when selecting one field.
-	func ({{ $selectReceiver }} *{{ $selectBuilder }}) {{ $plural }}(ctx context.Context) ([]{{ $t }}, error) {
-		if len({{ $selectReceiver }}.fields) > 1 {
-			return nil, errors.New("{{ $pkg }}: {{ $selectBuilder }}.{{ $plural }} is not achievable when selecting more than 1 field")
-		}
-		var v []{{ $t }}
-		if err := {{ $selectReceiver }}.Scan(ctx, &v); err != nil {
-			return nil, err
-		}
-		return v, nil
-	}
-
-	// {{ $plural }}X is like {{ $plural }}, but panics if an error occurs.
-	func ({{ $selectReceiver }} *{{ $selectBuilder }}) {{ $plural }}X(ctx context.Context) []{{ $t }} {
-		v, err := {{ $selectReceiver }}.{{ $plural }}(ctx)
-		if err != nil {
-			panic(err)
-		}
-		return v
-	}
-
-	{{ $singular := pascal $t -}}
-	// {{ $singular }} returns a single {{ $t }} from a selector. It is only allowed when selecting one field.
-	func ({{ $selectReceiver }} *{{ $selectBuilder }}) {{ $singular }}(ctx context.Context) (_ {{ $t }}, err error) {
-		var v []{{ $t }}
-		if v, err = {{ $selectReceiver }}.{{ $plural }}(ctx); err != nil {
-			return
-		}
-		switch len(v) {
-		case 1:
-			return v[0], nil
-		case 0:
-			err = &NotFoundError{ {{ $.Package }}.Label}
-		default:
-			err = fmt.Errorf("{{ $pkg }}: {{ $selectBuilder }}.{{ $plural }} returned %d results when one was expected", len(v))
-		}
-		return
-	}
-
-	// {{ $singular }}X is like {{ $singular }}, but panics if an error occurs.
-	func ({{ $selectReceiver }} *{{ $selectBuilder }}) {{ $singular }}X(ctx context.Context) {{ $t }} {
-		v, err := {{ $selectReceiver }}.{{ $singular }}(ctx)
-		if err != nil {
-			panic(err)
-		}
-		return v
-	}
-{{ end }}
 
 {{ with extend $ "Builder" $selectBuilder }}
 	{{ $tmpl := printf "dialect/%s/select" $.Storage }}

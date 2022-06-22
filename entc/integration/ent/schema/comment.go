@@ -24,5 +24,7 @@ func (Comment) Fields() []ent.Field {
 		field.Int("nillable_int").
 			Optional().
 			Nillable(),
+		field.String("table").
+			Optional(),
 	}
 }

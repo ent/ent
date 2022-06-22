@@ -36,7 +36,7 @@ func ScanOne(rows ColumnScanner, v interface{}) error {
 	return rows.Err()
 }
 
-// ScanInt64 scans and returns an int64 from the rows columns.
+// ScanInt64 scans and returns an int64 from the rows.
 func ScanInt64(rows ColumnScanner) (int64, error) {
 	var n int64
 	if err := ScanOne(rows, &n); err != nil {
@@ -45,7 +45,7 @@ func ScanInt64(rows ColumnScanner) (int64, error) {
 	return n, nil
 }
 
-// ScanInt scans and returns an int from the rows columns.
+// ScanInt scans and returns an int from the rows.
 func ScanInt(rows ColumnScanner) (int, error) {
 	n, err := ScanInt64(rows)
 	if err != nil {
@@ -54,7 +54,16 @@ func ScanInt(rows ColumnScanner) (int, error) {
 	return int(n), nil
 }
 
-// ScanString scans and returns a string from the rows columns.
+// ScanBool scans and returns a boolean from the rows.
+func ScanBool(rows ColumnScanner) (bool, error) {
+	var b bool
+	if err := ScanOne(rows, &b); err != nil {
+		return false, err
+	}
+	return b, nil
+}
+
+// ScanString scans and returns a string from the rows.
 func ScanString(rows ColumnScanner) (string, error) {
 	var s string
 	if err := ScanOne(rows, &s); err != nil {
@@ -63,7 +72,7 @@ func ScanString(rows ColumnScanner) (string, error) {
 	return s, nil
 }
 
-// ScanValue scans and returns a driver.Value from the rows columns.
+// ScanValue scans and returns a driver.Value from the rows.
 func ScanValue(rows ColumnScanner) (driver.Value, error) {
 	var v driver.Value
 	if err := ScanOne(rows, &v); err != nil {

@@ -7,7 +7,12 @@ package schema
 import (
 	"time"
 
+	"github.com/google/uuid"
+
+	"entgo.io/ent/schema"
+
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -67,10 +72,14 @@ func (User) Fields() []ent.Field {
 		field.String("title").
 			Default("SWE"),
 		// change column name and reference it to the
-		// previous one ("renamed").
+		// previous one using storage-key ("renamed").
 		field.String("new_name").
 			Optional().
 			StorageKey("renamed"),
+		// change column name from "old_token" to "new_token"
+		// and use Atlas diff hook in the migration.
+		field.String("new_token").
+			DefaultFunc(uuid.NewString),
 		// extending the blob size.
 		field.Bytes("blob").
 			Optional().
@@ -78,7 +87,8 @@ func (User) Fields() []ent.Field {
 		// adding enum to the `state` column.
 		field.Enum("state").
 			Optional().
-			Values("logged_in", "logged_out", "online"),
+			Values("logged_in", "logged_out", "online").
+			Default("logged_in"),
 		// convert string to enum.
 		field.Enum("status").
 			Optional().
@@ -92,6 +102,10 @@ func (User) Fields() []ent.Field {
 			Annotations(&entsql.Annotation{
 				Default: "CURRENT_TIMESTAMP",
 			}),
+		// nullable field was changed to non-nullable without a static
+		// default value, and it requires apply hook to fix this.
+		field.String("drop_optional").
+			DefaultFunc(uuid.NewString),
 		// deleting the `address` column.
 	}
 }
@@ -120,10 +134,20 @@ func (User) Indexes() []ent.Index {
 		// this index on MySQL.
 		index.Fields("description").
 			Annotations(entsql.Prefix(100)),
-		// deleting old indexes (name, address),
+		// Deleting old indexes (name, address),
 		// and defining a new one.
 		index.Fields("phone", "age").
 			Unique(),
+		index.Fields("age").
+			Annotations(entsql.Desc()),
+		// Enable FULLTEXT search on "nickname"
+		// field only in MySQL.
+		index.Fields("nickname").
+			Annotations(
+				entsql.IndexTypes(map[string]string{
+					dialect.MySQL: "FULLTEXT",
+				}),
+			),
 	}
 }
 
@@ -131,11 +155,29 @@ type Car struct {
 	ent.Schema
 }
 
+// Annotations of the Car.
+func (Car) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "Car"},
+	}
+}
+
+func (Car) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name").
+			Optional().
+			Unique(),
+	}
+}
+
 func (Car) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("owner", User.Type).
 			Ref("car").
-			Unique(),
+			Unique().
+			// Make the M20 edge from nullable to required edge.
+			// Requires column and foreign-key migration.
+			Required(),
 	}
 }
 
@@ -145,6 +187,14 @@ type Group struct{ ent.Schema }
 // Pet schema.
 type Pet struct {
 	ent.Schema
+}
+
+func (Pet) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name").
+			Optional().
+			Unique(),
+	}
 }
 
 func (Pet) Edges() []ent.Edge {
