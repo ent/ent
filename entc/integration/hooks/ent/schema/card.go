@@ -18,7 +18,7 @@ import (
 	"entgo.io/ent/schema/mixin"
 )
 
-// RejectMany rejects all update operations
+// RejectUpdate rejects all update operations
 // that are not on a specific entity.
 type RejectUpdate struct {
 	mixin.Schema
@@ -83,7 +83,7 @@ func (Card) Fields() []ent.Field {
 		field.Time("created_at").
 			Default(time.Now),
 		field.String("in_hook").
-			Comment("A mandatory field that is set by the hook"),
+			Comment("InHook is a mandatory field that is set by the hook."),
 	}
 }
 

@@ -375,6 +375,8 @@ func (TenantMixin) Edges() []ent.Edge {
 }
 ```
 
+#### Filter Rules
+
 Next, we may want to enforce a rule that will limit viewers to only query groups and users that are connected to the tenant they belong to.
 For use cases like this, Ent has an additional type of privacy rule named `Filter`.
 We can use `Filter` rules to filter out entities based on the identity of the viewer.

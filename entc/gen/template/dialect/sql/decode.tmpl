@@ -9,8 +9,11 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/sql/decode/one" }}
 {{ $receiver := $.Receiver }}
 
-{{ $idscantype := $.ID.NewScanType }}{{ if not $.ID.UserDefined }}{{ $idscantype = "new(sql.NullInt64)" }}{{ end }}
-{{ $ctypes := dict $idscantype (list $.ID.Constant) }}
+{{ $ctypes := dict }}
+{{ if $.HasOneFieldID }}
+	{{ $idscantype := $.ID.NewScanType }}
+	{{ $ctypes = set $ctypes $idscantype (list $.ID.Constant) }}
+{{ end }}
 {{ range $f := $.Fields }}
 	{{ $names := list }}
 	{{ if hasKey $ctypes $f.NewScanType }}
@@ -50,18 +53,20 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []int
 	{{- $idx := "i" }}{{ if eq $idx $receiver }}{{ $idx = "j" }}{{ end }}
 	for {{ $idx }} := range columns {
 		switch columns[{{ $idx }}] {
-		case {{ $.Package }}.{{ $.ID.Constant }}:
-			{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID $.ID.IsBytes) }}
-				{{- with extend $ "Idx" $idx "Field" $.ID "Rec" $receiver }}
-					{{ template "dialect/sql/decode/field" . }}
+		{{- if $.HasOneFieldID }}
+			case {{ $.Package }}.{{ $.ID.Constant }}:
+				{{- if or $.ID.IsString $.ID.IsUUID $.ID.IsBytes $.ID.IsOther }}
+					{{- with extend $ "Idx" $idx "Field" $.ID "Rec" $receiver }}
+						{{ template "dialect/sql/decode/field" . }}
+					{{- end }}
+				{{- else }}
+					value, ok := values[{{ $idx }}].(*sql.NullInt64)
+					if !ok {
+						return fmt.Errorf("unexpected type %T for field id", value)
+					}
+					{{ $receiver }}.ID = {{ $.ID.Type }}(value.Int64)
 				{{- end }}
-			{{- else }}
-				value, ok := values[{{ $idx }}].(*sql.NullInt64)
-				if !ok {
-					return fmt.Errorf("unexpected type %T for field id", value)
-				}
-				{{ $receiver }}.ID = {{ $.ID.Type }}(value.Int64)
-			{{- end }}
+		{{- end }}
 		{{- range  $f := $.Fields }}
 			case {{ $.Package }}.{{ $f.Constant }}:
 				{{- with extend $ "Idx" $idx "Field" $f "Rec" $receiver }}
@@ -71,7 +76,7 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []int
 		{{- range $i, $fk := $.UnexportedForeignKeys }}
 			{{- $f := $fk.Field }}
 			case {{ if $fk.UserDefined }}{{ $.Package }}.{{ $.ID.Constant }}{{ else }}{{ $.Package }}.ForeignKeys[{{ $i }}]{{ end }}:
-				{{- if or $fk.UserDefined (and $f.UserDefined (or $f.IsString $f.IsUUID $f.IsBytes)) }}
+				{{- if or $fk.UserDefined (and $f.UserDefined (or $f.IsString $f.IsUUID $f.IsBytes $f.IsOther)) }}
 					{{- with extend $ "Idx" $idx "Field" $f "Rec" $receiver "StructField" $fk.StructField }}
 						{{ template "dialect/sql/decode/field" . }}
 					{{- end }}

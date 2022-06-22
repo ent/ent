@@ -1,6 +1,7 @@
 ## ent - An Entity Framework For Go
 
 [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/entgo_io.svg?style=social&label=Follow%20%40entgo_io)](https://twitter.com/entgo_io)
+[![Discord](https://img.shields.io/discord/885059418646003782?label=discord&logo=discord&style=flat-square&logoColor=white)](https://discord.gg/qZmPgTE6RX)
 
 [English](README.md) | [中文](README_zh.md) | [日本語](README_jp.md)
 
@@ -15,12 +16,12 @@ with large data-models.
 - **Schema As Code** - model any database schema as Go objects.
 - **Easily Traverse Any Graph** - run queries, aggregations and traverse any graph structure easily.
 - **Statically Typed And Explicit API** - 100% statically typed and explicit API using code generation.
-- **Multi Storage Driver** - supports MySQL, PostgreSQL, SQLite and Gremlin.
+- **Multi Storage Driver** - supports MySQL, MariaDB, TiDB, PostgreSQL, CockroachDB, SQLite and Gremlin.
 - **Extendable** - simple to extend and customize using Go templates.
 
 ## Quick Installation
 ```console
-go get -d entgo.io/ent/cmd/ent
+go install entgo.io/ent/cmd/ent@latest
 ```
 
 For proper installation using [Go modules], visit [entgo.io website][entgo instal].

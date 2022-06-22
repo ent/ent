@@ -44,6 +44,7 @@ module.exports = {
       items: [
         'migrate',
         'dialects',
+        'versioned-migrations',
       ],
       collapsed: false,
     },
@@ -88,6 +89,7 @@ module.exports = {
         'tutorial-todo-gql-tx-mutation',
         'tutorial-todo-gql-mutation-input',
         'tutorial-todo-gql-filter-input',
+        'tutorial-todo-gql-schema-generator',
       ],
       collapsed: false,
     },

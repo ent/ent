@@ -16,7 +16,7 @@ type BaseMixin struct {
 	mixin.Schema
 }
 
-// Shared policy for all schemas.
+// Policy defines shared policy for all schemas.
 func (BaseMixin) Policy() ent.Policy {
 	return privacy.Policy{
 		Mutation: privacy.MutationPolicy{

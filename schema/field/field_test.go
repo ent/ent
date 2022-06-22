@@ -8,14 +8,18 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"errors"
+	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
 	"reflect"
 	"regexp"
+	"strconv"
 	"testing"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/field"
 
@@ -230,7 +234,7 @@ func TestBytes(t *testing.T) {
 	assert.Equal(t, "uuid.UUID", fd.Info.Ident)
 	assert.Equal(t, "github.com/google/uuid", fd.Info.PkgPath)
 	assert.Equal(t, "uuid.UUID", fd.Info.String())
-	assert.True(t, fd.Info.Nillable)
+	assert.False(t, fd.Info.Nillable)
 	assert.True(t, fd.Info.ValueScanner())
 	assert.NotEmpty(t, fd.Default.(func() uuid.UUID)())
 
@@ -407,7 +411,7 @@ func TestTime(t *testing.T) {
 	assert.Equal(t, now, fd.UpdateDefault.(func() time.Time)())
 
 	type Time time.Time
-	fd = field.Time("deleted_at").GoType(Time{}).Descriptor()
+	fd = field.Time("deleted_at").GoType(Time{}).Default(func() Time { return Time{} }).Descriptor()
 	assert.NoError(t, fd.Err)
 	assert.Equal(t, "field_test.Time", fd.Info.Ident)
 	assert.Equal(t, "entgo.io/ent/schema/field_test", fd.Info.PkgPath)
@@ -423,6 +427,8 @@ func TestTime(t *testing.T) {
 	assert.True(t, fd.Info.Nillable)
 	assert.True(t, fd.Info.ValueScanner())
 
+	fd = field.Time("deleted_at").GoType(Time{}).Default(time.Now).Descriptor()
+	assert.Error(t, fd.Err)
 	fd = field.Time("active").GoType(1).Descriptor()
 	assert.Error(t, fd.Err)
 	fd = field.Time("active").GoType(struct{}{}).Descriptor()
@@ -502,6 +508,8 @@ func TestJSON(t *testing.T) {
 	assert.Equal(t, "net/url", fd.Info.PkgPath)
 	fd = field.JSON("values", map[string]*url.Values{}).Descriptor()
 	assert.Equal(t, "net/url", fd.Info.PkgPath)
+	fd = field.JSON("addr", net.Addr(nil)).Descriptor()
+	assert.EqualError(t, fd.Err, "expect a Go value as JSON type, but got nil")
 }
 
 func TestField_Tag(t *testing.T) {
@@ -676,6 +684,77 @@ func TestField_Other(t *testing.T) {
 		Default(func() custom { return custom{} }).
 		Descriptor()
 	assert.Error(t, fd.Err, "invalid default value")
+}
+
+type UserRole string
+
+const (
+	Admin   UserRole = "ADMIN"
+	User    UserRole = "USER"
+	Unknown UserRole = "UNKNOWN"
+)
+
+func (UserRole) Values() (roles []string) {
+	for _, r := range []UserRole{Admin, User, Unknown} {
+		roles = append(roles, string(r))
+	}
+	return
+}
+
+func (e UserRole) String() string {
+	return string(e)
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (e UserRole) MarshalGQL(w io.Writer) {
+	_, _ = io.WriteString(w, strconv.Quote(e.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (e *UserRole) UnmarshalGQL(val interface{}) error {
+	str, ok := val.(string)
+	if !ok {
+		return fmt.Errorf("enum %T must be a string", val)
+	}
+	*e = UserRole(str)
+	switch *e {
+	case Admin, User, Unknown:
+		return nil
+	default:
+		return fmt.Errorf("%s is not a valid Role", str)
+	}
+}
+
+type Scalar struct{}
+
+func (Scalar) MarshalGQL(io.Writer)            {}
+func (*Scalar) UnmarshalGQL(interface{}) error { return nil }
+func (Scalar) Value() (driver.Value, error)    { return nil, nil }
+
+func TestRType_Implements(t *testing.T) {
+	type (
+		marshaler   interface{ MarshalGQL(w io.Writer) }
+		unmarshaler interface{ UnmarshalGQL(v interface{}) error }
+		codec       interface {
+			marshaler
+			unmarshaler
+		}
+	)
+	var (
+		codecType     = reflect.TypeOf((*codec)(nil)).Elem()
+		marshalType   = reflect.TypeOf((*marshaler)(nil)).Elem()
+		unmarshalType = reflect.TypeOf((*unmarshaler)(nil)).Elem()
+	)
+	for _, f := range []ent.Field{
+		field.Enum("role").GoType(Admin),
+		field.Other("scalar", &Scalar{}),
+		field.Other("scalar", Scalar{}),
+	} {
+		fd := f.Descriptor()
+		assert.True(t, fd.Info.RType.Implements(codecType))
+		assert.True(t, fd.Info.RType.Implements(marshalType))
+		assert.True(t, fd.Info.RType.Implements(unmarshalType))
+	}
 }
 
 func TestTypeString(t *testing.T) {

@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// IsConstraintError returns true if the error resulted from a DB constraint violation
+// IsConstraintError returns true if the error resulted from a database constraint violation.
 func IsConstraintError(err error) bool {
 	var e *ConstraintError
 	return errors.As(err, &e) || IsUniqueConstraintError(err) || IsForeignKeyConstraintError(err)
@@ -18,7 +18,7 @@ func IsConstraintError(err error) bool {
 // IsUniqueConstraintError reports if the error resulted from a DB uniqueness constraint violation.
 // e.g. duplicate value in unique index.
 func IsUniqueConstraintError(err error) bool {
-	uniquenessErrors := []string{
+	for _, s := range []string{
 		"Error 1062",                 // MySQL
 		"violates unique constraint", // Postgres
 		"UNIQUE constraint failed",   // SQLite
@@ -32,15 +32,15 @@ func IsUniqueConstraintError(err error) bool {
 	return false
 }
 
-// IsForeignKeyConstraintError reports if the error resulted from a DB FK constraint violation.
+// IsForeignKeyConstraintError reports if the error resulted from a database foreign-key constraint violation.
 // e.g. parent row does not exist.
 func IsForeignKeyConstraintError(err error) bool {
-	fkErrors := []string{
-		"Error 1452",                      // MySQL
+	for _, s := range []string{
+		"Error 1451",                      // MySQL (Cannot delete or update a parent row).
+		"Error 1452",                      // MySQL (Cannot add or update a child row).
 		"violates foreign key constraint", // Postgres
 		"FOREIGN KEY constraint failed",   // SQLite
-	}
-	for _, s := range fkErrors {
+	} {
 		if strings.Contains(err.Error(), s) {
 			return true
 		}

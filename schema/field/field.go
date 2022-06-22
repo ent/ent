@@ -26,7 +26,7 @@ func String(name string) *stringBuilder {
 }
 
 // Text returns a new string field without limitation on the size.
-// In MySQL, it is the "longtext" type, but in SQLite and Gremlin it has not effect.
+// In MySQL, it is the "longtext" type, but in SQLite and Gremlin it has no effect.
 func Text(name string) *stringBuilder {
 	return &stringBuilder{&Descriptor{
 		Name: name,
@@ -71,15 +71,19 @@ func Time(name string) *timeBuilder {
 //		Optional()
 //
 func JSON(name string, typ interface{}) *jsonBuilder {
-	t := reflect.TypeOf(typ)
 	b := &jsonBuilder{&Descriptor{
 		Name: name,
 		Info: &TypeInfo{
-			Type:    TypeJSON,
-			Ident:   t.String(),
-			PkgPath: t.PkgPath(),
+			Type: TypeJSON,
 		},
 	}}
+	t := reflect.TypeOf(typ)
+	if t == nil {
+		b.desc.Err = errors.New("expect a Go value as JSON type, but got nil")
+		return b
+	}
+	b.desc.Info.Ident = t.String()
+	b.desc.Info.PkgPath = t.PkgPath()
 	b.desc.goType(typ, t)
 	switch t.Kind() {
 	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
@@ -129,10 +133,9 @@ func UUID(name string, typ driver.Valuer) *uuidBuilder {
 	b := &uuidBuilder{&Descriptor{
 		Name: name,
 		Info: &TypeInfo{
-			Type:     TypeUUID,
-			Nillable: true,
-			Ident:    rt.String(),
-			PkgPath:  indirect(rt).PkgPath(),
+			Type:    TypeUUID,
+			Ident:   rt.String(),
+			PkgPath: indirect(rt).PkgPath(),
 		},
 	}}
 	b.desc.goType(typ, valueScannerType)
@@ -370,8 +373,8 @@ func (b *timeBuilder) StructTag(s string) *timeBuilder {
 //	field.Time("created_at").
 //		Default(time.Now)
 //
-func (b *timeBuilder) Default(f func() time.Time) *timeBuilder {
-	b.desc.Default = f
+func (b *timeBuilder) Default(fn interface{}) *timeBuilder {
+	b.desc.Default = fn
 	return b
 }
 
@@ -382,8 +385,13 @@ func (b *timeBuilder) Default(f func() time.Time) *timeBuilder {
 //		Default(time.Now).
 //		UpdateDefault(time.Now),
 //
-func (b *timeBuilder) UpdateDefault(f func() time.Time) *timeBuilder {
-	b.desc.UpdateDefault = f
+//	field.Time("deleted_at").
+//		Optional().
+//		GoType(&sql.NullTime{}).
+//		UpdateDefault(NewNullTime),
+//
+func (b *timeBuilder) UpdateDefault(fn interface{}) *timeBuilder {
+	b.desc.UpdateDefault = fn
 	return b
 }
 
@@ -419,6 +427,9 @@ func (b *timeBuilder) Annotations(annotations ...schema.Annotation) *timeBuilder
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *timeBuilder) Descriptor() *Descriptor {
+	if b.desc.Default != nil {
+		b.desc.checkDefaultFunc(timeType)
+	}
 	return b.desc
 }
 
@@ -885,7 +896,7 @@ func (b *enumBuilder) GoType(ev EnumValues) *enumBuilder {
 	b.Values(ev.Values()...)
 	b.desc.goType(ev, stringType)
 	// If an error already exists, let that be returned instead.
-	// Otherwise check that the underlying type is either a string
+	// Otherwise, check that the underlying type is either a string
 	// or implements Stringer.
 	if b.desc.Err == nil && b.desc.Info.RType.rtype.Kind() != reflect.String && !b.desc.Info.Stringer() {
 		b.desc.Err = errors.New("enum values which implement ValueScanner must also implement Stringer")
@@ -1158,35 +1169,41 @@ func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 			Methods: make(map[string]struct{ In, Out []*RType }, t.NumMethod()),
 		},
 	}
+	methods(t, info.RType)
 	switch t.Kind() {
-	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
+	case reflect.Slice, reflect.Ptr, reflect.Map:
 		info.Nillable = true
 	}
 	switch pt := reflect.PtrTo(t); {
-	case pt.Implements(valueScannerType):
-		t = pt
-		fallthrough
-	case t.Implements(valueScannerType):
-		n := t.NumMethod()
-		for i := 0; i < n; i++ {
-			m := t.Method(i)
-			in := make([]*RType, m.Type.NumIn()-1)
-			for j := range in {
-				arg := m.Type.In(j + 1)
-				in[j] = &RType{Name: arg.Name(), Ident: arg.String(), Kind: arg.Kind(), PkgPath: arg.PkgPath()}
-			}
-			out := make([]*RType, m.Type.NumOut())
-			for j := range out {
-				ret := m.Type.Out(j)
-				out[j] = &RType{Name: ret.Name(), Ident: ret.String(), Kind: ret.Kind(), PkgPath: ret.PkgPath()}
-			}
-			info.RType.Methods[m.Name] = struct{ In, Out []*RType }{in, out}
-		}
-	case t.Kind() == expectType.Kind() && t.ConvertibleTo(expectType):
+	case pt.Implements(valueScannerType), t.Implements(valueScannerType),
+		t.Kind() == expectType.Kind() && t.ConvertibleTo(expectType):
 	default:
 		d.Err = fmt.Errorf("GoType must be a %q type or ValueScanner", expectType)
 	}
 	d.Info = info
+}
+
+func methods(t reflect.Type, rtype *RType) {
+	// For type T, add methods with
+	// pointer receiver as well (*T).
+	if t.Kind() != reflect.Ptr {
+		t = reflect.PtrTo(t)
+	}
+	n := t.NumMethod()
+	for i := 0; i < n; i++ {
+		m := t.Method(i)
+		in := make([]*RType, m.Type.NumIn()-1)
+		for j := range in {
+			arg := m.Type.In(j + 1)
+			in[j] = &RType{Name: arg.Name(), Ident: arg.String(), Kind: arg.Kind(), PkgPath: arg.PkgPath()}
+		}
+		out := make([]*RType, m.Type.NumOut())
+		for j := range out {
+			ret := m.Type.Out(j)
+			out[j] = &RType{Name: ret.Name(), Ident: ret.String(), Kind: ret.Kind(), PkgPath: ret.PkgPath()}
+		}
+		rtype.Methods[m.Name] = struct{ In, Out []*RType }{in, out}
+	}
 }
 
 func (d *Descriptor) checkDefaultFunc(expectType reflect.Type) {

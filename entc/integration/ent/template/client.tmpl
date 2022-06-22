@@ -9,5 +9,10 @@ in the LICENSE file in the root directory of this source tree.
     func(c *Client) Dialect() string {
         return c.driver.Dialect()
     }
+
+    // Driver returns the underlying driver.
+    func(c *Client) Driver() dialect.Driver {
+        return c.driver
+    }
 {{ end }}
 

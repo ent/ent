@@ -271,12 +271,13 @@ In this post, we presented the Upsert API, a long-anticipated capability, that i
 We discussed where upserts are commonly used in applications and the way they are implemented using common relational databases.
 Finally, we showed a simple example of how to get started with the Upsert API using Ent.
 
-Have questions? Need help with getting started? Feel free to [join our Slack channel](https://entgo.io/docs/slack/).
+Have questions? Need help with getting started? Feel free to join our [Discord server](https://discord.gg/qZmPgTE6RX) or [Slack channel](https://entgo.io/docs/slack/).
 
 :::note For more Ent news and updates:
 
 - Subscribe to our [Newsletter](https://www.getrevue.co/profile/ent)
 - Follow us on [Twitter](https://twitter.com/entgo_io)
 - Join us on #ent on the [Gophers Slack](https://entgo.io/docs/slack)
+- Join us on the [Ent Discord Server](https://discord.gg/qZmPgTE6RX)
 
 :::

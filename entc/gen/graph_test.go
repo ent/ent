@@ -123,7 +123,11 @@ func TestNewGraph(t *testing.T) {
 	require.Equal(graph.Nodes[0], e1.Type)
 
 	require.Equal("t2_m2m_from", t2.Edges[5].Name)
+	require.Equal("t2_m2m_to", t2.Edges[5].Inverse)
 	require.Equal("t2_m2m_to", t2.Edges[6].Name)
+	require.Empty(t2.Edges[6].Inverse)
+	require.Equal(t2.Edges[6], t2.Edges[5].Ref)
+	require.Equal(t2.Edges[5], t2.Edges[6].Ref)
 	require.Equal(map[string]string{"Name": "From"}, t2.Edges[5].Annotations["GQL"])
 	require.Equal(map[string]string{"Name": "To"}, t2.Edges[6].Annotations["GQL"])
 }
@@ -208,7 +212,49 @@ func TestNewGraphDuplicateEdgeField(t *testing.T) {
 				{Name: "parent", Type: "User"},
 			},
 		})
-	require.EqualError(t, err, `entc/gen: User schema can't contain field and edge with the same name "parent"`)
+	require.EqualError(t, err, `entc/gen: User schema cannot contain field and edge with the same name "parent"`)
+}
+
+func TestNewGraphThroughUndefinedType(t *testing.T) {
+	_, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, &load.Schema{
+		Name: "T1",
+		Edges: []*load.Edge{
+			{Name: "groups", Type: "T1", Required: true, Through: &struct{ N, T string }{N: "groups_edge", T: "T2"}},
+		},
+	})
+	require.EqualError(t, err, `entc/gen: resolving edges: edge T1.groups defined with Through("groups_edge", T2.Type), but type T2 was not found`)
+}
+
+func TestNewGraphThroughInvalidRel(t *testing.T) {
+	_, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, &load.Schema{
+		Name: "T1",
+		Edges: []*load.Edge{
+			{Name: "groups", Type: "T1", Unique: true, Required: true, Through: &struct{ N, T string }{N: "groups_edge", T: "T2"}},
+		},
+	})
+	require.EqualError(t, err, `entc/gen: resolving edges: edge T1.groups Through("groups_edge", T2.Type) is allowed only on M2M edges, but got: "O2O"`)
+}
+
+func TestNewGraphThroughDuplicates(t *testing.T) {
+	_, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]},
+		&load.Schema{
+			Name: "User",
+			Edges: []*load.Edge{
+				{Name: "groups", Type: "Group", Through: &struct{ N, T string }{N: "group_edges", T: "T1"}},
+				{Name: "group_edges", Type: "Group"},
+			},
+		},
+		&load.Schema{
+			Name: "Group",
+			Edges: []*load.Edge{
+				{Name: "users", Type: "User", Inverse: true, RefName: "groups", Through: &struct{ N, T string }{N: "user_edges", T: "T1"}},
+			},
+		},
+		&load.Schema{
+			Name: "T1",
+		},
+	)
+	require.EqualError(t, err, `entc/gen: resolving edges: edge User.groups defined with Through("group_edges", T1.Type), but schema User already has an edge named group_edges`)
 }
 
 func TestRelation(t *testing.T) {
@@ -303,39 +349,50 @@ func TestGraph_Gen(t *testing.T) {
 	require.NoError(os.MkdirAll(target, os.ModePerm), "creating tmpdir")
 	defer os.RemoveAll(target)
 	external := MustParse(NewTemplate("external").Parse("package external"))
+	skipped := MustParse(NewTemplate("skipped").SkipIf(func(*Graph) bool { return true }).Parse("package external"))
+	schemas := []*load.Schema{
+		{
+			Name: "T1",
+			Fields: []*load.Field{
+				{Name: "age", Info: &field.TypeInfo{Type: field.TypeInt}, Optional: true},
+				{Name: "expired_at", Info: &field.TypeInfo{Type: field.TypeTime}, Nillable: true, Optional: true},
+				{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
+			},
+			Edges: []*load.Edge{
+				{Name: "t1", Type: "T1", Unique: true},
+			},
+		},
+		{
+			Name: "T2",
+		},
+	}
 	graph, err := NewGraph(&Config{
 		Package:   "entc/gen",
 		Target:    target,
 		Storage:   drivers[0],
-		Templates: []*Template{external},
+		Templates: []*Template{external, skipped},
 		IDType:    &field.TypeInfo{Type: field.TypeInt},
 		Features:  AllFeatures,
-	}, &load.Schema{
-		Name: "T1",
-		Fields: []*load.Field{
-			{Name: "age", Info: &field.TypeInfo{Type: field.TypeInt}, Optional: true},
-			{Name: "expired_at", Info: &field.TypeInfo{Type: field.TypeTime}, Nillable: true, Optional: true},
-			{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
-		},
-		Edges: []*load.Edge{
-			{Name: "t1", Type: "T1", Unique: true},
-		},
-	})
+	}, schemas...)
 	require.NoError(err)
 	require.NotNil(graph)
 	require.NoError(graph.Gen())
-	// ensure graph files were generated.
+	// Ensure graph files were generated.
 	for _, name := range []string{"ent", "client", "config"} {
 		_, err := os.Stat(fmt.Sprintf("%s/%s.go", target, name))
 		require.NoError(err)
 	}
-	// ensure entity files were generated.
+	// Ensure entity files were generated.
 	for _, format := range []string{"%s", "%s_create", "%s_update", "%s_delete", "%s_query"} {
 		_, err := os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t1"))
+		require.NoError(err)
+		_, err = os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t2"))
 		require.NoError(err)
 	}
 	_, err = os.Stat(filepath.Join(target, "external.go"))
 	require.NoError(err)
+	_, err = os.Stat(filepath.Join(target, "skipped.go"))
+	require.True(os.IsNotExist(err))
 
 	// Generated feature templates.
 	_, err = os.Stat(filepath.Join(target, "internal", "schema.go"))
@@ -355,6 +412,26 @@ func TestGraph_Gen(t *testing.T) {
 	require.NoError(graph.Gen())
 	_, err = os.Stat(filepath.Join(target, "internal"))
 	require.True(os.IsNotExist(err))
+
+	schemas = schemas[:1]
+	graph, err = NewGraph(&Config{
+		Package:   "entc/gen",
+		Target:    target,
+		Storage:   drivers[0],
+		Templates: []*Template{external, skipped},
+		IDType:    &field.TypeInfo{Type: field.TypeInt},
+		Features:  AllFeatures,
+	}, schemas...)
+	require.NoError(err)
+	require.NotNil(graph)
+	require.NoError(graph.Gen())
+	// Ensure entity files were generated.
+	for _, format := range []string{"%s", "%s_create", "%s_update", "%s_delete", "%s_query"} {
+		_, err := os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t1"))
+		require.NoError(err)
+		_, err = os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t2"))
+		require.Error(err)
+	}
 }
 
 func ensureStructTag(name string) Hook {

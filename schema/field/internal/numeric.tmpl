@@ -197,8 +197,8 @@ func (b *{{ $builder }}) SchemaType(types map[string]string) *{{ $builder }} {
 // `Add(T) T` method in order to support the `Add<F>` operation
 // in mutations. For example:
 //
-//	func(t1 T) Add(t1 T) T {
-//		return add(t1, t1)
+//	func(t1 T) Add(t2 T) T {
+//		return add(t1, t2)
 //	}
 //
 func (b *{{ $builder }}) GoType(typ interface{}) *{{ $builder }} {
@@ -366,8 +366,8 @@ func (b *{{ $builder }}) SchemaType(types map[string]string) *{{ $builder }} {
 // `Add(T) T` method in order to support the `Add<F>` operation
 // in mutations. For example:
 //
-//	func(t1 T) Add(t1 T) T {
-//		return add(t1, t1)
+//	func(t1 T) Add(t2 T) T {
+//		return add(t1, t2)
 //	}
 //
 func (b *{{ $builder }}) GoType(typ interface{}) *{{ $builder }} {

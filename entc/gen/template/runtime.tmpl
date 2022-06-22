@@ -72,7 +72,7 @@ import (
 		"{{ . }}"
 	{{- end }}
 	{{- range $n := $.Nodes }}
-		"{{ $.Config.Package }}/{{ $n.Package }}"
+		{{ $n.PackageAlias }} "{{ $.Config.Package }}/{{ $n.PackageDir }}"
 		{{- /* Import external packages */}}
 		{{- template "import/types" $n }}
 	{{- end }}
@@ -134,7 +134,7 @@ func init() {
 				_ = {{ $pkg }}MixinFields{{ $i }}
 			{{- end }}
 		{{- end }}
-		{{- $fields := $n.Fields }}{{ if $n.ID.UserDefined }}{{ $fields = append $fields $n.ID }}{{ end }}
+		{{- $fields := $n.Fields }}{{ if $n.HasOneFieldID }}{{ if $n.ID.UserDefined }}{{ $fields = append $fields $n.ID }}{{ end }}{{ end }}
 		{{- with $fields }}
 			{{ $pkg }}Fields := {{ $schema }}.{{ $n.Name }}{}.Fields()
 			_ = {{ $pkg }}Fields

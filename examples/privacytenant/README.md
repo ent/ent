@@ -1,7 +1,6 @@
 # Privacy Multi-Tenant Example
 
-An example for an application that allows any user to read any data,
-but accepts mutations only from viewers with admin role.
+The example code for https://entgo.io/docs/privacy#multi-tenancy. 
    
 ### Generate Assets
 

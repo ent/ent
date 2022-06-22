@@ -6,25 +6,7 @@ in the LICENSE file in the root directory of this source tree.
 
 {{/* gotype: entgo.io/ent/entc/gen.Graph */}}
 
-{{ define "client" }}
-
-{{ $pkg := base $.Config.Package }}
-{{ template "header" $ }}
-
-import (
-	"log"
-
-	"{{ $.Config.Package }}/migrate"
-	{{ range $n := $.Nodes }}
-		"{{ $n.Config.Package }}/{{ $n.Package }}"
-	{{- end }}
-
-	"entgo.io/ent/dialect"
-	{{ range $import := $.Storage.Imports -}}
-		"{{ $import }}"
-	{{ end -}}
-)
-
+{{ define "client/init" }}
 // Client is the client that holds all ent builders.
 type Client struct {
 	config
@@ -58,9 +40,31 @@ func (c *Client) init() {
 		c.Schema = migrate.NewSchema(c.driver)
 	{{- end }}
 	{{- range $n := $.Nodes }}
-    	c.{{ $n.Name }} =  New{{ $n.Name }}Client(c.config)
+    	c.{{ $n.Name }} = New{{ $n.Name }}Client(c.config)
 	{{- end }}
 }
+{{ end }}
+
+{{ define "client" }}
+
+{{ $pkg := base $.Config.Package }}
+{{ template "header" $ }}
+
+import (
+	"log"
+
+	"{{ $.Config.Package }}/migrate"
+	{{ range $n := $.Nodes }}
+		{{ $n.PackageAlias }} "{{ $n.Config.Package }}/{{ $n.PackageDir }}"
+	{{- end }}
+
+	"entgo.io/ent/dialect"
+	{{ range $import := $.Storage.Imports -}}
+		"{{ $import }}"
+	{{ end -}}
+)
+
+{{ template "client/init" $ }}
 
 // Open opens a database/sql.DB specified by the driver name and
 // the data source name, and returns a new client attached to it.
@@ -159,7 +163,7 @@ func (c *{{ $client }}) Use(hooks ...Hook) {
 	c.hooks.{{ $n.Name }} = append(c.hooks.{{ $n.Name }}, hooks...)
 }
 
-// Create returns a create builder for {{ $n.Name }}.
+// Create returns a builder for creating a {{ $n.Name }} entity.
 func (c *{{ $client }}) Create() *{{ $n.CreateName }} {
 	mutation := new{{ $n.MutationName }}(c.config, OpCreate)
 	return &{{ $n.CreateName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
@@ -178,15 +182,22 @@ func (c *{{ $client }}) Update() *{{ $n.UpdateName }} {
 
 // UpdateOne returns an update builder for the given entity.
 func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $n.UpdateOneName }} {
-	mutation := new{{ $n.MutationName }}(c.config, OpUpdateOne, {{ print "with" $n.Name }}({{ $rec }}))
+	{{- if $n.HasOneFieldID }}
+		mutation := new{{ $n.MutationName }}(c.config, OpUpdateOne, {{ print "with" $n.Name }}({{ $rec }}))
+	{{- else }}
+		mutation := new{{ $n.MutationName }}(c.config, OpUpdateOne)
+		mutation.Where({{ range $id := $n.EdgeSchema.ID }}{{ $n.Package }}.{{ $id.StructField }}({{ $rec }}.{{ $id.StructField }}),{{ end }})
+	{{- end }}
 	return &{{ $n.UpdateOneName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// UpdateOneID returns an update builder for the given id.
-func (c *{{ $client }}) UpdateOneID(id {{ $n.ID.Type }}) *{{ $n.UpdateOneName }} {
-	mutation := new{{ $n.MutationName }}(c.config, OpUpdateOne, {{ print "with" $n.Name "ID" }}(id))
-	return &{{ $n.UpdateOneName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
+{{ with $n.HasOneFieldID }}
+	// UpdateOneID returns an update builder for the given id.
+	func (c *{{ $client }}) UpdateOneID(id {{ $n.ID.Type }}) *{{ $n.UpdateOneName }} {
+		mutation := new{{ $n.MutationName }}(c.config, OpUpdateOne, {{ print "with" $n.Name "ID" }}(id))
+		return &{{ $n.UpdateOneName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
+	}
+{{ end }}
 
 // Delete returns a delete builder for {{ $n.Name }}.
 func (c *{{ $client }}) Delete() *{{ $n.DeleteName }} {
@@ -194,18 +205,20 @@ func (c *{{ $client }}) Delete() *{{ $n.DeleteName }} {
 	return &{{ $n.DeleteName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// DeleteOne returns a delete builder for the given entity.
-func (c *{{ $client }}) DeleteOne({{ $rec }} *{{ $n.Name }}) *{{ $n.DeleteOneName }} {
-	return c.DeleteOneID({{ $rec }}.ID)
-}
+{{ with $n.HasOneFieldID }}
+	// DeleteOne returns a builder for deleting the given entity.
+	func (c *{{ $client }}) DeleteOne({{ $rec }} *{{ $n.Name }}) *{{ $n.DeleteOneName }} {
+		return c.DeleteOneID({{ $rec }}.ID)
+	}
 
-// DeleteOneID returns a delete builder for the given id.
-func (c *{{ $client }}) DeleteOneID(id {{ $n.ID.Type }}) *{{ $n.DeleteOneName }} {
-	builder := c.Delete().Where({{ $n.Package }}.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &{{ $n.DeleteOneName }}{builder}
-}
+	// DeleteOne returns a builder for deleting the given entity by its id.
+	func (c *{{ $client }}) DeleteOneID(id {{ $n.ID.Type }}) *{{ $n.DeleteOneName }} {
+		builder := c.Delete().Where({{ $n.Package }}.ID(id))
+		builder.mutation.id = &id
+		builder.mutation.op = OpDeleteOne
+		return &{{ $n.DeleteOneName }}{builder}
+	}
+{{ end }}
 
 // Query returns a query builder for {{ $n.Name }}.
 func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
@@ -219,34 +232,44 @@ func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
 	}
 }
 
-// Get returns a {{ $n.Name }} entity by its id.
-func (c *{{ $client }}) Get(ctx context.Context, id {{ $n.ID.Type }}) (*{{ $n.Name }}, error) {
-	return c.Query().Where({{ $n.Package }}.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *{{ $client }}) GetX(ctx context.Context, id {{ $n.ID.Type }}) *{{ $n.Name }} {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
+{{ with $n.HasOneFieldID }}
+	// Get returns a {{ $n.Name }} entity by its id.
+	func (c *{{ $client }}) Get(ctx context.Context, id {{ $n.ID.Type }}) (*{{ $n.Name }}, error) {
+		return c.Query().Where({{ $n.Package }}.ID(id)).Only(ctx)
 	}
-	return obj
-}
+
+	// GetX is like Get, but panics if an error occurs.
+	func (c *{{ $client }}) GetX(ctx context.Context, id {{ $n.ID.Type }}) *{{ $n.Name }} {
+		obj, err := c.Get(ctx, id)
+		if err != nil {
+			panic(err)
+		}
+		return obj
+	}
+{{ end }}
 
 {{ range $e := $n.Edges }}
 {{ $builder := $e.Type.QueryName }}
 {{ $arg := $rec }}{{ if eq $arg "id" }}{{ $arg = "node" }}{{ end }}
+{{ $func := print "Query" (pascal $e.Name) }}
 // Query{{ pascal $e.Name }} queries the {{ $e.Name }} edge of a {{ $n.Name }}.
-func (c *{{ $client }}) Query{{ pascal $e.Name }}({{ $arg }} *{{ $n.Name }}) *{{ $builder }} {
-	query := &{{ $builder }}{config: c.config}
-	query.path = func(ctx context.Context) (fromV {{ $.Storage.Builder }}, _ error) {
-		{{- with extend $n "Receiver" $arg "Edge" $e "Ident" "fromV" }}
-			{{ $tmpl := printf "dialect/%s/query/from" $.Storage }}
-			{{- xtemplate $tmpl . -}}
-		{{- end -}}
-		return fromV, nil
-	}
-	return query
+func (c *{{ $client }}) {{ $func }}({{ $arg }} *{{ $n.Name }}) *{{ $builder }} {
+	{{- if $n.HasOneFieldID }}
+		query := &{{ $builder }}{config: c.config}
+		query.path = func(ctx context.Context) (fromV {{ $.Storage.Builder }}, _ error) {
+			{{- with extend $n "Receiver" $arg "Edge" $e "Ident" "fromV" }}
+				{{ $tmpl := printf "dialect/%s/query/from" $.Storage }}
+				{{- xtemplate $tmpl . -}}
+			{{- end -}}
+			return fromV, nil
+		}
+		return query
+	{{- else }}
+		{{- /* For edge schema, we use the predicate-based approach. */}}
+		return c.Query().
+			Where({{ range $id := $n.EdgeSchema.ID }}{{ $n.Package }}.{{ $id.StructField }}({{ $arg }}.{{ $id.StructField }}),{{ end }}).
+			{{ $func }}()
+	{{- end }}
 }
 {{ end }}
 

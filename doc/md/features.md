@@ -245,6 +245,37 @@ ORDER BY
     `groups`.`id` ASC
 ```
 
+#### SQL Raw API
+
+The `sql/execquery` option allows executing statements using the `ExecContext`/`QueryContext` methods of the underlying
+driver. For full documentation, see: [DB.ExecContext](https://pkg.go.dev/database/sql#DB.ExecContext), and
+[DB.QueryContext](https://pkg.go.dev/database/sql#DB.QueryContext).
+
+```go
+// From ent.Client.
+if _, err := client.ExecContext(ctx, "TRUNCATE t1"); err != nil {
+	return err
+}
+
+// From ent.Tx.
+tx, err := client.Tx(ctx)
+if err != nil {
+	return err
+}
+if err := tx.User.Create().Exec(ctx); err != nil {
+	return err
+}
+if _, err := tx.ExecContext("SAVEPOINT user_created"); err != nil {
+	return err
+}
+// ...
+```
+
+:::warning Note
+Statements executed using `ExecContext`/`QueryContext` do not go through Ent, and may skip fundamental layers in your
+application such as hooks, privacy (authorization), and validators.
+:::
+
 #### Upsert
 
 The `sql/upsert` option lets configure upsert and bulk-upsert logic using the SQL `ON CONFLICT` / `ON DUPLICATE KEY`

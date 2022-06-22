@@ -375,12 +375,13 @@ in any supported language and forget about writing a RESTful client ever _ever_ 
 In this post we introduced a new feature of `elk` - automatic OpenAPI Specification generation. This feature connects
 between Ent's code-generation capabilities and OpenAPI/Swagger's rich tooling ecosystem. 
 
-Have questions? Need help with getting started? Feel free to [join our Slack channel](https://entgo.io/docs/slack/).
+Have questions? Need help with getting started? Feel free to join our [Discord server](https://discord.gg/qZmPgTE6RX) or [Slack channel](https://entgo.io/docs/slack/).
 
 :::note For more Ent news and updates:
 
 - Subscribe to our [Newsletter](https://www.getrevue.co/profile/ent)
 - Follow us on [Twitter](https://twitter.com/entgo_io)
 - Join us on #ent on the [Gophers Slack](https://entgo.io/docs/slack)
+- Join us on the [Ent Discord Server](https://discord.gg/qZmPgTE6RX)
 
 :::

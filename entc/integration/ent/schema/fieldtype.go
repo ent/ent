@@ -208,7 +208,13 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 			GoType(&sql.NullBool{}),
 		field.Time("deleted_at").
 			Optional().
-			GoType(&sql.NullTime{}),
+			GoType(&sql.NullTime{}).
+			Default(func() *sql.NullTime {
+				return &sql.NullTime{Time: time.Now(), Valid: true}
+			}).
+			UpdateDefault(func() *sql.NullTime {
+				return &sql.NullTime{Time: time.Now(), Valid: true}
+			}),
 		field.Bytes("raw_data").
 			Optional().
 			MaxLen(20).
@@ -255,7 +261,7 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 		field.Enum("priority").
 			Optional().
 			GoType(role.Priority(0)),
-		field.UUID("uuid", uuid.UUID{}).
+		field.UUID("optional_uuid", uuid.UUID{}).
 			Optional(),
 		field.UUID("nillable_uuid", uuid.UUID{}).
 			Optional().

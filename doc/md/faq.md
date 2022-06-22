@@ -21,7 +21,8 @@ sidebar_label: FAQ
 [How to store Protobuf objects in a BLOB column?](#how-to-store-protobuf-objects-in-a-blob-column)  
 [How to add `CHECK` constraints to table?](#how-to-add-check-constraints-to-table)  
 [How to define a custom precision numeric field?](#how-to-define-a-custom-precision-numeric-field)  
-[How to configure two or more `DB` to separate read and write?](#how-to-configure-two-or-more-db-to-separate-read-and-write)
+[How to configure two or more `DB` to separate read and write?](#how-to-configure-two-or-more-db-to-separate-read-and-write)  
+[How to change the character set and/or collation of a MySQL table?](#how-to-change-the-character-set-andor-collation-of-a-mysql-table)
 
 ## Answers
 
@@ -295,11 +296,11 @@ func (i *Inet) Scan(value interface{}) (err error) {
     case nil:
     case []byte:
         if i.IP = net.ParseIP(string(v)); i.IP == nil {
-            err = fmt.Errorf("invalid value for ip %q", s)
+            err = fmt.Errorf("invalid value for ip %q", v)
         }
     case string:
         if i.IP = net.ParseIP(v); i.IP == nil {
-            err = fmt.Errorf("invalid value for ip %q", s)
+            err = fmt.Errorf("invalid value for ip %q", v)
         }
     default:
         err = fmt.Errorf("unexpected type %T", v)
@@ -401,7 +402,7 @@ func (User) Mixin() []ent.Mixin {
 #### How to use a custom XID globally unique ID?
 
 Package [xid](https://github.com/rs/xid) is a globally unique ID generator library that uses the [Mongo Object ID](https://docs.mongodb.org/manual/reference/object-id/)
-algorithm to generate a 12 byte, 20 character ID with no configuration. The xid package comes with [database/sql](https://golang.org/pkg/database/sql) `sql.Scanner` and `driver.Valuer` interfaces required by Ent for serialization.
+algorithm to generate a 12 byte, 20 character ID with no configuration. The xid package comes with [database/sql](https://pkg.go.dev/database/sql) `sql.Scanner` and `driver.Valuer` interfaces required by Ent for serialization.
 
 To store an XID in any string field use the [GoType](schema-fields.md#go-type) schema configuration:
 
@@ -662,7 +663,7 @@ func (User) Annotations() []schema.Annotation {
 #### How to define a custom precision numeric field?
 
 Using [GoType](schema-fields.md#go-type) and [SchemaType](schema-fields.md#database-type) it is possible to define
-custom precision numeric fields. For example, defining a field that uses [big.Int](https://golang.org/pkg/math/big/).
+custom precision numeric fields. For example, defining a field that uses [big.Int](https://pkg.go.dev/math/big).
 
 ```go
 func (T) Fields() []ent.Field {
@@ -756,6 +757,25 @@ func (d *multiDriver) Close() error {
 		return werr
 	}
 	return nil
+}
+```
+
+#### How to change the character set and/or collation of a MySQL table?
+
+By default for MySQL the character set `utf8mb4` is used and the collation of `utf8mb4_bin`.
+However if you'd like to change the schema's character set and/or collation you need to use an annotation.
+
+Here's an example where we set the character set to `ascii` and the collation to `ascii_general_ci`.
+
+```go
+// Annotations of the Entity.
+func (Entity) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{
+			Charset:   "ascii",
+			Collation: "ascii_general_ci",
+		},
+	}
 }
 ```
 

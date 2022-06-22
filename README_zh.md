@@ -1,6 +1,6 @@
-## ent - 一个强大的Go语言的实体框架
+## ent - 一个强大的Go语言实体框架
 
-[English](README.md) | [中文](README_zh.md)
+[English](README.md) | [中文](README_zh.md) | [日本語](README_jp.md)
 
 <img width="50%"
 align="right"
@@ -17,7 +17,7 @@ ent是一个简单而又功能强大的Go语言实体框架，ent易于构建和
 
 ## 快速安装
 ```console
-go get -d entgo.io/ent/cmd/ent
+go install entgo.io/ent/cmd/ent@latest
 ```
 
 请访问[entgo.io website][entgo instal]以使用[Go modules]进行正确安装。
@@ -32,12 +32,12 @@ go get -d entgo.io/ent/cmd/ent
 如果你的公司或者产品在使用`ent`，请让我们知道你已经加入 [ent 用户](https://github.com/ent/ent/wiki/ent-users)
 
 ## 关于项目
-`ent` 项目灵感来自于Ent,Ent是一个facebook内部使用的一个实体框架项目. 它由 [Facebook Connectivity][fbc] 团队通过 [a8m](https://github.com/a8m) 和 [alexsn](https://github.com/alexsn) 开发和维护
+`ent` 项目灵感来自于Ent，Ent是一个facebook内部使用的一个实体框架项目。 它由 [Facebook Connectivity][fbc] 团队通过 [a8m](https://github.com/a8m) 和 [alexsn](https://github.com/alexsn) 开发和维护
 , 它被生产中的多个团队和项目使用。它的v1版本的路线图为 [版本的路线图](https://github.com/ent/ent/issues/46).
-关于项目更多的信息 [ent介绍](https://entgo.io/blog/2019/10/03/introducing-ent).
+关于项目更多的信息 [ent介绍](https://entgo.io/blog/2019/10/03/introducing-ent)。
 
 ## 声明
-ent是在Apache 2.0下授权，可以在[LICENSE文件](LICENSE)中找到
+ent使用Apache 2.0协议授权，可以在[LICENSE文件](LICENSE)中找到。
 
 [entgo instal]: https://entgo.io/docs/code-gen/#version-compatibility-between-entc-and-ent
 [Go modules]: https://github.com/golang/go/wiki/Modules#quick-start

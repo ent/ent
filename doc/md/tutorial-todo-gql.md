@@ -27,7 +27,7 @@ go run ./cmd/todo/
 This tutorial begins where the previous one ended (with a working Todo-list schema). We start by creating a simple GraphQL schema for our todo list, then install the [99designs/gqlgen](https://github.com/99designs/gqlgen)
 package and configure it. Let's create a file named `todo.graphql` and paste the following:
 
-```graphql
+```graphql title="todo.graphql"
 # Maps a Time GraphQL scalar to a Go time.Time struct.
 scalar Time
 
@@ -80,7 +80,7 @@ go get github.com/99designs/gqlgen
 The gqlgen package can be configured using a `gqlgen.yml` file that it automatically loads from the current directory.
 Let's add this file. Follow the comments in this file to understand what each config directive means:
 
-```yaml
+```yaml title="gqlgen.yml"
 # schema tells gqlgen where the GraphQL schema is located.
 schema:
   - todo.graphql
@@ -149,7 +149,7 @@ go get entgo.io/contrib/entgql
 
 **2\.** Create a new Go file named `ent/entc.go`, and paste the following content:
 
-```go
+```go title="ent/entc.go"
 // +build ignore
 
 package main
@@ -178,7 +178,7 @@ func main() {
 
 **3\.** Edit the `ent/generate.go` file to execute the `ent/entc.go` file:
 
-```go
+```go title="ent/generate.go"
 package ent
 
 //go:generate go run entc.go
@@ -190,7 +190,7 @@ Note that `ent/entc.go` is ignored using a build tag, and it's executed by the g
 **4\.** In order to execute `gqlgen` through `go generate`, we create a new `generate.go` file (in the root
 of the project) with the following:
 
-```go
+```go title="generate.go"
 package todo
 
 //go:generate go run github.com/99designs/gqlgen
@@ -205,7 +205,7 @@ go generate ./...
 **5\.** `gqlgen` allows changing the generated `Resolver` and add additional dependencies to it. Let's add
 the `ent.Client` as a dependency by pasting the following in `resolver.go`:
 
-```go
+```go title="resolver.go"
 package todo
 
 import (
@@ -229,7 +229,7 @@ func NewSchema(client *ent.Client) graphql.ExecutableSchema {
 
 We create a new directory `cmd/todo` and a `main.go` file with the following code to create the GraphQL server:
 
-```go
+```go title="cmd/todo/main.go"
 package main
 
 import (
@@ -293,7 +293,7 @@ example repository.
 If we try to query our todo list, we'll get an error as the resolver method is not yet implemented. 
 Let's implement the resolver by replacing the `Todos` implementation in the query resolver:
 
-```diff
+```diff title="todo.resolvers.go"
 func (r *queryResolver) Todos(ctx context.Context) ([]*ent.Todo, error) {
 -	panic(fmt.Errorf("not implemented"))
 +	return r.client.Todo.Query().All(ctx)
@@ -317,7 +317,7 @@ query AllTodos {
 Same as before, if we try to create a todo item in GraphQL, we'll get an error as the resolver is not yet implemented.
 Let's implement the resolver by changing the `CreateTodo` implementation in the mutation resolver:
 
-```go
+```go title="todo.resolvers.go"
 func (r *mutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (*ent.Todo, error) {
 	return r.client.Todo.Create().
 		SetText(todo.Text).
@@ -331,8 +331,8 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (*ent
 Now, creating a todo item should work:
 
 ```graphql
-mutation CreateTodo($todo: TodoInput!) {
-    createTodo(todo: $todo) {
+mutation CreateTodo {
+    createTodo(todo: {text: "Create GraphQL Example", status: IN_PROGRESS, priority: 1}) {
         id
         text
         createdAt
@@ -342,8 +342,6 @@ mutation CreateTodo($todo: TodoInput!) {
         }
     }
 }
-
-# Query Variables: { "todo": { "text": "Create GraphQL Example", "status": "IN_PROGRESS", "priority": 1 } }
 # Output: { "data": { "createTodo": { "id": "2", "text": "Create GraphQL Example", "createdAt": "2021-03-10T15:02:18+02:00", "priority": 1, "parent": null } } }
 ```
 

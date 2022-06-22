@@ -43,7 +43,7 @@ type Tx struct {
 {{ range $func := keys $funcs }}
 	{{ $iface := get $funcs $func }}
 	type (
-		// {{ $iface }} is the interface that wraps the {{ $iface }} method.
+		// {{ $iface }} is the interface that wraps the {{ $func }} method.
 		{{ $iface }} interface {
 			{{ $func }}(context.Context, *Tx) error
 		}
@@ -173,5 +173,11 @@ func (tx *txDriver) Query(ctx context.Context, query string, args, v interface{}
 }
 
 var _ dialect.Driver = (*txDriver)(nil)
+
+{{- with $tmpls := matchTemplate "tx/additional/*" "tx/additional/*/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{- xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
 
 {{ end }}

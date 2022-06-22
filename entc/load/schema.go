@@ -67,11 +67,13 @@ type Edge struct {
 	Field       string                 `json:"field,omitempty"`
 	RefName     string                 `json:"ref_name,omitempty"`
 	Ref         *Edge                  `json:"ref,omitempty"`
+	Through     *struct{ N, T string } `json:"through,omitempty"`
 	Unique      bool                   `json:"unique,omitempty"`
 	Inverse     bool                   `json:"inverse,omitempty"`
 	Required    bool                   `json:"required,omitempty"`
 	StorageKey  *edge.StorageKey       `json:"storage_key,omitempty"`
 	Annotations map[string]interface{} `json:"annotations,omitempty"`
+	Comment     string                 `json:"comment,omitempty"`
 }
 
 // Index represents an ent.Index that was loaded from a complied user package.
@@ -94,7 +96,9 @@ func NewEdge(ed *edge.Descriptor) *Edge {
 		Inverse:     ed.Inverse,
 		Required:    ed.Required,
 		RefName:     ed.RefName,
+		Through:     ed.Through,
 		StorageKey:  ed.StorageKey,
+		Comment:     ed.Comment,
 		Annotations: make(map[string]interface{}),
 	}
 	for _, at := range ed.Annotations {

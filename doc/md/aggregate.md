@@ -85,3 +85,50 @@ func Do(ctx context.Context, client *ent.Client) {
 		Scan(ctx, &users)
 }
 ```
+
+## Having + Group By
+
+[Custom SQL modifiers](https://entgo.io/docs/feature-flags/#custom-sql-modifiers) can be useful if you want to control all query parts.
+The following shows how to retrieve the oldest users for each role.
+
+
+```go
+package main
+
+import (
+	"context"
+	"log"
+
+	"entgo.io/ent/dialect/sql"
+	"<project>/ent"
+	"<project>/ent/user"
+)
+
+func Do(ctx context.Context, client *ent.Client) {
+	var users []struct {
+		Id    	Int
+		Age     Int
+		Role    string
+	}
+	err := client.User.Query().
+		Modify(func(s *sql.Selector) {
+			s.GroupBy(user.Role)
+			s.Having(
+				sql.EQ(
+					user.FieldAge,
+					sql.Raw(sql.Max(user.FieldAge)),
+				),
+			)
+		}).
+		ScanX(ctx, &users)
+}
+
+```
+
+**Note:** The `sql.Raw` is crucial to have. It tells the predicate that `sql.Max` is not an arguement.
+
+The above code essentially generates the following SQL query:
+
+```sql
+SELECT * FROM user GROUP BY user.role HAVING user.age = MAX(user.age)
+```

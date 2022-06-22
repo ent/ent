@@ -20,30 +20,44 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 		Node: &sqlgraph.NodeSpec{
 			Table: {{ $.Package }}.Table,
 			Columns: {{ $.Package }}.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type: field.{{ $.ID.Type.ConstName }},
-				Column: {{ $.Package }}.{{ $.ID.Constant }},
-			},
+			{{- if $.HasOneFieldID }}
+				ID: &sqlgraph.FieldSpec{
+					Type: field.{{ $.ID.Type.ConstName }},
+					Column: {{ $.Package }}.{{ $.ID.Constant }},
+				},
+			{{- end }}
 		},
 	}
 	{{- if $one }}
-		id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}()
-		if !ok {
-			return {{ $zero }}, &ValidationError{Name: "{{ $.ID.Name }}", err: errors.New(`{{ $pkg }}: missing "{{ $.Name }}.{{ $.ID.Name }}" for update`)}
-		}
-		_spec.Node.ID.Value = id
-		if fields := {{ $receiver }}.fields; len(fields) > 0 {
-			_spec.Node.Columns = make([]string, 0, len(fields))
-			_spec.Node.Columns = append(_spec.Node.Columns, {{ $.Package }}.{{ $.ID.Constant }})
-			for _, f := range fields {
-				if !{{ $.Package }}.ValidColumn(f) {
-					return nil, &ValidationError{Name: f, err: fmt.Errorf("{{ $pkg }}: invalid field %q for query", f)}
-				}
-				if f != {{ $.Package }}.{{ $.ID.Constant }} {
-					_spec.Node.Columns = append(_spec.Node.Columns, f)
+		{{- if $.HasOneFieldID }}
+			id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}()
+			if !ok {
+				return {{ $zero }}, &ValidationError{Name: "{{ $.ID.Name }}", err: errors.New(`{{ $pkg }}: missing "{{ $.Name }}.{{ $.ID.Name }}" for update`)}
+			}
+			_spec.Node.ID.Value = id
+			if fields := {{ $receiver }}.fields; len(fields) > 0 {
+				_spec.Node.Columns = make([]string, 0, len(fields))
+				_spec.Node.Columns = append(_spec.Node.Columns, {{ $.Package }}.{{ $.ID.Constant }})
+				for _, f := range fields {
+					if !{{ $.Package }}.ValidColumn(f) {
+						return nil, &ValidationError{Name: f, err: fmt.Errorf("{{ $pkg }}: invalid field %q for query", f)}
+					}
+					if f != {{ $.Package }}.{{ $.ID.Constant }} {
+						_spec.Node.Columns = append(_spec.Node.Columns, f)
+					}
 				}
 			}
-		}
+		{{- else }}
+			if fields := {{ $receiver }}.fields; len(fields) > 0 {
+				_spec.Node.Columns = make([]string, len(fields))
+				for i, f := range fields {
+					if !{{ $.Package }}.ValidColumn(f) {
+						return nil, &ValidationError{Name: f, err: fmt.Errorf("{{ $pkg }}: invalid field %q for query", f)}
+					}
+					_spec.Node.Columns[i] = f
+				}
+			}
+		{{- end }}
 	{{- end }}
 	if ps := {{ $mutation }}.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -80,7 +94,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 				}
 			{{- end }}
 	{{- end }}
-	{{- range $e := $.Edges }}
+	{{- range $e := $.EdgesWithID }}
 		if {{ $mutation }}.{{ $e.MutationCleared }}() {
 			{{- with extend $ "Edge" $e }}
 				{{ template "dialect/sql/defedge" . }}
@@ -121,7 +135,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{ {{ $.Package }}.Label}
 		} else if sqlgraph.IsConstraintError(err) {
-			err = &ConstraintError{err.Error(), err}
+			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return {{ $zero }}, err
 	}
@@ -131,6 +145,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 
 {{ define "dialect/sql/defedge" }}
 	{{- $e := $.Scope.Edge -}}
+	{{- $receiver := pascal $.Scope.Builder | receiver -}}
 	edge := &sqlgraph.EdgeSpec{
 		Rel: sqlgraph.{{ $e.Rel.Type }},
 		Inverse: {{ $e.IsInverse }},
@@ -154,5 +169,14 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+	{{- end }}
+	{{- with $e.Through }}
+		{{- if .HasDefault }}
+			createE := &{{ .CreateName }}{config: {{ $receiver }}.config, mutation: new{{ .MutationName }}({{ $receiver }}.config, OpCreate)}
+			{{- /* Skip error handling here as this check was already handled. */}}
+			{{ if or $.NumHooks $.NumPolicy }}_ = {{ end }}createE.defaults()
+			_, specE := createE.createSpec()
+			edge.Target.Fields = specE.Fields
+		{{- end }}
 	{{- end }}
 {{- end }}
