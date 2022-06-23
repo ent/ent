@@ -11,13 +11,13 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// IntSid holds the schema definition for the IntSid entity.
-type IntSid struct {
+// IntSID holds the schema definition for the IntSID entity.
+type IntSID struct {
 	ent.Schema
 }
 
 // Fields of the IntSid.
-func (IntSid) Fields() []ent.Field {
+func (IntSID) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int64("id").
 			GoType(sid.New()).
@@ -27,10 +27,10 @@ func (IntSid) Fields() []ent.Field {
 }
 
 // Edges of the IntSid.
-func (IntSid) Edges() []ent.Edge {
+func (IntSID) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("parent", IntSid.Type).
+		edge.To("parent", IntSID.Type).
 			Unique(),
-		edge.From("children", IntSid.Type).Ref("parent"),
+		edge.From("children", IntSID.Type).Ref("parent"),
 	}
 }

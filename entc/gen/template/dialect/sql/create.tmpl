@@ -181,9 +181,11 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
 					mutation.{{ $.ID.BuilderField }} = &nodes[i].{{ $.ID.StructField }}
 					{{- if or $.ID.IsString $.ID.IsUUID $.ID.IsBytes $.ID.IsOther }}
 						{{- /* Do nothing, because these 4 types must be supplied by the user. */ -}}
-					{{- else if or $.ID.Type.ValueScanner (not $.ID.Type.Numeric) }}
+					{{- else if or $.ID.Type.ValueScanner }}
 						if specs[i].ID.Value != nil {
-							nodes[i].ID.Scan(specs[i].ID.Value)
+							if err := nodes[i].ID.Scan(specs[i].ID.Value); err != nil {
+								return nil, err
+							}
 						}
 					{{- else }}
 						if specs[i].ID.Value != nil {{ if $.ID.UserDefined }}&& nodes[i].ID == 0{{ end }} {
