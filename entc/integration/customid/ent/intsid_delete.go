@@ -88,7 +88,11 @@ func (isd *IntSIDDelete) sqlExec(ctx context.Context) (int, error) {
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, isd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, isd.driver, _spec)
+	if err != nil && sqlgraph.IsConstraintError(err) {
+		err = &ConstraintError{msg: err.Error(), wrap: err}
+	}
+	return affected, err
 }
 
 // IntSIDDeleteOne is the builder for deleting a single IntSID entity.
