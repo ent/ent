@@ -49,8 +49,14 @@ type Schema struct {
 // NewSchema creates a new schema client.
 func NewSchema(drv dialect.Driver) *Schema { return &Schema{drv: drv} }
 
+
 // Create creates all schema resources.
 func (s *Schema) Create(ctx context.Context, opts ...schema.MigrateOption) error {
+	return Create(ctx, s, Tables, opts...)
+}
+
+// Create creates all table resources using the given schema driver.
+func Create(ctx context.Context, s *Schema, tables []*schema.Table, opts ...schema.MigrateOption) error {
 	if s.drv.Dialect() == dialect.SQLServer {
     	return nil
     }
