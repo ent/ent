@@ -54,8 +54,8 @@ type Client struct {
 	Doc *DocClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
-	// IntSid is the client for interacting with the IntSid builders.
-	IntSid *IntSidClient
+	// IntSID is the client for interacting with the IntSID builders.
+	IntSID *IntSIDClient
 	// MixinID is the client for interacting with the MixinID builders.
 	MixinID *MixinIDClient
 	// Note is the client for interacting with the Note builders.
@@ -91,7 +91,7 @@ func (c *Client) init() {
 	c.Device = NewDeviceClient(c.config)
 	c.Doc = NewDocClient(c.config)
 	c.Group = NewGroupClient(c.config)
-	c.IntSid = NewIntSidClient(c.config)
+	c.IntSID = NewIntSIDClient(c.config)
 	c.MixinID = NewMixinIDClient(c.config)
 	c.Note = NewNoteClient(c.config)
 	c.Other = NewOtherClient(c.config)
@@ -139,7 +139,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Device:   NewDeviceClient(cfg),
 		Doc:      NewDocClient(cfg),
 		Group:    NewGroupClient(cfg),
-		IntSid:   NewIntSidClient(cfg),
+		IntSID:   NewIntSIDClient(cfg),
 		MixinID:  NewMixinIDClient(cfg),
 		Note:     NewNoteClient(cfg),
 		Other:    NewOtherClient(cfg),
@@ -173,7 +173,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Device:   NewDeviceClient(cfg),
 		Doc:      NewDocClient(cfg),
 		Group:    NewGroupClient(cfg),
-		IntSid:   NewIntSidClient(cfg),
+		IntSID:   NewIntSIDClient(cfg),
 		MixinID:  NewMixinIDClient(cfg),
 		Note:     NewNoteClient(cfg),
 		Other:    NewOtherClient(cfg),
@@ -217,7 +217,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Device.Use(hooks...)
 	c.Doc.Use(hooks...)
 	c.Group.Use(hooks...)
-	c.IntSid.Use(hooks...)
+	c.IntSID.Use(hooks...)
 	c.MixinID.Use(hooks...)
 	c.Note.Use(hooks...)
 	c.Other.Use(hooks...)
@@ -912,84 +912,84 @@ func (c *GroupClient) Hooks() []Hook {
 	return c.hooks.Group
 }
 
-// IntSidClient is a client for the IntSid schema.
-type IntSidClient struct {
+// IntSIDClient is a client for the IntSID schema.
+type IntSIDClient struct {
 	config
 }
 
-// NewIntSidClient returns a client for the IntSid from the given config.
-func NewIntSidClient(c config) *IntSidClient {
-	return &IntSidClient{config: c}
+// NewIntSIDClient returns a client for the IntSID from the given config.
+func NewIntSIDClient(c config) *IntSIDClient {
+	return &IntSIDClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
 // A call to `Use(f, g, h)` equals to `intsid.Hooks(f(g(h())))`.
-func (c *IntSidClient) Use(hooks ...Hook) {
-	c.hooks.IntSid = append(c.hooks.IntSid, hooks...)
+func (c *IntSIDClient) Use(hooks ...Hook) {
+	c.hooks.IntSID = append(c.hooks.IntSID, hooks...)
 }
 
-// Create returns a builder for creating a IntSid entity.
-func (c *IntSidClient) Create() *IntSidCreate {
-	mutation := newIntSidMutation(c.config, OpCreate)
-	return &IntSidCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a IntSID entity.
+func (c *IntSIDClient) Create() *IntSIDCreate {
+	mutation := newIntSIDMutation(c.config, OpCreate)
+	return &IntSIDCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of IntSid entities.
-func (c *IntSidClient) CreateBulk(builders ...*IntSidCreate) *IntSidCreateBulk {
-	return &IntSidCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of IntSID entities.
+func (c *IntSIDClient) CreateBulk(builders ...*IntSIDCreate) *IntSIDCreateBulk {
+	return &IntSIDCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for IntSid.
-func (c *IntSidClient) Update() *IntSidUpdate {
-	mutation := newIntSidMutation(c.config, OpUpdate)
-	return &IntSidUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for IntSID.
+func (c *IntSIDClient) Update() *IntSIDUpdate {
+	mutation := newIntSIDMutation(c.config, OpUpdate)
+	return &IntSIDUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *IntSidClient) UpdateOne(is *IntSid) *IntSidUpdateOne {
-	mutation := newIntSidMutation(c.config, OpUpdateOne, withIntSid(is))
-	return &IntSidUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *IntSIDClient) UpdateOne(is *IntSID) *IntSIDUpdateOne {
+	mutation := newIntSIDMutation(c.config, OpUpdateOne, withIntSID(is))
+	return &IntSIDUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *IntSidClient) UpdateOneID(id sid.ID) *IntSidUpdateOne {
-	mutation := newIntSidMutation(c.config, OpUpdateOne, withIntSidID(id))
-	return &IntSidUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *IntSIDClient) UpdateOneID(id sid.ID) *IntSIDUpdateOne {
+	mutation := newIntSIDMutation(c.config, OpUpdateOne, withIntSIDID(id))
+	return &IntSIDUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for IntSid.
-func (c *IntSidClient) Delete() *IntSidDelete {
-	mutation := newIntSidMutation(c.config, OpDelete)
-	return &IntSidDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for IntSID.
+func (c *IntSIDClient) Delete() *IntSIDDelete {
+	mutation := newIntSIDMutation(c.config, OpDelete)
+	return &IntSIDDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *IntSidClient) DeleteOne(is *IntSid) *IntSidDeleteOne {
+func (c *IntSIDClient) DeleteOne(is *IntSID) *IntSIDDeleteOne {
 	return c.DeleteOneID(is.ID)
 }
 
 // DeleteOne returns a builder for deleting the given entity by its id.
-func (c *IntSidClient) DeleteOneID(id sid.ID) *IntSidDeleteOne {
+func (c *IntSIDClient) DeleteOneID(id sid.ID) *IntSIDDeleteOne {
 	builder := c.Delete().Where(intsid.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &IntSidDeleteOne{builder}
+	return &IntSIDDeleteOne{builder}
 }
 
-// Query returns a query builder for IntSid.
-func (c *IntSidClient) Query() *IntSidQuery {
-	return &IntSidQuery{
+// Query returns a query builder for IntSID.
+func (c *IntSIDClient) Query() *IntSIDQuery {
+	return &IntSIDQuery{
 		config: c.config,
 	}
 }
 
-// Get returns a IntSid entity by its id.
-func (c *IntSidClient) Get(ctx context.Context, id sid.ID) (*IntSid, error) {
+// Get returns a IntSID entity by its id.
+func (c *IntSIDClient) Get(ctx context.Context, id sid.ID) (*IntSID, error) {
 	return c.Query().Where(intsid.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *IntSidClient) GetX(ctx context.Context, id sid.ID) *IntSid {
+func (c *IntSIDClient) GetX(ctx context.Context, id sid.ID) *IntSID {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -997,9 +997,9 @@ func (c *IntSidClient) GetX(ctx context.Context, id sid.ID) *IntSid {
 	return obj
 }
 
-// QueryParent queries the parent edge of a IntSid.
-func (c *IntSidClient) QueryParent(is *IntSid) *IntSidQuery {
-	query := &IntSidQuery{config: c.config}
+// QueryParent queries the parent edge of a IntSID.
+func (c *IntSIDClient) QueryParent(is *IntSID) *IntSIDQuery {
+	query := &IntSIDQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := is.ID
 		step := sqlgraph.NewStep(
@@ -1013,9 +1013,9 @@ func (c *IntSidClient) QueryParent(is *IntSid) *IntSidQuery {
 	return query
 }
 
-// QueryChildren queries the children edge of a IntSid.
-func (c *IntSidClient) QueryChildren(is *IntSid) *IntSidQuery {
-	query := &IntSidQuery{config: c.config}
+// QueryChildren queries the children edge of a IntSID.
+func (c *IntSIDClient) QueryChildren(is *IntSID) *IntSIDQuery {
+	query := &IntSIDQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := is.ID
 		step := sqlgraph.NewStep(
@@ -1030,8 +1030,8 @@ func (c *IntSidClient) QueryChildren(is *IntSid) *IntSidQuery {
 }
 
 // Hooks returns the client hooks.
-func (c *IntSidClient) Hooks() []Hook {
-	return c.hooks.IntSid
+func (c *IntSIDClient) Hooks() []Hook {
+	return c.hooks.IntSID
 }
 
 // MixinIDClient is a client for the MixinID schema.

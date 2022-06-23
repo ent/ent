@@ -14,29 +14,29 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id sid.ID) predicate.IntSid {
-	return predicate.IntSid(func(s *sql.Selector) {
+func ID(id sid.ID) predicate.IntSID {
+	return predicate.IntSID(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id sid.ID) predicate.IntSid {
-	return predicate.IntSid(func(s *sql.Selector) {
+func IDEQ(id sid.ID) predicate.IntSID {
+	return predicate.IntSID(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id sid.ID) predicate.IntSid {
-	return predicate.IntSid(func(s *sql.Selector) {
+func IDNEQ(id sid.ID) predicate.IntSID {
+	return predicate.IntSID(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldID), id))
 	})
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...sid.ID) predicate.IntSid {
-	return predicate.IntSid(func(s *sql.Selector) {
+func IDIn(ids ...sid.ID) predicate.IntSID {
+	return predicate.IntSID(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
 		if len(ids) == 0 {
@@ -52,8 +52,8 @@ func IDIn(ids ...sid.ID) predicate.IntSid {
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...sid.ID) predicate.IntSid {
-	return predicate.IntSid(func(s *sql.Selector) {
+func IDNotIn(ids ...sid.ID) predicate.IntSID {
+	return predicate.IntSID(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
 		if len(ids) == 0 {
@@ -69,36 +69,36 @@ func IDNotIn(ids ...sid.ID) predicate.IntSid {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id sid.ID) predicate.IntSid {
-	return predicate.IntSid(func(s *sql.Selector) {
+func IDGT(id sid.ID) predicate.IntSID {
+	return predicate.IntSID(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldID), id))
 	})
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id sid.ID) predicate.IntSid {
-	return predicate.IntSid(func(s *sql.Selector) {
+func IDGTE(id sid.ID) predicate.IntSID {
+	return predicate.IntSID(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldID), id))
 	})
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id sid.ID) predicate.IntSid {
-	return predicate.IntSid(func(s *sql.Selector) {
+func IDLT(id sid.ID) predicate.IntSID {
+	return predicate.IntSID(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldID), id))
 	})
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id sid.ID) predicate.IntSid {
-	return predicate.IntSid(func(s *sql.Selector) {
+func IDLTE(id sid.ID) predicate.IntSID {
+	return predicate.IntSID(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldID), id))
 	})
 }
 
 // HasParent applies the HasEdge predicate on the "parent" edge.
-func HasParent() predicate.IntSid {
-	return predicate.IntSid(func(s *sql.Selector) {
+func HasParent() predicate.IntSID {
+	return predicate.IntSID(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(ParentTable, FieldID),
@@ -109,8 +109,8 @@ func HasParent() predicate.IntSid {
 }
 
 // HasParentWith applies the HasEdge predicate on the "parent" edge with a given conditions (other predicates).
-func HasParentWith(preds ...predicate.IntSid) predicate.IntSid {
-	return predicate.IntSid(func(s *sql.Selector) {
+func HasParentWith(preds ...predicate.IntSID) predicate.IntSID {
+	return predicate.IntSID(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(Table, FieldID),
@@ -125,8 +125,8 @@ func HasParentWith(preds ...predicate.IntSid) predicate.IntSid {
 }
 
 // HasChildren applies the HasEdge predicate on the "children" edge.
-func HasChildren() predicate.IntSid {
-	return predicate.IntSid(func(s *sql.Selector) {
+func HasChildren() predicate.IntSID {
+	return predicate.IntSID(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(ChildrenTable, FieldID),
@@ -137,8 +137,8 @@ func HasChildren() predicate.IntSid {
 }
 
 // HasChildrenWith applies the HasEdge predicate on the "children" edge with a given conditions (other predicates).
-func HasChildrenWith(preds ...predicate.IntSid) predicate.IntSid {
-	return predicate.IntSid(func(s *sql.Selector) {
+func HasChildrenWith(preds ...predicate.IntSID) predicate.IntSID {
+	return predicate.IntSID(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(Table, FieldID),
@@ -153,8 +153,8 @@ func HasChildrenWith(preds ...predicate.IntSid) predicate.IntSid {
 }
 
 // And groups predicates with the AND operator between them.
-func And(predicates ...predicate.IntSid) predicate.IntSid {
-	return predicate.IntSid(func(s *sql.Selector) {
+func And(predicates ...predicate.IntSID) predicate.IntSID {
+	return predicate.IntSID(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)
 		for _, p := range predicates {
 			p(s1)
@@ -164,8 +164,8 @@ func And(predicates ...predicate.IntSid) predicate.IntSid {
 }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.IntSid) predicate.IntSid {
-	return predicate.IntSid(func(s *sql.Selector) {
+func Or(predicates ...predicate.IntSID) predicate.IntSID {
+	return predicate.IntSID(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)
 		for i, p := range predicates {
 			if i > 0 {
@@ -178,8 +178,8 @@ func Or(predicates ...predicate.IntSid) predicate.IntSid {
 }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.IntSid) predicate.IntSid {
-	return predicate.IntSid(func(s *sql.Selector) {
+func Not(p predicate.IntSID) predicate.IntSID {
+	return predicate.IntSID(func(s *sql.Selector) {
 		p(s.Not())
 	})
 }

@@ -18,47 +18,47 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// IntSidCreate is the builder for creating a IntSid entity.
-type IntSidCreate struct {
+// IntSIDCreate is the builder for creating a IntSID entity.
+type IntSIDCreate struct {
 	config
-	mutation *IntSidMutation
+	mutation *IntSIDMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
 }
 
 // SetID sets the "id" field.
-func (isc *IntSidCreate) SetID(s sid.ID) *IntSidCreate {
+func (isc *IntSIDCreate) SetID(s sid.ID) *IntSIDCreate {
 	isc.mutation.SetID(s)
 	return isc
 }
 
-// SetParentID sets the "parent" edge to the IntSid entity by ID.
-func (isc *IntSidCreate) SetParentID(id sid.ID) *IntSidCreate {
+// SetParentID sets the "parent" edge to the IntSID entity by ID.
+func (isc *IntSIDCreate) SetParentID(id sid.ID) *IntSIDCreate {
 	isc.mutation.SetParentID(id)
 	return isc
 }
 
-// SetNillableParentID sets the "parent" edge to the IntSid entity by ID if the given value is not nil.
-func (isc *IntSidCreate) SetNillableParentID(id *sid.ID) *IntSidCreate {
+// SetNillableParentID sets the "parent" edge to the IntSID entity by ID if the given value is not nil.
+func (isc *IntSIDCreate) SetNillableParentID(id *sid.ID) *IntSIDCreate {
 	if id != nil {
 		isc = isc.SetParentID(*id)
 	}
 	return isc
 }
 
-// SetParent sets the "parent" edge to the IntSid entity.
-func (isc *IntSidCreate) SetParent(i *IntSid) *IntSidCreate {
+// SetParent sets the "parent" edge to the IntSID entity.
+func (isc *IntSIDCreate) SetParent(i *IntSID) *IntSIDCreate {
 	return isc.SetParentID(i.ID)
 }
 
-// AddChildIDs adds the "children" edge to the IntSid entity by IDs.
-func (isc *IntSidCreate) AddChildIDs(ids ...sid.ID) *IntSidCreate {
+// AddChildIDs adds the "children" edge to the IntSID entity by IDs.
+func (isc *IntSIDCreate) AddChildIDs(ids ...sid.ID) *IntSIDCreate {
 	isc.mutation.AddChildIDs(ids...)
 	return isc
 }
 
-// AddChildren adds the "children" edges to the IntSid entity.
-func (isc *IntSidCreate) AddChildren(i ...*IntSid) *IntSidCreate {
+// AddChildren adds the "children" edges to the IntSID entity.
+func (isc *IntSIDCreate) AddChildren(i ...*IntSID) *IntSIDCreate {
 	ids := make([]sid.ID, len(i))
 	for j := range i {
 		ids[j] = i[j].ID
@@ -66,16 +66,16 @@ func (isc *IntSidCreate) AddChildren(i ...*IntSid) *IntSidCreate {
 	return isc.AddChildIDs(ids...)
 }
 
-// Mutation returns the IntSidMutation object of the builder.
-func (isc *IntSidCreate) Mutation() *IntSidMutation {
+// Mutation returns the IntSIDMutation object of the builder.
+func (isc *IntSIDCreate) Mutation() *IntSIDMutation {
 	return isc.mutation
 }
 
-// Save creates the IntSid in the database.
-func (isc *IntSidCreate) Save(ctx context.Context) (*IntSid, error) {
+// Save creates the IntSID in the database.
+func (isc *IntSIDCreate) Save(ctx context.Context) (*IntSID, error) {
 	var (
 		err  error
-		node *IntSid
+		node *IntSID
 	)
 	if len(isc.hooks) == 0 {
 		if err = isc.check(); err != nil {
@@ -84,7 +84,7 @@ func (isc *IntSidCreate) Save(ctx context.Context) (*IntSid, error) {
 		node, err = isc.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*IntSidMutation)
+			mutation, ok := m.(*IntSIDMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
 			}
@@ -109,9 +109,9 @@ func (isc *IntSidCreate) Save(ctx context.Context) (*IntSid, error) {
 		if err != nil {
 			return nil, err
 		}
-		nv, ok := v.(*IntSid)
+		nv, ok := v.(*IntSID)
 		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from IntSidMutation", v)
+			return nil, fmt.Errorf("unexpected node type %T returned from IntSIDMutation", v)
 		}
 		node = nv
 	}
@@ -119,7 +119,7 @@ func (isc *IntSidCreate) Save(ctx context.Context) (*IntSid, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (isc *IntSidCreate) SaveX(ctx context.Context) *IntSid {
+func (isc *IntSIDCreate) SaveX(ctx context.Context) *IntSID {
 	v, err := isc.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -128,24 +128,24 @@ func (isc *IntSidCreate) SaveX(ctx context.Context) *IntSid {
 }
 
 // Exec executes the query.
-func (isc *IntSidCreate) Exec(ctx context.Context) error {
+func (isc *IntSIDCreate) Exec(ctx context.Context) error {
 	_, err := isc.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (isc *IntSidCreate) ExecX(ctx context.Context) {
+func (isc *IntSIDCreate) ExecX(ctx context.Context) {
 	if err := isc.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (isc *IntSidCreate) check() error {
+func (isc *IntSIDCreate) check() error {
 	return nil
 }
 
-func (isc *IntSidCreate) sqlSave(ctx context.Context) (*IntSid, error) {
+func (isc *IntSIDCreate) sqlSave(ctx context.Context) (*IntSID, error) {
 	_node, _spec := isc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, isc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -163,9 +163,9 @@ func (isc *IntSidCreate) sqlSave(ctx context.Context) (*IntSid, error) {
 	return _node, nil
 }
 
-func (isc *IntSidCreate) createSpec() (*IntSid, *sqlgraph.CreateSpec) {
+func (isc *IntSIDCreate) createSpec() (*IntSID, *sqlgraph.CreateSpec) {
 	var (
-		_node = &IntSid{config: isc.config}
+		_node = &IntSID{config: isc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: intsid.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -224,7 +224,7 @@ func (isc *IntSidCreate) createSpec() (*IntSid, *sqlgraph.CreateSpec) {
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
-//	client.IntSid.Create().
+//	client.IntSID.Create().
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -232,9 +232,9 @@ func (isc *IntSidCreate) createSpec() (*IntSid, *sqlgraph.CreateSpec) {
 //		).
 //		Exec(ctx)
 //
-func (isc *IntSidCreate) OnConflict(opts ...sql.ConflictOption) *IntSidUpsertOne {
+func (isc *IntSIDCreate) OnConflict(opts ...sql.ConflictOption) *IntSIDUpsertOne {
 	isc.conflict = opts
-	return &IntSidUpsertOne{
+	return &IntSIDUpsertOne{
 		create: isc,
 	}
 }
@@ -242,26 +242,26 @@ func (isc *IntSidCreate) OnConflict(opts ...sql.ConflictOption) *IntSidUpsertOne
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//	client.IntSid.Create().
+//	client.IntSID.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
 //
-func (isc *IntSidCreate) OnConflictColumns(columns ...string) *IntSidUpsertOne {
+func (isc *IntSIDCreate) OnConflictColumns(columns ...string) *IntSIDUpsertOne {
 	isc.conflict = append(isc.conflict, sql.ConflictColumns(columns...))
-	return &IntSidUpsertOne{
+	return &IntSIDUpsertOne{
 		create: isc,
 	}
 }
 
 type (
-	// IntSidUpsertOne is the builder for "upsert"-ing
-	//  one IntSid node.
-	IntSidUpsertOne struct {
-		create *IntSidCreate
+	// IntSIDUpsertOne is the builder for "upsert"-ing
+	//  one IntSID node.
+	IntSIDUpsertOne struct {
+		create *IntSIDCreate
 	}
 
-	// IntSidUpsert is the "OnConflict" setter.
-	IntSidUpsert struct {
+	// IntSIDUpsert is the "OnConflict" setter.
+	IntSIDUpsert struct {
 		*sql.UpdateSet
 	}
 )
@@ -269,7 +269,7 @@ type (
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
-//	client.IntSid.Create().
+//	client.IntSID.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
 //			sql.ResolveWith(func(u *sql.UpdateSet) {
@@ -278,7 +278,7 @@ type (
 //		).
 //		Exec(ctx)
 //
-func (u *IntSidUpsertOne) UpdateNewValues() *IntSidUpsertOne {
+func (u *IntSIDUpsertOne) UpdateNewValues() *IntSIDUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		if _, exists := u.create.mutation.ID(); exists {
@@ -291,48 +291,48 @@ func (u *IntSidUpsertOne) UpdateNewValues() *IntSidUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.IntSid.Create().
+//  client.IntSID.Create().
 //      OnConflict(sql.ResolveWithIgnore()).
 //      Exec(ctx)
 //
-func (u *IntSidUpsertOne) Ignore() *IntSidUpsertOne {
+func (u *IntSIDUpsertOne) Ignore() *IntSIDUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
 }
 
 // DoNothing configures the conflict_action to `DO NOTHING`.
 // Supported only by SQLite and PostgreSQL.
-func (u *IntSidUpsertOne) DoNothing() *IntSidUpsertOne {
+func (u *IntSIDUpsertOne) DoNothing() *IntSIDUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.DoNothing())
 	return u
 }
 
-// Update allows overriding fields `UPDATE` values. See the IntSidCreate.OnConflict
+// Update allows overriding fields `UPDATE` values. See the IntSIDCreate.OnConflict
 // documentation for more info.
-func (u *IntSidUpsertOne) Update(set func(*IntSidUpsert)) *IntSidUpsertOne {
+func (u *IntSIDUpsertOne) Update(set func(*IntSIDUpsert)) *IntSIDUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&IntSidUpsert{UpdateSet: update})
+		set(&IntSIDUpsert{UpdateSet: update})
 	}))
 	return u
 }
 
 // Exec executes the query.
-func (u *IntSidUpsertOne) Exec(ctx context.Context) error {
+func (u *IntSIDUpsertOne) Exec(ctx context.Context) error {
 	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for IntSidCreate.OnConflict")
+		return errors.New("ent: missing options for IntSIDCreate.OnConflict")
 	}
 	return u.create.Exec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (u *IntSidUpsertOne) ExecX(ctx context.Context) {
+func (u *IntSIDUpsertOne) ExecX(ctx context.Context) {
 	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *IntSidUpsertOne) ID(ctx context.Context) (id sid.ID, err error) {
+func (u *IntSIDUpsertOne) ID(ctx context.Context) (id sid.ID, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -341,7 +341,7 @@ func (u *IntSidUpsertOne) ID(ctx context.Context) (id sid.ID, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *IntSidUpsertOne) IDX(ctx context.Context) sid.ID {
+func (u *IntSIDUpsertOne) IDX(ctx context.Context) sid.ID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -349,23 +349,23 @@ func (u *IntSidUpsertOne) IDX(ctx context.Context) sid.ID {
 	return id
 }
 
-// IntSidCreateBulk is the builder for creating many IntSid entities in bulk.
-type IntSidCreateBulk struct {
+// IntSIDCreateBulk is the builder for creating many IntSID entities in bulk.
+type IntSIDCreateBulk struct {
 	config
-	builders []*IntSidCreate
+	builders []*IntSIDCreate
 	conflict []sql.ConflictOption
 }
 
-// Save creates the IntSid entities in the database.
-func (iscb *IntSidCreateBulk) Save(ctx context.Context) ([]*IntSid, error) {
+// Save creates the IntSID entities in the database.
+func (iscb *IntSIDCreateBulk) Save(ctx context.Context) ([]*IntSID, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(iscb.builders))
-	nodes := make([]*IntSid, len(iscb.builders))
+	nodes := make([]*IntSID, len(iscb.builders))
 	mutators := make([]Mutator, len(iscb.builders))
 	for i := range iscb.builders {
 		func(i int, root context.Context) {
 			builder := iscb.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				mutation, ok := m.(*IntSidMutation)
+				mutation, ok := m.(*IntSIDMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
@@ -392,7 +392,9 @@ func (iscb *IntSidCreateBulk) Save(ctx context.Context) ([]*IntSid, error) {
 				}
 				mutation.id = &nodes[i].ID
 				if specs[i].ID.Value != nil {
-					nodes[i].ID.Scan(specs[i].ID.Value)
+					if err := nodes[i].ID.Scan(specs[i].ID.Value); err != nil {
+						return nil, err
+					}
 				}
 				mutation.done = true
 				return nodes[i], nil
@@ -412,7 +414,7 @@ func (iscb *IntSidCreateBulk) Save(ctx context.Context) ([]*IntSid, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (iscb *IntSidCreateBulk) SaveX(ctx context.Context) []*IntSid {
+func (iscb *IntSIDCreateBulk) SaveX(ctx context.Context) []*IntSID {
 	v, err := iscb.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -421,13 +423,13 @@ func (iscb *IntSidCreateBulk) SaveX(ctx context.Context) []*IntSid {
 }
 
 // Exec executes the query.
-func (iscb *IntSidCreateBulk) Exec(ctx context.Context) error {
+func (iscb *IntSIDCreateBulk) Exec(ctx context.Context) error {
 	_, err := iscb.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (iscb *IntSidCreateBulk) ExecX(ctx context.Context) {
+func (iscb *IntSIDCreateBulk) ExecX(ctx context.Context) {
 	if err := iscb.Exec(ctx); err != nil {
 		panic(err)
 	}
@@ -436,7 +438,7 @@ func (iscb *IntSidCreateBulk) ExecX(ctx context.Context) {
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
-//	client.IntSid.CreateBulk(builders...).
+//	client.IntSID.CreateBulk(builders...).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -444,9 +446,9 @@ func (iscb *IntSidCreateBulk) ExecX(ctx context.Context) {
 //		).
 //		Exec(ctx)
 //
-func (iscb *IntSidCreateBulk) OnConflict(opts ...sql.ConflictOption) *IntSidUpsertBulk {
+func (iscb *IntSIDCreateBulk) OnConflict(opts ...sql.ConflictOption) *IntSIDUpsertBulk {
 	iscb.conflict = opts
-	return &IntSidUpsertBulk{
+	return &IntSIDUpsertBulk{
 		create: iscb,
 	}
 }
@@ -454,27 +456,27 @@ func (iscb *IntSidCreateBulk) OnConflict(opts ...sql.ConflictOption) *IntSidUpse
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//	client.IntSid.Create().
+//	client.IntSID.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
 //
-func (iscb *IntSidCreateBulk) OnConflictColumns(columns ...string) *IntSidUpsertBulk {
+func (iscb *IntSIDCreateBulk) OnConflictColumns(columns ...string) *IntSIDUpsertBulk {
 	iscb.conflict = append(iscb.conflict, sql.ConflictColumns(columns...))
-	return &IntSidUpsertBulk{
+	return &IntSIDUpsertBulk{
 		create: iscb,
 	}
 }
 
-// IntSidUpsertBulk is the builder for "upsert"-ing
-// a bulk of IntSid nodes.
-type IntSidUpsertBulk struct {
-	create *IntSidCreateBulk
+// IntSIDUpsertBulk is the builder for "upsert"-ing
+// a bulk of IntSID nodes.
+type IntSIDUpsertBulk struct {
+	create *IntSIDCreateBulk
 }
 
 // UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
-//	client.IntSid.Create().
+//	client.IntSID.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
 //			sql.ResolveWith(func(u *sql.UpdateSet) {
@@ -483,7 +485,7 @@ type IntSidUpsertBulk struct {
 //		).
 //		Exec(ctx)
 //
-func (u *IntSidUpsertBulk) UpdateNewValues() *IntSidUpsertBulk {
+func (u *IntSIDUpsertBulk) UpdateNewValues() *IntSIDUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		for _, b := range u.create.builders {
@@ -499,46 +501,46 @@ func (u *IntSidUpsertBulk) UpdateNewValues() *IntSidUpsertBulk {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.IntSid.Create().
+//	client.IntSID.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
 //
-func (u *IntSidUpsertBulk) Ignore() *IntSidUpsertBulk {
+func (u *IntSIDUpsertBulk) Ignore() *IntSIDUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
 }
 
 // DoNothing configures the conflict_action to `DO NOTHING`.
 // Supported only by SQLite and PostgreSQL.
-func (u *IntSidUpsertBulk) DoNothing() *IntSidUpsertBulk {
+func (u *IntSIDUpsertBulk) DoNothing() *IntSIDUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.DoNothing())
 	return u
 }
 
-// Update allows overriding fields `UPDATE` values. See the IntSidCreateBulk.OnConflict
+// Update allows overriding fields `UPDATE` values. See the IntSIDCreateBulk.OnConflict
 // documentation for more info.
-func (u *IntSidUpsertBulk) Update(set func(*IntSidUpsert)) *IntSidUpsertBulk {
+func (u *IntSIDUpsertBulk) Update(set func(*IntSIDUpsert)) *IntSIDUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&IntSidUpsert{UpdateSet: update})
+		set(&IntSIDUpsert{UpdateSet: update})
 	}))
 	return u
 }
 
 // Exec executes the query.
-func (u *IntSidUpsertBulk) Exec(ctx context.Context) error {
+func (u *IntSIDUpsertBulk) Exec(ctx context.Context) error {
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the IntSidCreateBulk instead", i)
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the IntSIDCreateBulk instead", i)
 		}
 	}
 	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for IntSidCreateBulk.OnConflict")
+		return errors.New("ent: missing options for IntSIDCreateBulk.OnConflict")
 	}
 	return u.create.Exec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (u *IntSidUpsertBulk) ExecX(ctx context.Context) {
+func (u *IntSIDUpsertBulk) ExecX(ctx context.Context) {
 	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}

@@ -16,13 +16,13 @@ const (
 	// EdgeChildren holds the string denoting the children edge name in mutations.
 	EdgeChildren = "children"
 	// Table holds the table name of the intsid in the database.
-	Table = "int_sids"
+	Table = "int_si_ds"
 	// ParentTable is the table that holds the parent relation/edge.
-	ParentTable = "int_sids"
+	ParentTable = "int_si_ds"
 	// ParentColumn is the table column denoting the parent relation/edge.
 	ParentColumn = "int_sid_parent"
 	// ChildrenTable is the table that holds the children relation/edge.
-	ChildrenTable = "int_sids"
+	ChildrenTable = "int_si_ds"
 	// ChildrenColumn is the table column denoting the children relation/edge.
 	ChildrenColumn = "int_sid_parent"
 )
@@ -32,7 +32,7 @@ var Columns = []string{
 	FieldID,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "int_sids"
+// ForeignKeys holds the SQL foreign-keys that are owned by the "int_si_ds"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"int_sid_parent",

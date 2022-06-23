@@ -125,7 +125,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 				Column: intsid.FieldID,
 			},
 		},
-		Type:   "IntSid",
+		Type:   "IntSID",
 		Fields: map[string]*sqlgraph.FieldSpec{},
 	}
 	graph.Nodes[7] = &sqlgraph.Node{
@@ -348,8 +348,8 @@ var schemaGraph = func() *sqlgraph.Schema {
 			Columns: []string{intsid.ParentColumn},
 			Bidi:    true,
 		},
-		"IntSid",
-		"IntSid",
+		"IntSID",
+		"IntSID",
 	)
 	graph.MustAddE(
 		"children",
@@ -360,8 +360,8 @@ var schemaGraph = func() *sqlgraph.Schema {
 			Columns: []string{intsid.ChildrenColumn},
 			Bidi:    false,
 		},
-		"IntSid",
-		"IntSid",
+		"IntSID",
+		"IntSID",
 	)
 	graph.MustAddE(
 		"parent",
@@ -918,33 +918,33 @@ func (f *GroupFilter) WhereHasUsersWith(preds ...predicate.User) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (isq *IntSidQuery) addPredicate(pred func(s *sql.Selector)) {
+func (isq *IntSIDQuery) addPredicate(pred func(s *sql.Selector)) {
 	isq.predicates = append(isq.predicates, pred)
 }
 
-// Filter returns a Filter implementation to apply filters on the IntSidQuery builder.
-func (isq *IntSidQuery) Filter() *IntSidFilter {
-	return &IntSidFilter{config: isq.config, predicateAdder: isq}
+// Filter returns a Filter implementation to apply filters on the IntSIDQuery builder.
+func (isq *IntSIDQuery) Filter() *IntSIDFilter {
+	return &IntSIDFilter{config: isq.config, predicateAdder: isq}
 }
 
 // addPredicate implements the predicateAdder interface.
-func (m *IntSidMutation) addPredicate(pred func(s *sql.Selector)) {
+func (m *IntSIDMutation) addPredicate(pred func(s *sql.Selector)) {
 	m.predicates = append(m.predicates, pred)
 }
 
-// Filter returns an entql.Where implementation to apply filters on the IntSidMutation builder.
-func (m *IntSidMutation) Filter() *IntSidFilter {
-	return &IntSidFilter{config: m.config, predicateAdder: m}
+// Filter returns an entql.Where implementation to apply filters on the IntSIDMutation builder.
+func (m *IntSIDMutation) Filter() *IntSIDFilter {
+	return &IntSIDFilter{config: m.config, predicateAdder: m}
 }
 
-// IntSidFilter provides a generic filtering capability at runtime for IntSidQuery.
-type IntSidFilter struct {
+// IntSIDFilter provides a generic filtering capability at runtime for IntSIDQuery.
+type IntSIDFilter struct {
 	predicateAdder
 	config
 }
 
 // Where applies the entql predicate on the query filter.
-func (f *IntSidFilter) Where(p entql.P) {
+func (f *IntSIDFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
 		if err := schemaGraph.EvalP(schemaGraph.Nodes[6].Type, p, s); err != nil {
 			s.AddError(err)
@@ -953,17 +953,17 @@ func (f *IntSidFilter) Where(p entql.P) {
 }
 
 // WhereID applies the entql int64 predicate on the id field.
-func (f *IntSidFilter) WhereID(p entql.Int64P) {
+func (f *IntSIDFilter) WhereID(p entql.Int64P) {
 	f.Where(p.Field(intsid.FieldID))
 }
 
 // WhereHasParent applies a predicate to check if query has an edge parent.
-func (f *IntSidFilter) WhereHasParent() {
+func (f *IntSIDFilter) WhereHasParent() {
 	f.Where(entql.HasEdge("parent"))
 }
 
 // WhereHasParentWith applies a predicate to check if query has an edge parent with a given conditions (other predicates).
-func (f *IntSidFilter) WhereHasParentWith(preds ...predicate.IntSid) {
+func (f *IntSIDFilter) WhereHasParentWith(preds ...predicate.IntSID) {
 	f.Where(entql.HasEdgeWith("parent", sqlgraph.WrapFunc(func(s *sql.Selector) {
 		for _, p := range preds {
 			p(s)
@@ -972,12 +972,12 @@ func (f *IntSidFilter) WhereHasParentWith(preds ...predicate.IntSid) {
 }
 
 // WhereHasChildren applies a predicate to check if query has an edge children.
-func (f *IntSidFilter) WhereHasChildren() {
+func (f *IntSIDFilter) WhereHasChildren() {
 	f.Where(entql.HasEdge("children"))
 }
 
 // WhereHasChildrenWith applies a predicate to check if query has an edge children with a given conditions (other predicates).
-func (f *IntSidFilter) WhereHasChildrenWith(preds ...predicate.IntSid) {
+func (f *IntSIDFilter) WhereHasChildrenWith(preds ...predicate.IntSID) {
 	f.Where(entql.HasEdgeWith("children", sqlgraph.WrapFunc(func(s *sql.Selector) {
 		for _, p := range preds {
 			p(s)

@@ -17,21 +17,21 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// IntSidDelete is the builder for deleting a IntSid entity.
-type IntSidDelete struct {
+// IntSIDDelete is the builder for deleting a IntSID entity.
+type IntSIDDelete struct {
 	config
 	hooks    []Hook
-	mutation *IntSidMutation
+	mutation *IntSIDMutation
 }
 
-// Where appends a list predicates to the IntSidDelete builder.
-func (isd *IntSidDelete) Where(ps ...predicate.IntSid) *IntSidDelete {
+// Where appends a list predicates to the IntSIDDelete builder.
+func (isd *IntSIDDelete) Where(ps ...predicate.IntSID) *IntSIDDelete {
 	isd.mutation.Where(ps...)
 	return isd
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (isd *IntSidDelete) Exec(ctx context.Context) (int, error) {
+func (isd *IntSIDDelete) Exec(ctx context.Context) (int, error) {
 	var (
 		err      error
 		affected int
@@ -40,7 +40,7 @@ func (isd *IntSidDelete) Exec(ctx context.Context) (int, error) {
 		affected, err = isd.sqlExec(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*IntSidMutation)
+			mutation, ok := m.(*IntSIDMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
 			}
@@ -63,7 +63,7 @@ func (isd *IntSidDelete) Exec(ctx context.Context) (int, error) {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (isd *IntSidDelete) ExecX(ctx context.Context) int {
+func (isd *IntSIDDelete) ExecX(ctx context.Context) int {
 	n, err := isd.Exec(ctx)
 	if err != nil {
 		panic(err)
@@ -71,7 +71,7 @@ func (isd *IntSidDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (isd *IntSidDelete) sqlExec(ctx context.Context) (int, error) {
+func (isd *IntSIDDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table: intsid.Table,
@@ -91,13 +91,13 @@ func (isd *IntSidDelete) sqlExec(ctx context.Context) (int, error) {
 	return sqlgraph.DeleteNodes(ctx, isd.driver, _spec)
 }
 
-// IntSidDeleteOne is the builder for deleting a single IntSid entity.
-type IntSidDeleteOne struct {
-	isd *IntSidDelete
+// IntSIDDeleteOne is the builder for deleting a single IntSID entity.
+type IntSIDDeleteOne struct {
+	isd *IntSIDDelete
 }
 
 // Exec executes the deletion query.
-func (isdo *IntSidDeleteOne) Exec(ctx context.Context) error {
+func (isdo *IntSIDDeleteOne) Exec(ctx context.Context) error {
 	n, err := isdo.isd.Exec(ctx)
 	switch {
 	case err != nil:
@@ -110,6 +110,6 @@ func (isdo *IntSidDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (isdo *IntSidDeleteOne) ExecX(ctx context.Context) {
+func (isdo *IntSIDDeleteOne) ExecX(ctx context.Context) {
 	isdo.isd.ExecX(ctx)
 }

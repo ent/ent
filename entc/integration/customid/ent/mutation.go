@@ -48,7 +48,7 @@ const (
 	TypeDevice   = "Device"
 	TypeDoc      = "Doc"
 	TypeGroup    = "Group"
-	TypeIntSid   = "IntSid"
+	TypeIntSID   = "IntSID"
 	TypeMixinID  = "MixinID"
 	TypeNote     = "Note"
 	TypeOther    = "Other"
@@ -2880,8 +2880,8 @@ func (m *GroupMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Group edge %s", name)
 }
 
-// IntSidMutation represents an operation that mutates the IntSid nodes in the graph.
-type IntSidMutation struct {
+// IntSIDMutation represents an operation that mutates the IntSID nodes in the graph.
+type IntSIDMutation struct {
 	config
 	op              Op
 	typ             string
@@ -2893,21 +2893,21 @@ type IntSidMutation struct {
 	removedchildren map[sid.ID]struct{}
 	clearedchildren bool
 	done            bool
-	oldValue        func(context.Context) (*IntSid, error)
-	predicates      []predicate.IntSid
+	oldValue        func(context.Context) (*IntSID, error)
+	predicates      []predicate.IntSID
 }
 
-var _ ent.Mutation = (*IntSidMutation)(nil)
+var _ ent.Mutation = (*IntSIDMutation)(nil)
 
 // intsidOption allows management of the mutation configuration using functional options.
-type intsidOption func(*IntSidMutation)
+type intsidOption func(*IntSIDMutation)
 
-// newIntSidMutation creates new mutation for the IntSid entity.
-func newIntSidMutation(c config, op Op, opts ...intsidOption) *IntSidMutation {
-	m := &IntSidMutation{
+// newIntSIDMutation creates new mutation for the IntSID entity.
+func newIntSIDMutation(c config, op Op, opts ...intsidOption) *IntSIDMutation {
+	m := &IntSIDMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeIntSid,
+		typ:           TypeIntSID,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -2916,20 +2916,20 @@ func newIntSidMutation(c config, op Op, opts ...intsidOption) *IntSidMutation {
 	return m
 }
 
-// withIntSidID sets the ID field of the mutation.
-func withIntSidID(id sid.ID) intsidOption {
-	return func(m *IntSidMutation) {
+// withIntSIDID sets the ID field of the mutation.
+func withIntSIDID(id sid.ID) intsidOption {
+	return func(m *IntSIDMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *IntSid
+			value *IntSID
 		)
-		m.oldValue = func(ctx context.Context) (*IntSid, error) {
+		m.oldValue = func(ctx context.Context) (*IntSID, error) {
 			once.Do(func() {
 				if m.done {
 					err = errors.New("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().IntSid.Get(ctx, id)
+					value, err = m.Client().IntSID.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -2938,10 +2938,10 @@ func withIntSidID(id sid.ID) intsidOption {
 	}
 }
 
-// withIntSid sets the old IntSid of the mutation.
-func withIntSid(node *IntSid) intsidOption {
-	return func(m *IntSidMutation) {
-		m.oldValue = func(context.Context) (*IntSid, error) {
+// withIntSID sets the old IntSID of the mutation.
+func withIntSID(node *IntSID) intsidOption {
+	return func(m *IntSIDMutation) {
+		m.oldValue = func(context.Context) (*IntSID, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -2950,7 +2950,7 @@ func withIntSid(node *IntSid) intsidOption {
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m IntSidMutation) Client() *Client {
+func (m IntSIDMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -2958,7 +2958,7 @@ func (m IntSidMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m IntSidMutation) Tx() (*Tx, error) {
+func (m IntSIDMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
@@ -2968,14 +2968,14 @@ func (m IntSidMutation) Tx() (*Tx, error) {
 }
 
 // SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of IntSid entities.
-func (m *IntSidMutation) SetID(id sid.ID) {
+// operation is only accepted on creation of IntSID entities.
+func (m *IntSIDMutation) SetID(id sid.ID) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *IntSidMutation) ID() (id sid.ID, exists bool) {
+func (m *IntSIDMutation) ID() (id sid.ID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -2986,7 +2986,7 @@ func (m *IntSidMutation) ID() (id sid.ID, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *IntSidMutation) IDs(ctx context.Context) ([]sid.ID, error) {
+func (m *IntSIDMutation) IDs(ctx context.Context) ([]sid.ID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
@@ -2995,29 +2995,29 @@ func (m *IntSidMutation) IDs(ctx context.Context) ([]sid.ID, error) {
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().IntSid.Query().Where(m.predicates...).IDs(ctx)
+		return m.Client().IntSID.Query().Where(m.predicates...).IDs(ctx)
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
 }
 
-// SetParentID sets the "parent" edge to the IntSid entity by id.
-func (m *IntSidMutation) SetParentID(id sid.ID) {
+// SetParentID sets the "parent" edge to the IntSID entity by id.
+func (m *IntSIDMutation) SetParentID(id sid.ID) {
 	m.parent = &id
 }
 
-// ClearParent clears the "parent" edge to the IntSid entity.
-func (m *IntSidMutation) ClearParent() {
+// ClearParent clears the "parent" edge to the IntSID entity.
+func (m *IntSIDMutation) ClearParent() {
 	m.clearedparent = true
 }
 
-// ParentCleared reports if the "parent" edge to the IntSid entity was cleared.
-func (m *IntSidMutation) ParentCleared() bool {
+// ParentCleared reports if the "parent" edge to the IntSID entity was cleared.
+func (m *IntSIDMutation) ParentCleared() bool {
 	return m.clearedparent
 }
 
 // ParentID returns the "parent" edge ID in the mutation.
-func (m *IntSidMutation) ParentID() (id sid.ID, exists bool) {
+func (m *IntSIDMutation) ParentID() (id sid.ID, exists bool) {
 	if m.parent != nil {
 		return *m.parent, true
 	}
@@ -3027,7 +3027,7 @@ func (m *IntSidMutation) ParentID() (id sid.ID, exists bool) {
 // ParentIDs returns the "parent" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // ParentID instead. It exists only for internal usage by the builders.
-func (m *IntSidMutation) ParentIDs() (ids []sid.ID) {
+func (m *IntSIDMutation) ParentIDs() (ids []sid.ID) {
 	if id := m.parent; id != nil {
 		ids = append(ids, *id)
 	}
@@ -3035,13 +3035,13 @@ func (m *IntSidMutation) ParentIDs() (ids []sid.ID) {
 }
 
 // ResetParent resets all changes to the "parent" edge.
-func (m *IntSidMutation) ResetParent() {
+func (m *IntSIDMutation) ResetParent() {
 	m.parent = nil
 	m.clearedparent = false
 }
 
-// AddChildIDs adds the "children" edge to the IntSid entity by ids.
-func (m *IntSidMutation) AddChildIDs(ids ...sid.ID) {
+// AddChildIDs adds the "children" edge to the IntSID entity by ids.
+func (m *IntSIDMutation) AddChildIDs(ids ...sid.ID) {
 	if m.children == nil {
 		m.children = make(map[sid.ID]struct{})
 	}
@@ -3050,18 +3050,18 @@ func (m *IntSidMutation) AddChildIDs(ids ...sid.ID) {
 	}
 }
 
-// ClearChildren clears the "children" edge to the IntSid entity.
-func (m *IntSidMutation) ClearChildren() {
+// ClearChildren clears the "children" edge to the IntSID entity.
+func (m *IntSIDMutation) ClearChildren() {
 	m.clearedchildren = true
 }
 
-// ChildrenCleared reports if the "children" edge to the IntSid entity was cleared.
-func (m *IntSidMutation) ChildrenCleared() bool {
+// ChildrenCleared reports if the "children" edge to the IntSID entity was cleared.
+func (m *IntSIDMutation) ChildrenCleared() bool {
 	return m.clearedchildren
 }
 
-// RemoveChildIDs removes the "children" edge to the IntSid entity by IDs.
-func (m *IntSidMutation) RemoveChildIDs(ids ...sid.ID) {
+// RemoveChildIDs removes the "children" edge to the IntSID entity by IDs.
+func (m *IntSIDMutation) RemoveChildIDs(ids ...sid.ID) {
 	if m.removedchildren == nil {
 		m.removedchildren = make(map[sid.ID]struct{})
 	}
@@ -3071,8 +3071,8 @@ func (m *IntSidMutation) RemoveChildIDs(ids ...sid.ID) {
 	}
 }
 
-// RemovedChildren returns the removed IDs of the "children" edge to the IntSid entity.
-func (m *IntSidMutation) RemovedChildrenIDs() (ids []sid.ID) {
+// RemovedChildren returns the removed IDs of the "children" edge to the IntSID entity.
+func (m *IntSIDMutation) RemovedChildrenIDs() (ids []sid.ID) {
 	for id := range m.removedchildren {
 		ids = append(ids, id)
 	}
@@ -3080,7 +3080,7 @@ func (m *IntSidMutation) RemovedChildrenIDs() (ids []sid.ID) {
 }
 
 // ChildrenIDs returns the "children" edge IDs in the mutation.
-func (m *IntSidMutation) ChildrenIDs() (ids []sid.ID) {
+func (m *IntSIDMutation) ChildrenIDs() (ids []sid.ID) {
 	for id := range m.children {
 		ids = append(ids, id)
 	}
@@ -3088,31 +3088,31 @@ func (m *IntSidMutation) ChildrenIDs() (ids []sid.ID) {
 }
 
 // ResetChildren resets all changes to the "children" edge.
-func (m *IntSidMutation) ResetChildren() {
+func (m *IntSIDMutation) ResetChildren() {
 	m.children = nil
 	m.clearedchildren = false
 	m.removedchildren = nil
 }
 
-// Where appends a list predicates to the IntSidMutation builder.
-func (m *IntSidMutation) Where(ps ...predicate.IntSid) {
+// Where appends a list predicates to the IntSIDMutation builder.
+func (m *IntSIDMutation) Where(ps ...predicate.IntSID) {
 	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
-func (m *IntSidMutation) Op() Op {
+func (m *IntSIDMutation) Op() Op {
 	return m.op
 }
 
-// Type returns the node type of this mutation (IntSid).
-func (m *IntSidMutation) Type() string {
+// Type returns the node type of this mutation (IntSID).
+func (m *IntSIDMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during this mutation. Note that in
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
-func (m *IntSidMutation) Fields() []string {
+func (m *IntSIDMutation) Fields() []string {
 	fields := make([]string, 0, 0)
 	return fields
 }
@@ -3120,73 +3120,73 @@ func (m *IntSidMutation) Fields() []string {
 // Field returns the value of a field with the given name. The second boolean
 // return value indicates that this field was not set, or was not defined in the
 // schema.
-func (m *IntSidMutation) Field(name string) (ent.Value, bool) {
+func (m *IntSIDMutation) Field(name string) (ent.Value, bool) {
 	return nil, false
 }
 
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
-func (m *IntSidMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	return nil, fmt.Errorf("unknown IntSid field %s", name)
+func (m *IntSIDMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	return nil, fmt.Errorf("unknown IntSID field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *IntSidMutation) SetField(name string, value ent.Value) error {
+func (m *IntSIDMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown IntSid field %s", name)
+	return fmt.Errorf("unknown IntSID field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
-func (m *IntSidMutation) AddedFields() []string {
+func (m *IntSIDMutation) AddedFields() []string {
 	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
-func (m *IntSidMutation) AddedField(name string) (ent.Value, bool) {
+func (m *IntSIDMutation) AddedField(name string) (ent.Value, bool) {
 	return nil, false
 }
 
 // AddField adds the value to the field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *IntSidMutation) AddField(name string, value ent.Value) error {
-	return fmt.Errorf("unknown IntSid numeric field %s", name)
+func (m *IntSIDMutation) AddField(name string, value ent.Value) error {
+	return fmt.Errorf("unknown IntSID numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
-func (m *IntSidMutation) ClearedFields() []string {
+func (m *IntSIDMutation) ClearedFields() []string {
 	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
-func (m *IntSidMutation) FieldCleared(name string) bool {
+func (m *IntSIDMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *IntSidMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown IntSid nullable field %s", name)
+func (m *IntSIDMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown IntSID nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
-func (m *IntSidMutation) ResetField(name string) error {
-	return fmt.Errorf("unknown IntSid field %s", name)
+func (m *IntSIDMutation) ResetField(name string) error {
+	return fmt.Errorf("unknown IntSID field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
-func (m *IntSidMutation) AddedEdges() []string {
+func (m *IntSIDMutation) AddedEdges() []string {
 	edges := make([]string, 0, 2)
 	if m.parent != nil {
 		edges = append(edges, intsid.EdgeParent)
@@ -3199,7 +3199,7 @@ func (m *IntSidMutation) AddedEdges() []string {
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
-func (m *IntSidMutation) AddedIDs(name string) []ent.Value {
+func (m *IntSIDMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case intsid.EdgeParent:
 		if id := m.parent; id != nil {
@@ -3216,7 +3216,7 @@ func (m *IntSidMutation) AddedIDs(name string) []ent.Value {
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
-func (m *IntSidMutation) RemovedEdges() []string {
+func (m *IntSIDMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
 	if m.removedchildren != nil {
 		edges = append(edges, intsid.EdgeChildren)
@@ -3226,7 +3226,7 @@ func (m *IntSidMutation) RemovedEdges() []string {
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
-func (m *IntSidMutation) RemovedIDs(name string) []ent.Value {
+func (m *IntSIDMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
 	case intsid.EdgeChildren:
 		ids := make([]ent.Value, 0, len(m.removedchildren))
@@ -3239,7 +3239,7 @@ func (m *IntSidMutation) RemovedIDs(name string) []ent.Value {
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *IntSidMutation) ClearedEdges() []string {
+func (m *IntSIDMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 2)
 	if m.clearedparent {
 		edges = append(edges, intsid.EdgeParent)
@@ -3252,7 +3252,7 @@ func (m *IntSidMutation) ClearedEdges() []string {
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
-func (m *IntSidMutation) EdgeCleared(name string) bool {
+func (m *IntSIDMutation) EdgeCleared(name string) bool {
 	switch name {
 	case intsid.EdgeParent:
 		return m.clearedparent
@@ -3264,18 +3264,18 @@ func (m *IntSidMutation) EdgeCleared(name string) bool {
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
-func (m *IntSidMutation) ClearEdge(name string) error {
+func (m *IntSIDMutation) ClearEdge(name string) error {
 	switch name {
 	case intsid.EdgeParent:
 		m.ClearParent()
 		return nil
 	}
-	return fmt.Errorf("unknown IntSid unique edge %s", name)
+	return fmt.Errorf("unknown IntSID unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
-func (m *IntSidMutation) ResetEdge(name string) error {
+func (m *IntSIDMutation) ResetEdge(name string) error {
 	switch name {
 	case intsid.EdgeParent:
 		m.ResetParent()
@@ -3284,7 +3284,7 @@ func (m *IntSidMutation) ResetEdge(name string) error {
 		m.ResetChildren()
 		return nil
 	}
-	return fmt.Errorf("unknown IntSid edge %s", name)
+	return fmt.Errorf("unknown IntSID edge %s", name)
 }
 
 // MixinIDMutation represents an operation that mutates the MixinID nodes in the graph.
