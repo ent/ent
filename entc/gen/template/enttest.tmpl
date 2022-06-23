@@ -22,6 +22,7 @@ import (
 	_ "{{ $.Config.Package }}/runtime"
 
 	{{ if $.SupportMigrate }}
+		"{{ $.Config.Package }}/migrate"
 		"entgo.io/ent/dialect/sql/schema"
 	{{ end }}
 )
@@ -78,10 +79,7 @@ func Open(t TestingT, driverName, dataSourceName string, opts ...Option) *{{ $pk
 		t.FailNow()
 	}
 	{{- if $.SupportMigrate }}
-		if err := c.Schema.Create(context.Background(), o.migrateOpts...); err != nil {
-			t.Error(err)
-			t.FailNow()
-		}
+		migrateSchema(t, c, o)
 	{{- end }}
 	return c
 }
@@ -91,12 +89,22 @@ func NewClient(t TestingT, opts ...Option) *{{ $pkg }}.Client {
 	o := newOptions(opts)
 	c := {{ $pkg }}.NewClient(o.opts...)
 	{{- if $.SupportMigrate }}
-		if err := c.Schema.Create(context.Background(), o.migrateOpts...); err != nil {
-			t.Error(err)
-			t.FailNow()
-		}
+		migrateSchema(t, c, o)
 	{{- end }}
 	return c
 }
 
+{{- if $.SupportMigrate }}
+	func migrateSchema(t TestingT, c *{{ $pkg }}.Client, o *options) {
+		tables, err := schema.CopyTables(migrate.Tables)
+		if err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+		if err := migrate.Create(context.Background(), c.Schema, tables, o.migrateOpts...); err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+	}
+{{- end }}
 {{ end }}

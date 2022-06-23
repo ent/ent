@@ -79,7 +79,11 @@ func (tld *TweetLikeDelete) sqlExec(ctx context.Context) (int, error) {
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, tld.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, tld.driver, _spec)
+	if err != nil && sqlgraph.IsConstraintError(err) {
+		err = &ConstraintError{msg: err.Error(), wrap: err}
+	}
+	return affected, err
 }
 
 // TweetLikeDeleteOne is the builder for deleting a single TweetLike entity.

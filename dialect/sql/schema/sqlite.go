@@ -449,3 +449,10 @@ func (d *SQLite) atIndex(idx1 *Index, t2 *schema.Table, idx2 *schema.Index) erro
 	}
 	return nil
 }
+
+func (SQLite) atTypeRangeSQL(ts ...string) string {
+	for i := range ts {
+		ts[i] = fmt.Sprintf("('%s')", ts[i])
+	}
+	return fmt.Sprintf("INSERT INTO `%s` (`type`) VALUES %s", TypeTable, strings.Join(ts, ", "))
+}

@@ -88,7 +88,11 @@ func (od *OtherDelete) sqlExec(ctx context.Context) (int, error) {
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, od.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, od.driver, _spec)
+	if err != nil && sqlgraph.IsConstraintError(err) {
+		err = &ConstraintError{msg: err.Error(), wrap: err}
+	}
+	return affected, err
 }
 
 // OtherDeleteOne is the builder for deleting a single Other entity.

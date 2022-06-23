@@ -79,6 +79,15 @@ the object ID to be unique.
 
 To enable the Universal-IDs support for your project, pass the `WithGlobalUniqueID` option to the migration.
 
+:::note
+Be aware, that `WithGlobalUniqueID` and [versioned migration](versioned-migrations.md) files are not working together.
+When using `WithGlobalUniqueID`, the allocated ranges are computed dynamically when creating the diff between a deployed 
+database and the current schema. In cases where multiple deployments exist, the allocated ranges for the same type might 
+be different from each other, depending on when the deployment took part. If you only have one deployment or all 
+deployments have the exact same data in the `ent_types` table, you can use `WithUniversalID` instead. This will enable a
+file based type range store instead of a database-table as source of truth.
+:::
+
 ```go
 package main
 

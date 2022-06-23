@@ -14,6 +14,7 @@ import (
 	_ "entgo.io/ent/entc/integration/migrate/versioned/runtime"
 
 	"entgo.io/ent/dialect/sql/schema"
+	"entgo.io/ent/entc/integration/migrate/versioned/migrate"
 )
 
 type (
@@ -63,10 +64,7 @@ func Open(t TestingT, driverName, dataSourceName string, opts ...Option) *versio
 		t.Error(err)
 		t.FailNow()
 	}
-	if err := c.Schema.Create(context.Background(), o.migrateOpts...); err != nil {
-		t.Error(err)
-		t.FailNow()
-	}
+	migrateSchema(t, c, o)
 	return c
 }
 
@@ -74,9 +72,17 @@ func Open(t TestingT, driverName, dataSourceName string, opts ...Option) *versio
 func NewClient(t TestingT, opts ...Option) *versioned.Client {
 	o := newOptions(opts)
 	c := versioned.NewClient(o.opts...)
-	if err := c.Schema.Create(context.Background(), o.migrateOpts...); err != nil {
+	migrateSchema(t, c, o)
+	return c
+}
+func migrateSchema(t TestingT, c *versioned.Client, o *options) {
+	tables, err := schema.CopyTables(migrate.Tables)
+	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	return c
+	if err := migrate.Create(context.Background(), c.Schema, tables, o.migrateOpts...); err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
 }

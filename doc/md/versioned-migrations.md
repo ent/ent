@@ -163,16 +163,47 @@ migrate -source file://migrations -database mysql://root:pass@tcp(localhost:3306
 In case you already have an Ent application in production and want to switch over from auto migration to the new
 versioned migration, you need to take some extra steps.
 
-1. Create an initial migration file (or several files if you want) reflecting the currently deployed state.
+### Create an initial migration file reflecting the currently deployed state
 
-   To do this make sure your schema definition is in sync with your deployed version. Then spin up an empty database and
-   run the diff command once as described above. This will create the statements needed to create the current state of
-   your schema graph.
+To do this make sure your schema definition is in sync with your deployed version. Then spin up an empty database and
+run the diff command once as described above. This will create the statements needed to create the current state of
+your schema graph.
+If you happened to have [universal IDs](migrate.md#universal-ids) enabled before, the above command will create a 
+file called `.ent_types` containing a list of schema names similar to the following: 
 
-2. Configure the tool you use to manage migrations to consider this file as **applied**.
+```text title=".ent_types"
+atlas.sum ignore
+users,groups
+```
+Once that has been created, one of the migration files will contain statements to create a table called 
+`ent_types`, as well as some inserts to it:
 
-   In case of `golang-migrate` this can be done by forcing your database version as
-   described [here](https://github.com/golang-migrate/migrate/blob/master/GETTING_STARTED.md#forcing-your-database-version).
+```sql
+CREATE TABLE `users` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT);
+CREATE TABLE `groups` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT);
+INSERT INTO sqlite_sequence (name, seq) VALUES ("groups", 4294967296);
+CREATE TABLE `ent_types` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT, `type` text NOT NULL);
+CREATE UNIQUE INDEX `ent_types_type_key` ON `ent_types` (`type`);
+INSERT INTO `ent_types` (`type`) VALUES ('users'), ('groups');
+```
+
+In order to ensure to not break existing code, make sure the contents of that file are equal to the contents in the
+table present in the database you created the diff from. For example, if you consider the `.ent_types` file from
+above (`users,groups`) but your deployed table looks like the one below (`groups,users`):
+
+| id  | type   |
+|-----|--------|
+| 1   | groups |
+| 2   | users  |
+
+You can see, that the order differs. In that case, you have to manually change both the entries in the 
+`.ent_types` file, as well in the generated migrations file. As a safety feature, Ent will warn you about type 
+drifts if you attempt to run a migration diff.
+
+### Configure the tool you use to manage migrations to consider this file as applied
+
+In case of `golang-migrate` this can be done by forcing your database version as
+described [here](https://github.com/golang-migrate/migrate/blob/master/GETTING_STARTED.md#forcing-your-database-version).
 
 ## Use a Custom Formatter
 

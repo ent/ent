@@ -67,7 +67,10 @@ func TestMySQL(t *testing.T) {
 			require.NoError(t, err, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []interface{}{}, new(sql.Result)))
 			require.NoError(t, root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS versioned_migrate", []interface{}{}, new(sql.Result)))
 			defer root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []interface{}{}, new(sql.Result))
-			Versioned(t, drv, versioned.NewClient(versioned.Driver(drv)))
+			vdrv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/versioned_migrate?parseTime=True", port))
+			require.NoError(t, err, "connecting to versioned migrate database")
+			defer vdrv.Close()
+			Versioned(t, vdrv, versioned.NewClient(versioned.Driver(vdrv)))
 		})
 	}
 }
@@ -228,41 +231,54 @@ func Versioned(t *testing.T, drv sql.ExecQuerier, client *versioned.Client) {
 		template.Must(template.New("name").Parse(`{{ range .Changes }}{{ printf "%s;\n" .Cmd }}{{ end }}`)),
 	)
 	require.NoError(t, err)
-	opts := []schema.MigrateOption{schema.WithDir(dir), schema.WithGlobalUniqueID(true), schema.WithFormatter(format)}
+	opts := []schema.MigrateOption{
+		schema.WithDir(dir),
+		schema.WithUniversalID(),
+		schema.WithFormatter(format),
+	}
 
 	// Compared to empty database.
 	require.NoError(t, client.Schema.NamedDiff(ctx, "first", opts...))
-	require.Equal(t, 1, countFiles(t, dir))
+	require.Equal(t, 2, countFiles(t, dir))
 
 	// Apply the migrations.
-	fs, err := dir.Files()
+	files, err := dir.Files()
 	require.NoError(t, err)
-	for _, f := range fs {
+	for _, f := range files {
 		sc := bufio.NewScanner(f)
 		for sc.Scan() {
 			if sc.Text() != "" {
 				_, err := drv.ExecContext(ctx, sc.Text())
-				require.NoError(t, err)
+				require.NoError(t, err, sc.Text())
 			}
 		}
 	}
 
 	// Diff again - there should not be a new file.
 	require.NoError(t, client.Schema.NamedDiff(ctx, "second", opts...))
-	require.Equal(t, 1, countFiles(t, dir))
+	require.Equal(t, 2, countFiles(t, dir))
 }
 
 func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv2.Client) {
 	ctx := context.Background()
 
 	// Run migration and execute queries on v1.
-	require.NoError(t, clientv1.Schema.Create(ctx, migratev1.WithGlobalUniqueID(true), schema.WithAtlas(true)))
+	require.NoError(t, clientv1.Schema.Create(ctx, migratev1.WithGlobalUniqueID(true), schema.WithAtlas(false)))
 	SanityV1(t, dialect, clientv1)
+	require.NoError(t, clientv1.Schema.Create(ctx, migratev1.WithGlobalUniqueID(true), schema.WithAtlas(true)))
+
+	// Ensure migration to Atlas works with global unique ids.
+	// Create 2 records, delete first one, and create another two after migration.
+	// This way, we ensure that Atlas migration does not affect the PK starting point.
+	c1 := clientv1.Conversion.Create().SaveX(ctx)
+	clientv1.Conversion.Create().ExecX(ctx)
+	clientv1.Conversion.DeleteOne(c1).ExecX(ctx)
 
 	// Run migration and execute queries on v2.
 	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithAtlas(true), schema.WithDiffHook(renameTokenColumn), schema.WithApplyHook(fillNulls(dialect))))
 	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithAtlas(true)), "should not create additional resources on multiple runs")
 	SanityV2(t, dialect, clientv2)
+	clientv2.Conversion.CreateBulk(clientv2.Conversion.Create(), clientv2.Conversion.Create(), clientv2.Conversion.Create()).ExecX(ctx)
 
 	u := clientv2.User.Create().SetAge(1).SetName("foo").SetNickname("nick_foo").SetPhone("phone").SaveX(ctx)
 	idRange(t, clientv2.Car.Create().SetOwner(u).SaveX(ctx).ID, 0, 1<<32)
