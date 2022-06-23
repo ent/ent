@@ -18,11 +18,11 @@ func IsConstraintError(err error) bool {
 // IsUniqueConstraintError reports if the error resulted from a DB uniqueness constraint violation.
 // e.g. duplicate value in unique index.
 func IsUniqueConstraintError(err error) bool {
-	for _, s := range []string{
+	uniquenessErrors := []string{
 		"Error 1062",                 // MySQL
 		"violates unique constraint", // Postgres
 		"UNIQUE constraint failed",   // SQLite
-		"UNIQUE KEY",   // mssql
+		"UNIQUE KEY",                 // mssql
 	}
 	for _, s := range uniquenessErrors {
 		if strings.Contains(err.Error(), s) {
