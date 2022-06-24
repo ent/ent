@@ -482,6 +482,20 @@ func TableContainsFold(v string) predicate.Comment {
 	})
 }
 
+// DirIsNil applies the IsNil predicate on the "dir" field.
+func DirIsNil() predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldDir)))
+	})
+}
+
+// DirNotNil applies the NotNil predicate on the "dir" field.
+func DirNotNil() predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldDir)))
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Comment) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {

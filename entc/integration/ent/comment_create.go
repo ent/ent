@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/comment"
+	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
 	"entgo.io/ent/schema/field"
 )
 
@@ -61,6 +62,20 @@ func (cc *CommentCreate) SetTable(s string) *CommentCreate {
 func (cc *CommentCreate) SetNillableTable(s *string) *CommentCreate {
 	if s != nil {
 		cc.SetTable(*s)
+	}
+	return cc
+}
+
+// SetDir sets the "dir" field.
+func (cc *CommentCreate) SetDir(s schemadir.Dir) *CommentCreate {
+	cc.mutation.SetDir(s)
+	return cc
+}
+
+// SetNillableDir sets the "dir" field if the given value is not nil.
+func (cc *CommentCreate) SetNillableDir(s *schemadir.Dir) *CommentCreate {
+	if s != nil {
+		cc.SetDir(*s)
 	}
 	return cc
 }
@@ -207,6 +222,14 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 		})
 		_node.Table = value
 	}
+	if value, ok := cc.mutation.Dir(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: comment.FieldDir,
+		})
+		_node.Dir = value
+	}
 	return _node, _spec
 }
 
@@ -336,6 +359,24 @@ func (u *CommentUpsert) UpdateTable() *CommentUpsert {
 // ClearTable clears the value of the "table" field.
 func (u *CommentUpsert) ClearTable() *CommentUpsert {
 	u.SetNull(comment.FieldTable)
+	return u
+}
+
+// SetDir sets the "dir" field.
+func (u *CommentUpsert) SetDir(v schemadir.Dir) *CommentUpsert {
+	u.Set(comment.FieldDir, v)
+	return u
+}
+
+// UpdateDir sets the "dir" field to the value that was provided on create.
+func (u *CommentUpsert) UpdateDir() *CommentUpsert {
+	u.SetExcluded(comment.FieldDir)
+	return u
+}
+
+// ClearDir clears the value of the "dir" field.
+func (u *CommentUpsert) ClearDir() *CommentUpsert {
+	u.SetNull(comment.FieldDir)
 	return u
 }
 
@@ -469,6 +510,27 @@ func (u *CommentUpsertOne) UpdateTable() *CommentUpsertOne {
 func (u *CommentUpsertOne) ClearTable() *CommentUpsertOne {
 	return u.Update(func(s *CommentUpsert) {
 		s.ClearTable()
+	})
+}
+
+// SetDir sets the "dir" field.
+func (u *CommentUpsertOne) SetDir(v schemadir.Dir) *CommentUpsertOne {
+	return u.Update(func(s *CommentUpsert) {
+		s.SetDir(v)
+	})
+}
+
+// UpdateDir sets the "dir" field to the value that was provided on create.
+func (u *CommentUpsertOne) UpdateDir() *CommentUpsertOne {
+	return u.Update(func(s *CommentUpsert) {
+		s.UpdateDir()
+	})
+}
+
+// ClearDir clears the value of the "dir" field.
+func (u *CommentUpsertOne) ClearDir() *CommentUpsertOne {
+	return u.Update(func(s *CommentUpsert) {
+		s.ClearDir()
 	})
 }
 
@@ -763,6 +825,27 @@ func (u *CommentUpsertBulk) UpdateTable() *CommentUpsertBulk {
 func (u *CommentUpsertBulk) ClearTable() *CommentUpsertBulk {
 	return u.Update(func(s *CommentUpsert) {
 		s.ClearTable()
+	})
+}
+
+// SetDir sets the "dir" field.
+func (u *CommentUpsertBulk) SetDir(v schemadir.Dir) *CommentUpsertBulk {
+	return u.Update(func(s *CommentUpsert) {
+		s.SetDir(v)
+	})
+}
+
+// UpdateDir sets the "dir" field to the value that was provided on create.
+func (u *CommentUpsertBulk) UpdateDir() *CommentUpsertBulk {
+	return u.Update(func(s *CommentUpsert) {
+		s.UpdateDir()
+	})
+}
+
+// ClearDir clears the value of the "dir" field.
+func (u *CommentUpsertBulk) ClearDir() *CommentUpsertBulk {
+	return u.Update(func(s *CommentUpsert) {
+		s.ClearDir()
 	})
 }
 
