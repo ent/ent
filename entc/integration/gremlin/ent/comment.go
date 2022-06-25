@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/gremlin"
+	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
 )
 
 // Comment is the model entity for the Comment schema.
@@ -26,6 +27,8 @@ type Comment struct {
 	NillableInt *int `json:"nillable_int,omitempty"`
 	// Table holds the value of the "table" field.
 	Table string `json:"table,omitempty"`
+	// Dir holds the value of the "dir" field.
+	Dir schemadir.Dir `json:"dir,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into Comment.
@@ -35,11 +38,12 @@ func (c *Comment) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanc struct {
-		ID          string  `json:"id,omitempty"`
-		UniqueInt   int     `json:"unique_int,omitempty"`
-		UniqueFloat float64 `json:"unique_float,omitempty"`
-		NillableInt *int    `json:"nillable_int,omitempty"`
-		Table       string  `json:"table,omitempty"`
+		ID          string        `json:"id,omitempty"`
+		UniqueInt   int           `json:"unique_int,omitempty"`
+		UniqueFloat float64       `json:"unique_float,omitempty"`
+		NillableInt *int          `json:"nillable_int,omitempty"`
+		Table       string        `json:"table,omitempty"`
+		Dir         schemadir.Dir `json:"dir,omitempty"`
 	}
 	if err := vmap.Decode(&scanc); err != nil {
 		return err
@@ -49,6 +53,7 @@ func (c *Comment) FromResponse(res *gremlin.Response) error {
 	c.UniqueFloat = scanc.UniqueFloat
 	c.NillableInt = scanc.NillableInt
 	c.Table = scanc.Table
+	c.Dir = scanc.Dir
 	return nil
 }
 
@@ -88,6 +93,9 @@ func (c *Comment) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("table=")
 	builder.WriteString(c.Table)
+	builder.WriteString(", ")
+	builder.WriteString("dir=")
+	builder.WriteString(fmt.Sprintf("%v", c.Dir))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -102,11 +110,12 @@ func (c *Comments) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanc []struct {
-		ID          string  `json:"id,omitempty"`
-		UniqueInt   int     `json:"unique_int,omitempty"`
-		UniqueFloat float64 `json:"unique_float,omitempty"`
-		NillableInt *int    `json:"nillable_int,omitempty"`
-		Table       string  `json:"table,omitempty"`
+		ID          string        `json:"id,omitempty"`
+		UniqueInt   int           `json:"unique_int,omitempty"`
+		UniqueFloat float64       `json:"unique_float,omitempty"`
+		NillableInt *int          `json:"nillable_int,omitempty"`
+		Table       string        `json:"table,omitempty"`
+		Dir         schemadir.Dir `json:"dir,omitempty"`
 	}
 	if err := vmap.Decode(&scanc); err != nil {
 		return err
@@ -118,6 +127,7 @@ func (c *Comments) FromResponse(res *gremlin.Response) error {
 			UniqueFloat: v.UniqueFloat,
 			NillableInt: v.NillableInt,
 			Table:       v.Table,
+			Dir:         v.Dir,
 		})
 	}
 	return nil

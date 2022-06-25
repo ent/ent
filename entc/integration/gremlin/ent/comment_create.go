@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
+	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
 	"entgo.io/ent/entc/integration/gremlin/ent/comment"
 )
 
@@ -62,6 +63,20 @@ func (cc *CommentCreate) SetTable(s string) *CommentCreate {
 func (cc *CommentCreate) SetNillableTable(s *string) *CommentCreate {
 	if s != nil {
 		cc.SetTable(*s)
+	}
+	return cc
+}
+
+// SetDir sets the "dir" field.
+func (cc *CommentCreate) SetDir(s schemadir.Dir) *CommentCreate {
+	cc.mutation.SetDir(s)
+	return cc
+}
+
+// SetNillableDir sets the "dir" field if the given value is not nil.
+func (cc *CommentCreate) SetNillableDir(s *schemadir.Dir) *CommentCreate {
+	if s != nil {
+		cc.SetDir(*s)
 	}
 	return cc
 }
@@ -193,6 +208,9 @@ func (cc *CommentCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := cc.mutation.Table(); ok {
 		v.Property(dsl.Single, comment.FieldTable, value)
+	}
+	if value, ok := cc.mutation.Dir(); ok {
+		v.Property(dsl.Single, comment.FieldDir, value)
 	}
 	if len(constraints) == 0 {
 		return v.ValueMap(true)
