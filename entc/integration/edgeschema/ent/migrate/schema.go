@@ -92,6 +92,17 @@ var (
 			},
 		},
 	}
+	// TagsColumns holds the columns for the "tags" table.
+	TagsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "value", Type: field.TypeString},
+	}
+	// TagsTable holds the schema information for the "tags" table.
+	TagsTable = &schema.Table{
+		Name:       "tags",
+		Columns:    TagsColumns,
+		PrimaryKey: []*schema.Column{TagsColumns[0]},
+	}
 	// TweetsColumns holds the columns for the "tweets" table.
 	TweetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -126,6 +137,40 @@ var (
 				Columns:    []*schema.Column{TweetLikesColumns[2]},
 				RefColumns: []*schema.Column{TweetsColumns[0]},
 				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// TweetTagsColumns holds the columns for the "tweet_tags" table.
+	TweetTagsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "added_at", Type: field.TypeTime},
+		{Name: "tag_id", Type: field.TypeInt},
+		{Name: "tweet_id", Type: field.TypeInt},
+	}
+	// TweetTagsTable holds the schema information for the "tweet_tags" table.
+	TweetTagsTable = &schema.Table{
+		Name:       "tweet_tags",
+		Columns:    TweetTagsColumns,
+		PrimaryKey: []*schema.Column{TweetTagsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "tweet_tags_tags_tag",
+				Columns:    []*schema.Column{TweetTagsColumns[2]},
+				RefColumns: []*schema.Column{TagsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "tweet_tags_tweets_tweet",
+				Columns:    []*schema.Column{TweetTagsColumns[3]},
+				RefColumns: []*schema.Column{TweetsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "tweettag_tag_id_tweet_id",
+				Unique:  true,
+				Columns: []*schema.Column{TweetTagsColumns[2], TweetTagsColumns[3]},
 			},
 		},
 	}
@@ -218,8 +263,10 @@ var (
 		FriendshipsTable,
 		GroupsTable,
 		RelationshipsTable,
+		TagsTable,
 		TweetsTable,
 		TweetLikesTable,
+		TweetTagsTable,
 		UsersTable,
 		UserGroupsTable,
 		UserTweetsTable,
@@ -233,6 +280,8 @@ func init() {
 	RelationshipsTable.ForeignKeys[1].RefTable = UsersTable
 	TweetLikesTable.ForeignKeys[0].RefTable = UsersTable
 	TweetLikesTable.ForeignKeys[1].RefTable = TweetsTable
+	TweetTagsTable.ForeignKeys[0].RefTable = TagsTable
+	TweetTagsTable.ForeignKeys[1].RefTable = TweetsTable
 	UserGroupsTable.ForeignKeys[0].RefTable = UsersTable
 	UserGroupsTable.ForeignKeys[1].RefTable = GroupsTable
 	UserTweetsTable.ForeignKeys[0].RefTable = UsersTable

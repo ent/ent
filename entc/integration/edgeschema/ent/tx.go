@@ -18,10 +18,14 @@ type Tx struct {
 	Group *GroupClient
 	// Relationship is the client for interacting with the Relationship builders.
 	Relationship *RelationshipClient
+	// Tag is the client for interacting with the Tag builders.
+	Tag *TagClient
 	// Tweet is the client for interacting with the Tweet builders.
 	Tweet *TweetClient
 	// TweetLike is the client for interacting with the TweetLike builders.
 	TweetLike *TweetLikeClient
+	// TweetTag is the client for interacting with the TweetTag builders.
+	TweetTag *TweetTagClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// UserGroup is the client for interacting with the UserGroup builders.
@@ -166,8 +170,10 @@ func (tx *Tx) init() {
 	tx.Friendship = NewFriendshipClient(tx.config)
 	tx.Group = NewGroupClient(tx.config)
 	tx.Relationship = NewRelationshipClient(tx.config)
+	tx.Tag = NewTagClient(tx.config)
 	tx.Tweet = NewTweetClient(tx.config)
 	tx.TweetLike = NewTweetLikeClient(tx.config)
+	tx.TweetTag = NewTweetTagClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UserGroup = NewUserGroupClient(tx.config)
 	tx.UserTweet = NewUserTweetClient(tx.config)

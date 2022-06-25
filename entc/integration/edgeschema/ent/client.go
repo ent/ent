@@ -8,12 +8,15 @@ import (
 	"log"
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/migrate"
+	"github.com/google/uuid"
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/friendship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
+	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
+	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
@@ -34,10 +37,14 @@ type Client struct {
 	Group *GroupClient
 	// Relationship is the client for interacting with the Relationship builders.
 	Relationship *RelationshipClient
+	// Tag is the client for interacting with the Tag builders.
+	Tag *TagClient
 	// Tweet is the client for interacting with the Tweet builders.
 	Tweet *TweetClient
 	// TweetLike is the client for interacting with the TweetLike builders.
 	TweetLike *TweetLikeClient
+	// TweetTag is the client for interacting with the TweetTag builders.
+	TweetTag *TweetTagClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// UserGroup is the client for interacting with the UserGroup builders.
@@ -60,8 +67,10 @@ func (c *Client) init() {
 	c.Friendship = NewFriendshipClient(c.config)
 	c.Group = NewGroupClient(c.config)
 	c.Relationship = NewRelationshipClient(c.config)
+	c.Tag = NewTagClient(c.config)
 	c.Tweet = NewTweetClient(c.config)
 	c.TweetLike = NewTweetLikeClient(c.config)
+	c.TweetTag = NewTweetTagClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.UserGroup = NewUserGroupClient(c.config)
 	c.UserTweet = NewUserTweetClient(c.config)
@@ -101,8 +110,10 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Friendship:   NewFriendshipClient(cfg),
 		Group:        NewGroupClient(cfg),
 		Relationship: NewRelationshipClient(cfg),
+		Tag:          NewTagClient(cfg),
 		Tweet:        NewTweetClient(cfg),
 		TweetLike:    NewTweetLikeClient(cfg),
+		TweetTag:     NewTweetTagClient(cfg),
 		User:         NewUserClient(cfg),
 		UserGroup:    NewUserGroupClient(cfg),
 		UserTweet:    NewUserTweetClient(cfg),
@@ -128,8 +139,10 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Friendship:   NewFriendshipClient(cfg),
 		Group:        NewGroupClient(cfg),
 		Relationship: NewRelationshipClient(cfg),
+		Tag:          NewTagClient(cfg),
 		Tweet:        NewTweetClient(cfg),
 		TweetLike:    NewTweetLikeClient(cfg),
+		TweetTag:     NewTweetTagClient(cfg),
 		User:         NewUserClient(cfg),
 		UserGroup:    NewUserGroupClient(cfg),
 		UserTweet:    NewUserTweetClient(cfg),
@@ -165,8 +178,10 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Friendship.Use(hooks...)
 	c.Group.Use(hooks...)
 	c.Relationship.Use(hooks...)
+	c.Tag.Use(hooks...)
 	c.Tweet.Use(hooks...)
 	c.TweetLike.Use(hooks...)
+	c.TweetTag.Use(hooks...)
 	c.User.Use(hooks...)
 	c.UserGroup.Use(hooks...)
 	c.UserTweet.Use(hooks...)
@@ -488,6 +503,128 @@ func (c *RelationshipClient) Hooks() []Hook {
 	return c.hooks.Relationship
 }
 
+// TagClient is a client for the Tag schema.
+type TagClient struct {
+	config
+}
+
+// NewTagClient returns a client for the Tag from the given config.
+func NewTagClient(c config) *TagClient {
+	return &TagClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `tag.Hooks(f(g(h())))`.
+func (c *TagClient) Use(hooks ...Hook) {
+	c.hooks.Tag = append(c.hooks.Tag, hooks...)
+}
+
+// Create returns a builder for creating a Tag entity.
+func (c *TagClient) Create() *TagCreate {
+	mutation := newTagMutation(c.config, OpCreate)
+	return &TagCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Tag entities.
+func (c *TagClient) CreateBulk(builders ...*TagCreate) *TagCreateBulk {
+	return &TagCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Tag.
+func (c *TagClient) Update() *TagUpdate {
+	mutation := newTagMutation(c.config, OpUpdate)
+	return &TagUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TagClient) UpdateOne(t *Tag) *TagUpdateOne {
+	mutation := newTagMutation(c.config, OpUpdateOne, withTag(t))
+	return &TagUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TagClient) UpdateOneID(id int) *TagUpdateOne {
+	mutation := newTagMutation(c.config, OpUpdateOne, withTagID(id))
+	return &TagUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Tag.
+func (c *TagClient) Delete() *TagDelete {
+	mutation := newTagMutation(c.config, OpDelete)
+	return &TagDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TagClient) DeleteOne(t *Tag) *TagDeleteOne {
+	return c.DeleteOneID(t.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *TagClient) DeleteOneID(id int) *TagDeleteOne {
+	builder := c.Delete().Where(tag.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TagDeleteOne{builder}
+}
+
+// Query returns a query builder for Tag.
+func (c *TagClient) Query() *TagQuery {
+	return &TagQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Tag entity by its id.
+func (c *TagClient) Get(ctx context.Context, id int) (*Tag, error) {
+	return c.Query().Where(tag.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TagClient) GetX(ctx context.Context, id int) *Tag {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTweets queries the tweets edge of a Tag.
+func (c *TagClient) QueryTweets(t *Tag) *TweetQuery {
+	query := &TweetQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tag.Table, tag.FieldID, id),
+			sqlgraph.To(tweet.Table, tweet.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, tag.TweetsTable, tag.TweetsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTweetTags queries the tweet_tags edge of a Tag.
+func (c *TagClient) QueryTweetTags(t *Tag) *TweetTagQuery {
+	query := &TweetTagQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tag.Table, tag.FieldID, id),
+			sqlgraph.To(tweettag.Table, tweettag.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, tag.TweetTagsTable, tag.TweetTagsColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TagClient) Hooks() []Hook {
+	return c.hooks.Tag
+}
+
 // TweetClient is a client for the Tweet schema.
 type TweetClient struct {
 	config
@@ -605,6 +742,22 @@ func (c *TweetClient) QueryUser(t *Tweet) *UserQuery {
 	return query
 }
 
+// QueryTags queries the tags edge of a Tweet.
+func (c *TweetClient) QueryTags(t *Tweet) *TagQuery {
+	query := &TagQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tweet.Table, tweet.FieldID, id),
+			sqlgraph.To(tag.Table, tag.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, tweet.TagsTable, tweet.TagsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryLikes queries the likes edge of a Tweet.
 func (c *TweetClient) QueryLikes(t *Tweet) *TweetLikeQuery {
 	query := &TweetLikeQuery{config: c.config}
@@ -630,6 +783,22 @@ func (c *TweetClient) QueryTweetUser(t *Tweet) *UserTweetQuery {
 			sqlgraph.From(tweet.Table, tweet.FieldID, id),
 			sqlgraph.To(usertweet.Table, usertweet.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, tweet.TweetUserTable, tweet.TweetUserColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTweetTags queries the tweet_tags edge of a Tweet.
+func (c *TweetClient) QueryTweetTags(t *Tweet) *TweetTagQuery {
+	query := &TweetTagQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tweet.Table, tweet.FieldID, id),
+			sqlgraph.To(tweettag.Table, tweettag.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, tweet.TweetTagsTable, tweet.TweetTagsColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -712,6 +881,128 @@ func (c *TweetLikeClient) QueryTweet(tl *TweetLike) *TweetQuery {
 // Hooks returns the client hooks.
 func (c *TweetLikeClient) Hooks() []Hook {
 	return c.hooks.TweetLike
+}
+
+// TweetTagClient is a client for the TweetTag schema.
+type TweetTagClient struct {
+	config
+}
+
+// NewTweetTagClient returns a client for the TweetTag from the given config.
+func NewTweetTagClient(c config) *TweetTagClient {
+	return &TweetTagClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `tweettag.Hooks(f(g(h())))`.
+func (c *TweetTagClient) Use(hooks ...Hook) {
+	c.hooks.TweetTag = append(c.hooks.TweetTag, hooks...)
+}
+
+// Create returns a builder for creating a TweetTag entity.
+func (c *TweetTagClient) Create() *TweetTagCreate {
+	mutation := newTweetTagMutation(c.config, OpCreate)
+	return &TweetTagCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TweetTag entities.
+func (c *TweetTagClient) CreateBulk(builders ...*TweetTagCreate) *TweetTagCreateBulk {
+	return &TweetTagCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TweetTag.
+func (c *TweetTagClient) Update() *TweetTagUpdate {
+	mutation := newTweetTagMutation(c.config, OpUpdate)
+	return &TweetTagUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TweetTagClient) UpdateOne(tt *TweetTag) *TweetTagUpdateOne {
+	mutation := newTweetTagMutation(c.config, OpUpdateOne, withTweetTag(tt))
+	return &TweetTagUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TweetTagClient) UpdateOneID(id uuid.UUID) *TweetTagUpdateOne {
+	mutation := newTweetTagMutation(c.config, OpUpdateOne, withTweetTagID(id))
+	return &TweetTagUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TweetTag.
+func (c *TweetTagClient) Delete() *TweetTagDelete {
+	mutation := newTweetTagMutation(c.config, OpDelete)
+	return &TweetTagDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TweetTagClient) DeleteOne(tt *TweetTag) *TweetTagDeleteOne {
+	return c.DeleteOneID(tt.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *TweetTagClient) DeleteOneID(id uuid.UUID) *TweetTagDeleteOne {
+	builder := c.Delete().Where(tweettag.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TweetTagDeleteOne{builder}
+}
+
+// Query returns a query builder for TweetTag.
+func (c *TweetTagClient) Query() *TweetTagQuery {
+	return &TweetTagQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a TweetTag entity by its id.
+func (c *TweetTagClient) Get(ctx context.Context, id uuid.UUID) (*TweetTag, error) {
+	return c.Query().Where(tweettag.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TweetTagClient) GetX(ctx context.Context, id uuid.UUID) *TweetTag {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTag queries the tag edge of a TweetTag.
+func (c *TweetTagClient) QueryTag(tt *TweetTag) *TagQuery {
+	query := &TagQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := tt.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tweettag.Table, tweettag.FieldID, id),
+			sqlgraph.To(tag.Table, tag.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, tweettag.TagTable, tweettag.TagColumn),
+		)
+		fromV = sqlgraph.Neighbors(tt.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTweet queries the tweet edge of a TweetTag.
+func (c *TweetTagClient) QueryTweet(tt *TweetTag) *TweetQuery {
+	query := &TweetQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := tt.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tweettag.Table, tweettag.FieldID, id),
+			sqlgraph.To(tweet.Table, tweet.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, tweettag.TweetTable, tweettag.TweetColumn),
+		)
+		fromV = sqlgraph.Neighbors(tt.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TweetTagClient) Hooks() []Hook {
+	return c.hooks.TweetTag
 }
 
 // UserClient is a client for the User schema.

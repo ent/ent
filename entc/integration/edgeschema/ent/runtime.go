@@ -10,9 +10,11 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/schema"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
+	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
+	"github.com/google/uuid"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -47,6 +49,16 @@ func init() {
 	tweetlikeDescLikedAt := tweetlikeFields[0].Descriptor()
 	// tweetlike.DefaultLikedAt holds the default value on creation for the liked_at field.
 	tweetlike.DefaultLikedAt = tweetlikeDescLikedAt.Default.(func() time.Time)
+	tweettagFields := schema.TweetTag{}.Fields()
+	_ = tweettagFields
+	// tweettagDescAddedAt is the schema descriptor for added_at field.
+	tweettagDescAddedAt := tweettagFields[1].Descriptor()
+	// tweettag.DefaultAddedAt holds the default value on creation for the added_at field.
+	tweettag.DefaultAddedAt = tweettagDescAddedAt.Default.(func() time.Time)
+	// tweettagDescID is the schema descriptor for id field.
+	tweettagDescID := tweettagFields[0].Descriptor()
+	// tweettag.DefaultID holds the default value on creation for the id field.
+	tweettag.DefaultID = tweettagDescID.Default.(func() uuid.UUID)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescName is the schema descriptor for name field.
