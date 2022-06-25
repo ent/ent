@@ -13,8 +13,10 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/friendship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
+	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
+	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
@@ -41,8 +43,10 @@ func columnChecker(table string) func(string) error {
 		friendship.Table:   friendship.ValidColumn,
 		group.Table:        group.ValidColumn,
 		relationship.Table: relationship.ValidColumn,
+		tag.Table:          tag.ValidColumn,
 		tweet.Table:        tweet.ValidColumn,
 		tweetlike.Table:    tweetlike.ValidColumn,
+		tweettag.Table:     tweettag.ValidColumn,
 		user.Table:         user.ValidColumn,
 		usergroup.Table:    usergroup.ValidColumn,
 		usertweet.Table:    usertweet.ValidColumn,

@@ -13,11 +13,14 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
+	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
+	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
+	"github.com/google/uuid"
 
 	"entgo.io/ent"
 )
@@ -34,8 +37,10 @@ const (
 	TypeFriendship   = "Friendship"
 	TypeGroup        = "Group"
 	TypeRelationship = "Relationship"
+	TypeTag          = "Tag"
 	TypeTweet        = "Tweet"
 	TypeTweetLike    = "TweetLike"
+	TypeTweetTag     = "TweetTag"
 	TypeUser         = "User"
 	TypeUserGroup    = "UserGroup"
 	TypeUserTweet    = "UserTweet"
@@ -1572,6 +1577,493 @@ func (m *RelationshipMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Relationship edge %s", name)
 }
 
+// TagMutation represents an operation that mutates the Tag nodes in the graph.
+type TagMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *int
+	value             *string
+	clearedFields     map[string]struct{}
+	tweets            map[int]struct{}
+	removedtweets     map[int]struct{}
+	clearedtweets     bool
+	tweet_tags        map[uuid.UUID]struct{}
+	removedtweet_tags map[uuid.UUID]struct{}
+	clearedtweet_tags bool
+	done              bool
+	oldValue          func(context.Context) (*Tag, error)
+	predicates        []predicate.Tag
+}
+
+var _ ent.Mutation = (*TagMutation)(nil)
+
+// tagOption allows management of the mutation configuration using functional options.
+type tagOption func(*TagMutation)
+
+// newTagMutation creates new mutation for the Tag entity.
+func newTagMutation(c config, op Op, opts ...tagOption) *TagMutation {
+	m := &TagMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTag,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTagID sets the ID field of the mutation.
+func withTagID(id int) tagOption {
+	return func(m *TagMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Tag
+		)
+		m.oldValue = func(ctx context.Context) (*Tag, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Tag.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTag sets the old Tag of the mutation.
+func withTag(node *Tag) tagOption {
+	return func(m *TagMutation) {
+		m.oldValue = func(context.Context) (*Tag, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TagMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TagMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TagMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TagMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Tag.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetValue sets the "value" field.
+func (m *TagMutation) SetValue(s string) {
+	m.value = &s
+}
+
+// Value returns the value of the "value" field in the mutation.
+func (m *TagMutation) Value() (r string, exists bool) {
+	v := m.value
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldValue returns the old "value" field's value of the Tag entity.
+// If the Tag object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TagMutation) OldValue(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldValue is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldValue requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValue: %w", err)
+	}
+	return oldValue.Value, nil
+}
+
+// ResetValue resets all changes to the "value" field.
+func (m *TagMutation) ResetValue() {
+	m.value = nil
+}
+
+// AddTweetIDs adds the "tweets" edge to the Tweet entity by ids.
+func (m *TagMutation) AddTweetIDs(ids ...int) {
+	if m.tweets == nil {
+		m.tweets = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.tweets[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTweets clears the "tweets" edge to the Tweet entity.
+func (m *TagMutation) ClearTweets() {
+	m.clearedtweets = true
+}
+
+// TweetsCleared reports if the "tweets" edge to the Tweet entity was cleared.
+func (m *TagMutation) TweetsCleared() bool {
+	return m.clearedtweets
+}
+
+// RemoveTweetIDs removes the "tweets" edge to the Tweet entity by IDs.
+func (m *TagMutation) RemoveTweetIDs(ids ...int) {
+	if m.removedtweets == nil {
+		m.removedtweets = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.tweets, ids[i])
+		m.removedtweets[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTweets returns the removed IDs of the "tweets" edge to the Tweet entity.
+func (m *TagMutation) RemovedTweetsIDs() (ids []int) {
+	for id := range m.removedtweets {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TweetsIDs returns the "tweets" edge IDs in the mutation.
+func (m *TagMutation) TweetsIDs() (ids []int) {
+	for id := range m.tweets {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTweets resets all changes to the "tweets" edge.
+func (m *TagMutation) ResetTweets() {
+	m.tweets = nil
+	m.clearedtweets = false
+	m.removedtweets = nil
+}
+
+// AddTweetTagIDs adds the "tweet_tags" edge to the TweetTag entity by ids.
+func (m *TagMutation) AddTweetTagIDs(ids ...uuid.UUID) {
+	if m.tweet_tags == nil {
+		m.tweet_tags = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.tweet_tags[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTweetTags clears the "tweet_tags" edge to the TweetTag entity.
+func (m *TagMutation) ClearTweetTags() {
+	m.clearedtweet_tags = true
+}
+
+// TweetTagsCleared reports if the "tweet_tags" edge to the TweetTag entity was cleared.
+func (m *TagMutation) TweetTagsCleared() bool {
+	return m.clearedtweet_tags
+}
+
+// RemoveTweetTagIDs removes the "tweet_tags" edge to the TweetTag entity by IDs.
+func (m *TagMutation) RemoveTweetTagIDs(ids ...uuid.UUID) {
+	if m.removedtweet_tags == nil {
+		m.removedtweet_tags = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.tweet_tags, ids[i])
+		m.removedtweet_tags[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTweetTags returns the removed IDs of the "tweet_tags" edge to the TweetTag entity.
+func (m *TagMutation) RemovedTweetTagsIDs() (ids []uuid.UUID) {
+	for id := range m.removedtweet_tags {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TweetTagsIDs returns the "tweet_tags" edge IDs in the mutation.
+func (m *TagMutation) TweetTagsIDs() (ids []uuid.UUID) {
+	for id := range m.tweet_tags {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTweetTags resets all changes to the "tweet_tags" edge.
+func (m *TagMutation) ResetTweetTags() {
+	m.tweet_tags = nil
+	m.clearedtweet_tags = false
+	m.removedtweet_tags = nil
+}
+
+// Where appends a list predicates to the TagMutation builder.
+func (m *TagMutation) Where(ps ...predicate.Tag) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *TagMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Tag).
+func (m *TagMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TagMutation) Fields() []string {
+	fields := make([]string, 0, 1)
+	if m.value != nil {
+		fields = append(fields, tag.FieldValue)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TagMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case tag.FieldValue:
+		return m.Value()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TagMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case tag.FieldValue:
+		return m.OldValue(ctx)
+	}
+	return nil, fmt.Errorf("unknown Tag field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TagMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case tag.FieldValue:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetValue(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Tag field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TagMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TagMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TagMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Tag numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TagMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TagMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TagMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Tag nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TagMutation) ResetField(name string) error {
+	switch name {
+	case tag.FieldValue:
+		m.ResetValue()
+		return nil
+	}
+	return fmt.Errorf("unknown Tag field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TagMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.tweets != nil {
+		edges = append(edges, tag.EdgeTweets)
+	}
+	if m.tweet_tags != nil {
+		edges = append(edges, tag.EdgeTweetTags)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TagMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case tag.EdgeTweets:
+		ids := make([]ent.Value, 0, len(m.tweets))
+		for id := range m.tweets {
+			ids = append(ids, id)
+		}
+		return ids
+	case tag.EdgeTweetTags:
+		ids := make([]ent.Value, 0, len(m.tweet_tags))
+		for id := range m.tweet_tags {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TagMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removedtweets != nil {
+		edges = append(edges, tag.EdgeTweets)
+	}
+	if m.removedtweet_tags != nil {
+		edges = append(edges, tag.EdgeTweetTags)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TagMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case tag.EdgeTweets:
+		ids := make([]ent.Value, 0, len(m.removedtweets))
+		for id := range m.removedtweets {
+			ids = append(ids, id)
+		}
+		return ids
+	case tag.EdgeTweetTags:
+		ids := make([]ent.Value, 0, len(m.removedtweet_tags))
+		for id := range m.removedtweet_tags {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TagMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedtweets {
+		edges = append(edges, tag.EdgeTweets)
+	}
+	if m.clearedtweet_tags {
+		edges = append(edges, tag.EdgeTweetTags)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TagMutation) EdgeCleared(name string) bool {
+	switch name {
+	case tag.EdgeTweets:
+		return m.clearedtweets
+	case tag.EdgeTweetTags:
+		return m.clearedtweet_tags
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TagMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Tag unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TagMutation) ResetEdge(name string) error {
+	switch name {
+	case tag.EdgeTweets:
+		m.ResetTweets()
+		return nil
+	case tag.EdgeTweetTags:
+		m.ResetTweetTags()
+		return nil
+	}
+	return fmt.Errorf("unknown Tag edge %s", name)
+}
+
 // TweetMutation represents an operation that mutates the Tweet nodes in the graph.
 type TweetMutation struct {
 	config
@@ -1586,9 +2078,15 @@ type TweetMutation struct {
 	user               map[int]struct{}
 	removeduser        map[int]struct{}
 	cleareduser        bool
+	tags               map[int]struct{}
+	removedtags        map[int]struct{}
+	clearedtags        bool
 	tweet_user         map[int]struct{}
 	removedtweet_user  map[int]struct{}
 	clearedtweet_user  bool
+	tweet_tags         map[uuid.UUID]struct{}
+	removedtweet_tags  map[uuid.UUID]struct{}
+	clearedtweet_tags  bool
 	done               bool
 	oldValue           func(context.Context) (*Tweet, error)
 	predicates         []predicate.Tweet
@@ -1836,6 +2334,60 @@ func (m *TweetMutation) ResetUser() {
 	m.removeduser = nil
 }
 
+// AddTagIDs adds the "tags" edge to the Tag entity by ids.
+func (m *TweetMutation) AddTagIDs(ids ...int) {
+	if m.tags == nil {
+		m.tags = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.tags[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTags clears the "tags" edge to the Tag entity.
+func (m *TweetMutation) ClearTags() {
+	m.clearedtags = true
+}
+
+// TagsCleared reports if the "tags" edge to the Tag entity was cleared.
+func (m *TweetMutation) TagsCleared() bool {
+	return m.clearedtags
+}
+
+// RemoveTagIDs removes the "tags" edge to the Tag entity by IDs.
+func (m *TweetMutation) RemoveTagIDs(ids ...int) {
+	if m.removedtags == nil {
+		m.removedtags = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.tags, ids[i])
+		m.removedtags[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTags returns the removed IDs of the "tags" edge to the Tag entity.
+func (m *TweetMutation) RemovedTagsIDs() (ids []int) {
+	for id := range m.removedtags {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TagsIDs returns the "tags" edge IDs in the mutation.
+func (m *TweetMutation) TagsIDs() (ids []int) {
+	for id := range m.tags {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTags resets all changes to the "tags" edge.
+func (m *TweetMutation) ResetTags() {
+	m.tags = nil
+	m.clearedtags = false
+	m.removedtags = nil
+}
+
 // AddTweetUserIDs adds the "tweet_user" edge to the UserTweet entity by ids.
 func (m *TweetMutation) AddTweetUserIDs(ids ...int) {
 	if m.tweet_user == nil {
@@ -1888,6 +2440,60 @@ func (m *TweetMutation) ResetTweetUser() {
 	m.tweet_user = nil
 	m.clearedtweet_user = false
 	m.removedtweet_user = nil
+}
+
+// AddTweetTagIDs adds the "tweet_tags" edge to the TweetTag entity by ids.
+func (m *TweetMutation) AddTweetTagIDs(ids ...uuid.UUID) {
+	if m.tweet_tags == nil {
+		m.tweet_tags = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.tweet_tags[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTweetTags clears the "tweet_tags" edge to the TweetTag entity.
+func (m *TweetMutation) ClearTweetTags() {
+	m.clearedtweet_tags = true
+}
+
+// TweetTagsCleared reports if the "tweet_tags" edge to the TweetTag entity was cleared.
+func (m *TweetMutation) TweetTagsCleared() bool {
+	return m.clearedtweet_tags
+}
+
+// RemoveTweetTagIDs removes the "tweet_tags" edge to the TweetTag entity by IDs.
+func (m *TweetMutation) RemoveTweetTagIDs(ids ...uuid.UUID) {
+	if m.removedtweet_tags == nil {
+		m.removedtweet_tags = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.tweet_tags, ids[i])
+		m.removedtweet_tags[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTweetTags returns the removed IDs of the "tweet_tags" edge to the TweetTag entity.
+func (m *TweetMutation) RemovedTweetTagsIDs() (ids []uuid.UUID) {
+	for id := range m.removedtweet_tags {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TweetTagsIDs returns the "tweet_tags" edge IDs in the mutation.
+func (m *TweetMutation) TweetTagsIDs() (ids []uuid.UUID) {
+	for id := range m.tweet_tags {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTweetTags resets all changes to the "tweet_tags" edge.
+func (m *TweetMutation) ResetTweetTags() {
+	m.tweet_tags = nil
+	m.clearedtweet_tags = false
+	m.removedtweet_tags = nil
 }
 
 // Where appends a list predicates to the TweetMutation builder.
@@ -2008,15 +2614,21 @@ func (m *TweetMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TweetMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 5)
 	if m.liked_users != nil {
 		edges = append(edges, tweet.EdgeLikedUsers)
 	}
 	if m.user != nil {
 		edges = append(edges, tweet.EdgeUser)
 	}
+	if m.tags != nil {
+		edges = append(edges, tweet.EdgeTags)
+	}
 	if m.tweet_user != nil {
 		edges = append(edges, tweet.EdgeTweetUser)
+	}
+	if m.tweet_tags != nil {
+		edges = append(edges, tweet.EdgeTweetTags)
 	}
 	return edges
 }
@@ -2037,9 +2649,21 @@ func (m *TweetMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case tweet.EdgeTags:
+		ids := make([]ent.Value, 0, len(m.tags))
+		for id := range m.tags {
+			ids = append(ids, id)
+		}
+		return ids
 	case tweet.EdgeTweetUser:
 		ids := make([]ent.Value, 0, len(m.tweet_user))
 		for id := range m.tweet_user {
+			ids = append(ids, id)
+		}
+		return ids
+	case tweet.EdgeTweetTags:
+		ids := make([]ent.Value, 0, len(m.tweet_tags))
+		for id := range m.tweet_tags {
 			ids = append(ids, id)
 		}
 		return ids
@@ -2049,15 +2673,21 @@ func (m *TweetMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TweetMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 5)
 	if m.removedliked_users != nil {
 		edges = append(edges, tweet.EdgeLikedUsers)
 	}
 	if m.removeduser != nil {
 		edges = append(edges, tweet.EdgeUser)
 	}
+	if m.removedtags != nil {
+		edges = append(edges, tweet.EdgeTags)
+	}
 	if m.removedtweet_user != nil {
 		edges = append(edges, tweet.EdgeTweetUser)
+	}
+	if m.removedtweet_tags != nil {
+		edges = append(edges, tweet.EdgeTweetTags)
 	}
 	return edges
 }
@@ -2078,9 +2708,21 @@ func (m *TweetMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case tweet.EdgeTags:
+		ids := make([]ent.Value, 0, len(m.removedtags))
+		for id := range m.removedtags {
+			ids = append(ids, id)
+		}
+		return ids
 	case tweet.EdgeTweetUser:
 		ids := make([]ent.Value, 0, len(m.removedtweet_user))
 		for id := range m.removedtweet_user {
+			ids = append(ids, id)
+		}
+		return ids
+	case tweet.EdgeTweetTags:
+		ids := make([]ent.Value, 0, len(m.removedtweet_tags))
+		for id := range m.removedtweet_tags {
 			ids = append(ids, id)
 		}
 		return ids
@@ -2090,15 +2732,21 @@ func (m *TweetMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TweetMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 5)
 	if m.clearedliked_users {
 		edges = append(edges, tweet.EdgeLikedUsers)
 	}
 	if m.cleareduser {
 		edges = append(edges, tweet.EdgeUser)
 	}
+	if m.clearedtags {
+		edges = append(edges, tweet.EdgeTags)
+	}
 	if m.clearedtweet_user {
 		edges = append(edges, tweet.EdgeTweetUser)
+	}
+	if m.clearedtweet_tags {
+		edges = append(edges, tweet.EdgeTweetTags)
 	}
 	return edges
 }
@@ -2111,8 +2759,12 @@ func (m *TweetMutation) EdgeCleared(name string) bool {
 		return m.clearedliked_users
 	case tweet.EdgeUser:
 		return m.cleareduser
+	case tweet.EdgeTags:
+		return m.clearedtags
 	case tweet.EdgeTweetUser:
 		return m.clearedtweet_user
+	case tweet.EdgeTweetTags:
+		return m.clearedtweet_tags
 	}
 	return false
 }
@@ -2135,8 +2787,14 @@ func (m *TweetMutation) ResetEdge(name string) error {
 	case tweet.EdgeUser:
 		m.ResetUser()
 		return nil
+	case tweet.EdgeTags:
+		m.ResetTags()
+		return nil
 	case tweet.EdgeTweetUser:
 		m.ResetTweetUser()
+		return nil
+	case tweet.EdgeTweetTags:
+		m.ResetTweetTags()
 		return nil
 	}
 	return fmt.Errorf("unknown Tweet edge %s", name)
@@ -2542,6 +3200,534 @@ func (m *TweetLikeMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown TweetLike edge %s", name)
+}
+
+// TweetTagMutation represents an operation that mutates the TweetTag nodes in the graph.
+type TweetTagMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *uuid.UUID
+	added_at      *time.Time
+	clearedFields map[string]struct{}
+	tag           *int
+	clearedtag    bool
+	tweet         *int
+	clearedtweet  bool
+	done          bool
+	oldValue      func(context.Context) (*TweetTag, error)
+	predicates    []predicate.TweetTag
+}
+
+var _ ent.Mutation = (*TweetTagMutation)(nil)
+
+// tweettagOption allows management of the mutation configuration using functional options.
+type tweettagOption func(*TweetTagMutation)
+
+// newTweetTagMutation creates new mutation for the TweetTag entity.
+func newTweetTagMutation(c config, op Op, opts ...tweettagOption) *TweetTagMutation {
+	m := &TweetTagMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTweetTag,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTweetTagID sets the ID field of the mutation.
+func withTweetTagID(id uuid.UUID) tweettagOption {
+	return func(m *TweetTagMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *TweetTag
+		)
+		m.oldValue = func(ctx context.Context) (*TweetTag, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().TweetTag.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTweetTag sets the old TweetTag of the mutation.
+func withTweetTag(node *TweetTag) tweettagOption {
+	return func(m *TweetTagMutation) {
+		m.oldValue = func(context.Context) (*TweetTag, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TweetTagMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TweetTagMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of TweetTag entities.
+func (m *TweetTagMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TweetTagMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TweetTagMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().TweetTag.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetAddedAt sets the "added_at" field.
+func (m *TweetTagMutation) SetAddedAt(t time.Time) {
+	m.added_at = &t
+}
+
+// AddedAt returns the value of the "added_at" field in the mutation.
+func (m *TweetTagMutation) AddedAt() (r time.Time, exists bool) {
+	v := m.added_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAddedAt returns the old "added_at" field's value of the TweetTag entity.
+// If the TweetTag object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TweetTagMutation) OldAddedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAddedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAddedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAddedAt: %w", err)
+	}
+	return oldValue.AddedAt, nil
+}
+
+// ResetAddedAt resets all changes to the "added_at" field.
+func (m *TweetTagMutation) ResetAddedAt() {
+	m.added_at = nil
+}
+
+// SetTagID sets the "tag_id" field.
+func (m *TweetTagMutation) SetTagID(i int) {
+	m.tag = &i
+}
+
+// TagID returns the value of the "tag_id" field in the mutation.
+func (m *TweetTagMutation) TagID() (r int, exists bool) {
+	v := m.tag
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTagID returns the old "tag_id" field's value of the TweetTag entity.
+// If the TweetTag object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TweetTagMutation) OldTagID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTagID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTagID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTagID: %w", err)
+	}
+	return oldValue.TagID, nil
+}
+
+// ResetTagID resets all changes to the "tag_id" field.
+func (m *TweetTagMutation) ResetTagID() {
+	m.tag = nil
+}
+
+// SetTweetID sets the "tweet_id" field.
+func (m *TweetTagMutation) SetTweetID(i int) {
+	m.tweet = &i
+}
+
+// TweetID returns the value of the "tweet_id" field in the mutation.
+func (m *TweetTagMutation) TweetID() (r int, exists bool) {
+	v := m.tweet
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTweetID returns the old "tweet_id" field's value of the TweetTag entity.
+// If the TweetTag object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TweetTagMutation) OldTweetID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTweetID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTweetID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTweetID: %w", err)
+	}
+	return oldValue.TweetID, nil
+}
+
+// ResetTweetID resets all changes to the "tweet_id" field.
+func (m *TweetTagMutation) ResetTweetID() {
+	m.tweet = nil
+}
+
+// ClearTag clears the "tag" edge to the Tag entity.
+func (m *TweetTagMutation) ClearTag() {
+	m.clearedtag = true
+}
+
+// TagCleared reports if the "tag" edge to the Tag entity was cleared.
+func (m *TweetTagMutation) TagCleared() bool {
+	return m.clearedtag
+}
+
+// TagIDs returns the "tag" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TagID instead. It exists only for internal usage by the builders.
+func (m *TweetTagMutation) TagIDs() (ids []int) {
+	if id := m.tag; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTag resets all changes to the "tag" edge.
+func (m *TweetTagMutation) ResetTag() {
+	m.tag = nil
+	m.clearedtag = false
+}
+
+// ClearTweet clears the "tweet" edge to the Tweet entity.
+func (m *TweetTagMutation) ClearTweet() {
+	m.clearedtweet = true
+}
+
+// TweetCleared reports if the "tweet" edge to the Tweet entity was cleared.
+func (m *TweetTagMutation) TweetCleared() bool {
+	return m.clearedtweet
+}
+
+// TweetIDs returns the "tweet" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TweetID instead. It exists only for internal usage by the builders.
+func (m *TweetTagMutation) TweetIDs() (ids []int) {
+	if id := m.tweet; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTweet resets all changes to the "tweet" edge.
+func (m *TweetTagMutation) ResetTweet() {
+	m.tweet = nil
+	m.clearedtweet = false
+}
+
+// Where appends a list predicates to the TweetTagMutation builder.
+func (m *TweetTagMutation) Where(ps ...predicate.TweetTag) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *TweetTagMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (TweetTag).
+func (m *TweetTagMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TweetTagMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.added_at != nil {
+		fields = append(fields, tweettag.FieldAddedAt)
+	}
+	if m.tag != nil {
+		fields = append(fields, tweettag.FieldTagID)
+	}
+	if m.tweet != nil {
+		fields = append(fields, tweettag.FieldTweetID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TweetTagMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case tweettag.FieldAddedAt:
+		return m.AddedAt()
+	case tweettag.FieldTagID:
+		return m.TagID()
+	case tweettag.FieldTweetID:
+		return m.TweetID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TweetTagMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case tweettag.FieldAddedAt:
+		return m.OldAddedAt(ctx)
+	case tweettag.FieldTagID:
+		return m.OldTagID(ctx)
+	case tweettag.FieldTweetID:
+		return m.OldTweetID(ctx)
+	}
+	return nil, fmt.Errorf("unknown TweetTag field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TweetTagMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case tweettag.FieldAddedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAddedAt(v)
+		return nil
+	case tweettag.FieldTagID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTagID(v)
+		return nil
+	case tweettag.FieldTweetID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTweetID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TweetTag field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TweetTagMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TweetTagMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TweetTagMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown TweetTag numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TweetTagMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TweetTagMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TweetTagMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown TweetTag nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TweetTagMutation) ResetField(name string) error {
+	switch name {
+	case tweettag.FieldAddedAt:
+		m.ResetAddedAt()
+		return nil
+	case tweettag.FieldTagID:
+		m.ResetTagID()
+		return nil
+	case tweettag.FieldTweetID:
+		m.ResetTweetID()
+		return nil
+	}
+	return fmt.Errorf("unknown TweetTag field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TweetTagMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.tag != nil {
+		edges = append(edges, tweettag.EdgeTag)
+	}
+	if m.tweet != nil {
+		edges = append(edges, tweettag.EdgeTweet)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TweetTagMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case tweettag.EdgeTag:
+		if id := m.tag; id != nil {
+			return []ent.Value{*id}
+		}
+	case tweettag.EdgeTweet:
+		if id := m.tweet; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TweetTagMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TweetTagMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TweetTagMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedtag {
+		edges = append(edges, tweettag.EdgeTag)
+	}
+	if m.clearedtweet {
+		edges = append(edges, tweettag.EdgeTweet)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TweetTagMutation) EdgeCleared(name string) bool {
+	switch name {
+	case tweettag.EdgeTag:
+		return m.clearedtag
+	case tweettag.EdgeTweet:
+		return m.clearedtweet
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TweetTagMutation) ClearEdge(name string) error {
+	switch name {
+	case tweettag.EdgeTag:
+		m.ClearTag()
+		return nil
+	case tweettag.EdgeTweet:
+		m.ClearTweet()
+		return nil
+	}
+	return fmt.Errorf("unknown TweetTag unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TweetTagMutation) ResetEdge(name string) error {
+	switch name {
+	case tweettag.EdgeTag:
+		m.ResetTag()
+		return nil
+	case tweettag.EdgeTweet:
+		m.ResetTweet()
+		return nil
+	}
+	return fmt.Errorf("unknown TweetTag edge %s", name)
 }
 
 // UserMutation represents an operation that mutates the User nodes in the graph.

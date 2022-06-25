@@ -13,10 +13,14 @@ const (
 	EdgeLikedUsers = "liked_users"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
+	// EdgeTags holds the string denoting the tags edge name in mutations.
+	EdgeTags = "tags"
 	// EdgeLikes holds the string denoting the likes edge name in mutations.
 	EdgeLikes = "likes"
 	// EdgeTweetUser holds the string denoting the tweet_user edge name in mutations.
 	EdgeTweetUser = "tweet_user"
+	// EdgeTweetTags holds the string denoting the tweet_tags edge name in mutations.
+	EdgeTweetTags = "tweet_tags"
 	// Table holds the table name of the tweet in the database.
 	Table = "tweets"
 	// LikedUsersTable is the table that holds the liked_users relation/edge. The primary key declared below.
@@ -29,6 +33,11 @@ const (
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users"
+	// TagsTable is the table that holds the tags relation/edge. The primary key declared below.
+	TagsTable = "tweet_tags"
+	// TagsInverseTable is the table name for the Tag entity.
+	// It exists in this package in order to avoid circular dependency with the "tag" package.
+	TagsInverseTable = "tags"
 	// LikesTable is the table that holds the likes relation/edge.
 	LikesTable = "tweet_likes"
 	// LikesInverseTable is the table name for the TweetLike entity.
@@ -43,6 +52,13 @@ const (
 	TweetUserInverseTable = "user_tweets"
 	// TweetUserColumn is the table column denoting the tweet_user relation/edge.
 	TweetUserColumn = "tweet_id"
+	// TweetTagsTable is the table that holds the tweet_tags relation/edge.
+	TweetTagsTable = "tweet_tags"
+	// TweetTagsInverseTable is the table name for the TweetTag entity.
+	// It exists in this package in order to avoid circular dependency with the "tweettag" package.
+	TweetTagsInverseTable = "tweet_tags"
+	// TweetTagsColumn is the table column denoting the tweet_tags relation/edge.
+	TweetTagsColumn = "tweet_id"
 )
 
 // Columns holds all SQL columns for tweet fields.
@@ -58,6 +74,9 @@ var (
 	// UserPrimaryKey and UserColumn2 are the table columns denoting the
 	// primary key for the user relation (M2M).
 	UserPrimaryKey = []string{"user_id", "tweet_id"}
+	// TagsPrimaryKey and TagsColumn2 are the table columns denoting the
+	// primary key for the tags relation (M2M).
+	TagsPrimaryKey = []string{"tag_id", "tweet_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).

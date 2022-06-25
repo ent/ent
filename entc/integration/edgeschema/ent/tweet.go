@@ -28,13 +28,17 @@ type TweetEdges struct {
 	LikedUsers []*User `json:"liked_users,omitempty"`
 	// The uniqueness is enforced on the edge schema
 	User []*User `json:"user,omitempty"`
+	// Tags holds the value of the tags edge.
+	Tags []*Tag `json:"tags,omitempty"`
 	// Likes holds the value of the likes edge.
 	Likes []*TweetLike `json:"likes,omitempty"`
 	// TweetUser holds the value of the tweet_user edge.
 	TweetUser []*UserTweet `json:"tweet_user,omitempty"`
+	// TweetTags holds the value of the tweet_tags edge.
+	TweetTags []*TweetTag `json:"tweet_tags,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [6]bool
 }
 
 // LikedUsersOrErr returns the LikedUsers value or an error if the edge
@@ -55,10 +59,19 @@ func (e TweetEdges) UserOrErr() ([]*User, error) {
 	return nil, &NotLoadedError{edge: "user"}
 }
 
+// TagsOrErr returns the Tags value or an error if the edge
+// was not loaded in eager-loading.
+func (e TweetEdges) TagsOrErr() ([]*Tag, error) {
+	if e.loadedTypes[2] {
+		return e.Tags, nil
+	}
+	return nil, &NotLoadedError{edge: "tags"}
+}
+
 // LikesOrErr returns the Likes value or an error if the edge
 // was not loaded in eager-loading.
 func (e TweetEdges) LikesOrErr() ([]*TweetLike, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[3] {
 		return e.Likes, nil
 	}
 	return nil, &NotLoadedError{edge: "likes"}
@@ -67,10 +80,19 @@ func (e TweetEdges) LikesOrErr() ([]*TweetLike, error) {
 // TweetUserOrErr returns the TweetUser value or an error if the edge
 // was not loaded in eager-loading.
 func (e TweetEdges) TweetUserOrErr() ([]*UserTweet, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		return e.TweetUser, nil
 	}
 	return nil, &NotLoadedError{edge: "tweet_user"}
+}
+
+// TweetTagsOrErr returns the TweetTags value or an error if the edge
+// was not loaded in eager-loading.
+func (e TweetEdges) TweetTagsOrErr() ([]*TweetTag, error) {
+	if e.loadedTypes[5] {
+		return e.TweetTags, nil
+	}
+	return nil, &NotLoadedError{edge: "tweet_tags"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -124,6 +146,11 @@ func (t *Tweet) QueryUser() *UserQuery {
 	return (&TweetClient{config: t.config}).QueryUser(t)
 }
 
+// QueryTags queries the "tags" edge of the Tweet entity.
+func (t *Tweet) QueryTags() *TagQuery {
+	return (&TweetClient{config: t.config}).QueryTags(t)
+}
+
 // QueryLikes queries the "likes" edge of the Tweet entity.
 func (t *Tweet) QueryLikes() *TweetLikeQuery {
 	return (&TweetClient{config: t.config}).QueryLikes(t)
@@ -132,6 +159,11 @@ func (t *Tweet) QueryLikes() *TweetLikeQuery {
 // QueryTweetUser queries the "tweet_user" edge of the Tweet entity.
 func (t *Tweet) QueryTweetUser() *UserTweetQuery {
 	return (&TweetClient{config: t.config}).QueryTweetUser(t)
+}
+
+// QueryTweetTags queries the "tweet_tags" edge of the Tweet entity.
+func (t *Tweet) QueryTweetTags() *TweetTagQuery {
+	return (&TweetClient{config: t.config}).QueryTweetTags(t)
 }
 
 // Update returns a builder for updating this Tweet.
