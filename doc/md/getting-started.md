@@ -177,7 +177,7 @@ import (
 func main() {
 	client, err := ent.Open("postgres","host=<host> port=<port> user=<user> dbname=<database> password=<pass>")
 	if err != nil {
-		log.Fatalf("failed opening connection to sqlite: %v", err)
+		log.Fatalf("failed opening connection to postgres: %v", err)
 	}
 	defer client.Close()
 	// Run the auto migration tool.
@@ -205,7 +205,7 @@ import (
 func main() {
 	client, err := ent.Open("mysql", "<user>:<pass>@tcp(<host>:<port>)/<database>?parseTime=True")
 	if err != nil {
-		log.Fatalf("failed opening connection to sqlite: %v", err)
+		log.Fatalf("failed opening connection to mysql: %v", err)
 	}
 	defer client.Close()
 	// Run the auto migration tool.
