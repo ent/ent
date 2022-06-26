@@ -277,3 +277,15 @@ sqljson.StringHasSuffix(user.FieldURL, ".com", sqljson.Path("host"))
 sqljson.StringHasPrefix(user.FieldData, "20", sqljson.DotPath("attributes[0].status_code"))
 ```
 
+## Usage with [Entgql](https://entgo.io/docs/tutorial-todo-gql)
+
+If you're already using Ent with Gqlgen through [Entgql](https://entgo.io/docs/tutorial-todo-gql) you can use this code for the already existing `WhereInput`:
+
+```go
+query := ent.Todo.Query()
+
+query, err := EntTodoWhereInput.Filter(query)
+// handle err
+
+query.All(ctx)
+```
