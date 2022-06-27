@@ -277,15 +277,14 @@ sqljson.StringHasSuffix(user.FieldURL, ".com", sqljson.Path("host"))
 sqljson.StringHasPrefix(user.FieldData, "20", sqljson.DotPath("attributes[0].status_code"))
 ```
 
-## Usage with [Entgql](https://entgo.io/docs/tutorial-todo-gql)
+### Usage of filter inputs as predicates
 
-If you're already using Ent with Gqlgen through [Entgql](https://entgo.io/docs/tutorial-todo-gql) you can use this code for the already existing `WhereInput`:
+The `Filter` option lets use the generated `WhereInput`s as regular repdicates on any type of query:
 
 ```go
 query := ent.Todo.Query()
-
-query, err := EntTodoWhereInput.Filter(query)
-// handle err
-
-query.All(ctx)
-```
+query, err := input.Filter(query)
+if err != nil {
+	return nil, err
+}
+return query.All(ctx)
