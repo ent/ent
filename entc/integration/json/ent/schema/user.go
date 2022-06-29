@@ -42,6 +42,7 @@ func (User) Fields() []ent.Field {
 		field.Strings("strings").
 			Optional(),
 		field.JSON("addr", Addr{}).
+			Sensitive().
 			Optional(),
 	}
 }

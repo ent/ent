@@ -11,6 +11,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"reflect"
 	"testing"
 
 	"entgo.io/ent/dialect"
@@ -199,6 +200,11 @@ func NetAddr(t *testing.T, client *ent.Client) {
 	require.Equal(t, "127.0.0.1:80", client.User.GetX(ctx, usr.ID).Addr.String())
 	usr.Update().SetAddr(schema.Addr{Addr: &net.UDPAddr{IP: ip, Port: 1812}}).ExecX(ctx)
 	require.Equal(t, "127.0.0.1:1812", client.User.GetX(ctx, usr.ID).Addr.String())
+
+	// Ensure sensitive fields are not marshalled.
+	f, ok := reflect.TypeOf(ent.User{}).FieldByName("Addr")
+	require.True(t, ok)
+	require.Equal(t, "-", f.Tag.Get("json"))
 }
 
 func Dirs(t *testing.T, client *ent.Client) {
