@@ -38,7 +38,7 @@ type User struct {
 	// Strings holds the value of the "strings" field.
 	Strings []string `json:"strings,omitempty"`
 	// Addr holds the value of the "addr" field.
-	Addr schema.Addr `json:"addr,omitempty"`
+	Addr schema.Addr `json:"-"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -184,8 +184,7 @@ func (u *User) String() string {
 	builder.WriteString("strings=")
 	builder.WriteString(fmt.Sprintf("%v", u.Strings))
 	builder.WriteString(", ")
-	builder.WriteString("addr=")
-	builder.WriteString(fmt.Sprintf("%v", u.Addr))
+	builder.WriteString("addr=<sensitive>")
 	builder.WriteByte(')')
 	return builder.String()
 }

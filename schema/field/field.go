@@ -716,6 +716,12 @@ func (b *jsonBuilder) Comment(c string) *jsonBuilder {
 	return b
 }
 
+// Sensitive fields not printable and not serializable.
+func (b *jsonBuilder) Sensitive() *jsonBuilder {
+	b.desc.Sensitive = true
+	return b
+}
+
 // StructTag sets the struct tag of the field.
 func (b *jsonBuilder) StructTag(s string) *jsonBuilder {
 	b.desc.Tag = s

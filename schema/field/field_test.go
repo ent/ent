@@ -474,9 +474,11 @@ func TestJSON(t *testing.T) {
 	fd = field.Strings("strings").
 		Optional().
 		Default([]string{"a", "b"}).
+		Sensitive().
 		Descriptor()
 	assert.NoError(t, fd.Err)
 	assert.True(t, fd.Optional)
+	assert.True(t, fd.Sensitive)
 	assert.Empty(t, fd.Info.PkgPath)
 	assert.Equal(t, "strings", fd.Name)
 	assert.Equal(t, []string{"a", "b"}, fd.Default)
