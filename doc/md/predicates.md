@@ -124,24 +124,6 @@ The above code will produce the same SQL query:
 ```sql
 SELECT `id` FROM `users` WHERE DATE(`last_login_at`) >= ?
 ```
-
-You may also perform a more complex sql query, for example `DATE_ADD()`
-
-```go
-events := client.Event.Query().
-	Where(func(s *sql.Selector) {
-		s.Where(sql.ExprP("DATE_ADD(date, INTERVAL duration MINUTE) BETWEEN ? AND ?", start, end))
-	}).
-	AllX(ctx)
-```
-
-The above code will produce the following SQL query:
-
-```sql
-SELECT `events`.`id`, `events`.`date`, `events`.`duration` 
-FROM events WHERE DATE_ADD(date, INTERVAL duration MINUTE) BETWEEN ? AND ?
-```
-
 #### Get all pets of users 1, 2 and 3
 
 ```go
