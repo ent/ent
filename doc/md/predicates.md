@@ -119,8 +119,6 @@ users := client.User.Query().
 	AllX(ctx)
 ```
 
-But note that `last_login_at` is now hardcoded, unlike the option number 1. 
-
 The above code will produce the same SQL query:
 
 ```sql
