@@ -112,7 +112,7 @@ SELECT `id` FROM `users` WHERE DATE(`last_login_at`) >= ?
 
 ```go
 users := client.User.Query().
-	Select("id").
+	Select(user.FieldID).
 	Where(func(s *sql.Selector) {
 		s.Where(sql.ExprP("DATE(last_login_at >= ?", value))
 	}).
