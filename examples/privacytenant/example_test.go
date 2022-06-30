@@ -37,8 +37,8 @@ func Example_CreateTenants() {
 		log.Fatal("expect tenant creation to fail, but got:", err)
 	}
 
-	// Operation should pass successfully as the user in the viewer-context is
-	// an admin user. First mutation privacy policy in Tenant schema.
+	// Operation should pass successfully as the user in the viewer-context
+	// is an admin user. First mutation privacy policy in Tenant schema.
 	adminCtx := viewer.NewContext(ctx, viewer.UserViewer{Role: viewer.Admin})
 	hub, err := client.Tenant.Create().SetName("GitHub").Save(adminCtx)
 	if err != nil {
@@ -55,7 +55,6 @@ func Example_CreateTenants() {
 	// Output:
 	// Tenant(id=1, name=GitHub)
 	// Tenant(id=2, name=GitLab)
-
 }
 
 func Example_TenantView() {
@@ -63,8 +62,8 @@ func Example_TenantView() {
 	client := open(ctx)
 	defer client.Close()
 
-	// Operation should pass successfully as the user in the viewer-context is
-	// an admin user. First mutation privacy policy in Tenant schema.
+	// Operation should pass successfully as the user in the viewer-context
+	// is an admin user. First mutation privacy policy in Tenant schema.
 	adminCtx := viewer.NewContext(ctx, viewer.UserViewer{Role: viewer.Admin})
 	hub := client.Tenant.Create().SetName("GitHub").SaveX(adminCtx)
 	lab := client.Tenant.Create().SetName("GitLab").SaveX(adminCtx)
@@ -144,8 +143,8 @@ func Example_DenyMismatchedTenants() {
 	client := open(ctx)
 	defer client.Close()
 
-	// Operation should pass successfully as the user in the viewer-context is
-	// an admin user. First mutation privacy policy in Tenant schema.
+	// Operation should pass successfully as the user in the viewer-context
+	// is an admin user. First mutation privacy policy in Tenant schema.
 	adminCtx := viewer.NewContext(ctx, viewer.UserViewer{Role: viewer.Admin})
 	hub := client.Tenant.Create().SetName("GitHub").SaveX(adminCtx)
 	lab := client.Tenant.Create().SetName("GitLab").SaveX(adminCtx)

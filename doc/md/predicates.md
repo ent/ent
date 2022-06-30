@@ -89,41 +89,6 @@ client.Pet.
 
 Custom predicates can be useful if you want to write your own dialect-specific logic or to control the executed queries.
 
-For example, in order to use built-in SQL functions such as `DATE()`, use one of the following options:
-
-1. Pass a dialect-aware predicate function using the `sql.P` option:
-
-```go
-users := client.User.Query().
-	Select(user.FieldID).
-	Where(sql.P(func(b *sql.Builder) {
-		b.WriteString("DATE(").Ident("last_login_at").WriteByte(')').WriteOp(OpGTE).Arg(value)
-	})).
-	AllX(ctx)
-```
-
-The above code will produce the following SQL query:
-
-```sql
-SELECT `id` FROM `users` WHERE DATE(`last_login_at`) >= ?
-```
-
-2. Inline a predicate expression using the `ExprP()` option:
-
-```go
-users := client.User.Query().
-	Select(user.FieldID).
-	Where(func(s *sql.Selector) {
-		s.Where(sql.ExprP("DATE(last_login_at >= ?", value))
-	}).
-	AllX(ctx)
-```
-
-The above code will produce the same SQL query:
-
-```sql
-SELECT `id` FROM `users` WHERE DATE(`last_login_at`) >= ?
-```
 #### Get all pets of users 1, 2 and 3
 
 ```go
@@ -238,6 +203,44 @@ The above code will produce the following SQL query:
 
 ```sql
 SELECT DISTINCT `pets`.`id`, `pets`.`owner_id`, `pets`.`name`, `pets`.`age`, `pets`.`species` FROM `pets` WHERE `name` LIKE '_B%'
+```
+
+#### Custom SQL functions
+
+In order to use built-in SQL functions such as `DATE()`, use one of the following options:
+
+1\. Pass a dialect-aware predicate function using the `sql.P` option:
+
+```go
+users := client.User.Query().
+	Select(user.FieldID).
+	Where(sql.P(func(b *sql.Builder) {
+		b.WriteString("DATE(").Ident("last_login_at").WriteByte(')').WriteOp(OpGTE).Arg(value)
+	})).
+	AllX(ctx)
+```
+
+The above code will produce the following SQL query:
+
+```sql
+SELECT `id` FROM `users` WHERE DATE(`last_login_at`) >= ?
+```
+
+2\. Inline a predicate expression using the `ExprP()` option:
+
+```go
+users := client.User.Query().
+	Select(user.FieldID).
+	Where(func(s *sql.Selector) {
+		s.Where(sql.ExprP("DATE(last_login_at >= ?", value))
+	}).
+	AllX(ctx)
+```
+
+The above code will produce the same SQL query:
+
+```sql
+SELECT `id` FROM `users` WHERE DATE(`last_login_at`) >= ?
 ```
 
 ## JSON predicates

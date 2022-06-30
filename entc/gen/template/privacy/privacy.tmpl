@@ -184,4 +184,10 @@ func DenyMutationOperationRule(op {{ $pkg }}.Op) MutationRule {
 	{{ template "privacy/filter" $ }}
 {{- end }}
 
+{{- with $tmpls := matchTemplate "privacy/additional/*" "privacy/additional/*/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{- xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
+
 {{ end }}

@@ -311,9 +311,9 @@ We can use this new filtering as any other predicate:
 }
 ```
 
-### Usage of filter inputs as predicates
+### Usage as predicates
 
-The `Filter` option lets use the generated `WhereInput`s as regular repdicates on any type of query:
+The `Filter` option lets use the generated `WhereInput`s as regular predicates on any type of query:
 
 ```go
 query := ent.Todo.Query()

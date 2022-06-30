@@ -8,7 +8,6 @@ import (
 	"context"
 
 	"entgo.io/ent/entql"
-
 	"entgo.io/ent/examples/privacytenant/ent"
 	"entgo.io/ent/examples/privacytenant/ent/privacy"
 	"entgo.io/ent/examples/privacytenant/ent/user"
@@ -41,7 +40,7 @@ func AllowIfAdmin() privacy.QueryMutationRule {
 
 // FilterTenantRule is a query/mutation rule that filters out entities that are not in the tenant.
 func FilterTenantRule() privacy.QueryMutationRule {
-	// TenantsFilter is an interface to wrap WhereHasTenantWith()
+	// TenantsFilter is an interface to wrap WhereTenantID()
 	// predicate that is used by both `Group` and `User` schemas.
 	type TenantsFilter interface {
 		WhereTenantID(entql.IntP)
