@@ -128,13 +128,15 @@ func TestMigrate_Diff(t *testing.T) {
 	require.IsType(t, &dirTypeStore{}, m.typeStore)
 	require.NoError(t, m.Diff(context.Background(),
 		&Table{Name: "users", Columns: idCol, PrimaryKey: idCol},
-		&Table{Name: "groups", Columns: idCol, PrimaryKey: idCol},
+		&Table{Name: "groups", Columns: idCol, PrimaryKey: idCol, Indexes: []*Index{{Name: "short", Columns: idCol}, {Name: "long_" + strings.Repeat("_", 60), Columns: idCol}}},
 	))
 	requireFileEqual(t, filepath.Join(p, ".ent_types"), atlasDirective+"users,groups")
 	changesSQL := strings.Join([]string{
 		"CREATE TABLE `users` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT);",
 		"CREATE TABLE `groups` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT);",
 		fmt.Sprintf("INSERT INTO sqlite_sequence (name, seq) VALUES (\"groups\", %d);", 1<<32),
+		"CREATE INDEX `short` ON `groups` (`id`);",
+		"CREATE INDEX `long____________________________1cb2e7e47a309191385af4ad320875b1` ON `groups` (`id`);",
 		"CREATE TABLE `ent_types` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT, `type` text NOT NULL);",
 		"CREATE UNIQUE INDEX `ent_types_type_key` ON `ent_types` (`type`);",
 		"INSERT INTO `ent_types` (`type`) VALUES ('users'), ('groups');", "",
