@@ -29,9 +29,6 @@ var (
 )
 
 type (
-	// Policies combines multiple policies into a single policy.
-	Policies []ent.Policy
-
 	// QueryRule defines the interface deciding whether a
 	// query is allowed and optionally modify it.
 	QueryRule interface {
@@ -49,7 +46,26 @@ type (
 
 	// MutationPolicy combines multiple mutation rules into a single policy.
 	MutationPolicy []MutationRule
+
+	// Policy groups query and mutation policies.
+	Policy struct {
+		Query    QueryPolicy
+		Mutation MutationPolicy
+	}
+
+	// Policies combines multiple policies into a single policy.
+	Policies []ent.Policy
 )
+
+// EvalQuery forwards evaluation to query a policy.
+func (p Policy) EvalQuery(ctx context.Context, q ent.Query) error {
+	return p.Query.EvalQuery(ctx, q)
+}
+
+// EvalMutation forwards evaluation to mutate a  policy.
+func (p Policy) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	return p.Mutation.EvalMutation(ctx, m)
+}
 
 // NewPolicies creates an ent.Policy from list of mixin.Schema
 // and ent.Schema that implement the ent.Policy interface.

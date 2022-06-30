@@ -7,10 +7,10 @@ package rule
 import (
 	"context"
 
+	"entgo.io/ent/entql"
+
 	"entgo.io/ent/examples/privacytenant/ent"
-	"entgo.io/ent/examples/privacytenant/ent/predicate"
 	"entgo.io/ent/examples/privacytenant/ent/privacy"
-	"entgo.io/ent/examples/privacytenant/ent/tenant"
 	"entgo.io/ent/examples/privacytenant/ent/user"
 	"entgo.io/ent/examples/privacytenant/viewer"
 )
@@ -44,19 +44,20 @@ func FilterTenantRule() privacy.QueryMutationRule {
 	// TenantsFilter is an interface to wrap WhereHasTenantWith()
 	// predicate that is used by both `Group` and `User` schemas.
 	type TenantsFilter interface {
-		WhereHasTenantWith(...predicate.Tenant)
+		WhereTenantID(entql.IntP)
 	}
 	return privacy.FilterFunc(func(ctx context.Context, f privacy.Filter) error {
 		view := viewer.FromContext(ctx)
-		if view.Tenant() == "" {
+		tid, ok := view.Tenant()
+		if !ok {
 			return privacy.Denyf("missing tenant information in viewer")
 		}
 		tf, ok := f.(TenantsFilter)
 		if !ok {
 			return privacy.Denyf("unexpected filter type %T", f)
 		}
-		// Make sure that a tenant reads only entities that has an edge to it.
-		tf.WhereHasTenantWith(tenant.Name(view.Tenant()))
+		// Make sure that a tenant reads only entities that have an edge to it.
+		tf.WhereTenantID(entql.IntEQ(tid))
 		// Skip to the next privacy rule (equivalent to return nil).
 		return privacy.Skip
 	})
@@ -75,14 +76,19 @@ func DenyMismatchedTenants() privacy.MutationRule {
 		if len(users) == 0 {
 			return privacy.Skip
 		}
-		// Query the tenant-id of all users. Expect to have exact 1 result,
-		// and it matches the tenant-id of the group above.
-		id, err := m.Client().User.Query().Where(user.IDIn(users...)).QueryTenant().OnlyID(ctx)
+		// Query the tenant-ids of all attached users. Expect all users to be connected to the same tenant
+		// as the group. Note, we use privacy.DecisionContext to skip the FilterTenantRule defined above.
+		ids, err := m.Client().User.Query().Where(user.IDIn(users...)).Select(user.FieldTenantID).Ints(privacy.DecisionContext(ctx, privacy.Allow))
 		if err != nil {
-			return privacy.Denyf("querying the tenant-id %v", err)
+			return privacy.Denyf("querying the tenant-ids %v", err)
 		}
-		if id != tid {
-			return privacy.Denyf("mismatch tenant-ids for group/users %d != %d", tid, id)
+		if len(ids) != len(users) {
+			return privacy.Denyf("one the attached users is not connected to a tenant %v", err)
+		}
+		for _, id := range ids {
+			if id != tid {
+				return privacy.Denyf("mismatch tenant-ids for group/users %d != %d", tid, id)
+			}
 		}
 		// Skip to the next privacy rule (equivalent to return nil).
 		return privacy.Skip

@@ -20,12 +20,13 @@ type Group struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// TenantID holds the value of the "tenant_id" field.
+	TenantID int `json:"tenant_id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GroupQuery when eager-loading is set.
-	Edges        GroupEdges `json:"edges"`
-	group_tenant *int
+	Edges GroupEdges `json:"edges"`
 }
 
 // GroupEdges holds the relations/edges for other nodes in the graph.
@@ -67,12 +68,10 @@ func (*Group) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case group.FieldID:
+		case group.FieldID, group.FieldTenantID:
 			values[i] = new(sql.NullInt64)
 		case group.FieldName:
 			values[i] = new(sql.NullString)
-		case group.ForeignKeys[0]: // group_tenant
-			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Group", columns[i])
 		}
@@ -94,18 +93,17 @@ func (gr *Group) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			gr.ID = int(value.Int64)
+		case group.FieldTenantID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field tenant_id", values[i])
+			} else if value.Valid {
+				gr.TenantID = int(value.Int64)
+			}
 		case group.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				gr.Name = value.String
-			}
-		case group.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field group_tenant", value)
-			} else if value.Valid {
-				gr.group_tenant = new(int)
-				*gr.group_tenant = int(value.Int64)
 			}
 		}
 	}
@@ -145,6 +143,9 @@ func (gr *Group) String() string {
 	var builder strings.Builder
 	builder.WriteString("Group(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", gr.ID))
+	builder.WriteString("tenant_id=")
+	builder.WriteString(fmt.Sprintf("%v", gr.TenantID))
+	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(gr.Name)
 	builder.WriteByte(')')

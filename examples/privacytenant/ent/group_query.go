@@ -34,7 +34,6 @@ type GroupQuery struct {
 	// eager-loading edges.
 	withTenant *TenantQuery
 	withUsers  *UserQuery
-	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -333,12 +332,12 @@ func (gq *GroupQuery) WithUsers(opts ...func(*UserQuery)) *GroupQuery {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		TenantID int `json:"tenant_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Group.Query().
-//		GroupBy(group.FieldName).
+//		GroupBy(group.FieldTenantID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -362,11 +361,11 @@ func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		TenantID int `json:"tenant_id,omitempty"`
 //	}
 //
 //	client.Group.Query().
-//		Select(group.FieldName).
+//		Select(group.FieldTenantID).
 //		Scan(ctx, &v)
 //
 func (gq *GroupQuery) Select(fields ...string) *GroupSelect {
@@ -402,19 +401,12 @@ func (gq *GroupQuery) prepareQuery(ctx context.Context) error {
 func (gq *GroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Group, error) {
 	var (
 		nodes       = []*Group{}
-		withFKs     = gq.withFKs
 		_spec       = gq.querySpec()
 		loadedTypes = [2]bool{
 			gq.withTenant != nil,
 			gq.withUsers != nil,
 		}
 	)
-	if gq.withTenant != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, group.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		return (*Group).scanValues(nil, columns)
 	}
@@ -438,10 +430,7 @@ func (gq *GroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Group,
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Group)
 		for i := range nodes {
-			if nodes[i].group_tenant == nil {
-				continue
-			}
-			fk := *nodes[i].group_tenant
+			fk := nodes[i].TenantID
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
@@ -455,7 +444,7 @@ func (gq *GroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Group,
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "group_tenant" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "tenant_id" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Tenant = n
