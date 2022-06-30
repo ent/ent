@@ -25,6 +25,12 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
+// SetTenantID sets the "tenant_id" field.
+func (uc *UserCreate) SetTenantID(i int) *UserCreate {
+	uc.mutation.SetTenantID(i)
+	return uc
+}
+
 // SetName sets the "name" field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
 	uc.mutation.SetName(s)
@@ -42,12 +48,6 @@ func (uc *UserCreate) SetNillableName(s *string) *UserCreate {
 // SetFoods sets the "foods" field.
 func (uc *UserCreate) SetFoods(s []string) *UserCreate {
 	uc.mutation.SetFoods(s)
-	return uc
-}
-
-// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
-func (uc *UserCreate) SetTenantID(id int) *UserCreate {
-	uc.mutation.SetTenantID(id)
 	return uc
 }
 
@@ -159,6 +159,9 @@ func (uc *UserCreate) defaults() error {
 
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
+	if _, ok := uc.mutation.TenantID(); !ok {
+		return &ValidationError{Name: "tenant_id", err: errors.New(`ent: missing required field "User.tenant_id"`)}
+	}
 	if _, ok := uc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "User.name"`)}
 	}
@@ -225,7 +228,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.user_tenant = &nodes[0]
+		_node.TenantID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := uc.mutation.GroupsIDs(); len(nodes) > 0 {

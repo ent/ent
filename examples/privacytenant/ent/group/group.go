@@ -15,6 +15,8 @@ const (
 	Label = "group"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldTenantID holds the string denoting the tenant_id field in the database.
+	FieldTenantID = "tenant_id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// EdgeTenant holds the string denoting the tenant edge name in mutations.
@@ -29,7 +31,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "tenant" package.
 	TenantInverseTable = "tenants"
 	// TenantColumn is the table column denoting the tenant relation/edge.
-	TenantColumn = "group_tenant"
+	TenantColumn = "tenant_id"
 	// UsersTable is the table that holds the users relation/edge. The primary key declared below.
 	UsersTable = "user_groups"
 	// UsersInverseTable is the table name for the User entity.
@@ -40,13 +42,8 @@ const (
 // Columns holds all SQL columns for group fields.
 var Columns = []string{
 	FieldID,
+	FieldTenantID,
 	FieldName,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "groups"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"group_tenant",
 }
 
 var (
@@ -59,11 +56,6 @@ var (
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}

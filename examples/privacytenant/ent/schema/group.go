@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// User holds the schema definition for the Group entity.
+// Group holds the schema definition for the Group entity.
 type Group struct {
 	ent.Schema
 }
@@ -50,12 +50,6 @@ func (Group) Policy() ent.Policy {
 			privacy.OnMutationOperation(
 				rule.DenyMismatchedTenants(),
 				ent.OpCreate,
-			),
-			// Limit the FilterTenantRule only for
-			// UpdateOne and DeleteOne operations.
-			privacy.OnMutationOperation(
-				rule.FilterTenantRule(),
-				ent.OpUpdateOne|ent.OpDeleteOne,
 			),
 		},
 	}

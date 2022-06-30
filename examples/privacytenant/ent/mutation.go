@@ -150,6 +150,42 @@ func (m *GroupMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
+// SetTenantID sets the "tenant_id" field.
+func (m *GroupMutation) SetTenantID(i int) {
+	m.tenant = &i
+}
+
+// TenantID returns the value of the "tenant_id" field in the mutation.
+func (m *GroupMutation) TenantID() (r int, exists bool) {
+	v := m.tenant
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTenantID returns the old "tenant_id" field's value of the Group entity.
+// If the Group object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GroupMutation) OldTenantID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTenantID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTenantID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTenantID: %w", err)
+	}
+	return oldValue.TenantID, nil
+}
+
+// ResetTenantID resets all changes to the "tenant_id" field.
+func (m *GroupMutation) ResetTenantID() {
+	m.tenant = nil
+}
+
 // SetName sets the "name" field.
 func (m *GroupMutation) SetName(s string) {
 	m.name = &s
@@ -186,11 +222,6 @@ func (m *GroupMutation) ResetName() {
 	m.name = nil
 }
 
-// SetTenantID sets the "tenant" edge to the Tenant entity by id.
-func (m *GroupMutation) SetTenantID(id int) {
-	m.tenant = &id
-}
-
 // ClearTenant clears the "tenant" edge to the Tenant entity.
 func (m *GroupMutation) ClearTenant() {
 	m.clearedtenant = true
@@ -199,14 +230,6 @@ func (m *GroupMutation) ClearTenant() {
 // TenantCleared reports if the "tenant" edge to the Tenant entity was cleared.
 func (m *GroupMutation) TenantCleared() bool {
 	return m.clearedtenant
-}
-
-// TenantID returns the "tenant" edge ID in the mutation.
-func (m *GroupMutation) TenantID() (id int, exists bool) {
-	if m.tenant != nil {
-		return *m.tenant, true
-	}
-	return
 }
 
 // TenantIDs returns the "tenant" edge IDs in the mutation.
@@ -298,7 +321,10 @@ func (m *GroupMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GroupMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 2)
+	if m.tenant != nil {
+		fields = append(fields, group.FieldTenantID)
+	}
 	if m.name != nil {
 		fields = append(fields, group.FieldName)
 	}
@@ -310,6 +336,8 @@ func (m *GroupMutation) Fields() []string {
 // schema.
 func (m *GroupMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case group.FieldTenantID:
+		return m.TenantID()
 	case group.FieldName:
 		return m.Name()
 	}
@@ -321,6 +349,8 @@ func (m *GroupMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *GroupMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case group.FieldTenantID:
+		return m.OldTenantID(ctx)
 	case group.FieldName:
 		return m.OldName(ctx)
 	}
@@ -332,6 +362,13 @@ func (m *GroupMutation) OldField(ctx context.Context, name string) (ent.Value, e
 // type.
 func (m *GroupMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case group.FieldTenantID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTenantID(v)
+		return nil
 	case group.FieldName:
 		v, ok := value.(string)
 		if !ok {
@@ -346,13 +383,16 @@ func (m *GroupMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *GroupMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *GroupMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
 	return nil, false
 }
 
@@ -388,6 +428,9 @@ func (m *GroupMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *GroupMutation) ResetField(name string) error {
 	switch name {
+	case group.FieldTenantID:
+		m.ResetTenantID()
+		return nil
 	case group.FieldName:
 		m.ResetName()
 		return nil
@@ -925,6 +968,42 @@ func (m *UserMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
+// SetTenantID sets the "tenant_id" field.
+func (m *UserMutation) SetTenantID(i int) {
+	m.tenant = &i
+}
+
+// TenantID returns the value of the "tenant_id" field in the mutation.
+func (m *UserMutation) TenantID() (r int, exists bool) {
+	v := m.tenant
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTenantID returns the old "tenant_id" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldTenantID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTenantID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTenantID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTenantID: %w", err)
+	}
+	return oldValue.TenantID, nil
+}
+
+// ResetTenantID resets all changes to the "tenant_id" field.
+func (m *UserMutation) ResetTenantID() {
+	m.tenant = nil
+}
+
 // SetName sets the "name" field.
 func (m *UserMutation) SetName(s string) {
 	m.name = &s
@@ -1010,11 +1089,6 @@ func (m *UserMutation) ResetFoods() {
 	delete(m.clearedFields, user.FieldFoods)
 }
 
-// SetTenantID sets the "tenant" edge to the Tenant entity by id.
-func (m *UserMutation) SetTenantID(id int) {
-	m.tenant = &id
-}
-
 // ClearTenant clears the "tenant" edge to the Tenant entity.
 func (m *UserMutation) ClearTenant() {
 	m.clearedtenant = true
@@ -1023,14 +1097,6 @@ func (m *UserMutation) ClearTenant() {
 // TenantCleared reports if the "tenant" edge to the Tenant entity was cleared.
 func (m *UserMutation) TenantCleared() bool {
 	return m.clearedtenant
-}
-
-// TenantID returns the "tenant" edge ID in the mutation.
-func (m *UserMutation) TenantID() (id int, exists bool) {
-	if m.tenant != nil {
-		return *m.tenant, true
-	}
-	return
 }
 
 // TenantIDs returns the "tenant" edge IDs in the mutation.
@@ -1122,7 +1188,10 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
+	if m.tenant != nil {
+		fields = append(fields, user.FieldTenantID)
+	}
 	if m.name != nil {
 		fields = append(fields, user.FieldName)
 	}
@@ -1137,6 +1206,8 @@ func (m *UserMutation) Fields() []string {
 // schema.
 func (m *UserMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case user.FieldTenantID:
+		return m.TenantID()
 	case user.FieldName:
 		return m.Name()
 	case user.FieldFoods:
@@ -1150,6 +1221,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case user.FieldTenantID:
+		return m.OldTenantID(ctx)
 	case user.FieldName:
 		return m.OldName(ctx)
 	case user.FieldFoods:
@@ -1163,6 +1236,13 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *UserMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case user.FieldTenantID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTenantID(v)
+		return nil
 	case user.FieldName:
 		v, ok := value.(string)
 		if !ok {
@@ -1184,13 +1264,16 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *UserMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
 	return nil, false
 }
 
@@ -1235,6 +1318,9 @@ func (m *UserMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *UserMutation) ResetField(name string) error {
 	switch name {
+	case user.FieldTenantID:
+		m.ResetTenantID()
+		return nil
 	case user.FieldName:
 		m.ResetName()
 		return nil

@@ -32,7 +32,8 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "Group",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			group.FieldName: {Type: field.TypeString, Column: group.FieldName},
+			group.FieldTenantID: {Type: field.TypeInt, Column: group.FieldTenantID},
+			group.FieldName:     {Type: field.TypeString, Column: group.FieldName},
 		},
 	}
 	graph.Nodes[1] = &sqlgraph.Node{
@@ -60,8 +61,9 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "User",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			user.FieldName:  {Type: field.TypeString, Column: user.FieldName},
-			user.FieldFoods: {Type: field.TypeJSON, Column: user.FieldFoods},
+			user.FieldTenantID: {Type: field.TypeInt, Column: user.FieldTenantID},
+			user.FieldName:     {Type: field.TypeString, Column: user.FieldName},
+			user.FieldFoods:    {Type: field.TypeJSON, Column: user.FieldFoods},
 		},
 	}
 	graph.MustAddE(
@@ -159,6 +161,11 @@ func (f *GroupFilter) Where(p entql.P) {
 // WhereID applies the entql int predicate on the id field.
 func (f *GroupFilter) WhereID(p entql.IntP) {
 	f.Where(p.Field(group.FieldID))
+}
+
+// WhereTenantID applies the entql int predicate on the tenant_id field.
+func (f *GroupFilter) WhereTenantID(p entql.IntP) {
+	f.Where(p.Field(group.FieldTenantID))
 }
 
 // WhereName applies the entql string predicate on the name field.
@@ -277,6 +284,11 @@ func (f *UserFilter) Where(p entql.P) {
 // WhereID applies the entql int predicate on the id field.
 func (f *UserFilter) WhereID(p entql.IntP) {
 	f.Where(p.Field(user.FieldID))
+}
+
+// WhereTenantID applies the entql int predicate on the tenant_id field.
+func (f *UserFilter) WhereTenantID(p entql.IntP) {
+	f.Where(p.Field(user.FieldTenantID))
 }
 
 // WhereName applies the entql string predicate on the name field.

@@ -199,6 +199,8 @@ var (
 		"tx/additional/*/*",
 		"update/additional/*",
 		"query/additional/*",
+		"privacy/additional/*",
+		"privacy/additional/*/*",
 	}
 	// importPkg are the import packages used for code generation.
 	importPkg = make(map[string]string)
