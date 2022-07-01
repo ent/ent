@@ -31,6 +31,7 @@ func (IntSID) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("parent", IntSID.Type).
 			Unique(),
-		edge.From("children", IntSID.Type).Ref("parent"),
+		edge.From("children", IntSID.Type).
+			Ref("parent"),
 	}
 }
