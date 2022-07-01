@@ -175,25 +175,23 @@ func (g *Graph) defaults() {
 	if g.IDType != nil {
 		return
 	}
+	g.IDType = defaultIDType
 	if len(g.Nodes) == 0 {
-		g.IDType = defaultIDType
 		return
 	}
-	nodes := make([]*Type, 0, len(g.Nodes))
+	idTypes := make([]*field.TypeInfo, 0, len(g.Nodes))
 	for _, n := range g.Nodes {
 		if n.HasOneFieldID() {
-			nodes = append(nodes, n)
+			idTypes = append(idTypes, n.ID.Type)
 		}
 	}
 	// Check that all nodes have the same type for the ID field.
-	for i := 0; i < len(nodes)-1; i++ {
-		cid, nid := nodes[i].ID.Type, nodes[i+1].ID.Type
-		if cid.Type != nid.Type {
-			g.IDType = defaultIDType
+	for i := 0; i < len(idTypes)-1; i++ {
+		if idTypes[i].Type != idTypes[i+1].Type {
 			return
 		}
 	}
-	g.IDType = nodes[0].ID.Type
+	g.IDType = idTypes[0]
 }
 
 // Gen generates the artifacts for the graph.
