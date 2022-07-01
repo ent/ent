@@ -7,11 +7,13 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/comment"
+	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
 )
 
 // Comment is the model entity for the Comment schema.
@@ -27,6 +29,8 @@ type Comment struct {
 	NillableInt *int `json:"nillable_int,omitempty"`
 	// Table holds the value of the "table" field.
 	Table string `json:"table,omitempty"`
+	// Dir holds the value of the "dir" field.
+	Dir schemadir.Dir `json:"dir,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -34,6 +38,8 @@ func (*Comment) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case comment.FieldDir:
+			values[i] = new([]byte)
 		case comment.FieldUniqueFloat:
 			values[i] = new(sql.NullFloat64)
 		case comment.FieldID, comment.FieldUniqueInt, comment.FieldNillableInt:
@@ -86,6 +92,14 @@ func (c *Comment) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				c.Table = value.String
 			}
+		case comment.FieldDir:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field dir", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &c.Dir); err != nil {
+					return fmt.Errorf("unmarshal field dir: %w", err)
+				}
+			}
 		}
 	}
 	return nil
@@ -127,6 +141,9 @@ func (c *Comment) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("table=")
 	builder.WriteString(c.Table)
+	builder.WriteString(", ")
+	builder.WriteString("dir=")
+	builder.WriteString(fmt.Sprintf("%v", c.Dir))
 	builder.WriteByte(')')
 	return builder.String()
 }

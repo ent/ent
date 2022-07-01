@@ -19,6 +19,8 @@ const (
 	FieldNillableInt = "nillable_int"
 	// FieldTable holds the string denoting the table field in the database.
 	FieldTable = "table"
+	// FieldDir holds the string denoting the dir field in the database.
+	FieldDir = "dir"
 )
 
 // comment from another template.

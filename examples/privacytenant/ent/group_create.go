@@ -25,6 +25,12 @@ type GroupCreate struct {
 	hooks    []Hook
 }
 
+// SetTenantID sets the "tenant_id" field.
+func (gc *GroupCreate) SetTenantID(i int) *GroupCreate {
+	gc.mutation.SetTenantID(i)
+	return gc
+}
+
 // SetName sets the "name" field.
 func (gc *GroupCreate) SetName(s string) *GroupCreate {
 	gc.mutation.SetName(s)
@@ -36,12 +42,6 @@ func (gc *GroupCreate) SetNillableName(s *string) *GroupCreate {
 	if s != nil {
 		gc.SetName(*s)
 	}
-	return gc
-}
-
-// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
-func (gc *GroupCreate) SetTenantID(id int) *GroupCreate {
-	gc.mutation.SetTenantID(id)
 	return gc
 }
 
@@ -153,6 +153,9 @@ func (gc *GroupCreate) defaults() error {
 
 // check runs all checks and user-defined validators on the builder.
 func (gc *GroupCreate) check() error {
+	if _, ok := gc.mutation.TenantID(); !ok {
+		return &ValidationError{Name: "tenant_id", err: errors.New(`ent: missing required field "Group.tenant_id"`)}
+	}
 	if _, ok := gc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Group.name"`)}
 	}
@@ -211,7 +214,7 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.group_tenant = &nodes[0]
+		_node.TenantID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := gc.mutation.UsersIDs(); len(nodes) > 0 {

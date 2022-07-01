@@ -48,6 +48,7 @@ var (
 		"isNil":         isNil,
 		"lower":         strings.ToLower,
 		"upper":         strings.ToUpper,
+		"trim":          strings.Trim,
 		"hasField":      hasField,
 		"hasImport":     hasImport,
 		"indirect":      indirect,

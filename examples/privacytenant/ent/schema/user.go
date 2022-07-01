@@ -42,6 +42,6 @@ func (User) Edges() []ent.Edge {
 
 // Policy defines the privacy policy of the User.
 func (User) Policy() ent.Policy {
-	// Privacy policy defined in the TenantMixin.
+	// Privacy policy defined in the BaseMixin and TenantMixin.
 	return nil
 }

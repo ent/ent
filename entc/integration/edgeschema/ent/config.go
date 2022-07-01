@@ -27,8 +27,10 @@ type hooks struct {
 	Friendship   []ent.Hook
 	Group        []ent.Hook
 	Relationship []ent.Hook
+	Tag          []ent.Hook
 	Tweet        []ent.Hook
 	TweetLike    []ent.Hook
+	TweetTag     []ent.Hook
 	User         []ent.Hook
 	UserGroup    []ent.Hook
 	UserTweet    []ent.Hook

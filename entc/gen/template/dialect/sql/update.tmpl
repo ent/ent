@@ -177,6 +177,11 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			{{ if or $.NumHooks $.NumPolicy }}_ = {{ end }}createE.defaults()
 			_, specE := createE.createSpec()
 			edge.Target.Fields = specE.Fields
+			{{- if and .HasOneFieldID .ID.Default }}
+				if specE.ID.Value != nil {
+					edge.Target.Fields = append(edge.Target.Fields, specE.ID)
+				}
+			{{- end }}
 		{{- end }}
 	{{- end }}
 {{- end }}

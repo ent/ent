@@ -15,11 +15,17 @@ type Group func(*sql.Selector)
 // Relationship is the predicate function for relationship builders.
 type Relationship func(*sql.Selector)
 
+// Tag is the predicate function for tag builders.
+type Tag func(*sql.Selector)
+
 // Tweet is the predicate function for tweet builders.
 type Tweet func(*sql.Selector)
 
 // TweetLike is the predicate function for tweetlike builders.
 type TweetLike func(*sql.Selector)
+
+// TweetTag is the predicate function for tweettag builders.
+type TweetTag func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

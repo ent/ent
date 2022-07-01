@@ -33,6 +33,12 @@ func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 	return gu
 }
 
+// SetTenantID sets the "tenant_id" field.
+func (gu *GroupUpdate) SetTenantID(i int) *GroupUpdate {
+	gu.mutation.SetTenantID(i)
+	return gu
+}
+
 // SetName sets the "name" field.
 func (gu *GroupUpdate) SetName(s string) *GroupUpdate {
 	gu.mutation.SetName(s)
@@ -44,12 +50,6 @@ func (gu *GroupUpdate) SetNillableName(s *string) *GroupUpdate {
 	if s != nil {
 		gu.SetName(*s)
 	}
-	return gu
-}
-
-// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
-func (gu *GroupUpdate) SetTenantID(id int) *GroupUpdate {
-	gu.mutation.SetTenantID(id)
 	return gu
 }
 
@@ -306,6 +306,12 @@ type GroupUpdateOne struct {
 	mutation *GroupMutation
 }
 
+// SetTenantID sets the "tenant_id" field.
+func (guo *GroupUpdateOne) SetTenantID(i int) *GroupUpdateOne {
+	guo.mutation.SetTenantID(i)
+	return guo
+}
+
 // SetName sets the "name" field.
 func (guo *GroupUpdateOne) SetName(s string) *GroupUpdateOne {
 	guo.mutation.SetName(s)
@@ -317,12 +323,6 @@ func (guo *GroupUpdateOne) SetNillableName(s *string) *GroupUpdateOne {
 	if s != nil {
 		guo.SetName(*s)
 	}
-	return guo
-}
-
-// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
-func (guo *GroupUpdateOne) SetTenantID(id int) *GroupUpdateOne {
-	guo.mutation.SetTenantID(id)
 	return guo
 }
 

@@ -33,6 +33,12 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	return uu
 }
 
+// SetTenantID sets the "tenant_id" field.
+func (uu *UserUpdate) SetTenantID(i int) *UserUpdate {
+	uu.mutation.SetTenantID(i)
+	return uu
+}
+
 // SetName sets the "name" field.
 func (uu *UserUpdate) SetName(s string) *UserUpdate {
 	uu.mutation.SetName(s)
@@ -56,12 +62,6 @@ func (uu *UserUpdate) SetFoods(s []string) *UserUpdate {
 // ClearFoods clears the value of the "foods" field.
 func (uu *UserUpdate) ClearFoods() *UserUpdate {
 	uu.mutation.ClearFoods()
-	return uu
-}
-
-// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
-func (uu *UserUpdate) SetTenantID(id int) *UserUpdate {
-	uu.mutation.SetTenantID(id)
 	return uu
 }
 
@@ -331,6 +331,12 @@ type UserUpdateOne struct {
 	mutation *UserMutation
 }
 
+// SetTenantID sets the "tenant_id" field.
+func (uuo *UserUpdateOne) SetTenantID(i int) *UserUpdateOne {
+	uuo.mutation.SetTenantID(i)
+	return uuo
+}
+
 // SetName sets the "name" field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
 	uuo.mutation.SetName(s)
@@ -354,12 +360,6 @@ func (uuo *UserUpdateOne) SetFoods(s []string) *UserUpdateOne {
 // ClearFoods clears the value of the "foods" field.
 func (uuo *UserUpdateOne) ClearFoods() *UserUpdateOne {
 	uuo.mutation.ClearFoods()
-	return uuo
-}
-
-// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
-func (uuo *UserUpdateOne) SetTenantID(id int) *UserUpdateOne {
-	uuo.mutation.SetTenantID(id)
 	return uuo
 }
 

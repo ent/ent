@@ -311,6 +311,19 @@ We can use this new filtering as any other predicate:
 }
 ```
 
+### Usage as predicates
+
+The `Filter` option lets use the generated `WhereInput`s as regular predicates on any type of query:
+
+```go
+query := ent.Todo.Query()
+query, err := input.Filter(query)
+if err != nil {
+	return nil, err
+}
+return query.All(ctx)
+```
+
 ---
 
 Well done! As you can see, by changing a few lines of code our application now exposes a type-safe GraphQL filters

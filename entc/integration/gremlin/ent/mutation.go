@@ -18,6 +18,7 @@ import (
 
 	"entgo.io/ent/entc/integration/ent/role"
 	"entgo.io/ent/entc/integration/ent/schema"
+	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
 	"entgo.io/ent/entc/integration/ent/schema/task"
 	"entgo.io/ent/entc/integration/gremlin/ent/card"
 	"entgo.io/ent/entc/integration/gremlin/ent/comment"
@@ -813,6 +814,7 @@ type CommentMutation struct {
 	nillable_int    *int
 	addnillable_int *int
 	table           *string
+	dir             *schemadir.Dir
 	clearedFields   map[string]struct{}
 	done            bool
 	oldValue        func(context.Context) (*Comment, error)
@@ -1148,6 +1150,55 @@ func (m *CommentMutation) ResetTable() {
 	delete(m.clearedFields, comment.FieldTable)
 }
 
+// SetDir sets the "dir" field.
+func (m *CommentMutation) SetDir(s schemadir.Dir) {
+	m.dir = &s
+}
+
+// Dir returns the value of the "dir" field in the mutation.
+func (m *CommentMutation) Dir() (r schemadir.Dir, exists bool) {
+	v := m.dir
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDir returns the old "dir" field's value of the Comment entity.
+// If the Comment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CommentMutation) OldDir(ctx context.Context) (v schemadir.Dir, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDir is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDir requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDir: %w", err)
+	}
+	return oldValue.Dir, nil
+}
+
+// ClearDir clears the value of the "dir" field.
+func (m *CommentMutation) ClearDir() {
+	m.dir = nil
+	m.clearedFields[comment.FieldDir] = struct{}{}
+}
+
+// DirCleared returns if the "dir" field was cleared in this mutation.
+func (m *CommentMutation) DirCleared() bool {
+	_, ok := m.clearedFields[comment.FieldDir]
+	return ok
+}
+
+// ResetDir resets all changes to the "dir" field.
+func (m *CommentMutation) ResetDir() {
+	m.dir = nil
+	delete(m.clearedFields, comment.FieldDir)
+}
+
 // Where appends a list predicates to the CommentMutation builder.
 func (m *CommentMutation) Where(ps ...predicate.Comment) {
 	m.predicates = append(m.predicates, ps...)
@@ -1167,7 +1218,7 @@ func (m *CommentMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CommentMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.unique_int != nil {
 		fields = append(fields, comment.FieldUniqueInt)
 	}
@@ -1179,6 +1230,9 @@ func (m *CommentMutation) Fields() []string {
 	}
 	if m.table != nil {
 		fields = append(fields, comment.FieldTable)
+	}
+	if m.dir != nil {
+		fields = append(fields, comment.FieldDir)
 	}
 	return fields
 }
@@ -1196,6 +1250,8 @@ func (m *CommentMutation) Field(name string) (ent.Value, bool) {
 		return m.NillableInt()
 	case comment.FieldTable:
 		return m.Table()
+	case comment.FieldDir:
+		return m.Dir()
 	}
 	return nil, false
 }
@@ -1213,6 +1269,8 @@ func (m *CommentMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldNillableInt(ctx)
 	case comment.FieldTable:
 		return m.OldTable(ctx)
+	case comment.FieldDir:
+		return m.OldDir(ctx)
 	}
 	return nil, fmt.Errorf("unknown Comment field %s", name)
 }
@@ -1249,6 +1307,13 @@ func (m *CommentMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTable(v)
+		return nil
+	case comment.FieldDir:
+		v, ok := value.(schemadir.Dir)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDir(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Comment field %s", name)
@@ -1325,6 +1390,9 @@ func (m *CommentMutation) ClearedFields() []string {
 	if m.FieldCleared(comment.FieldTable) {
 		fields = append(fields, comment.FieldTable)
 	}
+	if m.FieldCleared(comment.FieldDir) {
+		fields = append(fields, comment.FieldDir)
+	}
 	return fields
 }
 
@@ -1345,6 +1413,9 @@ func (m *CommentMutation) ClearField(name string) error {
 	case comment.FieldTable:
 		m.ClearTable()
 		return nil
+	case comment.FieldDir:
+		m.ClearDir()
+		return nil
 	}
 	return fmt.Errorf("unknown Comment nullable field %s", name)
 }
@@ -1364,6 +1435,9 @@ func (m *CommentMutation) ResetField(name string) error {
 		return nil
 	case comment.FieldTable:
 		m.ResetTable()
+		return nil
+	case comment.FieldDir:
+		m.ResetDir()
 		return nil
 	}
 	return fmt.Errorf("unknown Comment field %s", name)

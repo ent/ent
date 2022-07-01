@@ -9,6 +9,7 @@ import (
 	"entgo.io/ent/examples/privacytenant/ent/privacy"
 	"entgo.io/ent/examples/privacytenant/rule"
 	"entgo.io/ent/schema/edge"
+	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/mixin"
 )
 
@@ -20,10 +21,14 @@ type BaseMixin struct {
 // Policy defines the privacy policy of the BaseMixin.
 func (BaseMixin) Policy() ent.Policy {
 	return privacy.Policy{
-		Mutation: privacy.MutationPolicy{
-			rule.DenyIfNoViewer(),
-		},
 		Query: privacy.QueryPolicy{
+			// Deny any operation in case there is no "viewer context".
+			rule.DenyIfNoViewer(),
+			// Allow admins to query any information.
+			rule.AllowIfAdmin(),
+		},
+		Mutation: privacy.MutationPolicy{
+			// Deny any operation in case there is no "viewer context".
 			rule.DenyIfNoViewer(),
 		},
 	}
@@ -34,10 +39,18 @@ type TenantMixin struct {
 	mixin.Schema
 }
 
+// Fields for all schemas that embed TenantMixin.
+func (TenantMixin) Fields() []ent.Field {
+	return []ent.Field{
+		field.Int("tenant_id"),
+	}
+}
+
 // Edges for all schemas that embed TenantMixin.
 func (TenantMixin) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("tenant", Tenant.Type).
+			Field("tenant_id").
 			Unique().
 			Required(),
 	}
@@ -45,12 +58,5 @@ func (TenantMixin) Edges() []ent.Edge {
 
 // Policy for all schemas that embed TenantMixin.
 func (TenantMixin) Policy() ent.Policy {
-	return privacy.Policy{
-		Query: privacy.QueryPolicy{
-			rule.AllowIfAdmin(),
-			// Filter out entities that are not connected to the tenant.
-			// If the viewer is admin, this policy rule is skipped above.
-			rule.FilterTenantRule(),
-		},
-	}
+	return rule.FilterTenantRule()
 }

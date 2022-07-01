@@ -22,8 +22,8 @@ const (
 
 // Viewer describes the query/mutation viewer-context.
 type Viewer interface {
-	Admin() bool    // If viewer is admin.
-	Tenant() string // Tenant name.
+	Admin() bool         // If viewer is admin.
+	Tenant() (int, bool) // Tenant identifier.
 }
 
 // UserViewer describes a user-viewer.
@@ -36,11 +36,11 @@ func (v UserViewer) Admin() bool {
 	return v.Role&Admin != 0
 }
 
-func (v UserViewer) Tenant() string {
+func (v UserViewer) Tenant() (int, bool) {
 	if v.T != nil {
-		return v.T.Name
+		return v.T.ID, true
 	}
-	return ""
+	return 0, false
 }
 
 type ctxKey struct{}

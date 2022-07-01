@@ -287,10 +287,16 @@ type BaseMixin struct {
 // Policy defines the privacy policy of the BaseMixin.
 func (BaseMixin) Policy() ent.Policy {
 	return privacy.Policy{
-		Mutation: privacy.MutationPolicy{
-			rule.DenyIfNoViewer(),
-		},
 		Query: privacy.QueryPolicy{
+			// Deny any query operation in case
+			// there is no "viewer context".
+			rule.DenyIfNoViewer(),
+			// Allow admins to query any information.
+			rule.AllowIfAdmin(),
+		},
+		Mutation: privacy.MutationPolicy{
+			// Deny any mutation operation in case
+			// there is no "viewer context".
 			rule.DenyIfNoViewer(),
 		},
 	}
@@ -329,30 +335,39 @@ func (Tenant) Policy() ent.Policy {
 Then, we expect the following code to run successfully:
 
 ```go title="examples/privacytenant/example_test.go"
-func Do(ctx context.Context, client *ent.Client) error {
-	// Expect operation to fail, because viewer-context
-	// is missing (first mutation rule check).
+
+func Example_CreateTenants(ctx context.Context, client *ent.Client) {
+	// Expect operation to fail in case viewer-context is missing.
+	// First mutation privacy policy rule defined in BaseMixin.
 	if err := client.Tenant.Create().Exec(ctx); !errors.Is(err, privacy.Deny) {
-		return fmt.Errorf("expect operation to fail, but got %w", err)
+		log.Fatal("expect tenant creation to fail, but got:", err)
 	}
-	// Deny tenant creation if the viewer is not admin.
+
+	// Expect operation to fail in case the ent.User in the viewer-context
+	// is not an admin user. Privacy policy defined in the Tenant schema.
 	viewCtx := viewer.NewContext(ctx, viewer.UserViewer{Role: viewer.View})
 	if err := client.Tenant.Create().Exec(viewCtx); !errors.Is(err, privacy.Deny) {
-		return fmt.Errorf("expect operation to fail, but got %w", err)
+		log.Fatal("expect tenant creation to fail, but got:", err)
 	}
-	// Apply the same operation with "Admin" role, expect it to pass.
+
+	// Operations should pass successfully as the user in the viewer-context
+	// is an admin user. First mutation privacy policy in Tenant schema.
 	adminCtx := viewer.NewContext(ctx, viewer.UserViewer{Role: viewer.Admin})
 	hub, err := client.Tenant.Create().SetName("GitHub").Save(adminCtx)
 	if err != nil {
-		return fmt.Errorf("expect operation to pass, but got %w", err)
+		log.Fatal("expect tenant creation to pass, but got:", err)
 	}
 	fmt.Println(hub)
+
 	lab, err := client.Tenant.Create().SetName("GitLab").Save(adminCtx)
 	if err != nil {
-		return fmt.Errorf("expect operation to pass, but got %w", err)
+		log.Fatal("expect tenant creation to pass, but got:", err)
 	}
 	fmt.Println(lab)
-    return nil
+	
+	// Output:
+	// Tenant(id=1, name=GitHub)
+	// Tenant(id=2, name=GitLab)
 }
 ```
 
@@ -365,10 +380,18 @@ type TenantMixin struct {
 	mixin.Schema
 }
 
+// Fields for all schemas that embed TenantMixin.
+func (TenantMixin) Fields() []ent.Field {
+	return []ent.Field{
+		field.Int("tenant_id"),
+	}
+}
+
 // Edges for all schemas that embed TenantMixin.
 func (TenantMixin) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("tenant", Tenant.Type).
+			Field("tenant_id").
 			Unique().
 			Required(),
 	}
@@ -382,7 +405,9 @@ For use cases like this, Ent has an additional type of privacy rule named `Filte
 We can use `Filter` rules to filter out entities based on the identity of the viewer.
 Unlike the rules we previously discussed, `Filter` rules can limit the scope of the queries a viewer can make, in addition to returning privacy decisions. 
 
-> Note, the privacy filtering option needs to be enabled using the [`entql`](features.md#entql-filtering) feature-flag (see instructions [above](#configuration)).
+:::info Note
+The privacy filtering option needs to be enabled using the [`entql`](features.md#entql-filtering) feature-flag (see instructions [above](#configuration)).
+:::
 
 ```go title="examples/privacytenant/rule/rule.go"
 // FilterTenantRule is a query/mutation rule that filters out entities that are not in the tenant.
@@ -390,19 +415,20 @@ func FilterTenantRule() privacy.QueryMutationRule {
 	// TenantsFilter is an interface to wrap WhereHasTenantWith()
 	// predicate that is used by both `Group` and `User` schemas.
 	type TenantsFilter interface {
-		WhereHasTenantWith(...predicate.Tenant)
+		WhereTenantID(entql.IntP)
 	}
 	return privacy.FilterFunc(func(ctx context.Context, f privacy.Filter) error {
 		view := viewer.FromContext(ctx)
-		if view.Tenant() == "" {
+		tid, ok := view.Tenant()
+		if !ok {
 			return privacy.Denyf("missing tenant information in viewer")
 		}
 		tf, ok := f.(TenantsFilter)
 		if !ok {
 			return privacy.Denyf("unexpected filter type %T", f)
 		}
-		// Make sure that a tenant reads only entities that has an edge to it.
-		tf.WhereHasTenantWith(tenant.Name(view.Tenant()))
+		// Make sure that a tenant reads only entities that have an edge to it.
+		tf.WhereTenantID(entql.IntEQ(tid))
 		// Skip to the next privacy rule (equivalent to return nil).
 		return privacy.Skip
 	})
@@ -415,48 +441,94 @@ that use this mixin, will also have this privacy rule.
 ```go title="examples/privacytenant/ent/schema/mixin.go"
 // Policy for all schemas that embed TenantMixin.
 func (TenantMixin) Policy() ent.Policy {
-	return privacy.Policy{
-		Query: privacy.QueryPolicy{
-			rule.AllowIfAdmin(),
-			// Filter out entities that are not connected to the tenant.
-			// If the viewer is admin, this policy rule is skipped above.
-			rule.FilterTenantRule(),
-		},
-	}
+	return rule.FilterTenantRule()
 }
 ```
 
 Then, after running the code-generation, we expect the privacy-rules to take effect on the client operations.
 
 ```go title="examples/privacytenant/example_test.go"
-func Do(ctx context.Context, client *ent.Client) error {
-    // A continuation of the code-block above.
 
-	// Create 2 users connected to the 2 tenants we created above
-	hubUser := client.User.Create().SetName("a8m").SetTenant(hub).SaveX(adminCtx)
-	labUser := client.User.Create().SetName("nati").SetTenant(lab).SaveX(adminCtx)
+func Example_TenantView(ctx context.Context, client *ent.Client) {
+	// Operations should pass successfully as the user in the viewer-context
+	// is an admin user. First mutation privacy policy in Tenant schema.
+	adminCtx := viewer.NewContext(ctx, viewer.UserViewer{Role: viewer.Admin})
+	hub := client.Tenant.Create().SetName("GitHub").SaveX(adminCtx)
+	lab := client.Tenant.Create().SetName("GitLab").SaveX(adminCtx)
 
+	// Create 2 tenant-specific viewer contexts.
 	hubView := viewer.NewContext(ctx, viewer.UserViewer{T: hub})
-	out := client.User.Query().OnlyX(hubView)
-	// Expect that "GitHub" tenant to read only its users (i.e. a8m).
-	if out.ID != hubUser.ID {
-		return fmt.Errorf("expect result for user query, got %v", out)
-	}
-	fmt.Println(out)
-
 	labView := viewer.NewContext(ctx, viewer.UserViewer{T: lab})
-	out = client.User.Query().OnlyX(labView)
-	// Expect that "GitLab" tenant to read only its users (i.e. nati).
-	if out.ID != labUser.ID {
-		return fmt.Errorf("expect result for user query, got %v", out)
+
+	// Create 2 users in each tenant.
+	hubUsers := client.User.CreateBulk(
+		client.User.Create().SetName("a8m").SetTenant(hub),
+		client.User.Create().SetName("nati").SetTenant(hub),
+	).SaveX(hubView)
+	fmt.Println(hubUsers)
+
+	labUsers := client.User.CreateBulk(
+		client.User.Create().SetName("foo").SetTenant(lab),
+		client.User.Create().SetName("bar").SetTenant(lab),
+	).SaveX(labView)
+	fmt.Println(labUsers)
+
+	// Query users should fail in case viewer-context is missing.
+	if _, err := client.User.Query().Count(ctx); !errors.Is(err, privacy.Deny) {
+		log.Fatal("expect user query to fail, but got:", err)
 	}
-	fmt.Println(out)
-	return nil
+
+	// Ensure each tenant can see only its users.
+	// First and only rule in TenantMixin.
+	fmt.Println(client.User.Query().Select(user.FieldName).StringsX(hubView))
+	fmt.Println(client.User.Query().CountX(hubView))
+	fmt.Println(client.User.Query().Select(user.FieldName).StringsX(labView))
+	fmt.Println(client.User.Query().CountX(labView))
+
+	// Expect admin users to see everything. First
+	// query privacy policy defined in BaseMixin.
+	fmt.Println(client.User.Query().CountX(adminCtx)) // 4
+
+	// Update operation with specific tenant-view should update
+	// only the tenant in the viewer-context.
+	client.User.Update().SetFoods([]string{"pizza"}).SaveX(hubView)
+	fmt.Println(client.User.Query().AllX(hubView))
+	fmt.Println(client.User.Query().AllX(labView))
+
+	// Delete operation with specific tenant-view should delete
+	// only the tenant in the viewer-context.
+	client.User.Delete().ExecX(labView)
+	fmt.Println(
+		client.User.Query().CountX(hubView), // 2
+		client.User.Query().CountX(labView), // 0
+	)
+
+	// DeleteOne with wrong viewer-context is nop.
+	client.User.DeleteOne(hubUsers[0]).ExecX(labView)
+	fmt.Println(client.User.Query().CountX(hubView)) // 2
+
+	// Unlike queries, admin users are not allowed to mutate tenant specific data.
+	if err := client.User.DeleteOne(hubUsers[0]).Exec(adminCtx); !errors.Is(err, privacy.Deny) {
+		log.Fatal("expect user deletion to fail, but got:", err)
+	}
+
+	// Output:
+	// [User(id=1, tenant_id=1, name=a8m, foods=[]) User(id=2, tenant_id=1, name=nati, foods=[])]
+	// [User(id=3, tenant_id=2, name=foo, foods=[]) User(id=4, tenant_id=2, name=bar, foods=[])]
+	// [a8m nati]
+	// 2
+	// [foo bar]
+	// 2
+	// 4
+	// [User(id=1, tenant_id=1, name=a8m, foods=[pizza]) User(id=2, tenant_id=1, name=nati, foods=[pizza])]
+	// [User(id=3, tenant_id=2, name=foo, foods=[]) User(id=4, tenant_id=2, name=bar, foods=[])]
+	// 2 0
+	// 2
 }
 ```
 
 We finish our example with another privacy-rule named `DenyMismatchedTenants` on the `Group` schema.
-The `DenyMismatchedTenants` rule rejects group creation if the associated users don't belong to
+The `DenyMismatchedTenants` rule rejects group creation if the associated users do not belong to
 the same tenant as the group.
 
 ```go title="examples/privacytenant/rule/rule.go"
@@ -473,14 +545,19 @@ func DenyMismatchedTenants() privacy.MutationRule {
 		if len(users) == 0 {
 			return privacy.Skip
 		}
-		// Query the tenant-id of all users. Expect to have exact 1 result,
-		// and it matches the tenant-id of the group above.
-		id, err := m.Client().User.Query().Where(user.IDIn(users...)).QueryTenant().OnlyID(ctx)
+		// Query the tenant-ids of all attached users. Expect all users to be connected to the same tenant
+		// as the group. Note, we use privacy.DecisionContext to skip the FilterTenantRule defined above.
+		ids, err := m.Client().User.Query().Where(user.IDIn(users...)).Select(user.FieldTenantID).Ints(privacy.DecisionContext(ctx, privacy.Allow))
 		if err != nil {
-			return privacy.Denyf("querying the tenant-id %v", err)
+			return privacy.Denyf("querying the tenant-ids %v", err)
 		}
-		if id != tid {
-			return privacy.Denyf("mismatch tenant-ids for group/users %d != %d", tid, id)
+		if len(ids) != len(users) {
+			return privacy.Denyf("one the attached users is not connected to a tenant %v", err)
+		}
+		for _, id := range ids {
+			if id != tid {
+				return privacy.Denyf("mismatch tenant-ids for group/users %d != %d", tid, id)
+			}
 		}
 		// Skip to the next privacy rule (equivalent to return nil).
 		return privacy.Skip
@@ -509,72 +586,71 @@ func (Group) Policy() ent.Policy {
 Again, we expect the privacy-rules to take effect on the client operations.
 
 ```go title="examples/privacytenant/example_test.go"
-func Do(ctx context.Context, client *ent.Client) error {
-    // A continuation of the code-block above.
+func Example_DenyMismatchedTenants(ctx context.Context, client *ent.Client) {
+	// Operation should pass successfully as the user in the viewer-context
+	// is an admin user. First mutation privacy policy in Tenant schema.
+	adminCtx := viewer.NewContext(ctx, viewer.UserViewer{Role: viewer.Admin})
+	hub := client.Tenant.Create().SetName("GitHub").SaveX(adminCtx)
+	lab := client.Tenant.Create().SetName("GitLab").SaveX(adminCtx)
 
-	// Expect operation to fail because the DenyMismatchedTenants rule
-	// makes sure the group and the users are connected to the same tenant.
-	err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(labUser).Exec(adminCtx)
-	if !errors.Is(err, privacy.Deny) {
-		return fmt.Errorf("expect operation to fail, since user (nati) is not connected to the same tenant")
+	// Create 2 tenant-specific viewer contexts.
+	hubView := viewer.NewContext(ctx, viewer.UserViewer{T: hub})
+	labView := viewer.NewContext(ctx, viewer.UserViewer{T: lab})
+
+	// Create 2 users in each tenant.
+	hubUsers := client.User.CreateBulk(
+		client.User.Create().SetName("a8m").SetTenant(hub),
+		client.User.Create().SetName("nati").SetTenant(hub),
+	).SaveX(hubView)
+	fmt.Println(hubUsers)
+
+	labUsers := client.User.CreateBulk(
+		client.User.Create().SetName("foo").SetTenant(lab),
+		client.User.Create().SetName("bar").SetTenant(lab),
+	).SaveX(labView)
+	fmt.Println(labUsers)
+
+	// Expect operation to fail as the DenyMismatchedTenants rule makes
+	// sure the group and the users are connected to the same tenant.
+	if err := client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(labUsers...).Exec(hubView); !errors.Is(err, privacy.Deny) {
+		log.Fatal("expect operation to fail, since labUsers are not connected to the same tenant")
 	}
-	err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(labUser, hubUser).Exec(adminCtx)
-	if !errors.Is(err, privacy.Deny) {
-		return fmt.Errorf("expect operation to fail, since some users (nati) are not connected to the same tenant")
+	if err := client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(hubUsers[0], labUsers[0]).Exec(hubView); !errors.Is(err, privacy.Deny) {
+		log.Fatal("expect operation to fail, since labUsers[0] is not connected to the same tenant")
 	}
-	entgo, err := client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(hubUser).Save(adminCtx)
-	if err != nil {
-		return fmt.Errorf("expect operation to pass, but got %w", err)
-	}
+	// Expect mutation to pass as all users belong to the same tenant as the group.
+	entgo := client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(hubUsers...).SaveX(hubView)
 	fmt.Println(entgo)
-	return nil
+
+	// Output:
+	// [User(id=1, tenant_id=1, name=a8m, foods=[]) User(id=2, tenant_id=1, name=nati, foods=[])]
+	// [User(id=3, tenant_id=2, name=foo, foods=[]) User(id=4, tenant_id=2, name=bar, foods=[])]
+	// Group(id=1, tenant_id=1, name=entgo.io)
 }
 ```
 
-In some cases, we want to reject user operations on entities that don't belong to their tenant **without loading
-these entities from the database** (unlike the `DenyMismatchedTenants` example above). 
-To achieve this, we can use the `FilterTenantRule` rule for mutations as well, but limit it to specific operations as follows:
-
-```go title="examples/privacytenant/ent/schema/group.go"
-// Policy defines the privacy policy of the Group.
-func (Group) Policy() ent.Policy {
-	return privacy.Policy{
-		Mutation: privacy.MutationPolicy{
-			// Limit DenyMismatchedTenants only for
-			// Create operations
-			privacy.OnMutationOperation(
-				rule.DenyMismatchedTenants(),
-				ent.OpCreate,
-			),
-			// Limit the FilterTenantRule only for
-			// UpdateOne and DeleteOne operations.
-			privacy.OnMutationOperation(
-				rule.FilterTenantRule(),
-				ent.OpUpdateOne|ent.OpDeleteOne,
-			),
-		},
-	}
-}
-```
-
-Then, we expect the privacy-rules to take effect on the client operations.
+In some cases, we want to reject user operations on entities that do not belong to their tenant **without loading
+these entities from the database** (unlike the `DenyMismatchedTenants` example above).
+To achieve this, we rely on the `FilterTenantRule` rule to add its filtering on mutations as well, and expect
+operations to fail with `NotFoundError` in case the `tenant_id` column does not match the one stored in the
+viewer-context.
 
 ```go title="examples/privacytenant/example_test.go"
-func Do(ctx context.Context, client *ent.Client) error {
-    // A continuation of the code-block above.
-
+func Example_DenyMismatchedView(ctx context.Context, client *ent.Client) {
+	// Continuation of the code above.
+	
 	// Expect operation to fail, because the FilterTenantRule rule makes sure
 	// that tenants can update and delete only their groups.
-	err = entgo.Update().SetName("fail.go").Exec(labView)
-	if !ent.IsNotFound(err) {
-		return fmt.Errorf("expect operation to fail, since the group (entgo) is managed by a different tenant (hub), but got %w", err)
+	if err := entgo.Update().SetName("fail.go").Exec(labView); !ent.IsNotFound(err) {
+		log.Fatal("expect operation to fail, since the group (entgo) is managed by a different tenant (hub), but got:", err)
 	}
-	entgo, err = entgo.Update().SetName("entgo").Save(hubView)
-	if err != nil {
-		return fmt.Errorf("expect operation to pass, but got %w", err)
-	}
+
+	// Operation should pass in case it was applied with the right viewer-context.
+	entgo = entgo.Update().SetName("entgo").SaveX(hubView)
 	fmt.Println(entgo)
-	return nil
+
+	// Output:
+	// Group(id=1, tenant_id=1, name=entgo)
 }
 ```
 
