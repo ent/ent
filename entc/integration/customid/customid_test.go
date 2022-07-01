@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"net"
 	"strconv"
-	"strings"
 	"testing"
 
 	"entgo.io/ent/dialect"
@@ -182,24 +181,19 @@ func CustomID(t *testing.T, client *ent.Client) {
 	t.Run("IntSID", func(t *testing.T) {
 		root := client.IntSID.Create().SaveX(ctx)
 		require.EqualValues(t, sid.ID("1"), root.ID)
-		cid := sid.ID("100")
-		child := client.IntSID.Create().SetID(cid).SetParent(root).SaveX(ctx)
-		require.EqualValues(t, cid, child.ID)
-		require.EqualValues(t, root.ID, child.QueryParent().OnlyX(ctx).ID)
 		children := client.IntSID.CreateBulk(
 			client.IntSID.Create().SetParent(root),
 			client.IntSID.Create().SetParent(root),
 		).SaveX(ctx)
-		if strings.HasPrefix(t.Name(), "TestPostgres/") {
-			require.EqualValues(t, sid.ID("2"), children[0].ID)
-			require.EqualValues(t, sid.ID("3"), children[1].ID)
-		} else {
-			require.EqualValues(t, sid.ID("101"), children[0].ID)
-			require.EqualValues(t, sid.ID("102"), children[1].ID)
-		}
+		require.EqualValues(t, sid.ID("2"), children[0].ID)
+		require.EqualValues(t, sid.ID("3"), children[1].ID)
 		el := client.IntSID.Query().Where(intsid.ID(root.ID)).WithChildren().AllX(ctx)
 		require.EqualValues(t, 1, len(el))
-		require.EqualValues(t, 3, len(el[0].Edges.Children))
+		require.EqualValues(t, 2, len(el[0].Edges.Children))
+		cid := sid.ID("100")
+		child := client.IntSID.Create().SetID(cid).SetParent(root).SaveX(ctx)
+		require.EqualValues(t, cid, child.ID)
+		require.EqualValues(t, root.ID, child.QueryParent().OnlyX(ctx).ID)
 	})
 
 	t.Run("Upsert", func(t *testing.T) {
