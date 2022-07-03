@@ -12,6 +12,8 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
@@ -25,6 +27,7 @@ type TweetTagCreate struct {
 	config
 	mutation *TweetTagMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetAddedAt sets the "added_at" field.
@@ -213,6 +216,7 @@ func (ttc *TweetTagCreate) createSpec() (*TweetTag, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+	_spec.OnConflict = ttc.conflict
 	if id, ok := ttc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
@@ -268,10 +272,228 @@ func (ttc *TweetTagCreate) createSpec() (*TweetTag, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.TweetTag.Create().
+//		SetAddedAt(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.TweetTagUpsert) {
+//			SetAddedAt(v+v).
+//		}).
+//		Exec(ctx)
+//
+func (ttc *TweetTagCreate) OnConflict(opts ...sql.ConflictOption) *TweetTagUpsertOne {
+	ttc.conflict = opts
+	return &TweetTagUpsertOne{
+		create: ttc,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.TweetTag.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+//
+func (ttc *TweetTagCreate) OnConflictColumns(columns ...string) *TweetTagUpsertOne {
+	ttc.conflict = append(ttc.conflict, sql.ConflictColumns(columns...))
+	return &TweetTagUpsertOne{
+		create: ttc,
+	}
+}
+
+type (
+	// TweetTagUpsertOne is the builder for "upsert"-ing
+	//  one TweetTag node.
+	TweetTagUpsertOne struct {
+		create *TweetTagCreate
+	}
+
+	// TweetTagUpsert is the "OnConflict" setter.
+	TweetTagUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetAddedAt sets the "added_at" field.
+func (u *TweetTagUpsert) SetAddedAt(v time.Time) *TweetTagUpsert {
+	u.Set(tweettag.FieldAddedAt, v)
+	return u
+}
+
+// UpdateAddedAt sets the "added_at" field to the value that was provided on create.
+func (u *TweetTagUpsert) UpdateAddedAt() *TweetTagUpsert {
+	u.SetExcluded(tweettag.FieldAddedAt)
+	return u
+}
+
+// SetTagID sets the "tag_id" field.
+func (u *TweetTagUpsert) SetTagID(v int) *TweetTagUpsert {
+	u.Set(tweettag.FieldTagID, v)
+	return u
+}
+
+// UpdateTagID sets the "tag_id" field to the value that was provided on create.
+func (u *TweetTagUpsert) UpdateTagID() *TweetTagUpsert {
+	u.SetExcluded(tweettag.FieldTagID)
+	return u
+}
+
+// SetTweetID sets the "tweet_id" field.
+func (u *TweetTagUpsert) SetTweetID(v int) *TweetTagUpsert {
+	u.Set(tweettag.FieldTweetID, v)
+	return u
+}
+
+// UpdateTweetID sets the "tweet_id" field to the value that was provided on create.
+func (u *TweetTagUpsert) UpdateTweetID() *TweetTagUpsert {
+	u.SetExcluded(tweettag.FieldTweetID)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
+// Using this option is equivalent to using:
+//
+//	client.TweetTag.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(tweettag.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+//
+func (u *TweetTagUpsertOne) UpdateNewValues() *TweetTagUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(tweettag.FieldID)
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//  client.TweetTag.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
+func (u *TweetTagUpsertOne) Ignore() *TweetTagUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *TweetTagUpsertOne) DoNothing() *TweetTagUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the TweetTagCreate.OnConflict
+// documentation for more info.
+func (u *TweetTagUpsertOne) Update(set func(*TweetTagUpsert)) *TweetTagUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&TweetTagUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetAddedAt sets the "added_at" field.
+func (u *TweetTagUpsertOne) SetAddedAt(v time.Time) *TweetTagUpsertOne {
+	return u.Update(func(s *TweetTagUpsert) {
+		s.SetAddedAt(v)
+	})
+}
+
+// UpdateAddedAt sets the "added_at" field to the value that was provided on create.
+func (u *TweetTagUpsertOne) UpdateAddedAt() *TweetTagUpsertOne {
+	return u.Update(func(s *TweetTagUpsert) {
+		s.UpdateAddedAt()
+	})
+}
+
+// SetTagID sets the "tag_id" field.
+func (u *TweetTagUpsertOne) SetTagID(v int) *TweetTagUpsertOne {
+	return u.Update(func(s *TweetTagUpsert) {
+		s.SetTagID(v)
+	})
+}
+
+// UpdateTagID sets the "tag_id" field to the value that was provided on create.
+func (u *TweetTagUpsertOne) UpdateTagID() *TweetTagUpsertOne {
+	return u.Update(func(s *TweetTagUpsert) {
+		s.UpdateTagID()
+	})
+}
+
+// SetTweetID sets the "tweet_id" field.
+func (u *TweetTagUpsertOne) SetTweetID(v int) *TweetTagUpsertOne {
+	return u.Update(func(s *TweetTagUpsert) {
+		s.SetTweetID(v)
+	})
+}
+
+// UpdateTweetID sets the "tweet_id" field to the value that was provided on create.
+func (u *TweetTagUpsertOne) UpdateTweetID() *TweetTagUpsertOne {
+	return u.Update(func(s *TweetTagUpsert) {
+		s.UpdateTweetID()
+	})
+}
+
+// Exec executes the query.
+func (u *TweetTagUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for TweetTagCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *TweetTagUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *TweetTagUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: TweetTagUpsertOne.ID is not supported by MySQL driver. Use TweetTagUpsertOne.Exec instead")
+	}
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *TweetTagUpsertOne) IDX(ctx context.Context) uuid.UUID {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // TweetTagCreateBulk is the builder for creating many TweetTag entities in bulk.
 type TweetTagCreateBulk struct {
 	config
 	builders []*TweetTagCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the TweetTag entities in the database.
@@ -298,6 +520,7 @@ func (ttcb *TweetTagCreateBulk) Save(ctx context.Context) ([]*TweetTag, error) {
 					_, err = mutators[i+1].Mutate(root, ttcb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = ttcb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, ttcb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -344,6 +567,164 @@ func (ttcb *TweetTagCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (ttcb *TweetTagCreateBulk) ExecX(ctx context.Context) {
 	if err := ttcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.TweetTag.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.TweetTagUpsert) {
+//			SetAddedAt(v+v).
+//		}).
+//		Exec(ctx)
+//
+func (ttcb *TweetTagCreateBulk) OnConflict(opts ...sql.ConflictOption) *TweetTagUpsertBulk {
+	ttcb.conflict = opts
+	return &TweetTagUpsertBulk{
+		create: ttcb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.TweetTag.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+//
+func (ttcb *TweetTagCreateBulk) OnConflictColumns(columns ...string) *TweetTagUpsertBulk {
+	ttcb.conflict = append(ttcb.conflict, sql.ConflictColumns(columns...))
+	return &TweetTagUpsertBulk{
+		create: ttcb,
+	}
+}
+
+// TweetTagUpsertBulk is the builder for "upsert"-ing
+// a bulk of TweetTag nodes.
+type TweetTagUpsertBulk struct {
+	create *TweetTagCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.TweetTag.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(tweettag.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+//
+func (u *TweetTagUpsertBulk) UpdateNewValues() *TweetTagUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(tweettag.FieldID)
+				return
+			}
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.TweetTag.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+//
+func (u *TweetTagUpsertBulk) Ignore() *TweetTagUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *TweetTagUpsertBulk) DoNothing() *TweetTagUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the TweetTagCreateBulk.OnConflict
+// documentation for more info.
+func (u *TweetTagUpsertBulk) Update(set func(*TweetTagUpsert)) *TweetTagUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&TweetTagUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetAddedAt sets the "added_at" field.
+func (u *TweetTagUpsertBulk) SetAddedAt(v time.Time) *TweetTagUpsertBulk {
+	return u.Update(func(s *TweetTagUpsert) {
+		s.SetAddedAt(v)
+	})
+}
+
+// UpdateAddedAt sets the "added_at" field to the value that was provided on create.
+func (u *TweetTagUpsertBulk) UpdateAddedAt() *TweetTagUpsertBulk {
+	return u.Update(func(s *TweetTagUpsert) {
+		s.UpdateAddedAt()
+	})
+}
+
+// SetTagID sets the "tag_id" field.
+func (u *TweetTagUpsertBulk) SetTagID(v int) *TweetTagUpsertBulk {
+	return u.Update(func(s *TweetTagUpsert) {
+		s.SetTagID(v)
+	})
+}
+
+// UpdateTagID sets the "tag_id" field to the value that was provided on create.
+func (u *TweetTagUpsertBulk) UpdateTagID() *TweetTagUpsertBulk {
+	return u.Update(func(s *TweetTagUpsert) {
+		s.UpdateTagID()
+	})
+}
+
+// SetTweetID sets the "tweet_id" field.
+func (u *TweetTagUpsertBulk) SetTweetID(v int) *TweetTagUpsertBulk {
+	return u.Update(func(s *TweetTagUpsert) {
+		s.SetTweetID(v)
+	})
+}
+
+// UpdateTweetID sets the "tweet_id" field to the value that was provided on create.
+func (u *TweetTagUpsertBulk) UpdateTweetID() *TweetTagUpsertBulk {
+	return u.Update(func(s *TweetTagUpsert) {
+		s.UpdateTweetID()
+	})
+}
+
+// Exec executes the query.
+func (u *TweetTagUpsertBulk) Exec(ctx context.Context) error {
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the TweetTagCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for TweetTagCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *TweetTagUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

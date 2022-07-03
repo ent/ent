@@ -909,6 +909,7 @@ func (c *creator) node(ctx context.Context, drv dialect.Driver) error {
 		// In case the spec does not contain an ID field, we assume
 		// we interact with an edge-schema with composite primary key.
 		if c.ID == nil {
+			c.ensureConflict(insert)
 			query, args := insert.Query()
 			return c.tx.Exec(ctx, query, args, nil)
 		}
@@ -948,10 +949,7 @@ func (c *creator) setTableColumns(insert *sql.InsertBuilder, edges map[Rel][]*Ed
 
 // insert a node to its table and sets its ID if it was not provided by the user.
 func (c *creator) insert(ctx context.Context, insert *sql.InsertBuilder) error {
-	if opts := c.CreateSpec.OnConflict; len(opts) > 0 {
-		insert.OnConflict(opts...)
-		c.ensureLastInsertID(insert)
-	}
+	c.ensureConflict(insert)
 	// If the id field was provided by the user.
 	if c.ID.Value != nil {
 		insert.Set(c.ID.Column, c.ID.Value)
@@ -965,10 +963,18 @@ func (c *creator) insert(ctx context.Context, insert *sql.InsertBuilder) error {
 	return c.insertLastID(ctx, insert.Returning(c.ID.Column))
 }
 
+// ensureConflict ensures the ON CONFLICT is added to the insert statement.
+func (c *creator) ensureConflict(insert *sql.InsertBuilder) {
+	if opts := c.CreateSpec.OnConflict; len(opts) > 0 {
+		insert.OnConflict(opts...)
+		c.ensureLastInsertID(insert)
+	}
+}
+
 // ensureLastInsertID ensures the LAST_INSERT_ID was added to the
 // 'ON DUPLICATE .. UPDATE' clause in it was not provided.
 func (c *creator) ensureLastInsertID(insert *sql.InsertBuilder) {
-	if !c.ID.Type.Numeric() || c.ID.Value != nil || insert.Dialect() != dialect.MySQL {
+	if c.ID == nil || !c.ID.Type.Numeric() || c.ID.Value != nil || insert.Dialect() != dialect.MySQL {
 		return
 	}
 	insert.OnConflict(sql.ResolveWith(func(s *sql.UpdateSet) {

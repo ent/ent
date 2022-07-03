@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
@@ -26,6 +27,7 @@ type TweetCreate struct {
 	config
 	mutation *TweetMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetText sets the "text" field.
@@ -215,6 +217,7 @@ func (tc *TweetCreate) createSpec() (*Tweet, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+	_spec.OnConflict = tc.conflict
 	if value, ok := tc.mutation.Text(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -336,10 +339,163 @@ func (tc *TweetCreate) createSpec() (*Tweet, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Tweet.Create().
+//		SetText(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.TweetUpsert) {
+//			SetText(v+v).
+//		}).
+//		Exec(ctx)
+//
+func (tc *TweetCreate) OnConflict(opts ...sql.ConflictOption) *TweetUpsertOne {
+	tc.conflict = opts
+	return &TweetUpsertOne{
+		create: tc,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Tweet.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+//
+func (tc *TweetCreate) OnConflictColumns(columns ...string) *TweetUpsertOne {
+	tc.conflict = append(tc.conflict, sql.ConflictColumns(columns...))
+	return &TweetUpsertOne{
+		create: tc,
+	}
+}
+
+type (
+	// TweetUpsertOne is the builder for "upsert"-ing
+	//  one Tweet node.
+	TweetUpsertOne struct {
+		create *TweetCreate
+	}
+
+	// TweetUpsert is the "OnConflict" setter.
+	TweetUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetText sets the "text" field.
+func (u *TweetUpsert) SetText(v string) *TweetUpsert {
+	u.Set(tweet.FieldText, v)
+	return u
+}
+
+// UpdateText sets the "text" field to the value that was provided on create.
+func (u *TweetUpsert) UpdateText() *TweetUpsert {
+	u.SetExcluded(tweet.FieldText)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// Using this option is equivalent to using:
+//
+//	client.Tweet.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+//
+func (u *TweetUpsertOne) UpdateNewValues() *TweetUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//  client.Tweet.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
+func (u *TweetUpsertOne) Ignore() *TweetUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *TweetUpsertOne) DoNothing() *TweetUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the TweetCreate.OnConflict
+// documentation for more info.
+func (u *TweetUpsertOne) Update(set func(*TweetUpsert)) *TweetUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&TweetUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetText sets the "text" field.
+func (u *TweetUpsertOne) SetText(v string) *TweetUpsertOne {
+	return u.Update(func(s *TweetUpsert) {
+		s.SetText(v)
+	})
+}
+
+// UpdateText sets the "text" field to the value that was provided on create.
+func (u *TweetUpsertOne) UpdateText() *TweetUpsertOne {
+	return u.Update(func(s *TweetUpsert) {
+		s.UpdateText()
+	})
+}
+
+// Exec executes the query.
+func (u *TweetUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for TweetCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *TweetUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *TweetUpsertOne) ID(ctx context.Context) (id int, err error) {
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *TweetUpsertOne) IDX(ctx context.Context) int {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // TweetCreateBulk is the builder for creating many Tweet entities in bulk.
 type TweetCreateBulk struct {
 	config
 	builders []*TweetCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the Tweet entities in the database.
@@ -365,6 +521,7 @@ func (tcb *TweetCreateBulk) Save(ctx context.Context) ([]*Tweet, error) {
 					_, err = mutators[i+1].Mutate(root, tcb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = tcb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, tcb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -415,6 +572,125 @@ func (tcb *TweetCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (tcb *TweetCreateBulk) ExecX(ctx context.Context) {
 	if err := tcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Tweet.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.TweetUpsert) {
+//			SetText(v+v).
+//		}).
+//		Exec(ctx)
+//
+func (tcb *TweetCreateBulk) OnConflict(opts ...sql.ConflictOption) *TweetUpsertBulk {
+	tcb.conflict = opts
+	return &TweetUpsertBulk{
+		create: tcb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Tweet.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+//
+func (tcb *TweetCreateBulk) OnConflictColumns(columns ...string) *TweetUpsertBulk {
+	tcb.conflict = append(tcb.conflict, sql.ConflictColumns(columns...))
+	return &TweetUpsertBulk{
+		create: tcb,
+	}
+}
+
+// TweetUpsertBulk is the builder for "upsert"-ing
+// a bulk of Tweet nodes.
+type TweetUpsertBulk struct {
+	create *TweetCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.Tweet.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+//
+func (u *TweetUpsertBulk) UpdateNewValues() *TweetUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.Tweet.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+//
+func (u *TweetUpsertBulk) Ignore() *TweetUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *TweetUpsertBulk) DoNothing() *TweetUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the TweetCreateBulk.OnConflict
+// documentation for more info.
+func (u *TweetUpsertBulk) Update(set func(*TweetUpsert)) *TweetUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&TweetUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetText sets the "text" field.
+func (u *TweetUpsertBulk) SetText(v string) *TweetUpsertBulk {
+	return u.Update(func(s *TweetUpsert) {
+		s.SetText(v)
+	})
+}
+
+// UpdateText sets the "text" field to the value that was provided on create.
+func (u *TweetUpsertBulk) UpdateText() *TweetUpsertBulk {
+	return u.Update(func(s *TweetUpsert) {
+		s.UpdateText()
+	})
+}
+
+// Exec executes the query.
+func (u *TweetUpsertBulk) Exec(ctx context.Context) error {
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the TweetCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for TweetCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *TweetUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
