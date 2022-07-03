@@ -58,6 +58,9 @@ func TestEdgeSchemaWithID(t *testing.T) {
 	require.Equal(t, []int{hub.ID, lab.ID}, []int{users[0].Edges.JoinedGroups[0].GroupID, users[0].Edges.JoinedGroups[1].GroupID})
 	require.Equal(t, []int{hub.ID, lab.ID}, []int{users[0].Edges.JoinedGroups[0].Edges.Group.ID, users[0].Edges.JoinedGroups[1].Edges.Group.ID})
 	require.Equal(t, hub.ID, users[1].Edges.JoinedGroups[0].GroupID)
+
+	// Ignore update as we already have such edge between a8m and hub.
+	client.UserGroup.Create().SetUser(a8m).SetGroup(hub).OnConflict().Ignore().ExecX(ctx)
 }
 
 func TestEdgeSchemaCompositeID(t *testing.T) {
@@ -114,6 +117,10 @@ func TestEdgeSchemaCompositeID(t *testing.T) {
 	require.Equal(t, 3, v[0].Count)
 	require.Equal(t, nat.ID, v[1].UserID)
 	require.Equal(t, 2, v[1].Count)
+
+	// Ignore update as we already have such edge between a8m and hub.
+	client.TweetLike.Create().SetUserID(like.UserID).SetTweetID(like.TweetID).OnConflict().Ignore().ExecX(ctx)
+	client.TweetLike.Create().SetUserID(like.UserID).SetTweetID(like.TweetID).OnConflict().DoNothing().ExecX(ctx)
 }
 
 func TestEdgeSchemaDefaultID(t *testing.T) {

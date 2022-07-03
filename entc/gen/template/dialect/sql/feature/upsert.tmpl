@@ -142,14 +142,15 @@ type (
 	{{ end }}
 {{ end }}
 
+{{ $udfID := false }}{{ if $.HasOneFieldID }}{{ $udfID = $.ID.UserDefined }}{{ end }}
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create{{ if $.ID.UserDefined }} except the ID field{{ end }}.
+// UpdateNewValues updates the mutable fields using the new values that were set on create{{ if $udfID }} except the ID field{{ end }}.
 // Using this option is equivalent to using:
 //
 //	client.{{ $.Name }}.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
-{{- if $.ID.UserDefined }}
+{{- if $udfID }}
 //			sql.ResolveWith(func(u *sql.UpdateSet) {
 //				u.SetIgnore({{ $.Package }}.{{ $.ID.Constant }})
 //			}),
@@ -159,9 +160,9 @@ type (
 //
 func (u *{{ $upsertOne }}) UpdateNewValues() *{{ $upsertOne }} {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	{{- if or $.ID.UserDefined $.ImmutableFields }}
+	{{- if or $udfID $.ImmutableFields }}
 		u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
-			{{- if $.ID.UserDefined }}
+			{{- if $udfID }}
 				if _, exists := u.create.mutation.ID(); exists {
 					s.SetIgnore({{ $.Package }}.{{ $.ID.Constant }})
 				}
@@ -223,33 +224,34 @@ func (u *{{ $upsertOne }}) ExecX(ctx context.Context) {
 	}
 }
 
-// Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *{{ $upsertOne }}) ID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
-	{{- if and $.ID.UserDefined (not $.ID.Type.Numeric) }}
-		if u.create.driver.Dialect() == dialect.MySQL {
-			// In case of "ON CONFLICT", there is no way to get back non-numeric ID
-			// fields from the database since MySQL does not support the RETURNING clause.
-			return id, errors.New("{{ $pkg }}: {{ $upsertOne }}.ID is not supported by MySQL driver. Use {{ $upsertOne }}.Exec instead")
+{{ if $.HasOneFieldID }}
+	// Exec executes the UPSERT query and returns the inserted/updated ID.
+	func (u *{{ $upsertOne }}) ID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
+		{{- if and $udfID (not $.ID.Type.Numeric) }}
+			if u.create.driver.Dialect() == dialect.MySQL {
+				// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+				// fields from the database since MySQL does not support the RETURNING clause.
+				return id, errors.New("{{ $pkg }}: {{ $upsertOne }}.ID is not supported by MySQL driver. Use {{ $upsertOne }}.Exec instead")
+			}
+		{{- end }}
+		node, err := u.create.Save(ctx)
+		if err != nil {
+			return id, err
 		}
-	{{- end }}
-	node, err := u.create.Save(ctx)
-	if err != nil {
-		return id, err
+		return node.ID, nil
 	}
-	return node.ID, nil
-}
 
-
-// IDX is like ID, but panics if an error occurs.
-func (u *{{ $upsertOne }}) IDX(ctx context.Context) {{ $.ID.Type }} {
-	id, err := u.ID(ctx)
-	if err != nil {
-		panic(err)
+	// IDX is like ID, but panics if an error occurs.
+	func (u *{{ $upsertOne }}) IDX(ctx context.Context) {{ $.ID.Type }} {
+		id, err := u.ID(ctx)
+		if err != nil {
+			panic(err)
+		}
+		return id
 	}
-	return id
-}
+{{ end }}
 
-{{- end }}
+{{ end }}
 
 
 {{ define "dialect/sql/create_bulk/additional/upsert" }}
@@ -265,6 +267,7 @@ func (u *{{ $upsertOne }}) IDX(ctx context.Context) {{ $.ID.Type }} {
 {{ $receiver := receiver $builder }}
 {{ $upsertBulk := print $.Name "UpsertBulk" }}
 {{ $upsertSet := print $.Name "Upsert" }}
+{{ $udfID := false }}{{ if $.HasOneFieldID }}{{ $udfID = $.ID.UserDefined }}{{ end }}
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
@@ -319,7 +322,7 @@ type {{ $upsertBulk }} struct {
 //	client.{{ $.Name }}.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
-{{- if $.ID.UserDefined }}
+{{- if $udfID }}
 //			sql.ResolveWith(func(u *sql.UpdateSet) {
 //				u.SetIgnore({{ $.Package }}.{{ $.ID.Constant }})
 //			}),
@@ -329,7 +332,7 @@ type {{ $upsertBulk }} struct {
 //
 func (u *{{ $upsertBulk }}) UpdateNewValues() *{{ $upsertBulk }} {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	{{- if or $.ID.UserDefined $.ImmutableFields }}
+	{{- if or $udfID $.ImmutableFields }}
 		u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 			for _, b := range u.create.builders {
 				{{- if $.ID.UserDefined }}
