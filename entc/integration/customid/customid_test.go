@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent"
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/doc"
+	"entgo.io/ent/entc/integration/customid/ent/intsid"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 	"entgo.io/ent/entc/integration/customid/ent/token"
 	"entgo.io/ent/entc/integration/customid/ent/user"
@@ -176,6 +177,24 @@ func CustomID(t *testing.T, client *ent.Client) {
 	require.NotEmpty(t, pdoc.Text)
 	cdoc := client.Doc.Create().SetText("child").SetParent(pdoc).SaveX(ctx)
 	require.NotEmpty(t, cdoc.QueryParent().OnlyIDX(ctx))
+
+	t.Run("IntSID", func(t *testing.T) {
+		root := client.IntSID.Create().SaveX(ctx)
+		require.EqualValues(t, sid.ID("1"), root.ID)
+		children := client.IntSID.CreateBulk(
+			client.IntSID.Create().SetParent(root),
+			client.IntSID.Create().SetParent(root),
+		).SaveX(ctx)
+		require.EqualValues(t, sid.ID("2"), children[0].ID)
+		require.EqualValues(t, sid.ID("3"), children[1].ID)
+		el := client.IntSID.Query().Where(intsid.ID(root.ID)).WithChildren().AllX(ctx)
+		require.EqualValues(t, 1, len(el))
+		require.EqualValues(t, 2, len(el[0].Edges.Children))
+		cid := sid.ID("100")
+		child := client.IntSID.Create().SetID(cid).SetParent(root).SaveX(ctx)
+		require.EqualValues(t, cid, child.ID)
+		require.EqualValues(t, root.ID, child.QueryParent().OnlyX(ctx).ID)
+	})
 
 	t.Run("Upsert", func(t *testing.T) {
 		id := uuid.New()
