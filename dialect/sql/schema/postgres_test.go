@@ -997,7 +997,7 @@ func TestPostgres_Create(t *testing.T) {
 			db, mock, err := sqlmock.New()
 			require.NoError(t, err)
 			tt.before(pgMock{mock})
-			migrate, err := NewMigrate(sql.OpenDB("postgres", db), tt.options...)
+			migrate, err := NewMigrate(sql.OpenDB("postgres", db), append(tt.options, WithAtlas(false))...)
 			require.NoError(t, err)
 			err = migrate.Create(context.Background(), tt.tables...)
 			require.Equal(t, tt.wantErr, err != nil, err)

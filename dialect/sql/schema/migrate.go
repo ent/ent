@@ -6,13 +6,9 @@ package schema
 
 import (
 	"context"
-	"crypto/md5"
-	"errors"
 	"fmt"
 	"math"
-	"strings"
 
-	"ariga.io/atlas/sql/migrate"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
@@ -21,57 +17,61 @@ import (
 const (
 	// TypeTable defines the table name holding the type information.
 	TypeTable = "ent_types"
+
 	// MaxTypes defines the max number of types can be created when
 	// defining universal ids. The left 16-bits are reserved.
 	MaxTypes = math.MaxUint16
 )
 
-// MigrateOption allows for managing schema configuration using functional options.
-type MigrateOption func(*Migrate)
+// MigrateOption allows configuring Atlas using functional arguments.
+type MigrateOption func(*Atlas)
 
 // WithGlobalUniqueID sets the universal ids options to the migration.
 // Defaults to false.
 func WithGlobalUniqueID(b bool) MigrateOption {
-	return func(m *Migrate) {
-		m.universalID = b
+	return func(a *Atlas) {
+		a.universalID = b
 	}
 }
 
 // WithDropColumn sets the columns dropping option to the migration.
 // Defaults to false.
 func WithDropColumn(b bool) MigrateOption {
-	return func(m *Migrate) {
-		m.dropColumns = b
+	return func(a *Atlas) {
+		a.dropColumns = b
 	}
 }
 
 // WithDropIndex sets the indexes dropping option to the migration.
 // Defaults to false.
 func WithDropIndex(b bool) MigrateOption {
-	return func(m *Migrate) {
-		m.dropIndexes = b
+	return func(a *Atlas) {
+		a.dropIndexes = b
 	}
 }
 
 // WithFixture sets the foreign-key renaming option to the migration when upgrading
-// ent from v0.1.0 (issue-#285). Defaults to false.
+// sqlDialect from v0.1.0 (issue-#285). Defaults to false.
+//
+// Deprecated: This option is no longer needed with the Atlas based
+// migration engine, which now is the default.
 func WithFixture(b bool) MigrateOption {
-	return func(m *Migrate) {
-		m.withFixture = b
+	return func(a *Atlas) {
+		a.withFixture = b
 	}
 }
 
 // WithForeignKeys enables creating foreign-key in ddl. Defaults to true.
 func WithForeignKeys(b bool) MigrateOption {
-	return func(m *Migrate) {
-		m.withForeignKeys = b
+	return func(a *Atlas) {
+		a.withForeignKeys = b
 	}
 }
 
 // WithHooks adds a list of hooks to the schema migration.
 func WithHooks(hooks ...Hook) MigrateOption {
-	return func(m *Migrate) {
-		m.hooks = append(m.hooks, hooks...)
+	return func(a *Atlas) {
+		a.hooks = append(a.hooks, hooks...)
 	}
 }
 
@@ -105,42 +105,19 @@ func (f CreateFunc) Create(ctx context.Context, tables ...*Table) error {
 }
 
 // Migrate runs the migration logic for the SQL dialects.
+//
+// Deprecated: Use the new Atlas struct instead.
 type Migrate struct {
 	sqlDialect
-	universalID     bool          // global unique ids.
-	dropColumns     bool          // drop deleted columns.
-	dropIndexes     bool          // drop deleted indexes.
-	withFixture     bool          // with fks rename fixture.
-	withForeignKeys bool          // with foreign keys
-	atlas           *atlasOptions // migrate with atlas.
-	typeRanges      []string      // types order by their range.
-	hooks           []Hook        // hooks to apply before creation
-	typeStore       typeStore     // the typeStore to read and save type ranges
-	fileTypeRanges  []string      // used internally by ensureTypeTable hook
-	dbTypeRanges    []string      // used internally by ensureTypeTable hook
-}
+	atlas *Atlas // Atlas this Migrate is based on
 
-// NewMigrate create a migration structure for the given SQL driver.
-func NewMigrate(d dialect.Driver, opts ...MigrateOption) (*Migrate, error) {
-	m := &Migrate{withForeignKeys: true, atlas: &atlasOptions{}}
-	for _, opt := range opts {
-		opt(m)
-	}
-	switch d.Dialect() {
-	case dialect.MySQL:
-		m.sqlDialect = &MySQL{Driver: d}
-	case dialect.SQLite:
-		m.sqlDialect = &SQLite{Driver: d, WithForeignKeys: m.withForeignKeys}
-	case dialect.Postgres:
-		m.sqlDialect = &Postgres{Driver: d}
-	default:
-		return nil, fmt.Errorf("sql/schema: unsupported dialect %q", d.Dialect())
-	}
-	m.typeStore = &dbTypeStore{m.sqlDialect}
-	if err := m.setupAtlas(); err != nil {
-		return nil, err
-	}
-	return m, nil
+	universalID     bool     // global unique ids
+	dropColumns     bool     // drop deleted columns
+	dropIndexes     bool     // drop deleted indexes
+	withFixture     bool     // with fks rename fixture
+	withForeignKeys bool     // with foreign keys
+	typeRanges      []string // types order by their range
+	hooks           []Hook   // hooks to apply before creation
 }
 
 // Create creates all schema resources in the database. It works in an "append-only"
@@ -155,80 +132,10 @@ func NewMigrate(d dialect.Driver, opts ...MigrateOption) (*Migrate, error) {
 func (m *Migrate) Create(ctx context.Context, tables ...*Table) error {
 	m.setupTables(tables)
 	var creator Creator = CreateFunc(m.create)
-	if m.atlas.enabled {
-		creator = CreateFunc(m.atCreate)
-	}
 	for i := len(m.hooks) - 1; i >= 0; i-- {
 		creator = m.hooks[i](creator)
 	}
 	return creator.Create(ctx, tables...)
-}
-
-// Diff compares the state read from the connected database with the state defined by Ent.
-// Changes will be written to migration files by the configured Planner.
-func (m *Migrate) Diff(ctx context.Context, tables ...*Table) error {
-	return m.NamedDiff(ctx, "changes", tables...)
-}
-
-// NamedDiff compares the state read from the connected database with the state defined by Ent.
-// Changes will be written to migration files by the configured Planner.
-func (m *Migrate) NamedDiff(ctx context.Context, name string, tables ...*Table) error {
-	if m.atlas.dir == nil {
-		return errors.New("no migration directory given")
-	}
-	opts := []migrate.PlannerOption{
-		migrate.WithFormatter(m.atlas.fmt),
-	}
-	if m.atlas.genSum {
-		// Validate the migration directory before proceeding.
-		if err := migrate.Validate(m.atlas.dir); err != nil {
-			return fmt.Errorf("validating migration directory: %w", err)
-		}
-	} else {
-		opts = append(opts, migrate.DisableChecksum())
-	}
-	if err := m.init(ctx, m); err != nil {
-		return err
-	}
-	if m.universalID {
-		if err := m.types(ctx, m); err != nil {
-			return err
-		}
-		m.fileTypeRanges = m.typeRanges
-		ex, err := m.tableExist(ctx, m, TypeTable)
-		if err != nil {
-			return err
-		}
-		if ex {
-			m.dbTypeRanges, err = (&dbTypeStore{m}).load(ctx, m)
-			if err != nil {
-				return err
-			}
-		}
-		defer func() {
-			m.fileTypeRanges = nil
-			m.dbTypeRanges = nil
-		}()
-	}
-	m.setupTables(tables)
-	plan, err := m.atDiff(ctx, m, name, tables...)
-	if err != nil {
-		return err
-	}
-	if m.universalID {
-		newTypes := m.typeRanges[len(m.dbTypeRanges):]
-		if len(newTypes) > 0 {
-			plan.Changes = append(plan.Changes, &migrate.Change{
-				Cmd:     m.atTypeRangeSQL(newTypes...),
-				Comment: fmt.Sprintf("add pk ranges for %s tables", strings.Join(newTypes, ",")),
-			})
-		}
-	}
-	// Skip if the plan has no changes.
-	if len(plan.Changes) == 0 {
-		return nil
-	}
-	return migrate.NewPlanner(nil, m.atlas.dir, opts...).WritePlan(plan)
 }
 
 func (m *Migrate) create(ctx context.Context, tables ...*Table) error {
@@ -328,7 +235,7 @@ func (m *Migrate) txCreate(ctx context.Context, tx dialect.Tx, tables ...*Table)
 	return nil
 }
 
-// apply applies changes on the given table.
+// apply changes on the given table.
 func (m *Migrate) apply(ctx context.Context, tx dialect.Tx, table string, change *changes) error {
 	// Constraints should be dropped before dropping columns, because if a column
 	// is a part of multi-column constraints (like, unique index), ALTER TABLE
@@ -419,7 +326,7 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 		case c1.Unique && !c2.Unique:
 			// Make sure the table does not have unique index for this column
 			// before adding it to the changeset, because there are 2 ways to
-			// configure uniqueness on ent.Field (using the Unique modifier or
+			// configure uniqueness on sqlDialect.Field (using the Unique modifier or
 			// adding rule on the Indexes option).
 			if idx, ok := curr.index(c1.Name); !ok || !idx.Unique {
 				change.index.add.append(&Index{
@@ -580,10 +487,30 @@ func (m *Migrate) verify(ctx context.Context, tx dialect.Tx, t *Table) error {
 	return vr.verifyRange(ctx, tx, t, int64(id<<32))
 }
 
-// types loads the type list from the type store.
-func (m *Migrate) types(ctx context.Context, tx dialect.ExecQuerier) (err error) {
-	m.typeRanges, err = m.typeStore.load(ctx, tx)
-	return
+// types loads the type list from the type store. It will create the types table, if it does not exist yet.
+func (m *Migrate) types(ctx context.Context, tx dialect.ExecQuerier) error {
+	exists, err := m.tableExist(ctx, tx, TypeTable)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		t := NewTable(TypeTable).
+			AddPrimary(&Column{Name: "id", Type: field.TypeUint, Increment: true}).
+			AddColumn(&Column{Name: "type", Type: field.TypeString, Unique: true})
+		query, args := m.tBuilder(t).Query()
+		if err := tx.Exec(ctx, query, args, nil); err != nil {
+			return fmt.Errorf("create types table: %w", err)
+		}
+		return nil
+	}
+	rows := &sql.Rows{}
+	query, args := sql.Dialect(m.Dialect()).
+		Select("type").From(sql.Table(TypeTable)).OrderBy(sql.Asc("id")).Query()
+	if err := tx.Query(ctx, query, args, rows); err != nil {
+		return fmt.Errorf("query types table: %w", err)
+	}
+	defer rows.Close()
+	return sql.ScanSlice(rows, &m.typeRanges)
 }
 
 func (m *Migrate) allocPKRange(ctx context.Context, conn dialect.ExecQuerier, t *Table) error {
@@ -602,8 +529,9 @@ func (m *Migrate) pkRange(ctx context.Context, conn dialect.ExecQuerier, t *Tabl
 		if len(m.typeRanges) > MaxTypes {
 			return 0, fmt.Errorf("max number of types exceeded: %d", MaxTypes)
 		}
-		if err := m.typeStore.add(ctx, conn, t.Name); err != nil {
-			return 0, fmt.Errorf("store type range: %w", err)
+		query, args := sql.Dialect(m.Dialect()).Insert(TypeTable).Columns("type").Values(t.Name).Query()
+		if err := conn.Exec(ctx, query, args, nil); err != nil {
+			return 0, fmt.Errorf("insert into ent_types: %w", err)
 		}
 		id = len(m.typeRanges)
 		m.typeRanges = append(m.typeRanges, t.Name)
@@ -641,45 +569,7 @@ func (m *Migrate) fkColumn(ctx context.Context, tx dialect.Tx, fk *ForeignKey) (
 
 // setup ensures the table is configured properly, like table columns
 // are linked to their indexes, and PKs columns are defined.
-func (m *Migrate) setupTables(tables []*Table) {
-	for _, t := range tables {
-		if t.columns == nil {
-			t.columns = make(map[string]*Column, len(t.Columns))
-		}
-		for _, c := range t.Columns {
-			t.columns[c.Name] = c
-		}
-		for _, idx := range t.Indexes {
-			idx.Name = m.symbol(idx.Name)
-			for _, c := range idx.Columns {
-				c.indexes.append(idx)
-			}
-		}
-		for _, pk := range t.PrimaryKey {
-			c := t.columns[pk.Name]
-			c.Key = PrimaryKey
-			pk.Key = PrimaryKey
-		}
-		for _, fk := range t.ForeignKeys {
-			fk.Symbol = m.symbol(fk.Symbol)
-			for i := range fk.Columns {
-				fk.Columns[i].foreign = fk
-			}
-		}
-	}
-}
-
-// symbol makes sure the symbol length is not longer than the maxlength in the dialect.
-func (m *Migrate) symbol(name string) string {
-	size := 64
-	if m.Dialect() == dialect.Postgres {
-		size = 63
-	}
-	if len(name) <= size {
-		return name
-	}
-	return fmt.Sprintf("%s_%x", name[:size-33], md5.Sum([]byte(name)))
-}
+func (m *Migrate) setupTables(tables []*Table) { m.atlas.setupTables(tables) }
 
 // rollback calls to tx.Rollback and wraps the given error with the rollback error if occurred.
 func rollback(tx dialect.Tx, err error) error {
@@ -747,55 +637,3 @@ type fkRenamer interface {
 type verifyRanger interface {
 	verifyRange(context.Context, dialect.Tx, *Table, int64) error
 }
-
-// typeStore wraps methods for loading and storing pk range information for types.
-type typeStore interface {
-	load(context.Context, dialect.ExecQuerier) ([]string, error)
-	add(context.Context, dialect.ExecQuerier, string) error
-}
-
-// dbTypeStore stores and read pk information in a database table.
-// This is the "old" behaviour before the typeStore interface was added.
-type dbTypeStore struct {
-	drv sqlDialect
-}
-
-// load the types from the database. If the table does not exist, it will be created.
-func (s *dbTypeStore) load(ctx context.Context, conn dialect.ExecQuerier) ([]string, error) {
-	exists, err := s.drv.tableExist(ctx, conn, TypeTable)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		t := NewTable(TypeTable).
-			AddPrimary(&Column{Name: "id", Type: field.TypeUint, Increment: true}).
-			AddColumn(&Column{Name: "type", Type: field.TypeString, Unique: true})
-		query, args := s.drv.tBuilder(t).Query()
-		if err := conn.Exec(ctx, query, args, nil); err != nil {
-			return nil, fmt.Errorf("create types table: %w", err)
-		}
-		return nil, nil
-	}
-	rows := &sql.Rows{}
-	query, args := sql.Dialect(s.drv.Dialect()).
-		Select("type").From(sql.Table(TypeTable)).OrderBy(sql.Asc("id")).Query()
-	if err := conn.Query(ctx, query, args, rows); err != nil {
-		return nil, fmt.Errorf("query types table: %w", err)
-	}
-	defer rows.Close()
-	var types []string
-	return types, sql.ScanSlice(rows, &types)
-}
-
-// add a new type entry to the database table. since load is called first,
-// there is no need to check for the tables' existence.
-func (s *dbTypeStore) add(ctx context.Context, conn dialect.ExecQuerier, t string) error {
-	query, args := sql.Dialect(s.drv.Dialect()).
-		Insert(TypeTable).Columns("type").Values(t).Query()
-	if err := conn.Exec(ctx, query, args, nil); err != nil {
-		return fmt.Errorf("insert into ent_types: %w", err)
-	}
-	return nil
-}
-
-var _ typeStore = (*dbTypeStore)(nil)

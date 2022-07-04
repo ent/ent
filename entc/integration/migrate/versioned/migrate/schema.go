@@ -46,7 +46,9 @@ var (
 
 func init() {
 	VersionedGroupsTable.Annotation = &entsql.Annotation{
-		Table: "versioned_groups",
+		Table:     "versioned_groups",
+		Charset:   "ascii",
+		Collation: "ascii_general_ci",
 	}
 	VersionedUsersTable.Annotation = &entsql.Annotation{
 		Table: "versioned_users",

@@ -11,6 +11,7 @@ import (
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/entc/integration/multischema/ent"
 	"entgo.io/ent/entc/integration/multischema/ent/group"
 	"entgo.io/ent/entc/integration/multischema/ent/migrate"
@@ -109,7 +110,7 @@ func TestMySQL(t *testing.T) {
 
 func setupSchema(t *testing.T, drv *sql.Driver) {
 	client := ent.NewClient(ent.Driver(&rewriter{drv}))
-	err := client.Schema.Create(context.Background(), migrate.WithForeignKeys(false))
+	err := client.Schema.Create(context.Background(), migrate.WithForeignKeys(false), schema.WithAtlas(false))
 	require.NoError(t, err)
 }
 

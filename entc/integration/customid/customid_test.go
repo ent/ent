@@ -51,7 +51,7 @@ func TestMySQL(t *testing.T) {
 			cfg.DBName = "custom_id"
 			client, err := ent.Open("mysql", cfg.FormatDSN())
 			require.NoError(t, err, "connecting to custom_id database")
-			err = client.Schema.Create(context.Background(), schema.WithHooks(clearDefault, skipBytesID), schema.WithAtlas(true))
+			err = client.Schema.Create(context.Background(), schema.WithHooks(clearDefault, skipBytesID))
 			require.NoError(t, err)
 			CustomID(t, client)
 		})
@@ -75,7 +75,7 @@ func TestPostgres(t *testing.T) {
 			defer db.Exec("DROP SCHEMA custom_id CASCADE")
 
 			client := ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, db)))
-			err = client.Schema.Create(context.Background(), schema.WithAtlas(true), schema.WithDiffHook(expectOnePetsIndex))
+			err = client.Schema.Create(context.Background(), schema.WithDiffHook(expectOnePetsIndex))
 			require.NoError(t, err)
 			CustomID(t, client)
 			BytesID(t, client)
@@ -87,7 +87,7 @@ func TestSQLite(t *testing.T) {
 	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	require.NoError(t, err)
 	defer client.Close()
-	require.NoError(t, client.Schema.Create(context.Background(), schema.WithHooks(clearDefault)), schema.WithAtlas(true))
+	require.NoError(t, client.Schema.Create(context.Background(), schema.WithHooks(clearDefault)))
 	CustomID(t, client)
 	BytesID(t, client)
 }

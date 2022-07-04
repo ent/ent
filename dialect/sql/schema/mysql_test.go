@@ -1362,7 +1362,7 @@ func TestMySQL_Create(t *testing.T) {
 			db, mock, err := sqlmock.New()
 			require.NoError(t, err)
 			tt.before(mysqlMock{mock})
-			migrate, err := NewMigrate(sql.OpenDB("mysql", db), tt.options...)
+			migrate, err := NewMigrate(sql.OpenDB("mysql", db), append(tt.options, WithAtlas(false))...)
 			require.NoError(t, err)
 			err = migrate.Create(context.Background(), tt.tables...)
 			require.Equal(t, tt.wantErr, err != nil, err)
