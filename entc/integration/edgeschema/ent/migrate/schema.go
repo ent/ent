@@ -121,25 +121,25 @@ var (
 	// TweetLikesColumns holds the columns for the "tweet_likes" table.
 	TweetLikesColumns = []*schema.Column{
 		{Name: "liked_at", Type: field.TypeTime},
-		{Name: "user_id", Type: field.TypeInt},
 		{Name: "tweet_id", Type: field.TypeInt},
+		{Name: "user_id", Type: field.TypeInt},
 	}
 	// TweetLikesTable holds the schema information for the "tweet_likes" table.
 	TweetLikesTable = &schema.Table{
 		Name:       "tweet_likes",
 		Columns:    TweetLikesColumns,
-		PrimaryKey: []*schema.Column{TweetLikesColumns[1], TweetLikesColumns[2]},
+		PrimaryKey: []*schema.Column{TweetLikesColumns[2], TweetLikesColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "tweet_likes_users_user",
+				Symbol:     "tweet_likes_tweets_tweet",
 				Columns:    []*schema.Column{TweetLikesColumns[1]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
+				RefColumns: []*schema.Column{TweetsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "tweet_likes_tweets_tweet",
+				Symbol:     "tweet_likes_users_user",
 				Columns:    []*schema.Column{TweetLikesColumns[2]},
-				RefColumns: []*schema.Column{TweetsColumns[0]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -282,8 +282,8 @@ func init() {
 	FriendshipsTable.ForeignKeys[1].RefTable = UsersTable
 	RelationshipsTable.ForeignKeys[0].RefTable = UsersTable
 	RelationshipsTable.ForeignKeys[1].RefTable = UsersTable
-	TweetLikesTable.ForeignKeys[0].RefTable = UsersTable
-	TweetLikesTable.ForeignKeys[1].RefTable = TweetsTable
+	TweetLikesTable.ForeignKeys[0].RefTable = TweetsTable
+	TweetLikesTable.ForeignKeys[1].RefTable = UsersTable
 	TweetTagsTable.ForeignKeys[0].RefTable = TagsTable
 	TweetTagsTable.ForeignKeys[1].RefTable = TweetsTable
 	UserGroupsTable.ForeignKeys[0].RefTable = UsersTable

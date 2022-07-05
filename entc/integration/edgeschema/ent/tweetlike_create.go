@@ -54,14 +54,14 @@ func (tlc *TweetLikeCreate) SetTweetID(i int) *TweetLikeCreate {
 	return tlc
 }
 
-// SetUser sets the "user" edge to the User entity.
-func (tlc *TweetLikeCreate) SetUser(u *User) *TweetLikeCreate {
-	return tlc.SetUserID(u.ID)
-}
-
 // SetTweet sets the "tweet" edge to the Tweet entity.
 func (tlc *TweetLikeCreate) SetTweet(t *Tweet) *TweetLikeCreate {
 	return tlc.SetTweetID(t.ID)
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (tlc *TweetLikeCreate) SetUser(u *User) *TweetLikeCreate {
+	return tlc.SetUserID(u.ID)
 }
 
 // Mutation returns the TweetLikeMutation object of the builder.
@@ -156,11 +156,11 @@ func (tlc *TweetLikeCreate) check() error {
 	if _, ok := tlc.mutation.TweetID(); !ok {
 		return &ValidationError{Name: "tweet_id", err: errors.New(`ent: missing required field "TweetLike.tweet_id"`)}
 	}
-	if _, ok := tlc.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "TweetLike.user"`)}
-	}
 	if _, ok := tlc.mutation.TweetID(); !ok {
 		return &ValidationError{Name: "tweet", err: errors.New(`ent: missing required edge "TweetLike.tweet"`)}
+	}
+	if _, ok := tlc.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "TweetLike.user"`)}
 	}
 	return nil
 }
@@ -192,26 +192,6 @@ func (tlc *TweetLikeCreate) createSpec() (*TweetLike, *sqlgraph.CreateSpec) {
 		})
 		_node.LikedAt = value
 	}
-	if nodes := tlc.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   tweetlike.UserTable,
-			Columns: []string{tweetlike.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.UserID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
 	if nodes := tlc.mutation.TweetIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -230,6 +210,26 @@ func (tlc *TweetLikeCreate) createSpec() (*TweetLike, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.TweetID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tlc.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   tweetlike.UserTable,
+			Columns: []string{tweetlike.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

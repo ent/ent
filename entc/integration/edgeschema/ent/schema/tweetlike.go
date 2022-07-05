@@ -37,13 +37,13 @@ func (TweetLike) Fields() []ent.Field {
 // Edges of the TweetLike.
 func (TweetLike) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("user", User.Type).
-			Unique().
-			Required().
-			Field("user_id"),
 		edge.To("tweet", Tweet.Type).
 			Unique().
 			Required().
 			Field("tweet_id"),
+		edge.To("user", User.Type).
+			Unique().
+			Required().
+			Field("user_id"),
 	}
 }
