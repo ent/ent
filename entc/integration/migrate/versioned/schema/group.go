@@ -26,6 +26,10 @@ func (Group) Fields() []ent.Field {
 // Annotations of the Group.
 func (Group) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Table: "versioned_groups"},
+		entsql.Annotation{
+			Table:     "versioned_groups",
+			Charset:   "ascii",
+			Collation: "ascii_general_ci",
+		},
 	}
 }

@@ -116,7 +116,6 @@ func TestPostgres(t *testing.T) {
 
 var (
 	opts = enttest.WithMigrateOptions(
-		sqlschema.WithAtlas(true),
 		migrate.WithDropIndex(true),
 		migrate.WithDropColumn(true),
 	)
@@ -1872,7 +1871,6 @@ func NoSchemaChanges(t *testing.T, client *ent.Client) {
 		tables,
 		migrate.WithDropIndex(true),
 		migrate.WithDropColumn(true),
-		sqlschema.WithAtlas(true),
 	)
 	require.NoError(t, err)
 }

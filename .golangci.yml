@@ -69,3 +69,7 @@ issues:
     - path: entc/gen/graph.go
       linters:
         - gocritic
+    - path: entc/integration/multischema/multischema_test.go
+      linters:
+        - staticcheck
+      text: SA1019
