@@ -8,8 +8,6 @@ applying the computed changes directly to the database, it will generate a set o
 necessary SQL statements to migrate the database. These files can then be edited to your needs and be applied by any
 tool you like (like golang-migrate, Flyway, liquibase).
 
-![atlas-versioned-migration-process](https://entgo.io/images/assets/migrate-atlas-replay.png)
-
 ## Generating Versioned Migration Files
 
 As mentioned above, versioned migrations do only work, if the new Atlas based migration engine is used. Migration files
@@ -24,6 +22,8 @@ We emphasize to use the first option, as it has the advantage for you to not hav
 create a diff. In addition, this approach also works, if you have multiple deployments in different migration states.
 The first step is to enable the versioned migration feature by passing in the `sql/versioned-migration` feature flag.
 Depending on how you execute the Ent code generator, you have to use one of the two options:
+
+![atlas-versioned-migration-process](https://entgo.io/images/assets/migrate-atlas-replay.png)
 
 #### With Ent CLI
 
@@ -54,7 +54,7 @@ import (
 )
 
 func main() {
-	err := entc.Generate("./schema", &gen.Config{}, entc.FeatureNames("sql/versioned-migration"))
+	err := entc.Generate("./schema", &gen.Config{}, entc.FeatureNames(gen.FeatureVersionedMigration.Name))
 	if err != nil {
 		log.Fatalf("running ent codegen: %v", err)
 	}
@@ -103,7 +103,7 @@ func main() {
 
 You can then generate a new set of migration files by simply calling `go run -mod=mod main.go`.
 
-:::note
+:::info Note
 If you want to inspect an existing database and compute the diff against your Ent schema, pass in the `ModeInspect` 
 migration mode.
 :::
@@ -209,7 +209,7 @@ func main() {
 		schema.WithMigrationMode(schema.ModeReplay), // provide migration mode
 		schema.WithDialect(dialect.MySQL),           // Ent dialect to use
 		// highlight-start
-		// Chose one of the below.
+		// Choose one of the below.
 		schema.WithFormatter(sqltool.GolangMigrateFormatter),
 		schema.WithFormatter(sqltool.GooseFormatter),
 		schema.WithFormatter(sqltool.FlywayFormatter),
