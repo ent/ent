@@ -2811,10 +2811,10 @@ type TweetLikeMutation struct {
 	typ           string
 	liked_at      *time.Time
 	clearedFields map[string]struct{}
-	user          *int
-	cleareduser   bool
 	tweet         *int
 	clearedtweet  bool
+	user          *int
+	cleareduser   bool
 	done          bool
 	oldValue      func(context.Context) (*TweetLike, error)
 	predicates    []predicate.TweetLike
@@ -2915,32 +2915,6 @@ func (m *TweetLikeMutation) ResetTweetID() {
 	m.tweet = nil
 }
 
-// ClearUser clears the "user" edge to the User entity.
-func (m *TweetLikeMutation) ClearUser() {
-	m.cleareduser = true
-}
-
-// UserCleared reports if the "user" edge to the User entity was cleared.
-func (m *TweetLikeMutation) UserCleared() bool {
-	return m.cleareduser
-}
-
-// UserIDs returns the "user" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// UserID instead. It exists only for internal usage by the builders.
-func (m *TweetLikeMutation) UserIDs() (ids []int) {
-	if id := m.user; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetUser resets all changes to the "user" edge.
-func (m *TweetLikeMutation) ResetUser() {
-	m.user = nil
-	m.cleareduser = false
-}
-
 // ClearTweet clears the "tweet" edge to the Tweet entity.
 func (m *TweetLikeMutation) ClearTweet() {
 	m.clearedtweet = true
@@ -2965,6 +2939,32 @@ func (m *TweetLikeMutation) TweetIDs() (ids []int) {
 func (m *TweetLikeMutation) ResetTweet() {
 	m.tweet = nil
 	m.clearedtweet = false
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *TweetLikeMutation) ClearUser() {
+	m.cleareduser = true
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *TweetLikeMutation) UserCleared() bool {
+	return m.cleareduser
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *TweetLikeMutation) UserIDs() (ids []int) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *TweetLikeMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
 }
 
 // Where appends a list predicates to the TweetLikeMutation builder.
@@ -3115,11 +3115,11 @@ func (m *TweetLikeMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TweetLikeMutation) AddedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.user != nil {
-		edges = append(edges, tweetlike.EdgeUser)
-	}
 	if m.tweet != nil {
 		edges = append(edges, tweetlike.EdgeTweet)
+	}
+	if m.user != nil {
+		edges = append(edges, tweetlike.EdgeUser)
 	}
 	return edges
 }
@@ -3128,12 +3128,12 @@ func (m *TweetLikeMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *TweetLikeMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case tweetlike.EdgeUser:
-		if id := m.user; id != nil {
-			return []ent.Value{*id}
-		}
 	case tweetlike.EdgeTweet:
 		if id := m.tweet; id != nil {
+			return []ent.Value{*id}
+		}
+	case tweetlike.EdgeUser:
+		if id := m.user; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -3157,11 +3157,11 @@ func (m *TweetLikeMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TweetLikeMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.cleareduser {
-		edges = append(edges, tweetlike.EdgeUser)
-	}
 	if m.clearedtweet {
 		edges = append(edges, tweetlike.EdgeTweet)
+	}
+	if m.cleareduser {
+		edges = append(edges, tweetlike.EdgeUser)
 	}
 	return edges
 }
@@ -3170,10 +3170,10 @@ func (m *TweetLikeMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *TweetLikeMutation) EdgeCleared(name string) bool {
 	switch name {
-	case tweetlike.EdgeUser:
-		return m.cleareduser
 	case tweetlike.EdgeTweet:
 		return m.clearedtweet
+	case tweetlike.EdgeUser:
+		return m.cleareduser
 	}
 	return false
 }
@@ -3182,11 +3182,11 @@ func (m *TweetLikeMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *TweetLikeMutation) ClearEdge(name string) error {
 	switch name {
-	case tweetlike.EdgeUser:
-		m.ClearUser()
-		return nil
 	case tweetlike.EdgeTweet:
 		m.ClearTweet()
+		return nil
+	case tweetlike.EdgeUser:
+		m.ClearUser()
 		return nil
 	}
 	return fmt.Errorf("unknown TweetLike unique edge %s", name)
@@ -3196,11 +3196,11 @@ func (m *TweetLikeMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *TweetLikeMutation) ResetEdge(name string) error {
 	switch name {
-	case tweetlike.EdgeUser:
-		m.ResetUser()
-		return nil
 	case tweetlike.EdgeTweet:
 		m.ResetTweet()
+		return nil
+	case tweetlike.EdgeUser:
+		m.ResetUser()
 		return nil
 	}
 	return fmt.Errorf("unknown TweetLike edge %s", name)

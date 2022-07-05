@@ -60,14 +60,14 @@ func (tlu *TweetLikeUpdate) SetTweetID(i int) *TweetLikeUpdate {
 	return tlu
 }
 
-// SetUser sets the "user" edge to the User entity.
-func (tlu *TweetLikeUpdate) SetUser(u *User) *TweetLikeUpdate {
-	return tlu.SetUserID(u.ID)
-}
-
 // SetTweet sets the "tweet" edge to the Tweet entity.
 func (tlu *TweetLikeUpdate) SetTweet(t *Tweet) *TweetLikeUpdate {
 	return tlu.SetTweetID(t.ID)
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (tlu *TweetLikeUpdate) SetUser(u *User) *TweetLikeUpdate {
+	return tlu.SetUserID(u.ID)
 }
 
 // Mutation returns the TweetLikeMutation object of the builder.
@@ -75,15 +75,15 @@ func (tlu *TweetLikeUpdate) Mutation() *TweetLikeMutation {
 	return tlu.mutation
 }
 
-// ClearUser clears the "user" edge to the User entity.
-func (tlu *TweetLikeUpdate) ClearUser() *TweetLikeUpdate {
-	tlu.mutation.ClearUser()
-	return tlu
-}
-
 // ClearTweet clears the "tweet" edge to the Tweet entity.
 func (tlu *TweetLikeUpdate) ClearTweet() *TweetLikeUpdate {
 	tlu.mutation.ClearTweet()
+	return tlu
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (tlu *TweetLikeUpdate) ClearUser() *TweetLikeUpdate {
+	tlu.mutation.ClearUser()
 	return tlu
 }
 
@@ -149,11 +149,11 @@ func (tlu *TweetLikeUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (tlu *TweetLikeUpdate) check() error {
-	if _, ok := tlu.mutation.UserID(); tlu.mutation.UserCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "TweetLike.user"`)
-	}
 	if _, ok := tlu.mutation.TweetID(); tlu.mutation.TweetCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "TweetLike.tweet"`)
+	}
+	if _, ok := tlu.mutation.UserID(); tlu.mutation.UserCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "TweetLike.user"`)
 	}
 	return nil
 }
@@ -178,41 +178,6 @@ func (tlu *TweetLikeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Value:  value,
 			Column: tweetlike.FieldLikedAt,
 		})
-	}
-	if tlu.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   tweetlike.UserTable,
-			Columns: []string{tweetlike.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tlu.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   tweetlike.UserTable,
-			Columns: []string{tweetlike.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if tlu.mutation.TweetCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -241,6 +206,41 @@ func (tlu *TweetLikeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: tweet.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tlu.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   tweetlike.UserTable,
+			Columns: []string{tweetlike.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tlu.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   tweetlike.UserTable,
+			Columns: []string{tweetlike.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -294,14 +294,14 @@ func (tluo *TweetLikeUpdateOne) SetTweetID(i int) *TweetLikeUpdateOne {
 	return tluo
 }
 
-// SetUser sets the "user" edge to the User entity.
-func (tluo *TweetLikeUpdateOne) SetUser(u *User) *TweetLikeUpdateOne {
-	return tluo.SetUserID(u.ID)
-}
-
 // SetTweet sets the "tweet" edge to the Tweet entity.
 func (tluo *TweetLikeUpdateOne) SetTweet(t *Tweet) *TweetLikeUpdateOne {
 	return tluo.SetTweetID(t.ID)
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (tluo *TweetLikeUpdateOne) SetUser(u *User) *TweetLikeUpdateOne {
+	return tluo.SetUserID(u.ID)
 }
 
 // Mutation returns the TweetLikeMutation object of the builder.
@@ -309,15 +309,15 @@ func (tluo *TweetLikeUpdateOne) Mutation() *TweetLikeMutation {
 	return tluo.mutation
 }
 
-// ClearUser clears the "user" edge to the User entity.
-func (tluo *TweetLikeUpdateOne) ClearUser() *TweetLikeUpdateOne {
-	tluo.mutation.ClearUser()
-	return tluo
-}
-
 // ClearTweet clears the "tweet" edge to the Tweet entity.
 func (tluo *TweetLikeUpdateOne) ClearTweet() *TweetLikeUpdateOne {
 	tluo.mutation.ClearTweet()
+	return tluo
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (tluo *TweetLikeUpdateOne) ClearUser() *TweetLikeUpdateOne {
+	tluo.mutation.ClearUser()
 	return tluo
 }
 
@@ -396,11 +396,11 @@ func (tluo *TweetLikeUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (tluo *TweetLikeUpdateOne) check() error {
-	if _, ok := tluo.mutation.UserID(); tluo.mutation.UserCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "TweetLike.user"`)
-	}
 	if _, ok := tluo.mutation.TweetID(); tluo.mutation.TweetCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "TweetLike.tweet"`)
+	}
+	if _, ok := tluo.mutation.UserID(); tluo.mutation.UserCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "TweetLike.user"`)
 	}
 	return nil
 }
@@ -435,41 +435,6 @@ func (tluo *TweetLikeUpdateOne) sqlSave(ctx context.Context) (_node *TweetLike, 
 			Column: tweetlike.FieldLikedAt,
 		})
 	}
-	if tluo.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   tweetlike.UserTable,
-			Columns: []string{tweetlike.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tluo.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   tweetlike.UserTable,
-			Columns: []string{tweetlike.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if tluo.mutation.TweetCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -497,6 +462,41 @@ func (tluo *TweetLikeUpdateOne) sqlSave(ctx context.Context) (_node *TweetLike, 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: tweet.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tluo.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   tweetlike.UserTable,
+			Columns: []string{tweetlike.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tluo.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   tweetlike.UserTable,
+			Columns: []string{tweetlike.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
 				},
 			},
 		}

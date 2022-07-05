@@ -520,7 +520,7 @@ func (g *Graph) edgeSchemas() error {
 					Columns: ref.Rel.Columns,
 				},
 			})
-			// Edge schema contains a composite primary key.
+			// Edge schema contains a composite primary key, and it was not resolved in previous iterations.
 			if ant := fieldAnnotate(typ.Annotations); ant != nil && len(ant.ID) > 0 && len(typ.EdgeSchema.ID) == 0 {
 				r1, r2 := e.Rel.Columns[0], e.Rel.Columns[1]
 				if len(ant.ID) != 2 || ant.ID[0] != r1 || ant.ID[1] != r2 {
@@ -658,7 +658,9 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 			}
 		}
 		if n.HasCompositeID() {
-			addCompositePK(tables[n.Table()], n)
+			if err := addCompositePK(tables[n.Table()], n); err != nil {
+				return nil, err
+			}
 		}
 	}
 	// Append indexes to tables after all columns were added (including relation columns).
@@ -681,16 +683,22 @@ func mayAddColumn(t *schema.Table, c *schema.Column) {
 	}
 }
 
-func addCompositePK(t *schema.Table, n *Type) {
+func addCompositePK(t *schema.Table, n *Type) error {
 	columns := make([]*schema.Column, 0, len(n.EdgeSchema.ID))
 	for _, id := range n.EdgeSchema.ID {
-		for i, f := range n.Fields {
-			if f.IsEdgeField() && id == f && t.Columns[i].Name == f.StorageKey() {
-				columns = append(columns, t.Columns[i])
+		for _, f := range n.Fields {
+			if !f.IsEdgeField() || id != f {
+				continue
 			}
+			c, ok := t.Column(f.StorageKey())
+			if !ok {
+				return fmt.Errorf("missing column %q for edge field %q.%q", f.StorageKey(), n.Name, f.Name)
+			}
+			columns = append(columns, c)
 		}
 	}
 	t.PrimaryKey = columns
+	return nil
 }
 
 // fkSymbol returns the symbol of the foreign-key constraint for edges of type O2M, M2O and O2O.

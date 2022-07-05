@@ -868,18 +868,18 @@ func (c *TweetLikeClient) Query() *TweetLikeQuery {
 	}
 }
 
-// QueryUser queries the user edge of a TweetLike.
-func (c *TweetLikeClient) QueryUser(tl *TweetLike) *UserQuery {
-	return c.Query().
-		Where(tweetlike.UserID(tl.UserID), tweetlike.TweetID(tl.TweetID)).
-		QueryUser()
-}
-
 // QueryTweet queries the tweet edge of a TweetLike.
 func (c *TweetLikeClient) QueryTweet(tl *TweetLike) *TweetQuery {
 	return c.Query().
 		Where(tweetlike.UserID(tl.UserID), tweetlike.TweetID(tl.TweetID)).
 		QueryTweet()
+}
+
+// QueryUser queries the user edge of a TweetLike.
+func (c *TweetLikeClient) QueryUser(tl *TweetLike) *UserQuery {
+	return c.Query().
+		Where(tweetlike.UserID(tl.UserID), tweetlike.TweetID(tl.TweetID)).
+		QueryUser()
 }
 
 // Hooks returns the client hooks.
