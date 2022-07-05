@@ -121,6 +121,28 @@ func TestEdgeSchemaCompositeID(t *testing.T) {
 	// Ignore update as we already have such edge between a8m and hub.
 	client.TweetLike.Create().SetUserID(like.UserID).SetTweetID(like.TweetID).OnConflict().Ignore().ExecX(ctx)
 	client.TweetLike.Create().SetUserID(like.UserID).SetTweetID(like.TweetID).OnConflict().DoNothing().ExecX(ctx)
+
+	// Clean all tweet likes and create them in batch again.
+	client.TweetLike.Delete().ExecX(ctx)
+	likes = client.TweetLike.CreateBulk(
+		client.TweetLike.Create().SetUserID(a8m.ID).SetTweet(tweets[0]),
+		client.TweetLike.Create().SetUserID(a8m.ID).SetTweet(tweets[1]),
+		client.TweetLike.Create().SetUserID(nat.ID).SetTweet(tweets[1]),
+		client.TweetLike.Create().SetUserID(nat.ID).SetTweet(tweets[2]),
+	).SaveX(ctx)
+	require.Equal(t, likes[0].UserID, a8m.ID)
+	require.Equal(t, likes[0].TweetID, tweets[0].ID)
+	require.NotZero(t, likes[0].LikedAt)
+	require.Equal(t, likes[1].UserID, a8m.ID)
+	require.Equal(t, likes[1].TweetID, tweets[1].ID)
+	require.NotZero(t, likes[1].LikedAt)
+
+	require.Equal(t, likes[2].UserID, nat.ID)
+	require.Equal(t, likes[2].TweetID, tweets[1].ID)
+	require.NotZero(t, likes[2].LikedAt)
+	require.Equal(t, likes[3].UserID, nat.ID)
+	require.Equal(t, likes[3].TweetID, tweets[2].ID)
+	require.NotZero(t, likes[3].LikedAt)
 }
 
 func TestEdgeSchemaDefaultID(t *testing.T) {
