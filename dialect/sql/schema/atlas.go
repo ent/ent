@@ -99,9 +99,6 @@ func NewMigrateURL(u string, opts ...MigrateOption) (*Atlas, error) {
 // Column can be modified by turning into a NULL from NOT NULL, or having a type conversion not
 // resulting data altering. From example, changing varchar(255) to varchar(120) is invalid, but
 // changing varchar(120) to varchar(255) is valid. For more info, see the convert function below.
-//
-// Note that SQLite dialect does not support (this moment) the "append-only" mode describe above,
-// since it's used only for testing.
 func (a *Atlas) Create(ctx context.Context, tables ...*Table) (err error) {
 	a.setupTables(tables)
 	var creator Creator = CreateFunc(a.create)
@@ -647,8 +644,8 @@ func (a *Atlas) create(ctx context.Context, tables ...*Table) (err error) {
 	return tx.Commit()
 }
 
-// plan creates the current state by inspecting the connected database, computes the current state of the Ent schema
-// and proceeds to diff the changes to create a migration plan. The first return value are the old type allocation
+// plan creates the current state by inspecting the connected database, computing the current state of the Ent schema
+// and proceeds to diff the changes to create a migration plan.
 // before diffing.
 func (a *Atlas) plan(ctx context.Context, conn dialect.ExecQuerier, name string, tables []*Table) (*migrate.Plan, error) {
 	current, err := a.atDriver.InspectSchema(ctx, "", &schema.InspectOptions{
@@ -847,7 +844,7 @@ func (a *Atlas) aIndexes(et *Table, at *schema.Table) error {
 	return nil
 }
 
-// setup ensures the table is configured properly, like table columns
+// setupTables ensures the table is configured properly, like table columns
 // are linked to their indexes, and PKs columns are defined.
 func (a *Atlas) setupTables(tables []*Table) {
 	for _, t := range tables {
@@ -955,14 +952,14 @@ func descIndexes(idx *Index) map[string]bool {
 	return descs
 }
 
-// driver decorates the atlas migrate.Driver and adds "diff hooking" and "apply hooking" functionality.
+// driver decorates the atlas migrate.Driver and adds "diff hooking" and functionality.
 type diffDriver struct {
 	migrate.Driver
 	hooks []DiffHook // hooks to apply
 }
 
 // RealmDiff creates the diff between two realms. Since Ent does not care about Realms,
-// not even schema changes, skip them here.
+// not even schema changes, calling this method raises an error.
 func (r *diffDriver) RealmDiff(_, _ *schema.Realm) ([]schema.Change, error) {
 	return nil, errors.New("sqlDialect does not support working with realms")
 }
