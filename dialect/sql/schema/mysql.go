@@ -141,7 +141,7 @@ func (d *MySQL) setRange(ctx context.Context, conn dialect.ExecQuerier, t *Table
 	return conn.Exec(ctx, fmt.Sprintf("ALTER TABLE `%s` AUTO_INCREMENT = %d", t.Name, value), []interface{}{}, nil)
 }
 
-func (d *MySQL) verifyRange(ctx context.Context, tx dialect.Tx, t *Table, expected int64) error {
+func (d *MySQL) verifyRange(ctx context.Context, tx dialect.ExecQuerier, t *Table, expected int64) error {
 	if expected == 0 {
 		return nil
 	}

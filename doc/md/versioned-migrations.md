@@ -108,6 +108,62 @@ If you want to inspect an existing database and compute the diff against your En
 migration mode.
 :::
 
+### A Word on Global Unique IDs
+
+**This section only applies to MySQL users using the [global unique id](migrate.md/#universal-ids) feature.**
+
+When using the global unique ids, Ent allocates a range of `1<<32` integer values for each table. This is done by giving
+the first table an autoincrement starting value of `1`, the second one the starting value `4294967296`, the third one
+`8589934592`, and so on. The order in which the tables receive the starting value is saved in an extra table
+called `ent_types`. With MySQL 5.6 and 5.7, the autoincrement starting value is only saved in
+memory ([docs](https://dev.mysql.com/doc/refman/8.0/en/innodb-auto-increment-handling.html), **InnoDB AUTO_INCREMENT
+Counter Initialization** header) and re-calculated on startup by looking at the last inserted id for any table. Now, if
+you happen to have a table with no rows yet, the autoincrement starting value is set to 0 for every table without any
+entries. With the online migration feature this wasn't an issue, because the migration engine looked at the `ent_types`
+tables and made sure to update the counter, if it wasn't set correctly. However, with versioned migration, this is no
+longer the case. In oder to ensure, that everything is set up correctly after a server restart, make sure to call
+the `VerifyTableRange` method on the Atlas struct:
+
+```go
+package main
+
+import (
+	"context"
+	"log"
+
+	"<project>/ent"
+	"<project>/ent/migrate"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/schema"
+
+	_ "github.com/go-sql-driver/mysql"
+)
+
+func main() {
+	drv, err := sql.Open("mysql", "user:pass@tcp(localhost:3306)/ent")
+	if err != nil {
+		log.Fatalf("failed opening connection to mysql: %v", err)
+	}
+	defer drv.Close()
+	// Verify the type allocation range.
+	m, err := schema.NewMigrate(drv, nil)
+	if err != nil {
+		log.Fatalf("failed creating migrate: %v", err)
+	}
+	if err := m.VerifyTableRange(context.Background(), migrate.Tables); err != nil {
+		log.Fatalf("failed verifyint range allocations: %v", err)
+	}
+	client := ent.NewClient(ent.Driver(drv))
+	// ... do stuff with the client
+}
+```
+
+:::caution Important
+After an upgrade to MySQL 8 from a previous version, you still have to run the method once to update the starting 
+values. Since MySQL 8 the counter is no longer only stored in memory, meaning subsequent calls to the method are no 
+longer needed after the first one.
+:::
+
 ## Apply Migrations
 
 The Atlas migration engine does not support applying the migration files onto a database yet, therefore to manage and
