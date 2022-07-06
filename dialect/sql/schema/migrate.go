@@ -635,5 +635,5 @@ type fkRenamer interface {
 
 // verifyRanger wraps the method for verifying global-id range correctness.
 type verifyRanger interface {
-	verifyRange(context.Context, dialect.Tx, *Table, int64) error
+	verifyRange(context.Context, dialect.ExecQuerier, *Table, int64) error
 }

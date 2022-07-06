@@ -227,6 +227,55 @@ func (a *Atlas) NamedDiff(ctx context.Context, name string, tables ...*Table) er
 	return migrate.NewPlanner(nil, a.dir, opts...).WritePlan(plan)
 }
 
+// VerifyTableRange ensures, that the defined autoincrement starting value is set for each table as defined by the
+// TypTable. This is necessary for MySQL versions < 8.0. In those versions the defined starting value for AUTOINCREMENT
+// columns was stored in memory, and when a server restarts happens and there are no rows yet in a table, the defined
+// starting value is lost, which will result in incorrect behavior when working with global unique ids. Calling this
+// method on service start ensures the information are correct and are set again, if they aren't. For MySQL versions > 8
+// calling this method is only required once after the upgrade.
+func (a *Atlas) VerifyTableRange(ctx context.Context, tables []*Table) error {
+	if a.driver != nil {
+		var err error
+		a.sqlDialect, err = a.entDialect(a.driver)
+		if err != nil {
+			return err
+		}
+	} else {
+		c, err := sqlclient.OpenURL(ctx, a.url)
+		if err != nil {
+			return err
+		}
+		defer c.Close()
+		a.sqlDialect, err = a.entDialect(entsql.OpenDB(a.dialect, c.DB))
+		if err != nil {
+			return err
+		}
+	}
+	defer func() {
+		a.sqlDialect = nil
+	}()
+	vr, ok := a.sqlDialect.(verifyRanger)
+	if !ok {
+		return nil
+	}
+	types, err := a.loadTypes(ctx, a.sqlDialect)
+	if err != nil {
+		// In most cases this means the table does not exist, which in turn
+		// indicates the user does not use global unique ids.
+		return err
+	}
+	for _, t := range tables {
+		id := indexOf(types, t.Name)
+		if id == -1 {
+			continue
+		}
+		if err := vr.verifyRange(ctx, a.sqlDialect, t, int64(id<<32)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 type (
 	// Differ is the interface that wraps the Diff method.
 	Differ interface {
@@ -661,25 +710,11 @@ func (a *Atlas) plan(ctx context.Context, conn dialect.ExecQuerier, name string,
 	}
 	var types []string
 	if a.universalID {
-		// Fetch pre-existing type allocations.
-		exists, err := a.sqlDialect.tableExist(ctx, conn, TypeTable)
-		if err != nil {
+		types, err = a.loadTypes(ctx, conn)
+		if err != nil && !errors.Is(err, errTypeTableNotFound) {
 			return nil, err
 		}
-		if exists {
-			rows := &entsql.Rows{}
-			query, args := entsql.Dialect(a.dialect).
-				Select("type").From(entsql.Table(TypeTable)).OrderBy(entsql.Asc("id")).Query()
-			if err := conn.Query(ctx, query, args, rows); err != nil {
-				return nil, fmt.Errorf("query types table: %w", err)
-			}
-			defer rows.Close()
-			a.types = nil
-			if err := entsql.ScanSlice(rows, &a.types); err != nil {
-				return nil, err
-			}
-		}
-		types = a.types
+		a.types = types
 	}
 	desired, err := a.StateReader(tables...).ReadState(ctx)
 	if err != nil {
@@ -708,6 +743,32 @@ func (a *Atlas) plan(ctx context.Context, conn dialect.ExecQuerier, name string,
 		})
 	}
 	return plan, nil
+}
+
+var errTypeTableNotFound = errors.New("ent_type table not found")
+
+// loadTypes loads the currently saved range allocations from the TypeTable.
+func (a *Atlas) loadTypes(ctx context.Context, conn dialect.ExecQuerier) ([]string, error) {
+	// Fetch pre-existing type allocations.
+	exists, err := a.sqlDialect.tableExist(ctx, conn, TypeTable)
+	if err != nil {
+		return nil, err
+	}
+	if !exists {
+		return nil, errTypeTableNotFound
+	}
+	rows := &entsql.Rows{}
+	query, args := entsql.Dialect(a.dialect).
+		Select("type").From(entsql.Table(TypeTable)).OrderBy(entsql.Asc("id")).Query()
+	if err := conn.Query(ctx, query, args, rows); err != nil {
+		return nil, fmt.Errorf("query types table: %w", err)
+	}
+	defer rows.Close()
+	var types []string
+	if err := entsql.ScanSlice(rows, &types); err != nil {
+		return nil, err
+	}
+	return types, nil
 }
 
 type db struct{ dialect.ExecQuerier }
