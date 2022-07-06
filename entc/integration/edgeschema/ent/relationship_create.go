@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
+	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 	"entgo.io/ent/schema/field"
 )
@@ -52,6 +53,20 @@ func (rc *RelationshipCreate) SetRelativeID(i int) *RelationshipCreate {
 	return rc
 }
 
+// SetInfoID sets the "info_id" field.
+func (rc *RelationshipCreate) SetInfoID(i int) *RelationshipCreate {
+	rc.mutation.SetInfoID(i)
+	return rc
+}
+
+// SetNillableInfoID sets the "info_id" field if the given value is not nil.
+func (rc *RelationshipCreate) SetNillableInfoID(i *int) *RelationshipCreate {
+	if i != nil {
+		rc.SetInfoID(*i)
+	}
+	return rc
+}
+
 // SetUser sets the "user" edge to the User entity.
 func (rc *RelationshipCreate) SetUser(u *User) *RelationshipCreate {
 	return rc.SetUserID(u.ID)
@@ -60,6 +75,11 @@ func (rc *RelationshipCreate) SetUser(u *User) *RelationshipCreate {
 // SetRelative sets the "relative" edge to the User entity.
 func (rc *RelationshipCreate) SetRelative(u *User) *RelationshipCreate {
 	return rc.SetRelativeID(u.ID)
+}
+
+// SetInfo sets the "info" edge to the RelationshipInfo entity.
+func (rc *RelationshipCreate) SetInfo(r *RelationshipInfo) *RelationshipCreate {
+	return rc.SetInfoID(r.ID)
 }
 
 // Mutation returns the RelationshipMutation object of the builder.
@@ -230,6 +250,26 @@ func (rc *RelationshipCreate) createSpec() (*Relationship, *sqlgraph.CreateSpec)
 		_node.RelativeID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := rc.mutation.InfoIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   relationship.InfoTable,
+			Columns: []string{relationship.InfoColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: relationshipinfo.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.InfoID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	return _node, _spec
 }
 
@@ -326,6 +366,24 @@ func (u *RelationshipUpsert) UpdateRelativeID() *RelationshipUpsert {
 	return u
 }
 
+// SetInfoID sets the "info_id" field.
+func (u *RelationshipUpsert) SetInfoID(v int) *RelationshipUpsert {
+	u.Set(relationship.FieldInfoID, v)
+	return u
+}
+
+// UpdateInfoID sets the "info_id" field to the value that was provided on create.
+func (u *RelationshipUpsert) UpdateInfoID() *RelationshipUpsert {
+	u.SetExcluded(relationship.FieldInfoID)
+	return u
+}
+
+// ClearInfoID clears the value of the "info_id" field.
+func (u *RelationshipUpsert) ClearInfoID() *RelationshipUpsert {
+	u.SetNull(relationship.FieldInfoID)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -414,6 +472,27 @@ func (u *RelationshipUpsertOne) SetRelativeID(v int) *RelationshipUpsertOne {
 func (u *RelationshipUpsertOne) UpdateRelativeID() *RelationshipUpsertOne {
 	return u.Update(func(s *RelationshipUpsert) {
 		s.UpdateRelativeID()
+	})
+}
+
+// SetInfoID sets the "info_id" field.
+func (u *RelationshipUpsertOne) SetInfoID(v int) *RelationshipUpsertOne {
+	return u.Update(func(s *RelationshipUpsert) {
+		s.SetInfoID(v)
+	})
+}
+
+// UpdateInfoID sets the "info_id" field to the value that was provided on create.
+func (u *RelationshipUpsertOne) UpdateInfoID() *RelationshipUpsertOne {
+	return u.Update(func(s *RelationshipUpsert) {
+		s.UpdateInfoID()
+	})
+}
+
+// ClearInfoID clears the value of the "info_id" field.
+func (u *RelationshipUpsertOne) ClearInfoID() *RelationshipUpsertOne {
+	return u.Update(func(s *RelationshipUpsert) {
+		s.ClearInfoID()
 	})
 }
 
@@ -644,6 +723,27 @@ func (u *RelationshipUpsertBulk) SetRelativeID(v int) *RelationshipUpsertBulk {
 func (u *RelationshipUpsertBulk) UpdateRelativeID() *RelationshipUpsertBulk {
 	return u.Update(func(s *RelationshipUpsert) {
 		s.UpdateRelativeID()
+	})
+}
+
+// SetInfoID sets the "info_id" field.
+func (u *RelationshipUpsertBulk) SetInfoID(v int) *RelationshipUpsertBulk {
+	return u.Update(func(s *RelationshipUpsert) {
+		s.SetInfoID(v)
+	})
+}
+
+// UpdateInfoID sets the "info_id" field to the value that was provided on create.
+func (u *RelationshipUpsertBulk) UpdateInfoID() *RelationshipUpsertBulk {
+	return u.Update(func(s *RelationshipUpsert) {
+		s.UpdateInfoID()
+	})
+}
+
+// ClearInfoID clears the value of the "info_id" field.
+func (u *RelationshipUpsertBulk) ClearInfoID() *RelationshipUpsertBulk {
+	return u.Update(func(s *RelationshipUpsert) {
+		s.ClearInfoID()
 	})
 }
 

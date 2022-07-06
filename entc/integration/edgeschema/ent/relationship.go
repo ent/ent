@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
+	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 )
 
@@ -24,6 +25,8 @@ type Relationship struct {
 	UserID int `json:"user_id,omitempty"`
 	// RelativeID holds the value of the "relative_id" field.
 	RelativeID int `json:"relative_id,omitempty"`
+	// InfoID holds the value of the "info_id" field.
+	InfoID int `json:"info_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RelationshipQuery when eager-loading is set.
 	Edges RelationshipEdges `json:"edges"`
@@ -35,9 +38,11 @@ type RelationshipEdges struct {
 	User *User `json:"user,omitempty"`
 	// Relative holds the value of the relative edge.
 	Relative *User `json:"relative,omitempty"`
+	// Info holds the value of the info edge.
+	Info *RelationshipInfo `json:"info,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -68,12 +73,26 @@ func (e RelationshipEdges) RelativeOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "relative"}
 }
 
+// InfoOrErr returns the Info value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e RelationshipEdges) InfoOrErr() (*RelationshipInfo, error) {
+	if e.loadedTypes[2] {
+		if e.Info == nil {
+			// The edge info was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: relationshipinfo.Label}
+		}
+		return e.Info, nil
+	}
+	return nil, &NotLoadedError{edge: "info"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Relationship) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case relationship.FieldWeight, relationship.FieldUserID, relationship.FieldRelativeID:
+		case relationship.FieldWeight, relationship.FieldUserID, relationship.FieldRelativeID, relationship.FieldInfoID:
 			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Relationship", columns[i])
@@ -108,6 +127,12 @@ func (r *Relationship) assignValues(columns []string, values []interface{}) erro
 			} else if value.Valid {
 				r.RelativeID = int(value.Int64)
 			}
+		case relationship.FieldInfoID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field info_id", values[i])
+			} else if value.Valid {
+				r.InfoID = int(value.Int64)
+			}
 		}
 	}
 	return nil
@@ -121,6 +146,11 @@ func (r *Relationship) QueryUser() *UserQuery {
 // QueryRelative queries the "relative" edge of the Relationship entity.
 func (r *Relationship) QueryRelative() *UserQuery {
 	return (&RelationshipClient{config: r.config}).QueryRelative(r)
+}
+
+// QueryInfo queries the "info" edge of the Relationship entity.
+func (r *Relationship) QueryInfo() *RelationshipInfoQuery {
+	return (&RelationshipClient{config: r.config}).QueryInfo(r)
 }
 
 // Update returns a builder for updating this Relationship.
@@ -153,6 +183,9 @@ func (r *Relationship) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("relative_id=")
 	builder.WriteString(fmt.Sprintf("%v", r.RelativeID))
+	builder.WriteString(", ")
+	builder.WriteString("info_id=")
+	builder.WriteString(fmt.Sprintf("%v", r.InfoID))
 	builder.WriteByte(')')
 	return builder.String()
 }

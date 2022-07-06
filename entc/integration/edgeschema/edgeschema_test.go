@@ -213,6 +213,14 @@ func TestEdgeSchemaBidiCompositeID(t *testing.T) {
 	} {
 		require.Equal(t, u3.ID, r)
 	}
+
+	info := client.RelationshipInfo.Create().SetText("u1->u2").SaveX(ctx)
+	r1 := u1.QueryRelationship().OnlyX(ctx)
+	r1.Update().SetInfo(info).ExecX(ctx)
+	r2 := client.User.Query().QueryRelationship().Where(relationship.HasInfo()).WithInfo().OnlyX(ctx)
+	require.Equal(t, r1.UserID, r2.UserID)
+	require.Equal(t, r1.RelativeID, r2.RelativeID)
+	require.Equal(t, info.ID, r2.Edges.Info.ID)
 }
 
 func TestEdgeSchemaForO2M(t *testing.T) {

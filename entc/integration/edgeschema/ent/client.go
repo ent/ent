@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/friendship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
+	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
@@ -41,6 +42,8 @@ type Client struct {
 	Group *GroupClient
 	// Relationship is the client for interacting with the Relationship builders.
 	Relationship *RelationshipClient
+	// RelationshipInfo is the client for interacting with the RelationshipInfo builders.
+	RelationshipInfo *RelationshipInfoClient
 	// Tag is the client for interacting with the Tag builders.
 	Tag *TagClient
 	// Tweet is the client for interacting with the Tweet builders.
@@ -71,6 +74,7 @@ func (c *Client) init() {
 	c.Friendship = NewFriendshipClient(c.config)
 	c.Group = NewGroupClient(c.config)
 	c.Relationship = NewRelationshipClient(c.config)
+	c.RelationshipInfo = NewRelationshipInfoClient(c.config)
 	c.Tag = NewTagClient(c.config)
 	c.Tweet = NewTweetClient(c.config)
 	c.TweetLike = NewTweetLikeClient(c.config)
@@ -109,18 +113,19 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:          ctx,
-		config:       cfg,
-		Friendship:   NewFriendshipClient(cfg),
-		Group:        NewGroupClient(cfg),
-		Relationship: NewRelationshipClient(cfg),
-		Tag:          NewTagClient(cfg),
-		Tweet:        NewTweetClient(cfg),
-		TweetLike:    NewTweetLikeClient(cfg),
-		TweetTag:     NewTweetTagClient(cfg),
-		User:         NewUserClient(cfg),
-		UserGroup:    NewUserGroupClient(cfg),
-		UserTweet:    NewUserTweetClient(cfg),
+		ctx:              ctx,
+		config:           cfg,
+		Friendship:       NewFriendshipClient(cfg),
+		Group:            NewGroupClient(cfg),
+		Relationship:     NewRelationshipClient(cfg),
+		RelationshipInfo: NewRelationshipInfoClient(cfg),
+		Tag:              NewTagClient(cfg),
+		Tweet:            NewTweetClient(cfg),
+		TweetLike:        NewTweetLikeClient(cfg),
+		TweetTag:         NewTweetTagClient(cfg),
+		User:             NewUserClient(cfg),
+		UserGroup:        NewUserGroupClient(cfg),
+		UserTweet:        NewUserTweetClient(cfg),
 	}, nil
 }
 
@@ -138,18 +143,19 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:          ctx,
-		config:       cfg,
-		Friendship:   NewFriendshipClient(cfg),
-		Group:        NewGroupClient(cfg),
-		Relationship: NewRelationshipClient(cfg),
-		Tag:          NewTagClient(cfg),
-		Tweet:        NewTweetClient(cfg),
-		TweetLike:    NewTweetLikeClient(cfg),
-		TweetTag:     NewTweetTagClient(cfg),
-		User:         NewUserClient(cfg),
-		UserGroup:    NewUserGroupClient(cfg),
-		UserTweet:    NewUserTweetClient(cfg),
+		ctx:              ctx,
+		config:           cfg,
+		Friendship:       NewFriendshipClient(cfg),
+		Group:            NewGroupClient(cfg),
+		Relationship:     NewRelationshipClient(cfg),
+		RelationshipInfo: NewRelationshipInfoClient(cfg),
+		Tag:              NewTagClient(cfg),
+		Tweet:            NewTweetClient(cfg),
+		TweetLike:        NewTweetLikeClient(cfg),
+		TweetTag:         NewTweetTagClient(cfg),
+		User:             NewUserClient(cfg),
+		UserGroup:        NewUserGroupClient(cfg),
+		UserTweet:        NewUserTweetClient(cfg),
 	}, nil
 }
 
@@ -182,6 +188,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Friendship.Use(hooks...)
 	c.Group.Use(hooks...)
 	c.Relationship.Use(hooks...)
+	c.RelationshipInfo.Use(hooks...)
 	c.Tag.Use(hooks...)
 	c.Tweet.Use(hooks...)
 	c.TweetLike.Use(hooks...)
@@ -471,7 +478,8 @@ func (c *RelationshipClient) Update() *RelationshipUpdate {
 // UpdateOne returns an update builder for the given entity.
 func (c *RelationshipClient) UpdateOne(r *Relationship) *RelationshipUpdateOne {
 	mutation := newRelationshipMutation(c.config, OpUpdateOne)
-	mutation.Where(relationship.UserID(r.UserID), relationship.RelativeID(r.RelativeID))
+	mutation.user = &r.UserID
+	mutation.relative = &r.RelativeID
 	return &RelationshipUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -502,9 +510,106 @@ func (c *RelationshipClient) QueryRelative(r *Relationship) *UserQuery {
 		QueryRelative()
 }
 
+// QueryInfo queries the info edge of a Relationship.
+func (c *RelationshipClient) QueryInfo(r *Relationship) *RelationshipInfoQuery {
+	return c.Query().
+		Where(relationship.UserID(r.UserID), relationship.RelativeID(r.RelativeID)).
+		QueryInfo()
+}
+
 // Hooks returns the client hooks.
 func (c *RelationshipClient) Hooks() []Hook {
 	return c.hooks.Relationship
+}
+
+// RelationshipInfoClient is a client for the RelationshipInfo schema.
+type RelationshipInfoClient struct {
+	config
+}
+
+// NewRelationshipInfoClient returns a client for the RelationshipInfo from the given config.
+func NewRelationshipInfoClient(c config) *RelationshipInfoClient {
+	return &RelationshipInfoClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `relationshipinfo.Hooks(f(g(h())))`.
+func (c *RelationshipInfoClient) Use(hooks ...Hook) {
+	c.hooks.RelationshipInfo = append(c.hooks.RelationshipInfo, hooks...)
+}
+
+// Create returns a builder for creating a RelationshipInfo entity.
+func (c *RelationshipInfoClient) Create() *RelationshipInfoCreate {
+	mutation := newRelationshipInfoMutation(c.config, OpCreate)
+	return &RelationshipInfoCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of RelationshipInfo entities.
+func (c *RelationshipInfoClient) CreateBulk(builders ...*RelationshipInfoCreate) *RelationshipInfoCreateBulk {
+	return &RelationshipInfoCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for RelationshipInfo.
+func (c *RelationshipInfoClient) Update() *RelationshipInfoUpdate {
+	mutation := newRelationshipInfoMutation(c.config, OpUpdate)
+	return &RelationshipInfoUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *RelationshipInfoClient) UpdateOne(ri *RelationshipInfo) *RelationshipInfoUpdateOne {
+	mutation := newRelationshipInfoMutation(c.config, OpUpdateOne, withRelationshipInfo(ri))
+	return &RelationshipInfoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *RelationshipInfoClient) UpdateOneID(id int) *RelationshipInfoUpdateOne {
+	mutation := newRelationshipInfoMutation(c.config, OpUpdateOne, withRelationshipInfoID(id))
+	return &RelationshipInfoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for RelationshipInfo.
+func (c *RelationshipInfoClient) Delete() *RelationshipInfoDelete {
+	mutation := newRelationshipInfoMutation(c.config, OpDelete)
+	return &RelationshipInfoDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *RelationshipInfoClient) DeleteOne(ri *RelationshipInfo) *RelationshipInfoDeleteOne {
+	return c.DeleteOneID(ri.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *RelationshipInfoClient) DeleteOneID(id int) *RelationshipInfoDeleteOne {
+	builder := c.Delete().Where(relationshipinfo.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &RelationshipInfoDeleteOne{builder}
+}
+
+// Query returns a query builder for RelationshipInfo.
+func (c *RelationshipInfoClient) Query() *RelationshipInfoQuery {
+	return &RelationshipInfoQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a RelationshipInfo entity by its id.
+func (c *RelationshipInfoClient) Get(ctx context.Context, id int) (*RelationshipInfo, error) {
+	return c.Query().Where(relationshipinfo.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *RelationshipInfoClient) GetX(ctx context.Context, id int) *RelationshipInfo {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *RelationshipInfoClient) Hooks() []Hook {
+	return c.hooks.RelationshipInfo
 }
 
 // TagClient is a client for the Tag schema.
@@ -851,7 +956,8 @@ func (c *TweetLikeClient) Update() *TweetLikeUpdate {
 // UpdateOne returns an update builder for the given entity.
 func (c *TweetLikeClient) UpdateOne(tl *TweetLike) *TweetLikeUpdateOne {
 	mutation := newTweetLikeMutation(c.config, OpUpdateOne)
-	mutation.Where(tweetlike.UserID(tl.UserID), tweetlike.TweetID(tl.TweetID))
+	mutation.user = &tl.UserID
+	mutation.tweet = &tl.TweetID
 	return &TweetLikeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 

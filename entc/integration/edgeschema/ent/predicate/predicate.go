@@ -19,6 +19,9 @@ type Group func(*sql.Selector)
 // Relationship is the predicate function for relationship builders.
 type Relationship func(*sql.Selector)
 
+// RelationshipInfo is the predicate function for relationshipinfo builders.
+type RelationshipInfo func(*sql.Selector)
+
 // Tag is the predicate function for tag builders.
 type Tag func(*sql.Selector)
 

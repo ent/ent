@@ -186,7 +186,9 @@ func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $n.UpdateOneNam
 		mutation := new{{ $n.MutationName }}(c.config, OpUpdateOne, {{ print "with" $n.Name }}({{ $rec }}))
 	{{- else }}
 		mutation := new{{ $n.MutationName }}(c.config, OpUpdateOne)
-		mutation.Where({{ range $id := $n.EdgeSchema.ID }}{{ $n.Package }}.{{ $id.StructField }}({{ $rec }}.{{ $id.StructField }}),{{ end }})
+		{{- range $id := $n.EdgeSchema.ID }}
+			mutation.{{ $id.BuilderField }} = &{{ $rec }}.{{ $id.StructField }}
+		{{- end }}
 	{{- end }}
 	return &{{ $n.UpdateOneName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
