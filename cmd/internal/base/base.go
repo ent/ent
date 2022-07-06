@@ -72,6 +72,8 @@ func InitCmd() *cobra.Command {
 		Example: examples(
 			"ent init Example",
 			"ent init --target entv1/schema User Group",
+			"ent init --template '<template string>'",
+			"ent init --template file=path/to/tmpl.tmpl",
 		),
 		Args: func(_ *cobra.Command, names []string) error {
 			for _, name := range names {
