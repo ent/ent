@@ -163,6 +163,16 @@ func (tlu *TweetLikeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		Node: &sqlgraph.NodeSpec{
 			Table:   tweetlike.Table,
 			Columns: tweetlike.Columns,
+			CompositeID: []*sqlgraph.FieldSpec{
+				{
+					Type:   field.TypeInt,
+					Column: tweetlike.FieldUserID,
+				},
+				{
+					Type:   field.TypeInt,
+					Column: tweetlike.FieldTweetID,
+				},
+			},
 		},
 	}
 	if ps := tlu.mutation.predicates; len(ps) > 0 {
@@ -410,7 +420,27 @@ func (tluo *TweetLikeUpdateOne) sqlSave(ctx context.Context) (_node *TweetLike, 
 		Node: &sqlgraph.NodeSpec{
 			Table:   tweetlike.Table,
 			Columns: tweetlike.Columns,
+			CompositeID: []*sqlgraph.FieldSpec{
+				{
+					Type:   field.TypeInt,
+					Column: tweetlike.FieldUserID,
+				},
+				{
+					Type:   field.TypeInt,
+					Column: tweetlike.FieldTweetID,
+				},
+			},
 		},
+	}
+	if id, ok := tluo.mutation.UserID(); !ok {
+		return nil, &ValidationError{Name: "user_id", err: errors.New(`ent: missing "TweetLike.user_id" for update`)}
+	} else {
+		_spec.Node.CompositeID[0].Value = id
+	}
+	if id, ok := tluo.mutation.TweetID(); !ok {
+		return nil, &ValidationError{Name: "tweet_id", err: errors.New(`ent: missing "TweetLike.tweet_id" for update`)}
+	} else {
+		_spec.Node.CompositeID[1].Value = id
 	}
 	if fields := tluo.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, len(fields))

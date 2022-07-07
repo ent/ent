@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
+	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 )
 
@@ -30,6 +31,7 @@ type RelationshipQuery struct {
 	// eager-loading edges.
 	withUser     *UserQuery
 	withRelative *UserQuery
+	withInfo     *RelationshipInfoQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -103,6 +105,28 @@ func (rq *RelationshipQuery) QueryRelative() *UserQuery {
 			sqlgraph.From(relationship.Table, relationship.RelativeColumn, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, relationship.RelativeTable, relationship.RelativeColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryInfo chains the current query on the "info" edge.
+func (rq *RelationshipQuery) QueryInfo() *RelationshipInfoQuery {
+	query := &RelationshipInfoQuery{config: rq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := rq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := rq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(relationship.Table, relationship.InfoColumn, selector),
+			sqlgraph.To(relationshipinfo.Table, relationshipinfo.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, relationship.InfoTable, relationship.InfoColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -224,6 +248,7 @@ func (rq *RelationshipQuery) Clone() *RelationshipQuery {
 		predicates:   append([]predicate.Relationship{}, rq.predicates...),
 		withUser:     rq.withUser.Clone(),
 		withRelative: rq.withRelative.Clone(),
+		withInfo:     rq.withInfo.Clone(),
 		// clone intermediate query.
 		sql:    rq.sql.Clone(),
 		path:   rq.path,
@@ -250,6 +275,17 @@ func (rq *RelationshipQuery) WithRelative(opts ...func(*UserQuery)) *Relationshi
 		opt(query)
 	}
 	rq.withRelative = query
+	return rq
+}
+
+// WithInfo tells the query-builder to eager-load the nodes that are connected to
+// the "info" edge. The optional arguments are used to configure the query builder of the edge.
+func (rq *RelationshipQuery) WithInfo(opts ...func(*RelationshipInfoQuery)) *RelationshipQuery {
+	query := &RelationshipInfoQuery{config: rq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	rq.withInfo = query
 	return rq
 }
 
@@ -323,9 +359,10 @@ func (rq *RelationshipQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	var (
 		nodes       = []*Relationship{}
 		_spec       = rq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			rq.withUser != nil,
 			rq.withRelative != nil,
+			rq.withInfo != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -395,6 +432,32 @@ func (rq *RelationshipQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 			}
 			for i := range nodes {
 				nodes[i].Edges.Relative = n
+			}
+		}
+	}
+
+	if query := rq.withInfo; query != nil {
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*Relationship)
+		for i := range nodes {
+			fk := nodes[i].InfoID
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(relationshipinfo.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "info_id" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Info = n
 			}
 		}
 	}

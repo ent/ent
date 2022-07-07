@@ -28,8 +28,16 @@ func (Relationship) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("weight").
 			Default(1),
+
+		// Edge fields for the fields that compose this edge.
+		// They also function as the primary key of the table.
 		field.Int("user_id"),
 		field.Int("relative_id"),
+
+		// An edge field to external node that holds
+		// additional information about this edge.
+		field.Int("info_id").
+			Optional(),
 	}
 }
 
@@ -44,6 +52,12 @@ func (Relationship) Edges() []ent.Edge {
 			Required().
 			Unique().
 			Field("relative_id"),
+
+		// An optional edge to an entity that holds
+		// information about this relationship.
+		edge.To("info", RelationshipInfo.Type).
+			Field("info_id").
+			Unique(),
 	}
 }
 
@@ -51,5 +65,10 @@ func (Relationship) Edges() []ent.Edge {
 func (Relationship) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("weight"),
+
+		// A relationship-info can be connected to no more
+		// than one relationship object (and edge schema).
+		index.Edges("info").
+			Unique(),
 	}
 }

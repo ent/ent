@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/friendship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
+	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
@@ -44,16 +45,17 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		friendship.Table:   friendship.ValidColumn,
-		group.Table:        group.ValidColumn,
-		relationship.Table: relationship.ValidColumn,
-		tag.Table:          tag.ValidColumn,
-		tweet.Table:        tweet.ValidColumn,
-		tweetlike.Table:    tweetlike.ValidColumn,
-		tweettag.Table:     tweettag.ValidColumn,
-		user.Table:         user.ValidColumn,
-		usergroup.Table:    usergroup.ValidColumn,
-		usertweet.Table:    usertweet.ValidColumn,
+		friendship.Table:       friendship.ValidColumn,
+		group.Table:            group.ValidColumn,
+		relationship.Table:     relationship.ValidColumn,
+		relationshipinfo.Table: relationshipinfo.ValidColumn,
+		tag.Table:              tag.ValidColumn,
+		tweet.Table:            tweet.ValidColumn,
+		tweetlike.Table:        tweetlike.ValidColumn,
+		tweettag.Table:         tweettag.ValidColumn,
+		user.Table:             user.ValidColumn,
+		usergroup.Table:        usergroup.ValidColumn,
+		usertweet.Table:        usertweet.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {
