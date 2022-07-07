@@ -25,6 +25,15 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 					Type: field.{{ $.ID.Type.ConstName }},
 					Column: {{ $.Package }}.{{ $.ID.Constant }},
 				},
+			{{- else }}
+				CompositeID: []*sqlgraph.FieldSpec{
+					{{- range $id := $.EdgeSchema.ID }}
+						{
+							Type: field.{{ $id.Type.ConstName }},
+							Column: {{ $.Package }}.{{ $id.Constant }},
+						},
+					{{- end }}
+				},
 			{{- end }}
 		},
 	}
@@ -47,7 +56,14 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 					}
 				}
 			}
-		{{- else }}
+		{{- else }}{{/* Composite ID. */}}
+			{{- range $i, $id := $.EdgeSchema.ID }}
+				if id, ok := {{ $mutation }}.{{ $id.MutationGet }}(); !ok {
+					return {{ $zero }}, &ValidationError{Name: "{{ $id.Name }}", err: errors.New(`{{ $pkg }}: missing "{{ $.Name }}.{{ $id.Name }}" for update`)}
+				} else {
+					_spec.Node.CompositeID[{{ $i }}].Value = id
+				}
+			{{- end }}
 			if fields := {{ $receiver }}.fields; len(fields) > 0 {
 				_spec.Node.Columns = make([]string, len(fields))
 				for i, f := range fields {

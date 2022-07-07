@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
+	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 	"entgo.io/ent/schema/field"
 )
@@ -65,6 +66,26 @@ func (ru *RelationshipUpdate) SetRelativeID(i int) *RelationshipUpdate {
 	return ru
 }
 
+// SetInfoID sets the "info_id" field.
+func (ru *RelationshipUpdate) SetInfoID(i int) *RelationshipUpdate {
+	ru.mutation.SetInfoID(i)
+	return ru
+}
+
+// SetNillableInfoID sets the "info_id" field if the given value is not nil.
+func (ru *RelationshipUpdate) SetNillableInfoID(i *int) *RelationshipUpdate {
+	if i != nil {
+		ru.SetInfoID(*i)
+	}
+	return ru
+}
+
+// ClearInfoID clears the value of the "info_id" field.
+func (ru *RelationshipUpdate) ClearInfoID() *RelationshipUpdate {
+	ru.mutation.ClearInfoID()
+	return ru
+}
+
 // SetUser sets the "user" edge to the User entity.
 func (ru *RelationshipUpdate) SetUser(u *User) *RelationshipUpdate {
 	return ru.SetUserID(u.ID)
@@ -73,6 +94,11 @@ func (ru *RelationshipUpdate) SetUser(u *User) *RelationshipUpdate {
 // SetRelative sets the "relative" edge to the User entity.
 func (ru *RelationshipUpdate) SetRelative(u *User) *RelationshipUpdate {
 	return ru.SetRelativeID(u.ID)
+}
+
+// SetInfo sets the "info" edge to the RelationshipInfo entity.
+func (ru *RelationshipUpdate) SetInfo(r *RelationshipInfo) *RelationshipUpdate {
+	return ru.SetInfoID(r.ID)
 }
 
 // Mutation returns the RelationshipMutation object of the builder.
@@ -89,6 +115,12 @@ func (ru *RelationshipUpdate) ClearUser() *RelationshipUpdate {
 // ClearRelative clears the "relative" edge to the User entity.
 func (ru *RelationshipUpdate) ClearRelative() *RelationshipUpdate {
 	ru.mutation.ClearRelative()
+	return ru
+}
+
+// ClearInfo clears the "info" edge to the RelationshipInfo entity.
+func (ru *RelationshipUpdate) ClearInfo() *RelationshipUpdate {
+	ru.mutation.ClearInfo()
 	return ru
 }
 
@@ -168,6 +200,16 @@ func (ru *RelationshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		Node: &sqlgraph.NodeSpec{
 			Table:   relationship.Table,
 			Columns: relationship.Columns,
+			CompositeID: []*sqlgraph.FieldSpec{
+				{
+					Type:   field.TypeInt,
+					Column: relationship.FieldUserID,
+				},
+				{
+					Type:   field.TypeInt,
+					Column: relationship.FieldRelativeID,
+				},
+			},
 		},
 	}
 	if ps := ru.mutation.predicates; len(ps) > 0 {
@@ -261,6 +303,41 @@ func (ru *RelationshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if ru.mutation.InfoCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   relationship.InfoTable,
+			Columns: []string{relationship.InfoColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: relationshipinfo.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ru.mutation.InfoIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   relationship.InfoTable,
+			Columns: []string{relationship.InfoColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: relationshipinfo.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ru.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{relationship.Label}
@@ -313,6 +390,26 @@ func (ruo *RelationshipUpdateOne) SetRelativeID(i int) *RelationshipUpdateOne {
 	return ruo
 }
 
+// SetInfoID sets the "info_id" field.
+func (ruo *RelationshipUpdateOne) SetInfoID(i int) *RelationshipUpdateOne {
+	ruo.mutation.SetInfoID(i)
+	return ruo
+}
+
+// SetNillableInfoID sets the "info_id" field if the given value is not nil.
+func (ruo *RelationshipUpdateOne) SetNillableInfoID(i *int) *RelationshipUpdateOne {
+	if i != nil {
+		ruo.SetInfoID(*i)
+	}
+	return ruo
+}
+
+// ClearInfoID clears the value of the "info_id" field.
+func (ruo *RelationshipUpdateOne) ClearInfoID() *RelationshipUpdateOne {
+	ruo.mutation.ClearInfoID()
+	return ruo
+}
+
 // SetUser sets the "user" edge to the User entity.
 func (ruo *RelationshipUpdateOne) SetUser(u *User) *RelationshipUpdateOne {
 	return ruo.SetUserID(u.ID)
@@ -321,6 +418,11 @@ func (ruo *RelationshipUpdateOne) SetUser(u *User) *RelationshipUpdateOne {
 // SetRelative sets the "relative" edge to the User entity.
 func (ruo *RelationshipUpdateOne) SetRelative(u *User) *RelationshipUpdateOne {
 	return ruo.SetRelativeID(u.ID)
+}
+
+// SetInfo sets the "info" edge to the RelationshipInfo entity.
+func (ruo *RelationshipUpdateOne) SetInfo(r *RelationshipInfo) *RelationshipUpdateOne {
+	return ruo.SetInfoID(r.ID)
 }
 
 // Mutation returns the RelationshipMutation object of the builder.
@@ -337,6 +439,12 @@ func (ruo *RelationshipUpdateOne) ClearUser() *RelationshipUpdateOne {
 // ClearRelative clears the "relative" edge to the User entity.
 func (ruo *RelationshipUpdateOne) ClearRelative() *RelationshipUpdateOne {
 	ruo.mutation.ClearRelative()
+	return ruo
+}
+
+// ClearInfo clears the "info" edge to the RelationshipInfo entity.
+func (ruo *RelationshipUpdateOne) ClearInfo() *RelationshipUpdateOne {
+	ruo.mutation.ClearInfo()
 	return ruo
 }
 
@@ -429,7 +537,27 @@ func (ruo *RelationshipUpdateOne) sqlSave(ctx context.Context) (_node *Relations
 		Node: &sqlgraph.NodeSpec{
 			Table:   relationship.Table,
 			Columns: relationship.Columns,
+			CompositeID: []*sqlgraph.FieldSpec{
+				{
+					Type:   field.TypeInt,
+					Column: relationship.FieldUserID,
+				},
+				{
+					Type:   field.TypeInt,
+					Column: relationship.FieldRelativeID,
+				},
+			},
 		},
+	}
+	if id, ok := ruo.mutation.UserID(); !ok {
+		return nil, &ValidationError{Name: "user_id", err: errors.New(`ent: missing "Relationship.user_id" for update`)}
+	} else {
+		_spec.Node.CompositeID[0].Value = id
+	}
+	if id, ok := ruo.mutation.RelativeID(); !ok {
+		return nil, &ValidationError{Name: "relative_id", err: errors.New(`ent: missing "Relationship.relative_id" for update`)}
+	} else {
+		_spec.Node.CompositeID[1].Value = id
 	}
 	if fields := ruo.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, len(fields))
@@ -523,6 +651,41 @@ func (ruo *RelationshipUpdateOne) sqlSave(ctx context.Context) (_node *Relations
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ruo.mutation.InfoCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   relationship.InfoTable,
+			Columns: []string{relationship.InfoColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: relationshipinfo.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ruo.mutation.InfoIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   relationship.InfoTable,
+			Columns: []string{relationship.InfoColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: relationshipinfo.FieldID,
 				},
 			},
 		}

@@ -28,16 +28,17 @@ type config struct {
 
 // hooks per client, for fast access.
 type hooks struct {
-	Friendship   []ent.Hook
-	Group        []ent.Hook
-	Relationship []ent.Hook
-	Tag          []ent.Hook
-	Tweet        []ent.Hook
-	TweetLike    []ent.Hook
-	TweetTag     []ent.Hook
-	User         []ent.Hook
-	UserGroup    []ent.Hook
-	UserTweet    []ent.Hook
+	Friendship       []ent.Hook
+	Group            []ent.Hook
+	Relationship     []ent.Hook
+	RelationshipInfo []ent.Hook
+	Tag              []ent.Hook
+	Tweet            []ent.Hook
+	TweetLike        []ent.Hook
+	TweetTag         []ent.Hook
+	User             []ent.Hook
+	UserGroup        []ent.Hook
+	UserTweet        []ent.Hook
 }
 
 // Options applies the options on the config object.

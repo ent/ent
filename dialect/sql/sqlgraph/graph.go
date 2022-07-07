@@ -325,10 +325,11 @@ type (
 	// NodeSpec defines the information for querying and
 	// decoding nodes in the graph.
 	NodeSpec struct {
-		Table   string
-		Schema  string
-		Columns []string
-		ID      *FieldSpec
+		Table       string
+		Schema      string
+		Columns     []string
+		ID          *FieldSpec   // primary key.
+		CompositeID []*FieldSpec // composite id (edge schema).
 	}
 )
 
@@ -436,7 +437,7 @@ func UpdateNodes(ctx context.Context, drv dialect.Driver, spec *UpdateSpec) (int
 }
 
 // NotFoundError returns when trying to update an
-// entity and it was not found in the database.
+// entity, and it was not found in the database.
 type NotFoundError struct {
 	table string
 	id    driver.Value
@@ -655,13 +656,28 @@ type updater struct {
 
 func (u *updater) node(ctx context.Context, tx dialect.ExecQuerier) error {
 	var (
-		// id holds the PK of the node used for linking
-		// it with the other nodes.
-		id         = u.Node.ID.Value
+		id         driver.Value
+		idp        *sql.Predicate
 		addEdges   = EdgeSpecs(u.Edges.Add).GroupRel()
 		clearEdges = EdgeSpecs(u.Edges.Clear).GroupRel()
 	)
-	update := u.builder.Update(u.Node.Table).Schema(u.Node.Schema).Where(sql.EQ(u.Node.ID.Column, id))
+	switch {
+	// In case it is not an edge schema, the id holds the PK
+	// of the node used for linking it with the other nodes.
+	case u.Node.ID != nil:
+		id = u.Node.ID.Value
+		idp = sql.EQ(u.Node.ID.Column, id)
+	case len(u.Node.CompositeID) == 2:
+		idp = sql.And(
+			sql.EQ(u.Node.CompositeID[0].Column, u.Node.CompositeID[0].Value),
+			sql.EQ(u.Node.CompositeID[1].Column, u.Node.CompositeID[1].Value),
+		)
+	case len(u.Node.CompositeID) != 2:
+		return fmt.Errorf("sql/sqlgraph: invalid composite id for update table %q", u.Node.Table)
+	default:
+		return fmt.Errorf("sql/sqlgraph: missing node id for update table %q", u.Node.Table)
+	}
+	update := u.builder.Update(u.Node.Table).Schema(u.Node.Schema).Where(idp)
 	if pred := u.Predicate; pred != nil {
 		selector := u.builder.Select().From(u.builder.Table(u.Node.Table).Schema(u.Node.Schema))
 		pred(selector)
@@ -688,8 +704,11 @@ func (u *updater) node(ctx context.Context, tx dialect.ExecQuerier) error {
 			}
 		}
 	}
-	if err := u.setExternalEdges(ctx, []driver.Value{id}, addEdges, clearEdges); err != nil {
-		return err
+	if id != nil {
+		// Not an edge schema.
+		if err := u.setExternalEdges(ctx, []driver.Value{id}, addEdges, clearEdges); err != nil {
+			return err
+		}
 	}
 	// Ignore querying the database when there's nothing
 	// to scan into it.
@@ -698,9 +717,10 @@ func (u *updater) node(ctx context.Context, tx dialect.ExecQuerier) error {
 	}
 	selector := u.builder.Select(u.Node.Columns...).
 		From(u.builder.Table(u.Node.Table).Schema(u.Node.Schema)).
-		// Skip adding the custom predicates that were attached to the updater
-		// as they may point to columns that were changed by the UPDATE statement.
-		Where(sql.EQ(u.Node.ID.Column, u.Node.ID.Value))
+		// Skip adding the custom predicates that were attached
+		// to the updater as they may point to columns that were
+		// changed by the UPDATE statement.
+		Where(idp)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
@@ -853,6 +873,9 @@ func (u *updater) scan(rows *sql.Rows) error {
 	if !rows.Next() {
 		if err := rows.Err(); err != nil {
 			return err
+		}
+		if len(u.Node.CompositeID) == 2 {
+			return &NotFoundError{table: u.Node.Table, id: []driver.Value{u.Node.CompositeID[0].Value, u.Node.CompositeID[1].Value}}
 		}
 		return &NotFoundError{table: u.Node.Table, id: u.Node.ID.Value}
 	}
