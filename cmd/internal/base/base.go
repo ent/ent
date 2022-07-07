@@ -244,9 +244,6 @@ func fileExists(target, name string) bool {
 	return err == nil
 }
 
-// var tmpl = template.Must(template.New("schema").
-// 	Parse())
-
 const (
 	// default schema package path.
 	defaultSchema = "ent/schema"
