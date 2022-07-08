@@ -7,7 +7,6 @@ package base
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -73,9 +72,9 @@ func InitCmd() *cobra.Command {
 			"ent init --target entv1/schema User Group",
 		),
 		Args: func(_ *cobra.Command, names []string) error {
-			for _, name := range names {
-				if !unicode.IsUpper(rune(name[0])) {
-					return errors.New("schema names must begin with uppercase")
+			for i := range names {
+				if !unicode.IsUpper(rune(names[i][0])) {
+					names[i] = strings.Title(names[i])
 				}
 			}
 			return nil
