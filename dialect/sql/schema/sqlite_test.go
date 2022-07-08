@@ -437,7 +437,7 @@ func TestSQLite_Create(t *testing.T) {
 			db, mock, err := sqlmock.New()
 			require.NoError(t, err)
 			tt.before(sqliteMock{mock})
-			migrate, err := NewMigrate(sql.OpenDB("sqlite3", db), tt.options...)
+			migrate, err := NewMigrate(sql.OpenDB("sqlite3", db), append(tt.options, WithAtlas(false))...)
 			require.NoError(t, err)
 			err = migrate.Create(context.Background(), tt.tables...)
 			require.Equal(t, tt.wantErr, err != nil, err)

@@ -402,7 +402,7 @@ func (User) Mixin() []ent.Mixin {
 #### How to use a custom XID globally unique ID?
 
 Package [xid](https://github.com/rs/xid) is a globally unique ID generator library that uses the [Mongo Object ID](https://docs.mongodb.org/manual/reference/object-id/)
-algorithm to generate a 12 byte, 20 character ID with no configuration. The xid package comes with [database/sql](https://golang.org/pkg/database/sql) `sql.Scanner` and `driver.Valuer` interfaces required by Ent for serialization.
+algorithm to generate a 12 byte, 20 character ID with no configuration. The xid package comes with [database/sql](https://pkg.go.dev/database/sql) `sql.Scanner` and `driver.Valuer` interfaces required by Ent for serialization.
 
 To store an XID in any string field use the [GoType](schema-fields.md#go-type) schema configuration:
 
@@ -663,7 +663,7 @@ func (User) Annotations() []schema.Annotation {
 #### How to define a custom precision numeric field?
 
 Using [GoType](schema-fields.md#go-type) and [SchemaType](schema-fields.md#database-type) it is possible to define
-custom precision numeric fields. For example, defining a field that uses [big.Int](https://golang.org/pkg/math/big/).
+custom precision numeric fields. For example, defining a field that uses [big.Int](https://pkg.go.dev/math/big).
 
 ```go
 func (T) Fields() []ent.Field {

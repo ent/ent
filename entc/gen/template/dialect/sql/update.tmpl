@@ -25,6 +25,15 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 					Type: field.{{ $.ID.Type.ConstName }},
 					Column: {{ $.Package }}.{{ $.ID.Constant }},
 				},
+			{{- else }}
+				CompositeID: []*sqlgraph.FieldSpec{
+					{{- range $id := $.EdgeSchema.ID }}
+						{
+							Type: field.{{ $id.Type.ConstName }},
+							Column: {{ $.Package }}.{{ $id.Constant }},
+						},
+					{{- end }}
+				},
 			{{- end }}
 		},
 	}
@@ -47,7 +56,14 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 					}
 				}
 			}
-		{{- else }}
+		{{- else }}{{/* Composite ID. */}}
+			{{- range $i, $id := $.EdgeSchema.ID }}
+				if id, ok := {{ $mutation }}.{{ $id.MutationGet }}(); !ok {
+					return {{ $zero }}, &ValidationError{Name: "{{ $id.Name }}", err: errors.New(`{{ $pkg }}: missing "{{ $.Name }}.{{ $id.Name }}" for update`)}
+				} else {
+					_spec.Node.CompositeID[{{ $i }}].Value = id
+				}
+			{{- end }}
 			if fields := {{ $receiver }}.fields; len(fields) > 0 {
 				_spec.Node.Columns = make([]string, len(fields))
 				for i, f := range fields {
@@ -135,7 +151,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{ {{ $.Package }}.Label}
 		} else if sqlgraph.IsConstraintError(err) {
-			err = &ConstraintError{err.Error(), err}
+			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return {{ $zero }}, err
 	}
@@ -177,6 +193,11 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			{{ if or $.NumHooks $.NumPolicy }}_ = {{ end }}createE.defaults()
 			_, specE := createE.createSpec()
 			edge.Target.Fields = specE.Fields
+			{{- if and .HasOneFieldID .ID.Default }}
+				if specE.ID.Value != nil {
+					edge.Target.Fields = append(edge.Target.Fields, specE.ID)
+				}
+			{{- end }}
 		{{- end }}
 	{{- end }}
 {{- end }}

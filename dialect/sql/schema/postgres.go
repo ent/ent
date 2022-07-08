@@ -87,7 +87,7 @@ func (d *Postgres) setRange(ctx context.Context, conn dialect.ExecQuerier, t *Ta
 	if len(t.PrimaryKey) == 1 {
 		pk = t.PrimaryKey[0].Name
 	}
-	return conn.Exec(ctx, fmt.Sprintf("ALTER TABLE %s ALTER COLUMN %s RESTART WITH %d", t.Name, pk, value), []interface{}{}, nil)
+	return conn.Exec(ctx, fmt.Sprintf("ALTER TABLE %q ALTER COLUMN %q RESTART WITH %d", t.Name, pk, value), []interface{}{}, nil)
 }
 
 // table loads the current table description from the database.
@@ -783,4 +783,11 @@ func (d *Postgres) atIndex(idx1 *Index, t2 *schema.Table, idx2 *schema.Index) er
 		idx2.AddAttrs(&postgres.IndexType{T: t})
 	}
 	return nil
+}
+
+func (Postgres) atTypeRangeSQL(ts ...string) string {
+	for i := range ts {
+		ts[i] = fmt.Sprintf("('%s')", ts[i])
+	}
+	return fmt.Sprintf(`INSERT INTO "%s" ("type") VALUES %s`, TypeTable, strings.Join(ts, ", "))
 }

@@ -29,9 +29,6 @@ var (
 )
 
 type (
-	// Policies combines multiple policies into a single policy.
-	Policies []ent.Policy
-
 	// QueryRule defines the interface deciding whether a
 	// query is allowed and optionally modify it.
 	QueryRule interface {
@@ -49,10 +46,29 @@ type (
 
 	// MutationPolicy combines multiple mutation rules into a single policy.
 	MutationPolicy []MutationRule
+
+	// Policy groups query and mutation policies.
+	Policy struct {
+		Query    QueryPolicy
+		Mutation MutationPolicy
+	}
 )
+
+// EvalQuery forwards evaluation to query a policy.
+func (p Policy) EvalQuery(ctx context.Context, q ent.Query) error {
+	return p.Query.EvalQuery(ctx, q)
+}
+
+// EvalMutation forwards evaluation to mutate a  policy.
+func (p Policy) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	return p.Mutation.EvalMutation(ctx, m)
+}
 
 // NewPolicies creates an ent.Policy from list of mixin.Schema
 // and ent.Schema that implement the ent.Policy interface.
+//
+// Note that, this is a runtime function used by the ent generated
+// code and should not be used in ent/schemas as a privacy rule.
 func NewPolicies(schemas ...interface{ Policy() ent.Policy }) ent.Policy {
 	policies := make(Policies, 0, len(schemas))
 	for i := range schemas {
@@ -62,6 +78,12 @@ func NewPolicies(schemas ...interface{ Policy() ent.Policy }) ent.Policy {
 	}
 	return policies
 }
+
+// Policies combines multiple policies into a single policy.
+//
+// Note that, this is a runtime type used by the ent generated
+// code and should not be used in ent/schemas as a privacy rule.
+type Policies []ent.Policy
 
 // EvalQuery evaluates the query policies. If the Allow error is returned
 // from one of the policies, it stops the evaluation with a nil error.

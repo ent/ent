@@ -5,16 +5,22 @@
 package migrate
 
 import (
+	"bufio"
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"io/fs"
 	"math"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
+	"text/template"
 
+	"ariga.io/atlas/sql/migrate"
+	atlas "ariga.io/atlas/sql/schema"
 	"ariga.io/atlas/sql/sqltool"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -29,9 +35,7 @@ import (
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
 	"entgo.io/ent/entc/integration/migrate/versioned"
-
-	"ariga.io/atlas/sql/migrate"
-	atlas "ariga.io/atlas/sql/schema"
+	vmigrate "entgo.io/ent/entc/integration/migrate/versioned/migrate"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
@@ -51,6 +55,7 @@ func TestMySQL(t *testing.T) {
 
 			drv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/migrate?parseTime=True", port))
 			require.NoError(t, err, "connecting to migrate database")
+			defer drv.Close()
 
 			clientv1 := entv1.NewClient(entv1.Driver(drv))
 			clientv2 := entv2.NewClient(entv2.Driver(drv))
@@ -61,9 +66,19 @@ func TestMySQL(t *testing.T) {
 			NicknameSearch(t, clientv2)
 			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_name = ? AND column_name = ?")
 
-			require.NoError(t, err, root.Exec(ctx, "DROP DATABASE IF EXISTS migrate", []interface{}{}, new(sql.Result)))
-			require.NoError(t, root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS migrate", []interface{}{}, new(sql.Result)))
-			Versioned(t, versioned.NewClient(versioned.Driver(drv)))
+			require.NoError(t, err, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []interface{}{}, new(sql.Result)))
+			require.NoError(t, root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS versioned_migrate", []interface{}{}, new(sql.Result)))
+			defer root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []interface{}{}, new(sql.Result))
+			require.NoError(t, err, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate_dev", []interface{}{}, new(sql.Result)))
+			require.NoError(t, root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS versioned_migrate_dev", []interface{}{}, new(sql.Result)))
+			defer root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate_dev", []interface{}{}, new(sql.Result))
+			vdrv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/versioned_migrate?parseTime=True", port))
+			require.NoError(t, err, "connecting to versioned migrate database")
+			defer vdrv.Close()
+			Versioned(t, vdrv,
+				fmt.Sprintf("mysql://root:pass@localhost:%d/versioned_migrate_dev?parseTime=True", port),
+				versioned.NewClient(versioned.Driver(vdrv)),
+			)
 		})
 	}
 }
@@ -94,6 +109,20 @@ func TestPostgres(t *testing.T) {
 			V1ToV2(t, drv.Dialect(), clientv1, clientv2)
 			CheckConstraint(t, clientv2)
 			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_name = $1 AND column_name = $2")
+
+			vdrv, err := sql.Open(dialect.Postgres, dsn+" dbname=versioned_migrate")
+			require.NoError(t, err, "connecting to versioned migrate database")
+			defer vdrv.Close()
+			require.NoError(t, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []interface{}{}, new(sql.Result)))
+			require.NoError(t, root.Exec(ctx, "CREATE DATABASE versioned_migrate", []interface{}{}, new(sql.Result)))
+			defer root.Exec(ctx, "DROP DATABASE versioned_migrate", []interface{}{}, new(sql.Result))
+			require.NoError(t, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate_dev", []interface{}{}, new(sql.Result)))
+			require.NoError(t, root.Exec(ctx, "CREATE DATABASE versioned_migrate_dev", []interface{}{}, new(sql.Result)))
+			defer root.Exec(ctx, "DROP DATABASE versioned_migrate_dev", []interface{}{}, new(sql.Result))
+			Versioned(t, vdrv,
+				fmt.Sprintf("postgres://postgres:pass@localhost:%d/versioned_migrate_dev?sslmode=disable&search_path=public", port),
+				versioned.NewClient(versioned.Driver(vdrv)),
+			)
 		})
 	}
 }
@@ -160,6 +189,11 @@ func TestSQLite(t *testing.T) {
 	EqualFold(t, client)
 	ContainsFold(t, client)
 	CheckConstraint(t, client)
+
+	vdrv, err := sql.Open("sqlite3", "file:versioned_ent?mode=memory&cache=shared&_fk=1")
+	require.NoError(t, err)
+	defer vdrv.Close()
+	Versioned(t, vdrv, "sqlite3://file?mode=memory&cache=shared&_fk=1", versioned.NewClient(versioned.Driver(vdrv)))
 }
 
 func TestStorageKey(t *testing.T) {
@@ -168,52 +202,131 @@ func TestStorageKey(t *testing.T) {
 	require.Equal(t, "user_friend_id2", migratev2.FriendsTable.ForeignKeys[1].Symbol)
 }
 
-func Versioned(t *testing.T, client *versioned.Client) {
+func Versioned(t *testing.T, drv sql.ExecQuerier, devURL string, client *versioned.Client) {
 	ctx := context.Background()
 
 	p := t.TempDir()
 	dir, err := migrate.NewLocalDir(p)
 	require.NoError(t, err)
 	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir)))
-	require.Equal(t, 2, countFiles(t, dir))
+	require.Equal(t, 3, countFiles(t, dir))
 
 	p = t.TempDir()
 	dir, err = migrate.NewLocalDir(p)
 	require.NoError(t, err)
 	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir), schema.WithFormatter(sqltool.GooseFormatter)))
-	require.Equal(t, 1, countFiles(t, dir))
-
-	p = t.TempDir()
-	dir, err = migrate.NewLocalDir(p)
-	require.NoError(t, err)
-	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir), schema.WithFormatter(sqltool.FlywayFormatter)))
 	require.Equal(t, 2, countFiles(t, dir))
 
 	p = t.TempDir()
 	dir, err = migrate.NewLocalDir(p)
 	require.NoError(t, err)
-	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir), schema.WithFormatter(sqltool.LiquibaseFormatter)))
-	require.Equal(t, 1, countFiles(t, dir))
+	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir), schema.WithFormatter(sqltool.FlywayFormatter)))
+	require.Equal(t, 3, countFiles(t, dir))
 
 	p = t.TempDir()
 	dir, err = migrate.NewLocalDir(p)
 	require.NoError(t, err)
-	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir), schema.WithSumFile()))
+	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir), schema.WithFormatter(sqltool.LiquibaseFormatter)))
+	require.Equal(t, 2, countFiles(t, dir))
+
+	p = t.TempDir()
+	dir, err = migrate.NewLocalDir(p)
+	require.NoError(t, err)
+	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir)))
 	require.Equal(t, 3, countFiles(t, dir))
-	require.FileExists(t, filepath.Join(p, "atlas.sum"))
+	require.FileExists(t, filepath.Join(p, migrate.HashFileName))
+
+	// UniversalID with drift check.
+	p = t.TempDir()
+	dir, err = migrate.NewLocalDir(p)
+	require.NoError(t, err)
+	format, err := migrate.NewTemplateFormatter(
+		template.Must(template.New("name").Parse("{{ .Name }}.sql")),
+		template.Must(template.New("name").Parse(`{{ range .Changes }}{{ printf "%s;\n" .Cmd }}{{ end }}`)),
+	)
+	require.NoError(t, err)
+	opts := []schema.MigrateOption{
+		schema.WithDir(dir),
+		schema.WithGlobalUniqueID(true),
+		schema.WithFormatter(format),
+	}
+
+	// Compared to empty database.
+	require.NoError(t, client.Schema.NamedDiff(ctx, "first", opts...))
+	require.Equal(t, 2, countFiles(t, dir))
+
+	// Apply the migrations.
+	files, err := dir.Files()
+	require.NoError(t, err)
+	for _, f := range files {
+		sc := bufio.NewScanner(bytes.NewReader(f.Bytes()))
+		for sc.Scan() {
+			if sc.Text() != "" {
+				_, err := drv.ExecContext(ctx, sc.Text())
+				require.NoError(t, err, sc.Text())
+			}
+		}
+	}
+
+	// Diff again - there should not be a new file.
+	require.NoError(t, client.Schema.NamedDiff(ctx, "second", opts...))
+	require.Equal(t, 2, countFiles(t, dir))
+
+	// Replay Diff requires sum file.
+	require.NoError(t, os.Remove(filepath.Join(p, migrate.HashFileName)))
+	opts = append(opts, schema.WithMigrationMode(schema.ModeReplay))
+	require.ErrorIs(t, client.Schema.Diff(ctx, opts...), migrate.ErrChecksumNotFound)
+
+	// Invalid sum file errors.
+	require.NoError(t, migrate.WriteSumFile(dir, migrate.HashFile{}))
+	require.ErrorIs(t, client.Schema.Diff(ctx, opts...), migrate.ErrChecksumMismatch)
+
+	// Diffing by replaying on the current connection -> not clean.
+	hf, err := migrate.HashSum(dir)
+	require.NoError(t, err)
+	require.NoError(t, migrate.WriteSumFile(dir, hf))
+	require.ErrorIs(t, client.Schema.Diff(ctx, opts...), migrate.ErrNotClean)
+
+	// Diffing by replaying should not create new files.
+	require.Equal(t, 2, countFiles(t, dir))
+	require.NoError(t, vmigrate.Diff(ctx, devURL, opts...))
+	require.Equal(t, 2, countFiles(t, dir))
+
+	// Creating an empty and creating a diff by replay results in the same files.
+	p2 := t.TempDir()
+	dir2, err := migrate.NewLocalDir(p2)
+	require.NoError(t, err)
+	*dir = *dir2
+	require.Equal(t, 0, countFiles(t, dir))
+	require.NoError(t, vmigrate.Diff(ctx, devURL, opts...))
+	require.Equal(t, 2, countFiles(t, dir))
+	f1, err := os.ReadFile(filepath.Join(p, "first.sql"))
+	require.NoError(t, err)
+	f2, err := os.ReadFile(filepath.Join(p2, "changes.sql"))
+	require.NoError(t, err)
+	require.Equal(t, string(f1), string(f2))
 }
 
 func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv2.Client) {
 	ctx := context.Background()
 
 	// Run migration and execute queries on v1.
-	require.NoError(t, clientv1.Schema.Create(ctx, migratev1.WithGlobalUniqueID(true), schema.WithAtlas(true)))
+	require.NoError(t, clientv1.Schema.Create(ctx, migratev1.WithGlobalUniqueID(true)))
 	SanityV1(t, dialect, clientv1)
+	require.NoError(t, clientv1.Schema.Create(ctx, migratev1.WithGlobalUniqueID(true)))
+
+	// Ensure migration to Atlas works with global unique ids.
+	// Create 2 records, delete first one, and create another two after migration.
+	// This way, we ensure that Atlas migration does not affect the PK starting point.
+	c1 := clientv1.Conversion.Create().SaveX(ctx)
+	clientv1.Conversion.Create().ExecX(ctx)
+	clientv1.Conversion.DeleteOne(c1).ExecX(ctx)
 
 	// Run migration and execute queries on v2.
-	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithAtlas(true), schema.WithDiffHook(renameTokenColumn), schema.WithApplyHook(fillNulls(dialect))))
-	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithAtlas(true)), "should not create additional resources on multiple runs")
+	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithDiffHook(renameTokenColumn), schema.WithApplyHook(fillNulls(dialect))))
+	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true)), "should not create additional resources on multiple runs")
 	SanityV2(t, dialect, clientv2)
+	clientv2.Conversion.CreateBulk(clientv2.Conversion.Create(), clientv2.Conversion.Create(), clientv2.Conversion.Create()).ExecX(ctx)
 
 	u := clientv2.User.Create().SetAge(1).SetName("foo").SetNickname("nick_foo").SetPhone("phone").SaveX(ctx)
 	idRange(t, clientv2.Car.Create().SetOwner(u).SaveX(ctx).ID, 0, 1<<32)
@@ -450,7 +563,7 @@ func TimePrecision(t *testing.T, drv *sql.Driver, query string) {
 }
 
 func idRange(t *testing.T, id, l, h int) {
-	require.Truef(t, id > l && id < h, "id %s should be between %d to %d", id, l, h)
+	require.Truef(t, id > l && id < h, "id %d should be between %d to %d", id, l, h)
 }
 
 func countFiles(t *testing.T, d migrate.Dir) int {

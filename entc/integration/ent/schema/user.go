@@ -57,7 +57,7 @@ func (User) Fields() []ent.Field {
 // Edges of the user.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("card", Card.Type).Comment("O2O edge").Unique(),
+		edge.To("card", Card.Type).Comment("Cards associated with this user. O2O edge").Unique(),
 		edge.To("pets", Pet.Type),
 		edge.To("files", File.Type),
 		edge.To("groups", Group.Type),

@@ -69,8 +69,23 @@ func (t *Table) AddColumn(c *Column) *Table {
 
 // HasColumn reports if the table contains a column with the given name.
 func (t *Table) HasColumn(name string) bool {
-	_, ok := t.columns[name]
+	_, ok := t.Column(name)
 	return ok
+}
+
+// Column returns the column with the given name. If exists.
+func (t *Table) Column(name string) (*Column, bool) {
+	if c, ok := t.columns[name]; ok {
+		return c, true
+	}
+	// In case the column was added
+	// directly to the Columns field.
+	for _, c := range t.Columns {
+		if c.Name == name {
+			return c, true
+		}
+	}
+	return nil, false
 }
 
 // SetAnnotation the entsql.Annotation on the table.
@@ -171,6 +186,96 @@ func (t *Table) fk(symbol string) (*ForeignKey, bool) {
 		}
 	}
 	return nil, false
+}
+
+// CopyTables returns a deep-copy of the given tables. This utility function is
+// useful for copying the generated schema tables (i.e. migrate.Tables) before
+// running schema migration when there is a need for execute multiple migrations
+// concurrently. e.g. running parallel unit-tests using the generated enttest package.
+func CopyTables(tables []*Table) ([]*Table, error) {
+	var (
+		copyT  = make([]*Table, len(tables))
+		byName = make(map[string]*Table)
+	)
+	for i, t := range tables {
+		copyT[i] = &Table{
+			Name:        t.Name,
+			Columns:     make([]*Column, len(t.Columns)),
+			Indexes:     make([]*Index, len(t.Indexes)),
+			ForeignKeys: make([]*ForeignKey, len(t.ForeignKeys)),
+		}
+		for j, c := range t.Columns {
+			cc := *c
+			// SchemaType and Enums are read-only fields.
+			cc.indexes = nil
+			cc.foreign = nil
+			copyT[i].Columns[j] = &cc
+		}
+		if at := t.Annotation; at != nil {
+			cat := *at
+			copyT[i].Annotation = &cat
+		}
+		byName[t.Name] = copyT[i]
+	}
+	for i, t := range tables {
+		ct := copyT[i]
+		for _, c := range t.PrimaryKey {
+			cc, ok := ct.column(c.Name)
+			if !ok {
+				return nil, fmt.Errorf("sql/schema: missing primary key column %q", c.Name)
+			}
+			ct.PrimaryKey = append(ct.PrimaryKey, cc)
+		}
+		for j, idx := range t.Indexes {
+			cidx := &Index{
+				Name:    idx.Name,
+				Unique:  idx.Unique,
+				Columns: make([]*Column, len(idx.Columns)),
+			}
+			if at := idx.Annotation; at != nil {
+				cat := *at
+				cidx.Annotation = &cat
+			}
+			for k, c := range idx.Columns {
+				cc, ok := ct.column(c.Name)
+				if !ok {
+					return nil, fmt.Errorf("sql/schema: missing index column %q", c.Name)
+				}
+				cidx.Columns[k] = cc
+			}
+			ct.Indexes[j] = cidx
+		}
+		for j, fk := range t.ForeignKeys {
+			cfk := &ForeignKey{
+				Symbol:     fk.Symbol,
+				OnUpdate:   fk.OnUpdate,
+				OnDelete:   fk.OnDelete,
+				Columns:    make([]*Column, len(fk.Columns)),
+				RefColumns: make([]*Column, len(fk.RefColumns)),
+			}
+			for k, c := range fk.Columns {
+				cc, ok := ct.column(c.Name)
+				if !ok {
+					return nil, fmt.Errorf("sql/schema: missing foreign-key column %q", c.Name)
+				}
+				cfk.Columns[k] = cc
+			}
+			cref, ok := byName[fk.RefTable.Name]
+			if !ok {
+				return nil, fmt.Errorf("sql/schema: missing foreign-key ref-table %q", fk.RefTable.Name)
+			}
+			cfk.RefTable = cref
+			for k, c := range fk.RefColumns {
+				cc, ok := cref.column(c.Name)
+				if !ok {
+					return nil, fmt.Errorf("sql/schema: missing foreign-key ref-column %q", c.Name)
+				}
+				cfk.RefColumns[k] = cc
+			}
+			ct.ForeignKeys[j] = cfk
+		}
+	}
+	return copyT, nil
 }
 
 // Column schema definition for SQL dialects.

@@ -6,6 +6,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
 	"entgo.io/ent/schema/field"
 )
 
@@ -25,6 +26,8 @@ func (Comment) Fields() []ent.Field {
 			Optional().
 			Nillable(),
 		field.String("table").
+			Optional(),
+		field.JSON("dir", schemadir.Dir("")).
 			Optional(),
 	}
 }

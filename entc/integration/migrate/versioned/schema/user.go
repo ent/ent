@@ -7,8 +7,8 @@ package schema
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
-	"entgo.io/ent/schema/index"
 )
 
 // User holds the schema definition for the User entity.
@@ -19,22 +19,17 @@ type User struct {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("id"),
 		field.Int32("age"),
 		field.String("name").
 			MaxLen(10),
-		field.Text("description").
-			Optional(),
 		field.String("address").
 			Optional(),
 	}
 }
 
-func (User) Indexes() []ent.Index {
-	return []ent.Index{
-		index.Fields("description").
-			Annotations(entsql.Prefix(50)),
-		index.Fields("name", "address").
-			Unique(),
+// Annotations of the User.
+func (User) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "versioned_users"},
 	}
 }

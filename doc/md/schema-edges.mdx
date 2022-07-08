@@ -1416,6 +1416,23 @@ However, you should note, that this is currently an SQL-only feature.
 
 Read more about this in the [Indexes](schema-indexes.md) section.
 
+## Comments
+
+A comment can be added to the edge using the `.Comment()` method. This comment
+appears before the edge in the generated entity code. Newlines are supported 
+using the `\n` escape sequence.
+
+```go
+// Edges of the User.
+func (User) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("pets", Pet.Type).
+			Comment("Pets that this user is responsible for taking care of.\n" + 
+				"May be zero to many, depending on the user.")
+	}
+}
+```
+
 ## Annotations
 
 `Annotations` is used to attach arbitrary metadata to the edge object in code generation.

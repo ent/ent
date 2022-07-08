@@ -18,7 +18,6 @@ type Group struct {
 }
 
 // Fields of the Group.
-// Fields of the Group.
 func (Group) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name").

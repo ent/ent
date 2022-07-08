@@ -6,16 +6,19 @@ package schema
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+	"text/template"
 	"time"
 
 	"ariga.io/atlas/sql/migrate"
 	"ariga.io/atlas/sql/schema"
-
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/schema/field"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/require"
 
@@ -38,7 +41,7 @@ func TestMigrateHookOmitTable(t *testing.T) {
 		return CreateFunc(func(ctx context.Context, tables ...*Table) error {
 			return next.Create(ctx, tables[1])
 		})
-	}))
+	}), WithAtlas(false))
 	require.NoError(t, err)
 	err = m.Create(context.Background(), tables...)
 	require.NoError(t, err)
@@ -63,13 +66,15 @@ func TestMigrateHookAddTable(t *testing.T) {
 		return CreateFunc(func(ctx context.Context, tables ...*Table) error {
 			return next.Create(ctx, tables[0], &Table{Name: "pets"})
 		})
-	}))
+	}), WithAtlas(false))
 	require.NoError(t, err)
 	err = m.Create(context.Background(), tables...)
 	require.NoError(t, err)
 }
 
 func TestMigrate_Diff(t *testing.T) {
+	ctx := context.Background()
+
 	db, err := sql.Open(dialect.SQLite, "file:test?mode=memory&_fk=1")
 	require.NoError(t, err)
 
@@ -79,11 +84,11 @@ func TestMigrate_Diff(t *testing.T) {
 
 	m, err := NewMigrate(db, WithDir(d))
 	require.NoError(t, err)
-	require.NoError(t, m.Diff(context.Background(), &Table{Name: "users"}))
-	v := time.Now().Format("20060102150405")
+	require.NoError(t, m.Diff(ctx, &Table{Name: "users"}))
+	v := time.Now().UTC().Format("20060102150405")
 	requireFileEqual(t, filepath.Join(p, v+"_changes.up.sql"), "-- create \"users\" table\nCREATE TABLE `users` (, PRIMARY KEY ());\n")
 	requireFileEqual(t, filepath.Join(p, v+"_changes.down.sql"), "-- reverse: create \"users\" table\nDROP TABLE `users`;\n")
-	require.NoFileExists(t, filepath.Join(p, "atlas.sum"))
+	require.FileExists(t, filepath.Join(p, migrate.HashFileName))
 
 	// Test integrity file.
 	p = t.TempDir()
@@ -91,12 +96,63 @@ func TestMigrate_Diff(t *testing.T) {
 	require.NoError(t, err)
 	m, err = NewMigrate(db, WithDir(d), WithSumFile())
 	require.NoError(t, err)
-	require.NoError(t, m.Diff(context.Background(), &Table{Name: "users"}))
+	require.NoError(t, m.Diff(ctx, &Table{Name: "users"}))
 	requireFileEqual(t, filepath.Join(p, v+"_changes.up.sql"), "-- create \"users\" table\nCREATE TABLE `users` (, PRIMARY KEY ());\n")
 	requireFileEqual(t, filepath.Join(p, v+"_changes.down.sql"), "-- reverse: create \"users\" table\nDROP TABLE `users`;\n")
-	require.FileExists(t, filepath.Join(p, "atlas.sum"))
+	require.FileExists(t, filepath.Join(p, migrate.HashFileName))
 	require.NoError(t, d.WriteFile("tmp.sql", nil))
-	require.ErrorIs(t, m.Diff(context.Background(), &Table{Name: "users"}), migrate.ErrChecksumMismatch)
+	require.ErrorIs(t, m.Diff(ctx, &Table{Name: "users"}), migrate.ErrChecksumMismatch)
+
+	idCol := []*Column{{Name: "id", Type: field.TypeInt, Increment: true}}
+	p = t.TempDir()
+	d, err = migrate.NewLocalDir(p)
+	require.NoError(t, err)
+	f, err := migrate.NewTemplateFormatter(
+		template.Must(template.New("").Parse("{{ .Name }}.sql")),
+		template.Must(template.New("").Parse(
+			`{{ range .Changes }}{{ printf "%s;\n" .Cmd }}{{ end }}`,
+		)),
+	)
+	require.NoError(t, err)
+
+	m, err = NewMigrate(db, WithFormatter(f), WithDir(d), WithGlobalUniqueID(true))
+	require.NoError(t, err)
+	require.NoError(t, m.Diff(ctx,
+		&Table{Name: "users", Columns: idCol, PrimaryKey: idCol},
+		&Table{
+			Name:       "groups",
+			Columns:    idCol,
+			PrimaryKey: idCol,
+			Indexes: []*Index{
+				{Name: "short", Columns: idCol},
+				{Name: "long_" + strings.Repeat("_", 60), Columns: idCol},
+			}},
+	))
+	changesSQL := strings.Join([]string{
+		"CREATE TABLE `users` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT);",
+		"CREATE TABLE `groups` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT);",
+		fmt.Sprintf("INSERT INTO sqlite_sequence (name, seq) VALUES (\"groups\", %d);", 1<<32),
+		"CREATE INDEX `short` ON `groups` (`id`);",
+		"CREATE INDEX `long____________________________1cb2e7e47a309191385af4ad320875b1` ON `groups` (`id`);",
+		"CREATE TABLE `ent_types` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT, `type` text NOT NULL);",
+		"CREATE UNIQUE INDEX `ent_types_type_key` ON `ent_types` (`type`);",
+		"INSERT INTO `ent_types` (`type`) VALUES ('users'), ('groups');", "",
+	}, "\n")
+	requireFileEqual(t, filepath.Join(p, "changes.sql"), changesSQL)
+
+	// Adding another node will result in a new entry to the TypeTable (without actually creating it).
+	_, err = db.ExecContext(ctx, changesSQL, nil, nil)
+	require.NoError(t, err)
+	require.NoError(t, m.NamedDiff(ctx, "changes_2", &Table{Name: "pets", Columns: idCol, PrimaryKey: idCol}))
+	requireFileEqual(t,
+		filepath.Join(p, "changes_2.sql"), strings.Join([]string{
+			"CREATE TABLE `pets` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT);",
+			fmt.Sprintf("INSERT INTO sqlite_sequence (name, seq) VALUES (\"pets\", %d);", 2<<32),
+			"INSERT INTO `ent_types` (`type`) VALUES ('pets');", "",
+		}, "\n"))
+
+	// Checksum will be updated as well.
+	require.NoError(t, migrate.Validate(d))
 }
 
 func requireFileEqual(t *testing.T, name, contents string) {

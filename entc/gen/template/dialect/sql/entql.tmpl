@@ -82,7 +82,7 @@ type predicateAdder interface {
 
 	// Filter returns a Filter implementation to apply filters on the {{ $builder }} builder.
 	func ({{ $receiver }} *{{ $builder }}) Filter() *{{ $filter }} {
-		return &{{ $filter }}{ {{ $receiver }}.config, {{ $receiver}} }
+		return &{{ $filter }}{config: {{ $receiver }}.config, predicateAdder: {{ $receiver}} }
 	}
 
 	// addPredicate implements the predicateAdder interface.
@@ -92,13 +92,13 @@ type predicateAdder interface {
 
 	// Filter returns an entql.Where implementation to apply filters on the {{ $mutation }} builder.
 	func (m *{{ $mutation }}) Filter() *{{ $filter }} {
-		return &{{ $filter }}{m.config, m}
+		return &{{ $filter }}{config: m.config, predicateAdder: m}
 	}
 
 	// {{ $filter }} provides a generic filtering capability at runtime for {{ $builder }}.
 	type {{ $filter }} struct {
-		config
 		predicateAdder
+		config
 	}
 
 	// Where applies the entql predicate on the query filter.

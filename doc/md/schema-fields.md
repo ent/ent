@@ -508,6 +508,23 @@ func (User) Fields() []ent.Field {
 }
 ```
 
+## Comments
+
+A comment can be added to a field using the `.Comment()` method. This comment
+appears before the field in the generated entity code. Newlines are supported 
+using the `\n` escape sequence.
+
+```go
+// Fields of the user.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name").
+			Default("John Doe").
+			Comment("Name of the user.\n If not specified, defaults to \"John Doe\"."),
+	}
+}
+```
+
 ## Storage Key
 
 Custom storage name can be configured using the `StorageKey` method.

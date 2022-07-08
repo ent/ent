@@ -1639,6 +1639,14 @@ func (e Edge) Field() *Field {
 	return nil
 }
 
+// Comment returns the comment of the edge.
+func (e Edge) Comment() string {
+	if e.def.Comment != "" {
+		return e.def.Comment
+	}
+	return ""
+}
+
 // HasFieldSetter reports if this edge already has a field-edge setters for its mutation API.
 // It's used by the codegen templates to avoid generating duplicate setters for id APIs (e.g. SetOwnerID).
 func (e Edge) HasFieldSetter() bool {

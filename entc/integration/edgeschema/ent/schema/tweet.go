@@ -32,5 +32,8 @@ func (Tweet) Edges() []ent.Edge {
 			Ref("tweets").
 			Through("tweet_user", UserTweet.Type).
 			Comment("The uniqueness is enforced on the edge schema"),
+		edge.From("tags", Tag.Type).
+			Ref("tweets").
+			Through("tweet_tags", TweetTag.Type),
 	}
 }

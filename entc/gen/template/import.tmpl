@@ -42,7 +42,8 @@ import (
 	{{- range $f := $fields }}
 		{{- $pkg := $f.Type.PkgPath }}
 		{{- if and $pkg (not (hasImport (base $pkg ))) }}
-			"{{ $pkg }}"
+			{{- $name := trim (index (split $f.Type.RType.Ident ".") 0) "[]*" }}
+			{{ if ne $name (base $pkg) }}{{ $name }} {{ end}}"{{ $pkg }}"
 		{{- end }}
 	{{- end }}
 {{- end }}

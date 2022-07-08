@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 
+	"github.com/google/uuid"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
 )
@@ -57,6 +58,9 @@ func TestEdgeSchemaWithID(t *testing.T) {
 	require.Equal(t, []int{hub.ID, lab.ID}, []int{users[0].Edges.JoinedGroups[0].GroupID, users[0].Edges.JoinedGroups[1].GroupID})
 	require.Equal(t, []int{hub.ID, lab.ID}, []int{users[0].Edges.JoinedGroups[0].Edges.Group.ID, users[0].Edges.JoinedGroups[1].Edges.Group.ID})
 	require.Equal(t, hub.ID, users[1].Edges.JoinedGroups[0].GroupID)
+
+	// Ignore update as we already have such edge between a8m and hub.
+	client.UserGroup.Create().SetUser(a8m).SetGroup(hub).OnConflict().Ignore().ExecX(ctx)
 }
 
 func TestEdgeSchemaCompositeID(t *testing.T) {
@@ -113,6 +117,50 @@ func TestEdgeSchemaCompositeID(t *testing.T) {
 	require.Equal(t, 3, v[0].Count)
 	require.Equal(t, nat.ID, v[1].UserID)
 	require.Equal(t, 2, v[1].Count)
+
+	// Ignore update as we already have such edge between a8m and hub.
+	client.TweetLike.Create().SetUserID(like.UserID).SetTweetID(like.TweetID).OnConflict().Ignore().ExecX(ctx)
+	client.TweetLike.Create().SetUserID(like.UserID).SetTweetID(like.TweetID).OnConflict().DoNothing().ExecX(ctx)
+
+	// Clean all tweet likes and create them in batch again.
+	client.TweetLike.Delete().ExecX(ctx)
+	likes = client.TweetLike.CreateBulk(
+		client.TweetLike.Create().SetUserID(a8m.ID).SetTweet(tweets[0]),
+		client.TweetLike.Create().SetUserID(a8m.ID).SetTweet(tweets[1]),
+		client.TweetLike.Create().SetUserID(nat.ID).SetTweet(tweets[1]),
+		client.TweetLike.Create().SetUserID(nat.ID).SetTweet(tweets[2]),
+	).SaveX(ctx)
+	require.Equal(t, likes[0].UserID, a8m.ID)
+	require.Equal(t, likes[0].TweetID, tweets[0].ID)
+	require.NotZero(t, likes[0].LikedAt)
+	require.Equal(t, likes[1].UserID, a8m.ID)
+	require.Equal(t, likes[1].TweetID, tweets[1].ID)
+	require.NotZero(t, likes[1].LikedAt)
+
+	require.Equal(t, likes[2].UserID, nat.ID)
+	require.Equal(t, likes[2].TweetID, tweets[1].ID)
+	require.NotZero(t, likes[2].LikedAt)
+	require.Equal(t, likes[3].UserID, nat.ID)
+	require.Equal(t, likes[3].TweetID, tweets[2].ID)
+	require.NotZero(t, likes[3].LikedAt)
+}
+
+func TestEdgeSchemaDefaultID(t *testing.T) {
+	client, err := ent.Open(dialect.SQLite, "file:ent?mode=memory&cache=shared&_fk=1")
+	require.NoError(t, err)
+	defer client.Close()
+	ctx := context.Background()
+	require.NoError(t, client.Schema.Create(ctx))
+
+	tweet1 := client.Tweet.Create().SetText("foo").SaveX(ctx)
+	tag1 := client.Tag.Create().SetValue("1").SaveX(ctx)
+	tweet1.Update().AddTags(tag1).SaveX(ctx)
+	require.Equal(t, tag1.ID, tweet1.QueryTags().OnlyIDX(ctx))
+	require.NotEqual(t, uuid.Nil, tweet1.QueryTweetTags().OnlyIDX(ctx))
+
+	tweet2 := client.Tweet.Create().SetText("bar").AddTags(tag1).SaveX(ctx)
+	require.Equal(t, tag1.ID, tweet2.QueryTags().OnlyIDX(ctx))
+	require.NotEqual(t, uuid.Nil, tweet2.QueryTweetTags().OnlyIDX(ctx))
 }
 
 func TestEdgeSchemaBidiWithID(t *testing.T) {
@@ -165,6 +213,14 @@ func TestEdgeSchemaBidiCompositeID(t *testing.T) {
 	} {
 		require.Equal(t, u3.ID, r)
 	}
+
+	info := client.RelationshipInfo.Create().SetText("u1->u2").SaveX(ctx)
+	r1 := u1.QueryRelationship().OnlyX(ctx)
+	r1.Update().SetInfo(info).ExecX(ctx)
+	r2 := client.User.Query().QueryRelationship().Where(relationship.HasInfo()).WithInfo().OnlyX(ctx)
+	require.Equal(t, r1.UserID, r2.UserID)
+	require.Equal(t, r1.RelativeID, r2.RelativeID)
+	require.Equal(t, info.ID, r2.Edges.Info.ID)
 }
 
 func TestEdgeSchemaForO2M(t *testing.T) {
