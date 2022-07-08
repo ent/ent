@@ -76,7 +76,7 @@ import (
 
 	"<project>/ent/migrate"
 
-	atlas "ariga.io/atlas/sql/migrate"
+	"ariga.io/atlas/sql/sqltool"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql/schema"
 	_ "github.com/go-sql-driver/mysql"
@@ -84,8 +84,8 @@ import (
 
 func main() {
 	ctx := context.Background()
-	// Create a local migration directory.
-	dir, err := atlas.NewLocalDir("migrations")
+	// Create a local migration directory able to understand golang-migrate migration files for replay.
+	dir, err := sqltool.NewGolangMigrateDir("migrations")
 	if err != nil {
 		log.Fatalf("failed creating atlas migration directory: %v", err)
 	}
@@ -228,6 +228,9 @@ following four:
 2. [pressly/goose](https://github.com/pressly/goose)
 3. [Flyway](https://flywaydb.org/)
 4. [Liquibase](https://www.liquibase.org/)
+
+Please be aware, that migration directory replay us currently only support for `golang-migrate/migrate` formatted files.
+Attempting to replay migration files of other tools might work, but is not officially supported (yet).
 
 :::note
 You need to have the latest master of Ent installed for this to be working.
