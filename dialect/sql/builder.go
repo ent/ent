@@ -1643,6 +1643,28 @@ func (p *Predicate) Like(col, pattern string) *Predicate {
 	})
 }
 
+// Between is a shorthand for WHERE column BETWEEN ? AND ?
+func Between(col string, start, end interface{}) *Predicate {
+	p := P()
+	return p.Append(func(b *Builder) {
+		b.WriteString(fmt.Sprintf("%s BETWEEN ", col))
+		b.Arg(start)
+		b.WriteString(" AND ")
+		b.Arg(end)
+	})
+}
+
+// NotBetween is a shorthand for WHERE column NOT BETWEEN ? AND ?
+func NotBetween(col string, start, end interface{}) *Predicate {
+	p := P()
+	return p.Append(func(b *Builder) {
+		b.WriteString(fmt.Sprintf("%s NOT BETWEEN ", col))
+		b.Arg(start)
+		b.WriteString(" AND ")
+		b.Arg(end)
+	})
+}
+
 // escape escapes w with the default escape character ('/'),
 // to be used by the pattern matching functions below.
 // The second return value indicates if w was escaped or not.
