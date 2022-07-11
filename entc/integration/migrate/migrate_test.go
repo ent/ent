@@ -285,7 +285,7 @@ func Versioned(t *testing.T, drv sql.ExecQuerier, devURL string, client *version
 	hf, err := migrate.HashSum(dir)
 	require.NoError(t, err)
 	require.NoError(t, migrate.WriteSumFile(dir, hf))
-	require.ErrorIs(t, client.Schema.Diff(ctx, opts...), migrate.ErrNotClean)
+	require.ErrorAs(t, client.Schema.Diff(ctx, opts...), &migrate.NotCleanError{})
 
 	// Diffing by replaying should not create new files.
 	require.Equal(t, 2, countFiles(t, dir))
