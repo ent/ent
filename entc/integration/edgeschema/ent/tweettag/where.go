@@ -39,12 +39,6 @@ func IDNEQ(id uuid.UUID) predicate.TweetTag {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.TweetTag {
 	return predicate.TweetTag(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(ids) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		v := make([]interface{}, len(ids))
 		for i := range v {
 			v[i] = ids[i]
@@ -56,12 +50,6 @@ func IDIn(ids ...uuid.UUID) predicate.TweetTag {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.TweetTag {
 	return predicate.TweetTag(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(ids) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		v := make([]interface{}, len(ids))
 		for i := range v {
 			v[i] = ids[i]

@@ -2005,6 +2005,14 @@ func TestReusePredicates(t *testing.T) {
 			wantArgs:  []interface{}{"a", "b"},
 		},
 		{
+			p: Or(
+				EQ("a", "a"),
+				In("b"),
+			),
+			wantQuery: `SELECT * FROM "users" WHERE "a" = $1 OR FALSE`,
+			wantArgs:  []interface{}{"a"},
+		},
+		{
 			p: And(
 				EQ("active", true),
 				HasPrefix("name", "foo"),

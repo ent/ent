@@ -1535,8 +1535,10 @@ func In(col string, args ...interface{}) *Predicate {
 
 // In appends the `IN` predicate.
 func (p *Predicate) In(col string, args ...interface{}) *Predicate {
+	// if no arguments were provided, append the FALSE constants,
+	// since we can't apply "IN ()". This will make this predicate falsy.
 	if len(args) == 0 {
-		return p
+		return p.False()
 	}
 	return p.Append(func(b *Builder) {
 		b.Ident(col).WriteOp(OpIn)
