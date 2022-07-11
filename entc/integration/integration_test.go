@@ -2128,6 +2128,7 @@ func Conditional(t *testing.T, client *ent.Client) {
 	require.Nil(t, err)
 
 	users, err = client.User.Query().All(ctx)
+	require.Nil(t, err)
 	require.Equal(t, len(users), 2)
 
 	_, err = client.User.Update().
