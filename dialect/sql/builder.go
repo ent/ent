@@ -1535,9 +1535,9 @@ func In(col string, args ...interface{}) *Predicate {
 
 // In appends the `IN` predicate.
 func (p *Predicate) In(col string, args ...interface{}) *Predicate {
-    if len(args) == 0 {
-        return p.False()
-    }
+	if len(args) == 0 {
+		return p.False()
+	}
 	return p.Append(func(b *Builder) {
 		b.Ident(col).WriteOp(OpIn)
 		b.Nested(func(b *Builder) {
