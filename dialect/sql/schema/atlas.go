@@ -183,7 +183,7 @@ func (a *Atlas) NamedDiff(ctx context.Context, name string, tables ...*Table) er
 			return err
 		}
 		if len(s.Tables) > 0 {
-			return migrate.ErrNotClean
+			return migrate.NotCleanError{Reason: fmt.Sprintf("found table %q", s.Tables[0].Name)}
 		}
 		// Clean up once done.
 		defer func() {
