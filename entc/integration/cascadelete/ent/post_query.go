@@ -44,6 +44,15 @@ func (pq *PostQuery) Where(ps ...predicate.Post) *PostQuery {
 	return pq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (pq *PostQuery) When(condition bool, action func(builder *PostQuery)) *PostQuery {
+	if condition {
+		action(pq)
+	}
+
+	return pq
+}
+
 // Limit adds a limit step to the query.
 func (pq *PostQuery) Limit(limit int) *PostQuery {
 	pq.limit = &limit

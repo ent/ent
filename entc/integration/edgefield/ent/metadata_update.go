@@ -150,6 +150,15 @@ func (mu *MetadataUpdate) ClearParent() *MetadataUpdate {
 	return mu
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (mu *MetadataUpdate) When(condition bool, action func(builder *MetadataUpdate)) *MetadataUpdate {
+	if condition {
+		action(mu)
+	}
+
+	return mu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (mu *MetadataUpdate) Save(ctx context.Context) (int, error) {
 	var (

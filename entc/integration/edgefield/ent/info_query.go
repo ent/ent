@@ -41,6 +41,15 @@ func (iq *InfoQuery) Where(ps ...predicate.Info) *InfoQuery {
 	return iq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (iq *InfoQuery) When(condition bool, action func(builder *InfoQuery)) *InfoQuery {
+	if condition {
+		action(iq)
+	}
+
+	return iq
+}
+
 // Limit adds a limit step to the query.
 func (iq *InfoQuery) Limit(limit int) *InfoQuery {
 	iq.limit = &limit

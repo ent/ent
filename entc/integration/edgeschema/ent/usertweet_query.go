@@ -43,6 +43,15 @@ func (utq *UserTweetQuery) Where(ps ...predicate.UserTweet) *UserTweetQuery {
 	return utq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (utq *UserTweetQuery) When(condition bool, action func(builder *UserTweetQuery)) *UserTweetQuery {
+	if condition {
+		action(utq)
+	}
+
+	return utq
+}
+
 // Limit adds a limit step to the query.
 func (utq *UserTweetQuery) Limit(limit int) *UserTweetQuery {
 	utq.limit = &limit

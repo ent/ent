@@ -31,6 +31,15 @@ func (ftd *FieldTypeDelete) Where(ps ...predicate.FieldType) *FieldTypeDelete {
 	return ftd
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (ftd *FieldTypeDelete) When(condition bool, action func(builder *FieldTypeDelete)) *FieldTypeDelete {
+	if condition {
+		action(ftd)
+	}
+
+	return ftd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ftd *FieldTypeDelete) Exec(ctx context.Context) (int, error) {
 	var (

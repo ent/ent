@@ -44,6 +44,15 @@ func (nq *NoteQuery) Where(ps ...predicate.Note) *NoteQuery {
 	return nq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (nq *NoteQuery) When(condition bool, action func(builder *NoteQuery)) *NoteQuery {
+	if condition {
+		action(nq)
+	}
+
+	return nq
+}
+
 // Limit adds a limit step to the query.
 func (nq *NoteQuery) Limit(limit int) *NoteQuery {
 	nq.limit = &limit

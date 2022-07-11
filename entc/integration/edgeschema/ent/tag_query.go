@@ -44,6 +44,15 @@ func (tq *TagQuery) Where(ps ...predicate.Tag) *TagQuery {
 	return tq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (tq *TagQuery) When(condition bool, action func(builder *TagQuery)) *TagQuery {
+	if condition {
+		action(tq)
+	}
+
+	return tq
+}
+
 // Limit adds a limit step to the query.
 func (tq *TagQuery) Limit(limit int) *TagQuery {
 	tq.limit = &limit

@@ -38,6 +38,15 @@ func (mq *MediaQuery) Where(ps ...predicate.Media) *MediaQuery {
 	return mq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (mq *MediaQuery) When(condition bool, action func(builder *MediaQuery)) *MediaQuery {
+	if condition {
+		action(mq)
+	}
+
+	return mq
+}
+
 // Limit adds a limit step to the query.
 func (mq *MediaQuery) Limit(limit int) *MediaQuery {
 	mq.limit = &limit

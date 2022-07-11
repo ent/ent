@@ -45,6 +45,15 @@ func (tq *TeamQuery) Where(ps ...predicate.Team) *TeamQuery {
 	return tq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (tq *TeamQuery) When(condition bool, action func(builder *TeamQuery)) *TeamQuery {
+	if condition {
+		action(tq)
+	}
+
+	return tq
+}
+
 // Limit adds a limit step to the query.
 func (tq *TeamQuery) Limit(limit int) *TeamQuery {
 	tq.limit = &limit

@@ -30,6 +30,15 @@ func (md *MetadataDelete) Where(ps ...predicate.Metadata) *MetadataDelete {
 	return md
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (md *MetadataDelete) When(condition bool, action func(builder *MetadataDelete)) *MetadataDelete {
+	if condition {
+		action(md)
+	}
+
+	return md
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (md *MetadataDelete) Exec(ctx context.Context) (int, error) {
 	var (

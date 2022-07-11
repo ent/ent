@@ -124,6 +124,15 @@ func (ru *RelationshipUpdate) ClearInfo() *RelationshipUpdate {
 	return ru
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (ru *RelationshipUpdate) When(condition bool, action func(builder *RelationshipUpdate)) *RelationshipUpdate {
+	if condition {
+		action(ru)
+	}
+
+	return ru
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ru *RelationshipUpdate) Save(ctx context.Context) (int, error) {
 	var (

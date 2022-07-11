@@ -73,6 +73,15 @@ func (gu *GroupUpdate) RemoveUsers(u ...*User) *GroupUpdate {
 	return gu.RemoveUserIDs(ids...)
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (gu *GroupUpdate) When(condition bool, action func(builder *GroupUpdate)) *GroupUpdate {
+	if condition {
+		action(gu)
+	}
+
+	return gu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
 	var (

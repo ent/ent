@@ -130,6 +130,15 @@ func (cu *CommentUpdate) Mutation() *CommentMutation {
 	return cu.mutation
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (cu *CommentUpdate) When(condition bool, action func(builder *CommentUpdate)) *CommentUpdate {
+	if condition {
+		action(cu)
+	}
+
+	return cu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (cu *CommentUpdate) Save(ctx context.Context) (int, error) {
 	var (

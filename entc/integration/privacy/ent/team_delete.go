@@ -30,6 +30,15 @@ func (td *TeamDelete) Where(ps ...predicate.Team) *TeamDelete {
 	return td
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (td *TeamDelete) When(condition bool, action func(builder *TeamDelete)) *TeamDelete {
+	if condition {
+		action(td)
+	}
+
+	return td
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (td *TeamDelete) Exec(ctx context.Context) (int, error) {
 	var (

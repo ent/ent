@@ -118,6 +118,15 @@ func (du *DocUpdate) RemoveChildren(d ...*Doc) *DocUpdate {
 	return du.RemoveChildIDs(ids...)
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (du *DocUpdate) When(condition bool, action func(builder *DocUpdate)) *DocUpdate {
+	if condition {
+		action(du)
+	}
+
+	return du
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (du *DocUpdate) Save(ctx context.Context) (int, error) {
 	var (

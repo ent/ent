@@ -42,6 +42,15 @@ func (pq *PetQuery) Where(ps ...predicate.Pet) *PetQuery {
 	return pq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (pq *PetQuery) When(condition bool, action func(builder *PetQuery)) *PetQuery {
+	if condition {
+		action(pq)
+	}
+
+	return pq
+}
+
 // Limit adds a limit step to the query.
 func (pq *PetQuery) Limit(limit int) *PetQuery {
 	pq.limit = &limit

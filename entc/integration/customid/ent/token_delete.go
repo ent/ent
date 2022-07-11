@@ -30,6 +30,15 @@ func (td *TokenDelete) Where(ps ...predicate.Token) *TokenDelete {
 	return td
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (td *TokenDelete) When(condition bool, action func(builder *TokenDelete)) *TokenDelete {
+	if condition {
+		action(td)
+	}
+
+	return td
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (td *TokenDelete) Exec(ctx context.Context) (int, error) {
 	var (

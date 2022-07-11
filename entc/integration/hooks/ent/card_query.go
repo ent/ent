@@ -42,6 +42,15 @@ func (cq *CardQuery) Where(ps ...predicate.Card) *CardQuery {
 	return cq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (cq *CardQuery) When(condition bool, action func(builder *CardQuery)) *CardQuery {
+	if condition {
+		action(cq)
+	}
+
+	return cq
+}
+
 // Limit adds a limit step to the query.
 func (cq *CardQuery) Limit(limit int) *CardQuery {
 	cq.limit = &limit

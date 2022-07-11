@@ -30,6 +30,15 @@ func (sd *SessionDelete) Where(ps ...predicate.Session) *SessionDelete {
 	return sd
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (sd *SessionDelete) When(condition bool, action func(builder *SessionDelete)) *SessionDelete {
+	if condition {
+		action(sd)
+	}
+
+	return sd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (sd *SessionDelete) Exec(ctx context.Context) (int, error) {
 	var (

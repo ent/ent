@@ -133,6 +133,15 @@ func (bu *BlobUpdate) RemoveLinks(b ...*Blob) *BlobUpdate {
 	return bu.RemoveLinkIDs(ids...)
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (bu *BlobUpdate) When(condition bool, action func(builder *BlobUpdate)) *BlobUpdate {
+	if condition {
+		action(bu)
+	}
+
+	return bu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (bu *BlobUpdate) Save(ctx context.Context) (int, error) {
 	var (

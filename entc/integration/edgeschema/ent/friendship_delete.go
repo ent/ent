@@ -30,6 +30,15 @@ func (fd *FriendshipDelete) Where(ps ...predicate.Friendship) *FriendshipDelete 
 	return fd
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (fd *FriendshipDelete) When(condition bool, action func(builder *FriendshipDelete)) *FriendshipDelete {
+	if condition {
+		action(fd)
+	}
+
+	return fd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (fd *FriendshipDelete) Exec(ctx context.Context) (int, error) {
 	var (

@@ -107,6 +107,15 @@ func (fu *FriendshipUpdate) ClearFriend() *FriendshipUpdate {
 	return fu
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (fu *FriendshipUpdate) When(condition bool, action func(builder *FriendshipUpdate)) *FriendshipUpdate {
+	if condition {
+		action(fu)
+	}
+
+	return fu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (fu *FriendshipUpdate) Save(ctx context.Context) (int, error) {
 	var (

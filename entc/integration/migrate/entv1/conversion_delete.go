@@ -30,6 +30,15 @@ func (cd *ConversionDelete) Where(ps ...predicate.Conversion) *ConversionDelete 
 	return cd
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (cd *ConversionDelete) When(condition bool, action func(builder *ConversionDelete)) *ConversionDelete {
+	if condition {
+		action(cd)
+	}
+
+	return cd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (cd *ConversionDelete) Exec(ctx context.Context) (int, error) {
 	var (

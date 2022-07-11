@@ -1341,6 +1341,15 @@ func (ftu *FieldTypeUpdate) Mutation() *FieldTypeMutation {
 	return ftu.mutation
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (ftu *FieldTypeUpdate) When(condition bool, action func(builder *FieldTypeUpdate)) *FieldTypeUpdate {
+	if condition {
+		action(ftu)
+	}
+
+	return ftu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	var (

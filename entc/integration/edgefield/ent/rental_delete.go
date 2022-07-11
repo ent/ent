@@ -30,6 +30,15 @@ func (rd *RentalDelete) Where(ps ...predicate.Rental) *RentalDelete {
 	return rd
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (rd *RentalDelete) When(condition bool, action func(builder *RentalDelete)) *RentalDelete {
+	if condition {
+		action(rd)
+	}
+
+	return rd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (rd *RentalDelete) Exec(ctx context.Context) (int, error) {
 	var (

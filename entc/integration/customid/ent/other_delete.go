@@ -30,6 +30,15 @@ func (od *OtherDelete) Where(ps ...predicate.Other) *OtherDelete {
 	return od
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (od *OtherDelete) When(condition bool, action func(builder *OtherDelete)) *OtherDelete {
+	if condition {
+		action(od)
+	}
+
+	return od
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (od *OtherDelete) Exec(ctx context.Context) (int, error) {
 	var (

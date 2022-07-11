@@ -31,6 +31,15 @@ func (cd *CommentDelete) Where(ps ...predicate.Comment) *CommentDelete {
 	return cd
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (cd *CommentDelete) When(condition bool, action func(builder *CommentDelete)) *CommentDelete {
+	if condition {
+		action(cd)
+	}
+
+	return cd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (cd *CommentDelete) Exec(ctx context.Context) (int, error) {
 	var (

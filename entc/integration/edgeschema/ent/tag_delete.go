@@ -30,6 +30,15 @@ func (td *TagDelete) Where(ps ...predicate.Tag) *TagDelete {
 	return td
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (td *TagDelete) When(condition bool, action func(builder *TagDelete)) *TagDelete {
+	if condition {
+		action(td)
+	}
+
+	return td
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (td *TagDelete) Exec(ctx context.Context) (int, error) {
 	var (

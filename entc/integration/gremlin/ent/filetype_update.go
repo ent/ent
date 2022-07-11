@@ -108,6 +108,15 @@ func (ftu *FileTypeUpdate) RemoveFiles(f ...*File) *FileTypeUpdate {
 	return ftu.RemoveFileIDs(ids...)
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (ftu *FileTypeUpdate) When(condition bool, action func(builder *FileTypeUpdate)) *FileTypeUpdate {
+	if condition {
+		action(ftu)
+	}
+
+	return ftu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ftu *FileTypeUpdate) Save(ctx context.Context) (int, error) {
 	var (

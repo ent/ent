@@ -30,6 +30,15 @@ func (rid *RelationshipInfoDelete) Where(ps ...predicate.RelationshipInfo) *Rela
 	return rid
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (rid *RelationshipInfoDelete) When(condition bool, action func(builder *RelationshipInfoDelete)) *RelationshipInfoDelete {
+	if condition {
+		action(rid)
+	}
+
+	return rid
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (rid *RelationshipInfoDelete) Exec(ctx context.Context) (int, error) {
 	var (

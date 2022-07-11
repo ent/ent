@@ -99,6 +99,15 @@ func (du *DeviceUpdate) RemoveSessions(s ...*Session) *DeviceUpdate {
 	return du.RemoveSessionIDs(ids...)
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (du *DeviceUpdate) When(condition bool, action func(builder *DeviceUpdate)) *DeviceUpdate {
+	if condition {
+		action(du)
+	}
+
+	return du
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (du *DeviceUpdate) Save(ctx context.Context) (int, error) {
 	var (

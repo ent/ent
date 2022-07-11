@@ -30,6 +30,15 @@ func (ftd *FileTypeDelete) Where(ps ...predicate.FileType) *FileTypeDelete {
 	return ftd
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (ftd *FileTypeDelete) When(condition bool, action func(builder *FileTypeDelete)) *FileTypeDelete {
+	if condition {
+		action(ftd)
+	}
+
+	return ftd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ftd *FileTypeDelete) Exec(ctx context.Context) (int, error) {
 	var (

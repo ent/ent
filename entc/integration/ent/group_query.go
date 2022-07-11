@@ -50,6 +50,15 @@ func (gq *GroupQuery) Where(ps ...predicate.Group) *GroupQuery {
 	return gq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (gq *GroupQuery) When(condition bool, action func(builder *GroupQuery)) *GroupQuery {
+	if condition {
+		action(gq)
+	}
+
+	return gq
+}
+
 // Limit adds a limit step to the query.
 func (gq *GroupQuery) Limit(limit int) *GroupQuery {
 	gq.limit = &limit

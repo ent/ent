@@ -31,6 +31,15 @@ func (gid *GroupInfoDelete) Where(ps ...predicate.GroupInfo) *GroupInfoDelete {
 	return gid
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (gid *GroupInfoDelete) When(condition bool, action func(builder *GroupInfoDelete)) *GroupInfoDelete {
+	if condition {
+		action(gid)
+	}
+
+	return gid
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (gid *GroupInfoDelete) Exec(ctx context.Context) (int, error) {
 	var (

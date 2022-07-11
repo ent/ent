@@ -42,6 +42,15 @@ func (cq *CarQuery) Where(ps ...predicate.Car) *CarQuery {
 	return cq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (cq *CarQuery) When(condition bool, action func(builder *CarQuery)) *CarQuery {
+	if condition {
+		action(cq)
+	}
+
+	return cq
+}
+
 // Limit adds a limit step to the query.
 func (cq *CarQuery) Limit(limit int) *CarQuery {
 	cq.limit = &limit

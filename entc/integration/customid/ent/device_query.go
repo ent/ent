@@ -45,6 +45,15 @@ func (dq *DeviceQuery) Where(ps ...predicate.Device) *DeviceQuery {
 	return dq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (dq *DeviceQuery) When(condition bool, action func(builder *DeviceQuery)) *DeviceQuery {
+	if condition {
+		action(dq)
+	}
+
+	return dq
+}
+
 // Limit adds a limit step to the query.
 func (dq *DeviceQuery) Limit(limit int) *DeviceQuery {
 	dq.limit = &limit

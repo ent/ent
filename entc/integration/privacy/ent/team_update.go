@@ -116,6 +116,15 @@ func (tu *TeamUpdate) RemoveUsers(u ...*User) *TeamUpdate {
 	return tu.RemoveUserIDs(ids...)
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (tu *TeamUpdate) When(condition bool, action func(builder *TeamUpdate)) *TeamUpdate {
+	if condition {
+		action(tu)
+	}
+
+	return tu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (tu *TeamUpdate) Save(ctx context.Context) (int, error) {
 	var (

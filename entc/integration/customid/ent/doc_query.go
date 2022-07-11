@@ -44,6 +44,15 @@ func (dq *DocQuery) Where(ps ...predicate.Doc) *DocQuery {
 	return dq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (dq *DocQuery) When(condition bool, action func(builder *DocQuery)) *DocQuery {
+	if condition {
+		action(dq)
+	}
+
+	return dq
+}
+
 // Limit adds a limit step to the query.
 func (dq *DocQuery) Limit(limit int) *DocQuery {
 	dq.limit = &limit

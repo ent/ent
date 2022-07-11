@@ -88,6 +88,15 @@ func (ru *RentalUpdate) ClearCar() *RentalUpdate {
 	return ru
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (ru *RentalUpdate) When(condition bool, action func(builder *RentalUpdate)) *RentalUpdate {
+	if condition {
+		action(ru)
+	}
+
+	return ru
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ru *RentalUpdate) Save(ctx context.Context) (int, error) {
 	var (

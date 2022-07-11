@@ -31,6 +31,15 @@ func (ud *UserDelete) Where(ps ...predicate.User) *UserDelete {
 	return ud
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (ud *UserDelete) When(condition bool, action func(builder *UserDelete)) *UserDelete {
+	if condition {
+		action(ud)
+	}
+
+	return ud
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ud *UserDelete) Exec(ctx context.Context) (int, error) {
 	var (

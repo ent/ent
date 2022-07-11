@@ -160,6 +160,15 @@ func (tu *TaskUpdate) ClearOwner() *TaskUpdate {
 	return tu
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (tu *TaskUpdate) When(condition bool, action func(builder *TaskUpdate)) *TaskUpdate {
+	if condition {
+		action(tu)
+	}
+
+	return tu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (tu *TaskUpdate) Save(ctx context.Context) (int, error) {
 	var (

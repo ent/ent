@@ -87,6 +87,15 @@ func (ttu *TweetTagUpdate) ClearTweet() *TweetTagUpdate {
 	return ttu
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (ttu *TweetTagUpdate) When(condition bool, action func(builder *TweetTagUpdate)) *TweetTagUpdate {
+	if condition {
+		action(ttu)
+	}
+
+	return ttu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ttu *TweetTagUpdate) Save(ctx context.Context) (int, error) {
 	var (

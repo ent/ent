@@ -42,6 +42,15 @@ func (fq *FriendshipQuery) Where(ps ...predicate.Friendship) *FriendshipQuery {
 	return fq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (fq *FriendshipQuery) When(condition bool, action func(builder *FriendshipQuery)) *FriendshipQuery {
+	if condition {
+		action(fq)
+	}
+
+	return fq
+}
+
 // Limit adds a limit step to the query.
 func (fq *FriendshipQuery) Limit(limit int) *FriendshipQuery {
 	fq.limit = &limit

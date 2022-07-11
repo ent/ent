@@ -46,6 +46,15 @@ func (tq *TaskQuery) Where(ps ...predicate.Task) *TaskQuery {
 	return tq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (tq *TaskQuery) When(condition bool, action func(builder *TaskQuery)) *TaskQuery {
+	if condition {
+		action(tq)
+	}
+
+	return tq
+}
+
 // Limit adds a limit step to the query.
 func (tq *TaskQuery) Limit(limit int) *TaskQuery {
 	tq.limit = &limit

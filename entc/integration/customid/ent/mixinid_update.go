@@ -48,6 +48,15 @@ func (miu *MixinIDUpdate) Mutation() *MixinIDMutation {
 	return miu.mutation
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (miu *MixinIDUpdate) When(condition bool, action func(builder *MixinIDUpdate)) *MixinIDUpdate {
+	if condition {
+		action(miu)
+	}
+
+	return miu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (miu *MixinIDUpdate) Save(ctx context.Context) (int, error) {
 	var (

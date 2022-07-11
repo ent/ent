@@ -31,6 +31,15 @@ func (cd *CardDelete) Where(ps ...predicate.Card) *CardDelete {
 	return cd
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (cd *CardDelete) When(condition bool, action func(builder *CardDelete)) *CardDelete {
+	if condition {
+		action(cd)
+	}
+
+	return cd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (cd *CardDelete) Exec(ctx context.Context) (int, error) {
 	var (

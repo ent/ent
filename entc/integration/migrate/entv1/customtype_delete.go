@@ -30,6 +30,15 @@ func (ctd *CustomTypeDelete) Where(ps ...predicate.CustomType) *CustomTypeDelete
 	return ctd
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (ctd *CustomTypeDelete) When(condition bool, action func(builder *CustomTypeDelete)) *CustomTypeDelete {
+	if condition {
+		action(ctd)
+	}
+
+	return ctd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ctd *CustomTypeDelete) Exec(ctx context.Context) (int, error) {
 	var (

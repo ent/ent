@@ -30,6 +30,15 @@ func (md *MediaDelete) Where(ps ...predicate.Media) *MediaDelete {
 	return md
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (md *MediaDelete) When(condition bool, action func(builder *MediaDelete)) *MediaDelete {
+	if condition {
+		action(md)
+	}
+
+	return md
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (md *MediaDelete) Exec(ctx context.Context) (int, error) {
 	var (

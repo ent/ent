@@ -227,6 +227,15 @@ func (tu *TweetUpdate) RemoveTweetTags(t ...*TweetTag) *TweetUpdate {
 	return tu.RemoveTweetTagIDs(ids...)
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (tu *TweetUpdate) When(condition bool, action func(builder *TweetUpdate)) *TweetUpdate {
+	if condition {
+		action(tu)
+	}
+
+	return tu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (tu *TweetUpdate) Save(ctx context.Context) (int, error) {
 	var (

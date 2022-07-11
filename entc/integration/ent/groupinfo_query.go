@@ -44,6 +44,15 @@ func (giq *GroupInfoQuery) Where(ps ...predicate.GroupInfo) *GroupInfoQuery {
 	return giq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (giq *GroupInfoQuery) When(condition bool, action func(builder *GroupInfoQuery)) *GroupInfoQuery {
+	if condition {
+		action(giq)
+	}
+
+	return giq
+}
+
 // Limit adds a limit step to the query.
 func (giq *GroupInfoQuery) Limit(limit int) *GroupInfoQuery {
 	giq.limit = &limit

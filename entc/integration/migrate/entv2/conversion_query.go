@@ -38,6 +38,15 @@ func (cq *ConversionQuery) Where(ps ...predicate.Conversion) *ConversionQuery {
 	return cq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (cq *ConversionQuery) When(condition bool, action func(builder *ConversionQuery)) *ConversionQuery {
+	if condition {
+		action(cq)
+	}
+
+	return cq
+}
+
 // Limit adds a limit step to the query.
 func (cq *ConversionQuery) Limit(limit int) *ConversionQuery {
 	cq.limit = &limit

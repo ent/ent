@@ -38,6 +38,15 @@ func (rq *RevisionQuery) Where(ps ...predicate.Revision) *RevisionQuery {
 	return rq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (rq *RevisionQuery) When(condition bool, action func(builder *RevisionQuery)) *RevisionQuery {
+	if condition {
+		action(rq)
+	}
+
+	return rq
+}
+
 // Limit adds a limit step to the query.
 func (rq *RevisionQuery) Limit(limit int) *RevisionQuery {
 	rq.limit = &limit
