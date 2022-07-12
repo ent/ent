@@ -36,9 +36,11 @@ type BlobEdges struct {
 	Parent *Blob `json:"parent,omitempty"`
 	// Links holds the value of the links edge.
 	Links []*Blob `json:"links,omitempty"`
+	// BlobLinks holds the value of the blob_links edge.
+	BlobLinks []*BlobLink `json:"blob_links,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // ParentOrErr returns the Parent value or an error if the edge
@@ -62,6 +64,15 @@ func (e BlobEdges) LinksOrErr() ([]*Blob, error) {
 		return e.Links, nil
 	}
 	return nil, &NotLoadedError{edge: "links"}
+}
+
+// BlobLinksOrErr returns the BlobLinks value or an error if the edge
+// was not loaded in eager-loading.
+func (e BlobEdges) BlobLinksOrErr() ([]*BlobLink, error) {
+	if e.loadedTypes[2] {
+		return e.BlobLinks, nil
+	}
+	return nil, &NotLoadedError{edge: "blob_links"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -128,6 +139,11 @@ func (b *Blob) QueryParent() *BlobQuery {
 // QueryLinks queries the "links" edge of the Blob entity.
 func (b *Blob) QueryLinks() *BlobQuery {
 	return (&BlobClient{config: b.config}).QueryLinks(b)
+}
+
+// QueryBlobLinks queries the "blob_links" edge of the Blob entity.
+func (b *Blob) QueryBlobLinks() *BlobLinkQuery {
+	return (&BlobClient{config: b.config}).QueryBlobLinks(b)
 }
 
 // Update returns a builder for updating this Blob.

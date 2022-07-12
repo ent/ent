@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/blob"
+	"entgo.io/ent/entc/integration/customid/ent/bloblink"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
@@ -30,9 +31,10 @@ type BlobQuery struct {
 	fields     []string
 	predicates []predicate.Blob
 	// eager-loading edges.
-	withParent *BlobQuery
-	withLinks  *BlobQuery
-	withFKs    bool
+	withParent    *BlobQuery
+	withLinks     *BlobQuery
+	withBlobLinks *BlobLinkQuery
+	withFKs       bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -106,6 +108,28 @@ func (bq *BlobQuery) QueryLinks() *BlobQuery {
 			sqlgraph.From(blob.Table, blob.FieldID, selector),
 			sqlgraph.To(blob.Table, blob.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, blob.LinksTable, blob.LinksPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryBlobLinks chains the current query on the "blob_links" edge.
+func (bq *BlobQuery) QueryBlobLinks() *BlobLinkQuery {
+	query := &BlobLinkQuery{config: bq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := bq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := bq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(blob.Table, blob.FieldID, selector),
+			sqlgraph.To(bloblink.Table, bloblink.BlobColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, blob.BlobLinksTable, blob.BlobLinksColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
 		return fromU, nil
@@ -289,13 +313,14 @@ func (bq *BlobQuery) Clone() *BlobQuery {
 		return nil
 	}
 	return &BlobQuery{
-		config:     bq.config,
-		limit:      bq.limit,
-		offset:     bq.offset,
-		order:      append([]OrderFunc{}, bq.order...),
-		predicates: append([]predicate.Blob{}, bq.predicates...),
-		withParent: bq.withParent.Clone(),
-		withLinks:  bq.withLinks.Clone(),
+		config:        bq.config,
+		limit:         bq.limit,
+		offset:        bq.offset,
+		order:         append([]OrderFunc{}, bq.order...),
+		predicates:    append([]predicate.Blob{}, bq.predicates...),
+		withParent:    bq.withParent.Clone(),
+		withLinks:     bq.withLinks.Clone(),
+		withBlobLinks: bq.withBlobLinks.Clone(),
 		// clone intermediate query.
 		sql:    bq.sql.Clone(),
 		path:   bq.path,
@@ -322,6 +347,17 @@ func (bq *BlobQuery) WithLinks(opts ...func(*BlobQuery)) *BlobQuery {
 		opt(query)
 	}
 	bq.withLinks = query
+	return bq
+}
+
+// WithBlobLinks tells the query-builder to eager-load the nodes that are connected to
+// the "blob_links" edge. The optional arguments are used to configure the query builder of the edge.
+func (bq *BlobQuery) WithBlobLinks(opts ...func(*BlobLinkQuery)) *BlobQuery {
+	query := &BlobLinkQuery{config: bq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	bq.withBlobLinks = query
 	return bq
 }
 
@@ -396,9 +432,10 @@ func (bq *BlobQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Blob, e
 		nodes       = []*Blob{}
 		withFKs     = bq.withFKs
 		_spec       = bq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			bq.withParent != nil,
 			bq.withLinks != nil,
+			bq.withBlobLinks != nil,
 		}
 	)
 	if bq.withParent != nil {
@@ -505,6 +542,31 @@ func (bq *BlobQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Blob, e
 			for kn := range nodes {
 				kn.Edges.Links = append(kn.Edges.Links, n)
 			}
+		}
+	}
+
+	if query := bq.withBlobLinks; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*Blob)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.BlobLinks = []*BlobLink{}
+		}
+		query.Where(predicate.BlobLink(func(s *sql.Selector) {
+			s.Where(sql.InValues(blob.BlobLinksColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.BlobID
+			node, ok := nodeids[fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "blob_id" returned %v for node %v`, fk, n)
+			}
+			node.Edges.BlobLinks = append(node.Edges.BlobLinks, n)
 		}
 	}
 

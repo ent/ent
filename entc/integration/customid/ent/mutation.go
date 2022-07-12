@@ -11,9 +11,11 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 
 	"entgo.io/ent/entc/integration/customid/ent/account"
 	"entgo.io/ent/entc/integration/customid/ent/blob"
+	"entgo.io/ent/entc/integration/customid/ent/bloblink"
 	"entgo.io/ent/entc/integration/customid/ent/car"
 	"entgo.io/ent/entc/integration/customid/ent/device"
 	"entgo.io/ent/entc/integration/customid/ent/doc"
@@ -44,6 +46,7 @@ const (
 	// Node types.
 	TypeAccount  = "Account"
 	TypeBlob     = "Blob"
+	TypeBlobLink = "BlobLink"
 	TypeCar      = "Car"
 	TypeDevice   = "Device"
 	TypeDoc      = "Doc"
@@ -1026,6 +1029,405 @@ func (m *BlobMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Blob edge %s", name)
+}
+
+// BlobLinkMutation represents an operation that mutates the BlobLink nodes in the graph.
+type BlobLinkMutation struct {
+	config
+	op            Op
+	typ           string
+	created_at    *time.Time
+	clearedFields map[string]struct{}
+	blob          *uuid.UUID
+	clearedblob   bool
+	link          *uuid.UUID
+	clearedlink   bool
+	done          bool
+	oldValue      func(context.Context) (*BlobLink, error)
+	predicates    []predicate.BlobLink
+}
+
+var _ ent.Mutation = (*BlobLinkMutation)(nil)
+
+// bloblinkOption allows management of the mutation configuration using functional options.
+type bloblinkOption func(*BlobLinkMutation)
+
+// newBlobLinkMutation creates new mutation for the BlobLink entity.
+func newBlobLinkMutation(c config, op Op, opts ...bloblinkOption) *BlobLinkMutation {
+	m := &BlobLinkMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeBlobLink,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m BlobLinkMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m BlobLinkMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *BlobLinkMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *BlobLinkMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *BlobLinkMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetBlobID sets the "blob_id" field.
+func (m *BlobLinkMutation) SetBlobID(u uuid.UUID) {
+	m.blob = &u
+}
+
+// BlobID returns the value of the "blob_id" field in the mutation.
+func (m *BlobLinkMutation) BlobID() (r uuid.UUID, exists bool) {
+	v := m.blob
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetBlobID resets all changes to the "blob_id" field.
+func (m *BlobLinkMutation) ResetBlobID() {
+	m.blob = nil
+}
+
+// SetLinkID sets the "link_id" field.
+func (m *BlobLinkMutation) SetLinkID(u uuid.UUID) {
+	m.link = &u
+}
+
+// LinkID returns the value of the "link_id" field in the mutation.
+func (m *BlobLinkMutation) LinkID() (r uuid.UUID, exists bool) {
+	v := m.link
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetLinkID resets all changes to the "link_id" field.
+func (m *BlobLinkMutation) ResetLinkID() {
+	m.link = nil
+}
+
+// ClearBlob clears the "blob" edge to the Blob entity.
+func (m *BlobLinkMutation) ClearBlob() {
+	m.clearedblob = true
+}
+
+// BlobCleared reports if the "blob" edge to the Blob entity was cleared.
+func (m *BlobLinkMutation) BlobCleared() bool {
+	return m.clearedblob
+}
+
+// BlobIDs returns the "blob" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// BlobID instead. It exists only for internal usage by the builders.
+func (m *BlobLinkMutation) BlobIDs() (ids []uuid.UUID) {
+	if id := m.blob; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetBlob resets all changes to the "blob" edge.
+func (m *BlobLinkMutation) ResetBlob() {
+	m.blob = nil
+	m.clearedblob = false
+}
+
+// ClearLink clears the "link" edge to the Blob entity.
+func (m *BlobLinkMutation) ClearLink() {
+	m.clearedlink = true
+}
+
+// LinkCleared reports if the "link" edge to the Blob entity was cleared.
+func (m *BlobLinkMutation) LinkCleared() bool {
+	return m.clearedlink
+}
+
+// LinkIDs returns the "link" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// LinkID instead. It exists only for internal usage by the builders.
+func (m *BlobLinkMutation) LinkIDs() (ids []uuid.UUID) {
+	if id := m.link; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetLink resets all changes to the "link" edge.
+func (m *BlobLinkMutation) ResetLink() {
+	m.link = nil
+	m.clearedlink = false
+}
+
+// Where appends a list predicates to the BlobLinkMutation builder.
+func (m *BlobLinkMutation) Where(ps ...predicate.BlobLink) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *BlobLinkMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (BlobLink).
+func (m *BlobLinkMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *BlobLinkMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.created_at != nil {
+		fields = append(fields, bloblink.FieldCreatedAt)
+	}
+	if m.blob != nil {
+		fields = append(fields, bloblink.FieldBlobID)
+	}
+	if m.link != nil {
+		fields = append(fields, bloblink.FieldLinkID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *BlobLinkMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case bloblink.FieldCreatedAt:
+		return m.CreatedAt()
+	case bloblink.FieldBlobID:
+		return m.BlobID()
+	case bloblink.FieldLinkID:
+		return m.LinkID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *BlobLinkMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	return nil, errors.New("edge schema BlobLink does not support getting old values")
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BlobLinkMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case bloblink.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case bloblink.FieldBlobID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBlobID(v)
+		return nil
+	case bloblink.FieldLinkID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLinkID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown BlobLink field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *BlobLinkMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *BlobLinkMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BlobLinkMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown BlobLink numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *BlobLinkMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *BlobLinkMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *BlobLinkMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown BlobLink nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *BlobLinkMutation) ResetField(name string) error {
+	switch name {
+	case bloblink.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case bloblink.FieldBlobID:
+		m.ResetBlobID()
+		return nil
+	case bloblink.FieldLinkID:
+		m.ResetLinkID()
+		return nil
+	}
+	return fmt.Errorf("unknown BlobLink field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *BlobLinkMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.blob != nil {
+		edges = append(edges, bloblink.EdgeBlob)
+	}
+	if m.link != nil {
+		edges = append(edges, bloblink.EdgeLink)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *BlobLinkMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case bloblink.EdgeBlob:
+		if id := m.blob; id != nil {
+			return []ent.Value{*id}
+		}
+	case bloblink.EdgeLink:
+		if id := m.link; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *BlobLinkMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *BlobLinkMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *BlobLinkMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedblob {
+		edges = append(edges, bloblink.EdgeBlob)
+	}
+	if m.clearedlink {
+		edges = append(edges, bloblink.EdgeLink)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *BlobLinkMutation) EdgeCleared(name string) bool {
+	switch name {
+	case bloblink.EdgeBlob:
+		return m.clearedblob
+	case bloblink.EdgeLink:
+		return m.clearedlink
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *BlobLinkMutation) ClearEdge(name string) error {
+	switch name {
+	case bloblink.EdgeBlob:
+		m.ClearBlob()
+		return nil
+	case bloblink.EdgeLink:
+		m.ClearLink()
+		return nil
+	}
+	return fmt.Errorf("unknown BlobLink unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *BlobLinkMutation) ResetEdge(name string) error {
+	switch name {
+	case bloblink.EdgeBlob:
+		m.ResetBlob()
+		return nil
+	case bloblink.EdgeLink:
+		m.ResetLink()
+		return nil
+	}
+	return fmt.Errorf("unknown BlobLink edge %s", name)
 }
 
 // CarMutation represents an operation that mutates the Car nodes in the graph.

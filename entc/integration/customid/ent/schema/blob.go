@@ -5,6 +5,10 @@
 package schema
 
 import (
+	"time"
+
+	"entgo.io/ent/schema"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
@@ -40,6 +44,43 @@ func (Blob) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("parent", Blob.Type).
 			Unique(),
-		edge.To("links", Blob.Type),
+		edge.To("links", Blob.Type).
+			Through("blob_links", BlobLink.Type),
+	}
+}
+
+// BlobLink holds the edge schema definition for blob links.
+type BlobLink struct {
+	ent.Schema
+}
+
+// Annotations of the BlobLink.
+func (BlobLink) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		field.ID("blob_id", "link_id"),
+	}
+}
+
+// Fields of the BlobLink.
+func (BlobLink) Fields() []ent.Field {
+	return []ent.Field{
+		field.Time("created_at").
+			Default(time.Now),
+		field.UUID("blob_id", uuid.UUID{}),
+		field.UUID("link_id", uuid.UUID{}),
+	}
+}
+
+// Edges of the BlobLink.
+func (BlobLink) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("blob", Blob.Type).
+			Field("blob_id").
+			Required().
+			Unique(),
+		edge.To("link", Blob.Type).
+			Field("link_id").
+			Required().
+			Unique(),
 	}
 }

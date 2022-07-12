@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
 
@@ -316,6 +317,12 @@ func (tlq *TweetLikeQuery) prepareQuery(ctx context.Context) error {
 			return err
 		}
 		tlq.sql = prev
+	}
+	if tweetlike.Policy == nil {
+		return errors.New("ent: uninitialized tweetlike.Policy (forgotten import ent/runtime?)")
+	}
+	if err := tweetlike.Policy.EvalQuery(ctx, tlq); err != nil {
+		return err
 	}
 	return nil
 }

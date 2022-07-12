@@ -23,6 +23,8 @@ const (
 	EdgeParent = "parent"
 	// EdgeLinks holds the string denoting the links edge name in mutations.
 	EdgeLinks = "links"
+	// EdgeBlobLinks holds the string denoting the blob_links edge name in mutations.
+	EdgeBlobLinks = "blob_links"
 	// Table holds the table name of the blob in the database.
 	Table = "blobs"
 	// ParentTable is the table that holds the parent relation/edge.
@@ -31,6 +33,13 @@ const (
 	ParentColumn = "blob_parent"
 	// LinksTable is the table that holds the links relation/edge. The primary key declared below.
 	LinksTable = "blob_links"
+	// BlobLinksTable is the table that holds the blob_links relation/edge.
+	BlobLinksTable = "blob_links"
+	// BlobLinksInverseTable is the table name for the BlobLink entity.
+	// It exists in this package in order to avoid circular dependency with the "bloblink" package.
+	BlobLinksInverseTable = "blob_links"
+	// BlobLinksColumn is the table column denoting the blob_links relation/edge.
+	BlobLinksColumn = "blob_id"
 )
 
 // Columns holds all SQL columns for blob fields.

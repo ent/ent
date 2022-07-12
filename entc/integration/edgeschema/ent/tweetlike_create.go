@@ -75,7 +75,9 @@ func (tlc *TweetLikeCreate) Save(ctx context.Context) (*TweetLike, error) {
 		err  error
 		node *TweetLike
 	)
-	tlc.defaults()
+	if err := tlc.defaults(); err != nil {
+		return nil, err
+	}
 	if len(tlc.hooks) == 0 {
 		if err = tlc.check(); err != nil {
 			return nil, err
@@ -138,11 +140,15 @@ func (tlc *TweetLikeCreate) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (tlc *TweetLikeCreate) defaults() {
+func (tlc *TweetLikeCreate) defaults() error {
 	if _, ok := tlc.mutation.LikedAt(); !ok {
+		if tweetlike.DefaultLikedAt == nil {
+			return fmt.Errorf("ent: uninitialized tweetlike.DefaultLikedAt (forgotten import ent/runtime?)")
+		}
 		v := tweetlike.DefaultLikedAt()
 		tlc.mutation.SetLikedAt(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.

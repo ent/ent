@@ -18,6 +18,7 @@ import (
 
 	"entgo.io/ent/entc/integration/customid/ent/account"
 	"entgo.io/ent/entc/integration/customid/ent/blob"
+	"entgo.io/ent/entc/integration/customid/ent/bloblink"
 	"entgo.io/ent/entc/integration/customid/ent/car"
 	"entgo.io/ent/entc/integration/customid/ent/device"
 	"entgo.io/ent/entc/integration/customid/ent/doc"
@@ -46,6 +47,8 @@ type Client struct {
 	Account *AccountClient
 	// Blob is the client for interacting with the Blob builders.
 	Blob *BlobClient
+	// BlobLink is the client for interacting with the BlobLink builders.
+	BlobLink *BlobLinkClient
 	// Car is the client for interacting with the Car builders.
 	Car *CarClient
 	// Device is the client for interacting with the Device builders.
@@ -87,6 +90,7 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Account = NewAccountClient(c.config)
 	c.Blob = NewBlobClient(c.config)
+	c.BlobLink = NewBlobLinkClient(c.config)
 	c.Car = NewCarClient(c.config)
 	c.Device = NewDeviceClient(c.config)
 	c.Doc = NewDocClient(c.config)
@@ -135,6 +139,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:   cfg,
 		Account:  NewAccountClient(cfg),
 		Blob:     NewBlobClient(cfg),
+		BlobLink: NewBlobLinkClient(cfg),
 		Car:      NewCarClient(cfg),
 		Device:   NewDeviceClient(cfg),
 		Doc:      NewDocClient(cfg),
@@ -169,6 +174,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:   cfg,
 		Account:  NewAccountClient(cfg),
 		Blob:     NewBlobClient(cfg),
+		BlobLink: NewBlobLinkClient(cfg),
 		Car:      NewCarClient(cfg),
 		Device:   NewDeviceClient(cfg),
 		Doc:      NewDocClient(cfg),
@@ -213,6 +219,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	c.Account.Use(hooks...)
 	c.Blob.Use(hooks...)
+	c.BlobLink.Use(hooks...)
 	c.Car.Use(hooks...)
 	c.Device.Use(hooks...)
 	c.Doc.Use(hooks...)
@@ -451,9 +458,98 @@ func (c *BlobClient) QueryLinks(b *Blob) *BlobQuery {
 	return query
 }
 
+// QueryBlobLinks queries the blob_links edge of a Blob.
+func (c *BlobClient) QueryBlobLinks(b *Blob) *BlobLinkQuery {
+	query := &BlobLinkQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := b.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(blob.Table, blob.FieldID, id),
+			sqlgraph.To(bloblink.Table, bloblink.BlobColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, blob.BlobLinksTable, blob.BlobLinksColumn),
+		)
+		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *BlobClient) Hooks() []Hook {
 	return c.hooks.Blob
+}
+
+// BlobLinkClient is a client for the BlobLink schema.
+type BlobLinkClient struct {
+	config
+}
+
+// NewBlobLinkClient returns a client for the BlobLink from the given config.
+func NewBlobLinkClient(c config) *BlobLinkClient {
+	return &BlobLinkClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `bloblink.Hooks(f(g(h())))`.
+func (c *BlobLinkClient) Use(hooks ...Hook) {
+	c.hooks.BlobLink = append(c.hooks.BlobLink, hooks...)
+}
+
+// Create returns a builder for creating a BlobLink entity.
+func (c *BlobLinkClient) Create() *BlobLinkCreate {
+	mutation := newBlobLinkMutation(c.config, OpCreate)
+	return &BlobLinkCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of BlobLink entities.
+func (c *BlobLinkClient) CreateBulk(builders ...*BlobLinkCreate) *BlobLinkCreateBulk {
+	return &BlobLinkCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for BlobLink.
+func (c *BlobLinkClient) Update() *BlobLinkUpdate {
+	mutation := newBlobLinkMutation(c.config, OpUpdate)
+	return &BlobLinkUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *BlobLinkClient) UpdateOne(bl *BlobLink) *BlobLinkUpdateOne {
+	mutation := newBlobLinkMutation(c.config, OpUpdateOne)
+	mutation.blob = &bl.BlobID
+	mutation.link = &bl.LinkID
+	return &BlobLinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for BlobLink.
+func (c *BlobLinkClient) Delete() *BlobLinkDelete {
+	mutation := newBlobLinkMutation(c.config, OpDelete)
+	return &BlobLinkDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Query returns a query builder for BlobLink.
+func (c *BlobLinkClient) Query() *BlobLinkQuery {
+	return &BlobLinkQuery{
+		config: c.config,
+	}
+}
+
+// QueryBlob queries the blob edge of a BlobLink.
+func (c *BlobLinkClient) QueryBlob(bl *BlobLink) *BlobQuery {
+	return c.Query().
+		Where(bloblink.BlobID(bl.BlobID), bloblink.LinkID(bl.LinkID)).
+		QueryBlob()
+}
+
+// QueryLink queries the link edge of a BlobLink.
+func (c *BlobLinkClient) QueryLink(bl *BlobLink) *BlobQuery {
+	return c.Query().
+		Where(bloblink.BlobID(bl.BlobID), bloblink.LinkID(bl.LinkID)).
+		QueryLink()
+}
+
+// Hooks returns the client hooks.
+func (c *BlobLinkClient) Hooks() []Hook {
+	return c.hooks.BlobLink
 }
 
 // CarClient is a client for the Car schema.

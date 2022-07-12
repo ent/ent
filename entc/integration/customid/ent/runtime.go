@@ -7,8 +7,11 @@
 package ent
 
 import (
+	"time"
+
 	"entgo.io/ent/entc/integration/customid/ent/account"
 	"entgo.io/ent/entc/integration/customid/ent/blob"
+	"entgo.io/ent/entc/integration/customid/ent/bloblink"
 	"entgo.io/ent/entc/integration/customid/ent/car"
 	"entgo.io/ent/entc/integration/customid/ent/device"
 	"entgo.io/ent/entc/integration/customid/ent/doc"
@@ -51,6 +54,12 @@ func init() {
 	blobDescID := blobFields[0].Descriptor()
 	// blob.DefaultID holds the default value on creation for the id field.
 	blob.DefaultID = blobDescID.Default.(func() uuid.UUID)
+	bloblinkFields := schema.BlobLink{}.Fields()
+	_ = bloblinkFields
+	// bloblinkDescCreatedAt is the schema descriptor for created_at field.
+	bloblinkDescCreatedAt := bloblinkFields[0].Descriptor()
+	// bloblink.DefaultCreatedAt holds the default value on creation for the created_at field.
+	bloblink.DefaultCreatedAt = bloblinkDescCreatedAt.Default.(func() time.Time)
 	carMixin := schema.Car{}.Mixin()
 	carMixinFields0 := carMixin[0].Fields()
 	_ = carMixinFields0

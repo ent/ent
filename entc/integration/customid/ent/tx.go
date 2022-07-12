@@ -20,6 +20,8 @@ type Tx struct {
 	Account *AccountClient
 	// Blob is the client for interacting with the Blob builders.
 	Blob *BlobClient
+	// BlobLink is the client for interacting with the BlobLink builders.
+	BlobLink *BlobLinkClient
 	// Car is the client for interacting with the Car builders.
 	Car *CarClient
 	// Device is the client for interacting with the Device builders.
@@ -183,6 +185,7 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Account = NewAccountClient(tx.config)
 	tx.Blob = NewBlobClient(tx.config)
+	tx.BlobLink = NewBlobLinkClient(tx.config)
 	tx.Car = NewCarClient(tx.config)
 	tx.Device = NewDeviceClient(tx.config)
 	tx.Doc = NewDocClient(tx.config)

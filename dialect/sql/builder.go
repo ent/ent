@@ -1535,8 +1535,8 @@ func In(col string, args ...interface{}) *Predicate {
 
 // In appends the `IN` predicate.
 func (p *Predicate) In(col string, args ...interface{}) *Predicate {
-	// if no arguments were provided, append the FALSE constants,
-	// since we can't apply "IN ()". This will make this predicate falsy.
+	// If no arguments were provided, append the FALSE constant, since
+	// we cannot apply "IN ()". This will make this predicate falsy.
 	if len(args) == 0 {
 		return p.False()
 	}

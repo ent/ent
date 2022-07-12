@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
 	"entgo.io/ent/entc/integration/edgeschema/ent/migrate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
+	_ "entgo.io/ent/entc/integration/edgeschema/ent/runtime"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 
