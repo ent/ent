@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/account"
 	"entgo.io/ent/entc/integration/customid/ent/blob"
+	"entgo.io/ent/entc/integration/customid/ent/bloblink"
 	"entgo.io/ent/entc/integration/customid/ent/car"
 	"entgo.io/ent/entc/integration/customid/ent/device"
 	"entgo.io/ent/entc/integration/customid/ent/doc"
@@ -51,6 +52,7 @@ func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
 		account.Table:  account.ValidColumn,
 		blob.Table:     blob.ValidColumn,
+		bloblink.Table: bloblink.ValidColumn,
 		car.Table:      car.ValidColumn,
 		device.Table:   device.ValidColumn,
 		doc.Table:      doc.ValidColumn,

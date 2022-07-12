@@ -16,6 +16,9 @@ type Account func(*sql.Selector)
 // Blob is the predicate function for blob builders.
 type Blob func(*sql.Selector)
 
+// BlobLink is the predicate function for bloblink builders.
+type BlobLink func(*sql.Selector)
+
 // Car is the predicate function for car builders.
 type Car func(*sql.Selector)
 

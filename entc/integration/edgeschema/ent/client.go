@@ -990,7 +990,8 @@ func (c *TweetLikeClient) QueryUser(tl *TweetLike) *UserQuery {
 
 // Hooks returns the client hooks.
 func (c *TweetLikeClient) Hooks() []Hook {
-	return c.hooks.TweetLike
+	hooks := c.hooks.TweetLike
+	return append(hooks[:len(hooks):len(hooks)], tweetlike.Hooks[:]...)
 }
 
 // TweetTagClient is a client for the TweetTag schema.

@@ -335,7 +335,7 @@ func (u *{{ $upsertBulk }}) UpdateNewValues() *{{ $upsertBulk }} {
 	{{- if or $udfID $.ImmutableFields }}
 		u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 			for _, b := range u.create.builders {
-				{{- if $.ID.UserDefined }}
+				{{- if $udfID }}
 					if _, exists := b.mutation.ID(); exists {
 						s.SetIgnore({{ $.Package }}.{{ $.ID.Constant }})
 						return

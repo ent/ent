@@ -44,6 +44,32 @@ var (
 			},
 		},
 	}
+	// BlobLinksColumns holds the columns for the "blob_links" table.
+	BlobLinksColumns = []*schema.Column{
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "blob_id", Type: field.TypeUUID},
+		{Name: "link_id", Type: field.TypeUUID},
+	}
+	// BlobLinksTable holds the schema information for the "blob_links" table.
+	BlobLinksTable = &schema.Table{
+		Name:       "blob_links",
+		Columns:    BlobLinksColumns,
+		PrimaryKey: []*schema.Column{BlobLinksColumns[1], BlobLinksColumns[2]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "blob_links_blobs_blob",
+				Columns:    []*schema.Column{BlobLinksColumns[1]},
+				RefColumns: []*schema.Column{BlobsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "blob_links_blobs_link",
+				Columns:    []*schema.Column{BlobLinksColumns[2]},
+				RefColumns: []*schema.Column{BlobsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// CarsColumns holds the columns for the "cars" table.
 	CarsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -292,31 +318,6 @@ var (
 			},
 		},
 	}
-	// BlobLinksColumns holds the columns for the "blob_links" table.
-	BlobLinksColumns = []*schema.Column{
-		{Name: "blob_id", Type: field.TypeUUID},
-		{Name: "link_id", Type: field.TypeUUID},
-	}
-	// BlobLinksTable holds the schema information for the "blob_links" table.
-	BlobLinksTable = &schema.Table{
-		Name:       "blob_links",
-		Columns:    BlobLinksColumns,
-		PrimaryKey: []*schema.Column{BlobLinksColumns[0], BlobLinksColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "blob_links_blob_id",
-				Columns:    []*schema.Column{BlobLinksColumns[0]},
-				RefColumns: []*schema.Column{BlobsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "blob_links_link_id",
-				Columns:    []*schema.Column{BlobLinksColumns[1]},
-				RefColumns: []*schema.Column{BlobsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
 	// GroupUsersColumns holds the columns for the "group_users" table.
 	GroupUsersColumns = []*schema.Column{
 		{Name: "group_id", Type: field.TypeInt},
@@ -371,6 +372,7 @@ var (
 	Tables = []*schema.Table{
 		AccountsTable,
 		BlobsTable,
+		BlobLinksTable,
 		CarsTable,
 		DevicesTable,
 		DocsTable,
@@ -384,7 +386,6 @@ var (
 		SessionsTable,
 		TokensTable,
 		UsersTable,
-		BlobLinksTable,
 		GroupUsersTable,
 		PetFriendsTable,
 	}
@@ -392,6 +393,8 @@ var (
 
 func init() {
 	BlobsTable.ForeignKeys[0].RefTable = BlobsTable
+	BlobLinksTable.ForeignKeys[0].RefTable = BlobsTable
+	BlobLinksTable.ForeignKeys[1].RefTable = BlobsTable
 	CarsTable.ForeignKeys[0].RefTable = PetsTable
 	DevicesTable.ForeignKeys[0].RefTable = SessionsTable
 	DocsTable.ForeignKeys[0].RefTable = DocsTable
@@ -402,8 +405,6 @@ func init() {
 	SessionsTable.ForeignKeys[0].RefTable = DevicesTable
 	TokensTable.ForeignKeys[0].RefTable = AccountsTable
 	UsersTable.ForeignKeys[0].RefTable = UsersTable
-	BlobLinksTable.ForeignKeys[0].RefTable = BlobsTable
-	BlobLinksTable.ForeignKeys[1].RefTable = BlobsTable
 	GroupUsersTable.ForeignKeys[0].RefTable = GroupsTable
 	GroupUsersTable.ForeignKeys[1].RefTable = UsersTable
 	PetFriendsTable.ForeignKeys[0].RefTable = PetsTable

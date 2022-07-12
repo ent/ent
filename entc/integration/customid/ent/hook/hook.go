@@ -39,6 +39,19 @@ func (f BlobFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 	return f(ctx, mv)
 }
 
+// The BlobLinkFunc type is an adapter to allow the use of ordinary
+// function as BlobLink mutator.
+type BlobLinkFunc func(context.Context, *ent.BlobLinkMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f BlobLinkFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.BlobLinkMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BlobLinkMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The CarFunc type is an adapter to allow the use of ordinary
 // function as Car mutator.
 type CarFunc func(context.Context, *ent.CarMutation) (ent.Value, error)

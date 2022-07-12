@@ -306,6 +306,34 @@ func HasLinksWith(preds ...predicate.Blob) predicate.Blob {
 	})
 }
 
+// HasBlobLinks applies the HasEdge predicate on the "blob_links" edge.
+func HasBlobLinks() predicate.Blob {
+	return predicate.Blob(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(BlobLinksTable, BlobLinksColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, BlobLinksTable, BlobLinksColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasBlobLinksWith applies the HasEdge predicate on the "blob_links" edge with a given conditions (other predicates).
+func HasBlobLinksWith(preds ...predicate.BlobLink) predicate.Blob {
+	return predicate.Blob(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(BlobLinksInverseTable, BlobLinksColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, BlobLinksTable, BlobLinksColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Blob) predicate.Blob {
 	return predicate.Blob(func(s *sql.Selector) {
