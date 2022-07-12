@@ -1579,12 +1579,57 @@ AND "users"."id1" > "users"."id2") AND "users"."id1" >= "users"."id2")
 AND "users"."id1" < "users"."id2") AND "users"."id1" <= "users"."id2"`, "\n", ""),
 		},
 		{
-			input:     Select("age").From(Table("users")).Where(Between("age", 20, 30)),
+			input: Select("age").
+				From(Table("users")).
+				Where(Between("age", 20, 30)),
 			wantQuery: "SELECT `age` FROM `users` WHERE age BETWEEN ? AND ?",
 			wantArgs:  []interface{}{20, 30},
 		},
 		{
-			input:     Select("age").From(Table("users")).Where(NotBetween("age", 20, 30)),
+			input: Dialect(dialect.Postgres).
+				Select("age").
+				From(Table("users")).
+				Where(Between("age", 20, 30)),
+			wantQuery: "SELECT `age` FROM `users` WHERE age BETWEEN ? AND ?",
+			wantArgs:  []interface{}{20, 30},
+		},
+		{
+			input: Dialect(dialect.MySQL).
+				Select("age").
+				From(Table("users")).
+				Where(Between("age", 20, 30)),
+			wantQuery: "SELECT `age` FROM `users` WHERE age BETWEEN ? AND ?",
+			wantArgs:  []interface{}{20, 30},
+		},
+		{
+			input: Dialect(dialect.SQLite).
+				Select("age").
+				From(Table("users")).
+				Where(Between("age", 20, 30)),
+			wantQuery: "SELECT `age` FROM `users` WHERE age BETWEEN ? AND ?",
+			wantArgs:  []interface{}{20, 30},
+		},
+		{
+			input: Dialect(dialect.Postgres).
+				Select("age").
+				From(Table("users")).
+				Where(NotBetween("age", 20, 30)),
+			wantQuery: "SELECT `age` FROM `users` WHERE age NOT BETWEEN ? AND ?",
+			wantArgs:  []interface{}{20, 30},
+		},
+		{
+			input: Dialect(dialect.MySQL).
+				Select("age").
+				From(Table("users")).
+				Where(NotBetween("age", 20, 30)),
+			wantQuery: "SELECT `age` FROM `users` WHERE age NOT BETWEEN ? AND ?",
+			wantArgs:  []interface{}{20, 30},
+		},
+		{
+			input: Dialect(dialect.SQLite).
+				Select("age").
+				From(Table("users")).
+				Where(NotBetween("age", 20, 30)),
 			wantQuery: "SELECT `age` FROM `users` WHERE age NOT BETWEEN ? AND ?",
 			wantArgs:  []interface{}{20, 30},
 		},

@@ -1647,7 +1647,8 @@ func (p *Predicate) Like(col, pattern string) *Predicate {
 func Between(col string, start, end interface{}) *Predicate {
 	p := P()
 	return p.Append(func(b *Builder) {
-		b.WriteString(fmt.Sprintf("%s BETWEEN ", col))
+		b.Ident(col)
+		b.WriteString(" BETWEEN ")
 		b.Arg(start)
 		b.WriteString(" AND ")
 		b.Arg(end)
@@ -1658,7 +1659,8 @@ func Between(col string, start, end interface{}) *Predicate {
 func NotBetween(col string, start, end interface{}) *Predicate {
 	p := P()
 	return p.Append(func(b *Builder) {
-		b.WriteString(fmt.Sprintf("%s NOT BETWEEN ", col))
+		b.Ident(col)
+		b.WriteString(" NOT BETWEEN ")
 		b.Arg(start)
 		b.WriteString(" AND ")
 		b.Arg(end)
