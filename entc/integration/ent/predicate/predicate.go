@@ -37,6 +37,9 @@ type GroupInfo func(*sql.Selector)
 // Item is the predicate function for item builders.
 type Item func(*sql.Selector)
 
+// License is the predicate function for license builders.
+type License func(*sql.Selector)
+
 // Node is the predicate function for node builders.
 type Node func(*sql.Selector)
 

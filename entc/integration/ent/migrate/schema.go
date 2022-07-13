@@ -288,6 +288,16 @@ var (
 		Columns:    ItemsColumns,
 		PrimaryKey: []*schema.Column{ItemsColumns[0]},
 	}
+	// LicensesColumns holds the columns for the "licenses" table.
+	LicensesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "bigserial"}},
+	}
+	// LicensesTable holds the schema information for the "licenses" table.
+	LicensesTable = &schema.Table{
+		Name:       "licenses",
+		Columns:    LicensesColumns,
+		PrimaryKey: []*schema.Column{LicensesColumns[0]},
+	}
 	// NodesColumns holds the columns for the "nodes" table.
 	NodesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -526,6 +536,7 @@ var (
 		GroupsTable,
 		GroupInfosTable,
 		ItemsTable,
+		LicensesTable,
 		NodesTable,
 		PetTable,
 		SpecsTable,

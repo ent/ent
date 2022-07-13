@@ -758,6 +758,9 @@ func (d *Postgres) atImplicitIndexName(idx *Index, t1 *Table, c1 *Column) bool {
 }
 
 func (d *Postgres) atIncrementC(t *schema.Table, c *schema.Column) {
+	if _, ok := c.Type.Type.(*postgres.SerialType); ok {
+		return
+	}
 	id := &postgres.Identity{}
 	for _, a := range t.Attrs {
 		if a, ok := a.(*postgres.Identity); ok {

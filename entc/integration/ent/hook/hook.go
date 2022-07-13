@@ -130,6 +130,19 @@ func (f ItemFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 	return f(ctx, mv)
 }
 
+// The LicenseFunc type is an adapter to allow the use of ordinary
+// function as License mutator.
+type LicenseFunc func(context.Context, *ent.LicenseMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LicenseFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.LicenseMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LicenseMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The NodeFunc type is an adapter to allow the use of ordinary
 // function as Node mutator.
 type NodeFunc func(context.Context, *ent.NodeMutation) (ent.Value, error)
