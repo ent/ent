@@ -3,7 +3,7 @@ module entgo.io/ent
 go 1.17
 
 require (
-	ariga.io/atlas v0.4.3-0.20220711120113-a190b01c6ef9
+	ariga.io/atlas v0.4.3-0.20220713162925-e2eac411c1ee
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/go-openapi/inflect v0.19.0
 	github.com/go-sql-driver/mysql v1.6.0
