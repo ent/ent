@@ -375,7 +375,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		createE := &TweetLikeCreate{config: uc.config, mutation: newTweetLikeMutation(uc.config, OpCreate)}
-		createE.defaults()
+		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges = append(_spec.Edges, edge)

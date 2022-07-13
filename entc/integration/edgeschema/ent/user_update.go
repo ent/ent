@@ -635,7 +635,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		}
 		createE := &TweetLikeCreate{config: uu.config, mutation: newTweetLikeMutation(uu.config, OpCreate)}
-		createE.defaults()
+		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -658,7 +658,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		createE := &TweetLikeCreate{config: uu.config, mutation: newTweetLikeMutation(uu.config, OpCreate)}
-		createE.defaults()
+		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -681,7 +681,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		createE := &TweetLikeCreate{config: uu.config, mutation: newTweetLikeMutation(uu.config, OpCreate)}
-		createE.defaults()
+		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -1562,7 +1562,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			},
 		}
 		createE := &TweetLikeCreate{config: uuo.config, mutation: newTweetLikeMutation(uuo.config, OpCreate)}
-		createE.defaults()
+		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1585,7 +1585,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		createE := &TweetLikeCreate{config: uuo.config, mutation: newTweetLikeMutation(uuo.config, OpCreate)}
-		createE.defaults()
+		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1608,7 +1608,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		createE := &TweetLikeCreate{config: uuo.config, mutation: newTweetLikeMutation(uuo.config, OpCreate)}
-		createE.defaults()
+		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
