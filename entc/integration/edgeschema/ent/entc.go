@@ -25,6 +25,8 @@ func main() {
 		`,
 		Features: []gen.Feature{
 			gen.FeatureUpsert,
+			gen.FeaturePrivacy,
+			gen.FeatureSnapshot,
 		},
 	})
 	if err != nil {
