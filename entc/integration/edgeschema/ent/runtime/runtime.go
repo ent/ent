@@ -13,6 +13,8 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/friendship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
+	"entgo.io/ent/entc/integration/edgeschema/ent/role"
+	"entgo.io/ent/entc/integration/edgeschema/ent/roleuser"
 	"entgo.io/ent/entc/integration/edgeschema/ent/schema"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
@@ -51,6 +53,18 @@ func init() {
 	relationshipDescWeight := relationshipFields[0].Descriptor()
 	// relationship.DefaultWeight holds the default value on creation for the weight field.
 	relationship.DefaultWeight = relationshipDescWeight.Default.(int)
+	roleFields := schema.Role{}.Fields()
+	_ = roleFields
+	// roleDescCreatedAt is the schema descriptor for created_at field.
+	roleDescCreatedAt := roleFields[1].Descriptor()
+	// role.DefaultCreatedAt holds the default value on creation for the created_at field.
+	role.DefaultCreatedAt = roleDescCreatedAt.Default.(func() time.Time)
+	roleuserFields := schema.RoleUser{}.Fields()
+	_ = roleuserFields
+	// roleuserDescCreatedAt is the schema descriptor for created_at field.
+	roleuserDescCreatedAt := roleuserFields[0].Descriptor()
+	// roleuser.DefaultCreatedAt holds the default value on creation for the created_at field.
+	roleuser.DefaultCreatedAt = roleuserDescCreatedAt.Default.(func() time.Time)
 	tweetlike.Policy = privacy.NewPolicies(schema.TweetLike{})
 	tweetlike.Hooks[0] = func(next ent.Mutator) ent.Mutator {
 		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
@@ -76,6 +90,15 @@ func init() {
 	tweettagDescID := tweettagFields[0].Descriptor()
 	// tweettag.DefaultID holds the default value on creation for the id field.
 	tweettag.DefaultID = tweettagDescID.Default.(func() uuid.UUID)
+	user.Policy = privacy.NewPolicies(schema.User{})
+	user.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := user.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescName is the schema descriptor for name field.

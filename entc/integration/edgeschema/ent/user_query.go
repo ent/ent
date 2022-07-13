@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"database/sql/driver"
+	"errors"
 	"fmt"
 	"math"
 
@@ -18,6 +19,8 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
+	"entgo.io/ent/entc/integration/edgeschema/ent/role"
+	"entgo.io/ent/entc/integration/edgeschema/ent/roleuser"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
@@ -41,11 +44,13 @@ type UserQuery struct {
 	withRelatives    *UserQuery
 	withLikedTweets  *TweetQuery
 	withTweets       *TweetQuery
+	withRoles        *RoleQuery
 	withJoinedGroups *UserGroupQuery
 	withFriendships  *FriendshipQuery
 	withRelationship *RelationshipQuery
 	withLikes        *TweetLikeQuery
 	withUserTweets   *UserTweetQuery
+	withRolesUsers   *RoleUserQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -192,6 +197,28 @@ func (uq *UserQuery) QueryTweets() *TweetQuery {
 	return query
 }
 
+// QueryRoles chains the current query on the "roles" edge.
+func (uq *UserQuery) QueryRoles() *RoleQuery {
+	query := &RoleQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(role.Table, role.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.RolesTable, user.RolesPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // QueryJoinedGroups chains the current query on the "joined_groups" edge.
 func (uq *UserQuery) QueryJoinedGroups() *UserGroupQuery {
 	query := &UserGroupQuery{config: uq.config}
@@ -295,6 +322,28 @@ func (uq *UserQuery) QueryUserTweets() *UserTweetQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(usertweet.Table, usertweet.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, user.UserTweetsTable, user.UserTweetsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryRolesUsers chains the current query on the "roles_users" edge.
+func (uq *UserQuery) QueryRolesUsers() *RoleUserQuery {
+	query := &RoleUserQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(roleuser.Table, roleuser.UserColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.RolesUsersTable, user.RolesUsersColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -488,11 +537,13 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withRelatives:    uq.withRelatives.Clone(),
 		withLikedTweets:  uq.withLikedTweets.Clone(),
 		withTweets:       uq.withTweets.Clone(),
+		withRoles:        uq.withRoles.Clone(),
 		withJoinedGroups: uq.withJoinedGroups.Clone(),
 		withFriendships:  uq.withFriendships.Clone(),
 		withRelationship: uq.withRelationship.Clone(),
 		withLikes:        uq.withLikes.Clone(),
 		withUserTweets:   uq.withUserTweets.Clone(),
+		withRolesUsers:   uq.withRolesUsers.Clone(),
 		// clone intermediate query.
 		sql:    uq.sql.Clone(),
 		path:   uq.path,
@@ -555,6 +606,17 @@ func (uq *UserQuery) WithTweets(opts ...func(*TweetQuery)) *UserQuery {
 	return uq
 }
 
+// WithRoles tells the query-builder to eager-load the nodes that are connected to
+// the "roles" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithRoles(opts ...func(*RoleQuery)) *UserQuery {
+	query := &RoleQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withRoles = query
+	return uq
+}
+
 // WithJoinedGroups tells the query-builder to eager-load the nodes that are connected to
 // the "joined_groups" edge. The optional arguments are used to configure the query builder of the edge.
 func (uq *UserQuery) WithJoinedGroups(opts ...func(*UserGroupQuery)) *UserQuery {
@@ -607,6 +669,17 @@ func (uq *UserQuery) WithUserTweets(opts ...func(*UserTweetQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withUserTweets = query
+	return uq
+}
+
+// WithRolesUsers tells the query-builder to eager-load the nodes that are connected to
+// the "roles_users" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithRolesUsers(opts ...func(*RoleUserQuery)) *UserQuery {
+	query := &RoleUserQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withRolesUsers = query
 	return uq
 }
 
@@ -673,6 +746,12 @@ func (uq *UserQuery) prepareQuery(ctx context.Context) error {
 		}
 		uq.sql = prev
 	}
+	if user.Policy == nil {
+		return errors.New("ent: uninitialized user.Policy (forgotten import ent/runtime?)")
+	}
+	if err := user.Policy.EvalQuery(ctx, uq); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -680,17 +759,19 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [10]bool{
+		loadedTypes = [12]bool{
 			uq.withGroups != nil,
 			uq.withFriends != nil,
 			uq.withRelatives != nil,
 			uq.withLikedTweets != nil,
 			uq.withTweets != nil,
+			uq.withRoles != nil,
 			uq.withJoinedGroups != nil,
 			uq.withFriendships != nil,
 			uq.withRelationship != nil,
 			uq.withLikes != nil,
 			uq.withUserTweets != nil,
+			uq.withRolesUsers != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -977,6 +1058,59 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		}
 	}
 
+	if query := uq.withRoles; query != nil {
+		edgeids := make([]driver.Value, len(nodes))
+		byid := make(map[int]*User)
+		nids := make(map[int]map[*User]struct{})
+		for i, node := range nodes {
+			edgeids[i] = node.ID
+			byid[node.ID] = node
+			node.Edges.Roles = []*Role{}
+		}
+		query.Where(func(s *sql.Selector) {
+			joinT := sql.Table(user.RolesTable)
+			s.Join(joinT).On(s.C(role.FieldID), joinT.C(user.RolesPrimaryKey[1]))
+			s.Where(sql.InValues(joinT.C(user.RolesPrimaryKey[0]), edgeids...))
+			columns := s.SelectedColumns()
+			s.Select(joinT.C(user.RolesPrimaryKey[0]))
+			s.AppendSelect(columns...)
+			s.SetDistinct(false)
+		})
+		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]interface{}, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]interface{}{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []interface{}) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*User]struct{}{byid[outValue]: struct{}{}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byid[outValue]] = struct{}{}
+				return nil
+			}
+		})
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected "roles" node returned %v`, n.ID)
+			}
+			for kn := range nodes {
+				kn.Edges.Roles = append(kn.Edges.Roles, n)
+			}
+		}
+	}
+
 	if query := uq.withJoinedGroups; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[int]*User)
@@ -1099,6 +1233,31 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 				return nil, fmt.Errorf(`unexpected foreign-key "user_id" returned %v for node %v`, fk, n.ID)
 			}
 			node.Edges.UserTweets = append(node.Edges.UserTweets, n)
+		}
+	}
+
+	if query := uq.withRolesUsers; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.RolesUsers = []*RoleUser{}
+		}
+		query.Where(predicate.RoleUser(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.RolesUsersColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.UserID
+			node, ok := nodeids[fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "user_id" returned %v for node %v`, fk, n)
+			}
+			node.Edges.RolesUsers = append(node.Edges.RolesUsers, n)
 		}
 	}
 

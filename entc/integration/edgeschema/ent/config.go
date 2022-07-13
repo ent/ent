@@ -32,6 +32,8 @@ type hooks struct {
 	Group            []ent.Hook
 	Relationship     []ent.Hook
 	RelationshipInfo []ent.Hook
+	Role             []ent.Hook
+	RoleUser         []ent.Hook
 	Tag              []ent.Hook
 	Tweet            []ent.Hook
 	TweetLike        []ent.Hook

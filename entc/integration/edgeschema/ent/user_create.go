@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/friendship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
+	"entgo.io/ent/entc/integration/edgeschema/ent/role"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
@@ -119,6 +120,21 @@ func (uc *UserCreate) AddTweets(t ...*Tweet) *UserCreate {
 	return uc.AddTweetIDs(ids...)
 }
 
+// AddRoleIDs adds the "roles" edge to the Role entity by IDs.
+func (uc *UserCreate) AddRoleIDs(ids ...int) *UserCreate {
+	uc.mutation.AddRoleIDs(ids...)
+	return uc
+}
+
+// AddRoles adds the "roles" edges to the Role entity.
+func (uc *UserCreate) AddRoles(r ...*Role) *UserCreate {
+	ids := make([]int, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uc.AddRoleIDs(ids...)
+}
+
 // AddJoinedGroupIDs adds the "joined_groups" edge to the UserGroup entity by IDs.
 func (uc *UserCreate) AddJoinedGroupIDs(ids ...int) *UserCreate {
 	uc.mutation.AddJoinedGroupIDs(ids...)
@@ -175,7 +191,9 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 		err  error
 		node *User
 	)
-	uc.defaults()
+	if err := uc.defaults(); err != nil {
+		return nil, err
+	}
 	if len(uc.hooks) == 0 {
 		if err = uc.check(); err != nil {
 			return nil, err
@@ -240,11 +258,12 @@ func (uc *UserCreate) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (uc *UserCreate) defaults() {
+func (uc *UserCreate) defaults() error {
 	if _, ok := uc.mutation.Name(); !ok {
 		v := user.DefaultName
 		uc.mutation.SetName(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -398,6 +417,29 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		createE := &UserTweetCreate{config: uc.config, mutation: newUserTweetMutation(uc.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.RolesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.RolesTable,
+			Columns: user.RolesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: role.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &RoleUserCreate{config: uc.config, mutation: newRoleUserMutation(uc.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields

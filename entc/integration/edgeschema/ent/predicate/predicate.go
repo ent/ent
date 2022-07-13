@@ -22,6 +22,12 @@ type Relationship func(*sql.Selector)
 // RelationshipInfo is the predicate function for relationshipinfo builders.
 type RelationshipInfo func(*sql.Selector)
 
+// Role is the predicate function for role builders.
+type Role func(*sql.Selector)
+
+// RoleUser is the predicate function for roleuser builders.
+type RoleUser func(*sql.Selector)
+
 // Tag is the predicate function for tag builders.
 type Tag func(*sql.Selector)
 

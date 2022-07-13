@@ -6,6 +6,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/entc/integration/privacy/ent/privacy"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
@@ -36,5 +37,19 @@ func (User) Edges() []ent.Edge {
 			Through("likes", TweetLike.Type),
 		edge.To("tweets", Tweet.Type).
 			Through("user_tweets", UserTweet.Type),
+		edge.To("roles", Role.Type).
+			Through("roles_users", RoleUser.Type),
+	}
+}
+
+// Policy defines the privacy policy of the User.
+func (User) Policy() ent.Policy {
+	return privacy.Policy{
+		Mutation: privacy.MutationPolicy{
+			privacy.AlwaysAllowRule(),
+		},
+		Query: privacy.QueryPolicy{
+			privacy.AlwaysAllowRule(),
+		},
 	}
 }
