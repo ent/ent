@@ -36,6 +36,8 @@ type Tx struct {
 	GroupInfo *GroupInfoClient
 	// Item is the client for interacting with the Item builders.
 	Item *ItemClient
+	// License is the client for interacting with the License builders.
+	License *LicenseClient
 	// Node is the client for interacting with the Node builders.
 	Node *NodeClient
 	// Pet is the client for interacting with the Pet builders.
@@ -190,6 +192,7 @@ func (tx *Tx) init() {
 	tx.Group = NewGroupClient(tx.config)
 	tx.GroupInfo = NewGroupInfoClient(tx.config)
 	tx.Item = NewItemClient(tx.config)
+	tx.License = NewLicenseClient(tx.config)
 	tx.Node = NewNodeClient(tx.config)
 	tx.Pet = NewPetClient(tx.config)
 	tx.Spec = NewSpecClient(tx.config)

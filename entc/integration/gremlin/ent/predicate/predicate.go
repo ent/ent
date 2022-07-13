@@ -37,6 +37,9 @@ type GroupInfo func(*dsl.Traversal)
 // Item is the predicate function for item builders.
 type Item func(*dsl.Traversal)
 
+// License is the predicate function for license builders.
+type License func(*dsl.Traversal)
+
 // Node is the predicate function for node builders.
 type Node func(*dsl.Traversal)
 

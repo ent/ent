@@ -23,6 +23,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/group"
 	"entgo.io/ent/entc/integration/ent/groupinfo"
 	"entgo.io/ent/entc/integration/ent/item"
+	"entgo.io/ent/entc/integration/ent/license"
 	"entgo.io/ent/entc/integration/ent/node"
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/spec"
@@ -57,6 +58,7 @@ func columnChecker(table string) func(string) error {
 		group.Table:     group.ValidColumn,
 		groupinfo.Table: groupinfo.ValidColumn,
 		item.Table:      item.ValidColumn,
+		license.Table:   license.ValidColumn,
 		node.Table:      node.ValidColumn,
 		pet.Table:       pet.ValidColumn,
 		spec.Table:      spec.ValidColumn,

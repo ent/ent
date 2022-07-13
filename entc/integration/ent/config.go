@@ -41,6 +41,7 @@ type hooks struct {
 	Group     []ent.Hook
 	GroupInfo []ent.Hook
 	Item      []ent.Hook
+	License   []ent.Hook
 	Node      []ent.Hook
 	Pet       []ent.Hook
 	Spec      []ent.Hook
