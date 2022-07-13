@@ -119,6 +119,44 @@ var (
 		Columns:    RelationshipInfosColumns,
 		PrimaryKey: []*schema.Column{RelationshipInfosColumns[0]},
 	}
+	// RolesColumns holds the columns for the "roles" table.
+	RolesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+	}
+	// RolesTable holds the schema information for the "roles" table.
+	RolesTable = &schema.Table{
+		Name:       "roles",
+		Columns:    RolesColumns,
+		PrimaryKey: []*schema.Column{RolesColumns[0]},
+	}
+	// RoleUsersColumns holds the columns for the "role_users" table.
+	RoleUsersColumns = []*schema.Column{
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "role_id", Type: field.TypeInt},
+		{Name: "user_id", Type: field.TypeInt},
+	}
+	// RoleUsersTable holds the schema information for the "role_users" table.
+	RoleUsersTable = &schema.Table{
+		Name:       "role_users",
+		Columns:    RoleUsersColumns,
+		PrimaryKey: []*schema.Column{RoleUsersColumns[2], RoleUsersColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "role_users_roles_role",
+				Columns:    []*schema.Column{RoleUsersColumns[1]},
+				RefColumns: []*schema.Column{RolesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "role_users_users_user",
+				Columns:    []*schema.Column{RoleUsersColumns[2]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// TagsColumns holds the columns for the "tags" table.
 	TagsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -291,6 +329,8 @@ var (
 		GroupsTable,
 		RelationshipsTable,
 		RelationshipInfosTable,
+		RolesTable,
+		RoleUsersTable,
 		TagsTable,
 		TweetsTable,
 		TweetLikesTable,
@@ -307,6 +347,8 @@ func init() {
 	RelationshipsTable.ForeignKeys[0].RefTable = UsersTable
 	RelationshipsTable.ForeignKeys[1].RefTable = UsersTable
 	RelationshipsTable.ForeignKeys[2].RefTable = RelationshipInfosTable
+	RoleUsersTable.ForeignKeys[0].RefTable = RolesTable
+	RoleUsersTable.ForeignKeys[1].RefTable = UsersTable
 	TweetLikesTable.ForeignKeys[0].RefTable = TweetsTable
 	TweetLikesTable.ForeignKeys[1].RefTable = UsersTable
 	TweetTagsTable.ForeignKeys[0].RefTable = TagsTable

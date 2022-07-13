@@ -24,6 +24,10 @@ type Tx struct {
 	Relationship *RelationshipClient
 	// RelationshipInfo is the client for interacting with the RelationshipInfo builders.
 	RelationshipInfo *RelationshipInfoClient
+	// Role is the client for interacting with the Role builders.
+	Role *RoleClient
+	// RoleUser is the client for interacting with the RoleUser builders.
+	RoleUser *RoleUserClient
 	// Tag is the client for interacting with the Tag builders.
 	Tag *TagClient
 	// Tweet is the client for interacting with the Tweet builders.
@@ -177,6 +181,8 @@ func (tx *Tx) init() {
 	tx.Group = NewGroupClient(tx.config)
 	tx.Relationship = NewRelationshipClient(tx.config)
 	tx.RelationshipInfo = NewRelationshipInfoClient(tx.config)
+	tx.Role = NewRoleClient(tx.config)
+	tx.RoleUser = NewRoleUserClient(tx.config)
 	tx.Tag = NewTagClient(tx.config)
 	tx.Tweet = NewTweetClient(tx.config)
 	tx.TweetLike = NewTweetLikeClient(tx.config)
