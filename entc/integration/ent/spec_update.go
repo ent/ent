@@ -73,6 +73,15 @@ func (su *SpecUpdate) RemoveCard(c ...*Card) *SpecUpdate {
 	return su.RemoveCardIDs(ids...)
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (su *SpecUpdate) When(condition bool, action func(builder *SpecUpdate)) *SpecUpdate {
+	if condition {
+		action(su)
+	}
+
+	return su
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (su *SpecUpdate) Save(ctx context.Context) (int, error) {
 	var (

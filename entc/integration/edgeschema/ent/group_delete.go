@@ -30,6 +30,15 @@ func (gd *GroupDelete) Where(ps ...predicate.Group) *GroupDelete {
 	return gd
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (gd *GroupDelete) When(condition bool, action func(builder *GroupDelete)) *GroupDelete {
+	if condition {
+		action(gd)
+	}
+
+	return gd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (gd *GroupDelete) Exec(ctx context.Context) (int, error) {
 	var (

@@ -44,6 +44,15 @@ func (ttq *TweetTagQuery) Where(ps ...predicate.TweetTag) *TweetTagQuery {
 	return ttq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (ttq *TweetTagQuery) When(condition bool, action func(builder *TweetTagQuery)) *TweetTagQuery {
+	if condition {
+		action(ttq)
+	}
+
+	return ttq
+}
+
 // Limit adds a limit step to the query.
 func (ttq *TweetTagQuery) Limit(limit int) *TweetTagQuery {
 	ttq.limit = &limit

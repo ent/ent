@@ -68,6 +68,15 @@ func (pu *PetUpdate) ClearOwner() *PetUpdate {
 	return pu
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (pu *PetUpdate) When(condition bool, action func(builder *PetUpdate)) *PetUpdate {
+	if condition {
+		action(pu)
+	}
+
+	return pu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (pu *PetUpdate) Save(ctx context.Context) (int, error) {
 	var (

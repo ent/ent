@@ -93,6 +93,15 @@ func (cu *CarUpdate) RemoveRentals(r ...*Rental) *CarUpdate {
 	return cu.RemoveRentalIDs(ids...)
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (cu *CarUpdate) When(condition bool, action func(builder *CarUpdate)) *CarUpdate {
+	if condition {
+		action(cu)
+	}
+
+	return cu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (cu *CarUpdate) Save(ctx context.Context) (int, error) {
 	var (

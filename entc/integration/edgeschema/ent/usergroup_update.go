@@ -87,6 +87,15 @@ func (ugu *UserGroupUpdate) ClearGroup() *UserGroupUpdate {
 	return ugu
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (ugu *UserGroupUpdate) When(condition bool, action func(builder *UserGroupUpdate)) *UserGroupUpdate {
+	if condition {
+		action(ugu)
+	}
+
+	return ugu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ugu *UserGroupUpdate) Save(ctx context.Context) (int, error) {
 	var (

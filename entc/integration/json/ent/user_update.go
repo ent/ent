@@ -138,6 +138,15 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (uu *UserUpdate) When(condition bool, action func(builder *UserUpdate)) *UserUpdate {
+	if condition {
+		action(uu)
+	}
+
+	return uu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 	var (

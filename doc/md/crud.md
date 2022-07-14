@@ -495,3 +495,21 @@ func SetName(m SetNamer, name string) {
     }
 }
 ```
+
+## Conditional Query Builder
+
+You may build part of your query by checking some condition. For example you
+may want to only paginate your query if `toPaginate` is true.
+
+```go
+toPaginate := true
+
+users, err := client.User.
+	When(toPaginate, func(n *ent.UserQuery) {
+        b.
+			Limit(10).
+			Offset(0).
+			Order(ent.Asc(user.FieldName))
+    })
+    .All(ctx)
+```

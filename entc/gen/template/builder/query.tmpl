@@ -53,6 +53,15 @@ func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $
 	return {{ $receiver }}
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func ({{ $receiver }} *{{ $builder }}) When(condition bool, action func(builder *{{ $builder }})) *{{ $builder }} {
+	if condition {
+		action({{ $receiver }})
+	}
+
+	return {{ $receiver }}
+}
+
 // Limit adds a limit step to the query.
 func ({{ $receiver }} *{{ $builder }}) Limit(limit int) *{{ $builder }} {
 	{{ $receiver }}.limit = &limit

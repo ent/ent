@@ -30,6 +30,15 @@ func (pd *PetDelete) Where(ps ...predicate.Pet) *PetDelete {
 	return pd
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (pd *PetDelete) When(condition bool, action func(builder *PetDelete)) *PetDelete {
+	if condition {
+		action(pd)
+	}
+
+	return pd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (pd *PetDelete) Exec(ctx context.Context) (int, error) {
 	var (

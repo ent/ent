@@ -100,6 +100,15 @@ func (giu *GroupInfoUpdate) RemoveGroups(g ...*Group) *GroupInfoUpdate {
 	return giu.RemoveGroupIDs(ids...)
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (giu *GroupInfoUpdate) When(condition bool, action func(builder *GroupInfoUpdate)) *GroupInfoUpdate {
+	if condition {
+		action(giu)
+	}
+
+	return giu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (giu *GroupInfoUpdate) Save(ctx context.Context) (int, error) {
 	var (

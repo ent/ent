@@ -30,6 +30,15 @@ func (bd *BlobDelete) Where(ps ...predicate.Blob) *BlobDelete {
 	return bd
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (bd *BlobDelete) When(condition bool, action func(builder *BlobDelete)) *BlobDelete {
+	if condition {
+		action(bd)
+	}
+
+	return bd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (bd *BlobDelete) Exec(ctx context.Context) (int, error) {
 	var (

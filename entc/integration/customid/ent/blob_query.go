@@ -46,6 +46,15 @@ func (bq *BlobQuery) Where(ps ...predicate.Blob) *BlobQuery {
 	return bq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (bq *BlobQuery) When(condition bool, action func(builder *BlobQuery)) *BlobQuery {
+	if condition {
+		action(bq)
+	}
+
+	return bq
+}
+
 // Limit adds a limit step to the query.
 func (bq *BlobQuery) Limit(limit int) *BlobQuery {
 	bq.limit = &limit

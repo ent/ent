@@ -38,6 +38,15 @@ func (gq *GoodsQuery) Where(ps ...predicate.Goods) *GoodsQuery {
 	return gq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (gq *GoodsQuery) When(condition bool, action func(builder *GoodsQuery)) *GoodsQuery {
+	if condition {
+		action(gq)
+	}
+
+	return gq
+}
+
 // Limit adds a limit step to the query.
 func (gq *GoodsQuery) Limit(limit int) *GoodsQuery {
 	gq.limit = &limit

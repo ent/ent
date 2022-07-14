@@ -45,6 +45,15 @@ func (nq *NodeQuery) Where(ps ...predicate.Node) *NodeQuery {
 	return nq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (nq *NodeQuery) When(condition bool, action func(builder *NodeQuery)) *NodeQuery {
+	if condition {
+		action(nq)
+	}
+
+	return nq
+}
+
 // Limit adds a limit step to the query.
 func (nq *NodeQuery) Limit(limit int) *NodeQuery {
 	nq.limit = &limit

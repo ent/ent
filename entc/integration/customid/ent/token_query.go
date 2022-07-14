@@ -43,6 +43,15 @@ func (tq *TokenQuery) Where(ps ...predicate.Token) *TokenQuery {
 	return tq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (tq *TokenQuery) When(condition bool, action func(builder *TokenQuery)) *TokenQuery {
+	if condition {
+		action(tq)
+	}
+
+	return tq
+}
+
 // Limit adds a limit step to the query.
 func (tq *TokenQuery) Limit(limit int) *TokenQuery {
 	tq.limit = &limit

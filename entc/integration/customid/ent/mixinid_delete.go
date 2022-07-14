@@ -30,6 +30,15 @@ func (mid *MixinIDDelete) Where(ps ...predicate.MixinID) *MixinIDDelete {
 	return mid
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (mid *MixinIDDelete) When(condition bool, action func(builder *MixinIDDelete)) *MixinIDDelete {
+	if condition {
+		action(mid)
+	}
+
+	return mid
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (mid *MixinIDDelete) Exec(ctx context.Context) (int, error) {
 	var (

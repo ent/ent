@@ -74,6 +74,15 @@ func (pu *PostUpdate) ClearAuthor() *PostUpdate {
 	return pu
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (pu *PostUpdate) When(condition bool, action func(builder *PostUpdate)) *PostUpdate {
+	if condition {
+		action(pu)
+	}
+
+	return pu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (pu *PostUpdate) Save(ctx context.Context) (int, error) {
 	var (

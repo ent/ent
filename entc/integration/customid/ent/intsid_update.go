@@ -98,6 +98,15 @@ func (isu *IntSIDUpdate) RemoveChildren(i ...*IntSID) *IntSIDUpdate {
 	return isu.RemoveChildIDs(ids...)
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (isu *IntSIDUpdate) When(condition bool, action func(builder *IntSIDUpdate)) *IntSIDUpdate {
+	if condition {
+		action(isu)
+	}
+
+	return isu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (isu *IntSIDUpdate) Save(ctx context.Context) (int, error) {
 	var (

@@ -44,6 +44,15 @@ func (ftq *FileTypeQuery) Where(ps ...predicate.FileType) *FileTypeQuery {
 	return ftq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (ftq *FileTypeQuery) When(condition bool, action func(builder *FileTypeQuery)) *FileTypeQuery {
+	if condition {
+		action(ftq)
+	}
+
+	return ftq
+}
+
 // Limit adds a limit step to the query.
 func (ftq *FileTypeQuery) Limit(limit int) *FileTypeQuery {
 	ftq.limit = &limit

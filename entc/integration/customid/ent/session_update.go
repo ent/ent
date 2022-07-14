@@ -63,6 +63,15 @@ func (su *SessionUpdate) ClearDevice() *SessionUpdate {
 	return su
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (su *SessionUpdate) When(condition bool, action func(builder *SessionUpdate)) *SessionUpdate {
+	if condition {
+		action(su)
+	}
+
+	return su
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (su *SessionUpdate) Save(ctx context.Context) (int, error) {
 	var (

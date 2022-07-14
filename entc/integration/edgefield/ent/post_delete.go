@@ -30,6 +30,15 @@ func (pd *PostDelete) Where(ps ...predicate.Post) *PostDelete {
 	return pd
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (pd *PostDelete) When(condition bool, action func(builder *PostDelete)) *PostDelete {
+	if condition {
+		action(pd)
+	}
+
+	return pd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (pd *PostDelete) Exec(ctx context.Context) (int, error) {
 	var (

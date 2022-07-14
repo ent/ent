@@ -30,6 +30,15 @@ func (ad *AccountDelete) Where(ps ...predicate.Account) *AccountDelete {
 	return ad
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (ad *AccountDelete) When(condition bool, action func(builder *AccountDelete)) *AccountDelete {
+	if condition {
+		action(ad)
+	}
+
+	return ad
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ad *AccountDelete) Exec(ctx context.Context) (int, error) {
 	var (

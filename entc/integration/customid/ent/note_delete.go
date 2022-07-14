@@ -30,6 +30,15 @@ func (nd *NoteDelete) Where(ps ...predicate.Note) *NoteDelete {
 	return nd
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (nd *NoteDelete) When(condition bool, action func(builder *NoteDelete)) *NoteDelete {
+	if condition {
+		action(nd)
+	}
+
+	return nd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (nd *NoteDelete) Exec(ctx context.Context) (int, error) {
 	var (

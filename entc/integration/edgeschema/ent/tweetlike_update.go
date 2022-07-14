@@ -87,6 +87,15 @@ func (tlu *TweetLikeUpdate) ClearUser() *TweetLikeUpdate {
 	return tlu
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (tlu *TweetLikeUpdate) When(condition bool, action func(builder *TweetLikeUpdate)) *TweetLikeUpdate {
+	if condition {
+		action(tlu)
+	}
+
+	return tlu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (tlu *TweetLikeUpdate) Save(ctx context.Context) (int, error) {
 	var (

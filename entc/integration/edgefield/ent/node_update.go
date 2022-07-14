@@ -113,6 +113,15 @@ func (nu *NodeUpdate) ClearNext() *NodeUpdate {
 	return nu
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (nu *NodeUpdate) When(condition bool, action func(builder *NodeUpdate)) *NodeUpdate {
+	if condition {
+		action(nu)
+	}
+
+	return nu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (nu *NodeUpdate) Save(ctx context.Context) (int, error) {
 	var (

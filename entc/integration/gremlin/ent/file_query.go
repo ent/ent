@@ -44,6 +44,15 @@ func (fq *FileQuery) Where(ps ...predicate.File) *FileQuery {
 	return fq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (fq *FileQuery) When(condition bool, action func(builder *FileQuery)) *FileQuery {
+	if condition {
+		action(fq)
+	}
+
+	return fq
+}
+
 // Limit adds a limit step to the query.
 func (fq *FileQuery) Limit(limit int) *FileQuery {
 	fq.limit = &limit

@@ -44,6 +44,15 @@ func (mq *MetadataQuery) Where(ps ...predicate.Metadata) *MetadataQuery {
 	return mq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (mq *MetadataQuery) When(condition bool, action func(builder *MetadataQuery)) *MetadataQuery {
+	if condition {
+		action(mq)
+	}
+
+	return mq
+}
+
 // Limit adds a limit step to the query.
 func (mq *MetadataQuery) Limit(limit int) *MetadataQuery {
 	mq.limit = &limit

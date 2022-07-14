@@ -62,6 +62,15 @@ func (uq *UserQuery) Where(ps ...predicate.User) *UserQuery {
 	return uq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (uq *UserQuery) When(condition bool, action func(builder *UserQuery)) *UserQuery {
+	if condition {
+		action(uq)
+	}
+
+	return uq
+}
+
 // Limit adds a limit step to the query.
 func (uq *UserQuery) Limit(limit int) *UserQuery {
 	uq.limit = &limit

@@ -38,6 +38,15 @@ func (riq *RelationshipInfoQuery) Where(ps ...predicate.RelationshipInfo) *Relat
 	return riq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (riq *RelationshipInfoQuery) When(condition bool, action func(builder *RelationshipInfoQuery)) *RelationshipInfoQuery {
+	if condition {
+		action(riq)
+	}
+
+	return riq
+}
+
 // Limit adds a limit step to the query.
 func (riq *RelationshipInfoQuery) Limit(limit int) *RelationshipInfoQuery {
 	riq.limit = &limit

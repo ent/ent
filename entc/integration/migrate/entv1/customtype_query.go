@@ -38,6 +38,15 @@ func (ctq *CustomTypeQuery) Where(ps ...predicate.CustomType) *CustomTypeQuery {
 	return ctq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (ctq *CustomTypeQuery) When(condition bool, action func(builder *CustomTypeQuery)) *CustomTypeQuery {
+	if condition {
+		action(ctq)
+	}
+
+	return ctq
+}
+
 // Limit adds a limit step to the query.
 func (ctq *CustomTypeQuery) Limit(limit int) *CustomTypeQuery {
 	ctq.limit = &limit

@@ -40,6 +40,15 @@ func (iq *ItemQuery) Where(ps ...predicate.Item) *ItemQuery {
 	return iq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (iq *ItemQuery) When(condition bool, action func(builder *ItemQuery)) *ItemQuery {
+	if condition {
+		action(iq)
+	}
+
+	return iq
+}
+
 // Limit adds a limit step to the query.
 func (iq *ItemQuery) Limit(limit int) *ItemQuery {
 	iq.limit = &limit

@@ -41,6 +41,15 @@ func (cq *CommentQuery) Where(ps ...predicate.Comment) *CommentQuery {
 	return cq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (cq *CommentQuery) When(condition bool, action func(builder *CommentQuery)) *CommentQuery {
+	if condition {
+		action(cq)
+	}
+
+	return cq
+}
+
 // Limit adds a limit step to the query.
 func (cq *CommentQuery) Limit(limit int) *CommentQuery {
 	cq.limit = &limit

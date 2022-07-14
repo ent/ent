@@ -44,6 +44,15 @@ func (rq *RentalQuery) Where(ps ...predicate.Rental) *RentalQuery {
 	return rq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (rq *RentalQuery) When(condition bool, action func(builder *RentalQuery)) *RentalQuery {
+	if condition {
+		action(rq)
+	}
+
+	return rq
+}
+
 // Limit adds a limit step to the query.
 func (rq *RentalQuery) Limit(limit int) *RentalQuery {
 	rq.limit = &limit

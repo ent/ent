@@ -39,6 +39,15 @@ func (miq *MixinIDQuery) Where(ps ...predicate.MixinID) *MixinIDQuery {
 	return miq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (miq *MixinIDQuery) When(condition bool, action func(builder *MixinIDQuery)) *MixinIDQuery {
+	if condition {
+		action(miq)
+	}
+
+	return miq
+}
+
 // Limit adds a limit step to the query.
 func (miq *MixinIDQuery) Limit(limit int) *MixinIDQuery {
 	miq.limit = &limit

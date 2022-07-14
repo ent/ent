@@ -30,6 +30,15 @@ func (td *TweetDelete) Where(ps ...predicate.Tweet) *TweetDelete {
 	return td
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (td *TweetDelete) When(condition bool, action func(builder *TweetDelete)) *TweetDelete {
+	if condition {
+		action(td)
+	}
+
+	return td
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (td *TweetDelete) Exec(ctx context.Context) (int, error) {
 	var (

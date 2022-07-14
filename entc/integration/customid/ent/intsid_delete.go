@@ -30,6 +30,15 @@ func (isd *IntSIDDelete) Where(ps ...predicate.IntSID) *IntSIDDelete {
 	return isd
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (isd *IntSIDDelete) When(condition bool, action func(builder *IntSIDDelete)) *IntSIDDelete {
+	if condition {
+		action(isd)
+	}
+
+	return isd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (isd *IntSIDDelete) Exec(ctx context.Context) (int, error) {
 	var (

@@ -31,6 +31,15 @@ func (fd *FileDelete) Where(ps ...predicate.File) *FileDelete {
 	return fd
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (fd *FileDelete) When(condition bool, action func(builder *FileDelete)) *FileDelete {
+	if condition {
+		action(fd)
+	}
+
+	return fd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (fd *FileDelete) Exec(ctx context.Context) (int, error) {
 	var (

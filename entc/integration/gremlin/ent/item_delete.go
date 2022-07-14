@@ -31,6 +31,15 @@ func (id *ItemDelete) Where(ps ...predicate.Item) *ItemDelete {
 	return id
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (id *ItemDelete) When(condition bool, action func(builder *ItemDelete)) *ItemDelete {
+	if condition {
+		action(id)
+	}
+
+	return id
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (id *ItemDelete) Exec(ctx context.Context) (int, error) {
 	var (

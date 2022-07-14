@@ -30,6 +30,15 @@ func (ugd *UserGroupDelete) Where(ps ...predicate.UserGroup) *UserGroupDelete {
 	return ugd
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (ugd *UserGroupDelete) When(condition bool, action func(builder *UserGroupDelete)) *UserGroupDelete {
+	if condition {
+		action(ugd)
+	}
+
+	return ugd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ugd *UserGroupDelete) Exec(ctx context.Context) (int, error) {
 	var (

@@ -44,6 +44,15 @@ func (isq *IntSIDQuery) Where(ps ...predicate.IntSID) *IntSIDQuery {
 	return isq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (isq *IntSIDQuery) When(condition bool, action func(builder *IntSIDQuery)) *IntSIDQuery {
+	if condition {
+		action(isq)
+	}
+
+	return isq
+}
+
 // Limit adds a limit step to the query.
 func (isq *IntSIDQuery) Limit(limit int) *IntSIDQuery {
 	isq.limit = &limit

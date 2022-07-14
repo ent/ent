@@ -43,6 +43,15 @@ func (aq *AccountQuery) Where(ps ...predicate.Account) *AccountQuery {
 	return aq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (aq *AccountQuery) When(condition bool, action func(builder *AccountQuery)) *AccountQuery {
+	if condition {
+		action(aq)
+	}
+
+	return aq
+}
+
 // Limit adds a limit step to the query.
 func (aq *AccountQuery) Limit(limit int) *AccountQuery {
 	aq.limit = &limit

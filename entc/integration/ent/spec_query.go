@@ -44,6 +44,15 @@ func (sq *SpecQuery) Where(ps ...predicate.Spec) *SpecQuery {
 	return sq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (sq *SpecQuery) When(condition bool, action func(builder *SpecQuery)) *SpecQuery {
+	if condition {
+		action(sq)
+	}
+
+	return sq
+}
+
 // Limit adds a limit step to the query.
 func (sq *SpecQuery) Limit(limit int) *SpecQuery {
 	sq.limit = &limit

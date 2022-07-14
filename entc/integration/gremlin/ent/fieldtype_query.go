@@ -38,6 +38,15 @@ func (ftq *FieldTypeQuery) Where(ps ...predicate.FieldType) *FieldTypeQuery {
 	return ftq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (ftq *FieldTypeQuery) When(condition bool, action func(builder *FieldTypeQuery)) *FieldTypeQuery {
+	if condition {
+		action(ftq)
+	}
+
+	return ftq
+}
+
 // Limit adds a limit step to the query.
 func (ftq *FieldTypeQuery) Limit(limit int) *FieldTypeQuery {
 	ftq.limit = &limit

@@ -34,6 +34,15 @@ func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $
 	return {{ $receiver }}
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func ({{ $receiver }} *{{ $builder }}) When(condition bool, action func(builder *{{ $builder }})) *{{ $builder }} {
+	if condition {
+		action({{ $receiver }})
+	}
+
+	return {{ $receiver }}
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func ({{ $receiver}} *{{ $builder }}) Exec(ctx context.Context) (int, error) {
 	var (

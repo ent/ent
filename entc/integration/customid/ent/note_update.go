@@ -118,6 +118,15 @@ func (nu *NoteUpdate) RemoveChildren(n ...*Note) *NoteUpdate {
 	return nu.RemoveChildIDs(ids...)
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (nu *NoteUpdate) When(condition bool, action func(builder *NoteUpdate)) *NoteUpdate {
+	if condition {
+		action(nu)
+	}
+
+	return nu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (nu *NoteUpdate) Save(ctx context.Context) (int, error) {
 	var (

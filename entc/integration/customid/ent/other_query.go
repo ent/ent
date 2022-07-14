@@ -39,6 +39,15 @@ func (oq *OtherQuery) Where(ps ...predicate.Other) *OtherQuery {
 	return oq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (oq *OtherQuery) When(condition bool, action func(builder *OtherQuery)) *OtherQuery {
+	if condition {
+		action(oq)
+	}
+
+	return oq
+}
+
 // Limit adds a limit step to the query.
 func (oq *OtherQuery) Limit(limit int) *OtherQuery {
 	oq.limit = &limit

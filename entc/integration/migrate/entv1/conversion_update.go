@@ -272,6 +272,15 @@ func (cu *ConversionUpdate) Mutation() *ConversionMutation {
 	return cu.mutation
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (cu *ConversionUpdate) When(condition bool, action func(builder *ConversionUpdate)) *ConversionUpdate {
+	if condition {
+		action(cu)
+	}
+
+	return cu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (cu *ConversionUpdate) Save(ctx context.Context) (int, error) {
 	var (

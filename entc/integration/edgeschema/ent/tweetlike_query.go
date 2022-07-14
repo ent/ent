@@ -43,6 +43,15 @@ func (tlq *TweetLikeQuery) Where(ps ...predicate.TweetLike) *TweetLikeQuery {
 	return tlq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (tlq *TweetLikeQuery) When(condition bool, action func(builder *TweetLikeQuery)) *TweetLikeQuery {
+	if condition {
+		action(tlq)
+	}
+
+	return tlq
+}
+
 // Limit adds a limit step to the query.
 func (tlq *TweetLikeQuery) Limit(limit int) *TweetLikeQuery {
 	tlq.limit = &limit

@@ -154,6 +154,7 @@ var (
 		Mutation,
 		CreateBulk,
 		ConstraintChecks,
+		Conditional,
 	}
 )
 
@@ -2094,6 +2095,53 @@ func Lock(t *testing.T, client *ent.Client) {
 		require.NoError(t, tx2.Rollback())
 		require.NoError(t, tx3.Rollback())
 	})
+}
+
+func Conditional(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+
+	builders := []*ent.UserCreate{
+		client.User.Create().SetName("A").SetAge(1).SetPhone("0000"), // Duplicate
+		client.User.Create().SetName("B").SetAge(1).SetPhone("1111"), // New row.
+		client.User.Create().SetName("C").SetAge(1).SetPhone("2222"), // New row.
+	}
+	client.User.CreateBulk(builders...).
+		OnConflictColumns(user.FieldPhone).
+		UpdateNewValues().
+		ExecX(ctx)
+
+	users, err := client.User.Query().
+		When(true, func(b *ent.UserQuery) {
+			b.
+				Limit(1).
+				Offset(1).
+				Order(ent.Asc(user.FieldName))
+		}).
+		All(ctx)
+	require.Nil(t, err)
+	require.Equal(t, len(users), 1)
+
+	_, err = client.User.Delete().
+		When(true, func(b *ent.UserDelete) {
+			b.Where(user.NameEQ("C"))
+		}).Exec(ctx)
+	require.Nil(t, err)
+
+	users, err = client.User.Query().All(ctx)
+	require.Nil(t, err)
+	require.Equal(t, len(users), 2)
+
+	_, err = client.User.Update().
+		When(true, func(b *ent.UserUpdate) {
+			b.Where(user.NameEQ("B"))
+		}).
+		SetPhone("BBBB").
+		Save(ctx)
+	require.Nil(t, err)
+
+	found, err := client.User.Query().Where(user.PhoneEQ("BBBB")).Exist(ctx)
+	require.Nil(t, err)
+	require.Equal(t, true, found)
 }
 
 func skip(t *testing.T, names ...string) {

@@ -56,6 +56,15 @@ func (iu *ItemUpdate) Mutation() *ItemMutation {
 	return iu.mutation
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (iu *ItemUpdate) When(condition bool, action func(builder *ItemUpdate)) *ItemUpdate {
+	if condition {
+		action(iu)
+	}
+
+	return iu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (iu *ItemUpdate) Save(ctx context.Context) (int, error) {
 	var (

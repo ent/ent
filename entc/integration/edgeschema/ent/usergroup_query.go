@@ -43,6 +43,15 @@ func (ugq *UserGroupQuery) Where(ps ...predicate.UserGroup) *UserGroupQuery {
 	return ugq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (ugq *UserGroupQuery) When(condition bool, action func(builder *UserGroupQuery)) *UserGroupQuery {
+	if condition {
+		action(ugq)
+	}
+
+	return ugq
+}
+
 // Limit adds a limit step to the query.
 func (ugq *UserGroupQuery) Limit(limit int) *UserGroupQuery {
 	ugq.limit = &limit

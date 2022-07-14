@@ -212,6 +212,15 @@ func (fu *FileUpdate) RemoveField(f ...*FieldType) *FileUpdate {
 	return fu.RemoveFieldIDs(ids...)
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (fu *FileUpdate) When(condition bool, action func(builder *FileUpdate)) *FileUpdate {
+	if condition {
+		action(fu)
+	}
+
+	return fu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (fu *FileUpdate) Save(ctx context.Context) (int, error) {
 	var (

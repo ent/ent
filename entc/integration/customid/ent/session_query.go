@@ -43,6 +43,15 @@ func (sq *SessionQuery) Where(ps ...predicate.Session) *SessionQuery {
 	return sq
 }
 
+// When runs the provided builder(s) if and only if condition is true.
+func (sq *SessionQuery) When(condition bool, action func(builder *SessionQuery)) *SessionQuery {
+	if condition {
+		action(sq)
+	}
+
+	return sq
+}
+
 // Limit adds a limit step to the query.
 func (sq *SessionQuery) Limit(limit int) *SessionQuery {
 	sq.limit = &limit
