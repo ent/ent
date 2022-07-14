@@ -1,6 +1,6 @@
 run:
   go: '1.17'
-  timeout: 3m
+  timeout: 5m
 
 linters-settings:
   errcheck:
