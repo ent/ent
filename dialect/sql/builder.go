@@ -1587,8 +1587,10 @@ func NotIn(col string, args ...interface{}) *Predicate {
 
 // NotIn appends the `Not IN` predicate.
 func (p *Predicate) NotIn(col string, args ...interface{}) *Predicate {
+	// If no arguments were provided, append the FALSE constant, since
+	// we cannot apply "NOT IN ()". This will make this predicate falsy.
 	if len(args) == 0 {
-		return p
+		return p.False()
 	}
 	return p.Append(func(b *Builder) {
 		b.Ident(col).WriteOp(OpNotIn)
