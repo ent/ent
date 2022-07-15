@@ -119,12 +119,6 @@ func UUIDIn(vs ...uuid.UUID) predicate.Blob {
 		v[i] = vs[i]
 	}
 	return predicate.Blob(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldUUID), v...))
 	})
 }
@@ -136,12 +130,6 @@ func UUIDNotIn(vs ...uuid.UUID) predicate.Blob {
 		v[i] = vs[i]
 	}
 	return predicate.Blob(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldUUID), v...))
 	})
 }
@@ -195,12 +183,6 @@ func CountIn(vs ...int) predicate.Blob {
 		v[i] = vs[i]
 	}
 	return predicate.Blob(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldCount), v...))
 	})
 }
@@ -212,12 +194,6 @@ func CountNotIn(vs ...int) predicate.Blob {
 		v[i] = vs[i]
 	}
 	return predicate.Blob(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldCount), v...))
 	})
 }

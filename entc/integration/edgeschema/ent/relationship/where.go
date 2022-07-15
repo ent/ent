@@ -61,12 +61,6 @@ func WeightIn(vs ...int) predicate.Relationship {
 		v[i] = vs[i]
 	}
 	return predicate.Relationship(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldWeight), v...))
 	})
 }
@@ -78,12 +72,6 @@ func WeightNotIn(vs ...int) predicate.Relationship {
 		v[i] = vs[i]
 	}
 	return predicate.Relationship(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldWeight), v...))
 	})
 }
@@ -137,12 +125,6 @@ func UserIDIn(vs ...int) predicate.Relationship {
 		v[i] = vs[i]
 	}
 	return predicate.Relationship(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldUserID), v...))
 	})
 }
@@ -154,12 +136,6 @@ func UserIDNotIn(vs ...int) predicate.Relationship {
 		v[i] = vs[i]
 	}
 	return predicate.Relationship(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldUserID), v...))
 	})
 }
@@ -185,12 +161,6 @@ func RelativeIDIn(vs ...int) predicate.Relationship {
 		v[i] = vs[i]
 	}
 	return predicate.Relationship(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldRelativeID), v...))
 	})
 }
@@ -202,12 +172,6 @@ func RelativeIDNotIn(vs ...int) predicate.Relationship {
 		v[i] = vs[i]
 	}
 	return predicate.Relationship(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldRelativeID), v...))
 	})
 }
@@ -233,12 +197,6 @@ func InfoIDIn(vs ...int) predicate.Relationship {
 		v[i] = vs[i]
 	}
 	return predicate.Relationship(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldInfoID), v...))
 	})
 }
@@ -250,12 +208,6 @@ func InfoIDNotIn(vs ...int) predicate.Relationship {
 		v[i] = vs[i]
 	}
 	return predicate.Relationship(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldInfoID), v...))
 	})
 }

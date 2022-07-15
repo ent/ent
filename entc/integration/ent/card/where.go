@@ -141,12 +141,6 @@ func CreateTimeIn(vs ...time.Time) predicate.Card {
 		v[i] = vs[i]
 	}
 	return predicate.Card(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldCreateTime), v...))
 	})
 }
@@ -158,12 +152,6 @@ func CreateTimeNotIn(vs ...time.Time) predicate.Card {
 		v[i] = vs[i]
 	}
 	return predicate.Card(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldCreateTime), v...))
 	})
 }
@@ -217,12 +205,6 @@ func UpdateTimeIn(vs ...time.Time) predicate.Card {
 		v[i] = vs[i]
 	}
 	return predicate.Card(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldUpdateTime), v...))
 	})
 }
@@ -234,12 +216,6 @@ func UpdateTimeNotIn(vs ...time.Time) predicate.Card {
 		v[i] = vs[i]
 	}
 	return predicate.Card(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldUpdateTime), v...))
 	})
 }
@@ -293,12 +269,6 @@ func BalanceIn(vs ...float64) predicate.Card {
 		v[i] = vs[i]
 	}
 	return predicate.Card(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldBalance), v...))
 	})
 }
@@ -310,12 +280,6 @@ func BalanceNotIn(vs ...float64) predicate.Card {
 		v[i] = vs[i]
 	}
 	return predicate.Card(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldBalance), v...))
 	})
 }
@@ -369,12 +333,6 @@ func NumberIn(vs ...string) predicate.Card {
 		v[i] = vs[i]
 	}
 	return predicate.Card(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldNumber), v...))
 	})
 }
@@ -386,12 +344,6 @@ func NumberNotIn(vs ...string) predicate.Card {
 		v[i] = vs[i]
 	}
 	return predicate.Card(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldNumber), v...))
 	})
 }
@@ -480,12 +432,6 @@ func NameIn(vs ...string) predicate.Card {
 		v[i] = vs[i]
 	}
 	return predicate.Card(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldName), v...))
 	})
 }
@@ -497,12 +443,6 @@ func NameNotIn(vs ...string) predicate.Card {
 		v[i] = vs[i]
 	}
 	return predicate.Card(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldName), v...))
 	})
 }

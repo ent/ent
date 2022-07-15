@@ -166,12 +166,6 @@ func NameIn(vs ...string) predicate.Conversion {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldName), v...))
 	})
 }
@@ -183,12 +177,6 @@ func NameNotIn(vs ...string) predicate.Conversion {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldName), v...))
 	})
 }
@@ -291,12 +279,6 @@ func Int8ToStringIn(vs ...string) predicate.Conversion {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldInt8ToString), v...))
 	})
 }
@@ -308,12 +290,6 @@ func Int8ToStringNotIn(vs ...string) predicate.Conversion {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldInt8ToString), v...))
 	})
 }
@@ -416,12 +392,6 @@ func Uint8ToStringIn(vs ...string) predicate.Conversion {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldUint8ToString), v...))
 	})
 }
@@ -433,12 +403,6 @@ func Uint8ToStringNotIn(vs ...string) predicate.Conversion {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldUint8ToString), v...))
 	})
 }
@@ -541,12 +505,6 @@ func Int16ToStringIn(vs ...string) predicate.Conversion {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldInt16ToString), v...))
 	})
 }
@@ -558,12 +516,6 @@ func Int16ToStringNotIn(vs ...string) predicate.Conversion {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldInt16ToString), v...))
 	})
 }
@@ -666,12 +618,6 @@ func Uint16ToStringIn(vs ...string) predicate.Conversion {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldUint16ToString), v...))
 	})
 }
@@ -683,12 +629,6 @@ func Uint16ToStringNotIn(vs ...string) predicate.Conversion {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldUint16ToString), v...))
 	})
 }
@@ -791,12 +731,6 @@ func Int32ToStringIn(vs ...string) predicate.Conversion {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldInt32ToString), v...))
 	})
 }
@@ -808,12 +742,6 @@ func Int32ToStringNotIn(vs ...string) predicate.Conversion {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldInt32ToString), v...))
 	})
 }
@@ -916,12 +844,6 @@ func Uint32ToStringIn(vs ...string) predicate.Conversion {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldUint32ToString), v...))
 	})
 }
@@ -933,12 +855,6 @@ func Uint32ToStringNotIn(vs ...string) predicate.Conversion {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldUint32ToString), v...))
 	})
 }
@@ -1041,12 +957,6 @@ func Int64ToStringIn(vs ...string) predicate.Conversion {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldInt64ToString), v...))
 	})
 }
@@ -1058,12 +968,6 @@ func Int64ToStringNotIn(vs ...string) predicate.Conversion {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldInt64ToString), v...))
 	})
 }
@@ -1166,12 +1070,6 @@ func Uint64ToStringIn(vs ...string) predicate.Conversion {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldUint64ToString), v...))
 	})
 }
@@ -1183,12 +1081,6 @@ func Uint64ToStringNotIn(vs ...string) predicate.Conversion {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldUint64ToString), v...))
 	})
 }

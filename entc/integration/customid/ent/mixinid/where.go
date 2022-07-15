@@ -118,12 +118,6 @@ func SomeFieldIn(vs ...string) predicate.MixinID {
 		v[i] = vs[i]
 	}
 	return predicate.MixinID(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldSomeField), v...))
 	})
 }
@@ -135,12 +129,6 @@ func SomeFieldNotIn(vs ...string) predicate.MixinID {
 		v[i] = vs[i]
 	}
 	return predicate.MixinID(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldSomeField), v...))
 	})
 }
@@ -229,12 +217,6 @@ func MixinFieldIn(vs ...string) predicate.MixinID {
 		v[i] = vs[i]
 	}
 	return predicate.MixinID(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldMixinField), v...))
 	})
 }
@@ -246,12 +228,6 @@ func MixinFieldNotIn(vs ...string) predicate.MixinID {
 		v[i] = vs[i]
 	}
 	return predicate.MixinID(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldMixinField), v...))
 	})
 }

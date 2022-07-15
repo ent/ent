@@ -112,12 +112,6 @@ func BodyIn(vs ...string) predicate.Token {
 		v[i] = vs[i]
 	}
 	return predicate.Token(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldBody), v...))
 	})
 }
@@ -129,12 +123,6 @@ func BodyNotIn(vs ...string) predicate.Token {
 		v[i] = vs[i]
 	}
 	return predicate.Token(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldBody), v...))
 	})
 }

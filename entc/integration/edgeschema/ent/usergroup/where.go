@@ -127,12 +127,6 @@ func JoinedAtIn(vs ...time.Time) predicate.UserGroup {
 		v[i] = vs[i]
 	}
 	return predicate.UserGroup(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldJoinedAt), v...))
 	})
 }
@@ -144,12 +138,6 @@ func JoinedAtNotIn(vs ...time.Time) predicate.UserGroup {
 		v[i] = vs[i]
 	}
 	return predicate.UserGroup(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldJoinedAt), v...))
 	})
 }
@@ -203,12 +191,6 @@ func UserIDIn(vs ...int) predicate.UserGroup {
 		v[i] = vs[i]
 	}
 	return predicate.UserGroup(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldUserID), v...))
 	})
 }
@@ -220,12 +202,6 @@ func UserIDNotIn(vs ...int) predicate.UserGroup {
 		v[i] = vs[i]
 	}
 	return predicate.UserGroup(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldUserID), v...))
 	})
 }
@@ -251,12 +227,6 @@ func GroupIDIn(vs ...int) predicate.UserGroup {
 		v[i] = vs[i]
 	}
 	return predicate.UserGroup(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldGroupID), v...))
 	})
 }
@@ -268,12 +238,6 @@ func GroupIDNotIn(vs ...int) predicate.UserGroup {
 		v[i] = vs[i]
 	}
 	return predicate.UserGroup(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldGroupID), v...))
 	})
 }

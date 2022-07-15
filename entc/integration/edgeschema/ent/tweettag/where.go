@@ -128,12 +128,6 @@ func AddedAtIn(vs ...time.Time) predicate.TweetTag {
 		v[i] = vs[i]
 	}
 	return predicate.TweetTag(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldAddedAt), v...))
 	})
 }
@@ -145,12 +139,6 @@ func AddedAtNotIn(vs ...time.Time) predicate.TweetTag {
 		v[i] = vs[i]
 	}
 	return predicate.TweetTag(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldAddedAt), v...))
 	})
 }
@@ -204,12 +192,6 @@ func TagIDIn(vs ...int) predicate.TweetTag {
 		v[i] = vs[i]
 	}
 	return predicate.TweetTag(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldTagID), v...))
 	})
 }
@@ -221,12 +203,6 @@ func TagIDNotIn(vs ...int) predicate.TweetTag {
 		v[i] = vs[i]
 	}
 	return predicate.TweetTag(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldTagID), v...))
 	})
 }
@@ -252,12 +228,6 @@ func TweetIDIn(vs ...int) predicate.TweetTag {
 		v[i] = vs[i]
 	}
 	return predicate.TweetTag(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldTweetID), v...))
 	})
 }
@@ -269,12 +239,6 @@ func TweetIDNotIn(vs ...int) predicate.TweetTag {
 		v[i] = vs[i]
 	}
 	return predicate.TweetTag(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldTweetID), v...))
 	})
 }

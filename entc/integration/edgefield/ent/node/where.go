@@ -118,12 +118,6 @@ func ValueIn(vs ...int) predicate.Node {
 		v[i] = vs[i]
 	}
 	return predicate.Node(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldValue), v...))
 	})
 }
@@ -135,12 +129,6 @@ func ValueNotIn(vs ...int) predicate.Node {
 		v[i] = vs[i]
 	}
 	return predicate.Node(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldValue), v...))
 	})
 }
@@ -194,12 +182,6 @@ func PrevIDIn(vs ...int) predicate.Node {
 		v[i] = vs[i]
 	}
 	return predicate.Node(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldPrevID), v...))
 	})
 }
@@ -211,12 +193,6 @@ func PrevIDNotIn(vs ...int) predicate.Node {
 		v[i] = vs[i]
 	}
 	return predicate.Node(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldPrevID), v...))
 	})
 }

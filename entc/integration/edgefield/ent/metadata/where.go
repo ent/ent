@@ -118,12 +118,6 @@ func AgeIn(vs ...int) predicate.Metadata {
 		v[i] = vs[i]
 	}
 	return predicate.Metadata(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldAge), v...))
 	})
 }
@@ -135,12 +129,6 @@ func AgeNotIn(vs ...int) predicate.Metadata {
 		v[i] = vs[i]
 	}
 	return predicate.Metadata(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldAge), v...))
 	})
 }
@@ -194,12 +182,6 @@ func ParentIDIn(vs ...int) predicate.Metadata {
 		v[i] = vs[i]
 	}
 	return predicate.Metadata(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldParentID), v...))
 	})
 }
@@ -211,12 +193,6 @@ func ParentIDNotIn(vs ...int) predicate.Metadata {
 		v[i] = vs[i]
 	}
 	return predicate.Metadata(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldParentID), v...))
 	})
 }

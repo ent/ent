@@ -124,12 +124,6 @@ func UniqueIntIn(vs ...int) predicate.Comment {
 		v[i] = vs[i]
 	}
 	return predicate.Comment(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldUniqueInt), v...))
 	})
 }
@@ -141,12 +135,6 @@ func UniqueIntNotIn(vs ...int) predicate.Comment {
 		v[i] = vs[i]
 	}
 	return predicate.Comment(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldUniqueInt), v...))
 	})
 }
@@ -200,12 +188,6 @@ func UniqueFloatIn(vs ...float64) predicate.Comment {
 		v[i] = vs[i]
 	}
 	return predicate.Comment(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldUniqueFloat), v...))
 	})
 }
@@ -217,12 +199,6 @@ func UniqueFloatNotIn(vs ...float64) predicate.Comment {
 		v[i] = vs[i]
 	}
 	return predicate.Comment(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldUniqueFloat), v...))
 	})
 }
@@ -276,12 +252,6 @@ func NillableIntIn(vs ...int) predicate.Comment {
 		v[i] = vs[i]
 	}
 	return predicate.Comment(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldNillableInt), v...))
 	})
 }
@@ -293,12 +263,6 @@ func NillableIntNotIn(vs ...int) predicate.Comment {
 		v[i] = vs[i]
 	}
 	return predicate.Comment(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldNillableInt), v...))
 	})
 }
@@ -366,12 +330,6 @@ func TableIn(vs ...string) predicate.Comment {
 		v[i] = vs[i]
 	}
 	return predicate.Comment(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldTable), v...))
 	})
 }
@@ -383,12 +341,6 @@ func TableNotIn(vs ...string) predicate.Comment {
 		v[i] = vs[i]
 	}
 	return predicate.Comment(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldTable), v...))
 	})
 }

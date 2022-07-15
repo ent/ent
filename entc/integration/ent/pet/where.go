@@ -133,12 +133,6 @@ func AgeIn(vs ...float64) predicate.Pet {
 		v[i] = vs[i]
 	}
 	return predicate.Pet(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldAge), v...))
 	})
 }
@@ -150,12 +144,6 @@ func AgeNotIn(vs ...float64) predicate.Pet {
 		v[i] = vs[i]
 	}
 	return predicate.Pet(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldAge), v...))
 	})
 }
@@ -209,12 +197,6 @@ func NameIn(vs ...string) predicate.Pet {
 		v[i] = vs[i]
 	}
 	return predicate.Pet(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldName), v...))
 	})
 }
@@ -226,12 +208,6 @@ func NameNotIn(vs ...string) predicate.Pet {
 		v[i] = vs[i]
 	}
 	return predicate.Pet(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldName), v...))
 	})
 }
@@ -320,12 +296,6 @@ func UUIDIn(vs ...uuid.UUID) predicate.Pet {
 		v[i] = vs[i]
 	}
 	return predicate.Pet(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldUUID), v...))
 	})
 }
@@ -337,12 +307,6 @@ func UUIDNotIn(vs ...uuid.UUID) predicate.Pet {
 		v[i] = vs[i]
 	}
 	return predicate.Pet(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldUUID), v...))
 	})
 }
@@ -410,12 +374,6 @@ func NicknameIn(vs ...string) predicate.Pet {
 		v[i] = vs[i]
 	}
 	return predicate.Pet(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldNickname), v...))
 	})
 }
@@ -427,12 +385,6 @@ func NicknameNotIn(vs ...string) predicate.Pet {
 		v[i] = vs[i]
 	}
 	return predicate.Pet(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldNickname), v...))
 	})
 }

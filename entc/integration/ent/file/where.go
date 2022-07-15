@@ -139,12 +139,6 @@ func SizeIn(vs ...int) predicate.File {
 		v[i] = vs[i]
 	}
 	return predicate.File(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldSize), v...))
 	})
 }
@@ -156,12 +150,6 @@ func SizeNotIn(vs ...int) predicate.File {
 		v[i] = vs[i]
 	}
 	return predicate.File(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldSize), v...))
 	})
 }
@@ -215,12 +203,6 @@ func NameIn(vs ...string) predicate.File {
 		v[i] = vs[i]
 	}
 	return predicate.File(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldName), v...))
 	})
 }
@@ -232,12 +214,6 @@ func NameNotIn(vs ...string) predicate.File {
 		v[i] = vs[i]
 	}
 	return predicate.File(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldName), v...))
 	})
 }
@@ -326,12 +302,6 @@ func UserIn(vs ...string) predicate.File {
 		v[i] = vs[i]
 	}
 	return predicate.File(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldUser), v...))
 	})
 }
@@ -343,12 +313,6 @@ func UserNotIn(vs ...string) predicate.File {
 		v[i] = vs[i]
 	}
 	return predicate.File(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldUser), v...))
 	})
 }
@@ -451,12 +415,6 @@ func GroupIn(vs ...string) predicate.File {
 		v[i] = vs[i]
 	}
 	return predicate.File(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldGroup), v...))
 	})
 }
@@ -468,12 +426,6 @@ func GroupNotIn(vs ...string) predicate.File {
 		v[i] = vs[i]
 	}
 	return predicate.File(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldGroup), v...))
 	})
 }

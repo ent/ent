@@ -128,12 +128,6 @@ func DateIn(vs ...time.Time) predicate.Rental {
 		v[i] = vs[i]
 	}
 	return predicate.Rental(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldDate), v...))
 	})
 }
@@ -145,12 +139,6 @@ func DateNotIn(vs ...time.Time) predicate.Rental {
 		v[i] = vs[i]
 	}
 	return predicate.Rental(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldDate), v...))
 	})
 }
@@ -204,12 +192,6 @@ func UserIDIn(vs ...int) predicate.Rental {
 		v[i] = vs[i]
 	}
 	return predicate.Rental(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldUserID), v...))
 	})
 }
@@ -221,12 +203,6 @@ func UserIDNotIn(vs ...int) predicate.Rental {
 		v[i] = vs[i]
 	}
 	return predicate.Rental(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldUserID), v...))
 	})
 }
@@ -252,12 +228,6 @@ func CarIDIn(vs ...uuid.UUID) predicate.Rental {
 		v[i] = vs[i]
 	}
 	return predicate.Rental(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldCarID), v...))
 	})
 }
@@ -269,12 +239,6 @@ func CarIDNotIn(vs ...uuid.UUID) predicate.Rental {
 		v[i] = vs[i]
 	}
 	return predicate.Rental(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldCarID), v...))
 	})
 }
