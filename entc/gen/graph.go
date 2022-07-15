@@ -623,12 +623,12 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 					continue
 				}
 				t1, t2 := tables[n.Table()], tables[e.Type.Table()]
-				c1 := &schema.Column{Name: e.Rel.Columns[0], Type: field.TypeInt}
+				c1 := &schema.Column{Name: e.Rel.Columns[0], Type: field.TypeInt, SchemaType: n.ID.def.SchemaType}
 				if ref := n.ID; ref.UserDefined {
 					c1.Type = ref.Type.Type
 					c1.Size = ref.size()
 				}
-				c2 := &schema.Column{Name: e.Rel.Columns[1], Type: field.TypeInt}
+				c2 := &schema.Column{Name: e.Rel.Columns[1], Type: field.TypeInt, SchemaType: e.Type.ID.def.SchemaType}
 				if ref := e.Type.ID; ref.UserDefined {
 					c2.Type = ref.Type.Type
 					c2.Size = ref.size()

@@ -21,6 +21,8 @@ const (
 	EdgeParent = "parent"
 	// EdgeChildren holds the string denoting the children edge name in mutations.
 	EdgeChildren = "children"
+	// EdgeRelated holds the string denoting the related edge name in mutations.
+	EdgeRelated = "related"
 	// Table holds the table name of the doc in the database.
 	Table = "docs"
 	// ParentTable is the table that holds the parent relation/edge.
@@ -31,6 +33,8 @@ const (
 	ChildrenTable = "docs"
 	// ChildrenColumn is the table column denoting the children relation/edge.
 	ChildrenColumn = "doc_children"
+	// RelatedTable is the table that holds the related relation/edge. The primary key declared below.
+	RelatedTable = "doc_related"
 )
 
 // Columns holds all SQL columns for doc fields.
@@ -44,6 +48,12 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"doc_children",
 }
+
+var (
+	// RelatedPrimaryKey and RelatedColumn2 are the table columns denoting the
+	// primary key for the related relation (M2M).
+	RelatedPrimaryKey = []string{"doc_id", "related_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {

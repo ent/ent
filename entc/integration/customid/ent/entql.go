@@ -377,6 +377,18 @@ var schemaGraph = func() *sqlgraph.Schema {
 		"Doc",
 	)
 	graph.MustAddE(
+		"related",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   doc.RelatedTable,
+			Columns: doc.RelatedPrimaryKey,
+			Bidi:    true,
+		},
+		"Doc",
+		"Doc",
+	)
+	graph.MustAddE(
 		"users",
 		&sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -998,6 +1010,20 @@ func (f *DocFilter) WhereHasChildren() {
 // WhereHasChildrenWith applies a predicate to check if query has an edge children with a given conditions (other predicates).
 func (f *DocFilter) WhereHasChildrenWith(preds ...predicate.Doc) {
 	f.Where(entql.HasEdgeWith("children", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// WhereHasRelated applies a predicate to check if query has an edge related.
+func (f *DocFilter) WhereHasRelated() {
+	f.Where(entql.HasEdge("related"))
+}
+
+// WhereHasRelatedWith applies a predicate to check if query has an edge related with a given conditions (other predicates).
+func (f *DocFilter) WhereHasRelatedWith(preds ...predicate.Doc) {
+	f.Where(entql.HasEdgeWith("related", sqlgraph.WrapFunc(func(s *sql.Selector) {
 		for _, p := range preds {
 			p(s)
 		}

@@ -897,6 +897,22 @@ func (c *DocClient) QueryChildren(d *Doc) *DocQuery {
 	return query
 }
 
+// QueryRelated queries the related edge of a Doc.
+func (c *DocClient) QueryRelated(d *Doc) *DocQuery {
+	query := &DocQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := d.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(doc.Table, doc.FieldID, id),
+			sqlgraph.To(doc.Table, doc.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, doc.RelatedTable, doc.RelatedPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *DocClient) Hooks() []Hook {
 	return c.hooks.Doc

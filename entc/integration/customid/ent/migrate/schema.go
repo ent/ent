@@ -113,9 +113,9 @@ var (
 	}
 	// DocsColumns holds the columns for the "docs" table.
 	DocsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36, SchemaType: map[string]string{"postgres": "uuid"}},
 		{Name: "text", Type: field.TypeString, Nullable: true},
-		{Name: "doc_children", Type: field.TypeString, Nullable: true, Size: 36},
+		{Name: "doc_children", Type: field.TypeString, Nullable: true, Size: 36, SchemaType: map[string]string{"postgres": "uuid"}},
 	}
 	// DocsTable holds the schema information for the "docs" table.
 	DocsTable = &schema.Table{
@@ -318,6 +318,31 @@ var (
 			},
 		},
 	}
+	// DocRelatedColumns holds the columns for the "doc_related" table.
+	DocRelatedColumns = []*schema.Column{
+		{Name: "doc_id", Type: field.TypeString, Size: 36, SchemaType: map[string]string{"postgres": "uuid"}},
+		{Name: "related_id", Type: field.TypeString, Size: 36, SchemaType: map[string]string{"postgres": "uuid"}},
+	}
+	// DocRelatedTable holds the schema information for the "doc_related" table.
+	DocRelatedTable = &schema.Table{
+		Name:       "doc_related",
+		Columns:    DocRelatedColumns,
+		PrimaryKey: []*schema.Column{DocRelatedColumns[0], DocRelatedColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "doc_related_doc_id",
+				Columns:    []*schema.Column{DocRelatedColumns[0]},
+				RefColumns: []*schema.Column{DocsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "doc_related_related_id",
+				Columns:    []*schema.Column{DocRelatedColumns[1]},
+				RefColumns: []*schema.Column{DocsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// GroupUsersColumns holds the columns for the "group_users" table.
 	GroupUsersColumns = []*schema.Column{
 		{Name: "group_id", Type: field.TypeInt},
@@ -386,6 +411,7 @@ var (
 		SessionsTable,
 		TokensTable,
 		UsersTable,
+		DocRelatedTable,
 		GroupUsersTable,
 		PetFriendsTable,
 	}
@@ -405,6 +431,8 @@ func init() {
 	SessionsTable.ForeignKeys[0].RefTable = DevicesTable
 	TokensTable.ForeignKeys[0].RefTable = AccountsTable
 	UsersTable.ForeignKeys[0].RefTable = UsersTable
+	DocRelatedTable.ForeignKeys[0].RefTable = DocsTable
+	DocRelatedTable.ForeignKeys[1].RefTable = DocsTable
 	GroupUsersTable.ForeignKeys[0].RefTable = GroupsTable
 	GroupUsersTable.ForeignKeys[1].RefTable = UsersTable
 	PetFriendsTable.ForeignKeys[0].RefTable = PetsTable
