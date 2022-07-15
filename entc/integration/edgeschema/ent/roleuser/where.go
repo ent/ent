@@ -56,12 +56,6 @@ func CreatedAtIn(vs ...time.Time) predicate.RoleUser {
 		v[i] = vs[i]
 	}
 	return predicate.RoleUser(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldCreatedAt), v...))
 	})
 }
@@ -73,12 +67,6 @@ func CreatedAtNotIn(vs ...time.Time) predicate.RoleUser {
 		v[i] = vs[i]
 	}
 	return predicate.RoleUser(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldCreatedAt), v...))
 	})
 }
@@ -132,12 +120,6 @@ func RoleIDIn(vs ...int) predicate.RoleUser {
 		v[i] = vs[i]
 	}
 	return predicate.RoleUser(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldRoleID), v...))
 	})
 }
@@ -149,12 +131,6 @@ func RoleIDNotIn(vs ...int) predicate.RoleUser {
 		v[i] = vs[i]
 	}
 	return predicate.RoleUser(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldRoleID), v...))
 	})
 }
@@ -180,12 +156,6 @@ func UserIDIn(vs ...int) predicate.RoleUser {
 		v[i] = vs[i]
 	}
 	return predicate.RoleUser(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldUserID), v...))
 	})
 }
@@ -197,12 +167,6 @@ func UserIDNotIn(vs ...int) predicate.RoleUser {
 		v[i] = vs[i]
 	}
 	return predicate.RoleUser(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldUserID), v...))
 	})
 }

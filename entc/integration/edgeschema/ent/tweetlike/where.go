@@ -56,12 +56,6 @@ func LikedAtIn(vs ...time.Time) predicate.TweetLike {
 		v[i] = vs[i]
 	}
 	return predicate.TweetLike(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldLikedAt), v...))
 	})
 }
@@ -73,12 +67,6 @@ func LikedAtNotIn(vs ...time.Time) predicate.TweetLike {
 		v[i] = vs[i]
 	}
 	return predicate.TweetLike(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldLikedAt), v...))
 	})
 }
@@ -132,12 +120,6 @@ func UserIDIn(vs ...int) predicate.TweetLike {
 		v[i] = vs[i]
 	}
 	return predicate.TweetLike(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldUserID), v...))
 	})
 }
@@ -149,12 +131,6 @@ func UserIDNotIn(vs ...int) predicate.TweetLike {
 		v[i] = vs[i]
 	}
 	return predicate.TweetLike(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldUserID), v...))
 	})
 }
@@ -180,12 +156,6 @@ func TweetIDIn(vs ...int) predicate.TweetLike {
 		v[i] = vs[i]
 	}
 	return predicate.TweetLike(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldTweetID), v...))
 	})
 }
@@ -197,12 +167,6 @@ func TweetIDNotIn(vs ...int) predicate.TweetLike {
 		v[i] = vs[i]
 	}
 	return predicate.TweetLike(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldTweetID), v...))
 	})
 }

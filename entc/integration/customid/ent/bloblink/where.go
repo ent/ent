@@ -57,12 +57,6 @@ func CreatedAtIn(vs ...time.Time) predicate.BlobLink {
 		v[i] = vs[i]
 	}
 	return predicate.BlobLink(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldCreatedAt), v...))
 	})
 }
@@ -74,12 +68,6 @@ func CreatedAtNotIn(vs ...time.Time) predicate.BlobLink {
 		v[i] = vs[i]
 	}
 	return predicate.BlobLink(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldCreatedAt), v...))
 	})
 }
@@ -133,12 +121,6 @@ func BlobIDIn(vs ...uuid.UUID) predicate.BlobLink {
 		v[i] = vs[i]
 	}
 	return predicate.BlobLink(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldBlobID), v...))
 	})
 }
@@ -150,12 +132,6 @@ func BlobIDNotIn(vs ...uuid.UUID) predicate.BlobLink {
 		v[i] = vs[i]
 	}
 	return predicate.BlobLink(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldBlobID), v...))
 	})
 }
@@ -181,12 +157,6 @@ func LinkIDIn(vs ...uuid.UUID) predicate.BlobLink {
 		v[i] = vs[i]
 	}
 	return predicate.BlobLink(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldLinkID), v...))
 	})
 }
@@ -198,12 +168,6 @@ func LinkIDNotIn(vs ...uuid.UUID) predicate.BlobLink {
 		v[i] = vs[i]
 	}
 	return predicate.BlobLink(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldLinkID), v...))
 	})
 }
