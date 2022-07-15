@@ -34,9 +34,11 @@ type DocEdges struct {
 	Parent *Doc `json:"parent,omitempty"`
 	// Children holds the value of the children edge.
 	Children []*Doc `json:"children,omitempty"`
+	// Related holds the value of the related edge.
+	Related []*Doc `json:"related,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // ParentOrErr returns the Parent value or an error if the edge
@@ -60,6 +62,15 @@ func (e DocEdges) ChildrenOrErr() ([]*Doc, error) {
 		return e.Children, nil
 	}
 	return nil, &NotLoadedError{edge: "children"}
+}
+
+// RelatedOrErr returns the Related value or an error if the edge
+// was not loaded in eager-loading.
+func (e DocEdges) RelatedOrErr() ([]*Doc, error) {
+	if e.loadedTypes[2] {
+		return e.Related, nil
+	}
+	return nil, &NotLoadedError{edge: "related"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -120,6 +131,11 @@ func (d *Doc) QueryParent() *DocQuery {
 // QueryChildren queries the "children" edge of the Doc entity.
 func (d *Doc) QueryChildren() *DocQuery {
 	return (&DocClient{config: d.config}).QueryChildren(d)
+}
+
+// QueryRelated queries the "related" edge of the Doc entity.
+func (d *Doc) QueryRelated() *DocQuery {
+	return (&DocClient{config: d.config}).QueryRelated(d)
 }
 
 // Update returns a builder for updating this Doc.

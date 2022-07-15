@@ -20,7 +20,8 @@ type Role struct {
 // Fields of the Role.
 func (Role) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name").Unique(),
+		field.String("name").
+			Unique(),
 		field.Time("created_at").
 			Default(time.Now),
 	}

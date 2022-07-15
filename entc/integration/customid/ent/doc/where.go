@@ -260,6 +260,34 @@ func HasChildrenWith(preds ...predicate.Doc) predicate.Doc {
 	})
 }
 
+// HasRelated applies the HasEdge predicate on the "related" edge.
+func HasRelated() predicate.Doc {
+	return predicate.Doc(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(RelatedTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, RelatedTable, RelatedPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasRelatedWith applies the HasEdge predicate on the "related" edge with a given conditions (other predicates).
+func HasRelatedWith(preds ...predicate.Doc) predicate.Doc {
+	return predicate.Doc(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, RelatedTable, RelatedPrimaryKey...),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Doc) predicate.Doc {
 	return predicate.Doc(func(s *sql.Selector) {

@@ -2456,6 +2456,9 @@ type DocMutation struct {
 	children        map[schema.DocID]struct{}
 	removedchildren map[schema.DocID]struct{}
 	clearedchildren bool
+	related         map[schema.DocID]struct{}
+	removedrelated  map[schema.DocID]struct{}
+	clearedrelated  bool
 	done            bool
 	oldValue        func(context.Context) (*Doc, error)
 	predicates      []predicate.Doc
@@ -2707,6 +2710,60 @@ func (m *DocMutation) ResetChildren() {
 	m.removedchildren = nil
 }
 
+// AddRelatedIDs adds the "related" edge to the Doc entity by ids.
+func (m *DocMutation) AddRelatedIDs(ids ...schema.DocID) {
+	if m.related == nil {
+		m.related = make(map[schema.DocID]struct{})
+	}
+	for i := range ids {
+		m.related[ids[i]] = struct{}{}
+	}
+}
+
+// ClearRelated clears the "related" edge to the Doc entity.
+func (m *DocMutation) ClearRelated() {
+	m.clearedrelated = true
+}
+
+// RelatedCleared reports if the "related" edge to the Doc entity was cleared.
+func (m *DocMutation) RelatedCleared() bool {
+	return m.clearedrelated
+}
+
+// RemoveRelatedIDs removes the "related" edge to the Doc entity by IDs.
+func (m *DocMutation) RemoveRelatedIDs(ids ...schema.DocID) {
+	if m.removedrelated == nil {
+		m.removedrelated = make(map[schema.DocID]struct{})
+	}
+	for i := range ids {
+		delete(m.related, ids[i])
+		m.removedrelated[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedRelated returns the removed IDs of the "related" edge to the Doc entity.
+func (m *DocMutation) RemovedRelatedIDs() (ids []schema.DocID) {
+	for id := range m.removedrelated {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// RelatedIDs returns the "related" edge IDs in the mutation.
+func (m *DocMutation) RelatedIDs() (ids []schema.DocID) {
+	for id := range m.related {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetRelated resets all changes to the "related" edge.
+func (m *DocMutation) ResetRelated() {
+	m.related = nil
+	m.clearedrelated = false
+	m.removedrelated = nil
+}
+
 // Where appends a list predicates to the DocMutation builder.
 func (m *DocMutation) Where(ps ...predicate.Doc) {
 	m.predicates = append(m.predicates, ps...)
@@ -2834,12 +2891,15 @@ func (m *DocMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *DocMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.parent != nil {
 		edges = append(edges, doc.EdgeParent)
 	}
 	if m.children != nil {
 		edges = append(edges, doc.EdgeChildren)
+	}
+	if m.related != nil {
+		edges = append(edges, doc.EdgeRelated)
 	}
 	return edges
 }
@@ -2858,15 +2918,24 @@ func (m *DocMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case doc.EdgeRelated:
+		ids := make([]ent.Value, 0, len(m.related))
+		for id := range m.related {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *DocMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removedchildren != nil {
 		edges = append(edges, doc.EdgeChildren)
+	}
+	if m.removedrelated != nil {
+		edges = append(edges, doc.EdgeRelated)
 	}
 	return edges
 }
@@ -2881,18 +2950,27 @@ func (m *DocMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case doc.EdgeRelated:
+		ids := make([]ent.Value, 0, len(m.removedrelated))
+		for id := range m.removedrelated {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *DocMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.clearedparent {
 		edges = append(edges, doc.EdgeParent)
 	}
 	if m.clearedchildren {
 		edges = append(edges, doc.EdgeChildren)
+	}
+	if m.clearedrelated {
+		edges = append(edges, doc.EdgeRelated)
 	}
 	return edges
 }
@@ -2905,6 +2983,8 @@ func (m *DocMutation) EdgeCleared(name string) bool {
 		return m.clearedparent
 	case doc.EdgeChildren:
 		return m.clearedchildren
+	case doc.EdgeRelated:
+		return m.clearedrelated
 	}
 	return false
 }
@@ -2929,6 +3009,9 @@ func (m *DocMutation) ResetEdge(name string) error {
 		return nil
 	case doc.EdgeChildren:
 		m.ResetChildren()
+		return nil
+	case doc.EdgeRelated:
+		m.ResetRelated()
 		return nil
 	}
 	return fmt.Errorf("unknown Doc edge %s", name)

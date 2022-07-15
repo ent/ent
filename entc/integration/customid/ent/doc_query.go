@@ -32,6 +32,7 @@ type DocQuery struct {
 	// eager-loading edges.
 	withParent   *DocQuery
 	withChildren *DocQuery
+	withRelated  *DocQuery
 	withFKs      bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -106,6 +107,28 @@ func (dq *DocQuery) QueryChildren() *DocQuery {
 			sqlgraph.From(doc.Table, doc.FieldID, selector),
 			sqlgraph.To(doc.Table, doc.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, doc.ChildrenTable, doc.ChildrenColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(dq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryRelated chains the current query on the "related" edge.
+func (dq *DocQuery) QueryRelated() *DocQuery {
+	query := &DocQuery{config: dq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := dq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := dq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(doc.Table, doc.FieldID, selector),
+			sqlgraph.To(doc.Table, doc.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, doc.RelatedTable, doc.RelatedPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(dq.driver.Dialect(), step)
 		return fromU, nil
@@ -296,6 +319,7 @@ func (dq *DocQuery) Clone() *DocQuery {
 		predicates:   append([]predicate.Doc{}, dq.predicates...),
 		withParent:   dq.withParent.Clone(),
 		withChildren: dq.withChildren.Clone(),
+		withRelated:  dq.withRelated.Clone(),
 		// clone intermediate query.
 		sql:    dq.sql.Clone(),
 		path:   dq.path,
@@ -322,6 +346,17 @@ func (dq *DocQuery) WithChildren(opts ...func(*DocQuery)) *DocQuery {
 		opt(query)
 	}
 	dq.withChildren = query
+	return dq
+}
+
+// WithRelated tells the query-builder to eager-load the nodes that are connected to
+// the "related" edge. The optional arguments are used to configure the query builder of the edge.
+func (dq *DocQuery) WithRelated(opts ...func(*DocQuery)) *DocQuery {
+	query := &DocQuery{config: dq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	dq.withRelated = query
 	return dq
 }
 
@@ -396,9 +431,10 @@ func (dq *DocQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Doc, err
 		nodes       = []*Doc{}
 		withFKs     = dq.withFKs
 		_spec       = dq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			dq.withParent != nil,
 			dq.withChildren != nil,
+			dq.withRelated != nil,
 		}
 	)
 	if dq.withParent != nil {
@@ -481,6 +517,59 @@ func (dq *DocQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Doc, err
 				return nil, fmt.Errorf(`unexpected foreign-key "doc_children" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Children = append(node.Edges.Children, n)
+		}
+	}
+
+	if query := dq.withRelated; query != nil {
+		edgeids := make([]driver.Value, len(nodes))
+		byid := make(map[schema.DocID]*Doc)
+		nids := make(map[schema.DocID]map[*Doc]struct{})
+		for i, node := range nodes {
+			edgeids[i] = node.ID
+			byid[node.ID] = node
+			node.Edges.Related = []*Doc{}
+		}
+		query.Where(func(s *sql.Selector) {
+			joinT := sql.Table(doc.RelatedTable)
+			s.Join(joinT).On(s.C(doc.FieldID), joinT.C(doc.RelatedPrimaryKey[1]))
+			s.Where(sql.InValues(joinT.C(doc.RelatedPrimaryKey[0]), edgeids...))
+			columns := s.SelectedColumns()
+			s.Select(joinT.C(doc.RelatedPrimaryKey[0]))
+			s.AppendSelect(columns...)
+			s.SetDistinct(false)
+		})
+		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]interface{}, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]interface{}{new(schema.DocID)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []interface{}) error {
+				outValue := *values[0].(*schema.DocID)
+				inValue := *values[1].(*schema.DocID)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Doc]struct{}{byid[outValue]: struct{}{}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byid[outValue]] = struct{}{}
+				return nil
+			}
+		})
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected "related" node returned %v`, n.ID)
+			}
+			for kn := range nodes {
+				kn.Edges.Related = append(kn.Edges.Related, n)
+			}
 		}
 	}
 

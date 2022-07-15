@@ -89,6 +89,21 @@ func (dc *DocCreate) AddChildren(d ...*Doc) *DocCreate {
 	return dc.AddChildIDs(ids...)
 }
 
+// AddRelatedIDs adds the "related" edge to the Doc entity by IDs.
+func (dc *DocCreate) AddRelatedIDs(ids ...schema.DocID) *DocCreate {
+	dc.mutation.AddRelatedIDs(ids...)
+	return dc
+}
+
+// AddRelated adds the "related" edges to the Doc entity.
+func (dc *DocCreate) AddRelated(d ...*Doc) *DocCreate {
+	ids := make([]schema.DocID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return dc.AddRelatedIDs(ids...)
+}
+
 // Mutation returns the DocMutation object of the builder.
 func (dc *DocCreate) Mutation() *DocMutation {
 	return dc.mutation
@@ -251,6 +266,25 @@ func (dc *DocCreate) createSpec() (*Doc, *sqlgraph.CreateSpec) {
 			Table:   doc.ChildrenTable,
 			Columns: []string{doc.ChildrenColumn},
 			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: doc.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := dc.mutation.RelatedIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   doc.RelatedTable,
+			Columns: doc.RelatedPrimaryKey,
+			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeString,
