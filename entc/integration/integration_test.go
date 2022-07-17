@@ -344,7 +344,7 @@ func Upsert(t *testing.T, client *ent.Client) {
 		SetAge(33).
 		SetPhone("0000").
 		OnConflictColumns(user.FieldPhone).
-		// Override some of the fields with custom update.
+		// Override some fields with custom update.
 		AddAge(-1).
 		IDX(ctx)
 	u = client.User.GetX(ctx, id)

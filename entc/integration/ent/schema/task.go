@@ -25,5 +25,7 @@ func (Task) Fields() []ent.Field {
 			Validate(func(i int) error {
 				return task.Priority(i).Validate()
 			}),
+		field.JSON("priorities", map[string]task.Priority{}).
+			Optional(),
 	}
 }

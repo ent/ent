@@ -163,6 +163,20 @@ func PriorityLTE(v task.Priority) predicate.Task {
 	})
 }
 
+// PrioritiesIsNil applies the IsNil predicate on the "priorities" field.
+func PrioritiesIsNil() predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldPriorities)
+	})
+}
+
+// PrioritiesNotNil applies the NotNil predicate on the "priorities" field.
+func PrioritiesNotNil() predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldPriorities)
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Task) predicate.Task {
 	return predicate.Task(func(tr *dsl.Traversal) {

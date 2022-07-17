@@ -378,6 +378,7 @@ func TestString(t *testing.T) {
 	assert.Equal(t, "*field_test.tURL", fd.Info.String())
 	assert.True(t, fd.Info.ValueScanner())
 	assert.True(t, fd.Info.Stringer())
+	assert.Equal(t, "field_test", fd.Info.PkgName)
 
 	fd = field.String("name").GoType(1).Descriptor()
 	assert.Error(t, fd.Err)
@@ -426,6 +427,7 @@ func TestTime(t *testing.T) {
 	assert.Equal(t, "*sql.NullTime", fd.Info.String())
 	assert.True(t, fd.Info.Nillable)
 	assert.True(t, fd.Info.ValueScanner())
+	assert.Equal(t, "sql", fd.Info.PkgName)
 
 	fd = field.Time("deleted_at").GoType(Time{}).Default(time.Now).Descriptor()
 	assert.Error(t, fd.Err)
@@ -450,6 +452,7 @@ func TestJSON(t *testing.T) {
 	assert.Equal(t, "comment", fd.Comment)
 	assert.True(t, fd.Info.Nillable)
 	assert.False(t, fd.Info.RType.IsPtr())
+	assert.Empty(t, fd.Info.PkgName)
 
 	type T struct{ S string }
 	fd = field.JSON("name", &T{}).
@@ -489,12 +492,15 @@ func TestJSON(t *testing.T) {
 		Default([]http.Dir{"a", "b"}).
 		Descriptor()
 	assert.NoError(t, fd.Err)
+	assert.Equal(t, "http", fd.Info.PkgName)
+
 	fd = field.JSON("dirs", []http.Dir{}).
 		Default(func() []http.Dir {
 			return []http.Dir{"/tmp"}
 		}).
 		Descriptor()
 	assert.NoError(t, fd.Err)
+
 	fd = field.JSON("dirs", []http.Dir{}).
 		Default([]string{"a", "b"}).
 		Descriptor()
@@ -502,14 +508,19 @@ func TestJSON(t *testing.T) {
 
 	fd = field.JSON("values", &url.Values{}).Descriptor()
 	assert.Equal(t, "net/url", fd.Info.PkgPath)
+	assert.Equal(t, "url", fd.Info.PkgName)
 	fd = field.JSON("values", []url.Values{}).Descriptor()
 	assert.Equal(t, "net/url", fd.Info.PkgPath)
+	assert.Equal(t, "url", fd.Info.PkgName)
 	fd = field.JSON("values", []*url.Values{}).Descriptor()
 	assert.Equal(t, "net/url", fd.Info.PkgPath)
+	assert.Equal(t, "url", fd.Info.PkgName)
 	fd = field.JSON("values", map[string]url.Values{}).Descriptor()
 	assert.Equal(t, "net/url", fd.Info.PkgPath)
+	assert.Equal(t, "url", fd.Info.PkgName)
 	fd = field.JSON("values", map[string]*url.Values{}).Descriptor()
 	assert.Equal(t, "net/url", fd.Info.PkgPath)
+	assert.Equal(t, "url", fd.Info.PkgName)
 	fd = field.JSON("addr", net.Addr(nil)).Descriptor()
 	assert.EqualError(t, fd.Err, "expect a Go value as JSON type, but got nil")
 }

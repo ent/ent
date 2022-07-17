@@ -306,7 +306,8 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "Task",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			enttask.FieldPriority: {Type: field.TypeInt, Column: enttask.FieldPriority},
+			enttask.FieldPriority:   {Type: field.TypeInt, Column: enttask.FieldPriority},
+			enttask.FieldPriorities: {Type: field.TypeJSON, Column: enttask.FieldPriorities},
 		},
 	}
 	graph.Nodes[14] = &sqlgraph.Node{
@@ -1933,6 +1934,11 @@ func (f *TaskFilter) WhereID(p entql.IntP) {
 // WherePriority applies the entql int predicate on the priority field.
 func (f *TaskFilter) WherePriority(p entql.IntP) {
 	f.Where(p.Field(enttask.FieldPriority))
+}
+
+// WherePriorities applies the entql json.RawMessage predicate on the priorities field.
+func (f *TaskFilter) WherePriorities(p entql.BytesP) {
+	f.Where(p.Field(enttask.FieldPriorities))
 }
 
 // addPredicate implements the predicateAdder interface.

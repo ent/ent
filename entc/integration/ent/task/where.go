@@ -161,6 +161,20 @@ func PriorityLTE(v task.Priority) predicate.Task {
 	})
 }
 
+// PrioritiesIsNil applies the IsNil predicate on the "priorities" field.
+func PrioritiesIsNil() predicate.Task {
+	return predicate.Task(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldPriorities)))
+	})
+}
+
+// PrioritiesNotNil applies the NotNil predicate on the "priorities" field.
+func PrioritiesNotNil() predicate.Task {
+	return predicate.Task(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldPriorities)))
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Task) predicate.Task {
 	return predicate.Task(func(s *sql.Selector) {

@@ -17,6 +17,8 @@ const (
 	FieldID = "id"
 	// FieldPriority holds the string denoting the priority field in the database.
 	FieldPriority = "priority"
+	// FieldPriorities holds the string denoting the priorities field in the database.
+	FieldPriorities = "priorities"
 	// Table holds the table name of the task in the database.
 	Table = "tasks"
 )
@@ -25,6 +27,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldPriority,
+	FieldPriorities,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

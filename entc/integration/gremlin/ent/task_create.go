@@ -40,6 +40,12 @@ func (tc *TaskCreate) SetNillablePriority(t *task.Priority) *TaskCreate {
 	return tc
 }
 
+// SetPriorities sets the "priorities" field.
+func (tc *TaskCreate) SetPriorities(m map[string]task.Priority) *TaskCreate {
+	tc.mutation.SetPriorities(m)
+	return tc
+}
+
 // Mutation returns the TaskMutation object of the builder.
 func (tc *TaskCreate) Mutation() *TaskMutation {
 	return tc.mutation
@@ -156,6 +162,9 @@ func (tc *TaskCreate) gremlin() *dsl.Traversal {
 	v := g.AddV(enttask.Label)
 	if value, ok := tc.mutation.Priority(); ok {
 		v.Property(dsl.Single, enttask.FieldPriority, value)
+	}
+	if value, ok := tc.mutation.Priorities(); ok {
+		v.Property(dsl.Single, enttask.FieldPriorities, value)
 	}
 	return v.ValueMap(true)
 }
