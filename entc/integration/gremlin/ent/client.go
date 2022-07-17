@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/url"
@@ -126,7 +127,7 @@ func Open(driverName, dataSourceName string, options ...Option) (*Client, error)
 // is used until the transaction is committed or rolled back.
 func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
-		return nil, fmt.Errorf("ent: cannot start a transaction within a transaction")
+		return nil, errors.New("ent: cannot start a transaction within a transaction")
 	}
 	tx, err := newTx(ctx, c.driver)
 	if err != nil {

@@ -7,6 +7,7 @@ package gen
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"go/token"
 	"go/types"
@@ -248,7 +249,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 		// User defined id field.
 		if tf.Name == typ.ID.Name {
 			if tf.Optional {
-				return nil, fmt.Errorf("id field cannot be optional")
+				return nil, errors.New("id field cannot be optional")
 			}
 			typ.ID = tf
 		} else {
@@ -606,7 +607,7 @@ func (t Type) TagTypes() []string {
 func (t *Type) AddIndex(idx *load.Index) error {
 	index := &Index{Name: idx.StorageKey, Unique: idx.Unique, Annotations: idx.Annotations}
 	if len(idx.Fields) == 0 && len(idx.Edges) == 0 {
-		return fmt.Errorf("missing fields or edges")
+		return errors.New("missing fields or edges")
 	}
 	switch ant := entsqlIndexAnnotate(idx.Annotations); {
 	case ant == nil:
