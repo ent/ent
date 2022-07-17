@@ -21,6 +21,8 @@ type Task struct {
 	ID string `json:"id,omitempty"`
 	// Priority holds the value of the "priority" field.
 	Priority task.Priority `json:"priority,omitempty"`
+	// Priorities holds the value of the "priorities" field.
+	Priorities map[string]task.Priority `json:"priorities,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into Task.
@@ -30,14 +32,16 @@ func (t *Task) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scant struct {
-		ID       string        `json:"id,omitempty"`
-		Priority task.Priority `json:"priority,omitempty"`
+		ID         string                   `json:"id,omitempty"`
+		Priority   task.Priority            `json:"priority,omitempty"`
+		Priorities map[string]task.Priority `json:"priorities,omitempty"`
 	}
 	if err := vmap.Decode(&scant); err != nil {
 		return err
 	}
 	t.ID = scant.ID
 	t.Priority = scant.Priority
+	t.Priorities = scant.Priorities
 	return nil
 }
 
@@ -66,6 +70,9 @@ func (t *Task) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
 	builder.WriteString("priority=")
 	builder.WriteString(fmt.Sprintf("%v", t.Priority))
+	builder.WriteString(", ")
+	builder.WriteString("priorities=")
+	builder.WriteString(fmt.Sprintf("%v", t.Priorities))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -80,16 +87,18 @@ func (t *Tasks) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scant []struct {
-		ID       string        `json:"id,omitempty"`
-		Priority task.Priority `json:"priority,omitempty"`
+		ID         string                   `json:"id,omitempty"`
+		Priority   task.Priority            `json:"priority,omitempty"`
+		Priorities map[string]task.Priority `json:"priorities,omitempty"`
 	}
 	if err := vmap.Decode(&scant); err != nil {
 		return err
 	}
 	for _, v := range scant {
 		*t = append(*t, &Task{
-			ID:       v.ID,
-			Priority: v.Priority,
+			ID:         v.ID,
+			Priority:   v.Priority,
+			Priorities: v.Priorities,
 		})
 	}
 	return nil

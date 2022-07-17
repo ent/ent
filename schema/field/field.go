@@ -12,6 +12,7 @@ import (
 	"math"
 	"reflect"
 	"regexp"
+	"strings"
 	"time"
 
 	"entgo.io/ent/schema"
@@ -1166,6 +1167,7 @@ func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 		Type:    d.Info.Type,
 		Ident:   t.String(),
 		PkgPath: tv.PkgPath(),
+		PkgName: pkgName(tv.String()),
 		RType: &RType{
 			rtype:   t,
 			Kind:    t.Kind(),
@@ -1187,6 +1189,20 @@ func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 		d.Err = fmt.Errorf("GoType must be a %q type or ValueScanner", expectType)
 	}
 	d.Info = info
+}
+
+// pkgName returns the package name from a Go
+// identifier with a package qualifier.
+func pkgName(ident string) string {
+	i := strings.LastIndexByte(ident, '.')
+	if i == -1 {
+		return ""
+	}
+	s := ident[:i]
+	if i := strings.LastIndexAny(s, "]*"); i != -1 {
+		s = s[i+1:]
+	}
+	return s
 }
 
 func methods(t reflect.Type, rtype *RType) {

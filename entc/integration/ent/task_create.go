@@ -41,6 +41,12 @@ func (tc *TaskCreate) SetNillablePriority(t *task.Priority) *TaskCreate {
 	return tc
 }
 
+// SetPriorities sets the "priorities" field.
+func (tc *TaskCreate) SetPriorities(m map[string]task.Priority) *TaskCreate {
+	tc.mutation.SetPriorities(m)
+	return tc
+}
+
 // Mutation returns the TaskMutation object of the builder.
 func (tc *TaskCreate) Mutation() *TaskMutation {
 	return tc.mutation
@@ -170,6 +176,14 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 		})
 		_node.Priority = value
 	}
+	if value, ok := tc.mutation.Priorities(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: enttask.FieldPriorities,
+		})
+		_node.Priorities = value
+	}
 	return _node, _spec
 }
 
@@ -242,6 +256,24 @@ func (u *TaskUpsert) AddPriority(v task.Priority) *TaskUpsert {
 	return u
 }
 
+// SetPriorities sets the "priorities" field.
+func (u *TaskUpsert) SetPriorities(v map[string]task.Priority) *TaskUpsert {
+	u.Set(enttask.FieldPriorities, v)
+	return u
+}
+
+// UpdatePriorities sets the "priorities" field to the value that was provided on create.
+func (u *TaskUpsert) UpdatePriorities() *TaskUpsert {
+	u.SetExcluded(enttask.FieldPriorities)
+	return u
+}
+
+// ClearPriorities clears the value of the "priorities" field.
+func (u *TaskUpsert) ClearPriorities() *TaskUpsert {
+	u.SetNull(enttask.FieldPriorities)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -302,6 +334,27 @@ func (u *TaskUpsertOne) AddPriority(v task.Priority) *TaskUpsertOne {
 func (u *TaskUpsertOne) UpdatePriority() *TaskUpsertOne {
 	return u.Update(func(s *TaskUpsert) {
 		s.UpdatePriority()
+	})
+}
+
+// SetPriorities sets the "priorities" field.
+func (u *TaskUpsertOne) SetPriorities(v map[string]task.Priority) *TaskUpsertOne {
+	return u.Update(func(s *TaskUpsert) {
+		s.SetPriorities(v)
+	})
+}
+
+// UpdatePriorities sets the "priorities" field to the value that was provided on create.
+func (u *TaskUpsertOne) UpdatePriorities() *TaskUpsertOne {
+	return u.Update(func(s *TaskUpsert) {
+		s.UpdatePriorities()
+	})
+}
+
+// ClearPriorities clears the value of the "priorities" field.
+func (u *TaskUpsertOne) ClearPriorities() *TaskUpsertOne {
+	return u.Update(func(s *TaskUpsert) {
+		s.ClearPriorities()
 	})
 }
 
@@ -527,6 +580,27 @@ func (u *TaskUpsertBulk) AddPriority(v task.Priority) *TaskUpsertBulk {
 func (u *TaskUpsertBulk) UpdatePriority() *TaskUpsertBulk {
 	return u.Update(func(s *TaskUpsert) {
 		s.UpdatePriority()
+	})
+}
+
+// SetPriorities sets the "priorities" field.
+func (u *TaskUpsertBulk) SetPriorities(v map[string]task.Priority) *TaskUpsertBulk {
+	return u.Update(func(s *TaskUpsert) {
+		s.SetPriorities(v)
+	})
+}
+
+// UpdatePriorities sets the "priorities" field to the value that was provided on create.
+func (u *TaskUpsertBulk) UpdatePriorities() *TaskUpsertBulk {
+	return u.Update(func(s *TaskUpsert) {
+		s.UpdatePriorities()
+	})
+}
+
+// ClearPriorities clears the value of the "priorities" field.
+func (u *TaskUpsertBulk) ClearPriorities() *TaskUpsertBulk {
+	return u.Update(func(s *TaskUpsert) {
+		s.ClearPriorities()
 	})
 }
 

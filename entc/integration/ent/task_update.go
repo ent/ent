@@ -54,6 +54,18 @@ func (tu *TaskUpdate) AddPriority(t task.Priority) *TaskUpdate {
 	return tu
 }
 
+// SetPriorities sets the "priorities" field.
+func (tu *TaskUpdate) SetPriorities(m map[string]task.Priority) *TaskUpdate {
+	tu.mutation.SetPriorities(m)
+	return tu
+}
+
+// ClearPriorities clears the value of the "priorities" field.
+func (tu *TaskUpdate) ClearPriorities() *TaskUpdate {
+	tu.mutation.ClearPriorities()
+	return tu
+}
+
 // Mutation returns the TaskMutation object of the builder.
 func (tu *TaskUpdate) Mutation() *TaskMutation {
 	return tu.mutation
@@ -161,6 +173,19 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: enttask.FieldPriority,
 		})
 	}
+	if value, ok := tu.mutation.Priorities(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: enttask.FieldPriorities,
+		})
+	}
+	if tu.mutation.PrioritiesCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: enttask.FieldPriorities,
+		})
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{enttask.Label}
@@ -198,6 +223,18 @@ func (tuo *TaskUpdateOne) SetNillablePriority(t *task.Priority) *TaskUpdateOne {
 // AddPriority adds t to the "priority" field.
 func (tuo *TaskUpdateOne) AddPriority(t task.Priority) *TaskUpdateOne {
 	tuo.mutation.AddPriority(t)
+	return tuo
+}
+
+// SetPriorities sets the "priorities" field.
+func (tuo *TaskUpdateOne) SetPriorities(m map[string]task.Priority) *TaskUpdateOne {
+	tuo.mutation.SetPriorities(m)
+	return tuo
+}
+
+// ClearPriorities clears the value of the "priorities" field.
+func (tuo *TaskUpdateOne) ClearPriorities() *TaskUpdateOne {
+	tuo.mutation.ClearPriorities()
 	return tuo
 }
 
@@ -336,6 +373,19 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 			Type:   field.TypeInt,
 			Value:  value,
 			Column: enttask.FieldPriority,
+		})
+	}
+	if value, ok := tuo.mutation.Priorities(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: enttask.FieldPriorities,
+		})
+	}
+	if tuo.mutation.PrioritiesCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: enttask.FieldPriorities,
 		})
 	}
 	_node = &Task{config: tuo.config}

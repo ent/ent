@@ -17,6 +17,8 @@ const (
 	FieldID = "id"
 	// FieldPriority holds the string denoting the priority field in the database.
 	FieldPriority = "priority"
+	// FieldPriorities holds the string denoting the priorities field in the database.
+	FieldPriorities = "priorities"
 )
 
 var (

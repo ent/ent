@@ -12491,6 +12491,7 @@ type TaskMutation struct {
 	id            *int
 	priority      *task.Priority
 	addpriority   *task.Priority
+	priorities    *map[string]task.Priority
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Task, error)
@@ -12651,6 +12652,55 @@ func (m *TaskMutation) ResetPriority() {
 	m.addpriority = nil
 }
 
+// SetPriorities sets the "priorities" field.
+func (m *TaskMutation) SetPriorities(value map[string]task.Priority) {
+	m.priorities = &value
+}
+
+// Priorities returns the value of the "priorities" field in the mutation.
+func (m *TaskMutation) Priorities() (r map[string]task.Priority, exists bool) {
+	v := m.priorities
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPriorities returns the old "priorities" field's value of the Task entity.
+// If the Task object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TaskMutation) OldPriorities(ctx context.Context) (v map[string]task.Priority, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPriorities is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPriorities requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPriorities: %w", err)
+	}
+	return oldValue.Priorities, nil
+}
+
+// ClearPriorities clears the value of the "priorities" field.
+func (m *TaskMutation) ClearPriorities() {
+	m.priorities = nil
+	m.clearedFields[enttask.FieldPriorities] = struct{}{}
+}
+
+// PrioritiesCleared returns if the "priorities" field was cleared in this mutation.
+func (m *TaskMutation) PrioritiesCleared() bool {
+	_, ok := m.clearedFields[enttask.FieldPriorities]
+	return ok
+}
+
+// ResetPriorities resets all changes to the "priorities" field.
+func (m *TaskMutation) ResetPriorities() {
+	m.priorities = nil
+	delete(m.clearedFields, enttask.FieldPriorities)
+}
+
 // Where appends a list predicates to the TaskMutation builder.
 func (m *TaskMutation) Where(ps ...predicate.Task) {
 	m.predicates = append(m.predicates, ps...)
@@ -12670,9 +12720,12 @@ func (m *TaskMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TaskMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 2)
 	if m.priority != nil {
 		fields = append(fields, enttask.FieldPriority)
+	}
+	if m.priorities != nil {
+		fields = append(fields, enttask.FieldPriorities)
 	}
 	return fields
 }
@@ -12684,6 +12737,8 @@ func (m *TaskMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case enttask.FieldPriority:
 		return m.Priority()
+	case enttask.FieldPriorities:
+		return m.Priorities()
 	}
 	return nil, false
 }
@@ -12695,6 +12750,8 @@ func (m *TaskMutation) OldField(ctx context.Context, name string) (ent.Value, er
 	switch name {
 	case enttask.FieldPriority:
 		return m.OldPriority(ctx)
+	case enttask.FieldPriorities:
+		return m.OldPriorities(ctx)
 	}
 	return nil, fmt.Errorf("unknown Task field %s", name)
 }
@@ -12710,6 +12767,13 @@ func (m *TaskMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPriority(v)
+		return nil
+	case enttask.FieldPriorities:
+		v, ok := value.(map[string]task.Priority)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPriorities(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Task field %s", name)
@@ -12755,7 +12819,11 @@ func (m *TaskMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *TaskMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(enttask.FieldPriorities) {
+		fields = append(fields, enttask.FieldPriorities)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -12768,6 +12836,11 @@ func (m *TaskMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *TaskMutation) ClearField(name string) error {
+	switch name {
+	case enttask.FieldPriorities:
+		m.ClearPriorities()
+		return nil
+	}
 	return fmt.Errorf("unknown Task nullable field %s", name)
 }
 
@@ -12777,6 +12850,9 @@ func (m *TaskMutation) ResetField(name string) error {
 	switch name {
 	case enttask.FieldPriority:
 		m.ResetPriority()
+		return nil
+	case enttask.FieldPriorities:
+		m.ResetPriorities()
 		return nil
 	}
 	return fmt.Errorf("unknown Task field %s", name)
