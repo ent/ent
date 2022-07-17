@@ -126,7 +126,7 @@ var (
 		{Name: "schema_float", Type: field.TypeFloat64, Nullable: true},
 		{Name: "schema_float32", Type: field.TypeFloat32, Nullable: true},
 		{Name: "null_float", Type: field.TypeFloat64, Nullable: true},
-		{Name: "role", Type: field.TypeEnum, Enums: []string{"ADMIN", "OWNER", "USER", "READ", "WRITE"}, Default: "READ"},
+		{Name: "role", Type: field.TypeEnum, Enums: []string{"ADMIN", "OWNER", "USER", "READ", "WRITE", "READ+WRITE"}, Default: "READ"},
 		{Name: "priority", Type: field.TypeEnum, Nullable: true, Enums: []string{"UNKNOWN", "LOW", "HIGH"}},
 		{Name: "optional_uuid", Type: field.TypeUUID, Nullable: true},
 		{Name: "nillable_uuid", Type: field.TypeUUID, Nullable: true},

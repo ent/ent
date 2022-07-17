@@ -11,15 +11,16 @@ import (
 type Role string
 
 const (
-	Admin Role = "ADMIN"
-	Owner Role = "OWNER"
-	User  Role = "USER"
-	Read  Role = "READ"
-	Write Role = "WRITE"
+	Admin     Role = "ADMIN"
+	Owner     Role = "OWNER"
+	User      Role = "USER"
+	Read      Role = "READ"
+	Write     Role = "WRITE"
+	ReadWrite Role = "READ+WRITE"
 )
 
 func (Role) Values() (roles []string) {
-	for _, r := range []Role{Admin, Owner, User, Read, Write} {
+	for _, r := range []Role{Admin, Owner, User, Read, Write, ReadWrite} {
 		roles = append(roles, string(r))
 	}
 	return
