@@ -1503,7 +1503,7 @@ func (f Field) enums(lf *load.Field) ([]Enum, error) {
 			return nil, fmt.Errorf("%q field value cannot be empty", f.Name)
 		case values[value]:
 			return nil, fmt.Errorf("duplicate values %q for enum field %q", value, f.Name)
-		case !token.IsIdentifier(name):
+		case !token.IsIdentifier(name) && !f.HasGoType():
 			return nil, fmt.Errorf("enum %q does not have a valid Go identifier (%q)", value, name)
 		default:
 			values[value] = true
