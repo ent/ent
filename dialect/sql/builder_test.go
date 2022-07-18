@@ -643,7 +643,7 @@ func TestBuilder(t *testing.T) {
 		{
 			input: Delete("users").
 				Where(And(IsNull("parent_id"), NotIn("name"))),
-			wantQuery: "DELETE FROM `users` WHERE `parent_id` IS NULL AND FALSE",
+			wantQuery: "DELETE FROM `users` WHERE `parent_id` IS NULL AND (NOT (FALSE))",
 		},
 		{
 			input: Delete("users").
