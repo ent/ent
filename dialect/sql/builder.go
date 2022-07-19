@@ -1337,6 +1337,8 @@ func IsTrue(col string) *Predicate {
 func (p *Predicate) IsTrue(col string) *Predicate {
 	return p.Append(func(b *Builder) {
 		b.Ident(col)
+		b.WriteOp(OpEQ)
+		b.Arg(true)
 	})
 }
 
@@ -1348,7 +1350,9 @@ func IsFalse(col string) *Predicate {
 // IsFalse appends a predicate that checks if the column value is falsey.
 func (p *Predicate) IsFalse(col string) *Predicate {
 	return p.Append(func(b *Builder) {
-		b.WriteString("NOT ").Ident(col)
+		b.Ident(col)
+		b.WriteOp(OpEQ)
+		b.Arg(false)
 	})
 }
 
