@@ -50,6 +50,28 @@ func (mutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (*ent.To
 }
 ```
 
+## Isolation Levels
+
+If you'd like to tweak the transaction's isolation level. You can do so by implementing your own `TxOpener`. For Example - 
+
+```go
+type CustomTxOpener struct {
+	client *ent.Client
+}
+
+func (c *CustomTxOpener) OpenTx(ctx context.Context) (context.Context, driver.Tx, error) {
+	tx, err := c.client.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelRepeatableRead})
+	if err != nil {
+		return nil, nil, err
+	}
+	ctx = ent.NewTxContext(ctx, tx)
+	ctx = ent.NewContext(ctx, tx.Client())
+	return ctx, tx, nil
+}
+
+srv.Use(entgql.Transactioner{TxOpener: &CustomTxOpener{client: client}})
+```
+
 ---
 
 Great! With a few lines of code, our application now supports automatic transactional mutations. Please continue to the
