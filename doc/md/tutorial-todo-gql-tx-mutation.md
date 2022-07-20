@@ -52,7 +52,7 @@ func (mutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (*ent.To
 
 ## Isolation Levels
 
-If you'd like to tweak the transaction's isolation level. You can do so by implementing your own `TxOpener`. For Example - 
+If you'd like to tweak the transaction's isolation level, you can do so by implementing your own `TxOpener`. For example:
 
 ```go
 srv.Use(entgql.Transactioner{
