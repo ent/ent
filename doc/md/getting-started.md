@@ -129,7 +129,8 @@ To get started, create a new `ent.Client`.
 defaultValue="sqlite"
 values={[
 {label: 'SQLite', value: 'sqlite'},
-{label: 'PostgreSQL', value: 'postgres'},
+{label: 'PostgreSQL (pq)', value: 'postgres-pq'},
+{label: 'PostgreSQL (pgx)', value: 'postgres-pgx'},
 {label: 'MySQL', value: 'mysql'},
 ]}>
 <TabItem value="sqlite">
@@ -149,7 +150,7 @@ import (
 func main() {
 	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	if err != nil {
-		log.Fatalf("failed opening connection to sqlite: %v", err)
+		log.Fatalf("failed opening connection to database: %v", err)
 	}
 	defer client.Close()
 	// Run the auto migration tool.
@@ -160,7 +161,7 @@ func main() {
 ```
 
 </TabItem>
-<TabItem value="postgres">
+<TabItem value="postgres-pq">
 
 ```go title="<project>/start/start.go"
 package main
@@ -177,7 +178,35 @@ import (
 func main() {
 	client, err := ent.Open("postgres","host=<host> port=<port> user=<user> dbname=<database> password=<pass>")
 	if err != nil {
-		log.Fatalf("failed opening connection to postgres: %v", err)
+		log.Fatalf("failed opening connection to database: %v", err)
+	}
+	defer client.Close()
+	// Run the auto migration tool.
+	if err := client.Schema.Create(context.Background()); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
+}
+```
+
+</TabItem>
+<TabItem value="postgres-pgx">
+
+```go title="<project>/start/start.go"
+package main
+
+import (
+	"context"
+	"log"
+
+	"<project>/ent"
+
+	_ "github.com/jackc/pgx/v4/stdlib"
+)
+
+func main() {
+	client, err := ent.Open("pgx","host=<host> port=<port> user=<user> dbname=<database> password=<pass>")
+	if err != nil {
+		log.Fatalf("failed opening connection to database: %v", err)
 	}
 	defer client.Close()
 	// Run the auto migration tool.
@@ -205,7 +234,7 @@ import (
 func main() {
 	client, err := ent.Open("mysql", "<user>:<pass>@tcp(<host>:<port>)/<database>?parseTime=True")
 	if err != nil {
-		log.Fatalf("failed opening connection to mysql: %v", err)
+		log.Fatalf("failed opening connection to database: %v", err)
 	}
 	defer client.Close()
 	// Run the auto migration tool.
