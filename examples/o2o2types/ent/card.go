@@ -138,6 +138,7 @@ func (c *Card) Unwrap() *Card {
 // String implements the fmt.Stringer.
 func (c *Card) String() string {
 	var builder strings.Builder
+	builder.Grow(26)
 	builder.WriteString("Card(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
 	builder.WriteString("expired=")

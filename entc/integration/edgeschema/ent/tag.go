@@ -127,6 +127,7 @@ func (t *Tag) Unwrap() *Tag {
 // String implements the fmt.Stringer.
 func (t *Tag) String() string {
 	var builder strings.Builder
+	builder.Grow(14)
 	builder.WriteString("Tag(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
 	builder.WriteString("value=")

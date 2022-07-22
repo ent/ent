@@ -125,6 +125,7 @@ func (c *Comment) Unwrap() *Comment {
 // String implements the fmt.Stringer.
 func (c *Comment) String() string {
 	var builder strings.Builder
+	builder.Grow(27)
 	builder.WriteString("Comment(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
 	builder.WriteString("text=")

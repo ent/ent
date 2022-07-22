@@ -159,6 +159,7 @@ func (r *Rental) Unwrap() *Rental {
 // String implements the fmt.Stringer.
 func (r *Rental) String() string {
 	var builder strings.Builder
+	builder.Grow(35)
 	builder.WriteString("Rental(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", r.ID))
 	builder.WriteString("date=")

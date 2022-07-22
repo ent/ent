@@ -85,6 +85,7 @@ func (ct *CustomType) Unwrap() *CustomType {
 // String implements the fmt.Stringer.
 func (ct *CustomType) String() string {
 	var builder strings.Builder
+	builder.Grow(22)
 	builder.WriteString("CustomType(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", ct.ID))
 	builder.WriteString("custom=")

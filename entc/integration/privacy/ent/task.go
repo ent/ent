@@ -170,6 +170,7 @@ func (t *Task) Unwrap() *Task {
 // String implements the fmt.Stringer.
 func (t *Task) String() string {
 	var builder strings.Builder
+	builder.Grow(45)
 	builder.WriteString("Task(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
 	builder.WriteString("title=")

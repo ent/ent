@@ -167,6 +167,7 @@ func (b *Blob) Unwrap() *Blob {
 // String implements the fmt.Stringer.
 func (b *Blob) String() string {
 	var builder strings.Builder
+	builder.Grow(22)
 	builder.WriteString("Blob(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", b.ID))
 	builder.WriteString("uuid=")

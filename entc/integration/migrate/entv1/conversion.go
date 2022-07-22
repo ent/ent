@@ -149,6 +149,7 @@ func (c *Conversion) Unwrap() *Conversion {
 // String implements the fmt.Stringer.
 func (c *Conversion) String() string {
 	var builder strings.Builder
+	builder.Grow(166)
 	builder.WriteString("Conversion(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
 	builder.WriteString("name=")

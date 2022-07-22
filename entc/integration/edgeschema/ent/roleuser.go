@@ -148,6 +148,7 @@ func (ru *RoleUser) Unwrap() *RoleUser {
 // String implements the fmt.Stringer.
 func (ru *RoleUser) String() string {
 	var builder strings.Builder
+	builder.Grow(41)
 	builder.WriteString("RoleUser(")
 	builder.WriteString("created_at=")
 	builder.WriteString(ru.CreatedAt.Format(time.ANSIC))

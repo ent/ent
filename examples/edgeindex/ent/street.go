@@ -127,6 +127,7 @@ func (s *Street) Unwrap() *Street {
 // String implements the fmt.Stringer.
 func (s *Street) String() string {
 	var builder strings.Builder
+	builder.Grow(16)
 	builder.WriteString("Street(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", s.ID))
 	builder.WriteString("name=")

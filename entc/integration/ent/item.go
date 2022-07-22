@@ -83,6 +83,7 @@ func (i *Item) Unwrap() *Item {
 // String implements the fmt.Stringer.
 func (i *Item) String() string {
 	var builder strings.Builder
+	builder.Grow(14)
 	builder.WriteString("Item(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", i.ID))
 	builder.WriteString("text=")

@@ -661,6 +661,7 @@ func (ft *FieldType) Unwrap() *FieldType {
 // String implements the fmt.Stringer.
 func (ft *FieldType) String() string {
 	var builder strings.Builder
+	builder.Grow(836)
 	builder.WriteString("FieldType(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", ft.ID))
 	builder.WriteString("int=")

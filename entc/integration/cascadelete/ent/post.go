@@ -141,6 +141,7 @@ func (po *Post) Unwrap() *Post {
 // String implements the fmt.Stringer.
 func (po *Post) String() string {
 	var builder strings.Builder
+	builder.Grow(26)
 	builder.WriteString("Post(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", po.ID))
 	builder.WriteString("text=")

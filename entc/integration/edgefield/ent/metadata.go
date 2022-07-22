@@ -160,6 +160,7 @@ func (m *Metadata) Unwrap() *Metadata {
 // String implements the fmt.Stringer.
 func (m *Metadata) String() string {
 	var builder strings.Builder
+	builder.Grow(29)
 	builder.WriteString("Metadata(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("age=")

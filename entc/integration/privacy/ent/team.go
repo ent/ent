@@ -127,6 +127,7 @@ func (t *Team) Unwrap() *Team {
 // String implements the fmt.Stringer.
 func (t *Team) String() string {
 	var builder strings.Builder
+	builder.Grow(14)
 	builder.WriteString("Team(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
 	builder.WriteString("name=")

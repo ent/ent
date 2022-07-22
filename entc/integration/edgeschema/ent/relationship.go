@@ -174,6 +174,7 @@ func (r *Relationship) Unwrap() *Relationship {
 // String implements the fmt.Stringer.
 func (r *Relationship) String() string {
 	var builder strings.Builder
+	builder.Grow(55)
 	builder.WriteString("Relationship(")
 	builder.WriteString("weight=")
 	builder.WriteString(fmt.Sprintf("%v", r.Weight))

@@ -140,6 +140,7 @@ func (n *Node) Unwrap() *Node {
 // String implements the fmt.Stringer.
 func (n *Node) String() string {
 	var builder strings.Builder
+	builder.Grow(15)
 	builder.WriteString("Node(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", n.ID))
 	builder.WriteString("value=")

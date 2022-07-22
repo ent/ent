@@ -58,12 +58,14 @@ var (
 		"xtemplate":     xtemplate,
 		"hasTemplate":   hasTemplate,
 		"matchTemplate": matchTemplate,
+		"mul":           mul,
 		"split":         strings.Split,
 		"tagLookup":     tagLookup,
 		"toString":      toString,
 		"dict":          dict,
 		"get":           get,
 		"set":           set,
+		"sub":           sub,
 		"unset":         unset,
 		"hasKey":        hasKey,
 		"list":          list,
@@ -382,6 +384,11 @@ func matchTemplate(patterns ...string) []string {
 	return names
 }
 
+// mul multiplying A by B.
+func mul(a, b int) int {
+	return a * b
+}
+
 // hasField determines if a struct has a field with the given name.
 func hasField(v interface{}, name string) bool {
 	vr := reflect.Indirect(reflect.ValueOf(v))
@@ -471,6 +478,11 @@ func get(d map[string]interface{}, key string) interface{} {
 func set(d map[string]interface{}, key string, value interface{}) map[string]interface{} {
 	d[key] = value
 	return d
+}
+
+// sub subtracting B from A.
+func sub(a, b int) int {
+	return a - b
 }
 
 // unset removes a key from the dict.

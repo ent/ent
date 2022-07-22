@@ -133,6 +133,7 @@ func (is *IntSID) Unwrap() *IntSID {
 // String implements the fmt.Stringer.
 func (is *IntSID) String() string {
 	var builder strings.Builder
+	builder.Grow(9)
 	builder.WriteString("IntSID(")
 	builder.WriteString(fmt.Sprintf("id=%v", is.ID))
 	builder.WriteByte(')')

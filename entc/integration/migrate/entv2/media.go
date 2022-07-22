@@ -101,6 +101,7 @@ func (m *Media) Unwrap() *Media {
 // String implements the fmt.Stringer.
 func (m *Media) String() string {
 	var builder strings.Builder
+	builder.Grow(37)
 	builder.WriteString("Media(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("source=")

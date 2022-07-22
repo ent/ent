@@ -146,6 +146,15 @@ func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 	// String implements the fmt.Stringer.
 	func ({{ $receiver }} *{{ $.Name }}) String() string {
 		var builder strings.Builder
+		{{- $grow := add (len $.Name) 2 }}
+		{{- if $.HasOneFieldID }}
+			{{- $grow = add $grow 3 }}
+		{{- end }}
+		{{- $grow = add $grow (mul (sub (len $.Fields) 1) 2) }}
+		{{- range $i, $f := $.Fields }}
+			{{- $grow = add $grow (add (len $f.Name) 1) }}
+		{{- end }}
+		builder.Grow({{ $grow }})
 		builder.WriteString("{{ $.Name }}(")
 		{{- if $.HasOneFieldID }}
 			builder.WriteString(fmt.Sprintf("id=%v{{ if $.Fields }}, {{ end }}", {{ $receiver }}.ID))

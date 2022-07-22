@@ -120,6 +120,7 @@ func (i *Info) Unwrap() *Info {
 // String implements the fmt.Stringer.
 func (i *Info) String() string {
 	var builder strings.Builder
+	builder.Grow(17)
 	builder.WriteString("Info(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", i.ID))
 	builder.WriteString("content=")

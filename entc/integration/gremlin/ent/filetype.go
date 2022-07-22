@@ -96,6 +96,7 @@ func (ft *FileType) Unwrap() *FileType {
 // String implements the fmt.Stringer.
 func (ft *FileType) String() string {
 	var builder strings.Builder
+	builder.Grow(33)
 	builder.WriteString("FileType(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", ft.ID))
 	builder.WriteString("name=")

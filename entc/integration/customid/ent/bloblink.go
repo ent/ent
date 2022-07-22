@@ -148,6 +148,7 @@ func (bl *BlobLink) Unwrap() *BlobLink {
 // String implements the fmt.Stringer.
 func (bl *BlobLink) String() string {
 	var builder strings.Builder
+	builder.Grow(41)
 	builder.WriteString("BlobLink(")
 	builder.WriteString("created_at=")
 	builder.WriteString(bl.CreatedAt.Format(time.ANSIC))

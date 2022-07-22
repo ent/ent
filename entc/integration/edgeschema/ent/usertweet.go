@@ -156,6 +156,7 @@ func (ut *UserTweet) Unwrap() *UserTweet {
 // String implements the fmt.Stringer.
 func (ut *UserTweet) String() string {
 	var builder strings.Builder
+	builder.Grow(46)
 	builder.WriteString("UserTweet(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", ut.ID))
 	builder.WriteString("created_at=")

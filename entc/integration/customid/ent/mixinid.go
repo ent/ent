@@ -94,6 +94,7 @@ func (mi *MixinID) Unwrap() *MixinID {
 // String implements the fmt.Stringer.
 func (mi *MixinID) String() string {
 	var builder strings.Builder
+	builder.Grow(37)
 	builder.WriteString("MixinID(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", mi.ID))
 	builder.WriteString("some_field=")

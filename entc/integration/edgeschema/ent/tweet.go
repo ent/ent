@@ -191,6 +191,7 @@ func (t *Tweet) Unwrap() *Tweet {
 // String implements the fmt.Stringer.
 func (t *Tweet) String() string {
 	var builder strings.Builder
+	builder.Grow(15)
 	builder.WriteString("Tweet(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
 	builder.WriteString("text=")

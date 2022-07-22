@@ -163,6 +163,7 @@ func (f *Friendship) Unwrap() *Friendship {
 // String implements the fmt.Stringer.
 func (f *Friendship) String() string {
 	var builder strings.Builder
+	builder.Grow(57)
 	builder.WriteString("Friendship(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", f.ID))
 	builder.WriteString("weight=")

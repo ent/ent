@@ -112,6 +112,7 @@ func (a *Account) Unwrap() *Account {
 // String implements the fmt.Stringer.
 func (a *Account) String() string {
 	var builder strings.Builder
+	builder.Grow(18)
 	builder.WriteString("Account(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", a.ID))
 	builder.WriteString("email=")

@@ -148,6 +148,7 @@ func (tl *TweetLike) Unwrap() *TweetLike {
 // String implements the fmt.Stringer.
 func (tl *TweetLike) String() string {
 	var builder strings.Builder
+	builder.Grow(41)
 	builder.WriteString("TweetLike(")
 	builder.WriteString("liked_at=")
 	builder.WriteString(tl.LikedAt.Format(time.ANSIC))

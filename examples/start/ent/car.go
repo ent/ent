@@ -138,6 +138,7 @@ func (c *Car) Unwrap() *Car {
 // String implements the fmt.Stringer.
 func (c *Car) String() string {
 	var builder strings.Builder
+	builder.Grow(30)
 	builder.WriteString("Car(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
 	builder.WriteString("model=")

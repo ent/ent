@@ -159,6 +159,7 @@ func (d *Doc) Unwrap() *Doc {
 // String implements the fmt.Stringer.
 func (d *Doc) String() string {
 	var builder strings.Builder
+	builder.Grow(13)
 	builder.WriteString("Doc(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", d.ID))
 	builder.WriteString("text=")

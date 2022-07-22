@@ -85,6 +85,7 @@ func (gr *Group) Unwrap() *Group {
 // String implements the fmt.Stringer.
 func (gr *Group) String() string {
 	var builder strings.Builder
+	builder.Grow(15)
 	builder.WriteString("Group(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", gr.ID))
 	builder.WriteString("name=")

@@ -83,6 +83,7 @@ func (s *Spec) Unwrap() *Spec {
 // String implements the fmt.Stringer.
 func (s *Spec) String() string {
 	var builder strings.Builder
+	builder.Grow(7)
 	builder.WriteString("Spec(")
 	builder.WriteString(fmt.Sprintf("id=%v", s.ID))
 	builder.WriteByte(')')

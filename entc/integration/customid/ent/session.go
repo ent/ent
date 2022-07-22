@@ -118,6 +118,7 @@ func (s *Session) Unwrap() *Session {
 // String implements the fmt.Stringer.
 func (s *Session) String() string {
 	var builder strings.Builder
+	builder.Grow(10)
 	builder.WriteString("Session(")
 	builder.WriteString(fmt.Sprintf("id=%v", s.ID))
 	builder.WriteByte(')')

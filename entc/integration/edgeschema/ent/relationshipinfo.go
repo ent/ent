@@ -85,6 +85,7 @@ func (ri *RelationshipInfo) Unwrap() *RelationshipInfo {
 // String implements the fmt.Stringer.
 func (ri *RelationshipInfo) String() string {
 	var builder strings.Builder
+	builder.Grow(26)
 	builder.WriteString("RelationshipInfo(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", ri.ID))
 	builder.WriteString("text=")

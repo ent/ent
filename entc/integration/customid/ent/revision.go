@@ -75,6 +75,7 @@ func (r *Revision) Unwrap() *Revision {
 // String implements the fmt.Stringer.
 func (r *Revision) String() string {
 	var builder strings.Builder
+	builder.Grow(11)
 	builder.WriteString("Revision(")
 	builder.WriteString(fmt.Sprintf("id=%v", r.ID))
 	builder.WriteByte(')')

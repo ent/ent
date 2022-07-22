@@ -95,6 +95,7 @@ func (u *User) Unwrap() *User {
 // String implements the fmt.Stringer.
 func (u *User) String() string {
 	var builder strings.Builder
+	builder.Grow(22)
 	builder.WriteString("User(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", u.ID))
 	builder.WriteString("name=")

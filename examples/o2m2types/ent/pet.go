@@ -127,6 +127,7 @@ func (pe *Pet) Unwrap() *Pet {
 // String implements the fmt.Stringer.
 func (pe *Pet) String() string {
 	var builder strings.Builder
+	builder.Grow(13)
 	builder.WriteString("Pet(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", pe.ID))
 	builder.WriteString("name=")

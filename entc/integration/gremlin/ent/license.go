@@ -57,6 +57,7 @@ func (l *License) Unwrap() *License {
 // String implements the fmt.Stringer.
 func (l *License) String() string {
 	var builder strings.Builder
+	builder.Grow(10)
 	builder.WriteString("License(")
 	builder.WriteString(fmt.Sprintf("id=%v", l.ID))
 	builder.WriteByte(')')

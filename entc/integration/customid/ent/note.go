@@ -141,6 +141,7 @@ func (n *Note) Unwrap() *Note {
 // String implements the fmt.Stringer.
 func (n *Note) String() string {
 	var builder strings.Builder
+	builder.Grow(14)
 	builder.WriteString("Note(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", n.ID))
 	builder.WriteString("text=")

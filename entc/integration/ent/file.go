@@ -220,6 +220,7 @@ func (f *File) Unwrap() *File {
 // String implements the fmt.Stringer.
 func (f *File) String() string {
 	var builder strings.Builder
+	builder.Grow(41)
 	builder.WriteString("File(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", f.ID))
 	builder.WriteString("size=")

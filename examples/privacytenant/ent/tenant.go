@@ -85,6 +85,7 @@ func (t *Tenant) Unwrap() *Tenant {
 // String implements the fmt.Stringer.
 func (t *Tenant) String() string {
 	var builder strings.Builder
+	builder.Grow(16)
 	builder.WriteString("Tenant(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
 	builder.WriteString("name=")

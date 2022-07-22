@@ -134,6 +134,7 @@ func (d *Device) Unwrap() *Device {
 // String implements the fmt.Stringer.
 func (d *Device) String() string {
 	var builder strings.Builder
+	builder.Grow(9)
 	builder.WriteString("Device(")
 	builder.WriteString(fmt.Sprintf("id=%v", d.ID))
 	builder.WriteByte(')')

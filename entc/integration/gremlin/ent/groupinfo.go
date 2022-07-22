@@ -91,6 +91,7 @@ func (gi *GroupInfo) Unwrap() *GroupInfo {
 // String implements the fmt.Stringer.
 func (gi *GroupInfo) String() string {
 	var builder strings.Builder
+	builder.Grow(31)
 	builder.WriteString("GroupInfo(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", gi.ID))
 	builder.WriteString("desc=")

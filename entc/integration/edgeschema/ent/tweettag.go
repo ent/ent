@@ -159,6 +159,7 @@ func (tt *TweetTag) Unwrap() *TweetTag {
 // String implements the fmt.Stringer.
 func (tt *TweetTag) String() string {
 	var builder strings.Builder
+	builder.Grow(42)
 	builder.WriteString("TweetTag(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", tt.ID))
 	builder.WriteString("added_at=")

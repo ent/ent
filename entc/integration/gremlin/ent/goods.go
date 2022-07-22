@@ -57,6 +57,7 @@ func (_go *Goods) Unwrap() *Goods {
 // String implements the fmt.Stringer.
 func (_go *Goods) String() string {
 	var builder strings.Builder
+	builder.Grow(8)
 	builder.WriteString("Goods(")
 	builder.WriteString(fmt.Sprintf("id=%v", _go.ID))
 	builder.WriteByte(')')

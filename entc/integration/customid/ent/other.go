@@ -75,6 +75,7 @@ func (o *Other) Unwrap() *Other {
 // String implements the fmt.Stringer.
 func (o *Other) String() string {
 	var builder strings.Builder
+	builder.Grow(8)
 	builder.WriteString("Other(")
 	builder.WriteString(fmt.Sprintf("id=%v", o.ID))
 	builder.WriteByte(')')

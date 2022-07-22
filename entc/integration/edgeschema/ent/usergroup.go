@@ -156,6 +156,7 @@ func (ug *UserGroup) Unwrap() *UserGroup {
 // String implements the fmt.Stringer.
 func (ug *UserGroup) String() string {
 	var builder strings.Builder
+	builder.Grow(45)
 	builder.WriteString("UserGroup(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", ug.ID))
 	builder.WriteString("joined_at=")

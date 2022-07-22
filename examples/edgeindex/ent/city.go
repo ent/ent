@@ -111,6 +111,7 @@ func (c *City) Unwrap() *City {
 // String implements the fmt.Stringer.
 func (c *City) String() string {
 	var builder strings.Builder
+	builder.Grow(14)
 	builder.WriteString("City(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
 	builder.WriteString("name=")

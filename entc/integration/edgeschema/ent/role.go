@@ -138,6 +138,7 @@ func (r *Role) Unwrap() *Role {
 // String implements the fmt.Stringer.
 func (r *Role) String() string {
 	var builder strings.Builder
+	builder.Grow(27)
 	builder.WriteString("Role(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", r.ID))
 	builder.WriteString("name=")

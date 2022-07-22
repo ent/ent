@@ -128,6 +128,7 @@ func (t *Token) Unwrap() *Token {
 // String implements the fmt.Stringer.
 func (t *Token) String() string {
 	var builder strings.Builder
+	builder.Grow(15)
 	builder.WriteString("Token(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
 	builder.WriteString("body=")
