@@ -116,8 +116,8 @@ func (ftq *FileTypeQuery) FirstX(ctx context.Context) *FileType {
 // FirstID returns the first FileType ID from the query.
 // Returns a *NotFoundError when no FileType ID was found.
 func (ftq *FileTypeQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = ftq.Limit(1).IDs(ctx); err != nil {
+	ids, err := ftq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -167,8 +167,8 @@ func (ftq *FileTypeQuery) OnlyX(ctx context.Context) *FileType {
 // Returns a *NotSingularError when more than one FileType ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (ftq *FileTypeQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = ftq.Limit(2).IDs(ctx); err != nil {
+	ids, err := ftq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

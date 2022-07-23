@@ -104,8 +104,8 @@ func (sq *SpecQuery) FirstX(ctx context.Context) *Spec {
 // FirstID returns the first Spec ID from the query.
 // Returns a *NotFoundError when no Spec ID was found.
 func (sq *SpecQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
-	if ids, err = sq.Limit(1).IDs(ctx); err != nil {
+	ids, err := sq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -155,8 +155,8 @@ func (sq *SpecQuery) OnlyX(ctx context.Context) *Spec {
 // Returns a *NotSingularError when more than one Spec ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (sq *SpecQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
-	if ids, err = sq.Limit(2).IDs(ctx); err != nil {
+	ids, err := sq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

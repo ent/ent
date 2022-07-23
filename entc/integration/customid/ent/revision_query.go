@@ -88,8 +88,8 @@ func (rq *RevisionQuery) FirstX(ctx context.Context) *Revision {
 // FirstID returns the first Revision ID from the query.
 // Returns a *NotFoundError when no Revision ID was found.
 func (rq *RevisionQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
-	if ids, err = rq.Limit(1).IDs(ctx); err != nil {
+	ids, err := rq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -139,8 +139,8 @@ func (rq *RevisionQuery) OnlyX(ctx context.Context) *Revision {
 // Returns a *NotSingularError when more than one Revision ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (rq *RevisionQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
-	if ids, err = rq.Limit(2).IDs(ctx); err != nil {
+	ids, err := rq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

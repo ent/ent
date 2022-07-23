@@ -136,8 +136,8 @@ func (fq *FileQuery) FirstX(ctx context.Context) *File {
 // FirstID returns the first File ID from the query.
 // Returns a *NotFoundError when no File ID was found.
 func (fq *FileQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
-	if ids, err = fq.Limit(1).IDs(ctx); err != nil {
+	ids, err := fq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -187,8 +187,8 @@ func (fq *FileQuery) OnlyX(ctx context.Context) *File {
 // Returns a *NotSingularError when more than one File ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (fq *FileQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
-	if ids, err = fq.Limit(2).IDs(ctx); err != nil {
+	ids, err := fq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

@@ -88,8 +88,8 @@ func (iq *ItemQuery) FirstX(ctx context.Context) *Item {
 // FirstID returns the first Item ID from the query.
 // Returns a *NotFoundError when no Item ID was found.
 func (iq *ItemQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
-	if ids, err = iq.Limit(1).IDs(ctx); err != nil {
+	ids, err := iq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -139,8 +139,8 @@ func (iq *ItemQuery) OnlyX(ctx context.Context) *Item {
 // Returns a *NotSingularError when more than one Item ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (iq *ItemQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
-	if ids, err = iq.Limit(2).IDs(ctx); err != nil {
+	ids, err := iq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

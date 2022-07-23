@@ -88,8 +88,8 @@ func (ftq *FieldTypeQuery) FirstX(ctx context.Context) *FieldType {
 // FirstID returns the first FieldType ID from the query.
 // Returns a *NotFoundError when no FieldType ID was found.
 func (ftq *FieldTypeQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
-	if ids, err = ftq.Limit(1).IDs(ctx); err != nil {
+	ids, err := ftq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -139,8 +139,8 @@ func (ftq *FieldTypeQuery) OnlyX(ctx context.Context) *FieldType {
 // Returns a *NotSingularError when more than one FieldType ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (ftq *FieldTypeQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
-	if ids, err = ftq.Limit(2).IDs(ctx); err != nil {
+	ids, err := ftq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

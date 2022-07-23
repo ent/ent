@@ -114,8 +114,8 @@ func (sq *StreetQuery) FirstX(ctx context.Context) *Street {
 // FirstID returns the first Street ID from the query.
 // Returns a *NotFoundError when no Street ID was found.
 func (sq *StreetQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = sq.Limit(1).IDs(ctx); err != nil {
+	ids, err := sq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -165,8 +165,8 @@ func (sq *StreetQuery) OnlyX(ctx context.Context) *Street {
 // Returns a *NotSingularError when more than one Street ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (sq *StreetQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = sq.Limit(2).IDs(ctx); err != nil {
+	ids, err := sq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

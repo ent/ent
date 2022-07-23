@@ -89,8 +89,8 @@ func (miq *MixinIDQuery) FirstX(ctx context.Context) *MixinID {
 // FirstID returns the first MixinID ID from the query.
 // Returns a *NotFoundError when no MixinID ID was found.
 func (miq *MixinIDQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
-	if ids, err = miq.Limit(1).IDs(ctx); err != nil {
+	ids, err := miq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -140,8 +140,8 @@ func (miq *MixinIDQuery) OnlyX(ctx context.Context) *MixinID {
 // Returns a *NotSingularError when more than one MixinID ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (miq *MixinIDQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
-	if ids, err = miq.Limit(2).IDs(ctx); err != nil {
+	ids, err := miq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

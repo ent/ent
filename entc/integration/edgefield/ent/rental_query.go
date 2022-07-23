@@ -138,8 +138,8 @@ func (rq *RentalQuery) FirstX(ctx context.Context) *Rental {
 // FirstID returns the first Rental ID from the query.
 // Returns a *NotFoundError when no Rental ID was found.
 func (rq *RentalQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = rq.Limit(1).IDs(ctx); err != nil {
+	ids, err := rq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -189,8 +189,8 @@ func (rq *RentalQuery) OnlyX(ctx context.Context) *Rental {
 // Returns a *NotSingularError when more than one Rental ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (rq *RentalQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = rq.Limit(2).IDs(ctx); err != nil {
+	ids, err := rq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

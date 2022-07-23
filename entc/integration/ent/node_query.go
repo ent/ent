@@ -139,8 +139,8 @@ func (nq *NodeQuery) FirstX(ctx context.Context) *Node {
 // FirstID returns the first Node ID from the query.
 // Returns a *NotFoundError when no Node ID was found.
 func (nq *NodeQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = nq.Limit(1).IDs(ctx); err != nil {
+	ids, err := nq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -190,8 +190,8 @@ func (nq *NodeQuery) OnlyX(ctx context.Context) *Node {
 // Returns a *NotSingularError when more than one Node ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (nq *NodeQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = nq.Limit(2).IDs(ctx); err != nil {
+	ids, err := nq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

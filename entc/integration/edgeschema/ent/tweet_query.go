@@ -233,8 +233,8 @@ func (tq *TweetQuery) FirstX(ctx context.Context) *Tweet {
 // FirstID returns the first Tweet ID from the query.
 // Returns a *NotFoundError when no Tweet ID was found.
 func (tq *TweetQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = tq.Limit(1).IDs(ctx); err != nil {
+	ids, err := tq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -284,8 +284,8 @@ func (tq *TweetQuery) OnlyX(ctx context.Context) *Tweet {
 // Returns a *NotSingularError when more than one Tweet ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (tq *TweetQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = tq.Limit(2).IDs(ctx); err != nil {
+	ids, err := tq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

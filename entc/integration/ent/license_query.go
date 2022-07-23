@@ -90,8 +90,8 @@ func (lq *LicenseQuery) FirstX(ctx context.Context) *License {
 // FirstID returns the first License ID from the query.
 // Returns a *NotFoundError when no License ID was found.
 func (lq *LicenseQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = lq.Limit(1).IDs(ctx); err != nil {
+	ids, err := lq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -141,8 +141,8 @@ func (lq *LicenseQuery) OnlyX(ctx context.Context) *License {
 // Returns a *NotSingularError when more than one License ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (lq *LicenseQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = lq.Limit(2).IDs(ctx); err != nil {
+	ids, err := lq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

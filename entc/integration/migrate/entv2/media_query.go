@@ -88,8 +88,8 @@ func (mq *MediaQuery) FirstX(ctx context.Context) *Media {
 // FirstID returns the first Media ID from the query.
 // Returns a *NotFoundError when no Media ID was found.
 func (mq *MediaQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = mq.Limit(1).IDs(ctx); err != nil {
+	ids, err := mq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -139,8 +139,8 @@ func (mq *MediaQuery) OnlyX(ctx context.Context) *Media {
 // Returns a *NotSingularError when more than one Media ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (mq *MediaQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = mq.Limit(2).IDs(ctx); err != nil {
+	ids, err := mq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

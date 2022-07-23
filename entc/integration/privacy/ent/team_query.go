@@ -139,8 +139,8 @@ func (tq *TeamQuery) FirstX(ctx context.Context) *Team {
 // FirstID returns the first Team ID from the query.
 // Returns a *NotFoundError when no Team ID was found.
 func (tq *TeamQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = tq.Limit(1).IDs(ctx); err != nil {
+	ids, err := tq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -190,8 +190,8 @@ func (tq *TeamQuery) OnlyX(ctx context.Context) *Team {
 // Returns a *NotSingularError when more than one Team ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (tq *TeamQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = tq.Limit(2).IDs(ctx); err != nil {
+	ids, err := tq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

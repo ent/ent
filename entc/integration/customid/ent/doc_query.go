@@ -161,8 +161,8 @@ func (dq *DocQuery) FirstX(ctx context.Context) *Doc {
 // FirstID returns the first Doc ID from the query.
 // Returns a *NotFoundError when no Doc ID was found.
 func (dq *DocQuery) FirstID(ctx context.Context) (id schema.DocID, err error) {
-	var ids []schema.DocID
-	if ids, err = dq.Limit(1).IDs(ctx); err != nil {
+	ids, err := dq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -212,8 +212,8 @@ func (dq *DocQuery) OnlyX(ctx context.Context) *Doc {
 // Returns a *NotSingularError when more than one Doc ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (dq *DocQuery) OnlyID(ctx context.Context) (id schema.DocID, err error) {
-	var ids []schema.DocID
-	if ids, err = dq.Limit(2).IDs(ctx); err != nil {
+	ids, err := dq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

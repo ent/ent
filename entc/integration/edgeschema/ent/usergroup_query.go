@@ -137,8 +137,8 @@ func (ugq *UserGroupQuery) FirstX(ctx context.Context) *UserGroup {
 // FirstID returns the first UserGroup ID from the query.
 // Returns a *NotFoundError when no UserGroup ID was found.
 func (ugq *UserGroupQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = ugq.Limit(1).IDs(ctx); err != nil {
+	ids, err := ugq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -188,8 +188,8 @@ func (ugq *UserGroupQuery) OnlyX(ctx context.Context) *UserGroup {
 // Returns a *NotSingularError when more than one UserGroup ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (ugq *UserGroupQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = ugq.Limit(2).IDs(ctx); err != nil {
+	ids, err := ugq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

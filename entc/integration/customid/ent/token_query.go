@@ -115,8 +115,8 @@ func (tq *TokenQuery) FirstX(ctx context.Context) *Token {
 // FirstID returns the first Token ID from the query.
 // Returns a *NotFoundError when no Token ID was found.
 func (tq *TokenQuery) FirstID(ctx context.Context) (id sid.ID, err error) {
-	var ids []sid.ID
-	if ids, err = tq.Limit(1).IDs(ctx); err != nil {
+	ids, err := tq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -166,8 +166,8 @@ func (tq *TokenQuery) OnlyX(ctx context.Context) *Token {
 // Returns a *NotSingularError when more than one Token ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (tq *TokenQuery) OnlyID(ctx context.Context) (id sid.ID, err error) {
-	var ids []sid.ID
-	if ids, err = tq.Limit(2).IDs(ctx); err != nil {
+	ids, err := tq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

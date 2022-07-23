@@ -115,8 +115,8 @@ func (aq *AccountQuery) FirstX(ctx context.Context) *Account {
 // FirstID returns the first Account ID from the query.
 // Returns a *NotFoundError when no Account ID was found.
 func (aq *AccountQuery) FirstID(ctx context.Context) (id sid.ID, err error) {
-	var ids []sid.ID
-	if ids, err = aq.Limit(1).IDs(ctx); err != nil {
+	ids, err := aq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -166,8 +166,8 @@ func (aq *AccountQuery) OnlyX(ctx context.Context) *Account {
 // Returns a *NotSingularError when more than one Account ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (aq *AccountQuery) OnlyID(ctx context.Context) (id sid.ID, err error) {
-	var ids []sid.ID
-	if ids, err = aq.Limit(2).IDs(ctx); err != nil {
+	ids, err := aq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

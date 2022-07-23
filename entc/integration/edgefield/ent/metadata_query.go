@@ -160,8 +160,8 @@ func (mq *MetadataQuery) FirstX(ctx context.Context) *Metadata {
 // FirstID returns the first Metadata ID from the query.
 // Returns a *NotFoundError when no Metadata ID was found.
 func (mq *MetadataQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = mq.Limit(1).IDs(ctx); err != nil {
+	ids, err := mq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -211,8 +211,8 @@ func (mq *MetadataQuery) OnlyX(ctx context.Context) *Metadata {
 // Returns a *NotSingularError when more than one Metadata ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (mq *MetadataQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = mq.Limit(2).IDs(ctx); err != nil {
+	ids, err := mq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

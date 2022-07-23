@@ -88,8 +88,8 @@ func (riq *RelationshipInfoQuery) FirstX(ctx context.Context) *RelationshipInfo 
 // FirstID returns the first RelationshipInfo ID from the query.
 // Returns a *NotFoundError when no RelationshipInfo ID was found.
 func (riq *RelationshipInfoQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = riq.Limit(1).IDs(ctx); err != nil {
+	ids, err := riq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -139,8 +139,8 @@ func (riq *RelationshipInfoQuery) OnlyX(ctx context.Context) *RelationshipInfo {
 // Returns a *NotSingularError when more than one RelationshipInfo ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (riq *RelationshipInfoQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = riq.Limit(2).IDs(ctx); err != nil {
+	ids, err := riq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

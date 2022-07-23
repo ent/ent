@@ -138,8 +138,8 @@ func (nq *NoteQuery) FirstX(ctx context.Context) *Note {
 // FirstID returns the first Note ID from the query.
 // Returns a *NotFoundError when no Note ID was found.
 func (nq *NoteQuery) FirstID(ctx context.Context) (id schema.NoteID, err error) {
-	var ids []schema.NoteID
-	if ids, err = nq.Limit(1).IDs(ctx); err != nil {
+	ids, err := nq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -189,8 +189,8 @@ func (nq *NoteQuery) OnlyX(ctx context.Context) *Note {
 // Returns a *NotSingularError when more than one Note ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (nq *NoteQuery) OnlyID(ctx context.Context) (id schema.NoteID, err error) {
-	var ids []schema.NoteID
-	if ids, err = nq.Limit(2).IDs(ctx); err != nil {
+	ids, err := nq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

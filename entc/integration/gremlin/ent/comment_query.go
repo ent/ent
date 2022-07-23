@@ -88,8 +88,8 @@ func (cq *CommentQuery) FirstX(ctx context.Context) *Comment {
 // FirstID returns the first Comment ID from the query.
 // Returns a *NotFoundError when no Comment ID was found.
 func (cq *CommentQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
-	if ids, err = cq.Limit(1).IDs(ctx); err != nil {
+	ids, err := cq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -139,8 +139,8 @@ func (cq *CommentQuery) OnlyX(ctx context.Context) *Comment {
 // Returns a *NotSingularError when more than one Comment ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (cq *CommentQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
-	if ids, err = cq.Limit(2).IDs(ctx); err != nil {
+	ids, err := cq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

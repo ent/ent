@@ -88,8 +88,8 @@ func (ctq *CustomTypeQuery) FirstX(ctx context.Context) *CustomType {
 // FirstID returns the first CustomType ID from the query.
 // Returns a *NotFoundError when no CustomType ID was found.
 func (ctq *CustomTypeQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = ctq.Limit(1).IDs(ctx); err != nil {
+	ids, err := ctq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -139,8 +139,8 @@ func (ctq *CustomTypeQuery) OnlyX(ctx context.Context) *CustomType {
 // Returns a *NotSingularError when more than one CustomType ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (ctq *CustomTypeQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = ctq.Limit(2).IDs(ctx); err != nil {
+	ids, err := ctq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

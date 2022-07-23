@@ -150,8 +150,8 @@ func (gq *GroupQuery) FirstX(ctx context.Context) *Group {
 // FirstID returns the first Group ID from the query.
 // Returns a *NotFoundError when no Group ID was found.
 func (gq *GroupQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
-	if ids, err = gq.Limit(1).IDs(ctx); err != nil {
+	ids, err := gq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -201,8 +201,8 @@ func (gq *GroupQuery) OnlyX(ctx context.Context) *Group {
 // Returns a *NotSingularError when more than one Group ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (gq *GroupQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
-	if ids, err = gq.Limit(2).IDs(ctx); err != nil {
+	ids, err := gq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

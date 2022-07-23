@@ -116,8 +116,8 @@ func (giq *GroupInfoQuery) FirstX(ctx context.Context) *GroupInfo {
 // FirstID returns the first GroupInfo ID from the query.
 // Returns a *NotFoundError when no GroupInfo ID was found.
 func (giq *GroupInfoQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = giq.Limit(1).IDs(ctx); err != nil {
+	ids, err := giq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -167,8 +167,8 @@ func (giq *GroupInfoQuery) OnlyX(ctx context.Context) *GroupInfo {
 // Returns a *NotSingularError when more than one GroupInfo ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (giq *GroupInfoQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = giq.Limit(2).IDs(ctx); err != nil {
+	ids, err := giq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

@@ -124,8 +124,8 @@ func ({{ $receiver }} *{{ $builder }}) FirstX(ctx context.Context) *{{ $.Name }}
 	// FirstID returns the first {{ $.Name }} ID from the query.
 	// Returns a *NotFoundError when no {{ $.Name }} ID was found.
 	func ({{ $receiver }} *{{ $builder }}) FirstID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
-		var ids []{{ $.ID.Type }}
-		if ids, err = {{ $receiver }}.Limit(1).IDs(ctx); err != nil {
+		ids, err := {{ $receiver }}.Limit(1).IDs(ctx)
+		if err != nil {
 			return
 		}
 		if len(ids) == 0 {
@@ -177,8 +177,8 @@ func ({{ $receiver }} *{{ $builder }}) OnlyX(ctx context.Context) *{{ $.Name }} 
 	// Returns a *NotSingularError when more than one {{ $.Name }} ID is found.
 	// Returns a *NotFoundError when no entities are found.
 	func ({{ $receiver }} *{{ $builder }}) OnlyID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
-		var ids []{{ $.ID.Type }}
-		if ids, err = {{ $receiver }}.Limit(2).IDs(ctx); err != nil {
+		ids, err := {{ $receiver }}.Limit(2).IDs(ctx)
+		if err != nil {
 			return
 		}
 		switch len(ids) {

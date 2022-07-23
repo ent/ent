@@ -138,8 +138,8 @@ func (tq *TagQuery) FirstX(ctx context.Context) *Tag {
 // FirstID returns the first Tag ID from the query.
 // Returns a *NotFoundError when no Tag ID was found.
 func (tq *TagQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = tq.Limit(1).IDs(ctx); err != nil {
+	ids, err := tq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -189,8 +189,8 @@ func (tq *TagQuery) OnlyX(ctx context.Context) *Tag {
 // Returns a *NotSingularError when more than one Tag ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (tq *TagQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = tq.Limit(2).IDs(ctx); err != nil {
+	ids, err := tq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

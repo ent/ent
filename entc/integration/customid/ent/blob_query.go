@@ -162,8 +162,8 @@ func (bq *BlobQuery) FirstX(ctx context.Context) *Blob {
 // FirstID returns the first Blob ID from the query.
 // Returns a *NotFoundError when no Blob ID was found.
 func (bq *BlobQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
-	if ids, err = bq.Limit(1).IDs(ctx); err != nil {
+	ids, err := bq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -213,8 +213,8 @@ func (bq *BlobQuery) OnlyX(ctx context.Context) *Blob {
 // Returns a *NotSingularError when more than one Blob ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (bq *BlobQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
-	if ids, err = bq.Limit(2).IDs(ctx); err != nil {
+	ids, err := bq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

@@ -113,8 +113,8 @@ func (iq *InfoQuery) FirstX(ctx context.Context) *Info {
 // FirstID returns the first Info ID from the query.
 // Returns a *NotFoundError when no Info ID was found.
 func (iq *InfoQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = iq.Limit(1).IDs(ctx); err != nil {
+	ids, err := iq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -164,8 +164,8 @@ func (iq *InfoQuery) OnlyX(ctx context.Context) *Info {
 // Returns a *NotSingularError when more than one Info ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (iq *InfoQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = iq.Limit(2).IDs(ctx); err != nil {
+	ids, err := iq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

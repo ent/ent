@@ -114,8 +114,8 @@ func (pq *PetQuery) FirstX(ctx context.Context) *Pet {
 // FirstID returns the first Pet ID from the query.
 // Returns a *NotFoundError when no Pet ID was found.
 func (pq *PetQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = pq.Limit(1).IDs(ctx); err != nil {
+	ids, err := pq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -165,8 +165,8 @@ func (pq *PetQuery) OnlyX(ctx context.Context) *Pet {
 // Returns a *NotSingularError when more than one Pet ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (pq *PetQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = pq.Limit(2).IDs(ctx); err != nil {
+	ids, err := pq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

@@ -89,8 +89,8 @@ func (tq *TenantQuery) FirstX(ctx context.Context) *Tenant {
 // FirstID returns the first Tenant ID from the query.
 // Returns a *NotFoundError when no Tenant ID was found.
 func (tq *TenantQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = tq.Limit(1).IDs(ctx); err != nil {
+	ids, err := tq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -140,8 +140,8 @@ func (tq *TenantQuery) OnlyX(ctx context.Context) *Tenant {
 // Returns a *NotSingularError when more than one Tenant ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (tq *TenantQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = tq.Limit(2).IDs(ctx); err != nil {
+	ids, err := tq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

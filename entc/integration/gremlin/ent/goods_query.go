@@ -88,8 +88,8 @@ func (gq *GoodsQuery) FirstX(ctx context.Context) *Goods {
 // FirstID returns the first Goods ID from the query.
 // Returns a *NotFoundError when no Goods ID was found.
 func (gq *GoodsQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
-	if ids, err = gq.Limit(1).IDs(ctx); err != nil {
+	ids, err := gq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -139,8 +139,8 @@ func (gq *GoodsQuery) OnlyX(ctx context.Context) *Goods {
 // Returns a *NotSingularError when more than one Goods ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (gq *GoodsQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
-	if ids, err = gq.Limit(2).IDs(ctx); err != nil {
+	ids, err := gq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

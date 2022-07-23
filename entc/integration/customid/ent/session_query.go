@@ -115,8 +115,8 @@ func (sq *SessionQuery) FirstX(ctx context.Context) *Session {
 // FirstID returns the first Session ID from the query.
 // Returns a *NotFoundError when no Session ID was found.
 func (sq *SessionQuery) FirstID(ctx context.Context) (id schema.ID, err error) {
-	var ids []schema.ID
-	if ids, err = sq.Limit(1).IDs(ctx); err != nil {
+	ids, err := sq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -166,8 +166,8 @@ func (sq *SessionQuery) OnlyX(ctx context.Context) *Session {
 // Returns a *NotSingularError when more than one Session ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (sq *SessionQuery) OnlyID(ctx context.Context) (id schema.ID, err error) {
-	var ids []schema.ID
-	if ids, err = sq.Limit(2).IDs(ctx); err != nil {
+	ids, err := sq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

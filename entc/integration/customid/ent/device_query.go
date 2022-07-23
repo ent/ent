@@ -139,8 +139,8 @@ func (dq *DeviceQuery) FirstX(ctx context.Context) *Device {
 // FirstID returns the first Device ID from the query.
 // Returns a *NotFoundError when no Device ID was found.
 func (dq *DeviceQuery) FirstID(ctx context.Context) (id schema.ID, err error) {
-	var ids []schema.ID
-	if ids, err = dq.Limit(1).IDs(ctx); err != nil {
+	ids, err := dq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -190,8 +190,8 @@ func (dq *DeviceQuery) OnlyX(ctx context.Context) *Device {
 // Returns a *NotSingularError when more than one Device ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (dq *DeviceQuery) OnlyID(ctx context.Context) (id schema.ID, err error) {
-	var ids []schema.ID
-	if ids, err = dq.Limit(2).IDs(ctx); err != nil {
+	ids, err := dq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

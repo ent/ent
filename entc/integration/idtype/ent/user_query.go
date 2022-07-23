@@ -160,8 +160,8 @@ func (uq *UserQuery) FirstX(ctx context.Context) *User {
 // FirstID returns the first User ID from the query.
 // Returns a *NotFoundError when no User ID was found.
 func (uq *UserQuery) FirstID(ctx context.Context) (id uint64, err error) {
-	var ids []uint64
-	if ids, err = uq.Limit(1).IDs(ctx); err != nil {
+	ids, err := uq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -211,8 +211,8 @@ func (uq *UserQuery) OnlyX(ctx context.Context) *User {
 // Returns a *NotSingularError when more than one User ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (uq *UserQuery) OnlyID(ctx context.Context) (id uint64, err error) {
-	var ids []uint64
-	if ids, err = uq.Limit(2).IDs(ctx); err != nil {
+	ids, err := uq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

@@ -138,8 +138,8 @@ func (isq *IntSIDQuery) FirstX(ctx context.Context) *IntSID {
 // FirstID returns the first IntSID ID from the query.
 // Returns a *NotFoundError when no IntSID ID was found.
 func (isq *IntSIDQuery) FirstID(ctx context.Context) (id sid.ID, err error) {
-	var ids []sid.ID
-	if ids, err = isq.Limit(1).IDs(ctx); err != nil {
+	ids, err := isq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -189,8 +189,8 @@ func (isq *IntSIDQuery) OnlyX(ctx context.Context) *IntSID {
 // Returns a *NotSingularError when more than one IntSID ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (isq *IntSIDQuery) OnlyID(ctx context.Context) (id sid.ID, err error) {
-	var ids []sid.ID
-	if ids, err = isq.Limit(2).IDs(ctx); err != nil {
+	ids, err := isq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

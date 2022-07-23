@@ -138,8 +138,8 @@ func (ttq *TweetTagQuery) FirstX(ctx context.Context) *TweetTag {
 // FirstID returns the first TweetTag ID from the query.
 // Returns a *NotFoundError when no TweetTag ID was found.
 func (ttq *TweetTagQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
-	if ids, err = ttq.Limit(1).IDs(ctx); err != nil {
+	ids, err := ttq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -189,8 +189,8 @@ func (ttq *TweetTagQuery) OnlyX(ctx context.Context) *TweetTag {
 // Returns a *NotSingularError when more than one TweetTag ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (ttq *TweetTagQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
-	if ids, err = ttq.Limit(2).IDs(ctx); err != nil {
+	ids, err := ttq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

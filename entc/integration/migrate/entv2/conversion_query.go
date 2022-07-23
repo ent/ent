@@ -88,8 +88,8 @@ func (cq *ConversionQuery) FirstX(ctx context.Context) *Conversion {
 // FirstID returns the first Conversion ID from the query.
 // Returns a *NotFoundError when no Conversion ID was found.
 func (cq *ConversionQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = cq.Limit(1).IDs(ctx); err != nil {
+	ids, err := cq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -139,8 +139,8 @@ func (cq *ConversionQuery) OnlyX(ctx context.Context) *Conversion {
 // Returns a *NotSingularError when more than one Conversion ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (cq *ConversionQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = cq.Limit(2).IDs(ctx); err != nil {
+	ids, err := cq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

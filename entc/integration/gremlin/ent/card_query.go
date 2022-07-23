@@ -121,8 +121,8 @@ func (cq *CardQuery) FirstX(ctx context.Context) *Card {
 // FirstID returns the first Card ID from the query.
 // Returns a *NotFoundError when no Card ID was found.
 func (cq *CardQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
-	if ids, err = cq.Limit(1).IDs(ctx); err != nil {
+	ids, err := cq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -172,8 +172,8 @@ func (cq *CardQuery) OnlyX(ctx context.Context) *Card {
 // Returns a *NotSingularError when more than one Card ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (cq *CardQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
-	if ids, err = cq.Limit(2).IDs(ctx); err != nil {
+	ids, err := cq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

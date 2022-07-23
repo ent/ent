@@ -89,8 +89,8 @@ func (tq *TaskQuery) FirstX(ctx context.Context) *Task {
 // FirstID returns the first Task ID from the query.
 // Returns a *NotFoundError when no Task ID was found.
 func (tq *TaskQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
-	if ids, err = tq.Limit(1).IDs(ctx); err != nil {
+	ids, err := tq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -140,8 +140,8 @@ func (tq *TaskQuery) OnlyX(ctx context.Context) *Task {
 // Returns a *NotSingularError when more than one Task ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (tq *TaskQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
-	if ids, err = tq.Limit(2).IDs(ctx); err != nil {
+	ids, err := tq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {

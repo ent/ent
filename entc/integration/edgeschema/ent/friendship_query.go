@@ -136,8 +136,8 @@ func (fq *FriendshipQuery) FirstX(ctx context.Context) *Friendship {
 // FirstID returns the first Friendship ID from the query.
 // Returns a *NotFoundError when no Friendship ID was found.
 func (fq *FriendshipQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = fq.Limit(1).IDs(ctx); err != nil {
+	ids, err := fq.Limit(1).IDs(ctx)
+	if err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -187,8 +187,8 @@ func (fq *FriendshipQuery) OnlyX(ctx context.Context) *Friendship {
 // Returns a *NotSingularError when more than one Friendship ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (fq *FriendshipQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
-	if ids, err = fq.Limit(2).IDs(ctx); err != nil {
+	ids, err := fq.Limit(2).IDs(ctx)
+	if err != nil {
 		return
 	}
 	switch len(ids) {
