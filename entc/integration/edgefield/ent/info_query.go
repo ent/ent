@@ -380,34 +380,40 @@ func (iq *InfoQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Info, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := iq.withUser; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Info)
-		for i := range nodes {
-			fk := nodes[i].ID
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := iq.loadUser(ctx, query, nodes, nil,
+			func(n *Info, e *User) { n.Edges.User = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "id" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.User = n
-			}
+	}
+	return nodes, nil
+}
+
+func (iq *InfoQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Info, init func(*Info), assign func(*Info, *User)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Info)
+	for i := range nodes {
+		fk := nodes[i].ID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
 }
 
 func (iq *InfoQuery) sqlCount(ctx context.Context) (int, error) {

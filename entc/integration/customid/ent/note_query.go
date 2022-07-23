@@ -425,66 +425,81 @@ func (nq *NoteQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Note, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := nq.withParent; query != nil {
-		ids := make([]schema.NoteID, 0, len(nodes))
-		nodeids := make(map[schema.NoteID][]*Note)
-		for i := range nodes {
-			if nodes[i].note_children == nil {
-				continue
-			}
-			fk := *nodes[i].note_children
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(note.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := nq.loadParent(ctx, query, nodes, nil,
+			func(n *Note, e *Note) { n.Edges.Parent = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "note_children" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Parent = n
-			}
-		}
 	}
-
 	if query := nq.withChildren; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[schema.NoteID]*Note)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Children = []*Note{}
-		}
-		query.withFKs = true
-		query.Where(predicate.Note(func(s *sql.Selector) {
-			s.Where(sql.InValues(note.ChildrenColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := nq.loadChildren(ctx, query, nodes,
+			func(n *Note) { n.Edges.Children = []*Note{} },
+			func(n *Note, e *Note) { n.Edges.Children = append(n.Edges.Children, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			fk := n.note_children
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "note_children" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "note_children" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Children = append(node.Edges.Children, n)
+	}
+	return nodes, nil
+}
+
+func (nq *NoteQuery) loadParent(ctx context.Context, query *NoteQuery, nodes []*Note, init func(*Note), assign func(*Note, *Note)) error {
+	ids := make([]schema.NoteID, 0, len(nodes))
+	nodeids := make(map[schema.NoteID][]*Note)
+	for i := range nodes {
+		if nodes[i].note_children == nil {
+			continue
+		}
+		fk := *nodes[i].note_children
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(note.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "note_children" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
+}
+func (nq *NoteQuery) loadChildren(ctx context.Context, query *NoteQuery, nodes []*Note, init func(*Note), assign func(*Note, *Note)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[schema.NoteID]*Note)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Note(func(s *sql.Selector) {
+		s.Where(sql.InValues(note.ChildrenColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.note_children
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "note_children" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "note_children" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (nq *NoteQuery) sqlCount(ctx context.Context) (int, error) {

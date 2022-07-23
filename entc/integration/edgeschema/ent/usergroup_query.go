@@ -417,60 +417,72 @@ func (ugq *UserGroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*U
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := ugq.withUser; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*UserGroup)
-		for i := range nodes {
-			fk := nodes[i].UserID
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := ugq.loadUser(ctx, query, nodes, nil,
+			func(n *UserGroup, e *User) { n.Edges.User = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.User = n
-			}
-		}
 	}
-
 	if query := ugq.withGroup; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*UserGroup)
-		for i := range nodes {
-			fk := nodes[i].GroupID
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(group.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := ugq.loadGroup(ctx, query, nodes, nil,
+			func(n *UserGroup, e *Group) { n.Edges.Group = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "group_id" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Group = n
-			}
+	}
+	return nodes, nil
+}
+
+func (ugq *UserGroupQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*UserGroup, init func(*UserGroup), assign func(*UserGroup, *User)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*UserGroup)
+	for i := range nodes {
+		fk := nodes[i].UserID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
+}
+func (ugq *UserGroupQuery) loadGroup(ctx context.Context, query *GroupQuery, nodes []*UserGroup, init func(*UserGroup), assign func(*UserGroup, *Group)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*UserGroup)
+	for i := range nodes {
+		fk := nodes[i].GroupID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(group.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "group_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (ugq *UserGroupQuery) sqlCount(ctx context.Context) (int, error) {

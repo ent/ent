@@ -453,85 +453,106 @@ func (mq *MetadataQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Met
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := mq.withUser; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Metadata)
-		for i := range nodes {
-			fk := nodes[i].ID
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := mq.loadUser(ctx, query, nodes, nil,
+			func(n *Metadata, e *User) { n.Edges.User = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "id" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.User = n
-			}
-		}
 	}
-
 	if query := mq.withChildren; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*Metadata)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Children = []*Metadata{}
-		}
-		query.Where(predicate.Metadata(func(s *sql.Selector) {
-			s.Where(sql.InValues(metadata.ChildrenColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := mq.loadChildren(ctx, query, nodes,
+			func(n *Metadata) { n.Edges.Children = []*Metadata{} },
+			func(n *Metadata, e *Metadata) { n.Edges.Children = append(n.Edges.Children, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			fk := n.ParentID
-			node, ok := nodeids[fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
-			}
-			node.Edges.Children = append(node.Edges.Children, n)
-		}
 	}
-
 	if query := mq.withParent; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Metadata)
-		for i := range nodes {
-			fk := nodes[i].ParentID
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(metadata.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := mq.loadParent(ctx, query, nodes, nil,
+			func(n *Metadata, e *Metadata) { n.Edges.Parent = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "parent_id" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Parent = n
-			}
+	}
+	return nodes, nil
+}
+
+func (mq *MetadataQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Metadata, init func(*Metadata), assign func(*Metadata, *User)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Metadata)
+	for i := range nodes {
+		fk := nodes[i].ID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
+}
+func (mq *MetadataQuery) loadChildren(ctx context.Context, query *MetadataQuery, nodes []*Metadata, init func(*Metadata), assign func(*Metadata, *Metadata)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Metadata)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.Where(predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.InValues(metadata.ChildrenColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ParentID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (mq *MetadataQuery) loadParent(ctx context.Context, query *MetadataQuery, nodes []*Metadata, init func(*Metadata), assign func(*Metadata, *Metadata)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Metadata)
+	for i := range nodes {
+		fk := nodes[i].ParentID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(metadata.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "parent_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (mq *MetadataQuery) sqlCount(ctx context.Context) (int, error) {

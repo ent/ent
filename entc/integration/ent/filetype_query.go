@@ -386,37 +386,46 @@ func (ftq *FileTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Fi
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := ftq.withFiles; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*FileType)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Files = []*File{}
-		}
-		query.withFKs = true
-		query.Where(predicate.File(func(s *sql.Selector) {
-			s.Where(sql.InValues(filetype.FilesColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := ftq.loadFiles(ctx, query, nodes,
+			func(n *FileType) { n.Edges.Files = []*File{} },
+			func(n *FileType, e *File) { n.Edges.Files = append(n.Edges.Files, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			fk := n.file_type_files
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "file_type_files" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "file_type_files" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Files = append(node.Edges.Files, n)
+	}
+	return nodes, nil
+}
+
+func (ftq *FileTypeQuery) loadFiles(ctx context.Context, query *FileQuery, nodes []*FileType, init func(*FileType), assign func(*FileType, *File)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*FileType)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
 		}
 	}
-
-	return nodes, nil
+	query.withFKs = true
+	query.Where(predicate.File(func(s *sql.Selector) {
+		s.Where(sql.InValues(filetype.FilesColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.file_type_files
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "file_type_files" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "file_type_files" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (ftq *FileTypeQuery) sqlCount(ctx context.Context) (int, error) {

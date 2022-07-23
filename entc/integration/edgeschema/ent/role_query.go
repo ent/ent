@@ -418,86 +418,104 @@ func (rq *RoleQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Role, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := rq.withUser; query != nil {
-		edgeids := make([]driver.Value, len(nodes))
-		byid := make(map[int]*Role)
-		nids := make(map[int]map[*Role]struct{})
-		for i, node := range nodes {
-			edgeids[i] = node.ID
-			byid[node.ID] = node
-			node.Edges.User = []*User{}
-		}
-		query.Where(func(s *sql.Selector) {
-			joinT := sql.Table(role.UserTable)
-			s.Join(joinT).On(s.C(user.FieldID), joinT.C(role.UserPrimaryKey[0]))
-			s.Where(sql.InValues(joinT.C(role.UserPrimaryKey[1]), edgeids...))
-			columns := s.SelectedColumns()
-			s.Select(joinT.C(role.UserPrimaryKey[1]))
-			s.AppendSelect(columns...)
-			s.SetDistinct(false)
-		})
-		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]interface{}, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]interface{}{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []interface{}) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Role]struct{}{byid[outValue]: struct{}{}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byid[outValue]] = struct{}{}
-				return nil
-			}
-		})
-		if err != nil {
+		if err := rq.loadUser(ctx, query, nodes,
+			func(n *Role) { n.Edges.User = []*User{} },
+			func(n *Role, e *User) { n.Edges.User = append(n.Edges.User, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected "user" node returned %v`, n.ID)
-			}
-			for kn := range nodes {
-				kn.Edges.User = append(kn.Edges.User, n)
-			}
-		}
 	}
-
 	if query := rq.withRolesUsers; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*Role)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.RolesUsers = []*RoleUser{}
-		}
-		query.Where(predicate.RoleUser(func(s *sql.Selector) {
-			s.Where(sql.InValues(role.RolesUsersColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := rq.loadRolesUsers(ctx, query, nodes,
+			func(n *Role) { n.Edges.RolesUsers = []*RoleUser{} },
+			func(n *Role, e *RoleUser) { n.Edges.RolesUsers = append(n.Edges.RolesUsers, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			fk := n.RoleID
-			node, ok := nodeids[fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "role_id" returned %v for node %v`, fk, n)
-			}
-			node.Edges.RolesUsers = append(node.Edges.RolesUsers, n)
+	}
+	return nodes, nil
+}
+
+func (rq *RoleQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Role, init func(*Role), assign func(*Role, *User)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Role)
+	nids := make(map[int]map[*Role]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
 		}
 	}
-
-	return nodes, nil
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(role.UserTable)
+		s.Join(joinT).On(s.C(user.FieldID), joinT.C(role.UserPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(role.UserPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(role.UserPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+		assign := spec.Assign
+		values := spec.ScanValues
+		spec.ScanValues = func(columns []string) ([]interface{}, error) {
+			values, err := values(columns[1:])
+			if err != nil {
+				return nil, err
+			}
+			return append([]interface{}{new(sql.NullInt64)}, values...), nil
+		}
+		spec.Assign = func(columns []string, values []interface{}) error {
+			outValue := int(values[0].(*sql.NullInt64).Int64)
+			inValue := int(values[1].(*sql.NullInt64).Int64)
+			if nids[inValue] == nil {
+				nids[inValue] = map[*Role]struct{}{byID[outValue]: struct{}{}}
+				return assign(columns[1:], values[1:])
+			}
+			nids[inValue][byID[outValue]] = struct{}{}
+			return nil
+		}
+	})
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "user" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
+func (rq *RoleQuery) loadRolesUsers(ctx context.Context, query *RoleUserQuery, nodes []*Role, init func(*Role), assign func(*Role, *RoleUser)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Role)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.Where(predicate.RoleUser(func(s *sql.Selector) {
+		s.Where(sql.InValues(role.RolesUsersColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.RoleID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "role_id" returned %v for node %v`, fk, n)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (rq *RoleQuery) sqlCount(ctx context.Context) (int, error) {

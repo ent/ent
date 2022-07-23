@@ -347,60 +347,72 @@ func (blq *BlobLinkQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bl
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := blq.withBlob; query != nil {
-		ids := make([]uuid.UUID, 0, len(nodes))
-		nodeids := make(map[uuid.UUID][]*BlobLink)
-		for i := range nodes {
-			fk := nodes[i].BlobID
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(blob.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := blq.loadBlob(ctx, query, nodes, nil,
+			func(n *BlobLink, e *Blob) { n.Edges.Blob = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "blob_id" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Blob = n
-			}
-		}
 	}
-
 	if query := blq.withLink; query != nil {
-		ids := make([]uuid.UUID, 0, len(nodes))
-		nodeids := make(map[uuid.UUID][]*BlobLink)
-		for i := range nodes {
-			fk := nodes[i].LinkID
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(blob.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := blq.loadLink(ctx, query, nodes, nil,
+			func(n *BlobLink, e *Blob) { n.Edges.Link = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "link_id" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Link = n
-			}
+	}
+	return nodes, nil
+}
+
+func (blq *BlobLinkQuery) loadBlob(ctx context.Context, query *BlobQuery, nodes []*BlobLink, init func(*BlobLink), assign func(*BlobLink, *Blob)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*BlobLink)
+	for i := range nodes {
+		fk := nodes[i].BlobID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(blob.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "blob_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
+}
+func (blq *BlobLinkQuery) loadLink(ctx context.Context, query *BlobQuery, nodes []*BlobLink, init func(*BlobLink), assign func(*BlobLink, *Blob)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*BlobLink)
+	for i := range nodes {
+		fk := nodes[i].LinkID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(blob.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "link_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (blq *BlobLinkQuery) sqlCount(ctx context.Context) (int, error) {

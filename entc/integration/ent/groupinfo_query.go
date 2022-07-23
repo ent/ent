@@ -386,37 +386,46 @@ func (giq *GroupInfoQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*G
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := giq.withGroups; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*GroupInfo)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Groups = []*Group{}
-		}
-		query.withFKs = true
-		query.Where(predicate.Group(func(s *sql.Selector) {
-			s.Where(sql.InValues(groupinfo.GroupsColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := giq.loadGroups(ctx, query, nodes,
+			func(n *GroupInfo) { n.Edges.Groups = []*Group{} },
+			func(n *GroupInfo, e *Group) { n.Edges.Groups = append(n.Edges.Groups, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			fk := n.group_info
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "group_info" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "group_info" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Groups = append(node.Edges.Groups, n)
+	}
+	return nodes, nil
+}
+
+func (giq *GroupInfoQuery) loadGroups(ctx context.Context, query *GroupQuery, nodes []*GroupInfo, init func(*GroupInfo), assign func(*GroupInfo, *Group)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*GroupInfo)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
 		}
 	}
-
-	return nodes, nil
+	query.withFKs = true
+	query.Where(predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.InValues(groupinfo.GroupsColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.group_info
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "group_info" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "group_info" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (giq *GroupInfoQuery) sqlCount(ctx context.Context) (int, error) {
