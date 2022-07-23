@@ -559,7 +559,7 @@ func (g *Graph) edgeSchemas() error {
 
 // Tables returns the schema definitions of SQL tables for the graph.
 func (g *Graph) Tables() (all []*schema.Table, err error) {
-	tables := make(map[string]*schema.Table)
+	tables := make(map[string]*schema.Table, len(g.Nodes))
 	for _, n := range g.Nodes {
 		table := schema.NewTable(n.Table())
 		if n.HasOneFieldID() {

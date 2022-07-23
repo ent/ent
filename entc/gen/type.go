@@ -922,7 +922,7 @@ func (t Type) UnexportedForeignKeys() []*ForeignKey {
 // aliases adds package aliases (local names) for all type-packages that
 // their import identifier conflicts with user-defined packages (i.e. GoType).
 func aliases(g *Graph) {
-	names := make(map[string]*Type)
+	names := make(map[string]*Type, len(g.Nodes))
 	for _, n := range g.Nodes {
 		names[n.PackageDir()] = n
 	}
@@ -1018,7 +1018,7 @@ func (f Field) EntSQL() *entsql.Annotation {
 // mutMethods returns the method names of mutation interface.
 var mutMethods = func() map[string]struct{} {
 	t := reflect.TypeOf(new(ent.Mutation)).Elem()
-	names := make(map[string]struct{})
+	names := make(map[string]struct{}, t.NumMethod())
 	for i := 0; i < t.NumMethod(); i++ {
 		names[t.Method(i).Name] = struct{}{}
 	}
