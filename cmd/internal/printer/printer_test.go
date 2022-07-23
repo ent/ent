@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"entgo.io/ent/entc/gen"
 	"entgo.io/ent/schema/field"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestPrinter_Print(t *testing.T) {

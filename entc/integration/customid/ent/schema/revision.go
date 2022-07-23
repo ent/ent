@@ -4,7 +4,6 @@
 
 package schema
 
-// User holds the schema definition for the User entity.
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"

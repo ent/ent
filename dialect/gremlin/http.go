@@ -12,9 +12,9 @@ import (
 	"net/http"
 	"net/url"
 
-	"entgo.io/ent/dialect/gremlin/encoding/graphson"
-
 	jsoniter "github.com/json-iterator/go"
+
+	"entgo.io/ent/dialect/gremlin/encoding/graphson"
 )
 
 type httpTransport struct {

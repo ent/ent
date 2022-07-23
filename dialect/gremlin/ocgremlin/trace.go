@@ -8,9 +8,9 @@ import (
 	"context"
 	"fmt"
 
-	"entgo.io/ent/dialect/gremlin"
-
 	"go.opencensus.io/trace"
+
+	"entgo.io/ent/dialect/gremlin"
 )
 
 // Attributes recorded on the span for the requests.

@@ -9,11 +9,10 @@ import (
 	"fmt"
 	"log"
 
-	"entgo.io/ent/examples/m2mrecur/ent/user"
+	_ "github.com/mattn/go-sqlite3"
 
 	"entgo.io/ent/examples/m2mrecur/ent"
-
-	_ "github.com/mattn/go-sqlite3"
+	"entgo.io/ent/examples/m2mrecur/ent/user"
 )
 
 func Example_M2MRecur() {

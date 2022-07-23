@@ -9,14 +9,14 @@ import (
 	"errors"
 	"testing"
 
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/stretchr/testify/require"
+
 	"entgo.io/ent/entc/integration/privacy/ent/enttest"
 	"entgo.io/ent/entc/integration/privacy/ent/privacy"
 	"entgo.io/ent/entc/integration/privacy/ent/task"
 	"entgo.io/ent/entc/integration/privacy/rule"
 	"entgo.io/ent/entc/integration/privacy/viewer"
-
-	_ "github.com/mattn/go-sqlite3"
-	"github.com/stretchr/testify/require"
 )
 
 func TestPrivacyRules(t *testing.T) {

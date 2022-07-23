@@ -11,13 +11,13 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/stretchr/testify/require"
+
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
-
-	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/stretchr/testify/require"
 )
 
 func TestMySQL_Create(t *testing.T) {

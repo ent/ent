@@ -9,13 +9,12 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/require"
 
 	"entgo.io/ent/entc/integration/ent"
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/user"
 	"entgo.io/ent/entql"
-
-	"github.com/stretchr/testify/require"
 )
 
 func EntQL(t *testing.T, client *ent.Client) {

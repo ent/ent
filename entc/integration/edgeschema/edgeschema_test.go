@@ -9,6 +9,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/stretchr/testify/require"
+
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/entc/integration/edgeschema/ent"
 	"entgo.io/ent/entc/integration/edgeschema/ent/friendship"
@@ -18,10 +22,6 @@ import (
 	_ "entgo.io/ent/entc/integration/edgeschema/ent/runtime"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
-
-	"github.com/google/uuid"
-	_ "github.com/mattn/go-sqlite3"
-	"github.com/stretchr/testify/require"
 )
 
 func TestEdgeSchemaWithID(t *testing.T) {

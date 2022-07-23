@@ -10,11 +10,11 @@ import (
 	"log"
 	"time"
 
+	_ "github.com/mattn/go-sqlite3"
+
 	"entgo.io/ent/examples/version/ent"
 	_ "entgo.io/ent/examples/version/ent/runtime"
 	"entgo.io/ent/examples/version/ent/user"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
 func Example_OptimisticLock() {

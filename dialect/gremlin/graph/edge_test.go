@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"testing"
 
-	"entgo.io/ent/dialect/gremlin/encoding/graphson"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"entgo.io/ent/dialect/gremlin/encoding/graphson"
 )
 
 func TestEdgeString(t *testing.T) {

@@ -9,11 +9,11 @@ import (
 	"strconv"
 	"time"
 
-	"entgo.io/ent/dialect/gremlin"
-
 	"go.opencensus.io/stats"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/tag"
+
+	"entgo.io/ent/dialect/gremlin"
 )
 
 // The following measures are supported for use in custom views.

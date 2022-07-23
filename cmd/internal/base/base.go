@@ -16,12 +16,12 @@ import (
 	"text/template"
 	"unicode"
 
+	"github.com/spf13/cobra"
+
 	"entgo.io/ent/cmd/internal/printer"
 	"entgo.io/ent/entc"
 	"entgo.io/ent/entc/gen"
 	"entgo.io/ent/schema/field"
-
-	"github.com/spf13/cobra"
 )
 
 // IDType is a custom ID implementation for pflag.

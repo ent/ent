@@ -17,9 +17,9 @@ import (
 	"text/template"
 	"unicode"
 
-	"entgo.io/ent/schema/field"
-
 	"github.com/go-openapi/inflect"
+
+	"entgo.io/ent/schema/field"
 )
 
 var (

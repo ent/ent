@@ -7,9 +7,9 @@ package ocgremlin
 import (
 	"context"
 
-	"entgo.io/ent/dialect/gremlin"
-
 	"go.opencensus.io/trace"
+
+	"entgo.io/ent/dialect/gremlin"
 )
 
 // Transport is an gremlin.RoundTripper that instruments all outgoing requests with

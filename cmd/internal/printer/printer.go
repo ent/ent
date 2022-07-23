@@ -11,9 +11,9 @@ import (
 	"strconv"
 	"strings"
 
-	"entgo.io/ent/entc/gen"
-
 	"github.com/olekukonko/tablewriter"
+
+	"entgo.io/ent/entc/gen"
 )
 
 // A Config controls the output of Fprint.

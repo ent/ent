@@ -11,11 +11,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"entgo.io/ent/dialect/gremlin/encoding/graphson"
-
 	jsoniter "github.com/json-iterator/go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"entgo.io/ent/dialect/gremlin/encoding/graphson"
 )
 
 func TestHTTPTransportRoundTripper(t *testing.T) {

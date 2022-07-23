@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"log"
 
-	"entgo.io/ent/examples/edgeindex/ent"
-
 	_ "github.com/mattn/go-sqlite3"
+
+	"entgo.io/ent/examples/edgeindex/ent"
 )
 
 func Example_EdgeIndex() {

@@ -7,10 +7,10 @@ package gen
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"entgo.io/ent/entc/load"
 	"entgo.io/ent/schema/field"
-
-	"github.com/stretchr/testify/require"
 )
 
 func TestType(t *testing.T) {

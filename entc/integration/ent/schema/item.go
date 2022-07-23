@@ -5,10 +5,10 @@
 package schema
 
 import (
+	"github.com/google/uuid"
+
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
-
-	"github.com/google/uuid"
 )
 
 // Item holds the schema definition for the Item entity.

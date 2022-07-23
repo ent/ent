@@ -9,10 +9,10 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"entgo.io/ent"
 	"entgo.io/ent/privacy"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestDecisionContext(t *testing.T) {

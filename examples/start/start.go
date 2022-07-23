@@ -10,12 +10,12 @@ import (
 	"log"
 	"time"
 
+	_ "github.com/mattn/go-sqlite3"
+
 	"entgo.io/ent/examples/start/ent"
 	"entgo.io/ent/examples/start/ent/car"
 	"entgo.io/ent/examples/start/ent/group"
 	"entgo.io/ent/examples/start/ent/user"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {

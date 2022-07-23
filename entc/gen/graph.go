@@ -18,11 +18,11 @@ import (
 	"strings"
 	"text/template/parse"
 
+	"golang.org/x/tools/imports"
+
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/entc/load"
 	"entgo.io/ent/schema/field"
-
-	"golang.org/x/tools/imports"
 )
 
 type (

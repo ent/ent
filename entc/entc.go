@@ -15,13 +15,13 @@ import (
 	"reflect"
 	"strings"
 
+	"golang.org/x/tools/go/packages"
+
 	"entgo.io/ent/entc/gen"
 	"entgo.io/ent/entc/internal"
 	"entgo.io/ent/entc/load"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
-
-	"golang.org/x/tools/go/packages"
 )
 
 // LoadGraph loads the schema package from the given schema path,

@@ -10,13 +10,12 @@ import (
 	"fmt"
 	"log"
 
-	"entgo.io/ent/examples/privacyadmin/viewer"
+	_ "github.com/mattn/go-sqlite3"
 
 	"entgo.io/ent/examples/privacyadmin/ent"
 	"entgo.io/ent/examples/privacyadmin/ent/privacy"
 	_ "entgo.io/ent/examples/privacyadmin/ent/runtime"
-
-	_ "github.com/mattn/go-sqlite3"
+	"entgo.io/ent/examples/privacyadmin/viewer"
 )
 
 func Example_PrivacyAdmin() {

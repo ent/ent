@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"testing"
 
-	"entgo.io/ent/entql"
-
 	"github.com/stretchr/testify/assert"
+
+	"entgo.io/ent/entql"
 )
 
 func TestPString(t *testing.T) {

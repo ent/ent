@@ -5,11 +5,11 @@
 package schema
 
 import (
+	"ariga.io/atlas/sql/postgres"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/field"
-
-	"ariga.io/atlas/sql/postgres"
 )
 
 // License holds the schema definition for the License entity.

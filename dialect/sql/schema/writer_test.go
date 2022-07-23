@@ -10,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"entgo.io/ent/dialect"
-
 	"github.com/stretchr/testify/require"
+
+	"entgo.io/ent/dialect"
 )
 
 func TestWriteDriver(t *testing.T) {

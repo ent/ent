@@ -10,10 +10,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/spf13/cobra"
+
 	"entgo.io/ent/cmd/internal/base"
 	"entgo.io/ent/entc/gen"
-
-	"github.com/spf13/cobra"
 )
 
 func main() {

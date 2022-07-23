@@ -16,13 +16,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/role"
 	"entgo.io/ent/schema/field"
-
-	"github.com/google/uuid"
 )
 
 // FieldType holds the schema definition for the FieldType entity.

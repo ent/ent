@@ -9,6 +9,9 @@ import (
 	"strings"
 	"testing"
 
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/stretchr/testify/require"
+
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/schema"
@@ -17,9 +20,6 @@ import (
 	"entgo.io/ent/entc/integration/multischema/ent/migrate"
 	"entgo.io/ent/entc/integration/multischema/ent/pet"
 	"entgo.io/ent/entc/integration/multischema/ent/user"
-	"github.com/stretchr/testify/require"
-
-	_ "github.com/go-sql-driver/mysql"
 )
 
 func TestMySQL(t *testing.T) {

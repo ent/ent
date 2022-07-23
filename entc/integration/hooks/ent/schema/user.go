@@ -9,10 +9,9 @@ import (
 	"errors"
 	"fmt"
 
-	"entgo.io/ent/entc/integration/hooks/ent/user"
-
 	"entgo.io/ent"
 	"entgo.io/ent/entc/integration/hooks/ent/hook"
+	"entgo.io/ent/entc/integration/hooks/ent/user"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/mixin"

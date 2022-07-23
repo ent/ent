@@ -11,12 +11,12 @@ import (
 	"fmt"
 	"testing"
 
-	"entgo.io/ent/dialect/gremlin"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.opencensus.io/trace"
+
+	"entgo.io/ent/dialect/gremlin"
 )
 
 type mockTransport struct {

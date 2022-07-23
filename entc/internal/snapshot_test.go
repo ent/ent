@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"entgo.io/ent/entc/gen"
-
 	"github.com/stretchr/testify/require"
+
+	"entgo.io/ent/entc/gen"
 )
 
 func TestSnapshot_Restore(t *testing.T) {

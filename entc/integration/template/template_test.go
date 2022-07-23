@@ -10,15 +10,15 @@ import (
 	"reflect"
 	"testing"
 
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/stretchr/testify/require"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/template/ent"
 	"entgo.io/ent/entc/integration/template/ent/hook"
 	"entgo.io/ent/entc/integration/template/ent/migrate"
 	"entgo.io/ent/entc/integration/template/ent/pet"
 	"entgo.io/ent/entc/integration/template/ent/user"
-
-	_ "github.com/mattn/go-sqlite3"
-	"github.com/stretchr/testify/require"
 )
 
 func TestCustomTemplate(t *testing.T) {

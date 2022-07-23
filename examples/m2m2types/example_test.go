@@ -9,11 +9,11 @@ import (
 	"fmt"
 	"log"
 
+	_ "github.com/mattn/go-sqlite3"
+
 	"entgo.io/ent/examples/m2m2types/ent"
 	"entgo.io/ent/examples/m2m2types/ent/group"
 	"entgo.io/ent/examples/m2m2types/ent/user"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
 func Example_M2M2Types() {

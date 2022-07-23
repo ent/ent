@@ -12,6 +12,8 @@ import (
 	"go/token"
 	"testing"
 
+	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -20,9 +22,6 @@ import (
 	"entgo.io/ent/entc/integration/config/ent"
 	"entgo.io/ent/entc/integration/config/ent/migrate"
 	"entgo.io/ent/entc/integration/config/ent/schema"
-
-	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 func TestSchemaConfig(t *testing.T) {

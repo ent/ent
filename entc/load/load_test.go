@@ -7,9 +7,9 @@ package load
 import (
 	"testing"
 
-	"entgo.io/ent/schema/field"
-
 	"github.com/stretchr/testify/require"
+
+	"entgo.io/ent/schema/field"
 )
 
 func TestLoad(t *testing.T) {

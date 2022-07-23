@@ -11,10 +11,10 @@ import (
 	"net/http"
 	"os"
 
+	_ "github.com/mattn/go-sqlite3"
+
 	"entgo.io/ent/examples/entcpkg/ent"
 	"entgo.io/ent/examples/entcpkg/ent/hook"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
 func Example_EntcPkg() {

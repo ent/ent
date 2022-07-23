@@ -7,10 +7,10 @@ package schema
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/field"
-
-	"github.com/stretchr/testify/require"
 )
 
 func TestColumn_ConvertibleTo(t *testing.T) {

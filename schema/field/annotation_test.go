@@ -7,9 +7,9 @@ package field_test
 import (
 	"testing"
 
-	"entgo.io/ent/schema/field"
-
 	"github.com/stretchr/testify/assert"
+
+	"entgo.io/ent/schema/field"
 )
 
 func TestAnnotation_Merge(t *testing.T) {

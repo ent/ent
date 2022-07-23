@@ -13,6 +13,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/require"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent"
 	"entgo.io/ent/entc/integration/ent/fieldtype"
@@ -20,9 +23,6 @@ import (
 	"entgo.io/ent/entc/integration/ent/schema"
 	"entgo.io/ent/entc/integration/ent/schema/task"
 	enttask "entgo.io/ent/entc/integration/ent/task"
-
-	"github.com/google/uuid"
-	"github.com/stretchr/testify/require"
 )
 
 func Types(t *testing.T, client *ent.Client) {

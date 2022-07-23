@@ -8,12 +8,12 @@ import (
 	"context"
 	"testing"
 
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/stretchr/testify/require"
+
 	"entgo.io/ent/entc/integration/idtype/ent"
 	"entgo.io/ent/entc/integration/idtype/ent/migrate"
 	"entgo.io/ent/entc/integration/idtype/ent/user"
-
-	_ "github.com/mattn/go-sqlite3"
-	"github.com/stretchr/testify/require"
 )
 
 func TestIDType(t *testing.T) {

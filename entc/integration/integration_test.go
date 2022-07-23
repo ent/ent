@@ -20,6 +20,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-sql-driver/mysql"
+	"github.com/lib/pq"
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	sqlschema "entgo.io/ent/dialect/sql/schema"
@@ -39,12 +45,6 @@ import (
 	"entgo.io/ent/entc/integration/ent/schema"
 	"entgo.io/ent/entc/integration/ent/user"
 	"entgo.io/ent/entc/integration/privacy/ent/task"
-
-	"github.com/go-sql-driver/mysql"
-	"github.com/lib/pq"
-	_ "github.com/mattn/go-sqlite3"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 )
 
 func TestSQLite(t *testing.T) {

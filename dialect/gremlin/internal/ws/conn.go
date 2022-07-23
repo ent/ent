@@ -14,12 +14,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gorilla/websocket"
+	"golang.org/x/sync/errgroup"
+
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/encoding"
 	"entgo.io/ent/dialect/gremlin/encoding/graphson"
-
-	"github.com/gorilla/websocket"
-	"golang.org/x/sync/errgroup"
 )
 
 const (

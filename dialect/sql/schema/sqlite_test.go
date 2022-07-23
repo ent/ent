@@ -10,12 +10,12 @@ import (
 	"math"
 	"testing"
 
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/stretchr/testify/require"
+
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
-
-	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/stretchr/testify/require"
 )
 
 func TestSQLite_Create(t *testing.T) {

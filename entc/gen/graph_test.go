@@ -11,10 +11,10 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"entgo.io/ent/entc/load"
 	"entgo.io/ent/schema/field"
-
-	"github.com/stretchr/testify/require"
 )
 
 var (

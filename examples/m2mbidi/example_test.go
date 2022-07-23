@@ -9,10 +9,10 @@ import (
 	"fmt"
 	"log"
 
+	_ "github.com/mattn/go-sqlite3"
+
 	"entgo.io/ent/examples/m2mbidi/ent"
 	"entgo.io/ent/examples/m2mbidi/ent/user"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
 func Example_M2MBidi() {

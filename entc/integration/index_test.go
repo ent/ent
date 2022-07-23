@@ -8,9 +8,9 @@ import (
 	"context"
 	"testing"
 
-	"entgo.io/ent/entc/integration/ent"
-
 	"github.com/stretchr/testify/require"
+
+	"entgo.io/ent/entc/integration/ent"
 )
 
 func Indexes(t *testing.T, client *ent.Client) {

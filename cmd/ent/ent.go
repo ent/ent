@@ -7,9 +7,9 @@ package main
 import (
 	"log"
 
-	"entgo.io/ent/cmd/internal/base"
-
 	"github.com/spf13/cobra"
+
+	"entgo.io/ent/cmd/internal/base"
 )
 
 func main() {

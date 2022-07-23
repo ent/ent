@@ -12,6 +12,13 @@ import (
 	"strconv"
 	"testing"
 
+	atlas "ariga.io/atlas/sql/schema"
+	"github.com/go-sql-driver/mysql"
+	"github.com/google/uuid"
+	_ "github.com/lib/pq"
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/stretchr/testify/require"
+
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/schema"
@@ -24,13 +31,6 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/user"
 	"entgo.io/ent/entc/integration/customid/sid"
 	"entgo.io/ent/schema/field"
-
-	atlas "ariga.io/atlas/sql/schema"
-	"github.com/go-sql-driver/mysql"
-	"github.com/google/uuid"
-	_ "github.com/lib/pq"
-	_ "github.com/mattn/go-sqlite3"
-	"github.com/stretchr/testify/require"
 )
 
 func TestMySQL(t *testing.T) {

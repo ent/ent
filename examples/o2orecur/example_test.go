@@ -9,10 +9,10 @@ import (
 	"fmt"
 	"log"
 
+	_ "github.com/mattn/go-sqlite3"
+
 	"entgo.io/ent/examples/o2orecur/ent"
 	"entgo.io/ent/examples/o2orecur/ent/node"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
 func Example_O2ORecur() {

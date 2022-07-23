@@ -10,13 +10,13 @@ import (
 	"fmt"
 	"log"
 
+	_ "github.com/mattn/go-sqlite3"
+
 	"entgo.io/ent/examples/privacytenant/ent"
 	"entgo.io/ent/examples/privacytenant/ent/privacy"
 	_ "entgo.io/ent/examples/privacytenant/ent/runtime"
 	"entgo.io/ent/examples/privacytenant/ent/user"
 	"entgo.io/ent/examples/privacytenant/viewer"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
 func Example_CreateTenants() {

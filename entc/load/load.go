@@ -22,9 +22,9 @@ import (
 	"text/template"
 	"time"
 
-	"entgo.io/ent"
-
 	"golang.org/x/tools/go/packages"
+
+	"entgo.io/ent"
 )
 
 type (
