@@ -382,37 +382,46 @@ func (aq *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Acco
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := aq.withToken; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[sid.ID]*Account)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Token = []*Token{}
-		}
-		query.withFKs = true
-		query.Where(predicate.Token(func(s *sql.Selector) {
-			s.Where(sql.InValues(account.TokenColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := aq.loadToken(ctx, query, nodes,
+			func(n *Account) { n.Edges.Token = []*Token{} },
+			func(n *Account, e *Token) { n.Edges.Token = append(n.Edges.Token, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			fk := n.account_token
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "account_token" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "account_token" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Token = append(node.Edges.Token, n)
+	}
+	return nodes, nil
+}
+
+func (aq *AccountQuery) loadToken(ctx context.Context, query *TokenQuery, nodes []*Account, init func(*Account), assign func(*Account, *Token)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[sid.ID]*Account)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
 		}
 	}
-
-	return nodes, nil
+	query.withFKs = true
+	query.Where(predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.InValues(account.TokenColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.account_token
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "account_token" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "account_token" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (aq *AccountQuery) sqlCount(ctx context.Context) (int, error) {

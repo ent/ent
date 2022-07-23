@@ -424,65 +424,77 @@ func (nq *NodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Node, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := nq.withPrev; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Node)
-		for i := range nodes {
-			if nodes[i].node_next == nil {
-				continue
-			}
-			fk := *nodes[i].node_next
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(node.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := nq.loadPrev(ctx, query, nodes, nil,
+			func(n *Node, e *Node) { n.Edges.Prev = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "node_next" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Prev = n
-			}
-		}
 	}
-
 	if query := nq.withNext; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*Node)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-		}
-		query.withFKs = true
-		query.Where(predicate.Node(func(s *sql.Selector) {
-			s.Where(sql.InValues(node.NextColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := nq.loadNext(ctx, query, nodes, nil,
+			func(n *Node, e *Node) { n.Edges.Next = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			fk := n.node_next
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "node_next" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "node_next" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Next = n
+	}
+	return nodes, nil
+}
+
+func (nq *NodeQuery) loadPrev(ctx context.Context, query *NodeQuery, nodes []*Node, init func(*Node), assign func(*Node, *Node)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Node)
+	for i := range nodes {
+		if nodes[i].node_next == nil {
+			continue
+		}
+		fk := *nodes[i].node_next
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(node.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "node_next" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
+}
+func (nq *NodeQuery) loadNext(ctx context.Context, query *NodeQuery, nodes []*Node, init func(*Node), assign func(*Node, *Node)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Node)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	query.withFKs = true
+	query.Where(predicate.Node(func(s *sql.Selector) {
+		s.Where(sql.InValues(node.NextColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.node_next
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "node_next" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "node_next" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (nq *NodeQuery) sqlCount(ctx context.Context) (int, error) {

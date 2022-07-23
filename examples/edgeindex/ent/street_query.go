@@ -388,37 +388,43 @@ func (sq *StreetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Stree
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := sq.withCity; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Street)
-		for i := range nodes {
-			if nodes[i].city_streets == nil {
-				continue
-			}
-			fk := *nodes[i].city_streets
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(city.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := sq.loadCity(ctx, query, nodes, nil,
+			func(n *Street, e *City) { n.Edges.City = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "city_streets" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.City = n
-			}
+	}
+	return nodes, nil
+}
+
+func (sq *StreetQuery) loadCity(ctx context.Context, query *CityQuery, nodes []*Street, init func(*Street), assign func(*Street, *City)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Street)
+	for i := range nodes {
+		if nodes[i].city_streets == nil {
+			continue
+		}
+		fk := *nodes[i].city_streets
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(city.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "city_streets" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
 }
 
 func (sq *StreetQuery) sqlCount(ctx context.Context) (int, error) {

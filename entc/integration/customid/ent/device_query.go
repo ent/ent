@@ -402,66 +402,81 @@ func (dq *DeviceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Devic
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := dq.withActiveSession; query != nil {
-		ids := make([]schema.ID, 0, len(nodes))
-		nodeids := make(map[schema.ID][]*Device)
-		for i := range nodes {
-			if nodes[i].device_active_session == nil {
-				continue
-			}
-			fk := *nodes[i].device_active_session
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(session.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := dq.loadActiveSession(ctx, query, nodes, nil,
+			func(n *Device, e *Session) { n.Edges.ActiveSession = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "device_active_session" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.ActiveSession = n
-			}
-		}
 	}
-
 	if query := dq.withSessions; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[schema.ID]*Device)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Sessions = []*Session{}
-		}
-		query.withFKs = true
-		query.Where(predicate.Session(func(s *sql.Selector) {
-			s.Where(sql.InValues(device.SessionsColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := dq.loadSessions(ctx, query, nodes,
+			func(n *Device) { n.Edges.Sessions = []*Session{} },
+			func(n *Device, e *Session) { n.Edges.Sessions = append(n.Edges.Sessions, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			fk := n.device_sessions
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "device_sessions" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "device_sessions" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Sessions = append(node.Edges.Sessions, n)
+	}
+	return nodes, nil
+}
+
+func (dq *DeviceQuery) loadActiveSession(ctx context.Context, query *SessionQuery, nodes []*Device, init func(*Device), assign func(*Device, *Session)) error {
+	ids := make([]schema.ID, 0, len(nodes))
+	nodeids := make(map[schema.ID][]*Device)
+	for i := range nodes {
+		if nodes[i].device_active_session == nil {
+			continue
+		}
+		fk := *nodes[i].device_active_session
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(session.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "device_active_session" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
+}
+func (dq *DeviceQuery) loadSessions(ctx context.Context, query *SessionQuery, nodes []*Device, init func(*Device), assign func(*Device, *Session)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[schema.ID]*Device)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.InValues(device.SessionsColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.device_sessions
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "device_sessions" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "device_sessions" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (dq *DeviceQuery) sqlCount(ctx context.Context) (int, error) {

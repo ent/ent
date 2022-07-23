@@ -381,37 +381,46 @@ func (cq *CityQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*City, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := cq.withStreets; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*City)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Streets = []*Street{}
-		}
-		query.withFKs = true
-		query.Where(predicate.Street(func(s *sql.Selector) {
-			s.Where(sql.InValues(city.StreetsColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := cq.loadStreets(ctx, query, nodes,
+			func(n *City) { n.Edges.Streets = []*Street{} },
+			func(n *City, e *Street) { n.Edges.Streets = append(n.Edges.Streets, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			fk := n.city_streets
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "city_streets" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "city_streets" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Streets = append(node.Edges.Streets, n)
+	}
+	return nodes, nil
+}
+
+func (cq *CityQuery) loadStreets(ctx context.Context, query *StreetQuery, nodes []*City, init func(*City), assign func(*City, *Street)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*City)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
 		}
 	}
-
-	return nodes, nil
+	query.withFKs = true
+	query.Where(predicate.Street(func(s *sql.Selector) {
+		s.Where(sql.InValues(city.StreetsColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.city_streets
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "city_streets" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "city_streets" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (cq *CityQuery) sqlCount(ctx context.Context) (int, error) {

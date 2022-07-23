@@ -389,37 +389,43 @@ func (tq *TokenQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Token,
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := tq.withAccount; query != nil {
-		ids := make([]sid.ID, 0, len(nodes))
-		nodeids := make(map[sid.ID][]*Token)
-		for i := range nodes {
-			if nodes[i].account_token == nil {
-				continue
-			}
-			fk := *nodes[i].account_token
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(account.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := tq.loadAccount(ctx, query, nodes, nil,
+			func(n *Token, e *Account) { n.Edges.Account = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "account_token" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Account = n
-			}
+	}
+	return nodes, nil
+}
+
+func (tq *TokenQuery) loadAccount(ctx context.Context, query *AccountQuery, nodes []*Token, init func(*Token), assign func(*Token, *Account)) error {
+	ids := make([]sid.ID, 0, len(nodes))
+	nodeids := make(map[sid.ID][]*Token)
+	for i := range nodes {
+		if nodes[i].account_token == nil {
+			continue
+		}
+		fk := *nodes[i].account_token
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(account.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "account_token" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
 }
 
 func (tq *TokenQuery) sqlCount(ctx context.Context) (int, error) {

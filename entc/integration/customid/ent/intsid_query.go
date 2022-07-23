@@ -401,66 +401,81 @@ func (isq *IntSIDQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*IntS
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := isq.withParent; query != nil {
-		ids := make([]sid.ID, 0, len(nodes))
-		nodeids := make(map[sid.ID][]*IntSID)
-		for i := range nodes {
-			if nodes[i].int_sid_parent == nil {
-				continue
-			}
-			fk := *nodes[i].int_sid_parent
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(intsid.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := isq.loadParent(ctx, query, nodes, nil,
+			func(n *IntSID, e *IntSID) { n.Edges.Parent = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "int_sid_parent" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Parent = n
-			}
-		}
 	}
-
 	if query := isq.withChildren; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[sid.ID]*IntSID)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Children = []*IntSID{}
-		}
-		query.withFKs = true
-		query.Where(predicate.IntSID(func(s *sql.Selector) {
-			s.Where(sql.InValues(intsid.ChildrenColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := isq.loadChildren(ctx, query, nodes,
+			func(n *IntSID) { n.Edges.Children = []*IntSID{} },
+			func(n *IntSID, e *IntSID) { n.Edges.Children = append(n.Edges.Children, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			fk := n.int_sid_parent
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "int_sid_parent" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "int_sid_parent" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Children = append(node.Edges.Children, n)
+	}
+	return nodes, nil
+}
+
+func (isq *IntSIDQuery) loadParent(ctx context.Context, query *IntSIDQuery, nodes []*IntSID, init func(*IntSID), assign func(*IntSID, *IntSID)) error {
+	ids := make([]sid.ID, 0, len(nodes))
+	nodeids := make(map[sid.ID][]*IntSID)
+	for i := range nodes {
+		if nodes[i].int_sid_parent == nil {
+			continue
+		}
+		fk := *nodes[i].int_sid_parent
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(intsid.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "int_sid_parent" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
+}
+func (isq *IntSIDQuery) loadChildren(ctx context.Context, query *IntSIDQuery, nodes []*IntSID, init func(*IntSID), assign func(*IntSID, *IntSID)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[sid.ID]*IntSID)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.IntSID(func(s *sql.Selector) {
+		s.Where(sql.InValues(intsid.ChildrenColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.int_sid_parent
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "int_sid_parent" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "int_sid_parent" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (isq *IntSIDQuery) sqlCount(ctx context.Context) (int, error) {
