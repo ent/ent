@@ -42,6 +42,22 @@ in the LICENSE file in the root directory of this source tree.
                     return _e, nil
                 }
             }
+
+            {{ if $e.Unique }}
+                func ({{ $receiver }} *{{ $.Name }}) setNamed{{ $e.StructField }}(name string, edge *{{ $e.Type.Name }}) {
+                    if {{ $receiver }}.Edges.named{{ $e.StructField }} == nil {
+                        {{ $receiver }}.Edges.named{{ $e.StructField }} = make(map[string]*{{ $e.Type.Name }})
+                    }
+                    {{ $receiver }}.Edges.named{{ $e.StructField }}[name] = edge
+                }
+            {{ else }}
+                func ({{ $receiver }} *{{ $.Name }}) appendNamed{{ $e.StructField }}(name string, edges ...*{{ $e.Type.Name }}) {
+                    if {{ $receiver }}.Edges.named{{ $e.StructField }} == nil {
+                        {{ $receiver }}.Edges.named{{ $e.StructField }} = make(map[string][]*{{ $e.Type.Name }})
+                    }
+                    {{ $receiver }}.Edges.named{{ $e.StructField }}[name] = append({{ $receiver }}.Edges.named{{ $e.StructField }}[name], edges...)
+                }
+            {{ end }}
         {{- end }}
     {{- end }}
 {{ end }}
@@ -77,3 +93,20 @@ in the LICENSE file in the root directory of this source tree.
         {{- end }}
     {{- end }}
 {{ end }}
+
+{{/* Process nodes before they are returned and resolve named-edges. */}}
+{{- define "dialect/sql/query/all/nodes/namedges" }}
+    {{- if $.FeatureEnabled "namedges" }}
+        {{- $builder := pascal $.Scope.Builder }}
+        {{- $receiver := receiver $builder }}
+        {{- range $e := $.Edges }}
+            for name, query := range {{ $receiver }}.{{ $e.EagerLoadNamedField }} {
+                if err := {{ $receiver }}.load{{ $e.StructField }}(ctx, query, nodes,
+                    func(n *{{ $.Name }}) { {{ if $e.Unique }} n.setNamed{{ $e.StructField }}(name, nil) {{ else }} n.appendNamed{{ $e.StructField }}(name) {{ end }} },
+                    func(n *{{ $.Name }}, e *{{ $e.Type.Name }}){ n.{{ if $e.Unique }}set{{ else }}append{{ end }}Named{{ $e.StructField }}(name, e) }); err != nil {
+                    return nil, err
+                }
+            }
+        {{- end }}
+    {{- end }}
+{{- end }}

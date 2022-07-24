@@ -146,6 +146,13 @@ func (gi *GroupInfo) NamedGroups(name string) ([]*Group, error) {
 	}
 }
 
+func (gi *GroupInfo) appendNamedGroups(name string, edges ...*Group) {
+	if gi.Edges.namedGroups == nil {
+		gi.Edges.namedGroups = make(map[string][]*Group)
+	}
+	gi.Edges.namedGroups[name] = append(gi.Edges.namedGroups[name], edges...)
+}
+
 // GroupInfos is a parsable slice of GroupInfo.
 type GroupInfos []*GroupInfo
 

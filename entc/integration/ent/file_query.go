@@ -489,6 +489,27 @@ func (fq *FileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*File, e
 			return nil, err
 		}
 	}
+	for name, query := range fq.withNamedOwner {
+		if err := fq.loadOwner(ctx, query, nodes,
+			func(n *File) { n.setNamedOwner(name, nil) },
+			func(n *File, e *User) { n.setNamedOwner(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range fq.withNamedType {
+		if err := fq.loadType(ctx, query, nodes,
+			func(n *File) { n.setNamedType(name, nil) },
+			func(n *File, e *FileType) { n.setNamedType(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range fq.withNamedField {
+		if err := fq.loadField(ctx, query, nodes,
+			func(n *File) { n.appendNamedField(name) },
+			func(n *File, e *FieldType) { n.appendNamedField(name, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -504,6 +525,9 @@ func (fq *FileQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*F
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
+		if init != nil {
+			init(nodes[i])
+		}
 	}
 	query.Where(user.IDIn(ids...))
 	neighbors, err := query.All(ctx)
@@ -533,6 +557,9 @@ func (fq *FileQuery) loadType(ctx context.Context, query *FileTypeQuery, nodes [
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
+		if init != nil {
+			init(nodes[i])
+		}
 	}
 	query.Where(filetype.IDIn(ids...))
 	neighbors, err := query.All(ctx)

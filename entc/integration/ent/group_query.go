@@ -534,6 +534,34 @@ func (gq *GroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Group,
 			return nil, err
 		}
 	}
+	for name, query := range gq.withNamedFiles {
+		if err := gq.loadFiles(ctx, query, nodes,
+			func(n *Group) { n.appendNamedFiles(name) },
+			func(n *Group, e *File) { n.appendNamedFiles(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range gq.withNamedBlocked {
+		if err := gq.loadBlocked(ctx, query, nodes,
+			func(n *Group) { n.appendNamedBlocked(name) },
+			func(n *Group, e *User) { n.appendNamedBlocked(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range gq.withNamedUsers {
+		if err := gq.loadUsers(ctx, query, nodes,
+			func(n *Group) { n.appendNamedUsers(name) },
+			func(n *Group, e *User) { n.appendNamedUsers(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range gq.withNamedInfo {
+		if err := gq.loadInfo(ctx, query, nodes,
+			func(n *Group) { n.setNamedInfo(name, nil) },
+			func(n *Group, e *GroupInfo) { n.setNamedInfo(name, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -666,6 +694,9 @@ func (gq *GroupQuery) loadInfo(ctx context.Context, query *GroupInfoQuery, nodes
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
+		if init != nil {
+			init(nodes[i])
+		}
 	}
 	query.Where(groupinfo.IDIn(ids...))
 	neighbors, err := query.All(ctx)

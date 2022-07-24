@@ -157,6 +157,13 @@ func (ft *FileType) NamedFiles(name string) ([]*File, error) {
 	}
 }
 
+func (ft *FileType) appendNamedFiles(name string, edges ...*File) {
+	if ft.Edges.namedFiles == nil {
+		ft.Edges.namedFiles = make(map[string][]*File)
+	}
+	ft.Edges.namedFiles[name] = append(ft.Edges.namedFiles[name], edges...)
+}
+
 // FileTypes is a parsable slice of FileType.
 type FileTypes []*FileType
 

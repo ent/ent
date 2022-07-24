@@ -222,6 +222,13 @@ func (pe *Pet) NamedTeam(name string) (*User, error) {
 	}
 }
 
+func (pe *Pet) setNamedTeam(name string, edge *User) {
+	if pe.Edges.namedTeam == nil {
+		pe.Edges.namedTeam = make(map[string]*User)
+	}
+	pe.Edges.namedTeam[name] = edge
+}
+
 // NamedOwner returns the Owner named value or an error if the edge was not
 // loaded in eager-loading with this name, or loaded but was not found.
 func (pe *Pet) NamedOwner(name string) (*User, error) {
@@ -237,6 +244,13 @@ func (pe *Pet) NamedOwner(name string) (*User, error) {
 	default:
 		return _e, nil
 	}
+}
+
+func (pe *Pet) setNamedOwner(name string, edge *User) {
+	if pe.Edges.namedOwner == nil {
+		pe.Edges.namedOwner = make(map[string]*User)
+	}
+	pe.Edges.namedOwner[name] = edge
 }
 
 // Pets is a parsable slice of Pet.

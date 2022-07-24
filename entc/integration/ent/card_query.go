@@ -445,6 +445,20 @@ func (cq *CardQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Card, e
 			return nil, err
 		}
 	}
+	for name, query := range cq.withNamedOwner {
+		if err := cq.loadOwner(ctx, query, nodes,
+			func(n *Card) { n.setNamedOwner(name, nil) },
+			func(n *Card, e *User) { n.setNamedOwner(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range cq.withNamedSpec {
+		if err := cq.loadSpec(ctx, query, nodes,
+			func(n *Card) { n.appendNamedSpec(name) },
+			func(n *Card, e *Spec) { n.appendNamedSpec(name, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -460,6 +474,9 @@ func (cq *CardQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*C
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
+		if init != nil {
+			init(nodes[i])
+		}
 	}
 	query.Where(user.IDIn(ids...))
 	neighbors, err := query.All(ctx)

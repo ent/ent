@@ -261,6 +261,13 @@ func (f *File) NamedOwner(name string) (*User, error) {
 	}
 }
 
+func (f *File) setNamedOwner(name string, edge *User) {
+	if f.Edges.namedOwner == nil {
+		f.Edges.namedOwner = make(map[string]*User)
+	}
+	f.Edges.namedOwner[name] = edge
+}
+
 // NamedType returns the Type named value or an error if the edge was not
 // loaded in eager-loading with this name, or loaded but was not found.
 func (f *File) NamedType(name string) (*FileType, error) {
@@ -278,6 +285,13 @@ func (f *File) NamedType(name string) (*FileType, error) {
 	}
 }
 
+func (f *File) setNamedType(name string, edge *FileType) {
+	if f.Edges.namedType == nil {
+		f.Edges.namedType = make(map[string]*FileType)
+	}
+	f.Edges.namedType[name] = edge
+}
+
 // NamedField returns the Field named value or an error if the edge was not
 // loaded in eager-loading with this name.
 func (f *File) NamedField(name string) ([]*FieldType, error) {
@@ -290,6 +304,13 @@ func (f *File) NamedField(name string) ([]*FieldType, error) {
 	default:
 		return _e, nil
 	}
+}
+
+func (f *File) appendNamedField(name string, edges ...*FieldType) {
+	if f.Edges.namedField == nil {
+		f.Edges.namedField = make(map[string][]*FieldType)
+	}
+	f.Edges.namedField[name] = append(f.Edges.namedField[name], edges...)
 }
 
 // Files is a parsable slice of File.

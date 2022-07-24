@@ -840,6 +840,83 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
+	for name, query := range uq.withNamedCard {
+		if err := uq.loadCard(ctx, query, nodes,
+			func(n *User) { n.setNamedCard(name, nil) },
+			func(n *User, e *Card) { n.setNamedCard(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range uq.withNamedPets {
+		if err := uq.loadPets(ctx, query, nodes,
+			func(n *User) { n.appendNamedPets(name) },
+			func(n *User, e *Pet) { n.appendNamedPets(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range uq.withNamedFiles {
+		if err := uq.loadFiles(ctx, query, nodes,
+			func(n *User) { n.appendNamedFiles(name) },
+			func(n *User, e *File) { n.appendNamedFiles(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range uq.withNamedGroups {
+		if err := uq.loadGroups(ctx, query, nodes,
+			func(n *User) { n.appendNamedGroups(name) },
+			func(n *User, e *Group) { n.appendNamedGroups(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range uq.withNamedFriends {
+		if err := uq.loadFriends(ctx, query, nodes,
+			func(n *User) { n.appendNamedFriends(name) },
+			func(n *User, e *User) { n.appendNamedFriends(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range uq.withNamedFollowers {
+		if err := uq.loadFollowers(ctx, query, nodes,
+			func(n *User) { n.appendNamedFollowers(name) },
+			func(n *User, e *User) { n.appendNamedFollowers(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range uq.withNamedFollowing {
+		if err := uq.loadFollowing(ctx, query, nodes,
+			func(n *User) { n.appendNamedFollowing(name) },
+			func(n *User, e *User) { n.appendNamedFollowing(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range uq.withNamedTeam {
+		if err := uq.loadTeam(ctx, query, nodes,
+			func(n *User) { n.setNamedTeam(name, nil) },
+			func(n *User, e *Pet) { n.setNamedTeam(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range uq.withNamedSpouse {
+		if err := uq.loadSpouse(ctx, query, nodes,
+			func(n *User) { n.setNamedSpouse(name, nil) },
+			func(n *User, e *User) { n.setNamedSpouse(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range uq.withNamedChildren {
+		if err := uq.loadChildren(ctx, query, nodes,
+			func(n *User) { n.appendNamedChildren(name) },
+			func(n *User, e *User) { n.appendNamedChildren(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range uq.withNamedParent {
+		if err := uq.loadParent(ctx, query, nodes,
+			func(n *User) { n.setNamedParent(name, nil) },
+			func(n *User, e *User) { n.setNamedParent(name, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -849,6 +926,9 @@ func (uq *UserQuery) loadCard(ctx context.Context, query *CardQuery, nodes []*Us
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
 	}
 	query.withFKs = true
 	query.Where(predicate.Card(func(s *sql.Selector) {
@@ -1159,6 +1239,9 @@ func (uq *UserQuery) loadTeam(ctx context.Context, query *PetQuery, nodes []*Use
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
 	}
 	query.withFKs = true
 	query.Where(predicate.Pet(func(s *sql.Selector) {
@@ -1193,6 +1276,9 @@ func (uq *UserQuery) loadSpouse(ctx context.Context, query *UserQuery, nodes []*
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
+		if init != nil {
+			init(nodes[i])
+		}
 	}
 	query.Where(user.IDIn(ids...))
 	neighbors, err := query.All(ctx)
@@ -1253,6 +1339,9 @@ func (uq *UserQuery) loadParent(ctx context.Context, query *UserQuery, nodes []*
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
+		if init != nil {
+			init(nodes[i])
+		}
 	}
 	query.Where(user.IDIn(ids...))
 	neighbors, err := query.All(ctx)

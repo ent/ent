@@ -222,6 +222,13 @@ func (c *Card) NamedOwner(name string) (*User, error) {
 	}
 }
 
+func (c *Card) setNamedOwner(name string, edge *User) {
+	if c.Edges.namedOwner == nil {
+		c.Edges.namedOwner = make(map[string]*User)
+	}
+	c.Edges.namedOwner[name] = edge
+}
+
 // NamedSpec returns the Spec named value or an error if the edge was not
 // loaded in eager-loading with this name.
 func (c *Card) NamedSpec(name string) ([]*Spec, error) {
@@ -234,6 +241,13 @@ func (c *Card) NamedSpec(name string) ([]*Spec, error) {
 	default:
 		return _e, nil
 	}
+}
+
+func (c *Card) appendNamedSpec(name string, edges ...*Spec) {
+	if c.Edges.namedSpec == nil {
+		c.Edges.namedSpec = make(map[string][]*Spec)
+	}
+	c.Edges.namedSpec[name] = append(c.Edges.namedSpec[name], edges...)
 }
 
 // Cards is a parsable slice of Card.

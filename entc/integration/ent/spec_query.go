@@ -369,6 +369,13 @@ func (sq *SpecQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Spec, e
 			return nil, err
 		}
 	}
+	for name, query := range sq.withNamedCard {
+		if err := sq.loadCard(ctx, query, nodes,
+			func(n *Spec) { n.appendNamedCard(name) },
+			func(n *Spec, e *Card) { n.appendNamedCard(name, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 

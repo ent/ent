@@ -442,6 +442,20 @@ func (pq *PetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pet, err
 			return nil, err
 		}
 	}
+	for name, query := range pq.withNamedTeam {
+		if err := pq.loadTeam(ctx, query, nodes,
+			func(n *Pet) { n.setNamedTeam(name, nil) },
+			func(n *Pet, e *User) { n.setNamedTeam(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range pq.withNamedOwner {
+		if err := pq.loadOwner(ctx, query, nodes,
+			func(n *Pet) { n.setNamedOwner(name, nil) },
+			func(n *Pet, e *User) { n.setNamedOwner(name, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -457,6 +471,9 @@ func (pq *PetQuery) loadTeam(ctx context.Context, query *UserQuery, nodes []*Pet
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
+		if init != nil {
+			init(nodes[i])
+		}
 	}
 	query.Where(user.IDIn(ids...))
 	neighbors, err := query.All(ctx)
@@ -486,6 +503,9 @@ func (pq *PetQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*Pe
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
+		if init != nil {
+			init(nodes[i])
+		}
 	}
 	query.Where(user.IDIn(ids...))
 	neighbors, err := query.All(ctx)

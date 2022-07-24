@@ -253,6 +253,13 @@ func (gr *Group) NamedFiles(name string) ([]*File, error) {
 	}
 }
 
+func (gr *Group) appendNamedFiles(name string, edges ...*File) {
+	if gr.Edges.namedFiles == nil {
+		gr.Edges.namedFiles = make(map[string][]*File)
+	}
+	gr.Edges.namedFiles[name] = append(gr.Edges.namedFiles[name], edges...)
+}
+
 // NamedBlocked returns the Blocked named value or an error if the edge was not
 // loaded in eager-loading with this name.
 func (gr *Group) NamedBlocked(name string) ([]*User, error) {
@@ -267,6 +274,13 @@ func (gr *Group) NamedBlocked(name string) ([]*User, error) {
 	}
 }
 
+func (gr *Group) appendNamedBlocked(name string, edges ...*User) {
+	if gr.Edges.namedBlocked == nil {
+		gr.Edges.namedBlocked = make(map[string][]*User)
+	}
+	gr.Edges.namedBlocked[name] = append(gr.Edges.namedBlocked[name], edges...)
+}
+
 // NamedUsers returns the Users named value or an error if the edge was not
 // loaded in eager-loading with this name.
 func (gr *Group) NamedUsers(name string) ([]*User, error) {
@@ -279,6 +293,13 @@ func (gr *Group) NamedUsers(name string) ([]*User, error) {
 	default:
 		return _e, nil
 	}
+}
+
+func (gr *Group) appendNamedUsers(name string, edges ...*User) {
+	if gr.Edges.namedUsers == nil {
+		gr.Edges.namedUsers = make(map[string][]*User)
+	}
+	gr.Edges.namedUsers[name] = append(gr.Edges.namedUsers[name], edges...)
 }
 
 // NamedInfo returns the Info named value or an error if the edge was not
@@ -296,6 +317,13 @@ func (gr *Group) NamedInfo(name string) (*GroupInfo, error) {
 	default:
 		return _e, nil
 	}
+}
+
+func (gr *Group) setNamedInfo(name string, edge *GroupInfo) {
+	if gr.Edges.namedInfo == nil {
+		gr.Edges.namedInfo = make(map[string]*GroupInfo)
+	}
+	gr.Edges.namedInfo[name] = edge
 }
 
 // Groups is a parsable slice of Group.

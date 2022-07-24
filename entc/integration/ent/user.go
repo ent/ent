@@ -465,6 +465,13 @@ func (u *User) NamedCard(name string) (*Card, error) {
 	}
 }
 
+func (u *User) setNamedCard(name string, edge *Card) {
+	if u.Edges.namedCard == nil {
+		u.Edges.namedCard = make(map[string]*Card)
+	}
+	u.Edges.namedCard[name] = edge
+}
+
 // NamedPets returns the Pets named value or an error if the edge was not
 // loaded in eager-loading with this name.
 func (u *User) NamedPets(name string) ([]*Pet, error) {
@@ -477,6 +484,13 @@ func (u *User) NamedPets(name string) ([]*Pet, error) {
 	default:
 		return _e, nil
 	}
+}
+
+func (u *User) appendNamedPets(name string, edges ...*Pet) {
+	if u.Edges.namedPets == nil {
+		u.Edges.namedPets = make(map[string][]*Pet)
+	}
+	u.Edges.namedPets[name] = append(u.Edges.namedPets[name], edges...)
 }
 
 // NamedFiles returns the Files named value or an error if the edge was not
@@ -493,6 +507,13 @@ func (u *User) NamedFiles(name string) ([]*File, error) {
 	}
 }
 
+func (u *User) appendNamedFiles(name string, edges ...*File) {
+	if u.Edges.namedFiles == nil {
+		u.Edges.namedFiles = make(map[string][]*File)
+	}
+	u.Edges.namedFiles[name] = append(u.Edges.namedFiles[name], edges...)
+}
+
 // NamedGroups returns the Groups named value or an error if the edge was not
 // loaded in eager-loading with this name.
 func (u *User) NamedGroups(name string) ([]*Group, error) {
@@ -505,6 +526,13 @@ func (u *User) NamedGroups(name string) ([]*Group, error) {
 	default:
 		return _e, nil
 	}
+}
+
+func (u *User) appendNamedGroups(name string, edges ...*Group) {
+	if u.Edges.namedGroups == nil {
+		u.Edges.namedGroups = make(map[string][]*Group)
+	}
+	u.Edges.namedGroups[name] = append(u.Edges.namedGroups[name], edges...)
 }
 
 // NamedFriends returns the Friends named value or an error if the edge was not
@@ -521,6 +549,13 @@ func (u *User) NamedFriends(name string) ([]*User, error) {
 	}
 }
 
+func (u *User) appendNamedFriends(name string, edges ...*User) {
+	if u.Edges.namedFriends == nil {
+		u.Edges.namedFriends = make(map[string][]*User)
+	}
+	u.Edges.namedFriends[name] = append(u.Edges.namedFriends[name], edges...)
+}
+
 // NamedFollowers returns the Followers named value or an error if the edge was not
 // loaded in eager-loading with this name.
 func (u *User) NamedFollowers(name string) ([]*User, error) {
@@ -535,6 +570,13 @@ func (u *User) NamedFollowers(name string) ([]*User, error) {
 	}
 }
 
+func (u *User) appendNamedFollowers(name string, edges ...*User) {
+	if u.Edges.namedFollowers == nil {
+		u.Edges.namedFollowers = make(map[string][]*User)
+	}
+	u.Edges.namedFollowers[name] = append(u.Edges.namedFollowers[name], edges...)
+}
+
 // NamedFollowing returns the Following named value or an error if the edge was not
 // loaded in eager-loading with this name.
 func (u *User) NamedFollowing(name string) ([]*User, error) {
@@ -547,6 +589,13 @@ func (u *User) NamedFollowing(name string) ([]*User, error) {
 	default:
 		return _e, nil
 	}
+}
+
+func (u *User) appendNamedFollowing(name string, edges ...*User) {
+	if u.Edges.namedFollowing == nil {
+		u.Edges.namedFollowing = make(map[string][]*User)
+	}
+	u.Edges.namedFollowing[name] = append(u.Edges.namedFollowing[name], edges...)
 }
 
 // NamedTeam returns the Team named value or an error if the edge was not
@@ -566,6 +615,13 @@ func (u *User) NamedTeam(name string) (*Pet, error) {
 	}
 }
 
+func (u *User) setNamedTeam(name string, edge *Pet) {
+	if u.Edges.namedTeam == nil {
+		u.Edges.namedTeam = make(map[string]*Pet)
+	}
+	u.Edges.namedTeam[name] = edge
+}
+
 // NamedSpouse returns the Spouse named value or an error if the edge was not
 // loaded in eager-loading with this name, or loaded but was not found.
 func (u *User) NamedSpouse(name string) (*User, error) {
@@ -583,6 +639,13 @@ func (u *User) NamedSpouse(name string) (*User, error) {
 	}
 }
 
+func (u *User) setNamedSpouse(name string, edge *User) {
+	if u.Edges.namedSpouse == nil {
+		u.Edges.namedSpouse = make(map[string]*User)
+	}
+	u.Edges.namedSpouse[name] = edge
+}
+
 // NamedChildren returns the Children named value or an error if the edge was not
 // loaded in eager-loading with this name.
 func (u *User) NamedChildren(name string) ([]*User, error) {
@@ -595,6 +658,13 @@ func (u *User) NamedChildren(name string) ([]*User, error) {
 	default:
 		return _e, nil
 	}
+}
+
+func (u *User) appendNamedChildren(name string, edges ...*User) {
+	if u.Edges.namedChildren == nil {
+		u.Edges.namedChildren = make(map[string][]*User)
+	}
+	u.Edges.namedChildren[name] = append(u.Edges.namedChildren[name], edges...)
 }
 
 // NamedParent returns the Parent named value or an error if the edge was not
@@ -612,6 +682,13 @@ func (u *User) NamedParent(name string) (*User, error) {
 	default:
 		return _e, nil
 	}
+}
+
+func (u *User) setNamedParent(name string, edge *User) {
+	if u.Edges.namedParent == nil {
+		u.Edges.namedParent = make(map[string]*User)
+	}
+	u.Edges.namedParent[name] = edge
 }
 
 // Users is a parsable slice of User.

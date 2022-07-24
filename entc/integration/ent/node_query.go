@@ -442,6 +442,20 @@ func (nq *NodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Node, e
 			return nil, err
 		}
 	}
+	for name, query := range nq.withNamedPrev {
+		if err := nq.loadPrev(ctx, query, nodes,
+			func(n *Node) { n.setNamedPrev(name, nil) },
+			func(n *Node, e *Node) { n.setNamedPrev(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range nq.withNamedNext {
+		if err := nq.loadNext(ctx, query, nodes,
+			func(n *Node) { n.setNamedNext(name, nil) },
+			func(n *Node, e *Node) { n.setNamedNext(name, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -457,6 +471,9 @@ func (nq *NodeQuery) loadPrev(ctx context.Context, query *NodeQuery, nodes []*No
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
+		if init != nil {
+			init(nodes[i])
+		}
 	}
 	query.Where(node.IDIn(ids...))
 	neighbors, err := query.All(ctx)
@@ -480,6 +497,9 @@ func (nq *NodeQuery) loadNext(ctx context.Context, query *NodeQuery, nodes []*No
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
 	}
 	query.withFKs = true
 	query.Where(predicate.Node(func(s *sql.Selector) {

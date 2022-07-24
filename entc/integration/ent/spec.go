@@ -123,6 +123,13 @@ func (s *Spec) NamedCard(name string) ([]*Card, error) {
 	}
 }
 
+func (s *Spec) appendNamedCard(name string, edges ...*Card) {
+	if s.Edges.namedCard == nil {
+		s.Edges.namedCard = make(map[string][]*Card)
+	}
+	s.Edges.namedCard[name] = append(s.Edges.namedCard[name], edges...)
+}
+
 // Specs is a parsable slice of Spec.
 type Specs []*Spec
 

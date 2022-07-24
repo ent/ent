@@ -171,6 +171,13 @@ func (n *Node) NamedPrev(name string) (*Node, error) {
 	}
 }
 
+func (n *Node) setNamedPrev(name string, edge *Node) {
+	if n.Edges.namedPrev == nil {
+		n.Edges.namedPrev = make(map[string]*Node)
+	}
+	n.Edges.namedPrev[name] = edge
+}
+
 // NamedNext returns the Next named value or an error if the edge was not
 // loaded in eager-loading with this name, or loaded but was not found.
 func (n *Node) NamedNext(name string) (*Node, error) {
@@ -186,6 +193,13 @@ func (n *Node) NamedNext(name string) (*Node, error) {
 	default:
 		return _e, nil
 	}
+}
+
+func (n *Node) setNamedNext(name string, edge *Node) {
+	if n.Edges.namedNext == nil {
+		n.Edges.namedNext = make(map[string]*Node)
+	}
+	n.Edges.namedNext[name] = edge
 }
 
 // Nodes is a parsable slice of Node.
