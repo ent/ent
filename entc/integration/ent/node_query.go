@@ -23,18 +23,16 @@ import (
 // NodeQuery is the builder for querying Node entities.
 type NodeQuery struct {
 	config
-	limit         *int
-	offset        *int
-	unique        *bool
-	order         []OrderFunc
-	fields        []string
-	predicates    []predicate.Node
-	withPrev      *NodeQuery
-	withNext      *NodeQuery
-	withFKs       bool
-	modifiers     []func(*sql.Selector)
-	withNamedPrev map[string]*NodeQuery
-	withNamedNext map[string]*NodeQuery
+	limit      *int
+	offset     *int
+	unique     *bool
+	order      []OrderFunc
+	fields     []string
+	predicates []predicate.Node
+	withPrev   *NodeQuery
+	withNext   *NodeQuery
+	withFKs    bool
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -442,20 +440,6 @@ func (nq *NodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Node, e
 			return nil, err
 		}
 	}
-	for name, query := range nq.withNamedPrev {
-		if err := nq.loadPrev(ctx, query, nodes,
-			func(n *Node) { n.setNamedPrev(name, nil) },
-			func(n *Node, e *Node) { n.setNamedPrev(name, e) }); err != nil {
-			return nil, err
-		}
-	}
-	for name, query := range nq.withNamedNext {
-		if err := nq.loadNext(ctx, query, nodes,
-			func(n *Node) { n.setNamedNext(name, nil) },
-			func(n *Node, e *Node) { n.setNamedNext(name, e) }); err != nil {
-			return nil, err
-		}
-	}
 	return nodes, nil
 }
 
@@ -656,34 +640,6 @@ func (nq *NodeQuery) ForShare(opts ...sql.LockOption) *NodeQuery {
 func (nq *NodeQuery) Modify(modifiers ...func(s *sql.Selector)) *NodeSelect {
 	nq.modifiers = append(nq.modifiers, modifiers...)
 	return nq.Select()
-}
-
-// WithNamedPrev tells the query-builder to eager-load the nodes that are connected to the "prev"
-// edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (nq *NodeQuery) WithNamedPrev(name string, opts ...func(*NodeQuery)) *NodeQuery {
-	query := &NodeQuery{config: nq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	if nq.withNamedPrev == nil {
-		nq.withNamedPrev = make(map[string]*NodeQuery)
-	}
-	nq.withNamedPrev[name] = query
-	return nq
-}
-
-// WithNamedNext tells the query-builder to eager-load the nodes that are connected to the "next"
-// edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (nq *NodeQuery) WithNamedNext(name string, opts ...func(*NodeQuery)) *NodeQuery {
-	query := &NodeQuery{config: nq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	if nq.withNamedNext == nil {
-		nq.withNamedNext = make(map[string]*NodeQuery)
-	}
-	nq.withNamedNext[name] = query
-	return nq
 }
 
 // NodeGroupBy is the group-by builder for Node entities.

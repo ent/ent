@@ -37,8 +37,6 @@ type FileQuery struct {
 	withField      *FieldTypeQuery
 	withFKs        bool
 	modifiers      []func(*sql.Selector)
-	withNamedOwner map[string]*UserQuery
-	withNamedType  map[string]*FileTypeQuery
 	withNamedField map[string]*FieldTypeQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -489,20 +487,6 @@ func (fq *FileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*File, e
 			return nil, err
 		}
 	}
-	for name, query := range fq.withNamedOwner {
-		if err := fq.loadOwner(ctx, query, nodes,
-			func(n *File) { n.setNamedOwner(name, nil) },
-			func(n *File, e *User) { n.setNamedOwner(name, e) }); err != nil {
-			return nil, err
-		}
-	}
-	for name, query := range fq.withNamedType {
-		if err := fq.loadType(ctx, query, nodes,
-			func(n *File) { n.setNamedType(name, nil) },
-			func(n *File, e *FileType) { n.setNamedType(name, e) }); err != nil {
-			return nil, err
-		}
-	}
 	for name, query := range fq.withNamedField {
 		if err := fq.loadField(ctx, query, nodes,
 			func(n *File) { n.appendNamedField(name) },
@@ -742,34 +726,6 @@ func (fq *FileQuery) ForShare(opts ...sql.LockOption) *FileQuery {
 func (fq *FileQuery) Modify(modifiers ...func(s *sql.Selector)) *FileSelect {
 	fq.modifiers = append(fq.modifiers, modifiers...)
 	return fq.Select()
-}
-
-// WithNamedOwner tells the query-builder to eager-load the nodes that are connected to the "owner"
-// edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (fq *FileQuery) WithNamedOwner(name string, opts ...func(*UserQuery)) *FileQuery {
-	query := &UserQuery{config: fq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	if fq.withNamedOwner == nil {
-		fq.withNamedOwner = make(map[string]*UserQuery)
-	}
-	fq.withNamedOwner[name] = query
-	return fq
-}
-
-// WithNamedType tells the query-builder to eager-load the nodes that are connected to the "type"
-// edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (fq *FileQuery) WithNamedType(name string, opts ...func(*FileTypeQuery)) *FileQuery {
-	query := &FileTypeQuery{config: fq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	if fq.withNamedType == nil {
-		fq.withNamedType = make(map[string]*FileTypeQuery)
-	}
-	fq.withNamedType[name] = query
-	return fq
 }
 
 // WithNamedField tells the query-builder to eager-load the nodes that are connected to the "field"

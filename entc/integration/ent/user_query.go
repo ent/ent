@@ -46,17 +46,13 @@ type UserQuery struct {
 	withParent         *UserQuery
 	withFKs            bool
 	modifiers          []func(*sql.Selector)
-	withNamedCard      map[string]*CardQuery
 	withNamedPets      map[string]*PetQuery
 	withNamedFiles     map[string]*FileQuery
 	withNamedGroups    map[string]*GroupQuery
 	withNamedFriends   map[string]*UserQuery
 	withNamedFollowers map[string]*UserQuery
 	withNamedFollowing map[string]*UserQuery
-	withNamedTeam      map[string]*PetQuery
-	withNamedSpouse    map[string]*UserQuery
 	withNamedChildren  map[string]*UserQuery
-	withNamedParent    map[string]*UserQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -840,13 +836,6 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
-	for name, query := range uq.withNamedCard {
-		if err := uq.loadCard(ctx, query, nodes,
-			func(n *User) { n.setNamedCard(name, nil) },
-			func(n *User, e *Card) { n.setNamedCard(name, e) }); err != nil {
-			return nil, err
-		}
-	}
 	for name, query := range uq.withNamedPets {
 		if err := uq.loadPets(ctx, query, nodes,
 			func(n *User) { n.appendNamedPets(name) },
@@ -889,31 +878,10 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
-	for name, query := range uq.withNamedTeam {
-		if err := uq.loadTeam(ctx, query, nodes,
-			func(n *User) { n.setNamedTeam(name, nil) },
-			func(n *User, e *Pet) { n.setNamedTeam(name, e) }); err != nil {
-			return nil, err
-		}
-	}
-	for name, query := range uq.withNamedSpouse {
-		if err := uq.loadSpouse(ctx, query, nodes,
-			func(n *User) { n.setNamedSpouse(name, nil) },
-			func(n *User, e *User) { n.setNamedSpouse(name, e) }); err != nil {
-			return nil, err
-		}
-	}
 	for name, query := range uq.withNamedChildren {
 		if err := uq.loadChildren(ctx, query, nodes,
 			func(n *User) { n.appendNamedChildren(name) },
 			func(n *User, e *User) { n.appendNamedChildren(name, e) }); err != nil {
-			return nil, err
-		}
-	}
-	for name, query := range uq.withNamedParent {
-		if err := uq.loadParent(ctx, query, nodes,
-			func(n *User) { n.setNamedParent(name, nil) },
-			func(n *User, e *User) { n.setNamedParent(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -1495,20 +1463,6 @@ func (uq *UserQuery) Modify(modifiers ...func(s *sql.Selector)) *UserSelect {
 	return uq.Select()
 }
 
-// WithNamedCard tells the query-builder to eager-load the nodes that are connected to the "card"
-// edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithNamedCard(name string, opts ...func(*CardQuery)) *UserQuery {
-	query := &CardQuery{config: uq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	if uq.withNamedCard == nil {
-		uq.withNamedCard = make(map[string]*CardQuery)
-	}
-	uq.withNamedCard[name] = query
-	return uq
-}
-
 // WithNamedPets tells the query-builder to eager-load the nodes that are connected to the "pets"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (uq *UserQuery) WithNamedPets(name string, opts ...func(*PetQuery)) *UserQuery {
@@ -1593,34 +1547,6 @@ func (uq *UserQuery) WithNamedFollowing(name string, opts ...func(*UserQuery)) *
 	return uq
 }
 
-// WithNamedTeam tells the query-builder to eager-load the nodes that are connected to the "team"
-// edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithNamedTeam(name string, opts ...func(*PetQuery)) *UserQuery {
-	query := &PetQuery{config: uq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	if uq.withNamedTeam == nil {
-		uq.withNamedTeam = make(map[string]*PetQuery)
-	}
-	uq.withNamedTeam[name] = query
-	return uq
-}
-
-// WithNamedSpouse tells the query-builder to eager-load the nodes that are connected to the "spouse"
-// edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithNamedSpouse(name string, opts ...func(*UserQuery)) *UserQuery {
-	query := &UserQuery{config: uq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	if uq.withNamedSpouse == nil {
-		uq.withNamedSpouse = make(map[string]*UserQuery)
-	}
-	uq.withNamedSpouse[name] = query
-	return uq
-}
-
 // WithNamedChildren tells the query-builder to eager-load the nodes that are connected to the "children"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (uq *UserQuery) WithNamedChildren(name string, opts ...func(*UserQuery)) *UserQuery {
@@ -1632,20 +1558,6 @@ func (uq *UserQuery) WithNamedChildren(name string, opts ...func(*UserQuery)) *U
 		uq.withNamedChildren = make(map[string]*UserQuery)
 	}
 	uq.withNamedChildren[name] = query
-	return uq
-}
-
-// WithNamedParent tells the query-builder to eager-load the nodes that are connected to the "parent"
-// edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithNamedParent(name string, opts ...func(*UserQuery)) *UserQuery {
-	query := &UserQuery{config: uq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	if uq.withNamedParent == nil {
-		uq.withNamedParent = make(map[string]*UserQuery)
-	}
-	uq.withNamedParent[name] = query
 	return uq
 }
 

@@ -41,7 +41,6 @@ type GroupQuery struct {
 	withNamedFiles   map[string]*FileQuery
 	withNamedBlocked map[string]*UserQuery
 	withNamedUsers   map[string]*UserQuery
-	withNamedInfo    map[string]*GroupInfoQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -555,13 +554,6 @@ func (gq *GroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Group,
 			return nil, err
 		}
 	}
-	for name, query := range gq.withNamedInfo {
-		if err := gq.loadInfo(ctx, query, nodes,
-			func(n *Group) { n.setNamedInfo(name, nil) },
-			func(n *Group, e *GroupInfo) { n.setNamedInfo(name, e) }); err != nil {
-			return nil, err
-		}
-	}
 	return nodes, nil
 }
 
@@ -889,20 +881,6 @@ func (gq *GroupQuery) WithNamedUsers(name string, opts ...func(*UserQuery)) *Gro
 		gq.withNamedUsers = make(map[string]*UserQuery)
 	}
 	gq.withNamedUsers[name] = query
-	return gq
-}
-
-// WithNamedInfo tells the query-builder to eager-load the nodes that are connected to the "info"
-// edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (gq *GroupQuery) WithNamedInfo(name string, opts ...func(*GroupInfoQuery)) *GroupQuery {
-	query := &GroupInfoQuery{config: gq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	if gq.withNamedInfo == nil {
-		gq.withNamedInfo = make(map[string]*GroupInfoQuery)
-	}
-	gq.withNamedInfo[name] = query
 	return gq
 }
 

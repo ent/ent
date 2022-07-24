@@ -50,10 +50,7 @@ type FileEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
-	// Edges that were loaded with dynamic name.
-	namedOwner map[string]*User
-	namedType  map[string]*FileType
-	namedField map[string][]*FieldType
+	namedField  map[string][]*FieldType
 }
 
 // OwnerOrErr returns the Owner value or an error if the edge
@@ -244,73 +241,28 @@ func (f *File) String() string {
 	return builder.String()
 }
 
-// NamedOwner returns the Owner named value or an error if the edge was not
-// loaded in eager-loading with this name, or loaded but was not found.
-func (f *File) NamedOwner(name string) (*User, error) {
-	if f.Edges.namedOwner == nil {
-		return nil, &NotLoadedError{edge: "owner"}
-	}
-	switch _e, ok := f.Edges.namedOwner[name]; {
-	case !ok:
-		return nil, &NotLoadedError{edge: "owner"}
-	case _e == nil:
-		// Edge was loaded but was not found.
-		return nil, &NotFoundError{label: user.Label}
-	default:
-		return _e, nil
-	}
-}
-
-func (f *File) setNamedOwner(name string, edge *User) {
-	if f.Edges.namedOwner == nil {
-		f.Edges.namedOwner = make(map[string]*User)
-	}
-	f.Edges.namedOwner[name] = edge
-}
-
-// NamedType returns the Type named value or an error if the edge was not
-// loaded in eager-loading with this name, or loaded but was not found.
-func (f *File) NamedType(name string) (*FileType, error) {
-	if f.Edges.namedType == nil {
-		return nil, &NotLoadedError{edge: "type"}
-	}
-	switch _e, ok := f.Edges.namedType[name]; {
-	case !ok:
-		return nil, &NotLoadedError{edge: "type"}
-	case _e == nil:
-		// Edge was loaded but was not found.
-		return nil, &NotFoundError{label: filetype.Label}
-	default:
-		return _e, nil
-	}
-}
-
-func (f *File) setNamedType(name string, edge *FileType) {
-	if f.Edges.namedType == nil {
-		f.Edges.namedType = make(map[string]*FileType)
-	}
-	f.Edges.namedType[name] = edge
-}
-
 // NamedField returns the Field named value or an error if the edge was not
 // loaded in eager-loading with this name.
 func (f *File) NamedField(name string) ([]*FieldType, error) {
 	if f.Edges.namedField == nil {
-		return nil, &NotLoadedError{edge: "field"}
+		return nil, &NotLoadedError{edge: name}
 	}
-	switch _e, ok := f.Edges.namedField[name]; {
-	case !ok:
-		return nil, &NotLoadedError{edge: "field"}
-	default:
-		return _e, nil
+	nodes, ok := f.Edges.namedField[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
 	}
+	return nodes, nil
 }
 
 func (f *File) appendNamedField(name string, edges ...*FieldType) {
 	if f.Edges.namedField == nil {
 		f.Edges.namedField = make(map[string][]*FieldType)
 	}
-	f.Edges.namedField[name] = append(f.Edges.namedField[name], edges...)
+	if len(edges) == 0 {
+		f.Edges.namedField[name] = []*FieldType{}
+	} else {
+		f.Edges.namedField[name] = append(f.Edges.namedField[name], edges...)
+	}
 }
 
 // Files is a parsable slice of File.

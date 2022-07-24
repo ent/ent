@@ -77,19 +77,14 @@ type UserEdges struct {
 	Parent *User `json:"parent,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [11]bool
-	// Edges that were loaded with dynamic name.
-	namedCard      map[string]*Card
+	loadedTypes    [11]bool
 	namedPets      map[string][]*Pet
 	namedFiles     map[string][]*File
 	namedGroups    map[string][]*Group
 	namedFriends   map[string][]*User
 	namedFollowers map[string][]*User
 	namedFollowing map[string][]*User
-	namedTeam      map[string]*Pet
-	namedSpouse    map[string]*User
 	namedChildren  map[string][]*User
-	namedParent    map[string]*User
 }
 
 // CardOrErr returns the Card value or an error if the edge
@@ -448,247 +443,172 @@ func (u *User) String() string {
 	return builder.String()
 }
 
-// NamedCard returns the Card named value or an error if the edge was not
-// loaded in eager-loading with this name, or loaded but was not found.
-func (u *User) NamedCard(name string) (*Card, error) {
-	if u.Edges.namedCard == nil {
-		return nil, &NotLoadedError{edge: "card"}
-	}
-	switch _e, ok := u.Edges.namedCard[name]; {
-	case !ok:
-		return nil, &NotLoadedError{edge: "card"}
-	case _e == nil:
-		// Edge was loaded but was not found.
-		return nil, &NotFoundError{label: card.Label}
-	default:
-		return _e, nil
-	}
-}
-
-func (u *User) setNamedCard(name string, edge *Card) {
-	if u.Edges.namedCard == nil {
-		u.Edges.namedCard = make(map[string]*Card)
-	}
-	u.Edges.namedCard[name] = edge
-}
-
 // NamedPets returns the Pets named value or an error if the edge was not
 // loaded in eager-loading with this name.
 func (u *User) NamedPets(name string) ([]*Pet, error) {
 	if u.Edges.namedPets == nil {
-		return nil, &NotLoadedError{edge: "pets"}
+		return nil, &NotLoadedError{edge: name}
 	}
-	switch _e, ok := u.Edges.namedPets[name]; {
-	case !ok:
-		return nil, &NotLoadedError{edge: "pets"}
-	default:
-		return _e, nil
+	nodes, ok := u.Edges.namedPets[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
 	}
+	return nodes, nil
 }
 
 func (u *User) appendNamedPets(name string, edges ...*Pet) {
 	if u.Edges.namedPets == nil {
 		u.Edges.namedPets = make(map[string][]*Pet)
 	}
-	u.Edges.namedPets[name] = append(u.Edges.namedPets[name], edges...)
+	if len(edges) == 0 {
+		u.Edges.namedPets[name] = []*Pet{}
+	} else {
+		u.Edges.namedPets[name] = append(u.Edges.namedPets[name], edges...)
+	}
 }
 
 // NamedFiles returns the Files named value or an error if the edge was not
 // loaded in eager-loading with this name.
 func (u *User) NamedFiles(name string) ([]*File, error) {
 	if u.Edges.namedFiles == nil {
-		return nil, &NotLoadedError{edge: "files"}
+		return nil, &NotLoadedError{edge: name}
 	}
-	switch _e, ok := u.Edges.namedFiles[name]; {
-	case !ok:
-		return nil, &NotLoadedError{edge: "files"}
-	default:
-		return _e, nil
+	nodes, ok := u.Edges.namedFiles[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
 	}
+	return nodes, nil
 }
 
 func (u *User) appendNamedFiles(name string, edges ...*File) {
 	if u.Edges.namedFiles == nil {
 		u.Edges.namedFiles = make(map[string][]*File)
 	}
-	u.Edges.namedFiles[name] = append(u.Edges.namedFiles[name], edges...)
+	if len(edges) == 0 {
+		u.Edges.namedFiles[name] = []*File{}
+	} else {
+		u.Edges.namedFiles[name] = append(u.Edges.namedFiles[name], edges...)
+	}
 }
 
 // NamedGroups returns the Groups named value or an error if the edge was not
 // loaded in eager-loading with this name.
 func (u *User) NamedGroups(name string) ([]*Group, error) {
 	if u.Edges.namedGroups == nil {
-		return nil, &NotLoadedError{edge: "groups"}
+		return nil, &NotLoadedError{edge: name}
 	}
-	switch _e, ok := u.Edges.namedGroups[name]; {
-	case !ok:
-		return nil, &NotLoadedError{edge: "groups"}
-	default:
-		return _e, nil
+	nodes, ok := u.Edges.namedGroups[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
 	}
+	return nodes, nil
 }
 
 func (u *User) appendNamedGroups(name string, edges ...*Group) {
 	if u.Edges.namedGroups == nil {
 		u.Edges.namedGroups = make(map[string][]*Group)
 	}
-	u.Edges.namedGroups[name] = append(u.Edges.namedGroups[name], edges...)
+	if len(edges) == 0 {
+		u.Edges.namedGroups[name] = []*Group{}
+	} else {
+		u.Edges.namedGroups[name] = append(u.Edges.namedGroups[name], edges...)
+	}
 }
 
 // NamedFriends returns the Friends named value or an error if the edge was not
 // loaded in eager-loading with this name.
 func (u *User) NamedFriends(name string) ([]*User, error) {
 	if u.Edges.namedFriends == nil {
-		return nil, &NotLoadedError{edge: "friends"}
+		return nil, &NotLoadedError{edge: name}
 	}
-	switch _e, ok := u.Edges.namedFriends[name]; {
-	case !ok:
-		return nil, &NotLoadedError{edge: "friends"}
-	default:
-		return _e, nil
+	nodes, ok := u.Edges.namedFriends[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
 	}
+	return nodes, nil
 }
 
 func (u *User) appendNamedFriends(name string, edges ...*User) {
 	if u.Edges.namedFriends == nil {
 		u.Edges.namedFriends = make(map[string][]*User)
 	}
-	u.Edges.namedFriends[name] = append(u.Edges.namedFriends[name], edges...)
+	if len(edges) == 0 {
+		u.Edges.namedFriends[name] = []*User{}
+	} else {
+		u.Edges.namedFriends[name] = append(u.Edges.namedFriends[name], edges...)
+	}
 }
 
 // NamedFollowers returns the Followers named value or an error if the edge was not
 // loaded in eager-loading with this name.
 func (u *User) NamedFollowers(name string) ([]*User, error) {
 	if u.Edges.namedFollowers == nil {
-		return nil, &NotLoadedError{edge: "followers"}
+		return nil, &NotLoadedError{edge: name}
 	}
-	switch _e, ok := u.Edges.namedFollowers[name]; {
-	case !ok:
-		return nil, &NotLoadedError{edge: "followers"}
-	default:
-		return _e, nil
+	nodes, ok := u.Edges.namedFollowers[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
 	}
+	return nodes, nil
 }
 
 func (u *User) appendNamedFollowers(name string, edges ...*User) {
 	if u.Edges.namedFollowers == nil {
 		u.Edges.namedFollowers = make(map[string][]*User)
 	}
-	u.Edges.namedFollowers[name] = append(u.Edges.namedFollowers[name], edges...)
+	if len(edges) == 0 {
+		u.Edges.namedFollowers[name] = []*User{}
+	} else {
+		u.Edges.namedFollowers[name] = append(u.Edges.namedFollowers[name], edges...)
+	}
 }
 
 // NamedFollowing returns the Following named value or an error if the edge was not
 // loaded in eager-loading with this name.
 func (u *User) NamedFollowing(name string) ([]*User, error) {
 	if u.Edges.namedFollowing == nil {
-		return nil, &NotLoadedError{edge: "following"}
+		return nil, &NotLoadedError{edge: name}
 	}
-	switch _e, ok := u.Edges.namedFollowing[name]; {
-	case !ok:
-		return nil, &NotLoadedError{edge: "following"}
-	default:
-		return _e, nil
+	nodes, ok := u.Edges.namedFollowing[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
 	}
+	return nodes, nil
 }
 
 func (u *User) appendNamedFollowing(name string, edges ...*User) {
 	if u.Edges.namedFollowing == nil {
 		u.Edges.namedFollowing = make(map[string][]*User)
 	}
-	u.Edges.namedFollowing[name] = append(u.Edges.namedFollowing[name], edges...)
-}
-
-// NamedTeam returns the Team named value or an error if the edge was not
-// loaded in eager-loading with this name, or loaded but was not found.
-func (u *User) NamedTeam(name string) (*Pet, error) {
-	if u.Edges.namedTeam == nil {
-		return nil, &NotLoadedError{edge: "team"}
+	if len(edges) == 0 {
+		u.Edges.namedFollowing[name] = []*User{}
+	} else {
+		u.Edges.namedFollowing[name] = append(u.Edges.namedFollowing[name], edges...)
 	}
-	switch _e, ok := u.Edges.namedTeam[name]; {
-	case !ok:
-		return nil, &NotLoadedError{edge: "team"}
-	case _e == nil:
-		// Edge was loaded but was not found.
-		return nil, &NotFoundError{label: pet.Label}
-	default:
-		return _e, nil
-	}
-}
-
-func (u *User) setNamedTeam(name string, edge *Pet) {
-	if u.Edges.namedTeam == nil {
-		u.Edges.namedTeam = make(map[string]*Pet)
-	}
-	u.Edges.namedTeam[name] = edge
-}
-
-// NamedSpouse returns the Spouse named value or an error if the edge was not
-// loaded in eager-loading with this name, or loaded but was not found.
-func (u *User) NamedSpouse(name string) (*User, error) {
-	if u.Edges.namedSpouse == nil {
-		return nil, &NotLoadedError{edge: "spouse"}
-	}
-	switch _e, ok := u.Edges.namedSpouse[name]; {
-	case !ok:
-		return nil, &NotLoadedError{edge: "spouse"}
-	case _e == nil:
-		// Edge was loaded but was not found.
-		return nil, &NotFoundError{label: user.Label}
-	default:
-		return _e, nil
-	}
-}
-
-func (u *User) setNamedSpouse(name string, edge *User) {
-	if u.Edges.namedSpouse == nil {
-		u.Edges.namedSpouse = make(map[string]*User)
-	}
-	u.Edges.namedSpouse[name] = edge
 }
 
 // NamedChildren returns the Children named value or an error if the edge was not
 // loaded in eager-loading with this name.
 func (u *User) NamedChildren(name string) ([]*User, error) {
 	if u.Edges.namedChildren == nil {
-		return nil, &NotLoadedError{edge: "children"}
+		return nil, &NotLoadedError{edge: name}
 	}
-	switch _e, ok := u.Edges.namedChildren[name]; {
-	case !ok:
-		return nil, &NotLoadedError{edge: "children"}
-	default:
-		return _e, nil
+	nodes, ok := u.Edges.namedChildren[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
 	}
+	return nodes, nil
 }
 
 func (u *User) appendNamedChildren(name string, edges ...*User) {
 	if u.Edges.namedChildren == nil {
 		u.Edges.namedChildren = make(map[string][]*User)
 	}
-	u.Edges.namedChildren[name] = append(u.Edges.namedChildren[name], edges...)
-}
-
-// NamedParent returns the Parent named value or an error if the edge was not
-// loaded in eager-loading with this name, or loaded but was not found.
-func (u *User) NamedParent(name string) (*User, error) {
-	if u.Edges.namedParent == nil {
-		return nil, &NotLoadedError{edge: "parent"}
+	if len(edges) == 0 {
+		u.Edges.namedChildren[name] = []*User{}
+	} else {
+		u.Edges.namedChildren[name] = append(u.Edges.namedChildren[name], edges...)
 	}
-	switch _e, ok := u.Edges.namedParent[name]; {
-	case !ok:
-		return nil, &NotLoadedError{edge: "parent"}
-	case _e == nil:
-		// Edge was loaded but was not found.
-		return nil, &NotFoundError{label: user.Label}
-	default:
-		return _e, nil
-	}
-}
-
-func (u *User) setNamedParent(name string, edge *User) {
-	if u.Edges.namedParent == nil {
-		u.Edges.namedParent = make(map[string]*User)
-	}
-	u.Edges.namedParent[name] = edge
 }
 
 // Users is a parsable slice of User.

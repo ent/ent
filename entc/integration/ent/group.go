@@ -49,12 +49,10 @@ type GroupEdges struct {
 	Info *GroupInfo `json:"info,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
-	// Edges that were loaded with dynamic name.
+	loadedTypes  [4]bool
 	namedFiles   map[string][]*File
 	namedBlocked map[string][]*User
 	namedUsers   map[string][]*User
-	namedInfo    map[string]*GroupInfo
 }
 
 // FilesOrErr returns the Files value or an error if the edge
@@ -243,87 +241,72 @@ func (gr *Group) String() string {
 // loaded in eager-loading with this name.
 func (gr *Group) NamedFiles(name string) ([]*File, error) {
 	if gr.Edges.namedFiles == nil {
-		return nil, &NotLoadedError{edge: "files"}
+		return nil, &NotLoadedError{edge: name}
 	}
-	switch _e, ok := gr.Edges.namedFiles[name]; {
-	case !ok:
-		return nil, &NotLoadedError{edge: "files"}
-	default:
-		return _e, nil
+	nodes, ok := gr.Edges.namedFiles[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
 	}
+	return nodes, nil
 }
 
 func (gr *Group) appendNamedFiles(name string, edges ...*File) {
 	if gr.Edges.namedFiles == nil {
 		gr.Edges.namedFiles = make(map[string][]*File)
 	}
-	gr.Edges.namedFiles[name] = append(gr.Edges.namedFiles[name], edges...)
+	if len(edges) == 0 {
+		gr.Edges.namedFiles[name] = []*File{}
+	} else {
+		gr.Edges.namedFiles[name] = append(gr.Edges.namedFiles[name], edges...)
+	}
 }
 
 // NamedBlocked returns the Blocked named value or an error if the edge was not
 // loaded in eager-loading with this name.
 func (gr *Group) NamedBlocked(name string) ([]*User, error) {
 	if gr.Edges.namedBlocked == nil {
-		return nil, &NotLoadedError{edge: "blocked"}
+		return nil, &NotLoadedError{edge: name}
 	}
-	switch _e, ok := gr.Edges.namedBlocked[name]; {
-	case !ok:
-		return nil, &NotLoadedError{edge: "blocked"}
-	default:
-		return _e, nil
+	nodes, ok := gr.Edges.namedBlocked[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
 	}
+	return nodes, nil
 }
 
 func (gr *Group) appendNamedBlocked(name string, edges ...*User) {
 	if gr.Edges.namedBlocked == nil {
 		gr.Edges.namedBlocked = make(map[string][]*User)
 	}
-	gr.Edges.namedBlocked[name] = append(gr.Edges.namedBlocked[name], edges...)
+	if len(edges) == 0 {
+		gr.Edges.namedBlocked[name] = []*User{}
+	} else {
+		gr.Edges.namedBlocked[name] = append(gr.Edges.namedBlocked[name], edges...)
+	}
 }
 
 // NamedUsers returns the Users named value or an error if the edge was not
 // loaded in eager-loading with this name.
 func (gr *Group) NamedUsers(name string) ([]*User, error) {
 	if gr.Edges.namedUsers == nil {
-		return nil, &NotLoadedError{edge: "users"}
+		return nil, &NotLoadedError{edge: name}
 	}
-	switch _e, ok := gr.Edges.namedUsers[name]; {
-	case !ok:
-		return nil, &NotLoadedError{edge: "users"}
-	default:
-		return _e, nil
+	nodes, ok := gr.Edges.namedUsers[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
 	}
+	return nodes, nil
 }
 
 func (gr *Group) appendNamedUsers(name string, edges ...*User) {
 	if gr.Edges.namedUsers == nil {
 		gr.Edges.namedUsers = make(map[string][]*User)
 	}
-	gr.Edges.namedUsers[name] = append(gr.Edges.namedUsers[name], edges...)
-}
-
-// NamedInfo returns the Info named value or an error if the edge was not
-// loaded in eager-loading with this name, or loaded but was not found.
-func (gr *Group) NamedInfo(name string) (*GroupInfo, error) {
-	if gr.Edges.namedInfo == nil {
-		return nil, &NotLoadedError{edge: "info"}
+	if len(edges) == 0 {
+		gr.Edges.namedUsers[name] = []*User{}
+	} else {
+		gr.Edges.namedUsers[name] = append(gr.Edges.namedUsers[name], edges...)
 	}
-	switch _e, ok := gr.Edges.namedInfo[name]; {
-	case !ok:
-		return nil, &NotLoadedError{edge: "info"}
-	case _e == nil:
-		// Edge was loaded but was not found.
-		return nil, &NotFoundError{label: groupinfo.Label}
-	default:
-		return _e, nil
-	}
-}
-
-func (gr *Group) setNamedInfo(name string, edge *GroupInfo) {
-	if gr.Edges.namedInfo == nil {
-		gr.Edges.namedInfo = make(map[string]*GroupInfo)
-	}
-	gr.Edges.namedInfo[name] = edge
 }
 
 // Groups is a parsable slice of Group.

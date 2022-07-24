@@ -29,6 +29,8 @@ type Pet struct {
 	UUID uuid.UUID `json:"uuid,omitempty"`
 	// Nickname holds the value of the "nickname" field.
 	Nickname string `json:"nickname,omitempty"`
+	// Trained holds the value of the "trained" field.
+	Trained bool `json:"trained,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PetQuery when eager-loading is set.
 	Edges     PetEdges `json:"edges"`
@@ -45,9 +47,6 @@ type PetEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
-	// Edges that were loaded with dynamic name.
-	namedTeam  map[string]*User
-	namedOwner map[string]*User
 }
 
 // TeamOrErr returns the Team value or an error if the edge
@@ -81,6 +80,8 @@ func (*Pet) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case pet.FieldTrained:
+			values[i] = new(sql.NullBool)
 		case pet.FieldAge:
 			values[i] = new(sql.NullFloat64)
 		case pet.FieldID:
@@ -137,6 +138,12 @@ func (pe *Pet) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field nickname", values[i])
 			} else if value.Valid {
 				pe.Nickname = value.String
+			}
+		case pet.FieldTrained:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field trained", values[i])
+			} else if value.Valid {
+				pe.Trained = value.Bool
 			}
 		case pet.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -201,56 +208,11 @@ func (pe *Pet) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("nickname=")
 	builder.WriteString(pe.Nickname)
+	builder.WriteString(", ")
+	builder.WriteString("trained=")
+	builder.WriteString(fmt.Sprintf("%v", pe.Trained))
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// NamedTeam returns the Team named value or an error if the edge was not
-// loaded in eager-loading with this name, or loaded but was not found.
-func (pe *Pet) NamedTeam(name string) (*User, error) {
-	if pe.Edges.namedTeam == nil {
-		return nil, &NotLoadedError{edge: "team"}
-	}
-	switch _e, ok := pe.Edges.namedTeam[name]; {
-	case !ok:
-		return nil, &NotLoadedError{edge: "team"}
-	case _e == nil:
-		// Edge was loaded but was not found.
-		return nil, &NotFoundError{label: user.Label}
-	default:
-		return _e, nil
-	}
-}
-
-func (pe *Pet) setNamedTeam(name string, edge *User) {
-	if pe.Edges.namedTeam == nil {
-		pe.Edges.namedTeam = make(map[string]*User)
-	}
-	pe.Edges.namedTeam[name] = edge
-}
-
-// NamedOwner returns the Owner named value or an error if the edge was not
-// loaded in eager-loading with this name, or loaded but was not found.
-func (pe *Pet) NamedOwner(name string) (*User, error) {
-	if pe.Edges.namedOwner == nil {
-		return nil, &NotLoadedError{edge: "owner"}
-	}
-	switch _e, ok := pe.Edges.namedOwner[name]; {
-	case !ok:
-		return nil, &NotLoadedError{edge: "owner"}
-	case _e == nil:
-		// Edge was loaded but was not found.
-		return nil, &NotFoundError{label: user.Label}
-	default:
-		return _e, nil
-	}
-}
-
-func (pe *Pet) setNamedOwner(name string, edge *User) {
-	if pe.Edges.namedOwner == nil {
-		pe.Edges.namedOwner = make(map[string]*User)
-	}
-	pe.Edges.namedOwner[name] = edge
 }
 
 // Pets is a parsable slice of Pet.

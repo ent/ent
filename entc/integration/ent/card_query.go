@@ -25,18 +25,17 @@ import (
 // CardQuery is the builder for querying Card entities.
 type CardQuery struct {
 	config
-	limit          *int
-	offset         *int
-	unique         *bool
-	order          []OrderFunc
-	fields         []string
-	predicates     []predicate.Card
-	withOwner      *UserQuery
-	withSpec       *SpecQuery
-	withFKs        bool
-	modifiers      []func(*sql.Selector)
-	withNamedOwner map[string]*UserQuery
-	withNamedSpec  map[string]*SpecQuery
+	limit         *int
+	offset        *int
+	unique        *bool
+	order         []OrderFunc
+	fields        []string
+	predicates    []predicate.Card
+	withOwner     *UserQuery
+	withSpec      *SpecQuery
+	withFKs       bool
+	modifiers     []func(*sql.Selector)
+	withNamedSpec map[string]*SpecQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -445,13 +444,6 @@ func (cq *CardQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Card, e
 			return nil, err
 		}
 	}
-	for name, query := range cq.withNamedOwner {
-		if err := cq.loadOwner(ctx, query, nodes,
-			func(n *Card) { n.setNamedOwner(name, nil) },
-			func(n *Card, e *User) { n.setNamedOwner(name, e) }); err != nil {
-			return nil, err
-		}
-	}
 	for name, query := range cq.withNamedSpec {
 		if err := cq.loadSpec(ctx, query, nodes,
 			func(n *Card) { n.appendNamedSpec(name) },
@@ -683,20 +675,6 @@ func (cq *CardQuery) ForShare(opts ...sql.LockOption) *CardQuery {
 func (cq *CardQuery) Modify(modifiers ...func(s *sql.Selector)) *CardSelect {
 	cq.modifiers = append(cq.modifiers, modifiers...)
 	return cq.Select()
-}
-
-// WithNamedOwner tells the query-builder to eager-load the nodes that are connected to the "owner"
-// edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (cq *CardQuery) WithNamedOwner(name string, opts ...func(*UserQuery)) *CardQuery {
-	query := &UserQuery{config: cq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	if cq.withNamedOwner == nil {
-		cq.withNamedOwner = make(map[string]*UserQuery)
-	}
-	cq.withNamedOwner[name] = query
-	return cq
 }
 
 // WithNamedSpec tells the query-builder to eager-load the nodes that are connected to the "spec"

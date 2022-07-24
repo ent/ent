@@ -35,7 +35,6 @@ type GroupInfoEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
-	// Edges that were loaded with dynamic name.
 	namedGroups map[string][]*Group
 }
 
@@ -136,21 +135,24 @@ func (gi *GroupInfo) String() string {
 // loaded in eager-loading with this name.
 func (gi *GroupInfo) NamedGroups(name string) ([]*Group, error) {
 	if gi.Edges.namedGroups == nil {
-		return nil, &NotLoadedError{edge: "groups"}
+		return nil, &NotLoadedError{edge: name}
 	}
-	switch _e, ok := gi.Edges.namedGroups[name]; {
-	case !ok:
-		return nil, &NotLoadedError{edge: "groups"}
-	default:
-		return _e, nil
+	nodes, ok := gi.Edges.namedGroups[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
 	}
+	return nodes, nil
 }
 
 func (gi *GroupInfo) appendNamedGroups(name string, edges ...*Group) {
 	if gi.Edges.namedGroups == nil {
 		gi.Edges.namedGroups = make(map[string][]*Group)
 	}
-	gi.Edges.namedGroups[name] = append(gi.Edges.namedGroups[name], edges...)
+	if len(edges) == 0 {
+		gi.Edges.namedGroups[name] = []*Group{}
+	} else {
+		gi.Edges.namedGroups[name] = append(gi.Edges.namedGroups[name], edges...)
+	}
 }
 
 // GroupInfos is a parsable slice of GroupInfo.
