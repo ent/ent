@@ -45,3 +45,35 @@ in the LICENSE file in the root directory of this source tree.
         {{- end }}
     {{- end }}
 {{ end }}
+
+{{- define "dialect/sql/query/fields/additional/namedges" }}
+    {{- if $.FeatureEnabled "namedges" }}
+        {{- range $e := $.Edges }}
+            {{ $e.EagerLoadNamedField }} map[string]*{{ $e.Type.QueryName }}
+        {{- end }}
+    {{- end }}
+{{- end }}
+
+{{ define "dialect/sql/query/additional/namedges" }}
+    {{- if $.FeatureEnabled "namedges" }}
+        {{ $builder := $.QueryName }}
+        {{ $receiver := receiver $builder }}
+        {{- range $e := $.Edges }}
+            {{ $ebuilder := $e.Type.QueryName }}
+            {{ $func := print "WithNamed" $e.StructField }}
+            // {{ $func }} tells the query-builder to eager-load the nodes that are connected to the "{{ $e.Name }}"
+            // edge with the given name. The optional arguments are used to configure the query builder of the edge.
+            func ({{ $receiver }} *{{ $builder }}) {{ $func }}(name string, opts ...func(*{{ $ebuilder }})) *{{ $builder }} {
+                query := &{{ $ebuilder }}{config: {{ $receiver }}.config}
+                for _, opt := range opts {
+                    opt(query)
+                }
+                if {{ $receiver }}.{{ $e.EagerLoadNamedField }} == nil {
+                    {{ $receiver }}.{{ $e.EagerLoadNamedField }} = make(map[string]*{{ $e.Type.QueryName }})
+                }
+                {{ $receiver }}.{{ $e.EagerLoadNamedField }}[name] = query
+                return {{ $receiver }}
+            }
+        {{- end }}
+    {{- end }}
+{{ end }}

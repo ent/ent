@@ -26,18 +26,20 @@ import (
 // FileQuery is the builder for querying File entities.
 type FileQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.File
-	// eager-loading edges.
-	withOwner *UserQuery
-	withType  *FileTypeQuery
-	withField *FieldTypeQuery
-	withFKs   bool
-	modifiers []func(*sql.Selector)
+	limit          *int
+	offset         *int
+	unique         *bool
+	order          []OrderFunc
+	fields         []string
+	predicates     []predicate.File
+	withOwner      *UserQuery
+	withType       *FileTypeQuery
+	withField      *FieldTypeQuery
+	withFKs        bool
+	modifiers      []func(*sql.Selector)
+	withNamedOwner map[string]*UserQuery
+	withNamedType  map[string]*FileTypeQuery
+	withNamedField map[string]*FieldTypeQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -713,6 +715,48 @@ func (fq *FileQuery) ForShare(opts ...sql.LockOption) *FileQuery {
 func (fq *FileQuery) Modify(modifiers ...func(s *sql.Selector)) *FileSelect {
 	fq.modifiers = append(fq.modifiers, modifiers...)
 	return fq.Select()
+}
+
+// WithNamedOwner tells the query-builder to eager-load the nodes that are connected to the "owner"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (fq *FileQuery) WithNamedOwner(name string, opts ...func(*UserQuery)) *FileQuery {
+	query := &UserQuery{config: fq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if fq.withNamedOwner == nil {
+		fq.withNamedOwner = make(map[string]*UserQuery)
+	}
+	fq.withNamedOwner[name] = query
+	return fq
+}
+
+// WithNamedType tells the query-builder to eager-load the nodes that are connected to the "type"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (fq *FileQuery) WithNamedType(name string, opts ...func(*FileTypeQuery)) *FileQuery {
+	query := &FileTypeQuery{config: fq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if fq.withNamedType == nil {
+		fq.withNamedType = make(map[string]*FileTypeQuery)
+	}
+	fq.withNamedType[name] = query
+	return fq
+}
+
+// WithNamedField tells the query-builder to eager-load the nodes that are connected to the "field"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (fq *FileQuery) WithNamedField(name string, opts ...func(*FieldTypeQuery)) *FileQuery {
+	query := &FieldTypeQuery{config: fq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if fq.withNamedField == nil {
+		fq.withNamedField = make(map[string]*FieldTypeQuery)
+	}
+	fq.withNamedField[name] = query
+	return fq
 }
 
 // FileGroupBy is the group-by builder for File entities.

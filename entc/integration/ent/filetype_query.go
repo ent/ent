@@ -24,15 +24,15 @@ import (
 // FileTypeQuery is the builder for querying FileType entities.
 type FileTypeQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.FileType
-	// eager-loading edges.
-	withFiles *FileQuery
-	modifiers []func(*sql.Selector)
+	limit          *int
+	offset         *int
+	unique         *bool
+	order          []OrderFunc
+	fields         []string
+	predicates     []predicate.FileType
+	withFiles      *FileQuery
+	modifiers      []func(*sql.Selector)
+	withNamedFiles map[string]*FileQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -561,6 +561,20 @@ func (ftq *FileTypeQuery) ForShare(opts ...sql.LockOption) *FileTypeQuery {
 func (ftq *FileTypeQuery) Modify(modifiers ...func(s *sql.Selector)) *FileTypeSelect {
 	ftq.modifiers = append(ftq.modifiers, modifiers...)
 	return ftq.Select()
+}
+
+// WithNamedFiles tells the query-builder to eager-load the nodes that are connected to the "files"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (ftq *FileTypeQuery) WithNamedFiles(name string, opts ...func(*FileQuery)) *FileTypeQuery {
+	query := &FileQuery{config: ftq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if ftq.withNamedFiles == nil {
+		ftq.withNamedFiles = make(map[string]*FileQuery)
+	}
+	ftq.withNamedFiles[name] = query
+	return ftq
 }
 
 // FileTypeGroupBy is the group-by builder for FileType entities.

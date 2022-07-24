@@ -27,26 +27,36 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.User
-	// eager-loading edges.
-	withCard      *CardQuery
-	withPets      *PetQuery
-	withFiles     *FileQuery
-	withGroups    *GroupQuery
-	withFriends   *UserQuery
-	withFollowers *UserQuery
-	withFollowing *UserQuery
-	withTeam      *PetQuery
-	withSpouse    *UserQuery
-	withChildren  *UserQuery
-	withParent    *UserQuery
-	withFKs       bool
-	modifiers     []func(*sql.Selector)
+	limit              *int
+	offset             *int
+	unique             *bool
+	order              []OrderFunc
+	fields             []string
+	predicates         []predicate.User
+	withCard           *CardQuery
+	withPets           *PetQuery
+	withFiles          *FileQuery
+	withGroups         *GroupQuery
+	withFriends        *UserQuery
+	withFollowers      *UserQuery
+	withFollowing      *UserQuery
+	withTeam           *PetQuery
+	withSpouse         *UserQuery
+	withChildren       *UserQuery
+	withParent         *UserQuery
+	withFKs            bool
+	modifiers          []func(*sql.Selector)
+	withNamedCard      map[string]*CardQuery
+	withNamedPets      map[string]*PetQuery
+	withNamedFiles     map[string]*FileQuery
+	withNamedGroups    map[string]*GroupQuery
+	withNamedFriends   map[string]*UserQuery
+	withNamedFollowers map[string]*UserQuery
+	withNamedFollowing map[string]*UserQuery
+	withNamedTeam      map[string]*PetQuery
+	withNamedSpouse    map[string]*UserQuery
+	withNamedChildren  map[string]*UserQuery
+	withNamedParent    map[string]*UserQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -1394,6 +1404,160 @@ func (uq *UserQuery) ForShare(opts ...sql.LockOption) *UserQuery {
 func (uq *UserQuery) Modify(modifiers ...func(s *sql.Selector)) *UserSelect {
 	uq.modifiers = append(uq.modifiers, modifiers...)
 	return uq.Select()
+}
+
+// WithNamedCard tells the query-builder to eager-load the nodes that are connected to the "card"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithNamedCard(name string, opts ...func(*CardQuery)) *UserQuery {
+	query := &CardQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if uq.withNamedCard == nil {
+		uq.withNamedCard = make(map[string]*CardQuery)
+	}
+	uq.withNamedCard[name] = query
+	return uq
+}
+
+// WithNamedPets tells the query-builder to eager-load the nodes that are connected to the "pets"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithNamedPets(name string, opts ...func(*PetQuery)) *UserQuery {
+	query := &PetQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if uq.withNamedPets == nil {
+		uq.withNamedPets = make(map[string]*PetQuery)
+	}
+	uq.withNamedPets[name] = query
+	return uq
+}
+
+// WithNamedFiles tells the query-builder to eager-load the nodes that are connected to the "files"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithNamedFiles(name string, opts ...func(*FileQuery)) *UserQuery {
+	query := &FileQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if uq.withNamedFiles == nil {
+		uq.withNamedFiles = make(map[string]*FileQuery)
+	}
+	uq.withNamedFiles[name] = query
+	return uq
+}
+
+// WithNamedGroups tells the query-builder to eager-load the nodes that are connected to the "groups"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithNamedGroups(name string, opts ...func(*GroupQuery)) *UserQuery {
+	query := &GroupQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if uq.withNamedGroups == nil {
+		uq.withNamedGroups = make(map[string]*GroupQuery)
+	}
+	uq.withNamedGroups[name] = query
+	return uq
+}
+
+// WithNamedFriends tells the query-builder to eager-load the nodes that are connected to the "friends"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithNamedFriends(name string, opts ...func(*UserQuery)) *UserQuery {
+	query := &UserQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if uq.withNamedFriends == nil {
+		uq.withNamedFriends = make(map[string]*UserQuery)
+	}
+	uq.withNamedFriends[name] = query
+	return uq
+}
+
+// WithNamedFollowers tells the query-builder to eager-load the nodes that are connected to the "followers"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithNamedFollowers(name string, opts ...func(*UserQuery)) *UserQuery {
+	query := &UserQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if uq.withNamedFollowers == nil {
+		uq.withNamedFollowers = make(map[string]*UserQuery)
+	}
+	uq.withNamedFollowers[name] = query
+	return uq
+}
+
+// WithNamedFollowing tells the query-builder to eager-load the nodes that are connected to the "following"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithNamedFollowing(name string, opts ...func(*UserQuery)) *UserQuery {
+	query := &UserQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if uq.withNamedFollowing == nil {
+		uq.withNamedFollowing = make(map[string]*UserQuery)
+	}
+	uq.withNamedFollowing[name] = query
+	return uq
+}
+
+// WithNamedTeam tells the query-builder to eager-load the nodes that are connected to the "team"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithNamedTeam(name string, opts ...func(*PetQuery)) *UserQuery {
+	query := &PetQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if uq.withNamedTeam == nil {
+		uq.withNamedTeam = make(map[string]*PetQuery)
+	}
+	uq.withNamedTeam[name] = query
+	return uq
+}
+
+// WithNamedSpouse tells the query-builder to eager-load the nodes that are connected to the "spouse"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithNamedSpouse(name string, opts ...func(*UserQuery)) *UserQuery {
+	query := &UserQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if uq.withNamedSpouse == nil {
+		uq.withNamedSpouse = make(map[string]*UserQuery)
+	}
+	uq.withNamedSpouse[name] = query
+	return uq
+}
+
+// WithNamedChildren tells the query-builder to eager-load the nodes that are connected to the "children"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithNamedChildren(name string, opts ...func(*UserQuery)) *UserQuery {
+	query := &UserQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if uq.withNamedChildren == nil {
+		uq.withNamedChildren = make(map[string]*UserQuery)
+	}
+	uq.withNamedChildren[name] = query
+	return uq
+}
+
+// WithNamedParent tells the query-builder to eager-load the nodes that are connected to the "parent"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithNamedParent(name string, opts ...func(*UserQuery)) *UserQuery {
+	query := &UserQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if uq.withNamedParent == nil {
+		uq.withNamedParent = make(map[string]*UserQuery)
+	}
+	uq.withNamedParent[name] = query
+	return uq
 }
 
 // UserGroupBy is the group-by builder for User entities.

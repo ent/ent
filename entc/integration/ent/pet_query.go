@@ -23,17 +23,18 @@ import (
 // PetQuery is the builder for querying Pet entities.
 type PetQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Pet
-	// eager-loading edges.
-	withTeam  *UserQuery
-	withOwner *UserQuery
-	withFKs   bool
-	modifiers []func(*sql.Selector)
+	limit          *int
+	offset         *int
+	unique         *bool
+	order          []OrderFunc
+	fields         []string
+	predicates     []predicate.Pet
+	withTeam       *UserQuery
+	withOwner      *UserQuery
+	withFKs        bool
+	modifiers      []func(*sql.Selector)
+	withNamedTeam  map[string]*UserQuery
+	withNamedOwner map[string]*UserQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -636,6 +637,34 @@ func (pq *PetQuery) ForShare(opts ...sql.LockOption) *PetQuery {
 func (pq *PetQuery) Modify(modifiers ...func(s *sql.Selector)) *PetSelect {
 	pq.modifiers = append(pq.modifiers, modifiers...)
 	return pq.Select()
+}
+
+// WithNamedTeam tells the query-builder to eager-load the nodes that are connected to the "team"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (pq *PetQuery) WithNamedTeam(name string, opts ...func(*UserQuery)) *PetQuery {
+	query := &UserQuery{config: pq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if pq.withNamedTeam == nil {
+		pq.withNamedTeam = make(map[string]*UserQuery)
+	}
+	pq.withNamedTeam[name] = query
+	return pq
+}
+
+// WithNamedOwner tells the query-builder to eager-load the nodes that are connected to the "owner"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (pq *PetQuery) WithNamedOwner(name string, opts ...func(*UserQuery)) *PetQuery {
+	query := &UserQuery{config: pq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if pq.withNamedOwner == nil {
+		pq.withNamedOwner = make(map[string]*UserQuery)
+	}
+	pq.withNamedOwner[name] = query
+	return pq
 }
 
 // PetGroupBy is the group-by builder for Pet entities.

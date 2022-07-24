@@ -26,19 +26,22 @@ import (
 // GroupQuery is the builder for querying Group entities.
 type GroupQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Group
-	// eager-loading edges.
-	withFiles   *FileQuery
-	withBlocked *UserQuery
-	withUsers   *UserQuery
-	withInfo    *GroupInfoQuery
-	withFKs     bool
-	modifiers   []func(*sql.Selector)
+	limit            *int
+	offset           *int
+	unique           *bool
+	order            []OrderFunc
+	fields           []string
+	predicates       []predicate.Group
+	withFiles        *FileQuery
+	withBlocked      *UserQuery
+	withUsers        *UserQuery
+	withInfo         *GroupInfoQuery
+	withFKs          bool
+	modifiers        []func(*sql.Selector)
+	withNamedFiles   map[string]*FileQuery
+	withNamedBlocked map[string]*UserQuery
+	withNamedUsers   map[string]*UserQuery
+	withNamedInfo    map[string]*GroupInfoQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -814,6 +817,62 @@ func (gq *GroupQuery) ForShare(opts ...sql.LockOption) *GroupQuery {
 func (gq *GroupQuery) Modify(modifiers ...func(s *sql.Selector)) *GroupSelect {
 	gq.modifiers = append(gq.modifiers, modifiers...)
 	return gq.Select()
+}
+
+// WithNamedFiles tells the query-builder to eager-load the nodes that are connected to the "files"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (gq *GroupQuery) WithNamedFiles(name string, opts ...func(*FileQuery)) *GroupQuery {
+	query := &FileQuery{config: gq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if gq.withNamedFiles == nil {
+		gq.withNamedFiles = make(map[string]*FileQuery)
+	}
+	gq.withNamedFiles[name] = query
+	return gq
+}
+
+// WithNamedBlocked tells the query-builder to eager-load the nodes that are connected to the "blocked"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (gq *GroupQuery) WithNamedBlocked(name string, opts ...func(*UserQuery)) *GroupQuery {
+	query := &UserQuery{config: gq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if gq.withNamedBlocked == nil {
+		gq.withNamedBlocked = make(map[string]*UserQuery)
+	}
+	gq.withNamedBlocked[name] = query
+	return gq
+}
+
+// WithNamedUsers tells the query-builder to eager-load the nodes that are connected to the "users"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (gq *GroupQuery) WithNamedUsers(name string, opts ...func(*UserQuery)) *GroupQuery {
+	query := &UserQuery{config: gq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if gq.withNamedUsers == nil {
+		gq.withNamedUsers = make(map[string]*UserQuery)
+	}
+	gq.withNamedUsers[name] = query
+	return gq
+}
+
+// WithNamedInfo tells the query-builder to eager-load the nodes that are connected to the "info"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (gq *GroupQuery) WithNamedInfo(name string, opts ...func(*GroupInfoQuery)) *GroupQuery {
+	query := &GroupInfoQuery{config: gq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if gq.withNamedInfo == nil {
+		gq.withNamedInfo = make(map[string]*GroupInfoQuery)
+	}
+	gq.withNamedInfo[name] = query
+	return gq
 }
 
 // GroupGroupBy is the group-by builder for Group entities.

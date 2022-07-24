@@ -25,17 +25,18 @@ import (
 // CardQuery is the builder for querying Card entities.
 type CardQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Card
-	// eager-loading edges.
-	withOwner *UserQuery
-	withSpec  *SpecQuery
-	withFKs   bool
-	modifiers []func(*sql.Selector)
+	limit          *int
+	offset         *int
+	unique         *bool
+	order          []OrderFunc
+	fields         []string
+	predicates     []predicate.Card
+	withOwner      *UserQuery
+	withSpec       *SpecQuery
+	withFKs        bool
+	modifiers      []func(*sql.Selector)
+	withNamedOwner map[string]*UserQuery
+	withNamedSpec  map[string]*SpecQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -665,6 +666,34 @@ func (cq *CardQuery) ForShare(opts ...sql.LockOption) *CardQuery {
 func (cq *CardQuery) Modify(modifiers ...func(s *sql.Selector)) *CardSelect {
 	cq.modifiers = append(cq.modifiers, modifiers...)
 	return cq.Select()
+}
+
+// WithNamedOwner tells the query-builder to eager-load the nodes that are connected to the "owner"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (cq *CardQuery) WithNamedOwner(name string, opts ...func(*UserQuery)) *CardQuery {
+	query := &UserQuery{config: cq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if cq.withNamedOwner == nil {
+		cq.withNamedOwner = make(map[string]*UserQuery)
+	}
+	cq.withNamedOwner[name] = query
+	return cq
+}
+
+// WithNamedSpec tells the query-builder to eager-load the nodes that are connected to the "spec"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (cq *CardQuery) WithNamedSpec(name string, opts ...func(*SpecQuery)) *CardQuery {
+	query := &SpecQuery{config: cq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if cq.withNamedSpec == nil {
+		cq.withNamedSpec = make(map[string]*SpecQuery)
+	}
+	cq.withNamedSpec[name] = query
+	return cq
 }
 
 // CardGroupBy is the group-by builder for Card entities.
