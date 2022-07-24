@@ -30,9 +30,8 @@ type TweetTagQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.TweetTag
-	// eager-loading edges.
-	withTag   *TagQuery
-	withTweet *TweetQuery
+	withTag    *TagQuery
+	withTweet  *TweetQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)

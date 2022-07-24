@@ -23,13 +23,12 @@ import (
 // IntSIDQuery is the builder for querying IntSID entities.
 type IntSIDQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.IntSID
-	// eager-loading edges.
+	limit        *int
+	offset       *int
+	unique       *bool
+	order        []OrderFunc
+	fields       []string
+	predicates   []predicate.IntSID
 	withParent   *IntSIDQuery
 	withChildren *IntSIDQuery
 	withFKs      bool

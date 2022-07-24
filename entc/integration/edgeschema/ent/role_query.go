@@ -24,13 +24,12 @@ import (
 // RoleQuery is the builder for querying Role entities.
 type RoleQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Role
-	// eager-loading edges.
+	limit          *int
+	offset         *int
+	unique         *bool
+	order          []OrderFunc
+	fields         []string
+	predicates     []predicate.Role
 	withUser       *UserQuery
 	withRolesUsers *RoleUserQuery
 	// intermediate query (i.e. traversal path).

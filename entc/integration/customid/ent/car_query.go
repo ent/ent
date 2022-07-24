@@ -28,9 +28,8 @@ type CarQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Car
-	// eager-loading edges.
-	withOwner *PetQuery
-	withFKs   bool
+	withOwner  *PetQuery
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)

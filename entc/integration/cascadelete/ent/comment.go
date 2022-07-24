@@ -43,8 +43,7 @@ type CommentEdges struct {
 func (e CommentEdges) PostOrErr() (*Post, error) {
 	if e.loadedTypes[0] {
 		if e.Post == nil {
-			// The edge post was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: post.Label}
 		}
 		return e.Post, nil

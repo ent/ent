@@ -48,8 +48,7 @@ type BlobEdges struct {
 func (e BlobEdges) ParentOrErr() (*Blob, error) {
 	if e.loadedTypes[0] {
 		if e.Parent == nil {
-			// The edge parent was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: blob.Label}
 		}
 		return e.Parent, nil

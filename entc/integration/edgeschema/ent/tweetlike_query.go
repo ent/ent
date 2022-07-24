@@ -29,9 +29,8 @@ type TweetLikeQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.TweetLike
-	// eager-loading edges.
-	withTweet *TweetQuery
-	withUser  *UserQuery
+	withTweet  *TweetQuery
+	withUser   *UserQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)

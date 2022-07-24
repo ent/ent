@@ -53,8 +53,7 @@ func (e GroupEdges) UsersOrErr() ([]*User, error) {
 func (e GroupEdges) AdminOrErr() (*User, error) {
 	if e.loadedTypes[1] {
 		if e.Admin == nil {
-			// The edge admin was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Admin, nil

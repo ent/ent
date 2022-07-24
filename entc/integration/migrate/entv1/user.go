@@ -71,8 +71,7 @@ type UserEdges struct {
 func (e UserEdges) ParentOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.Parent == nil {
-			// The edge parent was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Parent, nil
@@ -94,8 +93,7 @@ func (e UserEdges) ChildrenOrErr() ([]*User, error) {
 func (e UserEdges) SpouseOrErr() (*User, error) {
 	if e.loadedTypes[2] {
 		if e.Spouse == nil {
-			// The edge spouse was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Spouse, nil
@@ -108,8 +106,7 @@ func (e UserEdges) SpouseOrErr() (*User, error) {
 func (e UserEdges) CarOrErr() (*Car, error) {
 	if e.loadedTypes[3] {
 		if e.Car == nil {
-			// The edge car was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: car.Label}
 		}
 		return e.Car, nil

@@ -24,15 +24,15 @@ import (
 // SpecQuery is the builder for querying Spec entities.
 type SpecQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Spec
-	// eager-loading edges.
-	withCard  *CardQuery
-	modifiers []func(*sql.Selector)
+	limit         *int
+	offset        *int
+	unique        *bool
+	order         []OrderFunc
+	fields        []string
+	predicates    []predicate.Spec
+	withCard      *CardQuery
+	modifiers     []func(*sql.Selector)
+	withNamedCard map[string]*CardQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -369,6 +369,13 @@ func (sq *SpecQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Spec, e
 			return nil, err
 		}
 	}
+	for name, query := range sq.withNamedCard {
+		if err := sq.loadCard(ctx, query, nodes,
+			func(n *Spec) { n.appendNamedCard(name) },
+			func(n *Spec, e *Card) { n.appendNamedCard(name, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -561,6 +568,20 @@ func (sq *SpecQuery) ForShare(opts ...sql.LockOption) *SpecQuery {
 func (sq *SpecQuery) Modify(modifiers ...func(s *sql.Selector)) *SpecSelect {
 	sq.modifiers = append(sq.modifiers, modifiers...)
 	return sq.Select()
+}
+
+// WithNamedCard tells the query-builder to eager-load the nodes that are connected to the "card"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (sq *SpecQuery) WithNamedCard(name string, opts ...func(*CardQuery)) *SpecQuery {
+	query := &CardQuery{config: sq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if sq.withNamedCard == nil {
+		sq.withNamedCard = make(map[string]*CardQuery)
+	}
+	sq.withNamedCard[name] = query
+	return sq
 }
 
 // SpecGroupBy is the group-by builder for Spec entities.

@@ -45,8 +45,7 @@ type PostEdges struct {
 func (e PostEdges) AuthorOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.Author == nil {
-			// The edge author was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Author, nil

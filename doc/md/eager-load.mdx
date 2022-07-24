@@ -3,6 +3,9 @@ id: eager-load
 title: Eager Loading
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 ## Overview
 
 `ent` supports querying entities with their associations (through their edges). The associated entities
@@ -109,7 +112,78 @@ for _, admin := range admins {
 Each query-builder has a list of methods in the form of `With<E>(...func(<N>Query))` for each of its edges.
 `<E>` stands for the edge name (like, `WithGroups`) and `<N>` for the edge type (like, `GroupQuery`).
  
-Note that, only SQL dialects support this feature.
+Note that only SQL dialects support this feature.
+
+## Named Edges
+
+In some cases there is a need for preloading edges with custom names. For example, a GraphQL query that has two aliases
+referencing the same edge with different arguments. For this situation, Ent provides another API named `WithNamed<E>`
+that can be enabled using the [`namedges`](features.md#named-edges) feature-flag and seamlessly integrated with
+[EntGQL Fields Collection](tutorial-todo-gql-field-collection.md).
+
+<Tabs
+defaultValue="ent"
+values={[
+{label: 'Ent', value: 'ent'},
+{label: 'GraphQL', value: 'graphql'},
+]}>
+<TabItem value="ent">
+
+See the GraphQL tab to learn more about the motivation behind this API.
+
+```go
+posts, err := client.Post.Query().
+    WithNamedComments("published", func(q *ent.CommentQuery) {
+        q.Where(comment.StatusEQ(comment.StatusPublished))
+    })
+    WithNamedComments("draft", func(q *ent.CommentQuery) {
+        q.Where(comment.StatusEQ(comment.StatusDraft))
+    }).
+    Paginate(...)
+
+// Get the preloaded edges by their name:
+for _, p := range posts {
+    published, err := p.Edges.NamedComments("published")
+    if err != nil {
+        return err
+    }
+    draft, err := p.Edges.NamedComments("draft")
+    if err != nil {
+        return err
+    }
+}
+```
+
+</TabItem>
+<TabItem value="graphql">
+
+An example of a GraphQL query that has two aliases referencing the same edge with different arguments.
+
+```graphql
+query {
+  posts {
+    id
+    title
+    published: comments(where: { status: PUBLISHED }) {
+      edges {
+        node {
+          text
+        }
+      }
+    }
+    draft: comments(where: { status: DRAFT }) {
+      edges {
+        node {
+          text
+        }
+      }
+    }
+  }
+}
+```
+
+</TabItem>
+</Tabs>
 
 ## Implementation
 

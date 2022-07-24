@@ -26,18 +26,18 @@ import (
 // FileQuery is the builder for querying File entities.
 type FileQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.File
-	// eager-loading edges.
-	withOwner *UserQuery
-	withType  *FileTypeQuery
-	withField *FieldTypeQuery
-	withFKs   bool
-	modifiers []func(*sql.Selector)
+	limit          *int
+	offset         *int
+	unique         *bool
+	order          []OrderFunc
+	fields         []string
+	predicates     []predicate.File
+	withOwner      *UserQuery
+	withType       *FileTypeQuery
+	withField      *FieldTypeQuery
+	withFKs        bool
+	modifiers      []func(*sql.Selector)
+	withNamedField map[string]*FieldTypeQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -487,6 +487,13 @@ func (fq *FileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*File, e
 			return nil, err
 		}
 	}
+	for name, query := range fq.withNamedField {
+		if err := fq.loadField(ctx, query, nodes,
+			func(n *File) { n.appendNamedField(name) },
+			func(n *File, e *FieldType) { n.appendNamedField(name, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -713,6 +720,20 @@ func (fq *FileQuery) ForShare(opts ...sql.LockOption) *FileQuery {
 func (fq *FileQuery) Modify(modifiers ...func(s *sql.Selector)) *FileSelect {
 	fq.modifiers = append(fq.modifiers, modifiers...)
 	return fq.Select()
+}
+
+// WithNamedField tells the query-builder to eager-load the nodes that are connected to the "field"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (fq *FileQuery) WithNamedField(name string, opts ...func(*FieldTypeQuery)) *FileQuery {
+	query := &FieldTypeQuery{config: fq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if fq.withNamedField == nil {
+		fq.withNamedField = make(map[string]*FieldTypeQuery)
+	}
+	fq.withNamedField[name] = query
+	return fq
 }
 
 // FileGroupBy is the group-by builder for File entities.

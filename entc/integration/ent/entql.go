@@ -281,6 +281,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			pet.FieldName:     {Type: field.TypeString, Column: pet.FieldName},
 			pet.FieldUUID:     {Type: field.TypeUUID, Column: pet.FieldUUID},
 			pet.FieldNickname: {Type: field.TypeString, Column: pet.FieldNickname},
+			pet.FieldTrained:  {Type: field.TypeBool, Column: pet.FieldTrained},
 		},
 	}
 	graph.Nodes[12] = &sqlgraph.Node{
@@ -1807,6 +1808,11 @@ func (f *PetFilter) WhereUUID(p entql.ValueP) {
 // WhereNickname applies the entql string predicate on the nickname field.
 func (f *PetFilter) WhereNickname(p entql.StringP) {
 	f.Where(p.Field(pet.FieldNickname))
+}
+
+// WhereTrained applies the entql bool predicate on the trained field.
+func (f *PetFilter) WhereTrained(p entql.BoolP) {
+	f.Where(p.Field(pet.FieldTrained))
 }
 
 // WhereHasTeam applies a predicate to check if query has an edge team.

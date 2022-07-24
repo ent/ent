@@ -51,21 +51,7 @@ func main() {
 
 ## List of Features
 
-#### Privacy Layer
-
-The privacy layer allows configuring privacy policy for queries and mutations of entities in the database.
-
-This option can added to a project using the `--feature privacy` flag, and its full documentation exists
-in the [privacy page](privacy.md).
-
-#### EntQL Filtering
-
-The `entql` option provides a generic and dynamic filtering capability at runtime for the different query builders.
-
-This option can be added to a project using the `--feature entql` flag, and more information about it exists
-in the [privacy page](privacy.md#multi-tenancy).
-
-#### Auto-Solve Merge Conflicts
+### Auto-Solve Merge Conflicts
 
 The `schema/snapshot` option tells `entc` (ent codegen) to store a snapshot of the latest schema in an internal package,
 and use it to automatically solve merge conflicts when user's schema can't be built.
@@ -73,7 +59,28 @@ and use it to automatically solve merge conflicts when user's schema can't be bu
 This option can be added to a project using the `--feature schema/snapshot` flag, but please see
 [ent/ent/issues/852](https://github.com/ent/ent/issues/852) to get more context about it.
 
-#### Schema Config
+### Privacy Layer
+
+The privacy layer allows configuring privacy policy for queries and mutations of entities in the database.
+
+This option can be added to a project using the `--feature privacy` flag, and you can learn more about in the
+[privacy](privacy.md) documentation.
+
+### EntQL Filtering
+
+The `entql` option provides a generic and dynamic filtering capability at runtime for the different query builders.
+
+This option can be added to a project using the `--feature entql` flag, and you can learn more about in the
+[privacy](privacy.md#multi-tenancy) documentation.
+
+### Named Edges
+
+The `namedges` option provides an API for preloading edges with custom names.
+
+This option can be added to a project using the `--feature namedges` flag, and you can learn more about in the
+[Eager Loading](eager-load.mdx) documentation.
+
+### Schema Config
 
 The `sql/schemaconfig` option lets you pass alternate SQL database names to models. This is useful when your models don't all live under one database and are spread out across different schemas.
 
@@ -88,7 +95,7 @@ c.User.Query().All(ctx) // SELECT * FROM `usersdb`.`users`
 c.Car.Query().All(ctx) 	// SELECT * FROM `carsdb`.`cars`
 ```
 
-#### Row-level Locks
+### Row-level Locks
 
 The `sql/lock` option lets configure row-level locking using the SQL `SELECT ... FOR {UPDATE | SHARE}` syntax.
 
@@ -114,7 +121,7 @@ tx.Pet.Query().
 	Only(ctx)
 ```
 
-#### Custom SQL Modifiers
+### Custom SQL Modifiers
 
 The `sql/modifier` option lets add custom SQL modifiers to the builders and mutate the statements before they are executed.
 
@@ -245,7 +252,7 @@ ORDER BY
     `groups`.`id` ASC
 ```
 
-#### SQL Raw API
+### SQL Raw API
 
 The `sql/execquery` option allows executing statements using the `ExecContext`/`QueryContext` methods of the underlying
 driver. For full documentation, see: [DB.ExecContext](https://pkg.go.dev/database/sql#DB.ExecContext), and
@@ -276,7 +283,7 @@ Statements executed using `ExecContext`/`QueryContext` do not go through Ent, an
 application such as hooks, privacy (authorization), and validators.
 :::
 
-#### Upsert
+### Upsert
 
 The `sql/upsert` option lets configure upsert and bulk-upsert logic using the SQL `ON CONFLICT` / `ON DUPLICATE KEY`
 syntax. For full documentation, go to the [Upsert API](crud.md#upsert-one).

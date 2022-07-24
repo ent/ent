@@ -24,15 +24,15 @@ import (
 // GroupInfoQuery is the builder for querying GroupInfo entities.
 type GroupInfoQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.GroupInfo
-	// eager-loading edges.
-	withGroups *GroupQuery
-	modifiers  []func(*sql.Selector)
+	limit           *int
+	offset          *int
+	unique          *bool
+	order           []OrderFunc
+	fields          []string
+	predicates      []predicate.GroupInfo
+	withGroups      *GroupQuery
+	modifiers       []func(*sql.Selector)
+	withNamedGroups map[string]*GroupQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -393,6 +393,13 @@ func (giq *GroupInfoQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*G
 			return nil, err
 		}
 	}
+	for name, query := range giq.withNamedGroups {
+		if err := giq.loadGroups(ctx, query, nodes,
+			func(n *GroupInfo) { n.appendNamedGroups(name) },
+			func(n *GroupInfo, e *Group) { n.appendNamedGroups(name, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -561,6 +568,20 @@ func (giq *GroupInfoQuery) ForShare(opts ...sql.LockOption) *GroupInfoQuery {
 func (giq *GroupInfoQuery) Modify(modifiers ...func(s *sql.Selector)) *GroupInfoSelect {
 	giq.modifiers = append(giq.modifiers, modifiers...)
 	return giq.Select()
+}
+
+// WithNamedGroups tells the query-builder to eager-load the nodes that are connected to the "groups"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (giq *GroupInfoQuery) WithNamedGroups(name string, opts ...func(*GroupQuery)) *GroupInfoQuery {
+	query := &GroupQuery{config: giq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if giq.withNamedGroups == nil {
+		giq.withNamedGroups = make(map[string]*GroupQuery)
+	}
+	giq.withNamedGroups[name] = query
+	return giq
 }
 
 // GroupInfoGroupBy is the group-by builder for GroupInfo entities.

@@ -76,9 +76,9 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 	}
 	{{- range $e := $.Edges }}
 		if query := {{ $receiver }}.{{ $e.EagerLoadField }}; query != nil {
-			if err := {{ $receiver }}.load{{ $e.StructField }}(ctx, query, nodes, {{ if and (not $e.M2M) (not $e.O2M) }}nil{{ else }}
+			if err := {{ $receiver }}.load{{ $e.StructField }}(ctx, query, nodes, {{ if $e.Unique }}nil{{ else }}
 				func(n *{{ $.Name }}){ n.Edges.{{ $e.StructField }} = []*{{ $e.Type.Name }}{} }{{ end }},
-				func(n *{{ $.Name }}, e *{{ $e.Type.Name }}){ n.Edges.{{ $e.StructField }} = {{ if or $e.OwnFK $e.Unique }}e{{ else }}append(n.Edges.{{ $e.StructField }}, e){{ end }} }); err != nil {
+				func(n *{{ $.Name }}, e *{{ $e.Type.Name }}){ n.Edges.{{ $e.StructField }} = {{ if $e.Unique }}e{{ else }}append(n.Edges.{{ $e.StructField }}, e){{ end }} }); err != nil {
 				return nil, err
 			}
 		}
@@ -190,7 +190,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 				nodeids[nodes[i].ID] = nodes[i]
 				{{- if $e.O2M }}
 					if init != nil {
-						init(nodes[i])
+					init(nodes[i])
 					}
 				{{- end }}
 			}

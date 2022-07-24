@@ -28,7 +28,6 @@ type PostQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Post
-	// eager-loading edges.
 	withAuthor *UserQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector

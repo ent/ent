@@ -226,6 +226,10 @@ func init() {
 	petDescAge := petFields[0].Descriptor()
 	// pet.DefaultAge holds the default value on creation for the age field.
 	pet.DefaultAge = petDescAge.Default.(float64)
+	// petDescTrained is the schema descriptor for trained field.
+	petDescTrained := petFields[4].Descriptor()
+	// pet.DefaultTrained holds the default value on creation for the trained field.
+	pet.DefaultTrained = petDescTrained.Default.(bool)
 	enttaskFields := schema.Task{}.Fields()
 	_ = enttaskFields
 	// enttaskDescPriority is the schema descriptor for priority field.

@@ -24,13 +24,12 @@ import (
 // PetQuery is the builder for querying Pet entities.
 type PetQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Pet
-	// eager-loading edges.
+	limit          *int
+	offset         *int
+	unique         *bool
+	order          []OrderFunc
+	fields         []string
+	predicates     []predicate.Pet
 	withOwner      *UserQuery
 	withCars       *CarQuery
 	withFriends    *PetQuery

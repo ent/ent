@@ -23,13 +23,12 @@ import (
 // TokenQuery is the builder for querying Token entities.
 type TokenQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Token
-	// eager-loading edges.
+	limit       *int
+	offset      *int
+	unique      *bool
+	order       []OrderFunc
+	fields      []string
+	predicates  []predicate.Token
 	withAccount *AccountQuery
 	withFKs     bool
 	// intermediate query (i.e. traversal path).

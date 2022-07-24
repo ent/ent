@@ -29,10 +29,9 @@ type FileQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.File
-	// eager-loading edges.
-	withOwner *UserQuery
-	withType  *FileTypeQuery
-	withField *FieldTypeQuery
+	withOwner  *UserQuery
+	withType   *FileTypeQuery
+	withField  *FieldTypeQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
 	path    func(context.Context) (*dsl.Traversal, error)

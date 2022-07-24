@@ -24,13 +24,12 @@ import (
 // DeviceQuery is the builder for querying Device entities.
 type DeviceQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Device
-	// eager-loading edges.
+	limit             *int
+	offset            *int
+	unique            *bool
+	order             []OrderFunc
+	fields            []string
+	predicates        []predicate.Device
 	withActiveSession *SessionQuery
 	withSessions      *SessionQuery
 	withFKs           bool

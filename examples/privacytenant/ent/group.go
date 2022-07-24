@@ -45,8 +45,7 @@ type GroupEdges struct {
 func (e GroupEdges) TenantOrErr() (*Tenant, error) {
 	if e.loadedTypes[0] {
 		if e.Tenant == nil {
-			// The edge tenant was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: tenant.Label}
 		}
 		return e.Tenant, nil

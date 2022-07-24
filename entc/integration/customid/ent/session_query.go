@@ -29,7 +29,6 @@ type SessionQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Session
-	// eager-loading edges.
 	withDevice *DeviceQuery
 	withFKs    bool
 	// intermediate query (i.e. traversal path).

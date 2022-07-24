@@ -49,8 +49,7 @@ type UserGroupEdges struct {
 func (e UserGroupEdges) UserOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.User == nil {
-			// The edge user was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.User, nil
@@ -63,8 +62,7 @@ func (e UserGroupEdges) UserOrErr() (*User, error) {
 func (e UserGroupEdges) GroupOrErr() (*Group, error) {
 	if e.loadedTypes[1] {
 		if e.Group == nil {
-			// The edge group was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: group.Label}
 		}
 		return e.Group, nil

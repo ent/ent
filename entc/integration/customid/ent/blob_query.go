@@ -24,13 +24,12 @@ import (
 // BlobQuery is the builder for querying Blob entities.
 type BlobQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Blob
-	// eager-loading edges.
+	limit         *int
+	offset        *int
+	unique        *bool
+	order         []OrderFunc
+	fields        []string
+	predicates    []predicate.Blob
 	withParent    *BlobQuery
 	withLinks     *BlobQuery
 	withBlobLinks *BlobLinkQuery

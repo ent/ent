@@ -1593,9 +1593,16 @@ func (e Edge) BuilderField() string {
 	return builderField(e.Name)
 }
 
-// EagerLoadField returns the struct field (of query builder) for storing the eager-loading info.
+// EagerLoadField returns the struct field (of query builder)
+// for storing the eager-loading info.
 func (e Edge) EagerLoadField() string {
-	return "with" + pascal(e.Name)
+	return "with" + e.StructField()
+}
+
+// EagerLoadNamedField returns the struct field (of query builder)
+// for storing the eager-loading info for named edges.
+func (e Edge) EagerLoadNamedField() string {
+	return "withNamed" + e.StructField()
 }
 
 // StructField returns the struct member of the edge in the model.

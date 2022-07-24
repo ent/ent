@@ -112,6 +112,13 @@ func Nickname(v string) predicate.Pet {
 	})
 }
 
+// Trained applies equality check predicate on the "trained" field. It's identical to TrainedEQ.
+func Trained(v bool) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTrained), v))
+	})
+}
+
 // AgeEQ applies the EQ predicate on the "age" field.
 func AgeEQ(v float64) predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {
@@ -463,6 +470,20 @@ func NicknameEqualFold(v string) predicate.Pet {
 func NicknameContainsFold(v string) predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldNickname), v))
+	})
+}
+
+// TrainedEQ applies the EQ predicate on the "trained" field.
+func TrainedEQ(v bool) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTrained), v))
+	})
+}
+
+// TrainedNEQ applies the NEQ predicate on the "trained" field.
+func TrainedNEQ(v bool) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldTrained), v))
 	})
 }
 

@@ -69,8 +69,7 @@ func (e UserEdges) FriendsOrErr() ([]*User, error) {
 func (e UserEdges) BestFriendOrErr() (*User, error) {
 	if e.loadedTypes[2] {
 		if e.BestFriend == nil {
-			// The edge best_friend was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.BestFriend, nil

@@ -30,9 +30,8 @@ type RentalQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Rental
-	// eager-loading edges.
-	withUser *UserQuery
-	withCar  *CarQuery
+	withUser   *UserQuery
+	withCar    *CarQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)

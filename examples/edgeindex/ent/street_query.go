@@ -28,9 +28,8 @@ type StreetQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Street
-	// eager-loading edges.
-	withCity *CityQuery
-	withFKs  bool
+	withCity   *CityQuery
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
