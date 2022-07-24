@@ -24,13 +24,12 @@ import (
 // GroupQuery is the builder for querying Group entities.
 type GroupQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Group
-	// eager-loading edges.
+	limit           *int
+	offset          *int
+	unique          *bool
+	order           []OrderFunc
+	fields          []string
+	predicates      []predicate.Group
 	withUsers       *UserQuery
 	withJoinedUsers *UserGroupQuery
 	// intermediate query (i.e. traversal path).

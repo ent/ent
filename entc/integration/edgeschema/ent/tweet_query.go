@@ -27,13 +27,12 @@ import (
 // TweetQuery is the builder for querying Tweet entities.
 type TweetQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Tweet
-	// eager-loading edges.
+	limit          *int
+	offset         *int
+	unique         *bool
+	order          []OrderFunc
+	fields         []string
+	predicates     []predicate.Tweet
 	withLikedUsers *UserQuery
 	withUser       *UserQuery
 	withTags       *TagQuery

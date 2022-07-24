@@ -22,13 +22,12 @@ import (
 // RelationshipQuery is the builder for querying Relationship entities.
 type RelationshipQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Relationship
-	// eager-loading edges.
+	limit        *int
+	offset       *int
+	unique       *bool
+	order        []OrderFunc
+	fields       []string
+	predicates   []predicate.Relationship
 	withUser     *UserQuery
 	withRelative *UserQuery
 	withInfo     *RelationshipInfoQuery

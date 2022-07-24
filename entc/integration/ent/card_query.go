@@ -466,9 +466,6 @@ func (cq *CardQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*C
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	query.Where(user.IDIn(ids...))
 	neighbors, err := query.All(ctx)

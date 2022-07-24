@@ -455,9 +455,6 @@ func (pq *PetQuery) loadTeam(ctx context.Context, query *UserQuery, nodes []*Pet
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	query.Where(user.IDIn(ids...))
 	neighbors, err := query.All(ctx)
@@ -487,9 +484,6 @@ func (pq *PetQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*Pe
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	query.Where(user.IDIn(ids...))
 	neighbors, err := query.All(ctx)

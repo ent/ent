@@ -509,9 +509,6 @@ func (fq *FileQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*F
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	query.Where(user.IDIn(ids...))
 	neighbors, err := query.All(ctx)
@@ -541,9 +538,6 @@ func (fq *FileQuery) loadType(ctx context.Context, query *FileTypeQuery, nodes [
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	query.Where(filetype.IDIn(ids...))
 	neighbors, err := query.All(ctx)

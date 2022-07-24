@@ -31,7 +31,6 @@ type GroupQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Group
-	// eager-loading edges.
 	withTenant *TenantQuery
 	withUsers  *UserQuery
 	// intermediate query (i.e. traversal path).

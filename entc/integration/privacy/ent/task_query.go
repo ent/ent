@@ -31,10 +31,9 @@ type TaskQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Task
-	// eager-loading edges.
-	withTeams *TeamQuery
-	withOwner *UserQuery
-	withFKs   bool
+	withTeams  *TeamQuery
+	withOwner  *UserQuery
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)

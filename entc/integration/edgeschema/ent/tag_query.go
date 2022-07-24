@@ -24,13 +24,12 @@ import (
 // TagQuery is the builder for querying Tag entities.
 type TagQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Tag
-	// eager-loading edges.
+	limit         *int
+	offset        *int
+	unique        *bool
+	order         []OrderFunc
+	fields        []string
+	predicates    []predicate.Tag
 	withTweets    *TweetQuery
 	withTweetTags *TweetTagQuery
 	// intermediate query (i.e. traversal path).

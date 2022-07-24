@@ -28,9 +28,8 @@ type PetQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Pet
-	// eager-loading edges.
-	withOwner *UserQuery
-	withFKs   bool
+	withOwner  *UserQuery
+	withFKs    bool
 	// additional query fields.
 	extra     string
 	modifiers []func(s *sql.Selector)

@@ -29,9 +29,8 @@ type UserGroupQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.UserGroup
-	// eager-loading edges.
-	withUser  *UserQuery
-	withGroup *GroupQuery
+	withUser   *UserQuery
+	withGroup  *GroupQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)

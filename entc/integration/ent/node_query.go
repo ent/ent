@@ -455,9 +455,6 @@ func (nq *NodeQuery) loadPrev(ctx context.Context, query *NodeQuery, nodes []*No
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	query.Where(node.IDIn(ids...))
 	neighbors, err := query.All(ctx)
@@ -481,9 +478,6 @@ func (nq *NodeQuery) loadNext(ctx context.Context, query *NodeQuery, nodes []*No
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	query.withFKs = true
 	query.Where(predicate.Node(func(s *sql.Selector) {

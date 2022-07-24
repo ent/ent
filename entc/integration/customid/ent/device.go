@@ -43,8 +43,7 @@ type DeviceEdges struct {
 func (e DeviceEdges) ActiveSessionOrErr() (*Session, error) {
 	if e.loadedTypes[0] {
 		if e.ActiveSession == nil {
-			// The edge active_session was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: session.Label}
 		}
 		return e.ActiveSession, nil

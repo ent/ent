@@ -28,9 +28,8 @@ type BlobLinkQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.BlobLink
-	// eager-loading edges.
-	withBlob *BlobQuery
-	withLink *BlobQuery
+	withBlob   *BlobQuery
+	withLink   *BlobQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)

@@ -28,9 +28,8 @@ type PetQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Pet
-	// eager-loading edges.
-	withTeam  *UserQuery
-	withOwner *UserQuery
+	withTeam   *UserQuery
+	withOwner  *UserQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
 	path    func(context.Context) (*dsl.Traversal, error)

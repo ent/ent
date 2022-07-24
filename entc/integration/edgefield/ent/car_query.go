@@ -24,13 +24,12 @@ import (
 // CarQuery is the builder for querying Car entities.
 type CarQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Car
-	// eager-loading edges.
+	limit       *int
+	offset      *int
+	unique      *bool
+	order       []OrderFunc
+	fields      []string
+	predicates  []predicate.Car
 	withRentals *RentalQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector

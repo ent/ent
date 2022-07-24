@@ -23,13 +23,12 @@ import (
 // CityQuery is the builder for querying City entities.
 type CityQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.City
-	// eager-loading edges.
+	limit       *int
+	offset      *int
+	unique      *bool
+	order       []OrderFunc
+	fields      []string
+	predicates  []predicate.City
 	withStreets *StreetQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector

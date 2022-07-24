@@ -42,8 +42,7 @@ type IntSIDEdges struct {
 func (e IntSIDEdges) ParentOrErr() (*IntSID, error) {
 	if e.loadedTypes[0] {
 		if e.Parent == nil {
-			// The edge parent was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: intsid.Label}
 		}
 		return e.Parent, nil

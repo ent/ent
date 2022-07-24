@@ -22,13 +22,12 @@ import (
 // NodeQuery is the builder for querying Node entities.
 type NodeQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Node
-	// eager-loading edges.
+	limit        *int
+	offset       *int
+	unique       *bool
+	order        []OrderFunc
+	fields       []string
+	predicates   []predicate.Node
 	withParent   *NodeQuery
 	withChildren *NodeQuery
 	withFKs      bool

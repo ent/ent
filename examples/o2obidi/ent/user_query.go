@@ -27,7 +27,6 @@ type UserQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.User
-	// eager-loading edges.
 	withSpouse *UserQuery
 	withFKs    bool
 	// intermediate query (i.e. traversal path).

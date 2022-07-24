@@ -894,9 +894,6 @@ func (uq *UserQuery) loadCard(ctx context.Context, query *CardQuery, nodes []*Us
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	query.withFKs = true
 	query.Where(predicate.Card(func(s *sql.Selector) {
@@ -1207,9 +1204,6 @@ func (uq *UserQuery) loadTeam(ctx context.Context, query *PetQuery, nodes []*Use
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	query.withFKs = true
 	query.Where(predicate.Pet(func(s *sql.Selector) {
@@ -1244,9 +1238,6 @@ func (uq *UserQuery) loadSpouse(ctx context.Context, query *UserQuery, nodes []*
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	query.Where(user.IDIn(ids...))
 	neighbors, err := query.All(ctx)
@@ -1307,9 +1298,6 @@ func (uq *UserQuery) loadParent(ctx context.Context, query *UserQuery, nodes []*
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	query.Where(user.IDIn(ids...))
 	neighbors, err := query.All(ctx)

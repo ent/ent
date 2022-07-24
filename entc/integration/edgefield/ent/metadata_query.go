@@ -23,13 +23,12 @@ import (
 // MetadataQuery is the builder for querying Metadata entities.
 type MetadataQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Metadata
-	// eager-loading edges.
+	limit        *int
+	offset       *int
+	unique       *bool
+	order        []OrderFunc
+	fields       []string
+	predicates   []predicate.Metadata
 	withUser     *UserQuery
 	withChildren *MetadataQuery
 	withParent   *MetadataQuery

@@ -29,9 +29,8 @@ type PetQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Pet
-	// eager-loading edges.
-	withOwner *UserQuery
-	modifiers []func(*sql.Selector)
+	withOwner  *UserQuery
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)

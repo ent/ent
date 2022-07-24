@@ -23,13 +23,12 @@ import (
 // DocQuery is the builder for querying Doc entities.
 type DocQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Doc
-	// eager-loading edges.
+	limit        *int
+	offset       *int
+	unique       *bool
+	order        []OrderFunc
+	fields       []string
+	predicates   []predicate.Doc
 	withParent   *DocQuery
 	withChildren *DocQuery
 	withRelated  *DocQuery

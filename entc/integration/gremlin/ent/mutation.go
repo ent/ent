@@ -11474,6 +11474,7 @@ type PetMutation struct {
 	name          *string
 	uuid          *uuid.UUID
 	nickname      *string
+	trained       *bool
 	clearedFields map[string]struct{}
 	team          *string
 	clearedteam   bool
@@ -11772,6 +11773,42 @@ func (m *PetMutation) ResetNickname() {
 	delete(m.clearedFields, pet.FieldNickname)
 }
 
+// SetTrained sets the "trained" field.
+func (m *PetMutation) SetTrained(b bool) {
+	m.trained = &b
+}
+
+// Trained returns the value of the "trained" field in the mutation.
+func (m *PetMutation) Trained() (r bool, exists bool) {
+	v := m.trained
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTrained returns the old "trained" field's value of the Pet entity.
+// If the Pet object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PetMutation) OldTrained(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTrained is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTrained requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTrained: %w", err)
+	}
+	return oldValue.Trained, nil
+}
+
+// ResetTrained resets all changes to the "trained" field.
+func (m *PetMutation) ResetTrained() {
+	m.trained = nil
+}
+
 // SetTeamID sets the "team" edge to the User entity by id.
 func (m *PetMutation) SetTeamID(id string) {
 	m.team = &id
@@ -11869,7 +11906,7 @@ func (m *PetMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PetMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.age != nil {
 		fields = append(fields, pet.FieldAge)
 	}
@@ -11881,6 +11918,9 @@ func (m *PetMutation) Fields() []string {
 	}
 	if m.nickname != nil {
 		fields = append(fields, pet.FieldNickname)
+	}
+	if m.trained != nil {
+		fields = append(fields, pet.FieldTrained)
 	}
 	return fields
 }
@@ -11898,6 +11938,8 @@ func (m *PetMutation) Field(name string) (ent.Value, bool) {
 		return m.UUID()
 	case pet.FieldNickname:
 		return m.Nickname()
+	case pet.FieldTrained:
+		return m.Trained()
 	}
 	return nil, false
 }
@@ -11915,6 +11957,8 @@ func (m *PetMutation) OldField(ctx context.Context, name string) (ent.Value, err
 		return m.OldUUID(ctx)
 	case pet.FieldNickname:
 		return m.OldNickname(ctx)
+	case pet.FieldTrained:
+		return m.OldTrained(ctx)
 	}
 	return nil, fmt.Errorf("unknown Pet field %s", name)
 }
@@ -11951,6 +11995,13 @@ func (m *PetMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetNickname(v)
+		return nil
+	case pet.FieldTrained:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTrained(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Pet field %s", name)
@@ -12042,6 +12093,9 @@ func (m *PetMutation) ResetField(name string) error {
 		return nil
 	case pet.FieldNickname:
 		m.ResetNickname()
+		return nil
+	case pet.FieldTrained:
+		m.ResetTrained()
 		return nil
 	}
 	return fmt.Errorf("unknown Pet field %s", name)

@@ -28,8 +28,7 @@ type CommentQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Comment
-	// eager-loading edges.
-	withPost *PostQuery
+	withPost   *PostQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)

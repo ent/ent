@@ -22,13 +22,12 @@ import (
 // FileQuery is the builder for querying File entities.
 type FileQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.File
-	// eager-loading edges.
+	limit        *int
+	offset       *int
+	unique       *bool
+	order        []OrderFunc
+	fields       []string
+	predicates   []predicate.File
 	withParent   *FileQuery
 	withChildren *FileQuery
 	// intermediate query (i.e. traversal path).

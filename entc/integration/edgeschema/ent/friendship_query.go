@@ -28,7 +28,6 @@ type FriendshipQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Friendship
-	// eager-loading edges.
 	withUser   *UserQuery
 	withFriend *UserQuery
 	// intermediate query (i.e. traversal path).

@@ -167,9 +167,6 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 					ids = append(ids, fk)
 				}
 				nodeids[fk] = append(nodeids[fk], nodes[i])
-				if init != nil {
-					init(nodes[i])
-				}
 			}
 			query.Where({{ $e.Type.Package }}.IDIn(ids...))
 			neighbors, err := query.All(ctx)
@@ -191,9 +188,11 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 			for i := range nodes {
 				fks = append(fks, nodes[i].ID)
 				nodeids[nodes[i].ID] = nodes[i]
-				if init != nil {
+				{{- if $e.O2M }}
+					if init != nil {
 					init(nodes[i])
-				}
+					}
+				{{- end }}
 			}
 			{{- with $e.Type.UnexportedForeignKeys }}
 				query.withFKs = true

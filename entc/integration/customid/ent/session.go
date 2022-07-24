@@ -41,8 +41,7 @@ type SessionEdges struct {
 func (e SessionEdges) DeviceOrErr() (*Device, error) {
 	if e.loadedTypes[0] {
 		if e.Device == nil {
-			// The edge device was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: device.Label}
 		}
 		return e.Device, nil

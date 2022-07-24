@@ -28,9 +28,8 @@ type CardQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Card
-	// eager-loading edges.
-	withOwner *UserQuery
-	withFKs   bool
+	withOwner  *UserQuery
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)

@@ -28,9 +28,8 @@ type RoleUserQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.RoleUser
-	// eager-loading edges.
-	withRole *RoleQuery
-	withUser *UserQuery
+	withRole   *RoleQuery
+	withUser   *UserQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)

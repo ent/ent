@@ -31,7 +31,6 @@ type UserQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.User
-	// eager-loading edges.
 	withTenant *TenantQuery
 	withGroups *GroupQuery
 	// intermediate query (i.e. traversal path).

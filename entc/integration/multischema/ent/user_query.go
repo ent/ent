@@ -31,7 +31,6 @@ type UserQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.User
-	// eager-loading edges.
 	withPets   *PetQuery
 	withGroups *GroupQuery
 	modifiers  []func(*sql.Selector)

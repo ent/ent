@@ -50,8 +50,7 @@ type RentalEdges struct {
 func (e RentalEdges) UserOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.User == nil {
-			// The edge user was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.User, nil
@@ -64,8 +63,7 @@ func (e RentalEdges) UserOrErr() (*User, error) {
 func (e RentalEdges) CarOrErr() (*Car, error) {
 	if e.loadedTypes[1] {
 		if e.Car == nil {
-			// The edge car was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: car.Label}
 		}
 		return e.Car, nil

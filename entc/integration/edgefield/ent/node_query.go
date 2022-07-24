@@ -28,9 +28,8 @@ type NodeQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Node
-	// eager-loading edges.
-	withPrev *NodeQuery
-	withNext *NodeQuery
+	withPrev   *NodeQuery
+	withNext   *NodeQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)

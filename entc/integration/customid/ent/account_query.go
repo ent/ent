@@ -30,8 +30,7 @@ type AccountQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Account
-	// eager-loading edges.
-	withToken *TokenQuery
+	withToken  *TokenQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
