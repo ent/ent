@@ -37,6 +37,8 @@ type FileTypeEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
+	// Edges that were loaded with dynamic name.
+	namedFiles map[string][]*File
 }
 
 // FilesOrErr returns the Files value or an error if the edge
@@ -139,6 +141,20 @@ func (ft *FileType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.State))
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedFiles returns the Files named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (ft *FileType) NamedFiles(name string) ([]*File, error) {
+	if ft.Edges.namedFiles == nil {
+		return nil, &NotLoadedError{edge: "files"}
+	}
+	switch _e, ok := ft.Edges.namedFiles[name]; {
+	case !ok:
+		return nil, &NotLoadedError{edge: "files"}
+	default:
+		return _e, nil
+	}
 }
 
 // FileTypes is a parsable slice of FileType.

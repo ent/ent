@@ -36,6 +36,9 @@ type NodeEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
+	// Edges that were loaded with dynamic name.
+	namedPrev map[string]*Node
+	namedNext map[string]*Node
 }
 
 // PrevOrErr returns the Prev value or an error if the edge
@@ -43,8 +46,7 @@ type NodeEdges struct {
 func (e NodeEdges) PrevOrErr() (*Node, error) {
 	if e.loadedTypes[0] {
 		if e.Prev == nil {
-			// The edge prev was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: node.Label}
 		}
 		return e.Prev, nil
@@ -57,8 +59,7 @@ func (e NodeEdges) PrevOrErr() (*Node, error) {
 func (e NodeEdges) NextOrErr() (*Node, error) {
 	if e.loadedTypes[1] {
 		if e.Next == nil {
-			// The edge next was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: node.Label}
 		}
 		return e.Next, nil
@@ -151,6 +152,40 @@ func (n *Node) String() string {
 	builder.WriteString(fmt.Sprintf("%v", n.Value))
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedPrev returns the Prev named value or an error if the edge was not
+// loaded in eager-loading with this name, or loaded but was not found.
+func (n *Node) NamedPrev(name string) (*Node, error) {
+	if n.Edges.namedPrev == nil {
+		return nil, &NotLoadedError{edge: "prev"}
+	}
+	switch _e, ok := n.Edges.namedPrev[name]; {
+	case !ok:
+		return nil, &NotLoadedError{edge: "prev"}
+	case _e == nil:
+		// Edge was loaded but was not found.
+		return nil, &NotFoundError{label: node.Label}
+	default:
+		return _e, nil
+	}
+}
+
+// NamedNext returns the Next named value or an error if the edge was not
+// loaded in eager-loading with this name, or loaded but was not found.
+func (n *Node) NamedNext(name string) (*Node, error) {
+	if n.Edges.namedNext == nil {
+		return nil, &NotLoadedError{edge: "next"}
+	}
+	switch _e, ok := n.Edges.namedNext[name]; {
+	case !ok:
+		return nil, &NotLoadedError{edge: "next"}
+	case _e == nil:
+		// Edge was loaded but was not found.
+		return nil, &NotFoundError{label: node.Label}
+	default:
+		return _e, nil
+	}
 }
 
 // Nodes is a parsable slice of Node.

@@ -50,6 +50,11 @@ type GroupEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [4]bool
+	// Edges that were loaded with dynamic name.
+	namedFiles   map[string][]*File
+	namedBlocked map[string][]*User
+	namedUsers   map[string][]*User
+	namedInfo    map[string]*GroupInfo
 }
 
 // FilesOrErr returns the Files value or an error if the edge
@@ -84,8 +89,7 @@ func (e GroupEdges) UsersOrErr() ([]*User, error) {
 func (e GroupEdges) InfoOrErr() (*GroupInfo, error) {
 	if e.loadedTypes[3] {
 		if e.Info == nil {
-			// The edge info was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: groupinfo.Label}
 		}
 		return e.Info, nil
@@ -233,6 +237,65 @@ func (gr *Group) String() string {
 	builder.WriteString(gr.Name)
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedFiles returns the Files named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (gr *Group) NamedFiles(name string) ([]*File, error) {
+	if gr.Edges.namedFiles == nil {
+		return nil, &NotLoadedError{edge: "files"}
+	}
+	switch _e, ok := gr.Edges.namedFiles[name]; {
+	case !ok:
+		return nil, &NotLoadedError{edge: "files"}
+	default:
+		return _e, nil
+	}
+}
+
+// NamedBlocked returns the Blocked named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (gr *Group) NamedBlocked(name string) ([]*User, error) {
+	if gr.Edges.namedBlocked == nil {
+		return nil, &NotLoadedError{edge: "blocked"}
+	}
+	switch _e, ok := gr.Edges.namedBlocked[name]; {
+	case !ok:
+		return nil, &NotLoadedError{edge: "blocked"}
+	default:
+		return _e, nil
+	}
+}
+
+// NamedUsers returns the Users named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (gr *Group) NamedUsers(name string) ([]*User, error) {
+	if gr.Edges.namedUsers == nil {
+		return nil, &NotLoadedError{edge: "users"}
+	}
+	switch _e, ok := gr.Edges.namedUsers[name]; {
+	case !ok:
+		return nil, &NotLoadedError{edge: "users"}
+	default:
+		return _e, nil
+	}
+}
+
+// NamedInfo returns the Info named value or an error if the edge was not
+// loaded in eager-loading with this name, or loaded but was not found.
+func (gr *Group) NamedInfo(name string) (*GroupInfo, error) {
+	if gr.Edges.namedInfo == nil {
+		return nil, &NotLoadedError{edge: "info"}
+	}
+	switch _e, ok := gr.Edges.namedInfo[name]; {
+	case !ok:
+		return nil, &NotLoadedError{edge: "info"}
+	case _e == nil:
+		// Edge was loaded but was not found.
+		return nil, &NotFoundError{label: groupinfo.Label}
+	default:
+		return _e, nil
+	}
 }
 
 // Groups is a parsable slice of Group.

@@ -49,6 +49,9 @@ type CardEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
+	// Edges that were loaded with dynamic name.
+	namedOwner map[string]*User
+	namedSpec  map[string][]*Spec
 }
 
 // OwnerOrErr returns the Owner value or an error if the edge
@@ -56,8 +59,7 @@ type CardEdges struct {
 func (e CardEdges) OwnerOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.Owner == nil {
-			// The edge owner was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Owner, nil
@@ -201,6 +203,37 @@ func (c *Card) String() string {
 	builder.WriteString(c.Name)
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedOwner returns the Owner named value or an error if the edge was not
+// loaded in eager-loading with this name, or loaded but was not found.
+func (c *Card) NamedOwner(name string) (*User, error) {
+	if c.Edges.namedOwner == nil {
+		return nil, &NotLoadedError{edge: "owner"}
+	}
+	switch _e, ok := c.Edges.namedOwner[name]; {
+	case !ok:
+		return nil, &NotLoadedError{edge: "owner"}
+	case _e == nil:
+		// Edge was loaded but was not found.
+		return nil, &NotFoundError{label: user.Label}
+	default:
+		return _e, nil
+	}
+}
+
+// NamedSpec returns the Spec named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (c *Card) NamedSpec(name string) ([]*Spec, error) {
+	if c.Edges.namedSpec == nil {
+		return nil, &NotLoadedError{edge: "spec"}
+	}
+	switch _e, ok := c.Edges.namedSpec[name]; {
+	case !ok:
+		return nil, &NotLoadedError{edge: "spec"}
+	default:
+		return _e, nil
+	}
 }
 
 // Cards is a parsable slice of Card.

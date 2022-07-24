@@ -31,6 +31,8 @@ type SpecEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
+	// Edges that were loaded with dynamic name.
+	namedCard map[string][]*Card
 }
 
 // CardOrErr returns the Card value or an error if the edge
@@ -105,6 +107,20 @@ func (s *Spec) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", s.ID))
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedCard returns the Card named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (s *Spec) NamedCard(name string) ([]*Card, error) {
+	if s.Edges.namedCard == nil {
+		return nil, &NotLoadedError{edge: "card"}
+	}
+	switch _e, ok := s.Edges.namedCard[name]; {
+	case !ok:
+		return nil, &NotLoadedError{edge: "card"}
+	default:
+		return _e, nil
+	}
 }
 
 // Specs is a parsable slice of Spec.

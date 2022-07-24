@@ -45,6 +45,9 @@ type PetEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
+	// Edges that were loaded with dynamic name.
+	namedTeam  map[string]*User
+	namedOwner map[string]*User
 }
 
 // TeamOrErr returns the Team value or an error if the edge
@@ -52,8 +55,7 @@ type PetEdges struct {
 func (e PetEdges) TeamOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.Team == nil {
-			// The edge team was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Team, nil
@@ -66,8 +68,7 @@ func (e PetEdges) TeamOrErr() (*User, error) {
 func (e PetEdges) OwnerOrErr() (*User, error) {
 	if e.loadedTypes[1] {
 		if e.Owner == nil {
-			// The edge owner was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Owner, nil
@@ -202,6 +203,40 @@ func (pe *Pet) String() string {
 	builder.WriteString(pe.Nickname)
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedTeam returns the Team named value or an error if the edge was not
+// loaded in eager-loading with this name, or loaded but was not found.
+func (pe *Pet) NamedTeam(name string) (*User, error) {
+	if pe.Edges.namedTeam == nil {
+		return nil, &NotLoadedError{edge: "team"}
+	}
+	switch _e, ok := pe.Edges.namedTeam[name]; {
+	case !ok:
+		return nil, &NotLoadedError{edge: "team"}
+	case _e == nil:
+		// Edge was loaded but was not found.
+		return nil, &NotFoundError{label: user.Label}
+	default:
+		return _e, nil
+	}
+}
+
+// NamedOwner returns the Owner named value or an error if the edge was not
+// loaded in eager-loading with this name, or loaded but was not found.
+func (pe *Pet) NamedOwner(name string) (*User, error) {
+	if pe.Edges.namedOwner == nil {
+		return nil, &NotLoadedError{edge: "owner"}
+	}
+	switch _e, ok := pe.Edges.namedOwner[name]; {
+	case !ok:
+		return nil, &NotLoadedError{edge: "owner"}
+	case _e == nil:
+		// Edge was loaded but was not found.
+		return nil, &NotFoundError{label: user.Label}
+	default:
+		return _e, nil
+	}
 }
 
 // Pets is a parsable slice of Pet.
