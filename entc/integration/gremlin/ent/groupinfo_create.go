@@ -98,7 +98,7 @@ func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
 		})
 		for i := len(gic.hooks) - 1; i >= 0; i-- {
 			if gic.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = gic.hooks[i](mut)
 		}

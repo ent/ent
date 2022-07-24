@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -91,7 +92,7 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 		})
 		for i := len(uc.hooks) - 1; i >= 0; i-- {
 			if uc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = uc.hooks[i](mut)
 		}

@@ -143,7 +143,7 @@ func (tu *TeamUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(tu.hooks) - 1; i >= 0; i-- {
 			if tu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return 0, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = tu.hooks[i](mut)
 		}
@@ -455,7 +455,7 @@ func (tuo *TeamUpdateOne) Save(ctx context.Context) (*Team, error) {
 		})
 		for i := len(tuo.hooks) - 1; i >= 0; i-- {
 			if tuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = tuo.hooks[i](mut)
 		}

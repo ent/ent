@@ -121,7 +121,7 @@ func (giu *GroupInfoUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(giu.hooks) - 1; i >= 0; i-- {
 			if giu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return 0, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = giu.hooks[i](mut)
 		}
@@ -362,7 +362,7 @@ func (giuo *GroupInfoUpdateOne) Save(ctx context.Context) (*GroupInfo, error) {
 		})
 		for i := len(giuo.hooks) - 1; i >= 0; i-- {
 			if giuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = giuo.hooks[i](mut)
 		}

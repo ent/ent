@@ -9,7 +9,7 @@ package ent
 import (
 	"context"
 	stdsql "database/sql"
-	"fmt"
+	"errors"
 	"sync"
 
 	"entgo.io/ent/dialect"
@@ -264,7 +264,7 @@ func (tx *txDriver) ExecContext(ctx context.Context, query string, args ...inter
 		ExecContext(context.Context, string, ...interface{}) (stdsql.Result, error)
 	})
 	if !ok {
-		return nil, fmt.Errorf("Tx.ExecContext is not supported")
+		return nil, errors.New("Tx.ExecContext is not supported")
 	}
 	return ex.ExecContext(ctx, query, args...)
 }
@@ -276,7 +276,7 @@ func (tx *txDriver) QueryContext(ctx context.Context, query string, args ...inte
 		QueryContext(context.Context, string, ...interface{}) (*stdsql.Rows, error)
 	})
 	if !ok {
-		return nil, fmt.Errorf("Tx.QueryContext is not supported")
+		return nil, errors.New("Tx.QueryContext is not supported")
 	}
 	return q.QueryContext(ctx, query, args...)
 }

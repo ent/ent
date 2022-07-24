@@ -103,7 +103,7 @@ func (pu *PetUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(pu.hooks) - 1; i >= 0; i-- {
 			if pu.hooks[i] == nil {
-				return 0, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+				return 0, errors.New("entv2: uninitialized hook (forgotten import entv2/runtime?)")
 			}
 			mut = pu.hooks[i](mut)
 		}
@@ -299,7 +299,7 @@ func (puo *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
 		})
 		for i := len(puo.hooks) - 1; i >= 0; i-- {
 			if puo.hooks[i] == nil {
-				return nil, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+				return nil, errors.New("entv2: uninitialized hook (forgotten import entv2/runtime?)")
 			}
 			mut = puo.hooks[i](mut)
 		}

@@ -154,7 +154,7 @@ func (bu *BlobUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(bu.hooks) - 1; i >= 0; i-- {
 			if bu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return 0, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = bu.hooks[i](mut)
 		}
@@ -475,7 +475,7 @@ func (buo *BlobUpdateOne) Save(ctx context.Context) (*Blob, error) {
 		})
 		for i := len(buo.hooks) - 1; i >= 0; i-- {
 			if buo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = buo.hooks[i](mut)
 		}

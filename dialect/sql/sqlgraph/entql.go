@@ -5,6 +5,7 @@
 package sqlgraph
 
 import (
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -59,7 +60,7 @@ func (g *Schema) AddE(name string, spec *EdgeSpec, from, to string) error {
 		}
 	}
 	if fromT == nil || toT == nil {
-		return fmt.Errorf("from/to type was not found")
+		return errors.New("from/to type was not found")
 	}
 	if fromT.Edges == nil {
 		fromT.Edges = make(map[string]struct {

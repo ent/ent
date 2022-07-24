@@ -98,7 +98,7 @@ func (blc *BlobLinkCreate) Save(ctx context.Context) (*BlobLink, error) {
 		})
 		for i := len(blc.hooks) - 1; i >= 0; i-- {
 			if blc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = blc.hooks[i](mut)
 		}

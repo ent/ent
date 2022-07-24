@@ -113,7 +113,7 @@ func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
 		})
 		for i := len(fc.hooks) - 1; i >= 0; i-- {
 			if fc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = fc.hooks[i](mut)
 		}

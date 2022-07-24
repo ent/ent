@@ -114,7 +114,7 @@ func (ruu *RoleUserUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(ruu.hooks) - 1; i >= 0; i-- {
 			if ruu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return 0, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = ruu.hooks[i](mut)
 		}
@@ -365,7 +365,7 @@ func (ruuo *RoleUserUpdateOne) Save(ctx context.Context) (*RoleUser, error) {
 		})
 		for i := len(ruuo.hooks) - 1; i >= 0; i-- {
 			if ruuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = ruuo.hooks[i](mut)
 		}

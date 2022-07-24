@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -51,7 +52,7 @@ func (ftd *FileTypeDelete) Exec(ctx context.Context) (int, error) {
 		})
 		for i := len(ftd.hooks) - 1; i >= 0; i-- {
 			if ftd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return 0, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = ftd.hooks[i](mut)
 		}

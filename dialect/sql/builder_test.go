@@ -7,7 +7,7 @@ package sql
 import (
 	"context"
 	"database/sql/driver"
-	"fmt"
+	"errors"
 	"strconv"
 	"strings"
 	"testing"
@@ -1601,12 +1601,12 @@ AND "users"."id1" < "users"."id2") AND "users"."id1" <= "users"."id2"`, "\n", ""
 func TestBuilder_Err(t *testing.T) {
 	b := Select("i-")
 	require.NoError(t, b.Err())
-	b.AddError(fmt.Errorf("invalid"))
+	b.AddError(errors.New("invalid"))
 	require.EqualError(t, b.Err(), "invalid")
-	b.AddError(fmt.Errorf("unexpected"))
+	b.AddError(errors.New("unexpected"))
 	require.EqualError(t, b.Err(), "invalid; unexpected")
 	b.Where(P(func(builder *Builder) {
-		builder.AddError(fmt.Errorf("inner"))
+		builder.AddError(errors.New("inner"))
 	}))
 	_, _ = b.Query()
 	require.EqualError(t, b.Err(), "invalid; unexpected; inner")

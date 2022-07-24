@@ -115,7 +115,7 @@ func (ru *RentalUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(ru.hooks) - 1; i >= 0; i-- {
 			if ru.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return 0, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = ru.hooks[i](mut)
 		}
@@ -360,7 +360,7 @@ func (ruo *RentalUpdateOne) Save(ctx context.Context) (*Rental, error) {
 		})
 		for i := len(ruo.hooks) - 1; i >= 0; i-- {
 			if ruo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = ruo.hooks[i](mut)
 		}

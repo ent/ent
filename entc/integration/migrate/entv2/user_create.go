@@ -315,7 +315,7 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 		})
 		for i := len(uc.hooks) - 1; i >= 0; i-- {
 			if uc.hooks[i] == nil {
-				return nil, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+				return nil, errors.New("entv2: uninitialized hook (forgotten import entv2/runtime?)")
 			}
 			mut = uc.hooks[i](mut)
 		}

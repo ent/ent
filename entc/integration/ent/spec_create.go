@@ -76,7 +76,7 @@ func (sc *SpecCreate) Save(ctx context.Context) (*Spec, error) {
 		})
 		for i := len(sc.hooks) - 1; i >= 0; i-- {
 			if sc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = sc.hooks[i](mut)
 		}

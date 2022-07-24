@@ -133,7 +133,7 @@ func (mc *MetadataCreate) Save(ctx context.Context) (*Metadata, error) {
 		})
 		for i := len(mc.hooks) - 1; i >= 0; i-- {
 			if mc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = mc.hooks[i](mut)
 		}

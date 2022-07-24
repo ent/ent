@@ -6,6 +6,7 @@ package schema
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -39,7 +40,7 @@ func (d *Postgres) init(ctx context.Context, tx dialect.ExecQuerier) error {
 		if err := rows.Err(); err != nil {
 			return err
 		}
-		return fmt.Errorf("server_version_num variable was not found")
+		return errors.New("server_version_num variable was not found")
 	}
 	var version string
 	if err := rows.Scan(&version); err != nil {

@@ -99,7 +99,7 @@ func (ac *AccountCreate) Save(ctx context.Context) (*Account, error) {
 		})
 		for i := len(ac.hooks) - 1; i >= 0; i-- {
 			if ac.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = ac.hooks[i](mut)
 		}

@@ -101,7 +101,7 @@ func (cu *CarUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(cu.hooks) - 1; i >= 0; i-- {
 			if cu.hooks[i] == nil {
-				return 0, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+				return 0, errors.New("entv2: uninitialized hook (forgotten import entv2/runtime?)")
 			}
 			mut = cu.hooks[i](mut)
 		}
@@ -303,7 +303,7 @@ func (cuo *CarUpdateOne) Save(ctx context.Context) (*Car, error) {
 		})
 		for i := len(cuo.hooks) - 1; i >= 0; i-- {
 			if cuo.hooks[i] == nil {
-				return nil, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+				return nil, errors.New("entv2: uninitialized hook (forgotten import entv2/runtime?)")
 			}
 			mut = cuo.hooks[i](mut)
 		}

@@ -101,7 +101,7 @@ func (isc *IntSIDCreate) Save(ctx context.Context) (*IntSID, error) {
 		})
 		for i := len(isc.hooks) - 1; i >= 0; i-- {
 			if isc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = isc.hooks[i](mut)
 		}

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/gremlin"
@@ -52,7 +53,7 @@ func (sd *SpecDelete) Exec(ctx context.Context) (int, error) {
 		})
 		for i := len(sd.hooks) - 1; i >= 0; i-- {
 			if sd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return 0, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = sd.hooks[i](mut)
 		}

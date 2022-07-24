@@ -8,6 +8,7 @@ package versioned
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -51,7 +52,7 @@ func (gd *GroupDelete) Exec(ctx context.Context) (int, error) {
 		})
 		for i := len(gd.hooks) - 1; i >= 0; i-- {
 			if gd.hooks[i] == nil {
-				return 0, fmt.Errorf("versioned: uninitialized hook (forgotten import versioned/runtime?)")
+				return 0, errors.New("versioned: uninitialized hook (forgotten import versioned/runtime?)")
 			}
 			mut = gd.hooks[i](mut)
 		}

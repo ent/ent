@@ -114,7 +114,7 @@ func (ugu *UserGroupUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(ugu.hooks) - 1; i >= 0; i-- {
 			if ugu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return 0, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = ugu.hooks[i](mut)
 		}
@@ -359,7 +359,7 @@ func (uguo *UserGroupUpdateOne) Save(ctx context.Context) (*UserGroup, error) {
 		})
 		for i := len(uguo.hooks) - 1; i >= 0; i-- {
 			if uguo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = uguo.hooks[i](mut)
 		}

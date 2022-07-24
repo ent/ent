@@ -100,7 +100,7 @@ func (utc *UserTweetCreate) Save(ctx context.Context) (*UserTweet, error) {
 		})
 		for i := len(utc.hooks) - 1; i >= 0; i-- {
 			if utc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = utc.hooks[i](mut)
 		}

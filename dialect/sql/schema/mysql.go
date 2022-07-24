@@ -6,6 +6,7 @@ package schema
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
 	"strconv"
@@ -39,7 +40,7 @@ func (d *MySQL) init(ctx context.Context, conn dialect.ExecQuerier) error {
 		if err := rows.Err(); err != nil {
 			return err
 		}
-		return fmt.Errorf("mysql: version variable was not found")
+		return errors.New("mysql: version variable was not found")
 	}
 	version := make([]string, 2)
 	if err := rows.Scan(&version[0], &version[1]); err != nil {

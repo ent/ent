@@ -63,7 +63,7 @@ func (riu *RelationshipInfoUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(riu.hooks) - 1; i >= 0; i-- {
 			if riu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return 0, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = riu.hooks[i](mut)
 		}
@@ -179,7 +179,7 @@ func (riuo *RelationshipInfoUpdateOne) Save(ctx context.Context) (*RelationshipI
 		})
 		for i := len(riuo.hooks) - 1; i >= 0; i-- {
 			if riuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = riuo.hooks[i](mut)
 		}

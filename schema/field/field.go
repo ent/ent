@@ -809,7 +809,7 @@ func (b *enumBuilder) Values(values ...string) *enumBuilder {
 //
 func (b *enumBuilder) NamedValues(namevalue ...string) *enumBuilder {
 	if len(namevalue)%2 == 1 {
-		b.desc.Err = fmt.Errorf("Enum.NamedValues: odd argument count")
+		b.desc.Err = errors.New("Enum.NamedValues: odd argument count")
 		return b
 	}
 	for i := 0; i < len(namevalue); i += 2 {
@@ -1133,7 +1133,7 @@ func (b *otherBuilder) Annotations(annotations ...schema.Annotation) *otherBuild
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *otherBuilder) Descriptor() *Descriptor {
 	if len(b.desc.SchemaType) == 0 {
-		b.desc.Err = fmt.Errorf("expect SchemaType to be set for other field")
+		b.desc.Err = errors.New("expect SchemaType to be set for other field")
 	}
 	return b.desc
 }

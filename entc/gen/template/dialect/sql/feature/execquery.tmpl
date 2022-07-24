@@ -22,7 +22,7 @@ in the LICENSE file in the root directory of this source tree.
         		ExecContext(context.Context, string, ...interface{}) (stdsql.Result, error)
         	})
         	if !ok {
-        		return nil, fmt.Errorf("Driver.ExecContext is not supported")
+        		return nil, errors.New("Driver.ExecContext is not supported")
         	}
         	return ex.ExecContext(ctx, query, args...)
         }
@@ -34,7 +34,7 @@ in the LICENSE file in the root directory of this source tree.
         		QueryContext(context.Context, string, ...interface{}) (*stdsql.Rows, error)
         	})
         	if !ok {
-        		return nil, fmt.Errorf("Driver.QueryContext is not supported")
+        		return nil, errors.New("Driver.QueryContext is not supported")
         	}
         	return q.QueryContext(ctx, query, args...)
         }
@@ -51,7 +51,7 @@ in the LICENSE file in the root directory of this source tree.
         		ExecContext(context.Context, string, ...interface{}) (stdsql.Result, error)
         	})
         	if !ok {
-        		return nil, fmt.Errorf("Tx.ExecContext is not supported")
+        		return nil, errors.New("Tx.ExecContext is not supported")
         	}
         	return ex.ExecContext(ctx, query, args...)
         }
@@ -63,7 +63,7 @@ in the LICENSE file in the root directory of this source tree.
         		QueryContext(context.Context, string, ...interface{}) (*stdsql.Rows, error)
         	})
         	if !ok {
-        		return nil, fmt.Errorf("Tx.QueryContext is not supported")
+        		return nil, errors.New("Tx.QueryContext is not supported")
         	}
         	return q.QueryContext(ctx, query, args...)
         }

@@ -6,7 +6,7 @@ package schema
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"time"
 
 	"entgo.io/ent"
@@ -48,11 +48,11 @@ func (Card) Hooks() []ent.Hook {
 				return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
 					num, ok := m.Field(card.FieldNumber)
 					if !ok {
-						return nil, fmt.Errorf("missing card number value")
+						return nil, errors.New("missing card number value")
 					}
 					// Validator in hooks.
 					if len(num.(string)) < 4 {
-						return nil, fmt.Errorf("card number is too short")
+						return nil, errors.New("card number is too short")
 					}
 					return next.Mutate(ctx, m)
 				})

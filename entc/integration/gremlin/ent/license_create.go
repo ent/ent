@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/gremlin"
@@ -64,7 +65,7 @@ func (lc *LicenseCreate) Save(ctx context.Context) (*License, error) {
 		})
 		for i := len(lc.hooks) - 1; i >= 0; i-- {
 			if lc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = lc.hooks[i](mut)
 		}

@@ -57,7 +57,7 @@ func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(gu.hooks) - 1; i >= 0; i-- {
 			if gu.hooks[i] == nil {
-				return 0, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+				return 0, errors.New("entv2: uninitialized hook (forgotten import entv2/runtime?)")
 			}
 			mut = gu.hooks[i](mut)
 		}
@@ -160,7 +160,7 @@ func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 		})
 		for i := len(guo.hooks) - 1; i >= 0; i-- {
 			if guo.hooks[i] == nil {
-				return nil, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+				return nil, errors.New("entv2: uninitialized hook (forgotten import entv2/runtime?)")
 			}
 			mut = guo.hooks[i](mut)
 		}

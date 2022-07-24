@@ -119,7 +119,7 @@ func (isu *IntSIDUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(isu.hooks) - 1; i >= 0; i-- {
 			if isu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return 0, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = isu.hooks[i](mut)
 		}
@@ -372,7 +372,7 @@ func (isuo *IntSIDUpdateOne) Save(ctx context.Context) (*IntSID, error) {
 		})
 		for i := len(isuo.hooks) - 1; i >= 0; i-- {
 			if isuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = isuo.hooks[i](mut)
 		}

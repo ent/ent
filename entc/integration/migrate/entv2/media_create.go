@@ -8,6 +8,7 @@ package entv2
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -99,7 +100,7 @@ func (mc *MediaCreate) Save(ctx context.Context) (*Media, error) {
 		})
 		for i := len(mc.hooks) - 1; i >= 0; i-- {
 			if mc.hooks[i] == nil {
-				return nil, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+				return nil, errors.New("entv2: uninitialized hook (forgotten import entv2/runtime?)")
 			}
 			mut = mc.hooks[i](mut)
 		}

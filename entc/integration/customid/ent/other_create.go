@@ -77,7 +77,7 @@ func (oc *OtherCreate) Save(ctx context.Context) (*Other, error) {
 		})
 		for i := len(oc.hooks) - 1; i >= 0; i-- {
 			if oc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = oc.hooks[i](mut)
 		}

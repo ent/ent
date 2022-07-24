@@ -120,7 +120,7 @@ func (du *DeviceUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(du.hooks) - 1; i >= 0; i-- {
 			if du.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return 0, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = du.hooks[i](mut)
 		}
@@ -373,7 +373,7 @@ func (duo *DeviceUpdateOne) Save(ctx context.Context) (*Device, error) {
 		})
 		for i := len(duo.hooks) - 1; i >= 0; i-- {
 			if duo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = duo.hooks[i](mut)
 		}

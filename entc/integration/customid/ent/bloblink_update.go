@@ -114,7 +114,7 @@ func (blu *BlobLinkUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(blu.hooks) - 1; i >= 0; i-- {
 			if blu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return 0, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = blu.hooks[i](mut)
 		}
@@ -365,7 +365,7 @@ func (bluo *BlobLinkUpdateOne) Save(ctx context.Context) (*BlobLink, error) {
 		})
 		for i := len(bluo.hooks) - 1; i >= 0; i-- {
 			if bluo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = bluo.hooks[i](mut)
 		}

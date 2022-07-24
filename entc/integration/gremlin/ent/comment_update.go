@@ -153,7 +153,7 @@ func (cu *CommentUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(cu.hooks) - 1; i >= 0; i-- {
 			if cu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return 0, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = cu.hooks[i](mut)
 		}
@@ -418,7 +418,7 @@ func (cuo *CommentUpdateOne) Save(ctx context.Context) (*Comment, error) {
 		})
 		for i := len(cuo.hooks) - 1; i >= 0; i-- {
 			if cuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = cuo.hooks[i](mut)
 		}

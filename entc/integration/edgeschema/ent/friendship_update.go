@@ -134,7 +134,7 @@ func (fu *FriendshipUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(fu.hooks) - 1; i >= 0; i-- {
 			if fu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return 0, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = fu.hooks[i](mut)
 		}
@@ -414,7 +414,7 @@ func (fuo *FriendshipUpdateOne) Save(ctx context.Context) (*Friendship, error) {
 		})
 		for i := len(fuo.hooks) - 1; i >= 0; i-- {
 			if fuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = fuo.hooks[i](mut)
 		}

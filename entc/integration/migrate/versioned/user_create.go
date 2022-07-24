@@ -84,7 +84,7 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 		})
 		for i := len(uc.hooks) - 1; i >= 0; i-- {
 			if uc.hooks[i] == nil {
-				return nil, fmt.Errorf("versioned: uninitialized hook (forgotten import versioned/runtime?)")
+				return nil, errors.New("versioned: uninitialized hook (forgotten import versioned/runtime?)")
 			}
 			mut = uc.hooks[i](mut)
 		}

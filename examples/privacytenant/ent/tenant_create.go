@@ -64,7 +64,7 @@ func (tc *TenantCreate) Save(ctx context.Context) (*Tenant, error) {
 		})
 		for i := len(tc.hooks) - 1; i >= 0; i-- {
 			if tc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = tc.hooks[i](mut)
 		}

@@ -6,6 +6,7 @@ package sqljson
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"unicode"
@@ -460,11 +461,11 @@ func ParsePath(dotpath string) ([]string, error) {
 		switch r := dotpath[i]; {
 		case r == '"':
 			if i == len(dotpath)-1 {
-				return nil, fmt.Errorf("unexpected quote")
+				return nil, errors.New("unexpected quote")
 			}
 			idx := strings.IndexRune(dotpath[i+1:], '"')
 			if idx == -1 || idx == 0 {
-				return nil, fmt.Errorf("unbalanced quote")
+				return nil, errors.New("unbalanced quote")
 			}
 			i += idx + 2
 		case r == '[':
@@ -473,11 +474,11 @@ func ParsePath(dotpath string) ([]string, error) {
 			}
 			p = i
 			if i == len(dotpath)-1 {
-				return nil, fmt.Errorf("unexpected bracket")
+				return nil, errors.New("unexpected bracket")
 			}
 			idx := strings.IndexRune(dotpath[i:], ']')
 			if idx == -1 || idx == 1 {
-				return nil, fmt.Errorf("unbalanced bracket")
+				return nil, errors.New("unbalanced bracket")
 			}
 			if !isNumber(dotpath[i+1 : i+idx]) {
 				return nil, fmt.Errorf("invalid index %q", dotpath[i:i+idx+1])

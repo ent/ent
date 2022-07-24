@@ -81,7 +81,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }},
 		})
 		for i := len({{ $receiver }}.hooks) - 1; i >= 0; i-- {
 			if {{ $receiver }}.hooks[i] == nil {
-				return nil, fmt.Errorf("{{ $pkg }}: uninitialized hook (forgotten import {{ $pkg }}/runtime?)")
+				return nil, errors.New("{{ $pkg }}: uninitialized hook (forgotten import {{ $pkg }}/runtime?)")
 			}
 			mut = {{ $receiver }}.hooks[i](mut)
 		}
@@ -129,7 +129,7 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
 				if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {
 					{{- if and $runtimeRequired $f.DefaultFunc }}
 						if {{ $.Package }}.{{ $f.DefaultName }} == nil {
-							return fmt.Errorf("{{ $pkg }}: uninitialized {{ $.Package }}.{{ $f.DefaultName }} (forgotten import {{ $pkg }}/runtime?)")
+							return errors.New("{{ $pkg }}: uninitialized {{ $.Package }}.{{ $f.DefaultName }} (forgotten import {{ $pkg }}/runtime?)")
 						}
 					{{- end }}
 					v := {{ $.Package }}.{{ $f.DefaultName }}{{ if $f.DefaultFunc }}(){{ end }}

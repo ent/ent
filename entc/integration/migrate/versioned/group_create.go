@@ -64,7 +64,7 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 		})
 		for i := len(gc.hooks) - 1; i >= 0; i-- {
 			if gc.hooks[i] == nil {
-				return nil, fmt.Errorf("versioned: uninitialized hook (forgotten import versioned/runtime?)")
+				return nil, errors.New("versioned: uninitialized hook (forgotten import versioned/runtime?)")
 			}
 			mut = gc.hooks[i](mut)
 		}

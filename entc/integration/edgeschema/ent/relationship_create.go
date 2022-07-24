@@ -116,7 +116,7 @@ func (rc *RelationshipCreate) Save(ctx context.Context) (*Relationship, error) {
 		})
 		for i := len(rc.hooks) - 1; i >= 0; i-- {
 			if rc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = rc.hooks[i](mut)
 		}

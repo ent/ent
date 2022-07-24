@@ -7,6 +7,7 @@ package sql
 import (
 	"database/sql"
 	"database/sql/driver"
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -31,7 +32,7 @@ func ScanOne(rows ColumnScanner, v interface{}) error {
 		return err
 	}
 	if rows.Next() {
-		return fmt.Errorf("sql/scan: expect exactly one row in result set")
+		return errors.New("sql/scan: expect exactly one row in result set")
 	}
 	return rows.Err()
 }
@@ -95,7 +96,7 @@ func ScanSlice(rows ColumnScanner, v interface{}) error {
 		}
 		fallthrough
 	case rv.IsNil():
-		return fmt.Errorf("sql/scan: ScanSlice(nil)")
+		return errors.New("sql/scan: ScanSlice(nil)")
 	}
 	rv = reflect.Indirect(rv)
 	if k := rv.Kind(); k != reflect.Slice {

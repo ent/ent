@@ -57,7 +57,7 @@ func (lu *LicenseUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(lu.hooks) - 1; i >= 0; i-- {
 			if lu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return 0, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = lu.hooks[i](mut)
 		}
@@ -160,7 +160,7 @@ func (luo *LicenseUpdateOne) Save(ctx context.Context) (*License, error) {
 		})
 		for i := len(luo.hooks) - 1; i >= 0; i-- {
 			if luo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = luo.hooks[i](mut)
 		}

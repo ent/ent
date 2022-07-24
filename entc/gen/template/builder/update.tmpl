@@ -84,7 +84,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (int, error) {
 		})
 		for i := len({{ $receiver }}.hooks) - 1; i >= 0; i-- {
 			if {{ $receiver }}.hooks[i] == nil {
-				return 0, fmt.Errorf("{{ $pkg }}: uninitialized hook (forgotten import {{ $pkg }}/runtime?)")
+				return 0, errors.New("{{ $pkg }}: uninitialized hook (forgotten import {{ $pkg }}/runtime?)")
 			}
 			mut = {{ $receiver }}.hooks[i](mut)
 		}
@@ -193,7 +193,7 @@ func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name
 		})
 		for i := len({{ $receiver }}.hooks) - 1; i >= 0; i-- {
 			if {{ $receiver }}.hooks[i] == nil {
-				return nil, fmt.Errorf("{{ $pkg }}: uninitialized hook (forgotten import {{ $pkg }}/runtime?)")
+				return nil, errors.New("{{ $pkg }}: uninitialized hook (forgotten import {{ $pkg }}/runtime?)")
 			}
 			mut = {{ $receiver }}.hooks[i](mut)
 		}
@@ -309,7 +309,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 				if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {{ if $f.Optional }} && !{{ $mutation }}.{{ $f.StructField }}Cleared() {{ end }} {
 					{{- if $runtimeRequired }}
 						if {{ $.Package }}.{{ $f.UpdateDefaultName }} == nil {
-							return fmt.Errorf("{{ $pkg }}: uninitialized {{ $.Package }}.{{ $f.UpdateDefaultName }} (forgotten import {{ $pkg }}/runtime?)")
+							return errors.New("{{ $pkg }}: uninitialized {{ $.Package }}.{{ $f.UpdateDefaultName }} (forgotten import {{ $pkg }}/runtime?)")
 						}
 					{{- end }}
 					v := {{ $.Package }}.{{ $f.UpdateDefaultName }}()

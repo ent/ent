@@ -116,7 +116,7 @@ func (ttc *TweetTagCreate) Save(ctx context.Context) (*TweetTag, error) {
 		})
 		for i := len(ttc.hooks) - 1; i >= 0; i-- {
 			if ttc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = ttc.hooks[i](mut)
 		}

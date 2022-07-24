@@ -140,7 +140,7 @@ func (dc *DocCreate) Save(ctx context.Context) (*Doc, error) {
 		})
 		for i := len(dc.hooks) - 1; i >= 0; i-- {
 			if dc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = dc.hooks[i](mut)
 		}

@@ -102,7 +102,7 @@ func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(uu.hooks) - 1; i >= 0; i-- {
 			if uu.hooks[i] == nil {
-				return 0, fmt.Errorf("versioned: uninitialized hook (forgotten import versioned/runtime?)")
+				return 0, errors.New("versioned: uninitialized hook (forgotten import versioned/runtime?)")
 			}
 			mut = uu.hooks[i](mut)
 		}
@@ -294,7 +294,7 @@ func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 		})
 		for i := len(uuo.hooks) - 1; i >= 0; i-- {
 			if uuo.hooks[i] == nil {
-				return nil, fmt.Errorf("versioned: uninitialized hook (forgotten import versioned/runtime?)")
+				return nil, errors.New("versioned: uninitialized hook (forgotten import versioned/runtime?)")
 			}
 			mut = uuo.hooks[i](mut)
 		}

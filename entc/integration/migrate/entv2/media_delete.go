@@ -8,6 +8,7 @@ package entv2
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -51,7 +52,7 @@ func (md *MediaDelete) Exec(ctx context.Context) (int, error) {
 		})
 		for i := len(md.hooks) - 1; i >= 0; i-- {
 			if md.hooks[i] == nil {
-				return 0, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+				return 0, errors.New("entv2: uninitialized hook (forgotten import entv2/runtime?)")
 			}
 			mut = md.hooks[i](mut)
 		}

@@ -6,10 +6,8 @@ package schema
 
 import (
 	"context"
-	"errors"
-	"fmt"
-
 	"entgo.io/ent/entc/integration/hooks/ent/user"
+	"errors"
 
 	"entgo.io/ent"
 	"entgo.io/ent/entc/integration/hooks/ent/hook"
@@ -106,10 +104,10 @@ func VersionHook() ent.Hook {
 			}
 			curV, exists := ver.Version()
 			if !exists {
-				return nil, fmt.Errorf("version field is required in update mutation")
+				return nil, errors.New("version field is required in update mutation")
 			}
 			if curV != oldV+1 {
-				return nil, fmt.Errorf("version field must be incremented by 1")
+				return nil, errors.New("version field must be incremented by 1")
 			}
 			// Add an SQL predicate that validates the "version" column is equal
 			// to "oldV" (it wasn't changed during the mutation by other process).

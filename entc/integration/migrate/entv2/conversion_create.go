@@ -8,6 +8,7 @@ package entv2
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -183,7 +184,7 @@ func (cc *ConversionCreate) Save(ctx context.Context) (*Conversion, error) {
 		})
 		for i := len(cc.hooks) - 1; i >= 0; i-- {
 			if cc.hooks[i] == nil {
-				return nil, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+				return nil, errors.New("entv2: uninitialized hook (forgotten import entv2/runtime?)")
 			}
 			mut = cc.hooks[i](mut)
 		}

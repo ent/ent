@@ -6,7 +6,7 @@ package rule
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"sync"
 
 	"entgo.io/ent/entc/integration/privacy/ent"
@@ -135,7 +135,7 @@ func DenyIfStatusChangedByOther() privacy.MutationRule {
 		}
 		id, ok := m.ID()
 		if !ok {
-			return fmt.Errorf("missing task id")
+			return errors.New("missing task id")
 		}
 		owner, err := m.Client().User.Query().Where(user.HasTasksWith(task.ID(id))).Only(ctx)
 		if err != nil {
@@ -164,7 +164,7 @@ func AllowIfViewerInTheSameTeam() privacy.MutationRule {
 		}
 		id, ok := m.ID()
 		if !ok {
-			return fmt.Errorf("missing task id")
+			return errors.New("missing task id")
 		}
 		// Query should return an error if the viewer
 		// does not belong to the task namespace/team.

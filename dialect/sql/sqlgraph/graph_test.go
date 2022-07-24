@@ -1514,7 +1514,7 @@ func (*user) values(columns []string) ([]interface{}, error) {
 
 func (u *user) assign(columns []string, values []interface{}) error {
 	if len(columns) != len(values) {
-		return fmt.Errorf("mismatch number of values")
+		return errors.New("mismatch number of values")
 	}
 	for i, c := range columns {
 		switch c {

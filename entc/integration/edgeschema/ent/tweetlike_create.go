@@ -100,7 +100,7 @@ func (tlc *TweetLikeCreate) Save(ctx context.Context) (*TweetLike, error) {
 		})
 		for i := len(tlc.hooks) - 1; i >= 0; i-- {
 			if tlc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = tlc.hooks[i](mut)
 		}
@@ -143,7 +143,7 @@ func (tlc *TweetLikeCreate) ExecX(ctx context.Context) {
 func (tlc *TweetLikeCreate) defaults() error {
 	if _, ok := tlc.mutation.LikedAt(); !ok {
 		if tweetlike.DefaultLikedAt == nil {
-			return fmt.Errorf("ent: uninitialized tweetlike.DefaultLikedAt (forgotten import ent/runtime?)")
+			return errors.New("ent: uninitialized tweetlike.DefaultLikedAt (forgotten import ent/runtime?)")
 		}
 		v := tweetlike.DefaultLikedAt()
 		tlc.mutation.SetLikedAt(v)

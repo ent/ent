@@ -114,7 +114,7 @@ func (tlu *TweetLikeUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(tlu.hooks) - 1; i >= 0; i-- {
 			if tlu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return 0, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = tlu.hooks[i](mut)
 		}
@@ -365,7 +365,7 @@ func (tluo *TweetLikeUpdateOne) Save(ctx context.Context) (*TweetLike, error) {
 		})
 		for i := len(tluo.hooks) - 1; i >= 0; i-- {
 			if tluo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = tluo.hooks[i](mut)
 		}

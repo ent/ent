@@ -10,6 +10,7 @@ import (
 	"context"
 	"database/sql/driver"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"sort"
@@ -520,7 +521,7 @@ type EdgeQuerySpec struct {
 // QueryEdges queries the edges in the graph and scans the result with the given dest function.
 func QueryEdges(ctx context.Context, drv dialect.Driver, spec *EdgeQuerySpec) error {
 	if len(spec.Edge.Columns) != 2 {
-		return fmt.Errorf("sqlgraph: edge query requires 2 columns (out, in)")
+		return errors.New("sqlgraph: edge query requires 2 columns (out, in)")
 	}
 	out, in := spec.Edge.Columns[0], spec.Edge.Columns[1]
 	if spec.Edge.Inverse {
@@ -1046,7 +1047,7 @@ func (c *batchCreator) nodes(ctx context.Context, drv dialect.Driver) error {
 					// If the ID value was provided to one of the nodes, it should be
 					// provided to all others because this affects the way we calculate
 					// their values in MySQL and SQLite dialects.
-					return fmt.Errorf("incosistent id values for batch insert")
+					return errors.New("incosistent id values for batch insert")
 				}
 				// Assign NULL values for empty placeholders.
 				values[i][column] = nil

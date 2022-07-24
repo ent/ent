@@ -84,7 +84,7 @@ func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
 		})
 		for i := len(pc.hooks) - 1; i >= 0; i-- {
 			if pc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = pc.hooks[i](mut)
 		}

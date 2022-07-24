@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -51,7 +52,7 @@ func (ld *LicenseDelete) Exec(ctx context.Context) (int, error) {
 		})
 		for i := len(ld.hooks) - 1; i >= 0; i-- {
 			if ld.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return 0, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = ld.hooks[i](mut)
 		}

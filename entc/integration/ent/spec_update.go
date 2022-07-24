@@ -94,7 +94,7 @@ func (su *SpecUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(su.hooks) - 1; i >= 0; i-- {
 			if su.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return 0, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = su.hooks[i](mut)
 		}
@@ -287,7 +287,7 @@ func (suo *SpecUpdateOne) Save(ctx context.Context) (*Spec, error) {
 		})
 		for i := len(suo.hooks) - 1; i >= 0; i-- {
 			if suo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = suo.hooks[i](mut)
 		}

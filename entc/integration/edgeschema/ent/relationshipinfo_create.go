@@ -66,7 +66,7 @@ func (ric *RelationshipInfoCreate) Save(ctx context.Context) (*RelationshipInfo,
 		})
 		for i := len(ric.hooks) - 1; i >= 0; i-- {
 			if ric.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = ric.hooks[i](mut)
 		}

@@ -117,7 +117,7 @@ func (mu *MediaUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(mu.hooks) - 1; i >= 0; i-- {
 			if mu.hooks[i] == nil {
-				return 0, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+				return 0, errors.New("entv2: uninitialized hook (forgotten import entv2/runtime?)")
 			}
 			mut = mu.hooks[i](mut)
 		}
@@ -319,7 +319,7 @@ func (muo *MediaUpdateOne) Save(ctx context.Context) (*Media, error) {
 		})
 		for i := len(muo.hooks) - 1; i >= 0; i-- {
 			if muo.hooks[i] == nil {
-				return nil, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+				return nil, errors.New("entv2: uninitialized hook (forgotten import entv2/runtime?)")
 			}
 			mut = muo.hooks[i](mut)
 		}

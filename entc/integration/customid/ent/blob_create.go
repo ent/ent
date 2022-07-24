@@ -139,7 +139,7 @@ func (bc *BlobCreate) Save(ctx context.Context) (*Blob, error) {
 		})
 		for i := len(bc.hooks) - 1; i >= 0; i-- {
 			if bc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = bc.hooks[i](mut)
 		}

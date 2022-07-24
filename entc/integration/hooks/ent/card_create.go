@@ -130,7 +130,7 @@ func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 		})
 		for i := len(cc.hooks) - 1; i >= 0; i-- {
 			if cc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = cc.hooks[i](mut)
 		}
@@ -177,7 +177,7 @@ func (cc *CardCreate) defaults() error {
 	}
 	if _, ok := cc.mutation.CreatedAt(); !ok {
 		if card.DefaultCreatedAt == nil {
-			return fmt.Errorf("ent: uninitialized card.DefaultCreatedAt (forgotten import ent/runtime?)")
+			return errors.New("ent: uninitialized card.DefaultCreatedAt (forgotten import ent/runtime?)")
 		}
 		v := card.DefaultCreatedAt()
 		cc.mutation.SetCreatedAt(v)

@@ -100,7 +100,7 @@ func (ugc *UserGroupCreate) Save(ctx context.Context) (*UserGroup, error) {
 		})
 		for i := len(ugc.hooks) - 1; i >= 0; i-- {
 			if ugc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = ugc.hooks[i](mut)
 		}

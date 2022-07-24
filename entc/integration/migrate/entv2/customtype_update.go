@@ -118,7 +118,7 @@ func (ctu *CustomTypeUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(ctu.hooks) - 1; i >= 0; i-- {
 			if ctu.hooks[i] == nil {
-				return 0, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+				return 0, errors.New("entv2: uninitialized hook (forgotten import entv2/runtime?)")
 			}
 			mut = ctu.hooks[i](mut)
 		}
@@ -320,7 +320,7 @@ func (ctuo *CustomTypeUpdateOne) Save(ctx context.Context) (*CustomType, error) 
 		})
 		for i := len(ctuo.hooks) - 1; i >= 0; i-- {
 			if ctuo.hooks[i] == nil {
-				return nil, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+				return nil, errors.New("entv2: uninitialized hook (forgotten import entv2/runtime?)")
 			}
 			mut = ctuo.hooks[i](mut)
 		}

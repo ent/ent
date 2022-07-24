@@ -8,6 +8,7 @@ package entv2
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -51,7 +52,7 @@ func (pd *PetDelete) Exec(ctx context.Context) (int, error) {
 		})
 		for i := len(pd.hooks) - 1; i >= 0; i-- {
 			if pd.hooks[i] == nil {
-				return 0, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+				return 0, errors.New("entv2: uninitialized hook (forgotten import entv2/runtime?)")
 			}
 			mut = pd.hooks[i](mut)
 		}

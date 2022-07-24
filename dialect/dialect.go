@@ -8,6 +8,7 @@ import (
 	"context"
 	"database/sql"
 	"database/sql/driver"
+	"errors"
 	"fmt"
 	"log"
 
@@ -99,7 +100,7 @@ func (d *DebugDriver) ExecContext(ctx context.Context, query string, args ...int
 		ExecContext(context.Context, string, ...interface{}) (sql.Result, error)
 	})
 	if !ok {
-		return nil, fmt.Errorf("Driver.ExecContext is not supported")
+		return nil, errors.New("Driver.ExecContext is not supported")
 	}
 	d.log(ctx, fmt.Sprintf("driver.ExecContext: query=%v args=%v", query, args))
 	return drv.ExecContext(ctx, query, args...)
@@ -117,7 +118,7 @@ func (d *DebugDriver) QueryContext(ctx context.Context, query string, args ...in
 		QueryContext(context.Context, string, ...interface{}) (*sql.Rows, error)
 	})
 	if !ok {
-		return nil, fmt.Errorf("Driver.QueryContext is not supported")
+		return nil, errors.New("Driver.QueryContext is not supported")
 	}
 	d.log(ctx, fmt.Sprintf("driver.QueryContext: query=%v args=%v", query, args))
 	return drv.QueryContext(ctx, query, args...)
@@ -140,7 +141,7 @@ func (d *DebugDriver) BeginTx(ctx context.Context, opts *sql.TxOptions) (Tx, err
 		BeginTx(context.Context, *sql.TxOptions) (Tx, error)
 	})
 	if !ok {
-		return nil, fmt.Errorf("Driver.BeginTx is not supported")
+		return nil, errors.New("Driver.BeginTx is not supported")
 	}
 	tx, err := drv.BeginTx(ctx, opts)
 	if err != nil {
@@ -171,7 +172,7 @@ func (d *DebugTx) ExecContext(ctx context.Context, query string, args ...interfa
 		ExecContext(context.Context, string, ...interface{}) (sql.Result, error)
 	})
 	if !ok {
-		return nil, fmt.Errorf("Tx.ExecContext is not supported")
+		return nil, errors.New("Tx.ExecContext is not supported")
 	}
 	d.log(ctx, fmt.Sprintf("Tx(%s).ExecContext: query=%v args=%v", d.id, query, args))
 	return drv.ExecContext(ctx, query, args...)
@@ -189,7 +190,7 @@ func (d *DebugTx) QueryContext(ctx context.Context, query string, args ...interf
 		QueryContext(context.Context, string, ...interface{}) (*sql.Rows, error)
 	})
 	if !ok {
-		return nil, fmt.Errorf("Tx.QueryContext is not supported")
+		return nil, errors.New("Tx.QueryContext is not supported")
 	}
 	d.log(ctx, fmt.Sprintf("Tx(%s).QueryContext: query=%v args=%v", d.id, query, args))
 	return drv.QueryContext(ctx, query, args...)

@@ -1006,7 +1006,7 @@ func (i *InsertBuilder) writeConflict() {
 	case dialect.MySQL:
 		i.WriteString(" ON DUPLICATE KEY UPDATE ")
 		if i.conflict.action.nothing {
-			i.AddError(fmt.Errorf("invalid CONFLICT action ('DO NOTHING')"))
+			i.AddError(errors.New("invalid CONFLICT action ('DO NOTHING')"))
 		}
 	case dialect.SQLite, dialect.Postgres:
 		i.WriteString(" ON CONFLICT")
@@ -3205,7 +3205,7 @@ func (b *Builder) Err() error {
 		}
 		br.WriteString(b.errs[i].Error())
 	}
-	return fmt.Errorf(br.String())
+	return errors.New(br.String())
 }
 
 // An Op represents an operator.

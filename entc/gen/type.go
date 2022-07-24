@@ -885,7 +885,7 @@ func ValidSchemaName(name string) error {
 func (t *Type) checkField(tf *Field, f *load.Field) (err error) {
 	switch {
 	case f.Name == "":
-		err = fmt.Errorf("field name cannot be empty")
+		err = errors.New("field name cannot be empty")
 	case f.Info == nil || !f.Info.Valid():
 		err = fmt.Errorf("invalid type for field %s", f.Name)
 	case f.Nillable && !f.Optional:

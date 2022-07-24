@@ -114,7 +114,7 @@ func (utu *UserTweetUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(utu.hooks) - 1; i >= 0; i-- {
 			if utu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return 0, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = utu.hooks[i](mut)
 		}
@@ -359,7 +359,7 @@ func (utuo *UserTweetUpdateOne) Save(ctx context.Context) (*UserTweet, error) {
 		})
 		for i := len(utuo.hooks) - 1; i >= 0; i-- {
 			if utuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = utuo.hooks[i](mut)
 		}

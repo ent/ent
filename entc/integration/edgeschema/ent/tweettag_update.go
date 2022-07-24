@@ -114,7 +114,7 @@ func (ttu *TweetTagUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(ttu.hooks) - 1; i >= 0; i-- {
 			if ttu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return 0, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = ttu.hooks[i](mut)
 		}
@@ -359,7 +359,7 @@ func (ttuo *TweetTagUpdateOne) Save(ctx context.Context) (*TweetTag, error) {
 		})
 		for i := len(ttuo.hooks) - 1; i >= 0; i-- {
 			if ttuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = ttuo.hooks[i](mut)
 		}

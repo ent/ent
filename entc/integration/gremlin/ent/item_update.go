@@ -85,7 +85,7 @@ func (iu *ItemUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(iu.hooks) - 1; i >= 0; i-- {
 			if iu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return 0, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = iu.hooks[i](mut)
 		}
@@ -252,7 +252,7 @@ func (iuo *ItemUpdateOne) Save(ctx context.Context) (*Item, error) {
 		})
 		for i := len(iuo.hooks) - 1; i >= 0; i-- {
 			if iuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = iuo.hooks[i](mut)
 		}

@@ -84,7 +84,7 @@ func (cc *CarCreate) Save(ctx context.Context) (*Car, error) {
 		})
 		for i := len(cc.hooks) - 1; i >= 0; i-- {
 			if cc.hooks[i] == nil {
-				return nil, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+				return nil, errors.New("entv2: uninitialized hook (forgotten import entv2/runtime?)")
 			}
 			mut = cc.hooks[i](mut)
 		}

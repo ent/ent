@@ -480,7 +480,7 @@ func (e *ConstraintError) UnmarshalGraphson(b []byte) error {
 		return err
 	}
 	if v[0] == nil {
-		return fmt.Errorf("ent: missing string value")
+		return errors.New("ent: missing string value")
 	}
 	if !strings.HasPrefix(*v[0], e.prefix()) {
 		return fmt.Errorf("ent: invalid string for error: %s", *v[0])

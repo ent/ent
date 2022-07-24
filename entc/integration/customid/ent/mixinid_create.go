@@ -89,7 +89,7 @@ func (mic *MixinIDCreate) Save(ctx context.Context) (*MixinID, error) {
 		})
 		for i := len(mic.hooks) - 1; i >= 0; i-- {
 			if mic.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = mic.hooks[i](mut)
 		}

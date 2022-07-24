@@ -107,7 +107,7 @@ func (au *AccountUpdate) Save(ctx context.Context) (int, error) {
 		})
 		for i := len(au.hooks) - 1; i >= 0; i-- {
 			if au.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return 0, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = au.hooks[i](mut)
 		}
@@ -329,7 +329,7 @@ func (auo *AccountUpdateOne) Save(ctx context.Context) (*Account, error) {
 		})
 		for i := len(auo.hooks) - 1; i >= 0; i-- {
 			if auo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+				return nil, errors.New("ent: uninitialized hook (forgotten import ent/runtime?)")
 			}
 			mut = auo.hooks[i](mut)
 		}
