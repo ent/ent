@@ -141,7 +141,7 @@ posts, err := client.Post.Query().
     }).
     Paginate(...)
 
-// Then, get each named loaded edge as follows:
+// Get the preloaded edges by their name:
 for _, p := range posts {
     published, err := p.Edges.NamedComments("published")
     if err != nil {
