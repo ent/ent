@@ -60,8 +60,8 @@ its comments (500). That means, we have `1+50+50+500=601` queries in total.
 ## Ent Solution
 
 The Ent extension for field collection adds support for automatic [GraphQL fields collection](https://spec.graphql.org/June2018/#sec-Field-Collection)
-for associations (i.e. edges) using [eager loading](eager-load.md). That means, if a query asks for nodes and their edges, 
-`entgql` will automatically add [`With<E>`](eager-load.md#api) steps to the root query, and as a result, the client will
+for associations (i.e. edges) using [eager loading](eager-load.mdx). That means, if a query asks for nodes and their edges, 
+`entgql` will automatically add [`With<E>`](eager-load.mdx) steps to the root query, and as a result, the client will
 execute constant number of queries to the database - and it works recursively.
 
 That means, in the GraphQL query above, the client will execute 1 query for getting the users, 1 for getting the photos,
