@@ -65,15 +65,14 @@ func (IDType) String() string {
 // InitCmd returns the init command for ent/c packages.
 func InitCmd() *cobra.Command {
 	var target string
-	var newSchemaTemplate string
+	var tmplPath string
 	cmd := &cobra.Command{
 		Use:   "init [flags] [schemas]",
 		Short: "initialize an environment with zero or more schemas",
 		Example: examples(
 			"ent init Example",
 			"ent init --target entv1/schema User Group",
-			"ent init --template '<template string>'",
-			"ent init --template file=path/to/tmpl.tmpl",
+			"ent init --template ./path/to/tmpl.tmpl User",
 		),
 		Args: func(_ *cobra.Command, names []string) error {
 			for _, name := range names {
@@ -87,15 +86,10 @@ func InitCmd() *cobra.Command {
 			var tmpl *template.Template
 			var err error
 
-			if parts := strings.SplitN(newSchemaTemplate, "=", 2); len(parts) > 1 {
-				switch parts[0] {
-				case "file":
-					tmpl, err = template.ParseFiles(parts[1])
-				default:
-					log.Fatalln("unsupported template type", parts[0])
-				}
+			if tmplPath != "" {
+				tmpl, err = template.ParseFiles(tmplPath)
 			} else {
-				tmpl, err = template.New("schema").Parse(newSchemaTemplate)
+				tmpl, err = template.New("schema").Parse(defaultTemplate)
 			}
 
 			if err != nil {
@@ -108,7 +102,7 @@ func InitCmd() *cobra.Command {
 		},
 	}
 	cmd.Flags().StringVar(&target, "target", defaultSchema, "target directory for schemas")
-	cmd.Flags().StringVar(&newSchemaTemplate, "template", defaultTemplate, "template to use for new schemas")
+	cmd.Flags().StringVar(&tmplPath, "template", "", "template to use for new schemas")
 	return cmd
 }
 
