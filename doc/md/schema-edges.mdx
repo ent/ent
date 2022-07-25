@@ -1434,9 +1434,7 @@ func (Pet) Edges() []ent.Edge {
 		edge.To("owner", User.Type).
 			Ref("pets").
 			Unique().
-			Annotations(entgql.Annotation{
-				OrderField: "OWNER",
-			}),
+			Annotations(entgql.RelayConnection()),
 	}
 }
 ```
