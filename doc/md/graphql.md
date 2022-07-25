@@ -238,7 +238,7 @@ query {
 ## Fields Collection
 
 The collection template adds support for automatic [GraphQL fields collection](https://spec.graphql.org/June2018/#sec-Field-Collection)
-for ent-edges using eager-loading. That means, if a query asks for nodes and their edges, entgql will add automatically [`With<E>`](eager-load.md#api)
+for ent-edges using eager-loading. That means, if a query asks for nodes and their edges, entgql will add automatically [`With<E>`](eager-load.mdx#api)
 steps to the root query, and as a result, the client will execute constant number of queries to the database - and it works recursively.
 
 For example, given this GraphQL query:
