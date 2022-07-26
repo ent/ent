@@ -49,6 +49,9 @@ type (
 		Path string
 		// Names are the schema names to load. Empty means all schemas in the directory.
 		Names []string
+		// BuildFlags are forwarded to the package.Config when
+		// loading the schema package.
+		BuildFlags []string
 	}
 )
 
@@ -104,7 +107,8 @@ var entInterface = reflect.TypeOf(struct{ ent.Interface }{}).Field(0).Type
 // load loads the schemas info.
 func (c *Config) load() (*SchemaSpec, error) {
 	pkgs, err := packages.Load(&packages.Config{
-		Mode: packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedModule,
+		BuildFlags: c.BuildFlags,
+		Mode:       packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedModule,
 	}, c.Path, entInterface.PkgPath())
 	if err != nil {
 		return nil, fmt.Errorf("loading package: %w", err)

@@ -90,6 +90,10 @@ type (
 		//
 		// Note that the mapping is from the annotation-name (e.g. "GQL") to a JSON decoded object.
 		Annotations Annotations
+
+		// BuildFlags holds a list of custom build flags to use
+		// when loading the schema packages.
+		BuildFlags []string
 	}
 
 	// Graph holds the nodes/entities of the loaded graph schema. Note that, it doesn't

@@ -67,3 +67,25 @@ func TestLoadBaseSchema(t *testing.T) {
 	require.Equal(t, "user_field", f2.Name)
 	require.Equal(t, field.TypeString, f2.Info.Type)
 }
+
+func TestLoadTags(t *testing.T) {
+	all, err := (&Config{
+		Path: "./testdata/buildflags",
+	}).Load()
+	require.NoError(t, err)
+
+	require.Len(t, all.Schemas, 2)
+	require.Equal(t, "Group", all.Schemas[0].Name, "ordered alphabetically")
+	require.Equal(t, "User", all.Schemas[1].Name)
+
+	notags, err := (&Config{
+		Path:       "./testdata/buildflags",
+		BuildFlags: []string{"-tags", "hidegroups"},
+	}).Load()
+	require.NoError(t, err)
+
+	require.Len(t, notags.Schemas, 1)
+	require.Equal(t, "User", notags.Schemas[0].Name)
+
+	require.Equal(t, all.Schemas[1], notags.Schemas[0])
+}
