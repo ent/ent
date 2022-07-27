@@ -74,13 +74,14 @@ func Do(ctx context.Context, client *ent.Client) {
 		ID      int
 		Name    string
 		Average float64
+		Count   int
 	}
 	err := client.User.Query().
 		GroupBy(user.FieldID, user.FieldName).
-		Aggregate(func(s *sql.Selector) string {
+		Aggregate(func(s *sql.Selector) []string {
 			t := sql.Table(pet.Table)
 			s.Join(t).On(s.C(user.FieldID), t.C(pet.OwnerColumn))
-			return sql.As(sql.Avg(t.C(pet.FieldAge)), "average")
+			return []string{sql.As(sql.Avg(t.C(pet.FieldAge)), "average"), sql.As(sql.Count(), "count")}
 		}).
 		Scan(ctx, &users)
 }

@@ -562,7 +562,7 @@ func (igb *InfoGroupBy) sqlQuery() *sql.Selector {
 	selector := igb.sql.Select()
 	aggregation := make([]string, 0, len(igb.fns))
 	for _, fn := range igb.fns {
-		aggregation = append(aggregation, fn(selector))
+		aggregation = append(aggregation, fn(selector)...)
 	}
 	// If no columns were selected in a custom aggregation function, the default
 	// selection is the fields used for "group-by", and the aggregation functions.

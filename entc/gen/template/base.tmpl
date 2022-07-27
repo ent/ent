@@ -44,16 +44,14 @@ type (
 {{ xtemplate $tmpl . }}
 
 
+{{ $tmpl = printf "dialect/%s/group/as" $.Storage }}
 // As is a pseudo aggregation function for renaming another other functions with custom names. For example:
 //
 //	GroupBy(field1, field2).
 //	Aggregate({{ $pkg }}.As({{ $pkg }}.Sum(field1), "sum_field1"), ({{ $pkg }}.As({{ $pkg }}.Sum(field2), "sum_field2")).
 //	Scan(ctx, &v)
 //
-func As(fn AggregateFunc, end string) AggregateFunc {
-	{{- $tmpl = printf "dialect/%s/group/as" $.Storage }}
-	return {{ xtemplate $tmpl . }}
-}
+{{ xtemplate $tmpl . }}
 
 {{ range $name, $withField := aggregate }}
 	{{ $fn := pascal $name }}

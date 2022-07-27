@@ -634,7 +634,7 @@ func (gigb *GroupInfoGroupBy) sqlQuery() *sql.Selector {
 	selector := gigb.sql.Select()
 	aggregation := make([]string, 0, len(gigb.fns))
 	for _, fn := range gigb.fns {
-		aggregation = append(aggregation, fn(selector))
+		aggregation = append(aggregation, fn(selector)...)
 	}
 	// If no columns were selected in a custom aggregation function, the default
 	// selection is the fields used for "group-by", and the aggregation functions.

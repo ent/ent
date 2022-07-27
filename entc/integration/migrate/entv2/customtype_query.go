@@ -489,7 +489,7 @@ func (ctgb *CustomTypeGroupBy) sqlQuery() *sql.Selector {
 	selector := ctgb.sql.Select()
 	aggregation := make([]string, 0, len(ctgb.fns))
 	for _, fn := range ctgb.fns {
-		aggregation = append(aggregation, fn(selector))
+		aggregation = append(aggregation, fn(selector)...)
 	}
 	// If no columns were selected in a custom aggregation function, the default
 	// selection is the fields used for "group-by", and the aggregation functions.
