@@ -83,7 +83,7 @@ func InitCmd() *cobra.Command {
 		},
 		Run: func(cmd *cobra.Command, names []string) {
 			var (
-				err error
+				err  error
 				tmpl *template.Template
 			)
 			if tmplPath != "" {
