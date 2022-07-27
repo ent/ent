@@ -64,15 +64,14 @@ func (IDType) String() string {
 
 // InitCmd returns the init command for ent/c packages.
 func InitCmd() *cobra.Command {
-	var target string
-	var tmplPath string
+	var target, tmplPath string
 	cmd := &cobra.Command{
 		Use:   "init [flags] [schemas]",
 		Short: "initialize an environment with zero or more schemas",
 		Example: examples(
 			"ent init Example",
 			"ent init --target entv1/schema User Group",
-			"ent init --template ./path/to/tmpl.tmpl User",
+			"ent init --template ./path/to/file.tmpl User",
 		),
 		Args: func(_ *cobra.Command, names []string) error {
 			for _, name := range names {
@@ -83,19 +82,18 @@ func InitCmd() *cobra.Command {
 			return nil
 		},
 		Run: func(cmd *cobra.Command, names []string) {
-			var tmpl *template.Template
-			var err error
-
+			var (
+				err error
+				tmpl *template.Template
+			)
 			if tmplPath != "" {
 				tmpl, err = template.ParseFiles(tmplPath)
 			} else {
 				tmpl, err = template.New("schema").Parse(defaultTemplate)
 			}
-
 			if err != nil {
-				log.Fatalln(fmt.Errorf("ent/init: could not compile template %w", err))
+				log.Fatalln(fmt.Errorf("ent/init: could not parse template %w", err))
 			}
-
 			if err := initEnv(target, names, tmpl); err != nil {
 				log.Fatalln(fmt.Errorf("ent/init: %w", err))
 			}
