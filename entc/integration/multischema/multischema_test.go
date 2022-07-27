@@ -6,10 +6,8 @@ package multischema
 
 import (
 	"context"
-	"strings"
 	"testing"
 
-	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/entc/integration/multischema/ent"
@@ -17,9 +15,10 @@ import (
 	"entgo.io/ent/entc/integration/multischema/ent/migrate"
 	"entgo.io/ent/entc/integration/multischema/ent/pet"
 	"entgo.io/ent/entc/integration/multischema/ent/user"
-	"github.com/stretchr/testify/require"
 
+	atlas "ariga.io/atlas/sql/schema"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMySQL(t *testing.T) {
@@ -33,14 +32,27 @@ func TestMySQL(t *testing.T) {
 	require.NoError(t, err, "creating database")
 	defer db.ExecContext(ctx, "DROP DATABASE IF EXISTS db1")
 	defer db.ExecContext(ctx, "DROP DATABASE IF EXISTS db2")
-	setupSchema(t, db)
 
-	client := ent.NewClient(ent.Driver(db), ent.AlternateSchema(ent.SchemaConfig{
-		Pet:        "db1",
-		User:       "db2",
-		Group:      "db1",
+	// Default schema for the connection is db1.
+	db1, err := sql.Open("mysql", "root:pass@tcp(localhost:3308)/db1")
+	require.NoError(t, err)
+	defer db1.Close()
+
+	cfg := ent.SchemaConfig{
+		// The "users" and the "pets" table reside in the same schema
+		// as the connection (the default search schema). Thus, there
+		// is no need to set them explicitly both in the migration and
+		// runtime statements.
+		//
+		// Pet:  "db1",
+		// User: "db1",
+
+		// The "groups" and "group_users" reside in external schema (db2).
+		Group:      "db2",
 		GroupUsers: "db2",
-	}))
+	}
+	client := ent.NewClient(ent.Driver(db1), ent.AlternateSchema(cfg))
+	setupSchema(t, client, cfg)
 	pedro := client.Pet.Create().SetName("Pedro").SaveX(ctx)
 	groups := client.Group.CreateBulk(
 		client.Group.Create().SetName("GitHub"),
@@ -108,30 +120,19 @@ func TestMySQL(t *testing.T) {
 	require.Equal(t, client.Pet.Query().CountX(ctx), len(client.Pet.Query().AllX(ctx)))
 }
 
-func setupSchema(t *testing.T, drv *sql.Driver) {
-	client := ent.NewClient(ent.Driver(&rewriter{drv}))
-	err := client.Schema.Create(context.Background(), migrate.WithForeignKeys(false), schema.WithAtlas(false))
+func setupSchema(t *testing.T, client *ent.Client, cfg ent.SchemaConfig) {
+	err := client.Schema.Create(
+		context.Background(),
+		migrate.WithForeignKeys(false),
+		schema.WithDiffHook(func(next schema.Differ) schema.Differ {
+			return schema.DiffFunc(func(current, desired *atlas.Schema) ([]atlas.Change, error) {
+				for tt, s := range map[string]string{group.Table: cfg.Group, group.UsersTable: cfg.GroupUsers} {
+					t1, ok := desired.Table(tt)
+					require.True(t, ok)
+					t1.SetSchema(atlas.New(s))
+				}
+				return next.Diff(current, desired)
+			})
+		}))
 	require.NoError(t, err)
-}
-
-type rewriter struct {
-	dialect.Driver
-}
-
-func (r *rewriter) Tx(ctx context.Context) (dialect.Tx, error) {
-	tx, err := r.Driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return &txRewriter{tx}, nil
-}
-
-type txRewriter struct {
-	dialect.Tx
-}
-
-func (r *txRewriter) Exec(ctx context.Context, query string, args, v interface{}) error {
-	rp := strings.NewReplacer("`groups`", "`db1`.`groups`", "`pets`", "`db1`.`pets`", "`users`", "`db2`.`users`", "`group_users`", "`db2`.`group_users`")
-	query = rp.Replace(query)
-	return r.Tx.Exec(ctx, query, args, v)
 }
