@@ -310,7 +310,7 @@ func (t Type) PackageDir() string { return strings.ToLower(t.Name) }
 
 // PackageAlias returns local package name of a type if there is one.
 // A package has an alias if its generated name conflicts with
-// one of the imports of the user-defined types.
+// one of the imports of the user-defined or ent builtin types.
 func (t Type) PackageAlias() string { return t.alias }
 
 // Receiver returns the receiver name of this node. It makes sure the
@@ -922,9 +922,14 @@ func (t Type) UnexportedForeignKeys() []*ForeignKey {
 // aliases adds package aliases (local names) for all type-packages that
 // their import identifier conflicts with user-defined packages (i.e. GoType).
 func aliases(g *Graph) {
-	names := make(map[string]*Type)
+	mayAlias := make(map[string]*Type)
 	for _, n := range g.Nodes {
-		names[n.PackageDir()] = n
+		if pkg := n.PackageDir(); importPkg[pkg] != "" {
+			// By default, a package named "pet" will be named as "entpet".
+			n.alias = path.Base(g.Package) + pkg
+		} else {
+			mayAlias[n.PackageDir()] = n
+		}
 	}
 	for _, n := range g.Nodes {
 		for _, f := range n.Fields {
@@ -937,7 +942,7 @@ func aliases(g *Graph) {
 			}
 			// A user-defined type already uses the
 			// package local name.
-			if n, ok := names[name]; ok {
+			if n, ok := mayAlias[name]; ok {
 				// By default, a package named "pet" will be named as "entpet".
 				n.alias = path.Base(g.Package) + name
 			}
