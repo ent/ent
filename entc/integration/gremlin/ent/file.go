@@ -30,6 +30,8 @@ type File struct {
 	Group string `json:"group,omitempty"`
 	// Op holds the value of the "op" field.
 	Op bool `json:"op,omitempty"`
+	// FieldID holds the value of the "field_id" field.
+	FieldID int `json:"field_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FileQuery when eager-loading is set.
 	Edges FileEdges `json:"file_edges"`
@@ -90,12 +92,13 @@ func (f *File) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanf struct {
-		ID    string  `json:"id,omitempty"`
-		Size  int     `json:"fsize,omitempty"`
-		Name  string  `json:"name,omitempty"`
-		User  *string `json:"user,omitempty"`
-		Group string  `json:"group,omitempty"`
-		Op    bool    `json:"op,omitempty"`
+		ID      string  `json:"id,omitempty"`
+		Size    int     `json:"fsize,omitempty"`
+		Name    string  `json:"name,omitempty"`
+		User    *string `json:"user,omitempty"`
+		Group   string  `json:"group,omitempty"`
+		Op      bool    `json:"op,omitempty"`
+		FieldID int     `json:"field_id,omitempty"`
 	}
 	if err := vmap.Decode(&scanf); err != nil {
 		return err
@@ -106,6 +109,7 @@ func (f *File) FromResponse(res *gremlin.Response) error {
 	f.User = scanf.User
 	f.Group = scanf.Group
 	f.Op = scanf.Op
+	f.FieldID = scanf.FieldID
 	return nil
 }
 
@@ -163,6 +167,9 @@ func (f *File) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("op=")
 	builder.WriteString(fmt.Sprintf("%v", f.Op))
+	builder.WriteString(", ")
+	builder.WriteString("field_id=")
+	builder.WriteString(fmt.Sprintf("%v", f.FieldID))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -177,24 +184,26 @@ func (f *Files) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanf []struct {
-		ID    string  `json:"id,omitempty"`
-		Size  int     `json:"fsize,omitempty"`
-		Name  string  `json:"name,omitempty"`
-		User  *string `json:"user,omitempty"`
-		Group string  `json:"group,omitempty"`
-		Op    bool    `json:"op,omitempty"`
+		ID      string  `json:"id,omitempty"`
+		Size    int     `json:"fsize,omitempty"`
+		Name    string  `json:"name,omitempty"`
+		User    *string `json:"user,omitempty"`
+		Group   string  `json:"group,omitempty"`
+		Op      bool    `json:"op,omitempty"`
+		FieldID int     `json:"field_id,omitempty"`
 	}
 	if err := vmap.Decode(&scanf); err != nil {
 		return err
 	}
 	for _, v := range scanf {
 		*f = append(*f, &File{
-			ID:    v.ID,
-			Size:  v.Size,
-			Name:  v.Name,
-			User:  v.User,
-			Group: v.Group,
-			Op:    v.Op,
+			ID:      v.ID,
+			Size:    v.Size,
+			Name:    v.Name,
+			User:    v.User,
+			Group:   v.Group,
+			Op:      v.Op,
+			FieldID: v.FieldID,
 		})
 	}
 	return nil

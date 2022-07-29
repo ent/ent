@@ -535,6 +535,84 @@ func OpNotNil() predicate.File {
 	})
 }
 
+// FieldIDEQ applies the EQ predicate on the "field_id" field.
+func FieldIDEQ(v int) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldFieldID), v))
+	})
+}
+
+// FieldIDNEQ applies the NEQ predicate on the "field_id" field.
+func FieldIDNEQ(v int) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldFieldID), v))
+	})
+}
+
+// FieldIDIn applies the In predicate on the "field_id" field.
+func FieldIDIn(vs ...int) predicate.File {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldFieldID), v...))
+	})
+}
+
+// FieldIDNotIn applies the NotIn predicate on the "field_id" field.
+func FieldIDNotIn(vs ...int) predicate.File {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldFieldID), v...))
+	})
+}
+
+// FieldIDGT applies the GT predicate on the "field_id" field.
+func FieldIDGT(v int) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldFieldID), v))
+	})
+}
+
+// FieldIDGTE applies the GTE predicate on the "field_id" field.
+func FieldIDGTE(v int) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldFieldID), v))
+	})
+}
+
+// FieldIDLT applies the LT predicate on the "field_id" field.
+func FieldIDLT(v int) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldFieldID), v))
+	})
+}
+
+// FieldIDLTE applies the LTE predicate on the "field_id" field.
+func FieldIDLTE(v int) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldFieldID), v))
+	})
+}
+
+// FieldIDIsNil applies the IsNil predicate on the "field_id" field.
+func FieldIDIsNil() predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldFieldID)))
+	})
+}
+
+// FieldIDNotNil applies the NotNil predicate on the "field_id" field.
+func FieldIDNotNil() predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldFieldID)))
+	})
+}
+
 // HasOwner applies the HasEdge predicate on the "owner" edge.
 func HasOwner() predicate.File {
 	return predicate.File(func(s *sql.Selector) {

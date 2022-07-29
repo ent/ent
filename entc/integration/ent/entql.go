@@ -158,11 +158,12 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "File",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			file.FieldSize:  {Type: field.TypeInt, Column: file.FieldSize},
-			file.FieldName:  {Type: field.TypeString, Column: file.FieldName},
-			file.FieldUser:  {Type: field.TypeString, Column: file.FieldUser},
-			file.FieldGroup: {Type: field.TypeString, Column: file.FieldGroup},
-			file.FieldOp:    {Type: field.TypeBool, Column: file.FieldOp},
+			file.FieldSize:    {Type: field.TypeInt, Column: file.FieldSize},
+			file.FieldName:    {Type: field.TypeString, Column: file.FieldName},
+			file.FieldUser:    {Type: field.TypeString, Column: file.FieldUser},
+			file.FieldGroup:   {Type: field.TypeString, Column: file.FieldGroup},
+			file.FieldOp:      {Type: field.TypeBool, Column: file.FieldOp},
+			file.FieldFieldID: {Type: field.TypeInt, Column: file.FieldFieldID},
 		},
 	}
 	graph.Nodes[4] = &sqlgraph.Node{
@@ -1254,6 +1255,11 @@ func (f *FileFilter) WhereGroup(p entql.StringP) {
 // WhereOp applies the entql bool predicate on the op field.
 func (f *FileFilter) WhereOp(p entql.BoolP) {
 	f.Where(p.Field(file.FieldOp))
+}
+
+// WhereFieldID applies the entql int predicate on the field_id field.
+func (f *FileFilter) WhereFieldID(p entql.IntP) {
+	f.Where(p.Field(file.FieldFieldID))
 }
 
 // WhereHasOwner applies a predicate to check if query has an edge owner.
