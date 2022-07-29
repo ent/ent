@@ -31,6 +31,8 @@ type File struct {
 	Group string `json:"group,omitempty"`
 	// Op holds the value of the "op" field.
 	Op bool `json:"op,omitempty"`
+	// FieldID holds the value of the "field_id" field.
+	FieldID int `json:"field_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FileQuery when eager-loading is set.
 	Edges           FileEdges `json:"file_edges"`
@@ -95,7 +97,7 @@ func (*File) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case file.FieldOp:
 			values[i] = new(sql.NullBool)
-		case file.FieldID, file.FieldSize:
+		case file.FieldID, file.FieldSize, file.FieldFieldID:
 			values[i] = new(sql.NullInt64)
 		case file.FieldName, file.FieldUser, file.FieldGroup:
 			values[i] = new(sql.NullString)
@@ -156,6 +158,12 @@ func (f *File) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field op", values[i])
 			} else if value.Valid {
 				f.Op = value.Bool
+			}
+		case file.FieldFieldID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field field_id", values[i])
+			} else if value.Valid {
+				f.FieldID = int(value.Int64)
 			}
 		case file.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -237,6 +245,9 @@ func (f *File) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("op=")
 	builder.WriteString(fmt.Sprintf("%v", f.Op))
+	builder.WriteString(", ")
+	builder.WriteString("field_id=")
+	builder.WriteString(fmt.Sprintf("%v", f.FieldID))
 	builder.WriteByte(')')
 	return builder.String()
 }
