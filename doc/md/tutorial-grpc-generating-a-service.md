@@ -42,10 +42,14 @@ service UserService {
   rpc Update ( UpdateUserRequest ) returns ( User );
 
   rpc Delete ( DeleteUserRequest ) returns ( google.protobuf.Empty );
+
+  rpc List ( ListUserRequest ) returns ( ListUserResponse );
+
+  rpc BatchCreate ( BatchCreateUsersRequest ) returns ( BatchCreateUsersResponse );
 }
 ```
 
-In addition, two new files were created. The first, `ent_grpc.pb.go`, contains the gRPC client stub and the interface definition. If you open the file, you will find in it (among many other things):
+In addition, two new files were created. The first, `entpb_grpc.pb.go`, contains the gRPC client stub and the interface definition. If you open the file, you will find in it (among many other things):
 
 ```go
 // UserServiceClient is the client API for UserService service.
@@ -57,6 +61,8 @@ type UserServiceClient interface {
 	Get(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error)
 	Update(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*User, error)
 	Delete(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	List(ctx context.Context, in *ListUserRequest, opts ...grpc.CallOption) (*ListUserResponse, error)
+	BatchCreate(ctx context.Context, in *BatchCreateUsersRequest, opts ...grpc.CallOption) (*BatchCreateUsersResponse, error)
 }
 ```
 
