@@ -147,8 +147,10 @@ type (
 		// For O2O and O2M, it's the table name of the type we're this edge point to.
 		// For M2O, this is the owner's type, and for M2M this is the join table.
 		Table string
-		// Columns holds the relation column in the relation table above.
-		// In O2M, M2O and O2O, this the first element.
+		// Columns holds the relation column(s) in the relation table above.
+		// For O2M, M2O and O2O, it contains one element with the column name.
+		// For M2M edges, it contains two columns defined in the join table with
+		// the same order as defined in the schema: (owner_id, reference_id).
 		Columns []string
 		// foreign-key information for non-M2M edges.
 		fk *ForeignKey
