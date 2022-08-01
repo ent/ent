@@ -36,6 +36,15 @@ var schemaGraph = func() *sqlgraph.Schema {
 						Type: field.{{ $n.ID.Type.ConstName }},
 						Column: {{ $n.Package }}.{{ $n.ID.Constant }},
 					},
+				{{- else }}
+					CompositeID: []*sqlgraph.FieldSpec{
+						{{- range $id := $n.EdgeSchema.ID }}
+							{
+								Type: field.{{ $id.Type.ConstName }},
+								Column: {{ $n.Package }}.{{ $id.Constant }},
+							},
+						{{- end }}
+					},
 				{{- end }}
 			},
 			Type: "{{ $n.Name }}",
