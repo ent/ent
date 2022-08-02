@@ -42,8 +42,7 @@ type StreetEdges struct {
 func (e StreetEdges) CityOrErr() (*City, error) {
 	if e.loadedTypes[0] {
 		if e.City == nil {
-			// The edge city was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: city.Label}
 		}
 		return e.City, nil

@@ -158,11 +158,12 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "File",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			file.FieldSize:  {Type: field.TypeInt, Column: file.FieldSize},
-			file.FieldName:  {Type: field.TypeString, Column: file.FieldName},
-			file.FieldUser:  {Type: field.TypeString, Column: file.FieldUser},
-			file.FieldGroup: {Type: field.TypeString, Column: file.FieldGroup},
-			file.FieldOp:    {Type: field.TypeBool, Column: file.FieldOp},
+			file.FieldSize:    {Type: field.TypeInt, Column: file.FieldSize},
+			file.FieldName:    {Type: field.TypeString, Column: file.FieldName},
+			file.FieldUser:    {Type: field.TypeString, Column: file.FieldUser},
+			file.FieldGroup:   {Type: field.TypeString, Column: file.FieldGroup},
+			file.FieldOp:      {Type: field.TypeBool, Column: file.FieldOp},
+			file.FieldFieldID: {Type: field.TypeInt, Column: file.FieldFieldID},
 		},
 	}
 	graph.Nodes[4] = &sqlgraph.Node{
@@ -281,6 +282,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			pet.FieldName:     {Type: field.TypeString, Column: pet.FieldName},
 			pet.FieldUUID:     {Type: field.TypeUUID, Column: pet.FieldUUID},
 			pet.FieldNickname: {Type: field.TypeString, Column: pet.FieldNickname},
+			pet.FieldTrained:  {Type: field.TypeBool, Column: pet.FieldTrained},
 		},
 	}
 	graph.Nodes[12] = &sqlgraph.Node{
@@ -1255,6 +1257,11 @@ func (f *FileFilter) WhereOp(p entql.BoolP) {
 	f.Where(p.Field(file.FieldOp))
 }
 
+// WhereFieldID applies the entql int predicate on the field_id field.
+func (f *FileFilter) WhereFieldID(p entql.IntP) {
+	f.Where(p.Field(file.FieldFieldID))
+}
+
 // WhereHasOwner applies a predicate to check if query has an edge owner.
 func (f *FileFilter) WhereHasOwner() {
 	f.Where(entql.HasEdge("owner"))
@@ -1807,6 +1814,11 @@ func (f *PetFilter) WhereUUID(p entql.ValueP) {
 // WhereNickname applies the entql string predicate on the nickname field.
 func (f *PetFilter) WhereNickname(p entql.StringP) {
 	f.Where(p.Field(pet.FieldNickname))
+}
+
+// WhereTrained applies the entql bool predicate on the trained field.
+func (f *PetFilter) WhereTrained(p entql.BoolP) {
+	f.Where(p.Field(pet.FieldTrained))
 }
 
 // WhereHasTeam applies a predicate to check if query has an edge team.

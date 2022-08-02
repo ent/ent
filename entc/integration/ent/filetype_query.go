@@ -24,15 +24,15 @@ import (
 // FileTypeQuery is the builder for querying FileType entities.
 type FileTypeQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.FileType
-	// eager-loading edges.
-	withFiles *FileQuery
-	modifiers []func(*sql.Selector)
+	limit          *int
+	offset         *int
+	unique         *bool
+	order          []OrderFunc
+	fields         []string
+	predicates     []predicate.FileType
+	withFiles      *FileQuery
+	modifiers      []func(*sql.Selector)
+	withNamedFiles map[string]*FileQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -386,37 +386,53 @@ func (ftq *FileTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Fi
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := ftq.withFiles; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*FileType)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Files = []*File{}
-		}
-		query.withFKs = true
-		query.Where(predicate.File(func(s *sql.Selector) {
-			s.Where(sql.InValues(filetype.FilesColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := ftq.loadFiles(ctx, query, nodes,
+			func(n *FileType) { n.Edges.Files = []*File{} },
+			func(n *FileType, e *File) { n.Edges.Files = append(n.Edges.Files, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			fk := n.file_type_files
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "file_type_files" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "file_type_files" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Files = append(node.Edges.Files, n)
+	}
+	for name, query := range ftq.withNamedFiles {
+		if err := ftq.loadFiles(ctx, query, nodes,
+			func(n *FileType) { n.appendNamedFiles(name) },
+			func(n *FileType, e *File) { n.appendNamedFiles(name, e) }); err != nil {
+			return nil, err
 		}
 	}
-
 	return nodes, nil
+}
+
+func (ftq *FileTypeQuery) loadFiles(ctx context.Context, query *FileQuery, nodes []*FileType, init func(*FileType), assign func(*FileType, *File)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*FileType)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.File(func(s *sql.Selector) {
+		s.Where(sql.InValues(filetype.FilesColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.file_type_files
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "file_type_files" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "file_type_files" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (ftq *FileTypeQuery) sqlCount(ctx context.Context) (int, error) {
@@ -552,6 +568,20 @@ func (ftq *FileTypeQuery) ForShare(opts ...sql.LockOption) *FileTypeQuery {
 func (ftq *FileTypeQuery) Modify(modifiers ...func(s *sql.Selector)) *FileTypeSelect {
 	ftq.modifiers = append(ftq.modifiers, modifiers...)
 	return ftq.Select()
+}
+
+// WithNamedFiles tells the query-builder to eager-load the nodes that are connected to the "files"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (ftq *FileTypeQuery) WithNamedFiles(name string, opts ...func(*FileQuery)) *FileTypeQuery {
+	query := &FileQuery{config: ftq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if ftq.withNamedFiles == nil {
+		ftq.withNamedFiles = make(map[string]*FileQuery)
+	}
+	ftq.withNamedFiles[name] = query
+	return ftq
 }
 
 // FileTypeGroupBy is the group-by builder for FileType entities.

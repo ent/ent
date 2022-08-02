@@ -50,8 +50,7 @@ type TweetTagEdges struct {
 func (e TweetTagEdges) TagOrErr() (*Tag, error) {
 	if e.loadedTypes[0] {
 		if e.Tag == nil {
-			// The edge tag was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: tag.Label}
 		}
 		return e.Tag, nil
@@ -64,8 +63,7 @@ func (e TweetTagEdges) TagOrErr() (*Tag, error) {
 func (e TweetTagEdges) TweetOrErr() (*Tweet, error) {
 	if e.loadedTypes[1] {
 		if e.Tweet == nil {
-			// The edge tweet was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: tweet.Label}
 		}
 		return e.Tweet, nil

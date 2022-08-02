@@ -67,8 +67,7 @@ func (e UserEdges) PetsOrErr() ([]*Pet, error) {
 func (e UserEdges) ParentOrErr() (*User, error) {
 	if e.loadedTypes[1] {
 		if e.Parent == nil {
-			// The edge parent was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Parent, nil
@@ -90,8 +89,7 @@ func (e UserEdges) ChildrenOrErr() ([]*User, error) {
 func (e UserEdges) SpouseOrErr() (*User, error) {
 	if e.loadedTypes[3] {
 		if e.Spouse == nil {
-			// The edge spouse was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Spouse, nil
@@ -104,8 +102,7 @@ func (e UserEdges) SpouseOrErr() (*User, error) {
 func (e UserEdges) CardOrErr() (*Card, error) {
 	if e.loadedTypes[4] {
 		if e.Card == nil {
-			// The edge card was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: card.Label}
 		}
 		return e.Card, nil
@@ -118,8 +115,7 @@ func (e UserEdges) CardOrErr() (*Card, error) {
 func (e UserEdges) MetadataOrErr() (*Metadata, error) {
 	if e.loadedTypes[5] {
 		if e.Metadata == nil {
-			// The edge metadata was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: metadata.Label}
 		}
 		return e.Metadata, nil

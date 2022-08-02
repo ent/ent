@@ -7371,6 +7371,8 @@ type FileMutation struct {
 	user          *string
 	group         *string
 	_op           *bool
+	field_id      *int
+	addfield_id   *int
 	clearedFields map[string]struct{}
 	owner         *string
 	clearedowner  bool
@@ -7721,6 +7723,76 @@ func (m *FileMutation) ResetOp() {
 	delete(m.clearedFields, file.FieldOp)
 }
 
+// SetFieldID sets the "field_id" field.
+func (m *FileMutation) SetFieldID(i int) {
+	m.field_id = &i
+	m.addfield_id = nil
+}
+
+// FieldID returns the value of the "field_id" field in the mutation.
+func (m *FileMutation) FieldID() (r int, exists bool) {
+	v := m.field_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFieldID returns the old "field_id" field's value of the File entity.
+// If the File object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FileMutation) OldFieldID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFieldID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFieldID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFieldID: %w", err)
+	}
+	return oldValue.FieldID, nil
+}
+
+// AddFieldID adds i to the "field_id" field.
+func (m *FileMutation) AddFieldID(i int) {
+	if m.addfield_id != nil {
+		*m.addfield_id += i
+	} else {
+		m.addfield_id = &i
+	}
+}
+
+// AddedFieldID returns the value that was added to the "field_id" field in this mutation.
+func (m *FileMutation) AddedFieldID() (r int, exists bool) {
+	v := m.addfield_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearFieldID clears the value of the "field_id" field.
+func (m *FileMutation) ClearFieldID() {
+	m.field_id = nil
+	m.addfield_id = nil
+	m.clearedFields[file.FieldFieldID] = struct{}{}
+}
+
+// FieldIDCleared returns if the "field_id" field was cleared in this mutation.
+func (m *FileMutation) FieldIDCleared() bool {
+	_, ok := m.clearedFields[file.FieldFieldID]
+	return ok
+}
+
+// ResetFieldID resets all changes to the "field_id" field.
+func (m *FileMutation) ResetFieldID() {
+	m.field_id = nil
+	m.addfield_id = nil
+	delete(m.clearedFields, file.FieldFieldID)
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by id.
 func (m *FileMutation) SetOwnerID(id string) {
 	m.owner = &id
@@ -7872,7 +7944,7 @@ func (m *FileMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FileMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.size != nil {
 		fields = append(fields, file.FieldSize)
 	}
@@ -7887,6 +7959,9 @@ func (m *FileMutation) Fields() []string {
 	}
 	if m._op != nil {
 		fields = append(fields, file.FieldOp)
+	}
+	if m.field_id != nil {
+		fields = append(fields, file.FieldFieldID)
 	}
 	return fields
 }
@@ -7906,6 +7981,8 @@ func (m *FileMutation) Field(name string) (ent.Value, bool) {
 		return m.Group()
 	case file.FieldOp:
 		return m.GetOp()
+	case file.FieldFieldID:
+		return m.FieldID()
 	}
 	return nil, false
 }
@@ -7925,6 +8002,8 @@ func (m *FileMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldGroup(ctx)
 	case file.FieldOp:
 		return m.OldOp(ctx)
+	case file.FieldFieldID:
+		return m.OldFieldID(ctx)
 	}
 	return nil, fmt.Errorf("unknown File field %s", name)
 }
@@ -7969,6 +8048,13 @@ func (m *FileMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetOp(v)
 		return nil
+	case file.FieldFieldID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFieldID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown File field %s", name)
 }
@@ -7980,6 +8066,9 @@ func (m *FileMutation) AddedFields() []string {
 	if m.addsize != nil {
 		fields = append(fields, file.FieldSize)
 	}
+	if m.addfield_id != nil {
+		fields = append(fields, file.FieldFieldID)
+	}
 	return fields
 }
 
@@ -7990,6 +8079,8 @@ func (m *FileMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case file.FieldSize:
 		return m.AddedSize()
+	case file.FieldFieldID:
+		return m.AddedFieldID()
 	}
 	return nil, false
 }
@@ -8005,6 +8096,13 @@ func (m *FileMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddSize(v)
+		return nil
+	case file.FieldFieldID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddFieldID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown File numeric field %s", name)
@@ -8022,6 +8120,9 @@ func (m *FileMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(file.FieldOp) {
 		fields = append(fields, file.FieldOp)
+	}
+	if m.FieldCleared(file.FieldFieldID) {
+		fields = append(fields, file.FieldFieldID)
 	}
 	return fields
 }
@@ -8046,6 +8147,9 @@ func (m *FileMutation) ClearField(name string) error {
 	case file.FieldOp:
 		m.ClearOp()
 		return nil
+	case file.FieldFieldID:
+		m.ClearFieldID()
+		return nil
 	}
 	return fmt.Errorf("unknown File nullable field %s", name)
 }
@@ -8068,6 +8172,9 @@ func (m *FileMutation) ResetField(name string) error {
 		return nil
 	case file.FieldOp:
 		m.ResetOp()
+		return nil
+	case file.FieldFieldID:
+		m.ResetFieldID()
 		return nil
 	}
 	return fmt.Errorf("unknown File field %s", name)
@@ -11474,6 +11581,7 @@ type PetMutation struct {
 	name          *string
 	uuid          *uuid.UUID
 	nickname      *string
+	trained       *bool
 	clearedFields map[string]struct{}
 	team          *string
 	clearedteam   bool
@@ -11772,6 +11880,42 @@ func (m *PetMutation) ResetNickname() {
 	delete(m.clearedFields, pet.FieldNickname)
 }
 
+// SetTrained sets the "trained" field.
+func (m *PetMutation) SetTrained(b bool) {
+	m.trained = &b
+}
+
+// Trained returns the value of the "trained" field in the mutation.
+func (m *PetMutation) Trained() (r bool, exists bool) {
+	v := m.trained
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTrained returns the old "trained" field's value of the Pet entity.
+// If the Pet object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PetMutation) OldTrained(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTrained is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTrained requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTrained: %w", err)
+	}
+	return oldValue.Trained, nil
+}
+
+// ResetTrained resets all changes to the "trained" field.
+func (m *PetMutation) ResetTrained() {
+	m.trained = nil
+}
+
 // SetTeamID sets the "team" edge to the User entity by id.
 func (m *PetMutation) SetTeamID(id string) {
 	m.team = &id
@@ -11869,7 +12013,7 @@ func (m *PetMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PetMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.age != nil {
 		fields = append(fields, pet.FieldAge)
 	}
@@ -11881,6 +12025,9 @@ func (m *PetMutation) Fields() []string {
 	}
 	if m.nickname != nil {
 		fields = append(fields, pet.FieldNickname)
+	}
+	if m.trained != nil {
+		fields = append(fields, pet.FieldTrained)
 	}
 	return fields
 }
@@ -11898,6 +12045,8 @@ func (m *PetMutation) Field(name string) (ent.Value, bool) {
 		return m.UUID()
 	case pet.FieldNickname:
 		return m.Nickname()
+	case pet.FieldTrained:
+		return m.Trained()
 	}
 	return nil, false
 }
@@ -11915,6 +12064,8 @@ func (m *PetMutation) OldField(ctx context.Context, name string) (ent.Value, err
 		return m.OldUUID(ctx)
 	case pet.FieldNickname:
 		return m.OldNickname(ctx)
+	case pet.FieldTrained:
+		return m.OldTrained(ctx)
 	}
 	return nil, fmt.Errorf("unknown Pet field %s", name)
 }
@@ -11951,6 +12102,13 @@ func (m *PetMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetNickname(v)
+		return nil
+	case pet.FieldTrained:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTrained(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Pet field %s", name)
@@ -12042,6 +12200,9 @@ func (m *PetMutation) ResetField(name string) error {
 		return nil
 	case pet.FieldNickname:
 		m.ResetNickname()
+		return nil
+	case pet.FieldTrained:
+		m.ResetTrained()
 		return nil
 	}
 	return fmt.Errorf("unknown Pet field %s", name)

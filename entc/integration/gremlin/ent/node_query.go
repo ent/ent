@@ -27,9 +27,8 @@ type NodeQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Node
-	// eager-loading edges.
-	withPrev *NodeQuery
-	withNext *NodeQuery
+	withPrev   *NodeQuery
+	withNext   *NodeQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
 	path    func(context.Context) (*dsl.Traversal, error)

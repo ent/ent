@@ -30,9 +30,8 @@ type TweetTagQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.TweetTag
-	// eager-loading edges.
-	withTag   *TagQuery
-	withTweet *TweetQuery
+	withTag    *TagQuery
+	withTweet  *TweetQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -418,60 +417,72 @@ func (ttq *TweetTagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tw
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := ttq.withTag; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*TweetTag)
-		for i := range nodes {
-			fk := nodes[i].TagID
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(tag.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := ttq.loadTag(ctx, query, nodes, nil,
+			func(n *TweetTag, e *Tag) { n.Edges.Tag = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "tag_id" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Tag = n
-			}
-		}
 	}
-
 	if query := ttq.withTweet; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*TweetTag)
-		for i := range nodes {
-			fk := nodes[i].TweetID
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(tweet.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := ttq.loadTweet(ctx, query, nodes, nil,
+			func(n *TweetTag, e *Tweet) { n.Edges.Tweet = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "tweet_id" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Tweet = n
-			}
+	}
+	return nodes, nil
+}
+
+func (ttq *TweetTagQuery) loadTag(ctx context.Context, query *TagQuery, nodes []*TweetTag, init func(*TweetTag), assign func(*TweetTag, *Tag)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*TweetTag)
+	for i := range nodes {
+		fk := nodes[i].TagID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(tag.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "tag_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
+}
+func (ttq *TweetTagQuery) loadTweet(ctx context.Context, query *TweetQuery, nodes []*TweetTag, init func(*TweetTag), assign func(*TweetTag, *Tweet)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*TweetTag)
+	for i := range nodes {
+		fk := nodes[i].TweetID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(tweet.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "tweet_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (ttq *TweetTagQuery) sqlCount(ctx context.Context) (int, error) {

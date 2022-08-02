@@ -147,8 +147,10 @@ type (
 		// For O2O and O2M, it's the table name of the type we're this edge point to.
 		// For M2O, this is the owner's type, and for M2M this is the join table.
 		Table string
-		// Columns holds the relation column in the relation table above.
-		// In O2M, M2O and O2O, this the first element.
+		// Columns holds the relation column(s) in the relation table above.
+		// For O2M, M2O and O2O, it contains one element with the column name.
+		// For M2M edges, it contains two columns defined in the join table with
+		// the same order as defined in the schema: (owner_id, reference_id).
 		Columns []string
 		// foreign-key information for non-M2M edges.
 		fk *ForeignKey
@@ -310,7 +312,7 @@ func (t Type) PackageDir() string { return strings.ToLower(t.Name) }
 
 // PackageAlias returns local package name of a type if there is one.
 // A package has an alias if its generated name conflicts with
-// one of the imports of the user-defined types.
+// one of the imports of the user-defined or ent builtin types.
 func (t Type) PackageAlias() string { return t.alias }
 
 // Receiver returns the receiver name of this node. It makes sure the
@@ -922,9 +924,14 @@ func (t Type) UnexportedForeignKeys() []*ForeignKey {
 // aliases adds package aliases (local names) for all type-packages that
 // their import identifier conflicts with user-defined packages (i.e. GoType).
 func aliases(g *Graph) {
-	names := make(map[string]*Type, len(g.Nodes))
+	mayAlias := make(map[string]*Type)
 	for _, n := range g.Nodes {
-		names[n.PackageDir()] = n
+		if pkg := n.PackageDir(); importPkg[pkg] != "" {
+			// By default, a package named "pet" will be named as "entpet".
+			n.alias = path.Base(g.Package) + pkg
+		} else {
+			mayAlias[n.PackageDir()] = n
+		}
 	}
 	for _, n := range g.Nodes {
 		for _, f := range n.Fields {
@@ -937,7 +944,7 @@ func aliases(g *Graph) {
 			}
 			// A user-defined type already uses the
 			// package local name.
-			if n, ok := names[name]; ok {
+			if n, ok := mayAlias[name]; ok {
 				// By default, a package named "pet" will be named as "entpet".
 				n.alias = path.Base(g.Package) + name
 			}
@@ -1018,7 +1025,7 @@ func (f Field) EntSQL() *entsql.Annotation {
 // mutMethods returns the method names of mutation interface.
 var mutMethods = func() map[string]struct{} {
 	t := reflect.TypeOf(new(ent.Mutation)).Elem()
-	names := make(map[string]struct{}, t.NumMethod())
+	names := make(map[string]struct{})
 	for i := 0; i < t.NumMethod(); i++ {
 		names[t.Method(i).Name] = struct{}{}
 	}
@@ -1593,9 +1600,16 @@ func (e Edge) BuilderField() string {
 	return builderField(e.Name)
 }
 
-// EagerLoadField returns the struct field (of query builder) for storing the eager-loading info.
+// EagerLoadField returns the struct field (of query builder)
+// for storing the eager-loading info.
 func (e Edge) EagerLoadField() string {
-	return "with" + pascal(e.Name)
+	return "with" + e.StructField()
+}
+
+// EagerLoadNamedField returns the struct field (of query builder)
+// for storing the eager-loading info for named edges.
+func (e Edge) EagerLoadNamedField() string {
+	return "withNamed" + e.StructField()
 }
 
 // StructField returns the struct member of the edge in the model.

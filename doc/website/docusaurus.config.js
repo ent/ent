@@ -56,9 +56,10 @@ const config = {
       "@docusaurus/preset-classic",
       {
         "docs": {
-          "path": "../md",
-          "showLastUpdateAuthor": false,
-          "showLastUpdateTime": false,
+          path: "../md",
+          editUrl: 'https://github.com/ent/ent/edit/master/doc/md/',
+          showLastUpdateAuthor: true,
+          showLastUpdateTime: true,
           sidebarPath: require.resolve('./sidebars.js'),
         },
         "blog": {

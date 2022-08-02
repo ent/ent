@@ -90,6 +90,20 @@ func (fc *FileCreate) SetNillableOp(b *bool) *FileCreate {
 	return fc
 }
 
+// SetFieldID sets the "field_id" field.
+func (fc *FileCreate) SetFieldID(i int) *FileCreate {
+	fc.mutation.SetFieldID(i)
+	return fc
+}
+
+// SetNillableFieldID sets the "field_id" field if the given value is not nil.
+func (fc *FileCreate) SetNillableFieldID(i *int) *FileCreate {
+	if i != nil {
+		fc.SetFieldID(*i)
+	}
+	return fc
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (fc *FileCreate) SetOwnerID(id int) *FileCreate {
 	fc.mutation.SetOwnerID(id)
@@ -307,6 +321,14 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 		})
 		_node.Op = value
 	}
+	if value, ok := fc.mutation.FieldID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: file.FieldFieldID,
+		})
+		_node.FieldID = value
+	}
 	if nodes := fc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -504,6 +526,30 @@ func (u *FileUpsert) ClearOp() *FileUpsert {
 	return u
 }
 
+// SetFieldID sets the "field_id" field.
+func (u *FileUpsert) SetFieldID(v int) *FileUpsert {
+	u.Set(file.FieldFieldID, v)
+	return u
+}
+
+// UpdateFieldID sets the "field_id" field to the value that was provided on create.
+func (u *FileUpsert) UpdateFieldID() *FileUpsert {
+	u.SetExcluded(file.FieldFieldID)
+	return u
+}
+
+// AddFieldID adds v to the "field_id" field.
+func (u *FileUpsert) AddFieldID(v int) *FileUpsert {
+	u.Add(file.FieldFieldID, v)
+	return u
+}
+
+// ClearFieldID clears the value of the "field_id" field.
+func (u *FileUpsert) ClearFieldID() *FileUpsert {
+	u.SetNull(file.FieldFieldID)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -641,6 +687,34 @@ func (u *FileUpsertOne) UpdateOp() *FileUpsertOne {
 func (u *FileUpsertOne) ClearOp() *FileUpsertOne {
 	return u.Update(func(s *FileUpsert) {
 		s.ClearOp()
+	})
+}
+
+// SetFieldID sets the "field_id" field.
+func (u *FileUpsertOne) SetFieldID(v int) *FileUpsertOne {
+	return u.Update(func(s *FileUpsert) {
+		s.SetFieldID(v)
+	})
+}
+
+// AddFieldID adds v to the "field_id" field.
+func (u *FileUpsertOne) AddFieldID(v int) *FileUpsertOne {
+	return u.Update(func(s *FileUpsert) {
+		s.AddFieldID(v)
+	})
+}
+
+// UpdateFieldID sets the "field_id" field to the value that was provided on create.
+func (u *FileUpsertOne) UpdateFieldID() *FileUpsertOne {
+	return u.Update(func(s *FileUpsert) {
+		s.UpdateFieldID()
+	})
+}
+
+// ClearFieldID clears the value of the "field_id" field.
+func (u *FileUpsertOne) ClearFieldID() *FileUpsertOne {
+	return u.Update(func(s *FileUpsert) {
+		s.ClearFieldID()
 	})
 }
 
@@ -943,6 +1017,34 @@ func (u *FileUpsertBulk) UpdateOp() *FileUpsertBulk {
 func (u *FileUpsertBulk) ClearOp() *FileUpsertBulk {
 	return u.Update(func(s *FileUpsert) {
 		s.ClearOp()
+	})
+}
+
+// SetFieldID sets the "field_id" field.
+func (u *FileUpsertBulk) SetFieldID(v int) *FileUpsertBulk {
+	return u.Update(func(s *FileUpsert) {
+		s.SetFieldID(v)
+	})
+}
+
+// AddFieldID adds v to the "field_id" field.
+func (u *FileUpsertBulk) AddFieldID(v int) *FileUpsertBulk {
+	return u.Update(func(s *FileUpsert) {
+		s.AddFieldID(v)
+	})
+}
+
+// UpdateFieldID sets the "field_id" field to the value that was provided on create.
+func (u *FileUpsertBulk) UpdateFieldID() *FileUpsertBulk {
+	return u.Update(func(s *FileUpsert) {
+		s.UpdateFieldID()
+	})
+}
+
+// ClearFieldID clears the value of the "field_id" field.
+func (u *FileUpsertBulk) ClearFieldID() *FileUpsertBulk {
+	return u.Update(func(s *FileUpsert) {
+		s.ClearFieldID()
 	})
 }
 

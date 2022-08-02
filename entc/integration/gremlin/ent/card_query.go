@@ -29,9 +29,8 @@ type CardQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Card
-	// eager-loading edges.
-	withOwner *UserQuery
-	withSpec  *SpecQuery
+	withOwner  *UserQuery
+	withSpec   *SpecQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
 	path    func(context.Context) (*dsl.Traversal, error)

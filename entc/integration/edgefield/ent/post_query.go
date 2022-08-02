@@ -28,7 +28,6 @@ type PostQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Post
-	// eager-loading edges.
 	withAuthor *UserQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -380,37 +379,43 @@ func (pq *PostQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Post, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := pq.withAuthor; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Post)
-		for i := range nodes {
-			if nodes[i].AuthorID == nil {
-				continue
-			}
-			fk := *nodes[i].AuthorID
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := pq.loadAuthor(ctx, query, nodes, nil,
+			func(n *Post, e *User) { n.Edges.Author = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "author_id" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Author = n
-			}
+	}
+	return nodes, nil
+}
+
+func (pq *PostQuery) loadAuthor(ctx context.Context, query *UserQuery, nodes []*Post, init func(*Post), assign func(*Post, *User)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Post)
+	for i := range nodes {
+		if nodes[i].AuthorID == nil {
+			continue
+		}
+		fk := *nodes[i].AuthorID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "author_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
 }
 
 func (pq *PostQuery) sqlCount(ctx context.Context) (int, error) {

@@ -43,8 +43,7 @@ type UserEdges struct {
 func (e UserEdges) SpouseOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.Spouse == nil {
-			// The edge spouse was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Spouse, nil

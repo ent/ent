@@ -53,8 +53,7 @@ func (e PetEdges) FriendsOrErr() ([]*Pet, error) {
 func (e PetEdges) OwnerOrErr() (*User, error) {
 	if e.loadedTypes[1] {
 		if e.Owner == nil {
-			// The edge owner was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Owner, nil

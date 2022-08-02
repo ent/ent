@@ -46,8 +46,7 @@ type DocEdges struct {
 func (e DocEdges) ParentOrErr() (*Doc, error) {
 	if e.loadedTypes[0] {
 		if e.Parent == nil {
-			// The edge parent was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: doc.Label}
 		}
 		return e.Parent, nil

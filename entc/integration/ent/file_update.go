@@ -121,6 +121,33 @@ func (fu *FileUpdate) ClearOp() *FileUpdate {
 	return fu
 }
 
+// SetFieldID sets the "field_id" field.
+func (fu *FileUpdate) SetFieldID(i int) *FileUpdate {
+	fu.mutation.ResetFieldID()
+	fu.mutation.SetFieldID(i)
+	return fu
+}
+
+// SetNillableFieldID sets the "field_id" field if the given value is not nil.
+func (fu *FileUpdate) SetNillableFieldID(i *int) *FileUpdate {
+	if i != nil {
+		fu.SetFieldID(*i)
+	}
+	return fu
+}
+
+// AddFieldID adds i to the "field_id" field.
+func (fu *FileUpdate) AddFieldID(i int) *FileUpdate {
+	fu.mutation.AddFieldID(i)
+	return fu
+}
+
+// ClearFieldID clears the value of the "field_id" field.
+func (fu *FileUpdate) ClearFieldID() *FileUpdate {
+	fu.mutation.ClearFieldID()
+	return fu
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (fu *FileUpdate) SetOwnerID(id int) *FileUpdate {
 	fu.mutation.SetOwnerID(id)
@@ -360,6 +387,26 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: file.FieldOp,
 		})
 	}
+	if value, ok := fu.mutation.FieldID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: file.FieldFieldID,
+		})
+	}
+	if value, ok := fu.mutation.AddedFieldID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: file.FieldFieldID,
+		})
+	}
+	if fu.mutation.FieldIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: file.FieldFieldID,
+		})
+	}
 	if fu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -587,6 +634,33 @@ func (fuo *FileUpdateOne) SetNillableOp(b *bool) *FileUpdateOne {
 // ClearOp clears the value of the "op" field.
 func (fuo *FileUpdateOne) ClearOp() *FileUpdateOne {
 	fuo.mutation.ClearOp()
+	return fuo
+}
+
+// SetFieldID sets the "field_id" field.
+func (fuo *FileUpdateOne) SetFieldID(i int) *FileUpdateOne {
+	fuo.mutation.ResetFieldID()
+	fuo.mutation.SetFieldID(i)
+	return fuo
+}
+
+// SetNillableFieldID sets the "field_id" field if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableFieldID(i *int) *FileUpdateOne {
+	if i != nil {
+		fuo.SetFieldID(*i)
+	}
+	return fuo
+}
+
+// AddFieldID adds i to the "field_id" field.
+func (fuo *FileUpdateOne) AddFieldID(i int) *FileUpdateOne {
+	fuo.mutation.AddFieldID(i)
+	return fuo
+}
+
+// ClearFieldID clears the value of the "field_id" field.
+func (fuo *FileUpdateOne) ClearFieldID() *FileUpdateOne {
+	fuo.mutation.ClearFieldID()
 	return fuo
 }
 
@@ -857,6 +931,26 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
 			Column: file.FieldOp,
+		})
+	}
+	if value, ok := fuo.mutation.FieldID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: file.FieldFieldID,
+		})
+	}
+	if value, ok := fuo.mutation.AddedFieldID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: file.FieldFieldID,
+		})
+	}
+	if fuo.mutation.FieldIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: file.FieldFieldID,
 		})
 	}
 	if fuo.mutation.OwnerCleared() {

@@ -24,13 +24,12 @@ import (
 // CarQuery is the builder for querying Car entities.
 type CarQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Car
-	// eager-loading edges.
+	limit       *int
+	offset      *int
+	unique      *bool
+	order       []OrderFunc
+	fields      []string
+	predicates  []predicate.Car
 	withRentals *RentalQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -382,33 +381,42 @@ func (cq *CarQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Car, err
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := cq.withRentals; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[uuid.UUID]*Car)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Rentals = []*Rental{}
-		}
-		query.Where(predicate.Rental(func(s *sql.Selector) {
-			s.Where(sql.InValues(car.RentalsColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := cq.loadRentals(ctx, query, nodes,
+			func(n *Car) { n.Edges.Rentals = []*Rental{} },
+			func(n *Car, e *Rental) { n.Edges.Rentals = append(n.Edges.Rentals, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			fk := n.CarID
-			node, ok := nodeids[fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "car_id" returned %v for node %v`, fk, n.ID)
-			}
-			node.Edges.Rentals = append(node.Edges.Rentals, n)
+	}
+	return nodes, nil
+}
+
+func (cq *CarQuery) loadRentals(ctx context.Context, query *RentalQuery, nodes []*Car, init func(*Car), assign func(*Car, *Rental)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Car)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
 		}
 	}
-
-	return nodes, nil
+	query.Where(predicate.Rental(func(s *sql.Selector) {
+		s.Where(sql.InValues(car.RentalsColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.CarID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "car_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (cq *CarQuery) sqlCount(ctx context.Context) (int, error) {

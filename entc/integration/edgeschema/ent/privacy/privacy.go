@@ -11,6 +11,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/entc/integration/edgeschema/ent"
+	"entgo.io/ent/entql"
 
 	"entgo.io/ent/privacy"
 )
@@ -463,4 +464,103 @@ func (f UserTweetMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutat
 		return f(ctx, m)
 	}
 	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.UserTweetMutation", m)
+}
+
+type (
+	// Filter is the interface that wraps the Where function
+	// for filtering nodes in queries and mutations.
+	Filter interface {
+		// Where applies a filter on the executed query/mutation.
+		Where(entql.P)
+	}
+
+	// The FilterFunc type is an adapter that allows the use of ordinary
+	// functions as filters for query and mutation types.
+	FilterFunc func(context.Context, Filter) error
+)
+
+// EvalQuery calls f(ctx, q) if the query implements the Filter interface, otherwise it is denied.
+func (f FilterFunc) EvalQuery(ctx context.Context, q ent.Query) error {
+	fr, err := queryFilter(q)
+	if err != nil {
+		return err
+	}
+	return f(ctx, fr)
+}
+
+// EvalMutation calls f(ctx, q) if the mutation implements the Filter interface, otherwise it is denied.
+func (f FilterFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	fr, err := mutationFilter(m)
+	if err != nil {
+		return err
+	}
+	return f(ctx, fr)
+}
+
+var _ QueryMutationRule = FilterFunc(nil)
+
+func queryFilter(q ent.Query) (Filter, error) {
+	switch q := q.(type) {
+	case *ent.FriendshipQuery:
+		return q.Filter(), nil
+	case *ent.GroupQuery:
+		return q.Filter(), nil
+	case *ent.RelationshipQuery:
+		return q.Filter(), nil
+	case *ent.RelationshipInfoQuery:
+		return q.Filter(), nil
+	case *ent.RoleQuery:
+		return q.Filter(), nil
+	case *ent.RoleUserQuery:
+		return q.Filter(), nil
+	case *ent.TagQuery:
+		return q.Filter(), nil
+	case *ent.TweetQuery:
+		return q.Filter(), nil
+	case *ent.TweetLikeQuery:
+		return q.Filter(), nil
+	case *ent.TweetTagQuery:
+		return q.Filter(), nil
+	case *ent.UserQuery:
+		return q.Filter(), nil
+	case *ent.UserGroupQuery:
+		return q.Filter(), nil
+	case *ent.UserTweetQuery:
+		return q.Filter(), nil
+	default:
+		return nil, Denyf("ent/privacy: unexpected query type %T for query filter", q)
+	}
+}
+
+func mutationFilter(m ent.Mutation) (Filter, error) {
+	switch m := m.(type) {
+	case *ent.FriendshipMutation:
+		return m.Filter(), nil
+	case *ent.GroupMutation:
+		return m.Filter(), nil
+	case *ent.RelationshipMutation:
+		return m.Filter(), nil
+	case *ent.RelationshipInfoMutation:
+		return m.Filter(), nil
+	case *ent.RoleMutation:
+		return m.Filter(), nil
+	case *ent.RoleUserMutation:
+		return m.Filter(), nil
+	case *ent.TagMutation:
+		return m.Filter(), nil
+	case *ent.TweetMutation:
+		return m.Filter(), nil
+	case *ent.TweetLikeMutation:
+		return m.Filter(), nil
+	case *ent.TweetTagMutation:
+		return m.Filter(), nil
+	case *ent.UserMutation:
+		return m.Filter(), nil
+	case *ent.UserGroupMutation:
+		return m.Filter(), nil
+	case *ent.UserTweetMutation:
+		return m.Filter(), nil
+	default:
+		return nil, Denyf("ent/privacy: unexpected mutation type %T for mutation filter", m)
+	}
 }

@@ -29,11 +29,10 @@ type PetQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Pet
-	// eager-loading edges.
-	withTeam  *UserQuery
-	withOwner *UserQuery
-	withFKs   bool
-	modifiers []func(*sql.Selector)
+	withTeam   *UserQuery
+	withOwner  *UserQuery
+	withFKs    bool
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -429,66 +428,78 @@ func (pq *PetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pet, err
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := pq.withTeam; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Pet)
-		for i := range nodes {
-			if nodes[i].user_team == nil {
-				continue
-			}
-			fk := *nodes[i].user_team
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := pq.loadTeam(ctx, query, nodes, nil,
+			func(n *Pet, e *User) { n.Edges.Team = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_team" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Team = n
-			}
-		}
 	}
-
 	if query := pq.withOwner; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Pet)
-		for i := range nodes {
-			if nodes[i].user_pets == nil {
-				continue
-			}
-			fk := *nodes[i].user_pets
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := pq.loadOwner(ctx, query, nodes, nil,
+			func(n *Pet, e *User) { n.Edges.Owner = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_pets" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Owner = n
-			}
+	}
+	return nodes, nil
+}
+
+func (pq *PetQuery) loadTeam(ctx context.Context, query *UserQuery, nodes []*Pet, init func(*Pet), assign func(*Pet, *User)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Pet)
+	for i := range nodes {
+		if nodes[i].user_team == nil {
+			continue
+		}
+		fk := *nodes[i].user_team
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_team" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
+}
+func (pq *PetQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*Pet, init func(*Pet), assign func(*Pet, *User)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Pet)
+	for i := range nodes {
+		if nodes[i].user_pets == nil {
+			continue
+		}
+		fk := *nodes[i].user_pets
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_pets" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (pq *PetQuery) sqlCount(ctx context.Context) (int, error) {

@@ -29,7 +29,6 @@ type SessionQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Session
-	// eager-loading edges.
 	withDevice *DeviceQuery
 	withFKs    bool
 	// intermediate query (i.e. traversal path).
@@ -365,37 +364,43 @@ func (sq *SessionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Sess
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := sq.withDevice; query != nil {
-		ids := make([]schema.ID, 0, len(nodes))
-		nodeids := make(map[schema.ID][]*Session)
-		for i := range nodes {
-			if nodes[i].device_sessions == nil {
-				continue
-			}
-			fk := *nodes[i].device_sessions
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(device.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := sq.loadDevice(ctx, query, nodes, nil,
+			func(n *Session, e *Device) { n.Edges.Device = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "device_sessions" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Device = n
-			}
+	}
+	return nodes, nil
+}
+
+func (sq *SessionQuery) loadDevice(ctx context.Context, query *DeviceQuery, nodes []*Session, init func(*Session), assign func(*Session, *Device)) error {
+	ids := make([]schema.ID, 0, len(nodes))
+	nodeids := make(map[schema.ID][]*Session)
+	for i := range nodes {
+		if nodes[i].device_sessions == nil {
+			continue
+		}
+		fk := *nodes[i].device_sessions
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(device.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "device_sessions" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
 }
 
 func (sq *SessionQuery) sqlCount(ctx context.Context) (int, error) {

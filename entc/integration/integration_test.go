@@ -151,6 +151,7 @@ var (
 		ImmutableValue,
 		Sensitive,
 		EagerLoading,
+		NamedEagerLoading,
 		Mutation,
 		CreateBulk,
 		ConstraintChecks,
@@ -1848,6 +1849,29 @@ func limitRows(partitionBy string, limit int, orderBy ...string) func(s *sql.Sel
 			Where(sql.LTE(t.C("row_number"), limit)).
 			Prefix(with)
 	}
+}
+
+func NamedEagerLoading(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	a8m := client.User.Create().SetName("a8m").SetAge(30).SaveX(ctx)
+	p1 := client.Pet.Create().SetName("pet1").SetOwner(a8m).SetTrained(true).SaveX(ctx)
+	p2 := client.Pet.Create().SetName("pet2").SetOwner(a8m).SetTrained(false).SaveX(ctx)
+
+	a8m = client.User.Query().
+		WithNamedPets("Trained", func(q *ent.PetQuery) { q.Where(pet.Trained(true)) }).
+		WithNamedPets("Untrained", func(q *ent.PetQuery) { q.Where(pet.Trained(false)) }).
+		OnlyX(ctx)
+	trained, err := a8m.NamedPets("Trained")
+	require.NoError(t, err)
+	require.Len(t, trained, 1)
+	require.Equal(t, p1.ID, trained[0].ID)
+	untrained, err := a8m.NamedPets("Untrained")
+	require.NoError(t, err)
+	require.Len(t, untrained, 1)
+	require.Equal(t, p2.ID, untrained[0].ID)
+	unknown, err := a8m.NamedPets("Unknown")
+	require.True(t, ent.IsNotLoaded(err))
+	require.Nil(t, unknown)
 }
 
 // writerFunc is an io.Writer implemented by the underlying func.

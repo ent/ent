@@ -33,8 +33,8 @@ go mod init <project>
 go install entgo.io/ent/cmd/ent@latest
 ```
 
-After installing `ent` codegen tool, you should have it in your `PATH`.
-If you don't find it your path, you can also run: `go run entgo.io/ent/cmd/ent <command>`
+After installing `ent` codegen tool, use `go run entgo.io/ent/cmd/ent <command>` to execute
+commands.
 
 ## Create Your First Schema
 

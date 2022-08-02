@@ -113,6 +113,13 @@ func Nickname(v string) predicate.Pet {
 	})
 }
 
+// Trained applies equality check predicate on the "trained" field. It's identical to TrainedEQ.
+func Trained(v bool) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldTrained, p.EQ(v))
+	})
+}
+
 // AgeEQ applies the EQ predicate on the "age" field.
 func AgeEQ(v float64) predicate.Pet {
 	return predicate.Pet(func(t *dsl.Traversal) {
@@ -436,6 +443,20 @@ func NicknameIsNil() predicate.Pet {
 func NicknameNotNil() predicate.Pet {
 	return predicate.Pet(func(t *dsl.Traversal) {
 		t.HasLabel(Label).Has(FieldNickname)
+	})
+}
+
+// TrainedEQ applies the EQ predicate on the "trained" field.
+func TrainedEQ(v bool) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldTrained, p.EQ(v))
+	})
+}
+
+// TrainedNEQ applies the NEQ predicate on the "trained" field.
+func TrainedNEQ(v bool) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldTrained, p.NEQ(v))
 	})
 }
 

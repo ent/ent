@@ -31,11 +31,9 @@ type {{ $builder }} struct {
 	order		[]OrderFunc
 	fields		[]string
 	predicates 	[]predicate.{{ $.Name }}
-	{{- with $.Edges }}
-		// eager-loading edges.
-		{{- range $e := . }}
-			{{ $e.EagerLoadField }} *{{ $e.Type.QueryName }}
-		{{- end }}
+	{{- /* Eager loading fields. */}}
+	{{- range $e := $.Edges }}
+		{{ $e.EagerLoadField }} *{{ $e.Type.QueryName }}
 	{{- end }}
 	{{- /* Additional fields to add to the builder. */}}
 	{{- $tmpl := printf "dialect/%s/query/fields" $.Storage }}
@@ -297,9 +295,10 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 
 {{- range $e := $.Edges }}
 	{{ $ebuilder := $e.Type.QueryName }}
-	// With{{ pascal $e.Name }} tells the query-builder to eager-load the nodes that are connected to
+	{{ $func := print "With" $e.StructField }}
+	// {{ $func }} tells the query-builder to eager-load the nodes that are connected to
 	// the "{{ $e.Name }}" edge. The optional arguments are used to configure the query builder of the edge.
-	func ({{ $receiver }} *{{ $builder }}) With{{ pascal $e.Name }}(opts ...func(*{{ $ebuilder }})) *{{ $builder }} {
+	func ({{ $receiver }} *{{ $builder }}) {{ $func }}(opts ...func(*{{ $ebuilder }})) *{{ $builder }} {
 		query := &{{ $ebuilder }}{config: {{ $receiver }}.config}
 		for _, opt := range opts {
 			opt(query)

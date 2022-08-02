@@ -43,8 +43,7 @@ type UserEdges struct {
 func (e UserEdges) CardOrErr() (*Card, error) {
 	if e.loadedTypes[0] {
 		if e.Card == nil {
-			// The edge card was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: card.Label}
 		}
 		return e.Card, nil

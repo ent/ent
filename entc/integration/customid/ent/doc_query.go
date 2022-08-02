@@ -23,13 +23,12 @@ import (
 // DocQuery is the builder for querying Doc entities.
 type DocQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Doc
-	// eager-loading edges.
+	limit        *int
+	offset       *int
+	unique       *bool
+	order        []OrderFunc
+	fields       []string
+	predicates   []predicate.Doc
 	withParent   *DocQuery
 	withChildren *DocQuery
 	withRelated  *DocQuery
@@ -461,119 +460,143 @@ func (dq *DocQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Doc, err
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := dq.withParent; query != nil {
-		ids := make([]schema.DocID, 0, len(nodes))
-		nodeids := make(map[schema.DocID][]*Doc)
-		for i := range nodes {
-			if nodes[i].doc_children == nil {
-				continue
-			}
-			fk := *nodes[i].doc_children
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(doc.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := dq.loadParent(ctx, query, nodes, nil,
+			func(n *Doc, e *Doc) { n.Edges.Parent = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "doc_children" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Parent = n
-			}
-		}
 	}
-
 	if query := dq.withChildren; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[schema.DocID]*Doc)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Children = []*Doc{}
-		}
-		query.withFKs = true
-		query.Where(predicate.Doc(func(s *sql.Selector) {
-			s.Where(sql.InValues(doc.ChildrenColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := dq.loadChildren(ctx, query, nodes,
+			func(n *Doc) { n.Edges.Children = []*Doc{} },
+			func(n *Doc, e *Doc) { n.Edges.Children = append(n.Edges.Children, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			fk := n.doc_children
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "doc_children" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "doc_children" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Children = append(node.Edges.Children, n)
-		}
 	}
-
 	if query := dq.withRelated; query != nil {
-		edgeids := make([]driver.Value, len(nodes))
-		byid := make(map[schema.DocID]*Doc)
-		nids := make(map[schema.DocID]map[*Doc]struct{})
-		for i, node := range nodes {
-			edgeids[i] = node.ID
-			byid[node.ID] = node
-			node.Edges.Related = []*Doc{}
-		}
-		query.Where(func(s *sql.Selector) {
-			joinT := sql.Table(doc.RelatedTable)
-			s.Join(joinT).On(s.C(doc.FieldID), joinT.C(doc.RelatedPrimaryKey[1]))
-			s.Where(sql.InValues(joinT.C(doc.RelatedPrimaryKey[0]), edgeids...))
-			columns := s.SelectedColumns()
-			s.Select(joinT.C(doc.RelatedPrimaryKey[0]))
-			s.AppendSelect(columns...)
-			s.SetDistinct(false)
-		})
-		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]interface{}, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]interface{}{new(schema.DocID)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []interface{}) error {
-				outValue := *values[0].(*schema.DocID)
-				inValue := *values[1].(*schema.DocID)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Doc]struct{}{byid[outValue]: struct{}{}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byid[outValue]] = struct{}{}
-				return nil
-			}
-		})
-		if err != nil {
+		if err := dq.loadRelated(ctx, query, nodes,
+			func(n *Doc) { n.Edges.Related = []*Doc{} },
+			func(n *Doc, e *Doc) { n.Edges.Related = append(n.Edges.Related, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected "related" node returned %v`, n.ID)
-			}
-			for kn := range nodes {
-				kn.Edges.Related = append(kn.Edges.Related, n)
-			}
+	}
+	return nodes, nil
+}
+
+func (dq *DocQuery) loadParent(ctx context.Context, query *DocQuery, nodes []*Doc, init func(*Doc), assign func(*Doc, *Doc)) error {
+	ids := make([]schema.DocID, 0, len(nodes))
+	nodeids := make(map[schema.DocID][]*Doc)
+	for i := range nodes {
+		if nodes[i].doc_children == nil {
+			continue
+		}
+		fk := *nodes[i].doc_children
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(doc.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "doc_children" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
+}
+func (dq *DocQuery) loadChildren(ctx context.Context, query *DocQuery, nodes []*Doc, init func(*Doc), assign func(*Doc, *Doc)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[schema.DocID]*Doc)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Doc(func(s *sql.Selector) {
+		s.Where(sql.InValues(doc.ChildrenColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.doc_children
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "doc_children" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "doc_children" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (dq *DocQuery) loadRelated(ctx context.Context, query *DocQuery, nodes []*Doc, init func(*Doc), assign func(*Doc, *Doc)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[schema.DocID]*Doc)
+	nids := make(map[schema.DocID]map[*Doc]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(doc.RelatedTable)
+		s.Join(joinT).On(s.C(doc.FieldID), joinT.C(doc.RelatedPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(doc.RelatedPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(doc.RelatedPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+		assign := spec.Assign
+		values := spec.ScanValues
+		spec.ScanValues = func(columns []string) ([]interface{}, error) {
+			values, err := values(columns[1:])
+			if err != nil {
+				return nil, err
+			}
+			return append([]interface{}{new(schema.DocID)}, values...), nil
+		}
+		spec.Assign = func(columns []string, values []interface{}) error {
+			outValue := *values[0].(*schema.DocID)
+			inValue := *values[1].(*schema.DocID)
+			if nids[inValue] == nil {
+				nids[inValue] = map[*Doc]struct{}{byID[outValue]: struct{}{}}
+				return assign(columns[1:], values[1:])
+			}
+			nids[inValue][byID[outValue]] = struct{}{}
+			return nil
+		}
+	})
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "related" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
 }
 
 func (dq *DocQuery) sqlCount(ctx context.Context) (int, error) {

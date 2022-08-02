@@ -76,8 +76,7 @@ type {{ $.Name }}Edges struct {
 		if e.loadedTypes[{{ $i }}] {
 			{{- if $e.Unique }}
 				if e.{{ $e.StructField }} == nil {
-					// The edge {{ $e.Name }} was loaded in eager-loading,
-					// but was not found.
+					// Edge was loaded but was not found.
 					return nil, &NotFoundError{label: {{ $e.Type.Package }}.Label}
 				}
 			{{- end }}

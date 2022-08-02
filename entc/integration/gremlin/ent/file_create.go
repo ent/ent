@@ -90,6 +90,20 @@ func (fc *FileCreate) SetNillableOp(b *bool) *FileCreate {
 	return fc
 }
 
+// SetFieldID sets the "field_id" field.
+func (fc *FileCreate) SetFieldID(i int) *FileCreate {
+	fc.mutation.SetFieldID(i)
+	return fc
+}
+
+// SetNillableFieldID sets the "field_id" field if the given value is not nil.
+func (fc *FileCreate) SetNillableFieldID(i *int) *FileCreate {
+	if i != nil {
+		fc.SetFieldID(*i)
+	}
+	return fc
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (fc *FileCreate) SetOwnerID(id string) *FileCreate {
 	fc.mutation.SetOwnerID(id)
@@ -279,6 +293,9 @@ func (fc *FileCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := fc.mutation.GetOp(); ok {
 		v.Property(dsl.Single, file.FieldOp, value)
+	}
+	if value, ok := fc.mutation.FieldID(); ok {
+		v.Property(dsl.Single, file.FieldFieldID, value)
 	}
 	for _, id := range fc.mutation.OwnerIDs() {
 		v.AddE(user.FilesLabel).From(g.V(id)).InV()

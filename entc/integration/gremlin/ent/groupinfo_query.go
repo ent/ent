@@ -28,7 +28,6 @@ type GroupInfoQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.GroupInfo
-	// eager-loading edges.
 	withGroups *GroupQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal

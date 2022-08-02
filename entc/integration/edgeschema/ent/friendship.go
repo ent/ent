@@ -50,8 +50,7 @@ type FriendshipEdges struct {
 func (e FriendshipEdges) UserOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.User == nil {
-			// The edge user was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.User, nil
@@ -64,8 +63,7 @@ func (e FriendshipEdges) UserOrErr() (*User, error) {
 func (e FriendshipEdges) FriendOrErr() (*User, error) {
 	if e.loadedTypes[1] {
 		if e.Friend == nil {
-			// The edge friend was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Friend, nil

@@ -82,8 +82,7 @@ type UserEdges struct {
 func (e UserEdges) CardOrErr() (*Card, error) {
 	if e.loadedTypes[0] {
 		if e.Card == nil {
-			// The edge card was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: card.Label}
 		}
 		return e.Card, nil
@@ -150,8 +149,7 @@ func (e UserEdges) FollowingOrErr() ([]*User, error) {
 func (e UserEdges) TeamOrErr() (*Pet, error) {
 	if e.loadedTypes[7] {
 		if e.Team == nil {
-			// The edge team was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: pet.Label}
 		}
 		return e.Team, nil
@@ -164,8 +162,7 @@ func (e UserEdges) TeamOrErr() (*Pet, error) {
 func (e UserEdges) SpouseOrErr() (*User, error) {
 	if e.loadedTypes[8] {
 		if e.Spouse == nil {
-			// The edge spouse was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Spouse, nil
@@ -187,8 +184,7 @@ func (e UserEdges) ChildrenOrErr() ([]*User, error) {
 func (e UserEdges) ParentOrErr() (*User, error) {
 	if e.loadedTypes[10] {
 		if e.Parent == nil {
-			// The edge parent was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Parent, nil

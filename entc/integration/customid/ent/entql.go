@@ -67,6 +67,16 @@ var schemaGraph = func() *sqlgraph.Schema {
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   bloblink.Table,
 			Columns: bloblink.Columns,
+			CompositeID: []*sqlgraph.FieldSpec{
+				{
+					Type:   field.TypeUUID,
+					Column: bloblink.FieldBlobID,
+				},
+				{
+					Type:   field.TypeUUID,
+					Column: bloblink.FieldLinkID,
+				},
+			},
 		},
 		Type: "BlobLink",
 		Fields: map[string]*sqlgraph.FieldSpec{
