@@ -251,6 +251,7 @@ import (
 	"<project>/ent/migrate"
 
 	atlas "ariga.io/atlas/sql/migrate"
+	_ "ariga.io/atlas/sql/mysql"
 	"ariga.io/atlas/sql/sqltool"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql/schema"
