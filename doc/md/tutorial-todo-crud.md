@@ -23,7 +23,6 @@ func TestExampleTodo(t *testing.T) {
 	if err := client.Schema.Create(ctx); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
-
 	task1, err := client.Todo.Create().SetText("some").Save(ctx)
 	if err != nil {
 		log.Fatalf("failed creating a todo: %v", err)
