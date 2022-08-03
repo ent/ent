@@ -998,6 +998,9 @@ func (uq *UserQuery) loadGroups(ctx context.Context, query *GroupQuery, nodes []
 		s.AppendSelect(columns...)
 		s.SetDistinct(false)
 	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
 	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
 		assign := spec.Assign
 		values := spec.ScanValues
@@ -1053,6 +1056,9 @@ func (uq *UserQuery) loadFriends(ctx context.Context, query *UserQuery, nodes []
 		s.AppendSelect(columns...)
 		s.SetDistinct(false)
 	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
 	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
 		assign := spec.Assign
 		values := spec.ScanValues
@@ -1108,6 +1114,9 @@ func (uq *UserQuery) loadFollowers(ctx context.Context, query *UserQuery, nodes 
 		s.AppendSelect(columns...)
 		s.SetDistinct(false)
 	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
 	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
 		assign := spec.Assign
 		values := spec.ScanValues
@@ -1163,6 +1172,9 @@ func (uq *UserQuery) loadFollowing(ctx context.Context, query *UserQuery, nodes 
 		s.AppendSelect(columns...)
 		s.SetDistinct(false)
 	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
 	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
 		assign := spec.Assign
 		values := spec.ScanValues

@@ -629,6 +629,9 @@ func (tq *TweetQuery) loadLikedUsers(ctx context.Context, query *UserQuery, node
 		s.AppendSelect(columns...)
 		s.SetDistinct(false)
 	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
 	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
 		assign := spec.Assign
 		values := spec.ScanValues
@@ -684,6 +687,9 @@ func (tq *TweetQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*T
 		s.AppendSelect(columns...)
 		s.SetDistinct(false)
 	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
 	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
 		assign := spec.Assign
 		values := spec.ScanValues
@@ -739,6 +745,9 @@ func (tq *TweetQuery) loadTags(ctx context.Context, query *TagQuery, nodes []*Tw
 		s.AppendSelect(columns...)
 		s.SetDistinct(false)
 	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
 	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
 		assign := spec.Assign
 		values := spec.ScanValues
