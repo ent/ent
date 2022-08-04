@@ -7,6 +7,7 @@ package gen
 import (
 	"database/sql"
 	"encoding/json"
+	"entgo.io/ent/entc/str"
 	"errors"
 	"fmt"
 	"go/token"
@@ -322,7 +323,7 @@ func (t Type) Receiver() string {
 }
 
 // hasEdge returns true if this type as an edge (reverse or assoc)
-/// with the given name.
+// / with the given name.
 func (t Type) hasEdge(name string) bool {
 	for _, e := range t.Edges {
 		if name == e.Name {
@@ -1220,7 +1221,7 @@ func (f Field) ScanTypeField(rec string) string {
 	case field.TypeEnum:
 		expr = fmt.Sprintf("%s(%s.String)", f.Type, rec)
 	case field.TypeString, field.TypeBool, field.TypeInt64, field.TypeFloat64:
-		expr = f.goType(fmt.Sprintf("%s.%s", rec, strings.Title(f.Type.Type.String())))
+		expr = f.goType(fmt.Sprintf("%s.%s", rec, str.Title(f.Type.Type.String())))
 	case field.TypeTime:
 		expr = fmt.Sprintf("%s.Time", rec)
 	case field.TypeFloat32:
@@ -1394,7 +1395,6 @@ func (f Field) SupportsMutationAdd() bool {
 //
 //	MutationAddAssignExpr(a, b) => *m.a += b		// Basic Go type.
 //	MutationAddAssignExpr(a, b) => *m.a = m.Add(b)	// Custom Go types that implement the (Add(T) T) interface.
-//
 func (f Field) MutationAddAssignExpr(ident1, ident2 string) (string, error) {
 	if !f.SupportsMutationAdd() {
 		return "", fmt.Errorf("field %q does not support the add operation (a + b)", f.Name)
@@ -1443,7 +1443,6 @@ var (
 //	v (http.Dir)		=> string(v)
 //	v (fmt.Stringer)	=> v.String()
 //	v (sql.NullString)	=> v.String
-//
 func (f Field) BasicType(ident string) (expr string) {
 	if !f.HasGoType() {
 		return ident

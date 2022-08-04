@@ -5,9 +5,9 @@
 package field
 
 import (
+	"entgo.io/ent/entc/str"
 	"fmt"
 	"reflect"
-	"strings"
 )
 
 // A Type represents a field type.
@@ -76,7 +76,7 @@ func (t Type) ConstName() string {
 	case int(t) < len(constNames) && constNames[t] != "":
 		return constNames[t]
 	default:
-		return "Type" + strings.Title(typeNames[t])
+		return "Type" + str.Title(typeNames[t])
 	}
 }
 

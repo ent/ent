@@ -7,10 +7,10 @@ package main
 
 import (
 	"bytes"
+	"entgo.io/ent/entc/str"
 	"go/format"
 	"log"
 	"os"
-	"strings"
 	"text/template"
 
 	"entgo.io/ent/schema/field"
@@ -24,7 +24,7 @@ func main() {
 	tmpl := template.Must(template.New("types").
 		Funcs(template.FuncMap{
 			"ops":   ops,
-			"title": strings.Title,
+			"title": str.Title,
 			"ident": ident,
 			"type":  typ,
 		}).

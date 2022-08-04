@@ -6,6 +6,7 @@
 package schema
 
 import (
+	"entgo.io/ent/entc/str"
 	"fmt"
 	"sort"
 	"strconv"
@@ -514,7 +515,7 @@ const (
 
 // ConstName returns the constant name of a reference option. It's used by entc for printing the constant name in templates.
 func (r ReferenceOption) ConstName() string {
-	return strings.ReplaceAll(strings.Title(strings.ToLower(string(r))), " ", "")
+	return strings.ReplaceAll(str.Title(strings.ToLower(string(r))), " ", "")
 }
 
 // Index definition for table index.
