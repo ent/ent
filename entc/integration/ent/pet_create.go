@@ -352,7 +352,6 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 //			SetAge(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (pc *PetCreate) OnConflict(opts ...sql.ConflictOption) *PetUpsertOne {
 	pc.conflict = opts
 	return &PetUpsertOne{
@@ -366,7 +365,6 @@ func (pc *PetCreate) OnConflict(opts ...sql.ConflictOption) *PetUpsertOne {
 //	client.Pet.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (pc *PetCreate) OnConflictColumns(columns ...string) *PetUpsertOne {
 	pc.conflict = append(pc.conflict, sql.ConflictColumns(columns...))
 	return &PetUpsertOne{
@@ -473,7 +471,6 @@ func (u *PetUpsert) UpdateTrained() *PetUpsert {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *PetUpsertOne) UpdateNewValues() *PetUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -482,10 +479,9 @@ func (u *PetUpsertOne) UpdateNewValues() *PetUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.Pet.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.Pet.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *PetUpsertOne) Ignore() *PetUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -732,7 +728,6 @@ func (pcb *PetCreateBulk) ExecX(ctx context.Context) {
 //			SetAge(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (pcb *PetCreateBulk) OnConflict(opts ...sql.ConflictOption) *PetUpsertBulk {
 	pcb.conflict = opts
 	return &PetUpsertBulk{
@@ -746,7 +741,6 @@ func (pcb *PetCreateBulk) OnConflict(opts ...sql.ConflictOption) *PetUpsertBulk 
 //	client.Pet.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (pcb *PetCreateBulk) OnConflictColumns(columns ...string) *PetUpsertBulk {
 	pcb.conflict = append(pcb.conflict, sql.ConflictColumns(columns...))
 	return &PetUpsertBulk{
@@ -768,7 +762,6 @@ type PetUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *PetUpsertBulk) UpdateNewValues() *PetUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -780,7 +773,6 @@ func (u *PetUpsertBulk) UpdateNewValues() *PetUpsertBulk {
 //	client.Pet.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *PetUpsertBulk) Ignore() *PetUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

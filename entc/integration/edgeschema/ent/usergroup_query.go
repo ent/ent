@@ -337,7 +337,6 @@ func (ugq *UserGroupQuery) WithGroup(opts ...func(*GroupQuery)) *UserGroupQuery 
 //		GroupBy(usergroup.FieldJoinedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (ugq *UserGroupQuery) GroupBy(field string, fields ...string) *UserGroupGroupBy {
 	grbuild := &UserGroupGroupBy{config: ugq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -364,7 +363,6 @@ func (ugq *UserGroupQuery) GroupBy(field string, fields ...string) *UserGroupGro
 //	client.UserGroup.Query().
 //		Select(usergroup.FieldJoinedAt).
 //		Scan(ctx, &v)
-//
 func (ugq *UserGroupQuery) Select(fields ...string) *UserGroupSelect {
 	ugq.fields = append(ugq.fields, fields...)
 	selbuild := &UserGroupSelect{UserGroupQuery: ugq}

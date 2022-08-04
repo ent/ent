@@ -1,6 +1,6 @@
 module entgo.io/ent
 
-go 1.17
+go 1.18
 
 require (
 	ariga.io/atlas v0.5.1-0.20220717122844-8593d7eb1a8e
@@ -21,7 +21,7 @@ require (
 	github.com/stretchr/testify v1.7.1-0.20210427113832-6241f9ab9942
 	go.opencensus.io v0.23.0
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
-	golang.org/x/tools v0.1.12
+	golang.org/x/tools v0.1.13-0.20220804200503-81c7dc4e4efa
 )
 
 require (

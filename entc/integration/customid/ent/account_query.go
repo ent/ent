@@ -303,7 +303,6 @@ func (aq *AccountQuery) WithToken(opts ...func(*TokenQuery)) *AccountQuery {
 //		GroupBy(account.FieldEmail).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (aq *AccountQuery) GroupBy(field string, fields ...string) *AccountGroupBy {
 	grbuild := &AccountGroupBy{config: aq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -330,7 +329,6 @@ func (aq *AccountQuery) GroupBy(field string, fields ...string) *AccountGroupBy 
 //	client.Account.Query().
 //		Select(account.FieldEmail).
 //		Scan(ctx, &v)
-//
 func (aq *AccountQuery) Select(fields ...string) *AccountSelect {
 	aq.fields = append(aq.fields, fields...)
 	selbuild := &AccountSelect{AccountQuery: aq}
