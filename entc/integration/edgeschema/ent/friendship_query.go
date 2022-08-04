@@ -336,7 +336,6 @@ func (fq *FriendshipQuery) WithFriend(opts ...func(*UserQuery)) *FriendshipQuery
 //		GroupBy(friendship.FieldWeight).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (fq *FriendshipQuery) GroupBy(field string, fields ...string) *FriendshipGroupBy {
 	grbuild := &FriendshipGroupBy{config: fq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -363,7 +362,6 @@ func (fq *FriendshipQuery) GroupBy(field string, fields ...string) *FriendshipGr
 //	client.Friendship.Query().
 //		Select(friendship.FieldWeight).
 //		Scan(ctx, &v)
-//
 func (fq *FriendshipQuery) Select(fields ...string) *FriendshipSelect {
 	fq.fields = append(fq.fields, fields...)
 	selbuild := &FriendshipSelect{FriendshipQuery: fq}

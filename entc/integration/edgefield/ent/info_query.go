@@ -301,7 +301,6 @@ func (iq *InfoQuery) WithUser(opts ...func(*UserQuery)) *InfoQuery {
 //		GroupBy(info.FieldContent).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (iq *InfoQuery) GroupBy(field string, fields ...string) *InfoGroupBy {
 	grbuild := &InfoGroupBy{config: iq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -328,7 +327,6 @@ func (iq *InfoQuery) GroupBy(field string, fields ...string) *InfoGroupBy {
 //	client.Info.Query().
 //		Select(info.FieldContent).
 //		Scan(ctx, &v)
-//
 func (iq *InfoQuery) Select(fields ...string) *InfoSelect {
 	iq.fields = append(iq.fields, fields...)
 	selbuild := &InfoSelect{InfoQuery: iq}

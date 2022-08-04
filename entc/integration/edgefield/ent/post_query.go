@@ -301,7 +301,6 @@ func (pq *PostQuery) WithAuthor(opts ...func(*UserQuery)) *PostQuery {
 //		GroupBy(post.FieldText).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (pq *PostQuery) GroupBy(field string, fields ...string) *PostGroupBy {
 	grbuild := &PostGroupBy{config: pq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -328,7 +327,6 @@ func (pq *PostQuery) GroupBy(field string, fields ...string) *PostGroupBy {
 //	client.Post.Query().
 //		Select(post.FieldText).
 //		Scan(ctx, &v)
-//
 func (pq *PostQuery) Select(fields ...string) *PostSelect {
 	pq.fields = append(pq.fields, fields...)
 	selbuild := &PostSelect{PostQuery: pq}

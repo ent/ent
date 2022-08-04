@@ -338,7 +338,6 @@ func (tq *TagQuery) WithTweetTags(opts ...func(*TweetTagQuery)) *TagQuery {
 //		GroupBy(tag.FieldValue).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (tq *TagQuery) GroupBy(field string, fields ...string) *TagGroupBy {
 	grbuild := &TagGroupBy{config: tq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -365,7 +364,6 @@ func (tq *TagQuery) GroupBy(field string, fields ...string) *TagGroupBy {
 //	client.Tag.Query().
 //		Select(tag.FieldValue).
 //		Scan(ctx, &v)
-//
 func (tq *TagQuery) Select(fields ...string) *TagSelect {
 	tq.fields = append(tq.fields, fields...)
 	selbuild := &TagSelect{TagQuery: tq}

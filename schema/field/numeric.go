@@ -189,7 +189,6 @@ func (b *intBuilder) DefaultFunc(fn interface{}) *intBuilder {
 //	field.Int("int").
 //		Default(0).
 //		UpdateDefault(GenNumber),
-//
 func (b *intBuilder) UpdateDefault(fn interface{}) *intBuilder {
 	b.desc.UpdateDefault = fn
 	return b
@@ -247,7 +246,6 @@ func (b *intBuilder) StorageKey(key string) *intBuilder {
 //		SchemaType(map[string]string{
 //			dialect.Postgres: "CustomType",
 //		})
-//
 func (b *intBuilder) SchemaType(types map[string]string) *intBuilder {
 	b.desc.SchemaType = types
 	return b
@@ -265,7 +263,6 @@ func (b *intBuilder) SchemaType(types map[string]string) *intBuilder {
 //	func(t1 T) Add(t2 T) T {
 //		return add(t1, t2)
 //	}
-//
 func (b *intBuilder) GoType(typ interface{}) *intBuilder {
 	b.desc.goType(typ, intType)
 	return b
@@ -276,7 +273,6 @@ func (b *intBuilder) GoType(typ interface{}) *intBuilder {
 //
 //	field.Int("int").
 //		Annotations(entgql.OrderField("INT"))
-//
 func (b *intBuilder) Annotations(annotations ...schema.Annotation) *intBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
@@ -358,7 +354,6 @@ func (b *uintBuilder) DefaultFunc(fn interface{}) *uintBuilder {
 //	field.Uint("uint").
 //		Default(0).
 //		UpdateDefault(GenNumber),
-//
 func (b *uintBuilder) UpdateDefault(fn interface{}) *uintBuilder {
 	b.desc.UpdateDefault = fn
 	return b
@@ -416,7 +411,6 @@ func (b *uintBuilder) StorageKey(key string) *uintBuilder {
 //		SchemaType(map[string]string{
 //			dialect.Postgres: "CustomType",
 //		})
-//
 func (b *uintBuilder) SchemaType(types map[string]string) *uintBuilder {
 	b.desc.SchemaType = types
 	return b
@@ -434,7 +428,6 @@ func (b *uintBuilder) SchemaType(types map[string]string) *uintBuilder {
 //	func(t1 T) Add(t2 T) T {
 //		return add(t1, t2)
 //	}
-//
 func (b *uintBuilder) GoType(typ interface{}) *uintBuilder {
 	b.desc.goType(typ, uintType)
 	return b
@@ -445,7 +438,6 @@ func (b *uintBuilder) GoType(typ interface{}) *uintBuilder {
 //
 //	field.Uint("uint").
 //		Annotations(entgql.OrderField("UINT"))
-//
 func (b *uintBuilder) Annotations(annotations ...schema.Annotation) *uintBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
@@ -537,7 +529,6 @@ func (b *int8Builder) DefaultFunc(fn interface{}) *int8Builder {
 //	field.Int8("int8").
 //		Default(0).
 //		UpdateDefault(GenNumber),
-//
 func (b *int8Builder) UpdateDefault(fn interface{}) *int8Builder {
 	b.desc.UpdateDefault = fn
 	return b
@@ -595,7 +586,6 @@ func (b *int8Builder) StorageKey(key string) *int8Builder {
 //		SchemaType(map[string]string{
 //			dialect.Postgres: "CustomType",
 //		})
-//
 func (b *int8Builder) SchemaType(types map[string]string) *int8Builder {
 	b.desc.SchemaType = types
 	return b
@@ -613,7 +603,6 @@ func (b *int8Builder) SchemaType(types map[string]string) *int8Builder {
 //	func(t1 T) Add(t2 T) T {
 //		return add(t1, t2)
 //	}
-//
 func (b *int8Builder) GoType(typ interface{}) *int8Builder {
 	b.desc.goType(typ, int8Type)
 	return b
@@ -624,7 +613,6 @@ func (b *int8Builder) GoType(typ interface{}) *int8Builder {
 //
 //	field.Int8("int8").
 //		Annotations(entgql.OrderField("INT8"))
-//
 func (b *int8Builder) Annotations(annotations ...schema.Annotation) *int8Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
@@ -716,7 +704,6 @@ func (b *int16Builder) DefaultFunc(fn interface{}) *int16Builder {
 //	field.Int16("int16").
 //		Default(0).
 //		UpdateDefault(GenNumber),
-//
 func (b *int16Builder) UpdateDefault(fn interface{}) *int16Builder {
 	b.desc.UpdateDefault = fn
 	return b
@@ -774,7 +761,6 @@ func (b *int16Builder) StorageKey(key string) *int16Builder {
 //		SchemaType(map[string]string{
 //			dialect.Postgres: "CustomType",
 //		})
-//
 func (b *int16Builder) SchemaType(types map[string]string) *int16Builder {
 	b.desc.SchemaType = types
 	return b
@@ -792,7 +778,6 @@ func (b *int16Builder) SchemaType(types map[string]string) *int16Builder {
 //	func(t1 T) Add(t2 T) T {
 //		return add(t1, t2)
 //	}
-//
 func (b *int16Builder) GoType(typ interface{}) *int16Builder {
 	b.desc.goType(typ, int16Type)
 	return b
@@ -803,7 +788,6 @@ func (b *int16Builder) GoType(typ interface{}) *int16Builder {
 //
 //	field.Int16("int16").
 //		Annotations(entgql.OrderField("INT16"))
-//
 func (b *int16Builder) Annotations(annotations ...schema.Annotation) *int16Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
@@ -895,7 +879,6 @@ func (b *int32Builder) DefaultFunc(fn interface{}) *int32Builder {
 //	field.Int32("int32").
 //		Default(0).
 //		UpdateDefault(GenNumber),
-//
 func (b *int32Builder) UpdateDefault(fn interface{}) *int32Builder {
 	b.desc.UpdateDefault = fn
 	return b
@@ -953,7 +936,6 @@ func (b *int32Builder) StorageKey(key string) *int32Builder {
 //		SchemaType(map[string]string{
 //			dialect.Postgres: "CustomType",
 //		})
-//
 func (b *int32Builder) SchemaType(types map[string]string) *int32Builder {
 	b.desc.SchemaType = types
 	return b
@@ -971,7 +953,6 @@ func (b *int32Builder) SchemaType(types map[string]string) *int32Builder {
 //	func(t1 T) Add(t2 T) T {
 //		return add(t1, t2)
 //	}
-//
 func (b *int32Builder) GoType(typ interface{}) *int32Builder {
 	b.desc.goType(typ, int32Type)
 	return b
@@ -982,7 +963,6 @@ func (b *int32Builder) GoType(typ interface{}) *int32Builder {
 //
 //	field.Int32("int32").
 //		Annotations(entgql.OrderField("INT32"))
-//
 func (b *int32Builder) Annotations(annotations ...schema.Annotation) *int32Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
@@ -1074,7 +1054,6 @@ func (b *int64Builder) DefaultFunc(fn interface{}) *int64Builder {
 //	field.Int64("int64").
 //		Default(0).
 //		UpdateDefault(GenNumber),
-//
 func (b *int64Builder) UpdateDefault(fn interface{}) *int64Builder {
 	b.desc.UpdateDefault = fn
 	return b
@@ -1132,7 +1111,6 @@ func (b *int64Builder) StorageKey(key string) *int64Builder {
 //		SchemaType(map[string]string{
 //			dialect.Postgres: "CustomType",
 //		})
-//
 func (b *int64Builder) SchemaType(types map[string]string) *int64Builder {
 	b.desc.SchemaType = types
 	return b
@@ -1150,7 +1128,6 @@ func (b *int64Builder) SchemaType(types map[string]string) *int64Builder {
 //	func(t1 T) Add(t2 T) T {
 //		return add(t1, t2)
 //	}
-//
 func (b *int64Builder) GoType(typ interface{}) *int64Builder {
 	b.desc.goType(typ, int64Type)
 	return b
@@ -1161,7 +1138,6 @@ func (b *int64Builder) GoType(typ interface{}) *int64Builder {
 //
 //	field.Int64("int64").
 //		Annotations(entgql.OrderField("INT64"))
-//
 func (b *int64Builder) Annotations(annotations ...schema.Annotation) *int64Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
@@ -1243,7 +1219,6 @@ func (b *uint8Builder) DefaultFunc(fn interface{}) *uint8Builder {
 //	field.Uint8("uint8").
 //		Default(0).
 //		UpdateDefault(GenNumber),
-//
 func (b *uint8Builder) UpdateDefault(fn interface{}) *uint8Builder {
 	b.desc.UpdateDefault = fn
 	return b
@@ -1301,7 +1276,6 @@ func (b *uint8Builder) StorageKey(key string) *uint8Builder {
 //		SchemaType(map[string]string{
 //			dialect.Postgres: "CustomType",
 //		})
-//
 func (b *uint8Builder) SchemaType(types map[string]string) *uint8Builder {
 	b.desc.SchemaType = types
 	return b
@@ -1319,7 +1293,6 @@ func (b *uint8Builder) SchemaType(types map[string]string) *uint8Builder {
 //	func(t1 T) Add(t2 T) T {
 //		return add(t1, t2)
 //	}
-//
 func (b *uint8Builder) GoType(typ interface{}) *uint8Builder {
 	b.desc.goType(typ, uint8Type)
 	return b
@@ -1330,7 +1303,6 @@ func (b *uint8Builder) GoType(typ interface{}) *uint8Builder {
 //
 //	field.Uint8("uint8").
 //		Annotations(entgql.OrderField("UINT8"))
-//
 func (b *uint8Builder) Annotations(annotations ...schema.Annotation) *uint8Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
@@ -1412,7 +1384,6 @@ func (b *uint16Builder) DefaultFunc(fn interface{}) *uint16Builder {
 //	field.Uint16("uint16").
 //		Default(0).
 //		UpdateDefault(GenNumber),
-//
 func (b *uint16Builder) UpdateDefault(fn interface{}) *uint16Builder {
 	b.desc.UpdateDefault = fn
 	return b
@@ -1470,7 +1441,6 @@ func (b *uint16Builder) StorageKey(key string) *uint16Builder {
 //		SchemaType(map[string]string{
 //			dialect.Postgres: "CustomType",
 //		})
-//
 func (b *uint16Builder) SchemaType(types map[string]string) *uint16Builder {
 	b.desc.SchemaType = types
 	return b
@@ -1488,7 +1458,6 @@ func (b *uint16Builder) SchemaType(types map[string]string) *uint16Builder {
 //	func(t1 T) Add(t2 T) T {
 //		return add(t1, t2)
 //	}
-//
 func (b *uint16Builder) GoType(typ interface{}) *uint16Builder {
 	b.desc.goType(typ, uint16Type)
 	return b
@@ -1499,7 +1468,6 @@ func (b *uint16Builder) GoType(typ interface{}) *uint16Builder {
 //
 //	field.Uint16("uint16").
 //		Annotations(entgql.OrderField("UINT16"))
-//
 func (b *uint16Builder) Annotations(annotations ...schema.Annotation) *uint16Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
@@ -1581,7 +1549,6 @@ func (b *uint32Builder) DefaultFunc(fn interface{}) *uint32Builder {
 //	field.Uint32("uint32").
 //		Default(0).
 //		UpdateDefault(GenNumber),
-//
 func (b *uint32Builder) UpdateDefault(fn interface{}) *uint32Builder {
 	b.desc.UpdateDefault = fn
 	return b
@@ -1639,7 +1606,6 @@ func (b *uint32Builder) StorageKey(key string) *uint32Builder {
 //		SchemaType(map[string]string{
 //			dialect.Postgres: "CustomType",
 //		})
-//
 func (b *uint32Builder) SchemaType(types map[string]string) *uint32Builder {
 	b.desc.SchemaType = types
 	return b
@@ -1657,7 +1623,6 @@ func (b *uint32Builder) SchemaType(types map[string]string) *uint32Builder {
 //	func(t1 T) Add(t2 T) T {
 //		return add(t1, t2)
 //	}
-//
 func (b *uint32Builder) GoType(typ interface{}) *uint32Builder {
 	b.desc.goType(typ, uint32Type)
 	return b
@@ -1668,7 +1633,6 @@ func (b *uint32Builder) GoType(typ interface{}) *uint32Builder {
 //
 //	field.Uint32("uint32").
 //		Annotations(entgql.OrderField("UINT32"))
-//
 func (b *uint32Builder) Annotations(annotations ...schema.Annotation) *uint32Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
@@ -1750,7 +1714,6 @@ func (b *uint64Builder) DefaultFunc(fn interface{}) *uint64Builder {
 //	field.Uint64("uint64").
 //		Default(0).
 //		UpdateDefault(GenNumber),
-//
 func (b *uint64Builder) UpdateDefault(fn interface{}) *uint64Builder {
 	b.desc.UpdateDefault = fn
 	return b
@@ -1808,7 +1771,6 @@ func (b *uint64Builder) StorageKey(key string) *uint64Builder {
 //		SchemaType(map[string]string{
 //			dialect.Postgres: "CustomType",
 //		})
-//
 func (b *uint64Builder) SchemaType(types map[string]string) *uint64Builder {
 	b.desc.SchemaType = types
 	return b
@@ -1826,7 +1788,6 @@ func (b *uint64Builder) SchemaType(types map[string]string) *uint64Builder {
 //	func(t1 T) Add(t2 T) T {
 //		return add(t1, t2)
 //	}
-//
 func (b *uint64Builder) GoType(typ interface{}) *uint64Builder {
 	b.desc.goType(typ, uint64Type)
 	return b
@@ -1837,7 +1798,6 @@ func (b *uint64Builder) GoType(typ interface{}) *uint64Builder {
 //
 //	field.Uint64("uint64").
 //		Annotations(entgql.OrderField("UINT64"))
-//
 func (b *uint64Builder) Annotations(annotations ...schema.Annotation) *uint64Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
@@ -1977,7 +1937,6 @@ func (b *float64Builder) StorageKey(key string) *float64Builder {
 //			dialect.MySQL:		"decimal(5, 2)",
 //			dialect.Postgres: 	"numeric(5, 2)",
 //		})
-//
 func (b *float64Builder) SchemaType(types map[string]string) *float64Builder {
 	b.desc.SchemaType = types
 	return b
@@ -1995,7 +1954,6 @@ func (b *float64Builder) SchemaType(types map[string]string) *float64Builder {
 //	func(t1 T) Add(t2 T) T {
 //		return add(t1, t2)
 //	}
-//
 func (b *float64Builder) GoType(typ interface{}) *float64Builder {
 	b.desc.goType(typ, float64Type)
 	return b
@@ -2006,7 +1964,6 @@ func (b *float64Builder) GoType(typ interface{}) *float64Builder {
 //
 //	field.Float64("float64").
 //		Annotations(entgql.OrderField("FLOAT64"))
-//
 func (b *float64Builder) Annotations(annotations ...schema.Annotation) *float64Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
@@ -2130,7 +2087,6 @@ func (b *float32Builder) StorageKey(key string) *float32Builder {
 //			dialect.MySQL:		"decimal(5, 2)",
 //			dialect.Postgres: 	"numeric(5, 2)",
 //		})
-//
 func (b *float32Builder) SchemaType(types map[string]string) *float32Builder {
 	b.desc.SchemaType = types
 	return b
@@ -2148,7 +2104,6 @@ func (b *float32Builder) SchemaType(types map[string]string) *float32Builder {
 //	func(t1 T) Add(t2 T) T {
 //		return add(t1, t2)
 //	}
-//
 func (b *float32Builder) GoType(typ interface{}) *float32Builder {
 	b.desc.goType(typ, float32Type)
 	return b
@@ -2159,7 +2114,6 @@ func (b *float32Builder) GoType(typ interface{}) *float32Builder {
 //
 //	field.Float32("float32").
 //		Annotations(entgql.OrderField("FLOAT32"))
-//
 func (b *float32Builder) Annotations(annotations ...schema.Annotation) *float32Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b

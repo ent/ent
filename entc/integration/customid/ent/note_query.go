@@ -338,7 +338,6 @@ func (nq *NoteQuery) WithChildren(opts ...func(*NoteQuery)) *NoteQuery {
 //		GroupBy(note.FieldText).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (nq *NoteQuery) GroupBy(field string, fields ...string) *NoteGroupBy {
 	grbuild := &NoteGroupBy{config: nq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -365,7 +364,6 @@ func (nq *NoteQuery) GroupBy(field string, fields ...string) *NoteGroupBy {
 //	client.Note.Query().
 //		Select(note.FieldText).
 //		Scan(ctx, &v)
-//
 func (nq *NoteQuery) Select(fields ...string) *NoteSelect {
 	nq.fields = append(nq.fields, fields...)
 	selbuild := &NoteSelect{NoteQuery: nq}

@@ -251,7 +251,6 @@ func (ruc *RoleUserCreate) createSpec() (*RoleUser, *sqlgraph.CreateSpec) {
 //			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (ruc *RoleUserCreate) OnConflict(opts ...sql.ConflictOption) *RoleUserUpsertOne {
 	ruc.conflict = opts
 	return &RoleUserUpsertOne{
@@ -265,7 +264,6 @@ func (ruc *RoleUserCreate) OnConflict(opts ...sql.ConflictOption) *RoleUserUpser
 //	client.RoleUser.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (ruc *RoleUserCreate) OnConflictColumns(columns ...string) *RoleUserUpsertOne {
 	ruc.conflict = append(ruc.conflict, sql.ConflictColumns(columns...))
 	return &RoleUserUpsertOne{
@@ -330,7 +328,6 @@ func (u *RoleUserUpsert) UpdateUserID() *RoleUserUpsert {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *RoleUserUpsertOne) UpdateNewValues() *RoleUserUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -339,10 +336,9 @@ func (u *RoleUserUpsertOne) UpdateNewValues() *RoleUserUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.RoleUser.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.RoleUser.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *RoleUserUpsertOne) Ignore() *RoleUserUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -517,7 +513,6 @@ func (rucb *RoleUserCreateBulk) ExecX(ctx context.Context) {
 //			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (rucb *RoleUserCreateBulk) OnConflict(opts ...sql.ConflictOption) *RoleUserUpsertBulk {
 	rucb.conflict = opts
 	return &RoleUserUpsertBulk{
@@ -531,7 +526,6 @@ func (rucb *RoleUserCreateBulk) OnConflict(opts ...sql.ConflictOption) *RoleUser
 //	client.RoleUser.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (rucb *RoleUserCreateBulk) OnConflictColumns(columns ...string) *RoleUserUpsertBulk {
 	rucb.conflict = append(rucb.conflict, sql.ConflictColumns(columns...))
 	return &RoleUserUpsertBulk{
@@ -553,7 +547,6 @@ type RoleUserUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *RoleUserUpsertBulk) UpdateNewValues() *RoleUserUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -565,7 +558,6 @@ func (u *RoleUserUpsertBulk) UpdateNewValues() *RoleUserUpsertBulk {
 //	client.RoleUser.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *RoleUserUpsertBulk) Ignore() *RoleUserUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

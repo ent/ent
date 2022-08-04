@@ -73,7 +73,6 @@ func ValidColumn(column string) bool {
 // it should be imported in the main as follows:
 //
 //	import _ "entgo.io/ent/entc/integration/hooks/ent/runtime"
-//
 var (
 	Hooks [3]ent.Hook
 	// DefaultNumber holds the default value on creation for the "number" field.

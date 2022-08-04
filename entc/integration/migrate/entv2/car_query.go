@@ -302,7 +302,6 @@ func (cq *CarQuery) WithOwner(opts ...func(*UserQuery)) *CarQuery {
 //		GroupBy(car.FieldName).
 //		Aggregate(entv2.Count()).
 //		Scan(ctx, &v)
-//
 func (cq *CarQuery) GroupBy(field string, fields ...string) *CarGroupBy {
 	grbuild := &CarGroupBy{config: cq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -329,7 +328,6 @@ func (cq *CarQuery) GroupBy(field string, fields ...string) *CarGroupBy {
 //	client.Car.Query().
 //		Select(car.FieldName).
 //		Scan(ctx, &v)
-//
 func (cq *CarQuery) Select(fields ...string) *CarSelect {
 	cq.fields = append(cq.fields, fields...)
 	selbuild := &CarSelect{CarQuery: cq}
