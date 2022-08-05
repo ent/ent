@@ -6,6 +6,15 @@ in the LICENSE file in the root directory of this source tree.
 
 {{/* gotype: entgo.io/ent/entc/gen.typeScope */}}
 
+{{/* Additional fields for the builder. */}}
+{{ define "dialect/sql/update/fields" }}
+	{{- with $tmpls := matchTemplate "dialect/sql/update/fields/additional/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
+{{- end }}
+
 {{ define "dialect/sql/update" }}
 {{ $pkg := $.Scope.Package }}
 {{ $builder := pascal $.Scope.Builder }}
@@ -14,6 +23,13 @@ in the LICENSE file in the root directory of this source tree.
 {{ $one := hasSuffix $builder "One" }}
 {{- $zero := 0 }}{{ if $one }}{{ $zero = "nil" }}{{ end }}
 {{- $ret := "n" }}{{ if $one }}{{ $ret = "_node" }}{{ end }}
+
+{{- /* Allow adding methods to the update-builder by ent extensions or user templates.*/}}
+{{- with $tmpls := matchTemplate "dialect/sql/update/additional/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{- xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} {{ if $one }}*{{ $.Name }}{{ else }}int{{ end }}, err error) {
 	_spec := &sqlgraph.UpdateSpec{

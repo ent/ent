@@ -22,8 +22,9 @@ import (
 // CommentUpdate is the builder for updating Comment entities.
 type CommentUpdate struct {
 	config
-	hooks    []Hook
-	mutation *CommentMutation
+	hooks     []Hook
+	mutation  *CommentMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the CommentUpdate builder.
@@ -184,6 +185,12 @@ func (cu *CommentUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (cu *CommentUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *CommentUpdate {
+	cu.modifiers = append(cu.modifiers, modifiers...)
+	return cu
+}
+
 func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -276,6 +283,7 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: comment.FieldDir,
 		})
 	}
+	_spec.Modifiers = cu.modifiers
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{comment.Label}
@@ -290,9 +298,10 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // CommentUpdateOne is the builder for updating a single Comment entity.
 type CommentUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *CommentMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *CommentMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetUniqueInt sets the "unique_int" field.
@@ -460,6 +469,12 @@ func (cuo *CommentUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (cuo *CommentUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *CommentUpdateOne {
+	cuo.modifiers = append(cuo.modifiers, modifiers...)
+	return cuo
+}
+
 func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -569,6 +584,7 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 			Column: comment.FieldDir,
 		})
 	}
+	_spec.Modifiers = cuo.modifiers
 	_node = &Comment{config: cuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

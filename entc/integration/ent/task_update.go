@@ -23,8 +23,9 @@ import (
 // TaskUpdate is the builder for updating Task entities.
 type TaskUpdate struct {
 	config
-	hooks    []Hook
-	mutation *TaskMutation
+	hooks     []Hook
+	mutation  *TaskMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the TaskUpdate builder.
@@ -141,6 +142,12 @@ func (tu *TaskUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (tu *TaskUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *TaskUpdate {
+	tu.modifiers = append(tu.modifiers, modifiers...)
+	return tu
+}
+
 func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -186,6 +193,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: enttask.FieldPriorities,
 		})
 	}
+	_spec.Modifiers = tu.modifiers
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{enttask.Label}
@@ -200,9 +208,10 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // TaskUpdateOne is the builder for updating a single Task entity.
 type TaskUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *TaskMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *TaskMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetPriority sets the "priority" field.
@@ -326,6 +335,12 @@ func (tuo *TaskUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (tuo *TaskUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *TaskUpdateOne {
+	tuo.modifiers = append(tuo.modifiers, modifiers...)
+	return tuo
+}
+
 func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -388,6 +403,7 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 			Column: enttask.FieldPriorities,
 		})
 	}
+	_spec.Modifiers = tuo.modifiers
 	_node = &Task{config: tuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
