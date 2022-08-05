@@ -248,12 +248,24 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 	{{- end }}
 {{- end }}
 
+{{- /* Support adding update methods by global templates. */}}
+{{- with $tmpls := matchTemplate "update/additional/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{ xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
+
 {{ end }}
 
 {{/* shared struct fields between the two updaters */}}
 {{ define "update/fields"}}
 	hooks []Hook
 	mutation *{{ $.MutationName }}
+	{{- /* Additional fields to add to the builder. */}}
+	{{- $tmpl := printf "dialect/%s/update/fields" $.Storage }}
+	{{- if hasTemplate $tmpl }}
+		{{- xtemplate $tmpl . }}
+	{{- end }}
 {{ end }}
 
 {{/* shared edges removal between the two updaters */}}

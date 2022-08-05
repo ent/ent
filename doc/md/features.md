@@ -127,7 +127,7 @@ The `sql/modifier` option lets add custom SQL modifiers to the builders and muta
 
 This option can be added to a project using the `--feature sql/modifier` flag.
 
-**Example 1**
+#### Modify Example 1
 
 ```go
 client.Pet.
@@ -144,7 +144,7 @@ The above code will produce the following SQL query:
 SELECT SUM(LENGTH(name)) FROM `pet`
 ```
 
-**Example 2**
+#### Modify Example 2
 
 ```go
 var p1 []struct {
@@ -166,7 +166,7 @@ The above code will produce the following SQL query:
 SELECT `pet`.*, LENGTH(name) FROM `pet` ORDER BY `pet`.`id` ASC
 ```
 
-**Example 3**
+#### Modify Example 3
 
 ```go
 var v []struct {
@@ -210,7 +210,7 @@ ORDER BY
     DATE(created_at) DESC
 ```
 
-**Example 4**
+#### Modify Example 4
 
 ```go
 var gs []struct {
@@ -250,6 +250,42 @@ GROUP BY
     `groups`.`id`
 ORDER BY
     `groups`.`id` ASC
+```
+
+
+#### Modify Example 5
+
+```go
+client.User.Update().
+	Modify(func(s *sql.UpdateBuilder) {
+		s.Set(user.FieldName, sql.Expr(fmt.Sprintf("UPPER(%s)", user.FieldName)))
+	}).
+	ExecX(ctx)
+```
+
+The above code will produce the following SQL query:
+
+```sql
+UPDATE `users` SET `name` = UPPER(`name`)
+```
+
+#### Modify Example 6
+
+```go
+client.User.Update().
+	Modify(func(u *sql.UpdateBuilder) {
+		u.Set(user.FieldID, sql.ExprFunc(func(b *sql.Builder) {
+			b.Ident(user.FieldID).WriteOp(sql.OpAdd).Arg(1)
+		}))
+		u.OrderBy(sql.Desc(user.FieldID))
+	}).
+	ExecX(ctx)
+```
+
+The above code will produce the following SQL query:
+
+```sql
+UPDATE `users` SET `id` = `id` + 1 ORDER BY `id` DESC
 ```
 
 ### SQL Raw API

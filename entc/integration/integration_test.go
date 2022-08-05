@@ -710,6 +710,24 @@ func Select(t *testing.T, client *ent.Client) {
 		}).
 		OnlyIDX(ctx)
 	require.Equal(u.ID, id)
+
+	// Update modifiers.
+	allUpper := func() bool {
+		for _, name := range client.User.Query().Select(user.FieldName).StringsX(ctx) {
+			if strings.ToUpper(name) != name {
+				return false
+			}
+		}
+		return true
+	}
+	require.False(allUpper(), "at least one name is not upper-cased")
+	// Execute custom update modifier.
+	client.User.Update().
+		Modify(func(u *sql.UpdateBuilder) {
+			u.Set(user.FieldName, sql.Expr(fmt.Sprintf("UPPER(%s)", user.FieldName)))
+		}).
+		ExecX(ctx)
+	require.True(allUpper(), "at names must be upper-cased")
 }
 
 func ExecQuery(t *testing.T, client *ent.Client) {

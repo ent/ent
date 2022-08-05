@@ -21,8 +21,9 @@ import (
 // LicenseUpdate is the builder for updating License entities.
 type LicenseUpdate struct {
 	config
-	hooks    []Hook
-	mutation *LicenseMutation
+	hooks     []Hook
+	mutation  *LicenseMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the LicenseUpdate builder.
@@ -90,6 +91,12 @@ func (lu *LicenseUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (lu *LicenseUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *LicenseUpdate {
+	lu.modifiers = append(lu.modifiers, modifiers...)
+	return lu
+}
+
 func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -108,6 +115,7 @@ func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	_spec.Modifiers = lu.modifiers
 	if n, err = sqlgraph.UpdateNodes(ctx, lu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{license.Label}
@@ -122,9 +130,10 @@ func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // LicenseUpdateOne is the builder for updating a single License entity.
 type LicenseUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *LicenseMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *LicenseMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Mutation returns the LicenseMutation object of the builder.
@@ -199,6 +208,12 @@ func (luo *LicenseUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (luo *LicenseUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *LicenseUpdateOne {
+	luo.modifiers = append(luo.modifiers, modifiers...)
+	return luo
+}
+
 func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -234,6 +249,7 @@ func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err e
 			}
 		}
 	}
+	_spec.Modifiers = luo.modifiers
 	_node = &License{config: luo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
