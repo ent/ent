@@ -2115,3 +2115,14 @@ func TestSelector_UnqualifiedColumns(t *testing.T) {
 	require.Equal(t, []string{`"t1"."a"`, `"t2"."b"`}, s.SelectedColumns())
 	require.Equal(t, []string{"a", "b"}, s.UnqualifiedColumns())
 }
+
+func TestUpdateBuilder_OrderBy(t *testing.T) {
+	u := Dialect(dialect.MySQL).Update("users").Set("id", Expr("`id` + 1")).OrderBy("id")
+	require.NoError(t, u.Err())
+	query, args := u.Query()
+	require.Nil(t, args)
+	require.Equal(t, "UPDATE `users` SET `id` = `id` + 1 ORDER BY `id`", query)
+
+	u = Dialect(dialect.Postgres).Update("users").Set("id", Expr("id + 1")).OrderBy("id")
+	require.Error(t, u.Err())
+}
