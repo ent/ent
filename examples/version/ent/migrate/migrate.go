@@ -60,10 +60,9 @@ func Create(ctx context.Context, s *Schema, tables []*schema.Table, opts ...sche
 
 // WriteTo writes the schema changes to w instead of running them against the database.
 //
-// 	if err := client.Schema.WriteTo(context.Background(), os.Stdout); err != nil {
+//	if err := client.Schema.WriteTo(context.Background(), os.Stdout); err != nil {
 //		log.Fatal(err)
-// 	}
-//
+//	}
 func (s *Schema) WriteTo(ctx context.Context, w io.Writer, opts ...schema.MigrateOption) error {
 	return Create(ctx, &Schema{drv: &schema.WriteDriver{Writer: w, Driver: s.drv}}, Tables, opts...)
 }

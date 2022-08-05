@@ -302,7 +302,6 @@ func (sq *StreetQuery) WithCity(opts ...func(*CityQuery)) *StreetQuery {
 //		GroupBy(street.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (sq *StreetQuery) GroupBy(field string, fields ...string) *StreetGroupBy {
 	grbuild := &StreetGroupBy{config: sq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -329,7 +328,6 @@ func (sq *StreetQuery) GroupBy(field string, fields ...string) *StreetGroupBy {
 //	client.Street.Query().
 //		Select(street.FieldName).
 //		Scan(ctx, &v)
-//
 func (sq *StreetQuery) Select(fields ...string) *StreetSelect {
 	sq.fields = append(sq.fields, fields...)
 	selbuild := &StreetSelect{StreetQuery: sq}

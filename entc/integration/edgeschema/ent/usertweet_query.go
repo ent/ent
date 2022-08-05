@@ -337,7 +337,6 @@ func (utq *UserTweetQuery) WithTweet(opts ...func(*TweetQuery)) *UserTweetQuery 
 //		GroupBy(usertweet.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (utq *UserTweetQuery) GroupBy(field string, fields ...string) *UserTweetGroupBy {
 	grbuild := &UserTweetGroupBy{config: utq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -364,7 +363,6 @@ func (utq *UserTweetQuery) GroupBy(field string, fields ...string) *UserTweetGro
 //	client.UserTweet.Query().
 //		Select(usertweet.FieldCreatedAt).
 //		Scan(ctx, &v)
-//
 func (utq *UserTweetQuery) Select(fields ...string) *UserTweetSelect {
 	utq.fields = append(utq.fields, fields...)
 	selbuild := &UserTweetSelect{UserTweetQuery: utq}

@@ -307,7 +307,6 @@ func (gq *GroupQuery) WithUsers(opts ...func(*UserQuery)) *GroupQuery {
 //		GroupBy(group.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 	grbuild := &GroupGroupBy{config: gq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -334,7 +333,6 @@ func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 //	client.Group.Query().
 //		Select(group.FieldName).
 //		Scan(ctx, &v)
-//
 func (gq *GroupQuery) Select(fields ...string) *GroupSelect {
 	gq.fields = append(gq.fields, fields...)
 	selbuild := &GroupSelect{GroupQuery: gq}
