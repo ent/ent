@@ -134,7 +134,6 @@ func Edge(rel Rel, inverse bool, table string, columns ...string) StepOption {
 //		To("table", "pk"),
 //		Edge("name", O2M, "fk"),
 //	)
-//
 func NewStep(opts ...StepOption) *Step {
 	s := &Step{}
 	for _, opt := range opts {
@@ -409,6 +408,7 @@ type (
 		Edges     EdgeMut
 		Fields    FieldMut
 		Predicate func(*sql.Selector)
+		Modifiers []func(*sql.UpdateBuilder)
 
 		ScanValues func(columns []string) ([]interface{}, error)
 		Assign     func(columns []string, values []interface{}) error
@@ -686,6 +686,12 @@ func (u *updater) node(ctx context.Context, tx dialect.ExecQuerier) error {
 	if err := u.setTableColumns(update, addEdges, clearEdges); err != nil {
 		return err
 	}
+	for _, m := range u.Modifiers {
+		m(update)
+	}
+	if err := update.Err(); err != nil {
+		return err
+	}
 	if !update.Empty() {
 		var res sql.Result
 		query, args := update.Query()
@@ -793,6 +799,12 @@ func (u *updater) nodes(ctx context.Context, drv dialect.Driver) (int, error) {
 }
 
 func (u *updater) updateTable(ctx context.Context, stmt *sql.UpdateBuilder) (int, error) {
+	for _, m := range u.Modifiers {
+		m(stmt)
+	}
+	if err := stmt.Err(); err != nil {
+		return 0, err
+	}
 	if stmt.Empty() {
 		return 0, nil
 	}

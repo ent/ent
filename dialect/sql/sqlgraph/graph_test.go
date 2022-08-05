@@ -1572,6 +1572,33 @@ func TestUpdateNode(t *testing.T) {
 			wantUser: &user{name: "Ariel", age: 30, id: 1},
 		},
 		{
+			name: "fields/set_modifier",
+			spec: &UpdateSpec{
+				Node: &NodeSpec{
+					Table:   "users",
+					Columns: []string{"id", "name", "age"},
+					ID:      &FieldSpec{Column: "id", Type: field.TypeInt, Value: 1},
+				},
+				Modifiers: []func(*sql.UpdateBuilder){
+					func(u *sql.UpdateBuilder) {
+						u.Set("name", sql.Expr(sql.Lower("name")))
+					},
+				},
+			},
+			prepare: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectExec(escape("UPDATE `users` SET `name` = LOWER(`name`) WHERE `id` = ?")).
+					WithArgs(1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectQuery(escape("SELECT `id`, `name`, `age` FROM `users` WHERE `id` = ?")).
+					WithArgs(1).
+					WillReturnRows(sqlmock.NewRows([]string{"id", "age", "name"}).
+						AddRow(1, 30, "Ariel"))
+				mock.ExpectCommit()
+			},
+			wantUser: &user{name: "Ariel", age: 30, id: 1},
+		},
+		{
 			name: "fields/add_set_clear",
 			spec: &UpdateSpec{
 				Node: &NodeSpec{
@@ -1905,6 +1932,25 @@ func TestUpdateNodes(t *testing.T) {
 				// Clear fields.
 				mock.ExpectExec(escape("UPDATE `users` SET `age` = NULL, `name` = NULL WHERE `name` = ?")).
 					WithArgs("a8m").
+					WillReturnResult(sqlmock.NewResult(0, 1))
+			},
+			wantAffected: 1,
+		},
+		{
+			name: "with modifier",
+			spec: &UpdateSpec{
+				Node: &NodeSpec{
+					Table: "users",
+					ID:    &FieldSpec{Column: "id", Type: field.TypeInt},
+				},
+				Modifiers: []func(*sql.UpdateBuilder){
+					func(u *sql.UpdateBuilder) {
+						u.Set("id", sql.Expr("id + 1")).OrderBy("id")
+					},
+				},
+			},
+			prepare: func(mock sqlmock.Sqlmock) {
+				mock.ExpectExec(escape("UPDATE `users` SET `id` = id + 1 ORDER BY `id`")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 			},
 			wantAffected: 1,
