@@ -524,7 +524,6 @@ func (u *TokenUpsertBulk) UpdateNewValues() *TokenUpsertBulk {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(token.FieldID)
-				return
 			}
 		}
 	}))

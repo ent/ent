@@ -641,7 +641,6 @@ func (u *BlobUpsertBulk) UpdateNewValues() *BlobUpsertBulk {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(blob.FieldID)
-				return
 			}
 		}
 	}))

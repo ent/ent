@@ -338,7 +338,6 @@ func (u *{{ $upsertBulk }}) UpdateNewValues() *{{ $upsertBulk }} {
 				{{- if $udfID }}
 					if _, exists := b.mutation.ID(); exists {
 						s.SetIgnore({{ $.Package }}.{{ $.ID.Constant }})
-						return
 					}
 				{{- end }}
 				{{- range $f := $.ImmutableFields }}
