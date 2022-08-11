@@ -1,0 +1,25 @@
+package schema
+
+import (
+    "entgo.io/ent"
+    "entgo.io/ent/schema/mixin"
+)
+
+// {{ . }} holds the schema definition for the {{ . }} entity.
+type {{ . }} struct {
+    ent.Schema
+}
+
+// Mixins of the {{ . }}.
+func ({{ . }}) Mixins() []ent.Mixin {
+    return []ent.Mixin{
+        mixin.Time{},
+    }
+}
+
+// Fields of the {{ . }}.
+func ({{ . }}) Fields() []ent.Field {
+    return []ent.Field{
+        // Fields go here.
+    }
+}
