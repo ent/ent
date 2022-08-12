@@ -663,7 +663,6 @@ func (u *CarUpsertBulk) UpdateNewValues() *CarUpsertBulk {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(car.FieldID)
-				return
 			}
 		}
 	}))

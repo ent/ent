@@ -406,7 +406,6 @@ func (u *LicenseUpsertBulk) UpdateNewValues() *LicenseUpsertBulk {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(license.FieldID)
-				return
 			}
 		}
 	}))
