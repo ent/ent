@@ -8,7 +8,9 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -21,6 +23,34 @@ type LicenseCreate struct {
 	config
 	mutation *LicenseMutation
 	hooks    []Hook
+}
+
+// SetCreateTime sets the "create_time" field.
+func (lc *LicenseCreate) SetCreateTime(t time.Time) *LicenseCreate {
+	lc.mutation.SetCreateTime(t)
+	return lc
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (lc *LicenseCreate) SetNillableCreateTime(t *time.Time) *LicenseCreate {
+	if t != nil {
+		lc.SetCreateTime(*t)
+	}
+	return lc
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (lc *LicenseCreate) SetUpdateTime(t time.Time) *LicenseCreate {
+	lc.mutation.SetUpdateTime(t)
+	return lc
+}
+
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (lc *LicenseCreate) SetNillableUpdateTime(t *time.Time) *LicenseCreate {
+	if t != nil {
+		lc.SetUpdateTime(*t)
+	}
+	return lc
 }
 
 // SetID sets the "id" field.
@@ -40,6 +70,7 @@ func (lc *LicenseCreate) Save(ctx context.Context) (*License, error) {
 		err  error
 		node *License
 	)
+	lc.defaults()
 	if len(lc.hooks) == 0 {
 		if err = lc.check(); err != nil {
 			return nil, err
@@ -103,8 +134,26 @@ func (lc *LicenseCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (lc *LicenseCreate) defaults() {
+	if _, ok := lc.mutation.CreateTime(); !ok {
+		v := license.DefaultCreateTime()
+		lc.mutation.SetCreateTime(v)
+	}
+	if _, ok := lc.mutation.UpdateTime(); !ok {
+		v := license.DefaultUpdateTime()
+		lc.mutation.SetUpdateTime(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (lc *LicenseCreate) check() error {
+	if _, ok := lc.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "License.create_time"`)}
+	}
+	if _, ok := lc.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "License.update_time"`)}
+	}
 	return nil
 }
 
@@ -128,6 +177,12 @@ func (lc *LicenseCreate) gremlin() *dsl.Traversal {
 	v := g.AddV(license.Label)
 	if id, ok := lc.mutation.ID(); ok {
 		v.Property(dsl.ID, id)
+	}
+	if value, ok := lc.mutation.CreateTime(); ok {
+		v.Property(dsl.Single, license.FieldCreateTime, value)
+	}
+	if value, ok := lc.mutation.UpdateTime(); ok {
+		v.Property(dsl.Single, license.FieldUpdateTime, value)
 	}
 	return v.ValueMap(true)
 }

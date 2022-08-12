@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/group"
 	"entgo.io/ent/entc/integration/ent/groupinfo"
 	"entgo.io/ent/entc/integration/ent/item"
+	"entgo.io/ent/entc/integration/ent/license"
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/schema"
 	"entgo.io/ent/entc/integration/ent/schema/task"
@@ -220,6 +221,21 @@ func init() {
 	item.DefaultID = itemDescID.Default.(func() string)
 	// item.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	item.IDValidator = itemDescID.Validators[0].(func(string) error)
+	licenseMixin := schema.License{}.Mixin()
+	licenseMixinFields0 := licenseMixin[0].Fields()
+	_ = licenseMixinFields0
+	licenseFields := schema.License{}.Fields()
+	_ = licenseFields
+	// licenseDescCreateTime is the schema descriptor for create_time field.
+	licenseDescCreateTime := licenseMixinFields0[0].Descriptor()
+	// license.DefaultCreateTime holds the default value on creation for the create_time field.
+	license.DefaultCreateTime = licenseDescCreateTime.Default.(func() time.Time)
+	// licenseDescUpdateTime is the schema descriptor for update_time field.
+	licenseDescUpdateTime := licenseMixinFields0[1].Descriptor()
+	// license.DefaultUpdateTime holds the default value on creation for the update_time field.
+	license.DefaultUpdateTime = licenseDescUpdateTime.Default.(func() time.Time)
+	// license.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	license.UpdateDefaultUpdateTime = licenseDescUpdateTime.UpdateDefault.(func() time.Time)
 	petFields := schema.Pet{}.Fields()
 	_ = petFields
 	// petDescAge is the schema descriptor for age field.

@@ -28,6 +28,7 @@ import (
 	"entgo.io/ent/entc/integration/gremlin/ent/group"
 	"entgo.io/ent/entc/integration/gremlin/ent/groupinfo"
 	"entgo.io/ent/entc/integration/gremlin/ent/item"
+	"entgo.io/ent/entc/integration/gremlin/ent/license"
 	"entgo.io/ent/entc/integration/gremlin/ent/node"
 	"entgo.io/ent/entc/integration/gremlin/ent/pet"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
@@ -10823,6 +10824,8 @@ type LicenseMutation struct {
 	op            Op
 	typ           string
 	id            *int
+	create_time   *time.Time
+	update_time   *time.Time
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*License, error)
@@ -10933,6 +10936,78 @@ func (m *LicenseMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
+// SetCreateTime sets the "create_time" field.
+func (m *LicenseMutation) SetCreateTime(t time.Time) {
+	m.create_time = &t
+}
+
+// CreateTime returns the value of the "create_time" field in the mutation.
+func (m *LicenseMutation) CreateTime() (r time.Time, exists bool) {
+	v := m.create_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreateTime returns the old "create_time" field's value of the License entity.
+// If the License object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LicenseMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreateTime: %w", err)
+	}
+	return oldValue.CreateTime, nil
+}
+
+// ResetCreateTime resets all changes to the "create_time" field.
+func (m *LicenseMutation) ResetCreateTime() {
+	m.create_time = nil
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (m *LicenseMutation) SetUpdateTime(t time.Time) {
+	m.update_time = &t
+}
+
+// UpdateTime returns the value of the "update_time" field in the mutation.
+func (m *LicenseMutation) UpdateTime() (r time.Time, exists bool) {
+	v := m.update_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdateTime returns the old "update_time" field's value of the License entity.
+// If the License object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LicenseMutation) OldUpdateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdateTime: %w", err)
+	}
+	return oldValue.UpdateTime, nil
+}
+
+// ResetUpdateTime resets all changes to the "update_time" field.
+func (m *LicenseMutation) ResetUpdateTime() {
+	m.update_time = nil
+}
+
 // Where appends a list predicates to the LicenseMutation builder.
 func (m *LicenseMutation) Where(ps ...predicate.License) {
 	m.predicates = append(m.predicates, ps...)
@@ -10952,7 +11027,13 @@ func (m *LicenseMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LicenseMutation) Fields() []string {
-	fields := make([]string, 0, 0)
+	fields := make([]string, 0, 2)
+	if m.create_time != nil {
+		fields = append(fields, license.FieldCreateTime)
+	}
+	if m.update_time != nil {
+		fields = append(fields, license.FieldUpdateTime)
+	}
 	return fields
 }
 
@@ -10960,6 +11041,12 @@ func (m *LicenseMutation) Fields() []string {
 // return value indicates that this field was not set, or was not defined in the
 // schema.
 func (m *LicenseMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case license.FieldCreateTime:
+		return m.CreateTime()
+	case license.FieldUpdateTime:
+		return m.UpdateTime()
+	}
 	return nil, false
 }
 
@@ -10967,6 +11054,12 @@ func (m *LicenseMutation) Field(name string) (ent.Value, bool) {
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
 func (m *LicenseMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case license.FieldCreateTime:
+		return m.OldCreateTime(ctx)
+	case license.FieldUpdateTime:
+		return m.OldUpdateTime(ctx)
+	}
 	return nil, fmt.Errorf("unknown License field %s", name)
 }
 
@@ -10975,6 +11068,20 @@ func (m *LicenseMutation) OldField(ctx context.Context, name string) (ent.Value,
 // type.
 func (m *LicenseMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case license.FieldCreateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreateTime(v)
+		return nil
+	case license.FieldUpdateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdateTime(v)
+		return nil
 	}
 	return fmt.Errorf("unknown License field %s", name)
 }
@@ -10996,6 +11103,8 @@ func (m *LicenseMutation) AddedField(name string) (ent.Value, bool) {
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
 func (m *LicenseMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown License numeric field %s", name)
 }
 
@@ -11021,6 +11130,14 @@ func (m *LicenseMutation) ClearField(name string) error {
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
 func (m *LicenseMutation) ResetField(name string) error {
+	switch name {
+	case license.FieldCreateTime:
+		m.ResetCreateTime()
+		return nil
+	case license.FieldUpdateTime:
+		m.ResetUpdateTime()
+		return nil
+	}
 	return fmt.Errorf("unknown License field %s", name)
 }
 

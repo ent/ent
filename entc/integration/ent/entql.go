@@ -250,8 +250,11 @@ var schemaGraph = func() *sqlgraph.Schema {
 				Column: license.FieldID,
 			},
 		},
-		Type:   "License",
-		Fields: map[string]*sqlgraph.FieldSpec{},
+		Type: "License",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			license.FieldCreateTime: {Type: field.TypeTime, Column: license.FieldCreateTime},
+			license.FieldUpdateTime: {Type: field.TypeTime, Column: license.FieldUpdateTime},
+		},
 	}
 	graph.Nodes[10] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
@@ -1681,6 +1684,16 @@ func (f *LicenseFilter) Where(p entql.P) {
 // WhereID applies the entql int predicate on the id field.
 func (f *LicenseFilter) WhereID(p entql.IntP) {
 	f.Where(p.Field(license.FieldID))
+}
+
+// WhereCreateTime applies the entql time.Time predicate on the create_time field.
+func (f *LicenseFilter) WhereCreateTime(p entql.TimeP) {
+	f.Where(p.Field(license.FieldCreateTime))
+}
+
+// WhereUpdateTime applies the entql time.Time predicate on the update_time field.
+func (f *LicenseFilter) WhereUpdateTime(p entql.TimeP) {
+	f.Where(p.Field(license.FieldUpdateTime))
 }
 
 // addPredicate implements the predicateAdder interface.
