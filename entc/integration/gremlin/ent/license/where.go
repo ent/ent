@@ -7,6 +7,8 @@
 package license
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
@@ -81,6 +83,148 @@ func IDLT(id int) predicate.License {
 func IDLTE(id int) predicate.License {
 	return predicate.License(func(t *dsl.Traversal) {
 		t.HasID(p.LTE(id))
+	})
+}
+
+// CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
+func CreateTime(v time.Time) predicate.License {
+	return predicate.License(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreateTime, p.EQ(v))
+	})
+}
+
+// UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
+func UpdateTime(v time.Time) predicate.License {
+	return predicate.License(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUpdateTime, p.EQ(v))
+	})
+}
+
+// CreateTimeEQ applies the EQ predicate on the "create_time" field.
+func CreateTimeEQ(v time.Time) predicate.License {
+	return predicate.License(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreateTime, p.EQ(v))
+	})
+}
+
+// CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
+func CreateTimeNEQ(v time.Time) predicate.License {
+	return predicate.License(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreateTime, p.NEQ(v))
+	})
+}
+
+// CreateTimeIn applies the In predicate on the "create_time" field.
+func CreateTimeIn(vs ...time.Time) predicate.License {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.License(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreateTime, p.Within(v...))
+	})
+}
+
+// CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
+func CreateTimeNotIn(vs ...time.Time) predicate.License {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.License(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreateTime, p.Without(v...))
+	})
+}
+
+// CreateTimeGT applies the GT predicate on the "create_time" field.
+func CreateTimeGT(v time.Time) predicate.License {
+	return predicate.License(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreateTime, p.GT(v))
+	})
+}
+
+// CreateTimeGTE applies the GTE predicate on the "create_time" field.
+func CreateTimeGTE(v time.Time) predicate.License {
+	return predicate.License(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreateTime, p.GTE(v))
+	})
+}
+
+// CreateTimeLT applies the LT predicate on the "create_time" field.
+func CreateTimeLT(v time.Time) predicate.License {
+	return predicate.License(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreateTime, p.LT(v))
+	})
+}
+
+// CreateTimeLTE applies the LTE predicate on the "create_time" field.
+func CreateTimeLTE(v time.Time) predicate.License {
+	return predicate.License(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreateTime, p.LTE(v))
+	})
+}
+
+// UpdateTimeEQ applies the EQ predicate on the "update_time" field.
+func UpdateTimeEQ(v time.Time) predicate.License {
+	return predicate.License(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUpdateTime, p.EQ(v))
+	})
+}
+
+// UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
+func UpdateTimeNEQ(v time.Time) predicate.License {
+	return predicate.License(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUpdateTime, p.NEQ(v))
+	})
+}
+
+// UpdateTimeIn applies the In predicate on the "update_time" field.
+func UpdateTimeIn(vs ...time.Time) predicate.License {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.License(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUpdateTime, p.Within(v...))
+	})
+}
+
+// UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
+func UpdateTimeNotIn(vs ...time.Time) predicate.License {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.License(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUpdateTime, p.Without(v...))
+	})
+}
+
+// UpdateTimeGT applies the GT predicate on the "update_time" field.
+func UpdateTimeGT(v time.Time) predicate.License {
+	return predicate.License(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUpdateTime, p.GT(v))
+	})
+}
+
+// UpdateTimeGTE applies the GTE predicate on the "update_time" field.
+func UpdateTimeGTE(v time.Time) predicate.License {
+	return predicate.License(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUpdateTime, p.GTE(v))
+	})
+}
+
+// UpdateTimeLT applies the LT predicate on the "update_time" field.
+func UpdateTimeLT(v time.Time) predicate.License {
+	return predicate.License(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUpdateTime, p.LT(v))
+	})
+}
+
+// UpdateTimeLTE applies the LTE predicate on the "update_time" field.
+func UpdateTimeLTE(v time.Time) predicate.License {
+	return predicate.License(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUpdateTime, p.LTE(v))
 	})
 }
 

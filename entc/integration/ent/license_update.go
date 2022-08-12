@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -32,6 +33,12 @@ func (lu *LicenseUpdate) Where(ps ...predicate.License) *LicenseUpdate {
 	return lu
 }
 
+// SetUpdateTime sets the "update_time" field.
+func (lu *LicenseUpdate) SetUpdateTime(t time.Time) *LicenseUpdate {
+	lu.mutation.SetUpdateTime(t)
+	return lu
+}
+
 // Mutation returns the LicenseMutation object of the builder.
 func (lu *LicenseUpdate) Mutation() *LicenseMutation {
 	return lu.mutation
@@ -43,6 +50,7 @@ func (lu *LicenseUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
+	lu.defaults()
 	if len(lu.hooks) == 0 {
 		affected, err = lu.sqlSave(ctx)
 	} else {
@@ -91,6 +99,14 @@ func (lu *LicenseUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (lu *LicenseUpdate) defaults() {
+	if _, ok := lu.mutation.UpdateTime(); !ok {
+		v := license.UpdateDefaultUpdateTime()
+		lu.mutation.SetUpdateTime(v)
+	}
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (lu *LicenseUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *LicenseUpdate {
 	lu.modifiers = append(lu.modifiers, modifiers...)
@@ -115,6 +131,13 @@ func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := lu.mutation.UpdateTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: license.FieldUpdateTime,
+		})
+	}
 	_spec.Modifiers = lu.modifiers
 	if n, err = sqlgraph.UpdateNodes(ctx, lu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -136,6 +159,12 @@ type LicenseUpdateOne struct {
 	modifiers []func(*sql.UpdateBuilder)
 }
 
+// SetUpdateTime sets the "update_time" field.
+func (luo *LicenseUpdateOne) SetUpdateTime(t time.Time) *LicenseUpdateOne {
+	luo.mutation.SetUpdateTime(t)
+	return luo
+}
+
 // Mutation returns the LicenseMutation object of the builder.
 func (luo *LicenseUpdateOne) Mutation() *LicenseMutation {
 	return luo.mutation
@@ -154,6 +183,7 @@ func (luo *LicenseUpdateOne) Save(ctx context.Context) (*License, error) {
 		err  error
 		node *License
 	)
+	luo.defaults()
 	if len(luo.hooks) == 0 {
 		node, err = luo.sqlSave(ctx)
 	} else {
@@ -208,6 +238,14 @@ func (luo *LicenseUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (luo *LicenseUpdateOne) defaults() {
+	if _, ok := luo.mutation.UpdateTime(); !ok {
+		v := license.UpdateDefaultUpdateTime()
+		luo.mutation.SetUpdateTime(v)
+	}
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (luo *LicenseUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *LicenseUpdateOne {
 	luo.modifiers = append(luo.modifiers, modifiers...)
@@ -248,6 +286,13 @@ func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err e
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := luo.mutation.UpdateTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: license.FieldUpdateTime,
+		})
 	}
 	_spec.Modifiers = luo.modifiers
 	_node = &License{config: luo.config}

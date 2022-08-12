@@ -33,6 +33,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/groupinfo"
 	"entgo.io/ent/entc/integration/ent/hook"
 	"entgo.io/ent/entc/integration/ent/item"
+	"entgo.io/ent/entc/integration/ent/license"
 	"entgo.io/ent/entc/integration/ent/migrate"
 	"entgo.io/ent/entc/integration/ent/node"
 	"entgo.io/ent/entc/integration/ent/pet"
@@ -326,7 +327,7 @@ func Upsert(t *testing.T, client *ent.Client) {
 		SetAge(33).
 		SetPhone("0000").
 		OnConflictColumns(user.FieldPhone).
-		// Override some of the fields with custom update.
+		// Override some fields with custom update.
 		Update(func(u *ent.UserUpsert) {
 			// Age was set to the new value (33).
 			u.UpdateAge()
@@ -445,9 +446,20 @@ func Upsert(t *testing.T, client *ent.Client) {
 			IDX(ctx)
 	}
 
+	// Ensure immutable fields were not changed during upsert.
 	c2 := client.Card.GetX(ctx, id)
 	require.Equal(t, c1.CreateTime.Unix(), c2.CreateTime.Unix())
 	require.NotEqual(t, c1.UpdateTime.Unix(), c2.UpdateTime.Unix())
+
+	// Ensure immutable fields were not changed during bulk upsert.
+	l1 := client.License.Create().SetCreateTime(ts).SetUpdateTime(ts).SaveX(ctx)
+	client.License.CreateBulk(client.License.Create().SetID(l1.ID)).
+		OnConflictColumns(license.FieldID).
+		UpdateNewValues().
+		ExecX(ctx)
+	l2 := client.License.GetX(ctx, l1.ID)
+	require.Equal(t, l1.CreateTime.Unix(), l2.CreateTime.Unix())
+	require.NotEqual(t, l1.UpdateTime.Unix(), l2.UpdateTime.Unix())
 }
 
 func Clone(t *testing.T, client *ent.Client) {

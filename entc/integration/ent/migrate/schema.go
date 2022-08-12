@@ -292,6 +292,8 @@ var (
 	// LicensesColumns holds the columns for the "licenses" table.
 	LicensesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "bigserial"}},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 	}
 	// LicensesTable holds the schema information for the "licenses" table.
 	LicensesTable = &schema.Table{
