@@ -461,6 +461,17 @@ func Upsert(t *testing.T, client *ent.Client) {
 	l2 := client.License.GetX(ctx, l1.ID)
 	require.Equal(t, l1.CreateTime.Unix(), l2.CreateTime.Unix())
 	require.NotEqual(t, l1.UpdateTime.Unix(), l2.UpdateTime.Unix())
+
+	c3 := client.Card.Create().SetName("a8m").SetNumber("405060").SaveX(ctx)
+	client.Card.Create().SetNumber(c3.Number).OnConflictColumns(card.FieldNumber).ClearName().UpdateNewValues().ExecX(ctx)
+	require.Empty(t, client.Card.GetX(ctx, c3.ID).Name)
+	c3.Update().SetName("a8m").ExecX(ctx)
+	client.Card.CreateBulk(client.Card.Create().SetNumber(c3.Number), client.Card.Create().SetNumber("708090").SetName("m8a")).
+		OnConflictColumns(card.FieldNumber).
+		UpdateNewValues().
+		ExecX(ctx)
+	require.Empty(t, client.Card.GetX(ctx, c3.ID).Name, "existing name fields should be cleared when not set (= set to nil)")
+	require.NotEmpty(t, client.Card.Query().Where(card.Number("708090")).OnlyX(ctx).Name, "new record should set their name")
 }
 
 func Clone(t *testing.T, client *ent.Client) {
