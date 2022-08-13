@@ -79,9 +79,8 @@ func (_go *GoodsSlice) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	for _, v := range scan_go {
-		*_go = append(*_go, &Goods{
-			ID: v.ID,
-		})
+		node := &Goods{ID: v.ID}
+		*_go = append(*_go, node)
 	}
 	return nil
 }

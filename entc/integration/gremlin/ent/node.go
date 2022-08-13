@@ -137,10 +137,9 @@ func (n *Nodes) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	for _, v := range scann {
-		*n = append(*n, &Node{
-			ID:    v.ID,
-			Value: v.Value,
-		})
+		node := &Node{ID: v.ID}
+		node.Value = v.Value
+		*n = append(*n, node)
 	}
 	return nil
 }

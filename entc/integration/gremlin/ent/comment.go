@@ -121,14 +121,13 @@ func (c *Comments) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	for _, v := range scanc {
-		*c = append(*c, &Comment{
-			ID:          v.ID,
-			UniqueInt:   v.UniqueInt,
-			UniqueFloat: v.UniqueFloat,
-			NillableInt: v.NillableInt,
-			Table:       v.Table,
-			Dir:         v.Dir,
-		})
+		node := &Comment{ID: v.ID}
+		node.UniqueInt = v.UniqueInt
+		node.UniqueFloat = v.UniqueFloat
+		node.NillableInt = v.NillableInt
+		node.Table = v.Table
+		node.Dir = v.Dir
+		*c = append(*c, node)
 	}
 	return nil
 }

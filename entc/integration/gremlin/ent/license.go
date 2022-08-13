@@ -95,11 +95,10 @@ func (l *Licenses) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	for _, v := range scanl {
-		*l = append(*l, &License{
-			ID:         v.ID,
-			CreateTime: time.Unix(0, v.CreateTime),
-			UpdateTime: time.Unix(0, v.UpdateTime),
-		})
+		node := &License{ID: v.ID}
+		node.CreateTime = time.Unix(0, v.CreateTime)
+		node.UpdateTime = time.Unix(0, v.UpdateTime)
+		*l = append(*l, node)
 	}
 	return nil
 }

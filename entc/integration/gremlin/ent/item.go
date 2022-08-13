@@ -86,10 +86,9 @@ func (i *Items) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	for _, v := range scani {
-		*i = append(*i, &Item{
-			ID:   v.ID,
-			Text: v.Text,
-		})
+		node := &Item{ID: v.ID}
+		node.Text = v.Text
+		*i = append(*i, node)
 	}
 	return nil
 }

@@ -46,7 +46,8 @@ func (t *Task) FromResponse(res *gremlin.Response) error {
 	t.ID = scant.ID
 	t.Priority = scant.Priority
 	t.Priorities = scant.Priorities
-	t.CreatedAt = time.Unix(0, scant.CreatedAt)
+	v2 := time.Unix(0, scant.CreatedAt)
+	t.CreatedAt = &v2
 	return nil
 }
 
@@ -106,12 +107,12 @@ func (t *Tasks) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	for _, v := range scant {
-		*t = append(*t, &Task{
-			ID:         v.ID,
-			Priority:   v.Priority,
-			Priorities: v.Priorities,
-			CreatedAt:  time.Unix(0, v.CreatedAt),
-		})
+		node := &Task{ID: v.ID}
+		node.Priority = v.Priority
+		node.Priorities = v.Priorities
+		v2 := time.Unix(0, v.CreatedAt)
+		node.CreatedAt = &v2
+		*t = append(*t, node)
 	}
 	return nil
 }
