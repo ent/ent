@@ -38,8 +38,8 @@ import (
 	"entgo.io/ent/entc/integration/ent/node"
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/schema"
+	enttask "entgo.io/ent/entc/integration/ent/task"
 	"entgo.io/ent/entc/integration/ent/user"
-	"entgo.io/ent/entc/integration/privacy/ent/task"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/lib/pq"
@@ -156,6 +156,7 @@ var (
 		Mutation,
 		CreateBulk,
 		ConstraintChecks,
+		NillableRequired,
 	}
 )
 
@@ -753,13 +754,24 @@ func ExecQuery(t *testing.T, client *ent.Client) {
 	require.NoError(err)
 	tx.Task.Create().ExecX(ctx)
 	require.Equal(1, tx.Task.Query().CountX(ctx))
-	rows, err = tx.QueryContext(ctx, "SELECT COUNT(*) FROM "+task.Table)
+	rows, err = tx.QueryContext(ctx, "SELECT COUNT(*) FROM "+enttask.Table)
 	require.NoError(err)
 	count, err := sql.ScanInt(rows)
 	require.NoError(err)
 	require.NoError(rows.Close())
 	require.Equal(1, count)
 	require.NoError(tx.Commit())
+}
+
+func NillableRequired(t *testing.T, client *ent.Client) {
+	require := require.New(t)
+	ctx := context.Background()
+	client.Task.Create().ExecX(ctx)
+	tk := client.Task.Query().OnlyX(ctx)
+	require.NotNil(tk.CreatedAt, "field value should be populated by default by the database")
+	require.False(reflect.ValueOf(tk.Update()).MethodByName("SetNillableCreatedAt").IsValid(), "immutable-nillable should not have SetNillable setter on update")
+	tk = client.Task.Query().Select(enttask.FieldID, enttask.FieldPriority).OnlyX(ctx)
+	require.Nil(tk.CreatedAt, "field should not be populated when it is not selected")
 }
 
 func Predicate(t *testing.T, client *ent.Client) {

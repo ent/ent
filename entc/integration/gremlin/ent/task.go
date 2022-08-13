@@ -9,6 +9,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/entc/integration/ent/schema/task"
@@ -23,6 +24,8 @@ type Task struct {
 	Priority task.Priority `json:"priority,omitempty"`
 	// Priorities holds the value of the "priorities" field.
 	Priorities map[string]task.Priority `json:"priorities,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt *time.Time `json:"created_at,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into Task.
@@ -35,6 +38,7 @@ func (t *Task) FromResponse(res *gremlin.Response) error {
 		ID         string                   `json:"id,omitempty"`
 		Priority   task.Priority            `json:"priority,omitempty"`
 		Priorities map[string]task.Priority `json:"priorities,omitempty"`
+		CreatedAt  int64                    `json:"created_at,omitempty"`
 	}
 	if err := vmap.Decode(&scant); err != nil {
 		return err
@@ -42,6 +46,7 @@ func (t *Task) FromResponse(res *gremlin.Response) error {
 	t.ID = scant.ID
 	t.Priority = scant.Priority
 	t.Priorities = scant.Priorities
+	t.CreatedAt = time.Unix(0, scant.CreatedAt)
 	return nil
 }
 
@@ -73,6 +78,11 @@ func (t *Task) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("priorities=")
 	builder.WriteString(fmt.Sprintf("%v", t.Priorities))
+	builder.WriteString(", ")
+	if v := t.CreatedAt; v != nil {
+		builder.WriteString("created_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -90,6 +100,7 @@ func (t *Tasks) FromResponse(res *gremlin.Response) error {
 		ID         string                   `json:"id,omitempty"`
 		Priority   task.Priority            `json:"priority,omitempty"`
 		Priorities map[string]task.Priority `json:"priorities,omitempty"`
+		CreatedAt  int64                    `json:"created_at,omitempty"`
 	}
 	if err := vmap.Decode(&scant); err != nil {
 		return err
@@ -99,6 +110,7 @@ func (t *Tasks) FromResponse(res *gremlin.Response) error {
 			ID:         v.ID,
 			Priority:   v.Priority,
 			Priorities: v.Priorities,
+			CreatedAt:  time.Unix(0, v.CreatedAt),
 		})
 	}
 	return nil

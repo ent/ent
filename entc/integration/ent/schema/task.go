@@ -5,6 +5,8 @@
 package schema
 
 import (
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
 
@@ -27,5 +29,9 @@ func (Task) Fields() []ent.Field {
 			}),
 		field.JSON("priorities", map[string]task.Priority{}).
 			Optional(),
+		field.Time("created_at").
+			Default(time.Now).
+			Immutable().
+			Nillable(),
 	}
 }

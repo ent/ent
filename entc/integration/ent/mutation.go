@@ -12770,6 +12770,7 @@ type TaskMutation struct {
 	priority      *task.Priority
 	addpriority   *task.Priority
 	priorities    *map[string]task.Priority
+	created_at    *time.Time
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Task, error)
@@ -12979,6 +12980,42 @@ func (m *TaskMutation) ResetPriorities() {
 	delete(m.clearedFields, enttask.FieldPriorities)
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (m *TaskMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *TaskMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Task entity.
+// If the Task object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TaskMutation) OldCreatedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *TaskMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
 // Where appends a list predicates to the TaskMutation builder.
 func (m *TaskMutation) Where(ps ...predicate.Task) {
 	m.predicates = append(m.predicates, ps...)
@@ -12998,12 +13035,15 @@ func (m *TaskMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TaskMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
 	if m.priority != nil {
 		fields = append(fields, enttask.FieldPriority)
 	}
 	if m.priorities != nil {
 		fields = append(fields, enttask.FieldPriorities)
+	}
+	if m.created_at != nil {
+		fields = append(fields, enttask.FieldCreatedAt)
 	}
 	return fields
 }
@@ -13017,6 +13057,8 @@ func (m *TaskMutation) Field(name string) (ent.Value, bool) {
 		return m.Priority()
 	case enttask.FieldPriorities:
 		return m.Priorities()
+	case enttask.FieldCreatedAt:
+		return m.CreatedAt()
 	}
 	return nil, false
 }
@@ -13030,6 +13072,8 @@ func (m *TaskMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldPriority(ctx)
 	case enttask.FieldPriorities:
 		return m.OldPriorities(ctx)
+	case enttask.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown Task field %s", name)
 }
@@ -13052,6 +13096,13 @@ func (m *TaskMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPriorities(v)
+		return nil
+	case enttask.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Task field %s", name)
@@ -13131,6 +13182,9 @@ func (m *TaskMutation) ResetField(name string) error {
 		return nil
 	case enttask.FieldPriorities:
 		m.ResetPriorities()
+		return nil
+	case enttask.FieldCreatedAt:
+		m.ResetCreatedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Task field %s", name)

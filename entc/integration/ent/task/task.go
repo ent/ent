@@ -7,6 +7,8 @@
 package enttask
 
 import (
+	"time"
+
 	"entgo.io/ent/entc/integration/ent/schema/task"
 )
 
@@ -19,6 +21,8 @@ const (
 	FieldPriority = "priority"
 	// FieldPriorities holds the string denoting the priorities field in the database.
 	FieldPriorities = "priorities"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
 	// Table holds the table name of the task in the database.
 	Table = "tasks"
 )
@@ -28,6 +32,7 @@ var Columns = []string{
 	FieldID,
 	FieldPriority,
 	FieldPriorities,
+	FieldCreatedAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -45,6 +50,8 @@ var (
 	DefaultPriority task.Priority
 	// PriorityValidator is a validator for the "priority" field. It is called by the builders before save.
 	PriorityValidator func(int) error
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
 )
 
 // comment from another template.
