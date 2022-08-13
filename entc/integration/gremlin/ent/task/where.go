@@ -7,6 +7,8 @@
 package enttask
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
@@ -93,6 +95,13 @@ func Priority(v task.Priority) predicate.Task {
 	})
 }
 
+// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
+func CreatedAt(v time.Time) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreatedAt, p.EQ(v))
+	})
+}
+
 // PriorityEQ applies the EQ predicate on the "priority" field.
 func PriorityEQ(v task.Priority) predicate.Task {
 	vc := int(v)
@@ -174,6 +183,70 @@ func PrioritiesIsNil() predicate.Task {
 func PrioritiesNotNil() predicate.Task {
 	return predicate.Task(func(t *dsl.Traversal) {
 		t.HasLabel(Label).Has(FieldPriorities)
+	})
+}
+
+// CreatedAtEQ applies the EQ predicate on the "created_at" field.
+func CreatedAtEQ(v time.Time) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreatedAt, p.EQ(v))
+	})
+}
+
+// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
+func CreatedAtNEQ(v time.Time) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreatedAt, p.NEQ(v))
+	})
+}
+
+// CreatedAtIn applies the In predicate on the "created_at" field.
+func CreatedAtIn(vs ...time.Time) predicate.Task {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreatedAt, p.Within(v...))
+	})
+}
+
+// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
+func CreatedAtNotIn(vs ...time.Time) predicate.Task {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreatedAt, p.Without(v...))
+	})
+}
+
+// CreatedAtGT applies the GT predicate on the "created_at" field.
+func CreatedAtGT(v time.Time) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreatedAt, p.GT(v))
+	})
+}
+
+// CreatedAtGTE applies the GTE predicate on the "created_at" field.
+func CreatedAtGTE(v time.Time) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreatedAt, p.GTE(v))
+	})
+}
+
+// CreatedAtLT applies the LT predicate on the "created_at" field.
+func CreatedAtLT(v time.Time) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreatedAt, p.LT(v))
+	})
+}
+
+// CreatedAtLTE applies the LTE predicate on the "created_at" field.
+func CreatedAtLTE(v time.Time) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreatedAt, p.LTE(v))
 	})
 }
 

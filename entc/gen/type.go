@@ -322,7 +322,7 @@ func (t Type) Receiver() string {
 }
 
 // hasEdge returns true if this type as an edge (reverse or assoc)
-/// with the given name.
+// with the given name.
 func (t Type) hasEdge(name string) bool {
 	for _, e := range t.Edges {
 		if name == e.Name {
@@ -890,8 +890,6 @@ func (t *Type) checkField(tf *Field, f *load.Field) (err error) {
 		err = fmt.Errorf("field name cannot be empty")
 	case f.Info == nil || !f.Info.Valid():
 		err = fmt.Errorf("invalid type for field %s", f.Name)
-	case f.Nillable && !f.Optional:
-		err = fmt.Errorf("nillable field %q must be optional", f.Name)
 	case f.Unique && f.Default && f.DefaultKind != reflect.Func:
 		err = fmt.Errorf("unique field %q cannot have default value", f.Name)
 	case t.fields[f.Name] != nil:
@@ -1394,7 +1392,6 @@ func (f Field) SupportsMutationAdd() bool {
 //
 //	MutationAddAssignExpr(a, b) => *m.a += b		// Basic Go type.
 //	MutationAddAssignExpr(a, b) => *m.a = m.Add(b)	// Custom Go types that implement the (Add(T) T) interface.
-//
 func (f Field) MutationAddAssignExpr(ident1, ident2 string) (string, error) {
 	if !f.SupportsMutationAdd() {
 		return "", fmt.Errorf("field %q does not support the add operation (a + b)", f.Name)
@@ -1443,7 +1440,6 @@ var (
 //	v (http.Dir)		=> string(v)
 //	v (fmt.Stringer)	=> v.String()
 //	v (sql.NullString)	=> v.String
-//
 func (f Field) BasicType(ident string) (expr string) {
 	if !f.HasGoType() {
 		return ident

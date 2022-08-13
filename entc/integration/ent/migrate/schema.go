@@ -379,6 +379,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "priority", Type: field.TypeInt, Default: 1},
 		{Name: "priorities", Type: field.TypeJSON, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
 	}
 	// TasksTable holds the schema information for the "tasks" table.
 	TasksTable = &schema.Table{

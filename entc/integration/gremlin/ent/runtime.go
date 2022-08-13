@@ -254,6 +254,10 @@ func init() {
 	enttask.DefaultPriority = task.Priority(enttaskDescPriority.Default.(int))
 	// enttask.PriorityValidator is a validator for the "priority" field. It is called by the builders before save.
 	enttask.PriorityValidator = enttaskDescPriority.Validators[0].(func(int) error)
+	// enttaskDescCreatedAt is the schema descriptor for created_at field.
+	enttaskDescCreatedAt := enttaskFields[2].Descriptor()
+	// enttask.DefaultCreatedAt holds the default value on creation for the created_at field.
+	enttask.DefaultCreatedAt = enttaskDescCreatedAt.Default.(func() time.Time)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
 	_ = userMixinFields0
