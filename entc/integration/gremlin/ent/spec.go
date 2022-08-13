@@ -105,9 +105,8 @@ func (s *Specs) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	for _, v := range scans {
-		*s = append(*s, &Spec{
-			ID: v.ID,
-		})
+		node := &Spec{ID: v.ID}
+		*s = append(*s, node)
 	}
 	return nil
 }

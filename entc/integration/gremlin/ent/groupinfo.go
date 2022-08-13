@@ -120,11 +120,10 @@ func (gi *GroupInfos) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	for _, v := range scangi {
-		*gi = append(*gi, &GroupInfo{
-			ID:       v.ID,
-			Desc:     v.Desc,
-			MaxUsers: v.MaxUsers,
-		})
+		node := &GroupInfo{ID: v.ID}
+		node.Desc = v.Desc
+		node.MaxUsers = v.MaxUsers
+		*gi = append(*gi, node)
 	}
 	return nil
 }

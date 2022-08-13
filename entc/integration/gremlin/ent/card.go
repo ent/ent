@@ -168,14 +168,13 @@ func (c *Cards) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	for _, v := range scanc {
-		*c = append(*c, &Card{
-			ID:         v.ID,
-			CreateTime: time.Unix(0, v.CreateTime),
-			UpdateTime: time.Unix(0, v.UpdateTime),
-			Balance:    v.Balance,
-			Number:     v.Number,
-			Name:       v.Name,
-		})
+		node := &Card{ID: v.ID}
+		node.CreateTime = time.Unix(0, v.CreateTime)
+		node.UpdateTime = time.Unix(0, v.UpdateTime)
+		node.Balance = v.Balance
+		node.Number = v.Number
+		node.Name = v.Name
+		*c = append(*c, node)
 	}
 	return nil
 }

@@ -129,12 +129,11 @@ func (ft *FileTypes) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	for _, v := range scanft {
-		*ft = append(*ft, &FileType{
-			ID:    v.ID,
-			Name:  v.Name,
-			Type:  v.Type,
-			State: v.State,
-		})
+		node := &FileType{ID: v.ID}
+		node.Name = v.Name
+		node.Type = v.Type
+		node.State = v.State
+		*ft = append(*ft, node)
 	}
 	return nil
 }

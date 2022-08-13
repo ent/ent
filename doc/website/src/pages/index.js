@@ -9,9 +9,8 @@
  */
 
 const React = require('react');
-import LayoutProviders from '@theme/LayoutProviders';
+import LayoutProvider from '@theme/Layout/Provider';
 import Footer from '@theme/Footer';
-import Navbar from '@theme/Navbar';
 import Link from '@docusaurus/Link';
 
 
@@ -191,12 +190,12 @@ class Index extends React.Component {
 }
 
 export default function (props) {
-    return <LayoutProviders>
+    return <LayoutProvider>
         {/*<div className={"section_index"}>*/}
         {/*    <Navbar/>*/}
         {/*</div>*/}
         <HomeNav />
         <Index {...props} />
         <Footer/>
-    </LayoutProviders>;
+    </LayoutProvider>;
 };

@@ -629,74 +629,73 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	for _, v := range scanft {
-		*ft = append(*ft, &FieldType{
-			ID:                    v.ID,
-			Int:                   v.Int,
-			Int8:                  v.Int8,
-			Int16:                 v.Int16,
-			Int32:                 v.Int32,
-			Int64:                 v.Int64,
-			OptionalInt:           v.OptionalInt,
-			OptionalInt8:          v.OptionalInt8,
-			OptionalInt16:         v.OptionalInt16,
-			OptionalInt32:         v.OptionalInt32,
-			OptionalInt64:         v.OptionalInt64,
-			NillableInt:           v.NillableInt,
-			NillableInt8:          v.NillableInt8,
-			NillableInt16:         v.NillableInt16,
-			NillableInt32:         v.NillableInt32,
-			NillableInt64:         v.NillableInt64,
-			ValidateOptionalInt32: v.ValidateOptionalInt32,
-			OptionalUint:          v.OptionalUint,
-			OptionalUint8:         v.OptionalUint8,
-			OptionalUint16:        v.OptionalUint16,
-			OptionalUint32:        v.OptionalUint32,
-			OptionalUint64:        v.OptionalUint64,
-			State:                 v.State,
-			OptionalFloat:         v.OptionalFloat,
-			OptionalFloat32:       v.OptionalFloat32,
-			Text:                  v.Text,
-			Datetime:              time.Unix(0, v.Datetime),
-			Decimal:               v.Decimal,
-			LinkOther:             v.LinkOther,
-			LinkOtherFunc:         v.LinkOtherFunc,
-			MAC:                   v.MAC,
-			StringArray:           v.StringArray,
-			Password:              v.Password,
-			StringScanner:         v.StringScanner,
-			Duration:              v.Duration,
-			Dir:                   v.Dir,
-			Ndir:                  v.Ndir,
-			Str:                   v.Str,
-			NullStr:               v.NullStr,
-			Link:                  v.Link,
-			NullLink:              v.NullLink,
-			Active:                v.Active,
-			NullActive:            v.NullActive,
-			Deleted:               v.Deleted,
-			DeletedAt:             v.DeletedAt,
-			RawData:               v.RawData,
-			Sensitive:             v.Sensitive,
-			IP:                    v.IP,
-			NullInt64:             v.NullInt64,
-			SchemaInt:             v.SchemaInt,
-			SchemaInt8:            v.SchemaInt8,
-			SchemaInt64:           v.SchemaInt64,
-			SchemaFloat:           v.SchemaFloat,
-			SchemaFloat32:         v.SchemaFloat32,
-			NullFloat:             v.NullFloat,
-			Role:                  v.Role,
-			Priority:              v.Priority,
-			OptionalUUID:          v.OptionalUUID,
-			NillableUUID:          v.NillableUUID,
-			Strings:               v.Strings,
-			Pair:                  v.Pair,
-			NilPair:               v.NilPair,
-			Vstring:               v.Vstring,
-			Triple:                v.Triple,
-			BigInt:                v.BigInt,
-			PasswordOther:         v.PasswordOther,
-		})
+		node := &FieldType{ID: v.ID}
+		node.Int = v.Int
+		node.Int8 = v.Int8
+		node.Int16 = v.Int16
+		node.Int32 = v.Int32
+		node.Int64 = v.Int64
+		node.OptionalInt = v.OptionalInt
+		node.OptionalInt8 = v.OptionalInt8
+		node.OptionalInt16 = v.OptionalInt16
+		node.OptionalInt32 = v.OptionalInt32
+		node.OptionalInt64 = v.OptionalInt64
+		node.NillableInt = v.NillableInt
+		node.NillableInt8 = v.NillableInt8
+		node.NillableInt16 = v.NillableInt16
+		node.NillableInt32 = v.NillableInt32
+		node.NillableInt64 = v.NillableInt64
+		node.ValidateOptionalInt32 = v.ValidateOptionalInt32
+		node.OptionalUint = v.OptionalUint
+		node.OptionalUint8 = v.OptionalUint8
+		node.OptionalUint16 = v.OptionalUint16
+		node.OptionalUint32 = v.OptionalUint32
+		node.OptionalUint64 = v.OptionalUint64
+		node.State = v.State
+		node.OptionalFloat = v.OptionalFloat
+		node.OptionalFloat32 = v.OptionalFloat32
+		node.Text = v.Text
+		node.Datetime = time.Unix(0, v.Datetime)
+		node.Decimal = v.Decimal
+		node.LinkOther = v.LinkOther
+		node.LinkOtherFunc = v.LinkOtherFunc
+		node.MAC = v.MAC
+		node.StringArray = v.StringArray
+		node.Password = v.Password
+		node.StringScanner = v.StringScanner
+		node.Duration = v.Duration
+		node.Dir = v.Dir
+		node.Ndir = v.Ndir
+		node.Str = v.Str
+		node.NullStr = v.NullStr
+		node.Link = v.Link
+		node.NullLink = v.NullLink
+		node.Active = v.Active
+		node.NullActive = v.NullActive
+		node.Deleted = v.Deleted
+		node.DeletedAt = v.DeletedAt
+		node.RawData = v.RawData
+		node.Sensitive = v.Sensitive
+		node.IP = v.IP
+		node.NullInt64 = v.NullInt64
+		node.SchemaInt = v.SchemaInt
+		node.SchemaInt8 = v.SchemaInt8
+		node.SchemaInt64 = v.SchemaInt64
+		node.SchemaFloat = v.SchemaFloat
+		node.SchemaFloat32 = v.SchemaFloat32
+		node.NullFloat = v.NullFloat
+		node.Role = v.Role
+		node.Priority = v.Priority
+		node.OptionalUUID = v.OptionalUUID
+		node.NillableUUID = v.NillableUUID
+		node.Strings = v.Strings
+		node.Pair = v.Pair
+		node.NilPair = v.NilPair
+		node.Vstring = v.Vstring
+		node.Triple = v.Triple
+		node.BigInt = v.BigInt
+		node.PasswordOther = v.PasswordOther
+		*ft = append(*ft, node)
 	}
 	return nil
 }

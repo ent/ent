@@ -370,20 +370,19 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	for _, v := range scanu {
-		*u = append(*u, &User{
-			ID:          v.ID,
-			OptionalInt: v.OptionalInt,
-			Age:         v.Age,
-			Name:        v.Name,
-			Last:        v.Last,
-			Nickname:    v.Nickname,
-			Address:     v.Address,
-			Phone:       v.Phone,
-			Password:    v.Password,
-			Role:        v.Role,
-			Employment:  v.Employment,
-			SSOCert:     v.SSOCert,
-		})
+		node := &User{ID: v.ID}
+		node.OptionalInt = v.OptionalInt
+		node.Age = v.Age
+		node.Name = v.Name
+		node.Last = v.Last
+		node.Nickname = v.Nickname
+		node.Address = v.Address
+		node.Phone = v.Phone
+		node.Password = v.Password
+		node.Role = v.Role
+		node.Employment = v.Employment
+		node.SSOCert = v.SSOCert
+		*u = append(*u, node)
 	}
 	return nil
 }
