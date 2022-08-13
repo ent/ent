@@ -194,6 +194,7 @@ func (Card) Fields() []ent.Field {
 ```
 
 ## Go Type
+
 The default type for fields are the basic Go types. For example, for string fields, the type is `string`,
 and for time fields, the type is `time.Time`. The `GoType` method provides an option to override the
 default ent type with a custom one.
