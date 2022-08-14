@@ -1950,8 +1950,8 @@ func TestInsert_OnConflict(t *testing.T) {
 
 		query, args = Dialect(dialect.MySQL).
 			Insert("users").
-			Columns("name").
-			Values("Mashraki").
+			Columns("name", "rank").
+			Values("Mashraki", nil).
 			OnConflict(
 				ResolveWithNewValues(),
 				ResolveWith(func(s *UpdateSet) {
@@ -1959,8 +1959,23 @@ func TestInsert_OnConflict(t *testing.T) {
 				}),
 			).
 			Query()
-		require.Equal(t, "INSERT INTO `users` (`name`) VALUES (?) ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `id` = LAST_INSERT_ID(`id`)", query)
+		require.Equal(t, "INSERT INTO `users` (`name`, `rank`) VALUES (?, NULL) ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `rank` = VALUES(`rank`), `id` = LAST_INSERT_ID(`id`)", query)
 		require.Equal(t, []interface{}{"Mashraki"}, args)
+
+		query, args = Dialect(dialect.MySQL).
+			Insert("users").
+			Columns("name", "rank").
+			Values("Ariel", 10).
+			Values("Mashraki", nil).
+			OnConflict(
+				ResolveWithNewValues(),
+				ResolveWith(func(s *UpdateSet) {
+					s.Set("id", Expr("LAST_INSERT_ID(`id`)"))
+				}),
+			).
+			Query()
+		require.Equal(t, "INSERT INTO `users` (`name`, `rank`) VALUES (?, ?), (?, NULL) ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `rank` = VALUES(`rank`), `id` = LAST_INSERT_ID(`id`)", query)
+		require.Equal(t, []interface{}{"Ariel", 10, "Mashraki"}, args)
 	})
 }
 

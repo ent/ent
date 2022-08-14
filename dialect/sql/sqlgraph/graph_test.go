@@ -1366,8 +1366,8 @@ func TestBatchCreate(t *testing.T) {
 			},
 			expect: func(m sqlmock.Sqlmock) {
 				// Insert nodes with FKs.
-				m.ExpectExec(escape("INSERT INTO `users` (`active`, `age`, `best_friend_id`, `name`, `workplace_id`) VALUES (?, ?, ?, ?, ?), (?, ?, ?, ?, ?)")).
-					WithArgs(false, 32, 3, "a8m", 2, nil, 30, 4, "nati", 2).
+				m.ExpectExec(escape("INSERT INTO `users` (`active`, `age`, `best_friend_id`, `name`, `workplace_id`) VALUES (?, ?, ?, ?, ?), (NULL, ?, ?, ?, ?)")).
+					WithArgs(false, 32, 3, "a8m", 2, 30, 4, "nati", 2).
 					WillReturnResult(sqlmock.NewResult(10, 2))
 			},
 		},
@@ -1450,8 +1450,8 @@ func TestBatchCreate(t *testing.T) {
 			expect: func(m sqlmock.Sqlmock) {
 				m.ExpectBegin()
 				// Insert nodes with FKs.
-				m.ExpectExec(escape("INSERT INTO `users` (`active`, `age`, `name`, `workplace_id`) VALUES (?, ?, ?, ?), (?, ?, ?, ?)")).
-					WithArgs(false, 32, "a8m", 2, nil, 30, "nati", nil).
+				m.ExpectExec(escape("INSERT INTO `users` (`active`, `age`, `name`, `workplace_id`) VALUES (?, ?, ?, ?), (NULL, ?, ?, NULL)")).
+					WithArgs(false, 32, "a8m", 2, 30, "nati").
 					WillReturnResult(sqlmock.NewResult(10, 2))
 				// Insert M2M inverse-edges.
 				m.ExpectExec(escape("INSERT INTO `group_users` (`group_id`, `user_id`) VALUES (?, ?), (?, ?)")).

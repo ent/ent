@@ -3266,6 +3266,9 @@ type (
 // Arg appends an input argument to the builder.
 func (b *Builder) Arg(a interface{}) *Builder {
 	switch a := a.(type) {
+	case nil:
+		b.WriteString("NULL")
+		return b
 	case *raw:
 		b.WriteString(a.s)
 		return b
@@ -3278,7 +3281,7 @@ func (b *Builder) Arg(a interface{}) *Builder {
 	// Default placeholder param (MySQL and SQLite).
 	param := "?"
 	if b.postgres() {
-		// PostgreSQL arguments are referenced using the syntax $n.
+		// Postgres' arguments are referenced using the syntax $n.
 		// $1 refers to the 1st argument, $2 to the 2nd, and so on.
 		param = "$" + strconv.Itoa(b.total)
 	}
