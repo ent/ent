@@ -8,7 +8,6 @@ module.exports = {
       ],
       collapsed: false,
     },
-    'ci',
     {
       type: 'category',
       label: 'Schema',
@@ -57,6 +56,7 @@ module.exports = {
         'extensions',
         'graphql',
         'sql-integration',
+        'ci',
         'testing',
         'faq',
         'feature-flags',
