@@ -56,6 +56,7 @@ module.exports = {
         'extensions',
         'graphql',
         'sql-integration',
+        'ci',
         'testing',
         'faq',
         'feature-flags',
