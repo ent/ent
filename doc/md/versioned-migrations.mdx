@@ -211,6 +211,44 @@ h1:NRHsNIjvSSzprr/EzMdtszQg3t3pVLk4G4N1tX4rMfk=
 
 The full reference example exists in [GitHub repository](https://github.com/ent/ent/tree/master/examples/migration).
 
+### Verifying and linting migrations
+
+After generating our migration files with Atlas, we can run the [`atlas migrate lint`](https://atlasgo.io/versioned/lint)
+command that validates and analyzes the contents of the migration directory and generate insights and diagnostics on the
+selected changes:
+
+1. Ensure the migration history can be replayed from any point at time.
+2. Protect from unexpected history changes when concurrent migrations are written to the migration directory by multiple
+team members. Read more about the consistency checks in the [section below](#atlas-migration-directory-integrity-file).
+3. Detect whether [destructive](https://atlasgo.io/lint/analyzers#destructive-changes) or irreversible changes have been
+made or whether they are dependent on tables' contents and can cause a migration failure.
+
+Let's run `atlas migrate lint` with the necessary parameters to run migration linting:
+
+- `--dev-url` a URL to a [Dev Database](https://atlasgo.io/concepts/dev-database) that will be used to replay changes.
+- `--dir` the URL to the migration directory, by default it is `file://migrations`.
+- `--dir-format` custom directory format, by default it is `atlas`.
+- (optional) `--log` custom logging using a Go template.
+- (optional) `--latest` run analysis on the latest `N` migration files.
+- (optional) `--git-base` run analysis against the base Git branch.
+
+```bash
+go run -mod=mod ariga.io/atlas/cmd/atlas@master migrate lint \
+  --dev-url="mysql://root:pass@localhost:3306/test" \
+  --dir="file://ent/migrate/migrations" \
+  --dir-format="golang-migrate" \
+  --latest=1
+```
+
+An output of such a run might look as follows:
+
+```text
+Destructive changes detected in file 20220814125800_name.up.sql:
+
+	L1: Dropping table "posts"
+```
+
+
 ### A Word on Global Unique IDs
 
 **This section only applies to MySQL users using the [global unique id](migrate.md/#universal-ids) feature.**

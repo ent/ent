@@ -1,6 +1,6 @@
 ---
 id: migrate
-title: Database Migration
+title: Automatic Migration
 ---
 
 The migration support for `ent` provides the option for keeping the database schema

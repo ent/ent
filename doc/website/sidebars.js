@@ -43,8 +43,8 @@ module.exports = {
       label: 'Migration',
       items: [
         'migrate',
-        'dialects',
         'versioned-migrations',
+        'dialects',
       ],
       collapsed: false,
     },
