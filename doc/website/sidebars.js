@@ -8,6 +8,7 @@ module.exports = {
       ],
       collapsed: false,
     },
+    'ci',
     {
       type: 'category',
       label: 'Schema',
