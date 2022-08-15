@@ -1010,6 +1010,22 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"bar", "baz"},
 		},
 		{
+			input: Dialect(dialect.Postgres).
+				Select().
+				From(Table("users")).
+				Where(Or(EqualFold("name", "BAR%"), EqualFold("name", "%BAZ"))),
+			wantQuery: `SELECT * FROM "users" WHERE "name" ILIKE $1 OR "name" ILIKE $2`,
+			wantArgs:  []interface{}{"bar\\%", "\\%baz"},
+		},
+		{
+			input: Dialect(dialect.Postgres).
+				Select().
+				From(Table("users")).
+				Where(Or(EqualFold("name", "BAR\\"), EqualFold("name", "\\BAZ"))),
+			wantQuery: `SELECT * FROM "users" WHERE "name" ILIKE $1 OR "name" ILIKE $2`,
+			wantArgs:  []interface{}{"bar\\\\", "\\\\baz"},
+		},
+		{
 			input: Dialect(dialect.MySQL).
 				Select().
 				From(Table("users")).
