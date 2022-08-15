@@ -291,6 +291,10 @@ func Sanity(t *testing.T, client *ent.Client) {
 		require.True(client.Pet.Query().Where(pet.NameContainsFold("A")).ExistX(ctx))
 		require.False(client.Pet.Query().Where(pet.NameContainsFold("%A")).ExistX(ctx))
 		require.False(client.Pet.Query().Where(pet.NameContainsFold("A%")).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameEqualFold("A_\\")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameEqualFold("%A_\\")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameEqualFold("A_\\%")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameEqualFold("A%")).ExistX(ctx))
 	})
 }
 
