@@ -65,8 +65,8 @@ func NopTx(d Driver) Tx {
 
 // DebugDriver is a driver that logs all driver operations.
 type DebugDriver struct {
-	Driver                                       // underlying driver.
-	log    func(context.Context, ...interface{}) // log function. defaults to log.Println.
+	Driver                                 // underlying driver.
+	log    func(context.Context, LogEntry) // log function. defaults to log.Println.
 }
 
 // Debug gets a driver and an optional logging function, and returns
@@ -76,20 +76,24 @@ func Debug(d Driver, logger ...func(...interface{})) Driver {
 	if len(logger) == 1 {
 		logf = logger[0]
 	}
-	drv := &DebugDriver{d, func(_ context.Context, v ...interface{}) { logf(v...) }}
+	drv := &DebugDriver{d, func(_ context.Context, v LogEntry) { logf(v) }}
 	return drv
 }
 
 // DebugWithContext gets a driver and a logging function, and returns
 // a new debugged-driver that prints all outgoing operations with context.
-func DebugWithContext(d Driver, logger func(context.Context, ...interface{})) Driver {
+func DebugWithContext(d Driver, logger func(context.Context, LogEntry)) Driver {
 	drv := &DebugDriver{d, logger}
 	return drv
 }
 
 // Exec logs its params and calls the underlying driver Exec method.
 func (d *DebugDriver) Exec(ctx context.Context, query string, args, v interface{}) error {
-	d.log(ctx, fmt.Sprintf("driver.Exec: query=%v args=%v", query, args))
+	d.log(ctx, LogEntry{
+		Action: DriverActionExec,
+		Query:  query,
+		Args:   args,
+	})
 	return d.Driver.Exec(ctx, query, args, v)
 }
 
@@ -107,7 +111,11 @@ func (d *DebugDriver) ExecContext(ctx context.Context, query string, args ...int
 
 // Query logs its params and calls the underlying driver Query method.
 func (d *DebugDriver) Query(ctx context.Context, query string, args, v interface{}) error {
-	d.log(ctx, fmt.Sprintf("driver.Query: query=%v args=%v", query, args))
+	d.log(ctx, LogEntry{
+		Action: DriverActionQuery,
+		Query:  query,
+		Args:   args,
+	})
 	return d.Driver.Query(ctx, query, args, v)
 }
 
@@ -130,8 +138,11 @@ func (d *DebugDriver) Tx(ctx context.Context) (Tx, error) {
 		return nil, err
 	}
 	id := uuid.New().String()
-	d.log(ctx, fmt.Sprintf("driver.Tx(%s): started", id))
-	return &DebugTx{tx, id, d.log, ctx}, nil
+	d.log(ctx, LogEntry{
+		Action: DriverActionTx,
+		TxID:   id,
+	})
+	return &DebugTx{tx, id, d.log, ctx, nil}, nil
 }
 
 // BeginTx adds an log-id for the transaction and calls the underlying driver BeginTx command if it is supported.
@@ -147,21 +158,31 @@ func (d *DebugDriver) BeginTx(ctx context.Context, opts *sql.TxOptions) (Tx, err
 		return nil, err
 	}
 	id := uuid.New().String()
-	d.log(ctx, fmt.Sprintf("driver.BeginTx(%s): started", id))
-	return &DebugTx{tx, id, d.log, ctx}, nil
+	d.log(ctx, LogEntry{
+		Action: DriverActionBeginTx,
+		TxID:   id,
+	})
+	return &DebugTx{tx, id, d.log, ctx, opts}, nil
 }
 
 // DebugTx is a transaction implementation that logs all transaction operations.
 type DebugTx struct {
-	Tx                                        // underlying transaction.
-	id  string                                // transaction logging id.
-	log func(context.Context, ...interface{}) // log function. defaults to fmt.Println.
-	ctx context.Context                       // underlying transaction context.
+	Tx                                   // underlying transaction.
+	id   string                          // transaction logging id.
+	log  func(context.Context, LogEntry) // log function. defaults to fmt.Println.
+	ctx  context.Context                 // underlying transaction context.
+	opts *sql.TxOptions                  // underlying transaction options.
 }
 
 // Exec logs its params and calls the underlying transaction Exec method.
 func (d *DebugTx) Exec(ctx context.Context, query string, args, v interface{}) error {
-	d.log(ctx, fmt.Sprintf("Tx(%s).Exec: query=%v args=%v", d.id, query, args))
+	d.log(ctx, LogEntry{
+		Action: DriverActionExec,
+		TxID:   d.id,
+		TxOpt:  d.opts,
+		Query:  query,
+		Args:   args,
+	})
 	return d.Tx.Exec(ctx, query, args, v)
 }
 
@@ -179,7 +200,13 @@ func (d *DebugTx) ExecContext(ctx context.Context, query string, args ...interfa
 
 // Query logs its params and calls the underlying transaction Query method.
 func (d *DebugTx) Query(ctx context.Context, query string, args, v interface{}) error {
-	d.log(ctx, fmt.Sprintf("Tx(%s).Query: query=%v args=%v", d.id, query, args))
+	d.log(ctx, LogEntry{
+		Action: DriverActionQuery,
+		TxID:   d.id,
+		TxOpt:  d.opts,
+		Query:  query,
+		Args:   args,
+	})
 	return d.Tx.Query(ctx, query, args, v)
 }
 
@@ -197,12 +224,20 @@ func (d *DebugTx) QueryContext(ctx context.Context, query string, args ...interf
 
 // Commit logs this step and calls the underlying transaction Commit method.
 func (d *DebugTx) Commit() error {
-	d.log(d.ctx, fmt.Sprintf("Tx(%s): committed", d.id))
+	d.log(d.ctx, LogEntry{
+		Action: DriverActionTxCommit,
+		TxID:   d.id,
+		TxOpt:  d.opts,
+	})
 	return d.Tx.Commit()
 }
 
 // Rollback logs this step and calls the underlying transaction Rollback method.
 func (d *DebugTx) Rollback() error {
-	d.log(d.ctx, fmt.Sprintf("Tx(%s): rollbacked", d.id))
+	d.log(d.ctx, LogEntry{
+		Action: DriverActionTxRollback,
+		TxID:   d.id,
+		TxOpt:  d.opts,
+	})
 	return d.Tx.Rollback()
 }
