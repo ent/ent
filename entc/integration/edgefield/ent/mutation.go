@@ -309,6 +309,15 @@ func (m *CarMutation) Field(name string) (ent.Value, bool) {
 	return nil, false
 }
 
+// FieldDefault returns the default value of a field with the given name. The
+// second boolean return value indicates that the field has a default defined
+// in the schema.
+func (m *CarMutation) FieldDefault(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
@@ -760,6 +769,15 @@ func (m *CardMutation) Field(name string) (ent.Value, bool) {
 	return nil, false
 }
 
+// FieldDefault returns the default value of a field with the given name. The
+// second boolean return value indicates that the field has a default defined
+// in the schema.
+func (m *CardMutation) FieldDefault(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
@@ -1172,6 +1190,15 @@ func (m *InfoMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case info.FieldContent:
 		return m.Content()
+	}
+	return nil, false
+}
+
+// FieldDefault returns the default value of a field with the given name. The
+// second boolean return value indicates that the field has a default defined
+// in the schema.
+func (m *InfoMutation) FieldDefault(name string) (ent.Value, bool) {
+	switch name {
 	}
 	return nil, false
 }
@@ -1718,6 +1745,17 @@ func (m *MetadataMutation) Field(name string) (ent.Value, bool) {
 		return m.Age()
 	case metadata.FieldParentID:
 		return m.ParentID()
+	}
+	return nil, false
+}
+
+// FieldDefault returns the default value of a field with the given name. The
+// second boolean return value indicates that the field has a default defined
+// in the schema.
+func (m *MetadataMutation) FieldDefault(name string) (ent.Value, bool) {
+	switch name {
+	case metadata.FieldAge:
+		return metadata.DefaultAge, true
 	}
 	return nil, false
 }
@@ -2285,6 +2323,17 @@ func (m *NodeMutation) Field(name string) (ent.Value, bool) {
 	return nil, false
 }
 
+// FieldDefault returns the default value of a field with the given name. The
+// second boolean return value indicates that the field has a default defined
+// in the schema.
+func (m *NodeMutation) FieldDefault(name string) (ent.Value, bool) {
+	switch name {
+	case node.FieldValue:
+		return node.DefaultValue, true
+	}
+	return nil, false
+}
+
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
@@ -2718,6 +2767,15 @@ func (m *PetMutation) Field(name string) (ent.Value, bool) {
 	return nil, false
 }
 
+// FieldDefault returns the default value of a field with the given name. The
+// second boolean return value indicates that the field has a default defined
+// in the schema.
+func (m *PetMutation) FieldDefault(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
@@ -3147,6 +3205,15 @@ func (m *PostMutation) Field(name string) (ent.Value, bool) {
 		return m.Text()
 	case post.FieldAuthorID:
 		return m.AuthorID()
+	}
+	return nil, false
+}
+
+// FieldDefault returns the default value of a field with the given name. The
+// second boolean return value indicates that the field has a default defined
+// in the schema.
+func (m *PostMutation) FieldDefault(name string) (ent.Value, bool) {
+	switch name {
 	}
 	return nil, false
 }
@@ -3648,6 +3715,20 @@ func (m *RentalMutation) Field(name string) (ent.Value, bool) {
 		return m.UserID()
 	case rental.FieldCarID:
 		return m.CarID()
+	}
+	return nil, false
+}
+
+// FieldDefault returns the default value of a field with the given name. The
+// second boolean return value indicates that the field has a default defined
+// in the schema.
+func (m *RentalMutation) FieldDefault(name string) (ent.Value, bool) {
+	switch name {
+	case rental.FieldDate:
+		if rental.DefaultDate == nil {
+			return nil, true
+		}
+		return rental.DefaultDate(), true
 	}
 	return nil, false
 }
@@ -4470,6 +4551,15 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.ParentID()
 	case user.FieldSpouseID:
 		return m.SpouseID()
+	}
+	return nil, false
+}
+
+// FieldDefault returns the default value of a field with the given name. The
+// second boolean return value indicates that the field has a default defined
+// in the schema.
+func (m *UserMutation) FieldDefault(name string) (ent.Value, bool) {
+	switch name {
 	}
 	return nil, false
 }
