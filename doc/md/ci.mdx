@@ -97,11 +97,11 @@ fi
 
 Changes to your project's Ent schema almost always result in a modification
 of your database. If you are using [Versioned Migrations](/docs/versioned-migrations)
-to manage changes to your database schema, we recommend running [migration linting](https://atlasgo.io/versioned/lint)
+to manage changes to your database schema, you can run [migration linting](https://atlasgo.io/versioned/lint)
 as part of your continuous integration flow. This is done for multiple reasons:
 
-* Linting replays your migration directory on a real database to make sure all SQL statements
-  are valid and in the correct order.
+* Linting replays your migration directory on a [database container](https://atlasgo.io/concepts/dev-database) to
+  make sure all SQL statements are valid and in the correct order.
 * [Migration directory integrity](/docs/versioned-migrations#atlas-migration-directory-integrity-file)
   is enforced - ensuring that history wasn't accidentally changed and that migrations that are
   planned in parallel are unified to a clean linear history.
@@ -110,7 +110,7 @@ as part of your continuous integration flow. This is done for multiple reasons:
 * Linting detects data-dependant changes that _may_ fail upon deployment and require
   more careful review from your side.
 
-If you're using GitHub, we recommend using the [Official Atlas Action](https://github.com/ariga/atlas-action)
+If you're using GitHub, you can use the [Official Atlas Action](https://github.com/ariga/atlas-action)
 to run migration linting during CI.
 
 Add `.github/workflows/atlas-ci.yaml` to your repo with the following contents:
