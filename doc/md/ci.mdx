@@ -102,8 +102,9 @@ as part of your continuous integration flow. This is done for multiple reasons:
 
 * Linting replays your migration directory on a real database to make sure all SQL statements
   are valid and in the correct order.
-* Directory integrity is enforced - ensuring that history wasn't accidentally changed and
-  that migrations that are planned in parallel are unified to a clean linear history.
+* [Migration directory integrity](/docs/versioned-migrations#atlas-migration-directory-integrity-file)
+  is enforced - ensuring that history wasn't accidentally changed and that migrations that are
+  planned in parallel are unified to a clean linear history.
 * Destructive changes are detected notifying you of any potential data loss that may be
   caused by your migrations way before they reach your production database.
 * Linting detects data-dependant changes that _may_ fail upon deployment and require
@@ -144,7 +145,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: pass
           MYSQL_DATABASE: test
         ports:
-          - "3307:3306"
+          - 3307:3306
         options: >-
           --health-cmd "mysqladmin ping -ppass"
           --health-interval 10s
@@ -182,7 +183,7 @@ jobs:
   lint:
     services:
       # Spin up a maria:10.7 container to be used as the dev-database for analysis.
-      maria107:
+      maria:
         image: mariadb:10.7
         env:
           MYSQL_DATABASE: test
@@ -226,7 +227,7 @@ jobs:
   lint:
     services:
       # Spin up a postgres:10 container to be used as the dev-database for analysis.
-      postgres10:
+      postgres:
         image: postgres:10
         env:
           POSTGRES_DB: test
