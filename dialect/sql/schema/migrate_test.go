@@ -77,7 +77,7 @@ func TestMigrate_Formatter(t *testing.T) {
 	db, _, err := sqlmock.New()
 	require.NoError(t, err)
 
-	// If not formatter is given it will be set according to the given migration directory implementation.
+	// If no formatter is given it will be set according to the given migration directory implementation.
 	for _, tt := range []struct {
 		dir migrate.Dir
 		fmt migrate.Formatter
