@@ -7,7 +7,7 @@ The `Hooks` option allows adding custom logic before and after operations that m
 
 ## Mutation
 
-A mutation operation is an operation that mutate the database. For example, adding
+A mutation operation is an operation that mutates the database. For example, adding
 a new node to the graph, remove an edge between 2 nodes or delete multiple nodes. 
 
 There are 5 types of mutations:
