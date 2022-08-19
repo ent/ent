@@ -39,7 +39,7 @@ func IDNEQ(id int) predicate.Rental {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Rental {
 	return predicate.Rental(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -50,7 +50,7 @@ func IDIn(ids ...int) predicate.Rental {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.Rental {
 	return predicate.Rental(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -123,7 +123,7 @@ func DateNEQ(v time.Time) predicate.Rental {
 
 // DateIn applies the In predicate on the "date" field.
 func DateIn(vs ...time.Time) predicate.Rental {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -134,7 +134,7 @@ func DateIn(vs ...time.Time) predicate.Rental {
 
 // DateNotIn applies the NotIn predicate on the "date" field.
 func DateNotIn(vs ...time.Time) predicate.Rental {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -187,7 +187,7 @@ func UserIDNEQ(v int) predicate.Rental {
 
 // UserIDIn applies the In predicate on the "user_id" field.
 func UserIDIn(vs ...int) predicate.Rental {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -198,7 +198,7 @@ func UserIDIn(vs ...int) predicate.Rental {
 
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
 func UserIDNotIn(vs ...int) predicate.Rental {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -223,7 +223,7 @@ func CarIDNEQ(v uuid.UUID) predicate.Rental {
 
 // CarIDIn applies the In predicate on the "car_id" field.
 func CarIDIn(vs ...uuid.UUID) predicate.Rental {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -234,7 +234,7 @@ func CarIDIn(vs ...uuid.UUID) predicate.Rental {
 
 // CarIDNotIn applies the NotIn predicate on the "car_id" field.
 func CarIDNotIn(vs ...uuid.UUID) predicate.Rental {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

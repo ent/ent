@@ -322,10 +322,10 @@ func (iq *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 		nodes = []*Item{}
 		_spec = iq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Item).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Item{config: iq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -498,7 +498,7 @@ func (igb *ItemGroupBy) Aggregate(fns ...AggregateFunc) *ItemGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (igb *ItemGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (igb *ItemGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := igb.path(ctx)
 	if err != nil {
 		return err
@@ -507,7 +507,7 @@ func (igb *ItemGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return igb.sqlScan(ctx, v)
 }
 
-func (igb *ItemGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (igb *ItemGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range igb.fields {
 		if !item.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -554,7 +554,7 @@ type ItemSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (is *ItemSelect) Scan(ctx context.Context, v interface{}) error {
+func (is *ItemSelect) Scan(ctx context.Context, v any) error {
 	if err := is.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -562,7 +562,7 @@ func (is *ItemSelect) Scan(ctx context.Context, v interface{}) error {
 	return is.sqlScan(ctx, v)
 }
 
-func (is *ItemSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (is *ItemSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := is.sql.Query()
 	if err := is.driver.Query(ctx, query, args, rows); err != nil {

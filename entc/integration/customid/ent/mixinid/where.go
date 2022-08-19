@@ -36,7 +36,7 @@ func IDNEQ(id uuid.UUID) predicate.MixinID {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.MixinID {
 	return predicate.MixinID(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -47,7 +47,7 @@ func IDIn(ids ...uuid.UUID) predicate.MixinID {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.MixinID {
 	return predicate.MixinID(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -113,7 +113,7 @@ func SomeFieldNEQ(v string) predicate.MixinID {
 
 // SomeFieldIn applies the In predicate on the "some_field" field.
 func SomeFieldIn(vs ...string) predicate.MixinID {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -124,7 +124,7 @@ func SomeFieldIn(vs ...string) predicate.MixinID {
 
 // SomeFieldNotIn applies the NotIn predicate on the "some_field" field.
 func SomeFieldNotIn(vs ...string) predicate.MixinID {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -212,7 +212,7 @@ func MixinFieldNEQ(v string) predicate.MixinID {
 
 // MixinFieldIn applies the In predicate on the "mixin_field" field.
 func MixinFieldIn(vs ...string) predicate.MixinID {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -223,7 +223,7 @@ func MixinFieldIn(vs ...string) predicate.MixinID {
 
 // MixinFieldNotIn applies the NotIn predicate on the "mixin_field" field.
 func MixinFieldNotIn(vs ...string) predicate.MixinID {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

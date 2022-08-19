@@ -131,7 +131,7 @@ type (
 	// on the Config object.
 	// The mapping is from the annotation name (e.g. "EntGQL") to the annotation itself.
 	// Note that, annotations that are defined in the schema must be JSON encoded/decoded.
-	Annotations map[string]interface{}
+	Annotations map[string]any
 )
 
 // Generate calls f(g).
@@ -998,14 +998,14 @@ func (a assets) format() error {
 }
 
 // expect panics if the condition is false.
-func expect(cond bool, msg string, args ...interface{}) {
+func expect(cond bool, msg string, args ...any) {
 	if !cond {
 		panic(graphError{fmt.Sprintf(msg, args...)})
 	}
 }
 
 // check panics if the error is not nil.
-func check(err error, msg string, args ...interface{}) {
+func check(err error, msg string, args ...any) {
 	if err != nil {
 		args = append(args, err)
 		panic(graphError{fmt.Sprintf(msg+": %s", args...)})

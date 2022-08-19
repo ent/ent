@@ -432,10 +432,10 @@ func (mq *MetadataQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Met
 			mq.withParent != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Metadata).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Metadata{config: mq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -667,7 +667,7 @@ func (mgb *MetadataGroupBy) Aggregate(fns ...AggregateFunc) *MetadataGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (mgb *MetadataGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (mgb *MetadataGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := mgb.path(ctx)
 	if err != nil {
 		return err
@@ -676,7 +676,7 @@ func (mgb *MetadataGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return mgb.sqlScan(ctx, v)
 }
 
-func (mgb *MetadataGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (mgb *MetadataGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range mgb.fields {
 		if !metadata.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -723,7 +723,7 @@ type MetadataSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ms *MetadataSelect) Scan(ctx context.Context, v interface{}) error {
+func (ms *MetadataSelect) Scan(ctx context.Context, v any) error {
 	if err := ms.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -731,7 +731,7 @@ func (ms *MetadataSelect) Scan(ctx context.Context, v interface{}) error {
 	return ms.sqlScan(ctx, v)
 }
 
-func (ms *MetadataSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ms *MetadataSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ms.sql.Query()
 	if err := ms.driver.Query(ctx, query, args, rows); err != nil {

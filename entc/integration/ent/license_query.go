@@ -322,10 +322,10 @@ func (lq *LicenseQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Lice
 		nodes = []*License{}
 		_spec = lq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*License).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &License{config: lq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -498,7 +498,7 @@ func (lgb *LicenseGroupBy) Aggregate(fns ...AggregateFunc) *LicenseGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (lgb *LicenseGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (lgb *LicenseGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := lgb.path(ctx)
 	if err != nil {
 		return err
@@ -507,7 +507,7 @@ func (lgb *LicenseGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return lgb.sqlScan(ctx, v)
 }
 
-func (lgb *LicenseGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (lgb *LicenseGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range lgb.fields {
 		if !license.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -554,7 +554,7 @@ type LicenseSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ls *LicenseSelect) Scan(ctx context.Context, v interface{}) error {
+func (ls *LicenseSelect) Scan(ctx context.Context, v any) error {
 	if err := ls.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -562,7 +562,7 @@ func (ls *LicenseSelect) Scan(ctx context.Context, v interface{}) error {
 	return ls.sqlScan(ctx, v)
 }
 
-func (ls *LicenseSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ls *LicenseSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ls.sql.Query()
 	if err := ls.driver.Query(ctx, query, args, rows); err != nil {

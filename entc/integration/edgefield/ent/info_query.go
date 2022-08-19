@@ -359,10 +359,10 @@ func (iq *InfoQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Info, e
 			iq.withUser != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Info).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Info{config: iq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -528,7 +528,7 @@ func (igb *InfoGroupBy) Aggregate(fns ...AggregateFunc) *InfoGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (igb *InfoGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (igb *InfoGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := igb.path(ctx)
 	if err != nil {
 		return err
@@ -537,7 +537,7 @@ func (igb *InfoGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return igb.sqlScan(ctx, v)
 }
 
-func (igb *InfoGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (igb *InfoGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range igb.fields {
 		if !info.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -584,7 +584,7 @@ type InfoSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (is *InfoSelect) Scan(ctx context.Context, v interface{}) error {
+func (is *InfoSelect) Scan(ctx context.Context, v any) error {
 	if err := is.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -592,7 +592,7 @@ func (is *InfoSelect) Scan(ctx context.Context, v interface{}) error {
 	return is.sqlScan(ctx, v)
 }
 
-func (is *InfoSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (is *InfoSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := is.sql.Query()
 	if err := is.driver.Query(ctx, query, args, rows); err != nil {

@@ -327,10 +327,10 @@ func (tq *TenantQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tenan
 		nodes = []*Tenant{}
 		_spec = tq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Tenant).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Tenant{config: tq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -462,7 +462,7 @@ func (tgb *TenantGroupBy) Aggregate(fns ...AggregateFunc) *TenantGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (tgb *TenantGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (tgb *TenantGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := tgb.path(ctx)
 	if err != nil {
 		return err
@@ -471,7 +471,7 @@ func (tgb *TenantGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return tgb.sqlScan(ctx, v)
 }
 
-func (tgb *TenantGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (tgb *TenantGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range tgb.fields {
 		if !tenant.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -518,7 +518,7 @@ type TenantSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ts *TenantSelect) Scan(ctx context.Context, v interface{}) error {
+func (ts *TenantSelect) Scan(ctx context.Context, v any) error {
 	if err := ts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -526,7 +526,7 @@ func (ts *TenantSelect) Scan(ctx context.Context, v interface{}) error {
 	return ts.sqlScan(ctx, v)
 }
 
-func (ts *TenantSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ts *TenantSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ts.sql.Query()
 	if err := ts.driver.Query(ctx, query, args, rows); err != nil {

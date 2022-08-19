@@ -395,10 +395,10 @@ func (fq *FriendshipQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*F
 			fq.withFriend != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Friendship).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Friendship{config: fq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -596,7 +596,7 @@ func (fgb *FriendshipGroupBy) Aggregate(fns ...AggregateFunc) *FriendshipGroupBy
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (fgb *FriendshipGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (fgb *FriendshipGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := fgb.path(ctx)
 	if err != nil {
 		return err
@@ -605,7 +605,7 @@ func (fgb *FriendshipGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return fgb.sqlScan(ctx, v)
 }
 
-func (fgb *FriendshipGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (fgb *FriendshipGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range fgb.fields {
 		if !friendship.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -652,7 +652,7 @@ type FriendshipSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (fs *FriendshipSelect) Scan(ctx context.Context, v interface{}) error {
+func (fs *FriendshipSelect) Scan(ctx context.Context, v any) error {
 	if err := fs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -660,7 +660,7 @@ func (fs *FriendshipSelect) Scan(ctx context.Context, v interface{}) error {
 	return fs.sqlScan(ctx, v)
 }
 
-func (fs *FriendshipSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (fs *FriendshipSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := fs.sql.Query()
 	if err := fs.driver.Query(ctx, query, args, rows); err != nil {

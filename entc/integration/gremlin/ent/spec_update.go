@@ -314,7 +314,7 @@ func (suo *SpecUpdateOne) gremlin(id string) *dsl.Traversal {
 		v.AddE(spec.CardLabel).To(g.V(id)).OutV()
 	}
 	if len(suo.fields) > 0 {
-		fields := make([]interface{}, 0, len(suo.fields)+1)
+		fields := make([]any, 0, len(suo.fields)+1)
 		fields = append(fields, true)
 		for _, f := range suo.fields {
 			fields = append(fields, f)

@@ -404,10 +404,10 @@ func (nq *NoteQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Note, e
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, note.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Note).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Note{config: nq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -614,7 +614,7 @@ func (ngb *NoteGroupBy) Aggregate(fns ...AggregateFunc) *NoteGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (ngb *NoteGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (ngb *NoteGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := ngb.path(ctx)
 	if err != nil {
 		return err
@@ -623,7 +623,7 @@ func (ngb *NoteGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return ngb.sqlScan(ctx, v)
 }
 
-func (ngb *NoteGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (ngb *NoteGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range ngb.fields {
 		if !note.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -670,7 +670,7 @@ type NoteSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ns *NoteSelect) Scan(ctx context.Context, v interface{}) error {
+func (ns *NoteSelect) Scan(ctx context.Context, v any) error {
 	if err := ns.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -678,7 +678,7 @@ func (ns *NoteSelect) Scan(ctx context.Context, v interface{}) error {
 	return ns.sqlScan(ctx, v)
 }
 
-func (ns *NoteSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ns *NoteSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ns.sql.Query()
 	if err := ns.driver.Query(ctx, query, args, rows); err != nil {

@@ -221,7 +221,7 @@ func (guo *GoodsUpdateOne) gremlin(id string) *dsl.Traversal {
 		trs []*dsl.Traversal
 	)
 	if len(guo.fields) > 0 {
-		fields := make([]interface{}, 0, len(guo.fields)+1)
+		fields := make([]any, 0, len(guo.fields)+1)
 		fields = append(fields, true)
 		for _, f := range guo.fields {
 			fields = append(fields, f)

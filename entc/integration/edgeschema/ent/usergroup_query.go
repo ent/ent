@@ -396,10 +396,10 @@ func (ugq *UserGroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*U
 			ugq.withGroup != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*UserGroup).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &UserGroup{config: ugq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -597,7 +597,7 @@ func (uggb *UserGroupGroupBy) Aggregate(fns ...AggregateFunc) *UserGroupGroupBy 
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (uggb *UserGroupGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (uggb *UserGroupGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := uggb.path(ctx)
 	if err != nil {
 		return err
@@ -606,7 +606,7 @@ func (uggb *UserGroupGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return uggb.sqlScan(ctx, v)
 }
 
-func (uggb *UserGroupGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (uggb *UserGroupGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range uggb.fields {
 		if !usergroup.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -653,7 +653,7 @@ type UserGroupSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ugs *UserGroupSelect) Scan(ctx context.Context, v interface{}) error {
+func (ugs *UserGroupSelect) Scan(ctx context.Context, v any) error {
 	if err := ugs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -661,7 +661,7 @@ func (ugs *UserGroupSelect) Scan(ctx context.Context, v interface{}) error {
 	return ugs.sqlScan(ctx, v)
 }
 
-func (ugs *UserGroupSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ugs *UserGroupSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ugs.sql.Query()
 	if err := ugs.driver.Query(ctx, query, args, rows); err != nil {

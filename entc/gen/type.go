@@ -962,7 +962,7 @@ func (f Field) DefaultName() string { return "Default" + pascal(f.Name) }
 func (f Field) UpdateDefaultName() string { return "Update" + f.DefaultName() }
 
 // DefaultValue returns the default value of the field. Invoked by the template.
-func (f Field) DefaultValue() interface{} { return f.def.DefaultValue }
+func (f Field) DefaultValue() any { return f.def.DefaultValue }
 
 // DefaultFunc returns a bool stating if the default value is a func. Invoked by the template.
 func (f Field) DefaultFunc() bool { return f.def.DefaultKind == reflect.Func }
@@ -1835,7 +1835,7 @@ func builderField(name string) string {
 }
 
 // fieldAnnotate extracts the field annotation from a loaded annotation format.
-func fieldAnnotate(annotation map[string]interface{}) *field.Annotation {
+func fieldAnnotate(annotation map[string]any) *field.Annotation {
 	annotate := &field.Annotation{}
 	if annotation == nil || annotation[annotate.Name()] == nil {
 		return nil
@@ -1847,7 +1847,7 @@ func fieldAnnotate(annotation map[string]interface{}) *field.Annotation {
 }
 
 // entsqlAnnotate extracts the entsql annotation from a loaded annotation format.
-func entsqlAnnotate(annotation map[string]interface{}) *entsql.Annotation {
+func entsqlAnnotate(annotation map[string]any) *entsql.Annotation {
 	annotate := &entsql.Annotation{}
 	if annotation == nil || annotation[annotate.Name()] == nil {
 		return nil
@@ -1859,7 +1859,7 @@ func entsqlAnnotate(annotation map[string]interface{}) *entsql.Annotation {
 }
 
 // entsqlIndexAnnotate extracts the entsql annotation from a loaded annotation format.
-func entsqlIndexAnnotate(annotation map[string]interface{}) *entsql.IndexAnnotation {
+func entsqlIndexAnnotate(annotation map[string]any) *entsql.IndexAnnotation {
 	annotate := &entsql.IndexAnnotation{}
 	if annotation == nil || annotation[annotate.Name()] == nil {
 		return nil

@@ -37,7 +37,7 @@ func IDNEQ(id schema.ID) predicate.Device {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...schema.ID) predicate.Device {
 	return predicate.Device(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -48,7 +48,7 @@ func IDIn(ids ...schema.ID) predicate.Device {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...schema.ID) predicate.Device {
 	return predicate.Device(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}

@@ -65,7 +65,7 @@ func TestEncodeTyper(t *testing.T) {
 	   }
 	}`
 
-	for _, tc := range []interface{}{m, &m, v, vv, &vv} {
+	for _, tc := range []any{m, &m, v, vv, &vv} {
 		got, err := MarshalToString(tc)
 		assert.NoError(t, err)
 		assert.JSONEq(t, want, got)

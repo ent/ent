@@ -581,7 +581,7 @@ func rollback(tx dialect.Tx, err error) error {
 }
 
 // exist checks if the given COUNT query returns a value >= 1.
-func exist(ctx context.Context, conn dialect.ExecQuerier, query string, args ...interface{}) (bool, error) {
+func exist(ctx context.Context, conn dialect.ExecQuerier, query string, args ...any) (bool, error) {
 	rows := &sql.Rows{}
 	if err := conn.Query(ctx, query, args, rows); err != nil {
 		return false, fmt.Errorf("reading schema information %w", err)

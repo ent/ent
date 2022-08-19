@@ -36,7 +36,7 @@ func IDNEQ(id int) predicate.Post {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Post {
 	return predicate.Post(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -47,7 +47,7 @@ func IDIn(ids ...int) predicate.Post {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.Post {
 	return predicate.Post(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -113,7 +113,7 @@ func TextNEQ(v string) predicate.Post {
 
 // TextIn applies the In predicate on the "text" field.
 func TextIn(vs ...string) predicate.Post {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -124,7 +124,7 @@ func TextIn(vs ...string) predicate.Post {
 
 // TextNotIn applies the NotIn predicate on the "text" field.
 func TextNotIn(vs ...string) predicate.Post {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -212,7 +212,7 @@ func AuthorIDNEQ(v int) predicate.Post {
 
 // AuthorIDIn applies the In predicate on the "author_id" field.
 func AuthorIDIn(vs ...int) predicate.Post {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -223,7 +223,7 @@ func AuthorIDIn(vs ...int) predicate.Post {
 
 // AuthorIDNotIn applies the NotIn predicate on the "author_id" field.
 func AuthorIDNotIn(vs ...int) predicate.Post {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

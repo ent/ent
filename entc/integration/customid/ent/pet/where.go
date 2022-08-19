@@ -36,7 +36,7 @@ func IDNEQ(id string) predicate.Pet {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...string) predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -47,7 +47,7 @@ func IDIn(ids ...string) predicate.Pet {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...string) predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}

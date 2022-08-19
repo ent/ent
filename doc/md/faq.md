@@ -245,7 +245,7 @@ type MAC struct {
 }
 
 // Scan implements the Scanner interface.
-func (m *MAC) Scan(value interface{}) (err error) {
+func (m *MAC) Scan(value any) (err error) {
 	switch v := value.(type) {
 	case nil:
 	case []byte:
@@ -291,7 +291,7 @@ type Inet struct {
 }
 
 // Scan implements the Scanner interface
-func (i *Inet) Scan(value interface{}) (err error) {
+func (i *Inet) Scan(value any) (err error) {
     switch v := value.(type) {
     case nil:
     case []byte:
@@ -494,7 +494,7 @@ import (
 type Point [2]float64
 
 // Scan implements the Scanner interface.
-func (p *Point) Scan(value interface{}) error {
+func (p *Point) Scan(value any) error {
 	bin, ok := value.([]byte)
 	if !ok {
 		return fmt.Errorf("invalid binary value for point")
@@ -579,7 +579,7 @@ func (x *Hi) Value() (driver.Value, error) {
 	return proto.Marshal(x)
 }
 
-func (x *Hi) Scan(src interface{}) error {
+func (x *Hi) Scan(src any) error {
 	if src == nil {
 		return nil
 	}
@@ -681,7 +681,7 @@ type BigInt struct {
 	big.Int
 }
 
-func (b *BigInt) Scan(src interface{}) error {
+func (b *BigInt) Scan(src any) error {
 	var i sql.NullString
 	if err := i.Scan(src); err != nil {
 		return err
@@ -729,11 +729,11 @@ type multiDriver struct {
 
 var _ dialect.Driver = (*multiDriver)(nil)
 
-func (d *multiDriver) Query(ctx context.Context, query string, args, v interface{}) error {
+func (d *multiDriver) Query(ctx context.Context, query string, args, v any) error {
 	return d.r.Query(ctx, query, args, v)
 }
 
-func (d *multiDriver) Exec(ctx context.Context, query string, args, v interface{}) error {
+func (d *multiDriver) Exec(ctx context.Context, query string, args, v any) error {
 	return d.w.Exec(ctx, query, args, v)
 }
 

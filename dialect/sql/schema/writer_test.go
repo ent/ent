@@ -44,10 +44,10 @@ type nopDriver struct {
 	dialect.Driver
 }
 
-func (nopDriver) Exec(context.Context, string, interface{}, interface{}) error {
+func (nopDriver) Exec(context.Context, string, any, any) error {
 	return nil
 }
 
-func (nopDriver) Query(context.Context, string, interface{}, interface{}) error {
+func (nopDriver) Query(context.Context, string, any, any) error {
 	return nil
 }

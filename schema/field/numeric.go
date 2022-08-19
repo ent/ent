@@ -178,7 +178,7 @@ func (b *intBuilder) Default(i int) *intBuilder {
 
 // DefaultFunc sets the function that is applied to set the default value
 // of the field on creation.
-func (b *intBuilder) DefaultFunc(fn interface{}) *intBuilder {
+func (b *intBuilder) DefaultFunc(fn any) *intBuilder {
 	b.desc.Default = fn
 	return b
 }
@@ -189,7 +189,7 @@ func (b *intBuilder) DefaultFunc(fn interface{}) *intBuilder {
 //	field.Int("int").
 //		Default(0).
 //		UpdateDefault(GenNumber),
-func (b *intBuilder) UpdateDefault(fn interface{}) *intBuilder {
+func (b *intBuilder) UpdateDefault(fn any) *intBuilder {
 	b.desc.UpdateDefault = fn
 	return b
 }
@@ -263,7 +263,7 @@ func (b *intBuilder) SchemaType(types map[string]string) *intBuilder {
 //	func(t1 T) Add(t2 T) T {
 //		return add(t1, t2)
 //	}
-func (b *intBuilder) GoType(typ interface{}) *intBuilder {
+func (b *intBuilder) GoType(typ any) *intBuilder {
 	b.desc.goType(typ, intType)
 	return b
 }
@@ -343,7 +343,7 @@ func (b *uintBuilder) Default(i uint) *uintBuilder {
 
 // DefaultFunc sets the function that is applied to set the default value
 // of the field on creation.
-func (b *uintBuilder) DefaultFunc(fn interface{}) *uintBuilder {
+func (b *uintBuilder) DefaultFunc(fn any) *uintBuilder {
 	b.desc.Default = fn
 	return b
 }
@@ -354,7 +354,7 @@ func (b *uintBuilder) DefaultFunc(fn interface{}) *uintBuilder {
 //	field.Uint("uint").
 //		Default(0).
 //		UpdateDefault(GenNumber),
-func (b *uintBuilder) UpdateDefault(fn interface{}) *uintBuilder {
+func (b *uintBuilder) UpdateDefault(fn any) *uintBuilder {
 	b.desc.UpdateDefault = fn
 	return b
 }
@@ -428,7 +428,7 @@ func (b *uintBuilder) SchemaType(types map[string]string) *uintBuilder {
 //	func(t1 T) Add(t2 T) T {
 //		return add(t1, t2)
 //	}
-func (b *uintBuilder) GoType(typ interface{}) *uintBuilder {
+func (b *uintBuilder) GoType(typ any) *uintBuilder {
 	b.desc.goType(typ, uintType)
 	return b
 }
@@ -518,7 +518,7 @@ func (b *int8Builder) Default(i int8) *int8Builder {
 
 // DefaultFunc sets the function that is applied to set the default value
 // of the field on creation.
-func (b *int8Builder) DefaultFunc(fn interface{}) *int8Builder {
+func (b *int8Builder) DefaultFunc(fn any) *int8Builder {
 	b.desc.Default = fn
 	return b
 }
@@ -529,7 +529,7 @@ func (b *int8Builder) DefaultFunc(fn interface{}) *int8Builder {
 //	field.Int8("int8").
 //		Default(0).
 //		UpdateDefault(GenNumber),
-func (b *int8Builder) UpdateDefault(fn interface{}) *int8Builder {
+func (b *int8Builder) UpdateDefault(fn any) *int8Builder {
 	b.desc.UpdateDefault = fn
 	return b
 }
@@ -603,7 +603,7 @@ func (b *int8Builder) SchemaType(types map[string]string) *int8Builder {
 //	func(t1 T) Add(t2 T) T {
 //		return add(t1, t2)
 //	}
-func (b *int8Builder) GoType(typ interface{}) *int8Builder {
+func (b *int8Builder) GoType(typ any) *int8Builder {
 	b.desc.goType(typ, int8Type)
 	return b
 }
@@ -693,7 +693,7 @@ func (b *int16Builder) Default(i int16) *int16Builder {
 
 // DefaultFunc sets the function that is applied to set the default value
 // of the field on creation.
-func (b *int16Builder) DefaultFunc(fn interface{}) *int16Builder {
+func (b *int16Builder) DefaultFunc(fn any) *int16Builder {
 	b.desc.Default = fn
 	return b
 }
@@ -704,7 +704,7 @@ func (b *int16Builder) DefaultFunc(fn interface{}) *int16Builder {
 //	field.Int16("int16").
 //		Default(0).
 //		UpdateDefault(GenNumber),
-func (b *int16Builder) UpdateDefault(fn interface{}) *int16Builder {
+func (b *int16Builder) UpdateDefault(fn any) *int16Builder {
 	b.desc.UpdateDefault = fn
 	return b
 }
@@ -778,7 +778,7 @@ func (b *int16Builder) SchemaType(types map[string]string) *int16Builder {
 //	func(t1 T) Add(t2 T) T {
 //		return add(t1, t2)
 //	}
-func (b *int16Builder) GoType(typ interface{}) *int16Builder {
+func (b *int16Builder) GoType(typ any) *int16Builder {
 	b.desc.goType(typ, int16Type)
 	return b
 }
@@ -868,7 +868,7 @@ func (b *int32Builder) Default(i int32) *int32Builder {
 
 // DefaultFunc sets the function that is applied to set the default value
 // of the field on creation.
-func (b *int32Builder) DefaultFunc(fn interface{}) *int32Builder {
+func (b *int32Builder) DefaultFunc(fn any) *int32Builder {
 	b.desc.Default = fn
 	return b
 }
@@ -879,7 +879,7 @@ func (b *int32Builder) DefaultFunc(fn interface{}) *int32Builder {
 //	field.Int32("int32").
 //		Default(0).
 //		UpdateDefault(GenNumber),
-func (b *int32Builder) UpdateDefault(fn interface{}) *int32Builder {
+func (b *int32Builder) UpdateDefault(fn any) *int32Builder {
 	b.desc.UpdateDefault = fn
 	return b
 }
@@ -953,7 +953,7 @@ func (b *int32Builder) SchemaType(types map[string]string) *int32Builder {
 //	func(t1 T) Add(t2 T) T {
 //		return add(t1, t2)
 //	}
-func (b *int32Builder) GoType(typ interface{}) *int32Builder {
+func (b *int32Builder) GoType(typ any) *int32Builder {
 	b.desc.goType(typ, int32Type)
 	return b
 }
@@ -1043,7 +1043,7 @@ func (b *int64Builder) Default(i int64) *int64Builder {
 
 // DefaultFunc sets the function that is applied to set the default value
 // of the field on creation.
-func (b *int64Builder) DefaultFunc(fn interface{}) *int64Builder {
+func (b *int64Builder) DefaultFunc(fn any) *int64Builder {
 	b.desc.Default = fn
 	return b
 }
@@ -1054,7 +1054,7 @@ func (b *int64Builder) DefaultFunc(fn interface{}) *int64Builder {
 //	field.Int64("int64").
 //		Default(0).
 //		UpdateDefault(GenNumber),
-func (b *int64Builder) UpdateDefault(fn interface{}) *int64Builder {
+func (b *int64Builder) UpdateDefault(fn any) *int64Builder {
 	b.desc.UpdateDefault = fn
 	return b
 }
@@ -1128,7 +1128,7 @@ func (b *int64Builder) SchemaType(types map[string]string) *int64Builder {
 //	func(t1 T) Add(t2 T) T {
 //		return add(t1, t2)
 //	}
-func (b *int64Builder) GoType(typ interface{}) *int64Builder {
+func (b *int64Builder) GoType(typ any) *int64Builder {
 	b.desc.goType(typ, int64Type)
 	return b
 }
@@ -1208,7 +1208,7 @@ func (b *uint8Builder) Default(i uint8) *uint8Builder {
 
 // DefaultFunc sets the function that is applied to set the default value
 // of the field on creation.
-func (b *uint8Builder) DefaultFunc(fn interface{}) *uint8Builder {
+func (b *uint8Builder) DefaultFunc(fn any) *uint8Builder {
 	b.desc.Default = fn
 	return b
 }
@@ -1219,7 +1219,7 @@ func (b *uint8Builder) DefaultFunc(fn interface{}) *uint8Builder {
 //	field.Uint8("uint8").
 //		Default(0).
 //		UpdateDefault(GenNumber),
-func (b *uint8Builder) UpdateDefault(fn interface{}) *uint8Builder {
+func (b *uint8Builder) UpdateDefault(fn any) *uint8Builder {
 	b.desc.UpdateDefault = fn
 	return b
 }
@@ -1293,7 +1293,7 @@ func (b *uint8Builder) SchemaType(types map[string]string) *uint8Builder {
 //	func(t1 T) Add(t2 T) T {
 //		return add(t1, t2)
 //	}
-func (b *uint8Builder) GoType(typ interface{}) *uint8Builder {
+func (b *uint8Builder) GoType(typ any) *uint8Builder {
 	b.desc.goType(typ, uint8Type)
 	return b
 }
@@ -1373,7 +1373,7 @@ func (b *uint16Builder) Default(i uint16) *uint16Builder {
 
 // DefaultFunc sets the function that is applied to set the default value
 // of the field on creation.
-func (b *uint16Builder) DefaultFunc(fn interface{}) *uint16Builder {
+func (b *uint16Builder) DefaultFunc(fn any) *uint16Builder {
 	b.desc.Default = fn
 	return b
 }
@@ -1384,7 +1384,7 @@ func (b *uint16Builder) DefaultFunc(fn interface{}) *uint16Builder {
 //	field.Uint16("uint16").
 //		Default(0).
 //		UpdateDefault(GenNumber),
-func (b *uint16Builder) UpdateDefault(fn interface{}) *uint16Builder {
+func (b *uint16Builder) UpdateDefault(fn any) *uint16Builder {
 	b.desc.UpdateDefault = fn
 	return b
 }
@@ -1458,7 +1458,7 @@ func (b *uint16Builder) SchemaType(types map[string]string) *uint16Builder {
 //	func(t1 T) Add(t2 T) T {
 //		return add(t1, t2)
 //	}
-func (b *uint16Builder) GoType(typ interface{}) *uint16Builder {
+func (b *uint16Builder) GoType(typ any) *uint16Builder {
 	b.desc.goType(typ, uint16Type)
 	return b
 }
@@ -1538,7 +1538,7 @@ func (b *uint32Builder) Default(i uint32) *uint32Builder {
 
 // DefaultFunc sets the function that is applied to set the default value
 // of the field on creation.
-func (b *uint32Builder) DefaultFunc(fn interface{}) *uint32Builder {
+func (b *uint32Builder) DefaultFunc(fn any) *uint32Builder {
 	b.desc.Default = fn
 	return b
 }
@@ -1549,7 +1549,7 @@ func (b *uint32Builder) DefaultFunc(fn interface{}) *uint32Builder {
 //	field.Uint32("uint32").
 //		Default(0).
 //		UpdateDefault(GenNumber),
-func (b *uint32Builder) UpdateDefault(fn interface{}) *uint32Builder {
+func (b *uint32Builder) UpdateDefault(fn any) *uint32Builder {
 	b.desc.UpdateDefault = fn
 	return b
 }
@@ -1623,7 +1623,7 @@ func (b *uint32Builder) SchemaType(types map[string]string) *uint32Builder {
 //	func(t1 T) Add(t2 T) T {
 //		return add(t1, t2)
 //	}
-func (b *uint32Builder) GoType(typ interface{}) *uint32Builder {
+func (b *uint32Builder) GoType(typ any) *uint32Builder {
 	b.desc.goType(typ, uint32Type)
 	return b
 }
@@ -1703,7 +1703,7 @@ func (b *uint64Builder) Default(i uint64) *uint64Builder {
 
 // DefaultFunc sets the function that is applied to set the default value
 // of the field on creation.
-func (b *uint64Builder) DefaultFunc(fn interface{}) *uint64Builder {
+func (b *uint64Builder) DefaultFunc(fn any) *uint64Builder {
 	b.desc.Default = fn
 	return b
 }
@@ -1714,7 +1714,7 @@ func (b *uint64Builder) DefaultFunc(fn interface{}) *uint64Builder {
 //	field.Uint64("uint64").
 //		Default(0).
 //		UpdateDefault(GenNumber),
-func (b *uint64Builder) UpdateDefault(fn interface{}) *uint64Builder {
+func (b *uint64Builder) UpdateDefault(fn any) *uint64Builder {
 	b.desc.UpdateDefault = fn
 	return b
 }
@@ -1788,7 +1788,7 @@ func (b *uint64Builder) SchemaType(types map[string]string) *uint64Builder {
 //	func(t1 T) Add(t2 T) T {
 //		return add(t1, t2)
 //	}
-func (b *uint64Builder) GoType(typ interface{}) *uint64Builder {
+func (b *uint64Builder) GoType(typ any) *uint64Builder {
 	b.desc.goType(typ, uint64Type)
 	return b
 }
@@ -1954,7 +1954,7 @@ func (b *float64Builder) SchemaType(types map[string]string) *float64Builder {
 //	func(t1 T) Add(t2 T) T {
 //		return add(t1, t2)
 //	}
-func (b *float64Builder) GoType(typ interface{}) *float64Builder {
+func (b *float64Builder) GoType(typ any) *float64Builder {
 	b.desc.goType(typ, float64Type)
 	return b
 }
@@ -2104,7 +2104,7 @@ func (b *float32Builder) SchemaType(types map[string]string) *float32Builder {
 //	func(t1 T) Add(t2 T) T {
 //		return add(t1, t2)
 //	}
-func (b *float32Builder) GoType(typ interface{}) *float32Builder {
+func (b *float32Builder) GoType(typ any) *float32Builder {
 	b.desc.goType(typ, float32Type)
 	return b
 }

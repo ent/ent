@@ -28,16 +28,16 @@ type Descriptor struct {
 }
 
 // To defines an association edge between two vertices.
-func To(name string, t interface{}) *assocBuilder {
+func To(name string, t any) *assocBuilder {
 	return &assocBuilder{desc: &Descriptor{Name: name, Type: typ(t)}}
 }
 
 // From represents a reversed-edge between two vertices that has a back-reference to its source edge.
-func From(name string, t interface{}) *inverseBuilder {
+func From(name string, t any) *inverseBuilder {
 	return &inverseBuilder{desc: &Descriptor{Name: name, Type: typ(t), Inverse: true}}
 }
 
-func typ(t interface{}) string {
+func typ(t any) string {
 	if rt := reflect.TypeOf(t); rt.NumIn() > 0 {
 		return rt.In(0).Name()
 	}
@@ -93,7 +93,7 @@ func (b *assocBuilder) Field(f string) *assocBuilder {
 //	edge.To("friends", User.Type).
 //		Through("friendships", Friendship.Type)
 //
-func (b *assocBuilder) Through(name string, t interface{}) *assocBuilder {
+func (b *assocBuilder) Through(name string, t any) *assocBuilder {
 	b.desc.Through = &struct{ N, T string }{N: name, T: typ(t)}
 	return b
 }
@@ -193,7 +193,7 @@ func (b *inverseBuilder) Field(f string) *inverseBuilder {
 //		Ref("liked_tweets").
 //		Through("likes", TweetLike.Type)
 //
-func (b *inverseBuilder) Through(name string, t interface{}) *inverseBuilder {
+func (b *inverseBuilder) Through(name string, t any) *inverseBuilder {
 	b.desc.Through = &struct{ N, T string }{N: name, T: typ(t)}
 	return b
 }

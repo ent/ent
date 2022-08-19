@@ -733,7 +733,7 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 	if value, ok := uu.mutation.SSOCert(); ok {
 		v.Property(dsl.Single, user.FieldSSOCert, value)
 	}
-	var properties []interface{}
+	var properties []any
 	if uu.mutation.OptionalIntCleared() {
 		properties = append(properties, user.FieldOptionalInt)
 	}
@@ -1601,7 +1601,7 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := uuo.mutation.SSOCert(); ok {
 		v.Property(dsl.Single, user.FieldSSOCert, value)
 	}
-	var properties []interface{}
+	var properties []any
 	if uuo.mutation.OptionalIntCleared() {
 		properties = append(properties, user.FieldOptionalInt)
 	}
@@ -1729,7 +1729,7 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 		v.AddE(user.ParentLabel).To(g.V(id)).OutV()
 	}
 	if len(uuo.fields) > 0 {
-		fields := make([]interface{}, 0, len(uuo.fields)+1)
+		fields := make([]any, 0, len(uuo.fields)+1)
 		fields = append(fields, true)
 		for _, f := range uuo.fields {
 			fields = append(fields, f)

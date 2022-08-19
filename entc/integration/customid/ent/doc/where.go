@@ -37,7 +37,7 @@ func IDNEQ(id schema.DocID) predicate.Doc {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...schema.DocID) predicate.Doc {
 	return predicate.Doc(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -48,7 +48,7 @@ func IDIn(ids ...schema.DocID) predicate.Doc {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...schema.DocID) predicate.Doc {
 	return predicate.Doc(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -107,7 +107,7 @@ func TextNEQ(v string) predicate.Doc {
 
 // TextIn applies the In predicate on the "text" field.
 func TextIn(vs ...string) predicate.Doc {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -118,7 +118,7 @@ func TextIn(vs ...string) predicate.Doc {
 
 // TextNotIn applies the NotIn predicate on the "text" field.
 func TextNotIn(vs ...string) predicate.Doc {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

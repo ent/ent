@@ -36,7 +36,7 @@ func IDNEQ(id int) predicate.GroupInfo {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.GroupInfo {
 	return predicate.GroupInfo(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -47,7 +47,7 @@ func IDIn(ids ...int) predicate.GroupInfo {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.GroupInfo {
 	return predicate.GroupInfo(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -113,7 +113,7 @@ func DescNEQ(v string) predicate.GroupInfo {
 
 // DescIn applies the In predicate on the "desc" field.
 func DescIn(vs ...string) predicate.GroupInfo {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -124,7 +124,7 @@ func DescIn(vs ...string) predicate.GroupInfo {
 
 // DescNotIn applies the NotIn predicate on the "desc" field.
 func DescNotIn(vs ...string) predicate.GroupInfo {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -212,7 +212,7 @@ func MaxUsersNEQ(v int) predicate.GroupInfo {
 
 // MaxUsersIn applies the In predicate on the "max_users" field.
 func MaxUsersIn(vs ...int) predicate.GroupInfo {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -223,7 +223,7 @@ func MaxUsersIn(vs ...int) predicate.GroupInfo {
 
 // MaxUsersNotIn applies the NotIn predicate on the "max_users" field.
 func MaxUsersNotIn(vs ...int) predicate.GroupInfo {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

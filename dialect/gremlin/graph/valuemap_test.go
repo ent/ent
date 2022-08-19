@@ -12,11 +12,11 @@ import (
 )
 
 func TestValueMapDecodeOne(t *testing.T) {
-	vm := ValueMap{map[string]interface{}{
+	vm := ValueMap{map[string]any{
 		"id":    int64(1),
 		"label": "person",
-		"name":  []interface{}{"marko"},
-		"age":   []interface{}{int32(29)},
+		"name":  []any{"marko"},
+		"age":   []any{int32(29)},
 	}}
 
 	var ent struct {
@@ -36,15 +36,15 @@ func TestValueMapDecodeOne(t *testing.T) {
 
 func TestValueMapDecodeMany(t *testing.T) {
 	vm := ValueMap{
-		map[string]interface{}{
+		map[string]any{
 			"id":    int64(1),
 			"label": "person",
-			"name":  []interface{}{"chico"},
+			"name":  []any{"chico"},
 		},
-		map[string]interface{}{
+		map[string]any{
 			"id":    int64(2),
 			"label": "person",
-			"name":  []interface{}{"dico"},
+			"name":  []any{"dico"},
 		},
 	}
 

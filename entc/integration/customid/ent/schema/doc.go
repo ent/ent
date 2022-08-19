@@ -55,7 +55,7 @@ func (Doc) Edges() []ent.Edge {
 type DocID string
 
 // Scan implements the Scanner interface.
-func (s *DocID) Scan(value interface{}) (err error) {
+func (s *DocID) Scan(value any) (err error) {
 	switch v := value.(type) {
 	case nil:
 	case []byte:

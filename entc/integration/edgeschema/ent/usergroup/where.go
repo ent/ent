@@ -38,7 +38,7 @@ func IDNEQ(id int) predicate.UserGroup {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.UserGroup {
 	return predicate.UserGroup(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -49,7 +49,7 @@ func IDIn(ids ...int) predicate.UserGroup {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.UserGroup {
 	return predicate.UserGroup(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -122,7 +122,7 @@ func JoinedAtNEQ(v time.Time) predicate.UserGroup {
 
 // JoinedAtIn applies the In predicate on the "joined_at" field.
 func JoinedAtIn(vs ...time.Time) predicate.UserGroup {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -133,7 +133,7 @@ func JoinedAtIn(vs ...time.Time) predicate.UserGroup {
 
 // JoinedAtNotIn applies the NotIn predicate on the "joined_at" field.
 func JoinedAtNotIn(vs ...time.Time) predicate.UserGroup {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -186,7 +186,7 @@ func UserIDNEQ(v int) predicate.UserGroup {
 
 // UserIDIn applies the In predicate on the "user_id" field.
 func UserIDIn(vs ...int) predicate.UserGroup {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -197,7 +197,7 @@ func UserIDIn(vs ...int) predicate.UserGroup {
 
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
 func UserIDNotIn(vs ...int) predicate.UserGroup {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -222,7 +222,7 @@ func GroupIDNEQ(v int) predicate.UserGroup {
 
 // GroupIDIn applies the In predicate on the "group_id" field.
 func GroupIDIn(vs ...int) predicate.UserGroup {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -233,7 +233,7 @@ func GroupIDIn(vs ...int) predicate.UserGroup {
 
 // GroupIDNotIn applies the NotIn predicate on the "group_id" field.
 func GroupIDNotIn(vs ...int) predicate.UserGroup {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

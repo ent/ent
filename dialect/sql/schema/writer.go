@@ -19,7 +19,7 @@ type WriteDriver struct {
 }
 
 // Exec writes its query and calls the underlying driver Exec method.
-func (w *WriteDriver) Exec(_ context.Context, query string, _, _ interface{}) error {
+func (w *WriteDriver) Exec(_ context.Context, query string, _, _ any) error {
 	if !strings.HasSuffix(query, ";") {
 		query += ";"
 	}

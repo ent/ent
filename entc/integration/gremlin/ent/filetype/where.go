@@ -37,7 +37,7 @@ func IDNEQ(id string) predicate.FileType {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...string) predicate.FileType {
 	return predicate.FileType(func(t *dsl.Traversal) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -48,7 +48,7 @@ func IDIn(ids ...string) predicate.FileType {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...string) predicate.FileType {
 	return predicate.FileType(func(t *dsl.Traversal) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -107,7 +107,7 @@ func NameNEQ(v string) predicate.FileType {
 
 // NameIn applies the In predicate on the "name" field.
 func NameIn(vs ...string) predicate.FileType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -118,7 +118,7 @@ func NameIn(vs ...string) predicate.FileType {
 
 // NameNotIn applies the NotIn predicate on the "name" field.
 func NameNotIn(vs ...string) predicate.FileType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -192,7 +192,7 @@ func TypeNEQ(v Type) predicate.FileType {
 
 // TypeIn applies the In predicate on the "type" field.
 func TypeIn(vs ...Type) predicate.FileType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -203,7 +203,7 @@ func TypeIn(vs ...Type) predicate.FileType {
 
 // TypeNotIn applies the NotIn predicate on the "type" field.
 func TypeNotIn(vs ...Type) predicate.FileType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -228,7 +228,7 @@ func StateNEQ(v State) predicate.FileType {
 
 // StateIn applies the In predicate on the "state" field.
 func StateIn(vs ...State) predicate.FileType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -239,7 +239,7 @@ func StateIn(vs ...State) predicate.FileType {
 
 // StateNotIn applies the NotIn predicate on the "state" field.
 func StateNotIn(vs ...State) predicate.FileType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -269,7 +269,7 @@ func HasFilesWith(preds ...predicate.File) predicate.FileType {
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.FileType) predicate.FileType {
 	return predicate.FileType(func(tr *dsl.Traversal) {
-		trs := make([]interface{}, 0, len(predicates))
+		trs := make([]any, 0, len(predicates))
 		for _, p := range predicates {
 			t := __.New()
 			p(t)
@@ -282,7 +282,7 @@ func And(predicates ...predicate.FileType) predicate.FileType {
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.FileType) predicate.FileType {
 	return predicate.FileType(func(tr *dsl.Traversal) {
-		trs := make([]interface{}, 0, len(predicates))
+		trs := make([]any, 0, len(predicates))
 		for _, p := range predicates {
 			t := __.New()
 			p(t)

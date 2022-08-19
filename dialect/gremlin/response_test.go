@@ -194,7 +194,7 @@ func TestResponseReadGraphElements(t *testing.T) {
 	tests := []struct {
 		method string
 		data   string
-		want   interface{}
+		want   any
 	}{
 		{
 			method: "ReadVertices",

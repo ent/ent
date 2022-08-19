@@ -16,7 +16,7 @@ func TestDecodeInterface(t *testing.T) {
 	tests := []struct {
 		name    string
 		in      string
-		want    interface{}
+		want    any
 		wantErr bool
 	}{
 		{
@@ -155,7 +155,7 @@ func TestDecodeInterface(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			var got interface{}
+			var got any
 			err := UnmarshalFromString(tc.in, &got)
 			if !tc.wantErr {
 				require.NoError(t, err)
@@ -170,14 +170,14 @@ func TestDecodeInterface(t *testing.T) {
 func TestDecodeInterfaceSlice(t *testing.T) {
 	tests := []struct {
 		in   string
-		want interface{}
+		want any
 	}{
 		{
 			in: `{
 				"@type": "g:List",
 				"@value": []
 			}`,
-			want: []interface{}{},
+			want: []any{},
 		},
 		{
 			in: `{
@@ -219,7 +219,7 @@ func TestDecodeInterfaceSlice(t *testing.T) {
 		tc := tc
 		t.Run(fmt.Sprintf("%T", tc.want), func(t *testing.T) {
 			t.Parallel()
-			var got interface{}
+			var got any
 			err := UnmarshalFromString(tc.in, &got)
 			require.NoError(t, err)
 			assert.Equal(t, tc.want, got)
@@ -230,14 +230,14 @@ func TestDecodeInterfaceSlice(t *testing.T) {
 func TestDecodeInterfaceMap(t *testing.T) {
 	tests := []struct {
 		in   string
-		want interface{}
+		want any
 	}{
 		{
 			in: `{
 				"@type": "g:Map",
 				"@value": []
 			}`,
-			want: map[interface{}]interface{}{},
+			want: map[any]any{},
 		},
 		{
 			in: `{
@@ -314,7 +314,7 @@ func TestDecodeInterfaceMap(t *testing.T) {
 		tc := tc
 		t.Run(fmt.Sprintf("%T", tc.want), func(t *testing.T) {
 			t.Parallel()
-			var got interface{}
+			var got any
 			err := UnmarshalFromString(tc.in, &got)
 			require.NoError(t, err)
 			assert.Equal(t, tc.want, got)
@@ -339,11 +339,11 @@ func TestDecodeInterfaceObject(t *testing.T) {
 	data, err := Marshal(book)
 	require.NoError(t, err)
 
-	var v interface{}
+	var v any
 	err = Unmarshal(data, &v)
 	require.NoError(t, err)
 
-	obj := v.(map[string]interface{})
+	obj := v.(map[string]any)
 	assert.Equal(t, book.ID, obj["id"])
 	assert.Equal(t, book.Title, obj["title"])
 	assert.Equal(t, book.Author, obj["author"])

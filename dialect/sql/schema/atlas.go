@@ -781,7 +781,7 @@ func (a *Atlas) loadTypes(ctx context.Context, conn dialect.ExecQuerier) ([]stri
 
 type db struct{ dialect.ExecQuerier }
 
-func (d *db) QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
+func (d *db) QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error) {
 	rows := &entsql.Rows{}
 	if err := d.ExecQuerier.Query(ctx, query, args, rows); err != nil {
 		return nil, err
@@ -789,7 +789,7 @@ func (d *db) QueryContext(ctx context.Context, query string, args ...interface{}
 	return rows.ColumnScanner.(*sql.Rows), nil
 }
 
-func (d *db) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
+func (d *db) ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error) {
 	var r sql.Result
 	if err := d.ExecQuerier.Exec(ctx, query, args, &r); err != nil {
 		return nil, err

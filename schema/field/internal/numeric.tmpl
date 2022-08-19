@@ -112,7 +112,7 @@ func (b *{{ $builder }}) Default(i {{ $t }}) *{{ $builder }} {
 
 // DefaultFunc sets the function that is applied to set the default value
 // of the field on creation.
-func (b *{{ $builder }}) DefaultFunc(fn interface{}) *{{ $builder }} {
+func (b *{{ $builder }}) DefaultFunc(fn any) *{{ $builder }} {
 	b.desc.Default = fn
 	return b
 }
@@ -124,7 +124,7 @@ func (b *{{ $builder }}) DefaultFunc(fn interface{}) *{{ $builder }} {
 //		Default(0).
 //		UpdateDefault(GenNumber),
 //
-func (b *{{ $builder }}) UpdateDefault(fn interface{}) *{{ $builder }} {
+func (b *{{ $builder }}) UpdateDefault(fn any) *{{ $builder }} {
     b.desc.UpdateDefault = fn
     return b
 }
@@ -201,7 +201,7 @@ func (b *{{ $builder }}) SchemaType(types map[string]string) *{{ $builder }} {
 //		return add(t1, t2)
 //	}
 //
-func (b *{{ $builder }}) GoType(typ interface{}) *{{ $builder }} {
+func (b *{{ $builder }}) GoType(typ any) *{{ $builder }} {
 	b.desc.goType(typ, {{ $t }}Type)
 	return b
 }
@@ -370,7 +370,7 @@ func (b *{{ $builder }}) SchemaType(types map[string]string) *{{ $builder }} {
 //		return add(t1, t2)
 //	}
 //
-func (b *{{ $builder }}) GoType(typ interface{}) *{{ $builder }} {
+func (b *{{ $builder }}) GoType(typ any) *{{ $builder }} {
 	b.desc.goType(typ, {{ $t }}Type)
 	return b
 }

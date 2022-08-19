@@ -40,7 +40,7 @@ func IDNEQ(id string) predicate.Task {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...string) predicate.Task {
 	return predicate.Task(func(t *dsl.Traversal) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -51,7 +51,7 @@ func IDIn(ids ...string) predicate.Task {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...string) predicate.Task {
 	return predicate.Task(func(t *dsl.Traversal) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -120,7 +120,7 @@ func PriorityNEQ(v task.Priority) predicate.Task {
 
 // PriorityIn applies the In predicate on the "priority" field.
 func PriorityIn(vs ...task.Priority) predicate.Task {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = int(vs[i])
 	}
@@ -131,7 +131,7 @@ func PriorityIn(vs ...task.Priority) predicate.Task {
 
 // PriorityNotIn applies the NotIn predicate on the "priority" field.
 func PriorityNotIn(vs ...task.Priority) predicate.Task {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = int(vs[i])
 	}
@@ -202,7 +202,7 @@ func CreatedAtNEQ(v time.Time) predicate.Task {
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
 func CreatedAtIn(vs ...time.Time) predicate.Task {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -213,7 +213,7 @@ func CreatedAtIn(vs ...time.Time) predicate.Task {
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
 func CreatedAtNotIn(vs ...time.Time) predicate.Task {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -253,7 +253,7 @@ func CreatedAtLTE(v time.Time) predicate.Task {
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Task) predicate.Task {
 	return predicate.Task(func(tr *dsl.Traversal) {
-		trs := make([]interface{}, 0, len(predicates))
+		trs := make([]any, 0, len(predicates))
 		for _, p := range predicates {
 			t := __.New()
 			p(t)
@@ -266,7 +266,7 @@ func And(predicates ...predicate.Task) predicate.Task {
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Task) predicate.Task {
 	return predicate.Task(func(tr *dsl.Traversal) {
-		trs := make([]interface{}, 0, len(predicates))
+		trs := make([]any, 0, len(predicates))
 		for _, p := range predicates {
 			t := __.New()
 			p(t)

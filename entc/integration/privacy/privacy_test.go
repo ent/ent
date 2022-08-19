@@ -24,7 +24,7 @@ func TestPrivacyRules(t *testing.T) {
 		"file:ent?mode=memory&cache=shared&_fk=1",
 	)
 	defer client.Close()
-	logf := rule.SetMutationLogFunc(func(string, ...interface{}) {
+	logf := rule.SetMutationLogFunc(func(string, ...any) {
 		require.FailNow(t, "hook called on privacy deny")
 	})
 	ctx := context.Background()

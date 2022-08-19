@@ -367,10 +367,10 @@ func (sq *StreetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Stree
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, street.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Street).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Street{config: sq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -539,7 +539,7 @@ func (sgb *StreetGroupBy) Aggregate(fns ...AggregateFunc) *StreetGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (sgb *StreetGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (sgb *StreetGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := sgb.path(ctx)
 	if err != nil {
 		return err
@@ -548,7 +548,7 @@ func (sgb *StreetGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return sgb.sqlScan(ctx, v)
 }
 
-func (sgb *StreetGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (sgb *StreetGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range sgb.fields {
 		if !street.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -595,7 +595,7 @@ type StreetSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ss *StreetSelect) Scan(ctx context.Context, v interface{}) error {
+func (ss *StreetSelect) Scan(ctx context.Context, v any) error {
 	if err := ss.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -603,7 +603,7 @@ func (ss *StreetSelect) Scan(ctx context.Context, v interface{}) error {
 	return ss.sqlScan(ctx, v)
 }
 
-func (ss *StreetSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ss *StreetSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ss.sql.Query()
 	if err := ss.driver.Query(ctx, query, args, rows); err != nil {

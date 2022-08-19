@@ -359,10 +359,10 @@ func (cq *CommentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Comm
 			cq.withPost != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Comment).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Comment{config: cq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -528,7 +528,7 @@ func (cgb *CommentGroupBy) Aggregate(fns ...AggregateFunc) *CommentGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (cgb *CommentGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (cgb *CommentGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := cgb.path(ctx)
 	if err != nil {
 		return err
@@ -537,7 +537,7 @@ func (cgb *CommentGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return cgb.sqlScan(ctx, v)
 }
 
-func (cgb *CommentGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (cgb *CommentGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range cgb.fields {
 		if !comment.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -584,7 +584,7 @@ type CommentSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (cs *CommentSelect) Scan(ctx context.Context, v interface{}) error {
+func (cs *CommentSelect) Scan(ctx context.Context, v any) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -592,7 +592,7 @@ func (cs *CommentSelect) Scan(ctx context.Context, v interface{}) error {
 	return cs.sqlScan(ctx, v)
 }
 
-func (cs *CommentSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (cs *CommentSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := cs.sql.Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {

@@ -149,6 +149,6 @@ func TestExpandOrdering(t *testing.T) {
 	}
 	c, err := cfg.Build(WithInterceptor(interceptor))
 	require.NoError(t, err)
-	req := NewEvalRequest("g.V().hasLabel($1)", WithBindings(map[string]interface{}{"$1": "user"}))
+	req := NewEvalRequest("g.V().hasLabel($1)", WithBindings(map[string]any{"$1": "user"}))
 	_, _ = c.Do(context.Background(), req)
 }

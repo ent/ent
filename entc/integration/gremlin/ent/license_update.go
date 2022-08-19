@@ -258,7 +258,7 @@ func (luo *LicenseUpdateOne) gremlin(id int) *dsl.Traversal {
 		v.Property(dsl.Single, license.FieldUpdateTime, value)
 	}
 	if len(luo.fields) > 0 {
-		fields := make([]interface{}, 0, len(luo.fields)+1)
+		fields := make([]any, 0, len(luo.fields)+1)
 		fields = append(fields, true)
 		for _, f := range luo.fields {
 			fields = append(fields, f)

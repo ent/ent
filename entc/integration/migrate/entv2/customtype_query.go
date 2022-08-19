@@ -320,10 +320,10 @@ func (ctq *CustomTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 		nodes = []*CustomType{}
 		_spec = ctq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*CustomType).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &CustomType{config: ctq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -455,7 +455,7 @@ func (ctgb *CustomTypeGroupBy) Aggregate(fns ...AggregateFunc) *CustomTypeGroupB
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (ctgb *CustomTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (ctgb *CustomTypeGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := ctgb.path(ctx)
 	if err != nil {
 		return err
@@ -464,7 +464,7 @@ func (ctgb *CustomTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return ctgb.sqlScan(ctx, v)
 }
 
-func (ctgb *CustomTypeGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (ctgb *CustomTypeGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range ctgb.fields {
 		if !customtype.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -511,7 +511,7 @@ type CustomTypeSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (cts *CustomTypeSelect) Scan(ctx context.Context, v interface{}) error {
+func (cts *CustomTypeSelect) Scan(ctx context.Context, v any) error {
 	if err := cts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -519,7 +519,7 @@ func (cts *CustomTypeSelect) Scan(ctx context.Context, v interface{}) error {
 	return cts.sqlScan(ctx, v)
 }
 
-func (cts *CustomTypeSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (cts *CustomTypeSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := cts.sql.Query()
 	if err := cts.driver.Query(ctx, query, args, rows); err != nil {

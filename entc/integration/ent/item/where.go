@@ -35,7 +35,7 @@ func IDNEQ(id string) predicate.Item {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...string) predicate.Item {
 	return predicate.Item(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -46,7 +46,7 @@ func IDIn(ids ...string) predicate.Item {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...string) predicate.Item {
 	return predicate.Item(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -105,7 +105,7 @@ func TextNEQ(v string) predicate.Item {
 
 // TextIn applies the In predicate on the "text" field.
 func TextIn(vs ...string) predicate.Item {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -116,7 +116,7 @@ func TextIn(vs ...string) predicate.Item {
 
 // TextNotIn applies the NotIn predicate on the "text" field.
 func TextNotIn(vs ...string) predicate.Item {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

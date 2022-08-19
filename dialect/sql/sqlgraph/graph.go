@@ -61,7 +61,7 @@ type Step struct {
 	From struct {
 		// V can be either one vertex or set of vertices.
 		// It can be a pre-processed step (sql.Query) or a simple Go type (integer or string).
-		V interface{}
+		V any
 		// Table holds the table name of V (from).
 		Table string
 		// Column to join with. Usually the "id" column.
@@ -99,7 +99,7 @@ type Step struct {
 type StepOption func(*Step)
 
 // From sets the source of the step.
-func From(table, column string, v ...interface{}) StepOption {
+func From(table, column string, v ...any) StepOption {
 	return func(s *Step) {
 		s.From.Table = table
 		s.From.Column = column
@@ -410,8 +410,8 @@ type (
 		Predicate func(*sql.Selector)
 		Modifiers []func(*sql.UpdateBuilder)
 
-		ScanValues func(columns []string) ([]interface{}, error)
-		Assign     func(columns []string, values []interface{}) error
+		ScanValues func(columns []string) ([]any, error)
+		Assign     func(columns []string, values []any) error
 	}
 )
 
@@ -490,8 +490,8 @@ type QuerySpec struct {
 	Predicate func(*sql.Selector)
 	Modifiers []func(*sql.Selector)
 
-	ScanValues func(columns []string) ([]interface{}, error)
-	Assign     func(columns []string, values []interface{}) error
+	ScanValues func(columns []string) ([]any, error)
+	Assign     func(columns []string, values []any) error
 }
 
 // QueryNodes queries the nodes in the graph query and scans them to the given values.
@@ -513,8 +513,8 @@ func CountNodes(ctx context.Context, drv dialect.Driver, spec *QuerySpec) (int, 
 type EdgeQuerySpec struct {
 	Edge       *EdgeSpec
 	Predicate  func(*sql.Selector)
-	ScanValues func() [2]interface{}
-	Assign     func(out, in interface{}) error
+	ScanValues func() [2]any
+	Assign     func(out, in any) error
 }
 
 // QueryEdges queries the edges in the graph and scans the result with the given dest function.
@@ -1068,7 +1068,7 @@ func (c *batchCreator) nodes(ctx context.Context, drv dialect.Driver) error {
 	sorted := keys(columns)
 	insert := c.builder.Insert(c.Nodes[0].Table).Schema(c.Nodes[0].Schema).Default().Columns(sorted...)
 	for i := range values {
-		vs := make([]interface{}, len(sorted))
+		vs := make([]any, len(sorted))
 		for j, c := range sorted {
 			vs[j] = values[i][c]
 		}
@@ -1223,7 +1223,7 @@ func (g *graph) addM2MEdges(ctx context.Context, ids []driver.Value, edges EdgeS
 		var (
 			edges   = tables[table]
 			columns = edges[0].Columns
-			values  = make([]interface{}, 0, len(edges[0].Target.Fields))
+			values  = make([]any, 0, len(edges[0].Target.Fields))
 		)
 		// Specs are generated equally for all edges from the same type.
 		for _, f := range edges[0].Target.Fields {
@@ -1242,9 +1242,9 @@ func (g *graph) addM2MEdges(ctx context.Context, ids []driver.Value, edges EdgeS
 				pk1, pk2 = pk2, pk1
 			}
 			for _, pair := range product(pk1, pk2) {
-				insert.Values(append([]interface{}{pair[0], pair[1]}, values...)...)
+				insert.Values(append([]any{pair[0], pair[1]}, values...)...)
 				if edge.Bidi {
-					insert.Values(append([]interface{}{pair[1], pair[0]}, values...)...)
+					insert.Values(append([]any{pair[1], pair[0]}, values...)...)
 				}
 			}
 		}

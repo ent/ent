@@ -25,7 +25,7 @@ type config struct {
 	// debug enable a debug logging.
 	debug bool
 	// log used for logging on debug mode.
-	log func(...interface{})
+	log func(...any)
 	// hooks to execute on mutations.
 	hooks *hooks
 }
@@ -67,7 +67,7 @@ func Debug() Option {
 }
 
 // Log sets the logging function for debug mode.
-func Log(fn func(...interface{})) Option {
+func Log(fn func(...any)) Option {
 	return func(c *config) {
 		c.log = fn
 	}
@@ -82,9 +82,9 @@ func Driver(driver dialect.Driver) Option {
 
 // ExecContext allows calling the underlying ExecContext method of the driver if it is supported by it.
 // See, database/sql#DB.ExecContext for more information.
-func (c *config) ExecContext(ctx context.Context, query string, args ...interface{}) (stdsql.Result, error) {
+func (c *config) ExecContext(ctx context.Context, query string, args ...any) (stdsql.Result, error) {
 	ex, ok := c.driver.(interface {
-		ExecContext(context.Context, string, ...interface{}) (stdsql.Result, error)
+		ExecContext(context.Context, string, ...any) (stdsql.Result, error)
 	})
 	if !ok {
 		return nil, fmt.Errorf("Driver.ExecContext is not supported")
@@ -94,9 +94,9 @@ func (c *config) ExecContext(ctx context.Context, query string, args ...interfac
 
 // QueryContext allows calling the underlying QueryContext method of the driver if it is supported by it.
 // See, database/sql#DB.QueryContext for more information.
-func (c *config) QueryContext(ctx context.Context, query string, args ...interface{}) (*stdsql.Rows, error) {
+func (c *config) QueryContext(ctx context.Context, query string, args ...any) (*stdsql.Rows, error) {
 	q, ok := c.driver.(interface {
-		QueryContext(context.Context, string, ...interface{}) (*stdsql.Rows, error)
+		QueryContext(context.Context, string, ...any) (*stdsql.Rows, error)
 	})
 	if !ok {
 		return nil, fmt.Errorf("Driver.QueryContext is not supported")

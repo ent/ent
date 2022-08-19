@@ -15,7 +15,7 @@ import (
 func TestEncodeStruct(t *testing.T) {
 	tests := []struct {
 		name string
-		in   interface{}
+		in   any
 		want string
 	}{
 		{
@@ -108,7 +108,7 @@ func TestDecodeStruct(t *testing.T) {
 	tests := []struct {
 		name string
 		in   string
-		want interface{}
+		want any
 	}{
 		{
 			name: "Simple",

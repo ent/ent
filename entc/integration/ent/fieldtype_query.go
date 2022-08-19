@@ -327,10 +327,10 @@ func (ftq *FieldTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*F
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, fieldtype.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*FieldType).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &FieldType{config: ftq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -503,7 +503,7 @@ func (ftgb *FieldTypeGroupBy) Aggregate(fns ...AggregateFunc) *FieldTypeGroupBy 
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (ftgb *FieldTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (ftgb *FieldTypeGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := ftgb.path(ctx)
 	if err != nil {
 		return err
@@ -512,7 +512,7 @@ func (ftgb *FieldTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return ftgb.sqlScan(ctx, v)
 }
 
-func (ftgb *FieldTypeGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (ftgb *FieldTypeGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range ftgb.fields {
 		if !fieldtype.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -559,7 +559,7 @@ type FieldTypeSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (fts *FieldTypeSelect) Scan(ctx context.Context, v interface{}) error {
+func (fts *FieldTypeSelect) Scan(ctx context.Context, v any) error {
 	if err := fts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -567,7 +567,7 @@ func (fts *FieldTypeSelect) Scan(ctx context.Context, v interface{}) error {
 	return fts.sqlScan(ctx, v)
 }
 
-func (fts *FieldTypeSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (fts *FieldTypeSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := fts.sql.Query()
 	if err := fts.driver.Query(ctx, query, args, rows); err != nil {

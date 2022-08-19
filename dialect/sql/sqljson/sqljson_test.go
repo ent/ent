@@ -18,7 +18,7 @@ func TestWritePath(t *testing.T) {
 	tests := []struct {
 		input     sql.Querier
 		wantQuery string
-		wantArgs  []interface{}
+		wantArgs  []any
 	}{
 		{
 			input: sql.Dialect(dialect.Postgres).
@@ -26,7 +26,7 @@ func TestWritePath(t *testing.T) {
 				From(sql.Table("users")).
 				Where(sqljson.ValueEQ("a", 1, sqljson.Path("b", "c", "[1]", "d"), sqljson.Cast("int"))),
 			wantQuery: `SELECT * FROM "users" WHERE ("a"->'b'->'c'->1->>'d')::int = $1`,
-			wantArgs:  []interface{}{1},
+			wantArgs:  []any{1},
 		},
 		{
 			input: sql.Dialect(dialect.MySQL).
@@ -34,7 +34,7 @@ func TestWritePath(t *testing.T) {
 				From(sql.Table("users")).
 				Where(sqljson.ValueEQ("a", "a", sqljson.DotPath("b.c[1].d"))),
 			wantQuery: "SELECT * FROM `users` WHERE JSON_EXTRACT(`a`, \"$.b.c[1].d\") = ?",
-			wantArgs:  []interface{}{"a"},
+			wantArgs:  []any{"a"},
 		},
 		{
 			input: sql.Dialect(dialect.MySQL).
@@ -42,7 +42,7 @@ func TestWritePath(t *testing.T) {
 				From(sql.Table("users")).
 				Where(sqljson.ValueEQ("a", "a", sqljson.DotPath("b.\"c[1]\".d[1][2].e"))),
 			wantQuery: "SELECT * FROM `users` WHERE JSON_EXTRACT(`a`, \"$.b.\"c[1]\".d[1][2].e\") = ?",
-			wantArgs:  []interface{}{"a"},
+			wantArgs:  []any{"a"},
 		},
 		{
 			input: sql.Select("*").
@@ -82,7 +82,7 @@ func TestWritePath(t *testing.T) {
 					),
 				),
 			wantQuery: "SELECT * FROM `test` WHERE `id` > ? AND (JSON_EXTRACT(`j`, \"$.a.*.c\") IS NOT NULL OR JSON_TYPE(`j`, \"$.a.*.c\") = 'null') AND `active`",
-			wantArgs:  []interface{}{100},
+			wantArgs:  []any{100},
 		},
 		{
 			input: sql.Dialect(dialect.Postgres).
@@ -93,7 +93,7 @@ func TestWritePath(t *testing.T) {
 					sqljson.ValueEQ("a", 1, sqljson.DotPath("b.c")),
 				)),
 			wantQuery: `SELECT * FROM "test" WHERE "e" = $1 AND ("a"->'b'->>'c')::int = $2`,
-			wantArgs:  []interface{}{10, 1},
+			wantArgs:  []any{10, 1},
 		},
 		{
 			input: sql.Dialect(dialect.MySQL).
@@ -101,7 +101,7 @@ func TestWritePath(t *testing.T) {
 				From(sql.Table("users")).
 				Where(sqljson.ValueEQ("a", "a", sqljson.Path("b", "c", "[1]", "d"), sqljson.Unquote(true))),
 			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, \"$.b.c[1].d\")) = ?",
-			wantArgs:  []interface{}{"a"},
+			wantArgs:  []any{"a"},
 		},
 		{
 			input: sql.Dialect(dialect.Postgres).
@@ -109,7 +109,7 @@ func TestWritePath(t *testing.T) {
 				From(sql.Table("users")).
 				Where(sqljson.ValueEQ("a", "a", sqljson.Path("b", "c", "[1]", "d"), sqljson.Unquote(true))),
 			wantQuery: `SELECT * FROM "users" WHERE "a"->'b'->'c'->1->>'d' = $1`,
-			wantArgs:  []interface{}{"a"},
+			wantArgs:  []any{"a"},
 		},
 		{
 			input: sql.Dialect(dialect.Postgres).
@@ -117,7 +117,7 @@ func TestWritePath(t *testing.T) {
 				From(sql.Table("users")).
 				Where(sqljson.ValueEQ("a", 1, sqljson.Path("b", "c", "[1]", "d"), sqljson.Cast("int"))),
 			wantQuery: `SELECT * FROM "users" WHERE ("a"->'b'->'c'->1->>'d')::int = $1`,
-			wantArgs:  []interface{}{1},
+			wantArgs:  []any{1},
 		},
 		{
 			input: sql.Dialect(dialect.Postgres).
@@ -133,7 +133,7 @@ func TestWritePath(t *testing.T) {
 					),
 				),
 			wantQuery: `SELECT * FROM "users" WHERE ("a"->>'b')::int <> $1 OR ("a"->>'c')::int > $2 OR ("a"->>'d')::float >= $3 OR ("a"->>'e')::int < $4 OR ("a"->>'f')::int <= $5`,
-			wantArgs:  []interface{}{1, 1, 1.1, 1, 1},
+			wantArgs:  []any{1, 1, 1.1, 1, 1},
 		},
 		{
 			input: sql.Dialect(dialect.Postgres).
@@ -141,7 +141,7 @@ func TestWritePath(t *testing.T) {
 				From(sql.Table("users")).
 				Where(sqljson.LenEQ("a", 1)),
 			wantQuery: `SELECT * FROM "users" WHERE JSONB_ARRAY_LENGTH("a") = $1`,
-			wantArgs:  []interface{}{1},
+			wantArgs:  []any{1},
 		},
 		{
 			input: sql.Dialect(dialect.MySQL).
@@ -149,7 +149,7 @@ func TestWritePath(t *testing.T) {
 				From(sql.Table("users")).
 				Where(sqljson.LenEQ("a", 1)),
 			wantQuery: "SELECT * FROM `users` WHERE JSON_LENGTH(`a`, \"$\") = ?",
-			wantArgs:  []interface{}{1},
+			wantArgs:  []any{1},
 		},
 		{
 			input: sql.Dialect(dialect.SQLite).
@@ -157,7 +157,7 @@ func TestWritePath(t *testing.T) {
 				From(sql.Table("users")).
 				Where(sqljson.LenEQ("a", 1)),
 			wantQuery: "SELECT * FROM `users` WHERE JSON_ARRAY_LENGTH(`a`, \"$\") = ?",
-			wantArgs:  []interface{}{1},
+			wantArgs:  []any{1},
 		},
 		{
 			input: sql.Dialect(dialect.SQLite).
@@ -172,7 +172,7 @@ func TestWritePath(t *testing.T) {
 					),
 				),
 			wantQuery: "SELECT * FROM `users` WHERE JSON_ARRAY_LENGTH(`a`, \"$.b\") > ? OR JSON_ARRAY_LENGTH(`a`, \"$.c\") >= ? OR JSON_ARRAY_LENGTH(`a`, \"$.d\") < ? OR JSON_ARRAY_LENGTH(`a`, \"$.e\") <= ?",
-			wantArgs:  []interface{}{1, 1, 1, 1},
+			wantArgs:  []any{1, 1, 1, 1},
 		},
 		{
 			input: sql.Dialect(dialect.MySQL).
@@ -180,7 +180,7 @@ func TestWritePath(t *testing.T) {
 				From(sql.Table("users")).
 				Where(sqljson.ValueContains("tags", "foo")),
 			wantQuery: "SELECT * FROM `users` WHERE JSON_CONTAINS(`tags`, ?, \"$\") = ?",
-			wantArgs:  []interface{}{"\"foo\"", 1},
+			wantArgs:  []any{"\"foo\"", 1},
 		},
 		{
 			input: sql.Dialect(dialect.MySQL).
@@ -188,7 +188,7 @@ func TestWritePath(t *testing.T) {
 				From(sql.Table("users")).
 				Where(sqljson.ValueContains("tags", 1, sqljson.Path("a"))),
 			wantQuery: "SELECT * FROM `users` WHERE JSON_CONTAINS(`tags`, ?, \"$.a\") = ?",
-			wantArgs:  []interface{}{"1", 1},
+			wantArgs:  []any{"1", 1},
 		},
 		{
 			input: sql.Dialect(dialect.SQLite).
@@ -196,7 +196,7 @@ func TestWritePath(t *testing.T) {
 				From(sql.Table("users")).
 				Where(sqljson.ValueContains("tags", "foo")),
 			wantQuery: "SELECT * FROM `users` WHERE EXISTS(SELECT * FROM JSON_EACH(`tags`, \"$\") WHERE `value` = ?)",
-			wantArgs:  []interface{}{"foo"},
+			wantArgs:  []any{"foo"},
 		},
 		{
 			input: sql.Dialect(dialect.SQLite).
@@ -204,7 +204,7 @@ func TestWritePath(t *testing.T) {
 				From(sql.Table("users")).
 				Where(sqljson.ValueContains("tags", 1, sqljson.Path("a"))),
 			wantQuery: "SELECT * FROM `users` WHERE EXISTS(SELECT * FROM JSON_EACH(`tags`, \"$.a\") WHERE `value` = ?)",
-			wantArgs:  []interface{}{1},
+			wantArgs:  []any{1},
 		},
 		{
 			input: sql.Dialect(dialect.Postgres).
@@ -212,7 +212,7 @@ func TestWritePath(t *testing.T) {
 				From(sql.Table("users")).
 				Where(sqljson.ValueContains("tags", "foo")),
 			wantQuery: "SELECT * FROM \"users\" WHERE \"tags\" @> $1",
-			wantArgs:  []interface{}{"\"foo\""},
+			wantArgs:  []any{"\"foo\""},
 		},
 		{
 			input: sql.Dialect(dialect.Postgres).
@@ -220,7 +220,7 @@ func TestWritePath(t *testing.T) {
 				From(sql.Table("users")).
 				Where(sqljson.ValueContains("tags", 1, sqljson.Path("a"))),
 			wantQuery: "SELECT * FROM \"users\" WHERE (\"tags\"->'a')::jsonb @> $1",
-			wantArgs:  []interface{}{"1"},
+			wantArgs:  []any{"1"},
 		},
 		{
 			input: sql.Dialect(dialect.Postgres).
@@ -249,7 +249,7 @@ func TestWritePath(t *testing.T) {
 				From(sql.Table("users")).
 				Where(sqljson.StringContains("a", "substr", sqljson.Path("b", "c", "[1]", "d"))),
 			wantQuery: `SELECT * FROM "users" WHERE "a"->'b'->'c'->1->>'d' LIKE $1`,
-			wantArgs:  []interface{}{"%substr%"},
+			wantArgs:  []any{"%substr%"},
 		},
 		{
 			input: sql.Dialect(dialect.Postgres).
@@ -262,7 +262,7 @@ func TestWritePath(t *testing.T) {
 					),
 				),
 			wantQuery: `SELECT * FROM "users" WHERE "a"->>'a' LIKE $1 AND "b"->>'b' LIKE $2`,
-			wantArgs:  []interface{}{"%c%", "%d%"},
+			wantArgs:  []any{"%c%", "%d%"},
 		},
 		{
 			input: sql.Dialect(dialect.MySQL).
@@ -270,7 +270,7 @@ func TestWritePath(t *testing.T) {
 				From(sql.Table("users")).
 				Where(sqljson.StringContains("a", "substr", sqljson.Path("b", "c", "[1]", "d"))),
 			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, \"$.b.c[1].d\")) LIKE ?",
-			wantArgs:  []interface{}{"%substr%"},
+			wantArgs:  []any{"%substr%"},
 		},
 		{
 			input: sql.Dialect(dialect.MySQL).
@@ -283,7 +283,7 @@ func TestWritePath(t *testing.T) {
 					),
 				),
 			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, \"$.a\")) LIKE ? AND JSON_UNQUOTE(JSON_EXTRACT(`b`, \"$.b\")) LIKE ?",
-			wantArgs:  []interface{}{"%c%", "%d%"},
+			wantArgs:  []any{"%c%", "%d%"},
 		},
 		{
 			input: sql.Dialect(dialect.Postgres).
@@ -291,7 +291,7 @@ func TestWritePath(t *testing.T) {
 				From(sql.Table("users")).
 				Where(sqljson.StringHasPrefix("a", "substr", sqljson.Path("b", "c", "[1]", "d"))),
 			wantQuery: `SELECT * FROM "users" WHERE "a"->'b'->'c'->1->>'d' LIKE $1`,
-			wantArgs:  []interface{}{"substr%"},
+			wantArgs:  []any{"substr%"},
 		},
 		{
 			input: sql.Dialect(dialect.MySQL).
@@ -299,7 +299,7 @@ func TestWritePath(t *testing.T) {
 				From(sql.Table("users")).
 				Where(sqljson.StringHasPrefix("a", "substr", sqljson.Path("b", "c", "[1]", "d"))),
 			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, \"$.b.c[1].d\")) LIKE ?",
-			wantArgs:  []interface{}{"substr%"},
+			wantArgs:  []any{"substr%"},
 		},
 		{
 			input: sql.Dialect(dialect.Postgres).
@@ -307,7 +307,7 @@ func TestWritePath(t *testing.T) {
 				From(sql.Table("users")).
 				Where(sqljson.StringHasSuffix("a", "substr", sqljson.Path("b", "c", "[1]", "d"))),
 			wantQuery: `SELECT * FROM "users" WHERE "a"->'b'->'c'->1->>'d' LIKE $1`,
-			wantArgs:  []interface{}{"%substr"},
+			wantArgs:  []any{"%substr"},
 		},
 		{
 			input: sql.Dialect(dialect.MySQL).
@@ -315,7 +315,7 @@ func TestWritePath(t *testing.T) {
 				From(sql.Table("users")).
 				Where(sqljson.StringHasSuffix("a", "substr", sqljson.Path("b", "c", "[1]", "d"))),
 			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, \"$.b.c[1].d\")) LIKE ?",
-			wantArgs:  []interface{}{"%substr"},
+			wantArgs:  []any{"%substr"},
 		},
 	}
 	for i, tt := range tests {

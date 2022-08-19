@@ -171,7 +171,7 @@ func (tu *TaskUpdate) gremlin() *dsl.Traversal {
 	if value, ok := tu.mutation.Priorities(); ok {
 		v.Property(dsl.Single, enttask.FieldPriorities, value)
 	}
-	var properties []interface{}
+	var properties []any
 	if tu.mutation.PrioritiesCleared() {
 		properties = append(properties, enttask.FieldPriorities)
 	}
@@ -346,7 +346,7 @@ func (tuo *TaskUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := tuo.mutation.Priorities(); ok {
 		v.Property(dsl.Single, enttask.FieldPriorities, value)
 	}
-	var properties []interface{}
+	var properties []any
 	if tuo.mutation.PrioritiesCleared() {
 		properties = append(properties, enttask.FieldPriorities)
 	}
@@ -354,7 +354,7 @@ func (tuo *TaskUpdateOne) gremlin(id string) *dsl.Traversal {
 		v.SideEffect(__.Properties(properties...).Drop())
 	}
 	if len(tuo.fields) > 0 {
-		fields := make([]interface{}, 0, len(tuo.fields)+1)
+		fields := make([]any, 0, len(tuo.fields)+1)
 		fields = append(fields, true)
 		for _, f := range tuo.fields {
 			fields = append(fields, f)

@@ -17,7 +17,7 @@ func testPkgPath(t *testing.T, x packagestest.Exporter) {
 	e := packagestest.Export(t, x, []packagestest.Module{
 		{
 			Name: "golang.org/x",
-			Files: map[string]interface{}{
+			Files: map[string]any{
 				"x.go":   "package x",
 				"y/y.go": "package y",
 			},

@@ -23,27 +23,27 @@ func TestExpandBindings(t *testing.T) {
 			wantQuery: "no bindings",
 		},
 		{
-			req:       NewEvalRequest("g.V($0)", WithBindings(map[string]interface{}{"$0": 1})),
+			req:       NewEvalRequest("g.V($0)", WithBindings(map[string]any{"$0": 1})),
 			wantQuery: "g.V(1)",
 		},
 		{
-			req:       NewEvalRequest("g.V().has($1, $2)", WithBindings(map[string]interface{}{"$1": "name", "$2": "a8m"})),
+			req:       NewEvalRequest("g.V().has($1, $2)", WithBindings(map[string]any{"$1": "name", "$2": "a8m"})),
 			wantQuery: "g.V().has(\"name\", \"a8m\")",
 		},
 		{
-			req:       NewEvalRequest("g.V().limit(n)", WithBindings(map[string]interface{}{"n": 10})),
+			req:       NewEvalRequest("g.V().limit(n)", WithBindings(map[string]any{"n": 10})),
 			wantQuery: "g.V().limit(10)",
 		},
 		{
-			req:     NewEvalRequest("g.V()", WithBindings(map[string]interface{}{"$0": func() {}})),
+			req:     NewEvalRequest("g.V()", WithBindings(map[string]any{"$0": func() {}})),
 			wantErr: true,
 		},
 		{
-			req:       NewEvalRequest("g.V().has($0, $1)", WithBindings(map[string]interface{}{"$0": "active", "$1": true})),
+			req:       NewEvalRequest("g.V().has($0, $1)", WithBindings(map[string]any{"$0": "active", "$1": true})),
 			wantQuery: "g.V().has(\"active\", true)",
 		},
 		{
-			req:       NewEvalRequest("g.V().has($1, $11)", WithBindings(map[string]interface{}{"$1": "active", "$11": true})),
+			req:       NewEvalRequest("g.V().has($1, $11)", WithBindings(map[string]any{"$1": "active", "$11": true})),
 			wantQuery: "g.V().has(\"active\", true)",
 		},
 	}
@@ -64,8 +64,8 @@ func TestExpandBindingsNoQuery(t *testing.T) {
 	rt := ExpandBindings(RoundTripperFunc(func(ctx context.Context, r *Request) (*Response, error) {
 		return nil, nil
 	}))
-	_, err := rt.RoundTrip(context.Background(), &Request{Arguments: map[string]interface{}{
-		ArgsBindings: map[string]interface{}{},
+	_, err := rt.RoundTrip(context.Background(), &Request{Arguments: map[string]any{
+		ArgsBindings: map[string]any{},
 	}})
 	assert.NoError(t, err)
 }

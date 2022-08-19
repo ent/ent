@@ -53,7 +53,7 @@ func (p Priority) Value() (driver.Value, error) {
 	return p.String(), nil
 }
 
-func (p *Priority) Scan(val interface{}) error {
+func (p *Priority) Scan(val any) error {
 	var s string
 
 	switch v := val.(type) {
