@@ -16,6 +16,7 @@ import (
 
 	"ariga.io/atlas/sql/migrate"
 	"ariga.io/atlas/sql/schema"
+	"ariga.io/atlas/sql/sqltool"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
@@ -72,6 +73,34 @@ func TestMigrateHookAddTable(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func TestMigrate_Formatter(t *testing.T) {
+	db, _, err := sqlmock.New()
+	require.NoError(t, err)
+
+	// If not formatter is given it will be set according to the given migration directory implementation.
+	for _, tt := range []struct {
+		dir migrate.Dir
+		fmt migrate.Formatter
+	}{
+		{&migrate.LocalDir{}, sqltool.GolangMigrateFormatter},
+		{&sqltool.GolangMigrateDir{}, sqltool.GolangMigrateFormatter},
+		{&sqltool.GooseDir{}, sqltool.GooseFormatter},
+		{&sqltool.DBMateDir{}, sqltool.DBMateFormatter},
+		{&sqltool.FlywayDir{}, sqltool.FlywayFormatter},
+		{&sqltool.LiquibaseDir{}, sqltool.LiquibaseFormatter},
+		{struct{ migrate.Dir }{}, sqltool.GolangMigrateFormatter}, // default one if migration dir is unknown
+	} {
+		m, err := NewMigrate(sql.OpenDB("", db), WithDir(tt.dir))
+		require.NoError(t, err)
+		require.Equal(t, tt.fmt, m.fmt)
+	}
+
+	// If a formatter is given, it is not overridden.
+	m, err := NewMigrate(sql.OpenDB("", db), WithDir(&migrate.LocalDir{}), WithFormatter(migrate.DefaultFormatter))
+	require.NoError(t, err)
+	require.Equal(t, migrate.DefaultFormatter, m.fmt)
+}
+
 func TestMigrate_Diff(t *testing.T) {
 	ctx := context.Background()
 
@@ -94,7 +123,7 @@ func TestMigrate_Diff(t *testing.T) {
 	p = t.TempDir()
 	d, err = migrate.NewLocalDir(p)
 	require.NoError(t, err)
-	m, err = NewMigrate(db, WithDir(d), WithSumFile())
+	m, err = NewMigrate(db, WithDir(d))
 	require.NoError(t, err)
 	require.NoError(t, m.Diff(ctx, &Table{Name: "users"}))
 	requireFileEqual(t, filepath.Join(p, v+"_changes.up.sql"), "-- create \"users\" table\nCREATE TABLE `users` (, PRIMARY KEY ());\n")

@@ -282,7 +282,7 @@ func Versioned(t *testing.T, drv sql.ExecQuerier, devURL string, client *version
 	require.ErrorIs(t, client.Schema.Diff(ctx, opts...), migrate.ErrChecksumMismatch)
 
 	// Diffing by replaying on the current connection -> not clean.
-	hf, err := migrate.HashSum(dir)
+	hf, err := dir.Checksum()
 	require.NoError(t, err)
 	require.NoError(t, migrate.WriteSumFile(dir, hf))
 	require.ErrorAs(t, client.Schema.Diff(ctx, opts...), &migrate.NotCleanError{})

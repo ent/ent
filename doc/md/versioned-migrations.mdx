@@ -120,6 +120,64 @@ docker run --name migration --rm -p 5432:5432 -e POSTGRES_PASSWORD=pass -e POSTG
 
 2\. Create a `main.go` file under the `migrate/ent` package and customize the migration generation for your project.
 
+<Tabs
+defaultValue="golang_migrate"
+values={[
+{label: 'Atlas', value: 'atlas'},
+{label: 'golang-migrate/migrate', value: 'golang_migrate'},
+{label: 'pressly/goose', value: 'goose'},
+{label: 'amacneil/dbmate', value: 'dbmate'},
+{label: 'Flyway', value: 'flyway'},
+{label: 'Liquibase', value: 'liquibase'},
+]}>
+<TabItem value="atlas">
+
+```go title="ent/migrate/main.go"
+//go:build ignore
+
+package main
+
+import (
+	"context"
+	"log"
+	"os"
+
+	"<project>/ent/migrate"
+
+	atlas "ariga.io/atlas/sql/migrate"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql/schema"
+	_ "github.com/go-sql-driver/mysql"
+)
+
+func main() {
+	ctx := context.Background()
+	// Create a local migration directory able to understand Atlas migration file format for replay.
+	dir, err := atlas.NewLocalDir("ent/migrate/migrations")
+	if err != nil {
+		log.Fatalf("failed creating atlas migration directory: %v", err)
+	}
+	// Migrate diff options.
+	opts := []schema.MigrateOption{
+		schema.WithDir(dir),                         // provide migration directory
+		schema.WithMigrationMode(schema.ModeReplay), // provide migration mode
+		schema.WithDialect(dialect.MySQL),           // Ent dialect to use
+		schema.WithFormatter(atlas.DefaultFormatter),
+	}
+	if len(os.Args) != 2 {
+		log.Fatalln("migration name is required. Use: 'go run -mod=mod ent/migrate/main.go <name>'")
+	}
+	// Generate migrations using Atlas support for MySQL (note the Ent dialect option passed above).
+	err = migrate.NamedDiff(ctx, "mysql://root:pass@localhost:3306/test", os.Args[1], opts...)
+	if err != nil {
+		log.Fatalf("failed generating migration file: %v", err)
+	}
+}
+```
+
+</TabItem>
+<TabItem value="golang_migrate">
+
 ```go title="ent/migrate/main.go"
 //go:build ignore
 
@@ -140,7 +198,7 @@ import (
 
 func main() {
 	ctx := context.Background()
-	// Create a local migration directory able to understand golang-migrate migration files for replay.
+	// Create a local migration directory able to understand golang-migrate migration file format for replay.
 	dir, err := sqltool.NewGolangMigrateDir("ent/migrate/migrations")
 	if err != nil {
 		log.Fatalf("failed creating atlas migration directory: %v", err)
@@ -161,6 +219,189 @@ func main() {
 	}
 }
 ```
+
+</TabItem>
+<TabItem value="goose">
+
+```go title="ent/migrate/main.go"
+//go:build ignore
+
+package main
+
+import (
+	"context"
+	"log"
+	"os"
+
+	"<project>/ent/migrate"
+
+	"ariga.io/atlas/sql/sqltool"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql/schema"
+	_ "github.com/go-sql-driver/mysql"
+)
+
+func main() {
+	ctx := context.Background()
+	// Create a local migration directory able to understand goose migration file format for replay.
+	dir, err := sqltool.NewGooseDir("ent/migrate/migrations")
+	if err != nil {
+		log.Fatalf("failed creating atlas migration directory: %v", err)
+	}
+	// Migrate diff options.
+	opts := []schema.MigrateOption{
+		schema.WithDir(dir),                         // provide migration directory
+		schema.WithMigrationMode(schema.ModeReplay), // provide migration mode
+		schema.WithDialect(dialect.MySQL),           // Ent dialect to use
+	}
+	if len(os.Args) != 2 {
+		log.Fatalln("migration name is required. Use: 'go run -mod=mod ent/migrate/main.go <name>'")
+	}
+	// Generate migrations using Atlas support for MySQL (note the Ent dialect option passed above).
+	err = migrate.NamedDiff(ctx, "mysql://root:pass@localhost:3306/test", os.Args[1], opts...)
+	if err != nil {
+		log.Fatalf("failed generating migration file: %v", err)
+	}
+}
+```
+
+</TabItem>
+<TabItem value="dbmate">
+
+```go title="ent/migrate/main.go"
+//go:build ignore
+
+package main
+
+import (
+	"context"
+	"log"
+	"os"
+
+	"<project>/ent/migrate"
+
+	"ariga.io/atlas/sql/sqltool"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql/schema"
+	_ "github.com/go-sql-driver/mysql"
+)
+
+func main() {
+	ctx := context.Background()
+	// Create a local migration directory able to understand dbmate migration file format for replay.
+	dir, err := sqltool.NewDBMateDir("ent/migrate/migrations")
+	if err != nil {
+		log.Fatalf("failed creating atlas migration directory: %v", err)
+	}
+	// Migrate diff options.
+	opts := []schema.MigrateOption{
+		schema.WithDir(dir),                         // provide migration directory
+		schema.WithMigrationMode(schema.ModeReplay), // provide migration mode
+		schema.WithDialect(dialect.MySQL),           // Ent dialect to use
+	}
+	if len(os.Args) != 2 {
+		log.Fatalln("migration name is required. Use: 'go run -mod=mod ent/migrate/main.go <name>'")
+	}
+	// Generate migrations using Atlas support for MySQL (note the Ent dialect option passed above).
+	err = migrate.NamedDiff(ctx, "mysql://root:pass@localhost:3306/test", os.Args[1], opts...)
+	if err != nil {
+		log.Fatalf("failed generating migration file: %v", err)
+	}
+}
+```
+
+</TabItem>
+<TabItem value="flyway">
+
+```go title="ent/migrate/main.go"
+//go:build ignore
+
+package main
+
+import (
+	"context"
+	"log"
+	"os"
+
+	"<project>/ent/migrate"
+
+	"ariga.io/atlas/sql/sqltool"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql/schema"
+	_ "github.com/go-sql-driver/mysql"
+)
+
+func main() {
+	ctx := context.Background()
+	// Create a local migration directory able to understand Flyway migration file format for replay.
+	dir, err := sqltool.NewFlywayDir("ent/migrate/migrations")
+	if err != nil {
+		log.Fatalf("failed creating atlas migration directory: %v", err)
+	}
+	// Migrate diff options.
+	opts := []schema.MigrateOption{
+		schema.WithDir(dir),                         // provide migration directory
+		schema.WithMigrationMode(schema.ModeReplay), // provide migration mode
+		schema.WithDialect(dialect.MySQL),           // Ent dialect to use
+	}
+	if len(os.Args) != 2 {
+		log.Fatalln("migration name is required. Use: 'go run -mod=mod ent/migrate/main.go <name>'")
+	}
+	// Generate migrations using Atlas support for MySQL (note the Ent dialect option passed above).
+	err = migrate.NamedDiff(ctx, "mysql://root:pass@localhost:3306/test", os.Args[1], opts...)
+	if err != nil {
+		log.Fatalf("failed generating migration file: %v", err)
+	}
+}
+```
+
+</TabItem>
+<TabItem value="liquibase">
+
+```go title="ent/migrate/main.go"
+//go:build ignore
+
+package main
+
+import (
+	"context"
+	"log"
+	"os"
+
+	"<project>/ent/migrate"
+
+	"ariga.io/atlas/sql/sqltool"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql/schema"
+	_ "github.com/go-sql-driver/mysql"
+)
+
+func main() {
+	ctx := context.Background()
+	// Create a local migration directory able to understand Liquibase migration file format for replay.
+	dir, err := sqltool.NewLiquibaseDir("ent/migrate/migrations")
+	if err != nil {
+		log.Fatalf("failed creating atlas migration directory: %v", err)
+	}
+	// Migrate diff options.
+	opts := []schema.MigrateOption{
+		schema.WithDir(dir),                         // provide migration directory
+		schema.WithMigrationMode(schema.ModeReplay), // provide migration mode
+		schema.WithDialect(dialect.MySQL),           // Ent dialect to use
+	}
+	if len(os.Args) != 2 {
+		log.Fatalln("migration name is required. Use: 'go run -mod=mod ent/migrate/main.go <name>'")
+	}
+	// Generate migrations using Atlas support for MySQL (note the Ent dialect option passed above).
+	err = migrate.NamedDiff(ctx, "mysql://root:pass@localhost:3306/test", os.Args[1], opts...)
+	if err != nil {
+		log.Fatalf("failed generating migration file: %v", err)
+	}
+}
+```
+
+</TabItem>
+</Tabs>
 
 3\. Trigger migration generation by executing `go run -mod=mod ent/migrate/main.go <name>` from the root of the project.
 For example:
@@ -307,15 +548,26 @@ longer needed after the first one.
 
 ## Apply Migrations
 
-The Atlas migration engine does not support applying the migration files onto a database yet, therefore to manage and
-execute the generated migration files, you have to rely on an external tool (or execute them by hand). By default, Atlas
-generates one "up" and one "down" migration file for the computed diff. These files are compatible with the popular
-[golang-migrate/migrate](https://github.com/golang-migrate/migrate) package, and you can use that tool to manage the
-migrations in your deployments.
+The Atlas migration engine has only experimental support applying the migration files onto a database yet. Therefore,
+to manage and execute the generated migration files for production systems it is recommended you use on an external tool
+(or execute them by hand).By default, Ent generates one "up" and one "down" migration file for the computed diff. These
+files are compatible with the popular [golang-migrate/migrate](https://github.com/golang-migrate/migrate) package, and
+you can use that tool to manage the migrations in your deployments.
 
 ```shell
 migrate -source file://migrations -database mysql://root:pass@tcp(localhost:3306)/test up
 ```
+
+:::note
+
+If you use golang-migrate with MySQL, you need to add the `multiStatements` parameter to `true` as in the example below
+and then take the DSN we used in the documents with the param applied.
+
+```
+"user:password@tcp(host:port)/dbname?multiStatements=true"
+```
+
+:::
 
 ## Moving from Auto-Migration to Versioned Migrations
 
@@ -354,81 +606,8 @@ migration file.
 ### Configure the tool you use to manage migrations to consider this file as applied
 
 In case of `golang-migrate` this can be done by forcing your database version as
-described [here](https://github.com/golang-migrate/migrate/blob/master/GETTING_STARTED.md#forcing-your-database-version)
-.
-
-## Use a Custom Formatter
-
-Atlas' migration engine comes with great customizability. By the use of a custom `Formatter` you can generate the
-migration files in a format compatible with other migration management tools and Atlas has built-in support for the
-following four:
-
-1. [golang-migrate/migrate](https://github.com/golang-migrate/migrate)
-2. [pressly/goose](https://github.com/pressly/goose)
-3. [Flyway](https://flywaydb.org/)
-4. [Liquibase](https://www.liquibase.org/)
-
-Please be aware, that migration directory replay currently only supports `golang-migrate/migrate` formatted files.
-Attempting to replay migration files of other tools might work, but is not officially supported (yet).
-
-```go
-//go:build ignore
-
-package main
-
-import (
-	"context"
-	"log"
-
-	"<project>/ent/migrate"
-
-	atlas "ariga.io/atlas/sql/migrate"
-	_ "ariga.io/atlas/sql/mysql"
-	"ariga.io/atlas/sql/sqltool"
-	"entgo.io/ent/dialect"
-	"entgo.io/ent/dialect/sql/schema"
-	_ "github.com/go-sql-driver/mysql"
-)
-
-func main() {
-	ctx := context.Background()
-	// Create a local migration directory.
-	dir, err := atlas.NewLocalDir("ent/migrate/migrations")
-	if err != nil {
-		log.Fatalf("failed creating atlas migration directory: %v", err)
-	}
-	// Write migration diff.
-	opts := []schema.MigrateOption{
-		schema.WithDir(dir),                         // provide migration directory
-		schema.WithMigrationMode(schema.ModeReplay), // provide migration mode
-		schema.WithDialect(dialect.MySQL),           // Ent dialect to use
-		// highlight-start
-		// Choose one of the below.
-		schema.WithFormatter(sqltool.GolangMigrateFormatter),
-		schema.WithFormatter(sqltool.GooseFormatter),
-		schema.WithFormatter(sqltool.FlywayFormatter),
-		schema.WithFormatter(sqltool.LiquibaseFormatter),
-		// highlight-end
-	}
-	if len(os.Args) != 2 {
-		log.Fatalln("migration name is required. Use: 'go run -mod=mod ent/migrate/main.go <name>'")
-	}
-	// Generate migrations using Atlas support for MySQL (note the Ent dialect option passed above).
-	err = migrate.NamedDiff(ctx, "mysql://root:pass@localhost:3306/test", os.Args[1], opts...)
-	if err != nil {
-		log.Fatalf("failed generating migration file: %v", err)
-	}
-}
-```
-
-### Note for using golang-migrate
-
-If you use golang-migrate with MySQL, you need to add the `multiStatements` parameter to `true` as in the example below
-and then take the DSN we used in the documents with the param applied.
-
-```
-"user:password@tcp(host:port)/dbname?multiStatements=true"
-```
+described
+[here](https://github.com/golang-migrate/migrate/blob/master/GETTING_STARTED.md#forcing-your-database-version).
 
 ## Atlas migration directory integrity file
 
