@@ -310,7 +310,6 @@ func (f DiffFunc) Diff(current, desired *schema.Schema) ([]schema.Change, error)
 //			return changes, nil
 //		})
 //	})
-//
 func WithDiffHook(hooks ...DiffHook) MigrateOption {
 	return func(a *Atlas) {
 		a.diffHooks = append(a.diffHooks, hooks...)
@@ -321,7 +320,6 @@ func WithDiffHook(hooks ...DiffHook) MigrateOption {
 // returned by the Differ before executing migration planning.
 //
 //	SkipChanges(schema.DropTable|schema.DropColumn)
-//
 func WithSkipChanges(skip ChangeKind) MigrateOption {
 	return func(a *Atlas) {
 		a.skip = skip
@@ -488,7 +486,6 @@ func (f ApplyFunc) Apply(ctx context.Context, conn dialect.ExecQuerier, plan *mi
 //			return next.Apply(ctx, conn, plan)
 //		})
 //	})
-//
 func WithApplyHook(hooks ...ApplyHook) MigrateOption {
 	return func(a *Atlas) {
 		a.applyHook = append(a.applyHook, hooks...)
@@ -608,7 +605,18 @@ func (a *Atlas) init() error {
 		a.diffHooks = append(a.diffHooks, withoutForeignKeys)
 	}
 	if a.dir != nil && a.fmt == nil {
-		a.fmt = sqltool.GolangMigrateFormatter
+		switch a.dir.(type) {
+		case *sqltool.GooseDir:
+			a.fmt = sqltool.GooseFormatter
+		case *sqltool.DBMateDir:
+			a.fmt = sqltool.DBMateFormatter
+		case *sqltool.FlywayDir:
+			a.fmt = sqltool.FlywayFormatter
+		case *sqltool.LiquibaseDir:
+			a.fmt = sqltool.LiquibaseFormatter
+		default: // migrate.LocalDir, sqltool.GolangMigrateDir and custom ones
+			a.fmt = sqltool.GolangMigrateFormatter
+		}
 	}
 	if a.mode == ModeReplay {
 		// ModeReplay requires a migration directory.
