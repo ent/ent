@@ -256,7 +256,7 @@ func (cu *CommentUpdate) gremlin() *dsl.Traversal {
 	if value, ok := cu.mutation.Dir(); ok {
 		v.Property(dsl.Single, comment.FieldDir, value)
 	}
-	var properties []interface{}
+	var properties []any
 	if cu.mutation.NillableIntCleared() {
 		properties = append(properties, comment.FieldNillableInt)
 	}
@@ -532,7 +532,7 @@ func (cuo *CommentUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := cuo.mutation.Dir(); ok {
 		v.Property(dsl.Single, comment.FieldDir, value)
 	}
-	var properties []interface{}
+	var properties []any
 	if cuo.mutation.NillableIntCleared() {
 		properties = append(properties, comment.FieldNillableInt)
 	}
@@ -546,7 +546,7 @@ func (cuo *CommentUpdateOne) gremlin(id string) *dsl.Traversal {
 		v.SideEffect(__.Properties(properties...).Drop())
 	}
 	if len(cuo.fields) > 0 {
-		fields := make([]interface{}, 0, len(cuo.fields)+1)
+		fields := make([]any, 0, len(cuo.fields)+1)
 		fields = append(fields, true)
 		for _, f := range cuo.fields {
 			fields = append(fields, f)

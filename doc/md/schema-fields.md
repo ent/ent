@@ -797,7 +797,7 @@ func (p Level) Value() (driver.Value, error) {
 }
 
 // Scan tells our code how to read the enum into our type.
-func (p *Level) Scan(val interface{}) error {
+func (p *Level) Scan(val any) error {
 	var s string
 	switch v := val.(type) {
 	case nil:

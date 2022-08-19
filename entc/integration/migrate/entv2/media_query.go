@@ -320,10 +320,10 @@ func (mq *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media,
 		nodes = []*Media{}
 		_spec = mq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Media).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Media{config: mq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -455,7 +455,7 @@ func (mgb *MediaGroupBy) Aggregate(fns ...AggregateFunc) *MediaGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (mgb *MediaGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (mgb *MediaGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := mgb.path(ctx)
 	if err != nil {
 		return err
@@ -464,7 +464,7 @@ func (mgb *MediaGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return mgb.sqlScan(ctx, v)
 }
 
-func (mgb *MediaGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (mgb *MediaGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range mgb.fields {
 		if !media.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -511,7 +511,7 @@ type MediaSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ms *MediaSelect) Scan(ctx context.Context, v interface{}) error {
+func (ms *MediaSelect) Scan(ctx context.Context, v any) error {
 	if err := ms.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -519,7 +519,7 @@ func (ms *MediaSelect) Scan(ctx context.Context, v interface{}) error {
 	return ms.sqlScan(ctx, v)
 }
 
-func (ms *MediaSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ms *MediaSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ms.sql.Query()
 	if err := ms.driver.Query(ctx, query, args, rows); err != nil {

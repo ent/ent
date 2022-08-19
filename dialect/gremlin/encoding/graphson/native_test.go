@@ -17,7 +17,7 @@ import (
 
 func TestEncodeNative(t *testing.T) {
 	tests := []struct {
-		in      interface{}
+		in      any
 		want    string
 		wantErr bool
 	}{
@@ -142,7 +142,7 @@ func TestEncodeNative(t *testing.T) {
 			}`,
 		},
 		{
-			in: func() interface{} { v := int16(6116); return &v }(),
+			in: func() any { v := int16(6116); return &v }(),
 			want: `{
 				"@type": "gx:Int16",
 				"@value": 6116
@@ -177,7 +177,7 @@ func TestEncodeNative(t *testing.T) {
 func TestDecodeNative(t *testing.T) {
 	tests := []struct {
 		in   string
-		want interface{}
+		want any
 	}{
 		{
 			in:   `{"@type": "g:Float", "@value": 3.14}`,

@@ -326,10 +326,10 @@ func (blq *BlobLinkQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bl
 			blq.withLink != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*BlobLink).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &BlobLink{config: blq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -518,7 +518,7 @@ func (blgb *BlobLinkGroupBy) Aggregate(fns ...AggregateFunc) *BlobLinkGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (blgb *BlobLinkGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (blgb *BlobLinkGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := blgb.path(ctx)
 	if err != nil {
 		return err
@@ -527,7 +527,7 @@ func (blgb *BlobLinkGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return blgb.sqlScan(ctx, v)
 }
 
-func (blgb *BlobLinkGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (blgb *BlobLinkGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range blgb.fields {
 		if !bloblink.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -574,7 +574,7 @@ type BlobLinkSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (bls *BlobLinkSelect) Scan(ctx context.Context, v interface{}) error {
+func (bls *BlobLinkSelect) Scan(ctx context.Context, v any) error {
 	if err := bls.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -582,7 +582,7 @@ func (bls *BlobLinkSelect) Scan(ctx context.Context, v interface{}) error {
 	return bls.sqlScan(ctx, v)
 }
 
-func (bls *BlobLinkSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (bls *BlobLinkSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := bls.sql.Query()
 	if err := bls.driver.Query(ctx, query, args, rows); err != nil {

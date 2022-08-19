@@ -314,7 +314,7 @@ func (cq *CommentQuery) gremlinAll(ctx context.Context) ([]*Comment, error) {
 	res := &gremlin.Response{}
 	traversal := cq.gremlinQuery(ctx)
 	if len(cq.fields) > 0 {
-		fields := make([]interface{}, len(cq.fields))
+		fields := make([]any, len(cq.fields))
 		for i, f := range cq.fields {
 			fields[i] = f
 		}
@@ -398,7 +398,7 @@ func (cgb *CommentGroupBy) Aggregate(fns ...AggregateFunc) *CommentGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (cgb *CommentGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (cgb *CommentGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := cgb.path(ctx)
 	if err != nil {
 		return err
@@ -407,7 +407,7 @@ func (cgb *CommentGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return cgb.gremlinScan(ctx, v)
 }
 
-func (cgb *CommentGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
+func (cgb *CommentGroupBy) gremlinScan(ctx context.Context, v any) error {
 	res := &gremlin.Response{}
 	query, bindings := cgb.gremlinQuery().Query()
 	if err := cgb.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -425,8 +425,8 @@ func (cgb *CommentGroupBy) gremlinScan(ctx context.Context, v interface{}) error
 
 func (cgb *CommentGroupBy) gremlinQuery() *dsl.Traversal {
 	var (
-		trs   []interface{}
-		names []interface{}
+		trs   []any
+		names []any
 	)
 	for _, fn := range cgb.fns {
 		name, tr := fn("p", "")
@@ -453,7 +453,7 @@ type CommentSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (cs *CommentSelect) Scan(ctx context.Context, v interface{}) error {
+func (cs *CommentSelect) Scan(ctx context.Context, v any) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -461,7 +461,7 @@ func (cs *CommentSelect) Scan(ctx context.Context, v interface{}) error {
 	return cs.gremlinScan(ctx, v)
 }
 
-func (cs *CommentSelect) gremlinScan(ctx context.Context, v interface{}) error {
+func (cs *CommentSelect) gremlinScan(ctx context.Context, v any) error {
 	var (
 		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
@@ -473,7 +473,7 @@ func (cs *CommentSelect) gremlinScan(ctx context.Context, v interface{}) error {
 			traversal = cs.gremlin.ID()
 		}
 	} else {
-		fields := make([]interface{}, len(cs.fields))
+		fields := make([]any, len(cs.fields))
 		for i, f := range cs.fields {
 			fields[i] = f
 		}

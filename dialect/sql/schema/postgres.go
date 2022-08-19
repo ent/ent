@@ -31,7 +31,7 @@ type Postgres struct {
 // It returns an error if the server version is lower than v10.
 func (d *Postgres) init(ctx context.Context, tx dialect.ExecQuerier) error {
 	rows := &sql.Rows{}
-	if err := tx.Query(ctx, "SHOW server_version_num", []interface{}{}, rows); err != nil {
+	if err := tx.Query(ctx, "SHOW server_version_num", []any{}, rows); err != nil {
 		return fmt.Errorf("querying server version %w", err)
 	}
 	defer rows.Close()
@@ -87,7 +87,7 @@ func (d *Postgres) setRange(ctx context.Context, conn dialect.ExecQuerier, t *Ta
 	if len(t.PrimaryKey) == 1 {
 		pk = t.PrimaryKey[0].Name
 	}
-	return conn.Exec(ctx, fmt.Sprintf("ALTER TABLE %q ALTER COLUMN %q RESTART WITH %d", t.Name, pk, value), []interface{}{}, nil)
+	return conn.Exec(ctx, fmt.Sprintf("ALTER TABLE %q ALTER COLUMN %q RESTART WITH %d", t.Name, pk, value), []any{}, nil)
 }
 
 // table loads the current table description from the database.
@@ -181,9 +181,9 @@ ORDER BY index_name, seq_in_index;
 `
 
 // indexesQuery returns the query (and its placeholders) for getting table indexes.
-func (d *Postgres) indexesQuery(table string) (string, []interface{}) {
+func (d *Postgres) indexesQuery(table string) (string, []any) {
 	if d.schema != "" {
-		return fmt.Sprintf(indexesQuery, "$1", table), []interface{}{d.schema}
+		return fmt.Sprintf(indexesQuery, "$1", table), []any{d.schema}
 	}
 	return fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", table), nil
 }
@@ -602,7 +602,7 @@ func (d *Postgres) foreignKeys(ctx context.Context, tx dialect.Tx, tables []*Tab
 	for _, t := range tables {
 		rows := &sql.Rows{}
 		query := fmt.Sprintf(fkQuery, t.Name)
-		if err := tx.Query(ctx, query, []interface{}{}, rows); err != nil {
+		if err := tx.Query(ctx, query, []any{}, rows); err != nil {
 			return fmt.Errorf("querying foreign keys for table %s: %w", t.Name, err)
 		}
 		defer rows.Close()

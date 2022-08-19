@@ -38,7 +38,7 @@ func IDNEQ(id int) predicate.Pet {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -49,7 +49,7 @@ func IDIn(ids ...int) predicate.Pet {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -115,7 +115,7 @@ func AgeNEQ(v int) predicate.Pet {
 
 // AgeIn applies the In predicate on the "age" field.
 func AgeIn(vs ...int) predicate.Pet {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -126,7 +126,7 @@ func AgeIn(vs ...int) predicate.Pet {
 
 // AgeNotIn applies the NotIn predicate on the "age" field.
 func AgeNotIn(vs ...int) predicate.Pet {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -179,7 +179,7 @@ func LicensedAtNEQ(v time.Time) predicate.Pet {
 
 // LicensedAtIn applies the In predicate on the "licensed_at" field.
 func LicensedAtIn(vs ...time.Time) predicate.Pet {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -190,7 +190,7 @@ func LicensedAtIn(vs ...time.Time) predicate.Pet {
 
 // LicensedAtNotIn applies the NotIn predicate on the "licensed_at" field.
 func LicensedAtNotIn(vs ...time.Time) predicate.Pet {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

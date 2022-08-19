@@ -395,10 +395,10 @@ func (nq *NodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Node, e
 			nq.withNext != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Node).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Node{config: nq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -594,7 +594,7 @@ func (ngb *NodeGroupBy) Aggregate(fns ...AggregateFunc) *NodeGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (ngb *NodeGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (ngb *NodeGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := ngb.path(ctx)
 	if err != nil {
 		return err
@@ -603,7 +603,7 @@ func (ngb *NodeGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return ngb.sqlScan(ctx, v)
 }
 
-func (ngb *NodeGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (ngb *NodeGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range ngb.fields {
 		if !node.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -650,7 +650,7 @@ type NodeSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ns *NodeSelect) Scan(ctx context.Context, v interface{}) error {
+func (ns *NodeSelect) Scan(ctx context.Context, v any) error {
 	if err := ns.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -658,7 +658,7 @@ func (ns *NodeSelect) Scan(ctx context.Context, v interface{}) error {
 	return ns.sqlScan(ctx, v)
 }
 
-func (ns *NodeSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ns *NodeSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ns.sql.Query()
 	if err := ns.driver.Query(ctx, query, args, rows); err != nil {

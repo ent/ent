@@ -363,10 +363,10 @@ func (ftq *FileTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Fi
 			ftq.withFiles != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*FileType).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &FileType{config: ftq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -600,7 +600,7 @@ func (ftgb *FileTypeGroupBy) Aggregate(fns ...AggregateFunc) *FileTypeGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (ftgb *FileTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (ftgb *FileTypeGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := ftgb.path(ctx)
 	if err != nil {
 		return err
@@ -609,7 +609,7 @@ func (ftgb *FileTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return ftgb.sqlScan(ctx, v)
 }
 
-func (ftgb *FileTypeGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (ftgb *FileTypeGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range ftgb.fields {
 		if !filetype.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -656,7 +656,7 @@ type FileTypeSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (fts *FileTypeSelect) Scan(ctx context.Context, v interface{}) error {
+func (fts *FileTypeSelect) Scan(ctx context.Context, v any) error {
 	if err := fts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -664,7 +664,7 @@ func (fts *FileTypeSelect) Scan(ctx context.Context, v interface{}) error {
 	return fts.sqlScan(ctx, v)
 }
 
-func (fts *FileTypeSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (fts *FileTypeSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := fts.sql.Query()
 	if err := fts.driver.Query(ctx, query, args, rows); err != nil {

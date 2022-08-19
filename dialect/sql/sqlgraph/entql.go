@@ -292,7 +292,7 @@ func (e *state) field(f *entql.Field) string {
 }
 
 func args(b *sql.Builder, v *entql.Value) {
-	vs, ok := v.V.([]interface{})
+	vs, ok := v.V.([]any)
 	if !ok {
 		b.Arg(v.V)
 		return
@@ -301,7 +301,7 @@ func args(b *sql.Builder, v *entql.Value) {
 }
 
 // expect panics if the condition is false.
-func expect(cond bool, msg string, args ...interface{}) {
+func expect(cond bool, msg string, args ...any) {
 	if !cond {
 		panic(evalError{fmt.Sprintf("expect "+msg, args...)})
 	}

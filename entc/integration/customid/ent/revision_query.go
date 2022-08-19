@@ -298,10 +298,10 @@ func (rq *RevisionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Rev
 		nodes = []*Revision{}
 		_spec = rq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Revision).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Revision{config: rq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -433,7 +433,7 @@ func (rgb *RevisionGroupBy) Aggregate(fns ...AggregateFunc) *RevisionGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (rgb *RevisionGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (rgb *RevisionGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := rgb.path(ctx)
 	if err != nil {
 		return err
@@ -442,7 +442,7 @@ func (rgb *RevisionGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return rgb.sqlScan(ctx, v)
 }
 
-func (rgb *RevisionGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (rgb *RevisionGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range rgb.fields {
 		if !revision.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -489,7 +489,7 @@ type RevisionSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (rs *RevisionSelect) Scan(ctx context.Context, v interface{}) error {
+func (rs *RevisionSelect) Scan(ctx context.Context, v any) error {
 	if err := rs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -497,7 +497,7 @@ func (rs *RevisionSelect) Scan(ctx context.Context, v interface{}) error {
 	return rs.sqlScan(ctx, v)
 }
 
-func (rs *RevisionSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (rs *RevisionSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := rs.sql.Query()
 	if err := rs.driver.Query(ctx, query, args, rows); err != nil {

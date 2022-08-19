@@ -323,10 +323,10 @@ func (tq *TaskQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Task, e
 		nodes = []*Task{}
 		_spec = tq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Task).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Task{config: tq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -499,7 +499,7 @@ func (tgb *TaskGroupBy) Aggregate(fns ...AggregateFunc) *TaskGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (tgb *TaskGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (tgb *TaskGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := tgb.path(ctx)
 	if err != nil {
 		return err
@@ -508,7 +508,7 @@ func (tgb *TaskGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return tgb.sqlScan(ctx, v)
 }
 
-func (tgb *TaskGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (tgb *TaskGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range tgb.fields {
 		if !enttask.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -555,7 +555,7 @@ type TaskSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ts *TaskSelect) Scan(ctx context.Context, v interface{}) error {
+func (ts *TaskSelect) Scan(ctx context.Context, v any) error {
 	if err := ts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -563,7 +563,7 @@ func (ts *TaskSelect) Scan(ctx context.Context, v interface{}) error {
 	return ts.sqlScan(ctx, v)
 }
 
-func (ts *TaskSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ts *TaskSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ts.sql.Query()
 	if err := ts.driver.Query(ctx, query, args, rows); err != nil {

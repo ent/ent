@@ -326,10 +326,10 @@ func (ruq *RoleUserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Ro
 			ruq.withUser != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*RoleUser).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &RoleUser{config: ruq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -518,7 +518,7 @@ func (rugb *RoleUserGroupBy) Aggregate(fns ...AggregateFunc) *RoleUserGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (rugb *RoleUserGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (rugb *RoleUserGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := rugb.path(ctx)
 	if err != nil {
 		return err
@@ -527,7 +527,7 @@ func (rugb *RoleUserGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return rugb.sqlScan(ctx, v)
 }
 
-func (rugb *RoleUserGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (rugb *RoleUserGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range rugb.fields {
 		if !roleuser.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -574,7 +574,7 @@ type RoleUserSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (rus *RoleUserSelect) Scan(ctx context.Context, v interface{}) error {
+func (rus *RoleUserSelect) Scan(ctx context.Context, v any) error {
 	if err := rus.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -582,7 +582,7 @@ func (rus *RoleUserSelect) Scan(ctx context.Context, v interface{}) error {
 	return rus.sqlScan(ctx, v)
 }
 
-func (rus *RoleUserSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (rus *RoleUserSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := rus.sql.Query()
 	if err := rus.driver.Query(ctx, query, args, rows); err != nil {

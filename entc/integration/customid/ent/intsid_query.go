@@ -382,10 +382,10 @@ func (isq *IntSIDQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*IntS
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, intsid.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*IntSID).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &IntSID{config: isq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -592,7 +592,7 @@ func (isgb *IntSIDGroupBy) Aggregate(fns ...AggregateFunc) *IntSIDGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (isgb *IntSIDGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (isgb *IntSIDGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := isgb.path(ctx)
 	if err != nil {
 		return err
@@ -601,7 +601,7 @@ func (isgb *IntSIDGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return isgb.sqlScan(ctx, v)
 }
 
-func (isgb *IntSIDGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (isgb *IntSIDGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range isgb.fields {
 		if !intsid.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -648,7 +648,7 @@ type IntSIDSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (iss *IntSIDSelect) Scan(ctx context.Context, v interface{}) error {
+func (iss *IntSIDSelect) Scan(ctx context.Context, v any) error {
 	if err := iss.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -656,7 +656,7 @@ func (iss *IntSIDSelect) Scan(ctx context.Context, v interface{}) error {
 	return iss.sqlScan(ctx, v)
 }
 
-func (iss *IntSIDSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (iss *IntSIDSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := iss.sql.Query()
 	if err := iss.driver.Query(ctx, query, args, rows); err != nil {

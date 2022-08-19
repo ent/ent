@@ -16,10 +16,10 @@ import (
 type (
 	// A Request models a request message sent to the server.
 	Request struct {
-		RequestID string                 `json:"requestId" graphson:"g:UUID"`
-		Operation string                 `json:"op"`
-		Processor string                 `json:"processor"`
-		Arguments map[string]interface{} `json:"args"`
+		RequestID string         `json:"requestId" graphson:"g:UUID"`
+		Operation string         `json:"op"`
+		Processor string         `json:"processor"`
+		Arguments map[string]any `json:"args"`
 	}
 
 	// RequestOption enables request customization.
@@ -34,7 +34,7 @@ func NewEvalRequest(query string, opts ...RequestOption) *Request {
 	r := &Request{
 		RequestID: uuid.New().String(),
 		Operation: OpsEval,
-		Arguments: map[string]interface{}{
+		Arguments: map[string]any{
 			ArgsGremlin:  query,
 			ArgsLanguage: "gremlin-groovy",
 		},
@@ -50,7 +50,7 @@ func NewAuthRequest(requestID, username, password string) *Request {
 	return &Request{
 		RequestID: requestID,
 		Operation: OpsAuthentication,
-		Arguments: map[string]interface{}{
+		Arguments: map[string]any{
 			ArgsSasl: Credentials{
 				Username: username,
 				Password: password,
@@ -61,7 +61,7 @@ func NewAuthRequest(requestID, username, password string) *Request {
 }
 
 // WithBindings sets request bindings.
-func WithBindings(bindings map[string]interface{}) RequestOption {
+func WithBindings(bindings map[string]any) RequestOption {
 	return func(r *Request) {
 		r.Arguments[ArgsBindings] = bindings
 	}

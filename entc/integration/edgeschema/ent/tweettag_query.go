@@ -397,10 +397,10 @@ func (ttq *TweetTagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tw
 			ttq.withTweet != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*TweetTag).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &TweetTag{config: ttq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -598,7 +598,7 @@ func (ttgb *TweetTagGroupBy) Aggregate(fns ...AggregateFunc) *TweetTagGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (ttgb *TweetTagGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (ttgb *TweetTagGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := ttgb.path(ctx)
 	if err != nil {
 		return err
@@ -607,7 +607,7 @@ func (ttgb *TweetTagGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return ttgb.sqlScan(ctx, v)
 }
 
-func (ttgb *TweetTagGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (ttgb *TweetTagGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range ttgb.fields {
 		if !tweettag.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -654,7 +654,7 @@ type TweetTagSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (tts *TweetTagSelect) Scan(ctx context.Context, v interface{}) error {
+func (tts *TweetTagSelect) Scan(ctx context.Context, v any) error {
 	if err := tts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -662,7 +662,7 @@ func (tts *TweetTagSelect) Scan(ctx context.Context, v interface{}) error {
 	return tts.sqlScan(ctx, v)
 }
 
-func (tts *TweetTagSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (tts *TweetTagSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := tts.sql.Query()
 	if err := tts.driver.Query(ctx, query, args, rows); err != nil {

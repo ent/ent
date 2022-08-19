@@ -35,7 +35,7 @@ func IDNEQ(id int) predicate.Comment {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -46,7 +46,7 @@ func IDIn(ids ...int) predicate.Comment {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -119,7 +119,7 @@ func UniqueIntNEQ(v int) predicate.Comment {
 
 // UniqueIntIn applies the In predicate on the "unique_int" field.
 func UniqueIntIn(vs ...int) predicate.Comment {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -130,7 +130,7 @@ func UniqueIntIn(vs ...int) predicate.Comment {
 
 // UniqueIntNotIn applies the NotIn predicate on the "unique_int" field.
 func UniqueIntNotIn(vs ...int) predicate.Comment {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -183,7 +183,7 @@ func UniqueFloatNEQ(v float64) predicate.Comment {
 
 // UniqueFloatIn applies the In predicate on the "unique_float" field.
 func UniqueFloatIn(vs ...float64) predicate.Comment {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -194,7 +194,7 @@ func UniqueFloatIn(vs ...float64) predicate.Comment {
 
 // UniqueFloatNotIn applies the NotIn predicate on the "unique_float" field.
 func UniqueFloatNotIn(vs ...float64) predicate.Comment {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -247,7 +247,7 @@ func NillableIntNEQ(v int) predicate.Comment {
 
 // NillableIntIn applies the In predicate on the "nillable_int" field.
 func NillableIntIn(vs ...int) predicate.Comment {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -258,7 +258,7 @@ func NillableIntIn(vs ...int) predicate.Comment {
 
 // NillableIntNotIn applies the NotIn predicate on the "nillable_int" field.
 func NillableIntNotIn(vs ...int) predicate.Comment {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -325,7 +325,7 @@ func TableNEQ(v string) predicate.Comment {
 
 // TableIn applies the In predicate on the "table" field.
 func TableIn(vs ...string) predicate.Comment {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -336,7 +336,7 @@ func TableIn(vs ...string) predicate.Comment {
 
 // TableNotIn applies the NotIn predicate on the "table" field.
 func TableNotIn(vs ...string) predicate.Comment {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

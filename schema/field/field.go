@@ -71,7 +71,7 @@ func Time(name string) *timeBuilder {
 //	field.JSON("info", &Info{}).
 //		Optional()
 //
-func JSON(name string, typ interface{}) *jsonBuilder {
+func JSON(name string, typ any) *jsonBuilder {
 	b := &jsonBuilder{&Descriptor{
 		Name: name,
 		Info: &TypeInfo{
@@ -241,7 +241,7 @@ func (b *stringBuilder) Default(s string) *stringBuilder {
 //	field.String("cuid").
 //		DefaultFunc(cuid.New)
 //
-func (b *stringBuilder) DefaultFunc(fn interface{}) *stringBuilder {
+func (b *stringBuilder) DefaultFunc(fn any) *stringBuilder {
 	b.desc.Default = fn
 	return b
 }
@@ -304,7 +304,7 @@ func (b *stringBuilder) SchemaType(types map[string]string) *stringBuilder {
 //	field.String("dir").
 //		GoType(http.Dir("dir"))
 //
-func (b *stringBuilder) GoType(typ interface{}) *stringBuilder {
+func (b *stringBuilder) GoType(typ any) *stringBuilder {
 	b.desc.goType(typ, stringType)
 	return b
 }
@@ -374,7 +374,7 @@ func (b *timeBuilder) StructTag(s string) *timeBuilder {
 //	field.Time("created_at").
 //		Default(time.Now)
 //
-func (b *timeBuilder) Default(fn interface{}) *timeBuilder {
+func (b *timeBuilder) Default(fn any) *timeBuilder {
 	b.desc.Default = fn
 	return b
 }
@@ -391,7 +391,7 @@ func (b *timeBuilder) Default(fn interface{}) *timeBuilder {
 //		GoType(&sql.NullTime{}).
 //		UpdateDefault(NewNullTime),
 //
-func (b *timeBuilder) UpdateDefault(fn interface{}) *timeBuilder {
+func (b *timeBuilder) UpdateDefault(fn any) *timeBuilder {
 	b.desc.UpdateDefault = fn
 	return b
 }
@@ -408,7 +408,7 @@ func (b *timeBuilder) StorageKey(key string) *timeBuilder {
 //	field.Time("deleted_at").
 //		GoType(&sql.NullTime{})
 //
-func (b *timeBuilder) GoType(typ interface{}) *timeBuilder {
+func (b *timeBuilder) GoType(typ any) *timeBuilder {
 	b.desc.goType(typ, timeType)
 	return b
 }
@@ -503,7 +503,7 @@ func (b *boolBuilder) StorageKey(key string) *boolBuilder {
 //	field.Bool("deleted").
 //		GoType(&sql.NullBool{})
 //
-func (b *boolBuilder) GoType(typ interface{}) *boolBuilder {
+func (b *boolBuilder) GoType(typ any) *boolBuilder {
 	b.desc.goType(typ, boolType)
 	return b
 }
@@ -543,7 +543,7 @@ func (b *bytesBuilder) Default(v []byte) *bytesBuilder {
 //	field.Bytes("cuid").
 //		DefaultFunc(cuid.New)
 //
-func (b *bytesBuilder) DefaultFunc(fn interface{}) *bytesBuilder {
+func (b *bytesBuilder) DefaultFunc(fn any) *bytesBuilder {
 	b.desc.Default = fn
 	return b
 }
@@ -652,7 +652,7 @@ func (b *bytesBuilder) StorageKey(key string) *bytesBuilder {
 //	field.Bytes("ip").
 //		GoType(net.IP("127.0.0.1"))
 //
-func (b *bytesBuilder) GoType(typ interface{}) *bytesBuilder {
+func (b *bytesBuilder) GoType(typ any) *bytesBuilder {
 	b.desc.goType(typ, bytesType)
 	return b
 }
@@ -760,7 +760,7 @@ func (b *jsonBuilder) Annotations(annotations ...schema.Annotation) *jsonBuilder
 //		// A function for generating the default value.
 //		Default(DefaultDirs)
 //
-func (b *jsonBuilder) Default(v interface{}) *jsonBuilder {
+func (b *jsonBuilder) Default(v any) *jsonBuilder {
 	b.desc.Default = v
 	switch fieldT, defaultT := b.desc.Info.RType.rtype, reflect.TypeOf(v); {
 	case fieldT == defaultT:
@@ -973,7 +973,7 @@ func (b *uuidBuilder) StructTag(s string) *uuidBuilder {
 //	field.UUID("id", uuid.UUID{}).
 //		Default(uuid.New)
 //
-func (b *uuidBuilder) Default(fn interface{}) *uuidBuilder {
+func (b *uuidBuilder) Default(fn any) *uuidBuilder {
 	typ := reflect.TypeOf(fn)
 	if typ.Kind() != reflect.Func || typ.NumIn() != 0 || typ.NumOut() != 1 || typ.Out(0).String() != b.desc.Info.String() {
 		b.desc.Err = fmt.Errorf("expect type (func() %s) for uuid default value", b.desc.Info)
@@ -1048,7 +1048,7 @@ func (b *otherBuilder) Sensitive() *otherBuilder {
 //		// A function for generating the default value.
 //		Default(NewLink)
 //
-func (b *otherBuilder) Default(v interface{}) *otherBuilder {
+func (b *otherBuilder) Default(v any) *otherBuilder {
 	b.desc.Default = v
 	switch fieldT, defaultT := b.desc.Info.RType.rtype, reflect.TypeOf(v); {
 	case fieldT == defaultT:
@@ -1148,9 +1148,9 @@ type Descriptor struct {
 	Nillable      bool                    // nillable struct field.
 	Optional      bool                    // nullable field in database.
 	Immutable     bool                    // create-only field.
-	Default       interface{}             // default value on create.
-	UpdateDefault interface{}             // default value on update.
-	Validators    []interface{}           // validator functions.
+	Default       any                     // default value on create.
+	UpdateDefault any                     // default value on update.
+	Validators    []any                   // validator functions.
 	StorageKey    string                  // sql column or gremlin property.
 	Enums         []struct{ N, V string } // enum values.
 	Sensitive     bool                    // sensitive info string field.
@@ -1160,7 +1160,7 @@ type Descriptor struct {
 	Err           error
 }
 
-func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
+func (d *Descriptor) goType(typ any, expectType reflect.Type) {
 	t := reflect.TypeOf(typ)
 	tv := indirect(t)
 	info := &TypeInfo{

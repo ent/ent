@@ -28,7 +28,7 @@ func (i ID) Value() (driver.Value, error) {
 	return r, nil
 }
 
-func (i *ID) Scan(src interface{}) error {
+func (i *ID) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
 		return nil

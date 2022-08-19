@@ -359,10 +359,10 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			uq.withFriends != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*User).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &User{config: uq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -413,14 +413,14 @@ func (uq *UserQuery) loadFriends(ctx context.Context, query *UserQuery, nodes []
 	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
 		assign := spec.Assign
 		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]interface{}, error) {
+		spec.ScanValues = func(columns []string) ([]any, error) {
 			values, err := values(columns[1:])
 			if err != nil {
 				return nil, err
 			}
-			return append([]interface{}{new(sql.NullInt64)}, values...), nil
+			return append([]any{new(sql.NullInt64)}, values...), nil
 		}
-		spec.Assign = func(columns []string, values []interface{}) error {
+		spec.Assign = func(columns []string, values []any) error {
 			outValue := int(values[0].(*sql.NullInt64).Int64)
 			inValue := int(values[1].(*sql.NullInt64).Int64)
 			if nids[inValue] == nil {
@@ -561,7 +561,7 @@ func (ugb *UserGroupBy) Aggregate(fns ...AggregateFunc) *UserGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (ugb *UserGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (ugb *UserGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := ugb.path(ctx)
 	if err != nil {
 		return err
@@ -570,7 +570,7 @@ func (ugb *UserGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return ugb.sqlScan(ctx, v)
 }
 
-func (ugb *UserGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (ugb *UserGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range ugb.fields {
 		if !user.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -617,7 +617,7 @@ type UserSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (us *UserSelect) Scan(ctx context.Context, v interface{}) error {
+func (us *UserSelect) Scan(ctx context.Context, v any) error {
 	if err := us.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -625,7 +625,7 @@ func (us *UserSelect) Scan(ctx context.Context, v interface{}) error {
 	return us.sqlScan(ctx, v)
 }
 
-func (us *UserSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (us *UserSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := us.sql.Query()
 	if err := us.driver.Query(ctx, query, args, rows); err != nil {

@@ -116,7 +116,7 @@ type (
 
 	// A Value represents an arbitrary value.
 	Value struct {
-		V interface{}
+		V any
 	}
 )
 
@@ -173,7 +173,7 @@ func EQ(x, y Expr) P {
 }
 
 // FieldEQ returns a predicate to check if a field is equivalent to a given value.
-func FieldEQ(name string, v interface{}) P {
+func FieldEQ(name string, v any) P {
 	return &BinaryExpr{
 		Op: OpEQ,
 		X:  &Field{Name: name},
@@ -191,7 +191,7 @@ func NEQ(x, y Expr) P {
 }
 
 // FieldNEQ returns a predicate to check if a field is not equivalent to a given value.
-func FieldNEQ(name string, v interface{}) P {
+func FieldNEQ(name string, v any) P {
 	return &BinaryExpr{
 		Op: OpNEQ,
 		X:  &Field{Name: name},
@@ -209,7 +209,7 @@ func GT(x, y Expr) P {
 }
 
 // FieldGT returns a predicate to check if a field is > than the given value.
-func FieldGT(name string, v interface{}) P {
+func FieldGT(name string, v any) P {
 	return &BinaryExpr{
 		Op: OpGT,
 		X:  &Field{Name: name},
@@ -227,7 +227,7 @@ func GTE(x, y Expr) P {
 }
 
 // FieldGTE returns a predicate to check if a field is >= than the given value.
-func FieldGTE(name string, v interface{}) P {
+func FieldGTE(name string, v any) P {
 	return &BinaryExpr{
 		Op: OpGTE,
 		X:  &Field{Name: name},
@@ -245,7 +245,7 @@ func LT(x, y Expr) P {
 }
 
 // FieldLT returns a predicate to check if a field is < than the given value.
-func FieldLT(name string, v interface{}) P {
+func FieldLT(name string, v any) P {
 	return &BinaryExpr{
 		Op: OpLT,
 		X:  &Field{Name: name},
@@ -263,7 +263,7 @@ func LTE(x, y Expr) P {
 }
 
 // FieldLTE returns a predicate to check if a field is <= >than the given value.
-func FieldLTE(name string, v interface{}) P {
+func FieldLTE(name string, v any) P {
 	return &BinaryExpr{
 		Op: OpLTE,
 		X:  &Field{Name: name},
@@ -312,7 +312,7 @@ func FieldHasSuffix(name, suffix string) P {
 }
 
 // FieldIn returns a predicate to check if the field value matches any value in the given list.
-func FieldIn(name string, vs ...interface{}) P {
+func FieldIn(name string, vs ...any) P {
 	return &BinaryExpr{
 		Op: OpIn,
 		X:  &Field{Name: name},
@@ -321,7 +321,7 @@ func FieldIn(name string, vs ...interface{}) P {
 }
 
 // FieldNotIn returns a predicate to check if the field value doesn't match any value in the given list.
-func FieldNotIn(name string, vs ...interface{}) P {
+func FieldNotIn(name string, vs ...any) P {
 	return &BinaryExpr{
 		Op: OpNotIn,
 		X:  &Field{Name: name},

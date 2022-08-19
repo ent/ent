@@ -367,7 +367,7 @@ func (gu *GroupUpdate) gremlin() *dsl.Traversal {
 	if value, ok := gu.mutation.Name(); ok {
 		v.Property(dsl.Single, group.FieldName, value)
 	}
-	var properties []interface{}
+	var properties []any
 	if gu.mutation.TypeCleared() {
 		properties = append(properties, group.FieldType)
 	}
@@ -786,7 +786,7 @@ func (guo *GroupUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := guo.mutation.Name(); ok {
 		v.Property(dsl.Single, group.FieldName, value)
 	}
-	var properties []interface{}
+	var properties []any
 	if guo.mutation.TypeCleared() {
 		properties = append(properties, group.FieldType)
 	}
@@ -833,7 +833,7 @@ func (guo *GroupUpdateOne) gremlin(id string) *dsl.Traversal {
 		v.AddE(group.InfoLabel).To(g.V(id)).OutV()
 	}
 	if len(guo.fields) > 0 {
-		fields := make([]interface{}, 0, len(guo.fields)+1)
+		fields := make([]any, 0, len(guo.fields)+1)
 		fields = append(fields, true)
 		for _, f := range guo.fields {
 			fields = append(fields, f)

@@ -182,14 +182,14 @@ func AllowIfViewerInTheSameTeam() privacy.MutationRule {
 }
 
 var logger = struct {
-	logf func(string, ...interface{})
+	logf func(string, ...any)
 	sync.RWMutex
 }{
-	logf: func(string, ...interface{}) {},
+	logf: func(string, ...any) {},
 }
 
 // SetMutationLogFunc overrides the logging function used by LogPlanetMutationHook.
-func SetMutationLogFunc(f func(string, ...interface{})) func(string, ...interface{}) {
+func SetMutationLogFunc(f func(string, ...any)) func(string, ...any) {
 	logger.Lock()
 	defer logger.Unlock()
 	logf := logger.logf

@@ -1776,7 +1776,7 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.PasswordOther(); ok {
 		v.Property(dsl.Single, fieldtype.FieldPasswordOther, value)
 	}
-	var properties []interface{}
+	var properties []any
 	if ftu.mutation.OptionalIntCleared() {
 		properties = append(properties, fieldtype.FieldOptionalInt)
 	}
@@ -3713,7 +3713,7 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.PasswordOther(); ok {
 		v.Property(dsl.Single, fieldtype.FieldPasswordOther, value)
 	}
-	var properties []interface{}
+	var properties []any
 	if ftuo.mutation.OptionalIntCleared() {
 		properties = append(properties, fieldtype.FieldOptionalInt)
 	}
@@ -3883,7 +3883,7 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 		v.SideEffect(__.Properties(properties...).Drop())
 	}
 	if len(ftuo.fields) > 0 {
-		fields := make([]interface{}, 0, len(ftuo.fields)+1)
+		fields := make([]any, 0, len(ftuo.fields)+1)
 		fields = append(fields, true)
 		for _, f := range ftuo.fields {
 			fields = append(fields, f)

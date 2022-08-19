@@ -271,7 +271,7 @@ func (pu *PetUpdate) gremlin() *dsl.Traversal {
 	if value, ok := pu.mutation.Trained(); ok {
 		v.Property(dsl.Single, pet.FieldTrained, value)
 	}
-	var properties []interface{}
+	var properties []any
 	if pu.mutation.UUIDCleared() {
 		properties = append(properties, pet.FieldUUID)
 	}
@@ -576,7 +576,7 @@ func (puo *PetUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := puo.mutation.Trained(); ok {
 		v.Property(dsl.Single, pet.FieldTrained, value)
 	}
-	var properties []interface{}
+	var properties []any
 	if puo.mutation.UUIDCleared() {
 		properties = append(properties, pet.FieldUUID)
 	}
@@ -605,7 +605,7 @@ func (puo *PetUpdateOne) gremlin(id string) *dsl.Traversal {
 		v.AddE(user.PetsLabel).From(g.V(id)).InV()
 	}
 	if len(puo.fields) > 0 {
-		fields := make([]interface{}, 0, len(puo.fields)+1)
+		fields := make([]any, 0, len(puo.fields)+1)
 		fields = append(fields, true)
 		for _, f := range puo.fields {
 			fields = append(fields, f)

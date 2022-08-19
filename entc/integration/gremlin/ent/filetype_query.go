@@ -341,7 +341,7 @@ func (ftq *FileTypeQuery) gremlinAll(ctx context.Context) ([]*FileType, error) {
 	res := &gremlin.Response{}
 	traversal := ftq.gremlinQuery(ctx)
 	if len(ftq.fields) > 0 {
-		fields := make([]interface{}, len(ftq.fields))
+		fields := make([]any, len(ftq.fields))
 		for i, f := range ftq.fields {
 			fields[i] = f
 		}
@@ -425,7 +425,7 @@ func (ftgb *FileTypeGroupBy) Aggregate(fns ...AggregateFunc) *FileTypeGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (ftgb *FileTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (ftgb *FileTypeGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := ftgb.path(ctx)
 	if err != nil {
 		return err
@@ -434,7 +434,7 @@ func (ftgb *FileTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return ftgb.gremlinScan(ctx, v)
 }
 
-func (ftgb *FileTypeGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
+func (ftgb *FileTypeGroupBy) gremlinScan(ctx context.Context, v any) error {
 	res := &gremlin.Response{}
 	query, bindings := ftgb.gremlinQuery().Query()
 	if err := ftgb.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -452,8 +452,8 @@ func (ftgb *FileTypeGroupBy) gremlinScan(ctx context.Context, v interface{}) err
 
 func (ftgb *FileTypeGroupBy) gremlinQuery() *dsl.Traversal {
 	var (
-		trs   []interface{}
-		names []interface{}
+		trs   []any
+		names []any
 	)
 	for _, fn := range ftgb.fns {
 		name, tr := fn("p", "")
@@ -480,7 +480,7 @@ type FileTypeSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (fts *FileTypeSelect) Scan(ctx context.Context, v interface{}) error {
+func (fts *FileTypeSelect) Scan(ctx context.Context, v any) error {
 	if err := fts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -488,7 +488,7 @@ func (fts *FileTypeSelect) Scan(ctx context.Context, v interface{}) error {
 	return fts.gremlinScan(ctx, v)
 }
 
-func (fts *FileTypeSelect) gremlinScan(ctx context.Context, v interface{}) error {
+func (fts *FileTypeSelect) gremlinScan(ctx context.Context, v any) error {
 	var (
 		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
@@ -500,7 +500,7 @@ func (fts *FileTypeSelect) gremlinScan(ctx context.Context, v interface{}) error
 			traversal = fts.gremlin.ID()
 		}
 	} else {
-		fields := make([]interface{}, len(fts.fields))
+		fields := make([]any, len(fts.fields))
 		for i, f := range fts.fields {
 			fields[i] = f
 		}

@@ -321,10 +321,10 @@ func (miq *MixinIDQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Mix
 		nodes = []*MixinID{}
 		_spec = miq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*MixinID).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &MixinID{config: miq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -456,7 +456,7 @@ func (migb *MixinIDGroupBy) Aggregate(fns ...AggregateFunc) *MixinIDGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (migb *MixinIDGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (migb *MixinIDGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := migb.path(ctx)
 	if err != nil {
 		return err
@@ -465,7 +465,7 @@ func (migb *MixinIDGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return migb.sqlScan(ctx, v)
 }
 
-func (migb *MixinIDGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (migb *MixinIDGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range migb.fields {
 		if !mixinid.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -512,7 +512,7 @@ type MixinIDSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (mis *MixinIDSelect) Scan(ctx context.Context, v interface{}) error {
+func (mis *MixinIDSelect) Scan(ctx context.Context, v any) error {
 	if err := mis.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -520,7 +520,7 @@ func (mis *MixinIDSelect) Scan(ctx context.Context, v interface{}) error {
 	return mis.sqlScan(ctx, v)
 }
 
-func (mis *MixinIDSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (mis *MixinIDSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := mis.sql.Query()
 	if err := mis.driver.Query(ctx, query, args, rows); err != nil {

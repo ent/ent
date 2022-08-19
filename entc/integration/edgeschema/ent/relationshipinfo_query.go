@@ -320,10 +320,10 @@ func (riq *RelationshipInfoQuery) sqlAll(ctx context.Context, hooks ...queryHook
 		nodes = []*RelationshipInfo{}
 		_spec = riq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*RelationshipInfo).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &RelationshipInfo{config: riq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -455,7 +455,7 @@ func (rigb *RelationshipInfoGroupBy) Aggregate(fns ...AggregateFunc) *Relationsh
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (rigb *RelationshipInfoGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (rigb *RelationshipInfoGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := rigb.path(ctx)
 	if err != nil {
 		return err
@@ -464,7 +464,7 @@ func (rigb *RelationshipInfoGroupBy) Scan(ctx context.Context, v interface{}) er
 	return rigb.sqlScan(ctx, v)
 }
 
-func (rigb *RelationshipInfoGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (rigb *RelationshipInfoGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range rigb.fields {
 		if !relationshipinfo.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -511,7 +511,7 @@ type RelationshipInfoSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ris *RelationshipInfoSelect) Scan(ctx context.Context, v interface{}) error {
+func (ris *RelationshipInfoSelect) Scan(ctx context.Context, v any) error {
 	if err := ris.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -519,7 +519,7 @@ func (ris *RelationshipInfoSelect) Scan(ctx context.Context, v interface{}) erro
 	return ris.sqlScan(ctx, v)
 }
 
-func (ris *RelationshipInfoSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ris *RelationshipInfoSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ris.sql.Query()
 	if err := ris.driver.Query(ctx, query, args, rows); err != nil {

@@ -455,10 +455,10 @@ func (pq *PetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pet, err
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, pet.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Pet).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Pet{config: pq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -588,14 +588,14 @@ func (pq *PetQuery) loadFriends(ctx context.Context, query *PetQuery, nodes []*P
 	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
 		assign := spec.Assign
 		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]interface{}, error) {
+		spec.ScanValues = func(columns []string) ([]any, error) {
 			values, err := values(columns[1:])
 			if err != nil {
 				return nil, err
 			}
-			return append([]interface{}{new(sql.NullString)}, values...), nil
+			return append([]any{new(sql.NullString)}, values...), nil
 		}
-		spec.Assign = func(columns []string, values []interface{}) error {
+		spec.Assign = func(columns []string, values []any) error {
 			outValue := values[0].(*sql.NullString).String
 			inValue := values[1].(*sql.NullString).String
 			if nids[inValue] == nil {
@@ -765,7 +765,7 @@ func (pgb *PetGroupBy) Aggregate(fns ...AggregateFunc) *PetGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (pgb *PetGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (pgb *PetGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := pgb.path(ctx)
 	if err != nil {
 		return err
@@ -774,7 +774,7 @@ func (pgb *PetGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return pgb.sqlScan(ctx, v)
 }
 
-func (pgb *PetGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (pgb *PetGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range pgb.fields {
 		if !pet.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -821,7 +821,7 @@ type PetSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ps *PetSelect) Scan(ctx context.Context, v interface{}) error {
+func (ps *PetSelect) Scan(ctx context.Context, v any) error {
 	if err := ps.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -829,7 +829,7 @@ func (ps *PetSelect) Scan(ctx context.Context, v interface{}) error {
 	return ps.sqlScan(ctx, v)
 }
 
-func (ps *PetSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ps *PetSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ps.sql.Query()
 	if err := ps.driver.Query(ctx, query, args, rows); err != nil {

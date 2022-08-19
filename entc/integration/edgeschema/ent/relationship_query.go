@@ -362,10 +362,10 @@ func (rq *RelationshipQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 			rq.withInfo != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Relationship).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Relationship{config: rq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -586,7 +586,7 @@ func (rgb *RelationshipGroupBy) Aggregate(fns ...AggregateFunc) *RelationshipGro
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (rgb *RelationshipGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (rgb *RelationshipGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := rgb.path(ctx)
 	if err != nil {
 		return err
@@ -595,7 +595,7 @@ func (rgb *RelationshipGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return rgb.sqlScan(ctx, v)
 }
 
-func (rgb *RelationshipGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (rgb *RelationshipGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range rgb.fields {
 		if !relationship.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -642,7 +642,7 @@ type RelationshipSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (rs *RelationshipSelect) Scan(ctx context.Context, v interface{}) error {
+func (rs *RelationshipSelect) Scan(ctx context.Context, v any) error {
 	if err := rs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -650,7 +650,7 @@ func (rs *RelationshipSelect) Scan(ctx context.Context, v interface{}) error {
 	return rs.sqlScan(ctx, v)
 }
 
-func (rs *RelationshipSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (rs *RelationshipSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := rs.sql.Query()
 	if err := rs.driver.Query(ctx, query, args, rows); err != nil {

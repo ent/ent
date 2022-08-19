@@ -25,7 +25,7 @@
 {{/* Add the "DebugLog()" only to the "User" type. */}}
 {{ with $n := byName $ "User" }}
 	{{ $client := print $n.Name "Client" }}
-	func (c *{{ $client }}) DebugLog(fn func(...interface{})) *{{ $client }} {
+	func (c *{{ $client }}) DebugLog(fn func(...any)) *{{ $client }} {
 		if c.debug {
 			return c
 		}

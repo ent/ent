@@ -163,7 +163,7 @@ func (iu *ItemUpdate) gremlin() *dsl.Traversal {
 		})
 		v.Property(dsl.Single, item.FieldText, value)
 	}
-	var properties []interface{}
+	var properties []any
 	if iu.mutation.TextCleared() {
 		properties = append(properties, item.FieldText)
 	}
@@ -341,7 +341,7 @@ func (iuo *ItemUpdateOne) gremlin(id string) *dsl.Traversal {
 		})
 		v.Property(dsl.Single, item.FieldText, value)
 	}
-	var properties []interface{}
+	var properties []any
 	if iuo.mutation.TextCleared() {
 		properties = append(properties, item.FieldText)
 	}
@@ -349,7 +349,7 @@ func (iuo *ItemUpdateOne) gremlin(id string) *dsl.Traversal {
 		v.SideEffect(__.Properties(properties...).Drop())
 	}
 	if len(iuo.fields) > 0 {
-		fields := make([]interface{}, 0, len(iuo.fields)+1)
+		fields := make([]any, 0, len(iuo.fields)+1)
 		fields = append(fields, true)
 		for _, f := range iuo.fields {
 			fields = append(fields, f)

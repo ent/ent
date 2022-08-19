@@ -23,7 +23,7 @@ func TestMarshalerEncode(t *testing.T) {
 	call := m.On("MarshalGraphson").Return(want, nil)
 	defer m.AssertExpectations(t)
 
-	tests := []interface{}{m, &m, func() *Marshaler { marshaler := Marshaler(m); return &marshaler }(), Marshaler(nil)}
+	tests := []any{m, &m, func() *Marshaler { marshaler := Marshaler(m); return &marshaler }(), Marshaler(nil)}
 	call.Times(len(tests) - 1)
 
 	for _, tc := range tests {

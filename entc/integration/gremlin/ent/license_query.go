@@ -314,7 +314,7 @@ func (lq *LicenseQuery) gremlinAll(ctx context.Context) ([]*License, error) {
 	res := &gremlin.Response{}
 	traversal := lq.gremlinQuery(ctx)
 	if len(lq.fields) > 0 {
-		fields := make([]interface{}, len(lq.fields))
+		fields := make([]any, len(lq.fields))
 		for i, f := range lq.fields {
 			fields[i] = f
 		}
@@ -398,7 +398,7 @@ func (lgb *LicenseGroupBy) Aggregate(fns ...AggregateFunc) *LicenseGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (lgb *LicenseGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (lgb *LicenseGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := lgb.path(ctx)
 	if err != nil {
 		return err
@@ -407,7 +407,7 @@ func (lgb *LicenseGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return lgb.gremlinScan(ctx, v)
 }
 
-func (lgb *LicenseGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
+func (lgb *LicenseGroupBy) gremlinScan(ctx context.Context, v any) error {
 	res := &gremlin.Response{}
 	query, bindings := lgb.gremlinQuery().Query()
 	if err := lgb.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -425,8 +425,8 @@ func (lgb *LicenseGroupBy) gremlinScan(ctx context.Context, v interface{}) error
 
 func (lgb *LicenseGroupBy) gremlinQuery() *dsl.Traversal {
 	var (
-		trs   []interface{}
-		names []interface{}
+		trs   []any
+		names []any
 	)
 	for _, fn := range lgb.fns {
 		name, tr := fn("p", "")
@@ -453,7 +453,7 @@ type LicenseSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ls *LicenseSelect) Scan(ctx context.Context, v interface{}) error {
+func (ls *LicenseSelect) Scan(ctx context.Context, v any) error {
 	if err := ls.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -461,7 +461,7 @@ func (ls *LicenseSelect) Scan(ctx context.Context, v interface{}) error {
 	return ls.gremlinScan(ctx, v)
 }
 
-func (ls *LicenseSelect) gremlinScan(ctx context.Context, v interface{}) error {
+func (ls *LicenseSelect) gremlinScan(ctx context.Context, v any) error {
 	var (
 		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
@@ -473,7 +473,7 @@ func (ls *LicenseSelect) gremlinScan(ctx context.Context, v interface{}) error {
 			traversal = ls.gremlin.ID()
 		}
 	} else {
-		fields := make([]interface{}, len(ls.fields))
+		fields := make([]any, len(ls.fields))
 		for i, f := range ls.fields {
 			fields[i] = f
 		}

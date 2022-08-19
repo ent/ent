@@ -320,10 +320,10 @@ func (cq *ConversionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*C
 		nodes = []*Conversion{}
 		_spec = cq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Conversion).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Conversion{config: cq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -455,7 +455,7 @@ func (cgb *ConversionGroupBy) Aggregate(fns ...AggregateFunc) *ConversionGroupBy
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (cgb *ConversionGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (cgb *ConversionGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := cgb.path(ctx)
 	if err != nil {
 		return err
@@ -464,7 +464,7 @@ func (cgb *ConversionGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return cgb.sqlScan(ctx, v)
 }
 
-func (cgb *ConversionGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (cgb *ConversionGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range cgb.fields {
 		if !conversion.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -511,7 +511,7 @@ type ConversionSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (cs *ConversionSelect) Scan(ctx context.Context, v interface{}) error {
+func (cs *ConversionSelect) Scan(ctx context.Context, v any) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -519,7 +519,7 @@ func (cs *ConversionSelect) Scan(ctx context.Context, v interface{}) error {
 	return cs.sqlScan(ctx, v)
 }
 
-func (cs *ConversionSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (cs *ConversionSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := cs.sql.Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {

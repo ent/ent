@@ -404,10 +404,10 @@ func (tq *TeamQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Team, e
 			tq.withUsers != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Team).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Team{config: tq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -465,14 +465,14 @@ func (tq *TeamQuery) loadTasks(ctx context.Context, query *TaskQuery, nodes []*T
 	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
 		assign := spec.Assign
 		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]interface{}, error) {
+		spec.ScanValues = func(columns []string) ([]any, error) {
 			values, err := values(columns[1:])
 			if err != nil {
 				return nil, err
 			}
-			return append([]interface{}{new(sql.NullInt64)}, values...), nil
+			return append([]any{new(sql.NullInt64)}, values...), nil
 		}
-		spec.Assign = func(columns []string, values []interface{}) error {
+		spec.Assign = func(columns []string, values []any) error {
 			outValue := int(values[0].(*sql.NullInt64).Int64)
 			inValue := int(values[1].(*sql.NullInt64).Int64)
 			if nids[inValue] == nil {
@@ -523,14 +523,14 @@ func (tq *TeamQuery) loadUsers(ctx context.Context, query *UserQuery, nodes []*T
 	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
 		assign := spec.Assign
 		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]interface{}, error) {
+		spec.ScanValues = func(columns []string) ([]any, error) {
 			values, err := values(columns[1:])
 			if err != nil {
 				return nil, err
 			}
-			return append([]interface{}{new(sql.NullInt64)}, values...), nil
+			return append([]any{new(sql.NullInt64)}, values...), nil
 		}
-		spec.Assign = func(columns []string, values []interface{}) error {
+		spec.Assign = func(columns []string, values []any) error {
 			outValue := int(values[0].(*sql.NullInt64).Int64)
 			inValue := int(values[1].(*sql.NullInt64).Int64)
 			if nids[inValue] == nil {
@@ -671,7 +671,7 @@ func (tgb *TeamGroupBy) Aggregate(fns ...AggregateFunc) *TeamGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (tgb *TeamGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (tgb *TeamGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := tgb.path(ctx)
 	if err != nil {
 		return err
@@ -680,7 +680,7 @@ func (tgb *TeamGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return tgb.sqlScan(ctx, v)
 }
 
-func (tgb *TeamGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (tgb *TeamGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range tgb.fields {
 		if !team.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -727,7 +727,7 @@ type TeamSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ts *TeamSelect) Scan(ctx context.Context, v interface{}) error {
+func (ts *TeamSelect) Scan(ctx context.Context, v any) error {
 	if err := ts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -735,7 +735,7 @@ func (ts *TeamSelect) Scan(ctx context.Context, v interface{}) error {
 	return ts.sqlScan(ctx, v)
 }
 
-func (ts *TeamSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ts *TeamSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ts.sql.Query()
 	if err := ts.driver.Query(ctx, query, args, rows); err != nil {

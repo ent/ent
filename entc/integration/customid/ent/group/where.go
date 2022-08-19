@@ -36,7 +36,7 @@ func IDNEQ(id int) predicate.Group {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -47,7 +47,7 @@ func IDIn(ids ...int) predicate.Group {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}

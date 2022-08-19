@@ -346,10 +346,10 @@ func (sq *SessionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Sess
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, session.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Session).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Session{config: sq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -518,7 +518,7 @@ func (sgb *SessionGroupBy) Aggregate(fns ...AggregateFunc) *SessionGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (sgb *SessionGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (sgb *SessionGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := sgb.path(ctx)
 	if err != nil {
 		return err
@@ -527,7 +527,7 @@ func (sgb *SessionGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return sgb.sqlScan(ctx, v)
 }
 
-func (sgb *SessionGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (sgb *SessionGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range sgb.fields {
 		if !session.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -574,7 +574,7 @@ type SessionSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ss *SessionSelect) Scan(ctx context.Context, v interface{}) error {
+func (ss *SessionSelect) Scan(ctx context.Context, v any) error {
 	if err := ss.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -582,7 +582,7 @@ func (ss *SessionSelect) Scan(ctx context.Context, v interface{}) error {
 	return ss.sqlScan(ctx, v)
 }
 
-func (ss *SessionSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ss *SessionSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ss.sql.Query()
 	if err := ss.driver.Query(ctx, query, args, rows); err != nil {

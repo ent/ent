@@ -440,10 +440,10 @@ func (dq *DocQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Doc, err
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, doc.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Doc).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Doc{config: dq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -567,14 +567,14 @@ func (dq *DocQuery) loadRelated(ctx context.Context, query *DocQuery, nodes []*D
 	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
 		assign := spec.Assign
 		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]interface{}, error) {
+		spec.ScanValues = func(columns []string) ([]any, error) {
 			values, err := values(columns[1:])
 			if err != nil {
 				return nil, err
 			}
-			return append([]interface{}{new(schema.DocID)}, values...), nil
+			return append([]any{new(schema.DocID)}, values...), nil
 		}
-		spec.Assign = func(columns []string, values []interface{}) error {
+		spec.Assign = func(columns []string, values []any) error {
 			outValue := *values[0].(*schema.DocID)
 			inValue := *values[1].(*schema.DocID)
 			if nids[inValue] == nil {
@@ -715,7 +715,7 @@ func (dgb *DocGroupBy) Aggregate(fns ...AggregateFunc) *DocGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (dgb *DocGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (dgb *DocGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := dgb.path(ctx)
 	if err != nil {
 		return err
@@ -724,7 +724,7 @@ func (dgb *DocGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return dgb.sqlScan(ctx, v)
 }
 
-func (dgb *DocGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (dgb *DocGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range dgb.fields {
 		if !doc.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -771,7 +771,7 @@ type DocSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ds *DocSelect) Scan(ctx context.Context, v interface{}) error {
+func (ds *DocSelect) Scan(ctx context.Context, v any) error {
 	if err := ds.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -779,7 +779,7 @@ func (ds *DocSelect) Scan(ctx context.Context, v interface{}) error {
 	return ds.sqlScan(ctx, v)
 }
 
-func (ds *DocSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ds *DocSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ds.sql.Query()
 	if err := ds.driver.Query(ctx, query, args, rows); err != nil {

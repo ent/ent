@@ -333,10 +333,10 @@ func (tlq *TweetLikeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*T
 			tlq.withUser != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*TweetLike).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &TweetLike{config: tlq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -525,7 +525,7 @@ func (tlgb *TweetLikeGroupBy) Aggregate(fns ...AggregateFunc) *TweetLikeGroupBy 
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (tlgb *TweetLikeGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (tlgb *TweetLikeGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := tlgb.path(ctx)
 	if err != nil {
 		return err
@@ -534,7 +534,7 @@ func (tlgb *TweetLikeGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return tlgb.sqlScan(ctx, v)
 }
 
-func (tlgb *TweetLikeGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (tlgb *TweetLikeGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range tlgb.fields {
 		if !tweetlike.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -581,7 +581,7 @@ type TweetLikeSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (tls *TweetLikeSelect) Scan(ctx context.Context, v interface{}) error {
+func (tls *TweetLikeSelect) Scan(ctx context.Context, v any) error {
 	if err := tls.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -589,7 +589,7 @@ func (tls *TweetLikeSelect) Scan(ctx context.Context, v interface{}) error {
 	return tls.sqlScan(ctx, v)
 }
 
-func (tls *TweetLikeSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (tls *TweetLikeSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := tls.sql.Query()
 	if err := tls.driver.Query(ctx, query, args, rows); err != nil {

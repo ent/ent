@@ -76,7 +76,7 @@ func ValueIsNull(column string, opts ...Option) *sql.Predicate {
 //
 //	sqljson.ValueEQ("a", 1, sqljson.Path("b"))
 //
-func ValueEQ(column string, arg interface{}, opts ...Option) *sql.Predicate {
+func ValueEQ(column string, arg any, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		opts, arg = normalizePG(b, arg, opts)
 		ValuePath(b, column, opts...)
@@ -89,7 +89,7 @@ func ValueEQ(column string, arg interface{}, opts ...Option) *sql.Predicate {
 //
 //	sqljson.ValueNEQ("a", 1, sqljson.Path("b"))
 //
-func ValueNEQ(column string, arg interface{}, opts ...Option) *sql.Predicate {
+func ValueNEQ(column string, arg any, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		opts, arg = normalizePG(b, arg, opts)
 		ValuePath(b, column, opts...)
@@ -102,7 +102,7 @@ func ValueNEQ(column string, arg interface{}, opts ...Option) *sql.Predicate {
 //
 //	sqljson.ValueGT("a", 1, sqljson.Path("b"))
 //
-func ValueGT(column string, arg interface{}, opts ...Option) *sql.Predicate {
+func ValueGT(column string, arg any, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		opts, arg = normalizePG(b, arg, opts)
 		ValuePath(b, column, opts...)
@@ -116,7 +116,7 @@ func ValueGT(column string, arg interface{}, opts ...Option) *sql.Predicate {
 //
 //	sqljson.ValueGTE("a", 1, sqljson.Path("b"))
 //
-func ValueGTE(column string, arg interface{}, opts ...Option) *sql.Predicate {
+func ValueGTE(column string, arg any, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		opts, arg = normalizePG(b, arg, opts)
 		ValuePath(b, column, opts...)
@@ -129,7 +129,7 @@ func ValueGTE(column string, arg interface{}, opts ...Option) *sql.Predicate {
 //
 //	sqljson.ValueLT("a", 1, sqljson.Path("b"))
 //
-func ValueLT(column string, arg interface{}, opts ...Option) *sql.Predicate {
+func ValueLT(column string, arg any, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		opts, arg = normalizePG(b, arg, opts)
 		ValuePath(b, column, opts...)
@@ -143,7 +143,7 @@ func ValueLT(column string, arg interface{}, opts ...Option) *sql.Predicate {
 //
 //	sqljson.ValueLTE("a", 1, sqljson.Path("b"))
 //
-func ValueLTE(column string, arg interface{}, opts ...Option) *sql.Predicate {
+func ValueLTE(column string, arg any, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		opts, arg = normalizePG(b, arg, opts)
 		ValuePath(b, column, opts...)
@@ -156,7 +156,7 @@ func ValueLTE(column string, arg interface{}, opts ...Option) *sql.Predicate {
 //
 //	sqljson.ValueContains("a", 1, sqljson.Path("b"))
 //
-func ValueContains(column string, arg interface{}, opts ...Option) *sql.Predicate {
+func ValueContains(column string, arg any, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		path := identPath(column, opts...)
 		switch b.Dialect() {
@@ -501,7 +501,7 @@ func ParsePath(dotpath string) ([]string, error) {
 
 // normalizePG adds cast option to the JSON path is the argument type is
 // not string, in order to avoid "missing type casts" error in Postgres.
-func normalizePG(b *sql.Builder, arg interface{}, opts []Option) ([]Option, interface{}) {
+func normalizePG(b *sql.Builder, arg any, opts []Option) ([]Option, any) {
 	if b.Dialect() != dialect.Postgres {
 		return opts, arg
 	}
@@ -537,7 +537,7 @@ func isNumber(s string) bool {
 }
 
 // marshal stringifies the given argument to a valid JSON document.
-func marshal(arg interface{}) interface{} {
+func marshal(arg any) any {
 	if buf, err := json.Marshal(arg); err == nil {
 		arg = string(buf)
 	}

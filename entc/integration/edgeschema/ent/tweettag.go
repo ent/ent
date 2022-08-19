@@ -72,8 +72,8 @@ func (e TweetTagEdges) TweetOrErr() (*Tweet, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*TweetTag) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*TweetTag) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
 		case tweettag.FieldTagID, tweettag.FieldTweetID:
@@ -91,7 +91,7 @@ func (*TweetTag) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the TweetTag fields.
-func (tt *TweetTag) assignValues(columns []string, values []interface{}) error {
+func (tt *TweetTag) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}

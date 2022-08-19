@@ -383,10 +383,10 @@ func (dq *DeviceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Devic
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, device.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Device).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Device{config: dq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -593,7 +593,7 @@ func (dgb *DeviceGroupBy) Aggregate(fns ...AggregateFunc) *DeviceGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (dgb *DeviceGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (dgb *DeviceGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := dgb.path(ctx)
 	if err != nil {
 		return err
@@ -602,7 +602,7 @@ func (dgb *DeviceGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return dgb.sqlScan(ctx, v)
 }
 
-func (dgb *DeviceGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (dgb *DeviceGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range dgb.fields {
 		if !device.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -649,7 +649,7 @@ type DeviceSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ds *DeviceSelect) Scan(ctx context.Context, v interface{}) error {
+func (ds *DeviceSelect) Scan(ctx context.Context, v any) error {
 	if err := ds.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -657,7 +657,7 @@ func (ds *DeviceSelect) Scan(ctx context.Context, v interface{}) error {
 	return ds.sqlScan(ctx, v)
 }
 
-func (ds *DeviceSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ds *DeviceSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ds.sql.Query()
 	if err := ds.driver.Query(ctx, query, args, rows); err != nil {

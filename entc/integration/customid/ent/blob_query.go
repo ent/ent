@@ -441,10 +441,10 @@ func (bq *BlobQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Blob, e
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, blob.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Blob).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Blob{config: bq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -537,14 +537,14 @@ func (bq *BlobQuery) loadLinks(ctx context.Context, query *BlobQuery, nodes []*B
 	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
 		assign := spec.Assign
 		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]interface{}, error) {
+		spec.ScanValues = func(columns []string) ([]any, error) {
 			values, err := values(columns[1:])
 			if err != nil {
 				return nil, err
 			}
-			return append([]interface{}{new(uuid.UUID)}, values...), nil
+			return append([]any{new(uuid.UUID)}, values...), nil
 		}
-		spec.Assign = func(columns []string, values []interface{}) error {
+		spec.Assign = func(columns []string, values []any) error {
 			outValue := *values[0].(*uuid.UUID)
 			inValue := *values[1].(*uuid.UUID)
 			if nids[inValue] == nil {
@@ -712,7 +712,7 @@ func (bgb *BlobGroupBy) Aggregate(fns ...AggregateFunc) *BlobGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (bgb *BlobGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (bgb *BlobGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := bgb.path(ctx)
 	if err != nil {
 		return err
@@ -721,7 +721,7 @@ func (bgb *BlobGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return bgb.sqlScan(ctx, v)
 }
 
-func (bgb *BlobGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (bgb *BlobGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range bgb.fields {
 		if !blob.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -768,7 +768,7 @@ type BlobSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (bs *BlobSelect) Scan(ctx context.Context, v interface{}) error {
+func (bs *BlobSelect) Scan(ctx context.Context, v any) error {
 	if err := bs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -776,7 +776,7 @@ func (bs *BlobSelect) Scan(ctx context.Context, v interface{}) error {
 	return bs.sqlScan(ctx, v)
 }
 
-func (bs *BlobSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (bs *BlobSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := bs.sql.Query()
 	if err := bs.driver.Query(ctx, query, args, rows); err != nil {

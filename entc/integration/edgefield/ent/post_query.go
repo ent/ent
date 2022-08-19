@@ -359,10 +359,10 @@ func (pq *PostQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Post, e
 			pq.withAuthor != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Post).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Post{config: pq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -531,7 +531,7 @@ func (pgb *PostGroupBy) Aggregate(fns ...AggregateFunc) *PostGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (pgb *PostGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (pgb *PostGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := pgb.path(ctx)
 	if err != nil {
 		return err
@@ -540,7 +540,7 @@ func (pgb *PostGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return pgb.sqlScan(ctx, v)
 }
 
-func (pgb *PostGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (pgb *PostGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range pgb.fields {
 		if !post.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -587,7 +587,7 @@ type PostSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ps *PostSelect) Scan(ctx context.Context, v interface{}) error {
+func (ps *PostSelect) Scan(ctx context.Context, v any) error {
 	if err := ps.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -595,7 +595,7 @@ func (ps *PostSelect) Scan(ctx context.Context, v interface{}) error {
 	return ps.sqlScan(ctx, v)
 }
 
-func (ps *PostSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ps *PostSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ps.sql.Query()
 	if err := ps.driver.Query(ctx, query, args, rows); err != nil {

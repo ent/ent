@@ -396,10 +396,10 @@ func (utq *UserTweetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*U
 			utq.withTweet != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*UserTweet).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &UserTweet{config: utq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -597,7 +597,7 @@ func (utgb *UserTweetGroupBy) Aggregate(fns ...AggregateFunc) *UserTweetGroupBy 
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (utgb *UserTweetGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (utgb *UserTweetGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := utgb.path(ctx)
 	if err != nil {
 		return err
@@ -606,7 +606,7 @@ func (utgb *UserTweetGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return utgb.sqlScan(ctx, v)
 }
 
-func (utgb *UserTweetGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (utgb *UserTweetGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range utgb.fields {
 		if !usertweet.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -653,7 +653,7 @@ type UserTweetSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (uts *UserTweetSelect) Scan(ctx context.Context, v interface{}) error {
+func (uts *UserTweetSelect) Scan(ctx context.Context, v any) error {
 	if err := uts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -661,7 +661,7 @@ func (uts *UserTweetSelect) Scan(ctx context.Context, v interface{}) error {
 	return uts.sqlScan(ctx, v)
 }
 
-func (uts *UserTweetSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (uts *UserTweetSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := uts.sql.Query()
 	if err := uts.driver.Query(ctx, query, args, rows); err != nil {

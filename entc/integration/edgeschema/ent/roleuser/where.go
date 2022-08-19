@@ -51,7 +51,7 @@ func CreatedAtNEQ(v time.Time) predicate.RoleUser {
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
 func CreatedAtIn(vs ...time.Time) predicate.RoleUser {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -62,7 +62,7 @@ func CreatedAtIn(vs ...time.Time) predicate.RoleUser {
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
 func CreatedAtNotIn(vs ...time.Time) predicate.RoleUser {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -115,7 +115,7 @@ func RoleIDNEQ(v int) predicate.RoleUser {
 
 // RoleIDIn applies the In predicate on the "role_id" field.
 func RoleIDIn(vs ...int) predicate.RoleUser {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -126,7 +126,7 @@ func RoleIDIn(vs ...int) predicate.RoleUser {
 
 // RoleIDNotIn applies the NotIn predicate on the "role_id" field.
 func RoleIDNotIn(vs ...int) predicate.RoleUser {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -151,7 +151,7 @@ func UserIDNEQ(v int) predicate.RoleUser {
 
 // UserIDIn applies the In predicate on the "user_id" field.
 func UserIDIn(vs ...int) predicate.RoleUser {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -162,7 +162,7 @@ func UserIDIn(vs ...int) predicate.RoleUser {
 
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
 func UserIDNotIn(vs ...int) predicate.RoleUser {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

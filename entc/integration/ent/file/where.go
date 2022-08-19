@@ -36,7 +36,7 @@ func IDNEQ(id int) predicate.File {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.File {
 	return predicate.File(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -47,7 +47,7 @@ func IDIn(ids ...int) predicate.File {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.File {
 	return predicate.File(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -134,7 +134,7 @@ func SizeNEQ(v int) predicate.File {
 
 // SizeIn applies the In predicate on the "size" field.
 func SizeIn(vs ...int) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -145,7 +145,7 @@ func SizeIn(vs ...int) predicate.File {
 
 // SizeNotIn applies the NotIn predicate on the "size" field.
 func SizeNotIn(vs ...int) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -198,7 +198,7 @@ func NameNEQ(v string) predicate.File {
 
 // NameIn applies the In predicate on the "name" field.
 func NameIn(vs ...string) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -209,7 +209,7 @@ func NameIn(vs ...string) predicate.File {
 
 // NameNotIn applies the NotIn predicate on the "name" field.
 func NameNotIn(vs ...string) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -297,7 +297,7 @@ func UserNEQ(v string) predicate.File {
 
 // UserIn applies the In predicate on the "user" field.
 func UserIn(vs ...string) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -308,7 +308,7 @@ func UserIn(vs ...string) predicate.File {
 
 // UserNotIn applies the NotIn predicate on the "user" field.
 func UserNotIn(vs ...string) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -410,7 +410,7 @@ func GroupNEQ(v string) predicate.File {
 
 // GroupIn applies the In predicate on the "group" field.
 func GroupIn(vs ...string) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -421,7 +421,7 @@ func GroupIn(vs ...string) predicate.File {
 
 // GroupNotIn applies the NotIn predicate on the "group" field.
 func GroupNotIn(vs ...string) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -551,7 +551,7 @@ func FieldIDNEQ(v int) predicate.File {
 
 // FieldIDIn applies the In predicate on the "field_id" field.
 func FieldIDIn(vs ...int) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -562,7 +562,7 @@ func FieldIDIn(vs ...int) predicate.File {
 
 // FieldIDNotIn applies the NotIn predicate on the "field_id" field.
 func FieldIDNotIn(vs ...int) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

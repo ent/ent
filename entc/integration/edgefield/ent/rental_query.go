@@ -397,10 +397,10 @@ func (rq *RentalQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Renta
 			rq.withCar != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Rental).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Rental{config: rq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -598,7 +598,7 @@ func (rgb *RentalGroupBy) Aggregate(fns ...AggregateFunc) *RentalGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (rgb *RentalGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (rgb *RentalGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := rgb.path(ctx)
 	if err != nil {
 		return err
@@ -607,7 +607,7 @@ func (rgb *RentalGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return rgb.sqlScan(ctx, v)
 }
 
-func (rgb *RentalGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (rgb *RentalGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range rgb.fields {
 		if !rental.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -654,7 +654,7 @@ type RentalSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (rs *RentalSelect) Scan(ctx context.Context, v interface{}) error {
+func (rs *RentalSelect) Scan(ctx context.Context, v any) error {
 	if err := rs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -662,7 +662,7 @@ func (rs *RentalSelect) Scan(ctx context.Context, v interface{}) error {
 	return rs.sqlScan(ctx, v)
 }
 
-func (rs *RentalSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (rs *RentalSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := rs.sql.Query()
 	if err := rs.driver.Query(ctx, query, args, rows); err != nil {

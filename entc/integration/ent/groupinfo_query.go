@@ -363,10 +363,10 @@ func (giq *GroupInfoQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*G
 			giq.withGroups != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*GroupInfo).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &GroupInfo{config: giq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -600,7 +600,7 @@ func (gigb *GroupInfoGroupBy) Aggregate(fns ...AggregateFunc) *GroupInfoGroupBy 
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (gigb *GroupInfoGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (gigb *GroupInfoGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := gigb.path(ctx)
 	if err != nil {
 		return err
@@ -609,7 +609,7 @@ func (gigb *GroupInfoGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return gigb.sqlScan(ctx, v)
 }
 
-func (gigb *GroupInfoGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (gigb *GroupInfoGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range gigb.fields {
 		if !groupinfo.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -656,7 +656,7 @@ type GroupInfoSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (gis *GroupInfoSelect) Scan(ctx context.Context, v interface{}) error {
+func (gis *GroupInfoSelect) Scan(ctx context.Context, v any) error {
 	if err := gis.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -664,7 +664,7 @@ func (gis *GroupInfoSelect) Scan(ctx context.Context, v interface{}) error {
 	return gis.sqlScan(ctx, v)
 }
 
-func (gis *GroupInfoSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (gis *GroupInfoSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := gis.sql.Query()
 	if err := gis.driver.Query(ctx, query, args, rows); err != nil {

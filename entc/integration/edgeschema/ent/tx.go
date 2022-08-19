@@ -238,12 +238,12 @@ func (*txDriver) Commit() error { return nil }
 func (*txDriver) Rollback() error { return nil }
 
 // Exec calls tx.Exec.
-func (tx *txDriver) Exec(ctx context.Context, query string, args, v interface{}) error {
+func (tx *txDriver) Exec(ctx context.Context, query string, args, v any) error {
 	return tx.tx.Exec(ctx, query, args, v)
 }
 
 // Query calls tx.Query.
-func (tx *txDriver) Query(ctx context.Context, query string, args, v interface{}) error {
+func (tx *txDriver) Query(ctx context.Context, query string, args, v any) error {
 	return tx.tx.Query(ctx, query, args, v)
 }
 

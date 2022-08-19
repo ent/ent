@@ -73,9 +73,9 @@ func TestMySQL(t *testing.T) {
 			require.NoError(t, err)
 			defer root.Close()
 			ctx := context.Background()
-			err = root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS config", []interface{}{}, new(sql.Result))
+			err = root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS config", []any{}, new(sql.Result))
 			require.NoError(t, err, "creating database")
-			defer root.Exec(ctx, "DROP DATABASE IF EXISTS config", []interface{}{}, new(sql.Result))
+			defer root.Exec(ctx, "DROP DATABASE IF EXISTS config", []any{}, new(sql.Result))
 
 			drv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/config?parseTime=True", port))
 			require.NoError(t, err, "connecting to migrate database")

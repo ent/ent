@@ -397,10 +397,10 @@ func (rq *RoleQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Role, e
 			rq.withRolesUsers != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Role).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Role{config: rq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -458,14 +458,14 @@ func (rq *RoleQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Ro
 	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
 		assign := spec.Assign
 		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]interface{}, error) {
+		spec.ScanValues = func(columns []string) ([]any, error) {
 			values, err := values(columns[1:])
 			if err != nil {
 				return nil, err
 			}
-			return append([]interface{}{new(sql.NullInt64)}, values...), nil
+			return append([]any{new(sql.NullInt64)}, values...), nil
 		}
-		spec.Assign = func(columns []string, values []interface{}) error {
+		spec.Assign = func(columns []string, values []any) error {
 			outValue := int(values[0].(*sql.NullInt64).Int64)
 			inValue := int(values[1].(*sql.NullInt64).Int64)
 			if nids[inValue] == nil {
@@ -633,7 +633,7 @@ func (rgb *RoleGroupBy) Aggregate(fns ...AggregateFunc) *RoleGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (rgb *RoleGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (rgb *RoleGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := rgb.path(ctx)
 	if err != nil {
 		return err
@@ -642,7 +642,7 @@ func (rgb *RoleGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return rgb.sqlScan(ctx, v)
 }
 
-func (rgb *RoleGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (rgb *RoleGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range rgb.fields {
 		if !role.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -689,7 +689,7 @@ type RoleSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (rs *RoleSelect) Scan(ctx context.Context, v interface{}) error {
+func (rs *RoleSelect) Scan(ctx context.Context, v any) error {
 	if err := rs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -697,7 +697,7 @@ func (rs *RoleSelect) Scan(ctx context.Context, v interface{}) error {
 	return rs.sqlScan(ctx, v)
 }
 
-func (rs *RoleSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (rs *RoleSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := rs.sql.Query()
 	if err := rs.driver.Query(ctx, query, args, rows); err != nil {

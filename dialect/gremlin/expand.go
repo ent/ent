@@ -25,7 +25,7 @@ func ExpandBindings(rt RoundTripper) RoundTripper {
 			return rt.RoundTrip(ctx, r)
 		}
 		{
-			query, bindings := query.(string), bindings.(map[string]interface{})
+			query, bindings := query.(string), bindings.(map[string]any)
 			keys := make(sort.StringSlice, 0, len(bindings))
 			for k := range bindings {
 				keys = append(keys, k)

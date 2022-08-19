@@ -289,7 +289,7 @@ type Column struct {
 	Unique     bool              // column with unique constraint.
 	Increment  bool              // auto increment attribute.
 	Nullable   bool              // null or not null attribute.
-	Default    interface{}       // default value.
+	Default    any               // default value.
 	Enums      []string          // enum values.
 	Collation  string            // collation type (utf8mb4_unicode_ci, utf8mb4_general_ci)
 	typ        string            // row column type (used for Rows.Scan).

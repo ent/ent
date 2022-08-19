@@ -611,7 +611,7 @@ func (uq *UserQuery) gremlinAll(ctx context.Context) ([]*User, error) {
 	res := &gremlin.Response{}
 	traversal := uq.gremlinQuery(ctx)
 	if len(uq.fields) > 0 {
-		fields := make([]interface{}, len(uq.fields))
+		fields := make([]any, len(uq.fields))
 		for i, f := range uq.fields {
 			fields[i] = f
 		}
@@ -695,7 +695,7 @@ func (ugb *UserGroupBy) Aggregate(fns ...AggregateFunc) *UserGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (ugb *UserGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (ugb *UserGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := ugb.path(ctx)
 	if err != nil {
 		return err
@@ -704,7 +704,7 @@ func (ugb *UserGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return ugb.gremlinScan(ctx, v)
 }
 
-func (ugb *UserGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
+func (ugb *UserGroupBy) gremlinScan(ctx context.Context, v any) error {
 	res := &gremlin.Response{}
 	query, bindings := ugb.gremlinQuery().Query()
 	if err := ugb.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -722,8 +722,8 @@ func (ugb *UserGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
 
 func (ugb *UserGroupBy) gremlinQuery() *dsl.Traversal {
 	var (
-		trs   []interface{}
-		names []interface{}
+		trs   []any
+		names []any
 	)
 	for _, fn := range ugb.fns {
 		name, tr := fn("p", "")
@@ -750,7 +750,7 @@ type UserSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (us *UserSelect) Scan(ctx context.Context, v interface{}) error {
+func (us *UserSelect) Scan(ctx context.Context, v any) error {
 	if err := us.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -758,7 +758,7 @@ func (us *UserSelect) Scan(ctx context.Context, v interface{}) error {
 	return us.gremlinScan(ctx, v)
 }
 
-func (us *UserSelect) gremlinScan(ctx context.Context, v interface{}) error {
+func (us *UserSelect) gremlinScan(ctx context.Context, v any) error {
 	var (
 		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
@@ -770,7 +770,7 @@ func (us *UserSelect) gremlinScan(ctx context.Context, v interface{}) error {
 			traversal = us.gremlin.ID()
 		}
 	} else {
-		fields := make([]interface{}, len(us.fields))
+		fields := make([]any, len(us.fields))
 		for i, f := range us.fields {
 			fields[i] = f
 		}
