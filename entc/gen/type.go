@@ -109,6 +109,8 @@ type (
 		Type *Type
 		// Optional indicates is this edge is optional on create.
 		Optional bool
+		// Immutable indicates is this edge cannot be updated.
+		Immutable bool
 		// Unique indicates if this edge is a unique edge.
 		Unique bool
 		// Inverse holds the name of the reference edge declared in the schema.
@@ -517,9 +519,13 @@ func (t Type) NumConstraint() int {
 func (t Type) MutableFields() []*Field {
 	fields := make([]*Field, 0, len(t.Fields))
 	for _, f := range t.Fields {
-		if !f.Immutable {
-			fields = append(fields, f)
+		if f.Immutable {
+			continue
 		}
+		if e, err := f.Edge(); err == nil && e.Immutable {
+			continue
+		}
+		fields = append(fields, f)
 	}
 	return fields
 }

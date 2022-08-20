@@ -34,7 +34,7 @@ type User struct {
 type UserEdges struct {
 	// Pets holds the value of the pets edge.
 	Pets []*Pet `json:"pets,omitempty"`
-	// Parent holds the value of the parent edge.
+	// The parent edge and its field are immutable
 	Parent *User `json:"parent,omitempty"`
 	// Children holds the value of the children edge.
 	Children []*User `json:"children,omitempty"`

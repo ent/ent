@@ -291,6 +291,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Owner:       t,
 				Unique:      e.Unique,
 				Optional:    !e.Required,
+				Immutable:   e.Immutable,
 				StructTag:   structTag(e.Name, e.Tag),
 				Annotations: e.Annotations,
 			})
@@ -305,6 +306,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Inverse:     e.RefName,
 				Unique:      e.Unique,
 				Optional:    !e.Required,
+				Immutable:   e.Immutable,
 				StructTag:   structTag(e.Name, e.Tag),
 				Annotations: e.Annotations,
 			})
@@ -321,6 +323,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Inverse:     ref.Name,
 				Unique:      e.Unique,
 				Optional:    !e.Required,
+				Immutable:   e.Immutable,
 				StructTag:   structTag(e.Name, e.Tag),
 				Annotations: e.Annotations,
 			}
@@ -332,6 +335,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Name:        ref.Name,
 				Unique:      ref.Unique,
 				Optional:    !ref.Required,
+				Immutable:   ref.Immutable,
 				StructTag:   structTag(ref.Name, ref.Tag),
 				Annotations: ref.Annotations,
 			}
@@ -343,28 +347,27 @@ func (g *Graph) addEdges(schema *load.Schema) {
 	}
 }
 
-// resolve resolves the type reference and relation of edges.
+// resolve the type references and relations of its edges.
 // It fails if one of the references is missing or invalid.
 //
-// relation definitions between A and B, where A is the owner of
+// Relation definitions between A and B, where A is the owner of
 // the edge and B uses this edge as a back-reference:
 //
-// 	O2O
-// 	 - A have a unique edge (E) to B, and B have a back-reference unique edge (E') for E.
-// 	 - A have a unique edge (E) to A.
+//	O2O
+//	 - A have a unique edge (E) to B, and B have a back-reference unique edge (E') for E.
+//	 - A have a unique edge (E) to A.
 //
-// 	O2M (The "Many" side, keeps a reference to the "One" side).
-// 	 - A have an edge (E) to B (not unique), and B doesn't have a back-reference edge for E.
-// 	 - A have an edge (E) to B (not unique), and B have a back-reference unique edge (E') for E.
+//	O2M (The "Many" side, keeps a reference to the "One" side).
+//	 - A have an edge (E) to B (not unique), and B doesn't have a back-reference edge for E.
+//	 - A have an edge (E) to B (not unique), and B have a back-reference unique edge (E') for E.
 //
-// 	M2O (The "Many" side, holds the reference to the "One" side).
-// 	 - A have a unique edge (E) to B, and B doesn't have a back-reference edge for E.
-// 	 - A have a unique edge (E) to B, and B have a back-reference non-unique edge (E') for E.
+//	M2O (The "Many" side, holds the reference to the "One" side).
+//	 - A have a unique edge (E) to B, and B doesn't have a back-reference edge for E.
+//	 - A have a unique edge (E) to B, and B have a back-reference non-unique edge (E') for E.
 //
-// 	M2M
-// 	 - A have an edge (E) to B (not unique), and B have a back-reference non-unique edge (E') for E.
-// 	 - A have an edge (E) to A (not unique).
-//
+//	M2M
+//	 - A have an edge (E) to B (not unique), and B have a back-reference non-unique edge (E') for E.
+//	 - A have an edge (E) to A (not unique).
 func (g *Graph) resolve(t *Type) error {
 	for _, e := range t.Edges {
 		switch {
@@ -861,7 +864,6 @@ func (Config) ModuleInfo() (m debug.Module) {
 //	{{ with $.FeatureEnabled "privacy" }}
 //		...
 //	{{ end }}
-//
 func (c Config) FeatureEnabled(name string) (bool, error) {
 	for _, f := range AllFeatures {
 		if name == f.Name {

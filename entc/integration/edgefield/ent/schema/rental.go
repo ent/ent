@@ -37,7 +37,8 @@ func (Rental) Edges() []ent.Edge {
 			Ref("rentals").
 			Field("user_id").
 			Unique().
-			Required(),
+			Required().
+			Immutable(),
 		edge.From("car", Car.Type).
 			Ref("rentals").
 			Field("car_id").

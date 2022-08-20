@@ -525,13 +525,12 @@ fmt.Printf("%s\n", b)
 ## Immutable
 
 Immutable fields are fields that can be set only in the creation of the entity.
-i.e., no setters will be generated for the entity updater.
+i.e., no setters will be generated for the update builders of the entity.
 
-```go
+```go {6}
 // Fields of the user.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name"),
 		field.Time("created_at").
 			Default(time.Now).
 			Immutable(),
@@ -543,11 +542,10 @@ func (User) Fields() []ent.Field {
 Fields can be defined as unique using the `Unique` method.
 Note that unique fields cannot have default values.
 
-```go
+```go {5}
 // Fields of the user.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name"),
 		field.String("nickname").
 			Unique(),
 	}

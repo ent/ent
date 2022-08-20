@@ -71,6 +71,7 @@ type Edge struct {
 	Unique      bool                   `json:"unique,omitempty"`
 	Inverse     bool                   `json:"inverse,omitempty"`
 	Required    bool                   `json:"required,omitempty"`
+	Immutable   bool                   `json:"immutable,omitempty"`
 	StorageKey  *edge.StorageKey       `json:"storage_key,omitempty"`
 	Annotations map[string]any         `json:"annotations,omitempty"`
 	Comment     string                 `json:"comment,omitempty"`
@@ -95,6 +96,7 @@ func NewEdge(ed *edge.Descriptor) *Edge {
 		Unique:      ed.Unique,
 		Inverse:     ed.Inverse,
 		Required:    ed.Required,
+		Immutable:   ed.Immutable,
 		RefName:     ed.RefName,
 		Through:     ed.Through,
 		StorageKey:  ed.StorageKey,

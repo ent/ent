@@ -393,7 +393,8 @@ func (TenantMixin) Edges() []ent.Edge {
 		edge.To("tenant", Tenant.Type).
 			Field("tenant_id").
 			Unique().
-			Required(),
+			Required().
+			Immutable(),
 	}
 }
 ```
