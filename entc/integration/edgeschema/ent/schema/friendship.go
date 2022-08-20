@@ -25,8 +25,10 @@ func (Friendship) Fields() []ent.Field {
 			Default(1),
 		field.Time("created_at").
 			Default(time.Now),
-		field.Int("user_id"),
-		field.Int("friend_id"),
+		field.Int("user_id").
+			Immutable(),
+		field.Int("friend_id").
+			Immutable(),
 	}
 }
 

@@ -724,11 +724,17 @@ func (t *Type) setupFieldEdge(fk *ForeignKey, fkOwner *Edge, fkName string) erro
 	if !ok {
 		return fmt.Errorf("field %q was not found in the schema for edge %q", fkName, fkOwner.Name)
 	}
-	if tf.Optional != fkOwner.Optional {
-		return fmt.Errorf("mismatch optional/required config for edge %q and field %q", fkOwner.Name, fkName)
-	}
-	if tf.Immutable {
-		return fmt.Errorf("field edge %q cannot be immutable", fkName)
+	switch tf, ok := t.fields[fkName]; {
+	case !ok:
+		return fmt.Errorf("field %q was not found in the schema for edge %q", fkName, fkOwner.Name)
+	case tf.Optional && !fkOwner.Optional:
+		return fmt.Errorf("edge-field %q was set as Optional, but edge %q is not", fkName, fkOwner.Name)
+	case !tf.Optional && fkOwner.Optional:
+		return fmt.Errorf("edge %q was set as Optional, but edge-field %q is not", fkOwner.Name, fkName)
+	case tf.Immutable && !fkOwner.Immutable:
+		return fmt.Errorf("edge-field %q was set as Immutable, but edge %q is not", fkName, fkOwner.Name)
+	case !tf.Immutable && fkOwner.Immutable:
+		return fmt.Errorf("edge %q was set as Immutable, but edge-field %q is not", fkOwner.Name, fkName)
 	}
 	if t1, t2 := tf.Type.Type, fkOwner.Type.ID.Type.Type; t1 != t2 {
 		return fmt.Errorf("mismatch field type between edge field %q and id of type %q (%s != %s)", fkName, fkOwner.Type.Name, t1, t2)
