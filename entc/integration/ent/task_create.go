@@ -302,18 +302,6 @@ func (u *TaskUpsert) ClearPriorities() *TaskUpsert {
 	return u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (u *TaskUpsert) SetCreatedAt(v time.Time) *TaskUpsert {
-	u.Set(enttask.FieldCreatedAt, v)
-	return u
-}
-
-// UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
-func (u *TaskUpsert) UpdateCreatedAt() *TaskUpsert {
-	u.SetExcluded(enttask.FieldCreatedAt)
-	return u
-}
-
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -398,20 +386,6 @@ func (u *TaskUpsertOne) UpdatePriorities() *TaskUpsertOne {
 func (u *TaskUpsertOne) ClearPriorities() *TaskUpsertOne {
 	return u.Update(func(s *TaskUpsert) {
 		s.ClearPriorities()
-	})
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (u *TaskUpsertOne) SetCreatedAt(v time.Time) *TaskUpsertOne {
-	return u.Update(func(s *TaskUpsert) {
-		s.SetCreatedAt(v)
-	})
-}
-
-// UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
-func (u *TaskUpsertOne) UpdateCreatedAt() *TaskUpsertOne {
-	return u.Update(func(s *TaskUpsert) {
-		s.UpdateCreatedAt()
 	})
 }
 
@@ -661,20 +635,6 @@ func (u *TaskUpsertBulk) UpdatePriorities() *TaskUpsertBulk {
 func (u *TaskUpsertBulk) ClearPriorities() *TaskUpsertBulk {
 	return u.Update(func(s *TaskUpsert) {
 		s.ClearPriorities()
-	})
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (u *TaskUpsertBulk) SetCreatedAt(v time.Time) *TaskUpsertBulk {
-	return u.Update(func(s *TaskUpsert) {
-		s.SetCreatedAt(v)
-	})
-}
-
-// UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
-func (u *TaskUpsertBulk) UpdateCreatedAt() *TaskUpsertBulk {
-	return u.Update(func(s *TaskUpsert) {
-		s.UpdateCreatedAt()
 	})
 }
 

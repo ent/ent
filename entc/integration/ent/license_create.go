@@ -257,18 +257,6 @@ type (
 	}
 )
 
-// SetCreateTime sets the "create_time" field.
-func (u *LicenseUpsert) SetCreateTime(v time.Time) *LicenseUpsert {
-	u.Set(license.FieldCreateTime, v)
-	return u
-}
-
-// UpdateCreateTime sets the "create_time" field to the value that was provided on create.
-func (u *LicenseUpsert) UpdateCreateTime() *LicenseUpsert {
-	u.SetExcluded(license.FieldCreateTime)
-	return u
-}
-
 // SetUpdateTime sets the "update_time" field.
 func (u *LicenseUpsert) SetUpdateTime(v time.Time) *LicenseUpsert {
 	u.Set(license.FieldUpdateTime, v)
@@ -330,20 +318,6 @@ func (u *LicenseUpsertOne) Update(set func(*LicenseUpsert)) *LicenseUpsertOne {
 		set(&LicenseUpsert{UpdateSet: update})
 	}))
 	return u
-}
-
-// SetCreateTime sets the "create_time" field.
-func (u *LicenseUpsertOne) SetCreateTime(v time.Time) *LicenseUpsertOne {
-	return u.Update(func(s *LicenseUpsert) {
-		s.SetCreateTime(v)
-	})
-}
-
-// UpdateCreateTime sets the "create_time" field to the value that was provided on create.
-func (u *LicenseUpsertOne) UpdateCreateTime() *LicenseUpsertOne {
-	return u.Update(func(s *LicenseUpsert) {
-		s.UpdateCreateTime()
-	})
 }
 
 // SetUpdateTime sets the "update_time" field.
@@ -571,20 +545,6 @@ func (u *LicenseUpsertBulk) Update(set func(*LicenseUpsert)) *LicenseUpsertBulk 
 		set(&LicenseUpsert{UpdateSet: update})
 	}))
 	return u
-}
-
-// SetCreateTime sets the "create_time" field.
-func (u *LicenseUpsertBulk) SetCreateTime(v time.Time) *LicenseUpsertBulk {
-	return u.Update(func(s *LicenseUpsert) {
-		s.SetCreateTime(v)
-	})
-}
-
-// UpdateCreateTime sets the "create_time" field to the value that was provided on create.
-func (u *LicenseUpsertBulk) UpdateCreateTime() *LicenseUpsertBulk {
-	return u.Update(func(s *LicenseUpsert) {
-		s.UpdateCreateTime()
-	})
 }
 
 // SetUpdateTime sets the "update_time" field.
