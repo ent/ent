@@ -360,6 +360,14 @@ func (u *FriendshipUpsert) UpdateCreatedAt() *FriendshipUpsert {
 //		Exec(ctx)
 func (u *FriendshipUpsertOne) UpdateNewValues() *FriendshipUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.UserID(); exists {
+			s.SetIgnore(friendship.FieldUserID)
+		}
+		if _, exists := u.create.mutation.FriendID(); exists {
+			s.SetIgnore(friendship.FieldFriendID)
+		}
+	}))
 	return u
 }
 
@@ -595,6 +603,16 @@ type FriendshipUpsertBulk struct {
 //		Exec(ctx)
 func (u *FriendshipUpsertBulk) UpdateNewValues() *FriendshipUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.UserID(); exists {
+				s.SetIgnore(friendship.FieldUserID)
+			}
+			if _, exists := b.mutation.FriendID(); exists {
+				s.SetIgnore(friendship.FieldFriendID)
+			}
+		}
+	}))
 	return u
 }
 

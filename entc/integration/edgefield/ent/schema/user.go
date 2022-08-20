@@ -25,7 +25,8 @@ func (User) Fields() []ent.Field {
 			}).
 			Immutable(),
 		field.Int("parent_id").
-			Optional(),
+			Optional().
+			Immutable(),
 		field.Int("spouse_id").
 			Optional(),
 	}

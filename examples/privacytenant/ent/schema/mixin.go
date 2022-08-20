@@ -42,7 +42,8 @@ type TenantMixin struct {
 // Fields for all schemas that embed TenantMixin.
 func (TenantMixin) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("tenant_id"),
+		field.Int("tenant_id").
+			Immutable(),
 	}
 }
 
