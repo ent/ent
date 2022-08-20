@@ -1342,6 +1342,24 @@ as `NOT NULL` in the database for required edges that are not [self-reference](#
 existing foreign key columns, use the [Atlas Migration](migrate.md#atlas-integration) option.
 :::
 
+## Immutable
+
+Immutable edges are edges that can be set or added only in the creation of the entity.
+i.e., no setters will be generated for the update builders of the entity.
+
+```go {8}
+// Edges of the User.
+func (User) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("tenant", Tenant.Type).
+			Field("tenant_id").
+			Unique().
+			Required().
+			Immutable(),
+	}
+}
+```
+
 ## StorageKey
 
 By default, Ent configures edge storage-keys by the edge-owner (the schema that holds the `edge.To`), and not the by

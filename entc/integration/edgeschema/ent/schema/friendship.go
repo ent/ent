@@ -34,12 +34,14 @@ func (Friendship) Fields() []ent.Field {
 func (Friendship) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("user", User.Type).
-			Required().
 			Unique().
+			Required().
+			Immutable().
 			Field("user_id"),
 		edge.To("friend", User.Type).
-			Required().
 			Unique().
+			Required().
+			Immutable().
 			Field("friend_id"),
 	}
 }

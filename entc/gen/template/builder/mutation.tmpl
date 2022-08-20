@@ -633,18 +633,17 @@ func (m *{{ $mutation }}) RemovedEdges() []string {
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *{{ $mutation }}) RemovedIDs(name string) []ent.Value {
-	{{- with $n.EdgesWithID }}
+	{{- $edges := list }}{{ range $e := $n.EdgesWithID }}{{ if not $e.Unique }}{{ $edges = append $edges $e }}{{ end }}{{ end }}
+	{{- with $edges }}
 		switch name {
-		{{- range $e := $n.EdgesWithID }}
-			{{- if not $e.Unique }}
-				{{- $const := print $n.Package "." $e.Constant }}
-				case {{ $const }}:
-					ids := make([]ent.Value, 0, len(m.removed{{ $e.BuilderField }}))
-					for id := range m.removed{{ $e.BuilderField }} {
-						ids = append(ids, id)
-					}
-					return ids
-			{{- end }}
+		{{- range $e := $edges }}
+			{{- $const := print $n.Package "." $e.Constant }}
+			case {{ $const }}:
+				ids := make([]ent.Value, 0, len(m.removed{{ $e.BuilderField }}))
+				for id := range m.removed{{ $e.BuilderField }} {
+					ids = append(ids, id)
+				}
+				return ids
 		{{- end }}
 		}
 	{{- end }}

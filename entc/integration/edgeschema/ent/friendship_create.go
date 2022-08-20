@@ -350,30 +350,6 @@ func (u *FriendshipUpsert) UpdateCreatedAt() *FriendshipUpsert {
 	return u
 }
 
-// SetUserID sets the "user_id" field.
-func (u *FriendshipUpsert) SetUserID(v int) *FriendshipUpsert {
-	u.Set(friendship.FieldUserID, v)
-	return u
-}
-
-// UpdateUserID sets the "user_id" field to the value that was provided on create.
-func (u *FriendshipUpsert) UpdateUserID() *FriendshipUpsert {
-	u.SetExcluded(friendship.FieldUserID)
-	return u
-}
-
-// SetFriendID sets the "friend_id" field.
-func (u *FriendshipUpsert) SetFriendID(v int) *FriendshipUpsert {
-	u.Set(friendship.FieldFriendID, v)
-	return u
-}
-
-// UpdateFriendID sets the "friend_id" field to the value that was provided on create.
-func (u *FriendshipUpsert) UpdateFriendID() *FriendshipUpsert {
-	u.SetExcluded(friendship.FieldFriendID)
-	return u
-}
-
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -446,34 +422,6 @@ func (u *FriendshipUpsertOne) SetCreatedAt(v time.Time) *FriendshipUpsertOne {
 func (u *FriendshipUpsertOne) UpdateCreatedAt() *FriendshipUpsertOne {
 	return u.Update(func(s *FriendshipUpsert) {
 		s.UpdateCreatedAt()
-	})
-}
-
-// SetUserID sets the "user_id" field.
-func (u *FriendshipUpsertOne) SetUserID(v int) *FriendshipUpsertOne {
-	return u.Update(func(s *FriendshipUpsert) {
-		s.SetUserID(v)
-	})
-}
-
-// UpdateUserID sets the "user_id" field to the value that was provided on create.
-func (u *FriendshipUpsertOne) UpdateUserID() *FriendshipUpsertOne {
-	return u.Update(func(s *FriendshipUpsert) {
-		s.UpdateUserID()
-	})
-}
-
-// SetFriendID sets the "friend_id" field.
-func (u *FriendshipUpsertOne) SetFriendID(v int) *FriendshipUpsertOne {
-	return u.Update(func(s *FriendshipUpsert) {
-		s.SetFriendID(v)
-	})
-}
-
-// UpdateFriendID sets the "friend_id" field to the value that was provided on create.
-func (u *FriendshipUpsertOne) UpdateFriendID() *FriendshipUpsertOne {
-	return u.Update(func(s *FriendshipUpsert) {
-		s.UpdateFriendID()
 	})
 }
 
@@ -709,34 +657,6 @@ func (u *FriendshipUpsertBulk) SetCreatedAt(v time.Time) *FriendshipUpsertBulk {
 func (u *FriendshipUpsertBulk) UpdateCreatedAt() *FriendshipUpsertBulk {
 	return u.Update(func(s *FriendshipUpsert) {
 		s.UpdateCreatedAt()
-	})
-}
-
-// SetUserID sets the "user_id" field.
-func (u *FriendshipUpsertBulk) SetUserID(v int) *FriendshipUpsertBulk {
-	return u.Update(func(s *FriendshipUpsert) {
-		s.SetUserID(v)
-	})
-}
-
-// UpdateUserID sets the "user_id" field to the value that was provided on create.
-func (u *FriendshipUpsertBulk) UpdateUserID() *FriendshipUpsertBulk {
-	return u.Update(func(s *FriendshipUpsert) {
-		s.UpdateUserID()
-	})
-}
-
-// SetFriendID sets the "friend_id" field.
-func (u *FriendshipUpsertBulk) SetFriendID(v int) *FriendshipUpsertBulk {
-	return u.Update(func(s *FriendshipUpsert) {
-		s.SetFriendID(v)
-	})
-}
-
-// UpdateFriendID sets the "friend_id" field to the value that was provided on create.
-func (u *FriendshipUpsertBulk) UpdateFriendID() *FriendshipUpsertBulk {
-	return u.Update(func(s *FriendshipUpsert) {
-		s.UpdateFriendID()
 	})
 }
 

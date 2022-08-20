@@ -116,6 +116,8 @@ func (User) Edges() []ent.Edge {
 			Annotations(&OrderConfig{FieldName: "name"}),
 		edge.To("parent", User.Type).
 			Unique().
+			Required().
+			Immutable().
 			Field("parent_id").
 			StorageKey(edge.Column("parent_id")).
 			From("children"),
@@ -222,6 +224,8 @@ func TestMarshalSchema(t *testing.T) {
 		require.True(t, schema.Edges[1].Inverse)
 		require.Equal(t, "parent", schema.Edges[1].Ref.Name)
 		require.True(t, schema.Edges[1].Ref.Unique)
+		require.True(t, schema.Edges[1].Ref.Required)
+		require.True(t, schema.Edges[1].Ref.Immutable)
 		require.Equal(t, "parent_id", schema.Edges[1].Ref.StorageKey.Columns[0])
 
 		ant = schema.Edges[2].Annotations["order_config"].(map[string]any)

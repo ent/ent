@@ -17,7 +17,6 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/car"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/entc/integration/edgefield/ent/rental"
-	"entgo.io/ent/entc/integration/edgefield/ent/user"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -49,21 +48,10 @@ func (ru *RentalUpdate) SetNillableDate(t *time.Time) *RentalUpdate {
 	return ru
 }
 
-// SetUserID sets the "user_id" field.
-func (ru *RentalUpdate) SetUserID(i int) *RentalUpdate {
-	ru.mutation.SetUserID(i)
-	return ru
-}
-
 // SetCarID sets the "car_id" field.
 func (ru *RentalUpdate) SetCarID(u uuid.UUID) *RentalUpdate {
 	ru.mutation.SetCarID(u)
 	return ru
-}
-
-// SetUser sets the "user" edge to the User entity.
-func (ru *RentalUpdate) SetUser(u *User) *RentalUpdate {
-	return ru.SetUserID(u.ID)
 }
 
 // SetCar sets the "car" edge to the Car entity.
@@ -74,12 +62,6 @@ func (ru *RentalUpdate) SetCar(c *Car) *RentalUpdate {
 // Mutation returns the RentalMutation object of the builder.
 func (ru *RentalUpdate) Mutation() *RentalMutation {
 	return ru.mutation
-}
-
-// ClearUser clears the "user" edge to the User entity.
-func (ru *RentalUpdate) ClearUser() *RentalUpdate {
-	ru.mutation.ClearUser()
-	return ru
 }
 
 // ClearCar clears the "car" edge to the Car entity.
@@ -184,41 +166,6 @@ func (ru *RentalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: rental.FieldDate,
 		})
 	}
-	if ru.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   rental.UserTable,
-			Columns: []string{rental.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := ru.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   rental.UserTable,
-			Columns: []string{rental.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if ru.mutation.CarCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -287,21 +234,10 @@ func (ruo *RentalUpdateOne) SetNillableDate(t *time.Time) *RentalUpdateOne {
 	return ruo
 }
 
-// SetUserID sets the "user_id" field.
-func (ruo *RentalUpdateOne) SetUserID(i int) *RentalUpdateOne {
-	ruo.mutation.SetUserID(i)
-	return ruo
-}
-
 // SetCarID sets the "car_id" field.
 func (ruo *RentalUpdateOne) SetCarID(u uuid.UUID) *RentalUpdateOne {
 	ruo.mutation.SetCarID(u)
 	return ruo
-}
-
-// SetUser sets the "user" edge to the User entity.
-func (ruo *RentalUpdateOne) SetUser(u *User) *RentalUpdateOne {
-	return ruo.SetUserID(u.ID)
 }
 
 // SetCar sets the "car" edge to the Car entity.
@@ -312,12 +248,6 @@ func (ruo *RentalUpdateOne) SetCar(c *Car) *RentalUpdateOne {
 // Mutation returns the RentalMutation object of the builder.
 func (ruo *RentalUpdateOne) Mutation() *RentalMutation {
 	return ruo.mutation
-}
-
-// ClearUser clears the "user" edge to the User entity.
-func (ruo *RentalUpdateOne) ClearUser() *RentalUpdateOne {
-	ruo.mutation.ClearUser()
-	return ruo
 }
 
 // ClearCar clears the "car" edge to the Car entity.
@@ -451,41 +381,6 @@ func (ruo *RentalUpdateOne) sqlSave(ctx context.Context) (_node *Rental, err err
 			Value:  value,
 			Column: rental.FieldDate,
 		})
-	}
-	if ruo.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   rental.UserTable,
-			Columns: []string{rental.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := ruo.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   rental.UserTable,
-			Columns: []string{rental.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if ruo.mutation.CarCleared() {
 		edge := &sqlgraph.EdgeSpec{

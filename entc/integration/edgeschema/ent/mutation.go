@@ -608,8 +608,6 @@ func (m *FriendshipMutation) RemovedEdges() []string {
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *FriendshipMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 
@@ -1621,8 +1619,6 @@ func (m *RelationshipMutation) RemovedEdges() []string {
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *RelationshipMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 
@@ -2803,8 +2799,6 @@ func (m *RoleUserMutation) RemovedEdges() []string {
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *RoleUserMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 
@@ -4428,8 +4422,6 @@ func (m *TweetLikeMutation) RemovedEdges() []string {
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *TweetLikeMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 
@@ -4956,8 +4948,6 @@ func (m *TweetTagMutation) RemovedEdges() []string {
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *TweetTagMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 
@@ -6546,8 +6536,6 @@ func (m *UserGroupMutation) RemovedEdges() []string {
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *UserGroupMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 
@@ -7068,8 +7056,6 @@ func (m *UserTweetMutation) RemovedEdges() []string {
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *UserTweetMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 
