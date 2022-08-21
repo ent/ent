@@ -817,6 +817,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "water-a",
+      "name": "water-a",
+      "avatar_url": "https://avatars.githubusercontent.com/u/38114545?v=4",
+      "profile": "https://github.com/water-a",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
