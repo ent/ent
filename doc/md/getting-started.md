@@ -27,21 +27,12 @@ GOPATH, setup a [Go module](https://github.com/golang/go/wiki/Modules#quick-star
 go mod init <project>
 ```
 
-## Installation
-
-```console
-go install entgo.io/ent/cmd/ent@latest
-```
-
-After installing `ent` codegen tool, use `go run entgo.io/ent/cmd/ent <command>` to execute
-commands.
-
 ## Create Your First Schema
 
 Go to the root directory of your project, and run:
 
 ```console
-go run entgo.io/ent/cmd/ent init User
+go run -mod=mod entgo.io/ent/cmd/ent init User
 ```
 
 The command above will generate the schema for `User` under `<project>/ent/schema/` directory:
@@ -272,7 +263,7 @@ Let's create 2 additional entities named `Car` and `Group` with a few fields. We
 to generate the initial schemas:
 
 ```console
-go run entgo.io/ent/cmd/ent init Car Group
+go run -mod=mod entgo.io/ent/cmd/ent init Car Group
 ```
 
 And then we add the rest of the fields manually:
