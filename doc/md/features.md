@@ -13,7 +13,7 @@ Feature flags can be provided either by CLI flags or as arguments to the `gen` p
 #### CLI
 
 ```console
-go run entgo.io/ent/cmd/ent generate --feature privacy,entql ./ent/schema
+go run -mod=mod entgo.io/ent/cmd/ent generate --feature privacy,entql ./ent/schema
 ```
 
 #### Go
