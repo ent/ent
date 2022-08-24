@@ -270,6 +270,46 @@ func Predicates(t *testing.T, client *ent.Client) {
 	require.NoError(t, err)
 	require.Equal(t, 1, count)
 
+	t.Run("ValueIn", func(t *testing.T) {
+		count, err = client.User.Query().Where(func(s *sql.Selector) {
+			s.Where(sqljson.ValueIn(user.FieldURL, []any{"https", "http"}, sqljson.Path("Scheme")))
+		}).Count(ctx)
+		require.NoError(t, err)
+		require.Equal(t, 1, count)
+
+		count, err = client.User.Query().Where(func(s *sql.Selector) {
+			s.Where(sqljson.ValueIn(user.FieldURL, []any{"https", "ftp"}, sqljson.Path("Scheme")))
+		}).Count(ctx)
+		require.NoError(t, err)
+		require.Equal(t, 2, count)
+
+		count, err = client.User.Query().Where(func(s *sql.Selector) {
+			s.Where(sqljson.ValueIn(user.FieldURL, []any{"a", "b"}, sqljson.Path("Scheme")))
+		}).Count(ctx)
+		require.NoError(t, err)
+		require.Zero(t, count)
+	})
+
+	t.Run("ValueNotIn", func(t *testing.T) {
+		count, err = client.User.Query().Where(func(s *sql.Selector) {
+			s.Where(sqljson.ValueNotIn(user.FieldURL, []any{"https", "http"}, sqljson.Path("Scheme")))
+		}).Count(ctx)
+		require.NoError(t, err)
+		require.Equal(t, 1, count)
+
+		count, err = client.User.Query().Where(func(s *sql.Selector) {
+			s.Where(sqljson.ValueNotIn(user.FieldURL, []any{"https", "ftp"}, sqljson.Path("Scheme")))
+		}).Count(ctx)
+		require.NoError(t, err)
+		require.Equal(t, 0, count)
+
+		count, err = client.User.Query().Where(func(s *sql.Selector) {
+			s.Where(sqljson.ValueNotIn(user.FieldURL, []any{"a", "b"}, sqljson.Path("Scheme")))
+		}).Count(ctx)
+		require.NoError(t, err)
+		require.Equal(t, 2, count)
+	})
+
 	client.User.Delete().ExecX(ctx)
 	users, err = client.User.CreateBulk(
 		client.User.Create().SetT(&schema.T{I: 1, F: 1.1, T: &schema.T{I: 10}}),

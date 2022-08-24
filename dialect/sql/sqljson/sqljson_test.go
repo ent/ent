@@ -317,6 +317,30 @@ func TestWritePath(t *testing.T) {
 			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, \"$.b.c[1].d\")) LIKE ?",
 			wantArgs:  []any{"%substr"},
 		},
+		{
+			input: sql.Dialect(dialect.MySQL).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueIn("a", []any{"a", "b"}, sqljson.Path("b"))),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, \"$.b\")) IN (?, ?)",
+			wantArgs:  []any{"a", "b"},
+		},
+		{
+			input: sql.Dialect(dialect.MySQL).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueIn("a", []any{1, 2}, sqljson.Path("b"))),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_EXTRACT(`a`, \"$.b\") IN (?, ?)",
+			wantArgs:  []any{1, 2},
+		},
+		{
+			input: sql.Dialect(dialect.MySQL).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueIn("a", []any{1, "a"}, sqljson.Path("b"))),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_EXTRACT(`a`, \"$.b\") IN (?, ?)",
+			wantArgs:  []any{1, "a"},
+		},
 	}
 	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
