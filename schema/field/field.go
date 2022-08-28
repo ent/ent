@@ -79,7 +79,7 @@ func JSON(name string, typ any) *jsonBuilder {
 	}}
 	t := reflect.TypeOf(typ)
 	if t == nil {
-		b.desc.Err = errors.New("expect a Go value as JSON type, but got nil")
+		b.desc.Err = errors.New("expect a Go value as JSON type but got nil")
 		return b
 	}
 	b.desc.Info.Ident = t.String()
@@ -237,6 +237,9 @@ func (b *stringBuilder) Default(s string) *stringBuilder {
 //	field.String("cuid").
 //		DefaultFunc(cuid.New)
 func (b *stringBuilder) DefaultFunc(fn any) *stringBuilder {
+	if t := reflect.TypeOf(fn); t.Kind() != reflect.Func {
+		b.desc.Err = fmt.Errorf("field.String(%q).DefaultFunc expects func but got %s", b.desc.Name, t.Kind())
+	}
 	b.desc.Default = fn
 	return b
 }
@@ -528,6 +531,9 @@ func (b *bytesBuilder) Default(v []byte) *bytesBuilder {
 //	field.Bytes("cuid").
 //		DefaultFunc(cuid.New)
 func (b *bytesBuilder) DefaultFunc(fn any) *bytesBuilder {
+	if t := reflect.TypeOf(fn); t.Kind() != reflect.Func {
+		b.desc.Err = fmt.Errorf("field.Bytes(%q).DefaultFunc expects func but got %s", b.desc.Name, t.Kind())
+	}
 	b.desc.Default = fn
 	return b
 }
