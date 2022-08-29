@@ -55,6 +55,8 @@ type T struct {
 	T  *T       `json:"t,omitempty"`
 	Li []int    `json:"li,omitempty"`
 	Ls []string `json:"ls,omitempty"`
+	// Do not omit empty or null maps.
+	M map[string]any `json:"m"`
 }
 
 type Addr struct{ net.Addr }

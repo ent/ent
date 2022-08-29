@@ -401,11 +401,11 @@ func Predicates(t *testing.T, client *ent.Client) {
 		u, err := url.Parse("https://github.com/a8m")
 		require.NoError(t, err)
 		dirs := []http.Dir{"/dev/null"}
-		_, err = client.User.CreateBulk(
+		client.User.CreateBulk(
 			client.User.Create().SetURL(u),
 			client.User.Create().SetDirs(dirs),
 			client.User.Create().SetT(&schema.T{S: "foobar", Ls: []string{"foo", "bar"}}),
-		).Save(ctx)
+		).ExecX(ctx)
 		require.NoError(t, err)
 
 		ps := []*sql.Predicate{
@@ -448,5 +448,61 @@ func Predicates(t *testing.T, client *ent.Client) {
 			r = client.User.Query().Where(func(s *sql.Selector) { s.Where(p) }).OnlyX(ctx)
 			require.Equal(t, []string{"foo", "bar"}, r.T.Ls)
 		}
+	})
+
+	t.Run("HasKey", func(t *testing.T) {
+		client.User.Delete().ExecX(ctx)
+		client.User.CreateBulk(
+			client.User.Create(),
+			client.User.Create().SetT(&schema.T{}),
+			client.User.Create().SetT(&schema.T{M: map[string]any{}}),
+			client.User.Create().SetT(&schema.T{M: map[string]any{"a": nil}}),
+			client.User.Create().SetT(&schema.T{M: map[string]any{"a": map[string]any{"b": nil, "c": "c"}}}),
+		).ExecX(ctx)
+		require.NoError(t, err)
+
+		n := client.User.Query().Where(func(s *sql.Selector) {
+			s.Where(sqljson.HasKey(user.FieldT, sqljson.Path("m")))
+		}).CountX(ctx)
+		require.Equal(t, 4, n, "take all 'm', including empty and null as omitempty is not set")
+
+		n = client.User.Query().Where(func(s *sql.Selector) {
+			s.Where(sqljson.HasKey(user.FieldT, sqljson.DotPath("m.a")))
+		}).CountX(ctx)
+		require.Equal(t, 2, n)
+		n = client.User.Query().Where(func(s *sql.Selector) {
+			s.Where(
+				sql.Not(
+					sqljson.HasKey(user.FieldT, sqljson.DotPath("m.a")),
+				),
+			)
+		}).CountX(ctx)
+		require.Equal(t, 3, n)
+
+		n = client.User.Query().Where(func(s *sql.Selector) {
+			s.Where(sqljson.HasKey(user.FieldT, sqljson.DotPath("m.a.b")))
+		}).CountX(ctx)
+		require.Equal(t, 1, n)
+		n = client.User.Query().Where(func(s *sql.Selector) {
+			s.Where(
+				sql.Not(
+					sqljson.HasKey(user.FieldT, sqljson.DotPath("m.a.b")),
+				),
+			)
+		}).CountX(ctx)
+		require.Equal(t, 4, n)
+
+		n = client.User.Query().Where(func(s *sql.Selector) {
+			s.Where(sqljson.HasKey(user.FieldT, sqljson.DotPath("m.a.c")))
+		}).CountX(ctx)
+		require.Equal(t, 1, n)
+		n = client.User.Query().Where(func(s *sql.Selector) {
+			s.Where(
+				sql.Not(
+					sqljson.HasKey(user.FieldT, sqljson.DotPath("m.a.c")),
+				),
+			)
+		}).CountX(ctx)
+		require.Equal(t, 4, n)
 	})
 }

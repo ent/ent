@@ -61,14 +61,14 @@ func TestWritePath(t *testing.T) {
 				Select("*").
 				From(sql.Table("test")).
 				Where(sqljson.HasKey("j", sqljson.DotPath("attributes[1].body"))),
-			wantQuery: "SELECT * FROM `test` WHERE (JSON_EXTRACT(`j`, \"$.attributes[1].body\") IS NOT NULL OR JSON_TYPE(`j`, \"$.attributes[1].body\") = 'null')",
+			wantQuery: "SELECT * FROM `test` WHERE JSON_TYPE(`j`, \"$.attributes[1].body\") IS NOT NULL",
 		},
 		{
 			input: sql.Dialect(dialect.SQLite).
 				Select("*").
 				From(sql.Table("test")).
 				Where(sqljson.HasKey("j", sqljson.DotPath("a.*.c"))),
-			wantQuery: "SELECT * FROM `test` WHERE (JSON_EXTRACT(`j`, \"$.a.*.c\") IS NOT NULL OR JSON_TYPE(`j`, \"$.a.*.c\") = 'null')",
+			wantQuery: "SELECT * FROM `test` WHERE JSON_TYPE(`j`, \"$.a.*.c\") IS NOT NULL",
 		},
 		{
 			input: sql.Dialect(dialect.SQLite).
@@ -81,7 +81,7 @@ func TestWritePath(t *testing.T) {
 						sql.EQ("active", true),
 					),
 				),
-			wantQuery: "SELECT * FROM `test` WHERE `id` > ? AND (JSON_EXTRACT(`j`, \"$.a.*.c\") IS NOT NULL OR JSON_TYPE(`j`, \"$.a.*.c\") = 'null') AND `active`",
+			wantQuery: "SELECT * FROM `test` WHERE `id` > ? AND JSON_TYPE(`j`, \"$.a.*.c\") IS NOT NULL AND `active`",
 			wantArgs:  []any{100},
 		},
 		{
