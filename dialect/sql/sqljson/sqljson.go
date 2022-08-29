@@ -22,18 +22,11 @@ func HasKey(column string, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		switch b.Dialect() {
 		case dialect.SQLite:
-			b.Nested(func(b *sql.Builder) {
-				b.Join(
-					sql.Or(
-						// The result is NULL for JSON null.
-						sql.P(func(b *sql.Builder) {
-							ValuePath(b, column, opts...)
-							b.WriteOp(sql.OpNotNull)
-						}),
-						ValueIsNull(column, opts...),
-					),
-				)
-			})
+			// JSON_TYPE returns NULL in case the path selects an element
+			// that does not exist. See: https://sqlite.org/json1.html#jtype.
+			path := identPath(column, opts...)
+			path.mysqlFunc("JSON_TYPE", b)
+			b.WriteOp(sql.OpNotNull)
 		default:
 			ValuePath(b, column, opts...)
 			b.WriteOp(sql.OpNotNull)
