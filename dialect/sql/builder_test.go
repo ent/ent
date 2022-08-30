@@ -853,6 +853,18 @@ func TestBuilder(t *testing.T) {
 			}(),
 			wantQuery: "SELECT `g`.`id`, COUNT(`*`) AS `user_count` FROM `groups` AS `g` RIGHT JOIN `user_groups` AS `ug` ON `g`.`id` = `ug`.`group_id` GROUP BY `g`.`id`",
 		},
+        {
+            input: func() Querier {
+                t1 := Table("groups").As("g")
+                t2 := Table("user_groups").As("ug")
+                return Select(t1.C("id"), As(Count("`*`"), "user_count")).
+                    From(t1).
+                    FullJoin(t2).
+                    On(t1.C("id"), t2.C("group_id")).
+                    GroupBy(t1.C("id"))
+            }(),
+            wantQuery: "SELECT `g`.`id`, COUNT(`*`) AS `user_count` FROM `groups` AS `g` FULL JOIN `user_groups` AS `ug` ON `g`.`id` = `ug`.`group_id` GROUP BY `g`.`id`",
+        },
 		{
 			input: func() Querier {
 				t1 := Table("users").As("u")

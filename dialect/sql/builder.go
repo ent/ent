@@ -2331,6 +2331,11 @@ func (s *Selector) RightJoin(t TableView) *Selector {
 	return s.join("RIGHT JOIN", t)
 }
 
+// FullJoin appends a `FULL JOIN` clause to the statement.
+func (s *Selector) FullJoin(t TableView) *Selector {
+	return s.join("FULL JOIN", t)
+}
+
 // join adds a join table to the selector with the given kind.
 func (s *Selector) join(kind string, t TableView) *Selector {
 	s.joins = append(s.joins, join{
