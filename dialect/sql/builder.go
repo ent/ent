@@ -2331,7 +2331,7 @@ func (s *Selector) RightJoin(t TableView) *Selector {
 	return s.join("RIGHT JOIN", t)
 }
 
-// FullJoin appends a `Full JOIN` clause to the statement.
+// FullJoin appends a `FULL JOIN` clause to the statement.
 func (s *Selector) FullJoin(t TableView) *Selector {
 	return s.join("FULL JOIN", t)
 }
