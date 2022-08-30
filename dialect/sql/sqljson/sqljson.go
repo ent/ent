@@ -420,7 +420,7 @@ func (p *PathOptions) length(b *sql.Builder) {
 }
 
 // mysqlFunc writes the JSON path in MySQL format for the
-// the given function. `JSON_EXTRACT("a", '$.b.c')`.
+// given function. `JSON_EXTRACT("a", '$.b.c')`.
 func (p *PathOptions) mysqlFunc(fn string, b *sql.Builder) {
 	b.WriteString(fn).WriteByte('(')
 	b.Ident(p.Ident).Comma()
