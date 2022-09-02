@@ -330,10 +330,14 @@ func (oq *OtherQuery) sqlCount(ctx context.Context) (int, error) {
 
 func (oq *OtherQuery) sqlExist(ctx context.Context) (bool, error) {
 	_, err := oq.FirstID(ctx)
-	if err != nil && !IsNotFound(err) {
+	switch {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return !IsNotFound(err), nil
 }
 
 func (oq *OtherQuery) querySpec() *sqlgraph.QuerySpec {

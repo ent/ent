@@ -452,10 +452,14 @@ func (sq *SpecQuery) sqlCount(ctx context.Context) (int, error) {
 
 func (sq *SpecQuery) sqlExist(ctx context.Context) (bool, error) {
 	_, err := sq.FirstID(ctx)
-	if err != nil && !IsNotFound(err) {
+	switch {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return !IsNotFound(err), nil
 }
 
 func (sq *SpecQuery) querySpec() *sqlgraph.QuerySpec {

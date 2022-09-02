@@ -353,10 +353,14 @@ func (cq *ConversionQuery) sqlCount(ctx context.Context) (int, error) {
 
 func (cq *ConversionQuery) sqlExist(ctx context.Context) (bool, error) {
 	_, err := cq.FirstID(ctx)
-	if err != nil && !IsNotFound(err) {
+	switch {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("entv2: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return !IsNotFound(err), nil
 }
 
 func (cq *ConversionQuery) querySpec() *sqlgraph.QuerySpec {

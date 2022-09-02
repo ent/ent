@@ -438,10 +438,14 @@ func (tq *TokenQuery) sqlCount(ctx context.Context) (int, error) {
 
 func (tq *TokenQuery) sqlExist(ctx context.Context) (bool, error) {
 	_, err := tq.FirstID(ctx)
-	if err != nil && !IsNotFound(err) {
+	switch {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return !IsNotFound(err), nil
 }
 
 func (tq *TokenQuery) querySpec() *sqlgraph.QuerySpec {

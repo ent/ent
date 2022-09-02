@@ -353,10 +353,14 @@ func (mq *MediaQuery) sqlCount(ctx context.Context) (int, error) {
 
 func (mq *MediaQuery) sqlExist(ctx context.Context) (bool, error) {
 	_, err := mq.FirstID(ctx)
-	if err != nil && !IsNotFound(err) {
+	switch {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("entv2: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return !IsNotFound(err), nil
 }
 
 func (mq *MediaQuery) querySpec() *sqlgraph.QuerySpec {

@@ -329,10 +329,14 @@ func (gq *GroupQuery) sqlCount(ctx context.Context) (int, error) {
 
 func (gq *GroupQuery) sqlExist(ctx context.Context) (bool, error) {
 	_, err := gq.FirstID(ctx)
-	if err != nil && !IsNotFound(err) {
+	switch {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("entv2: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return !IsNotFound(err), nil
 }
 
 func (gq *GroupQuery) querySpec() *sqlgraph.QuerySpec {

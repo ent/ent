@@ -423,10 +423,14 @@ func (blq *BlobLinkQuery) sqlCount(ctx context.Context) (int, error) {
 
 func (blq *BlobLinkQuery) sqlExist(ctx context.Context) (bool, error) {
 	_, err := blq.First(ctx)
-	if err != nil && !IsNotFound(err) {
+	switch {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return !IsNotFound(err), nil
 }
 
 func (blq *BlobLinkQuery) querySpec() *sqlgraph.QuerySpec {
