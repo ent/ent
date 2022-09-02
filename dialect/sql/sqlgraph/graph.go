@@ -741,10 +741,27 @@ func (u *updater) nodes(ctx context.Context, drv dialect.Driver) (int, error) {
 		clearEdges = EdgeSpecs(u.Edges.Clear).GroupRel()
 		multiple   = hasExternalEdges(addEdges, clearEdges)
 		update     = u.builder.Update(u.Node.Table).Schema(u.Node.Schema)
-		selector   = u.builder.Select(u.Node.ID.Column).
+		selector   = u.builder.Select().
 				From(u.builder.Table(u.Node.Table).Schema(u.Node.Schema)).
 				WithContext(ctx)
 	)
+	switch {
+	// In case it is not an edge schema, the id holds the PK of
+	// the returned nodes are used for updating external tables.
+	case u.Node.ID != nil:
+		selector.Select(u.Node.ID.Column)
+	case len(u.Node.CompositeID) == 2:
+		// Other edge-schemas (M2M tables) cannot be updated by this operation.
+		// Also, in case there is a need to update an external foreign-key, it must
+		// be a single value and the user should use the "update by id" API instead.
+		if multiple {
+			return 0, fmt.Errorf("sql/sqlgraph: update edge schema table %q cannot update external tables", u.Node.Table)
+		}
+	case len(u.Node.CompositeID) != 2:
+		return 0, fmt.Errorf("sql/sqlgraph: invalid composite id for update table %q", u.Node.Table)
+	default:
+		return 0, fmt.Errorf("sql/sqlgraph: missing node id for update table %q", u.Node.Table)
+	}
 	if err := u.setTableColumns(update, addEdges, clearEdges); err != nil {
 		return 0, err
 	}

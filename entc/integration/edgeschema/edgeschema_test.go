@@ -145,6 +145,10 @@ func TestEdgeSchemaCompositeID(t *testing.T) {
 	require.Equal(t, likes[3].UserID, nat.ID)
 	require.Equal(t, likes[3].TweetID, tweets[2].ID)
 	require.NotZero(t, likes[3].LikedAt)
+
+	affected, err := client.TweetLike.Update().SetLikedAt(time.Now()).Save(ctx)
+	require.NoError(t, err)
+	require.Equal(t, client.TweetLike.Query().CountX(ctx), affected, "should update all edges (table rows)")
 }
 
 func TestEdgeSchemaDefaultID(t *testing.T) {

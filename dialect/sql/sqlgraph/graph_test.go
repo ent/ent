@@ -2122,6 +2122,29 @@ func TestUpdateNodes(t *testing.T) {
 			},
 			wantAffected: 2,
 		},
+		{
+			name: "m2m_edge_schema",
+			spec: &UpdateSpec{
+				Node: &NodeSpec{
+					Table:       "users",
+					CompositeID: []*FieldSpec{{Column: "user_id", Type: field.TypeInt}, {Column: "group_id", Type: field.TypeInt}},
+				},
+				Predicate: func(s *sql.Selector) {
+					s.Where(sql.EQ("version", 1))
+				},
+				Fields: FieldMut{
+					Add: []*FieldSpec{
+						{Column: "version", Type: field.TypeInt, Value: 1},
+					},
+				},
+			},
+			prepare: func(mock sqlmock.Sqlmock) {
+				mock.ExpectExec(escape("UPDATE `users` SET `version` = COALESCE(`users`.`version`, 0) + ? WHERE `version` = ?")).
+					WithArgs(1, 1).
+					WillReturnResult(sqlmock.NewResult(0, 4))
+			},
+			wantAffected: 4,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
