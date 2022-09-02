@@ -487,11 +487,11 @@ func (isq *IntSIDQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (isq *IntSIDQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := isq.sqlCount(ctx)
-	if err != nil {
+	_, err := isq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (isq *IntSIDQuery) querySpec() *sqlgraph.QuerySpec {

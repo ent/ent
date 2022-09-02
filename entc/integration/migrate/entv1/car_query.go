@@ -412,11 +412,11 @@ func (cq *CarQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (cq *CarQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := cq.sqlCount(ctx)
-	if err != nil {
+	_, err := cq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("entv1: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (cq *CarQuery) querySpec() *sqlgraph.QuerySpec {

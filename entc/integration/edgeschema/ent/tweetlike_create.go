@@ -257,6 +257,7 @@ func (tlc *TweetLikeCreate) createSpec() (*TweetLike, *sqlgraph.CreateSpec) {
 //			SetLikedAt(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (tlc *TweetLikeCreate) OnConflict(opts ...sql.ConflictOption) *TweetLikeUpsertOne {
 	tlc.conflict = opts
 	return &TweetLikeUpsertOne{
@@ -270,6 +271,7 @@ func (tlc *TweetLikeCreate) OnConflict(opts ...sql.ConflictOption) *TweetLikeUps
 //	client.TweetLike.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (tlc *TweetLikeCreate) OnConflictColumns(columns ...string) *TweetLikeUpsertOne {
 	tlc.conflict = append(tlc.conflict, sql.ConflictColumns(columns...))
 	return &TweetLikeUpsertOne{
@@ -334,6 +336,7 @@ func (u *TweetLikeUpsert) UpdateTweetID() *TweetLikeUpsert {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
+//
 func (u *TweetLikeUpsertOne) UpdateNewValues() *TweetLikeUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -342,9 +345,10 @@ func (u *TweetLikeUpsertOne) UpdateNewValues() *TweetLikeUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.TweetLike.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
+//  client.TweetLike.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
 func (u *TweetLikeUpsertOne) Ignore() *TweetLikeUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -519,6 +523,7 @@ func (tlcb *TweetLikeCreateBulk) ExecX(ctx context.Context) {
 //			SetLikedAt(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (tlcb *TweetLikeCreateBulk) OnConflict(opts ...sql.ConflictOption) *TweetLikeUpsertBulk {
 	tlcb.conflict = opts
 	return &TweetLikeUpsertBulk{
@@ -532,6 +537,7 @@ func (tlcb *TweetLikeCreateBulk) OnConflict(opts ...sql.ConflictOption) *TweetLi
 //	client.TweetLike.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (tlcb *TweetLikeCreateBulk) OnConflictColumns(columns ...string) *TweetLikeUpsertBulk {
 	tlcb.conflict = append(tlcb.conflict, sql.ConflictColumns(columns...))
 	return &TweetLikeUpsertBulk{
@@ -553,6 +559,7 @@ type TweetLikeUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
+//
 func (u *TweetLikeUpsertBulk) UpdateNewValues() *TweetLikeUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -564,6 +571,7 @@ func (u *TweetLikeUpsertBulk) UpdateNewValues() *TweetLikeUpsertBulk {
 //	client.TweetLike.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
+//
 func (u *TweetLikeUpsertBulk) Ignore() *TweetLikeUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

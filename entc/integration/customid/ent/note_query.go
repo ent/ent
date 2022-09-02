@@ -338,6 +338,7 @@ func (nq *NoteQuery) WithChildren(opts ...func(*NoteQuery)) *NoteQuery {
 //		GroupBy(note.FieldText).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (nq *NoteQuery) GroupBy(field string, fields ...string) *NoteGroupBy {
 	grbuild := &NoteGroupBy{config: nq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -364,6 +365,7 @@ func (nq *NoteQuery) GroupBy(field string, fields ...string) *NoteGroupBy {
 //	client.Note.Query().
 //		Select(note.FieldText).
 //		Scan(ctx, &v)
+//
 func (nq *NoteQuery) Select(fields ...string) *NoteSelect {
 	nq.fields = append(nq.fields, fields...)
 	selbuild := &NoteSelect{NoteQuery: nq}
@@ -509,11 +511,11 @@ func (nq *NoteQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (nq *NoteQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := nq.sqlCount(ctx)
-	if err != nil {
+	_, err := nq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (nq *NoteQuery) querySpec() *sqlgraph.QuerySpec {

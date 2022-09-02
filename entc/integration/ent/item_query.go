@@ -267,6 +267,7 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 //		GroupBy(item.FieldText).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 	grbuild := &ItemGroupBy{config: iq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -293,6 +294,7 @@ func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 //	client.Item.Query().
 //		Select(item.FieldText).
 //		Scan(ctx, &v)
+//
 func (iq *ItemQuery) Select(fields ...string) *ItemSelect {
 	iq.fields = append(iq.fields, fields...)
 	selbuild := &ItemSelect{ItemQuery: iq}
@@ -358,11 +360,11 @@ func (iq *ItemQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (iq *ItemQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := iq.sqlCount(ctx)
-	if err != nil {
+	_, err := iq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (iq *ItemQuery) querySpec() *sqlgraph.QuerySpec {

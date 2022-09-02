@@ -305,6 +305,7 @@ func (giq *GroupInfoQuery) WithGroups(opts ...func(*GroupQuery)) *GroupInfoQuery
 //		GroupBy(groupinfo.FieldDesc).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGroupBy {
 	grbuild := &GroupInfoGroupBy{config: giq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -331,6 +332,7 @@ func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGro
 //	client.GroupInfo.Query().
 //		Select(groupinfo.FieldDesc).
 //		Scan(ctx, &v)
+//
 func (giq *GroupInfoQuery) Select(fields ...string) *GroupInfoSelect {
 	giq.fields = append(giq.fields, fields...)
 	selbuild := &GroupInfoSelect{GroupInfoQuery: giq}
@@ -446,11 +448,11 @@ func (giq *GroupInfoQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (giq *GroupInfoQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := giq.sqlCount(ctx)
-	if err != nil {
+	_, err := giq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (giq *GroupInfoQuery) querySpec() *sqlgraph.QuerySpec {

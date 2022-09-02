@@ -97,6 +97,7 @@ type AggregateFunc func(*sql.Selector) string
 //	GroupBy(field1, field2).
 //	Aggregate(entv2.As(entv2.Sum(field1), "sum_field1"), (entv2.As(entv2.Sum(field2), "sum_field2")).
 //	Scan(ctx, &v)
+//
 func As(fn AggregateFunc, end string) AggregateFunc {
 	return func(s *sql.Selector) string {
 		return sql.As(fn(s), end)

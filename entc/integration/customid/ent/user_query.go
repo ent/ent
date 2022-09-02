@@ -663,11 +663,11 @@ func (uq *UserQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (uq *UserQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := uq.sqlCount(ctx)
-	if err != nil {
+	_, err := uq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {

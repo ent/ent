@@ -338,6 +338,7 @@ func (pq *PostQuery) WithComments(opts ...func(*CommentQuery)) *PostQuery {
 //		GroupBy(post.FieldText).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (pq *PostQuery) GroupBy(field string, fields ...string) *PostGroupBy {
 	grbuild := &PostGroupBy{config: pq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -364,6 +365,7 @@ func (pq *PostQuery) GroupBy(field string, fields ...string) *PostGroupBy {
 //	client.Post.Query().
 //		Select(post.FieldText).
 //		Scan(ctx, &v)
+//
 func (pq *PostQuery) Select(fields ...string) *PostSelect {
 	pq.fields = append(pq.fields, fields...)
 	selbuild := &PostSelect{PostQuery: pq}
@@ -495,11 +497,11 @@ func (pq *PostQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (pq *PostQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := pq.sqlCount(ctx)
-	if err != nil {
+	_, err := pq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (pq *PostQuery) querySpec() *sqlgraph.QuerySpec {

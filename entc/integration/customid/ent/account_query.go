@@ -303,6 +303,7 @@ func (aq *AccountQuery) WithToken(opts ...func(*TokenQuery)) *AccountQuery {
 //		GroupBy(account.FieldEmail).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (aq *AccountQuery) GroupBy(field string, fields ...string) *AccountGroupBy {
 	grbuild := &AccountGroupBy{config: aq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -329,6 +330,7 @@ func (aq *AccountQuery) GroupBy(field string, fields ...string) *AccountGroupBy 
 //	client.Account.Query().
 //		Select(account.FieldEmail).
 //		Scan(ctx, &v)
+//
 func (aq *AccountQuery) Select(fields ...string) *AccountSelect {
 	aq.fields = append(aq.fields, fields...)
 	selbuild := &AccountSelect{AccountQuery: aq}
@@ -431,11 +433,11 @@ func (aq *AccountQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (aq *AccountQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := aq.sqlCount(ctx)
-	if err != nil {
+	_, err := aq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (aq *AccountQuery) querySpec() *sqlgraph.QuerySpec {

@@ -488,11 +488,11 @@ func (dq *DeviceQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (dq *DeviceQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := dq.sqlCount(ctx)
-	if err != nil {
+	_, err := dq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (dq *DeviceQuery) querySpec() *sqlgraph.QuerySpec {

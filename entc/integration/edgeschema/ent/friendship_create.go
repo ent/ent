@@ -287,6 +287,7 @@ func (fc *FriendshipCreate) createSpec() (*Friendship, *sqlgraph.CreateSpec) {
 //			SetWeight(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (fc *FriendshipCreate) OnConflict(opts ...sql.ConflictOption) *FriendshipUpsertOne {
 	fc.conflict = opts
 	return &FriendshipUpsertOne{
@@ -300,6 +301,7 @@ func (fc *FriendshipCreate) OnConflict(opts ...sql.ConflictOption) *FriendshipUp
 //	client.Friendship.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (fc *FriendshipCreate) OnConflictColumns(columns ...string) *FriendshipUpsertOne {
 	fc.conflict = append(fc.conflict, sql.ConflictColumns(columns...))
 	return &FriendshipUpsertOne{
@@ -358,6 +360,7 @@ func (u *FriendshipUpsert) UpdateCreatedAt() *FriendshipUpsert {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
+//
 func (u *FriendshipUpsertOne) UpdateNewValues() *FriendshipUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -374,9 +377,10 @@ func (u *FriendshipUpsertOne) UpdateNewValues() *FriendshipUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.Friendship.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
+//  client.Friendship.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
 func (u *FriendshipUpsertOne) Ignore() *FriendshipUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -567,6 +571,7 @@ func (fcb *FriendshipCreateBulk) ExecX(ctx context.Context) {
 //			SetWeight(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (fcb *FriendshipCreateBulk) OnConflict(opts ...sql.ConflictOption) *FriendshipUpsertBulk {
 	fcb.conflict = opts
 	return &FriendshipUpsertBulk{
@@ -580,6 +585,7 @@ func (fcb *FriendshipCreateBulk) OnConflict(opts ...sql.ConflictOption) *Friends
 //	client.Friendship.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (fcb *FriendshipCreateBulk) OnConflictColumns(columns ...string) *FriendshipUpsertBulk {
 	fcb.conflict = append(fcb.conflict, sql.ConflictColumns(columns...))
 	return &FriendshipUpsertBulk{
@@ -601,6 +607,7 @@ type FriendshipUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
+//
 func (u *FriendshipUpsertBulk) UpdateNewValues() *FriendshipUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -622,6 +629,7 @@ func (u *FriendshipUpsertBulk) UpdateNewValues() *FriendshipUpsertBulk {
 //	client.Friendship.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
+//
 func (u *FriendshipUpsertBulk) Ignore() *FriendshipUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

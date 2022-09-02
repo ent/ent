@@ -339,6 +339,7 @@ func (tq *TeamQuery) WithUsers(opts ...func(*UserQuery)) *TeamQuery {
 //		GroupBy(team.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (tq *TeamQuery) GroupBy(field string, fields ...string) *TeamGroupBy {
 	grbuild := &TeamGroupBy{config: tq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -365,6 +366,7 @@ func (tq *TeamQuery) GroupBy(field string, fields ...string) *TeamGroupBy {
 //	client.Team.Query().
 //		Select(team.FieldName).
 //		Scan(ctx, &v)
+//
 func (tq *TeamQuery) Select(fields ...string) *TeamSelect {
 	tq.fields = append(tq.fields, fields...)
 	selbuild := &TeamSelect{TeamQuery: tq}
@@ -566,11 +568,11 @@ func (tq *TeamQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (tq *TeamQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := tq.sqlCount(ctx)
-	if err != nil {
+	_, err := tq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (tq *TeamQuery) querySpec() *sqlgraph.QuerySpec {

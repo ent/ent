@@ -267,6 +267,7 @@ func (lq *LicenseQuery) Clone() *LicenseQuery {
 //		GroupBy(license.FieldCreateTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (lq *LicenseQuery) GroupBy(field string, fields ...string) *LicenseGroupBy {
 	grbuild := &LicenseGroupBy{config: lq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -293,6 +294,7 @@ func (lq *LicenseQuery) GroupBy(field string, fields ...string) *LicenseGroupBy 
 //	client.License.Query().
 //		Select(license.FieldCreateTime).
 //		Scan(ctx, &v)
+//
 func (lq *LicenseQuery) Select(fields ...string) *LicenseSelect {
 	lq.fields = append(lq.fields, fields...)
 	selbuild := &LicenseSelect{LicenseQuery: lq}
@@ -358,11 +360,11 @@ func (lq *LicenseQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (lq *LicenseQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := lq.sqlCount(ctx)
-	if err != nil {
+	_, err := lq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (lq *LicenseQuery) querySpec() *sqlgraph.QuerySpec {

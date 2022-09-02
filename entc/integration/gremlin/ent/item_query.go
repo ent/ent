@@ -265,6 +265,7 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 //		GroupBy(item.FieldText).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 	grbuild := &ItemGroupBy{config: iq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -291,6 +292,7 @@ func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 //	client.Item.Query().
 //		Select(item.FieldText).
 //		Scan(ctx, &v)
+//
 func (iq *ItemQuery) Select(fields ...string) *ItemSelect {
 	iq.fields = append(iq.fields, fields...)
 	selbuild := &ItemSelect{ItemQuery: iq}

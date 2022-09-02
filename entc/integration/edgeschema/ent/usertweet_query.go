@@ -337,6 +337,7 @@ func (utq *UserTweetQuery) WithTweet(opts ...func(*TweetQuery)) *UserTweetQuery 
 //		GroupBy(usertweet.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (utq *UserTweetQuery) GroupBy(field string, fields ...string) *UserTweetGroupBy {
 	grbuild := &UserTweetGroupBy{config: utq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -363,6 +364,7 @@ func (utq *UserTweetQuery) GroupBy(field string, fields ...string) *UserTweetGro
 //	client.UserTweet.Query().
 //		Select(usertweet.FieldCreatedAt).
 //		Scan(ctx, &v)
+//
 func (utq *UserTweetQuery) Select(fields ...string) *UserTweetSelect {
 	utq.fields = append(utq.fields, fields...)
 	selbuild := &UserTweetSelect{UserTweetQuery: utq}
@@ -492,11 +494,11 @@ func (utq *UserTweetQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (utq *UserTweetQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := utq.sqlCount(ctx)
-	if err != nil {
+	_, err := utq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (utq *UserTweetQuery) querySpec() *sqlgraph.QuerySpec {

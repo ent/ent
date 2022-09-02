@@ -372,6 +372,7 @@ func (mq *MetadataQuery) WithParent(opts ...func(*MetadataQuery)) *MetadataQuery
 //		GroupBy(metadata.FieldAge).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (mq *MetadataQuery) GroupBy(field string, fields ...string) *MetadataGroupBy {
 	grbuild := &MetadataGroupBy{config: mq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -398,6 +399,7 @@ func (mq *MetadataQuery) GroupBy(field string, fields ...string) *MetadataGroupB
 //	client.Metadata.Query().
 //		Select(metadata.FieldAge).
 //		Scan(ctx, &v)
+//
 func (mq *MetadataQuery) Select(fields ...string) *MetadataSelect {
 	mq.fields = append(mq.fields, fields...)
 	selbuild := &MetadataSelect{MetadataQuery: mq}
@@ -562,11 +564,11 @@ func (mq *MetadataQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (mq *MetadataQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := mq.sqlCount(ctx)
-	if err != nil {
+	_, err := mq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (mq *MetadataQuery) querySpec() *sqlgraph.QuerySpec {

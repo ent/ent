@@ -249,11 +249,15 @@ func ({{ $receiver }} *{{ $builder }}) sqlCount(ctx context.Context) (int, error
 }
 
 func ({{ $receiver }} *{{ $builder }}) sqlExist(ctx context.Context) (bool, error) {
-	n, err := {{ $receiver }}.sqlCount(ctx)
-	if err != nil {
+	{{- if $.HasOneFieldID }}
+	_, err := {{ $receiver }}.FirstID(ctx)
+	{{- else }}
+	_, err := {{ $receiver }}.First(ctx)
+	{{- end }}
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("{{ $pkg }}: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {

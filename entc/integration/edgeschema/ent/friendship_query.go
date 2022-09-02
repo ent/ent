@@ -336,6 +336,7 @@ func (fq *FriendshipQuery) WithFriend(opts ...func(*UserQuery)) *FriendshipQuery
 //		GroupBy(friendship.FieldWeight).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (fq *FriendshipQuery) GroupBy(field string, fields ...string) *FriendshipGroupBy {
 	grbuild := &FriendshipGroupBy{config: fq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -362,6 +363,7 @@ func (fq *FriendshipQuery) GroupBy(field string, fields ...string) *FriendshipGr
 //	client.Friendship.Query().
 //		Select(friendship.FieldWeight).
 //		Scan(ctx, &v)
+//
 func (fq *FriendshipQuery) Select(fields ...string) *FriendshipSelect {
 	fq.fields = append(fq.fields, fields...)
 	selbuild := &FriendshipSelect{FriendshipQuery: fq}
@@ -491,11 +493,11 @@ func (fq *FriendshipQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (fq *FriendshipQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := fq.sqlCount(ctx)
-	if err != nil {
+	_, err := fq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (fq *FriendshipQuery) querySpec() *sqlgraph.QuerySpec {

@@ -216,6 +216,7 @@ func (mic *MixinIDCreate) createSpec() (*MixinID, *sqlgraph.CreateSpec) {
 //			SetSomeField(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (mic *MixinIDCreate) OnConflict(opts ...sql.ConflictOption) *MixinIDUpsertOne {
 	mic.conflict = opts
 	return &MixinIDUpsertOne{
@@ -229,6 +230,7 @@ func (mic *MixinIDCreate) OnConflict(opts ...sql.ConflictOption) *MixinIDUpsertO
 //	client.MixinID.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (mic *MixinIDCreate) OnConflictColumns(columns ...string) *MixinIDUpsertOne {
 	mic.conflict = append(mic.conflict, sql.ConflictColumns(columns...))
 	return &MixinIDUpsertOne{
@@ -284,6 +286,7 @@ func (u *MixinIDUpsert) UpdateMixinField() *MixinIDUpsert {
 //			}),
 //		).
 //		Exec(ctx)
+//
 func (u *MixinIDUpsertOne) UpdateNewValues() *MixinIDUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -297,9 +300,10 @@ func (u *MixinIDUpsertOne) UpdateNewValues() *MixinIDUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.MixinID.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
+//  client.MixinID.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
 func (u *MixinIDUpsertOne) Ignore() *MixinIDUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -484,6 +488,7 @@ func (micb *MixinIDCreateBulk) ExecX(ctx context.Context) {
 //			SetSomeField(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (micb *MixinIDCreateBulk) OnConflict(opts ...sql.ConflictOption) *MixinIDUpsertBulk {
 	micb.conflict = opts
 	return &MixinIDUpsertBulk{
@@ -497,6 +502,7 @@ func (micb *MixinIDCreateBulk) OnConflict(opts ...sql.ConflictOption) *MixinIDUp
 //	client.MixinID.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (micb *MixinIDCreateBulk) OnConflictColumns(columns ...string) *MixinIDUpsertBulk {
 	micb.conflict = append(micb.conflict, sql.ConflictColumns(columns...))
 	return &MixinIDUpsertBulk{
@@ -521,6 +527,7 @@ type MixinIDUpsertBulk struct {
 //			}),
 //		).
 //		Exec(ctx)
+//
 func (u *MixinIDUpsertBulk) UpdateNewValues() *MixinIDUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -539,6 +546,7 @@ func (u *MixinIDUpsertBulk) UpdateNewValues() *MixinIDUpsertBulk {
 //	client.MixinID.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
+//
 func (u *MixinIDUpsertBulk) Ignore() *MixinIDUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

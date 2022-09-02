@@ -266,6 +266,7 @@ func (miq *MixinIDQuery) Clone() *MixinIDQuery {
 //		GroupBy(mixinid.FieldSomeField).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (miq *MixinIDQuery) GroupBy(field string, fields ...string) *MixinIDGroupBy {
 	grbuild := &MixinIDGroupBy{config: miq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -292,6 +293,7 @@ func (miq *MixinIDQuery) GroupBy(field string, fields ...string) *MixinIDGroupBy
 //	client.MixinID.Query().
 //		Select(mixinid.FieldSomeField).
 //		Scan(ctx, &v)
+//
 func (miq *MixinIDQuery) Select(fields ...string) *MixinIDSelect {
 	miq.fields = append(miq.fields, fields...)
 	selbuild := &MixinIDSelect{MixinIDQuery: miq}
@@ -351,11 +353,11 @@ func (miq *MixinIDQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (miq *MixinIDQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := miq.sqlCount(ctx)
-	if err != nil {
+	_, err := miq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (miq *MixinIDQuery) querySpec() *sqlgraph.QuerySpec {

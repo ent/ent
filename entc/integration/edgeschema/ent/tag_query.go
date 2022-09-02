@@ -338,6 +338,7 @@ func (tq *TagQuery) WithTweetTags(opts ...func(*TweetTagQuery)) *TagQuery {
 //		GroupBy(tag.FieldValue).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (tq *TagQuery) GroupBy(field string, fields ...string) *TagGroupBy {
 	grbuild := &TagGroupBy{config: tq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -364,6 +365,7 @@ func (tq *TagQuery) GroupBy(field string, fields ...string) *TagGroupBy {
 //	client.Tag.Query().
 //		Select(tag.FieldValue).
 //		Scan(ctx, &v)
+//
 func (tq *TagQuery) Select(fields ...string) *TagSelect {
 	tq.fields = append(tq.fields, fields...)
 	selbuild := &TagSelect{TagQuery: tq}
@@ -528,11 +530,11 @@ func (tq *TagQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (tq *TagQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := tq.sqlCount(ctx)
-	if err != nil {
+	_, err := tq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (tq *TagQuery) querySpec() *sqlgraph.QuerySpec {

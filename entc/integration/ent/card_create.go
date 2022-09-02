@@ -365,6 +365,7 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 //			SetCreateTime(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (cc *CardCreate) OnConflict(opts ...sql.ConflictOption) *CardUpsertOne {
 	cc.conflict = opts
 	return &CardUpsertOne{
@@ -378,6 +379,7 @@ func (cc *CardCreate) OnConflict(opts ...sql.ConflictOption) *CardUpsertOne {
 //	client.Card.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (cc *CardCreate) OnConflictColumns(columns ...string) *CardUpsertOne {
 	cc.conflict = append(cc.conflict, sql.ConflictColumns(columns...))
 	return &CardUpsertOne{
@@ -454,6 +456,7 @@ func (u *CardUpsert) ClearName() *CardUpsert {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
+//
 func (u *CardUpsertOne) UpdateNewValues() *CardUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -470,9 +473,10 @@ func (u *CardUpsertOne) UpdateNewValues() *CardUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.Card.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
+//  client.Card.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
 func (u *CardUpsertOne) Ignore() *CardUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -684,6 +688,7 @@ func (ccb *CardCreateBulk) ExecX(ctx context.Context) {
 //			SetCreateTime(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (ccb *CardCreateBulk) OnConflict(opts ...sql.ConflictOption) *CardUpsertBulk {
 	ccb.conflict = opts
 	return &CardUpsertBulk{
@@ -697,6 +702,7 @@ func (ccb *CardCreateBulk) OnConflict(opts ...sql.ConflictOption) *CardUpsertBul
 //	client.Card.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (ccb *CardCreateBulk) OnConflictColumns(columns ...string) *CardUpsertBulk {
 	ccb.conflict = append(ccb.conflict, sql.ConflictColumns(columns...))
 	return &CardUpsertBulk{
@@ -718,6 +724,7 @@ type CardUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
+//
 func (u *CardUpsertBulk) UpdateNewValues() *CardUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -739,6 +746,7 @@ func (u *CardUpsertBulk) UpdateNewValues() *CardUpsertBulk {
 //	client.Card.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
+//
 func (u *CardUpsertBulk) Ignore() *CardUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

@@ -265,6 +265,7 @@ func (ctq *CustomTypeQuery) Clone() *CustomTypeQuery {
 //		GroupBy(customtype.FieldCustom).
 //		Aggregate(entv1.Count()).
 //		Scan(ctx, &v)
+//
 func (ctq *CustomTypeQuery) GroupBy(field string, fields ...string) *CustomTypeGroupBy {
 	grbuild := &CustomTypeGroupBy{config: ctq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -291,6 +292,7 @@ func (ctq *CustomTypeQuery) GroupBy(field string, fields ...string) *CustomTypeG
 //	client.CustomType.Query().
 //		Select(customtype.FieldCustom).
 //		Scan(ctx, &v)
+//
 func (ctq *CustomTypeQuery) Select(fields ...string) *CustomTypeSelect {
 	ctq.fields = append(ctq.fields, fields...)
 	selbuild := &CustomTypeSelect{CustomTypeQuery: ctq}
@@ -350,11 +352,11 @@ func (ctq *CustomTypeQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (ctq *CustomTypeQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := ctq.sqlCount(ctx)
-	if err != nil {
+	_, err := ctq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("entv1: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (ctq *CustomTypeQuery) querySpec() *sqlgraph.QuerySpec {

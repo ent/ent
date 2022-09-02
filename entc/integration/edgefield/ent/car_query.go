@@ -303,6 +303,7 @@ func (cq *CarQuery) WithRentals(opts ...func(*RentalQuery)) *CarQuery {
 //		GroupBy(car.FieldNumber).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (cq *CarQuery) GroupBy(field string, fields ...string) *CarGroupBy {
 	grbuild := &CarGroupBy{config: cq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -329,6 +330,7 @@ func (cq *CarQuery) GroupBy(field string, fields ...string) *CarGroupBy {
 //	client.Car.Query().
 //		Select(car.FieldNumber).
 //		Scan(ctx, &v)
+//
 func (cq *CarQuery) Select(fields ...string) *CarSelect {
 	cq.fields = append(cq.fields, fields...)
 	selbuild := &CarSelect{CarQuery: cq}
@@ -427,11 +429,11 @@ func (cq *CarQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (cq *CarQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := cq.sqlCount(ctx)
-	if err != nil {
+	_, err := cq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (cq *CarQuery) querySpec() *sqlgraph.QuerySpec {

@@ -355,6 +355,7 @@ func (tc *TweetCreate) createSpec() (*Tweet, *sqlgraph.CreateSpec) {
 //			SetText(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (tc *TweetCreate) OnConflict(opts ...sql.ConflictOption) *TweetUpsertOne {
 	tc.conflict = opts
 	return &TweetUpsertOne{
@@ -368,6 +369,7 @@ func (tc *TweetCreate) OnConflict(opts ...sql.ConflictOption) *TweetUpsertOne {
 //	client.Tweet.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (tc *TweetCreate) OnConflictColumns(columns ...string) *TweetUpsertOne {
 	tc.conflict = append(tc.conflict, sql.ConflictColumns(columns...))
 	return &TweetUpsertOne{
@@ -408,6 +410,7 @@ func (u *TweetUpsert) UpdateText() *TweetUpsert {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
+//
 func (u *TweetUpsertOne) UpdateNewValues() *TweetUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -416,9 +419,10 @@ func (u *TweetUpsertOne) UpdateNewValues() *TweetUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.Tweet.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
+//  client.Tweet.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
 func (u *TweetUpsertOne) Ignore() *TweetUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -587,6 +591,7 @@ func (tcb *TweetCreateBulk) ExecX(ctx context.Context) {
 //			SetText(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (tcb *TweetCreateBulk) OnConflict(opts ...sql.ConflictOption) *TweetUpsertBulk {
 	tcb.conflict = opts
 	return &TweetUpsertBulk{
@@ -600,6 +605,7 @@ func (tcb *TweetCreateBulk) OnConflict(opts ...sql.ConflictOption) *TweetUpsertB
 //	client.Tweet.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (tcb *TweetCreateBulk) OnConflictColumns(columns ...string) *TweetUpsertBulk {
 	tcb.conflict = append(tcb.conflict, sql.ConflictColumns(columns...))
 	return &TweetUpsertBulk{
@@ -621,6 +627,7 @@ type TweetUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
+//
 func (u *TweetUpsertBulk) UpdateNewValues() *TweetUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -632,6 +639,7 @@ func (u *TweetUpsertBulk) UpdateNewValues() *TweetUpsertBulk {
 //	client.Tweet.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
+//
 func (u *TweetUpsertBulk) Ignore() *TweetUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

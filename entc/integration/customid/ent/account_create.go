@@ -239,6 +239,7 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 //			SetEmail(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (ac *AccountCreate) OnConflict(opts ...sql.ConflictOption) *AccountUpsertOne {
 	ac.conflict = opts
 	return &AccountUpsertOne{
@@ -252,6 +253,7 @@ func (ac *AccountCreate) OnConflict(opts ...sql.ConflictOption) *AccountUpsertOn
 //	client.Account.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (ac *AccountCreate) OnConflictColumns(columns ...string) *AccountUpsertOne {
 	ac.conflict = append(ac.conflict, sql.ConflictColumns(columns...))
 	return &AccountUpsertOne{
@@ -295,6 +297,7 @@ func (u *AccountUpsert) UpdateEmail() *AccountUpsert {
 //			}),
 //		).
 //		Exec(ctx)
+//
 func (u *AccountUpsertOne) UpdateNewValues() *AccountUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -308,9 +311,10 @@ func (u *AccountUpsertOne) UpdateNewValues() *AccountUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.Account.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
+//  client.Account.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
 func (u *AccountUpsertOne) Ignore() *AccountUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -481,6 +485,7 @@ func (acb *AccountCreateBulk) ExecX(ctx context.Context) {
 //			SetEmail(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (acb *AccountCreateBulk) OnConflict(opts ...sql.ConflictOption) *AccountUpsertBulk {
 	acb.conflict = opts
 	return &AccountUpsertBulk{
@@ -494,6 +499,7 @@ func (acb *AccountCreateBulk) OnConflict(opts ...sql.ConflictOption) *AccountUps
 //	client.Account.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (acb *AccountCreateBulk) OnConflictColumns(columns ...string) *AccountUpsertBulk {
 	acb.conflict = append(acb.conflict, sql.ConflictColumns(columns...))
 	return &AccountUpsertBulk{
@@ -518,6 +524,7 @@ type AccountUpsertBulk struct {
 //			}),
 //		).
 //		Exec(ctx)
+//
 func (u *AccountUpsertBulk) UpdateNewValues() *AccountUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -536,6 +543,7 @@ func (u *AccountUpsertBulk) UpdateNewValues() *AccountUpsertBulk {
 //	client.Account.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
+//
 func (u *AccountUpsertBulk) Ignore() *AccountUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

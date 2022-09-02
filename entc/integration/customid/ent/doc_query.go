@@ -373,6 +373,7 @@ func (dq *DocQuery) WithRelated(opts ...func(*DocQuery)) *DocQuery {
 //		GroupBy(doc.FieldText).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (dq *DocQuery) GroupBy(field string, fields ...string) *DocGroupBy {
 	grbuild := &DocGroupBy{config: dq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -399,6 +400,7 @@ func (dq *DocQuery) GroupBy(field string, fields ...string) *DocGroupBy {
 //	client.Doc.Query().
 //		Select(doc.FieldText).
 //		Scan(ctx, &v)
+//
 func (dq *DocQuery) Select(fields ...string) *DocSelect {
 	dq.fields = append(dq.fields, fields...)
 	selbuild := &DocSelect{DocQuery: dq}
@@ -610,11 +612,11 @@ func (dq *DocQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (dq *DocQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := dq.sqlCount(ctx)
-	if err != nil {
+	_, err := dq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (dq *DocQuery) querySpec() *sqlgraph.QuerySpec {

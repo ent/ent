@@ -162,6 +162,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 //		Card.
 //		Query().
 //		Count(ctx)
+//
 func (c *Client) Debug() *Client {
 	if c.debug {
 		return c

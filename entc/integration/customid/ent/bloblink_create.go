@@ -251,6 +251,7 @@ func (blc *BlobLinkCreate) createSpec() (*BlobLink, *sqlgraph.CreateSpec) {
 //			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (blc *BlobLinkCreate) OnConflict(opts ...sql.ConflictOption) *BlobLinkUpsertOne {
 	blc.conflict = opts
 	return &BlobLinkUpsertOne{
@@ -264,6 +265,7 @@ func (blc *BlobLinkCreate) OnConflict(opts ...sql.ConflictOption) *BlobLinkUpser
 //	client.BlobLink.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (blc *BlobLinkCreate) OnConflictColumns(columns ...string) *BlobLinkUpsertOne {
 	blc.conflict = append(blc.conflict, sql.ConflictColumns(columns...))
 	return &BlobLinkUpsertOne{
@@ -328,6 +330,7 @@ func (u *BlobLinkUpsert) UpdateLinkID() *BlobLinkUpsert {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
+//
 func (u *BlobLinkUpsertOne) UpdateNewValues() *BlobLinkUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -336,9 +339,10 @@ func (u *BlobLinkUpsertOne) UpdateNewValues() *BlobLinkUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.BlobLink.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
+//  client.BlobLink.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
 func (u *BlobLinkUpsertOne) Ignore() *BlobLinkUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -513,6 +517,7 @@ func (blcb *BlobLinkCreateBulk) ExecX(ctx context.Context) {
 //			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (blcb *BlobLinkCreateBulk) OnConflict(opts ...sql.ConflictOption) *BlobLinkUpsertBulk {
 	blcb.conflict = opts
 	return &BlobLinkUpsertBulk{
@@ -526,6 +531,7 @@ func (blcb *BlobLinkCreateBulk) OnConflict(opts ...sql.ConflictOption) *BlobLink
 //	client.BlobLink.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (blcb *BlobLinkCreateBulk) OnConflictColumns(columns ...string) *BlobLinkUpsertBulk {
 	blcb.conflict = append(blcb.conflict, sql.ConflictColumns(columns...))
 	return &BlobLinkUpsertBulk{
@@ -547,6 +553,7 @@ type BlobLinkUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
+//
 func (u *BlobLinkUpsertBulk) UpdateNewValues() *BlobLinkUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -558,6 +565,7 @@ func (u *BlobLinkUpsertBulk) UpdateNewValues() *BlobLinkUpsertBulk {
 //	client.BlobLink.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
+//
 func (u *BlobLinkUpsertBulk) Ignore() *BlobLinkUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

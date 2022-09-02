@@ -302,6 +302,7 @@ func (cq *CardQuery) WithOwner(opts ...func(*UserQuery)) *CardQuery {
 //		GroupBy(card.FieldNumber).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 	grbuild := &CardGroupBy{config: cq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -328,6 +329,7 @@ func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 //	client.Card.Query().
 //		Select(card.FieldNumber).
 //		Scan(ctx, &v)
+//
 func (cq *CardQuery) Select(fields ...string) *CardSelect {
 	cq.fields = append(cq.fields, fields...)
 	selbuild := &CardSelect{CardQuery: cq}
@@ -434,11 +436,11 @@ func (cq *CardQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (cq *CardQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := cq.sqlCount(ctx)
-	if err != nil {
+	_, err := cq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (cq *CardQuery) querySpec() *sqlgraph.QuerySpec {

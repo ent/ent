@@ -239,6 +239,7 @@ func (tc *TokenCreate) createSpec() (*Token, *sqlgraph.CreateSpec) {
 //			SetBody(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (tc *TokenCreate) OnConflict(opts ...sql.ConflictOption) *TokenUpsertOne {
 	tc.conflict = opts
 	return &TokenUpsertOne{
@@ -252,6 +253,7 @@ func (tc *TokenCreate) OnConflict(opts ...sql.ConflictOption) *TokenUpsertOne {
 //	client.Token.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (tc *TokenCreate) OnConflictColumns(columns ...string) *TokenUpsertOne {
 	tc.conflict = append(tc.conflict, sql.ConflictColumns(columns...))
 	return &TokenUpsertOne{
@@ -295,6 +297,7 @@ func (u *TokenUpsert) UpdateBody() *TokenUpsert {
 //			}),
 //		).
 //		Exec(ctx)
+//
 func (u *TokenUpsertOne) UpdateNewValues() *TokenUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -308,9 +311,10 @@ func (u *TokenUpsertOne) UpdateNewValues() *TokenUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.Token.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
+//  client.Token.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
 func (u *TokenUpsertOne) Ignore() *TokenUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -481,6 +485,7 @@ func (tcb *TokenCreateBulk) ExecX(ctx context.Context) {
 //			SetBody(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (tcb *TokenCreateBulk) OnConflict(opts ...sql.ConflictOption) *TokenUpsertBulk {
 	tcb.conflict = opts
 	return &TokenUpsertBulk{
@@ -494,6 +499,7 @@ func (tcb *TokenCreateBulk) OnConflict(opts ...sql.ConflictOption) *TokenUpsertB
 //	client.Token.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (tcb *TokenCreateBulk) OnConflictColumns(columns ...string) *TokenUpsertBulk {
 	tcb.conflict = append(tcb.conflict, sql.ConflictColumns(columns...))
 	return &TokenUpsertBulk{
@@ -518,6 +524,7 @@ type TokenUpsertBulk struct {
 //			}),
 //		).
 //		Exec(ctx)
+//
 func (u *TokenUpsertBulk) UpdateNewValues() *TokenUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -536,6 +543,7 @@ func (u *TokenUpsertBulk) UpdateNewValues() *TokenUpsertBulk {
 //	client.Token.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
+//
 func (u *TokenUpsertBulk) Ignore() *TokenUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

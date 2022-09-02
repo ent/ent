@@ -234,6 +234,7 @@ func (gic *GroupInfoCreate) createSpec() (*GroupInfo, *sqlgraph.CreateSpec) {
 //			SetDesc(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (gic *GroupInfoCreate) OnConflict(opts ...sql.ConflictOption) *GroupInfoUpsertOne {
 	gic.conflict = opts
 	return &GroupInfoUpsertOne{
@@ -247,6 +248,7 @@ func (gic *GroupInfoCreate) OnConflict(opts ...sql.ConflictOption) *GroupInfoUps
 //	client.GroupInfo.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (gic *GroupInfoCreate) OnConflictColumns(columns ...string) *GroupInfoUpsertOne {
 	gic.conflict = append(gic.conflict, sql.ConflictColumns(columns...))
 	return &GroupInfoUpsertOne{
@@ -305,6 +307,7 @@ func (u *GroupInfoUpsert) AddMaxUsers(v int) *GroupInfoUpsert {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
+//
 func (u *GroupInfoUpsertOne) UpdateNewValues() *GroupInfoUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -313,9 +316,10 @@ func (u *GroupInfoUpsertOne) UpdateNewValues() *GroupInfoUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.GroupInfo.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
+//  client.GroupInfo.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
 func (u *GroupInfoUpsertOne) Ignore() *GroupInfoUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -506,6 +510,7 @@ func (gicb *GroupInfoCreateBulk) ExecX(ctx context.Context) {
 //			SetDesc(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (gicb *GroupInfoCreateBulk) OnConflict(opts ...sql.ConflictOption) *GroupInfoUpsertBulk {
 	gicb.conflict = opts
 	return &GroupInfoUpsertBulk{
@@ -519,6 +524,7 @@ func (gicb *GroupInfoCreateBulk) OnConflict(opts ...sql.ConflictOption) *GroupIn
 //	client.GroupInfo.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (gicb *GroupInfoCreateBulk) OnConflictColumns(columns ...string) *GroupInfoUpsertBulk {
 	gicb.conflict = append(gicb.conflict, sql.ConflictColumns(columns...))
 	return &GroupInfoUpsertBulk{
@@ -540,6 +546,7 @@ type GroupInfoUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
+//
 func (u *GroupInfoUpsertBulk) UpdateNewValues() *GroupInfoUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -551,6 +558,7 @@ func (u *GroupInfoUpsertBulk) UpdateNewValues() *GroupInfoUpsertBulk {
 //	client.GroupInfo.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
+//
 func (u *GroupInfoUpsertBulk) Ignore() *GroupInfoUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

@@ -301,6 +301,7 @@ func (iq *InfoQuery) WithUser(opts ...func(*UserQuery)) *InfoQuery {
 //		GroupBy(info.FieldContent).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (iq *InfoQuery) GroupBy(field string, fields ...string) *InfoGroupBy {
 	grbuild := &InfoGroupBy{config: iq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -327,6 +328,7 @@ func (iq *InfoQuery) GroupBy(field string, fields ...string) *InfoGroupBy {
 //	client.Info.Query().
 //		Select(info.FieldContent).
 //		Scan(ctx, &v)
+//
 func (iq *InfoQuery) Select(fields ...string) *InfoSelect {
 	iq.fields = append(iq.fields, fields...)
 	selbuild := &InfoSelect{InfoQuery: iq}
@@ -423,11 +425,11 @@ func (iq *InfoQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (iq *InfoQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := iq.sqlCount(ctx)
-	if err != nil {
+	_, err := iq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (iq *InfoQuery) querySpec() *sqlgraph.QuerySpec {

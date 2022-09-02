@@ -268,6 +268,7 @@ func (tq *TaskQuery) Clone() *TaskQuery {
 //		GroupBy(enttask.FieldPriority).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (tq *TaskQuery) GroupBy(field string, fields ...string) *TaskGroupBy {
 	grbuild := &TaskGroupBy{config: tq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -294,6 +295,7 @@ func (tq *TaskQuery) GroupBy(field string, fields ...string) *TaskGroupBy {
 //	client.Task.Query().
 //		Select(enttask.FieldPriority).
 //		Scan(ctx, &v)
+//
 func (tq *TaskQuery) Select(fields ...string) *TaskSelect {
 	tq.fields = append(tq.fields, fields...)
 	selbuild := &TaskSelect{TaskQuery: tq}
@@ -359,11 +361,11 @@ func (tq *TaskQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (tq *TaskQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := tq.sqlCount(ctx)
-	if err != nil {
+	_, err := tq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (tq *TaskQuery) querySpec() *sqlgraph.QuerySpec {

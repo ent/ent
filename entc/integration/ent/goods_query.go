@@ -336,11 +336,11 @@ func (gq *GoodsQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (gq *GoodsQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := gq.sqlCount(ctx)
-	if err != nil {
+	_, err := gq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (gq *GoodsQuery) querySpec() *sqlgraph.QuerySpec {

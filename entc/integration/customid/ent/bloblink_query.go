@@ -267,6 +267,7 @@ func (blq *BlobLinkQuery) WithLink(opts ...func(*BlobQuery)) *BlobLinkQuery {
 //		GroupBy(bloblink.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (blq *BlobLinkQuery) GroupBy(field string, fields ...string) *BlobLinkGroupBy {
 	grbuild := &BlobLinkGroupBy{config: blq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -293,6 +294,7 @@ func (blq *BlobLinkQuery) GroupBy(field string, fields ...string) *BlobLinkGroup
 //	client.BlobLink.Query().
 //		Select(bloblink.FieldCreatedAt).
 //		Scan(ctx, &v)
+//
 func (blq *BlobLinkQuery) Select(fields ...string) *BlobLinkSelect {
 	blq.fields = append(blq.fields, fields...)
 	selbuild := &BlobLinkSelect{BlobLinkQuery: blq}
@@ -420,11 +422,11 @@ func (blq *BlobLinkQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (blq *BlobLinkQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := blq.sqlCount(ctx)
-	if err != nil {
+	_, err := blq.First(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (blq *BlobLinkQuery) querySpec() *sqlgraph.QuerySpec {

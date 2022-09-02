@@ -660,11 +660,11 @@ func (pq *PetQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (pq *PetQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := pq.sqlCount(ctx)
-	if err != nil {
+	_, err := pq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {

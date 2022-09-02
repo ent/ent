@@ -268,6 +268,7 @@ func (tlq *TweetLikeQuery) WithUser(opts ...func(*UserQuery)) *TweetLikeQuery {
 //		GroupBy(tweetlike.FieldLikedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (tlq *TweetLikeQuery) GroupBy(field string, fields ...string) *TweetLikeGroupBy {
 	grbuild := &TweetLikeGroupBy{config: tlq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -294,6 +295,7 @@ func (tlq *TweetLikeQuery) GroupBy(field string, fields ...string) *TweetLikeGro
 //	client.TweetLike.Query().
 //		Select(tweetlike.FieldLikedAt).
 //		Scan(ctx, &v)
+//
 func (tlq *TweetLikeQuery) Select(fields ...string) *TweetLikeSelect {
 	tlq.fields = append(tlq.fields, fields...)
 	selbuild := &TweetLikeSelect{TweetLikeQuery: tlq}
@@ -427,11 +429,11 @@ func (tlq *TweetLikeQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (tlq *TweetLikeQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := tlq.sqlCount(ctx)
-	if err != nil {
+	_, err := tlq.First(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (tlq *TweetLikeQuery) querySpec() *sqlgraph.QuerySpec {

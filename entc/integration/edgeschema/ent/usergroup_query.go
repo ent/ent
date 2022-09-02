@@ -337,6 +337,7 @@ func (ugq *UserGroupQuery) WithGroup(opts ...func(*GroupQuery)) *UserGroupQuery 
 //		GroupBy(usergroup.FieldJoinedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (ugq *UserGroupQuery) GroupBy(field string, fields ...string) *UserGroupGroupBy {
 	grbuild := &UserGroupGroupBy{config: ugq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -363,6 +364,7 @@ func (ugq *UserGroupQuery) GroupBy(field string, fields ...string) *UserGroupGro
 //	client.UserGroup.Query().
 //		Select(usergroup.FieldJoinedAt).
 //		Scan(ctx, &v)
+//
 func (ugq *UserGroupQuery) Select(fields ...string) *UserGroupSelect {
 	ugq.fields = append(ugq.fields, fields...)
 	selbuild := &UserGroupSelect{UserGroupQuery: ugq}
@@ -492,11 +494,11 @@ func (ugq *UserGroupQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (ugq *UserGroupQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := ugq.sqlCount(ctx)
-	if err != nil {
+	_, err := ugq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (ugq *UserGroupQuery) querySpec() *sqlgraph.QuerySpec {

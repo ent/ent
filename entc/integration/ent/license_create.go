@@ -224,6 +224,7 @@ func (lc *LicenseCreate) createSpec() (*License, *sqlgraph.CreateSpec) {
 //			SetCreateTime(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (lc *LicenseCreate) OnConflict(opts ...sql.ConflictOption) *LicenseUpsertOne {
 	lc.conflict = opts
 	return &LicenseUpsertOne{
@@ -237,6 +238,7 @@ func (lc *LicenseCreate) OnConflict(opts ...sql.ConflictOption) *LicenseUpsertOn
 //	client.License.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (lc *LicenseCreate) OnConflictColumns(columns ...string) *LicenseUpsertOne {
 	lc.conflict = append(lc.conflict, sql.ConflictColumns(columns...))
 	return &LicenseUpsertOne{
@@ -280,6 +282,7 @@ func (u *LicenseUpsert) UpdateUpdateTime() *LicenseUpsert {
 //			}),
 //		).
 //		Exec(ctx)
+//
 func (u *LicenseUpsertOne) UpdateNewValues() *LicenseUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -296,9 +299,10 @@ func (u *LicenseUpsertOne) UpdateNewValues() *LicenseUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.License.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
+//  client.License.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
 func (u *LicenseUpsertOne) Ignore() *LicenseUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -468,6 +472,7 @@ func (lcb *LicenseCreateBulk) ExecX(ctx context.Context) {
 //			SetCreateTime(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (lcb *LicenseCreateBulk) OnConflict(opts ...sql.ConflictOption) *LicenseUpsertBulk {
 	lcb.conflict = opts
 	return &LicenseUpsertBulk{
@@ -481,6 +486,7 @@ func (lcb *LicenseCreateBulk) OnConflict(opts ...sql.ConflictOption) *LicenseUps
 //	client.License.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (lcb *LicenseCreateBulk) OnConflictColumns(columns ...string) *LicenseUpsertBulk {
 	lcb.conflict = append(lcb.conflict, sql.ConflictColumns(columns...))
 	return &LicenseUpsertBulk{
@@ -505,6 +511,7 @@ type LicenseUpsertBulk struct {
 //			}),
 //		).
 //		Exec(ctx)
+//
 func (u *LicenseUpsertBulk) UpdateNewValues() *LicenseUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -526,6 +533,7 @@ func (u *LicenseUpsertBulk) UpdateNewValues() *LicenseUpsertBulk {
 //	client.License.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
+//
 func (u *LicenseUpsertBulk) Ignore() *LicenseUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

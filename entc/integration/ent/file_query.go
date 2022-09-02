@@ -378,6 +378,7 @@ func (fq *FileQuery) WithField(opts ...func(*FieldTypeQuery)) *FileQuery {
 //		GroupBy(file.FieldSize).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 	grbuild := &FileGroupBy{config: fq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -404,6 +405,7 @@ func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 //	client.File.Query().
 //		Select(file.FieldSize).
 //		Scan(ctx, &v)
+//
 func (fq *FileQuery) Select(fields ...string) *FileSelect {
 	fq.fields = append(fq.fields, fields...)
 	selbuild := &FileSelect{FileQuery: fq}
@@ -598,11 +600,11 @@ func (fq *FileQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (fq *FileQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := fq.sqlCount(ctx)
-	if err != nil {
+	_, err := fq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (fq *FileQuery) querySpec() *sqlgraph.QuerySpec {

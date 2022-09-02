@@ -267,6 +267,7 @@ func (cq *CommentQuery) Clone() *CommentQuery {
 //		GroupBy(comment.FieldUniqueInt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy {
 	grbuild := &CommentGroupBy{config: cq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -293,6 +294,7 @@ func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy 
 //	client.Comment.Query().
 //		Select(comment.FieldUniqueInt).
 //		Scan(ctx, &v)
+//
 func (cq *CommentQuery) Select(fields ...string) *CommentSelect {
 	cq.fields = append(cq.fields, fields...)
 	selbuild := &CommentSelect{CommentQuery: cq}
@@ -358,11 +360,11 @@ func (cq *CommentQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (cq *CommentQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := cq.sqlCount(ctx)
-	if err != nil {
+	_, err := cq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (cq *CommentQuery) querySpec() *sqlgraph.QuerySpec {

@@ -413,11 +413,11 @@ func (sq *SessionQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (sq *SessionQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := sq.sqlCount(ctx)
-	if err != nil {
+	_, err := sq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (sq *SessionQuery) querySpec() *sqlgraph.QuerySpec {

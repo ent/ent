@@ -338,6 +338,7 @@ func (rq *RoleQuery) WithRolesUsers(opts ...func(*RoleUserQuery)) *RoleQuery {
 //		GroupBy(role.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (rq *RoleQuery) GroupBy(field string, fields ...string) *RoleGroupBy {
 	grbuild := &RoleGroupBy{config: rq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -364,6 +365,7 @@ func (rq *RoleQuery) GroupBy(field string, fields ...string) *RoleGroupBy {
 //	client.Role.Query().
 //		Select(role.FieldName).
 //		Scan(ctx, &v)
+//
 func (rq *RoleQuery) Select(fields ...string) *RoleSelect {
 	rq.fields = append(rq.fields, fields...)
 	selbuild := &RoleSelect{RoleQuery: rq}
@@ -528,11 +530,11 @@ func (rq *RoleQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (rq *RoleQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := rq.sqlCount(ctx)
-	if err != nil {
+	_, err := rq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (rq *RoleQuery) querySpec() *sqlgraph.QuerySpec {

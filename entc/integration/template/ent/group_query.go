@@ -268,6 +268,7 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 //		GroupBy(group.FieldMaxUsers).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 	grbuild := &GroupGroupBy{config: gq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -294,6 +295,7 @@ func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 //	client.Group.Query().
 //		Select(group.FieldMaxUsers).
 //		Scan(ctx, &v)
+//
 func (gq *GroupQuery) Select(fields ...string) *GroupSelect {
 	gq.fields = append(gq.fields, fields...)
 	selbuild := &GroupSelect{GroupQuery: gq}
@@ -359,11 +361,11 @@ func (gq *GroupQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (gq *GroupQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := gq.sqlCount(ctx)
-	if err != nil {
+	_, err := gq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (gq *GroupQuery) querySpec() *sqlgraph.QuerySpec {

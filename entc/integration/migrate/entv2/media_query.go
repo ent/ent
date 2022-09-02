@@ -265,6 +265,7 @@ func (mq *MediaQuery) Clone() *MediaQuery {
 //		GroupBy(media.FieldSource).
 //		Aggregate(entv2.Count()).
 //		Scan(ctx, &v)
+//
 func (mq *MediaQuery) GroupBy(field string, fields ...string) *MediaGroupBy {
 	grbuild := &MediaGroupBy{config: mq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -291,6 +292,7 @@ func (mq *MediaQuery) GroupBy(field string, fields ...string) *MediaGroupBy {
 //	client.Media.Query().
 //		Select(media.FieldSource).
 //		Scan(ctx, &v)
+//
 func (mq *MediaQuery) Select(fields ...string) *MediaSelect {
 	mq.fields = append(mq.fields, fields...)
 	selbuild := &MediaSelect{MediaQuery: mq}
@@ -350,11 +352,11 @@ func (mq *MediaQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (mq *MediaQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := mq.sqlCount(ctx)
-	if err != nil {
+	_, err := mq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("entv2: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (mq *MediaQuery) querySpec() *sqlgraph.QuerySpec {

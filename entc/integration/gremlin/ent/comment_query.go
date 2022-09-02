@@ -265,6 +265,7 @@ func (cq *CommentQuery) Clone() *CommentQuery {
 //		GroupBy(comment.FieldUniqueInt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy {
 	grbuild := &CommentGroupBy{config: cq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -291,6 +292,7 @@ func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy 
 //	client.Comment.Query().
 //		Select(comment.FieldUniqueInt).
 //		Scan(ctx, &v)
+//
 func (cq *CommentQuery) Select(fields ...string) *CommentSelect {
 	cq.fields = append(cq.fields, fields...)
 	selbuild := &CommentSelect{CommentQuery: cq}

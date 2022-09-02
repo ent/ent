@@ -338,6 +338,7 @@ func (ttq *TweetTagQuery) WithTweet(opts ...func(*TweetQuery)) *TweetTagQuery {
 //		GroupBy(tweettag.FieldAddedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (ttq *TweetTagQuery) GroupBy(field string, fields ...string) *TweetTagGroupBy {
 	grbuild := &TweetTagGroupBy{config: ttq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -364,6 +365,7 @@ func (ttq *TweetTagQuery) GroupBy(field string, fields ...string) *TweetTagGroup
 //	client.TweetTag.Query().
 //		Select(tweettag.FieldAddedAt).
 //		Scan(ctx, &v)
+//
 func (ttq *TweetTagQuery) Select(fields ...string) *TweetTagSelect {
 	ttq.fields = append(ttq.fields, fields...)
 	selbuild := &TweetTagSelect{TweetTagQuery: ttq}
@@ -493,11 +495,11 @@ func (ttq *TweetTagQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (ttq *TweetTagQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := ttq.sqlCount(ctx)
-	if err != nil {
+	_, err := ttq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (ttq *TweetTagQuery) querySpec() *sqlgraph.QuerySpec {

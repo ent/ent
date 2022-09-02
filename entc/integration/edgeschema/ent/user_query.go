@@ -696,6 +696,7 @@ func (uq *UserQuery) WithRolesUsers(opts ...func(*RoleUserQuery)) *UserQuery {
 //		GroupBy(user.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 	grbuild := &UserGroupBy{config: uq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -722,6 +723,7 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 //	client.User.Query().
 //		Select(user.FieldName).
 //		Scan(ctx, &v)
+//
 func (uq *UserQuery) Select(fields ...string) *UserSelect {
 	uq.fields = append(uq.fields, fields...)
 	selbuild := &UserSelect{UserQuery: uq}
@@ -1397,11 +1399,11 @@ func (uq *UserQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (uq *UserQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := uq.sqlCount(ctx)
-	if err != nil {
+	_, err := uq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {

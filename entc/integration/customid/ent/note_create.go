@@ -282,6 +282,7 @@ func (nc *NoteCreate) createSpec() (*Note, *sqlgraph.CreateSpec) {
 //			SetText(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (nc *NoteCreate) OnConflict(opts ...sql.ConflictOption) *NoteUpsertOne {
 	nc.conflict = opts
 	return &NoteUpsertOne{
@@ -295,6 +296,7 @@ func (nc *NoteCreate) OnConflict(opts ...sql.ConflictOption) *NoteUpsertOne {
 //	client.Note.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (nc *NoteCreate) OnConflictColumns(columns ...string) *NoteUpsertOne {
 	nc.conflict = append(nc.conflict, sql.ConflictColumns(columns...))
 	return &NoteUpsertOne{
@@ -344,6 +346,7 @@ func (u *NoteUpsert) ClearText() *NoteUpsert {
 //			}),
 //		).
 //		Exec(ctx)
+//
 func (u *NoteUpsertOne) UpdateNewValues() *NoteUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -357,9 +360,10 @@ func (u *NoteUpsertOne) UpdateNewValues() *NoteUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.Note.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
+//  client.Note.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
 func (u *NoteUpsertOne) Ignore() *NoteUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -537,6 +541,7 @@ func (ncb *NoteCreateBulk) ExecX(ctx context.Context) {
 //			SetText(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (ncb *NoteCreateBulk) OnConflict(opts ...sql.ConflictOption) *NoteUpsertBulk {
 	ncb.conflict = opts
 	return &NoteUpsertBulk{
@@ -550,6 +555,7 @@ func (ncb *NoteCreateBulk) OnConflict(opts ...sql.ConflictOption) *NoteUpsertBul
 //	client.Note.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (ncb *NoteCreateBulk) OnConflictColumns(columns ...string) *NoteUpsertBulk {
 	ncb.conflict = append(ncb.conflict, sql.ConflictColumns(columns...))
 	return &NoteUpsertBulk{
@@ -574,6 +580,7 @@ type NoteUpsertBulk struct {
 //			}),
 //		).
 //		Exec(ctx)
+//
 func (u *NoteUpsertBulk) UpdateNewValues() *NoteUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -592,6 +599,7 @@ func (u *NoteUpsertBulk) UpdateNewValues() *NoteUpsertBulk {
 //	client.Note.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
+//
 func (u *NoteUpsertBulk) Ignore() *NoteUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

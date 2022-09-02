@@ -160,6 +160,7 @@ func HasFields(field string, fields ...string) Condition {
 // If executes the given hook under condition.
 //
 //	hook.If(ComputeAverage, And(HasFields(...), HasAddedFields(...)))
+//
 func If(hk entv1.Hook, cond Condition) entv1.Hook {
 	return func(next entv1.Mutator) entv1.Mutator {
 		return entv1.MutateFunc(func(ctx context.Context, m entv1.Mutation) (entv1.Value, error) {
@@ -174,6 +175,7 @@ func If(hk entv1.Hook, cond Condition) entv1.Hook {
 // On executes the given hook only for the given operation.
 //
 //	hook.On(Log, entv1.Delete|entv1.Create)
+//
 func On(hk entv1.Hook, op entv1.Op) entv1.Hook {
 	return If(hk, HasOp(op))
 }
@@ -181,6 +183,7 @@ func On(hk entv1.Hook, op entv1.Op) entv1.Hook {
 // Unless skips the given hook only for the given operation.
 //
 //	hook.Unless(Log, entv1.Update|entv1.UpdateOne)
+//
 func Unless(hk entv1.Hook, op entv1.Op) entv1.Hook {
 	return If(hk, Not(HasOp(op)))
 }
@@ -201,6 +204,7 @@ func FixedError(err error) entv1.Hook {
 //			Reject(entv1.Delete|entv1.Update),
 //		}
 //	}
+//
 func Reject(op entv1.Op) entv1.Hook {
 	hk := FixedError(fmt.Errorf("%s operation is not allowed", op))
 	return On(hk, op)

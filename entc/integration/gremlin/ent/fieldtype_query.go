@@ -265,6 +265,7 @@ func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 //		GroupBy(fieldtype.FieldInt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (ftq *FieldTypeQuery) GroupBy(field string, fields ...string) *FieldTypeGroupBy {
 	grbuild := &FieldTypeGroupBy{config: ftq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -291,6 +292,7 @@ func (ftq *FieldTypeQuery) GroupBy(field string, fields ...string) *FieldTypeGro
 //	client.FieldType.Query().
 //		Select(fieldtype.FieldInt).
 //		Scan(ctx, &v)
+//
 func (ftq *FieldTypeQuery) Select(fields ...string) *FieldTypeSelect {
 	ftq.fields = append(ftq.fields, fields...)
 	selbuild := &FieldTypeSelect{FieldTypeQuery: ftq}

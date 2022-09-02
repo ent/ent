@@ -407,6 +407,7 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 //			SetSize(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (fc *FileCreate) OnConflict(opts ...sql.ConflictOption) *FileUpsertOne {
 	fc.conflict = opts
 	return &FileUpsertOne{
@@ -420,6 +421,7 @@ func (fc *FileCreate) OnConflict(opts ...sql.ConflictOption) *FileUpsertOne {
 //	client.File.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (fc *FileCreate) OnConflictColumns(columns ...string) *FileUpsertOne {
 	fc.conflict = append(fc.conflict, sql.ConflictColumns(columns...))
 	return &FileUpsertOne{
@@ -556,6 +558,7 @@ func (u *FileUpsert) ClearFieldID() *FileUpsert {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
+//
 func (u *FileUpsertOne) UpdateNewValues() *FileUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -564,9 +567,10 @@ func (u *FileUpsertOne) UpdateNewValues() *FileUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.File.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
+//  client.File.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
 func (u *FileUpsertOne) Ignore() *FileUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -848,6 +852,7 @@ func (fcb *FileCreateBulk) ExecX(ctx context.Context) {
 //			SetSize(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (fcb *FileCreateBulk) OnConflict(opts ...sql.ConflictOption) *FileUpsertBulk {
 	fcb.conflict = opts
 	return &FileUpsertBulk{
@@ -861,6 +866,7 @@ func (fcb *FileCreateBulk) OnConflict(opts ...sql.ConflictOption) *FileUpsertBul
 //	client.File.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (fcb *FileCreateBulk) OnConflictColumns(columns ...string) *FileUpsertBulk {
 	fcb.conflict = append(fcb.conflict, sql.ConflictColumns(columns...))
 	return &FileUpsertBulk{
@@ -882,6 +888,7 @@ type FileUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
+//
 func (u *FileUpsertBulk) UpdateNewValues() *FileUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -893,6 +900,7 @@ func (u *FileUpsertBulk) UpdateNewValues() *FileUpsertBulk {
 //	client.File.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
+//
 func (u *FileUpsertBulk) Ignore() *FileUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

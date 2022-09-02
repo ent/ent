@@ -302,6 +302,7 @@ func (rq *RelationshipQuery) WithInfo(opts ...func(*RelationshipInfoQuery)) *Rel
 //		GroupBy(relationship.FieldWeight).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (rq *RelationshipQuery) GroupBy(field string, fields ...string) *RelationshipGroupBy {
 	grbuild := &RelationshipGroupBy{config: rq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -328,6 +329,7 @@ func (rq *RelationshipQuery) GroupBy(field string, fields ...string) *Relationsh
 //	client.Relationship.Query().
 //		Select(relationship.FieldWeight).
 //		Scan(ctx, &v)
+//
 func (rq *RelationshipQuery) Select(fields ...string) *RelationshipSelect {
 	rq.fields = append(rq.fields, fields...)
 	selbuild := &RelationshipSelect{RelationshipQuery: rq}
@@ -488,11 +490,11 @@ func (rq *RelationshipQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (rq *RelationshipQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := rq.sqlCount(ctx)
-	if err != nil {
+	_, err := rq.First(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (rq *RelationshipQuery) querySpec() *sqlgraph.QuerySpec {

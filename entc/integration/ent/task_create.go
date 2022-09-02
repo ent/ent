@@ -233,6 +233,7 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 //			SetPriority(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (tc *TaskCreate) OnConflict(opts ...sql.ConflictOption) *TaskUpsertOne {
 	tc.conflict = opts
 	return &TaskUpsertOne{
@@ -246,6 +247,7 @@ func (tc *TaskCreate) OnConflict(opts ...sql.ConflictOption) *TaskUpsertOne {
 //	client.Task.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (tc *TaskCreate) OnConflictColumns(columns ...string) *TaskUpsertOne {
 	tc.conflict = append(tc.conflict, sql.ConflictColumns(columns...))
 	return &TaskUpsertOne{
@@ -310,6 +312,7 @@ func (u *TaskUpsert) ClearPriorities() *TaskUpsert {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
+//
 func (u *TaskUpsertOne) UpdateNewValues() *TaskUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -323,9 +326,10 @@ func (u *TaskUpsertOne) UpdateNewValues() *TaskUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.Task.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
+//  client.Task.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
 func (u *TaskUpsertOne) Ignore() *TaskUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -523,6 +527,7 @@ func (tcb *TaskCreateBulk) ExecX(ctx context.Context) {
 //			SetPriority(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (tcb *TaskCreateBulk) OnConflict(opts ...sql.ConflictOption) *TaskUpsertBulk {
 	tcb.conflict = opts
 	return &TaskUpsertBulk{
@@ -536,6 +541,7 @@ func (tcb *TaskCreateBulk) OnConflict(opts ...sql.ConflictOption) *TaskUpsertBul
 //	client.Task.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (tcb *TaskCreateBulk) OnConflictColumns(columns ...string) *TaskUpsertBulk {
 	tcb.conflict = append(tcb.conflict, sql.ConflictColumns(columns...))
 	return &TaskUpsertBulk{
@@ -557,6 +563,7 @@ type TaskUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
+//
 func (u *TaskUpsertBulk) UpdateNewValues() *TaskUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -575,6 +582,7 @@ func (u *TaskUpsertBulk) UpdateNewValues() *TaskUpsertBulk {
 //	client.Task.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
+//
 func (u *TaskUpsertBulk) Ignore() *TaskUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

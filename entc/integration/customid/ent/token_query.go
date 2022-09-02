@@ -303,6 +303,7 @@ func (tq *TokenQuery) WithAccount(opts ...func(*AccountQuery)) *TokenQuery {
 //		GroupBy(token.FieldBody).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (tq *TokenQuery) GroupBy(field string, fields ...string) *TokenGroupBy {
 	grbuild := &TokenGroupBy{config: tq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -329,6 +330,7 @@ func (tq *TokenQuery) GroupBy(field string, fields ...string) *TokenGroupBy {
 //	client.Token.Query().
 //		Select(token.FieldBody).
 //		Scan(ctx, &v)
+//
 func (tq *TokenQuery) Select(fields ...string) *TokenSelect {
 	tq.fields = append(tq.fields, fields...)
 	selbuild := &TokenSelect{TokenQuery: tq}
@@ -435,11 +437,11 @@ func (tq *TokenQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (tq *TokenQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := tq.sqlCount(ctx)
-	if err != nil {
+	_, err := tq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (tq *TokenQuery) querySpec() *sqlgraph.QuerySpec {

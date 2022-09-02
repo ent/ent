@@ -319,6 +319,7 @@ func (nq *NodeQuery) WithNext(opts ...func(*NodeQuery)) *NodeQuery {
 //		GroupBy(node.FieldValue).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 	grbuild := &NodeGroupBy{config: nq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -345,6 +346,7 @@ func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 //	client.Node.Query().
 //		Select(node.FieldValue).
 //		Scan(ctx, &v)
+//
 func (nq *NodeQuery) Select(fields ...string) *NodeSelect {
 	nq.fields = append(nq.fields, fields...)
 	selbuild := &NodeSelect{NodeQuery: nq}

@@ -339,6 +339,7 @@ func (pq *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
 //		GroupBy(pet.FieldAge).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 	grbuild := &PetGroupBy{config: pq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -365,6 +366,7 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 //	client.Pet.Query().
 //		Select(pet.FieldAge).
 //		Scan(ctx, &v)
+//
 func (pq *PetQuery) Select(fields ...string) *PetSelect {
 	pq.fields = append(pq.fields, fields...)
 	selbuild := &PetSelect{PetQuery: pq}
@@ -513,11 +515,11 @@ func (pq *PetQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (pq *PetQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := pq.sqlCount(ctx)
-	if err != nil {
+	_, err := pq.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
 		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
-	return n > 0, nil
+	return !IsNotFound(err), nil
 }
 
 func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {

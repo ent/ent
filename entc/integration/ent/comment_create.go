@@ -249,6 +249,7 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 //			SetUniqueInt(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (cc *CommentCreate) OnConflict(opts ...sql.ConflictOption) *CommentUpsertOne {
 	cc.conflict = opts
 	return &CommentUpsertOne{
@@ -262,6 +263,7 @@ func (cc *CommentCreate) OnConflict(opts ...sql.ConflictOption) *CommentUpsertOn
 //	client.Comment.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (cc *CommentCreate) OnConflictColumns(columns ...string) *CommentUpsertOne {
 	cc.conflict = append(cc.conflict, sql.ConflictColumns(columns...))
 	return &CommentUpsertOne{
@@ -386,6 +388,7 @@ func (u *CommentUpsert) ClearDir() *CommentUpsert {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
+//
 func (u *CommentUpsertOne) UpdateNewValues() *CommentUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -394,9 +397,10 @@ func (u *CommentUpsertOne) UpdateNewValues() *CommentUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.Comment.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
+//  client.Comment.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
 func (u *CommentUpsertOne) Ignore() *CommentUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -663,6 +667,7 @@ func (ccb *CommentCreateBulk) ExecX(ctx context.Context) {
 //			SetUniqueInt(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (ccb *CommentCreateBulk) OnConflict(opts ...sql.ConflictOption) *CommentUpsertBulk {
 	ccb.conflict = opts
 	return &CommentUpsertBulk{
@@ -676,6 +681,7 @@ func (ccb *CommentCreateBulk) OnConflict(opts ...sql.ConflictOption) *CommentUps
 //	client.Comment.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (ccb *CommentCreateBulk) OnConflictColumns(columns ...string) *CommentUpsertBulk {
 	ccb.conflict = append(ccb.conflict, sql.ConflictColumns(columns...))
 	return &CommentUpsertBulk{
@@ -697,6 +703,7 @@ type CommentUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
+//
 func (u *CommentUpsertBulk) UpdateNewValues() *CommentUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -708,6 +715,7 @@ func (u *CommentUpsertBulk) UpdateNewValues() *CommentUpsertBulk {
 //	client.Comment.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
+//
 func (u *CommentUpsertBulk) Ignore() *CommentUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

@@ -316,6 +316,7 @@ func (dc *DocCreate) createSpec() (*Doc, *sqlgraph.CreateSpec) {
 //			SetText(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (dc *DocCreate) OnConflict(opts ...sql.ConflictOption) *DocUpsertOne {
 	dc.conflict = opts
 	return &DocUpsertOne{
@@ -329,6 +330,7 @@ func (dc *DocCreate) OnConflict(opts ...sql.ConflictOption) *DocUpsertOne {
 //	client.Doc.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (dc *DocCreate) OnConflictColumns(columns ...string) *DocUpsertOne {
 	dc.conflict = append(dc.conflict, sql.ConflictColumns(columns...))
 	return &DocUpsertOne{
@@ -378,6 +380,7 @@ func (u *DocUpsert) ClearText() *DocUpsert {
 //			}),
 //		).
 //		Exec(ctx)
+//
 func (u *DocUpsertOne) UpdateNewValues() *DocUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -391,9 +394,10 @@ func (u *DocUpsertOne) UpdateNewValues() *DocUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.Doc.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
+//  client.Doc.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
 func (u *DocUpsertOne) Ignore() *DocUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -571,6 +575,7 @@ func (dcb *DocCreateBulk) ExecX(ctx context.Context) {
 //			SetText(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (dcb *DocCreateBulk) OnConflict(opts ...sql.ConflictOption) *DocUpsertBulk {
 	dcb.conflict = opts
 	return &DocUpsertBulk{
@@ -584,6 +589,7 @@ func (dcb *DocCreateBulk) OnConflict(opts ...sql.ConflictOption) *DocUpsertBulk 
 //	client.Doc.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (dcb *DocCreateBulk) OnConflictColumns(columns ...string) *DocUpsertBulk {
 	dcb.conflict = append(dcb.conflict, sql.ConflictColumns(columns...))
 	return &DocUpsertBulk{
@@ -608,6 +614,7 @@ type DocUpsertBulk struct {
 //			}),
 //		).
 //		Exec(ctx)
+//
 func (u *DocUpsertBulk) UpdateNewValues() *DocUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -626,6 +633,7 @@ func (u *DocUpsertBulk) UpdateNewValues() *DocUpsertBulk {
 //	client.Doc.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
+//
 func (u *DocUpsertBulk) Ignore() *DocUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

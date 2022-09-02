@@ -158,6 +158,7 @@ func (rc *RevisionCreate) createSpec() (*Revision, *sqlgraph.CreateSpec) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
+//
 func (rc *RevisionCreate) OnConflict(opts ...sql.ConflictOption) *RevisionUpsertOne {
 	rc.conflict = opts
 	return &RevisionUpsertOne{
@@ -171,6 +172,7 @@ func (rc *RevisionCreate) OnConflict(opts ...sql.ConflictOption) *RevisionUpsert
 //	client.Revision.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (rc *RevisionCreate) OnConflictColumns(columns ...string) *RevisionUpsertOne {
 	rc.conflict = append(rc.conflict, sql.ConflictColumns(columns...))
 	return &RevisionUpsertOne{
@@ -202,6 +204,7 @@ type (
 //			}),
 //		).
 //		Exec(ctx)
+//
 func (u *RevisionUpsertOne) UpdateNewValues() *RevisionUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -215,9 +218,10 @@ func (u *RevisionUpsertOne) UpdateNewValues() *RevisionUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.Revision.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
+//  client.Revision.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
 func (u *RevisionUpsertOne) Ignore() *RevisionUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -368,6 +372,7 @@ func (rcb *RevisionCreateBulk) ExecX(ctx context.Context) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
+//
 func (rcb *RevisionCreateBulk) OnConflict(opts ...sql.ConflictOption) *RevisionUpsertBulk {
 	rcb.conflict = opts
 	return &RevisionUpsertBulk{
@@ -381,6 +386,7 @@ func (rcb *RevisionCreateBulk) OnConflict(opts ...sql.ConflictOption) *RevisionU
 //	client.Revision.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (rcb *RevisionCreateBulk) OnConflictColumns(columns ...string) *RevisionUpsertBulk {
 	rcb.conflict = append(rcb.conflict, sql.ConflictColumns(columns...))
 	return &RevisionUpsertBulk{
@@ -405,6 +411,7 @@ type RevisionUpsertBulk struct {
 //			}),
 //		).
 //		Exec(ctx)
+//
 func (u *RevisionUpsertBulk) UpdateNewValues() *RevisionUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -423,6 +430,7 @@ func (u *RevisionUpsertBulk) UpdateNewValues() *RevisionUpsertBulk {
 //	client.Revision.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
+//
 func (u *RevisionUpsertBulk) Ignore() *RevisionUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

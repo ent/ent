@@ -247,6 +247,7 @@ func (nc *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 //			SetValue(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (nc *NodeCreate) OnConflict(opts ...sql.ConflictOption) *NodeUpsertOne {
 	nc.conflict = opts
 	return &NodeUpsertOne{
@@ -260,6 +261,7 @@ func (nc *NodeCreate) OnConflict(opts ...sql.ConflictOption) *NodeUpsertOne {
 //	client.Node.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (nc *NodeCreate) OnConflictColumns(columns ...string) *NodeUpsertOne {
 	nc.conflict = append(nc.conflict, sql.ConflictColumns(columns...))
 	return &NodeUpsertOne{
@@ -312,6 +314,7 @@ func (u *NodeUpsert) ClearValue() *NodeUpsert {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
+//
 func (u *NodeUpsertOne) UpdateNewValues() *NodeUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -320,9 +323,10 @@ func (u *NodeUpsertOne) UpdateNewValues() *NodeUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.Node.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
+//  client.Node.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
 func (u *NodeUpsertOne) Ignore() *NodeUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -505,6 +509,7 @@ func (ncb *NodeCreateBulk) ExecX(ctx context.Context) {
 //			SetValue(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (ncb *NodeCreateBulk) OnConflict(opts ...sql.ConflictOption) *NodeUpsertBulk {
 	ncb.conflict = opts
 	return &NodeUpsertBulk{
@@ -518,6 +523,7 @@ func (ncb *NodeCreateBulk) OnConflict(opts ...sql.ConflictOption) *NodeUpsertBul
 //	client.Node.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (ncb *NodeCreateBulk) OnConflictColumns(columns ...string) *NodeUpsertBulk {
 	ncb.conflict = append(ncb.conflict, sql.ConflictColumns(columns...))
 	return &NodeUpsertBulk{
@@ -539,6 +545,7 @@ type NodeUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
+//
 func (u *NodeUpsertBulk) UpdateNewValues() *NodeUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -550,6 +557,7 @@ func (u *NodeUpsertBulk) UpdateNewValues() *NodeUpsertBulk {
 //	client.Node.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
+//
 func (u *NodeUpsertBulk) Ignore() *NodeUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
