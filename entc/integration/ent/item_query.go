@@ -358,8 +358,7 @@ func (iq *ItemQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (iq *ItemQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := iq.FirstID(ctx)
-	switch {
+	switch _, err := iq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

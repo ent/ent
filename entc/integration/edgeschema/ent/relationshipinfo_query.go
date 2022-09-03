@@ -350,8 +350,7 @@ func (riq *RelationshipInfoQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (riq *RelationshipInfoQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := riq.FirstID(ctx)
-	switch {
+	switch _, err := riq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

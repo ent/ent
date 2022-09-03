@@ -492,8 +492,7 @@ func (ugq *UserGroupQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (ugq *UserGroupQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := ugq.FirstID(ctx)
-	switch {
+	switch _, err := ugq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

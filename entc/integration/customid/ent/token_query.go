@@ -435,8 +435,7 @@ func (tq *TokenQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (tq *TokenQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := tq.FirstID(ctx)
-	switch {
+	switch _, err := tq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

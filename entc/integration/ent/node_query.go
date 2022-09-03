@@ -512,8 +512,7 @@ func (nq *NodeQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (nq *NodeQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := nq.FirstID(ctx)
-	switch {
+	switch _, err := nq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

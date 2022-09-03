@@ -488,8 +488,7 @@ func (rq *RelationshipQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (rq *RelationshipQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := rq.First(ctx)
-	switch {
+	switch _, err := rq.First(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

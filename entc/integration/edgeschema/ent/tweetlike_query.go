@@ -427,8 +427,7 @@ func (tlq *TweetLikeQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (tlq *TweetLikeQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := tlq.First(ctx)
-	switch {
+	switch _, err := tlq.First(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

@@ -493,8 +493,7 @@ func (ttq *TweetTagQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (ttq *TweetTagQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := ttq.FirstID(ctx)
-	switch {
+	switch _, err := ttq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

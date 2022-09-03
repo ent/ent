@@ -329,8 +329,7 @@ func (oq *OtherQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (oq *OtherQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := oq.FirstID(ctx)
-	switch {
+	switch _, err := oq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

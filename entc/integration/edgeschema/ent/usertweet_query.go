@@ -492,8 +492,7 @@ func (utq *UserTweetQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (utq *UserTweetQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := utq.FirstID(ctx)
-	switch {
+	switch _, err := utq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

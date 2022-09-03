@@ -336,8 +336,7 @@ func (gq *GoodsQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (gq *GoodsQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := gq.FirstID(ctx)
-	switch {
+	switch _, err := gq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

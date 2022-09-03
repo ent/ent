@@ -607,8 +607,7 @@ func (bq *BlobQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (bq *BlobQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := bq.FirstID(ctx)
-	switch {
+	switch _, err := bq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

@@ -350,8 +350,7 @@ func (ctq *CustomTypeQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (ctq *CustomTypeQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := ctq.FirstID(ctx)
-	switch {
+	switch _, err := ctq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

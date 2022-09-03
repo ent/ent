@@ -493,8 +493,7 @@ func (fq *FileQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (fq *FileQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := fq.FirstID(ctx)
-	switch {
+	switch _, err := fq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

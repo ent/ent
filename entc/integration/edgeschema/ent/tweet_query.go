@@ -873,8 +873,7 @@ func (tq *TweetQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (tq *TweetQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := tq.FirstID(ctx)
-	switch {
+	switch _, err := tq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

@@ -351,8 +351,7 @@ func (miq *MixinIDQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (miq *MixinIDQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := miq.FirstID(ctx)
-	switch {
+	switch _, err := miq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

@@ -426,8 +426,7 @@ func (pq *PostQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (pq *PostQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := pq.FirstID(ctx)
-	switch {
+	switch _, err := pq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

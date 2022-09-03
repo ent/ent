@@ -493,8 +493,7 @@ func (rq *RentalQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (rq *RentalQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := rq.FirstID(ctx)
-	switch {
+	switch _, err := rq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

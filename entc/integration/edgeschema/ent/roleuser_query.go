@@ -420,8 +420,7 @@ func (ruq *RoleUserQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (ruq *RoleUserQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := ruq.First(ctx)
-	switch {
+	switch _, err := ruq.First(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

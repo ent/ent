@@ -430,8 +430,7 @@ func (uq *UserQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (uq *UserQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := uq.FirstID(ctx)
-	switch {
+	switch _, err := uq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

@@ -420,8 +420,7 @@ func (blq *BlobLinkQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (blq *BlobLinkQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := blq.First(ctx)
-	switch {
+	switch _, err := blq.First(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

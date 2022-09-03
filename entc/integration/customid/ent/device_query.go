@@ -488,8 +488,7 @@ func (dq *DeviceQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (dq *DeviceQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := dq.FirstID(ctx)
-	switch {
+	switch _, err := dq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

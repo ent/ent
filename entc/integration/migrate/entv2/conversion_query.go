@@ -350,8 +350,7 @@ func (cq *ConversionQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (cq *ConversionQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := cq.FirstID(ctx)
-	switch {
+	switch _, err := cq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

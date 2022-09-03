@@ -562,8 +562,7 @@ func (mq *MetadataQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (mq *MetadataQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := mq.FirstID(ctx)
-	switch {
+	switch _, err := mq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

@@ -451,8 +451,7 @@ func (sq *SpecQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (sq *SpecQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := sq.FirstID(ctx)
-	switch {
+	switch _, err := sq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

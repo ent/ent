@@ -487,8 +487,7 @@ func (isq *IntSIDQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (isq *IntSIDQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := isq.FirstID(ctx)
-	switch {
+	switch _, err := isq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

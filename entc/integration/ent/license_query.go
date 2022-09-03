@@ -358,8 +358,7 @@ func (lq *LicenseQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (lq *LicenseQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := lq.FirstID(ctx)
-	switch {
+	switch _, err := lq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

@@ -431,8 +431,7 @@ func (aq *AccountQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (aq *AccountQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := aq.FirstID(ctx)
-	switch {
+	switch _, err := aq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

@@ -446,8 +446,7 @@ func (ftq *FileTypeQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (ftq *FileTypeQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := ftq.FirstID(ctx)
-	switch {
+	switch _, err := ftq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:

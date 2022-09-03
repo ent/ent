@@ -566,8 +566,7 @@ func (tq *TeamQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (tq *TeamQuery) sqlExist(ctx context.Context) (bool, error) {
-	_, err := tq.FirstID(ctx)
-	switch {
+	switch _, err := tq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
