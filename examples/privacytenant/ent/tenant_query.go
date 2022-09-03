@@ -357,11 +357,15 @@ func (tq *TenantQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (tq *TenantQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := tq.sqlCount(ctx)
-	if err != nil {
+	_, err := tq.FirstID(ctx)
+	switch {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (tq *TenantQuery) querySpec() *sqlgraph.QuerySpec {
