@@ -265,7 +265,6 @@ func (riq *RelationshipInfoQuery) Clone() *RelationshipInfoQuery {
 //		GroupBy(relationshipinfo.FieldText).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (riq *RelationshipInfoQuery) GroupBy(field string, fields ...string) *RelationshipInfoGroupBy {
 	grbuild := &RelationshipInfoGroupBy{config: riq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -292,7 +291,6 @@ func (riq *RelationshipInfoQuery) GroupBy(field string, fields ...string) *Relat
 //	client.RelationshipInfo.Query().
 //		Select(relationshipinfo.FieldText).
 //		Scan(ctx, &v)
-//
 func (riq *RelationshipInfoQuery) Select(fields ...string) *RelationshipInfoSelect {
 	riq.fields = append(riq.fields, fields...)
 	selbuild := &RelationshipInfoSelect{RelationshipInfoQuery: riq}

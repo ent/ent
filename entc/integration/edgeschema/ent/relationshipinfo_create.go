@@ -165,7 +165,6 @@ func (ric *RelationshipInfoCreate) createSpec() (*RelationshipInfo, *sqlgraph.Cr
 //			SetText(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (ric *RelationshipInfoCreate) OnConflict(opts ...sql.ConflictOption) *RelationshipInfoUpsertOne {
 	ric.conflict = opts
 	return &RelationshipInfoUpsertOne{
@@ -179,7 +178,6 @@ func (ric *RelationshipInfoCreate) OnConflict(opts ...sql.ConflictOption) *Relat
 //	client.RelationshipInfo.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (ric *RelationshipInfoCreate) OnConflictColumns(columns ...string) *RelationshipInfoUpsertOne {
 	ric.conflict = append(ric.conflict, sql.ConflictColumns(columns...))
 	return &RelationshipInfoUpsertOne{
@@ -220,7 +218,6 @@ func (u *RelationshipInfoUpsert) UpdateText() *RelationshipInfoUpsert {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *RelationshipInfoUpsertOne) UpdateNewValues() *RelationshipInfoUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -229,10 +226,9 @@ func (u *RelationshipInfoUpsertOne) UpdateNewValues() *RelationshipInfoUpsertOne
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.RelationshipInfo.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.RelationshipInfo.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *RelationshipInfoUpsertOne) Ignore() *RelationshipInfoUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -401,7 +397,6 @@ func (ricb *RelationshipInfoCreateBulk) ExecX(ctx context.Context) {
 //			SetText(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (ricb *RelationshipInfoCreateBulk) OnConflict(opts ...sql.ConflictOption) *RelationshipInfoUpsertBulk {
 	ricb.conflict = opts
 	return &RelationshipInfoUpsertBulk{
@@ -415,7 +410,6 @@ func (ricb *RelationshipInfoCreateBulk) OnConflict(opts ...sql.ConflictOption) *
 //	client.RelationshipInfo.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (ricb *RelationshipInfoCreateBulk) OnConflictColumns(columns ...string) *RelationshipInfoUpsertBulk {
 	ricb.conflict = append(ricb.conflict, sql.ConflictColumns(columns...))
 	return &RelationshipInfoUpsertBulk{
@@ -437,7 +431,6 @@ type RelationshipInfoUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *RelationshipInfoUpsertBulk) UpdateNewValues() *RelationshipInfoUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -449,7 +442,6 @@ func (u *RelationshipInfoUpsertBulk) UpdateNewValues() *RelationshipInfoUpsertBu
 //	client.RelationshipInfo.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *RelationshipInfoUpsertBulk) Ignore() *RelationshipInfoUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

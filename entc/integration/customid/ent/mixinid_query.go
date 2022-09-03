@@ -266,7 +266,6 @@ func (miq *MixinIDQuery) Clone() *MixinIDQuery {
 //		GroupBy(mixinid.FieldSomeField).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (miq *MixinIDQuery) GroupBy(field string, fields ...string) *MixinIDGroupBy {
 	grbuild := &MixinIDGroupBy{config: miq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -293,7 +292,6 @@ func (miq *MixinIDQuery) GroupBy(field string, fields ...string) *MixinIDGroupBy
 //	client.MixinID.Query().
 //		Select(mixinid.FieldSomeField).
 //		Scan(ctx, &v)
-//
 func (miq *MixinIDQuery) Select(fields ...string) *MixinIDSelect {
 	miq.fields = append(miq.fields, fields...)
 	selbuild := &MixinIDSelect{MixinIDQuery: miq}

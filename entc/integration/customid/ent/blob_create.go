@@ -317,7 +317,6 @@ func (bc *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 //			SetUUID(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (bc *BlobCreate) OnConflict(opts ...sql.ConflictOption) *BlobUpsertOne {
 	bc.conflict = opts
 	return &BlobUpsertOne{
@@ -331,7 +330,6 @@ func (bc *BlobCreate) OnConflict(opts ...sql.ConflictOption) *BlobUpsertOne {
 //	client.Blob.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (bc *BlobCreate) OnConflictColumns(columns ...string) *BlobUpsertOne {
 	bc.conflict = append(bc.conflict, sql.ConflictColumns(columns...))
 	return &BlobUpsertOne{
@@ -393,7 +391,6 @@ func (u *BlobUpsert) AddCount(v int) *BlobUpsert {
 //			}),
 //		).
 //		Exec(ctx)
-//
 func (u *BlobUpsertOne) UpdateNewValues() *BlobUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -407,10 +404,9 @@ func (u *BlobUpsertOne) UpdateNewValues() *BlobUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.Blob.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.Blob.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *BlobUpsertOne) Ignore() *BlobUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -602,7 +598,6 @@ func (bcb *BlobCreateBulk) ExecX(ctx context.Context) {
 //			SetUUID(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (bcb *BlobCreateBulk) OnConflict(opts ...sql.ConflictOption) *BlobUpsertBulk {
 	bcb.conflict = opts
 	return &BlobUpsertBulk{
@@ -616,7 +611,6 @@ func (bcb *BlobCreateBulk) OnConflict(opts ...sql.ConflictOption) *BlobUpsertBul
 //	client.Blob.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (bcb *BlobCreateBulk) OnConflictColumns(columns ...string) *BlobUpsertBulk {
 	bcb.conflict = append(bcb.conflict, sql.ConflictColumns(columns...))
 	return &BlobUpsertBulk{
@@ -641,7 +635,6 @@ type BlobUpsertBulk struct {
 //			}),
 //		).
 //		Exec(ctx)
-//
 func (u *BlobUpsertBulk) UpdateNewValues() *BlobUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -660,7 +653,6 @@ func (u *BlobUpsertBulk) UpdateNewValues() *BlobUpsertBulk {
 //	client.Blob.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *BlobUpsertBulk) Ignore() *BlobUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

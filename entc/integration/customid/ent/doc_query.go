@@ -373,7 +373,6 @@ func (dq *DocQuery) WithRelated(opts ...func(*DocQuery)) *DocQuery {
 //		GroupBy(doc.FieldText).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (dq *DocQuery) GroupBy(field string, fields ...string) *DocGroupBy {
 	grbuild := &DocGroupBy{config: dq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -400,7 +399,6 @@ func (dq *DocQuery) GroupBy(field string, fields ...string) *DocGroupBy {
 //	client.Doc.Query().
 //		Select(doc.FieldText).
 //		Scan(ctx, &v)
-//
 func (dq *DocQuery) Select(fields ...string) *DocSelect {
 	dq.fields = append(dq.fields, fields...)
 	selbuild := &DocSelect{DocQuery: dq}

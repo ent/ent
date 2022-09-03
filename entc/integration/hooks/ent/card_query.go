@@ -302,7 +302,6 @@ func (cq *CardQuery) WithOwner(opts ...func(*UserQuery)) *CardQuery {
 //		GroupBy(card.FieldNumber).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 	grbuild := &CardGroupBy{config: cq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -329,7 +328,6 @@ func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 //	client.Card.Query().
 //		Select(card.FieldNumber).
 //		Scan(ctx, &v)
-//
 func (cq *CardQuery) Select(fields ...string) *CardSelect {
 	cq.fields = append(cq.fields, fields...)
 	selbuild := &CardSelect{CardQuery: cq}

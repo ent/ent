@@ -267,7 +267,6 @@ func (ruq *RoleUserQuery) WithUser(opts ...func(*UserQuery)) *RoleUserQuery {
 //		GroupBy(roleuser.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (ruq *RoleUserQuery) GroupBy(field string, fields ...string) *RoleUserGroupBy {
 	grbuild := &RoleUserGroupBy{config: ruq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -294,7 +293,6 @@ func (ruq *RoleUserQuery) GroupBy(field string, fields ...string) *RoleUserGroup
 //	client.RoleUser.Query().
 //		Select(roleuser.FieldCreatedAt).
 //		Scan(ctx, &v)
-//
 func (ruq *RoleUserQuery) Select(fields ...string) *RoleUserSelect {
 	ruq.fields = append(ruq.fields, fields...)
 	selbuild := &RoleUserSelect{RoleUserQuery: ruq}

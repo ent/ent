@@ -265,7 +265,6 @@ func (mq *MediaQuery) Clone() *MediaQuery {
 //		GroupBy(media.FieldSource).
 //		Aggregate(entv2.Count()).
 //		Scan(ctx, &v)
-//
 func (mq *MediaQuery) GroupBy(field string, fields ...string) *MediaGroupBy {
 	grbuild := &MediaGroupBy{config: mq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -292,7 +291,6 @@ func (mq *MediaQuery) GroupBy(field string, fields ...string) *MediaGroupBy {
 //	client.Media.Query().
 //		Select(media.FieldSource).
 //		Scan(ctx, &v)
-//
 func (mq *MediaQuery) Select(fields ...string) *MediaSelect {
 	mq.fields = append(mq.fields, fields...)
 	selbuild := &MediaSelect{MediaQuery: mq}

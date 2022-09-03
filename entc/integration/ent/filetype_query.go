@@ -305,7 +305,6 @@ func (ftq *FileTypeQuery) WithFiles(opts ...func(*FileQuery)) *FileTypeQuery {
 //		GroupBy(filetype.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (ftq *FileTypeQuery) GroupBy(field string, fields ...string) *FileTypeGroupBy {
 	grbuild := &FileTypeGroupBy{config: ftq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -332,7 +331,6 @@ func (ftq *FileTypeQuery) GroupBy(field string, fields ...string) *FileTypeGroup
 //	client.FileType.Query().
 //		Select(filetype.FieldName).
 //		Scan(ctx, &v)
-//
 func (ftq *FileTypeQuery) Select(fields ...string) *FileTypeSelect {
 	ftq.fields = append(ftq.fields, fields...)
 	selbuild := &FileTypeSelect{FileTypeQuery: ftq}

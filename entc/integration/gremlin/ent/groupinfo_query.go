@@ -293,7 +293,6 @@ func (giq *GroupInfoQuery) WithGroups(opts ...func(*GroupQuery)) *GroupInfoQuery
 //		GroupBy(groupinfo.FieldDesc).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGroupBy {
 	grbuild := &GroupInfoGroupBy{config: giq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -320,7 +319,6 @@ func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGro
 //	client.GroupInfo.Query().
 //		Select(groupinfo.FieldDesc).
 //		Scan(ctx, &v)
-//
 func (giq *GroupInfoQuery) Select(fields ...string) *GroupInfoSelect {
 	giq.fields = append(giq.fields, fields...)
 	selbuild := &GroupInfoSelect{GroupInfoQuery: giq}

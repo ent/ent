@@ -378,7 +378,6 @@ func (fq *FileQuery) WithField(opts ...func(*FieldTypeQuery)) *FileQuery {
 //		GroupBy(file.FieldSize).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 	grbuild := &FileGroupBy{config: fq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -405,7 +404,6 @@ func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 //	client.File.Query().
 //		Select(file.FieldSize).
 //		Scan(ctx, &v)
-//
 func (fq *FileQuery) Select(fields ...string) *FileSelect {
 	fq.fields = append(fq.fields, fields...)
 	selbuild := &FileSelect{FileQuery: fq}

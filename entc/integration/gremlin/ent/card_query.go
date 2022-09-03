@@ -321,7 +321,6 @@ func (cq *CardQuery) WithSpec(opts ...func(*SpecQuery)) *CardQuery {
 //		GroupBy(card.FieldCreateTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 	grbuild := &CardGroupBy{config: cq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -348,7 +347,6 @@ func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 //	client.Card.Query().
 //		Select(card.FieldCreateTime).
 //		Scan(ctx, &v)
-//
 func (cq *CardQuery) Select(fields ...string) *CardSelect {
 	cq.fields = append(cq.fields, fields...)
 	selbuild := &CardSelect{CardQuery: cq}

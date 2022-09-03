@@ -374,7 +374,6 @@ func (bq *BlobQuery) WithBlobLinks(opts ...func(*BlobLinkQuery)) *BlobQuery {
 //		GroupBy(blob.FieldUUID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (bq *BlobQuery) GroupBy(field string, fields ...string) *BlobGroupBy {
 	grbuild := &BlobGroupBy{config: bq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -401,7 +400,6 @@ func (bq *BlobQuery) GroupBy(field string, fields ...string) *BlobGroupBy {
 //	client.Blob.Query().
 //		Select(blob.FieldUUID).
 //		Scan(ctx, &v)
-//
 func (bq *BlobQuery) Select(fields ...string) *BlobSelect {
 	bq.fields = append(bq.fields, fields...)
 	selbuild := &BlobSelect{BlobQuery: bq}

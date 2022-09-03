@@ -265,7 +265,6 @@ func (cq *ConversionQuery) Clone() *ConversionQuery {
 //		GroupBy(conversion.FieldName).
 //		Aggregate(entv2.Count()).
 //		Scan(ctx, &v)
-//
 func (cq *ConversionQuery) GroupBy(field string, fields ...string) *ConversionGroupBy {
 	grbuild := &ConversionGroupBy{config: cq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -292,7 +291,6 @@ func (cq *ConversionQuery) GroupBy(field string, fields ...string) *ConversionGr
 //	client.Conversion.Query().
 //		Select(conversion.FieldName).
 //		Scan(ctx, &v)
-//
 func (cq *ConversionQuery) Select(fields ...string) *ConversionSelect {
 	cq.fields = append(cq.fields, fields...)
 	selbuild := &ConversionSelect{ConversionQuery: cq}
