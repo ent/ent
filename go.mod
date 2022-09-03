@@ -1,6 +1,6 @@
 module entgo.io/ent
 
-go 1.18
+go 1.19
 
 require (
 	ariga.io/atlas v0.6.2-0.20220819114704-2060066abac7
