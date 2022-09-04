@@ -249,7 +249,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlCount(ctx context.Context) (int, error
 }
 
 func ({{ $receiver }} *{{ $builder }}) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := {{ $receiver }}.First{{- if $.HasOneFieldID }}ID{{- end }}(ctx);{
+	switch _, err := {{ $receiver }}.First{{ if $.HasOneFieldID }}ID{{ end }}(ctx);{
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
