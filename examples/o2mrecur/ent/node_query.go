@@ -508,11 +508,14 @@ func (nq *NodeQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (nq *NodeQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := nq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := nq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (nq *NodeQuery) querySpec() *sqlgraph.QuerySpec {

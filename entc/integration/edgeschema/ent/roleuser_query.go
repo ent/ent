@@ -420,11 +420,14 @@ func (ruq *RoleUserQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (ruq *RoleUserQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := ruq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := ruq.First(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (ruq *RoleUserQuery) querySpec() *sqlgraph.QuerySpec {

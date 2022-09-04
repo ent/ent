@@ -427,11 +427,14 @@ func (tlq *TweetLikeQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (tlq *TweetLikeQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := tlq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := tlq.First(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (tlq *TweetLikeQuery) querySpec() *sqlgraph.QuerySpec {
