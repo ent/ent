@@ -291,10 +291,18 @@ func ruleset() *inflect.Ruleset {
 		"TLS", "TTL", "UDP", "UI", "UID", "URI", "URL", "UTF8", "UUID", "VM",
 		"XML", "XMPP", "XSRF", "XSS",
 	} {
-		acronyms[w] = struct{}{}
-		rules.AddAcronym(w)
+		addAcronym(rules, w)
 	}
 	return rules
+}
+
+func addAcronym(rules *inflect.Ruleset, word string) {
+	acronyms[word] = struct{}{}
+	rules.AddAcronym(word)
+}
+
+func AddAcronym(word string) {
+	addAcronym(rules, word)
 }
 
 // order returns a map of sort orders.
