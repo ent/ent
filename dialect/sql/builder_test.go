@@ -853,18 +853,18 @@ func TestBuilder(t *testing.T) {
 			}(),
 			wantQuery: "SELECT `g`.`id`, COUNT(`*`) AS `user_count` FROM `groups` AS `g` RIGHT JOIN `user_groups` AS `ug` ON `g`.`id` = `ug`.`group_id` GROUP BY `g`.`id`",
 		},
-        {
-            input: func() Querier {
-                t1 := Table("groups").As("g")
-                t2 := Table("user_groups").As("ug")
-                return Select(t1.C("id"), As(Count("`*`"), "user_count")).
-                    From(t1).
-                    FullJoin(t2).
-                    On(t1.C("id"), t2.C("group_id")).
-                    GroupBy(t1.C("id"))
-            }(),
-            wantQuery: "SELECT `g`.`id`, COUNT(`*`) AS `user_count` FROM `groups` AS `g` FULL JOIN `user_groups` AS `ug` ON `g`.`id` = `ug`.`group_id` GROUP BY `g`.`id`",
-        },
+		{
+			input: func() Querier {
+				t1 := Table("groups").As("g")
+				t2 := Table("user_groups").As("ug")
+				return Select(t1.C("id"), As(Count("`*`"), "user_count")).
+					From(t1).
+					FullJoin(t2).
+					On(t1.C("id"), t2.C("group_id")).
+					GroupBy(t1.C("id"))
+			}(),
+			wantQuery: "SELECT `g`.`id`, COUNT(`*`) AS `user_count` FROM `groups` AS `g` FULL JOIN `user_groups` AS `ug` ON `g`.`id` = `ug`.`group_id` GROUP BY `g`.`id`",
+		},
 		{
 			input: func() Querier {
 				t1 := Table("users").As("u")
@@ -2168,4 +2168,28 @@ func TestUpdateBuilder_OrderBy(t *testing.T) {
 
 	u = Dialect(dialect.Postgres).Update("users").Set("id", Expr("id + 1")).OrderBy("id")
 	require.Error(t, u.Err())
+}
+
+func TestUpdateBuilder_WithPrefix(t *testing.T) {
+	u := Dialect(dialect.MySQL).
+		Update("users").
+		Prefix(ExprFunc(func(b *Builder) {
+			b.WriteString("SET @i = ").Arg(1).WriteByte(';')
+		})).
+		Set("id", Expr("(@i:=@i+1)")).
+		OrderBy("id")
+	require.NoError(t, u.Err())
+	query, args := u.Query()
+	require.Equal(t, []any{1}, args)
+	require.Equal(t, "SET @i = ?; UPDATE `users` SET `id` = (@i:=@i+1) ORDER BY `id`", query)
+
+	u = Dialect(dialect.MySQL).
+		Update("users").
+		Prefix(Expr("SET @i = 1;")).
+		Set("id", Expr("(@i:=@i+1)")).
+		OrderBy("id")
+	require.NoError(t, u.Err())
+	query, args = u.Query()
+	require.Empty(t, args)
+	require.Equal(t, "SET @i = 1; UPDATE `users` SET `id` = (@i:=@i+1) ORDER BY `id`", query)
 }
