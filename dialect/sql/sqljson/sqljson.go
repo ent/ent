@@ -432,11 +432,12 @@ func (p *PathOptions) mysqlFunc(fn string, b *sql.Builder) {
 func (p *PathOptions) mysqlPath(b *sql.Builder) {
 	b.WriteString(`'$`)
 	for _, p := range p.Path {
-		if _, ok := isJSONIdx(p); ok {
+		switch _, isIndex := isJSONIdx(p); {
+		case isIndex:
 			b.WriteString(p)
-		} else if p == "*" || isQuoted(p) || isIdentifier(p) {
+		case p == "*" || isQuoted(p) || isIdentifier(p):
 			b.WriteString("." + p)
-		} else {
+		default:
 			b.WriteString(`."` + p + `"`)
 		}
 	}
