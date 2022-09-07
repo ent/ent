@@ -213,7 +213,7 @@ type IndexAnnotation struct {
 	//
 	Desc bool
 
-	// DescColumns defines the DESC clause for columns in a multi column index.
+	// DescColumns defines the DESC clause for columns in multi-column index.
 	// In MySQL, the following annotation maps to:
 	//
 	//	index.Fields("c1", "c2", "c3").
@@ -224,6 +224,18 @@ type IndexAnnotation struct {
 	//	CREATE INDEX `table_c1_c2_c3` ON `table`(`c1` DESC, `c2` DESC, `c3`)
 	//
 	DescColumns map[string]bool
+
+	// IncludeColumns defines the INCLUDE clause for the index.
+	// Works only in Postgres and its definition is as follows:
+	//
+	//	index.Fields("c1").
+	//		Annotation(
+	//			entsql.IncludeColumns("c2"),
+	//		)
+	//
+	//	CREATE INDEX "table_column" ON "table"("c1") INCLUDE ("c2")
+	//
+	IncludeColumns []string
 
 	// Type defines the type of the index.
 	// In MySQL, the following annotation maps to:
@@ -257,7 +269,6 @@ type IndexAnnotation struct {
 //		Annotation(entsql.Prefix(100))
 //
 //	CREATE INDEX `table_column` ON `table`(`column`(100))
-//
 func Prefix(prefix uint) *IndexAnnotation {
 	return &IndexAnnotation{
 		Prefix: prefix,
@@ -274,7 +285,6 @@ func Prefix(prefix uint) *IndexAnnotation {
 //		)
 //
 //	CREATE INDEX `table_c1_c2_c3` ON `table`(`c1`(100), `c2`(200), `c3`)
-//
 func PrefixColumn(name string, prefix uint) *IndexAnnotation {
 	return &IndexAnnotation{
 		PrefixColumns: map[string]uint{
@@ -290,7 +300,6 @@ func PrefixColumn(name string, prefix uint) *IndexAnnotation {
 //		Annotation(entsql.Desc())
 //
 //	CREATE INDEX `table_column` ON `table`(`column` DESC)
-//
 func Desc() *IndexAnnotation {
 	return &IndexAnnotation{
 		Desc: true,
@@ -306,7 +315,6 @@ func Desc() *IndexAnnotation {
 //		)
 //
 //	CREATE INDEX `table_c1_c2_c3` ON `table`(`c1` DESC, `c2` DESC, `c3`)
-//
 func DescColumns(names ...string) *IndexAnnotation {
 	ant := &IndexAnnotation{
 		DescColumns: make(map[string]bool, len(names)),
@@ -317,7 +325,20 @@ func DescColumns(names ...string) *IndexAnnotation {
 	return ant
 }
 
-// Type defines the type of the index.
+// IncludeColumns defines the INCLUDE clause for the index.
+// Works only in Postgres and its definition is as follows:
+//
+//	index.Fields("c1").
+//		Annotation(
+//			entsql.IncludeColumns("c2"),
+//		)
+//
+//	CREATE INDEX "table_column" ON "table"("c1") INCLUDE ("c2")
+func IncludeColumns(names ...string) *IndexAnnotation {
+	return &IndexAnnotation{IncludeColumns: names}
+}
+
+// IndexType defines the type of the index.
 // In MySQL, the following annotation maps to:
 //
 //	index.Fields("c1").
@@ -326,12 +347,11 @@ func DescColumns(names ...string) *IndexAnnotation {
 //		)
 //
 //	CREATE FULLTEXT INDEX `table_c1` ON `table`(`c1`)
-//
 func IndexType(t string) *IndexAnnotation {
 	return &IndexAnnotation{Type: t}
 }
 
-// Types is like the Type option but allows mapping an index-type per dialect.
+// IndexTypes is like the Type option but allows mapping an index-type per dialect.
 //
 //	index.Fields("c1").
 //		Annotations(
@@ -340,7 +360,6 @@ func IndexType(t string) *IndexAnnotation {
 //				dialect.Postgres: "GIN",
 //			}),
 //		)
-//
 func IndexTypes(types map[string]string) *IndexAnnotation {
 	return &IndexAnnotation{Types: types}
 }
@@ -384,6 +403,9 @@ func (a IndexAnnotation) Merge(other schema.Annotation) schema.Annotation {
 		for column, desc := range ant.DescColumns {
 			a.DescColumns[column] = desc
 		}
+	}
+	if ant.IncludeColumns != nil {
+		a.IncludeColumns = append(a.IncludeColumns, ant.IncludeColumns...)
 	}
 	if ant.Type != "" {
 		a.Type = ant.Type

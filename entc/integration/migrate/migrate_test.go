@@ -109,6 +109,9 @@ func TestPostgres(t *testing.T) {
 			V1ToV2(t, drv.Dialect(), clientv1, clientv2)
 			CheckConstraint(t, clientv2)
 			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_name = $1 AND column_name = $2")
+			if version != "10" {
+				IncludeColumns(t, drv)
+			}
 
 			vdrv, err := sql.Open(dialect.Postgres, dsn+" dbname=versioned_migrate")
 			require.NoError(t, err, "connecting to versioned migrate database")
@@ -560,6 +563,15 @@ func TimePrecision(t *testing.T, drv *sql.Driver, query string) {
 	require.NoError(t, err)
 	require.Equalf(t, 3, p, "custom_types field %q", customtype.FieldTz3)
 	require.NoError(t, rows.Close())
+}
+
+func IncludeColumns(t *testing.T, drv *sql.Driver) {
+	rows, err := drv.QueryContext(context.Background(), "select indexdef from pg_indexes where indexname='user_workplace'")
+	require.NoError(t, err)
+	d, err := sql.ScanString(rows)
+	require.NoError(t, err)
+	require.NoError(t, rows.Close())
+	require.Equal(t, d, "CREATE INDEX user_workplace ON public.users USING btree (workplace) INCLUDE (nickname)")
 }
 
 func idRange(t *testing.T, id, l, h int) {
