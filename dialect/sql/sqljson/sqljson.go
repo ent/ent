@@ -545,6 +545,10 @@ func isIdentifier(name string) bool {
 }
 
 func isQuoted(s string) bool {
+	if s == "" {
+		return false
+	}
+
 	return s[0] == '"' && s[len(s)-1] == '"'
 }
 
