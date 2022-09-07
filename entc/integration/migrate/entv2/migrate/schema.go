@@ -186,6 +186,16 @@ var (
 					},
 				},
 			},
+			{
+				Name:    "user_workplace",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[15]},
+				Annotation: &entsql.IndexAnnotation{
+					IncludeColumns: []string{
+						UsersColumns[6].Name,
+					},
+				},
+			},
 		},
 	}
 	// FriendsColumns holds the columns for the "friends" table.
