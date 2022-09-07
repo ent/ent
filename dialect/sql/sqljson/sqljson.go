@@ -536,7 +536,6 @@ func isIdentifier(name string) bool {
 	if name == "" {
 		return false
 	}
-
 	for i, c := range name {
 		if !unicode.IsLetter(c) && c != '_' && (i == 0 || !unicode.IsDigit(c)) {
 			return false
@@ -549,7 +548,6 @@ func isQuoted(s string) bool {
 	if s == "" {
 		return false
 	}
-
 	return s[0] == '"' && s[len(s)-1] == '"'
 }
 
