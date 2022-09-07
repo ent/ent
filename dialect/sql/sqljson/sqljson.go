@@ -430,15 +430,17 @@ func (p *PathOptions) mysqlFunc(fn string, b *sql.Builder) {
 
 // mysqlPath writes the JSON path in MySQL (or SQLite) format.
 func (p *PathOptions) mysqlPath(b *sql.Builder) {
-	b.WriteString(`"$`)
+	b.WriteString(`'$`)
 	for _, p := range p.Path {
 		if _, ok := isJSONIdx(p); ok {
 			b.WriteString(p)
-		} else {
+		} else if p == "*" || isQuoted(p) || isIdentifier(p) {
 			b.WriteString("." + p)
+		} else {
+			b.WriteString(`."` + p + `"`)
 		}
 	}
-	b.WriteByte('"')
+	b.WriteByte('\'')
 }
 
 // pgPath writes the JSON path in Postgres format `"a"->'b'->>'c'`.
@@ -527,6 +529,23 @@ func normalizePG(b *sql.Builder, arg any, opts []Option) []Option {
 		base = append(base, Cast("int"))
 	}
 	return append(base, opts...)
+}
+
+func isIdentifier(name string) bool {
+	if name == "" {
+		return false
+	}
+
+	for i, c := range name {
+		if !unicode.IsLetter(c) && c != '_' && (i == 0 || !unicode.IsDigit(c)) {
+			return false
+		}
+	}
+	return true
+}
+
+func isQuoted(s string) bool {
+	return s[0] == '"' && s[len(s)-1] == '"'
 }
 
 // isJSONIdx reports whether the string represents a JSON index.

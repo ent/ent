@@ -33,7 +33,7 @@ func TestWritePath(t *testing.T) {
 				Select("*").
 				From(sql.Table("users")).
 				Where(sqljson.ValueEQ("a", "a", sqljson.DotPath("b.c[1].d"))),
-			wantQuery: "SELECT * FROM `users` WHERE JSON_EXTRACT(`a`, \"$.b.c[1].d\") = ?",
+			wantQuery: "SELECT * FROM `users` WHERE JSON_EXTRACT(`a`, '$.b.c[1].d') = ?",
 			wantArgs:  []any{"a"},
 		},
 		{
@@ -41,34 +41,34 @@ func TestWritePath(t *testing.T) {
 				Select("*").
 				From(sql.Table("users")).
 				Where(sqljson.ValueEQ("a", "a", sqljson.DotPath("b.\"c[1]\".d[1][2].e"))),
-			wantQuery: "SELECT * FROM `users` WHERE JSON_EXTRACT(`a`, \"$.b.\"c[1]\".d[1][2].e\") = ?",
+			wantQuery: "SELECT * FROM `users` WHERE JSON_EXTRACT(`a`, '$.b.\"c[1]\".d[1][2].e') = ?",
 			wantArgs:  []any{"a"},
 		},
 		{
 			input: sql.Select("*").
 				From(sql.Table("test")).
 				Where(sqljson.HasKey("j", sqljson.DotPath("a.*.c"))),
-			wantQuery: "SELECT * FROM `test` WHERE JSON_EXTRACT(`j`, \"$.a.*.c\") IS NOT NULL",
+			wantQuery: "SELECT * FROM `test` WHERE JSON_EXTRACT(`j`, '$.a.*.c') IS NOT NULL",
 		},
 		{
 			input: sql.Select("*").
 				From(sql.Table("test")).
 				Where(sqljson.HasKey("j", sqljson.DotPath("a.*.c"))),
-			wantQuery: "SELECT * FROM `test` WHERE JSON_EXTRACT(`j`, \"$.a.*.c\") IS NOT NULL",
+			wantQuery: "SELECT * FROM `test` WHERE JSON_EXTRACT(`j`, '$.a.*.c') IS NOT NULL",
 		},
 		{
 			input: sql.Dialect(dialect.SQLite).
 				Select("*").
 				From(sql.Table("test")).
 				Where(sqljson.HasKey("j", sqljson.DotPath("attributes[1].body"))),
-			wantQuery: "SELECT * FROM `test` WHERE JSON_TYPE(`j`, \"$.attributes[1].body\") IS NOT NULL",
+			wantQuery: "SELECT * FROM `test` WHERE JSON_TYPE(`j`, '$.attributes[1].body') IS NOT NULL",
 		},
 		{
 			input: sql.Dialect(dialect.SQLite).
 				Select("*").
 				From(sql.Table("test")).
 				Where(sqljson.HasKey("j", sqljson.DotPath("a.*.c"))),
-			wantQuery: "SELECT * FROM `test` WHERE JSON_TYPE(`j`, \"$.a.*.c\") IS NOT NULL",
+			wantQuery: "SELECT * FROM `test` WHERE JSON_TYPE(`j`, '$.a.*.c') IS NOT NULL",
 		},
 		{
 			input: sql.Dialect(dialect.SQLite).
@@ -81,7 +81,7 @@ func TestWritePath(t *testing.T) {
 						sql.EQ("active", true),
 					),
 				),
-			wantQuery: "SELECT * FROM `test` WHERE `id` > ? AND JSON_TYPE(`j`, \"$.a.*.c\") IS NOT NULL AND `active`",
+			wantQuery: "SELECT * FROM `test` WHERE `id` > ? AND JSON_TYPE(`j`, '$.a.*.c') IS NOT NULL AND `active`",
 			wantArgs:  []any{100},
 		},
 		{
@@ -100,7 +100,7 @@ func TestWritePath(t *testing.T) {
 				Select("*").
 				From(sql.Table("users")).
 				Where(sqljson.ValueEQ("a", "a", sqljson.Path("b", "c", "[1]", "d"), sqljson.Unquote(true))),
-			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, \"$.b.c[1].d\")) = ?",
+			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, '$.b.c[1].d')) = ?",
 			wantArgs:  []any{"a"},
 		},
 		{
@@ -148,7 +148,7 @@ func TestWritePath(t *testing.T) {
 				Select("*").
 				From(sql.Table("users")).
 				Where(sqljson.LenEQ("a", 1)),
-			wantQuery: "SELECT * FROM `users` WHERE JSON_LENGTH(`a`, \"$\") = ?",
+			wantQuery: "SELECT * FROM `users` WHERE JSON_LENGTH(`a`, '$') = ?",
 			wantArgs:  []any{1},
 		},
 		{
@@ -156,7 +156,7 @@ func TestWritePath(t *testing.T) {
 				Select("*").
 				From(sql.Table("users")).
 				Where(sqljson.LenEQ("a", 1)),
-			wantQuery: "SELECT * FROM `users` WHERE JSON_ARRAY_LENGTH(`a`, \"$\") = ?",
+			wantQuery: "SELECT * FROM `users` WHERE JSON_ARRAY_LENGTH(`a`, '$') = ?",
 			wantArgs:  []any{1},
 		},
 		{
@@ -171,7 +171,7 @@ func TestWritePath(t *testing.T) {
 						sqljson.LenLTE("a", 1, sqljson.Path("e")),
 					),
 				),
-			wantQuery: "SELECT * FROM `users` WHERE JSON_ARRAY_LENGTH(`a`, \"$.b\") > ? OR JSON_ARRAY_LENGTH(`a`, \"$.c\") >= ? OR JSON_ARRAY_LENGTH(`a`, \"$.d\") < ? OR JSON_ARRAY_LENGTH(`a`, \"$.e\") <= ?",
+			wantQuery: "SELECT * FROM `users` WHERE JSON_ARRAY_LENGTH(`a`, '$.b') > ? OR JSON_ARRAY_LENGTH(`a`, '$.c') >= ? OR JSON_ARRAY_LENGTH(`a`, '$.d') < ? OR JSON_ARRAY_LENGTH(`a`, '$.e') <= ?",
 			wantArgs:  []any{1, 1, 1, 1},
 		},
 		{
@@ -179,7 +179,7 @@ func TestWritePath(t *testing.T) {
 				Select("*").
 				From(sql.Table("users")).
 				Where(sqljson.ValueContains("tags", "foo")),
-			wantQuery: "SELECT * FROM `users` WHERE JSON_CONTAINS(`tags`, ?, \"$\") = ?",
+			wantQuery: "SELECT * FROM `users` WHERE JSON_CONTAINS(`tags`, ?, '$') = ?",
 			wantArgs:  []any{"\"foo\"", 1},
 		},
 		{
@@ -187,7 +187,7 @@ func TestWritePath(t *testing.T) {
 				Select("*").
 				From(sql.Table("users")).
 				Where(sqljson.ValueContains("tags", 1, sqljson.Path("a"))),
-			wantQuery: "SELECT * FROM `users` WHERE JSON_CONTAINS(`tags`, ?, \"$.a\") = ?",
+			wantQuery: "SELECT * FROM `users` WHERE JSON_CONTAINS(`tags`, ?, '$.a') = ?",
 			wantArgs:  []any{"1", 1},
 		},
 		{
@@ -195,7 +195,7 @@ func TestWritePath(t *testing.T) {
 				Select("*").
 				From(sql.Table("users")).
 				Where(sqljson.ValueContains("tags", "foo")),
-			wantQuery: "SELECT * FROM `users` WHERE EXISTS(SELECT * FROM JSON_EACH(`tags`, \"$\") WHERE `value` = ?)",
+			wantQuery: "SELECT * FROM `users` WHERE EXISTS(SELECT * FROM JSON_EACH(`tags`, '$') WHERE `value` = ?)",
 			wantArgs:  []any{"foo"},
 		},
 		{
@@ -203,7 +203,7 @@ func TestWritePath(t *testing.T) {
 				Select("*").
 				From(sql.Table("users")).
 				Where(sqljson.ValueContains("tags", 1, sqljson.Path("a"))),
-			wantQuery: "SELECT * FROM `users` WHERE EXISTS(SELECT * FROM JSON_EACH(`tags`, \"$.a\") WHERE `value` = ?)",
+			wantQuery: "SELECT * FROM `users` WHERE EXISTS(SELECT * FROM JSON_EACH(`tags`, '$.a') WHERE `value` = ?)",
 			wantArgs:  []any{1},
 		},
 		{
@@ -234,14 +234,14 @@ func TestWritePath(t *testing.T) {
 				Select("*").
 				From(sql.Table("users")).
 				Where(sqljson.ValueIsNull("c", sqljson.Path("a"))),
-			wantQuery: "SELECT * FROM `users` WHERE JSON_CONTAINS(`c`, 'null', \"$.a\")",
+			wantQuery: "SELECT * FROM `users` WHERE JSON_CONTAINS(`c`, 'null', '$.a')",
 		},
 		{
 			input: sql.Dialect(dialect.SQLite).
 				Select("*").
 				From(sql.Table("users")).
 				Where(sqljson.ValueIsNull("c", sqljson.Path("a"))),
-			wantQuery: "SELECT * FROM `users` WHERE JSON_TYPE(`c`, \"$.a\") = 'null'",
+			wantQuery: "SELECT * FROM `users` WHERE JSON_TYPE(`c`, '$.a') = 'null'",
 		},
 		{
 			input: sql.Dialect(dialect.Postgres).
@@ -269,7 +269,7 @@ func TestWritePath(t *testing.T) {
 				Select("*").
 				From(sql.Table("users")).
 				Where(sqljson.StringContains("a", "substr", sqljson.Path("b", "c", "[1]", "d"))),
-			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, \"$.b.c[1].d\")) LIKE ?",
+			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, '$.b.c[1].d')) LIKE ?",
 			wantArgs:  []any{"%substr%"},
 		},
 		{
@@ -282,7 +282,7 @@ func TestWritePath(t *testing.T) {
 						sqljson.StringContains("b", "d", sqljson.Path("b")),
 					),
 				),
-			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, \"$.a\")) LIKE ? AND JSON_UNQUOTE(JSON_EXTRACT(`b`, \"$.b\")) LIKE ?",
+			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, '$.a')) LIKE ? AND JSON_UNQUOTE(JSON_EXTRACT(`b`, '$.b')) LIKE ?",
 			wantArgs:  []any{"%c%", "%d%"},
 		},
 		{
@@ -298,7 +298,7 @@ func TestWritePath(t *testing.T) {
 				Select("*").
 				From(sql.Table("users")).
 				Where(sqljson.StringHasPrefix("a", "substr", sqljson.Path("b", "c", "[1]", "d"))),
-			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, \"$.b.c[1].d\")) LIKE ?",
+			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, '$.b.c[1].d')) LIKE ?",
 			wantArgs:  []any{"substr%"},
 		},
 		{
@@ -314,7 +314,7 @@ func TestWritePath(t *testing.T) {
 				Select("*").
 				From(sql.Table("users")).
 				Where(sqljson.StringHasSuffix("a", "substr", sqljson.Path("b", "c", "[1]", "d"))),
-			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, \"$.b.c[1].d\")) LIKE ?",
+			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, '$.b.c[1].d')) LIKE ?",
 			wantArgs:  []any{"%substr"},
 		},
 		{
@@ -322,7 +322,7 @@ func TestWritePath(t *testing.T) {
 				Select("*").
 				From(sql.Table("users")).
 				Where(sqljson.ValueIn("a", []any{"a", "b"}, sqljson.Path("b"))),
-			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, \"$.b\")) IN (?, ?)",
+			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, '$.b')) IN (?, ?)",
 			wantArgs:  []any{"a", "b"},
 		},
 		{
@@ -330,7 +330,7 @@ func TestWritePath(t *testing.T) {
 				Select("*").
 				From(sql.Table("users")).
 				Where(sqljson.ValueIn("a", []any{1, 2}, sqljson.Path("b"))),
-			wantQuery: "SELECT * FROM `users` WHERE JSON_EXTRACT(`a`, \"$.b\") IN (?, ?)",
+			wantQuery: "SELECT * FROM `users` WHERE JSON_EXTRACT(`a`, '$.b') IN (?, ?)",
 			wantArgs:  []any{1, 2},
 		},
 		{
@@ -338,7 +338,7 @@ func TestWritePath(t *testing.T) {
 				Select("*").
 				From(sql.Table("users")).
 				Where(sqljson.ValueIn("a", []any{1, "a"}, sqljson.Path("b"))),
-			wantQuery: "SELECT * FROM `users` WHERE JSON_EXTRACT(`a`, \"$.b\") IN (?, ?)",
+			wantQuery: "SELECT * FROM `users` WHERE JSON_EXTRACT(`a`, '$.b') IN (?, ?)",
 			wantArgs:  []any{1, "a"},
 		},
 	}
