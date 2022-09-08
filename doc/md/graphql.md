@@ -12,7 +12,7 @@ provides various integrations, such as:
    loaders.
 5. [Transactional mutations](tutorial-todo-gql-tx-mutation.md) to ensure consistency in case of failures. 
 
-Check out the website's [GraphQL tutorial](tutorial-todo-gql.mdx) for more information.
+Check out the website's [GraphQL tutorial](tutorial-todo-gql.mdx#basic-setup) for more information.
 
 
 ## Quick Introduction
