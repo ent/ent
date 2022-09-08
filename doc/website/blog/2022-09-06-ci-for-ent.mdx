@@ -29,14 +29,14 @@ From our discussions with the Ent community, we have learned
 that many teams using Ent already use CI and would like to enforce some
 Ent-specific verifications into their workflows.
 
-To support the community with this effort we added to the docs [a guide](/docs/ci) which
+To support the community with this effort, we added a new [guide](/docs/ci) to the docs which
 documents common best practices to verify in CI and introduces
-[ent/contrib/ci](https://github.com/ent/contrib/ci) a GitHub Action
+[ent/contrib/ci](https://github.com/ent/contrib/ci): a GitHub Action
 we maintain that codifies them.
 
 In this post, I want to share some of our initial suggestions on how you
 might incorporate CI to you Ent project.  Towards the end of this post
-I will share insights into things we are working on and would like to
+I will share insights into projects we are working on and would like to
 get the community's feedback for.
 
 ## Verify all generated files are checked in
@@ -116,9 +116,9 @@ as part of your continuous integration flow. This is done for multiple reasons:
 * [Migration directory integrity](/docs/versioned-migrations#atlas-migration-directory-integrity-file)
   is enforced - ensuring that history wasn't accidentally changed and that migrations that are
   planned in parallel are unified to a clean linear history.
-* Destructive changes are detected notifying you of any potential data loss that may be
+* Destructive changes are detected, notifying you of any potential data loss that may be
   caused by your migrations way before they reach your production database.
-* Linting detects data-dependant changes that _may_ fail upon deployment and require
+* Linting detects data-dependent changes that _may_ fail upon deployment and require
   more careful review from your side.
 
 If you're using GitHub, you can use the [Official Atlas Action](https://github.com/ariga/atlas-action)
@@ -274,7 +274,7 @@ which is provided by the `services` block in the example code above.
 To add to this modest beginning, I want to share some features that we are experimenting
 with at [Ariga](https://ariga.io) with hope to get the community's feedback on them.
 
-* *Linting for Online Migrations* - many Ent projects use the  automatic schema migration
+* *Linting for Online Migrations* - many Ent projects use the automatic schema migration
   mechanism that is available in Ent (using `ent.Schema.Create` when applications start).
   Assuming a project's source code is managed in a version control system (such as Git),
   we compare the schema in the mainline branch (`master`/`main`/etc.) with the one in the
