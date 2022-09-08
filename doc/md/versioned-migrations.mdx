@@ -121,7 +121,7 @@ docker run --name migration --rm -p 5432:5432 -e POSTGRES_PASSWORD=pass -e POSTG
 2\. Create a `main.go` file under the `migrate/ent` package and customize the migration generation for your project.
 
 <Tabs
-defaultValue="golang_migrate"
+defaultValue="atlas"
 values={[
 {label: 'Atlas', value: 'atlas'},
 {label: 'golang-migrate/migrate', value: 'golang_migrate'},
@@ -410,29 +410,21 @@ For example:
 go run -mod=mod ent/migrate/main.go create_users
 ```
 
-Run `ls ent/migrate/migrations` after the command above was passed successfully, and you will notice Atlas created 3
+Run `ls ent/migrate/migrations` after the command above was passed successfully, and you will notice Atlas created 2
 files:
 
 <Tabs
-defaultValue="migration_file_up"
+defaultValue="migration_file"
 values={[
-{label: '20220811114629_create_users.up.sql', value: 'migration_file_up'},
-{label: '20220811114629_create_users.down.sql', value: 'migration_file_down'},
+{label: '20220811114629_create_users.sql', value: 'migration_file'},
 {label: 'atlas.sum', value: 'sum_file'},
 ]}>
-<TabItem value="migration_file_up">
+<TabItem value="migration_file">
 
 ```sql
 -- create "users" table
 CREATE TABLE `users` (`id` bigint NOT NULL AUTO_INCREMENT, PRIMARY KEY (`id`)) CHARSET utf8mb4 COLLATE utf8mb4_bin;
-```
 
-</TabItem>
-<TabItem value="migration_file_down">
-
-```sql
--- reverse: create "users" table
-DROP TABLE `users`;
 ```
 
 </TabItem>
@@ -443,8 +435,9 @@ to ensure the integrity of the migration directory and force developers to deal 
 where migration order or contents were modified after the fact.
 
 ```text
-h1:NRHsNIjvSSzprr/EzMdtszQg3t3pVLk4G4N1tX4rMfk=
-20220811114629_create_users.up.sql h1:Ng3GHrdk2davokjOctgVdxC+6QsK4JzaLX6RT3QstJc=
+h1:vj6fBSDiLEwe+jGdHQvM2NU8G70lAfXwmI+zkyrxMnk=
+20220811114629_create_users.sql h1:wrm4K8GSucW6uMJX7XfmfoVPhyzz3vN5CnU1mam2Y4c=
+
 ```
 
 </TabItem>
@@ -548,26 +541,17 @@ longer needed after the first one.
 
 ## Apply Migrations
 
-The Atlas migration engine has only experimental support applying the migration files onto a database yet. Therefore,
-to manage and execute the generated migration files for production systems it is recommended you use on an external tool
-(or execute them by hand). By default, Ent generates one "up" and one "down" migration file for the computed diff. These
-files are compatible with the popular [golang-migrate/migrate](https://github.com/golang-migrate/migrate) package, and
-you can use that tool to manage the migrations in your deployments.
+Ent recommends to use the Atlas CLI to apply the generated migration files onto the database. If you want to use any
+other migration management tool, Ent has support for generating migrations for several of them
+out of the box.
 
 ```shell
-migrate -source file://migrations -database mysql://root:pass@tcp(localhost:3306)/test up
+atlas migrate apply \
+  --dir "file://migrations"
+  --url mysql://root:pass@localhost:3306/ent
 ```
 
-:::note
-
-If you use golang-migrate with MySQL, you need to add the `multiStatements` parameter to `true` as in the example below
-and then take the DSN we used in the documents with the param applied.
-
-```
-"user:password@tcp(host:port)/dbname?multiStatements=true"
-```
-
-:::
+For more information head over the the [Atlas documentation](https://atlasgo.io/versioned/apply).
 
 ## Moving from Auto-Migration to Versioned Migrations
 
@@ -603,11 +587,17 @@ above (`users,groups`) but your deployed table looks like the one below (`groups
 You can see, that the order differs. In that case, you have to manually change both the entries in the generated
 migration file.
 
-### Configure the tool you use to manage migrations to consider this file as applied
+### Use an Atlas Baseline Migration
 
-In case of `golang-migrate` this can be done by forcing your database version as
-described
-[here](https://github.com/golang-migrate/migrate/blob/master/GETTING_STARTED.md#forcing-your-database-version).
+If you are using Atlas as migration execution engine, you can then simply use the `--baseline` flag. For other tools,
+please take a look at their respective documentation.
+
+```shell
+atlas migrate apply \
+  --dir "file://migrations"
+  --url mysql://root:pass@localhost:3306/ent
+  --baseline "<version>"
+```
 
 ## Atlas migration directory integrity file
 
