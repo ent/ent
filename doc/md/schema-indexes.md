@@ -258,6 +258,9 @@ CREATE FULLTEXT INDEX `users_c5` ON `users` (`c5`)
 
 -- PostgreSQL only.
 CREATE INDEX `users_c5` ON `users` USING GIN (`c5`)
+
+-- include index-only scan on PostgreSQL.
+CREATE INDEX `users_workplace` ON `users` USING (`workplace`) INCLUDE (address)
 ```
 
 
