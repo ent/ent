@@ -112,6 +112,46 @@ func (r *queryResolver) Todos(ctx context.Context, after *ent.Cursor, first *int
 }
 ```
 
+:::info Relay Connection Configuration
+
+The `entgql.RelayConnection()` function indicates that the node or edge should support pagination.
+Hence,the returned result is a Relay connection rather than a list of nodes (`[T!]!` => `<T>Connection!`).
+
+Setting this annotation on schema `T` (reside in ent/schema), enables pagination for this node and therefore, Ent will
+generate all Relay types for this schema, such as: `<T>Edge`, `<T>Connection`, and `PageInfo`. For example:
+
+```go
+func (Todo) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entgql.RelayConnection(),
+		entgql.QueryField(),
+	}
+}
+```
+
+Setting this annotation on an edge indicates that the GraphQL field for this edge should support nested pagination
+and the returned type is a Relay connection. For example:
+
+```go
+func (Todo) Edges() []ent.Edge {
+	return []ent.Edge{
+			edge.To("parent", Todo.Type).
+				Unique().
+				From("children").
+				Annotation(entgql.RelayConnection()),
+	}
+}
+```
+
+The generated GraphQL schema will be:
+
+```diff
+-children: [Todo!]!
++children(first: Int, last: Int, after: Cursor, before: Cursor): TodoConnection!
+```
+
+:::
+
 ## Pagination Usage
 
 Now, we're ready to test our new GraphQL resolvers. Let's start with creating a few todo items by running this
