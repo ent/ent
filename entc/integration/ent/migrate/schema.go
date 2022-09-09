@@ -62,6 +62,7 @@ var (
 		{Name: "nillable_int", Type: field.TypeInt, Nullable: true},
 		{Name: "table", Type: field.TypeString, Nullable: true},
 		{Name: "dir", Type: field.TypeJSON, Nullable: true},
+		{Name: "client", Type: field.TypeString, Nullable: true},
 	}
 	// CommentsTable holds the schema information for the "comments" table.
 	CommentsTable = &schema.Table{
