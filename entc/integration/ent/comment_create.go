@@ -80,6 +80,20 @@ func (cc *CommentCreate) SetNillableDir(s *schemadir.Dir) *CommentCreate {
 	return cc
 }
 
+// SetClient sets the "client" field.
+func (cc *CommentCreate) SetClient(s string) *CommentCreate {
+	cc.mutation.SetClient(s)
+	return cc
+}
+
+// SetNillableClient sets the "client" field if the given value is not nil.
+func (cc *CommentCreate) SetNillableClient(s *string) *CommentCreate {
+	if s != nil {
+		cc.SetClient(*s)
+	}
+	return cc
+}
+
 // Mutation returns the CommentMutation object of the builder.
 func (cc *CommentCreate) Mutation() *CommentMutation {
 	return cc.mutation
@@ -230,6 +244,14 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 		})
 		_node.Dir = value
 	}
+	if value, ok := cc.mutation.GetClient(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: comment.FieldClient,
+		})
+		_node.Client = value
+	}
 	return _node, _spec
 }
 
@@ -375,6 +397,24 @@ func (u *CommentUpsert) UpdateDir() *CommentUpsert {
 // ClearDir clears the value of the "dir" field.
 func (u *CommentUpsert) ClearDir() *CommentUpsert {
 	u.SetNull(comment.FieldDir)
+	return u
+}
+
+// SetClient sets the "client" field.
+func (u *CommentUpsert) SetClient(v string) *CommentUpsert {
+	u.Set(comment.FieldClient, v)
+	return u
+}
+
+// UpdateClient sets the "client" field to the value that was provided on create.
+func (u *CommentUpsert) UpdateClient() *CommentUpsert {
+	u.SetExcluded(comment.FieldClient)
+	return u
+}
+
+// ClearClient clears the value of the "client" field.
+func (u *CommentUpsert) ClearClient() *CommentUpsert {
+	u.SetNull(comment.FieldClient)
 	return u
 }
 
@@ -527,6 +567,27 @@ func (u *CommentUpsertOne) UpdateDir() *CommentUpsertOne {
 func (u *CommentUpsertOne) ClearDir() *CommentUpsertOne {
 	return u.Update(func(s *CommentUpsert) {
 		s.ClearDir()
+	})
+}
+
+// SetClient sets the "client" field.
+func (u *CommentUpsertOne) SetClient(v string) *CommentUpsertOne {
+	return u.Update(func(s *CommentUpsert) {
+		s.SetClient(v)
+	})
+}
+
+// UpdateClient sets the "client" field to the value that was provided on create.
+func (u *CommentUpsertOne) UpdateClient() *CommentUpsertOne {
+	return u.Update(func(s *CommentUpsert) {
+		s.UpdateClient()
+	})
+}
+
+// ClearClient clears the value of the "client" field.
+func (u *CommentUpsertOne) ClearClient() *CommentUpsertOne {
+	return u.Update(func(s *CommentUpsert) {
+		s.ClearClient()
 	})
 }
 
@@ -838,6 +899,27 @@ func (u *CommentUpsertBulk) UpdateDir() *CommentUpsertBulk {
 func (u *CommentUpsertBulk) ClearDir() *CommentUpsertBulk {
 	return u.Update(func(s *CommentUpsert) {
 		s.ClearDir()
+	})
+}
+
+// SetClient sets the "client" field.
+func (u *CommentUpsertBulk) SetClient(v string) *CommentUpsertBulk {
+	return u.Update(func(s *CommentUpsert) {
+		s.SetClient(v)
+	})
+}
+
+// UpdateClient sets the "client" field to the value that was provided on create.
+func (u *CommentUpsertBulk) UpdateClient() *CommentUpsertBulk {
+	return u.Update(func(s *CommentUpsert) {
+		s.UpdateClient()
+	})
+}
+
+// ClearClient clears the value of the "client" field.
+func (u *CommentUpsertBulk) ClearClient() *CommentUpsertBulk {
+	return u.Update(func(s *CommentUpsert) {
+		s.ClearClient()
 	})
 }
 

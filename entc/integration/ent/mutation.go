@@ -817,6 +817,7 @@ type CommentMutation struct {
 	addnillable_int *int
 	table           *string
 	dir             *schemadir.Dir
+	client          *string
 	clearedFields   map[string]struct{}
 	done            bool
 	oldValue        func(context.Context) (*Comment, error)
@@ -1201,6 +1202,55 @@ func (m *CommentMutation) ResetDir() {
 	delete(m.clearedFields, comment.FieldDir)
 }
 
+// SetClient sets the "client" field.
+func (m *CommentMutation) SetClient(s string) {
+	m.client = &s
+}
+
+// GetClient returns the value of the "client" field in the mutation.
+func (m *CommentMutation) GetClient() (r string, exists bool) {
+	v := m.client
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldClient returns the old "client" field's value of the Comment entity.
+// If the Comment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CommentMutation) OldClient(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldClient is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldClient requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldClient: %w", err)
+	}
+	return oldValue.Client, nil
+}
+
+// ClearClient clears the value of the "client" field.
+func (m *CommentMutation) ClearClient() {
+	m.client = nil
+	m.clearedFields[comment.FieldClient] = struct{}{}
+}
+
+// ClientCleared returns if the "client" field was cleared in this mutation.
+func (m *CommentMutation) ClientCleared() bool {
+	_, ok := m.clearedFields[comment.FieldClient]
+	return ok
+}
+
+// ResetClient resets all changes to the "client" field.
+func (m *CommentMutation) ResetClient() {
+	m.client = nil
+	delete(m.clearedFields, comment.FieldClient)
+}
+
 // Where appends a list predicates to the CommentMutation builder.
 func (m *CommentMutation) Where(ps ...predicate.Comment) {
 	m.predicates = append(m.predicates, ps...)
@@ -1220,7 +1270,7 @@ func (m *CommentMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CommentMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.unique_int != nil {
 		fields = append(fields, comment.FieldUniqueInt)
 	}
@@ -1235,6 +1285,9 @@ func (m *CommentMutation) Fields() []string {
 	}
 	if m.dir != nil {
 		fields = append(fields, comment.FieldDir)
+	}
+	if m.client != nil {
+		fields = append(fields, comment.FieldClient)
 	}
 	return fields
 }
@@ -1254,6 +1307,8 @@ func (m *CommentMutation) Field(name string) (ent.Value, bool) {
 		return m.Table()
 	case comment.FieldDir:
 		return m.Dir()
+	case comment.FieldClient:
+		return m.GetClient()
 	}
 	return nil, false
 }
@@ -1273,6 +1328,8 @@ func (m *CommentMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldTable(ctx)
 	case comment.FieldDir:
 		return m.OldDir(ctx)
+	case comment.FieldClient:
+		return m.OldClient(ctx)
 	}
 	return nil, fmt.Errorf("unknown Comment field %s", name)
 }
@@ -1316,6 +1373,13 @@ func (m *CommentMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDir(v)
+		return nil
+	case comment.FieldClient:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetClient(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Comment field %s", name)
@@ -1395,6 +1459,9 @@ func (m *CommentMutation) ClearedFields() []string {
 	if m.FieldCleared(comment.FieldDir) {
 		fields = append(fields, comment.FieldDir)
 	}
+	if m.FieldCleared(comment.FieldClient) {
+		fields = append(fields, comment.FieldClient)
+	}
 	return fields
 }
 
@@ -1418,6 +1485,9 @@ func (m *CommentMutation) ClearField(name string) error {
 	case comment.FieldDir:
 		m.ClearDir()
 		return nil
+	case comment.FieldClient:
+		m.ClearClient()
+		return nil
 	}
 	return fmt.Errorf("unknown Comment nullable field %s", name)
 }
@@ -1440,6 +1510,9 @@ func (m *CommentMutation) ResetField(name string) error {
 		return nil
 	case comment.FieldDir:
 		m.ResetDir()
+		return nil
+	case comment.FieldClient:
+		m.ResetClient()
 		return nil
 	}
 	return fmt.Errorf("unknown Comment field %s", name)

@@ -127,6 +127,26 @@ func (cu *CommentUpdate) ClearDir() *CommentUpdate {
 	return cu
 }
 
+// SetClient sets the "client" field.
+func (cu *CommentUpdate) SetClient(s string) *CommentUpdate {
+	cu.mutation.SetClient(s)
+	return cu
+}
+
+// SetNillableClient sets the "client" field if the given value is not nil.
+func (cu *CommentUpdate) SetNillableClient(s *string) *CommentUpdate {
+	if s != nil {
+		cu.SetClient(*s)
+	}
+	return cu
+}
+
+// ClearClient clears the value of the "client" field.
+func (cu *CommentUpdate) ClearClient() *CommentUpdate {
+	cu.mutation.ClearClient()
+	return cu
+}
+
 // Mutation returns the CommentMutation object of the builder.
 func (cu *CommentUpdate) Mutation() *CommentMutation {
 	return cu.mutation
@@ -256,6 +276,9 @@ func (cu *CommentUpdate) gremlin() *dsl.Traversal {
 	if value, ok := cu.mutation.Dir(); ok {
 		v.Property(dsl.Single, comment.FieldDir, value)
 	}
+	if value, ok := cu.mutation.GetClient(); ok {
+		v.Property(dsl.Single, comment.FieldClient, value)
+	}
 	var properties []any
 	if cu.mutation.NillableIntCleared() {
 		properties = append(properties, comment.FieldNillableInt)
@@ -265,6 +288,9 @@ func (cu *CommentUpdate) gremlin() *dsl.Traversal {
 	}
 	if cu.mutation.DirCleared() {
 		properties = append(properties, comment.FieldDir)
+	}
+	if cu.mutation.ClientCleared() {
+		properties = append(properties, comment.FieldClient)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -382,6 +408,26 @@ func (cuo *CommentUpdateOne) SetNillableDir(s *schemadir.Dir) *CommentUpdateOne 
 // ClearDir clears the value of the "dir" field.
 func (cuo *CommentUpdateOne) ClearDir() *CommentUpdateOne {
 	cuo.mutation.ClearDir()
+	return cuo
+}
+
+// SetClient sets the "client" field.
+func (cuo *CommentUpdateOne) SetClient(s string) *CommentUpdateOne {
+	cuo.mutation.SetClient(s)
+	return cuo
+}
+
+// SetNillableClient sets the "client" field if the given value is not nil.
+func (cuo *CommentUpdateOne) SetNillableClient(s *string) *CommentUpdateOne {
+	if s != nil {
+		cuo.SetClient(*s)
+	}
+	return cuo
+}
+
+// ClearClient clears the value of the "client" field.
+func (cuo *CommentUpdateOne) ClearClient() *CommentUpdateOne {
+	cuo.mutation.ClearClient()
 	return cuo
 }
 
@@ -532,6 +578,9 @@ func (cuo *CommentUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := cuo.mutation.Dir(); ok {
 		v.Property(dsl.Single, comment.FieldDir, value)
 	}
+	if value, ok := cuo.mutation.GetClient(); ok {
+		v.Property(dsl.Single, comment.FieldClient, value)
+	}
 	var properties []any
 	if cuo.mutation.NillableIntCleared() {
 		properties = append(properties, comment.FieldNillableInt)
@@ -541,6 +590,9 @@ func (cuo *CommentUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if cuo.mutation.DirCleared() {
 		properties = append(properties, comment.FieldDir)
+	}
+	if cuo.mutation.ClientCleared() {
+		properties = append(properties, comment.FieldClient)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())

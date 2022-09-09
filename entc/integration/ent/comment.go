@@ -31,6 +31,8 @@ type Comment struct {
 	Table string `json:"table,omitempty"`
 	// Dir holds the value of the "dir" field.
 	Dir schemadir.Dir `json:"dir,omitempty"`
+	// Client holds the value of the "client" field.
+	Client string `json:"client,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -44,7 +46,7 @@ func (*Comment) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullFloat64)
 		case comment.FieldID, comment.FieldUniqueInt, comment.FieldNillableInt:
 			values[i] = new(sql.NullInt64)
-		case comment.FieldTable:
+		case comment.FieldTable, comment.FieldClient:
 			values[i] = new(sql.NullString)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Comment", columns[i])
@@ -100,6 +102,12 @@ func (c *Comment) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field dir: %w", err)
 				}
 			}
+		case comment.FieldClient:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field client", values[i])
+			} else if value.Valid {
+				c.Client = value.String
+			}
 		}
 	}
 	return nil
@@ -144,6 +152,9 @@ func (c *Comment) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("dir=")
 	builder.WriteString(fmt.Sprintf("%v", c.Dir))
+	builder.WriteString(", ")
+	builder.WriteString("client=")
+	builder.WriteString(c.Client)
 	builder.WriteByte(')')
 	return builder.String()
 }

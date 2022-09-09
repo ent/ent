@@ -67,6 +67,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			comment.FieldNillableInt: {Type: field.TypeInt, Column: comment.FieldNillableInt},
 			comment.FieldTable:       {Type: field.TypeString, Column: comment.FieldTable},
 			comment.FieldDir:         {Type: field.TypeJSON, Column: comment.FieldDir},
+			comment.FieldClient:      {Type: field.TypeString, Column: comment.FieldClient},
 		},
 	}
 	graph.Nodes[2] = &sqlgraph.Node{
@@ -829,6 +830,11 @@ func (f *CommentFilter) WhereTable(p entql.StringP) {
 // WhereDir applies the entql json.RawMessage predicate on the dir field.
 func (f *CommentFilter) WhereDir(p entql.BytesP) {
 	f.Where(p.Field(comment.FieldDir))
+}
+
+// WhereClient applies the entql string predicate on the client field.
+func (f *CommentFilter) WhereClient(p entql.StringP) {
+	f.Where(p.Field(comment.FieldClient))
 }
 
 // addPredicate implements the predicateAdder interface.

@@ -126,6 +126,26 @@ func (cu *CommentUpdate) ClearDir() *CommentUpdate {
 	return cu
 }
 
+// SetClient sets the "client" field.
+func (cu *CommentUpdate) SetClient(s string) *CommentUpdate {
+	cu.mutation.SetClient(s)
+	return cu
+}
+
+// SetNillableClient sets the "client" field if the given value is not nil.
+func (cu *CommentUpdate) SetNillableClient(s *string) *CommentUpdate {
+	if s != nil {
+		cu.SetClient(*s)
+	}
+	return cu
+}
+
+// ClearClient clears the value of the "client" field.
+func (cu *CommentUpdate) ClearClient() *CommentUpdate {
+	cu.mutation.ClearClient()
+	return cu
+}
+
 // Mutation returns the CommentMutation object of the builder.
 func (cu *CommentUpdate) Mutation() *CommentMutation {
 	return cu.mutation
@@ -283,6 +303,19 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: comment.FieldDir,
 		})
 	}
+	if value, ok := cu.mutation.GetClient(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: comment.FieldClient,
+		})
+	}
+	if cu.mutation.ClientCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: comment.FieldClient,
+		})
+	}
 	_spec.Modifiers = cu.modifiers
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -394,6 +427,26 @@ func (cuo *CommentUpdateOne) SetNillableDir(s *schemadir.Dir) *CommentUpdateOne 
 // ClearDir clears the value of the "dir" field.
 func (cuo *CommentUpdateOne) ClearDir() *CommentUpdateOne {
 	cuo.mutation.ClearDir()
+	return cuo
+}
+
+// SetClient sets the "client" field.
+func (cuo *CommentUpdateOne) SetClient(s string) *CommentUpdateOne {
+	cuo.mutation.SetClient(s)
+	return cuo
+}
+
+// SetNillableClient sets the "client" field if the given value is not nil.
+func (cuo *CommentUpdateOne) SetNillableClient(s *string) *CommentUpdateOne {
+	if s != nil {
+		cuo.SetClient(*s)
+	}
+	return cuo
+}
+
+// ClearClient clears the value of the "client" field.
+func (cuo *CommentUpdateOne) ClearClient() *CommentUpdateOne {
+	cuo.mutation.ClearClient()
 	return cuo
 }
 
@@ -582,6 +635,19 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Column: comment.FieldDir,
+		})
+	}
+	if value, ok := cuo.mutation.GetClient(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: comment.FieldClient,
+		})
+	}
+	if cuo.mutation.ClientCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: comment.FieldClient,
 		})
 	}
 	_spec.Modifiers = cuo.modifiers
