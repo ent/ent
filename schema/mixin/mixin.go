@@ -39,7 +39,7 @@ func (Schema) Policy() ent.Policy { return nil }
 // Annotations of the mixin.
 func (Schema) Annotations() []schema.Annotation { return nil }
 
-// time mixin must implement `Mixin` interface.
+// schema mixin must implement `Mixin` interface.
 var _ ent.Mixin = (*Schema)(nil)
 
 // CreateTime adds created at time field.
@@ -69,7 +69,7 @@ func (UpdateTime) Fields() []ent.Field {
 	}
 }
 
-// create time mixin must implement `Mixin` interface.
+// update time mixin must implement `Mixin` interface.
 var _ ent.Mixin = (*UpdateTime)(nil)
 
 // Time composes create/update time mixin.
