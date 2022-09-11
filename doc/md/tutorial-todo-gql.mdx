@@ -99,7 +99,7 @@ file.
 contents. In next steps, `gqlgen` commands will be added to this file as well.
 
 ```go title="generate.go"
-package ent
+package todo
 
 //go:generate go run -mod=mod ./ent/entc.go
 ```
@@ -215,7 +215,7 @@ func main() {
 4\. Add the `gqlgen` generate command to the `generate.go` file:
 
 ```go title="generate.go"
-package ent
+package todo
 
 //go:generate go run -mod=mod ./ent/entc.go
 //highlight-next-line
