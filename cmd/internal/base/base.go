@@ -64,7 +64,11 @@ func (IDType) String() string {
 
 // InitCmd returns the init command for ent/c packages.
 func InitCmd() *cobra.Command {
-	var target, tmplPath string
+	var (
+		cfg              gen.Config
+		target, tmplPath string
+		features         []string
+	)
 	cmd := &cobra.Command{
 		Use:   "init [flags] [schemas]",
 		Short: "initialize an environment with zero or more schemas",
@@ -86,6 +90,9 @@ func InitCmd() *cobra.Command {
 				err  error
 				tmpl *template.Template
 			)
+			opts := []entc.Option{
+				entc.FeatureNames(features...),
+			}
 			if tmplPath != "" {
 				tmpl, err = template.ParseFiles(tmplPath)
 			} else {
@@ -94,13 +101,14 @@ func InitCmd() *cobra.Command {
 			if err != nil {
 				log.Fatalln(fmt.Errorf("ent/init: could not parse template %w", err))
 			}
-			if err := initEnv(target, names, tmpl); err != nil {
+			if err := initEnv(target, &cfg, names, tmpl, opts...); err != nil {
 				log.Fatalln(fmt.Errorf("ent/init: %w", err))
 			}
 		},
 	}
 	cmd.Flags().StringVar(&target, "target", defaultSchema, "target directory for schemas")
 	cmd.Flags().StringVar(&tmplPath, "template", "", "template to use for new schemas")
+	cmd.Flags().StringSliceVarP(&features, "feature", "", nil, "extend codegen with additional features")
 	return cmd
 }
 
@@ -190,8 +198,13 @@ func GenerateCmd(postRun ...func(*gen.Config)) *cobra.Command {
 }
 
 // initEnv initialize an environment for ent codegen.
-func initEnv(target string, names []string, tmpl *template.Template) error {
-	if err := createDir(target); err != nil {
+func initEnv(target string, cfg *gen.Config, names []string, tmpl *template.Template, opts ...entc.Option) error {
+	for _, opt := range opts {
+		if err := opt(cfg); err != nil {
+			return err
+		}
+	}
+	if err := createDir(target, cfg); err != nil {
 		return fmt.Errorf("create dir %s: %w", target, err)
 	}
 	for _, name := range names {
@@ -213,7 +226,7 @@ func initEnv(target string, names []string, tmpl *template.Template) error {
 	return nil
 }
 
-func createDir(target string) error {
+func createDir(target string, cfg *gen.Config) error {
 	_, err := os.Stat(target)
 	if err == nil || !os.IsNotExist(err) {
 		return err
@@ -224,7 +237,13 @@ func createDir(target string) error {
 	if target != defaultSchema {
 		return nil
 	}
-	if err := os.WriteFile("ent/generate.go", []byte(genFile), 0644); err != nil {
+	var featureStr string
+	for _, feature := range cfg.Features {
+		featureStr += featureFlag + feature.Name + " "
+	}
+
+	generateString := fmt.Sprintf(genFile, featureStr)
+	if err := os.WriteFile("ent/generate.go", []byte(generateString), 0644); err != nil {
 		return fmt.Errorf("creating generate.go file: %w", err)
 	}
 	return nil
@@ -239,8 +258,10 @@ func fileExists(target, name string) bool {
 const (
 	// default schema package path.
 	defaultSchema = "ent/schema"
+	// feature flag
+	featureFlag = "feature"
 	// ent/generate.go file used for "go generate" command.
-	genFile = "package ent\n\n//go:generate go run -mod=mod entgo.io/ent/cmd/ent generate ./schema\n"
+	genFile = "package ent\n\n//go:generate go run -mod=mod entgo.io/ent/cmd/ent generate %s ./schema\n"
 	// schema template for the "init" command.
 	defaultTemplate = `package schema
 
