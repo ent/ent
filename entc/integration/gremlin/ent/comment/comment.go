@@ -21,6 +21,8 @@ const (
 	FieldTable = "table"
 	// FieldDir holds the string denoting the dir field in the database.
 	FieldDir = "dir"
+	// FieldClient holds the string denoting the client field in the database.
+	FieldClient = "client"
 )
 
 // comment from another template.

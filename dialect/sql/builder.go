@@ -1033,6 +1033,7 @@ type UpdateBuilder struct {
 	columns []string
 	values  []any
 	order   []any
+	prefix  Queries
 }
 
 // Update creates a builder for the `UPDATE` statement.
@@ -1118,9 +1119,19 @@ func (u *UpdateBuilder) OrderBy(columns ...string) *UpdateBuilder {
 	return u
 }
 
+// Prefix prefixes the UPDATE statement with list of statements.
+func (u *UpdateBuilder) Prefix(stmts ...Querier) *UpdateBuilder {
+	u.prefix = append(u.prefix, stmts...)
+	return u
+}
+
 // Query returns query representation of an `UPDATE` statement.
 func (u *UpdateBuilder) Query() (string, []any) {
 	b := u.Builder.clone()
+	if len(u.prefix) > 0 {
+		b.join(u.prefix, " ")
+		b.Pad()
+	}
 	b.WriteString("UPDATE ")
 	b.writeSchema(u.schema)
 	b.Ident(u.table).WriteString(" SET ")
@@ -3333,7 +3344,7 @@ func (b *Builder) JoinComma(qs ...Querier) *Builder {
 	return b.join(qs, ", ")
 }
 
-// join joins a list of Queries to the builder with a given separator.
+// join a list of Queries to the builder with a given separator.
 func (b *Builder) join(qs []Querier, sep string) *Builder {
 	for i, q := range qs {
 		if i > 0 {

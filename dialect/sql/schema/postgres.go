@@ -785,6 +785,17 @@ func (d *Postgres) atIndex(idx1 *Index, t2 *schema.Table, idx2 *schema.Index) er
 	if t, ok := indexType(idx1, dialect.Postgres); ok {
 		idx2.AddAttrs(&postgres.IndexType{T: t})
 	}
+	if ant, supportsInclude := idx1.Annotation, compareVersions(d.version, "11.0.0") >= 0; ant != nil && len(ant.IncludeColumns) > 0 && supportsInclude {
+		columns := make([]*schema.Column, len(ant.IncludeColumns))
+		for i, ic := range ant.IncludeColumns {
+			c, ok := t2.Column(ic)
+			if !ok {
+				return fmt.Errorf("include column %q was not found for index %q", ic, idx1.Name)
+			}
+			columns[i] = c
+		}
+		idx2.AddAttrs(&postgres.IndexInclude{Columns: columns})
+	}
 	return nil
 }
 

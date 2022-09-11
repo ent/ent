@@ -493,11 +493,14 @@ func (rq *RentalQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (rq *RentalQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := rq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := rq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (rq *RentalQuery) querySpec() *sqlgraph.QuerySpec {

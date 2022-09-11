@@ -21,6 +21,8 @@ const (
 	FieldTable = "table"
 	// FieldDir holds the string denoting the dir field in the database.
 	FieldDir = "dir"
+	// FieldClient holds the string denoting the client field in the database.
+	FieldClient = "client"
 	// Table holds the table name of the comment in the database.
 	Table = "comments"
 )
@@ -33,6 +35,7 @@ var Columns = []string{
 	FieldNillableInt,
 	FieldTable,
 	FieldDir,
+	FieldClient,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

@@ -1,9 +1,9 @@
 module entgo.io/ent
 
-go 1.18
+go 1.19
 
 require (
-	ariga.io/atlas v0.6.2-0.20220819114704-2060066abac7
+	ariga.io/atlas v0.6.5-0.20220907173155-3332f3c1b8c9
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/go-openapi/inflect v0.19.0
 	github.com/go-sql-driver/mysql v1.6.0
@@ -11,7 +11,7 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/json-iterator/go v1.1.12
-	github.com/lib/pq v1.10.6
+	github.com/lib/pq v1.10.7
 	github.com/mattn/go-sqlite3 v1.14.15
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/modern-go/reflect2 v1.0.2

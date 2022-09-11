@@ -148,6 +148,11 @@ func (User) Indexes() []ent.Index {
 					dialect.MySQL: "FULLTEXT",
 				}),
 			),
+		// For PostgreSQL, we can include in the index non-key columns.
+		index.Fields("workplace").
+			Annotations(
+				entsql.IncludeColumns("nickname"),
+			),
 	}
 }
 

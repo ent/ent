@@ -214,7 +214,7 @@ CREATE INDEX `users_c1_c2_c3` ON `users`(`c1`(100), `c2`(200), `c3`)
 
 ## Atlas Support
 
-Starting with v0.10, Ent supports running migration with [Atlas](migrate.md#atlas-integration). This option provides
+Starting with v0.10, Ent running migration with [Atlas](https://github.com/ariga/atlas). This option provides
 more control on indexes such as, configuring their types or define indexes in a reverse order.
 ```go
 func (User) Indexes() []ent.Index {
@@ -234,6 +234,12 @@ func (User) Indexes() []ent.Index {
                     dialect.Postgres: "GIN",
                 }),
             ),
+		// For PostgreSQL, we can include in the index
+		// non-key columns.
+		index.Fields("workplace").
+			Annotations(
+				entsql.IncludeColumns("address"),
+			),
     }
 }
 ```
@@ -252,6 +258,9 @@ CREATE FULLTEXT INDEX `users_c5` ON `users` (`c5`)
 
 -- PostgreSQL only.
 CREATE INDEX `users_c5` ON `users` USING GIN (`c5`)
+
+-- include index-only scan on PostgreSQL.
+CREATE INDEX `users_workplace` ON `users` USING (`workplace`) INCLUDE (address)
 ```
 
 

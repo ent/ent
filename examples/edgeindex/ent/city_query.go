@@ -430,11 +430,14 @@ func (cq *CityQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (cq *CityQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := cq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := cq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (cq *CityQuery) querySpec() *sqlgraph.QuerySpec {

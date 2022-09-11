@@ -358,11 +358,14 @@ func (lq *LicenseQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (lq *LicenseQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := lq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := lq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (lq *LicenseQuery) querySpec() *sqlgraph.QuerySpec {

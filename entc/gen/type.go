@@ -1033,11 +1033,11 @@ func (f Field) EntSQL() *entsql.Annotation {
 }
 
 // mutMethods returns the method names of mutation interface.
-var mutMethods = func() map[string]struct{} {
+var mutMethods = func() map[string]bool {
+	names := map[string]bool{"Client": true, "Tx": true, "Where": true}
 	t := reflect.TypeOf(new(ent.Mutation)).Elem()
-	names := make(map[string]struct{})
 	for i := 0; i < t.NumMethod(); i++ {
-		names[t.Method(i).Name] = struct{}{}
+		names[t.Method(i).Name] = true
 	}
 	return names
 }()
@@ -1047,7 +1047,7 @@ var mutMethods = func() map[string]struct{} {
 // with the mutation methods, prefix the method with "Get".
 func (f Field) MutationGet() string {
 	name := pascal(f.Name)
-	if _, ok := mutMethods[name]; ok {
+	if mutMethods[name] {
 		name = "Get" + name
 	}
 	return name
@@ -1056,7 +1056,7 @@ func (f Field) MutationGet() string {
 // MutationGetOld returns the method name for getting the old value of a field.
 func (f Field) MutationGetOld() string {
 	name := "Old" + pascal(f.Name)
-	if _, ok := mutMethods[name]; ok {
+	if mutMethods[name] {
 		name = "Get" + name
 	}
 	return name
@@ -1067,7 +1067,7 @@ func (f Field) MutationGetOld() string {
 // with the mutation methods, suffix the method with "Field".
 func (f Field) MutationReset() string {
 	name := "Reset" + pascal(f.Name)
-	if _, ok := mutMethods[name]; ok {
+	if mutMethods[name] {
 		name += "Field"
 	}
 	return name
@@ -1078,7 +1078,7 @@ func (f Field) MutationReset() string {
 // with the mutation methods, suffix the method with "Field".
 func (f Field) MutationSet() string {
 	name := "Set" + f.StructField()
-	if _, ok := mutMethods[name]; ok {
+	if mutMethods[name] {
 		name += "Field"
 	}
 	return name

@@ -610,11 +610,14 @@ func (dq *DocQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (dq *DocQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := dq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := dq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (dq *DocQuery) querySpec() *sqlgraph.QuerySpec {

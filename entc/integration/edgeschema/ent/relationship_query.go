@@ -488,11 +488,14 @@ func (rq *RelationshipQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (rq *RelationshipQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := rq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := rq.First(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (rq *RelationshipQuery) querySpec() *sqlgraph.QuerySpec {

@@ -105,6 +105,13 @@ func NillableInt(v int) predicate.Comment {
 	})
 }
 
+// Client applies equality check predicate on the "client" field. It's identical to ClientEQ.
+func Client(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldClient, p.EQ(v))
+	})
+}
+
 // UniqueIntEQ applies the EQ predicate on the "unique_int" field.
 func UniqueIntEQ(v int) predicate.Comment {
 	return predicate.Comment(func(t *dsl.Traversal) {
@@ -421,6 +428,105 @@ func DirIsNil() predicate.Comment {
 func DirNotNil() predicate.Comment {
 	return predicate.Comment(func(t *dsl.Traversal) {
 		t.HasLabel(Label).Has(FieldDir)
+	})
+}
+
+// ClientEQ applies the EQ predicate on the "client" field.
+func ClientEQ(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldClient, p.EQ(v))
+	})
+}
+
+// ClientNEQ applies the NEQ predicate on the "client" field.
+func ClientNEQ(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldClient, p.NEQ(v))
+	})
+}
+
+// ClientIn applies the In predicate on the "client" field.
+func ClientIn(vs ...string) predicate.Comment {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldClient, p.Within(v...))
+	})
+}
+
+// ClientNotIn applies the NotIn predicate on the "client" field.
+func ClientNotIn(vs ...string) predicate.Comment {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldClient, p.Without(v...))
+	})
+}
+
+// ClientGT applies the GT predicate on the "client" field.
+func ClientGT(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldClient, p.GT(v))
+	})
+}
+
+// ClientGTE applies the GTE predicate on the "client" field.
+func ClientGTE(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldClient, p.GTE(v))
+	})
+}
+
+// ClientLT applies the LT predicate on the "client" field.
+func ClientLT(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldClient, p.LT(v))
+	})
+}
+
+// ClientLTE applies the LTE predicate on the "client" field.
+func ClientLTE(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldClient, p.LTE(v))
+	})
+}
+
+// ClientContains applies the Contains predicate on the "client" field.
+func ClientContains(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldClient, p.Containing(v))
+	})
+}
+
+// ClientHasPrefix applies the HasPrefix predicate on the "client" field.
+func ClientHasPrefix(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldClient, p.StartingWith(v))
+	})
+}
+
+// ClientHasSuffix applies the HasSuffix predicate on the "client" field.
+func ClientHasSuffix(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldClient, p.EndingWith(v))
+	})
+}
+
+// ClientIsNil applies the IsNil predicate on the "client" field.
+func ClientIsNil() predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldClient)
+	})
+}
+
+// ClientNotNil applies the NotNil predicate on the "client" field.
+func ClientNotNil() predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldClient)
 	})
 }
 
