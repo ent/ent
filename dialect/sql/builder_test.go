@@ -2193,3 +2193,42 @@ func TestUpdateBuilder_WithPrefix(t *testing.T) {
 	require.Empty(t, args)
 	require.Equal(t, "SET @i = 1; UPDATE `users` SET `id` = (@i:=@i+1) ORDER BY `id`", query)
 }
+
+func TestMultipleFrom(t *testing.T) {
+	query, args := Dialect(dialect.Postgres).
+		Select("items.*", As("ts_rank_cd(search, search_query)", "rank")).
+		From(Table("items")).
+		AppendFrom(Table("to_tsquery('neutrino|(dark & matter)')").As("search_query")).
+		Where(P(func(b *Builder) {
+			b.WriteString("search @@ search_query")
+		})).
+		OrderBy(Desc("rank")).
+		Query()
+	require.Empty(t, args)
+	require.Equal(t, `SELECT items.*, ts_rank_cd(search, search_query) AS "rank" FROM "items", to_tsquery('neutrino|(dark & matter)') AS "search_query" WHERE search @@ search_query ORDER BY "rank" DESC`, query)
+
+	query, args = Dialect(dialect.Postgres).
+		Select("items.*", As("ts_rank_cd(search, search_query)", "rank")).
+		From(Table("items")).
+		AppendFromExpr(Expr("to_tsquery($1) AS search_query", "neutrino|(dark & matter)")).
+		Where(P(func(b *Builder) {
+			b.WriteString("search @@ search_query")
+		})).
+		Query()
+	require.Equal(t, []any{"neutrino|(dark & matter)"}, args)
+	require.Equal(t, `SELECT items.*, ts_rank_cd(search, search_query) AS "rank" FROM "items", to_tsquery($1) AS search_query WHERE search @@ search_query`, query)
+
+	query, args = Dialect(dialect.Postgres).
+		Select("items.*", As("ts_rank_cd(search, search_query)", "rank")).
+		From(Table("items")).
+		Where(EQ("value", 10)).
+		AppendFromExpr(ExprFunc(func(b *Builder) {
+			b.WriteString("to_tsquery(").Arg("neutrino|(dark & matter)").WriteString(") AS search_query")
+		})).
+		Where(P(func(b *Builder) {
+			b.WriteString("search @@ search_query")
+		})).
+		Query()
+	require.Equal(t, []any{"neutrino|(dark & matter)", 10}, args)
+	require.Equal(t, `SELECT items.*, ts_rank_cd(search, search_query) AS "rank" FROM "items", to_tsquery($1) AS search_query WHERE "value" = $2 AND search @@ search_query`, query)
+}
