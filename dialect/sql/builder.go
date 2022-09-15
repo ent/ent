@@ -1095,8 +1095,8 @@ func (u *UpdateBuilder) Where(p *Predicate) *UpdateBuilder {
 // FromSelect makes it possible to update entities that match the sub-query.
 func (u *UpdateBuilder) FromSelect(s *Selector) *UpdateBuilder {
 	u.Where(s.where)
-	if table, _ := s.from.(*SelectTable); table != nil {
-		u.table = table.name
+	if t := s.Table(); t != nil {
+		u.table = t.name
 	}
 	return u
 }
@@ -1211,8 +1211,8 @@ func (d *DeleteBuilder) Where(p *Predicate) *DeleteBuilder {
 // FromSelect makes it possible to delete a sub query.
 func (d *DeleteBuilder) FromSelect(s *Selector) *DeleteBuilder {
 	d.Where(s.where)
-	if table, _ := s.from.(*SelectTable); table != nil {
-		d.table = table.name
+	if t := s.Table(); t != nil {
+		d.table = t.name
 	}
 	return d
 }
@@ -1994,6 +1994,11 @@ type TableView interface {
 	view()
 }
 
+// queryView allows using Querier (expressions) in the FROM clause.
+type queryView struct{ Querier }
+
+func (*queryView) view() {}
+
 // SelectTable is a table selector.
 type SelectTable struct {
 	Builder
@@ -2096,7 +2101,7 @@ type Selector struct {
 	ctx       context.Context
 	as        string
 	selection []any
-	from      TableView
+	from      []TableView
 	joins     []join
 	where     *Predicate
 	or        bool
@@ -2230,8 +2235,29 @@ func (s *Selector) UnqualifiedColumns() []string {
 
 // From sets the source of `FROM` clause.
 func (s *Selector) From(t TableView) *Selector {
-	s.from = t
+	s.from = nil
+	return s.AppendFrom(t)
+}
+
+// AppendFrom appends a new TableView to the `FROM` clause.
+func (s *Selector) AppendFrom(t TableView) *Selector {
+	s.from = append(s.from, t)
 	if st, ok := t.(state); ok {
+		st.SetDialect(s.dialect)
+	}
+	return s
+}
+
+// FromExpr sets the expression of `FROM` clause.
+func (s *Selector) FromExpr(x Querier) *Selector {
+	s.from = nil
+	return s.AppendFromExpr(x)
+}
+
+// AppendFromExpr appends an expression (Queries) to the `FROM` clause.
+func (s *Selector) AppendFromExpr(x Querier) *Selector {
+	s.from = append(s.from, &queryView{Querier: x})
+	if st, ok := x.(state); ok {
 		st.SetDialect(s.dialect)
 	}
 	return s
@@ -2312,12 +2338,15 @@ func (s *Selector) Or() *Selector {
 
 // Table returns the selected table.
 func (s *Selector) Table() *SelectTable {
-	return s.from.(*SelectTable)
+	if len(s.from) == 0 {
+		return nil
+	}
+	return s.from[0].(*SelectTable)
 }
 
 // TableName returns the name of the selected table or alias of selector.
 func (s *Selector) TableName() string {
-	switch view := s.from.(type) {
+	switch view := s.from[0].(type) {
 	case *SelectTable:
 		return view.name
 	case *Selector:
@@ -2665,23 +2694,30 @@ func (s *Selector) Query() (string, []any) {
 	} else {
 		b.WriteString("*")
 	}
-	switch t := s.from.(type) {
-	case *SelectTable:
+	if len(s.from) > 0 {
 		b.WriteString(" FROM ")
-		t.SetDialect(s.dialect)
-		b.WriteString(t.ref())
-	case *Selector:
-		b.WriteString(" FROM ")
-		t.SetDialect(s.dialect)
-		b.Nested(func(b *Builder) {
-			b.Join(t)
-		})
-		b.WriteString(" AS ")
-		b.Ident(t.as)
-	case *WithBuilder:
-		b.WriteString(" FROM ")
-		t.SetDialect(s.dialect)
-		b.Ident(t.Name())
+	}
+	for i, from := range s.from {
+		if i > 0 {
+			b.Comma()
+		}
+		switch t := from.(type) {
+		case *SelectTable:
+			t.SetDialect(s.dialect)
+			b.WriteString(t.ref())
+		case *Selector:
+			t.SetDialect(s.dialect)
+			b.Nested(func(b *Builder) {
+				b.Join(t)
+			})
+			b.WriteString(" AS ")
+			b.Ident(t.as)
+		case *WithBuilder:
+			t.SetDialect(s.dialect)
+			b.Ident(t.Name())
+		case *queryView:
+			b.Join(t.Querier)
+		}
 	}
 	for _, join := range s.joins {
 		b.WriteString(" " + join.kind + " ")
@@ -3109,7 +3145,7 @@ func (b *Builder) Quote(ident string) string {
 func (b *Builder) Ident(s string) *Builder {
 	switch {
 	case len(s) == 0:
-	case s != "*" && !b.isIdent(s) && !isFunc(s) && !isModifier(s):
+	case !strings.HasSuffix(s, "*") && !b.isIdent(s) && !isFunc(s) && !isModifier(s):
 		if b.qualifier != "" {
 			b.WriteString(b.Quote(b.qualifier)).WriteByte('.')
 		}
