@@ -39,17 +39,20 @@ func Fprint(w io.Writer, g *gen.Graph) {
 //			<Fields Table>
 //
 //			<Edges Table>
-//
 func (p Config) node(t *gen.Type) {
 	var (
 		b      strings.Builder
+		id     []*gen.Field
 		table  = tablewriter.NewWriter(&b)
 		header = []string{"Field", "Type", "Unique", "Optional", "Nillable", "Default", "UpdateDefault", "Immutable", "StructTag", "Validators"}
 	)
 	b.WriteString(t.Name + ":\n")
 	table.SetAutoFormatHeaders(false)
 	table.SetHeader(header)
-	for _, f := range append([]*gen.Field{t.ID}, t.Fields...) {
+	if t.ID != nil {
+		id = append(id, t.ID)
+	}
+	for _, f := range append(id, t.Fields...) {
 		v := reflect.ValueOf(*f)
 		row := make([]string, len(header))
 		for i := range row {
