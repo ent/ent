@@ -32,6 +32,8 @@ type Tx struct {
 	Group *GroupClient
 	// IntSID is the client for interacting with the IntSID builders.
 	IntSID *IntSIDClient
+	// Link is the client for interacting with the Link builders.
+	Link *LinkClient
 	// MixinID is the client for interacting with the MixinID builders.
 	MixinID *MixinIDClient
 	// Note is the client for interacting with the Note builders.
@@ -191,6 +193,7 @@ func (tx *Tx) init() {
 	tx.Doc = NewDocClient(tx.config)
 	tx.Group = NewGroupClient(tx.config)
 	tx.IntSID = NewIntSIDClient(tx.config)
+	tx.Link = NewLinkClient(tx.config)
 	tx.MixinID = NewMixinIDClient(tx.config)
 	tx.Note = NewNoteClient(tx.config)
 	tx.Other = NewOtherClient(tx.config)

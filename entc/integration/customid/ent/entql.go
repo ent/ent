@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/doc"
 	"entgo.io/ent/entc/integration/customid/ent/group"
 	"entgo.io/ent/entc/integration/customid/ent/intsid"
+	"entgo.io/ent/entc/integration/customid/ent/link"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
 	"entgo.io/ent/entc/integration/customid/ent/note"
 	"entgo.io/ent/entc/integration/customid/ent/other"
@@ -33,7 +34,7 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 16)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 17)}
 	graph.Nodes[0] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   account.Table,
@@ -153,6 +154,20 @@ var schemaGraph = func() *sqlgraph.Schema {
 	}
 	graph.Nodes[8] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
+			Table:   link.Table,
+			Columns: link.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeUUID,
+				Column: link.FieldID,
+			},
+		},
+		Type: "Link",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			link.FieldLinkInformation: {Type: field.TypeJSON, Column: link.FieldLinkInformation},
+		},
+	}
+	graph.Nodes[9] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
 			Table:   mixinid.Table,
 			Columns: mixinid.Columns,
 			ID: &sqlgraph.FieldSpec{
@@ -166,7 +181,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			mixinid.FieldMixinField: {Type: field.TypeString, Column: mixinid.FieldMixinField},
 		},
 	}
-	graph.Nodes[9] = &sqlgraph.Node{
+	graph.Nodes[10] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   note.Table,
 			Columns: note.Columns,
@@ -180,7 +195,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			note.FieldText: {Type: field.TypeString, Column: note.FieldText},
 		},
 	}
-	graph.Nodes[10] = &sqlgraph.Node{
+	graph.Nodes[11] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   other.Table,
 			Columns: other.Columns,
@@ -192,7 +207,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Type:   "Other",
 		Fields: map[string]*sqlgraph.FieldSpec{},
 	}
-	graph.Nodes[11] = &sqlgraph.Node{
+	graph.Nodes[12] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   pet.Table,
 			Columns: pet.Columns,
@@ -204,7 +219,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Type:   "Pet",
 		Fields: map[string]*sqlgraph.FieldSpec{},
 	}
-	graph.Nodes[12] = &sqlgraph.Node{
+	graph.Nodes[13] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   revision.Table,
 			Columns: revision.Columns,
@@ -216,7 +231,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Type:   "Revision",
 		Fields: map[string]*sqlgraph.FieldSpec{},
 	}
-	graph.Nodes[13] = &sqlgraph.Node{
+	graph.Nodes[14] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   session.Table,
 			Columns: session.Columns,
@@ -228,7 +243,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Type:   "Session",
 		Fields: map[string]*sqlgraph.FieldSpec{},
 	}
-	graph.Nodes[14] = &sqlgraph.Node{
+	graph.Nodes[15] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   token.Table,
 			Columns: token.Columns,
@@ -242,7 +257,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			token.FieldBody: {Type: field.TypeString, Column: token.FieldBody},
 		},
 	}
-	graph.Nodes[15] = &sqlgraph.Node{
+	graph.Nodes[16] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
@@ -1163,6 +1178,51 @@ func (f *IntSIDFilter) WhereHasChildrenWith(preds ...predicate.IntSID) {
 }
 
 // addPredicate implements the predicateAdder interface.
+func (lq *LinkQuery) addPredicate(pred func(s *sql.Selector)) {
+	lq.predicates = append(lq.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the LinkQuery builder.
+func (lq *LinkQuery) Filter() *LinkFilter {
+	return &LinkFilter{config: lq.config, predicateAdder: lq}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *LinkMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the LinkMutation builder.
+func (m *LinkMutation) Filter() *LinkFilter {
+	return &LinkFilter{config: m.config, predicateAdder: m}
+}
+
+// LinkFilter provides a generic filtering capability at runtime for LinkQuery.
+type LinkFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *LinkFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[8].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql [16]byte predicate on the id field.
+func (f *LinkFilter) WhereID(p entql.ValueP) {
+	f.Where(p.Field(link.FieldID))
+}
+
+// WhereLinkInformation applies the entql json.RawMessage predicate on the link_information field.
+func (f *LinkFilter) WhereLinkInformation(p entql.BytesP) {
+	f.Where(p.Field(link.FieldLinkInformation))
+}
+
+// addPredicate implements the predicateAdder interface.
 func (miq *MixinIDQuery) addPredicate(pred func(s *sql.Selector)) {
 	miq.predicates = append(miq.predicates, pred)
 }
@@ -1191,7 +1251,7 @@ type MixinIDFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *MixinIDFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[8].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[9].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -1241,7 +1301,7 @@ type NoteFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *NoteFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[9].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[10].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -1314,7 +1374,7 @@ type OtherFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *OtherFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[10].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[11].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -1354,7 +1414,7 @@ type PetFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *PetFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[11].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[12].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -1450,7 +1510,7 @@ type RevisionFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *RevisionFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[12].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[13].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -1490,7 +1550,7 @@ type SessionFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *SessionFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[13].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[14].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -1544,7 +1604,7 @@ type TokenFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TokenFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[14].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[15].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -1603,7 +1663,7 @@ type UserFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[15].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[16].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})

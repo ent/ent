@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/migrate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/entc/integration/customid/sid"
+	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
 	"github.com/google/uuid"
 
 	"entgo.io/ent/entc/integration/customid/ent/account"
@@ -25,6 +26,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/doc"
 	"entgo.io/ent/entc/integration/customid/ent/group"
 	"entgo.io/ent/entc/integration/customid/ent/intsid"
+	"entgo.io/ent/entc/integration/customid/ent/link"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
 	"entgo.io/ent/entc/integration/customid/ent/note"
 	"entgo.io/ent/entc/integration/customid/ent/other"
@@ -60,6 +62,8 @@ type Client struct {
 	Group *GroupClient
 	// IntSID is the client for interacting with the IntSID builders.
 	IntSID *IntSIDClient
+	// Link is the client for interacting with the Link builders.
+	Link *LinkClient
 	// MixinID is the client for interacting with the MixinID builders.
 	MixinID *MixinIDClient
 	// Note is the client for interacting with the Note builders.
@@ -97,6 +101,7 @@ func (c *Client) init() {
 	c.Doc = NewDocClient(c.config)
 	c.Group = NewGroupClient(c.config)
 	c.IntSID = NewIntSIDClient(c.config)
+	c.Link = NewLinkClient(c.config)
 	c.MixinID = NewMixinIDClient(c.config)
 	c.Note = NewNoteClient(c.config)
 	c.Other = NewOtherClient(c.config)
@@ -146,6 +151,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Doc:      NewDocClient(cfg),
 		Group:    NewGroupClient(cfg),
 		IntSID:   NewIntSIDClient(cfg),
+		Link:     NewLinkClient(cfg),
 		MixinID:  NewMixinIDClient(cfg),
 		Note:     NewNoteClient(cfg),
 		Other:    NewOtherClient(cfg),
@@ -181,6 +187,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Doc:      NewDocClient(cfg),
 		Group:    NewGroupClient(cfg),
 		IntSID:   NewIntSIDClient(cfg),
+		Link:     NewLinkClient(cfg),
 		MixinID:  NewMixinIDClient(cfg),
 		Note:     NewNoteClient(cfg),
 		Other:    NewOtherClient(cfg),
@@ -225,6 +232,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Doc.Use(hooks...)
 	c.Group.Use(hooks...)
 	c.IntSID.Use(hooks...)
+	c.Link.Use(hooks...)
 	c.MixinID.Use(hooks...)
 	c.Note.Use(hooks...)
 	c.Other.Use(hooks...)
@@ -1144,6 +1152,96 @@ func (c *IntSIDClient) QueryChildren(is *IntSID) *IntSIDQuery {
 // Hooks returns the client hooks.
 func (c *IntSIDClient) Hooks() []Hook {
 	return c.hooks.IntSID
+}
+
+// LinkClient is a client for the Link schema.
+type LinkClient struct {
+	config
+}
+
+// NewLinkClient returns a client for the Link from the given config.
+func NewLinkClient(c config) *LinkClient {
+	return &LinkClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `link.Hooks(f(g(h())))`.
+func (c *LinkClient) Use(hooks ...Hook) {
+	c.hooks.Link = append(c.hooks.Link, hooks...)
+}
+
+// Create returns a builder for creating a Link entity.
+func (c *LinkClient) Create() *LinkCreate {
+	mutation := newLinkMutation(c.config, OpCreate)
+	return &LinkCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Link entities.
+func (c *LinkClient) CreateBulk(builders ...*LinkCreate) *LinkCreateBulk {
+	return &LinkCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Link.
+func (c *LinkClient) Update() *LinkUpdate {
+	mutation := newLinkMutation(c.config, OpUpdate)
+	return &LinkUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LinkClient) UpdateOne(l *Link) *LinkUpdateOne {
+	mutation := newLinkMutation(c.config, OpUpdateOne, withLink(l))
+	return &LinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LinkClient) UpdateOneID(id uuidc.UUIDC) *LinkUpdateOne {
+	mutation := newLinkMutation(c.config, OpUpdateOne, withLinkID(id))
+	return &LinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Link.
+func (c *LinkClient) Delete() *LinkDelete {
+	mutation := newLinkMutation(c.config, OpDelete)
+	return &LinkDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LinkClient) DeleteOne(l *Link) *LinkDeleteOne {
+	return c.DeleteOneID(l.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *LinkClient) DeleteOneID(id uuidc.UUIDC) *LinkDeleteOne {
+	builder := c.Delete().Where(link.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LinkDeleteOne{builder}
+}
+
+// Query returns a query builder for Link.
+func (c *LinkClient) Query() *LinkQuery {
+	return &LinkQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Link entity by its id.
+func (c *LinkClient) Get(ctx context.Context, id uuidc.UUIDC) (*Link, error) {
+	return c.Query().Where(link.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LinkClient) GetX(ctx context.Context, id uuidc.UUIDC) *Link {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *LinkClient) Hooks() []Hook {
+	return c.hooks.Link
 }
 
 // MixinIDClient is a client for the MixinID schema.

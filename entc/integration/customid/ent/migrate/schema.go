@@ -160,6 +160,17 @@ var (
 			},
 		},
 	}
+	// LinksColumns holds the columns for the "links" table.
+	LinksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "link_information", Type: field.TypeJSON},
+	}
+	// LinksTable holds the schema information for the "links" table.
+	LinksTable = &schema.Table{
+		Name:       "links",
+		Columns:    LinksColumns,
+		PrimaryKey: []*schema.Column{LinksColumns[0]},
+	}
 	// MixinIdsColumns holds the columns for the "mixin_ids" table.
 	MixinIdsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -403,6 +414,7 @@ var (
 		DocsTable,
 		GroupsTable,
 		IntSiDsTable,
+		LinksTable,
 		MixinIdsTable,
 		NotesTable,
 		OthersTable,
