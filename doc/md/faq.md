@@ -6,6 +6,7 @@ sidebar_label: FAQ
 
 ## Questions
 
+[How do I print generated SQL queries?](#how-do-i-print-generated-sql-queries)  
 [How to create an entity from a struct `T`?](#how-to-create-an-entity-from-a-struct-t)  
 [How to create a struct (or a mutation) level validator?](#how-to-create-a-mutation-level-validator)  
 [How to write an audit-log extension?](#how-to-write-an-audit-log-extension)  
@@ -17,7 +18,7 @@ sidebar_label: FAQ
 [How to use a custom XID globally unique ID?](#how-to-use-a-custom-xid-globally-unique-id)  
 [How to define a spatial data type field in MySQL?](#how-to-define-a-spatial-data-type-field-in-mysql)  
 [How to extend the generated models?](#how-to-extend-the-generated-models)  
-[How to extend the generated builders?](#how-to-extend-the-generated-builders)   
+[How to extend the generated builders?](#how-to-extend-the-generated-builders)  
 [How to store Protobuf objects in a BLOB column?](#how-to-store-protobuf-objects-in-a-blob-column)  
 [How to add `CHECK` constraints to table?](#how-to-add-check-constraints-to-table)  
 [How to define a custom precision numeric field?](#how-to-define-a-custom-precision-numeric-field)  
@@ -25,6 +26,17 @@ sidebar_label: FAQ
 [How to change the character set and/or collation of a MySQL table?](#how-to-change-the-character-set-andor-collation-of-a-mysql-table)
 
 ## Answers
+
+### How do I print generated SQL queries?
+
+The generated `ent.Client` has a `Debug()` method which returns pointer to another `ent.Client` that will write the generated queries to the logs/stdout. A short example would be:
+
+```go
+// Reassigning the client to itself or you can also use another variable.
+client = client.Debug()
+// Anything using this client would be printing generated queries to the console.
+client.User.Query().All()
+```
 
 #### How to create an entity from a struct `T`?
 
@@ -222,7 +234,7 @@ option for doing it as follows:
 
 The [GoType](schema-fields.md#go-type) and the [SchemaType](schema-fields.md#database-type)
 options allow users to define database-specific fields. For example, in order to define a
- [`macaddr`](https://www.postgresql.org/docs/13/datatype-net-types.html#DATATYPE-MACADDR) field, use the following configuration:
+[`macaddr`](https://www.postgresql.org/docs/13/datatype-net-types.html#DATATYPE-MACADDR) field, use the following configuration:
 
 ```go
 func (T) Fields() []ent.Field {
@@ -263,6 +275,7 @@ func (m MAC) Value() (driver.Value, error) {
 	return m.HardwareAddr.String(), nil
 }
 ```
+
 Note that, if the database doesn't support the `macaddr` type (e.g. SQLite on testing), the field fallback to its
 native type (i.e. `string`).
 
@@ -317,9 +330,10 @@ func (i Inet) Value() (driver.Value, error) {
 #### How to customize time fields to type `DATETIME` in MySQL?
 
 `Time` fields use the MySQL `TIMESTAMP` type in the schema creation by default, and this type
- has a range of '1970-01-01 00:00:01' UTC to '2038-01-19 03:14:07' UTC (see, [MySQL docs](https://dev.mysql.com/doc/refman/5.6/en/datetime.html)).
+has a range of '1970-01-01 00:00:01' UTC to '2038-01-19 03:14:07' UTC (see, [MySQL docs](https://dev.mysql.com/doc/refman/5.6/en/datetime.html)).
 
 In order to customize time fields for a wider range, use the MySQL `DATETIME` as follows:
+
 ```go
 field.Time("birth_date").
 	Optional().
@@ -417,7 +431,7 @@ func (T) Fields() []ent.Field {
 }
 ```
 
-Or as a reusable [Mixin](schema-mixin.md) across multiple schemas: 
+Or as a reusable [Mixin](schema-mixin.md) across multiple schemas:
 
 ```go
 package schema
@@ -532,13 +546,11 @@ func (Point) SchemaType() map[string]string {
 
 A full example exists in the [example repository](https://github.com/a8m/entspatial).
 
-
 #### How to extend the generated models?
 
 Ent supports extending generated types (both global types and models) using custom templates. For example, in order to
 add additional struct fields or methods to the generated model, we can override the `model/fields/additional` template like in this
 [example](https://github.com/ent/ent/blob/dd4792f5b30bdd2db0d9a593a977a54cb3f0c1ce/examples/entcpkg/ent/template/static.tmpl).
-
 
 If your custom fields/methods require additional imports, you can add those imports using custom templates as well:
 
@@ -554,12 +566,13 @@ If your custom fields/methods require additional imports, you can add those impo
 
 #### How to extend the generated builders?
 
-See the *[Injecting External Dependencies](code-gen.md#external-dependencies)* section, or follow the
+See the _[Injecting External Dependencies](code-gen.md#external-dependencies)_ section, or follow the
 example on [GitHub](https://github.com/ent/ent/tree/master/examples/entcpkg).
 
 #### How to store Protobuf objects in a BLOB column?
 
 Assuming we have a Protobuf message defined:
+
 ```protobuf
 syntax = "proto3";
 
@@ -778,4 +791,3 @@ func (Entity) Annotations() []schema.Annotation {
 	}
 }
 ```
-
