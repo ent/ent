@@ -20,7 +20,7 @@ import (
 		{{- if $.HasOneFieldID }}
 			{{- with $.ID.Type.PkgPath }}
 				{{- $name := $.ID.Type.PkgName }}
-				{{ if ne $name (base $.ID.Type.PkgPath) }}{{ $name }} {{ end}}"{{ $.ID.Type.PkgPath }}"
+				{{ if ne $name (base $.ID.Type.PkgPath) }}{{ $name }} {{ end}}"{{ . }}"
 			{{- end }}
 		{{- end }}
 		{{- /* Import external packages */}}
