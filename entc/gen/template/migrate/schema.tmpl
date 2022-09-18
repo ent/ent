@@ -151,6 +151,9 @@ var (
 											{{- end }}
 										},
 									{{- end }}
+									{{- with $ant.Where }}
+										Where: "{{ . }}",
+									{{- end }}
 								},
 							{{- end }}
 						},

@@ -447,6 +447,9 @@ func (d *SQLite) atIndex(idx1 *Index, t2 *schema.Table, idx2 *schema.Index) erro
 		}
 		idx2.AddParts(&schema.IndexPart{C: c2})
 	}
+	if idx1.Annotation != nil && idx1.Annotation.Where != "" {
+		idx2.AddAttrs(&sqlite.IndexPredicate{P: idx1.Annotation.Where})
+	}
 	return nil
 }
 

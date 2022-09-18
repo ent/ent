@@ -2974,6 +2974,7 @@ type UserMutation struct {
 	id             *int
 	mixed_string   *string
 	mixed_enum     *user.MixedEnum
+	active         *bool
 	age            *int
 	addage         *int
 	name           *string
@@ -3178,6 +3179,42 @@ func (m *UserMutation) OldMixedEnum(ctx context.Context) (v user.MixedEnum, err 
 // ResetMixedEnum resets all changes to the "mixed_enum" field.
 func (m *UserMutation) ResetMixedEnum() {
 	m.mixed_enum = nil
+}
+
+// SetActive sets the "active" field.
+func (m *UserMutation) SetActive(b bool) {
+	m.active = &b
+}
+
+// Active returns the value of the "active" field in the mutation.
+func (m *UserMutation) Active() (r bool, exists bool) {
+	v := m.active
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActive returns the old "active" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldActive(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActive is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActive requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActive: %w", err)
+	}
+	return oldValue.Active, nil
+}
+
+// ResetActive resets all changes to the "active" field.
+func (m *UserMutation) ResetActive() {
+	m.active = nil
 }
 
 // SetAge sets the "age" field.
@@ -3997,12 +4034,15 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 17)
+	fields := make([]string, 0, 18)
 	if m.mixed_string != nil {
 		fields = append(fields, user.FieldMixedString)
 	}
 	if m.mixed_enum != nil {
 		fields = append(fields, user.FieldMixedEnum)
+	}
+	if m.active != nil {
+		fields = append(fields, user.FieldActive)
 	}
 	if m.age != nil {
 		fields = append(fields, user.FieldAge)
@@ -4061,6 +4101,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.MixedString()
 	case user.FieldMixedEnum:
 		return m.MixedEnum()
+	case user.FieldActive:
+		return m.Active()
 	case user.FieldAge:
 		return m.Age()
 	case user.FieldName:
@@ -4104,6 +4146,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldMixedString(ctx)
 	case user.FieldMixedEnum:
 		return m.OldMixedEnum(ctx)
+	case user.FieldActive:
+		return m.OldActive(ctx)
 	case user.FieldAge:
 		return m.OldAge(ctx)
 	case user.FieldName:
@@ -4156,6 +4200,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetMixedEnum(v)
+		return nil
+	case user.FieldActive:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActive(v)
 		return nil
 	case user.FieldAge:
 		v, ok := value.(int)
@@ -4376,6 +4427,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldMixedEnum:
 		m.ResetMixedEnum()
+		return nil
+	case user.FieldActive:
+		m.ResetActive()
 		return nil
 	case user.FieldAge:
 		m.ResetAge()
