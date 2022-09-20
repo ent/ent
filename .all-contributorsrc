@@ -826,6 +826,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "jhwz",
+      "name": "jhwz",
+      "avatar_url": "https://avatars.githubusercontent.com/u/52683873?v=4",
+      "profile": "https://github.com/jhwz",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
