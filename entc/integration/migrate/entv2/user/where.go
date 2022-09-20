@@ -92,6 +92,13 @@ func MixedString(v string) predicate.User {
 	})
 }
 
+// Active applies equality check predicate on the "active" field. It's identical to ActiveEQ.
+func Active(v bool) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldActive), v))
+	})
+}
+
 // Age applies equality check predicate on the "age" field. It's identical to AgeEQ.
 func Age(v int) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -315,6 +322,20 @@ func MixedEnumNotIn(vs ...MixedEnum) predicate.User {
 	}
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.NotIn(s.C(FieldMixedEnum), v...))
+	})
+}
+
+// ActiveEQ applies the EQ predicate on the "active" field.
+func ActiveEQ(v bool) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldActive), v))
+	})
+}
+
+// ActiveNEQ applies the NEQ predicate on the "active" field.
+func ActiveNEQ(v bool) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldActive), v))
 	})
 }
 

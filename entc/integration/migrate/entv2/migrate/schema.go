@@ -133,6 +133,7 @@ var (
 		{Name: "oid", Type: field.TypeInt, Increment: true},
 		{Name: "mixed_string", Type: field.TypeString, Default: "default"},
 		{Name: "mixed_enum", Type: field.TypeEnum, Enums: []string{"on", "off"}, Default: "on"},
+		{Name: "active", Type: field.TypeBool, Default: true},
 		{Name: "age", Type: field.TypeInt},
 		{Name: "name", Type: field.TypeString, Size: 2147483647},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
@@ -158,7 +159,7 @@ var (
 			{
 				Name:    "user_description",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[5]},
+				Columns: []*schema.Column{UsersColumns[6]},
 				Annotation: &entsql.IndexAnnotation{
 					Prefix: 100,
 				},
@@ -166,12 +167,12 @@ var (
 			{
 				Name:    "user_phone_age",
 				Unique:  true,
-				Columns: []*schema.Column{UsersColumns[7], UsersColumns[3]},
+				Columns: []*schema.Column{UsersColumns[8], UsersColumns[4]},
 			},
 			{
 				Name:    "user_age",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[3]},
+				Columns: []*schema.Column{UsersColumns[4]},
 				Annotation: &entsql.IndexAnnotation{
 					Desc: true,
 				},
@@ -179,7 +180,7 @@ var (
 			{
 				Name:    "user_nickname",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[6]},
+				Columns: []*schema.Column{UsersColumns[7]},
 				Annotation: &entsql.IndexAnnotation{
 					Types: map[string]string{
 						"mysql": "FULLTEXT",
@@ -189,11 +190,19 @@ var (
 			{
 				Name:    "user_workplace",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[15]},
+				Columns: []*schema.Column{UsersColumns[16]},
 				Annotation: &entsql.IndexAnnotation{
 					IncludeColumns: []string{
-						UsersColumns[6].Name,
+						UsersColumns[7].Name,
 					},
+				},
+			},
+			{
+				Name:    "user_phone",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[8]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "active",
 				},
 			},
 		},

@@ -260,6 +260,20 @@ type IndexAnnotation struct {
 	//		)
 	//
 	Types map[string]string
+
+	// IndexWhere allows configuring partial indexes in SQLite and PostgreSQL.
+	// Read more: https://postgresql.org/docs/current/indexes-partial.html.
+	//
+	// Note that the `WHERE` clause should be defined exactly like it is
+	// stored in the database (i.e. normal form). Read more about this on
+	// the Atlas website: https://atlasgo.io/concepts/dev-database#diffing.
+	//
+	//	index.Fields("a").
+	//		Annotations(
+	//			entsql.IndexWhere("b AND c > 0"),
+	//		)
+	//	CREATE INDEX "table_a" ON "table"("a") WHERE (b AND c > 0)
+	Where string
 }
 
 // Prefix returns a new index annotation with a single string column index.
@@ -364,6 +378,22 @@ func IndexTypes(types map[string]string) *IndexAnnotation {
 	return &IndexAnnotation{Types: types}
 }
 
+// IndexWhere allows configuring partial indexes in SQLite and PostgreSQL.
+// Read more: https://postgresql.org/docs/current/indexes-partial.html.
+//
+// Note that the `WHERE` clause should be defined exactly like it is
+// stored in the database (i.e. normal form). Read more about this on the
+// Atlas website: https://atlasgo.io/concepts/dev-database#diffing.
+//
+//	index.Fields("a").
+//		Annotations(
+//			entsql.IndexWhere("b AND c > 0"),
+//		)
+//	CREATE INDEX "table_a" ON "table"("a") WHERE (b AND c > 0)
+func IndexWhere(pred string) *IndexAnnotation {
+	return &IndexAnnotation{Where: pred}
+}
+
 // Name describes the annotation name.
 func (IndexAnnotation) Name() string {
 	return "EntSQLIndexes"
@@ -413,10 +443,13 @@ func (a IndexAnnotation) Merge(other schema.Annotation) schema.Annotation {
 	if ant.Types != nil {
 		a.Types = ant.Types
 	}
+	if ant.Where != "" {
+		a.Where = ant.Where
+	}
 	return a
 }
 
-var (
-	_ schema.Annotation = (*IndexAnnotation)(nil)
-	_ schema.Merger     = (*IndexAnnotation)(nil)
-)
+var _ interface {
+	schema.Annotation
+	schema.Merger
+} = (*IndexAnnotation)(nil)

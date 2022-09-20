@@ -50,6 +50,9 @@ func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id").
 			StorageKey("oid"),
+		// add a new column.
+		field.Bool("active").
+			Default(true),
 		// changing the type of the field.
 		field.Int("age"),
 		// extending name field to longtext.
@@ -152,6 +155,11 @@ func (User) Indexes() []ent.Index {
 		index.Fields("workplace").
 			Annotations(
 				entsql.IncludeColumns("nickname"),
+			),
+		// For PostgreSQL and SQLite, users can define partial indexes.
+		index.Fields("phone").
+			Annotations(
+				entsql.IndexWhere("active"),
 			),
 	}
 }

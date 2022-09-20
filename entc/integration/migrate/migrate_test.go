@@ -109,6 +109,7 @@ func TestPostgres(t *testing.T) {
 			V1ToV2(t, drv.Dialect(), clientv1, clientv2)
 			CheckConstraint(t, clientv2)
 			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_name = $1 AND column_name = $2")
+			PartialIndexes(t, drv, "select indexdef from pg_indexes where indexname=$1", "CREATE INDEX user_phone ON public.users USING btree (phone) WHERE active")
 			if version != "10" {
 				IncludeColumns(t, drv)
 			}
@@ -184,6 +185,7 @@ func TestSQLite(t *testing.T) {
 	idRange(t, client.Media.Create().SaveX(ctx).ID, 4<<32-1, 5<<32)
 	idRange(t, client.Pet.Create().SaveX(ctx).ID, 5<<32-1, 6<<32)
 	idRange(t, u.ID, 6<<32-1, 7<<32)
+	PartialIndexes(t, drv, "select sql from sqlite_master where name=?", "CREATE INDEX `user_phone` ON `users` (`phone`) WHERE active")
 
 	// Override the default behavior of LIKE in SQLite.
 	// https://www.sqlite.org/pragma.html#pragma_case_sensitive_like
@@ -572,6 +574,15 @@ func IncludeColumns(t *testing.T, drv *sql.Driver) {
 	require.NoError(t, err)
 	require.NoError(t, rows.Close())
 	require.Equal(t, d, "CREATE INDEX user_workplace ON public.users USING btree (workplace) INCLUDE (nickname)")
+}
+
+func PartialIndexes(t *testing.T, drv *sql.Driver, query, def string) {
+	rows, err := drv.QueryContext(context.Background(), query, "user_phone")
+	require.NoError(t, err)
+	d, err := sql.ScanString(rows)
+	require.NoError(t, err)
+	require.NoError(t, rows.Close())
+	require.Equal(t, d, def)
 }
 
 func idRange(t *testing.T, id, l, h int) {
