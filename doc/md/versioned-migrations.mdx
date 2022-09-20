@@ -542,8 +542,7 @@ longer needed after the first one.
 ## Apply Migrations
 
 Ent recommends to use the Atlas CLI to apply the generated migration files onto the database. If you want to use any
-other migration management tool, Ent has support for generating migrations for several of them
-out of the box.
+other migration management tool, Ent has support for generating migrations for several of them out of the box.
 
 ```shell
 atlas migrate apply \
@@ -552,6 +551,14 @@ atlas migrate apply \
 ```
 
 For more information head over the the [Atlas documentation](https://atlasgo.io/versioned/apply).
+
+:::info
+
+In previous versions of Ent [`golang-migrate/migrate`](https://github.com/golang-migrate/migrate) has been the default
+migration execution engine. For an easy transition, Atlas can import the migrations format of golang-migrate for you.
+You can learn more about it in the [Atlas documentation](https://atlasgo.io/versioned/import).
+
+:::
 
 ## Moving from Auto-Migration to Versioned Migrations
 
