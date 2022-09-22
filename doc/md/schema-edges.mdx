@@ -1448,7 +1448,7 @@ type Pet struct {
 
 // Edges of the Pet.
 func (Pet) Edges() []ent.Edge {
-	return []ent.Field{
+	return []ent.Edge{
 		edge.To("owner", User.Type).
 			Ref("pets").
 			Unique().
