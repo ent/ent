@@ -132,7 +132,6 @@ func TestMigrate_Diff(t *testing.T) {
 	require.NoError(t, d.WriteFile("tmp.sql", nil))
 	require.ErrorIs(t, m.Diff(ctx, &Table{Name: "users"}), migrate.ErrChecksumMismatch)
 
-	idCol := []*Column{{Name: "id", Type: field.TypeInt, Increment: true}}
 	p = t.TempDir()
 	d, err = migrate.NewLocalDir(p)
 	require.NoError(t, err)
@@ -144,35 +143,82 @@ func TestMigrate_Diff(t *testing.T) {
 	)
 	require.NoError(t, err)
 
+	var (
+		// GroupsColumns holds the columns for the "groups" table.
+		GroupsColumns = []*Column{
+			{Name: "id", Type: field.TypeInt, Increment: true},
+		}
+		// GroupsTable holds the schema information for the "groups" table.
+		GroupsTable = &Table{
+			Name:       "groups",
+			Columns:    GroupsColumns,
+			PrimaryKey: []*Column{GroupsColumns[0]},
+			Indexes: []*Index{
+				{Name: "short", Columns: GroupsColumns},
+				{Name: "long_" + strings.Repeat("_", 60), Columns: GroupsColumns},
+			},
+		}
+		// UsersColumns holds the columns for the "users" table.
+		UsersColumns = []*Column{
+			{Name: "id", Type: field.TypeInt, Increment: true},
+		}
+		// UsersTable holds the schema information for the "users" table.
+		UsersTable = &Table{
+			Name:       "users",
+			Columns:    UsersColumns,
+			PrimaryKey: []*Column{UsersColumns[0]},
+		}
+		// UserGroupsColumns holds the columns for the "user_groups" table.
+		UserGroupsColumns = []*Column{
+			{Name: "user_id", Type: field.TypeInt},
+			{Name: "group_id", Type: field.TypeInt},
+		}
+		// UserGroupsTable holds the schema information for the "user_groups" table.
+		UserGroupsTable = &Table{
+			Name:       "user_groups",
+			Columns:    UserGroupsColumns,
+			PrimaryKey: []*Column{UserGroupsColumns[0], UserGroupsColumns[1]},
+			ForeignKeys: []*ForeignKey{
+				{
+					Symbol:     "user_groups_user_id",
+					Columns:    []*Column{UserGroupsColumns[0]},
+					RefColumns: []*Column{UsersColumns[0]},
+					OnDelete:   Cascade,
+				},
+				{
+					Symbol:     "user_groups_group_id",
+					Columns:    []*Column{UserGroupsColumns[1]},
+					RefColumns: []*Column{GroupsColumns[0]},
+					OnDelete:   Cascade,
+				},
+			},
+		}
+	)
+	UserGroupsTable.ForeignKeys[0].RefTable = UsersTable
+	UserGroupsTable.ForeignKeys[1].RefTable = GroupsTable
+
+	// Join tables (mapping between user and group) will not result in an entry to the types table.
 	m, err = NewMigrate(db, WithFormatter(f), WithDir(d), WithGlobalUniqueID(true))
 	require.NoError(t, err)
-	require.NoError(t, m.Diff(ctx,
-		&Table{Name: "users", Columns: idCol, PrimaryKey: idCol},
-		&Table{
-			Name:       "groups",
-			Columns:    idCol,
-			PrimaryKey: idCol,
-			Indexes: []*Index{
-				{Name: "short", Columns: idCol},
-				{Name: "long_" + strings.Repeat("_", 60), Columns: idCol},
-			}},
-	))
+	require.NoError(t, m.Diff(ctx, GroupsTable, UsersTable, UserGroupsTable))
 	changesSQL := strings.Join([]string{
-		"CREATE TABLE `users` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT);",
 		"CREATE TABLE `groups` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT);",
-		fmt.Sprintf("INSERT INTO sqlite_sequence (name, seq) VALUES (\"groups\", %d);", 1<<32),
 		"CREATE INDEX `short` ON `groups` (`id`);",
 		"CREATE INDEX `long____________________________1cb2e7e47a309191385af4ad320875b1` ON `groups` (`id`);",
+		"CREATE TABLE `users` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT);",
+		fmt.Sprintf("INSERT INTO sqlite_sequence (name, seq) VALUES (\"users\", %d);", 1<<32),
+		"CREATE TABLE `user_groups` (`user_id` integer NOT NULL, `group_id` integer NOT NULL, PRIMARY KEY (`user_id`, `group_id`), CONSTRAINT `user_groups_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE, CONSTRAINT `user_groups_group_id` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE);",
 		"CREATE TABLE `ent_types` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT, `type` text NOT NULL);",
 		"CREATE UNIQUE INDEX `ent_types_type_key` ON `ent_types` (`type`);",
-		"INSERT INTO `ent_types` (`type`) VALUES ('users'), ('groups');", "",
+		"INSERT INTO `ent_types` (`type`) VALUES ('groups'), ('users');",
+		"",
 	}, "\n")
 	requireFileEqual(t, filepath.Join(p, "changes.sql"), changesSQL)
 
 	// Adding another node will result in a new entry to the TypeTable (without actually creating it).
 	_, err = db.ExecContext(ctx, changesSQL, nil, nil)
 	require.NoError(t, err)
-	require.NoError(t, m.NamedDiff(ctx, "changes_2", &Table{Name: "pets", Columns: idCol, PrimaryKey: idCol}))
+	require.NoError(t, m.NamedDiff(ctx, "changes_2", &Table{Name: "pets", Columns: GroupsColumns, PrimaryKey: GroupsColumns}))
 	requireFileEqual(t,
 		filepath.Join(p, "changes_2.sql"), strings.Join([]string{
 			"CREATE TABLE `pets` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT);",
