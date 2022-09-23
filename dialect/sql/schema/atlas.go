@@ -803,7 +803,7 @@ func (a *Atlas) tables(tables []*Table) ([]*schema.Table, error) {
 	for i, et := range tables {
 		at := schema.NewTable(et.Name)
 		a.sqlDialect.atTable(et, at)
-		if a.universalID && et.Name != TypeTable {
+		if a.universalID && et.Name != TypeTable && len(et.PrimaryKey) == 1 {
 			r, err := a.pkRange(et)
 			if err != nil {
 				return nil, err
