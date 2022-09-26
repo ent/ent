@@ -4,7 +4,7 @@ title: Relay Cursor Connections (Pagination)
 sidebar_label: Relay Cursor Connections
 ---
 
-In this section, we continue the [GraphQL example](tutorial-todo-gql.md) by explaining how to implement the 
+In this section, we continue the [GraphQL example](tutorial-todo-gql.mdx) by explaining how to implement the
 [Relay Cursor Connections Spec](https://relay.dev/graphql/connections.htm). If you're not familiar with the
 Cursor Connections interface, read the following paragraphs that were taken from [relay.dev](https://relay.dev/graphql/connections.htm#sel-DABDDDAADFA0E3kM):
 
