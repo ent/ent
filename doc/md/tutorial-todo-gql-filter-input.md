@@ -4,7 +4,7 @@ title: Filter Inputs
 sidebar_label: Filter Inputs
 ---
 
-In this section, we continue the [GraphQL example](tutorial-todo-gql.md) by explaining how to generate
+In this section, we continue the [GraphQL example](tutorial-todo-gql.mdx) by explaining how to generate
 type-safe GraphQL filters (i.e. `Where` predicates) from our `ent/schema`, and allow users to seamlessly
 map GraphQL queries to Ent queries. For example, the following GraphQL query, maps to the Ent query below:
 

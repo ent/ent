@@ -4,7 +4,7 @@ title: Transactional Mutations
 sidebar_label: Transactional Mutations
 ---
 
-In this section, we continue the [GraphQL example](tutorial-todo-gql.md) by explaining how to set our GraphQL mutations
+In this section, we continue the [GraphQL example](tutorial-todo-gql.mdx) by explaining how to set our GraphQL mutations
 to be transactional. That means, to automatically wrap our GraphQL mutations with a database transaction and either
 commit at the end, or rollback the transaction in case of a GraphQL error.
 

@@ -4,7 +4,7 @@ title: Mutation Inputs
 sidebar_label: Mutation Inputs
 ---
 
-In this section, we continue the [GraphQL example](tutorial-todo-gql.md) by explaining how to extend the Ent code
+In this section, we continue the [GraphQL example](tutorial-todo-gql.mdx) by explaining how to extend the Ent code
 generator using Go templates and generate [input type](https://graphql.org/graphql-js/mutations-and-input-types/)
 objects for our GraphQL mutations that can be applied directly on Ent mutations.
 

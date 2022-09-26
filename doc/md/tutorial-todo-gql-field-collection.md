@@ -4,7 +4,7 @@ title: GraphQL Field Collection
 sidebar_label: Field Collection
 ---
 
-In this section, we continue our [GraphQL example](tutorial-todo-gql.md) by explaining how Ent implements
+In this section, we continue our [GraphQL example](tutorial-todo-gql.mdx) by explaining how Ent implements
 [GraphQL Field Collection](https://spec.graphql.org/June2018/#sec-Field-Collection) for our GraphQL schema and solves the
 "N+1 Problem" in our resolvers.
 

@@ -4,7 +4,7 @@ title: Relay Node Interface
 sidebar_label: Relay Node Interface
 ---
 
-In this section, we continue the [GraphQL example](tutorial-todo-gql.md) by explaining how to implement the 
+In this section, we continue the [GraphQL example](tutorial-todo-gql.mdx) by explaining how to implement the
 [Relay Node Interface](https://relay.dev/graphql/objectidentification.htm). If you're not familiar with the
 Node interface, read the following paragraphs that were taken from [relay.dev](https://relay.dev/graphql/objectidentification.htm#sel-DABDDBAADLA0Cl0c):
 
