@@ -51,9 +51,6 @@ models:
   Node:
     model:
       - todo/ent.Noder
-  Status:
-    model:
-      - todo/ent/todo.Status
 ```
 
 To apply these changes, we rerun the code generation:
@@ -83,8 +80,8 @@ Now, we're ready to test our new GraphQL resolvers. Let's start with creating a 
 query multiple times (changing variables is optional):
 
 ```graphql
-mutation CreateTodo($todo: TodoInput!) {
-    createTodo(todo: $todo) {
+mutation CreateTodo($input: CreateTodoInput!) {
+    createTodo(input: $input) {
         id
         text
         createdAt
@@ -95,7 +92,7 @@ mutation CreateTodo($todo: TodoInput!) {
     }
 }
 
-# Query Variables: { "todo": { "text": "Create GraphQL Example", "status": "IN_PROGRESS", "priority": 1 } }
+# Query Variables: { "input": { "text":"Create GraphQL Example", "status": "IN_PROGRESS", "priority": 1 } }
 # Output: { "data": { "createTodo": { "id": "2", "text": "Create GraphQL Example", "createdAt": "2021-03-10T15:02:18+02:00", "priority": 1, "parent": null } } }
 ```
 
