@@ -66,7 +66,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ range $e := $.EdgesWithID }}
 	{{ if and $updater $e.Immutable }}
 		{{/* Skip to the next one as immutable edges cannot be updated. */}}
-		{{ continue }}
+		{{continue}}
 	{{ end }}
 	{{ $op := "add" }}{{ $idsFunc := $e.MutationAdd }}{{ if $e.Unique }}{{ $op = "set" }}{{ $idsFunc = $e.MutationSet }}{{ end }}
 	{{/* Check if this setter was already defined by the field-setters (e.g. edge-field with the same name). */}}
