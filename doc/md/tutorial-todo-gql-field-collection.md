@@ -73,7 +73,7 @@ and for the node(s) API.
 For the purpose of the example, we **disable the automatic field collection**, change the `ent.Client` to run in
 debug mode in the `Todos` resolver, and restart our GraphQL server:
 
-```diff title="todo.resolvers.go"
+```diff title="ent.resolvers.go"
 func (r *queryResolver) Todos(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.TodoOrder) (*ent.TodoConnection, error) {
 -	return r.client.Todo.Query().
 +	return r.client.Debug().Todo.Query().
