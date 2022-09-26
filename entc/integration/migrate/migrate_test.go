@@ -19,9 +19,6 @@ import (
 	"testing"
 	"text/template"
 
-	"ariga.io/atlas/sql/migrate"
-	atlas "ariga.io/atlas/sql/schema"
-	"ariga.io/atlas/sql/sqltool"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/schema"
@@ -29,6 +26,7 @@ import (
 	migratev1 "entgo.io/ent/entc/integration/migrate/entv1/migrate"
 	userv1 "entgo.io/ent/entc/integration/migrate/entv1/user"
 	"entgo.io/ent/entc/integration/migrate/entv2"
+	"entgo.io/ent/entc/integration/migrate/entv2/blog"
 	"entgo.io/ent/entc/integration/migrate/entv2/conversion"
 	"entgo.io/ent/entc/integration/migrate/entv2/customtype"
 	migratev2 "entgo.io/ent/entc/integration/migrate/entv2/migrate"
@@ -36,6 +34,11 @@ import (
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
 	"entgo.io/ent/entc/integration/migrate/versioned"
 	vmigrate "entgo.io/ent/entc/integration/migrate/versioned/migrate"
+
+	"ariga.io/atlas/sql/migrate"
+	"ariga.io/atlas/sql/postgres"
+	atlas "ariga.io/atlas/sql/schema"
+	"ariga.io/atlas/sql/sqltool"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
@@ -106,7 +109,26 @@ func TestPostgres(t *testing.T) {
 
 			clientv1 := entv1.NewClient(entv1.Driver(drv))
 			clientv2 := entv2.NewClient(entv2.Driver(drv))
-			V1ToV2(t, drv.Dialect(), clientv1, clientv2)
+			V1ToV2(
+				t, drv.Dialect(), clientv1, clientv2,
+				// A diff hook to ensure foreign-keys that point to
+				// serial columns are configured to integer types.
+				func(next schema.Differ) schema.Differ {
+					return schema.DiffFunc(func(current, desired *atlas.Schema) ([]atlas.Change, error) {
+						blogs, ok := desired.Table(blog.Table)
+						require.True(t, ok)
+						id, ok := blogs.Column(blog.FieldID)
+						require.True(t, ok)
+						require.IsType(t, &postgres.SerialType{}, id.Type.Type)
+						users, ok := desired.Table(user.Table)
+						require.True(t, ok)
+						fk, ok := users.Column(blog.AdminsColumn)
+						require.True(t, ok)
+						require.IsType(t, &atlas.IntegerType{}, fk.Type.Type)
+						return next.Diff(current, desired)
+					})
+				},
+			)
 			CheckConstraint(t, clientv2)
 			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_name = $1 AND column_name = $2")
 			PartialIndexes(t, drv, "select indexdef from pg_indexes where indexname=$1", "CREATE INDEX user_phone ON public.users USING btree (phone) WHERE active")
@@ -178,13 +200,14 @@ func TestSQLite(t *testing.T) {
 
 	SanityV2(t, drv.Dialect(), client)
 	u := client.User.Create().SetAge(1).SetName("x").SetNickname("x'").SetPhone("y").SaveX(ctx)
-	idRange(t, client.Car.Create().SetOwner(u).SaveX(ctx).ID, 0, 1<<32)
-	idRange(t, client.Conversion.Create().SaveX(ctx).ID, 1<<32-1, 2<<32)
-	idRange(t, client.CustomType.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
-	idRange(t, client.Group.Create().SaveX(ctx).ID, 3<<32-1, 4<<32)
-	idRange(t, client.Media.Create().SaveX(ctx).ID, 4<<32-1, 5<<32)
-	idRange(t, client.Pet.Create().SaveX(ctx).ID, 5<<32-1, 6<<32)
-	idRange(t, u.ID, 6<<32-1, 7<<32)
+	idRange(t, client.Blog.Create().SaveX(ctx).ID, 0, 1<<32)
+	idRange(t, client.Car.Create().SetOwner(u).SaveX(ctx).ID, 1<<32-1, 2<<32)
+	idRange(t, client.Conversion.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
+	idRange(t, client.CustomType.Create().SaveX(ctx).ID, 3<<32-1, 4<<32)
+	idRange(t, client.Group.Create().SaveX(ctx).ID, 4<<32-1, 5<<32)
+	idRange(t, client.Media.Create().SaveX(ctx).ID, 5<<32-1, 6<<32)
+	idRange(t, client.Pet.Create().SaveX(ctx).ID, 6<<32-1, 7<<32)
+	idRange(t, u.ID, 7<<32-1, 8<<32)
 	PartialIndexes(t, drv, "select sql from sqlite_master where name=?", "CREATE INDEX `user_phone` ON `users` (`phone`) WHERE active")
 
 	// Override the default behavior of LIKE in SQLite.
@@ -312,7 +335,7 @@ func Versioned(t *testing.T, drv sql.ExecQuerier, devURL string, client *version
 	require.Equal(t, string(f1), string(f2))
 }
 
-func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv2.Client) {
+func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv2.Client, hooks ...schema.DiffHook) {
 	ctx := context.Background()
 
 	// Run migration and execute queries on v1.
@@ -328,7 +351,7 @@ func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv
 	clientv1.Conversion.DeleteOne(c1).ExecX(ctx)
 
 	// Run migration and execute queries on v2.
-	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithDiffHook(renameTokenColumn), schema.WithApplyHook(fillNulls(dialect))))
+	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithDiffHook(append(hooks, renameTokenColumn)...), schema.WithApplyHook(fillNulls(dialect))))
 	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true)), "should not create additional resources on multiple runs")
 	SanityV2(t, dialect, clientv2)
 	clientv2.Conversion.CreateBulk(clientv2.Conversion.Create(), clientv2.Conversion.Create(), clientv2.Conversion.Create()).ExecX(ctx)
@@ -339,9 +362,9 @@ func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv
 	// Since "users" created in the migration of v1, it will occupy the range of 1<<32-1 ... 2<<32-1,
 	// even though they are ordered differently in the migration of v2 (groups, pets, users).
 	idRange(t, u.ID, 3<<32-1, 4<<32)
-	idRange(t, clientv2.Group.Create().SaveX(ctx).ID, 4<<32-1, 5<<32)
-	idRange(t, clientv2.Media.Create().SaveX(ctx).ID, 5<<32-1, 6<<32)
-	idRange(t, clientv2.Pet.Create().SaveX(ctx).ID, 6<<32-1, 7<<32)
+	idRange(t, clientv2.Group.Create().SaveX(ctx).ID, 5<<32-1, 6<<32)
+	idRange(t, clientv2.Media.Create().SaveX(ctx).ID, 6<<32-1, 7<<32)
+	idRange(t, clientv2.Pet.Create().SaveX(ctx).ID, 7<<32-1, 8<<32)
 
 	// SQL specific predicates.
 	EqualFold(t, clientv2)

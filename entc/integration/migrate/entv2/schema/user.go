@@ -7,17 +7,17 @@ package schema
 import (
 	"time"
 
-	"github.com/google/uuid"
-
-	"entgo.io/ent/schema"
-
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"entgo.io/ent/schema/mixin"
+
+	"ariga.io/atlas/sql/postgres"
+	"github.com/google/uuid"
 )
 
 type Mixin struct {
@@ -196,6 +196,24 @@ func (Car) Edges() []ent.Edge {
 
 // Group schema.
 type Group struct{ ent.Schema }
+
+// Blog schema.
+type Blog struct{ ent.Schema }
+
+func (Blog) Fields() []ent.Field {
+	return []ent.Field{
+		field.Int("id").
+			SchemaType(map[string]string{
+				dialect.Postgres: postgres.TypeSerial,
+			}),
+	}
+}
+
+func (Blog) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("admins", User.Type),
+	}
+}
 
 // Pet schema.
 type Pet struct {

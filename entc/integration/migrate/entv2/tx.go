@@ -16,6 +16,8 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// Blog is the client for interacting with the Blog builders.
+	Blog *BlogClient
 	// Car is the client for interacting with the Car builders.
 	Car *CarClient
 	// Conversion is the client for interacting with the Conversion builders.
@@ -165,6 +167,7 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.Blog = NewBlogClient(tx.config)
 	tx.Car = NewCarClient(tx.config)
 	tx.Conversion = NewConversionClient(tx.config)
 	tx.CustomType = NewCustomTypeClient(tx.config)
@@ -181,7 +184,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Car.QueryXXX(), the query will be executed
+// applies a query, for example: Blog.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

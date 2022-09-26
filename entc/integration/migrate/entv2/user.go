@@ -59,7 +59,8 @@ type User struct {
 	DropOptional string `json:"drop_optional,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges UserEdges `json:"edges"`
+	Edges       UserEdges `json:"edges"`
+	blog_admins *int
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
@@ -121,6 +122,8 @@ func (*User) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
+		case user.ForeignKeys[0]: // blog_admins
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
 		}
@@ -249,6 +252,13 @@ func (u *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field drop_optional", values[i])
 			} else if value.Valid {
 				u.DropOptional = value.String
+			}
+		case user.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field blog_admins", value)
+			} else if value.Valid {
+				u.blog_admins = new(int)
+				*u.blog_admins = int(value.Int64)
 			}
 		}
 	}
