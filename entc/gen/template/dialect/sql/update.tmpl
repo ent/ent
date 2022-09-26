@@ -129,7 +129,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 	{{- range $e := $.EdgesWithID }}
 		{{- if $e.Immutable }}
 			{{- /* Skip to the next one as immutable edges cannot be updated. */}}
-			{{- continue }}
+			{{- continue}}
 		{{- end }}
 		if {{ $mutation }}.{{ $e.MutationCleared }}() {
 			{{- with extend $ "Edge" $e }}
