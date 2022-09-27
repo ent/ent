@@ -39,6 +39,7 @@ import (
 	"ariga.io/atlas/sql/postgres"
 	atlas "ariga.io/atlas/sql/schema"
 	"ariga.io/atlas/sql/sqltool"
+	"entgo.io/ent/schema/field"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
@@ -222,6 +223,75 @@ func TestSQLite(t *testing.T) {
 	require.NoError(t, err)
 	defer vdrv.Close()
 	Versioned(t, vdrv, "sqlite3://file?mode=memory&cache=shared&_fk=1", versioned.NewClient(versioned.Driver(vdrv)))
+}
+
+// https://github.com/ent/ent/issues/2954
+func TestSQLite_ForeignKeyTx(t *testing.T) {
+	var (
+		usersColumns = []*schema.Column{
+			{Name: "id", Type: field.TypeInt, Increment: true},
+			{Name: "name", Type: field.TypeString},
+		}
+		usersTable = &schema.Table{
+			Name:       "users",
+			Columns:    usersColumns,
+			PrimaryKey: []*schema.Column{usersColumns[0]},
+		}
+		userFollowingColumns = []*schema.Column{
+			{Name: "user_id", Type: field.TypeInt},
+			{Name: "follower_id", Type: field.TypeInt},
+		}
+		userFollowingTable = &schema.Table{
+			Name:       "user_following",
+			Columns:    userFollowingColumns,
+			PrimaryKey: []*schema.Column{userFollowingColumns[0], userFollowingColumns[1]},
+			ForeignKeys: []*schema.ForeignKey{
+				{
+					Symbol:     "user_following_user_id",
+					Columns:    []*schema.Column{userFollowingColumns[0]},
+					RefColumns: []*schema.Column{usersColumns[0]},
+					OnDelete:   schema.Cascade,
+				},
+				{
+					Symbol:     "user_following_follower_id",
+					Columns:    []*schema.Column{userFollowingColumns[1]},
+					RefColumns: []*schema.Column{usersColumns[0]},
+					OnDelete:   schema.Cascade,
+				},
+			},
+		}
+	)
+	userFollowingTable.ForeignKeys[0].RefTable = usersTable
+	userFollowingTable.ForeignKeys[1].RefTable = usersTable
+
+	drv, err := sql.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	require.NoError(t, err)
+	defer drv.Close()
+	ctx := context.Background()
+	m, err := schema.NewMigrate(drv)
+	require.NoError(t, err)
+
+	// Migrate once.
+	require.NoError(t, m.Create(ctx, usersTable, userFollowingTable))
+
+	// Add data.
+	var exec = func(stmt string) {
+		_, err := drv.DB().ExecContext(ctx, stmt)
+		require.NoError(t, err)
+	}
+	exec("INSERT INTO `users` (`id`, `name`) VALUES (1, 'Ariel'), (2, 'Jannik');")
+	exec("INSERT INTO `user_following` (`user_id`, `follower_id`) VALUES (1,2), (2,1);")
+	var n int
+	require.NoError(t, drv.DB().QueryRow("SELECT COUNT(*) FROM `user_following`").Scan(&n))
+	require.Equal(t, 2, n)
+
+	// Modify a column in the users table.
+	usersTable.Columns[1].Nullable = true
+	require.NoError(t, m.Create(ctx, usersTable, userFollowingTable))
+
+	// Ensure the data in the join table does still exist.
+	require.NoError(t, drv.DB().QueryRow("SELECT COUNT(*) FROM `user_following`").Scan(&n))
+	require.Equal(t, 2, n)
 }
 
 func TestStorageKey(t *testing.T) {
