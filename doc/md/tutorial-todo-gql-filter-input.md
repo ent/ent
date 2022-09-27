@@ -189,21 +189,33 @@ Go code.
 
 #### Conjunction, disjunction and negation
 
-The `Not`, `And` and `Or` operators can be added using the `not`, `and` and `or` fields. For example:
+The `Not`, `And` and `Or` operators can be added to the `where` clause using the `not`, `and` and `or` fields. For example:
 
-```graphql
-{
-  or: [
-    {
-      status: COMPLETED,
-    },
-    {
-      not: {
-        hasParent: true,
-        status: IN_PROGRESS,
-      }
+```graphql {3-15}
+query {
+  todos(
+    where: {
+      or: [
+        {
+          status: COMPLETED
+        },
+        {
+          not: {
+            hasParent: true,
+            status: IN_PROGRESS
+          }
+        }
+      ]
     }
-  ]
+  ) {
+    edges {
+      node {
+        id
+        text
+      }
+      cursor
+    }
+  }
 }
 ```
 
