@@ -467,14 +467,6 @@ func (m sqliteMock) commit() {
 		WillReturnResult(sqlmock.NewResult(0, 1))
 }
 
-func (m sqliteMock) rollback() {
-	m.ExpectQuery("PRAGMA foreign_key_check").
-		WillReturnRows(sqlmock.NewRows([]string{})) // empty
-	m.ExpectRollback()
-	m.ExpectExec("PRAGMA foreign_keys = on").
-		WillReturnResult(sqlmock.NewResult(0, 1))
-}
-
 func (m sqliteMock) tableExists(table string, exists bool) {
 	count := 0
 	if exists {
