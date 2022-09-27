@@ -147,7 +147,7 @@ The only thing left is to test the `UpdateTodo` resolver. Let's use it to update
 
 ```graphql
 mutation UpdateTodo {
-  updateTodo(id: 2, input: {parent: 1}) {
+  updateTodo(id: 2, input: {parentID: 1}) {
     id
     text
     createdAt
