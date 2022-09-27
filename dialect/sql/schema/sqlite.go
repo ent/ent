@@ -46,6 +46,9 @@ func (d *SQLite) Tx(ctx context.Context) (dialect.Tx, error) {
 	}
 	tx := &tx{t}
 	cm, err := sqlite.CommitFunc(ctx, db, tx, true)
+	if err != nil {
+		return nil, err
+	}
 	return &SQLiteTx{Tx: t, commit: cm, rollback: sqlite.RollbackFunc(ctx, db, tx, true)}, nil
 }
 
