@@ -47,14 +47,15 @@ go run ./cmd/todo/
 
 ### Configure Ent
 
-Go to your `ent/entc.go` file, and add the 3 highlighted lines (extension options):
+Go to your `ent/entc.go` file, and add the 4 highlighted lines (extension options):
 
-```go {3-5} title="ent/entc.go"
+```go {3-6} title="ent/entc.go"
 func main() {
 	ex, err := entgql.NewExtension(
+		entgql.WithSchemaGenerator(),
 		entgql.WithWhereInputs(true),
-		entgql.WithConfigPath("../gqlgen.yml"),
-		entgql.WithSchemaPath("../ent.graphql"),
+		entgql.WithConfigPath("gqlgen.yml"),
+		entgql.WithSchemaPath("ent.graphql"),
 	)
 	if err != nil {
 		log.Fatalf("creating entgql extension: %v", err)
@@ -76,14 +77,14 @@ configures a path to a new, or an existing GraphQL schema to write the generated
 After changing the `entc.go` configuration, we're ready to execute the code generation as follows:
 
 ```console
-go generate ./ent/...
+go generate .
 ```
 
 Observe that Ent has generated `<T>WhereInput` for each type in your schema in a file named `ent/gql_where_input.go`. Ent
 also generates a GraphQL schema as well (`ent.graphql`), so you don't need to `autobind` them to `gqlgen` manually.
 For example:
 
-```go title="ent/where_input.go"
+```go title="ent/gql_where_input.go"
 // TodoWhereInput represents a where input for filtering Todo queries.
 type TodoWhereInput struct {
 	Not *TodoWhereInput   `json:"not,omitempty"`
