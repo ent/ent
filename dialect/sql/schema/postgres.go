@@ -690,6 +690,9 @@ func (d *Postgres) atTypeC(c1 *Column, c2 *schema.Column) error {
 			return err
 		}
 		c2.Type.Type = t
+		if s, ok := t.(*postgres.SerialType); c1.foreign != nil && ok {
+			c2.Type.Type = s.IntegerType()
+		}
 		return nil
 	}
 	var t schema.Type

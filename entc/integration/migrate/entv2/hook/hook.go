@@ -13,6 +13,19 @@ import (
 	"entgo.io/ent/entc/integration/migrate/entv2"
 )
 
+// The BlogFunc type is an adapter to allow the use of ordinary
+// function as Blog mutator.
+type BlogFunc func(context.Context, *entv2.BlogMutation) (entv2.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f BlogFunc) Mutate(ctx context.Context, m entv2.Mutation) (entv2.Value, error) {
+	mv, ok := m.(*entv2.BlogMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entv2.BlogMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The CarFunc type is an adapter to allow the use of ordinary
 // function as Car mutator.
 type CarFunc func(context.Context, *entv2.CarMutation) (entv2.Value, error)
