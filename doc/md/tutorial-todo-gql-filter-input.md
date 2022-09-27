@@ -47,14 +47,15 @@ go run ./cmd/todo/
 
 ### Configure Ent
 
-Go to your `ent/entc.go` file, and add the 3 highlighted lines (extension options):
+Go to your `ent/entc.go` file, and add the 4 highlighted lines (extension options):
 
-```go {3-5} title="ent/entc.go"
+```go {3-6} title="ent/entc.go"
 func main() {
 	ex, err := entgql.NewExtension(
+		entgql.WithSchemaGenerator(),
 		entgql.WithWhereInputs(true),
-		entgql.WithConfigPath("../gqlgen.yml"),
-		entgql.WithSchemaPath("../ent.graphql"),
+		entgql.WithConfigPath("gqlgen.yml"),
+		entgql.WithSchemaPath("ent.graphql"),
 	)
 	if err != nil {
 		log.Fatalf("creating entgql extension: %v", err)
@@ -76,14 +77,14 @@ configures a path to a new, or an existing GraphQL schema to write the generated
 After changing the `entc.go` configuration, we're ready to execute the code generation as follows:
 
 ```console
-go generate ./ent/...
+go generate .
 ```
 
 Observe that Ent has generated `<T>WhereInput` for each type in your schema in a file named `ent/gql_where_input.go`. Ent
 also generates a GraphQL schema as well (`ent.graphql`), so you don't need to `autobind` them to `gqlgen` manually.
 For example:
 
-```go title="ent/where_input.go"
+```go title="ent/gql_where_input.go"
 // TodoWhereInput represents a where input for filtering Todo queries.
 type TodoWhereInput struct {
 	Not *TodoWhereInput   `json:"not,omitempty"`
@@ -157,7 +158,7 @@ schema:
 After running the code generation, we're ready to complete the integration and expose the filtering capabilities in GraphQL:
 
 1\. Edit the GraphQL schema to accept the new filter types:
-```graphql {8} 
+```graphql {8} title="ent.graphql"
 type Query {
   todos(
     after: Cursor,
@@ -171,7 +172,7 @@ type Query {
 ```
 
 2\. Use the new filter types in GraphQL resolvers:
-```go {5}
+```go {5} title="ent.resolvers.go"
 func (r *queryResolver) Todos(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.TodoOrder, where *ent.TodoWhereInput) (*ent.TodoConnection, error) {
 	return r.client.Todo.Query().
 		Paginate(ctx, after, first, before, last,
@@ -188,21 +189,33 @@ Go code.
 
 #### Conjunction, disjunction and negation
 
-The `Not`, `And` and `Or` operators can be added using the `not`, `and` and `or` fields. For example:
+The `Not`, `And` and `Or` operators can be added to the `where` clause using the `not`, `and` and `or` fields. For example:
 
-```graphql
-{
-  or: [
-    {
-      status: COMPLETED,
-    },
-    {
-      not: {
-        hasParent: true,
-        status: IN_PROGRESS,
-      }
+```graphql {3-15}
+query {
+  todos(
+    where: {
+      or: [
+        {
+          status: COMPLETED
+        },
+        {
+          not: {
+            hasParent: true,
+            status: IN_PROGRESS
+          }
+        }
+      ]
     }
-  ]
+  ) {
+    edges {
+      node {
+        id
+        text
+      }
+      cursor
+    }
+  }
 }
 ```
 
