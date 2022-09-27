@@ -158,7 +158,7 @@ schema:
 After running the code generation, we're ready to complete the integration and expose the filtering capabilities in GraphQL:
 
 1\. Edit the GraphQL schema to accept the new filter types:
-```graphql {8} 
+```graphql {8} title="ent.graphql"
 type Query {
   todos(
     after: Cursor,
@@ -172,7 +172,7 @@ type Query {
 ```
 
 2\. Use the new filter types in GraphQL resolvers:
-```go {5}
+```go {5} title="ent.resolvers.go"
 func (r *queryResolver) Todos(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.TodoOrder, where *ent.TodoWhereInput) (*ent.TodoConnection, error) {
 	return r.client.Todo.Query().
 		Paginate(ctx, after, first, before, last,
