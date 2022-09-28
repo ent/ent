@@ -272,7 +272,7 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 			{{- end }}
 		},
 		From: {{ $receiver }}.sql,
-		Unique: true,
+		Unique: {{ $receiver }}.driver.Dialect() != dialect.SQLServer,
 	}
 	if unique := {{ $receiver }}.unique; unique != nil {
 		_spec.Unique = *unique

@@ -16,8 +16,10 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect"
 )
@@ -878,6 +880,9 @@ func ResolveWith(fn func(*UpdateSet)) ConflictOption {
 //			sql.ResolveWithNewValues()
 //		)
 func (i *InsertBuilder) OnConflict(opts ...ConflictOption) *InsertBuilder {
+	if i.dialect == dialect.SQLServer {
+		i.AddError(errors.New("sql: INSERT ON DUPLICATE KEY not supported in SQL Server"))
+	}
 	if i.conflict == nil {
 		i.conflict = &conflict{}
 	}
@@ -955,6 +960,9 @@ func (i *InsertBuilder) Query() (string, []any) {
 		i.writeDefault()
 	} else {
 		i.WriteByte('(').IdentComma(i.columns...).WriteByte(')')
+		if i.dialect == dialect.SQLServer && len(i.returning) > 0 {
+			i.WriteString(" OUTPUT INSERTED.\"" + i.returning[0] + "\" ")
+		}
 		i.WriteString(" VALUES ")
 		for j, v := range i.values {
 			if j > 0 {
@@ -966,7 +974,7 @@ func (i *InsertBuilder) Query() (string, []any) {
 	if i.conflict != nil {
 		i.writeConflict()
 	}
-	if len(i.returning) > 0 && !i.mysql() {
+	if len(i.returning) > 0 && !i.mysql() && !i.sqlserver() {
 		i.WriteString(" RETURNING ")
 		i.IdentComma(i.returning...)
 	}
@@ -1272,7 +1280,11 @@ func False() *Predicate {
 // False appends FALSE to the predicate.
 func (p *Predicate) False() *Predicate {
 	return p.Append(func(b *Builder) {
-		b.WriteString("FALSE")
+		if b.dialect != dialect.SQLServer {
+			b.WriteString("FALSE")
+		} else {
+			b.WriteString("1!=1")
+		}
 	})
 }
 
@@ -1325,6 +1337,8 @@ func IsTrue(col string) *Predicate {
 func (p *Predicate) IsTrue(col string) *Predicate {
 	return p.Append(func(b *Builder) {
 		b.Ident(col)
+		b.WriteOp(OpEQ)
+		b.Arg(true)
 	})
 }
 
@@ -1336,7 +1350,9 @@ func IsFalse(col string) *Predicate {
 // IsFalse appends a predicate that checks if the column value is falsey.
 func (p *Predicate) IsFalse(col string) *Predicate {
 	return p.Append(func(b *Builder) {
-		b.WriteString("NOT ").Ident(col)
+		b.Ident(col)
+		b.WriteOp(OpEQ)
+		b.Arg(false)
 	})
 }
 
@@ -2741,6 +2757,9 @@ func (s *Selector) Query() (string, []any) {
 			b.Join(join.on)
 		}
 	}
+	if s.lock != nil && s.dialect == dialect.SQLServer {
+		b.WriteString(" WITH (updlock) ")
+	}
 	if s.where != nil {
 		b.WriteString(" WHERE ")
 		b.Join(s.where)
@@ -2758,10 +2777,33 @@ func (s *Selector) Query() (string, []any) {
 	}
 	joinOrder(s.order, &b)
 	if s.limit != nil {
-		b.WriteString(" LIMIT ")
-		b.WriteString(strconv.Itoa(*s.limit))
+		if s.dialect == dialect.SQLServer {
+			if len(s.order) == 0 {
+				b.WriteString(" ORDER BY (SELECT NULL)  ")
+			}
+			if s.offset != nil {
+				b.WriteString(" OFFSET ")
+				b.WriteString(strconv.Itoa(*s.offset))
+				if *s.offset > 0 {
+					b.WriteString(" ROWS")
+				} else {
+					b.WriteString(" ROW")
+				}
+			} else {
+				b.WriteString(" OFFSET 0 ROW")
+			}
+			if *s.limit > 0 {
+				b.WriteString(" FETCH NEXT ")
+				b.WriteString(strconv.Itoa(*s.limit))
+				b.WriteString(" ROWS ONLY")
+			}
+		} else {
+			b.WriteString(" LIMIT ")
+			b.WriteString(strconv.Itoa(*s.limit))
+		}
+
 	}
-	if s.offset != nil {
+	if s.offset != nil && s.dialect != dialect.SQLServer {
 		b.WriteString(" OFFSET ")
 		b.WriteString(strconv.Itoa(*s.offset))
 	}
@@ -2779,7 +2821,7 @@ func (s *Selector) joinPrefix(b *Builder) {
 }
 
 func (s *Selector) joinLock(b *Builder) {
-	if s.lock == nil {
+	if s.lock == nil || s.dialect == dialect.SQLServer {
 		return
 	}
 	b.Pad()
@@ -3127,7 +3169,7 @@ type Builder struct {
 func (b *Builder) Quote(ident string) string {
 	quote := "`"
 	switch {
-	case b.postgres():
+	case b.postgres() || b.sqlserver():
 		// If it was quoted with the wrong
 		// identifier character.
 		if strings.Contains(ident, "`") {
@@ -3150,7 +3192,7 @@ func (b *Builder) Ident(s string) *Builder {
 			b.WriteString(b.Quote(b.qualifier)).WriteByte('.')
 		}
 		b.WriteString(b.Quote(s))
-	case (isFunc(s) || isModifier(s)) && b.postgres():
+	case (isFunc(s) || isModifier(s)) && (b.postgres() || b.sqlserver()):
 		// Modifiers and aggregation functions that
 		// were called without dialect information.
 		b.WriteString(strings.ReplaceAll(s, "`", `"`))
@@ -3332,13 +3374,43 @@ func (b *Builder) Arg(a any) *Builder {
 		return b
 	}
 	b.total++
-	b.args = append(b.args, a)
+	if !b.sqlserver() {
+		b.args = append(b.args, a)
+	}
 	// Default placeholder param (MySQL and SQLite).
 	param := "?"
 	if b.postgres() {
 		// Postgres' arguments are referenced using the syntax $n.
 		// $1 refers to the 1st argument, $2 to the 2nd, and so on.
 		param = "$" + strconv.Itoa(b.total)
+	} else if b.sqlserver() {
+		switch a.(type) {
+		case int8, int16, int, int32, int64, float32, float64:
+			param = fmt.Sprintf("%v", a)
+		case bool:
+			if a.(bool) {
+				param = "1"
+			} else {
+				param = "0"
+			}
+		case time.Time:
+			param = fmt.Sprintf("'%s'", a.(time.Time).Format("2006-01-02 15:04:05.000"))
+		default:
+			switch rv := reflect.ValueOf(a); rv.Kind() {
+			case reflect.Int8, reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64:
+				param = fmt.Sprintf("%d", a)
+			case reflect.Float32, reflect.Float64:
+				param = fmt.Sprintf("%f", a)
+			case reflect.Bool:
+				if rv.Bool() {
+					param = "1"
+				} else {
+					param = "0"
+				}
+			default:
+				param = fmt.Sprintf("'%s'", a)
+			}
+		}
 	}
 	if f, ok := a.(ParamFormatter); ok {
 		param = f.FormatParam(param, &StmtInfo{
@@ -3464,6 +3536,10 @@ func (b Builder) mysql() bool {
 	return b.Dialect() == dialect.MySQL
 }
 
+func (b Builder) sqlserver() bool {
+	return b.Dialect() == dialect.SQLServer
+}
+
 // fromIdent sets the builder dialect from the identifier format.
 func (b *Builder) fromIdent(ident string) {
 	if strings.Contains(ident, `"`) {
@@ -3475,7 +3551,7 @@ func (b *Builder) fromIdent(ident string) {
 // isIdent reports if the given string is a dialect identifier.
 func (b *Builder) isIdent(s string) bool {
 	switch {
-	case b.postgres():
+	case b.postgres() || b.sqlserver():
 		return strings.Contains(s, `"`)
 	default:
 		return strings.Contains(s, "`")
