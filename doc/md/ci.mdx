@@ -120,6 +120,7 @@ values={[
     {label: 'MySQL', value: 'mysql'},
     {label: 'MariaDB', value: 'maria'},
     {label: 'PostgreSQL', value: 'postgres'},
+    {label: 'SQLite', value: 'sqlite'},
 ]}>
 <TabItem value="mysql">
 
@@ -249,6 +250,35 @@ jobs:
           dir: ent/migrate/migrations
           dir-format: golang-migrate # Or: atlas, goose, dbmate
           dev-url: postgres://postgres:pass@localhost:5432/test?sslmode=disable
+```
+
+</TabItem>
+<TabItem value="sqlite">
+
+```yaml
+name: Atlas CI
+on:
+  # Run whenever code is changed in the master branch,
+  # change this to your root branch.
+  push:
+    branches:
+      - master
+  # Run on PRs where something changed under the `ent/migrate/migrations/` directory.
+  pull_request:
+    paths:
+      - 'ent/migrate/migrations/*'
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3.0.1
+        with:
+          fetch-depth: 0 # Mandatory unless "latest" is set below.
+      - uses: ariga/atlas-action@v0
+        with:
+          dir: ent/migrate/migrations
+          dir-format: golang-migrate # Or: atlas, goose, dbmate
+          dev-url: sqlite://./dev.db?_fk=1
 ```
 
 </TabItem>
