@@ -6,7 +6,7 @@ package schema
 
 import (
 	"context"
-	gosql "database/sql"
+	stdsql "database/sql"
 	"fmt"
 	"strconv"
 	"strings"
@@ -501,16 +501,16 @@ type tx struct {
 	dialect.Tx
 }
 
-func (tx *tx) QueryContext(ctx context.Context, query string, args ...any) (*gosql.Rows, error) {
+func (tx *tx) QueryContext(ctx context.Context, query string, args ...any) (*stdsql.Rows, error) {
 	rows := &sql.Rows{}
 	if err := tx.Query(ctx, query, args, rows); err != nil {
 		return nil, err
 	}
-	return rows.ColumnScanner.(*gosql.Rows), nil
+	return rows.ColumnScanner.(*stdsql.Rows), nil
 }
 
-func (tx *tx) ExecContext(ctx context.Context, query string, args ...any) (gosql.Result, error) {
-	var r gosql.Result
+func (tx *tx) ExecContext(ctx context.Context, query string, args ...any) (stdsql.Result, error) {
+	var r stdsql.Result
 	if err := tx.Exec(ctx, query, args, &r); err != nil {
 		return nil, err
 	}
