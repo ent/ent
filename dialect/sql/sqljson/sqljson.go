@@ -46,7 +46,7 @@ func ValueIsNull(column string, opts ...Option) *sql.Predicate {
 		switch b.Dialect() {
 		case dialect.MySQL:
 			path := identPath(column, opts...)
-			b.WriteString("JSON_CONTAINS").Nested(func(b *sql.Builder) {
+			b.WriteString("JSON_CONTAINS").Wrap(func(b *sql.Builder) {
 				b.Ident(column).Comma()
 				b.WriteString("'null'").Comma()
 				path.mysqlPath(b)
@@ -145,15 +145,15 @@ func ValueContains(column string, arg any, opts ...Option) *sql.Predicate {
 		path := identPath(column, opts...)
 		switch b.Dialect() {
 		case dialect.MySQL:
-			b.WriteString("JSON_CONTAINS").Nested(func(b *sql.Builder) {
+			b.WriteString("JSON_CONTAINS").Wrap(func(b *sql.Builder) {
 				b.Ident(column).Comma()
 				b.Arg(marshal(arg)).Comma()
 				path.mysqlPath(b)
 			})
 			b.WriteOp(sql.OpEQ).Arg(1)
 		case dialect.SQLite:
-			b.WriteString("EXISTS").Nested(func(b *sql.Builder) {
-				b.WriteString("SELECT * FROM JSON_EACH").Nested(func(b *sql.Builder) {
+			b.WriteString("EXISTS").Wrap(func(b *sql.Builder) {
+				b.WriteString("SELECT * FROM JSON_EACH").Wrap(func(b *sql.Builder) {
 					b.Ident(column).Comma()
 					path.mysqlPath(b)
 				})
@@ -227,7 +227,7 @@ func valueInOp(column string, args []any, opts []Option, op sql.Op) *sql.Predica
 		}
 		ValuePath(b, column, opts...)
 		b.WriteOp(op)
-		b.Nested(func(b *sql.Builder) {
+		b.Wrap(func(b *sql.Builder) {
 			if s, ok := args[0].(*sql.Selector); ok {
 				b.Join(s)
 			} else {
@@ -325,6 +325,37 @@ func LenPath(b *sql.Builder, column string, opts ...Option) {
 	path.length(b)
 }
 
+// Append writes to the given SQL builder the SQL command for appending JSON values
+// into the array, optionally defined as a key. Note, the generated SQL will use the
+// Go semantics, the JSON column/key will be set to the given Array in case it is `null`
+// or NULL. For example:
+//
+//	Append(u, column, []string{"a", "b"})
+//	UPDATE "t" SET "c" = CASE
+//		WHEN ("c" IS NULL OR "c" = 'null'::jsonb)
+//		THEN $1 ELSE "c" || $2 END
+//
+//	Append(u, column, []any{"a", 1}, sqljson.Path("a"))
+//	UPDATE "t" SET "c" = CASE
+//		WHEN (("c"->'a')::jsonb IS NULL OR ("c"->'a')::jsonb = 'null'::jsonb)
+//		THEN jsonb_set("c", '{a}', $1, true) ELSE jsonb_set("c", '{a}', "c"->'a' || $2, true) END
+func Append[T any](u *sql.UpdateBuilder, column string, elems []T, opts ...Option) {
+	if len(elems) == 0 {
+		u.AddError(fmt.Errorf("sqljson: cannot append an empty array to column %q", column))
+		return
+	}
+	drv, err := newDriver(u.Dialect())
+	if err != nil {
+		u.AddError(err)
+		return
+	}
+	vs := make([]any, len(elems))
+	for i, e := range elems {
+		vs[i] = e
+	}
+	drv.Append(u, column, vs, opts...)
+}
+
 // Option allows for calling database JSON paths with functional options.
 type Option func(*PathOptions)
 
@@ -359,7 +390,7 @@ func Unquote(unquote bool) Option {
 	}
 }
 
-// Cast indicates that the result value should be casted to the given type.
+// Cast indicates that the result value should be cast to the given type.
 //
 //	ValuePath(b, "column", Path("a", "b", "[1]", "c"), Cast("int"))
 func Cast(typ string) Option {
@@ -395,7 +426,7 @@ func (p *PathOptions) value(b *sql.Builder) {
 			b.WriteByte('(')
 			defer b.WriteString(")::" + p.Cast)
 		}
-		p.pgPath(b)
+		p.pgTextPath(b)
 	default:
 		if p.Unquote && b.Dialect() == dialect.MySQL {
 			b.WriteString("JSON_UNQUOTE(")
@@ -410,7 +441,7 @@ func (p *PathOptions) length(b *sql.Builder) {
 	switch {
 	case b.Dialect() == dialect.Postgres:
 		b.WriteString("JSONB_ARRAY_LENGTH(")
-		p.pgPath(b)
+		p.pgTextPath(b)
 		b.WriteByte(')')
 	case b.Dialect() == dialect.MySQL:
 		p.mysqlFunc("JSON_LENGTH", b)
@@ -444,8 +475,8 @@ func (p *PathOptions) mysqlPath(b *sql.Builder) {
 	b.WriteByte('\'')
 }
 
-// pgPath writes the JSON path in Postgres format `"a"->'b'->>'c'`.
-func (p *PathOptions) pgPath(b *sql.Builder) {
+// pgTextPath writes the JSON path in PostgreSQL text format: `"a"->'b'->>'c'`.
+func (p *PathOptions) pgTextPath(b *sql.Builder) {
 	b.Ident(p.Ident)
 	for i, s := range p.Path {
 		b.WriteString("->")
@@ -458,6 +489,21 @@ func (p *PathOptions) pgPath(b *sql.Builder) {
 			b.WriteString("'" + s + "'")
 		}
 	}
+}
+
+// pgArrayPath writes the JSON path in PostgreSQL array text[] format: '{a,1,b}'.
+func (p *PathOptions) pgArrayPath(b *sql.Builder) {
+	b.WriteString("'{")
+	for i, s := range p.Path {
+		if i > 0 {
+			b.Comma()
+		}
+		if idx, ok := isJSONIdx(s); ok {
+			s = idx
+		}
+		b.WriteString(s)
+	}
+	b.WriteString("}'")
 }
 
 // ParsePath parses the "dotpath" for the DotPath option.
@@ -553,7 +599,7 @@ func isQuoted(s string) bool {
 
 // isJSONIdx reports whether the string represents a JSON index.
 func isJSONIdx(s string) (string, bool) {
-	if len(s) > 2 && s[0] == '[' && s[len(s)-1] == ']' && isNumber(s[1:len(s)-1]) {
+	if len(s) > 2 && s[0] == '[' && s[len(s)-1] == ']' && (isNumber(s[1:len(s)-1]) || s[1] == '#' && isNumber(s[2:len(s)-1])) {
 		return s[1 : len(s)-1], true
 	}
 	return "", false

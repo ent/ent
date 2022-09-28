@@ -47,12 +47,12 @@ func TestMySQL(t *testing.T) {
 			Dirs(t, client)
 			Ints(t, client)
 			Floats(t, client)
-			Strings(t, client)
 			NetAddr(t, client)
 			RawMessage(t, client)
-			// Skip predicates test for MySQL old versions.
+			// Skip tests with JSON functions for old MySQL versions.
 			if version != "56" {
 				Predicates(t, client)
+				Strings(t, client)
 			}
 		})
 	}
@@ -183,6 +183,38 @@ func Strings(t *testing.T, client *ent.Client) {
 	require.Empty(t, usr.Strings)
 	require.Empty(t, client.User.GetX(ctx, usr.ID).Strings)
 	require.Zero(t, client.User.Query().Where(user.StringsNotNil()).CountX(ctx))
+
+	// Append to an empty array.
+	usr.Update().SetStrings([]string{}).SetT(&schema.T{Ls: []string{}}).ExecX(ctx)
+	usr = usr.Update().Modify(func(u *sql.UpdateBuilder) {
+		sqljson.Append(u, user.FieldStrings, []string{"foo"})
+		sqljson.Append(u, user.FieldT, []string{"foo"}, sqljson.Path("ls"))
+	}).SaveX(ctx)
+	require.Equal(t, []string{"foo"}, usr.Strings)
+	require.Equal(t, []string{"foo"}, usr.T.Ls)
+
+	// Set a 'null' (or an undefined) value.
+	usr.Update().ClearStrings().ClearT().ExecX(ctx)
+	usr.Update().SetStrings(nil).SetT(&schema.T{Ls: nil}).ExecX(ctx)
+	usr = usr.Update().Modify(func(u *sql.UpdateBuilder) {
+		sqljson.Append(u, user.FieldStrings, []string{"foo"})
+		sqljson.Append(u, user.FieldT, []string{"foo"}, sqljson.Path("ls"))
+	}).SaveX(ctx)
+	require.Equal(t, []string{"foo"}, usr.Strings)
+	require.Equal(t, []string{"foo"}, usr.T.Ls)
+	usr = usr.Update().Modify(func(u *sql.UpdateBuilder) {
+		sqljson.Append(u, user.FieldStrings, []string{"bar", "baz"})
+		sqljson.Append(u, user.FieldT, []string{"bar", "baz"}, sqljson.Path("ls"))
+	}).SaveX(ctx)
+	require.Equal(t, []string{"foo", "bar", "baz"}, usr.Strings)
+	require.Equal(t, []string{"foo", "bar", "baz"}, usr.T.Ls)
+
+	// Set a NULL (or an undefined) value.
+	usr.Update().ClearStrings().ExecX(ctx)
+	usr = usr.Update().Modify(func(u *sql.UpdateBuilder) {
+		sqljson.Append(u, user.FieldStrings, []string{"foo"})
+	}).SaveX(ctx)
+	require.Equal(t, []string{"foo"}, usr.Strings)
 }
 
 func RawMessage(t *testing.T, client *ent.Client) {
