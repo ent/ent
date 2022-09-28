@@ -53,8 +53,8 @@ type T struct {
 	B  bool     `json:"b,omitempty"`
 	S  string   `json:"s,omitempty"`
 	T  *T       `json:"t,omitempty"`
-	Li []int    `json:"li,omitempty"`
-	Ls []string `json:"ls,omitempty"`
+	Li []int    `json:"li"`
+	Ls []string `json:"ls"`
 	// Do not omit empty or null maps.
 	M map[string]any `json:"m"`
 }

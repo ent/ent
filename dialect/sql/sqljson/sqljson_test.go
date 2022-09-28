@@ -413,3 +413,73 @@ func TestParsePath(t *testing.T) {
 		})
 	}
 }
+
+func TestAppend(t *testing.T) {
+	tests := []struct {
+		input     sql.Querier
+		wantQuery string
+		wantArgs  []any
+	}{
+		{
+			input: func() sql.Querier {
+				u := sql.Dialect(dialect.Postgres).Update("t")
+				sqljson.Append(u, "c", []string{"a"})
+				return u
+			}(),
+			wantQuery: `UPDATE "t" SET "c" = CASE WHEN ("c" IS NULL OR "c" = 'null'::jsonb) THEN $1 ELSE "c" || $2 END`,
+			wantArgs:  []any{`["a"]`, `["a"]`},
+		},
+		{
+			input: func() sql.Querier {
+				u := sql.Dialect(dialect.Postgres).Update("t")
+				sqljson.Append(u, "c", []string{"a"}, sqljson.Path("a"))
+				return u
+			}(),
+			wantQuery: `UPDATE "t" SET "c" = CASE WHEN (("c"->'a')::jsonb IS NULL OR ("c"->'a')::jsonb = 'null'::jsonb) THEN jsonb_set("c", '{a}', $1, true) ELSE jsonb_set("c", '{a}', "c"->'a' || $2, true) END`,
+			wantArgs:  []any{`["a"]`, `["a"]`},
+		},
+		{
+			input: func() sql.Querier {
+				u := sql.Dialect(dialect.SQLite).Update("t")
+				sqljson.Append(u, "c", []string{"a"})
+				return u
+			}(),
+			wantQuery: "UPDATE `t` SET `c` = CASE WHEN (JSON_TYPE(`c`, '$') IS NULL OR JSON_TYPE(`c`, '$') = 'null') THEN JSON_ARRAY(?) ELSE JSON_INSERT(`c`, '$[#]', ?) END",
+			wantArgs:  []any{"a", "a"},
+		},
+		{
+			input: func() sql.Querier {
+				u := sql.Dialect(dialect.SQLite).Update("t")
+				sqljson.Append(u, "c", []string{"a"}, sqljson.Path("a"))
+				return u
+			}(),
+			wantQuery: "UPDATE `t` SET `c` = CASE WHEN (JSON_TYPE(`c`, '$.a') IS NULL OR JSON_TYPE(`c`, '$.a') = 'null') THEN JSON_SET(`c`, '$.a', JSON_ARRAY(?)) ELSE JSON_INSERT(`c`, '$.a[#]', ?) END",
+			wantArgs:  []any{"a", "a"},
+		},
+		{
+			input: func() sql.Querier {
+				u := sql.Dialect(dialect.MySQL).Update("t")
+				sqljson.Append(u, "c", []string{"a"})
+				return u
+			}(),
+			wantQuery: "UPDATE `t` SET `c` = CASE WHEN (JSON_TYPE(JSON_EXTRACT(`c`, '$')) IS NULL OR JSON_TYPE(JSON_EXTRACT(`c`, '$')) = 'NULL') THEN JSON_ARRAY(?) ELSE JSON_ARRAY_APPEND(`c`, '$', ?) END",
+			wantArgs:  []any{"a", "a"},
+		},
+		{
+			input: func() sql.Querier {
+				u := sql.Dialect(dialect.MySQL).Update("t")
+				sqljson.Append(u, "c", []string{"a"}, sqljson.Path("a"))
+				return u
+			}(),
+			wantQuery: "UPDATE `t` SET `c` = CASE WHEN (JSON_TYPE(JSON_EXTRACT(`c`, '$.a')) IS NULL OR JSON_TYPE(JSON_EXTRACT(`c`, '$.a')) = 'NULL') THEN JSON_SET(`c`, '$.a', JSON_ARRAY(?)) ELSE JSON_ARRAY_APPEND(`c`, '$.a', ?) END",
+			wantArgs:  []any{"a", "a"},
+		},
+	}
+	for i, tt := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			query, args := tt.input.Query()
+			require.Equal(t, tt.wantQuery, query)
+			require.Equal(t, tt.wantArgs, args)
+		})
+	}
+}

@@ -99,7 +99,7 @@ func (c *ColumnBuilder) Query() (string, []any) {
 	}
 	if c.check != nil {
 		c.WriteString(" CHECK ")
-		c.Nested(c.check)
+		c.Wrap(c.check)
 	}
 	return c.String(), c.args
 }
@@ -213,11 +213,11 @@ func (t *TableBuilder) Query() (string, []any) {
 		t.WriteString("IF NOT EXISTS ")
 	}
 	t.Ident(t.name)
-	t.Nested(func(b *Builder) {
+	t.Wrap(func(b *Builder) {
 		b.JoinComma(t.columns...)
 		if len(t.primary) > 0 {
 			b.Comma().WriteString("PRIMARY KEY")
-			b.Nested(func(b *Builder) {
+			b.Wrap(func(b *Builder) {
 				b.IdentComma(t.primary...)
 			})
 		}
@@ -340,7 +340,7 @@ func (t *TableAlter) AddIndex(idx *IndexBuilder) *TableAlter {
 	}
 	b.WriteString("INDEX ")
 	b.Ident(idx.name)
-	b.Nested(func(b *Builder) {
+	b.Wrap(func(b *Builder) {
 		b.IdentComma(idx.columns...)
 	})
 	t.Queries = append(t.Queries, b)
@@ -467,7 +467,7 @@ func (fk *ForeignKeyBuilder) Query() (string, []any) {
 		fk.Ident(fk.symbol).Pad()
 	}
 	fk.WriteString("FOREIGN KEY")
-	fk.Nested(func(b *Builder) {
+	fk.Wrap(func(b *Builder) {
 		b.IdentComma(fk.columns...)
 	})
 	fk.Pad().Join(fk.ref)
@@ -505,7 +505,7 @@ func (r *ReferenceBuilder) Columns(s ...string) *ReferenceBuilder {
 func (r *ReferenceBuilder) Query() (string, []any) {
 	r.WriteString("REFERENCES ")
 	r.Ident(r.table)
-	r.Nested(func(b *Builder) {
+	r.Wrap(func(b *Builder) {
 		b.IdentComma(r.columns...)
 	})
 	return r.String(), r.args
@@ -593,18 +593,18 @@ func (i *IndexBuilder) Query() (string, []any) {
 		if i.method != "" {
 			i.WriteString(" USING ").Ident(i.method)
 		}
-		i.Nested(func(b *Builder) {
+		i.Wrap(func(b *Builder) {
 			b.IdentComma(i.columns...)
 		})
 	case dialect.MySQL:
-		i.Nested(func(b *Builder) {
+		i.Wrap(func(b *Builder) {
 			b.IdentComma(i.columns...)
 		})
 		if i.method != "" {
 			i.WriteString(" USING " + i.method)
 		}
 	default:
-		i.Nested(func(b *Builder) {
+		i.Wrap(func(b *Builder) {
 			b.IdentComma(i.columns...)
 		})
 	}
@@ -1067,7 +1067,7 @@ func (u *UpdateBuilder) Add(column string, v any) *UpdateBuilder {
 	u.columns = append(u.columns, column)
 	u.values = append(u.values, ExprFunc(func(b *Builder) {
 		b.WriteString("COALESCE")
-		b.Nested(func(b *Builder) {
+		b.Wrap(func(b *Builder) {
 			b.Ident(Table(u.table).C(column)).Comma().WriteByte('0')
 		})
 		b.WriteString(" + ")
@@ -1281,7 +1281,7 @@ func (p *Predicate) False() *Predicate {
 //	Not(Or(EQ("name", "foo"), EQ("name", "bar")))
 func Not(pred *Predicate) *Predicate {
 	return P().Not().Append(func(b *Builder) {
-		b.Nested(func(b *Builder) {
+		b.Wrap(func(b *Builder) {
 			b.Join(pred)
 		})
 	})
@@ -1542,7 +1542,7 @@ func (p *Predicate) In(col string, args ...any) *Predicate {
 	}
 	return p.Append(func(b *Builder) {
 		b.Ident(col).WriteOp(OpIn)
-		b.Nested(func(b *Builder) {
+		b.Wrap(func(b *Builder) {
 			if s, ok := args[0].(*Selector); ok {
 				b.Join(s)
 			} else {
@@ -1594,7 +1594,7 @@ func (p *Predicate) NotIn(col string, args ...any) *Predicate {
 	}
 	return p.Append(func(b *Builder) {
 		b.Ident(col).WriteOp(OpNotIn)
-		b.Nested(func(b *Builder) {
+		b.Wrap(func(b *Builder) {
 			if s, ok := args[0].(*Selector); ok {
 				b.Join(s)
 			} else {
@@ -1613,7 +1613,7 @@ func Exists(query Querier) *Predicate {
 func (p *Predicate) Exists(query Querier) *Predicate {
 	return p.Append(func(b *Builder) {
 		b.WriteString("EXISTS ")
-		b.Nested(func(b *Builder) {
+		b.Wrap(func(b *Builder) {
 			b.Join(query)
 		})
 	})
@@ -1628,7 +1628,7 @@ func NotExists(query Querier) *Predicate {
 func (p *Predicate) NotExists(query Querier) *Predicate {
 	return p.Append(func(b *Builder) {
 		b.WriteString("NOT EXISTS ")
-		b.Nested(func(b *Builder) {
+		b.Wrap(func(b *Builder) {
 			b.Join(query)
 		})
 	})
@@ -1777,7 +1777,7 @@ func CompositeLT(columns []string, args ...any) *Predicate {
 
 func (p *Predicate) compositeP(operator string, columns []string, args ...any) *Predicate {
 	return p.Append(func(b *Builder) {
-		b.Nested(func(nb *Builder) {
+		b.Wrap(func(nb *Builder) {
 			nb.IdentComma(columns...)
 		})
 		b.WriteString(operator)
@@ -1822,7 +1822,7 @@ func (p *Predicate) Query() (string, []any) {
 func (*Predicate) arg(b *Builder, a any) {
 	switch a.(type) {
 	case *Selector:
-		b.Nested(func(b *Builder) {
+		b.Wrap(func(b *Builder) {
 			b.Arg(a)
 		})
 	default:
@@ -1855,7 +1855,7 @@ func (p *Predicate) mayWrap(preds []*Predicate, b *Builder, op string) {
 			b.WriteByte(' ')
 		}
 		if len(preds[i].fns) > 1 {
-			b.Nested(func(b *Builder) {
+			b.Wrap(func(b *Builder) {
 				b.Join(preds[i])
 			})
 		} else {
@@ -1948,7 +1948,7 @@ func (f *Func) Avg(ident string) {
 func (f *Func) byName(fn, ident string) {
 	f.Append(func(b *Builder) {
 		f.WriteString(fn)
-		f.Nested(func(b *Builder) {
+		f.Wrap(func(b *Builder) {
 			b.Ident(ident)
 		})
 	})
@@ -2707,7 +2707,7 @@ func (s *Selector) Query() (string, []any) {
 			b.WriteString(t.ref())
 		case *Selector:
 			t.SetDialect(s.dialect)
-			b.Nested(func(b *Builder) {
+			b.Wrap(func(b *Builder) {
 				b.Join(t)
 			})
 			b.WriteString(" AS ")
@@ -2727,7 +2727,7 @@ func (s *Selector) Query() (string, []any) {
 			b.WriteString(view.ref())
 		case *Selector:
 			view.SetDialect(s.dialect)
-			b.Nested(func(b *Builder) {
+			b.Wrap(func(b *Builder) {
 				b.Join(view)
 			})
 			b.WriteString(" AS ")
@@ -2936,7 +2936,7 @@ func (w *WithBuilder) Query() (string, []any) {
 			w.WriteByte(')')
 		}
 		w.WriteString(" AS ")
-		w.Nested(func(b *Builder) {
+		w.Wrap(func(b *Builder) {
 			b.Join(cte.s)
 		})
 	}
@@ -3002,7 +3002,7 @@ func (w *WindowBuilder) OrderExpr(exprs ...Querier) *WindowBuilder {
 func (w *WindowBuilder) Query() (string, []any) {
 	w.WriteString(w.fn)
 	w.WriteString("() OVER ")
-	w.Nested(func(b *Builder) {
+	w.Wrap(func(b *Builder) {
 		if w.partition != nil {
 			b.WriteString("PARTITION BY ")
 			w.partition(b)
@@ -3404,8 +3404,8 @@ func (b *Builder) join(qs []Querier, sep string) *Builder {
 	return b
 }
 
-// Nested gets a callback, and wraps its result with parentheses.
-func (b *Builder) Nested(f func(*Builder)) *Builder {
+// Wrap gets a callback, and wraps its result with parentheses.
+func (b *Builder) Wrap(f func(*Builder)) *Builder {
 	nb := &Builder{dialect: b.dialect, total: b.total, sb: &strings.Builder{}}
 	nb.WriteByte('(')
 	f(nb)
@@ -3414,6 +3414,13 @@ func (b *Builder) Nested(f func(*Builder)) *Builder {
 	b.args = append(b.args, nb.args...)
 	b.total = nb.total
 	return b
+}
+
+// Nested gets a callback, and wraps its result with parentheses.
+//
+// Deprecated: Use Builder.Wrap instead.
+func (b *Builder) Nested(f func(*Builder)) *Builder {
+	return b.Wrap(f)
 }
 
 // SetDialect sets the builder dialect. It's used for garnering dialect specific queries.

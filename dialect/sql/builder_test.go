@@ -1670,7 +1670,7 @@ func TestSelector_SelectExpr(t *testing.T) {
 		AppendSelectExpr(
 			Expr("age + $1", 1),
 			ExprFunc(func(b *Builder) {
-				b.Nested(func(b *Builder) {
+				b.Wrap(func(b *Builder) {
 					b.WriteString("similarity(").Ident("name").Comma().Arg("A").WriteByte(')')
 					b.WriteOp(OpAdd)
 					b.WriteString("similarity(").Ident("desc").Comma().Arg("D").WriteByte(')')
