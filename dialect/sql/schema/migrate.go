@@ -139,12 +139,12 @@ func (m *Migrate) Create(ctx context.Context, tables ...*Table) error {
 }
 
 func (m *Migrate) create(ctx context.Context, tables ...*Table) error {
+	if err := m.init(ctx); err != nil {
+		return err
+	}
 	tx, err := m.Tx(ctx)
 	if err != nil {
 		return err
-	}
-	if err := m.init(ctx, tx); err != nil {
-		return rollback(tx, err)
 	}
 	if m.universalID {
 		if err := m.types(ctx, tx); err != nil {
@@ -185,7 +185,7 @@ func (m *Migrate) txCreate(ctx context.Context, tx dialect.Tx, tables ...*Table)
 			if err := tx.Exec(ctx, query, args, nil); err != nil {
 				return fmt.Errorf("create table %q: %w", t.Name, err)
 			}
-			// If global unique identifier is enabled and it's not
+			// If global unique identifier is enabled, and it's not
 			// a relation table, allocate a range for the table pk.
 			if m.universalID && len(t.PrimaryKey) == 1 {
 				if err := m.allocPKRange(ctx, tx, t); err != nil {
@@ -606,7 +606,7 @@ func indexOf(a []string, s string) int {
 type sqlDialect interface {
 	atBuilder
 	dialect.Driver
-	init(context.Context, dialect.ExecQuerier) error
+	init(context.Context) error
 	table(context.Context, dialect.Tx, string) (*Table, error)
 	tableExist(context.Context, dialect.ExecQuerier, string) (bool, error)
 	fkExist(context.Context, dialect.Tx, string) (bool, error)

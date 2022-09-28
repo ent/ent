@@ -47,7 +47,7 @@ func TestSQLite_Create(t *testing.T) {
 			name: "no tables",
 			before: func(mock sqliteMock) {
 				mock.start()
-				mock.ExpectCommit()
+				mock.commit()
 			},
 		},
 		{
@@ -73,7 +73,7 @@ func TestSQLite_Create(t *testing.T) {
 				mock.tableExists("users", false)
 				mock.ExpectExec(escape("CREATE TABLE `users`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL, `name` varchar(255) NULL, `age` integer NOT NULL, `doc` json NULL, `uuid` uuid NULL, `decimal` decimal(6,2) NOT NULL)")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
-				mock.ExpectCommit()
+				mock.commit()
 			},
 		},
 		{
@@ -120,7 +120,7 @@ func TestSQLite_Create(t *testing.T) {
 				mock.tableExists("pets", false)
 				mock.ExpectExec(escape("CREATE TABLE `pets`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL, `name` varchar(255) NOT NULL, `owner_id` integer NULL, FOREIGN KEY(`owner_id`) REFERENCES `users`(`id`) ON DELETE CASCADE)")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
-				mock.ExpectCommit()
+				mock.commit()
 			},
 		},
 		{
@@ -170,7 +170,7 @@ func TestSQLite_Create(t *testing.T) {
 				mock.tableExists("pets", false)
 				mock.ExpectExec(escape("CREATE TABLE `pets`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL, `name` varchar(255) NOT NULL, `owner_id` integer NULL)")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
-				mock.ExpectCommit()
+				mock.commit()
 			},
 		},
 		{
@@ -204,7 +204,7 @@ func TestSQLite_Create(t *testing.T) {
 					WillReturnRows(sqlmock.NewRows([]string{"name", "unique", "origin"}))
 				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `age` integer NOT NULL DEFAULT 0")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
-				mock.ExpectCommit()
+				mock.commit()
 			},
 		},
 		{
@@ -234,7 +234,7 @@ func TestSQLite_Create(t *testing.T) {
 					WillReturnRows(sqlmock.NewRows([]string{"name", "unique", "origin"}))
 				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `updated_at` datetime NULL")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
-				mock.ExpectCommit()
+				mock.commit()
 			},
 		},
 		{
@@ -275,7 +275,7 @@ func TestSQLite_Create(t *testing.T) {
 					mock.ExpectExec(escape(fmt.Sprintf("ALTER TABLE `blobs` ADD COLUMN `new_%s` blob NOT NULL", c))).
 						WillReturnResult(sqlmock.NewResult(0, 1))
 				}
-				mock.ExpectCommit()
+				mock.commit()
 			},
 		},
 		{
@@ -306,7 +306,7 @@ func TestSQLite_Create(t *testing.T) {
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `active` bool NOT NULL DEFAULT false")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
-				mock.ExpectCommit()
+				mock.commit()
 			},
 		},
 		{
@@ -347,7 +347,7 @@ func TestSQLite_Create(t *testing.T) {
 					WillReturnRows(sqlmock.NewRows([]string{"name", "unique", "origin"}))
 				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `spouse_id` integer NULL CONSTRAINT user_spouse REFERENCES `users`(`id`) ON DELETE CASCADE")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
-				mock.ExpectCommit()
+				mock.commit()
 			},
 		},
 		{
@@ -389,7 +389,7 @@ func TestSQLite_Create(t *testing.T) {
 				mock.ExpectExec(escape("INSERT INTO `sqlite_sequence` (`name`, `seq`) VALUES (?, ?)")).
 					WithArgs("groups", 1<<32).
 					WillReturnResult(sqlmock.NewResult(0, 1))
-				mock.ExpectCommit()
+				mock.commit()
 			},
 		},
 		{
@@ -428,7 +428,7 @@ func TestSQLite_Create(t *testing.T) {
 				mock.ExpectExec(escape("INSERT INTO `sqlite_sequence` (`name`, `seq`) VALUES (?, ?)")).
 					WithArgs("groups", 1<<32).
 					WillReturnResult(sqlmock.NewResult(0, 1))
-				mock.ExpectCommit()
+				mock.commit()
 			},
 		},
 	}
@@ -450,9 +450,21 @@ type sqliteMock struct {
 }
 
 func (m sqliteMock) start() {
-	m.ExpectBegin()
 	m.ExpectQuery("PRAGMA foreign_keys").
 		WillReturnRows(sqlmock.NewRows([]string{"foreign_keys"}).AddRow(1))
+	m.ExpectExec("PRAGMA foreign_keys = off").
+		WillReturnResult(sqlmock.NewResult(0, 1))
+	m.ExpectBegin()
+	m.ExpectQuery("PRAGMA foreign_key_check").
+		WillReturnRows(sqlmock.NewRows([]string{})) // empty
+}
+
+func (m sqliteMock) commit() {
+	m.ExpectQuery("PRAGMA foreign_key_check").
+		WillReturnRows(sqlmock.NewRows([]string{})) // empty
+	m.ExpectCommit()
+	m.ExpectExec("PRAGMA foreign_keys = on").
+		WillReturnResult(sqlmock.NewResult(0, 1))
 }
 
 func (m sqliteMock) tableExists(table string, exists bool) {

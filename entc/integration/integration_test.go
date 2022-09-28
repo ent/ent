@@ -1939,7 +1939,18 @@ func (f writerFunc) Write(p []byte) (int, error) { return f(p) }
 func NoSchemaChanges(t *testing.T, client *ent.Client) {
 	w := writerFunc(func(p []byte) (int, error) {
 		stmt := strings.Trim(string(p), "\n;")
-		if stmt != "BEGIN" && stmt != "COMMIT" {
+		ok := []string{"BEGIN", "COMMIT"}
+		if strings.Contains(t.Name(), "SQLite") {
+			ok = append(ok, "PRAGMA foreign_keys = off", "PRAGMA foreign_keys = on")
+		}
+		if !func() bool {
+			for _, s := range ok {
+				if s == stmt {
+					return true
+				}
+			}
+			return false
+		}() {
 			t.Errorf("expect no statement to execute. got: %q", stmt)
 		}
 		return len(p), nil

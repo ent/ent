@@ -1010,9 +1010,9 @@ type pgMock struct {
 }
 
 func (m pgMock) start(version string) {
-	m.ExpectBegin()
 	m.ExpectQuery(escape("SHOW server_version_num")).
 		WillReturnRows(sqlmock.NewRows([]string{"server_version_num"}).AddRow(version))
+	m.ExpectBegin()
 }
 
 func (m pgMock) tableExists(table string, exists bool) {

@@ -29,9 +29,9 @@ type Postgres struct {
 
 // init loads the Postgres version from the database for later use in the migration process.
 // It returns an error if the server version is lower than v10.
-func (d *Postgres) init(ctx context.Context, tx dialect.ExecQuerier) error {
+func (d *Postgres) init(ctx context.Context) error {
 	rows := &sql.Rows{}
-	if err := tx.Query(ctx, "SHOW server_version_num", []any{}, rows); err != nil {
+	if err := d.Query(ctx, "SHOW server_version_num", []any{}, rows); err != nil {
 		return fmt.Errorf("querying server version %w", err)
 	}
 	defer rows.Close()

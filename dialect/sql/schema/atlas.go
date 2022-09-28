@@ -164,7 +164,7 @@ func (a *Atlas) NamedDiff(ctx context.Context, name string, tables ...*Table) er
 		a.sqlDialect = nil
 		a.atDriver = nil
 	}()
-	if err := a.sqlDialect.init(ctx, a.sqlDialect); err != nil {
+	if err := a.sqlDialect.init(ctx); err != nil {
 		return err
 	}
 	if a.universalID {
@@ -656,13 +656,13 @@ func (a *Atlas) create(ctx context.Context, tables ...*Table) (err error) {
 		}
 	}
 	defer func() { a.sqlDialect = nil }()
+	if err := a.sqlDialect.init(ctx); err != nil {
+		return err
+	}
 	// Open a transaction for backwards compatibility,
 	// even if the migration is not transactional.
 	tx, err := a.sqlDialect.Tx(ctx)
 	if err != nil {
-		return err
-	}
-	if err := a.sqlDialect.init(ctx, tx); err != nil {
 		return err
 	}
 	a.atDriver, err = a.sqlDialect.atOpen(tx)
