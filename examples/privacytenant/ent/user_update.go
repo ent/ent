@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/examples/privacytenant/ent/group"
 	"entgo.io/ent/examples/privacytenant/ent/predicate"
 	"entgo.io/ent/examples/privacytenant/ent/user"
@@ -49,6 +50,12 @@ func (uu *UserUpdate) SetNillableName(s *string) *UserUpdate {
 // SetFoods sets the "foods" field.
 func (uu *UserUpdate) SetFoods(s []string) *UserUpdate {
 	uu.mutation.SetFoods(s)
+	return uu
+}
+
+// AppendFoods appends s to the "foods" field.
+func (uu *UserUpdate) AppendFoods(s []string) *UserUpdate {
+	uu.mutation.AppendFoods(s)
 	return uu
 }
 
@@ -199,6 +206,11 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldFoods,
 		})
 	}
+	if value, ok := uu.mutation.AppendedFoods(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldFoods, value)
+		})
+	}
 	if uu.mutation.FoodsCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
@@ -295,6 +307,12 @@ func (uuo *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
 // SetFoods sets the "foods" field.
 func (uuo *UserUpdateOne) SetFoods(s []string) *UserUpdateOne {
 	uuo.mutation.SetFoods(s)
+	return uuo
+}
+
+// AppendFoods appends s to the "foods" field.
+func (uuo *UserUpdateOne) AppendFoods(s []string) *UserUpdateOne {
+	uuo.mutation.AppendFoods(s)
 	return uuo
 }
 
@@ -473,6 +491,11 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Type:   field.TypeJSON,
 			Value:  value,
 			Column: user.FieldFoods,
+		})
+	}
+	if value, ok := uuo.mutation.AppendedFoods(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldFoods, value)
 		})
 	}
 	if uuo.mutation.FoodsCleared() {

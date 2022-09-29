@@ -108,11 +108,18 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 					})
 				}
 				{{- if $f.SupportsMutationAdd }}
-					if value, ok := {{ $mutation }}.Added{{ $f.StructField }}(); ok {
+					if value, ok := {{ $mutation }}.{{ $f.MutationAdded }}(); ok {
 						_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 							Type: field.{{ $f.Type.ConstName }},
 							Value: value,
 							Column: {{ $.Package }}.{{ $f.Constant }},
+						})
+					}
+				{{- end }}
+				{{- if $f.SupportsMutationAppend }}
+					if value, ok := {{ $mutation }}.{{ $f.MutationAppended }}(); ok {
+						_spec.AddModifier(func(u *sql.UpdateBuilder) {
+							sqljson.Append(u, {{ $.Package }}.{{ $f.Constant }}, value)
 						})
 					}
 				{{- end }}

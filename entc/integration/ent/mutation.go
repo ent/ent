@@ -1661,6 +1661,7 @@ type FieldTypeMutation struct {
 	optional_uuid              *uuid.UUID
 	nillable_uuid              *uuid.UUID
 	strings                    *[]string
+	appendstrings              []string
 	pair                       *schema.Pair
 	nil_pair                   **schema.Pair
 	vstring                    *schema.VString
@@ -5151,6 +5152,7 @@ func (m *FieldTypeMutation) ResetNillableUUID() {
 // SetStrings sets the "strings" field.
 func (m *FieldTypeMutation) SetStrings(s []string) {
 	m.strings = &s
+	m.appendstrings = nil
 }
 
 // Strings returns the value of the "strings" field in the mutation.
@@ -5179,9 +5181,23 @@ func (m *FieldTypeMutation) OldStrings(ctx context.Context) (v []string, err err
 	return oldValue.Strings, nil
 }
 
+// AppendStrings adds s to the "strings" field.
+func (m *FieldTypeMutation) AppendStrings(s []string) {
+	m.appendstrings = append(m.appendstrings, s...)
+}
+
+// AppendedStrings returns the list of values that were appended to the "strings" field in this mutation.
+func (m *FieldTypeMutation) AppendedStrings() ([]string, bool) {
+	if len(m.appendstrings) == 0 {
+		return nil, false
+	}
+	return m.appendstrings, true
+}
+
 // ClearStrings clears the value of the "strings" field.
 func (m *FieldTypeMutation) ClearStrings() {
 	m.strings = nil
+	m.appendstrings = nil
 	m.clearedFields[fieldtype.FieldStrings] = struct{}{}
 }
 
@@ -5194,6 +5210,7 @@ func (m *FieldTypeMutation) StringsCleared() bool {
 // ResetStrings resets all changes to the "strings" field.
 func (m *FieldTypeMutation) ResetStrings() {
 	m.strings = nil
+	m.appendstrings = nil
 	delete(m.clearedFields, fieldtype.FieldStrings)
 }
 

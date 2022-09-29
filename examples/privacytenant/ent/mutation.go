@@ -859,6 +859,7 @@ type UserMutation struct {
 	id            *int
 	name          *string
 	foods         *[]string
+	appendfoods   []string
 	clearedFields map[string]struct{}
 	tenant        *int
 	clearedtenant bool
@@ -1043,6 +1044,7 @@ func (m *UserMutation) ResetName() {
 // SetFoods sets the "foods" field.
 func (m *UserMutation) SetFoods(s []string) {
 	m.foods = &s
+	m.appendfoods = nil
 }
 
 // Foods returns the value of the "foods" field in the mutation.
@@ -1071,9 +1073,23 @@ func (m *UserMutation) OldFoods(ctx context.Context) (v []string, err error) {
 	return oldValue.Foods, nil
 }
 
+// AppendFoods adds s to the "foods" field.
+func (m *UserMutation) AppendFoods(s []string) {
+	m.appendfoods = append(m.appendfoods, s...)
+}
+
+// AppendedFoods returns the list of values that were appended to the "foods" field in this mutation.
+func (m *UserMutation) AppendedFoods() ([]string, bool) {
+	if len(m.appendfoods) == 0 {
+		return nil, false
+	}
+	return m.appendfoods, true
+}
+
 // ClearFoods clears the value of the "foods" field.
 func (m *UserMutation) ClearFoods() {
 	m.foods = nil
+	m.appendfoods = nil
 	m.clearedFields[user.FieldFoods] = struct{}{}
 }
 
@@ -1086,6 +1102,7 @@ func (m *UserMutation) FoodsCleared() bool {
 // ResetFoods resets all changes to the "foods" field.
 func (m *UserMutation) ResetFoods() {
 	m.foods = nil
+	m.appendfoods = nil
 	delete(m.clearedFields, user.FieldFoods)
 }
 

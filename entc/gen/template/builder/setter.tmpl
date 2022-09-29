@@ -45,10 +45,17 @@ in the LICENSE file in the root directory of this source tree.
 	{{ end }}
 
 	{{ if and $updater $f.SupportsMutationAdd }}
-		{{ $func := print "Add" $f.StructField }}
-		// {{ $func }} adds {{ $p }} to the "{{ $f.Name }}" field.
-		func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ $f.SignedType }}) *{{ $builder }} {
-			{{ $receiver }}.mutation.{{ $func }}({{ $p }})
+		// {{ $f.MutationAdd }} adds {{ $p }} to the "{{ $f.Name }}" field.
+		func ({{ $receiver }} *{{ $builder }}) {{ $f.MutationAdd }}({{ $p }} {{ $f.SignedType }}) *{{ $builder }} {
+			{{ $receiver }}.mutation.{{ $f.MutationAdd }}({{ $p }})
+			return {{ $receiver }}
+		}
+	{{ end }}
+
+	{{ if and $updater $f.SupportsMutationAppend }}
+		// {{ $f.MutationAppend }} appends {{ $p }} to the "{{ $f.Name }}" field.
+		func ({{ $receiver }} *{{ $builder }}) {{ $f.MutationAppend }}({{ $p }} {{ $f.Type }}) *{{ $builder }} {
+			{{ $receiver }}.mutation.{{ $f.MutationAppend }}({{ $p }})
 			return {{ $receiver }}
 		}
 	{{ end }}
