@@ -288,6 +288,28 @@ The above code will produce the following SQL query:
 UPDATE `users` SET `id` = `id` + 1 ORDER BY `id` DESC
 ```
 
+#### Modify Example 7
+
+Append a list of values to a JSON column:
+
+```go
+client.User.Update().
+	Modify(func(u *sql.UpdateBuilder) {
+        sqljson.Append(u, user.FieldTags, []string{"tag1", "tag2"})
+	}).
+	ExecX(ctx)
+```
+
+The above code will produce the following SQL query:
+
+```sql
+UPDATE `users` SET `tags` = CASE
+    WHEN (JSON_TYPE(JSON_EXTRACT(`tags`, '$')) IS NULL OR JSON_TYPE(JSON_EXTRACT(`tags`, '$')) = 'NULL')
+    THEN JSON_ARRAY(?, ?)
+    ELSE JSON_ARRAY_APPEND(`tags`, '$', ?, '$', ?) END
+    WHERE `id` = ?
+```
+
 ### SQL Raw API
 
 The `sql/execquery` option allows executing statements using the `ExecContext`/`QueryContext` methods of the underlying
