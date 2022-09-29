@@ -38,7 +38,7 @@ go generate ./ent
 The `generate` command generates the following assets for the schemas:
 
 - `Client` and `Tx` objects used for interacting with the graph.
-- CRUD builders for each schema type. See [CRUD](crud.md) for more info.
+- CRUD builders for each schema type. See [CRUD](crud.mdx) for more info.
 - Entity object (Go struct) for each of the schema types.
 - Package containing constants and predicates used for interacting with the builders.
 - A `migrate` package for SQL dialects. See [Migration](migrate.md) for more info.
