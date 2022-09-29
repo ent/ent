@@ -254,7 +254,7 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_spec.Modifiers = giu.modifiers
+	_spec.AddModifiers(giu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, giu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{groupinfo.Label}
@@ -526,7 +526,7 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (_node *GroupInfo, 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_spec.Modifiers = giuo.modifiers
+	_spec.AddModifiers(giuo.modifiers...)
 	_node = &GroupInfo{config: giuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

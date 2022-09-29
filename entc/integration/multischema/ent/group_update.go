@@ -233,7 +233,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	_spec.Node.Schema = gu.schemaConfig.Group
 	ctx = internal.NewSchemaConfigContext(ctx, gu.schemaConfig)
-	_spec.Modifiers = gu.modifiers
+	_spec.AddModifiers(gu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, gu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{group.Label}
@@ -483,7 +483,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	}
 	_spec.Node.Schema = guo.schemaConfig.Group
 	ctx = internal.NewSchemaConfigContext(ctx, guo.schemaConfig)
-	_spec.Modifiers = guo.modifiers
+	_spec.AddModifiers(guo.modifiers...)
 	_node = &Group{config: guo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

@@ -415,6 +415,16 @@ type (
 	}
 )
 
+// AddModifier adds a new statement modifier to the spec.
+func (u *UpdateSpec) AddModifier(m func(*sql.UpdateBuilder)) {
+	u.Modifiers = append(u.Modifiers, m)
+}
+
+// AddModifiers adds a list of statement modifiers to the spec.
+func (u *UpdateSpec) AddModifiers(m ...func(*sql.UpdateBuilder)) {
+	u.Modifiers = append(u.Modifiers, m...)
+}
+
 // UpdateNode applies the UpdateSpec on one node in the graph.
 func UpdateNode(ctx context.Context, drv dialect.Driver, spec *UpdateSpec) error {
 	tx, err := drv.Tx(ctx)

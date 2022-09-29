@@ -87,6 +87,6 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/sql/update/spec/modify" }}
     {{- if $.FeatureEnabled "sql/modifier" }}
         {{- $receiver := pascal $.Scope.Builder | receiver }}
-        _spec.Modifiers = {{ $receiver }}.modifiers
+        _spec.AddModifiers({{ $receiver }}.modifiers...)
     {{- end }}
 {{- end -}}

@@ -184,37 +184,71 @@ func Strings(t *testing.T, client *ent.Client) {
 	require.Empty(t, client.User.GetX(ctx, usr.ID).Strings)
 	require.Zero(t, client.User.Query().Where(user.StringsNotNil()).CountX(ctx))
 
-	// Append to an empty array.
-	usr.Update().SetStrings([]string{}).SetT(&schema.T{Ls: []string{}}).ExecX(ctx)
-	usr = usr.Update().Modify(func(u *sql.UpdateBuilder) {
-		sqljson.Append(u, user.FieldStrings, []string{"foo"})
-		sqljson.Append(u, user.FieldT, []string{"foo"}, sqljson.Path("ls"))
-	}).SaveX(ctx)
-	require.Equal(t, []string{"foo"}, usr.Strings)
-	require.Equal(t, []string{"foo"}, usr.T.Ls)
+	t.Run("Modifier API", func(t *testing.T) {
+		// Append to an empty array.
+		usr.Update().SetStrings([]string{}).SetT(&schema.T{Ls: []string{}}).ExecX(ctx)
+		usr = usr.Update().Modify(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldStrings, []string{"foo"})
+			sqljson.Append(u, user.FieldT, []string{"foo"}, sqljson.Path("ls"))
+		}).SaveX(ctx)
+		require.Equal(t, []string{"foo"}, usr.Strings)
+		require.Equal(t, []string{"foo"}, usr.T.Ls)
 
-	// Set a 'null' (or an undefined) value.
-	usr.Update().ClearStrings().ClearT().ExecX(ctx)
-	usr.Update().SetStrings(nil).SetT(&schema.T{Ls: nil}).ExecX(ctx)
-	usr = usr.Update().Modify(func(u *sql.UpdateBuilder) {
-		sqljson.Append(u, user.FieldStrings, []string{"foo"})
-		sqljson.Append(u, user.FieldT, []string{"foo"}, sqljson.Path("ls"))
-	}).SaveX(ctx)
-	require.Equal(t, []string{"foo"}, usr.Strings)
-	require.Equal(t, []string{"foo"}, usr.T.Ls)
-	usr = usr.Update().Modify(func(u *sql.UpdateBuilder) {
-		sqljson.Append(u, user.FieldStrings, []string{"bar", "baz"})
-		sqljson.Append(u, user.FieldT, []string{"bar", "baz"}, sqljson.Path("ls"))
-	}).SaveX(ctx)
-	require.Equal(t, []string{"foo", "bar", "baz"}, usr.Strings)
-	require.Equal(t, []string{"foo", "bar", "baz"}, usr.T.Ls)
+		// Set a 'null' (or an undefined) value.
+		usr.Update().ClearStrings().ClearT().ExecX(ctx)
+		usr.Update().SetStrings(nil).SetT(&schema.T{Ls: nil}).ExecX(ctx)
+		usr = usr.Update().Modify(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldStrings, []string{"foo"})
+			sqljson.Append(u, user.FieldT, []string{"foo"}, sqljson.Path("ls"))
+		}).SaveX(ctx)
+		require.Equal(t, []string{"foo"}, usr.Strings)
+		require.Equal(t, []string{"foo"}, usr.T.Ls)
+		usr = usr.Update().Modify(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldStrings, []string{"bar", "baz"})
+			sqljson.Append(u, user.FieldT, []string{"bar", "baz"}, sqljson.Path("ls"))
+		}).SaveX(ctx)
+		require.Equal(t, []string{"foo", "bar", "baz"}, usr.Strings)
+		require.Equal(t, []string{"foo", "bar", "baz"}, usr.T.Ls)
 
-	// Set a NULL (or an undefined) value.
-	usr.Update().ClearStrings().ExecX(ctx)
-	usr = usr.Update().Modify(func(u *sql.UpdateBuilder) {
-		sqljson.Append(u, user.FieldStrings, []string{"foo"})
-	}).SaveX(ctx)
-	require.Equal(t, []string{"foo"}, usr.Strings)
+		// Set a NULL (or an undefined) value.
+		usr.Update().ClearStrings().ExecX(ctx)
+		usr = usr.Update().Modify(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldStrings, []string{"foo"})
+		}).SaveX(ctx)
+		require.Equal(t, []string{"foo"}, usr.Strings)
+	})
+
+	t.Run("Fluent API", func(t *testing.T) {
+		// Append to an empty array.
+		usr.Update().SetStrings([]string{}).SetInts([]int{}).ExecX(ctx)
+		usr = usr.Update().AppendStrings([]string{"foo"}).AppendInts([]int{1}).SaveX(ctx)
+		require.Equal(t, []int{1}, usr.Ints)
+		require.Equal(t, []string{"foo"}, usr.Strings)
+		usr = client.User.GetX(ctx, usr.ID)
+		require.Equal(t, []int{1}, usr.Ints)
+		require.Equal(t, []string{"foo"}, usr.Strings)
+		usr = usr.Update().AppendStrings([]string{"bar", "baz"}).AppendInts([]int{2, 3}).SaveX(ctx)
+		require.Equal(t, []int{1, 2, 3}, usr.Ints)
+		require.Equal(t, []string{"foo", "bar", "baz"}, usr.Strings)
+
+		// Set a 'null' (or an undefined) value.
+		usr.Update().ClearStrings().SetInts(nil).SetDirs(nil).ExecX(ctx)
+		usr = client.User.GetX(ctx, usr.ID)
+		require.Empty(t, usr.Ints)
+		require.Empty(t, usr.Strings)
+		usr = usr.Update().AppendStrings([]string{"foo"}).AppendInts([]int{1}).SaveX(ctx)
+		require.Equal(t, []int{1}, usr.Ints)
+		require.Equal(t, []string{"foo"}, usr.Strings)
+
+		usr.Update().AppendStrings([]string{"bar"}).SetStrings([]string{"baz"}).ExecX(ctx)
+		require.Equal(t, []string{"baz"}, client.User.GetX(ctx, usr.ID).Strings)
+		usr.Update().AppendStrings([]string{"bar"}).SetStrings([]string{"baz"}).ExecX(ctx)
+		require.Equal(t, []string{"baz"}, client.User.GetX(ctx, usr.ID).Strings)
+		usr.Update().AppendStrings([]string{"bar"}).ClearStrings().AppendDirs([]http.Dir{"/etc", "/dev"}).ExecX(ctx)
+		usr = client.User.GetX(ctx, usr.ID)
+		require.Empty(t, usr.Strings)
+		require.Equal(t, []http.Dir{"/etc", "/dev"}, usr.Dirs)
+	})
 }
 
 func RawMessage(t *testing.T, client *ent.Client) {

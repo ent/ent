@@ -1229,6 +1229,12 @@ func (ftu *FieldTypeUpdate) SetStrings(s []string) *FieldTypeUpdate {
 	return ftu
 }
 
+// AppendStrings appends s to the "strings" field.
+func (ftu *FieldTypeUpdate) AppendStrings(s []string) *FieldTypeUpdate {
+	ftu.mutation.AppendStrings(s)
+	return ftu
+}
+
 // ClearStrings clears the value of the "strings" field.
 func (ftu *FieldTypeUpdate) ClearStrings() *FieldTypeUpdate {
 	ftu.mutation.ClearStrings()
@@ -3145,6 +3151,12 @@ func (ftuo *FieldTypeUpdateOne) ClearNillableUUID() *FieldTypeUpdateOne {
 // SetStrings sets the "strings" field.
 func (ftuo *FieldTypeUpdateOne) SetStrings(s []string) *FieldTypeUpdateOne {
 	ftuo.mutation.SetStrings(s)
+	return ftuo
+}
+
+// AppendStrings appends s to the "strings" field.
+func (ftuo *FieldTypeUpdateOne) AppendStrings(s []string) *FieldTypeUpdateOne {
+	ftuo.mutation.AppendStrings(s)
 	return ftuo
 }
 

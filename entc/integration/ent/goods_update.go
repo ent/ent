@@ -115,7 +115,7 @@ func (gu *GoodsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	_spec.Modifiers = gu.modifiers
+	_spec.AddModifiers(gu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, gu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{goods.Label}
@@ -249,7 +249,7 @@ func (guo *GoodsUpdateOne) sqlSave(ctx context.Context) (_node *Goods, err error
 			}
 		}
 	}
-	_spec.Modifiers = guo.modifiers
+	_spec.AddModifiers(guo.modifiers...)
 	_node = &Goods{config: guo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

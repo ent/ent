@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/entc/integration/edgefield/ent/info"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
@@ -36,6 +37,12 @@ func (iu *InfoUpdate) Where(ps ...predicate.Info) *InfoUpdate {
 // SetContent sets the "content" field.
 func (iu *InfoUpdate) SetContent(jm json.RawMessage) *InfoUpdate {
 	iu.mutation.SetContent(jm)
+	return iu
+}
+
+// AppendContent appends jm to the "content" field.
+func (iu *InfoUpdate) AppendContent(jm json.RawMessage) *InfoUpdate {
+	iu.mutation.AppendContent(jm)
 	return iu
 }
 
@@ -148,6 +155,11 @@ func (iu *InfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: info.FieldContent,
 		})
 	}
+	if value, ok := iu.mutation.AppendedContent(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, info.FieldContent, value)
+		})
+	}
 	if iu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -205,6 +217,12 @@ type InfoUpdateOne struct {
 // SetContent sets the "content" field.
 func (iuo *InfoUpdateOne) SetContent(jm json.RawMessage) *InfoUpdateOne {
 	iuo.mutation.SetContent(jm)
+	return iuo
+}
+
+// AppendContent appends jm to the "content" field.
+func (iuo *InfoUpdateOne) AppendContent(jm json.RawMessage) *InfoUpdateOne {
+	iuo.mutation.AppendContent(jm)
 	return iuo
 }
 
@@ -345,6 +363,11 @@ func (iuo *InfoUpdateOne) sqlSave(ctx context.Context) (_node *Info, err error) 
 			Type:   field.TypeJSON,
 			Value:  value,
 			Column: info.FieldContent,
+		})
+	}
+	if value, ok := iuo.mutation.AppendedContent(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, info.FieldContent, value)
 		})
 	}
 	if iuo.mutation.UserCleared() {

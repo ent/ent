@@ -950,6 +950,7 @@ type InfoMutation struct {
 	typ           string
 	id            *int
 	content       *json.RawMessage
+	appendcontent json.RawMessage
 	clearedFields map[string]struct{}
 	user          *int
 	cleareduser   bool
@@ -1065,6 +1066,7 @@ func (m *InfoMutation) IDs(ctx context.Context) ([]int, error) {
 // SetContent sets the "content" field.
 func (m *InfoMutation) SetContent(jm json.RawMessage) {
 	m.content = &jm
+	m.appendcontent = nil
 }
 
 // Content returns the value of the "content" field in the mutation.
@@ -1093,9 +1095,23 @@ func (m *InfoMutation) OldContent(ctx context.Context) (v json.RawMessage, err e
 	return oldValue.Content, nil
 }
 
+// AppendContent adds jm to the "content" field.
+func (m *InfoMutation) AppendContent(jm json.RawMessage) {
+	m.appendcontent = append(m.appendcontent, jm...)
+}
+
+// AppendedContent returns the list of values that were appended to the "content" field in this mutation.
+func (m *InfoMutation) AppendedContent() (json.RawMessage, bool) {
+	if len(m.appendcontent) == 0 {
+		return nil, false
+	}
+	return m.appendcontent, true
+}
+
 // ResetContent resets all changes to the "content" field.
 func (m *InfoMutation) ResetContent() {
 	m.content = nil
+	m.appendcontent = nil
 }
 
 // SetUserID sets the "user" edge to the User entity by id.

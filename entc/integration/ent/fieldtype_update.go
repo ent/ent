@@ -16,6 +16,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/entc/integration/ent/fieldtype"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/role"
@@ -1228,6 +1229,12 @@ func (ftu *FieldTypeUpdate) SetStrings(s []string) *FieldTypeUpdate {
 	return ftu
 }
 
+// AppendStrings appends s to the "strings" field.
+func (ftu *FieldTypeUpdate) AppendStrings(s []string) *FieldTypeUpdate {
+	ftu.mutation.AppendStrings(s)
+	return ftu
+}
+
 // ClearStrings clears the value of the "strings" field.
 func (ftu *FieldTypeUpdate) ClearStrings() *FieldTypeUpdate {
 	ftu.mutation.ClearStrings()
@@ -2420,6 +2427,11 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: fieldtype.FieldStrings,
 		})
 	}
+	if value, ok := ftu.mutation.AppendedStrings(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, fieldtype.FieldStrings, value)
+		})
+	}
 	if ftu.mutation.StringsCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
@@ -2493,7 +2505,7 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: fieldtype.FieldPasswordOther,
 		})
 	}
-	_spec.Modifiers = ftu.modifiers
+	_spec.AddModifiers(ftu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, ftu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{fieldtype.Label}
@@ -3701,6 +3713,12 @@ func (ftuo *FieldTypeUpdateOne) ClearNillableUUID() *FieldTypeUpdateOne {
 // SetStrings sets the "strings" field.
 func (ftuo *FieldTypeUpdateOne) SetStrings(s []string) *FieldTypeUpdateOne {
 	ftuo.mutation.SetStrings(s)
+	return ftuo
+}
+
+// AppendStrings appends s to the "strings" field.
+func (ftuo *FieldTypeUpdateOne) AppendStrings(s []string) *FieldTypeUpdateOne {
+	ftuo.mutation.AppendStrings(s)
 	return ftuo
 }
 
@@ -4926,6 +4944,11 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 			Column: fieldtype.FieldStrings,
 		})
 	}
+	if value, ok := ftuo.mutation.AppendedStrings(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, fieldtype.FieldStrings, value)
+		})
+	}
 	if ftuo.mutation.StringsCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
@@ -4999,7 +5022,7 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 			Column: fieldtype.FieldPasswordOther,
 		})
 	}
-	_spec.Modifiers = ftuo.modifiers
+	_spec.AddModifiers(ftuo.modifiers...)
 	_node = &FieldType{config: ftuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

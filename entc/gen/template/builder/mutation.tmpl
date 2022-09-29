@@ -54,6 +54,9 @@ type {{ $mutation }} struct {
 		{{- if $f.SupportsMutationAdd }}
 			add{{ $f.BuilderField }} *{{ $f.SignedType }}
 		{{- end }}
+		{{- if $f.SupportsMutationAppend }}
+			append{{ $f.BuilderField }} {{ $f.Type }}
+		{{- end }}
 	{{- end }}
 	clearedFields map[string]struct{}
 	{{- range $e := $n.EdgesWithID }}
@@ -190,9 +193,13 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 	// {{ $func }} sets the "{{ $f.Name }}" field.
 	func (m *{{ $mutation }}) {{ $func }}({{ $p }} {{ $f.Type }}) {
 		m.{{ $f.BuilderField }} = &{{ $p }}
-		{{- /* setting numeric type override previous calls to Add. */}}
+		{{- /* Setting numeric type override previous calls to Add. */}}
 		{{- if $f.SupportsMutationAdd }}
 			m.add{{ $f.BuilderField }} = nil
+		{{- end }}
+		{{- /* Setting JSON type override previous calls to Append. */}}
+		{{- if $f.SupportsMutationAppend }}
+			m.append{{ $f.BuilderField }} = nil
 		{{- end }}
 	}
 
@@ -225,9 +232,8 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 	{{ end }}
 
 	{{ if $f.SupportsMutationAdd }}
-		{{ $func := print "Add" $f.StructField }}
-		// {{ $func }} adds {{ $p }} to the "{{ $f.Name }}" field.
-		func (m *{{ $mutation }}) {{ $func }}({{ $p }} {{ $f.SignedType }}) {
+		// {{ $f.MutationAdd }} adds {{ $p }} to the "{{ $f.Name }}" field.
+		func (m *{{ $mutation }}) {{ $f.MutationAdd }}({{ $p }} {{ $f.SignedType }}) {
 			{{- $structField := print "m.add" $f.BuilderField }}
 			if {{ $structField }} != nil {
 				{{ $f.MutationAddAssignExpr $structField $p }}
@@ -236,13 +242,29 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 			}
 		}
 
-		// Added{{ $f.StructField }} returns the value that was added to the "{{ $f.Name }}" field in this mutation.
-		func (m *{{ $mutation }}) Added{{ $f.StructField }}() (r {{ $f.SignedType }}, exists bool) {
+		// {{ $f.MutationAdded }} returns the value that was added to the "{{ $f.Name }}" field in this mutation.
+		func (m *{{ $mutation }}) {{ $f.MutationAdded }}() (r {{ $f.SignedType }}, exists bool) {
 			v := m.add{{ $f.BuilderField }}
 			if v == nil {
 				return
 			}
 			return *v, true
+		}
+	{{ end }}
+
+	{{ if $f.SupportsMutationAppend }}
+		{{- $structField := print "m.append" $f.BuilderField }}
+		// {{ $f.MutationAppend }} adds {{ $p }} to the "{{ $f.Name }}" field.
+		func (m *{{ $mutation }}) {{ $f.MutationAppend }}({{ $p }} {{ $f.Type }}) {
+			{{ $structField }} = append({{ $structField }}, {{ $p }}...)
+		}
+
+		// {{ $f.MutationAppended }} returns the list of values that were appended to the "{{ $f.Name }}" field in this mutation.
+		func (m *{{ $mutation }}) {{ $f.MutationAppended }}() ({{ $f.Type }}, bool) {
+			if len({{ $structField }}) == 0 {
+				return nil, false
+			}
+			return {{ $structField }}, true
 		}
 	{{ end }}
 
@@ -253,6 +275,9 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 			m.{{ $f.BuilderField }} = nil
 			{{- if $f.SupportsMutationAdd }}
 				m.add{{ $f.BuilderField }} = nil
+			{{- end }}
+			{{- if $f.SupportsMutationAppend }}
+				m.append{{ $f.BuilderField }} = nil
 			{{- end }}
 			m.clearedFields[{{ $const }}] = struct{}{}
 		}
@@ -271,6 +296,9 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 		m.{{ $f.BuilderField }} = nil
 		{{- if $f.SupportsMutationAdd }}
 			m.add{{ $f.BuilderField }} = nil
+		{{- end }}
+		{{- if $f.SupportsMutationAppend }}
+			m.append{{ $f.BuilderField }} = nil
 		{{- end }}
 		{{- if $f.Optional }}
 			delete(m.clearedFields, {{ $const }})
