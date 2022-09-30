@@ -835,6 +835,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "kortschak",
+      "name": "Dan Kortschak",
+      "avatar_url": "https://avatars.githubusercontent.com/u/275221?v=4",
+      "profile": "https://kortschak.io/",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
