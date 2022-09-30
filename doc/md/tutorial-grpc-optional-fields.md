@@ -9,7 +9,7 @@ primitive fields.
 
 To support this, the Protobuf project supports some [Well-Known types](https://developers.google.com/protocol-buffers/docs/reference/google.protobuf) called "wrapper types".
 For example, the wrapper type for a `bool`, is called `google.protobuf.BoolValue` and is [defined as](https://github.com/protocolbuffers/protobuf/blob/991bcada050d7e9919503adef5b52547ec249d35/src/google/protobuf/wrappers.proto#L103-L107):
-```protobuf
+```protobuf title="ent/proto/entpb/entpb.proto"
 // Wrapper message for `bool`.
 //
 // The JSON representation for `BoolValue` is JSON `true` and `false`.
@@ -22,7 +22,7 @@ When `entproto` generates a Protobuf message definition, it uses these wrapper t
 
 Let's see this in action, modifying our ent schema to include an optional field:
 
-```go {14-16}
+```go title="ent/schema/user.go" {14-16}
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
@@ -45,7 +45,7 @@ func (User) Fields() []ent.Field {
 
 Re-running `go generate ./...`, observe that our Protobuf definition for `User` now looks like:
 
-```protobuf {8}
+```protobuf title="ent/proto/entpb/entpb.proto" {8}
 message User {
   int32 id = 1;
 
@@ -54,33 +54,29 @@ message User {
   string email_address = 3;
 
   google.protobuf.StringValue alias = 4; // <-- this is new 
+
+  repeated Category administered = 5;
 }
 ```
 
 The generated service implementation also utilize this field. Observe in `entpb_user_service.go`:
 
-```go {5-7}
-// Create implements UserServiceServer.Create
-func (svc *UserService) Create(ctx context.Context, req *CreateUserRequest) (*User, error) {
-	user := req.GetUser()
+```go title="ent/proto/entpb/entpb_user_service.go" {3-6}
+func (svc *UserService) createBuilder(user *User) (*ent.UserCreate, error) {
 	m := svc.client.User.Create()
 	if user.GetAlias() != nil {
-		m.SetAlias(user.GetAlias().GetValue())
+		userAlias := user.GetAlias().GetValue()
+		m.SetAlias(userAlias)
 	}
-	m.SetEmailAddress(user.GetEmailAddress())
-	m.SetName(user.GetName())
-	res, err := m.Save(ctx)
-
-	switch {
-	case err == nil:
-		return toProtoUser(res), nil
-	case sqlgraph.IsUniqueConstraintError(err):
-		return nil, status.Errorf(codes.AlreadyExists, "already exists: %s", err)
-	case ent.IsConstraintError(err):
-		return nil, status.Errorf(codes.InvalidArgument, "invalid argument: %s", err)
-	default:
-		return nil, status.Errorf(codes.Internal, "internal: %s", err)
+	userEmailAddress := user.GetEmailAddress()
+	m.SetEmailAddress(userEmailAddress)
+	userName := user.GetName()
+	m.SetName(userName)
+	for _, item := range user.GetAdministered() {
+		administered := int(item.GetId())
+		m.AddAdministeredIDs(administered)
 	}
+	return m, nil
 }
 ```
 
