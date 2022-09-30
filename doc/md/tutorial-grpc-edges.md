@@ -8,7 +8,7 @@ together with generated gRPC services.
 
 Let's start by adding a new entity, `Category` and create edges relating our `User` type to it:
 
-```go
+```go title="ent/schema/category.go"
 package schema
 
 import (
@@ -47,7 +47,7 @@ func (Category) Edges() []ent.Edge {
 
 Creating the inverse relation on the `User`:
 
-```go {4-6}
+```go title="ent/schema/user.go" {4-6}
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
@@ -66,9 +66,9 @@ Notice a few things:
 
 Re-generating the project with `go generate ./...`, notice the changes to the `.proto` file:
 
-```protobuf {1-7,18}
+```protobuf title="ent/proto/entpb/entpb.proto" {1-7,18}
 message Category {
-  int32 id = 1;
+  int64 id = 1;
 
   string name = 2;
 
@@ -76,7 +76,7 @@ message Category {
 }
 
 message User {
-  int32 id = 1;
+  int64 id = 1;
 
   string name = 2;
 
@@ -137,7 +137,7 @@ func TestServiceWithEdges(t *testing.T) {
 			Name:         "user",
 			EmailAddress: "user@service.code",
 			Administered: []*entpb.Category{
-				{Id: int32(cat.ID)},
+				{Id: int64(cat.ID)},
 			},
 		},
 	})
@@ -168,16 +168,14 @@ func TestServiceWithEdges(t *testing.T) {
 To create the edge from the created `User` to the existing `Category` we do not need to populate the entire `Category`
 object. Instead we only populate the `Id` field. This is picked up by the generated service code:
 
-```go {5-7}
-// Create implements UserServiceServer.Create 
-func (svc *UserService) Create(ctx context.Context, req *CreateUserRequest) (*User, error) {
-	user := req.GetUser()
-    // truncated ...
+```go title="ent/proto/entpb/entpb_user_service.go" {3-6}
+func (svc *UserService) createBuilder(user *User) (*ent.UserCreate, error) {
+	  // truncated ...
 	for _, item := range user.GetAdministered() {
-		m.AddAdministeredIDs(int(item.GetId()))
+		administered := int(item.GetId())
+		m.AddAdministeredIDs(administered)
 	}
-	res, err := m.Save(ctx)
-	// truncated ...
+	return m, nil
 }
 ```
 
@@ -212,7 +210,7 @@ func TestGet(t *testing.T) {
 
 	// next, retrieve the user without edge information
 	get, err := svc.Get(ctx, &entpb.GetUserRequest{
-		Id: int32(user.ID),
+		Id: int64(user.ID),
 	})
 	if err != nil {
 		t.Fatal("failed retrieving the created user", err)
@@ -223,7 +221,7 @@ func TestGet(t *testing.T) {
 
 	// next, retrieve the user *WITH* edge information
 	get, err = svc.Get(ctx, &entpb.GetUserRequest{
-		Id:   int32(user.ID),
+		Id:   int64(user.ID),
 		View: entpb.GetUserRequest_WITH_EDGE_IDS,
 	})
 	if err != nil {
@@ -240,9 +238,9 @@ done deliberately because the amount of entities related to an entity is unbound
 whether or not to return the edge information or not, the generated service adheres to [AIP-157](https://google.aip.dev/157)
 (Partial Responses). In short, the `GetUserRequest` message includes an enum named `View`:
 
-```protobuf
+```protobuf title="ent/proto/entpb/entpb.proto"
 message GetUserRequest {
-  int32 id = 1;
+  int64 id = 1;
 
   View view = 2;
 
@@ -258,7 +256,7 @@ message GetUserRequest {
 
 Consider the generated code for the `Get` method:
 
-```go
+```go title="ent/proto/entpb/entpb_user_service.go"
 // Get implements UserServiceServer.Get
 func (svc *UserService) Get(ctx context.Context, req *GetUserRequest) (*User, error) {
 	// .. truncated ..

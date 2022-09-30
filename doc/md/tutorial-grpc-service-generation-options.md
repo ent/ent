@@ -31,7 +31,7 @@ To generate a service with multiple methods, bitwise OR the flags.
 
 
 To see this in action, we can modify our ent schema. Let's say we wanted to prevent our gRPC client from mutating entries. We can accomplish this by modifying `ent/schema/user.go`:
-```go {5}
+```go title="ent/schema/user.go" {5}
 func (User) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		entproto.Message(),
@@ -43,7 +43,7 @@ func (User) Annotations() []schema.Annotation {
 ```
 
 Re-running `go generate ./...` will give us the following service definition in `entpb.proto`:
-```protobuf
+```protobuf title="ent/proto/entpb/entpb.proto"
 service UserService {
   rpc Create ( CreateUserRequest ) returns ( User );
 

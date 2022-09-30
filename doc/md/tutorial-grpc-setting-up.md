@@ -38,7 +38,7 @@ go get -u entgo.io/contrib/entproto
 
 Next, we will define the schema for the `User` entity. Open `ent/schema/user.go` and edit:
 
-```go
+```go title="ent/schema/user.go"
 package schema
 
 import (
