@@ -28,12 +28,6 @@ type Tx struct {
 	// lazily loaded.
 	client     *Client
 	clientOnce sync.Once
-
-	// completion callbacks.
-	mu         sync.Mutex
-	onCommit   []CommitHook
-	onRollback []RollbackHook
-
 	// ctx lives for the life of the transaction. It is
 	// the same context used by the underlying connection.
 	ctx context.Context
@@ -82,9 +76,9 @@ type Tx struct {
 		var fn {{ $iface }} = {{ $func }}Func(func(context.Context, *Tx) error {
 			return txDriver.tx.{{ $func }}()
 		})
-		tx.mu.Lock()
-		hooks := append([]{{ $func }}Hook(nil), tx.{{ $onFuncs }}...)
-		tx.mu.Unlock()
+		txDriver.mu.Lock()
+		hooks := append([]{{ $func }}Hook(nil), txDriver.{{ $onFuncs }}...)
+		txDriver.mu.Unlock()
 		for i := len(hooks) - 1; i >= 0; i-- {
 			fn = hooks[i](fn)
 		}
@@ -93,9 +87,10 @@ type Tx struct {
 
 	// On{{ $func }} adds a hook to call on {{ lower $func }}.
 	func (tx *Tx) On{{ $func }}(f {{ $func }}Hook) {
-		tx.mu.Lock()
-		defer tx.mu.Unlock()
-		tx.{{ $onFuncs }} = append(tx.{{ $onFuncs }}, f)
+		txDriver := tx.config.driver.(*txDriver)
+		txDriver.mu.Lock()
+		txDriver.{{ $onFuncs }} = append(txDriver.{{ $onFuncs }}, f)
+		txDriver.mu.Unlock()
 	}
 {{- end }}
 
@@ -133,6 +128,10 @@ type txDriver struct {
 	drv dialect.Driver
 	// tx is the underlying transaction.
 	tx dialect.Tx
+	// completion hooks.
+	mu         sync.Mutex
+	onCommit   []CommitHook
+	onRollback []RollbackHook
 }
 
 // newTx creates a new transactional driver.
