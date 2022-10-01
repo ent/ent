@@ -205,6 +205,25 @@ The above code will produce the following SQL query:
 SELECT DISTINCT `pets`.`id`, `pets`.`owner_id`, `pets`.`name`, `pets`.`age`, `pets`.`species` FROM `pets` WHERE `name` LIKE '_B%'
 ```
 
+#### Between and Not Between
+
+Consider a query where you want to use `Between` or `Not Between`
+
+```sql
+SELECT `age` FROM `users` WHERE age BETWEEN ? AND ?;
+```
+
+This can be done with Between() or NotBetween() functions.
+
+```go
+users := client.User.
+	Query().
+    Where(func(s *sql.Selector) {
+        s.Where(sql.Between("age", 20, 30))
+    }).
+	AllX(ctx)
+```
+
 #### Custom SQL functions
 
 In order to use built-in SQL functions such as `DATE()`, use one of the following options:
