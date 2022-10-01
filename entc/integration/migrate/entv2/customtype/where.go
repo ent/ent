@@ -37,13 +37,7 @@ func IDNEQ(id int) predicate.CustomType {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.CustomType {
 	return predicate.CustomType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(ids) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -54,13 +48,7 @@ func IDIn(ids ...int) predicate.CustomType {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.CustomType {
 	return predicate.CustomType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(ids) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -133,34 +121,22 @@ func CustomNEQ(v string) predicate.CustomType {
 
 // CustomIn applies the In predicate on the "custom" field.
 func CustomIn(vs ...string) predicate.CustomType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.CustomType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldCustom), v...))
 	})
 }
 
 // CustomNotIn applies the NotIn predicate on the "custom" field.
 func CustomNotIn(vs ...string) predicate.CustomType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.CustomType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldCustom), v...))
 	})
 }
@@ -258,34 +234,22 @@ func Tz0NEQ(v time.Time) predicate.CustomType {
 
 // Tz0In applies the In predicate on the "tz0" field.
 func Tz0In(vs ...time.Time) predicate.CustomType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.CustomType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldTz0), v...))
 	})
 }
 
 // Tz0NotIn applies the NotIn predicate on the "tz0" field.
 func Tz0NotIn(vs ...time.Time) predicate.CustomType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.CustomType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldTz0), v...))
 	})
 }
@@ -348,34 +312,22 @@ func Tz3NEQ(v time.Time) predicate.CustomType {
 
 // Tz3In applies the In predicate on the "tz3" field.
 func Tz3In(vs ...time.Time) predicate.CustomType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.CustomType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldTz3), v...))
 	})
 }
 
 // Tz3NotIn applies the NotIn predicate on the "tz3" field.
 func Tz3NotIn(vs ...time.Time) predicate.CustomType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.CustomType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldTz3), v...))
 	})
 }

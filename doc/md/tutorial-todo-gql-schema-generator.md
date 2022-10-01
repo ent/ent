@@ -4,7 +4,7 @@ title: Schema Generator
 sidebar_label: Schema Generator
 ---
 
-In this section, we will continue the [GraphQL example](tutorial-todo-gql.md) by explaining how to generate a
+In this section, we will continue the [GraphQL example](tutorial-todo-gql.mdx) by explaining how to generate a
 type-safe GraphQL schema from our `ent/schema`.
 
 ### Configure Ent

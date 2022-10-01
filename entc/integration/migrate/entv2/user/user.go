@@ -20,6 +20,8 @@ const (
 	FieldMixedString = "mixed_string"
 	// FieldMixedEnum holds the string denoting the mixed_enum field in the database.
 	FieldMixedEnum = "mixed_enum"
+	// FieldActive holds the string denoting the active field in the database.
+	FieldActive = "active"
 	// FieldAge holds the string denoting the age field in the database.
 	FieldAge = "age"
 	// FieldName holds the string denoting the name field in the database.
@@ -85,6 +87,7 @@ var Columns = []string{
 	FieldID,
 	FieldMixedString,
 	FieldMixedEnum,
+	FieldActive,
 	FieldAge,
 	FieldName,
 	FieldDescription,
@@ -102,6 +105,12 @@ var Columns = []string{
 	FieldDropOptional,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "users"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"blog_admins",
+}
+
 var (
 	// FriendsPrimaryKey and FriendsColumn2 are the table columns denoting the
 	// primary key for the friends relation (M2M).
@@ -115,12 +124,19 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
+			return true
+		}
+	}
 	return false
 }
 
 var (
 	// DefaultMixedString holds the default value on creation for the "mixed_string" field.
 	DefaultMixedString string
+	// DefaultActive holds the default value on creation for the "active" field.
+	DefaultActive bool
 	// NicknameValidator is a validator for the "nickname" field. It is called by the builders before save.
 	NicknameValidator func(string) error
 	// DefaultPhone holds the default value on creation for the "phone" field.

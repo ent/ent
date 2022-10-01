@@ -49,7 +49,10 @@ type GroupEdges struct {
 	Info *GroupInfo `json:"info,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes  [4]bool
+	namedFiles   map[string][]*File
+	namedBlocked map[string][]*User
+	namedUsers   map[string][]*User
 }
 
 // FilesOrErr returns the Files value or an error if the edge
@@ -84,8 +87,7 @@ func (e GroupEdges) UsersOrErr() ([]*User, error) {
 func (e GroupEdges) InfoOrErr() (*GroupInfo, error) {
 	if e.loadedTypes[3] {
 		if e.Info == nil {
-			// The edge info was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: groupinfo.Label}
 		}
 		return e.Info, nil
@@ -94,8 +96,8 @@ func (e GroupEdges) InfoOrErr() (*GroupInfo, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Group) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*Group) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
 		case group.FieldActive:
@@ -117,7 +119,7 @@ func (*Group) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Group fields.
-func (gr *Group) assignValues(columns []string, values []interface{}) error {
+func (gr *Group) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -233,6 +235,78 @@ func (gr *Group) String() string {
 	builder.WriteString(gr.Name)
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedFiles returns the Files named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (gr *Group) NamedFiles(name string) ([]*File, error) {
+	if gr.Edges.namedFiles == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := gr.Edges.namedFiles[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (gr *Group) appendNamedFiles(name string, edges ...*File) {
+	if gr.Edges.namedFiles == nil {
+		gr.Edges.namedFiles = make(map[string][]*File)
+	}
+	if len(edges) == 0 {
+		gr.Edges.namedFiles[name] = []*File{}
+	} else {
+		gr.Edges.namedFiles[name] = append(gr.Edges.namedFiles[name], edges...)
+	}
+}
+
+// NamedBlocked returns the Blocked named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (gr *Group) NamedBlocked(name string) ([]*User, error) {
+	if gr.Edges.namedBlocked == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := gr.Edges.namedBlocked[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (gr *Group) appendNamedBlocked(name string, edges ...*User) {
+	if gr.Edges.namedBlocked == nil {
+		gr.Edges.namedBlocked = make(map[string][]*User)
+	}
+	if len(edges) == 0 {
+		gr.Edges.namedBlocked[name] = []*User{}
+	} else {
+		gr.Edges.namedBlocked[name] = append(gr.Edges.namedBlocked[name], edges...)
+	}
+}
+
+// NamedUsers returns the Users named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (gr *Group) NamedUsers(name string) ([]*User, error) {
+	if gr.Edges.namedUsers == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := gr.Edges.namedUsers[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (gr *Group) appendNamedUsers(name string, edges ...*User) {
+	if gr.Edges.namedUsers == nil {
+		gr.Edges.namedUsers = make(map[string][]*User)
+	}
+	if len(edges) == 0 {
+		gr.Edges.namedUsers[name] = []*User{}
+	} else {
+		gr.Edges.namedUsers[name] = append(gr.Edges.namedUsers[name], edges...)
+	}
 }
 
 // Groups is a parsable slice of Group.

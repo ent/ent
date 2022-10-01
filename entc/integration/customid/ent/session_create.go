@@ -221,7 +221,6 @@ func (sc *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (sc *SessionCreate) OnConflict(opts ...sql.ConflictOption) *SessionUpsertOne {
 	sc.conflict = opts
 	return &SessionUpsertOne{
@@ -235,7 +234,6 @@ func (sc *SessionCreate) OnConflict(opts ...sql.ConflictOption) *SessionUpsertOn
 //	client.Session.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (sc *SessionCreate) OnConflictColumns(columns ...string) *SessionUpsertOne {
 	sc.conflict = append(sc.conflict, sql.ConflictColumns(columns...))
 	return &SessionUpsertOne{
@@ -267,7 +265,6 @@ type (
 //			}),
 //		).
 //		Exec(ctx)
-//
 func (u *SessionUpsertOne) UpdateNewValues() *SessionUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -281,10 +278,9 @@ func (u *SessionUpsertOne) UpdateNewValues() *SessionUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.Session.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.Session.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *SessionUpsertOne) Ignore() *SessionUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -436,7 +432,6 @@ func (scb *SessionCreateBulk) ExecX(ctx context.Context) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (scb *SessionCreateBulk) OnConflict(opts ...sql.ConflictOption) *SessionUpsertBulk {
 	scb.conflict = opts
 	return &SessionUpsertBulk{
@@ -450,7 +445,6 @@ func (scb *SessionCreateBulk) OnConflict(opts ...sql.ConflictOption) *SessionUps
 //	client.Session.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (scb *SessionCreateBulk) OnConflictColumns(columns ...string) *SessionUpsertBulk {
 	scb.conflict = append(scb.conflict, sql.ConflictColumns(columns...))
 	return &SessionUpsertBulk{
@@ -475,14 +469,12 @@ type SessionUpsertBulk struct {
 //			}),
 //		).
 //		Exec(ctx)
-//
 func (u *SessionUpsertBulk) UpdateNewValues() *SessionUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(session.FieldID)
-				return
 			}
 		}
 	}))
@@ -495,7 +487,6 @@ func (u *SessionUpsertBulk) UpdateNewValues() *SessionUpsertBulk {
 //	client.Session.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *SessionUpsertBulk) Ignore() *SessionUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

@@ -53,8 +53,7 @@ type CardEdges struct {
 func (e CardEdges) OwnerOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.Owner == nil {
-			// The edge owner was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Owner, nil
@@ -169,14 +168,13 @@ func (c *Cards) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	for _, v := range scanc {
-		*c = append(*c, &Card{
-			ID:         v.ID,
-			CreateTime: time.Unix(0, v.CreateTime),
-			UpdateTime: time.Unix(0, v.UpdateTime),
-			Balance:    v.Balance,
-			Number:     v.Number,
-			Name:       v.Name,
-		})
+		node := &Card{ID: v.ID}
+		node.CreateTime = time.Unix(0, v.CreateTime)
+		node.UpdateTime = time.Unix(0, v.UpdateTime)
+		node.Balance = v.Balance
+		node.Number = v.Number
+		node.Name = v.Name
+		*c = append(*c, node)
 	}
 	return nil
 }

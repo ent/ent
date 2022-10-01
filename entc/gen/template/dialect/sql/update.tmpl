@@ -6,6 +6,15 @@ in the LICENSE file in the root directory of this source tree.
 
 {{/* gotype: entgo.io/ent/entc/gen.typeScope */}}
 
+{{/* Additional fields for the builder. */}}
+{{ define "dialect/sql/update/fields" }}
+	{{- with $tmpls := matchTemplate "dialect/sql/update/fields/additional/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
+{{- end }}
+
 {{ define "dialect/sql/update" }}
 {{ $pkg := $.Scope.Package }}
 {{ $builder := pascal $.Scope.Builder }}
@@ -14,6 +23,13 @@ in the LICENSE file in the root directory of this source tree.
 {{ $one := hasSuffix $builder "One" }}
 {{- $zero := 0 }}{{ if $one }}{{ $zero = "nil" }}{{ end }}
 {{- $ret := "n" }}{{ if $one }}{{ $ret = "_node" }}{{ end }}
+
+{{- /* Allow adding methods to the update-builder by ent extensions or user templates.*/}}
+{{- with $tmpls := matchTemplate "dialect/sql/update/additional/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{- xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} {{ if $one }}*{{ $.Name }}{{ else }}int{{ end }}, err error) {
 	_spec := &sqlgraph.UpdateSpec{
@@ -92,11 +108,18 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 					})
 				}
 				{{- if $f.SupportsMutationAdd }}
-					if value, ok := {{ $mutation }}.Added{{ $f.StructField }}(); ok {
+					if value, ok := {{ $mutation }}.{{ $f.MutationAdded }}(); ok {
 						_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 							Type: field.{{ $f.Type.ConstName }},
 							Value: value,
 							Column: {{ $.Package }}.{{ $f.Constant }},
+						})
+					}
+				{{- end }}
+				{{- if $f.SupportsMutationAppend }}
+					if value, ok := {{ $mutation }}.{{ $f.MutationAppended }}(); ok {
+						_spec.AddModifier(func(u *sql.UpdateBuilder) {
+							sqljson.Append(u, {{ $.Package }}.{{ $f.Constant }}, value)
 						})
 					}
 				{{- end }}
@@ -111,6 +134,10 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			{{- end }}
 	{{- end }}
 	{{- range $e := $.EdgesWithID }}
+		{{- if $e.Immutable }}
+			{{- /* Skip to the next one as immutable edges cannot be updated. */}}
+			{{- continue}}
+		{{- end }}
 		if {{ $mutation }}.{{ $e.MutationCleared }}() {
 			{{- with extend $ "Edge" $e }}
 				{{ template "dialect/sql/defedge" . }}
@@ -190,7 +217,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 		{{- if .HasDefault }}
 			createE := &{{ .CreateName }}{config: {{ $receiver }}.config, mutation: new{{ .MutationName }}({{ $receiver }}.config, OpCreate)}
 			{{- /* Skip error handling here as this check was already handled. */}}
-			{{ if or $.NumHooks $.NumPolicy }}_ = {{ end }}createE.defaults()
+			{{ if or .NumHooks .NumPolicy }}_ = {{ end }}createE.defaults()
 			_, specE := createE.createSpec()
 			edge.Target.Fields = specE.Fields
 			{{- if and .HasOneFieldID .ID.Default }}

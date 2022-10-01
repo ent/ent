@@ -799,17 +799,17 @@ func DefaultValue(t *testing.T, client *ent.Client) {
 func ImmutableValue(t *testing.T, client *ent.Client) {
 	tests := []struct {
 		name    string
-		updater func() interface{}
+		updater func() any
 	}{
 		{
 			name: "Update",
-			updater: func() interface{} {
+			updater: func() any {
 				return client.Card.Update()
 			},
 		},
 		{
 			name: "UpdateOne",
-			updater: func() interface{} {
+			updater: func() any {
 				return client.Card.Create().SetNumber("42").SaveX(context.Background()).Update()
 			},
 		},

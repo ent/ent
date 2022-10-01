@@ -50,8 +50,7 @@ type TweetTagEdges struct {
 func (e TweetTagEdges) TagOrErr() (*Tag, error) {
 	if e.loadedTypes[0] {
 		if e.Tag == nil {
-			// The edge tag was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: tag.Label}
 		}
 		return e.Tag, nil
@@ -64,8 +63,7 @@ func (e TweetTagEdges) TagOrErr() (*Tag, error) {
 func (e TweetTagEdges) TweetOrErr() (*Tweet, error) {
 	if e.loadedTypes[1] {
 		if e.Tweet == nil {
-			// The edge tweet was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: tweet.Label}
 		}
 		return e.Tweet, nil
@@ -74,8 +72,8 @@ func (e TweetTagEdges) TweetOrErr() (*Tweet, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*TweetTag) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*TweetTag) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
 		case tweettag.FieldTagID, tweettag.FieldTweetID:
@@ -93,7 +91,7 @@ func (*TweetTag) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the TweetTag fields.
-func (tt *TweetTag) assignValues(columns []string, values []interface{}) error {
+func (tt *TweetTag) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}

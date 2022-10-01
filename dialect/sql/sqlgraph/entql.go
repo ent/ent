@@ -244,9 +244,22 @@ func (e *state) evalBinary(expr *entql.BinaryExpr) *sql.Predicate {
 func (e *state) evalEdge(name string, exprs ...entql.Expr) *sql.Predicate {
 	edge, ok := e.context.Edges[name]
 	expect(ok, "edge %q was not found for node %q", name, e.context.Type)
+	var toC string
+	switch {
+	case edge.To.ID != nil:
+		toC = edge.To.ID.Column
+	// Edge-owner points to its edge schema.
+	case edge.To.CompositeID != nil && !edge.Spec.Inverse:
+		toC = edge.To.CompositeID[0].Column
+	// Edge-backref points to its edge schema.
+	case edge.To.CompositeID != nil && edge.Spec.Inverse:
+		toC = edge.To.CompositeID[1].Column
+	default:
+		panic(evalError{fmt.Sprintf("expect id definition for edge %q", name)})
+	}
 	step := NewStep(
 		From(e.context.Table, e.context.ID.Column),
-		To(edge.To.Table, edge.To.ID.Column),
+		To(edge.To.Table, toC),
 		Edge(edge.Spec.Rel, edge.Spec.Inverse, edge.Spec.Table, edge.Spec.Columns...),
 	)
 	selector := e.selector.Clone().SetP(nil)
@@ -279,7 +292,7 @@ func (e *state) field(f *entql.Field) string {
 }
 
 func args(b *sql.Builder, v *entql.Value) {
-	vs, ok := v.V.([]interface{})
+	vs, ok := v.V.([]any)
 	if !ok {
 		b.Arg(v.V)
 		return
@@ -288,7 +301,7 @@ func args(b *sql.Builder, v *entql.Value) {
 }
 
 // expect panics if the condition is false.
-func expect(cond bool, msg string, args ...interface{}) {
+func expect(cond bool, msg string, args ...any) {
 	if !cond {
 		panic(evalError{fmt.Sprintf("expect "+msg, args...)})
 	}

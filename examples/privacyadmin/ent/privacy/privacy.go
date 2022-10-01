@@ -30,17 +30,17 @@ var (
 )
 
 // Allowf returns an formatted wrapped Allow decision.
-func Allowf(format string, a ...interface{}) error {
+func Allowf(format string, a ...any) error {
 	return fmt.Errorf(format+": %w", append(a, Allow)...)
 }
 
 // Denyf returns an formatted wrapped Deny decision.
-func Denyf(format string, a ...interface{}) error {
+func Denyf(format string, a ...any) error {
 	return fmt.Errorf(format+": %w", append(a, Deny)...)
 }
 
 // Skipf returns an formatted wrapped Skip decision.
-func Skipf(format string, a ...interface{}) error {
+func Skipf(format string, a ...any) error {
 	return fmt.Errorf(format+": %w", append(a, Skip)...)
 }
 

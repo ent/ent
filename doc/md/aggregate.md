@@ -125,7 +125,7 @@ func Do(ctx context.Context, client *ent.Client) {
 
 ```
 
-**Note:** The `sql.Raw` is crucial to have. It tells the predicate that `sql.Max` is not an arguement.
+**Note:** The `sql.Raw` is crucial to have. It tells the predicate that `sql.Max` is not an argument.
 
 The above code essentially generates the following SQL query:
 

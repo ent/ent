@@ -13,6 +13,19 @@ import (
 	"entgo.io/ent/entc/integration/migrate/entv2"
 )
 
+// The BlogFunc type is an adapter to allow the use of ordinary
+// function as Blog mutator.
+type BlogFunc func(context.Context, *entv2.BlogMutation) (entv2.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f BlogFunc) Mutate(ctx context.Context, m entv2.Mutation) (entv2.Value, error) {
+	mv, ok := m.(*entv2.BlogMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entv2.BlogMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The CarFunc type is an adapter to allow the use of ordinary
 // function as Car mutator.
 type CarFunc func(context.Context, *entv2.CarMutation) (entv2.Value, error)
@@ -199,7 +212,6 @@ func HasFields(field string, fields ...string) Condition {
 // If executes the given hook under condition.
 //
 //	hook.If(ComputeAverage, And(HasFields(...), HasAddedFields(...)))
-//
 func If(hk entv2.Hook, cond Condition) entv2.Hook {
 	return func(next entv2.Mutator) entv2.Mutator {
 		return entv2.MutateFunc(func(ctx context.Context, m entv2.Mutation) (entv2.Value, error) {
@@ -214,7 +226,6 @@ func If(hk entv2.Hook, cond Condition) entv2.Hook {
 // On executes the given hook only for the given operation.
 //
 //	hook.On(Log, entv2.Delete|entv2.Create)
-//
 func On(hk entv2.Hook, op entv2.Op) entv2.Hook {
 	return If(hk, HasOp(op))
 }
@@ -222,7 +233,6 @@ func On(hk entv2.Hook, op entv2.Op) entv2.Hook {
 // Unless skips the given hook only for the given operation.
 //
 //	hook.Unless(Log, entv2.Update|entv2.UpdateOne)
-//
 func Unless(hk entv2.Hook, op entv2.Op) entv2.Hook {
 	return If(hk, Not(HasOp(op)))
 }
@@ -243,7 +253,6 @@ func FixedError(err error) entv2.Hook {
 //			Reject(entv2.Delete|entv2.Update),
 //		}
 //	}
-//
 func Reject(op entv2.Op) entv2.Hook {
 	hk := FixedError(fmt.Errorf("%s operation is not allowed", op))
 	return On(hk, op)

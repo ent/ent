@@ -15,8 +15,10 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
 	"entgo.io/ent/entc/integration/edgeschema/ent/migrate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
+	_ "entgo.io/ent/entc/integration/edgeschema/ent/runtime"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
+	"entgo.io/ent/entql"
 
 	"github.com/google/uuid"
 	_ "github.com/mattn/go-sqlite3"
@@ -143,6 +145,10 @@ func TestEdgeSchemaCompositeID(t *testing.T) {
 	require.Equal(t, likes[3].UserID, nat.ID)
 	require.Equal(t, likes[3].TweetID, tweets[2].ID)
 	require.NotZero(t, likes[3].LikedAt)
+
+	affected, err := client.TweetLike.Update().SetLikedAt(time.Now()).Save(ctx)
+	require.NoError(t, err)
+	require.Equal(t, client.TweetLike.Query().CountX(ctx), affected, "should update all edges (table rows)")
 }
 
 func TestEdgeSchemaDefaultID(t *testing.T) {
@@ -247,4 +253,46 @@ func TestEdgeSchemaForO2M(t *testing.T) {
 		client.Tweet.Create().SetText("t2"),
 	).SaveX(ctx)
 	nat.Update().AddTweets(tweets...).ExecX(ctx)
+}
+
+func TestEdgeSchemaEntQL(t *testing.T) {
+	client, err := ent.Open(dialect.SQLite, "file:ent?mode=memory&cache=shared&_fk=1")
+	require.NoError(t, err)
+	defer client.Close()
+	ctx := context.Background()
+	require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
+
+	tweets := client.Tweet.CreateBulk(
+		client.Tweet.Create().SetText("t1"),
+		client.Tweet.Create().SetText("t2"),
+	).SaveX(ctx)
+	nat := client.User.Create().SetName("nati").SaveX(ctx)
+	a8m := client.User.Create().SetName("a8m").AddLikedTweets(tweets...).SaveX(ctx)
+
+	// Using the regular fluent API.
+	require.Equal(t, a8m.ID, client.User.Query().Where(user.HasLikes()).OnlyIDX(ctx))
+	require.Equal(t, nat.ID, client.User.Query().Where(user.Not(user.HasLikes())).OnlyIDX(ctx))
+
+	// Using EntQL.
+	q1, q2 := client.User.Query(), client.User.Query()
+	q1.Filter().WhereHasLikes()
+	q2.Filter().Where(entql.Not(entql.HasEdge("likes")))
+	require.Equal(t, a8m.ID, q1.OnlyIDX(ctx))
+	require.Equal(t, nat.ID, q2.OnlyIDX(ctx))
+
+	nat.Update().AddLikedTweets(tweets[0]).ExecX(ctx)
+	// Using the regular fluent API.
+	require.Equal(t, 2, client.User.Query().Where(user.HasLikesWith(tweetlike.TweetID(tweets[0].ID))).CountX(ctx))
+	require.Equal(t, 1, client.User.Query().Where(user.HasLikesWith(tweetlike.TweetID(tweets[1].ID))).CountX(ctx))
+	// Using EntQL.
+	q1, q2 = client.User.Query(), client.User.Query()
+	q1.Filter().WhereHasLikesWith(tweetlike.TweetID(tweets[0].ID))
+	q2.Filter().Where(entql.HasEdgeWith("likes", entql.FieldEQ(tweetlike.FieldTweetID, tweets[0].ID)))
+	require.Equal(t, 2, q1.CountX(ctx))
+	require.Equal(t, 2, q2.CountX(ctx))
+	q1, q2 = client.User.Query(), client.User.Query()
+	q1.Filter().WhereHasLikesWith(tweetlike.TweetID(tweets[1].ID))
+	q2.Filter().Where(entql.HasEdgeWith("likes", entql.FieldEQ(tweetlike.FieldTweetID, tweets[1].ID)))
+	require.Equal(t, 1, q1.CountX(ctx))
+	require.Equal(t, 1, q2.CountX(ctx))
 }

@@ -23,13 +23,12 @@ import (
 // PetQuery is the builder for querying Pet entities.
 type PetQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Pet
-	// eager-loading edges.
+	limit       *int
+	offset      *int
+	unique      *bool
+	order       []OrderFunc
+	fields      []string
+	predicates  []predicate.Pet
 	withFriends *PetQuery
 	withOwner   *UserQuery
 	withFKs     bool
@@ -339,7 +338,6 @@ func (pq *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
 //		GroupBy(pet.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 	grbuild := &PetGroupBy{config: pq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -366,7 +364,6 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 //	client.Pet.Query().
 //		Select(pet.FieldName).
 //		Scan(ctx, &v)
-//
 func (pq *PetQuery) Select(fields ...string) *PetSelect {
 	pq.fields = append(pq.fields, fields...)
 	selbuild := &PetSelect{PetQuery: pq}
@@ -407,10 +404,10 @@ func (pq *PetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pet, err
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, pet.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Pet).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Pet{config: pq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -425,90 +422,108 @@ func (pq *PetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pet, err
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := pq.withFriends; query != nil {
-		edgeids := make([]driver.Value, len(nodes))
-		byid := make(map[int]*Pet)
-		nids := make(map[int]map[*Pet]struct{})
-		for i, node := range nodes {
-			edgeids[i] = node.ID
-			byid[node.ID] = node
-			node.Edges.Friends = []*Pet{}
-		}
-		query.Where(func(s *sql.Selector) {
-			joinT := sql.Table(pet.FriendsTable)
-			s.Join(joinT).On(s.C(pet.FieldID), joinT.C(pet.FriendsPrimaryKey[1]))
-			s.Where(sql.InValues(joinT.C(pet.FriendsPrimaryKey[0]), edgeids...))
-			columns := s.SelectedColumns()
-			s.Select(joinT.C(pet.FriendsPrimaryKey[0]))
-			s.AppendSelect(columns...)
-			s.SetDistinct(false)
-		})
-		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]interface{}, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]interface{}{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []interface{}) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Pet]struct{}{byid[outValue]: struct{}{}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byid[outValue]] = struct{}{}
-				return nil
-			}
-		})
-		if err != nil {
+		if err := pq.loadFriends(ctx, query, nodes,
+			func(n *Pet) { n.Edges.Friends = []*Pet{} },
+			func(n *Pet, e *Pet) { n.Edges.Friends = append(n.Edges.Friends, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected "friends" node returned %v`, n.ID)
-			}
-			for kn := range nodes {
-				kn.Edges.Friends = append(kn.Edges.Friends, n)
-			}
-		}
 	}
-
 	if query := pq.withOwner; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Pet)
-		for i := range nodes {
-			if nodes[i].user_pets == nil {
-				continue
-			}
-			fk := *nodes[i].user_pets
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := pq.loadOwner(ctx, query, nodes, nil,
+			func(n *Pet, e *User) { n.Edges.Owner = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_pets" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Owner = n
-			}
+	}
+	return nodes, nil
+}
+
+func (pq *PetQuery) loadFriends(ctx context.Context, query *PetQuery, nodes []*Pet, init func(*Pet), assign func(*Pet, *Pet)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Pet)
+	nids := make(map[int]map[*Pet]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
 		}
 	}
-
-	return nodes, nil
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(pet.FriendsTable)
+		s.Join(joinT).On(s.C(pet.FieldID), joinT.C(pet.FriendsPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(pet.FriendsPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(pet.FriendsPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+		assign := spec.Assign
+		values := spec.ScanValues
+		spec.ScanValues = func(columns []string) ([]any, error) {
+			values, err := values(columns[1:])
+			if err != nil {
+				return nil, err
+			}
+			return append([]any{new(sql.NullInt64)}, values...), nil
+		}
+		spec.Assign = func(columns []string, values []any) error {
+			outValue := int(values[0].(*sql.NullInt64).Int64)
+			inValue := int(values[1].(*sql.NullInt64).Int64)
+			if nids[inValue] == nil {
+				nids[inValue] = map[*Pet]struct{}{byID[outValue]: struct{}{}}
+				return assign(columns[1:], values[1:])
+			}
+			nids[inValue][byID[outValue]] = struct{}{}
+			return nil
+		}
+	})
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "friends" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
+func (pq *PetQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*Pet, init func(*Pet), assign func(*Pet, *User)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Pet)
+	for i := range nodes {
+		if nodes[i].user_pets == nil {
+			continue
+		}
+		fk := *nodes[i].user_pets
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_pets" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (pq *PetQuery) sqlCount(ctx context.Context) (int, error) {
@@ -521,11 +536,14 @@ func (pq *PetQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (pq *PetQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := pq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := pq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {
@@ -626,7 +644,7 @@ func (pgb *PetGroupBy) Aggregate(fns ...AggregateFunc) *PetGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (pgb *PetGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (pgb *PetGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := pgb.path(ctx)
 	if err != nil {
 		return err
@@ -635,7 +653,7 @@ func (pgb *PetGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return pgb.sqlScan(ctx, v)
 }
 
-func (pgb *PetGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (pgb *PetGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range pgb.fields {
 		if !pet.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -682,7 +700,7 @@ type PetSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ps *PetSelect) Scan(ctx context.Context, v interface{}) error {
+func (ps *PetSelect) Scan(ctx context.Context, v any) error {
 	if err := ps.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -690,7 +708,7 @@ func (ps *PetSelect) Scan(ctx context.Context, v interface{}) error {
 	return ps.sqlScan(ctx, v)
 }
 
-func (ps *PetSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ps *PetSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ps.sql.Query()
 	if err := ps.driver.Query(ctx, query, args, rows); err != nil {

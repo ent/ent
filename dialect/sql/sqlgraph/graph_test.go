@@ -26,7 +26,7 @@ func TestNeighbors(t *testing.T) {
 		name      string
 		input     *Step
 		wantQuery string
-		wantArgs  []interface{}
+		wantArgs  []any
 	}{
 		{
 			name: "O2O/1type",
@@ -38,7 +38,7 @@ func TestNeighbors(t *testing.T) {
 				Edge(O2O, false, "users", "spouse_id"),
 			),
 			wantQuery: "SELECT * FROM `users` WHERE `spouse_id` = ?",
-			wantArgs:  []interface{}{1},
+			wantArgs:  []any{1},
 		},
 		{
 			name: "O2O/1type/inverse",
@@ -48,7 +48,7 @@ func TestNeighbors(t *testing.T) {
 				Edge(O2O, true, "nodes", "prev_id"),
 			),
 			wantQuery: "SELECT * FROM `nodes` JOIN (SELECT `prev_id` FROM `nodes` WHERE `id` = ?) AS `t1` ON `nodes`.`id` = `t1`.`prev_id`",
-			wantArgs:  []interface{}{1},
+			wantArgs:  []any{1},
 		},
 		{
 			name: "O2M/1type",
@@ -58,7 +58,7 @@ func TestNeighbors(t *testing.T) {
 				Edge(O2M, false, "users", "parent_id"),
 			),
 			wantQuery: "SELECT * FROM `users` WHERE `parent_id` = ?",
-			wantArgs:  []interface{}{1},
+			wantArgs:  []any{1},
 		},
 		{
 			name: "O2O/2types",
@@ -68,7 +68,7 @@ func TestNeighbors(t *testing.T) {
 				Edge(O2O, false, "cards", "owner_id"),
 			),
 			wantQuery: "SELECT * FROM `card` WHERE `owner_id` = ?",
-			wantArgs:  []interface{}{2},
+			wantArgs:  []any{2},
 		},
 		{
 			name: "O2O/2types/inverse",
@@ -78,7 +78,7 @@ func TestNeighbors(t *testing.T) {
 				Edge(O2O, true, "cards", "owner_id"),
 			),
 			wantQuery: "SELECT * FROM `users` JOIN (SELECT `owner_id` FROM `cards` WHERE `id` = ?) AS `t1` ON `users`.`id` = `t1`.`owner_id`",
-			wantArgs:  []interface{}{2},
+			wantArgs:  []any{2},
 		},
 		{
 			name: "O2M/2types",
@@ -88,7 +88,7 @@ func TestNeighbors(t *testing.T) {
 				Edge(O2M, false, "pets", "owner_id"),
 			),
 			wantQuery: "SELECT * FROM `pets` WHERE `owner_id` = ?",
-			wantArgs:  []interface{}{1},
+			wantArgs:  []any{1},
 		},
 		{
 			name: "M2O/2types/inverse",
@@ -98,7 +98,7 @@ func TestNeighbors(t *testing.T) {
 				Edge(M2O, true, "pets", "owner_id"),
 			),
 			wantQuery: "SELECT * FROM `users` JOIN (SELECT `owner_id` FROM `pets` WHERE `id` = ?) AS `t1` ON `users`.`id` = `t1`.`owner_id`",
-			wantArgs:  []interface{}{2},
+			wantArgs:  []any{2},
 		},
 		{
 			name: "M2O/1type/inverse",
@@ -108,7 +108,7 @@ func TestNeighbors(t *testing.T) {
 				Edge(M2O, true, "users", "parent_id"),
 			),
 			wantQuery: "SELECT * FROM `users` JOIN (SELECT `parent_id` FROM `users` WHERE `id` = ?) AS `t1` ON `users`.`id` = `t1`.`parent_id`",
-			wantArgs:  []interface{}{2},
+			wantArgs:  []any{2},
 		},
 		{
 			name: "M2M/2type",
@@ -118,7 +118,7 @@ func TestNeighbors(t *testing.T) {
 				Edge(M2M, false, "user_groups", "group_id", "user_id"),
 			),
 			wantQuery: "SELECT * FROM `users` JOIN (SELECT `user_groups`.`user_id` FROM `user_groups` WHERE `user_groups`.`group_id` = ?) AS `t1` ON `users`.`id` = `t1`.`user_id`",
-			wantArgs:  []interface{}{2},
+			wantArgs:  []any{2},
 		},
 		{
 			name: "M2M/2type/inverse",
@@ -128,7 +128,7 @@ func TestNeighbors(t *testing.T) {
 				Edge(M2M, true, "user_groups", "group_id", "user_id"),
 			),
 			wantQuery: "SELECT * FROM `groups` JOIN (SELECT `user_groups`.`group_id` FROM `user_groups` WHERE `user_groups`.`user_id` = ?) AS `t1` ON `groups`.`id` = `t1`.`group_id`",
-			wantArgs:  []interface{}{2},
+			wantArgs:  []any{2},
 		},
 		{
 			name: "schema/O2O/1type",
@@ -144,7 +144,7 @@ func TestNeighbors(t *testing.T) {
 				return step
 			}(),
 			wantQuery: "SELECT * FROM `mydb`.`users` WHERE `spouse_id` = ?",
-			wantArgs:  []interface{}{1},
+			wantArgs:  []any{1},
 		},
 		{
 			name: "schema/O2O/1type/inverse",
@@ -159,7 +159,7 @@ func TestNeighbors(t *testing.T) {
 				return step
 			}(),
 			wantQuery: "SELECT * FROM `mydb`.`nodes` JOIN (SELECT `prev_id` FROM `mydb`.`nodes` WHERE `id` = ?) AS `t1` ON `mydb`.`nodes`.`id` = `t1`.`prev_id`",
-			wantArgs:  []interface{}{1},
+			wantArgs:  []any{1},
 		},
 		{
 			name: "schema/O2M/1type",
@@ -173,7 +173,7 @@ func TestNeighbors(t *testing.T) {
 				return step
 			}(),
 			wantQuery: "SELECT * FROM `mydb`.`users` WHERE `parent_id` = ?",
-			wantArgs:  []interface{}{1},
+			wantArgs:  []any{1},
 		},
 		{
 			name: "schema/O2O/2types",
@@ -187,7 +187,7 @@ func TestNeighbors(t *testing.T) {
 				return step
 			}(),
 			wantQuery: "SELECT * FROM `mydb`.`card` WHERE `owner_id` = ?",
-			wantArgs:  []interface{}{2},
+			wantArgs:  []any{2},
 		},
 		{
 			name: "schema/O2O/2types/inverse",
@@ -202,7 +202,7 @@ func TestNeighbors(t *testing.T) {
 				return step
 			}(),
 			wantQuery: "SELECT * FROM `mydb`.`users` JOIN (SELECT `owner_id` FROM `mydb`.`cards` WHERE `id` = ?) AS `t1` ON `mydb`.`users`.`id` = `t1`.`owner_id`",
-			wantArgs:  []interface{}{2},
+			wantArgs:  []any{2},
 		},
 		{
 			name: "schema/O2M/2types",
@@ -216,7 +216,7 @@ func TestNeighbors(t *testing.T) {
 				return step
 			}(),
 			wantQuery: "SELECT * FROM `mydb`.`pets` WHERE `owner_id` = ?",
-			wantArgs:  []interface{}{1},
+			wantArgs:  []any{1},
 		},
 		{
 			name: "schema/M2O/2types/inverse",
@@ -231,7 +231,7 @@ func TestNeighbors(t *testing.T) {
 				return step
 			}(),
 			wantQuery: "SELECT * FROM `s1`.`users` JOIN (SELECT `owner_id` FROM `s2`.`pets` WHERE `id` = ?) AS `t1` ON `s1`.`users`.`id` = `t1`.`owner_id`",
-			wantArgs:  []interface{}{2},
+			wantArgs:  []any{2},
 		},
 		{
 			name: "schema/M2O/1type/inverse",
@@ -246,7 +246,7 @@ func TestNeighbors(t *testing.T) {
 				return step
 			}(),
 			wantQuery: "SELECT * FROM `s1`.`users` JOIN (SELECT `parent_id` FROM `s1`.`users` WHERE `id` = ?) AS `t1` ON `s1`.`users`.`id` = `t1`.`parent_id`",
-			wantArgs:  []interface{}{2},
+			wantArgs:  []any{2},
 		},
 		{
 			name: "schema/M2M/2type",
@@ -261,7 +261,7 @@ func TestNeighbors(t *testing.T) {
 				return step
 			}(),
 			wantQuery: "SELECT * FROM `s1`.`users` JOIN (SELECT `s2`.`user_groups`.`user_id` FROM `s2`.`user_groups` WHERE `s2`.`user_groups`.`group_id` = ?) AS `t1` ON `s1`.`users`.`id` = `t1`.`user_id`",
-			wantArgs:  []interface{}{2},
+			wantArgs:  []any{2},
 		},
 		{
 			name: "schema/M2M/2type/inverse",
@@ -276,7 +276,7 @@ func TestNeighbors(t *testing.T) {
 				return step
 			}(),
 			wantQuery: "SELECT * FROM `s1`.`groups` JOIN (SELECT `s2`.`user_groups`.`group_id` FROM `s2`.`user_groups` WHERE `s2`.`user_groups`.`user_id` = ?) AS `t1` ON `s1`.`groups`.`id` = `t1`.`group_id`",
-			wantArgs:  []interface{}{2},
+			wantArgs:  []any{2},
 		},
 	}
 	for _, tt := range tests {
@@ -294,7 +294,7 @@ func TestSetNeighbors(t *testing.T) {
 		name      string
 		input     *Step
 		wantQuery string
-		wantArgs  []interface{}
+		wantArgs  []any
 	}{
 		{
 			name: "O2M/2types",
@@ -304,7 +304,7 @@ func TestSetNeighbors(t *testing.T) {
 				Edge(O2M, false, "users", "owner_id"),
 			),
 			wantQuery: `SELECT * FROM "pets" JOIN (SELECT "users"."id" FROM "users" WHERE "name" = $1) AS "t1" ON "pets"."owner_id" = "t1"."id"`,
-			wantArgs:  []interface{}{"a8m"},
+			wantArgs:  []any{"a8m"},
 		},
 		{
 			name: "M2O/2types",
@@ -314,7 +314,7 @@ func TestSetNeighbors(t *testing.T) {
 				Edge(M2O, true, "pets", "owner_id"),
 			),
 			wantQuery: `SELECT * FROM "users" JOIN (SELECT "pets"."owner_id" FROM "pets" WHERE "name" = $1) AS "t1" ON "users"."id" = "t1"."owner_id"`,
-			wantArgs:  []interface{}{"pedro"},
+			wantArgs:  []any{"pedro"},
 		},
 		{
 			name: "M2M/2types",
@@ -333,7 +333,7 @@ JOIN
      (SELECT "users"."id"
       FROM "users"
       WHERE "name" = $1) AS "t1" ON "user_groups"."user_id" = "t1"."id") AS "t1" ON "groups"."id" = "t1"."group_id"`,
-			wantArgs: []interface{}{"a8m"},
+			wantArgs: []any{"a8m"},
 		},
 		{
 			name: "M2M/2types/inverse",
@@ -352,7 +352,7 @@ JOIN
      (SELECT "groups"."id"
       FROM "groups"
       WHERE "name" = $1) AS "t1" ON "user_groups"."group_id" = "t1"."id") AS "t1" ON "users"."id" = "t1"."user_id"`,
-			wantArgs: []interface{}{"GitHub"},
+			wantArgs: []any{"GitHub"},
 		},
 		{
 			name: "schema/O2M/2types",
@@ -366,7 +366,7 @@ JOIN
 				return step
 			}(),
 			wantQuery: `SELECT * FROM "s1"."pets" JOIN (SELECT "s2"."users"."id" FROM "s2"."users" WHERE "name" = $1) AS "t1" ON "s1"."pets"."owner_id" = "t1"."id"`,
-			wantArgs:  []interface{}{"a8m"},
+			wantArgs:  []any{"a8m"},
 		},
 		{
 			name: "schema/M2O/2types",
@@ -380,7 +380,7 @@ JOIN
 				return step
 			}(),
 			wantQuery: `SELECT * FROM "s1"."users" JOIN (SELECT "s2"."pets"."owner_id" FROM "s2"."pets" WHERE "name" = $1) AS "t1" ON "s1"."users"."id" = "t1"."owner_id"`,
-			wantArgs:  []interface{}{"pedro"},
+			wantArgs:  []any{"pedro"},
 		},
 		{
 			name: "schema/M2M/2types",
@@ -404,7 +404,7 @@ JOIN
      (SELECT "s2"."users"."id"
       FROM "s2"."users"
       WHERE "name" = $1) AS "t1" ON "s3"."user_groups"."user_id" = "t1"."id") AS "t1" ON "s1"."groups"."id" = "t1"."group_id"`,
-			wantArgs: []interface{}{"a8m"},
+			wantArgs: []any{"a8m"},
 		},
 		{
 			name: "schema/M2M/2types/inverse",
@@ -428,7 +428,7 @@ JOIN
      (SELECT "s2"."groups"."id"
       FROM "s2"."groups"
       WHERE "name" = $1) AS "t1" ON "s3"."user_groups"."group_id" = "t1"."id") AS "t1" ON "s1"."users"."id" = "t1"."user_id"`,
-			wantArgs: []interface{}{"GitHub"},
+			wantArgs: []any{"GitHub"},
 		},
 	}
 	for _, tt := range tests {
@@ -642,7 +642,7 @@ func TestHasNeighborsWith(t *testing.T) {
 		selector  *sql.Selector
 		predicate func(*sql.Selector)
 		wantQuery string
-		wantArgs  []interface{}
+		wantArgs  []any
 	}{
 		{
 			name: "O2O",
@@ -669,7 +669,7 @@ func TestHasNeighborsWith(t *testing.T) {
 				s.Where(sql.EQ("name", "a8m"))
 			},
 			wantQuery: `SELECT * FROM "cards" WHERE "cards"."owner_id" IN (SELECT "users"."id" FROM "users" WHERE "name" = $1)`,
-			wantArgs:  []interface{}{"a8m"},
+			wantArgs:  []any{"a8m"},
 		},
 		{
 			name: "O2M",
@@ -685,7 +685,7 @@ func TestHasNeighborsWith(t *testing.T) {
 				s.Where(sql.EQ("name", "pedro"))
 			},
 			wantQuery: `SELECT * FROM "users" WHERE "last_name" = $1 AND "users"."id" IN (SELECT "pets"."owner_id" FROM "pets" WHERE "name" = $2)`,
-			wantArgs:  []interface{}{"mashraki", "pedro"},
+			wantArgs:  []any{"mashraki", "pedro"},
 		},
 		{
 			name: "M2O",
@@ -701,7 +701,7 @@ func TestHasNeighborsWith(t *testing.T) {
 				s.Where(sql.EQ("last_name", "mashraki"))
 			},
 			wantQuery: `SELECT * FROM "pets" WHERE "name" = $1 AND "pets"."owner_id" IN (SELECT "users"."id" FROM "users" WHERE "last_name" = $2)`,
-			wantArgs:  []interface{}{"pedro", "mashraki"},
+			wantArgs:  []any{"pedro", "mashraki"},
 		},
 		{
 			name: "M2M",
@@ -721,7 +721,7 @@ WHERE "users"."id" IN
   (SELECT "user_groups"."user_id"
   FROM "user_groups"
   JOIN "groups" AS "t1" ON "user_groups"."group_id" = "t1"."id" WHERE "name" = $1)`,
-			wantArgs: []interface{}{"GitHub"},
+			wantArgs: []any{"GitHub"},
 		},
 		{
 			name: "M2M/inverse",
@@ -741,7 +741,7 @@ WHERE "groups"."id" IN
   (SELECT "user_groups"."group_id"
   FROM "user_groups"
   JOIN "users" AS "t1" ON "user_groups"."user_id" = "t1"."id" WHERE "name" = $1)`,
-			wantArgs: []interface{}{"a8m"},
+			wantArgs: []any{"a8m"},
 		},
 		{
 			name: "M2M/inverse",
@@ -761,7 +761,7 @@ WHERE "groups"."id" IN
   (SELECT "user_groups"."group_id"
   FROM "user_groups"
   JOIN "users" AS "t1" ON "user_groups"."user_id" = "t1"."id" WHERE "name" IS NOT NULL AND "name" = $1)`,
-			wantArgs: []interface{}{"a8m"},
+			wantArgs: []any{"a8m"},
 		},
 		{
 			name: "schema/O2O",
@@ -798,7 +798,7 @@ WHERE "groups"."id" IN
 				s.Where(sql.EQ("name", "pedro"))
 			},
 			wantQuery: `SELECT * FROM "s1"."users" WHERE "last_name" = $1 AND "s1"."users"."id" IN (SELECT "s2"."pets"."owner_id" FROM "s2"."pets" WHERE "name" = $2)`,
-			wantArgs:  []interface{}{"mashraki", "pedro"},
+			wantArgs:  []any{"mashraki", "pedro"},
 		},
 		{
 			name: "schema/M2M",
@@ -823,7 +823,7 @@ WHERE "s1"."users"."id" IN
   (SELECT "s2"."user_groups"."user_id"
   FROM "s2"."user_groups"
   JOIN "s3"."groups" AS "t1" ON "s2"."user_groups"."group_id" = "t1"."id" WHERE "name" = $1)`,
-			wantArgs: []interface{}{"GitHub"},
+			wantArgs: []any{"GitHub"},
 		},
 		{
 			name: "O2M/selector",
@@ -839,7 +839,7 @@ WHERE "s1"."users"."id" IN
 				s.Where(sql.EQ("name", "pedro"))
 			},
 			wantQuery: `SELECT * FROM (SELECT * FROM "users") AS "users" WHERE "last_name" = $1 AND "users"."id" IN (SELECT "pets"."owner_id" FROM "pets" WHERE "name" = $2)`,
-			wantArgs:  []interface{}{"mashraki", "pedro"},
+			wantArgs:  []any{"mashraki", "pedro"},
 		},
 		{
 			name: "M2O/selector",
@@ -855,7 +855,7 @@ WHERE "s1"."users"."id" IN
 				s.Where(sql.EQ("last_name", "mashraki"))
 			},
 			wantQuery: `SELECT * FROM (SELECT * FROM "pets") AS "pets" WHERE "name" = $1 AND "pets"."owner_id" IN (SELECT "users"."id" FROM "users" WHERE "last_name" = $2)`,
-			wantArgs:  []interface{}{"pedro", "mashraki"},
+			wantArgs:  []any{"pedro", "mashraki"},
 		},
 		{
 			name: "M2M/selector",
@@ -869,7 +869,7 @@ WHERE "s1"."users"."id" IN
 				s.Where(sql.EQ("name", "GitHub"))
 			},
 			wantQuery: `SELECT * FROM (SELECT * FROM "users") AS "users" WHERE "users"."id" IN (SELECT "user_groups"."user_id" FROM "user_groups" JOIN "groups" AS "t1" ON "user_groups"."group_id" = "t1"."id" WHERE "name" = $1)`,
-			wantArgs:  []interface{}{"GitHub"},
+			wantArgs:  []any{"GitHub"},
 		},
 	}
 	for _, tt := range tests {
@@ -1366,8 +1366,8 @@ func TestBatchCreate(t *testing.T) {
 			},
 			expect: func(m sqlmock.Sqlmock) {
 				// Insert nodes with FKs.
-				m.ExpectExec(escape("INSERT INTO `users` (`active`, `age`, `best_friend_id`, `name`, `workplace_id`) VALUES (?, ?, ?, ?, ?), (?, ?, ?, ?, ?)")).
-					WithArgs(false, 32, 3, "a8m", 2, nil, 30, 4, "nati", 2).
+				m.ExpectExec(escape("INSERT INTO `users` (`active`, `age`, `best_friend_id`, `name`, `workplace_id`) VALUES (?, ?, ?, ?, ?), (NULL, ?, ?, ?, ?)")).
+					WithArgs(false, 32, 3, "a8m", 2, 30, 4, "nati", 2).
 					WillReturnResult(sqlmock.NewResult(10, 2))
 			},
 		},
@@ -1450,8 +1450,8 @@ func TestBatchCreate(t *testing.T) {
 			expect: func(m sqlmock.Sqlmock) {
 				m.ExpectBegin()
 				// Insert nodes with FKs.
-				m.ExpectExec(escape("INSERT INTO `users` (`active`, `age`, `name`, `workplace_id`) VALUES (?, ?, ?, ?), (?, ?, ?, ?)")).
-					WithArgs(false, 32, "a8m", 2, nil, 30, "nati", nil).
+				m.ExpectExec(escape("INSERT INTO `users` (`active`, `age`, `name`, `workplace_id`) VALUES (?, ?, ?, ?), (NULL, ?, ?, NULL)")).
+					WithArgs(false, 32, "a8m", 2, 30, "nati").
 					WillReturnResult(sqlmock.NewResult(10, 2))
 				// Insert M2M inverse-edges.
 				m.ExpectExec(escape("INSERT INTO `group_users` (`group_id`, `user_id`) VALUES (?, ?), (?, ?)")).
@@ -1497,8 +1497,8 @@ type user struct {
 	}
 }
 
-func (*user) values(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*user) values(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch c := columns[i]; c {
 		case "id", "age", "fk1", "fk2":
@@ -1512,7 +1512,7 @@ func (*user) values(columns []string) ([]interface{}, error) {
 	return values, nil
 }
 
-func (u *user) assign(columns []string, values []interface{}) error {
+func (u *user) assign(columns []string, values []any) error {
 	if len(columns) != len(values) {
 		return fmt.Errorf("mismatch number of values")
 	}
@@ -1562,6 +1562,33 @@ func TestUpdateNode(t *testing.T) {
 				mock.ExpectBegin()
 				mock.ExpectExec(escape("UPDATE `users` SET `age` = ?, `name` = ? WHERE `id` = ?")).
 					WithArgs(30, "Ariel", 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectQuery(escape("SELECT `id`, `name`, `age` FROM `users` WHERE `id` = ?")).
+					WithArgs(1).
+					WillReturnRows(sqlmock.NewRows([]string{"id", "age", "name"}).
+						AddRow(1, 30, "Ariel"))
+				mock.ExpectCommit()
+			},
+			wantUser: &user{name: "Ariel", age: 30, id: 1},
+		},
+		{
+			name: "fields/set_modifier",
+			spec: &UpdateSpec{
+				Node: &NodeSpec{
+					Table:   "users",
+					Columns: []string{"id", "name", "age"},
+					ID:      &FieldSpec{Column: "id", Type: field.TypeInt, Value: 1},
+				},
+				Modifiers: []func(*sql.UpdateBuilder){
+					func(u *sql.UpdateBuilder) {
+						u.Set("name", sql.Expr(sql.Lower("name")))
+					},
+				},
+			},
+			prepare: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectExec(escape("UPDATE `users` SET `name` = LOWER(`name`) WHERE `id` = ?")).
+					WithArgs(1).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				mock.ExpectQuery(escape("SELECT `id`, `name`, `age` FROM `users` WHERE `id` = ?")).
 					WithArgs(1).
@@ -1910,6 +1937,25 @@ func TestUpdateNodes(t *testing.T) {
 			wantAffected: 1,
 		},
 		{
+			name: "with modifier",
+			spec: &UpdateSpec{
+				Node: &NodeSpec{
+					Table: "users",
+					ID:    &FieldSpec{Column: "id", Type: field.TypeInt},
+				},
+				Modifiers: []func(*sql.UpdateBuilder){
+					func(u *sql.UpdateBuilder) {
+						u.Set("id", sql.Expr("id + 1")).OrderBy("id")
+					},
+				},
+			},
+			prepare: func(mock sqlmock.Sqlmock) {
+				mock.ExpectExec(escape("UPDATE `users` SET `id` = id + 1 ORDER BY `id`")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+			},
+			wantAffected: 1,
+		},
+		{
 			name: "own_fks/m2o_o2o_inverse",
 			spec: &UpdateSpec{
 				Node: &NodeSpec{
@@ -2076,6 +2122,29 @@ func TestUpdateNodes(t *testing.T) {
 			},
 			wantAffected: 2,
 		},
+		{
+			name: "m2m_edge_schema",
+			spec: &UpdateSpec{
+				Node: &NodeSpec{
+					Table:       "users",
+					CompositeID: []*FieldSpec{{Column: "user_id", Type: field.TypeInt}, {Column: "group_id", Type: field.TypeInt}},
+				},
+				Predicate: func(s *sql.Selector) {
+					s.Where(sql.EQ("version", 1))
+				},
+				Fields: FieldMut{
+					Add: []*FieldSpec{
+						{Column: "version", Type: field.TypeInt, Value: 1},
+					},
+				},
+			},
+			prepare: func(mock sqlmock.Sqlmock) {
+				mock.ExpectExec(escape("UPDATE `users` SET `version` = COALESCE(`users`.`version`, 0) + ? WHERE `version` = ?")).
+					WithArgs(1, 1).
+					WillReturnResult(sqlmock.NewResult(0, 4))
+			},
+			wantAffected: 4,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -2158,12 +2227,12 @@ func TestQueryNodes(t *testing.T) {
 			Modifiers: []func(*sql.Selector){
 				func(s *sql.Selector) { s.ForUpdate(sql.WithLockAction(sql.NoWait)) },
 			},
-			ScanValues: func(columns []string) ([]interface{}, error) {
+			ScanValues: func(columns []string) ([]any, error) {
 				u := &user{}
 				users = append(users, u)
 				return u.values(columns)
 			},
-			Assign: func(columns []string, values []interface{}) error {
+			Assign: func(columns []string, values []any) error {
 				return users[len(users)-1].assign(columns, values)
 			},
 		}
@@ -2217,12 +2286,12 @@ func TestQueryNodesSchema(t *testing.T) {
 			Predicate: func(s *sql.Selector) {
 				s.Where(sql.LT("age", 40))
 			},
-			ScanValues: func(columns []string) ([]interface{}, error) {
+			ScanValues: func(columns []string) ([]any, error) {
 				u := &user{}
 				users = append(users, u)
 				return u.values(columns)
 			},
-			Assign: func(columns []string, values []interface{}) error {
+			Assign: func(columns []string, values []any) error {
 				return users[len(users)-1].assign(columns, values)
 			},
 		}
@@ -2256,10 +2325,10 @@ func TestQueryEdges(t *testing.T) {
 			Predicate: func(s *sql.Selector) {
 				s.Where(sql.InValues("user_id", 1, 2, 3))
 			},
-			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
+			ScanValues: func() [2]any {
+				return [2]any{&sql.NullInt64{}, &sql.NullInt64{}}
 			},
-			Assign: func(out, in interface{}) error {
+			Assign: func(out, in any) error {
 				o, i := out.(*sql.NullInt64), in.(*sql.NullInt64)
 				edges = append(edges, []int64{o.Int64, i.Int64})
 				return nil
@@ -2294,10 +2363,10 @@ func TestQueryEdgesSchema(t *testing.T) {
 			Predicate: func(s *sql.Selector) {
 				s.Where(sql.InValues("user_id", 1, 2, 3))
 			},
-			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
+			ScanValues: func() [2]any {
+				return [2]any{&sql.NullInt64{}, &sql.NullInt64{}}
 			},
-			Assign: func(out, in interface{}) error {
+			Assign: func(out, in any) error {
 				o, i := out.(*sql.NullInt64), in.(*sql.NullInt64)
 				edges = append(edges, []int64{o.Int64, i.Int64})
 				return nil

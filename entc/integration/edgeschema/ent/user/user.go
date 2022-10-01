@@ -6,6 +6,10 @@
 
 package user
 
+import (
+	"entgo.io/ent"
+)
+
 const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
@@ -23,6 +27,8 @@ const (
 	EdgeLikedTweets = "liked_tweets"
 	// EdgeTweets holds the string denoting the tweets edge name in mutations.
 	EdgeTweets = "tweets"
+	// EdgeRoles holds the string denoting the roles edge name in mutations.
+	EdgeRoles = "roles"
 	// EdgeJoinedGroups holds the string denoting the joined_groups edge name in mutations.
 	EdgeJoinedGroups = "joined_groups"
 	// EdgeFriendships holds the string denoting the friendships edge name in mutations.
@@ -33,6 +39,8 @@ const (
 	EdgeLikes = "likes"
 	// EdgeUserTweets holds the string denoting the user_tweets edge name in mutations.
 	EdgeUserTweets = "user_tweets"
+	// EdgeRolesUsers holds the string denoting the roles_users edge name in mutations.
+	EdgeRolesUsers = "roles_users"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// GroupsTable is the table that holds the groups relation/edge. The primary key declared below.
@@ -54,6 +62,11 @@ const (
 	// TweetsInverseTable is the table name for the Tweet entity.
 	// It exists in this package in order to avoid circular dependency with the "tweet" package.
 	TweetsInverseTable = "tweets"
+	// RolesTable is the table that holds the roles relation/edge. The primary key declared below.
+	RolesTable = "role_users"
+	// RolesInverseTable is the table name for the Role entity.
+	// It exists in this package in order to avoid circular dependency with the "role" package.
+	RolesInverseTable = "roles"
 	// JoinedGroupsTable is the table that holds the joined_groups relation/edge.
 	JoinedGroupsTable = "user_groups"
 	// JoinedGroupsInverseTable is the table name for the UserGroup entity.
@@ -89,6 +102,13 @@ const (
 	UserTweetsInverseTable = "user_tweets"
 	// UserTweetsColumn is the table column denoting the user_tweets relation/edge.
 	UserTweetsColumn = "user_id"
+	// RolesUsersTable is the table that holds the roles_users relation/edge.
+	RolesUsersTable = "role_users"
+	// RolesUsersInverseTable is the table name for the RoleUser entity.
+	// It exists in this package in order to avoid circular dependency with the "roleuser" package.
+	RolesUsersInverseTable = "role_users"
+	// RolesUsersColumn is the table column denoting the roles_users relation/edge.
+	RolesUsersColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -113,6 +133,9 @@ var (
 	// TweetsPrimaryKey and TweetsColumn2 are the table columns denoting the
 	// primary key for the tweets relation (M2M).
 	TweetsPrimaryKey = []string{"user_id", "tweet_id"}
+	// RolesPrimaryKey and RolesColumn2 are the table columns denoting the
+	// primary key for the roles relation (M2M).
+	RolesPrimaryKey = []string{"user_id", "role_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -125,7 +148,14 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+// Note that the variables below are initialized by the runtime
+// package on the initialization of the application. Therefore,
+// it should be imported in the main as follows:
+//
+//	import _ "entgo.io/ent/entc/integration/edgeschema/ent/runtime"
 var (
+	Hooks  [1]ent.Hook
+	Policy ent.Policy
 	// DefaultName holds the default value on creation for the "name" field.
 	DefaultName string
 )

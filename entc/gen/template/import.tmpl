@@ -19,7 +19,8 @@ import (
 		"{{ $.Config.Package }}/predicate"
 		{{- if $.HasOneFieldID }}
 			{{- with $.ID.Type.PkgPath }}
-				"{{ . }}"
+				{{- $name := $.ID.Type.PkgName }}
+				{{ if ne $name (base $.ID.Type.PkgPath) }}{{ $name }} {{ end}}"{{ . }}"
 			{{- end }}
 		{{- end }}
 		{{- /* Import external packages */}}
@@ -42,7 +43,7 @@ import (
 	{{- range $f := $fields }}
 		{{- $pkg := $f.Type.PkgPath }}
 		{{- if and $pkg (not (hasImport (base $pkg ))) }}
-			{{- $name := trim (index (split $f.Type.RType.Ident ".") 0) "[]*" }}
+			{{- $name := $f.Type.PkgName }}
 			{{ if ne $name (base $pkg) }}{{ $name }} {{ end}}"{{ $pkg }}"
 		{{- end }}
 	{{- end }}

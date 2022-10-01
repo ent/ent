@@ -365,7 +365,6 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 //			SetCreateTime(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (cc *CardCreate) OnConflict(opts ...sql.ConflictOption) *CardUpsertOne {
 	cc.conflict = opts
 	return &CardUpsertOne{
@@ -379,7 +378,6 @@ func (cc *CardCreate) OnConflict(opts ...sql.ConflictOption) *CardUpsertOne {
 //	client.Card.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (cc *CardCreate) OnConflictColumns(columns ...string) *CardUpsertOne {
 	cc.conflict = append(cc.conflict, sql.ConflictColumns(columns...))
 	return &CardUpsertOne{
@@ -399,18 +397,6 @@ type (
 		*sql.UpdateSet
 	}
 )
-
-// SetCreateTime sets the "create_time" field.
-func (u *CardUpsert) SetCreateTime(v time.Time) *CardUpsert {
-	u.Set(card.FieldCreateTime, v)
-	return u
-}
-
-// UpdateCreateTime sets the "create_time" field to the value that was provided on create.
-func (u *CardUpsert) UpdateCreateTime() *CardUpsert {
-	u.SetExcluded(card.FieldCreateTime)
-	return u
-}
 
 // SetUpdateTime sets the "update_time" field.
 func (u *CardUpsert) SetUpdateTime(v time.Time) *CardUpsert {
@@ -442,18 +428,6 @@ func (u *CardUpsert) AddBalance(v float64) *CardUpsert {
 	return u
 }
 
-// SetNumber sets the "number" field.
-func (u *CardUpsert) SetNumber(v string) *CardUpsert {
-	u.Set(card.FieldNumber, v)
-	return u
-}
-
-// UpdateNumber sets the "number" field to the value that was provided on create.
-func (u *CardUpsert) UpdateNumber() *CardUpsert {
-	u.SetExcluded(card.FieldNumber)
-	return u
-}
-
 // SetName sets the "name" field.
 func (u *CardUpsert) SetName(v string) *CardUpsert {
 	u.Set(card.FieldName, v)
@@ -480,7 +454,6 @@ func (u *CardUpsert) ClearName() *CardUpsert {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *CardUpsertOne) UpdateNewValues() *CardUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -497,10 +470,9 @@ func (u *CardUpsertOne) UpdateNewValues() *CardUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.Card.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.Card.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *CardUpsertOne) Ignore() *CardUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -520,20 +492,6 @@ func (u *CardUpsertOne) Update(set func(*CardUpsert)) *CardUpsertOne {
 		set(&CardUpsert{UpdateSet: update})
 	}))
 	return u
-}
-
-// SetCreateTime sets the "create_time" field.
-func (u *CardUpsertOne) SetCreateTime(v time.Time) *CardUpsertOne {
-	return u.Update(func(s *CardUpsert) {
-		s.SetCreateTime(v)
-	})
-}
-
-// UpdateCreateTime sets the "create_time" field to the value that was provided on create.
-func (u *CardUpsertOne) UpdateCreateTime() *CardUpsertOne {
-	return u.Update(func(s *CardUpsert) {
-		s.UpdateCreateTime()
-	})
 }
 
 // SetUpdateTime sets the "update_time" field.
@@ -568,20 +526,6 @@ func (u *CardUpsertOne) AddBalance(v float64) *CardUpsertOne {
 func (u *CardUpsertOne) UpdateBalance() *CardUpsertOne {
 	return u.Update(func(s *CardUpsert) {
 		s.UpdateBalance()
-	})
-}
-
-// SetNumber sets the "number" field.
-func (u *CardUpsertOne) SetNumber(v string) *CardUpsertOne {
-	return u.Update(func(s *CardUpsert) {
-		s.SetNumber(v)
-	})
-}
-
-// UpdateNumber sets the "number" field to the value that was provided on create.
-func (u *CardUpsertOne) UpdateNumber() *CardUpsertOne {
-	return u.Update(func(s *CardUpsert) {
-		s.UpdateNumber()
 	})
 }
 
@@ -740,7 +684,6 @@ func (ccb *CardCreateBulk) ExecX(ctx context.Context) {
 //			SetCreateTime(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (ccb *CardCreateBulk) OnConflict(opts ...sql.ConflictOption) *CardUpsertBulk {
 	ccb.conflict = opts
 	return &CardUpsertBulk{
@@ -754,7 +697,6 @@ func (ccb *CardCreateBulk) OnConflict(opts ...sql.ConflictOption) *CardUpsertBul
 //	client.Card.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (ccb *CardCreateBulk) OnConflictColumns(columns ...string) *CardUpsertBulk {
 	ccb.conflict = append(ccb.conflict, sql.ConflictColumns(columns...))
 	return &CardUpsertBulk{
@@ -776,7 +718,6 @@ type CardUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *CardUpsertBulk) UpdateNewValues() *CardUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -798,7 +739,6 @@ func (u *CardUpsertBulk) UpdateNewValues() *CardUpsertBulk {
 //	client.Card.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *CardUpsertBulk) Ignore() *CardUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -818,20 +758,6 @@ func (u *CardUpsertBulk) Update(set func(*CardUpsert)) *CardUpsertBulk {
 		set(&CardUpsert{UpdateSet: update})
 	}))
 	return u
-}
-
-// SetCreateTime sets the "create_time" field.
-func (u *CardUpsertBulk) SetCreateTime(v time.Time) *CardUpsertBulk {
-	return u.Update(func(s *CardUpsert) {
-		s.SetCreateTime(v)
-	})
-}
-
-// UpdateCreateTime sets the "create_time" field to the value that was provided on create.
-func (u *CardUpsertBulk) UpdateCreateTime() *CardUpsertBulk {
-	return u.Update(func(s *CardUpsert) {
-		s.UpdateCreateTime()
-	})
 }
 
 // SetUpdateTime sets the "update_time" field.
@@ -866,20 +792,6 @@ func (u *CardUpsertBulk) AddBalance(v float64) *CardUpsertBulk {
 func (u *CardUpsertBulk) UpdateBalance() *CardUpsertBulk {
 	return u.Update(func(s *CardUpsert) {
 		s.UpdateBalance()
-	})
-}
-
-// SetNumber sets the "number" field.
-func (u *CardUpsertBulk) SetNumber(v string) *CardUpsertBulk {
-	return u.Update(func(s *CardUpsert) {
-		s.SetNumber(v)
-	})
-}
-
-// UpdateNumber sets the "number" field to the value that was provided on create.
-func (u *CardUpsertBulk) UpdateNumber() *CardUpsertBulk {
-	return u.Update(func(s *CardUpsert) {
-		s.UpdateNumber()
 	})
 }
 

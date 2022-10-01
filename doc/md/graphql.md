@@ -3,8 +3,17 @@ id: graphql
 title: GraphQL Integration
 ---
 
-The `ent` framework provides an integration with GraphQL through the [99designs/gqlgen](https://github.com/99designs/gqlgen)
-library using the [extension](extension.md) option (i.e. it can be extended to support other libraries).
+The Ent framework supports GraphQL using the [99designs/gqlgen](https://github.com/99designs/gqlgen) library and
+provides various integrations, such as:
+1. Generating a GraphQL schema for nodes and edges defined in an Ent schema.
+2. Auto-generated `Query` and `Mutation` resolvers and provide seamless integration with the [Relay framework](https://relay.dev/).
+3. Filtering, pagination (including nested) and compliant support with the [Relay Cursor Connections Spec](https://relay.dev/graphql/connections.htm).
+4. Efficient [field collection](tutorial-todo-gql-field-collection) to overcome the N+1 problem without requiring data
+   loaders.
+5. [Transactional mutations](tutorial-todo-gql-tx-mutation.md) to ensure consistency in case of failures. 
+
+Check out the website's [GraphQL tutorial](tutorial-todo-gql.mdx#basic-setup) for more information.
+
 
 ## Quick Introduction
 
@@ -238,7 +247,7 @@ query {
 ## Fields Collection
 
 The collection template adds support for automatic [GraphQL fields collection](https://spec.graphql.org/June2018/#sec-Field-Collection)
-for ent-edges using eager-loading. That means, if a query asks for nodes and their edges, entgql will add automatically [`With<E>`](eager-load.md#api)
+for ent-edges using eager-loading. That means, if a query asks for nodes and their edges, entgql will add automatically [`With<E>`](eager-load.mdx#api)
 steps to the root query, and as a result, the client will execute constant number of queries to the database - and it works recursively.
 
 For example, given this GraphQL query:

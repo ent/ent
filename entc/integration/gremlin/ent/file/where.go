@@ -37,7 +37,7 @@ func IDNEQ(id string) predicate.File {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...string) predicate.File {
 	return predicate.File(func(t *dsl.Traversal) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -48,7 +48,7 @@ func IDIn(ids ...string) predicate.File {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...string) predicate.File {
 	return predicate.File(func(t *dsl.Traversal) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -135,7 +135,7 @@ func SizeNEQ(v int) predicate.File {
 
 // SizeIn applies the In predicate on the "size" field.
 func SizeIn(vs ...int) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -146,7 +146,7 @@ func SizeIn(vs ...int) predicate.File {
 
 // SizeNotIn applies the NotIn predicate on the "size" field.
 func SizeNotIn(vs ...int) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -199,7 +199,7 @@ func NameNEQ(v string) predicate.File {
 
 // NameIn applies the In predicate on the "name" field.
 func NameIn(vs ...string) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -210,7 +210,7 @@ func NameIn(vs ...string) predicate.File {
 
 // NameNotIn applies the NotIn predicate on the "name" field.
 func NameNotIn(vs ...string) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -284,7 +284,7 @@ func UserNEQ(v string) predicate.File {
 
 // UserIn applies the In predicate on the "user" field.
 func UserIn(vs ...string) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -295,7 +295,7 @@ func UserIn(vs ...string) predicate.File {
 
 // UserNotIn applies the NotIn predicate on the "user" field.
 func UserNotIn(vs ...string) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -383,7 +383,7 @@ func GroupNEQ(v string) predicate.File {
 
 // GroupIn applies the In predicate on the "group" field.
 func GroupIn(vs ...string) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -394,7 +394,7 @@ func GroupIn(vs ...string) predicate.File {
 
 // GroupNotIn applies the NotIn predicate on the "group" field.
 func GroupNotIn(vs ...string) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -494,6 +494,84 @@ func OpNotNil() predicate.File {
 	})
 }
 
+// FieldIDEQ applies the EQ predicate on the "field_id" field.
+func FieldIDEQ(v int) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldFieldID, p.EQ(v))
+	})
+}
+
+// FieldIDNEQ applies the NEQ predicate on the "field_id" field.
+func FieldIDNEQ(v int) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldFieldID, p.NEQ(v))
+	})
+}
+
+// FieldIDIn applies the In predicate on the "field_id" field.
+func FieldIDIn(vs ...int) predicate.File {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldFieldID, p.Within(v...))
+	})
+}
+
+// FieldIDNotIn applies the NotIn predicate on the "field_id" field.
+func FieldIDNotIn(vs ...int) predicate.File {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldFieldID, p.Without(v...))
+	})
+}
+
+// FieldIDGT applies the GT predicate on the "field_id" field.
+func FieldIDGT(v int) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldFieldID, p.GT(v))
+	})
+}
+
+// FieldIDGTE applies the GTE predicate on the "field_id" field.
+func FieldIDGTE(v int) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldFieldID, p.GTE(v))
+	})
+}
+
+// FieldIDLT applies the LT predicate on the "field_id" field.
+func FieldIDLT(v int) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldFieldID, p.LT(v))
+	})
+}
+
+// FieldIDLTE applies the LTE predicate on the "field_id" field.
+func FieldIDLTE(v int) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldFieldID, p.LTE(v))
+	})
+}
+
+// FieldIDIsNil applies the IsNil predicate on the "field_id" field.
+func FieldIDIsNil() predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldFieldID)
+	})
+}
+
+// FieldIDNotNil applies the NotNil predicate on the "field_id" field.
+func FieldIDNotNil() predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldFieldID)
+	})
+}
+
 // HasOwner applies the HasEdge predicate on the "owner" edge.
 func HasOwner() predicate.File {
 	return predicate.File(func(t *dsl.Traversal) {
@@ -551,7 +629,7 @@ func HasFieldWith(preds ...predicate.FieldType) predicate.File {
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.File) predicate.File {
 	return predicate.File(func(tr *dsl.Traversal) {
-		trs := make([]interface{}, 0, len(predicates))
+		trs := make([]any, 0, len(predicates))
 		for _, p := range predicates {
 			t := __.New()
 			p(t)
@@ -564,7 +642,7 @@ func And(predicates ...predicate.File) predicate.File {
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.File) predicate.File {
 	return predicate.File(func(tr *dsl.Traversal) {
-		trs := make([]interface{}, 0, len(predicates))
+		trs := make([]any, 0, len(predicates))
 		for _, p := range predicates {
 			t := __.New()
 			p(t)

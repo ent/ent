@@ -231,7 +231,6 @@ func (isc *IntSIDCreate) createSpec() (*IntSID, *sqlgraph.CreateSpec) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (isc *IntSIDCreate) OnConflict(opts ...sql.ConflictOption) *IntSIDUpsertOne {
 	isc.conflict = opts
 	return &IntSIDUpsertOne{
@@ -245,7 +244,6 @@ func (isc *IntSIDCreate) OnConflict(opts ...sql.ConflictOption) *IntSIDUpsertOne
 //	client.IntSID.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (isc *IntSIDCreate) OnConflictColumns(columns ...string) *IntSIDUpsertOne {
 	isc.conflict = append(isc.conflict, sql.ConflictColumns(columns...))
 	return &IntSIDUpsertOne{
@@ -277,7 +275,6 @@ type (
 //			}),
 //		).
 //		Exec(ctx)
-//
 func (u *IntSIDUpsertOne) UpdateNewValues() *IntSIDUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -291,10 +288,9 @@ func (u *IntSIDUpsertOne) UpdateNewValues() *IntSIDUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.IntSID.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.IntSID.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *IntSIDUpsertOne) Ignore() *IntSIDUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -445,7 +441,6 @@ func (iscb *IntSIDCreateBulk) ExecX(ctx context.Context) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (iscb *IntSIDCreateBulk) OnConflict(opts ...sql.ConflictOption) *IntSIDUpsertBulk {
 	iscb.conflict = opts
 	return &IntSIDUpsertBulk{
@@ -459,7 +454,6 @@ func (iscb *IntSIDCreateBulk) OnConflict(opts ...sql.ConflictOption) *IntSIDUpse
 //	client.IntSID.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (iscb *IntSIDCreateBulk) OnConflictColumns(columns ...string) *IntSIDUpsertBulk {
 	iscb.conflict = append(iscb.conflict, sql.ConflictColumns(columns...))
 	return &IntSIDUpsertBulk{
@@ -484,14 +478,12 @@ type IntSIDUpsertBulk struct {
 //			}),
 //		).
 //		Exec(ctx)
-//
 func (u *IntSIDUpsertBulk) UpdateNewValues() *IntSIDUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(intsid.FieldID)
-				return
 			}
 		}
 	}))
@@ -504,7 +496,6 @@ func (u *IntSIDUpsertBulk) UpdateNewValues() *IntSIDUpsertBulk {
 //	client.IntSID.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *IntSIDUpsertBulk) Ignore() *IntSIDUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

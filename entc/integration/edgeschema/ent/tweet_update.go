@@ -321,7 +321,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		}
 		createE := &TweetLikeCreate{config: tu.config, mutation: newTweetLikeMutation(tu.config, OpCreate)}
-		createE.defaults()
+		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -344,7 +344,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		createE := &TweetLikeCreate{config: tu.config, mutation: newTweetLikeMutation(tu.config, OpCreate)}
-		createE.defaults()
+		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -367,7 +367,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		createE := &TweetLikeCreate{config: tu.config, mutation: newTweetLikeMutation(tu.config, OpCreate)}
-		createE.defaults()
+		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -955,7 +955,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 			},
 		}
 		createE := &TweetLikeCreate{config: tuo.config, mutation: newTweetLikeMutation(tuo.config, OpCreate)}
-		createE.defaults()
+		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -978,7 +978,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		createE := &TweetLikeCreate{config: tuo.config, mutation: newTweetLikeMutation(tuo.config, OpCreate)}
-		createE.defaults()
+		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1001,7 +1001,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		createE := &TweetLikeCreate{config: tuo.config, mutation: newTweetLikeMutation(tuo.config, OpCreate)}
-		createE.defaults()
+		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)

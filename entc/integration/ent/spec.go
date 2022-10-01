@@ -31,6 +31,7 @@ type SpecEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
+	namedCard   map[string][]*Card
 }
 
 // CardOrErr returns the Card value or an error if the edge
@@ -43,8 +44,8 @@ func (e SpecEdges) CardOrErr() ([]*Card, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Spec) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*Spec) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
 		case spec.FieldID:
@@ -58,7 +59,7 @@ func (*Spec) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Spec fields.
-func (s *Spec) assignValues(columns []string, values []interface{}) error {
+func (s *Spec) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -105,6 +106,30 @@ func (s *Spec) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", s.ID))
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedCard returns the Card named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (s *Spec) NamedCard(name string) ([]*Card, error) {
+	if s.Edges.namedCard == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := s.Edges.namedCard[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (s *Spec) appendNamedCard(name string, edges ...*Card) {
+	if s.Edges.namedCard == nil {
+		s.Edges.namedCard = make(map[string][]*Card)
+	}
+	if len(edges) == 0 {
+		s.Edges.namedCard[name] = []*Card{}
+	} else {
+		s.Edges.namedCard[name] = append(s.Edges.namedCard[name], edges...)
+	}
 }
 
 // Specs is a parsable slice of Spec.

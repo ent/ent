@@ -202,7 +202,7 @@ type (
 	}
 
 	querier interface {
-		Query(ctx context.Context, query string, args, v interface{}) error
+		Query(ctx context.Context, query string, args, v any) error
 	}
 )
 

@@ -24,8 +24,8 @@ type Item struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Item) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*Item) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
 		case item.FieldID, item.FieldText:
@@ -39,7 +39,7 @@ func (*Item) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Item fields.
-func (i *Item) assignValues(columns []string, values []interface{}) error {
+func (i *Item) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}

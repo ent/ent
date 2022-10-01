@@ -75,6 +75,20 @@ func (pc *PetCreate) SetNillableNickname(s *string) *PetCreate {
 	return pc
 }
 
+// SetTrained sets the "trained" field.
+func (pc *PetCreate) SetTrained(b bool) *PetCreate {
+	pc.mutation.SetTrained(b)
+	return pc
+}
+
+// SetNillableTrained sets the "trained" field if the given value is not nil.
+func (pc *PetCreate) SetNillableTrained(b *bool) *PetCreate {
+	if b != nil {
+		pc.SetTrained(*b)
+	}
+	return pc
+}
+
 // SetTeamID sets the "team" edge to the User entity by ID.
 func (pc *PetCreate) SetTeamID(id int) *PetCreate {
 	pc.mutation.SetTeamID(id)
@@ -194,6 +208,10 @@ func (pc *PetCreate) defaults() {
 		v := pet.DefaultAge
 		pc.mutation.SetAge(v)
 	}
+	if _, ok := pc.mutation.Trained(); !ok {
+		v := pet.DefaultTrained
+		pc.mutation.SetTrained(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -203,6 +221,9 @@ func (pc *PetCreate) check() error {
 	}
 	if _, ok := pc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Pet.name"`)}
+	}
+	if _, ok := pc.mutation.Trained(); !ok {
+		return &ValidationError{Name: "trained", err: errors.New(`ent: missing required field "Pet.trained"`)}
 	}
 	return nil
 }
@@ -264,6 +285,14 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 		})
 		_node.Nickname = value
 	}
+	if value, ok := pc.mutation.Trained(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: pet.FieldTrained,
+		})
+		_node.Trained = value
+	}
 	if nodes := pc.mutation.TeamIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -323,7 +352,6 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 //			SetAge(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (pc *PetCreate) OnConflict(opts ...sql.ConflictOption) *PetUpsertOne {
 	pc.conflict = opts
 	return &PetUpsertOne{
@@ -337,7 +365,6 @@ func (pc *PetCreate) OnConflict(opts ...sql.ConflictOption) *PetUpsertOne {
 //	client.Pet.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (pc *PetCreate) OnConflictColumns(columns ...string) *PetUpsertOne {
 	pc.conflict = append(pc.conflict, sql.ConflictColumns(columns...))
 	return &PetUpsertOne{
@@ -424,6 +451,18 @@ func (u *PetUpsert) ClearNickname() *PetUpsert {
 	return u
 }
 
+// SetTrained sets the "trained" field.
+func (u *PetUpsert) SetTrained(v bool) *PetUpsert {
+	u.Set(pet.FieldTrained, v)
+	return u
+}
+
+// UpdateTrained sets the "trained" field to the value that was provided on create.
+func (u *PetUpsert) UpdateTrained() *PetUpsert {
+	u.SetExcluded(pet.FieldTrained)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -432,7 +471,6 @@ func (u *PetUpsert) ClearNickname() *PetUpsert {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *PetUpsertOne) UpdateNewValues() *PetUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -441,10 +479,9 @@ func (u *PetUpsertOne) UpdateNewValues() *PetUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.Pet.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.Pet.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *PetUpsertOne) Ignore() *PetUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -540,6 +577,20 @@ func (u *PetUpsertOne) UpdateNickname() *PetUpsertOne {
 func (u *PetUpsertOne) ClearNickname() *PetUpsertOne {
 	return u.Update(func(s *PetUpsert) {
 		s.ClearNickname()
+	})
+}
+
+// SetTrained sets the "trained" field.
+func (u *PetUpsertOne) SetTrained(v bool) *PetUpsertOne {
+	return u.Update(func(s *PetUpsert) {
+		s.SetTrained(v)
+	})
+}
+
+// UpdateTrained sets the "trained" field to the value that was provided on create.
+func (u *PetUpsertOne) UpdateTrained() *PetUpsertOne {
+	return u.Update(func(s *PetUpsert) {
+		s.UpdateTrained()
 	})
 }
 
@@ -677,7 +728,6 @@ func (pcb *PetCreateBulk) ExecX(ctx context.Context) {
 //			SetAge(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (pcb *PetCreateBulk) OnConflict(opts ...sql.ConflictOption) *PetUpsertBulk {
 	pcb.conflict = opts
 	return &PetUpsertBulk{
@@ -691,7 +741,6 @@ func (pcb *PetCreateBulk) OnConflict(opts ...sql.ConflictOption) *PetUpsertBulk 
 //	client.Pet.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (pcb *PetCreateBulk) OnConflictColumns(columns ...string) *PetUpsertBulk {
 	pcb.conflict = append(pcb.conflict, sql.ConflictColumns(columns...))
 	return &PetUpsertBulk{
@@ -713,7 +762,6 @@ type PetUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *PetUpsertBulk) UpdateNewValues() *PetUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -725,7 +773,6 @@ func (u *PetUpsertBulk) UpdateNewValues() *PetUpsertBulk {
 //	client.Pet.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *PetUpsertBulk) Ignore() *PetUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -821,6 +868,20 @@ func (u *PetUpsertBulk) UpdateNickname() *PetUpsertBulk {
 func (u *PetUpsertBulk) ClearNickname() *PetUpsertBulk {
 	return u.Update(func(s *PetUpsert) {
 		s.ClearNickname()
+	})
+}
+
+// SetTrained sets the "trained" field.
+func (u *PetUpsertBulk) SetTrained(v bool) *PetUpsertBulk {
+	return u.Update(func(s *PetUpsert) {
+		s.SetTrained(v)
+	})
+}
+
+// UpdateTrained sets the "trained" field to the value that was provided on create.
+func (u *PetUpsertBulk) UpdateTrained() *PetUpsertBulk {
+	return u.Update(func(s *PetUpsert) {
+		s.UpdateTrained()
 	})
 }
 

@@ -63,7 +63,6 @@ type AggregateFunc func(string, string) (string, *dsl.Traversal)
 //	GroupBy(field1, field2).
 //	Aggregate(ent.As(ent.Sum(field1), "sum_field1"), (ent.As(ent.Sum(field2), "sum_field2")).
 //	Scan(ctx, &v)
-//
 func As(fn AggregateFunc, end string) AggregateFunc {
 	return func(start, _ string) (string, *dsl.Traversal) {
 		return fn(start, end)
@@ -271,11 +270,11 @@ func IsConstraintError(err error) bool {
 type selector struct {
 	label string
 	flds  *[]string
-	scan  func(context.Context, interface{}) error
+	scan  func(context.Context, any) error
 }
 
 // ScanX is like Scan, but panics if an error occurs.
-func (s *selector) ScanX(ctx context.Context, v interface{}) {
+func (s *selector) ScanX(ctx context.Context, v any) {
 	if err := s.scan(ctx, v); err != nil {
 		panic(err)
 	}
@@ -470,7 +469,7 @@ func (s *selector) BoolX(ctx context.Context) bool {
 }
 
 // Code implements the dsl.Node interface.
-func (e ConstraintError) Code() (string, []interface{}) {
+func (e ConstraintError) Code() (string, []any) {
 	return strconv.Quote(e.prefix() + e.msg), nil
 }
 
@@ -493,7 +492,7 @@ func (e *ConstraintError) UnmarshalGraphson(b []byte) error {
 func (ConstraintError) prefix() string { return "Error: " }
 
 // NewErrUniqueField creates a constraint error for unique fields.
-func NewErrUniqueField(label, field string, v interface{}) *ConstraintError {
+func NewErrUniqueField(label, field string, v any) *ConstraintError {
 	return &ConstraintError{msg: fmt.Sprintf("field %s.%s with value: %#v", label, field, v)}
 }
 

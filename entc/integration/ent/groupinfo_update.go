@@ -22,8 +22,9 @@ import (
 // GroupInfoUpdate is the builder for updating GroupInfo entities.
 type GroupInfoUpdate struct {
 	config
-	hooks    []Hook
-	mutation *GroupInfoMutation
+	hooks     []Hook
+	mutation  *GroupInfoMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the GroupInfoUpdate builder.
@@ -154,6 +155,12 @@ func (giu *GroupInfoUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (giu *GroupInfoUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *GroupInfoUpdate {
+	giu.modifiers = append(giu.modifiers, modifiers...)
+	return giu
+}
+
 func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -247,6 +254,7 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(giu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, giu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{groupinfo.Label}
@@ -261,9 +269,10 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // GroupInfoUpdateOne is the builder for updating a single GroupInfo entity.
 type GroupInfoUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *GroupInfoMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *GroupInfoMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetDesc sets the "desc" field.
@@ -401,6 +410,12 @@ func (giuo *GroupInfoUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (giuo *GroupInfoUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *GroupInfoUpdateOne {
+	giuo.modifiers = append(giuo.modifiers, modifiers...)
+	return giuo
+}
+
 func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (_node *GroupInfo, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -511,6 +526,7 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (_node *GroupInfo, 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(giuo.modifiers...)
 	_node = &GroupInfo{config: giuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

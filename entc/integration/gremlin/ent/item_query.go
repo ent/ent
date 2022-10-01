@@ -265,7 +265,6 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 //		GroupBy(item.FieldText).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 	grbuild := &ItemGroupBy{config: iq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -292,7 +291,6 @@ func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 //	client.Item.Query().
 //		Select(item.FieldText).
 //		Scan(ctx, &v)
-//
 func (iq *ItemQuery) Select(fields ...string) *ItemSelect {
 	iq.fields = append(iq.fields, fields...)
 	selbuild := &ItemSelect{ItemQuery: iq}
@@ -316,7 +314,7 @@ func (iq *ItemQuery) gremlinAll(ctx context.Context) ([]*Item, error) {
 	res := &gremlin.Response{}
 	traversal := iq.gremlinQuery(ctx)
 	if len(iq.fields) > 0 {
-		fields := make([]interface{}, len(iq.fields))
+		fields := make([]any, len(iq.fields))
 		for i, f := range iq.fields {
 			fields[i] = f
 		}
@@ -400,7 +398,7 @@ func (igb *ItemGroupBy) Aggregate(fns ...AggregateFunc) *ItemGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (igb *ItemGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (igb *ItemGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := igb.path(ctx)
 	if err != nil {
 		return err
@@ -409,7 +407,7 @@ func (igb *ItemGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return igb.gremlinScan(ctx, v)
 }
 
-func (igb *ItemGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
+func (igb *ItemGroupBy) gremlinScan(ctx context.Context, v any) error {
 	res := &gremlin.Response{}
 	query, bindings := igb.gremlinQuery().Query()
 	if err := igb.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -427,8 +425,8 @@ func (igb *ItemGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
 
 func (igb *ItemGroupBy) gremlinQuery() *dsl.Traversal {
 	var (
-		trs   []interface{}
-		names []interface{}
+		trs   []any
+		names []any
 	)
 	for _, fn := range igb.fns {
 		name, tr := fn("p", "")
@@ -455,7 +453,7 @@ type ItemSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (is *ItemSelect) Scan(ctx context.Context, v interface{}) error {
+func (is *ItemSelect) Scan(ctx context.Context, v any) error {
 	if err := is.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -463,7 +461,7 @@ func (is *ItemSelect) Scan(ctx context.Context, v interface{}) error {
 	return is.gremlinScan(ctx, v)
 }
 
-func (is *ItemSelect) gremlinScan(ctx context.Context, v interface{}) error {
+func (is *ItemSelect) gremlinScan(ctx context.Context, v any) error {
 	var (
 		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
@@ -475,7 +473,7 @@ func (is *ItemSelect) gremlinScan(ctx context.Context, v interface{}) error {
 			traversal = is.gremlin.ID()
 		}
 	} else {
-		fields := make([]interface{}, len(is.fields))
+		fields := make([]any, len(is.fields))
 		for i, f := range is.fields {
 			fields[i] = f
 		}

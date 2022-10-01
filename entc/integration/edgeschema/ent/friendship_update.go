@@ -16,7 +16,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/friendship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
-	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 	"entgo.io/ent/schema/field"
 )
 
@@ -68,43 +67,9 @@ func (fu *FriendshipUpdate) SetNillableCreatedAt(t *time.Time) *FriendshipUpdate
 	return fu
 }
 
-// SetUserID sets the "user_id" field.
-func (fu *FriendshipUpdate) SetUserID(i int) *FriendshipUpdate {
-	fu.mutation.SetUserID(i)
-	return fu
-}
-
-// SetFriendID sets the "friend_id" field.
-func (fu *FriendshipUpdate) SetFriendID(i int) *FriendshipUpdate {
-	fu.mutation.SetFriendID(i)
-	return fu
-}
-
-// SetUser sets the "user" edge to the User entity.
-func (fu *FriendshipUpdate) SetUser(u *User) *FriendshipUpdate {
-	return fu.SetUserID(u.ID)
-}
-
-// SetFriend sets the "friend" edge to the User entity.
-func (fu *FriendshipUpdate) SetFriend(u *User) *FriendshipUpdate {
-	return fu.SetFriendID(u.ID)
-}
-
 // Mutation returns the FriendshipMutation object of the builder.
 func (fu *FriendshipUpdate) Mutation() *FriendshipMutation {
 	return fu.mutation
-}
-
-// ClearUser clears the "user" edge to the User entity.
-func (fu *FriendshipUpdate) ClearUser() *FriendshipUpdate {
-	fu.mutation.ClearUser()
-	return fu
-}
-
-// ClearFriend clears the "friend" edge to the User entity.
-func (fu *FriendshipUpdate) ClearFriend() *FriendshipUpdate {
-	fu.mutation.ClearFriend()
-	return fu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -217,76 +182,6 @@ func (fu *FriendshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: friendship.FieldCreatedAt,
 		})
 	}
-	if fu.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   friendship.UserTable,
-			Columns: []string{friendship.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := fu.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   friendship.UserTable,
-			Columns: []string{friendship.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if fu.mutation.FriendCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   friendship.FriendTable,
-			Columns: []string{friendship.FriendColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := fu.mutation.FriendIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   friendship.FriendTable,
-			Columns: []string{friendship.FriendColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if n, err = sqlgraph.UpdateNodes(ctx, fu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{friendship.Label}
@@ -341,43 +236,9 @@ func (fuo *FriendshipUpdateOne) SetNillableCreatedAt(t *time.Time) *FriendshipUp
 	return fuo
 }
 
-// SetUserID sets the "user_id" field.
-func (fuo *FriendshipUpdateOne) SetUserID(i int) *FriendshipUpdateOne {
-	fuo.mutation.SetUserID(i)
-	return fuo
-}
-
-// SetFriendID sets the "friend_id" field.
-func (fuo *FriendshipUpdateOne) SetFriendID(i int) *FriendshipUpdateOne {
-	fuo.mutation.SetFriendID(i)
-	return fuo
-}
-
-// SetUser sets the "user" edge to the User entity.
-func (fuo *FriendshipUpdateOne) SetUser(u *User) *FriendshipUpdateOne {
-	return fuo.SetUserID(u.ID)
-}
-
-// SetFriend sets the "friend" edge to the User entity.
-func (fuo *FriendshipUpdateOne) SetFriend(u *User) *FriendshipUpdateOne {
-	return fuo.SetFriendID(u.ID)
-}
-
 // Mutation returns the FriendshipMutation object of the builder.
 func (fuo *FriendshipUpdateOne) Mutation() *FriendshipMutation {
 	return fuo.mutation
-}
-
-// ClearUser clears the "user" edge to the User entity.
-func (fuo *FriendshipUpdateOne) ClearUser() *FriendshipUpdateOne {
-	fuo.mutation.ClearUser()
-	return fuo
-}
-
-// ClearFriend clears the "friend" edge to the User entity.
-func (fuo *FriendshipUpdateOne) ClearFriend() *FriendshipUpdateOne {
-	fuo.mutation.ClearFriend()
-	return fuo
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -519,76 +380,6 @@ func (fuo *FriendshipUpdateOne) sqlSave(ctx context.Context) (_node *Friendship,
 			Value:  value,
 			Column: friendship.FieldCreatedAt,
 		})
-	}
-	if fuo.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   friendship.UserTable,
-			Columns: []string{friendship.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := fuo.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   friendship.UserTable,
-			Columns: []string{friendship.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if fuo.mutation.FriendCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   friendship.FriendTable,
-			Columns: []string{friendship.FriendColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := fuo.mutation.FriendIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   friendship.FriendTable,
-			Columns: []string{friendship.FriendColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Friendship{config: fuo.config}
 	_spec.Assign = _node.assignValues

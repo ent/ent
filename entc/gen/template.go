@@ -202,12 +202,25 @@ var (
 		"privacy/additional/*",
 		"privacy/additional/*/*",
 	}
-	// importPkg are the import packages used for code generation.
-	importPkg = make(map[string]string)
 	// templates holds the Go templates for the code generation.
 	templates *Template
 	//go:embed template/*
 	templateDir embed.FS
+	// importPkg are the import packages used for code generation.
+	// Extended by the function below on generation initialization.
+	importPkg = map[string]string{
+		"context": "context",
+		"driver":  "database/sql/driver",
+		"errors":  "errors",
+		"fmt":     "fmt",
+		"math":    "math",
+		"strings": "strings",
+		"time":    "time",
+		"ent":     "entgo.io/ent",
+		"dialect": "entgo.io/ent/dialect",
+		"schema":  "entgo.io/ent/schema",
+		"field":   "entgo.io/ent/schema/field",
+	}
 )
 
 func initTemplates() {

@@ -15,7 +15,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/privacytenant/ent/group"
 	"entgo.io/ent/examples/privacytenant/ent/predicate"
-	"entgo.io/ent/examples/privacytenant/ent/tenant"
 	"entgo.io/ent/examples/privacytenant/ent/user"
 	"entgo.io/ent/schema/field"
 )
@@ -33,12 +32,6 @@ func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 	return gu
 }
 
-// SetTenantID sets the "tenant_id" field.
-func (gu *GroupUpdate) SetTenantID(i int) *GroupUpdate {
-	gu.mutation.SetTenantID(i)
-	return gu
-}
-
 // SetName sets the "name" field.
 func (gu *GroupUpdate) SetName(s string) *GroupUpdate {
 	gu.mutation.SetName(s)
@@ -51,11 +44,6 @@ func (gu *GroupUpdate) SetNillableName(s *string) *GroupUpdate {
 		gu.SetName(*s)
 	}
 	return gu
-}
-
-// SetTenant sets the "tenant" edge to the Tenant entity.
-func (gu *GroupUpdate) SetTenant(t *Tenant) *GroupUpdate {
-	return gu.SetTenantID(t.ID)
 }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
@@ -76,12 +64,6 @@ func (gu *GroupUpdate) AddUsers(u ...*User) *GroupUpdate {
 // Mutation returns the GroupMutation object of the builder.
 func (gu *GroupUpdate) Mutation() *GroupMutation {
 	return gu.mutation
-}
-
-// ClearTenant clears the "tenant" edge to the Tenant entity.
-func (gu *GroupUpdate) ClearTenant() *GroupUpdate {
-	gu.mutation.ClearTenant()
-	return gu
 }
 
 // ClearUsers clears all "users" edges to the User entity.
@@ -198,41 +180,6 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: group.FieldName,
 		})
 	}
-	if gu.mutation.TenantCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   group.TenantTable,
-			Columns: []string{group.TenantColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tenant.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := gu.mutation.TenantIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   group.TenantTable,
-			Columns: []string{group.TenantColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tenant.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if gu.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -306,12 +253,6 @@ type GroupUpdateOne struct {
 	mutation *GroupMutation
 }
 
-// SetTenantID sets the "tenant_id" field.
-func (guo *GroupUpdateOne) SetTenantID(i int) *GroupUpdateOne {
-	guo.mutation.SetTenantID(i)
-	return guo
-}
-
 // SetName sets the "name" field.
 func (guo *GroupUpdateOne) SetName(s string) *GroupUpdateOne {
 	guo.mutation.SetName(s)
@@ -324,11 +265,6 @@ func (guo *GroupUpdateOne) SetNillableName(s *string) *GroupUpdateOne {
 		guo.SetName(*s)
 	}
 	return guo
-}
-
-// SetTenant sets the "tenant" edge to the Tenant entity.
-func (guo *GroupUpdateOne) SetTenant(t *Tenant) *GroupUpdateOne {
-	return guo.SetTenantID(t.ID)
 }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
@@ -349,12 +285,6 @@ func (guo *GroupUpdateOne) AddUsers(u ...*User) *GroupUpdateOne {
 // Mutation returns the GroupMutation object of the builder.
 func (guo *GroupUpdateOne) Mutation() *GroupMutation {
 	return guo.mutation
-}
-
-// ClearTenant clears the "tenant" edge to the Tenant entity.
-func (guo *GroupUpdateOne) ClearTenant() *GroupUpdateOne {
-	guo.mutation.ClearTenant()
-	return guo
 }
 
 // ClearUsers clears all "users" edges to the User entity.
@@ -500,41 +430,6 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 			Value:  value,
 			Column: group.FieldName,
 		})
-	}
-	if guo.mutation.TenantCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   group.TenantTable,
-			Columns: []string{group.TenantColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tenant.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := guo.mutation.TenantIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   group.TenantTable,
-			Columns: []string{group.TenantColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tenant.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if guo.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{

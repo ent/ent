@@ -251,7 +251,7 @@ SELECT `id` FROM `users` WHERE DATE(`last_login_at`) >= ?
 users := client.User.Query().
 	Select(user.FieldID).
 	Where(func(s *sql.Selector) {
-		s.Where(sql.ExprP("DATE(last_login_at >= ?", value))
+		s.Where(sql.ExprP("DATE(last_login_at) >= ?", value))
 	}).
 	AllX(ctx)
 ```
@@ -332,5 +332,13 @@ sqljson.StringContains(user.FieldURL, "github", sqljson.Path("host"))
 sqljson.StringHasSuffix(user.FieldURL, ".com", sqljson.Path("host"))
 
 sqljson.StringHasPrefix(user.FieldData, "20", sqljson.DotPath("attributes[0].status_code"))
+```
+
+#### Check if a JSON value is equal to any of the values in a list
+
+```go
+sqljson.ValueIn(user.FieldURL, []any{"https", "ftp"}, sqljson.Path("Scheme"))
+
+sqljson.ValueNotIn(user.FieldURL, []any{"github", "gitlab"}, sqljson.Path("Host"))
 ```
 

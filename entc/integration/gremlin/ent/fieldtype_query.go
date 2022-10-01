@@ -265,7 +265,6 @@ func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 //		GroupBy(fieldtype.FieldInt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (ftq *FieldTypeQuery) GroupBy(field string, fields ...string) *FieldTypeGroupBy {
 	grbuild := &FieldTypeGroupBy{config: ftq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -292,7 +291,6 @@ func (ftq *FieldTypeQuery) GroupBy(field string, fields ...string) *FieldTypeGro
 //	client.FieldType.Query().
 //		Select(fieldtype.FieldInt).
 //		Scan(ctx, &v)
-//
 func (ftq *FieldTypeQuery) Select(fields ...string) *FieldTypeSelect {
 	ftq.fields = append(ftq.fields, fields...)
 	selbuild := &FieldTypeSelect{FieldTypeQuery: ftq}
@@ -316,7 +314,7 @@ func (ftq *FieldTypeQuery) gremlinAll(ctx context.Context) ([]*FieldType, error)
 	res := &gremlin.Response{}
 	traversal := ftq.gremlinQuery(ctx)
 	if len(ftq.fields) > 0 {
-		fields := make([]interface{}, len(ftq.fields))
+		fields := make([]any, len(ftq.fields))
 		for i, f := range ftq.fields {
 			fields[i] = f
 		}
@@ -400,7 +398,7 @@ func (ftgb *FieldTypeGroupBy) Aggregate(fns ...AggregateFunc) *FieldTypeGroupBy 
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (ftgb *FieldTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (ftgb *FieldTypeGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := ftgb.path(ctx)
 	if err != nil {
 		return err
@@ -409,7 +407,7 @@ func (ftgb *FieldTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return ftgb.gremlinScan(ctx, v)
 }
 
-func (ftgb *FieldTypeGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
+func (ftgb *FieldTypeGroupBy) gremlinScan(ctx context.Context, v any) error {
 	res := &gremlin.Response{}
 	query, bindings := ftgb.gremlinQuery().Query()
 	if err := ftgb.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -427,8 +425,8 @@ func (ftgb *FieldTypeGroupBy) gremlinScan(ctx context.Context, v interface{}) er
 
 func (ftgb *FieldTypeGroupBy) gremlinQuery() *dsl.Traversal {
 	var (
-		trs   []interface{}
-		names []interface{}
+		trs   []any
+		names []any
 	)
 	for _, fn := range ftgb.fns {
 		name, tr := fn("p", "")
@@ -455,7 +453,7 @@ type FieldTypeSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (fts *FieldTypeSelect) Scan(ctx context.Context, v interface{}) error {
+func (fts *FieldTypeSelect) Scan(ctx context.Context, v any) error {
 	if err := fts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -463,7 +461,7 @@ func (fts *FieldTypeSelect) Scan(ctx context.Context, v interface{}) error {
 	return fts.gremlinScan(ctx, v)
 }
 
-func (fts *FieldTypeSelect) gremlinScan(ctx context.Context, v interface{}) error {
+func (fts *FieldTypeSelect) gremlinScan(ctx context.Context, v any) error {
 	var (
 		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
@@ -475,7 +473,7 @@ func (fts *FieldTypeSelect) gremlinScan(ctx context.Context, v interface{}) erro
 			traversal = fts.gremlin.ID()
 		}
 	} else {
-		fields := make([]interface{}, len(fts.fields))
+		fields := make([]any, len(fts.fields))
 		for i, f := range fts.fields {
 			fields[i] = f
 		}

@@ -81,6 +81,20 @@ func (cc *CommentCreate) SetNillableDir(s *schemadir.Dir) *CommentCreate {
 	return cc
 }
 
+// SetClient sets the "client" field.
+func (cc *CommentCreate) SetClient(s string) *CommentCreate {
+	cc.mutation.SetClient(s)
+	return cc
+}
+
+// SetNillableClient sets the "client" field if the given value is not nil.
+func (cc *CommentCreate) SetNillableClient(s *string) *CommentCreate {
+	if s != nil {
+		cc.SetClient(*s)
+	}
+	return cc
+}
+
 // Mutation returns the CommentMutation object of the builder.
 func (cc *CommentCreate) Mutation() *CommentMutation {
 	return cc.mutation
@@ -211,6 +225,9 @@ func (cc *CommentCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := cc.mutation.Dir(); ok {
 		v.Property(dsl.Single, comment.FieldDir, value)
+	}
+	if value, ok := cc.mutation.GetClient(); ok {
+		v.Property(dsl.Single, comment.FieldClient, value)
 	}
 	if len(constraints) == 0 {
 		return v.ValueMap(true)

@@ -71,8 +71,7 @@ type UserEdges struct {
 func (e UserEdges) ParentOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.Parent == nil {
-			// The edge parent was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Parent, nil
@@ -94,8 +93,7 @@ func (e UserEdges) ChildrenOrErr() ([]*User, error) {
 func (e UserEdges) SpouseOrErr() (*User, error) {
 	if e.loadedTypes[2] {
 		if e.Spouse == nil {
-			// The edge spouse was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Spouse, nil
@@ -108,8 +106,7 @@ func (e UserEdges) SpouseOrErr() (*User, error) {
 func (e UserEdges) CarOrErr() (*Car, error) {
 	if e.loadedTypes[3] {
 		if e.Car == nil {
-			// The edge car was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: car.Label}
 		}
 		return e.Car, nil
@@ -118,8 +115,8 @@ func (e UserEdges) CarOrErr() (*Car, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*User) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*User) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
 		case user.FieldBlob:
@@ -141,7 +138,7 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the User fields.
-func (u *User) assignValues(columns []string, values []interface{}) error {
+func (u *User) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}

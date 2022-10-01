@@ -43,8 +43,7 @@ type PostEdges struct {
 func (e PostEdges) AuthorOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.Author == nil {
-			// The edge author was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Author, nil
@@ -53,8 +52,8 @@ func (e PostEdges) AuthorOrErr() (*User, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Post) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*Post) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
 		case post.FieldID, post.FieldAuthorID:
@@ -70,7 +69,7 @@ func (*Post) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Post fields.
-func (po *Post) assignValues(columns []string, values []interface{}) error {
+func (po *Post) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}

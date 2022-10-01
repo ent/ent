@@ -31,6 +31,8 @@ type File struct {
 	Group string `json:"group,omitempty"`
 	// Op holds the value of the "op" field.
 	Op bool `json:"op,omitempty"`
+	// FieldID holds the value of the "field_id" field.
+	FieldID int `json:"field_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FileQuery when eager-loading is set.
 	Edges           FileEdges `json:"file_edges"`
@@ -50,6 +52,7 @@ type FileEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
+	namedField  map[string][]*FieldType
 }
 
 // OwnerOrErr returns the Owner value or an error if the edge
@@ -57,8 +60,7 @@ type FileEdges struct {
 func (e FileEdges) OwnerOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.Owner == nil {
-			// The edge owner was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Owner, nil
@@ -71,8 +73,7 @@ func (e FileEdges) OwnerOrErr() (*User, error) {
 func (e FileEdges) TypeOrErr() (*FileType, error) {
 	if e.loadedTypes[1] {
 		if e.Type == nil {
-			// The edge type was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: filetype.Label}
 		}
 		return e.Type, nil
@@ -90,13 +91,13 @@ func (e FileEdges) FieldOrErr() ([]*FieldType, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*File) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*File) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
 		case file.FieldOp:
 			values[i] = new(sql.NullBool)
-		case file.FieldID, file.FieldSize:
+		case file.FieldID, file.FieldSize, file.FieldFieldID:
 			values[i] = new(sql.NullInt64)
 		case file.FieldName, file.FieldUser, file.FieldGroup:
 			values[i] = new(sql.NullString)
@@ -115,7 +116,7 @@ func (*File) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the File fields.
-func (f *File) assignValues(columns []string, values []interface{}) error {
+func (f *File) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -157,6 +158,12 @@ func (f *File) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field op", values[i])
 			} else if value.Valid {
 				f.Op = value.Bool
+			}
+		case file.FieldFieldID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field field_id", values[i])
+			} else if value.Valid {
+				f.FieldID = int(value.Int64)
 			}
 		case file.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -238,8 +245,35 @@ func (f *File) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("op=")
 	builder.WriteString(fmt.Sprintf("%v", f.Op))
+	builder.WriteString(", ")
+	builder.WriteString("field_id=")
+	builder.WriteString(fmt.Sprintf("%v", f.FieldID))
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedField returns the Field named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (f *File) NamedField(name string) ([]*FieldType, error) {
+	if f.Edges.namedField == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := f.Edges.namedField[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (f *File) appendNamedField(name string, edges ...*FieldType) {
+	if f.Edges.namedField == nil {
+		f.Edges.namedField = make(map[string][]*FieldType)
+	}
+	if len(edges) == 0 {
+		f.Edges.namedField[name] = []*FieldType{}
+	} else {
+		f.Edges.namedField[name] = append(f.Edges.namedField[name], edges...)
+	}
 }
 
 // Files is a parsable slice of File.

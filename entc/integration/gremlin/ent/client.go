@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/url"
@@ -21,6 +22,7 @@ import (
 	"entgo.io/ent/entc/integration/gremlin/ent/group"
 	"entgo.io/ent/entc/integration/gremlin/ent/groupinfo"
 	"entgo.io/ent/entc/integration/gremlin/ent/item"
+	"entgo.io/ent/entc/integration/gremlin/ent/license"
 	"entgo.io/ent/entc/integration/gremlin/ent/node"
 	"entgo.io/ent/entc/integration/gremlin/ent/pet"
 	"entgo.io/ent/entc/integration/gremlin/ent/spec"
@@ -54,6 +56,8 @@ type Client struct {
 	GroupInfo *GroupInfoClient
 	// Item is the client for interacting with the Item builders.
 	Item *ItemClient
+	// License is the client for interacting with the License builders.
+	License *LicenseClient
 	// Node is the client for interacting with the Node builders.
 	Node *NodeClient
 	// Pet is the client for interacting with the Pet builders.
@@ -86,6 +90,7 @@ func (c *Client) init() {
 	c.Group = NewGroupClient(c.config)
 	c.GroupInfo = NewGroupInfoClient(c.config)
 	c.Item = NewItemClient(c.config)
+	c.License = NewLicenseClient(c.config)
 	c.Node = NewNodeClient(c.config)
 	c.Pet = NewPetClient(c.config)
 	c.Spec = NewSpecClient(c.config)
@@ -122,7 +127,7 @@ func Open(driverName, dataSourceName string, options ...Option) (*Client, error)
 // is used until the transaction is committed or rolled back.
 func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
-		return nil, fmt.Errorf("ent: cannot start a transaction within a transaction")
+		return nil, errors.New("ent: cannot start a transaction within a transaction")
 	}
 	tx, err := newTx(ctx, c.driver)
 	if err != nil {
@@ -142,6 +147,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Group:     NewGroupClient(cfg),
 		GroupInfo: NewGroupInfoClient(cfg),
 		Item:      NewItemClient(cfg),
+		License:   NewLicenseClient(cfg),
 		Node:      NewNodeClient(cfg),
 		Pet:       NewPetClient(cfg),
 		Spec:      NewSpecClient(cfg),
@@ -156,7 +162,6 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 //		Card.
 //		Query().
 //		Count(ctx)
-//
 func (c *Client) Debug() *Client {
 	if c.debug {
 		return c
@@ -185,6 +190,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Group.Use(hooks...)
 	c.GroupInfo.Use(hooks...)
 	c.Item.Use(hooks...)
+	c.License.Use(hooks...)
 	c.Node.Use(hooks...)
 	c.Pet.Use(hooks...)
 	c.Spec.Use(hooks...)
@@ -1131,6 +1137,96 @@ func (c *ItemClient) GetX(ctx context.Context, id string) *Item {
 // Hooks returns the client hooks.
 func (c *ItemClient) Hooks() []Hook {
 	return c.hooks.Item
+}
+
+// LicenseClient is a client for the License schema.
+type LicenseClient struct {
+	config
+}
+
+// NewLicenseClient returns a client for the License from the given config.
+func NewLicenseClient(c config) *LicenseClient {
+	return &LicenseClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `license.Hooks(f(g(h())))`.
+func (c *LicenseClient) Use(hooks ...Hook) {
+	c.hooks.License = append(c.hooks.License, hooks...)
+}
+
+// Create returns a builder for creating a License entity.
+func (c *LicenseClient) Create() *LicenseCreate {
+	mutation := newLicenseMutation(c.config, OpCreate)
+	return &LicenseCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of License entities.
+func (c *LicenseClient) CreateBulk(builders ...*LicenseCreate) *LicenseCreateBulk {
+	return &LicenseCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for License.
+func (c *LicenseClient) Update() *LicenseUpdate {
+	mutation := newLicenseMutation(c.config, OpUpdate)
+	return &LicenseUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LicenseClient) UpdateOne(l *License) *LicenseUpdateOne {
+	mutation := newLicenseMutation(c.config, OpUpdateOne, withLicense(l))
+	return &LicenseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LicenseClient) UpdateOneID(id int) *LicenseUpdateOne {
+	mutation := newLicenseMutation(c.config, OpUpdateOne, withLicenseID(id))
+	return &LicenseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for License.
+func (c *LicenseClient) Delete() *LicenseDelete {
+	mutation := newLicenseMutation(c.config, OpDelete)
+	return &LicenseDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LicenseClient) DeleteOne(l *License) *LicenseDeleteOne {
+	return c.DeleteOneID(l.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *LicenseClient) DeleteOneID(id int) *LicenseDeleteOne {
+	builder := c.Delete().Where(license.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LicenseDeleteOne{builder}
+}
+
+// Query returns a query builder for License.
+func (c *LicenseClient) Query() *LicenseQuery {
+	return &LicenseQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a License entity by its id.
+func (c *LicenseClient) Get(ctx context.Context, id int) (*License, error) {
+	return c.Query().Where(license.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LicenseClient) GetX(ctx context.Context, id int) *License {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *LicenseClient) Hooks() []Hook {
+	return c.hooks.License
 }
 
 // NodeClient is a client for the Node schema.

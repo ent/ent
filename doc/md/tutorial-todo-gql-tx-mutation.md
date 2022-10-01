@@ -4,7 +4,7 @@ title: Transactional Mutations
 sidebar_label: Transactional Mutations
 ---
 
-In this section, we continue the [GraphQL example](tutorial-todo-gql.md) by explaining how to set our GraphQL mutations
+In this section, we continue the [GraphQL example](tutorial-todo-gql.mdx) by explaining how to set our GraphQL mutations
 to be transactional. That means, to automatically wrap our GraphQL mutations with a database transaction and either
 commit at the end, or rollback the transaction in case of a GraphQL error.
 
@@ -37,17 +37,31 @@ srv := handler.NewDefaultServer(todo.NewSchema(client))
 
 2\. Then, in the GraphQL mutations, use the client from context as follows:
 ```diff title="todo.resolvers.go"
-func (mutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (*ent.Todo, error) {
-+	client := ent.FromContext(ctx)
-+	return client.Todo.
--	return r.client.Todo.
-		Create().
-		SetText(todo.Text).
-		SetStatus(todo.Status).
-		SetNillablePriority(todo.Priority). // Set the "priority" field if provided.
-		SetNillableParentID(todo.Parent).   // Set the "parent_id" field if provided.
-		Save(ctx)
 }
++func (mutationResolver) CreateTodo(ctx context.Context, input ent.CreateTodoInput) (*ent.Todo, error) {
++	client := ent.FromContext(ctx)
++	return client.Todo.Create().SetInput(input).Save(ctx)
+-func (r *mutationResolver) CreateTodo(ctx context.Context, input ent.CreateTodoInput) (*ent.Todo, error) {
+-	return r.client.Todo.Create().SetInput(input).Save(ctx)
+}
+```
+
+## Isolation Levels
+
+If you'd like to tweak the transaction's isolation level, you can do so by implementing your own `TxOpener`. For example:
+
+```go title="cmd/todo/main.go"
+srv.Use(entgql.Transactioner{
+	TxOpener: entgql.TxOpenerFunc(func(ctx context.Context) (context.Context, driver.Tx, error) {
+		tx, err := client.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelRepeatableRead})
+		if err != nil {
+			return nil, nil, err
+		}
+		ctx = ent.NewTxContext(ctx, tx)
+		ctx = ent.NewContext(ctx, tx.Client())
+		return ctx, tx, nil
+	}),
+})
 ```
 
 ---

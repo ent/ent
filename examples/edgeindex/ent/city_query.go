@@ -23,13 +23,12 @@ import (
 // CityQuery is the builder for querying City entities.
 type CityQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.City
-	// eager-loading edges.
+	limit       *int
+	offset      *int
+	unique      *bool
+	order       []OrderFunc
+	fields      []string
+	predicates  []predicate.City
 	withStreets *StreetQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -303,7 +302,6 @@ func (cq *CityQuery) WithStreets(opts ...func(*StreetQuery)) *CityQuery {
 //		GroupBy(city.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (cq *CityQuery) GroupBy(field string, fields ...string) *CityGroupBy {
 	grbuild := &CityGroupBy{config: cq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -330,7 +328,6 @@ func (cq *CityQuery) GroupBy(field string, fields ...string) *CityGroupBy {
 //	client.City.Query().
 //		Select(city.FieldName).
 //		Scan(ctx, &v)
-//
 func (cq *CityQuery) Select(fields ...string) *CitySelect {
 	cq.fields = append(cq.fields, fields...)
 	selbuild := &CitySelect{CityQuery: cq}
@@ -363,10 +360,10 @@ func (cq *CityQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*City, e
 			cq.withStreets != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*City).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &City{config: cq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -381,37 +378,46 @@ func (cq *CityQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*City, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := cq.withStreets; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*City)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Streets = []*Street{}
-		}
-		query.withFKs = true
-		query.Where(predicate.Street(func(s *sql.Selector) {
-			s.Where(sql.InValues(city.StreetsColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := cq.loadStreets(ctx, query, nodes,
+			func(n *City) { n.Edges.Streets = []*Street{} },
+			func(n *City, e *Street) { n.Edges.Streets = append(n.Edges.Streets, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			fk := n.city_streets
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "city_streets" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "city_streets" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Streets = append(node.Edges.Streets, n)
+	}
+	return nodes, nil
+}
+
+func (cq *CityQuery) loadStreets(ctx context.Context, query *StreetQuery, nodes []*City, init func(*City), assign func(*City, *Street)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*City)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
 		}
 	}
-
-	return nodes, nil
+	query.withFKs = true
+	query.Where(predicate.Street(func(s *sql.Selector) {
+		s.Where(sql.InValues(city.StreetsColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.city_streets
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "city_streets" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "city_streets" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (cq *CityQuery) sqlCount(ctx context.Context) (int, error) {
@@ -424,11 +430,14 @@ func (cq *CityQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (cq *CityQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := cq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := cq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (cq *CityQuery) querySpec() *sqlgraph.QuerySpec {
@@ -529,7 +538,7 @@ func (cgb *CityGroupBy) Aggregate(fns ...AggregateFunc) *CityGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (cgb *CityGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (cgb *CityGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := cgb.path(ctx)
 	if err != nil {
 		return err
@@ -538,7 +547,7 @@ func (cgb *CityGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return cgb.sqlScan(ctx, v)
 }
 
-func (cgb *CityGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (cgb *CityGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range cgb.fields {
 		if !city.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -585,7 +594,7 @@ type CitySelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (cs *CitySelect) Scan(ctx context.Context, v interface{}) error {
+func (cs *CitySelect) Scan(ctx context.Context, v any) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -593,7 +602,7 @@ func (cs *CitySelect) Scan(ctx context.Context, v interface{}) error {
 	return cs.sqlScan(ctx, v)
 }
 
-func (cs *CitySelect) sqlScan(ctx context.Context, v interface{}) error {
+func (cs *CitySelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := cs.sql.Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {

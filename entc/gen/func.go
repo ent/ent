@@ -75,7 +75,7 @@ var (
 )
 
 // quote only strings.
-func quote(v interface{}) interface{} {
+func quote(v any) any {
 	if s, ok := v.(string); ok {
 		return strconv.Quote(s)
 	}
@@ -144,7 +144,6 @@ func pascalWords(words []string) string {
 //	full_name 	=> FullName
 //	user_id   	=> UserID
 //	full-admin	=> FullAdmin
-//
 func pascal(s string) string {
 	words := strings.FieldsFunc(s, isSeparator)
 	return pascalWords(words)
@@ -156,7 +155,6 @@ func pascal(s string) string {
 //	full_name  => fullName
 //	user_id    => userID
 //	full-admin => fullAdmin
-//
 func camel(s string) string {
 	words := strings.FieldsFunc(s, isSeparator)
 	if len(words) == 1 {
@@ -170,7 +168,6 @@ func camel(s string) string {
 //	Username => username
 //	FullName => full_name
 //	HTTPCode => http_code
-//
 func snake(s string) string {
 	var (
 		j int
@@ -199,7 +196,6 @@ func snake(s string) string {
 //	[1]T      => t
 //	User      => u
 //	UserQuery => uq
-//
 func receiver(s string) (r string) {
 	// Trim invalid tokens for identifier prefix.
 	s = strings.Trim(s, "[]*&0123456789")
@@ -230,13 +226,13 @@ func receiver(s string) (r string) {
 // typeScope wraps the Type object with extended scope.
 type typeScope struct {
 	*Type
-	Scope map[interface{}]interface{}
+	Scope map[any]any
 }
 
 // graphScope wraps the Graph object with extended scope.
 type graphScope struct {
 	*Graph
-	Scope map[interface{}]interface{}
+	Scope map[any]any
 }
 
 // extend extends the parent block with a KV pairs.
@@ -244,12 +240,11 @@ type graphScope struct {
 //	{{ with $scope := extend $ "key" "value" }}
 //		{{ template "setters" $scope }}
 //	{{ end}}
-//
-func extend(v interface{}, kv ...interface{}) (interface{}, error) {
-	scope := make(map[interface{}]interface{})
+func extend(v any, kv ...any) (any, error) {
 	if len(kv)%2 != 0 {
 		return nil, fmt.Errorf("invalid number of parameters: %d", len(kv))
 	}
+	scope := make(map[any]any, len(kv)/2)
 	for i := 0; i < len(kv); i += 2 {
 		scope[kv[i]] = kv[i+1]
 	}
@@ -283,7 +278,7 @@ func add(xs ...int) (n int) {
 
 func ruleset() *inflect.Ruleset {
 	rules := inflect.NewDefaultRuleset()
-	// Add common initialisms from golint and more.
+	// Add common initialism from golint and more.
 	for _, w := range []string{
 		"ACL", "API", "ASCII", "AWS", "CPU", "CSS", "DNS", "EOF", "GB", "GUID",
 		"HTML", "HTTP", "HTTPS", "ID", "IP", "JSON", "KB", "LHS", "MAC", "MB",
@@ -295,6 +290,12 @@ func ruleset() *inflect.Ruleset {
 		rules.AddAcronym(w)
 	}
 	return rules
+}
+
+// AddAcronym adds initialism to the global ruleset.
+func AddAcronym(word string) {
+	acronyms[word] = struct{}{}
+	rules.AddAcronym(word)
 }
 
 // order returns a map of sort orders.
@@ -342,7 +343,7 @@ func join(a []string, sep string) string {
 }
 
 // xtemplate dynamically executes templates by their names.
-func xtemplate(name string, v interface{}) (string, error) {
+func xtemplate(name string, v any) (string, error) {
 	buf := bytes.NewBuffer(nil)
 	if err := templates.ExecuteTemplate(buf, name, v); err != nil {
 		return "", err
@@ -383,7 +384,7 @@ func matchTemplate(patterns ...string) []string {
 }
 
 // hasField determines if a struct has a field with the given name.
-func hasField(v interface{}, name string) bool {
+func hasField(v any, name string) bool {
 	vr := reflect.Indirect(reflect.ValueOf(v))
 	return vr.FieldByName(name).IsValid()
 }
@@ -400,7 +401,7 @@ func trimPackage(ident, pkg string) string {
 }
 
 // isNil reports whether its argument v is nil.
-func isNil(v interface{}) bool {
+func isNil(v any) bool {
 	rv := indirect(reflect.ValueOf(v))
 	if !rv.IsValid() {
 		return true
@@ -429,7 +430,7 @@ func tagLookup(tag, key string) string {
 }
 
 // toString converts `v` to a string.
-func toString(v interface{}) string {
+func toString(v any) string {
 	switch v := v.(type) {
 	case string:
 		return v
@@ -445,9 +446,9 @@ func toString(v interface{}) string {
 }
 
 // dict creates a dictionary from a list of pairs.
-func dict(v ...interface{}) map[string]interface{} {
+func dict(v ...any) map[string]any {
 	lenv := len(v)
-	dict := make(map[string]interface{}, lenv/2)
+	dict := make(map[string]any, lenv/2)
 	for i := 0; i < lenv; i += 2 {
 		key := toString(v[i])
 		if i+1 >= lenv {
@@ -460,7 +461,7 @@ func dict(v ...interface{}) map[string]interface{} {
 }
 
 // get the value from the dict for key.
-func get(d map[string]interface{}, key string) interface{} {
+func get(d map[string]any, key string) any {
 	if val, ok := d[key]; ok {
 		return val
 	}
@@ -468,25 +469,25 @@ func get(d map[string]interface{}, key string) interface{} {
 }
 
 // set adds a value to the dict for key.
-func set(d map[string]interface{}, key string, value interface{}) map[string]interface{} {
+func set(d map[string]any, key string, value any) map[string]any {
 	d[key] = value
 	return d
 }
 
 // unset removes a key from the dict.
-func unset(d map[string]interface{}, key string) map[string]interface{} {
+func unset(d map[string]any, key string) map[string]any {
 	delete(d, key)
 	return d
 }
 
 // hasKey tests whether a key is found in dict.
-func hasKey(d map[string]interface{}, key string) bool {
+func hasKey(d map[string]any, key string) bool {
 	_, ok := d[key]
 	return ok
 }
 
 // list creates a list from values.
-func list(v ...interface{}) []interface{} {
+func list(v ...any) []any {
 	return v
 }
 

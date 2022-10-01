@@ -271,7 +271,7 @@ type DependencyOption func(*gen.Dependency) error
 
 // DependencyType sets the type of the struct field in
 // the generated builders for the configured dependency.
-func DependencyType(v interface{}) DependencyOption {
+func DependencyType(v any) DependencyOption {
 	return func(d *gen.Dependency) error {
 		if v == nil {
 			return errors.New("nil dependency type")

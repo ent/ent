@@ -23,15 +23,15 @@ import (
 // DocQuery is the builder for querying Doc entities.
 type DocQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Doc
-	// eager-loading edges.
+	limit        *int
+	offset       *int
+	unique       *bool
+	order        []OrderFunc
+	fields       []string
+	predicates   []predicate.Doc
 	withParent   *DocQuery
 	withChildren *DocQuery
+	withRelated  *DocQuery
 	withFKs      bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -106,6 +106,28 @@ func (dq *DocQuery) QueryChildren() *DocQuery {
 			sqlgraph.From(doc.Table, doc.FieldID, selector),
 			sqlgraph.To(doc.Table, doc.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, doc.ChildrenTable, doc.ChildrenColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(dq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryRelated chains the current query on the "related" edge.
+func (dq *DocQuery) QueryRelated() *DocQuery {
+	query := &DocQuery{config: dq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := dq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := dq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(doc.Table, doc.FieldID, selector),
+			sqlgraph.To(doc.Table, doc.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, doc.RelatedTable, doc.RelatedPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(dq.driver.Dialect(), step)
 		return fromU, nil
@@ -296,6 +318,7 @@ func (dq *DocQuery) Clone() *DocQuery {
 		predicates:   append([]predicate.Doc{}, dq.predicates...),
 		withParent:   dq.withParent.Clone(),
 		withChildren: dq.withChildren.Clone(),
+		withRelated:  dq.withRelated.Clone(),
 		// clone intermediate query.
 		sql:    dq.sql.Clone(),
 		path:   dq.path,
@@ -325,6 +348,17 @@ func (dq *DocQuery) WithChildren(opts ...func(*DocQuery)) *DocQuery {
 	return dq
 }
 
+// WithRelated tells the query-builder to eager-load the nodes that are connected to
+// the "related" edge. The optional arguments are used to configure the query builder of the edge.
+func (dq *DocQuery) WithRelated(opts ...func(*DocQuery)) *DocQuery {
+	query := &DocQuery{config: dq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	dq.withRelated = query
+	return dq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -339,7 +373,6 @@ func (dq *DocQuery) WithChildren(opts ...func(*DocQuery)) *DocQuery {
 //		GroupBy(doc.FieldText).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (dq *DocQuery) GroupBy(field string, fields ...string) *DocGroupBy {
 	grbuild := &DocGroupBy{config: dq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -366,7 +399,6 @@ func (dq *DocQuery) GroupBy(field string, fields ...string) *DocGroupBy {
 //	client.Doc.Query().
 //		Select(doc.FieldText).
 //		Scan(ctx, &v)
-//
 func (dq *DocQuery) Select(fields ...string) *DocSelect {
 	dq.fields = append(dq.fields, fields...)
 	selbuild := &DocSelect{DocQuery: dq}
@@ -396,9 +428,10 @@ func (dq *DocQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Doc, err
 		nodes       = []*Doc{}
 		withFKs     = dq.withFKs
 		_spec       = dq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			dq.withParent != nil,
 			dq.withChildren != nil,
+			dq.withRelated != nil,
 		}
 	)
 	if dq.withParent != nil {
@@ -407,10 +440,10 @@ func (dq *DocQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Doc, err
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, doc.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Doc).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Doc{config: dq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -425,66 +458,146 @@ func (dq *DocQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Doc, err
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := dq.withParent; query != nil {
-		ids := make([]schema.DocID, 0, len(nodes))
-		nodeids := make(map[schema.DocID][]*Doc)
-		for i := range nodes {
-			if nodes[i].doc_children == nil {
-				continue
-			}
-			fk := *nodes[i].doc_children
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(doc.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := dq.loadParent(ctx, query, nodes, nil,
+			func(n *Doc, e *Doc) { n.Edges.Parent = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "doc_children" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Parent = n
-			}
-		}
 	}
-
 	if query := dq.withChildren; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[schema.DocID]*Doc)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Children = []*Doc{}
-		}
-		query.withFKs = true
-		query.Where(predicate.Doc(func(s *sql.Selector) {
-			s.Where(sql.InValues(doc.ChildrenColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := dq.loadChildren(ctx, query, nodes,
+			func(n *Doc) { n.Edges.Children = []*Doc{} },
+			func(n *Doc, e *Doc) { n.Edges.Children = append(n.Edges.Children, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			fk := n.doc_children
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "doc_children" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "doc_children" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Children = append(node.Edges.Children, n)
+	}
+	if query := dq.withRelated; query != nil {
+		if err := dq.loadRelated(ctx, query, nodes,
+			func(n *Doc) { n.Edges.Related = []*Doc{} },
+			func(n *Doc, e *Doc) { n.Edges.Related = append(n.Edges.Related, e) }); err != nil {
+			return nil, err
 		}
 	}
-
 	return nodes, nil
+}
+
+func (dq *DocQuery) loadParent(ctx context.Context, query *DocQuery, nodes []*Doc, init func(*Doc), assign func(*Doc, *Doc)) error {
+	ids := make([]schema.DocID, 0, len(nodes))
+	nodeids := make(map[schema.DocID][]*Doc)
+	for i := range nodes {
+		if nodes[i].doc_children == nil {
+			continue
+		}
+		fk := *nodes[i].doc_children
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(doc.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "doc_children" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (dq *DocQuery) loadChildren(ctx context.Context, query *DocQuery, nodes []*Doc, init func(*Doc), assign func(*Doc, *Doc)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[schema.DocID]*Doc)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Doc(func(s *sql.Selector) {
+		s.Where(sql.InValues(doc.ChildrenColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.doc_children
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "doc_children" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "doc_children" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (dq *DocQuery) loadRelated(ctx context.Context, query *DocQuery, nodes []*Doc, init func(*Doc), assign func(*Doc, *Doc)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[schema.DocID]*Doc)
+	nids := make(map[schema.DocID]map[*Doc]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(doc.RelatedTable)
+		s.Join(joinT).On(s.C(doc.FieldID), joinT.C(doc.RelatedPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(doc.RelatedPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(doc.RelatedPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+		assign := spec.Assign
+		values := spec.ScanValues
+		spec.ScanValues = func(columns []string) ([]any, error) {
+			values, err := values(columns[1:])
+			if err != nil {
+				return nil, err
+			}
+			return append([]any{new(schema.DocID)}, values...), nil
+		}
+		spec.Assign = func(columns []string, values []any) error {
+			outValue := *values[0].(*schema.DocID)
+			inValue := *values[1].(*schema.DocID)
+			if nids[inValue] == nil {
+				nids[inValue] = map[*Doc]struct{}{byID[outValue]: struct{}{}}
+				return assign(columns[1:], values[1:])
+			}
+			nids[inValue][byID[outValue]] = struct{}{}
+			return nil
+		}
+	})
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "related" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
 }
 
 func (dq *DocQuery) sqlCount(ctx context.Context) (int, error) {
@@ -497,11 +610,14 @@ func (dq *DocQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (dq *DocQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := dq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := dq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (dq *DocQuery) querySpec() *sqlgraph.QuerySpec {
@@ -602,7 +718,7 @@ func (dgb *DocGroupBy) Aggregate(fns ...AggregateFunc) *DocGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (dgb *DocGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (dgb *DocGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := dgb.path(ctx)
 	if err != nil {
 		return err
@@ -611,7 +727,7 @@ func (dgb *DocGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return dgb.sqlScan(ctx, v)
 }
 
-func (dgb *DocGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (dgb *DocGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range dgb.fields {
 		if !doc.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -658,7 +774,7 @@ type DocSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ds *DocSelect) Scan(ctx context.Context, v interface{}) error {
+func (ds *DocSelect) Scan(ctx context.Context, v any) error {
 	if err := ds.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -666,7 +782,7 @@ func (ds *DocSelect) Scan(ctx context.Context, v interface{}) error {
 	return ds.sqlScan(ctx, v)
 }
 
-func (ds *DocSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ds *DocSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ds.sql.Query()
 	if err := ds.driver.Query(ctx, query, args, rows); err != nil {

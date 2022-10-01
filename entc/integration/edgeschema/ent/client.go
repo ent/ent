@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 
@@ -18,6 +19,8 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
+	"entgo.io/ent/entc/integration/edgeschema/ent/role"
+	"entgo.io/ent/entc/integration/edgeschema/ent/roleuser"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
@@ -44,6 +47,10 @@ type Client struct {
 	Relationship *RelationshipClient
 	// RelationshipInfo is the client for interacting with the RelationshipInfo builders.
 	RelationshipInfo *RelationshipInfoClient
+	// Role is the client for interacting with the Role builders.
+	Role *RoleClient
+	// RoleUser is the client for interacting with the RoleUser builders.
+	RoleUser *RoleUserClient
 	// Tag is the client for interacting with the Tag builders.
 	Tag *TagClient
 	// Tweet is the client for interacting with the Tweet builders.
@@ -75,6 +82,8 @@ func (c *Client) init() {
 	c.Group = NewGroupClient(c.config)
 	c.Relationship = NewRelationshipClient(c.config)
 	c.RelationshipInfo = NewRelationshipInfoClient(c.config)
+	c.Role = NewRoleClient(c.config)
+	c.RoleUser = NewRoleUserClient(c.config)
 	c.Tag = NewTagClient(c.config)
 	c.Tweet = NewTweetClient(c.config)
 	c.TweetLike = NewTweetLikeClient(c.config)
@@ -104,7 +113,7 @@ func Open(driverName, dataSourceName string, options ...Option) (*Client, error)
 // is used until the transaction is committed or rolled back.
 func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
-		return nil, fmt.Errorf("ent: cannot start a transaction within a transaction")
+		return nil, errors.New("ent: cannot start a transaction within a transaction")
 	}
 	tx, err := newTx(ctx, c.driver)
 	if err != nil {
@@ -119,6 +128,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Group:            NewGroupClient(cfg),
 		Relationship:     NewRelationshipClient(cfg),
 		RelationshipInfo: NewRelationshipInfoClient(cfg),
+		Role:             NewRoleClient(cfg),
+		RoleUser:         NewRoleUserClient(cfg),
 		Tag:              NewTagClient(cfg),
 		Tweet:            NewTweetClient(cfg),
 		TweetLike:        NewTweetLikeClient(cfg),
@@ -132,7 +143,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 // BeginTx returns a transactional client with specified options.
 func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
-		return nil, fmt.Errorf("ent: cannot start a transaction within a transaction")
+		return nil, errors.New("ent: cannot start a transaction within a transaction")
 	}
 	tx, err := c.driver.(interface {
 		BeginTx(context.Context, *sql.TxOptions) (dialect.Tx, error)
@@ -149,6 +160,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Group:            NewGroupClient(cfg),
 		Relationship:     NewRelationshipClient(cfg),
 		RelationshipInfo: NewRelationshipInfoClient(cfg),
+		Role:             NewRoleClient(cfg),
+		RoleUser:         NewRoleUserClient(cfg),
 		Tag:              NewTagClient(cfg),
 		Tweet:            NewTweetClient(cfg),
 		TweetLike:        NewTweetLikeClient(cfg),
@@ -165,7 +178,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 //		Friendship.
 //		Query().
 //		Count(ctx)
-//
 func (c *Client) Debug() *Client {
 	if c.debug {
 		return c
@@ -189,6 +201,8 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Group.Use(hooks...)
 	c.Relationship.Use(hooks...)
 	c.RelationshipInfo.Use(hooks...)
+	c.Role.Use(hooks...)
+	c.RoleUser.Use(hooks...)
 	c.Tag.Use(hooks...)
 	c.Tweet.Use(hooks...)
 	c.TweetLike.Use(hooks...)
@@ -612,6 +626,201 @@ func (c *RelationshipInfoClient) Hooks() []Hook {
 	return c.hooks.RelationshipInfo
 }
 
+// RoleClient is a client for the Role schema.
+type RoleClient struct {
+	config
+}
+
+// NewRoleClient returns a client for the Role from the given config.
+func NewRoleClient(c config) *RoleClient {
+	return &RoleClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `role.Hooks(f(g(h())))`.
+func (c *RoleClient) Use(hooks ...Hook) {
+	c.hooks.Role = append(c.hooks.Role, hooks...)
+}
+
+// Create returns a builder for creating a Role entity.
+func (c *RoleClient) Create() *RoleCreate {
+	mutation := newRoleMutation(c.config, OpCreate)
+	return &RoleCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Role entities.
+func (c *RoleClient) CreateBulk(builders ...*RoleCreate) *RoleCreateBulk {
+	return &RoleCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Role.
+func (c *RoleClient) Update() *RoleUpdate {
+	mutation := newRoleMutation(c.config, OpUpdate)
+	return &RoleUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *RoleClient) UpdateOne(r *Role) *RoleUpdateOne {
+	mutation := newRoleMutation(c.config, OpUpdateOne, withRole(r))
+	return &RoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *RoleClient) UpdateOneID(id int) *RoleUpdateOne {
+	mutation := newRoleMutation(c.config, OpUpdateOne, withRoleID(id))
+	return &RoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Role.
+func (c *RoleClient) Delete() *RoleDelete {
+	mutation := newRoleMutation(c.config, OpDelete)
+	return &RoleDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *RoleClient) DeleteOne(r *Role) *RoleDeleteOne {
+	return c.DeleteOneID(r.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *RoleClient) DeleteOneID(id int) *RoleDeleteOne {
+	builder := c.Delete().Where(role.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &RoleDeleteOne{builder}
+}
+
+// Query returns a query builder for Role.
+func (c *RoleClient) Query() *RoleQuery {
+	return &RoleQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Role entity by its id.
+func (c *RoleClient) Get(ctx context.Context, id int) (*Role, error) {
+	return c.Query().Where(role.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *RoleClient) GetX(ctx context.Context, id int) *Role {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a Role.
+func (c *RoleClient) QueryUser(r *Role) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(role.Table, role.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, role.UserTable, role.UserPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRolesUsers queries the roles_users edge of a Role.
+func (c *RoleClient) QueryRolesUsers(r *Role) *RoleUserQuery {
+	query := &RoleUserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(role.Table, role.FieldID, id),
+			sqlgraph.To(roleuser.Table, roleuser.RoleColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, role.RolesUsersTable, role.RolesUsersColumn),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *RoleClient) Hooks() []Hook {
+	return c.hooks.Role
+}
+
+// RoleUserClient is a client for the RoleUser schema.
+type RoleUserClient struct {
+	config
+}
+
+// NewRoleUserClient returns a client for the RoleUser from the given config.
+func NewRoleUserClient(c config) *RoleUserClient {
+	return &RoleUserClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `roleuser.Hooks(f(g(h())))`.
+func (c *RoleUserClient) Use(hooks ...Hook) {
+	c.hooks.RoleUser = append(c.hooks.RoleUser, hooks...)
+}
+
+// Create returns a builder for creating a RoleUser entity.
+func (c *RoleUserClient) Create() *RoleUserCreate {
+	mutation := newRoleUserMutation(c.config, OpCreate)
+	return &RoleUserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of RoleUser entities.
+func (c *RoleUserClient) CreateBulk(builders ...*RoleUserCreate) *RoleUserCreateBulk {
+	return &RoleUserCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for RoleUser.
+func (c *RoleUserClient) Update() *RoleUserUpdate {
+	mutation := newRoleUserMutation(c.config, OpUpdate)
+	return &RoleUserUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *RoleUserClient) UpdateOne(ru *RoleUser) *RoleUserUpdateOne {
+	mutation := newRoleUserMutation(c.config, OpUpdateOne)
+	mutation.user = &ru.UserID
+	mutation.role = &ru.RoleID
+	return &RoleUserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for RoleUser.
+func (c *RoleUserClient) Delete() *RoleUserDelete {
+	mutation := newRoleUserMutation(c.config, OpDelete)
+	return &RoleUserDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Query returns a query builder for RoleUser.
+func (c *RoleUserClient) Query() *RoleUserQuery {
+	return &RoleUserQuery{
+		config: c.config,
+	}
+}
+
+// QueryRole queries the role edge of a RoleUser.
+func (c *RoleUserClient) QueryRole(ru *RoleUser) *RoleQuery {
+	return c.Query().
+		Where(roleuser.UserID(ru.UserID), roleuser.RoleID(ru.RoleID)).
+		QueryRole()
+}
+
+// QueryUser queries the user edge of a RoleUser.
+func (c *RoleUserClient) QueryUser(ru *RoleUser) *UserQuery {
+	return c.Query().
+		Where(roleuser.UserID(ru.UserID), roleuser.RoleID(ru.RoleID)).
+		QueryUser()
+}
+
+// Hooks returns the client hooks.
+func (c *RoleUserClient) Hooks() []Hook {
+	return c.hooks.RoleUser
+}
+
 // TagClient is a client for the Tag schema.
 type TagClient struct {
 	config
@@ -990,7 +1199,8 @@ func (c *TweetLikeClient) QueryUser(tl *TweetLike) *UserQuery {
 
 // Hooks returns the client hooks.
 func (c *TweetLikeClient) Hooks() []Hook {
-	return c.hooks.TweetLike
+	hooks := c.hooks.TweetLike
+	return append(hooks[:len(hooks):len(hooks)], tweetlike.Hooks[:]...)
 }
 
 // TweetTagClient is a client for the TweetTag schema.
@@ -1280,6 +1490,22 @@ func (c *UserClient) QueryTweets(u *User) *TweetQuery {
 	return query
 }
 
+// QueryRoles queries the roles edge of a User.
+func (c *UserClient) QueryRoles(u *User) *RoleQuery {
+	query := &RoleQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(role.Table, role.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.RolesTable, user.RolesPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryJoinedGroups queries the joined_groups edge of a User.
 func (c *UserClient) QueryJoinedGroups(u *User) *UserGroupQuery {
 	query := &UserGroupQuery{config: c.config}
@@ -1360,9 +1586,26 @@ func (c *UserClient) QueryUserTweets(u *User) *UserTweetQuery {
 	return query
 }
 
+// QueryRolesUsers queries the roles_users edge of a User.
+func (c *UserClient) QueryRolesUsers(u *User) *RoleUserQuery {
+	query := &RoleUserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(roleuser.Table, roleuser.UserColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.RolesUsersTable, user.RolesUsersColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
-	return c.hooks.User
+	hooks := c.hooks.User
+	return append(hooks[:len(hooks):len(hooks)], user.Hooks[:]...)
 }
 
 // UserGroupClient is a client for the UserGroup schema.

@@ -28,9 +28,8 @@ type StreetQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Street
-	// eager-loading edges.
-	withCity *CityQuery
-	withFKs  bool
+	withCity   *CityQuery
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -303,7 +302,6 @@ func (sq *StreetQuery) WithCity(opts ...func(*CityQuery)) *StreetQuery {
 //		GroupBy(street.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (sq *StreetQuery) GroupBy(field string, fields ...string) *StreetGroupBy {
 	grbuild := &StreetGroupBy{config: sq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -330,7 +328,6 @@ func (sq *StreetQuery) GroupBy(field string, fields ...string) *StreetGroupBy {
 //	client.Street.Query().
 //		Select(street.FieldName).
 //		Scan(ctx, &v)
-//
 func (sq *StreetQuery) Select(fields ...string) *StreetSelect {
 	sq.fields = append(sq.fields, fields...)
 	selbuild := &StreetSelect{StreetQuery: sq}
@@ -370,10 +367,10 @@ func (sq *StreetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Stree
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, street.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Street).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Street{config: sq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -388,37 +385,43 @@ func (sq *StreetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Stree
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := sq.withCity; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Street)
-		for i := range nodes {
-			if nodes[i].city_streets == nil {
-				continue
-			}
-			fk := *nodes[i].city_streets
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(city.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := sq.loadCity(ctx, query, nodes, nil,
+			func(n *Street, e *City) { n.Edges.City = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "city_streets" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.City = n
-			}
+	}
+	return nodes, nil
+}
+
+func (sq *StreetQuery) loadCity(ctx context.Context, query *CityQuery, nodes []*Street, init func(*Street), assign func(*Street, *City)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Street)
+	for i := range nodes {
+		if nodes[i].city_streets == nil {
+			continue
+		}
+		fk := *nodes[i].city_streets
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(city.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "city_streets" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
 }
 
 func (sq *StreetQuery) sqlCount(ctx context.Context) (int, error) {
@@ -431,11 +434,14 @@ func (sq *StreetQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (sq *StreetQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := sq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := sq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (sq *StreetQuery) querySpec() *sqlgraph.QuerySpec {
@@ -536,7 +542,7 @@ func (sgb *StreetGroupBy) Aggregate(fns ...AggregateFunc) *StreetGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (sgb *StreetGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (sgb *StreetGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := sgb.path(ctx)
 	if err != nil {
 		return err
@@ -545,7 +551,7 @@ func (sgb *StreetGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return sgb.sqlScan(ctx, v)
 }
 
-func (sgb *StreetGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (sgb *StreetGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range sgb.fields {
 		if !street.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -592,7 +598,7 @@ type StreetSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ss *StreetSelect) Scan(ctx context.Context, v interface{}) error {
+func (ss *StreetSelect) Scan(ctx context.Context, v any) error {
 	if err := ss.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -600,7 +606,7 @@ func (ss *StreetSelect) Scan(ctx context.Context, v interface{}) error {
 	return ss.sqlScan(ctx, v)
 }
 
-func (ss *StreetSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ss *StreetSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ss.sql.Query()
 	if err := ss.driver.Query(ctx, query, args, rows); err != nil {

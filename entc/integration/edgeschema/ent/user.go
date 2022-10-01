@@ -38,6 +38,8 @@ type UserEdges struct {
 	LikedTweets []*Tweet `json:"liked_tweets,omitempty"`
 	// Tweets holds the value of the tweets edge.
 	Tweets []*Tweet `json:"tweets,omitempty"`
+	// Roles holds the value of the roles edge.
+	Roles []*Role `json:"roles,omitempty"`
 	// JoinedGroups holds the value of the joined_groups edge.
 	JoinedGroups []*UserGroup `json:"joined_groups,omitempty"`
 	// Friendships holds the value of the friendships edge.
@@ -48,9 +50,11 @@ type UserEdges struct {
 	Likes []*TweetLike `json:"likes,omitempty"`
 	// UserTweets holds the value of the user_tweets edge.
 	UserTweets []*UserTweet `json:"user_tweets,omitempty"`
+	// RolesUsers holds the value of the roles_users edge.
+	RolesUsers []*RoleUser `json:"roles_users,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [10]bool
+	loadedTypes [12]bool
 }
 
 // GroupsOrErr returns the Groups value or an error if the edge
@@ -98,10 +102,19 @@ func (e UserEdges) TweetsOrErr() ([]*Tweet, error) {
 	return nil, &NotLoadedError{edge: "tweets"}
 }
 
+// RolesOrErr returns the Roles value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) RolesOrErr() ([]*Role, error) {
+	if e.loadedTypes[5] {
+		return e.Roles, nil
+	}
+	return nil, &NotLoadedError{edge: "roles"}
+}
+
 // JoinedGroupsOrErr returns the JoinedGroups value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) JoinedGroupsOrErr() ([]*UserGroup, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[6] {
 		return e.JoinedGroups, nil
 	}
 	return nil, &NotLoadedError{edge: "joined_groups"}
@@ -110,7 +123,7 @@ func (e UserEdges) JoinedGroupsOrErr() ([]*UserGroup, error) {
 // FriendshipsOrErr returns the Friendships value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) FriendshipsOrErr() ([]*Friendship, error) {
-	if e.loadedTypes[6] {
+	if e.loadedTypes[7] {
 		return e.Friendships, nil
 	}
 	return nil, &NotLoadedError{edge: "friendships"}
@@ -119,7 +132,7 @@ func (e UserEdges) FriendshipsOrErr() ([]*Friendship, error) {
 // RelationshipOrErr returns the Relationship value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) RelationshipOrErr() ([]*Relationship, error) {
-	if e.loadedTypes[7] {
+	if e.loadedTypes[8] {
 		return e.Relationship, nil
 	}
 	return nil, &NotLoadedError{edge: "relationship"}
@@ -128,7 +141,7 @@ func (e UserEdges) RelationshipOrErr() ([]*Relationship, error) {
 // LikesOrErr returns the Likes value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) LikesOrErr() ([]*TweetLike, error) {
-	if e.loadedTypes[8] {
+	if e.loadedTypes[9] {
 		return e.Likes, nil
 	}
 	return nil, &NotLoadedError{edge: "likes"}
@@ -137,15 +150,24 @@ func (e UserEdges) LikesOrErr() ([]*TweetLike, error) {
 // UserTweetsOrErr returns the UserTweets value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) UserTweetsOrErr() ([]*UserTweet, error) {
-	if e.loadedTypes[9] {
+	if e.loadedTypes[10] {
 		return e.UserTweets, nil
 	}
 	return nil, &NotLoadedError{edge: "user_tweets"}
 }
 
+// RolesUsersOrErr returns the RolesUsers value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) RolesUsersOrErr() ([]*RoleUser, error) {
+	if e.loadedTypes[11] {
+		return e.RolesUsers, nil
+	}
+	return nil, &NotLoadedError{edge: "roles_users"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
-func (*User) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*User) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
 		case user.FieldID:
@@ -161,7 +183,7 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the User fields.
-func (u *User) assignValues(columns []string, values []interface{}) error {
+func (u *User) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -209,6 +231,11 @@ func (u *User) QueryTweets() *TweetQuery {
 	return (&UserClient{config: u.config}).QueryTweets(u)
 }
 
+// QueryRoles queries the "roles" edge of the User entity.
+func (u *User) QueryRoles() *RoleQuery {
+	return (&UserClient{config: u.config}).QueryRoles(u)
+}
+
 // QueryJoinedGroups queries the "joined_groups" edge of the User entity.
 func (u *User) QueryJoinedGroups() *UserGroupQuery {
 	return (&UserClient{config: u.config}).QueryJoinedGroups(u)
@@ -232,6 +259,11 @@ func (u *User) QueryLikes() *TweetLikeQuery {
 // QueryUserTweets queries the "user_tweets" edge of the User entity.
 func (u *User) QueryUserTweets() *UserTweetQuery {
 	return (&UserClient{config: u.config}).QueryUserTweets(u)
+}
+
+// QueryRolesUsers queries the "roles_users" edge of the User entity.
+func (u *User) QueryRolesUsers() *RoleUserQuery {
+	return (&UserClient{config: u.config}).QueryRolesUsers(u)
 }
 
 // Update returns a builder for updating this User.

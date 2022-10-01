@@ -31,11 +31,13 @@ type Comment struct {
 	Table string `json:"table,omitempty"`
 	// Dir holds the value of the "dir" field.
 	Dir schemadir.Dir `json:"dir,omitempty"`
+	// Client holds the value of the "client" field.
+	Client string `json:"client,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Comment) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*Comment) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
 		case comment.FieldDir:
@@ -44,7 +46,7 @@ func (*Comment) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullFloat64)
 		case comment.FieldID, comment.FieldUniqueInt, comment.FieldNillableInt:
 			values[i] = new(sql.NullInt64)
-		case comment.FieldTable:
+		case comment.FieldTable, comment.FieldClient:
 			values[i] = new(sql.NullString)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Comment", columns[i])
@@ -55,7 +57,7 @@ func (*Comment) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Comment fields.
-func (c *Comment) assignValues(columns []string, values []interface{}) error {
+func (c *Comment) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -99,6 +101,12 @@ func (c *Comment) assignValues(columns []string, values []interface{}) error {
 				if err := json.Unmarshal(*value, &c.Dir); err != nil {
 					return fmt.Errorf("unmarshal field dir: %w", err)
 				}
+			}
+		case comment.FieldClient:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field client", values[i])
+			} else if value.Valid {
+				c.Client = value.String
 			}
 		}
 	}
@@ -144,6 +152,9 @@ func (c *Comment) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("dir=")
 	builder.WriteString(fmt.Sprintf("%v", c.Dir))
+	builder.WriteString(", ")
+	builder.WriteString("client=")
+	builder.WriteString(c.Client)
 	builder.WriteByte(')')
 	return builder.String()
 }

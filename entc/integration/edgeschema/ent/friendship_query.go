@@ -28,7 +28,6 @@ type FriendshipQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Friendship
-	// eager-loading edges.
 	withUser   *UserQuery
 	withFriend *UserQuery
 	// intermediate query (i.e. traversal path).
@@ -337,7 +336,6 @@ func (fq *FriendshipQuery) WithFriend(opts ...func(*UserQuery)) *FriendshipQuery
 //		GroupBy(friendship.FieldWeight).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (fq *FriendshipQuery) GroupBy(field string, fields ...string) *FriendshipGroupBy {
 	grbuild := &FriendshipGroupBy{config: fq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -364,7 +362,6 @@ func (fq *FriendshipQuery) GroupBy(field string, fields ...string) *FriendshipGr
 //	client.Friendship.Query().
 //		Select(friendship.FieldWeight).
 //		Scan(ctx, &v)
-//
 func (fq *FriendshipQuery) Select(fields ...string) *FriendshipSelect {
 	fq.fields = append(fq.fields, fields...)
 	selbuild := &FriendshipSelect{FriendshipQuery: fq}
@@ -398,10 +395,10 @@ func (fq *FriendshipQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*F
 			fq.withFriend != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Friendship).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Friendship{config: fq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -416,60 +413,72 @@ func (fq *FriendshipQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*F
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := fq.withUser; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Friendship)
-		for i := range nodes {
-			fk := nodes[i].UserID
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := fq.loadUser(ctx, query, nodes, nil,
+			func(n *Friendship, e *User) { n.Edges.User = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.User = n
-			}
-		}
 	}
-
 	if query := fq.withFriend; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Friendship)
-		for i := range nodes {
-			fk := nodes[i].FriendID
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := fq.loadFriend(ctx, query, nodes, nil,
+			func(n *Friendship, e *User) { n.Edges.Friend = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "friend_id" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Friend = n
-			}
+	}
+	return nodes, nil
+}
+
+func (fq *FriendshipQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Friendship, init func(*Friendship), assign func(*Friendship, *User)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Friendship)
+	for i := range nodes {
+		fk := nodes[i].UserID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
+}
+func (fq *FriendshipQuery) loadFriend(ctx context.Context, query *UserQuery, nodes []*Friendship, init func(*Friendship), assign func(*Friendship, *User)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Friendship)
+	for i := range nodes {
+		fk := nodes[i].FriendID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "friend_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (fq *FriendshipQuery) sqlCount(ctx context.Context) (int, error) {
@@ -482,11 +491,14 @@ func (fq *FriendshipQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (fq *FriendshipQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := fq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := fq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (fq *FriendshipQuery) querySpec() *sqlgraph.QuerySpec {
@@ -587,7 +599,7 @@ func (fgb *FriendshipGroupBy) Aggregate(fns ...AggregateFunc) *FriendshipGroupBy
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (fgb *FriendshipGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (fgb *FriendshipGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := fgb.path(ctx)
 	if err != nil {
 		return err
@@ -596,7 +608,7 @@ func (fgb *FriendshipGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return fgb.sqlScan(ctx, v)
 }
 
-func (fgb *FriendshipGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (fgb *FriendshipGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range fgb.fields {
 		if !friendship.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -643,7 +655,7 @@ type FriendshipSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (fs *FriendshipSelect) Scan(ctx context.Context, v interface{}) error {
+func (fs *FriendshipSelect) Scan(ctx context.Context, v any) error {
 	if err := fs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -651,7 +663,7 @@ func (fs *FriendshipSelect) Scan(ctx context.Context, v interface{}) error {
 	return fs.sqlScan(ctx, v)
 }
 
-func (fs *FriendshipSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (fs *FriendshipSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := fs.sql.Query()
 	if err := fs.driver.Query(ctx, query, args, rows); err != nil {

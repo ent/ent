@@ -13,9 +13,9 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/examples/privacytenant/ent/group"
 	"entgo.io/ent/examples/privacytenant/ent/predicate"
-	"entgo.io/ent/examples/privacytenant/ent/tenant"
 	"entgo.io/ent/examples/privacytenant/ent/user"
 	"entgo.io/ent/schema/field"
 )
@@ -30,12 +30,6 @@ type UserUpdate struct {
 // Where appends a list predicates to the UserUpdate builder.
 func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	uu.mutation.Where(ps...)
-	return uu
-}
-
-// SetTenantID sets the "tenant_id" field.
-func (uu *UserUpdate) SetTenantID(i int) *UserUpdate {
-	uu.mutation.SetTenantID(i)
 	return uu
 }
 
@@ -59,15 +53,16 @@ func (uu *UserUpdate) SetFoods(s []string) *UserUpdate {
 	return uu
 }
 
+// AppendFoods appends s to the "foods" field.
+func (uu *UserUpdate) AppendFoods(s []string) *UserUpdate {
+	uu.mutation.AppendFoods(s)
+	return uu
+}
+
 // ClearFoods clears the value of the "foods" field.
 func (uu *UserUpdate) ClearFoods() *UserUpdate {
 	uu.mutation.ClearFoods()
 	return uu
-}
-
-// SetTenant sets the "tenant" edge to the Tenant entity.
-func (uu *UserUpdate) SetTenant(t *Tenant) *UserUpdate {
-	return uu.SetTenantID(t.ID)
 }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
@@ -88,12 +83,6 @@ func (uu *UserUpdate) AddGroups(g ...*Group) *UserUpdate {
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
-}
-
-// ClearTenant clears the "tenant" edge to the Tenant entity.
-func (uu *UserUpdate) ClearTenant() *UserUpdate {
-	uu.mutation.ClearTenant()
-	return uu
 }
 
 // ClearGroups clears all "groups" edges to the Group entity.
@@ -217,46 +206,16 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldFoods,
 		})
 	}
+	if value, ok := uu.mutation.AppendedFoods(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldFoods, value)
+		})
+	}
 	if uu.mutation.FoodsCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Column: user.FieldFoods,
 		})
-	}
-	if uu.mutation.TenantCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   user.TenantTable,
-			Columns: []string{user.TenantColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tenant.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.TenantIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   user.TenantTable,
-			Columns: []string{user.TenantColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tenant.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if uu.mutation.GroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -331,12 +290,6 @@ type UserUpdateOne struct {
 	mutation *UserMutation
 }
 
-// SetTenantID sets the "tenant_id" field.
-func (uuo *UserUpdateOne) SetTenantID(i int) *UserUpdateOne {
-	uuo.mutation.SetTenantID(i)
-	return uuo
-}
-
 // SetName sets the "name" field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
 	uuo.mutation.SetName(s)
@@ -357,15 +310,16 @@ func (uuo *UserUpdateOne) SetFoods(s []string) *UserUpdateOne {
 	return uuo
 }
 
+// AppendFoods appends s to the "foods" field.
+func (uuo *UserUpdateOne) AppendFoods(s []string) *UserUpdateOne {
+	uuo.mutation.AppendFoods(s)
+	return uuo
+}
+
 // ClearFoods clears the value of the "foods" field.
 func (uuo *UserUpdateOne) ClearFoods() *UserUpdateOne {
 	uuo.mutation.ClearFoods()
 	return uuo
-}
-
-// SetTenant sets the "tenant" edge to the Tenant entity.
-func (uuo *UserUpdateOne) SetTenant(t *Tenant) *UserUpdateOne {
-	return uuo.SetTenantID(t.ID)
 }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
@@ -386,12 +340,6 @@ func (uuo *UserUpdateOne) AddGroups(g ...*Group) *UserUpdateOne {
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
-}
-
-// ClearTenant clears the "tenant" edge to the Tenant entity.
-func (uuo *UserUpdateOne) ClearTenant() *UserUpdateOne {
-	uuo.mutation.ClearTenant()
-	return uuo
 }
 
 // ClearGroups clears all "groups" edges to the Group entity.
@@ -545,46 +493,16 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Column: user.FieldFoods,
 		})
 	}
+	if value, ok := uuo.mutation.AppendedFoods(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldFoods, value)
+		})
+	}
 	if uuo.mutation.FoodsCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Column: user.FieldFoods,
 		})
-	}
-	if uuo.mutation.TenantCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   user.TenantTable,
-			Columns: []string{user.TenantColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tenant.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.TenantIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   user.TenantTable,
-			Columns: []string{user.TenantColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tenant.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if uuo.mutation.GroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{

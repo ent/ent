@@ -13,6 +13,16 @@ import (
 )
 
 var (
+	// BlogsColumns holds the columns for the "blogs" table.
+	BlogsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+	}
+	// BlogsTable holds the schema information for the "blogs" table.
+	BlogsTable = &schema.Table{
+		Name:       "blogs",
+		Columns:    BlogsColumns,
+		PrimaryKey: []*schema.Column{BlogsColumns[0]},
+	}
 	// CarColumns holds the columns for the "Car" table.
 	CarColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -133,6 +143,7 @@ var (
 		{Name: "oid", Type: field.TypeInt, Increment: true},
 		{Name: "mixed_string", Type: field.TypeString, Default: "default"},
 		{Name: "mixed_enum", Type: field.TypeEnum, Enums: []string{"on", "off"}, Default: "on"},
+		{Name: "active", Type: field.TypeBool, Default: true},
 		{Name: "age", Type: field.TypeInt},
 		{Name: "name", Type: field.TypeString, Size: 2147483647},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
@@ -148,17 +159,26 @@ var (
 		{Name: "workplace", Type: field.TypeString, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "drop_optional", Type: field.TypeString},
+		{Name: "blog_admins", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
 		Name:       "users",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "users_blogs_admins",
+				Columns:    []*schema.Column{UsersColumns[19]},
+				RefColumns: []*schema.Column{BlogsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "user_description",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[5]},
+				Columns: []*schema.Column{UsersColumns[6]},
 				Annotation: &entsql.IndexAnnotation{
 					Prefix: 100,
 				},
@@ -166,12 +186,12 @@ var (
 			{
 				Name:    "user_phone_age",
 				Unique:  true,
-				Columns: []*schema.Column{UsersColumns[7], UsersColumns[3]},
+				Columns: []*schema.Column{UsersColumns[8], UsersColumns[4]},
 			},
 			{
 				Name:    "user_age",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[3]},
+				Columns: []*schema.Column{UsersColumns[4]},
 				Annotation: &entsql.IndexAnnotation{
 					Desc: true,
 				},
@@ -179,11 +199,29 @@ var (
 			{
 				Name:    "user_nickname",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[6]},
+				Columns: []*schema.Column{UsersColumns[7]},
 				Annotation: &entsql.IndexAnnotation{
 					Types: map[string]string{
 						"mysql": "FULLTEXT",
 					},
+				},
+			},
+			{
+				Name:    "user_workplace",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[16]},
+				Annotation: &entsql.IndexAnnotation{
+					IncludeColumns: []string{
+						UsersColumns[7].Name,
+					},
+				},
+			},
+			{
+				Name:    "user_phone",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[8]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "active",
 				},
 			},
 		},
@@ -215,6 +253,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		BlogsTable,
 		CarTable,
 		ConversionsTable,
 		CustomTypesTable,
@@ -238,6 +277,7 @@ func init() {
 		"boring_check": "source_uri <> 'entgo.io'",
 	}
 	PetsTable.ForeignKeys[0].RefTable = UsersTable
+	UsersTable.ForeignKeys[0].RefTable = BlogsTable
 	FriendsTable.ForeignKeys[0].RefTable = UsersTable
 	FriendsTable.ForeignKeys[1].RefTable = UsersTable
 }

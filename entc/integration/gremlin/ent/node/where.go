@@ -37,7 +37,7 @@ func IDNEQ(id string) predicate.Node {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...string) predicate.Node {
 	return predicate.Node(func(t *dsl.Traversal) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -48,7 +48,7 @@ func IDIn(ids ...string) predicate.Node {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...string) predicate.Node {
 	return predicate.Node(func(t *dsl.Traversal) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -107,7 +107,7 @@ func ValueNEQ(v int) predicate.Node {
 
 // ValueIn applies the In predicate on the "value" field.
 func ValueIn(vs ...int) predicate.Node {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -118,7 +118,7 @@ func ValueIn(vs ...int) predicate.Node {
 
 // ValueNotIn applies the NotIn predicate on the "value" field.
 func ValueNotIn(vs ...int) predicate.Node {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -208,7 +208,7 @@ func HasNextWith(preds ...predicate.Node) predicate.Node {
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Node) predicate.Node {
 	return predicate.Node(func(tr *dsl.Traversal) {
-		trs := make([]interface{}, 0, len(predicates))
+		trs := make([]any, 0, len(predicates))
 		for _, p := range predicates {
 			t := __.New()
 			p(t)
@@ -221,7 +221,7 @@ func And(predicates ...predicate.Node) predicate.Node {
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Node) predicate.Node {
 	return predicate.Node(func(tr *dsl.Traversal) {
-		trs := make([]interface{}, 0, len(predicates))
+		trs := make([]any, 0, len(predicates))
 		for _, p := range predicates {
 			t := __.New()
 			p(t)

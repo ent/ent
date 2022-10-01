@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -37,6 +38,26 @@ func (tc *TaskCreate) SetPriority(t task.Priority) *TaskCreate {
 func (tc *TaskCreate) SetNillablePriority(t *task.Priority) *TaskCreate {
 	if t != nil {
 		tc.SetPriority(*t)
+	}
+	return tc
+}
+
+// SetPriorities sets the "priorities" field.
+func (tc *TaskCreate) SetPriorities(m map[string]task.Priority) *TaskCreate {
+	tc.mutation.SetPriorities(m)
+	return tc
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (tc *TaskCreate) SetCreatedAt(t time.Time) *TaskCreate {
+	tc.mutation.SetCreatedAt(t)
+	return tc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (tc *TaskCreate) SetNillableCreatedAt(t *time.Time) *TaskCreate {
+	if t != nil {
+		tc.SetCreatedAt(*t)
 	}
 	return tc
 }
@@ -122,6 +143,10 @@ func (tc *TaskCreate) defaults() {
 		v := enttask.DefaultPriority
 		tc.mutation.SetPriority(v)
 	}
+	if _, ok := tc.mutation.CreatedAt(); !ok {
+		v := enttask.DefaultCreatedAt()
+		tc.mutation.SetCreatedAt(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -133,6 +158,9 @@ func (tc *TaskCreate) check() error {
 		if err := enttask.PriorityValidator(int(v)); err != nil {
 			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
+	}
+	if _, ok := tc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Task.created_at"`)}
 	}
 	return nil
 }
@@ -170,6 +198,22 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 		})
 		_node.Priority = value
 	}
+	if value, ok := tc.mutation.Priorities(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: enttask.FieldPriorities,
+		})
+		_node.Priorities = value
+	}
+	if value, ok := tc.mutation.CreatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: enttask.FieldCreatedAt,
+		})
+		_node.CreatedAt = &value
+	}
 	return _node, _spec
 }
 
@@ -189,7 +233,6 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 //			SetPriority(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (tc *TaskCreate) OnConflict(opts ...sql.ConflictOption) *TaskUpsertOne {
 	tc.conflict = opts
 	return &TaskUpsertOne{
@@ -203,7 +246,6 @@ func (tc *TaskCreate) OnConflict(opts ...sql.ConflictOption) *TaskUpsertOne {
 //	client.Task.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (tc *TaskCreate) OnConflictColumns(columns ...string) *TaskUpsertOne {
 	tc.conflict = append(tc.conflict, sql.ConflictColumns(columns...))
 	return &TaskUpsertOne{
@@ -242,6 +284,24 @@ func (u *TaskUpsert) AddPriority(v task.Priority) *TaskUpsert {
 	return u
 }
 
+// SetPriorities sets the "priorities" field.
+func (u *TaskUpsert) SetPriorities(v map[string]task.Priority) *TaskUpsert {
+	u.Set(enttask.FieldPriorities, v)
+	return u
+}
+
+// UpdatePriorities sets the "priorities" field to the value that was provided on create.
+func (u *TaskUpsert) UpdatePriorities() *TaskUpsert {
+	u.SetExcluded(enttask.FieldPriorities)
+	return u
+}
+
+// ClearPriorities clears the value of the "priorities" field.
+func (u *TaskUpsert) ClearPriorities() *TaskUpsert {
+	u.SetNull(enttask.FieldPriorities)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -250,19 +310,22 @@ func (u *TaskUpsert) AddPriority(v task.Priority) *TaskUpsert {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *TaskUpsertOne) UpdateNewValues() *TaskUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.CreatedAt(); exists {
+			s.SetIgnore(enttask.FieldCreatedAt)
+		}
+	}))
 	return u
 }
 
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.Task.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.Task.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *TaskUpsertOne) Ignore() *TaskUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -302,6 +365,27 @@ func (u *TaskUpsertOne) AddPriority(v task.Priority) *TaskUpsertOne {
 func (u *TaskUpsertOne) UpdatePriority() *TaskUpsertOne {
 	return u.Update(func(s *TaskUpsert) {
 		s.UpdatePriority()
+	})
+}
+
+// SetPriorities sets the "priorities" field.
+func (u *TaskUpsertOne) SetPriorities(v map[string]task.Priority) *TaskUpsertOne {
+	return u.Update(func(s *TaskUpsert) {
+		s.SetPriorities(v)
+	})
+}
+
+// UpdatePriorities sets the "priorities" field to the value that was provided on create.
+func (u *TaskUpsertOne) UpdatePriorities() *TaskUpsertOne {
+	return u.Update(func(s *TaskUpsert) {
+		s.UpdatePriorities()
+	})
+}
+
+// ClearPriorities clears the value of the "priorities" field.
+func (u *TaskUpsertOne) ClearPriorities() *TaskUpsertOne {
+	return u.Update(func(s *TaskUpsert) {
+		s.ClearPriorities()
 	})
 }
 
@@ -439,7 +523,6 @@ func (tcb *TaskCreateBulk) ExecX(ctx context.Context) {
 //			SetPriority(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (tcb *TaskCreateBulk) OnConflict(opts ...sql.ConflictOption) *TaskUpsertBulk {
 	tcb.conflict = opts
 	return &TaskUpsertBulk{
@@ -453,7 +536,6 @@ func (tcb *TaskCreateBulk) OnConflict(opts ...sql.ConflictOption) *TaskUpsertBul
 //	client.Task.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (tcb *TaskCreateBulk) OnConflictColumns(columns ...string) *TaskUpsertBulk {
 	tcb.conflict = append(tcb.conflict, sql.ConflictColumns(columns...))
 	return &TaskUpsertBulk{
@@ -475,9 +557,15 @@ type TaskUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *TaskUpsertBulk) UpdateNewValues() *TaskUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.CreatedAt(); exists {
+				s.SetIgnore(enttask.FieldCreatedAt)
+			}
+		}
+	}))
 	return u
 }
 
@@ -487,7 +575,6 @@ func (u *TaskUpsertBulk) UpdateNewValues() *TaskUpsertBulk {
 //	client.Task.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *TaskUpsertBulk) Ignore() *TaskUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -527,6 +614,27 @@ func (u *TaskUpsertBulk) AddPriority(v task.Priority) *TaskUpsertBulk {
 func (u *TaskUpsertBulk) UpdatePriority() *TaskUpsertBulk {
 	return u.Update(func(s *TaskUpsert) {
 		s.UpdatePriority()
+	})
+}
+
+// SetPriorities sets the "priorities" field.
+func (u *TaskUpsertBulk) SetPriorities(v map[string]task.Priority) *TaskUpsertBulk {
+	return u.Update(func(s *TaskUpsert) {
+		s.SetPriorities(v)
+	})
+}
+
+// UpdatePriorities sets the "priorities" field to the value that was provided on create.
+func (u *TaskUpsertBulk) UpdatePriorities() *TaskUpsertBulk {
+	return u.Update(func(s *TaskUpsert) {
+		s.UpdatePriorities()
+	})
+}
+
+// ClearPriorities clears the value of the "priorities" field.
+func (u *TaskUpsertBulk) ClearPriorities() *TaskUpsertBulk {
+	return u.Update(func(s *TaskUpsert) {
+		s.ClearPriorities()
 	})
 }
 

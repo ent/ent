@@ -22,13 +22,12 @@ import (
 // RelationshipQuery is the builder for querying Relationship entities.
 type RelationshipQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Relationship
-	// eager-loading edges.
+	limit        *int
+	offset       *int
+	unique       *bool
+	order        []OrderFunc
+	fields       []string
+	predicates   []predicate.Relationship
 	withUser     *UserQuery
 	withRelative *UserQuery
 	withInfo     *RelationshipInfoQuery
@@ -303,7 +302,6 @@ func (rq *RelationshipQuery) WithInfo(opts ...func(*RelationshipInfoQuery)) *Rel
 //		GroupBy(relationship.FieldWeight).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (rq *RelationshipQuery) GroupBy(field string, fields ...string) *RelationshipGroupBy {
 	grbuild := &RelationshipGroupBy{config: rq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -330,7 +328,6 @@ func (rq *RelationshipQuery) GroupBy(field string, fields ...string) *Relationsh
 //	client.Relationship.Query().
 //		Select(relationship.FieldWeight).
 //		Scan(ctx, &v)
-//
 func (rq *RelationshipQuery) Select(fields ...string) *RelationshipSelect {
 	rq.fields = append(rq.fields, fields...)
 	selbuild := &RelationshipSelect{RelationshipQuery: rq}
@@ -365,10 +362,10 @@ func (rq *RelationshipQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 			rq.withInfo != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Relationship).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Relationship{config: rq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -383,86 +380,104 @@ func (rq *RelationshipQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := rq.withUser; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Relationship)
-		for i := range nodes {
-			fk := nodes[i].UserID
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := rq.loadUser(ctx, query, nodes, nil,
+			func(n *Relationship, e *User) { n.Edges.User = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.User = n
-			}
-		}
 	}
-
 	if query := rq.withRelative; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Relationship)
-		for i := range nodes {
-			fk := nodes[i].RelativeID
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := rq.loadRelative(ctx, query, nodes, nil,
+			func(n *Relationship, e *User) { n.Edges.Relative = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "relative_id" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Relative = n
-			}
-		}
 	}
-
 	if query := rq.withInfo; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Relationship)
-		for i := range nodes {
-			fk := nodes[i].InfoID
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(relationshipinfo.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := rq.loadInfo(ctx, query, nodes, nil,
+			func(n *Relationship, e *RelationshipInfo) { n.Edges.Info = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "info_id" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Info = n
-			}
+	}
+	return nodes, nil
+}
+
+func (rq *RelationshipQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Relationship, init func(*Relationship), assign func(*Relationship, *User)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Relationship)
+	for i := range nodes {
+		fk := nodes[i].UserID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
+}
+func (rq *RelationshipQuery) loadRelative(ctx context.Context, query *UserQuery, nodes []*Relationship, init func(*Relationship), assign func(*Relationship, *User)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Relationship)
+	for i := range nodes {
+		fk := nodes[i].RelativeID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "relative_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (rq *RelationshipQuery) loadInfo(ctx context.Context, query *RelationshipInfoQuery, nodes []*Relationship, init func(*Relationship), assign func(*Relationship, *RelationshipInfo)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Relationship)
+	for i := range nodes {
+		fk := nodes[i].InfoID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(relationshipinfo.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "info_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (rq *RelationshipQuery) sqlCount(ctx context.Context) (int, error) {
@@ -473,11 +488,14 @@ func (rq *RelationshipQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (rq *RelationshipQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := rq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := rq.First(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (rq *RelationshipQuery) querySpec() *sqlgraph.QuerySpec {
@@ -571,7 +589,7 @@ func (rgb *RelationshipGroupBy) Aggregate(fns ...AggregateFunc) *RelationshipGro
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (rgb *RelationshipGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (rgb *RelationshipGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := rgb.path(ctx)
 	if err != nil {
 		return err
@@ -580,7 +598,7 @@ func (rgb *RelationshipGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return rgb.sqlScan(ctx, v)
 }
 
-func (rgb *RelationshipGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (rgb *RelationshipGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range rgb.fields {
 		if !relationship.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -627,7 +645,7 @@ type RelationshipSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (rs *RelationshipSelect) Scan(ctx context.Context, v interface{}) error {
+func (rs *RelationshipSelect) Scan(ctx context.Context, v any) error {
 	if err := rs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -635,7 +653,7 @@ func (rs *RelationshipSelect) Scan(ctx context.Context, v interface{}) error {
 	return rs.sqlScan(ctx, v)
 }
 
-func (rs *RelationshipSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (rs *RelationshipSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := rs.sql.Query()
 	if err := rs.driver.Query(ctx, query, args, rows); err != nil {

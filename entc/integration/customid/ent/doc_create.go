@@ -89,6 +89,21 @@ func (dc *DocCreate) AddChildren(d ...*Doc) *DocCreate {
 	return dc.AddChildIDs(ids...)
 }
 
+// AddRelatedIDs adds the "related" edge to the Doc entity by IDs.
+func (dc *DocCreate) AddRelatedIDs(ids ...schema.DocID) *DocCreate {
+	dc.mutation.AddRelatedIDs(ids...)
+	return dc
+}
+
+// AddRelated adds the "related" edges to the Doc entity.
+func (dc *DocCreate) AddRelated(d ...*Doc) *DocCreate {
+	ids := make([]schema.DocID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return dc.AddRelatedIDs(ids...)
+}
+
 // Mutation returns the DocMutation object of the builder.
 func (dc *DocCreate) Mutation() *DocMutation {
 	return dc.mutation
@@ -263,6 +278,25 @@ func (dc *DocCreate) createSpec() (*Doc, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := dc.mutation.RelatedIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   doc.RelatedTable,
+			Columns: doc.RelatedPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: doc.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	return _node, _spec
 }
 
@@ -282,7 +316,6 @@ func (dc *DocCreate) createSpec() (*Doc, *sqlgraph.CreateSpec) {
 //			SetText(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (dc *DocCreate) OnConflict(opts ...sql.ConflictOption) *DocUpsertOne {
 	dc.conflict = opts
 	return &DocUpsertOne{
@@ -296,7 +329,6 @@ func (dc *DocCreate) OnConflict(opts ...sql.ConflictOption) *DocUpsertOne {
 //	client.Doc.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (dc *DocCreate) OnConflictColumns(columns ...string) *DocUpsertOne {
 	dc.conflict = append(dc.conflict, sql.ConflictColumns(columns...))
 	return &DocUpsertOne{
@@ -346,7 +378,6 @@ func (u *DocUpsert) ClearText() *DocUpsert {
 //			}),
 //		).
 //		Exec(ctx)
-//
 func (u *DocUpsertOne) UpdateNewValues() *DocUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -360,10 +391,9 @@ func (u *DocUpsertOne) UpdateNewValues() *DocUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.Doc.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.Doc.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *DocUpsertOne) Ignore() *DocUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -541,7 +571,6 @@ func (dcb *DocCreateBulk) ExecX(ctx context.Context) {
 //			SetText(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (dcb *DocCreateBulk) OnConflict(opts ...sql.ConflictOption) *DocUpsertBulk {
 	dcb.conflict = opts
 	return &DocUpsertBulk{
@@ -555,7 +584,6 @@ func (dcb *DocCreateBulk) OnConflict(opts ...sql.ConflictOption) *DocUpsertBulk 
 //	client.Doc.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (dcb *DocCreateBulk) OnConflictColumns(columns ...string) *DocUpsertBulk {
 	dcb.conflict = append(dcb.conflict, sql.ConflictColumns(columns...))
 	return &DocUpsertBulk{
@@ -580,14 +608,12 @@ type DocUpsertBulk struct {
 //			}),
 //		).
 //		Exec(ctx)
-//
 func (u *DocUpsertBulk) UpdateNewValues() *DocUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(doc.FieldID)
-				return
 			}
 		}
 	}))
@@ -600,7 +626,6 @@ func (u *DocUpsertBulk) UpdateNewValues() *DocUpsertBulk {
 //	client.Doc.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *DocUpsertBulk) Ignore() *DocUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

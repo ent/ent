@@ -28,7 +28,6 @@ type GroupInfoQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.GroupInfo
-	// eager-loading edges.
 	withGroups *GroupQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
@@ -294,7 +293,6 @@ func (giq *GroupInfoQuery) WithGroups(opts ...func(*GroupQuery)) *GroupInfoQuery
 //		GroupBy(groupinfo.FieldDesc).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGroupBy {
 	grbuild := &GroupInfoGroupBy{config: giq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -321,7 +319,6 @@ func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGro
 //	client.GroupInfo.Query().
 //		Select(groupinfo.FieldDesc).
 //		Scan(ctx, &v)
-//
 func (giq *GroupInfoQuery) Select(fields ...string) *GroupInfoSelect {
 	giq.fields = append(giq.fields, fields...)
 	selbuild := &GroupInfoSelect{GroupInfoQuery: giq}
@@ -345,7 +342,7 @@ func (giq *GroupInfoQuery) gremlinAll(ctx context.Context) ([]*GroupInfo, error)
 	res := &gremlin.Response{}
 	traversal := giq.gremlinQuery(ctx)
 	if len(giq.fields) > 0 {
-		fields := make([]interface{}, len(giq.fields))
+		fields := make([]any, len(giq.fields))
 		for i, f := range giq.fields {
 			fields[i] = f
 		}
@@ -429,7 +426,7 @@ func (gigb *GroupInfoGroupBy) Aggregate(fns ...AggregateFunc) *GroupInfoGroupBy 
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (gigb *GroupInfoGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (gigb *GroupInfoGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := gigb.path(ctx)
 	if err != nil {
 		return err
@@ -438,7 +435,7 @@ func (gigb *GroupInfoGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return gigb.gremlinScan(ctx, v)
 }
 
-func (gigb *GroupInfoGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
+func (gigb *GroupInfoGroupBy) gremlinScan(ctx context.Context, v any) error {
 	res := &gremlin.Response{}
 	query, bindings := gigb.gremlinQuery().Query()
 	if err := gigb.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -456,8 +453,8 @@ func (gigb *GroupInfoGroupBy) gremlinScan(ctx context.Context, v interface{}) er
 
 func (gigb *GroupInfoGroupBy) gremlinQuery() *dsl.Traversal {
 	var (
-		trs   []interface{}
-		names []interface{}
+		trs   []any
+		names []any
 	)
 	for _, fn := range gigb.fns {
 		name, tr := fn("p", "")
@@ -484,7 +481,7 @@ type GroupInfoSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (gis *GroupInfoSelect) Scan(ctx context.Context, v interface{}) error {
+func (gis *GroupInfoSelect) Scan(ctx context.Context, v any) error {
 	if err := gis.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -492,7 +489,7 @@ func (gis *GroupInfoSelect) Scan(ctx context.Context, v interface{}) error {
 	return gis.gremlinScan(ctx, v)
 }
 
-func (gis *GroupInfoSelect) gremlinScan(ctx context.Context, v interface{}) error {
+func (gis *GroupInfoSelect) gremlinScan(ctx context.Context, v any) error {
 	var (
 		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
@@ -504,7 +501,7 @@ func (gis *GroupInfoSelect) gremlinScan(ctx context.Context, v interface{}) erro
 			traversal = gis.gremlin.ID()
 		}
 	} else {
-		fields := make([]interface{}, len(gis.fields))
+		fields := make([]any, len(gis.fields))
 		for i, f := range gis.fields {
 			fields[i] = f
 		}

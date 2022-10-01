@@ -80,6 +80,20 @@ func (cc *CommentCreate) SetNillableDir(s *schemadir.Dir) *CommentCreate {
 	return cc
 }
 
+// SetClient sets the "client" field.
+func (cc *CommentCreate) SetClient(s string) *CommentCreate {
+	cc.mutation.SetClient(s)
+	return cc
+}
+
+// SetNillableClient sets the "client" field if the given value is not nil.
+func (cc *CommentCreate) SetNillableClient(s *string) *CommentCreate {
+	if s != nil {
+		cc.SetClient(*s)
+	}
+	return cc
+}
+
 // Mutation returns the CommentMutation object of the builder.
 func (cc *CommentCreate) Mutation() *CommentMutation {
 	return cc.mutation
@@ -230,6 +244,14 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 		})
 		_node.Dir = value
 	}
+	if value, ok := cc.mutation.GetClient(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: comment.FieldClient,
+		})
+		_node.Client = value
+	}
 	return _node, _spec
 }
 
@@ -249,7 +271,6 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 //			SetUniqueInt(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (cc *CommentCreate) OnConflict(opts ...sql.ConflictOption) *CommentUpsertOne {
 	cc.conflict = opts
 	return &CommentUpsertOne{
@@ -263,7 +284,6 @@ func (cc *CommentCreate) OnConflict(opts ...sql.ConflictOption) *CommentUpsertOn
 //	client.Comment.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (cc *CommentCreate) OnConflictColumns(columns ...string) *CommentUpsertOne {
 	cc.conflict = append(cc.conflict, sql.ConflictColumns(columns...))
 	return &CommentUpsertOne{
@@ -380,6 +400,24 @@ func (u *CommentUpsert) ClearDir() *CommentUpsert {
 	return u
 }
 
+// SetClient sets the "client" field.
+func (u *CommentUpsert) SetClient(v string) *CommentUpsert {
+	u.Set(comment.FieldClient, v)
+	return u
+}
+
+// UpdateClient sets the "client" field to the value that was provided on create.
+func (u *CommentUpsert) UpdateClient() *CommentUpsert {
+	u.SetExcluded(comment.FieldClient)
+	return u
+}
+
+// ClearClient clears the value of the "client" field.
+func (u *CommentUpsert) ClearClient() *CommentUpsert {
+	u.SetNull(comment.FieldClient)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -388,7 +426,6 @@ func (u *CommentUpsert) ClearDir() *CommentUpsert {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *CommentUpsertOne) UpdateNewValues() *CommentUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -397,10 +434,9 @@ func (u *CommentUpsertOne) UpdateNewValues() *CommentUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.Comment.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.Comment.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *CommentUpsertOne) Ignore() *CommentUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -531,6 +567,27 @@ func (u *CommentUpsertOne) UpdateDir() *CommentUpsertOne {
 func (u *CommentUpsertOne) ClearDir() *CommentUpsertOne {
 	return u.Update(func(s *CommentUpsert) {
 		s.ClearDir()
+	})
+}
+
+// SetClient sets the "client" field.
+func (u *CommentUpsertOne) SetClient(v string) *CommentUpsertOne {
+	return u.Update(func(s *CommentUpsert) {
+		s.SetClient(v)
+	})
+}
+
+// UpdateClient sets the "client" field to the value that was provided on create.
+func (u *CommentUpsertOne) UpdateClient() *CommentUpsertOne {
+	return u.Update(func(s *CommentUpsert) {
+		s.UpdateClient()
+	})
+}
+
+// ClearClient clears the value of the "client" field.
+func (u *CommentUpsertOne) ClearClient() *CommentUpsertOne {
+	return u.Update(func(s *CommentUpsert) {
+		s.ClearClient()
 	})
 }
 
@@ -667,7 +724,6 @@ func (ccb *CommentCreateBulk) ExecX(ctx context.Context) {
 //			SetUniqueInt(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (ccb *CommentCreateBulk) OnConflict(opts ...sql.ConflictOption) *CommentUpsertBulk {
 	ccb.conflict = opts
 	return &CommentUpsertBulk{
@@ -681,7 +737,6 @@ func (ccb *CommentCreateBulk) OnConflict(opts ...sql.ConflictOption) *CommentUps
 //	client.Comment.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (ccb *CommentCreateBulk) OnConflictColumns(columns ...string) *CommentUpsertBulk {
 	ccb.conflict = append(ccb.conflict, sql.ConflictColumns(columns...))
 	return &CommentUpsertBulk{
@@ -703,7 +758,6 @@ type CommentUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *CommentUpsertBulk) UpdateNewValues() *CommentUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -715,7 +769,6 @@ func (u *CommentUpsertBulk) UpdateNewValues() *CommentUpsertBulk {
 //	client.Comment.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *CommentUpsertBulk) Ignore() *CommentUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -846,6 +899,27 @@ func (u *CommentUpsertBulk) UpdateDir() *CommentUpsertBulk {
 func (u *CommentUpsertBulk) ClearDir() *CommentUpsertBulk {
 	return u.Update(func(s *CommentUpsert) {
 		s.ClearDir()
+	})
+}
+
+// SetClient sets the "client" field.
+func (u *CommentUpsertBulk) SetClient(v string) *CommentUpsertBulk {
+	return u.Update(func(s *CommentUpsert) {
+		s.SetClient(v)
+	})
+}
+
+// UpdateClient sets the "client" field to the value that was provided on create.
+func (u *CommentUpsertBulk) UpdateClient() *CommentUpsertBulk {
+	return u.Update(func(s *CommentUpsert) {
+		s.UpdateClient()
+	})
+}
+
+// ClearClient clears the value of the "client" field.
+func (u *CommentUpsertBulk) ClearClient() *CommentUpsertBulk {
+	return u.Update(func(s *CommentUpsert) {
+		s.ClearClient()
 	})
 }
 

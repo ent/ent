@@ -24,8 +24,9 @@ import (
 // FileUpdate is the builder for updating File entities.
 type FileUpdate struct {
 	config
-	hooks    []Hook
-	mutation *FileMutation
+	hooks     []Hook
+	mutation  *FileMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the FileUpdate builder.
@@ -118,6 +119,33 @@ func (fu *FileUpdate) SetNillableOp(b *bool) *FileUpdate {
 // ClearOp clears the value of the "op" field.
 func (fu *FileUpdate) ClearOp() *FileUpdate {
 	fu.mutation.ClearOp()
+	return fu
+}
+
+// SetFieldID sets the "field_id" field.
+func (fu *FileUpdate) SetFieldID(i int) *FileUpdate {
+	fu.mutation.ResetFieldID()
+	fu.mutation.SetFieldID(i)
+	return fu
+}
+
+// SetNillableFieldID sets the "field_id" field if the given value is not nil.
+func (fu *FileUpdate) SetNillableFieldID(i *int) *FileUpdate {
+	if i != nil {
+		fu.SetFieldID(*i)
+	}
+	return fu
+}
+
+// AddFieldID adds i to the "field_id" field.
+func (fu *FileUpdate) AddFieldID(i int) *FileUpdate {
+	fu.mutation.AddFieldID(i)
+	return fu
+}
+
+// ClearFieldID clears the value of the "field_id" field.
+func (fu *FileUpdate) ClearFieldID() *FileUpdate {
+	fu.mutation.ClearFieldID()
 	return fu
 }
 
@@ -282,6 +310,12 @@ func (fu *FileUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (fu *FileUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *FileUpdate {
+	fu.modifiers = append(fu.modifiers, modifiers...)
+	return fu
+}
+
 func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -358,6 +392,26 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
 			Column: file.FieldOp,
+		})
+	}
+	if value, ok := fu.mutation.FieldID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: file.FieldFieldID,
+		})
+	}
+	if value, ok := fu.mutation.AddedFieldID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: file.FieldFieldID,
+		})
+	}
+	if fu.mutation.FieldIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: file.FieldFieldID,
 		})
 	}
 	if fu.mutation.OwnerCleared() {
@@ -484,6 +538,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(fu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, fu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{file.Label}
@@ -498,9 +553,10 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // FileUpdateOne is the builder for updating a single File entity.
 type FileUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *FileMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *FileMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetSize sets the "size" field.
@@ -587,6 +643,33 @@ func (fuo *FileUpdateOne) SetNillableOp(b *bool) *FileUpdateOne {
 // ClearOp clears the value of the "op" field.
 func (fuo *FileUpdateOne) ClearOp() *FileUpdateOne {
 	fuo.mutation.ClearOp()
+	return fuo
+}
+
+// SetFieldID sets the "field_id" field.
+func (fuo *FileUpdateOne) SetFieldID(i int) *FileUpdateOne {
+	fuo.mutation.ResetFieldID()
+	fuo.mutation.SetFieldID(i)
+	return fuo
+}
+
+// SetNillableFieldID sets the "field_id" field if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableFieldID(i *int) *FileUpdateOne {
+	if i != nil {
+		fuo.SetFieldID(*i)
+	}
+	return fuo
+}
+
+// AddFieldID adds i to the "field_id" field.
+func (fuo *FileUpdateOne) AddFieldID(i int) *FileUpdateOne {
+	fuo.mutation.AddFieldID(i)
+	return fuo
+}
+
+// ClearFieldID clears the value of the "field_id" field.
+func (fuo *FileUpdateOne) ClearFieldID() *FileUpdateOne {
+	fuo.mutation.ClearFieldID()
 	return fuo
 }
 
@@ -764,6 +847,12 @@ func (fuo *FileUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (fuo *FileUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *FileUpdateOne {
+	fuo.modifiers = append(fuo.modifiers, modifiers...)
+	return fuo
+}
+
 func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -857,6 +946,26 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
 			Column: file.FieldOp,
+		})
+	}
+	if value, ok := fuo.mutation.FieldID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: file.FieldFieldID,
+		})
+	}
+	if value, ok := fuo.mutation.AddedFieldID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: file.FieldFieldID,
+		})
+	}
+	if fuo.mutation.FieldIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: file.FieldFieldID,
 		})
 	}
 	if fuo.mutation.OwnerCleared() {
@@ -983,6 +1092,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(fuo.modifiers...)
 	_node = &File{config: fuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

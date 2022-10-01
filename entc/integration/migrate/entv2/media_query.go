@@ -265,7 +265,6 @@ func (mq *MediaQuery) Clone() *MediaQuery {
 //		GroupBy(media.FieldSource).
 //		Aggregate(entv2.Count()).
 //		Scan(ctx, &v)
-//
 func (mq *MediaQuery) GroupBy(field string, fields ...string) *MediaGroupBy {
 	grbuild := &MediaGroupBy{config: mq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -292,7 +291,6 @@ func (mq *MediaQuery) GroupBy(field string, fields ...string) *MediaGroupBy {
 //	client.Media.Query().
 //		Select(media.FieldSource).
 //		Scan(ctx, &v)
-//
 func (mq *MediaQuery) Select(fields ...string) *MediaSelect {
 	mq.fields = append(mq.fields, fields...)
 	selbuild := &MediaSelect{MediaQuery: mq}
@@ -322,10 +320,10 @@ func (mq *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media,
 		nodes = []*Media{}
 		_spec = mq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Media).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Media{config: mq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -352,11 +350,14 @@ func (mq *MediaQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (mq *MediaQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := mq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := mq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("entv2: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (mq *MediaQuery) querySpec() *sqlgraph.QuerySpec {
@@ -457,7 +458,7 @@ func (mgb *MediaGroupBy) Aggregate(fns ...AggregateFunc) *MediaGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (mgb *MediaGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (mgb *MediaGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := mgb.path(ctx)
 	if err != nil {
 		return err
@@ -466,7 +467,7 @@ func (mgb *MediaGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return mgb.sqlScan(ctx, v)
 }
 
-func (mgb *MediaGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (mgb *MediaGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range mgb.fields {
 		if !media.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -513,7 +514,7 @@ type MediaSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ms *MediaSelect) Scan(ctx context.Context, v interface{}) error {
+func (ms *MediaSelect) Scan(ctx context.Context, v any) error {
 	if err := ms.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -521,7 +522,7 @@ func (ms *MediaSelect) Scan(ctx context.Context, v interface{}) error {
 	return ms.sqlScan(ctx, v)
 }
 
-func (ms *MediaSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ms *MediaSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ms.sql.Query()
 	if err := ms.driver.Query(ctx, query, args, rows); err != nil {

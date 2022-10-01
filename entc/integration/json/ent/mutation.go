@@ -43,10 +43,15 @@ type UserMutation struct {
 	t             **schema.T
 	url           **url.URL
 	raw           *json.RawMessage
+	appendraw     json.RawMessage
 	dirs          *[]http.Dir
+	appenddirs    []http.Dir
 	ints          *[]int
+	appendints    []int
 	floats        *[]float64
+	appendfloats  []float64
 	strings       *[]string
+	appendstrings []string
 	addr          *schema.Addr
 	clearedFields map[string]struct{}
 	done          bool
@@ -253,6 +258,7 @@ func (m *UserMutation) ResetURL() {
 // SetRaw sets the "raw" field.
 func (m *UserMutation) SetRaw(jm json.RawMessage) {
 	m.raw = &jm
+	m.appendraw = nil
 }
 
 // Raw returns the value of the "raw" field in the mutation.
@@ -281,9 +287,23 @@ func (m *UserMutation) OldRaw(ctx context.Context) (v json.RawMessage, err error
 	return oldValue.Raw, nil
 }
 
+// AppendRaw adds jm to the "raw" field.
+func (m *UserMutation) AppendRaw(jm json.RawMessage) {
+	m.appendraw = append(m.appendraw, jm...)
+}
+
+// AppendedRaw returns the list of values that were appended to the "raw" field in this mutation.
+func (m *UserMutation) AppendedRaw() (json.RawMessage, bool) {
+	if len(m.appendraw) == 0 {
+		return nil, false
+	}
+	return m.appendraw, true
+}
+
 // ClearRaw clears the value of the "raw" field.
 func (m *UserMutation) ClearRaw() {
 	m.raw = nil
+	m.appendraw = nil
 	m.clearedFields[user.FieldRaw] = struct{}{}
 }
 
@@ -296,12 +316,14 @@ func (m *UserMutation) RawCleared() bool {
 // ResetRaw resets all changes to the "raw" field.
 func (m *UserMutation) ResetRaw() {
 	m.raw = nil
+	m.appendraw = nil
 	delete(m.clearedFields, user.FieldRaw)
 }
 
 // SetDirs sets the "dirs" field.
 func (m *UserMutation) SetDirs(h []http.Dir) {
 	m.dirs = &h
+	m.appenddirs = nil
 }
 
 // Dirs returns the value of the "dirs" field in the mutation.
@@ -330,14 +352,29 @@ func (m *UserMutation) OldDirs(ctx context.Context) (v []http.Dir, err error) {
 	return oldValue.Dirs, nil
 }
 
+// AppendDirs adds h to the "dirs" field.
+func (m *UserMutation) AppendDirs(h []http.Dir) {
+	m.appenddirs = append(m.appenddirs, h...)
+}
+
+// AppendedDirs returns the list of values that were appended to the "dirs" field in this mutation.
+func (m *UserMutation) AppendedDirs() ([]http.Dir, bool) {
+	if len(m.appenddirs) == 0 {
+		return nil, false
+	}
+	return m.appenddirs, true
+}
+
 // ResetDirs resets all changes to the "dirs" field.
 func (m *UserMutation) ResetDirs() {
 	m.dirs = nil
+	m.appenddirs = nil
 }
 
 // SetInts sets the "ints" field.
 func (m *UserMutation) SetInts(i []int) {
 	m.ints = &i
+	m.appendints = nil
 }
 
 // Ints returns the value of the "ints" field in the mutation.
@@ -366,9 +403,23 @@ func (m *UserMutation) OldInts(ctx context.Context) (v []int, err error) {
 	return oldValue.Ints, nil
 }
 
+// AppendInts adds i to the "ints" field.
+func (m *UserMutation) AppendInts(i []int) {
+	m.appendints = append(m.appendints, i...)
+}
+
+// AppendedInts returns the list of values that were appended to the "ints" field in this mutation.
+func (m *UserMutation) AppendedInts() ([]int, bool) {
+	if len(m.appendints) == 0 {
+		return nil, false
+	}
+	return m.appendints, true
+}
+
 // ClearInts clears the value of the "ints" field.
 func (m *UserMutation) ClearInts() {
 	m.ints = nil
+	m.appendints = nil
 	m.clearedFields[user.FieldInts] = struct{}{}
 }
 
@@ -381,12 +432,14 @@ func (m *UserMutation) IntsCleared() bool {
 // ResetInts resets all changes to the "ints" field.
 func (m *UserMutation) ResetInts() {
 	m.ints = nil
+	m.appendints = nil
 	delete(m.clearedFields, user.FieldInts)
 }
 
 // SetFloats sets the "floats" field.
 func (m *UserMutation) SetFloats(f []float64) {
 	m.floats = &f
+	m.appendfloats = nil
 }
 
 // Floats returns the value of the "floats" field in the mutation.
@@ -415,9 +468,23 @@ func (m *UserMutation) OldFloats(ctx context.Context) (v []float64, err error) {
 	return oldValue.Floats, nil
 }
 
+// AppendFloats adds f to the "floats" field.
+func (m *UserMutation) AppendFloats(f []float64) {
+	m.appendfloats = append(m.appendfloats, f...)
+}
+
+// AppendedFloats returns the list of values that were appended to the "floats" field in this mutation.
+func (m *UserMutation) AppendedFloats() ([]float64, bool) {
+	if len(m.appendfloats) == 0 {
+		return nil, false
+	}
+	return m.appendfloats, true
+}
+
 // ClearFloats clears the value of the "floats" field.
 func (m *UserMutation) ClearFloats() {
 	m.floats = nil
+	m.appendfloats = nil
 	m.clearedFields[user.FieldFloats] = struct{}{}
 }
 
@@ -430,12 +497,14 @@ func (m *UserMutation) FloatsCleared() bool {
 // ResetFloats resets all changes to the "floats" field.
 func (m *UserMutation) ResetFloats() {
 	m.floats = nil
+	m.appendfloats = nil
 	delete(m.clearedFields, user.FieldFloats)
 }
 
 // SetStrings sets the "strings" field.
 func (m *UserMutation) SetStrings(s []string) {
 	m.strings = &s
+	m.appendstrings = nil
 }
 
 // Strings returns the value of the "strings" field in the mutation.
@@ -464,9 +533,23 @@ func (m *UserMutation) OldStrings(ctx context.Context) (v []string, err error) {
 	return oldValue.Strings, nil
 }
 
+// AppendStrings adds s to the "strings" field.
+func (m *UserMutation) AppendStrings(s []string) {
+	m.appendstrings = append(m.appendstrings, s...)
+}
+
+// AppendedStrings returns the list of values that were appended to the "strings" field in this mutation.
+func (m *UserMutation) AppendedStrings() ([]string, bool) {
+	if len(m.appendstrings) == 0 {
+		return nil, false
+	}
+	return m.appendstrings, true
+}
+
 // ClearStrings clears the value of the "strings" field.
 func (m *UserMutation) ClearStrings() {
 	m.strings = nil
+	m.appendstrings = nil
 	m.clearedFields[user.FieldStrings] = struct{}{}
 }
 
@@ -479,6 +562,7 @@ func (m *UserMutation) StringsCleared() bool {
 // ResetStrings resets all changes to the "strings" field.
 func (m *UserMutation) ResetStrings() {
 	m.strings = nil
+	m.appendstrings = nil
 	delete(m.clearedFields, user.FieldStrings)
 }
 

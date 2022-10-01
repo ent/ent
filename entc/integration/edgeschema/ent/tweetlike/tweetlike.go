@@ -8,6 +8,8 @@ package tweetlike
 
 import (
 	"time"
+
+	"entgo.io/ent"
 )
 
 const (
@@ -62,7 +64,14 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+// Note that the variables below are initialized by the runtime
+// package on the initialization of the application. Therefore,
+// it should be imported in the main as follows:
+//
+//	import _ "entgo.io/ent/entc/integration/edgeschema/ent/runtime"
 var (
+	Hooks  [1]ent.Hook
+	Policy ent.Policy
 	// DefaultLikedAt holds the default value on creation for the "liked_at" field.
 	DefaultLikedAt func() time.Time
 )

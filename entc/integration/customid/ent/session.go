@@ -41,8 +41,7 @@ type SessionEdges struct {
 func (e SessionEdges) DeviceOrErr() (*Device, error) {
 	if e.loadedTypes[0] {
 		if e.Device == nil {
-			// The edge device was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: device.Label}
 		}
 		return e.Device, nil
@@ -51,8 +50,8 @@ func (e SessionEdges) DeviceOrErr() (*Device, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Session) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*Session) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
 		case session.FieldID:
@@ -68,7 +67,7 @@ func (*Session) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Session fields.
-func (s *Session) assignValues(columns []string, values []interface{}) error {
+func (s *Session) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}

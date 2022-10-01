@@ -25,6 +25,8 @@ type User struct {
 	MixedString string `json:"mixed_string,omitempty"`
 	// MixedEnum holds the value of the "mixed_enum" field.
 	MixedEnum user.MixedEnum `json:"mixed_enum,omitempty"`
+	// Active holds the value of the "active" field.
+	Active bool `json:"active,omitempty"`
 	// Age holds the value of the "age" field.
 	Age int `json:"age,omitempty"`
 	// Name holds the value of the "name" field.
@@ -57,7 +59,8 @@ type User struct {
 	DropOptional string `json:"drop_optional,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges UserEdges `json:"edges"`
+	Edges       UserEdges `json:"edges"`
+	blog_admins *int
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
@@ -87,8 +90,7 @@ func (e UserEdges) CarOrErr() ([]*Car, error) {
 func (e UserEdges) PetsOrErr() (*Pet, error) {
 	if e.loadedTypes[1] {
 		if e.Pets == nil {
-			// The edge pets was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: pet.Label}
 		}
 		return e.Pets, nil
@@ -106,18 +108,22 @@ func (e UserEdges) FriendsOrErr() ([]*User, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*User) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*User) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
 		case user.FieldBuffer, user.FieldBlob:
 			values[i] = new([]byte)
+		case user.FieldActive:
+			values[i] = new(sql.NullBool)
 		case user.FieldID, user.FieldAge:
 			values[i] = new(sql.NullInt64)
 		case user.FieldMixedString, user.FieldMixedEnum, user.FieldName, user.FieldDescription, user.FieldNickname, user.FieldPhone, user.FieldTitle, user.FieldNewName, user.FieldNewToken, user.FieldState, user.FieldStatus, user.FieldWorkplace, user.FieldDropOptional:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
+		case user.ForeignKeys[0]: // blog_admins
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
 		}
@@ -127,7 +133,7 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the User fields.
-func (u *User) assignValues(columns []string, values []interface{}) error {
+func (u *User) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -150,6 +156,12 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field mixed_enum", values[i])
 			} else if value.Valid {
 				u.MixedEnum = user.MixedEnum(value.String)
+			}
+		case user.FieldActive:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field active", values[i])
+			} else if value.Valid {
+				u.Active = value.Bool
 			}
 		case user.FieldAge:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -241,6 +253,13 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				u.DropOptional = value.String
 			}
+		case user.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field blog_admins", value)
+			} else if value.Valid {
+				u.blog_admins = new(int)
+				*u.blog_admins = int(value.Int64)
+			}
 		}
 	}
 	return nil
@@ -289,6 +308,9 @@ func (u *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("mixed_enum=")
 	builder.WriteString(fmt.Sprintf("%v", u.MixedEnum))
+	builder.WriteString(", ")
+	builder.WriteString("active=")
+	builder.WriteString(fmt.Sprintf("%v", u.Active))
 	builder.WriteString(", ")
 	builder.WriteString("age=")
 	builder.WriteString(fmt.Sprintf("%v", u.Age))

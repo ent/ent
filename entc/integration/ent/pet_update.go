@@ -23,8 +23,9 @@ import (
 // PetUpdate is the builder for updating Pet entities.
 type PetUpdate struct {
 	config
-	hooks    []Hook
-	mutation *PetMutation
+	hooks     []Hook
+	mutation  *PetMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the PetUpdate builder.
@@ -97,6 +98,20 @@ func (pu *PetUpdate) SetNillableNickname(s *string) *PetUpdate {
 // ClearNickname clears the value of the "nickname" field.
 func (pu *PetUpdate) ClearNickname() *PetUpdate {
 	pu.mutation.ClearNickname()
+	return pu
+}
+
+// SetTrained sets the "trained" field.
+func (pu *PetUpdate) SetTrained(b bool) *PetUpdate {
+	pu.mutation.SetTrained(b)
+	return pu
+}
+
+// SetNillableTrained sets the "trained" field if the given value is not nil.
+func (pu *PetUpdate) SetNillableTrained(b *bool) *PetUpdate {
+	if b != nil {
+		pu.SetTrained(*b)
+	}
 	return pu
 }
 
@@ -209,6 +224,12 @@ func (pu *PetUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (pu *PetUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *PetUpdate {
+	pu.modifiers = append(pu.modifiers, modifiers...)
+	return pu
+}
+
 func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -272,6 +293,13 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: pet.FieldNickname,
+		})
+	}
+	if value, ok := pu.mutation.Trained(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: pet.FieldTrained,
 		})
 	}
 	if pu.mutation.TeamCleared() {
@@ -344,6 +372,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(pu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, pu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{pet.Label}
@@ -358,9 +387,10 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // PetUpdateOne is the builder for updating a single Pet entity.
 type PetUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *PetMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *PetMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetAge sets the "age" field.
@@ -427,6 +457,20 @@ func (puo *PetUpdateOne) SetNillableNickname(s *string) *PetUpdateOne {
 // ClearNickname clears the value of the "nickname" field.
 func (puo *PetUpdateOne) ClearNickname() *PetUpdateOne {
 	puo.mutation.ClearNickname()
+	return puo
+}
+
+// SetTrained sets the "trained" field.
+func (puo *PetUpdateOne) SetTrained(b bool) *PetUpdateOne {
+	puo.mutation.SetTrained(b)
+	return puo
+}
+
+// SetNillableTrained sets the "trained" field if the given value is not nil.
+func (puo *PetUpdateOne) SetNillableTrained(b *bool) *PetUpdateOne {
+	if b != nil {
+		puo.SetTrained(*b)
+	}
 	return puo
 }
 
@@ -552,6 +596,12 @@ func (puo *PetUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (puo *PetUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *PetUpdateOne {
+	puo.modifiers = append(puo.modifiers, modifiers...)
+	return puo
+}
+
 func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -634,6 +684,13 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 			Column: pet.FieldNickname,
 		})
 	}
+	if value, ok := puo.mutation.Trained(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: pet.FieldTrained,
+		})
+	}
 	if puo.mutation.TeamCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -704,6 +761,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(puo.modifiers...)
 	_node = &Pet{config: puo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

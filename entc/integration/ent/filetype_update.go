@@ -22,8 +22,9 @@ import (
 // FileTypeUpdate is the builder for updating FileType entities.
 type FileTypeUpdate struct {
 	config
-	hooks    []Hook
-	mutation *FileTypeMutation
+	hooks     []Hook
+	mutation  *FileTypeMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the FileTypeUpdate builder.
@@ -182,6 +183,12 @@ func (ftu *FileTypeUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (ftu *FileTypeUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *FileTypeUpdate {
+	ftu.modifiers = append(ftu.modifiers, modifiers...)
+	return ftu
+}
+
 func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -275,6 +282,7 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(ftu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, ftu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{filetype.Label}
@@ -289,9 +297,10 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // FileTypeUpdateOne is the builder for updating a single FileType entity.
 type FileTypeUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *FileTypeMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *FileTypeMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetName sets the "name" field.
@@ -457,6 +466,12 @@ func (ftuo *FileTypeUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (ftuo *FileTypeUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *FileTypeUpdateOne {
+	ftuo.modifiers = append(ftuo.modifiers, modifiers...)
+	return ftuo
+}
+
 func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (_node *FileType, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -567,6 +582,7 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (_node *FileType, er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(ftuo.modifiers...)
 	_node = &FileType{config: ftuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

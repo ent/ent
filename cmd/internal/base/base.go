@@ -64,13 +64,14 @@ func (IDType) String() string {
 
 // InitCmd returns the init command for ent/c packages.
 func InitCmd() *cobra.Command {
-	var target string
+	var target, tmplPath string
 	cmd := &cobra.Command{
 		Use:   "init [flags] [schemas]",
 		Short: "initialize an environment with zero or more schemas",
 		Example: examples(
 			"ent init Example",
 			"ent init --target entv1/schema User Group",
+			"ent init --template ./path/to/file.tmpl User",
 		),
 		Args: func(_ *cobra.Command, names []string) error {
 			for _, name := range names {
@@ -81,12 +82,25 @@ func InitCmd() *cobra.Command {
 			return nil
 		},
 		Run: func(cmd *cobra.Command, names []string) {
-			if err := initEnv(target, names); err != nil {
+			var (
+				err  error
+				tmpl *template.Template
+			)
+			if tmplPath != "" {
+				tmpl, err = template.ParseFiles(tmplPath)
+			} else {
+				tmpl, err = template.New("schema").Parse(defaultTemplate)
+			}
+			if err != nil {
+				log.Fatalln(fmt.Errorf("ent/init: could not parse template %w", err))
+			}
+			if err := initEnv(target, names, tmpl); err != nil {
 				log.Fatalln(fmt.Errorf("ent/init: %w", err))
 			}
 		},
 	}
 	cmd.Flags().StringVar(&target, "target", defaultSchema, "target directory for schemas")
+	cmd.Flags().StringVar(&tmplPath, "template", "", "template to use for new schemas")
 	return cmd
 }
 
@@ -176,7 +190,7 @@ func GenerateCmd(postRun ...func(*gen.Config)) *cobra.Command {
 }
 
 // initEnv initialize an environment for ent codegen.
-func initEnv(target string, names []string) error {
+func initEnv(target string, names []string, tmpl *template.Template) error {
 	if err := createDir(target); err != nil {
 		return fmt.Errorf("create dir %s: %w", target, err)
 	}
@@ -222,9 +236,13 @@ func fileExists(target, name string) bool {
 	return err == nil
 }
 
-// schema template for the "init" command.
-var tmpl = template.Must(template.New("schema").
-	Parse(`package schema
+const (
+	// default schema package path.
+	defaultSchema = "ent/schema"
+	// ent/generate.go file used for "go generate" command.
+	genFile = "package ent\n\n//go:generate go run -mod=mod entgo.io/ent/cmd/ent generate ./schema\n"
+	// schema template for the "init" command.
+	defaultTemplate = `package schema
 
 import "entgo.io/ent"
 
@@ -242,13 +260,7 @@ func ({{ . }}) Fields() []ent.Field {
 func ({{ . }}) Edges() []ent.Edge {
 	return nil
 }
-`))
-
-const (
-	// default schema package path.
-	defaultSchema = "ent/schema"
-	// ent/generate.go file used for "go generate" command.
-	genFile = "package ent\n\n//go:generate go run -mod=mod entgo.io/ent/cmd/ent generate ./schema\n"
+`
 )
 
 // examples formats the given examples to the cli.

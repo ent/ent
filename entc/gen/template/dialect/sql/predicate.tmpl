@@ -18,13 +18,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{- $storage := $.Scope.Storage -}}
 	func(s *sql.Selector) {
 		{{- if $op.Variadic }}
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len({{ $arg }}) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			v := make([]interface{}, len({{ $arg }}))
+			v := make([]any, len({{ $arg }}))
 			for i := range v {
 				v[i] = {{ $arg }}[i]
 			}
@@ -47,14 +41,6 @@ in the LICENSE file in the root directory of this source tree.
 	{{- $arg := $.Scope.Arg -}}
 	{{- $storage := $.Scope.Storage -}}
 	func(s *sql.Selector) {
-		{{- if $op.Variadic }}
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len({{ $arg }}) == 0 {
-				s.Where(sql.False())
-				return
-			}
-		{{- end }}
 		s.Where(sql.{{ call $storage.OpCode $op }}(s.C({{ $f.Constant }}){{ if not $op.Niladic }}, {{ $arg }}{{ if $op.Variadic }}...{{ end }}{{ end }}))
 	}
 {{- end }}

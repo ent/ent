@@ -37,13 +37,7 @@ func IDNEQ(id sid.ID) predicate.Token {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...sid.ID) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(ids) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -54,13 +48,7 @@ func IDIn(ids ...sid.ID) predicate.Token {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...sid.ID) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(ids) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -119,34 +107,22 @@ func BodyNEQ(v string) predicate.Token {
 
 // BodyIn applies the In predicate on the "body" field.
 func BodyIn(vs ...string) predicate.Token {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Token(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldBody), v...))
 	})
 }
 
 // BodyNotIn applies the NotIn predicate on the "body" field.
 func BodyNotIn(vs ...string) predicate.Token {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Token(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldBody), v...))
 	})
 }

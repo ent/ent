@@ -43,10 +43,7 @@ func (Todo) Fields() []ent.Field {
 				"InProgress", "IN_PROGRESS",
 				"Completed", "COMPLETED",
 			).
-			Annotations(
-				entgql.OrderField("STATUS"),
-			).
-			Default("in_progress"),
+			Default("IN_PROGRESS"),
 		field.Int("priority").
 			Default(0),
 	}

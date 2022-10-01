@@ -130,6 +130,17 @@ var (
 										{{- end }}
 										},
 									{{- end }}
+									{{- with $ant.IncludeColumns }}
+										IncludeColumns: []string{
+										{{- range $ic := . }}
+											{{- range $i, $c := $t.Columns }}
+												{{- if eq $ic $c.Name }}
+													{{ $columns }}[{{ $i }}].Name,
+												{{ end }}
+											{{- end }}
+										{{- end }}
+										},
+									{{- end }}
 									{{- with $ant.Type }}
 										Type: "{{ . }}",
 									{{- end }}
@@ -139,6 +150,9 @@ var (
 												"{{ $k }}": "{{ index $ant.Types $k }}",
 											{{- end }}
 										},
+									{{- end }}
+									{{- with $ant.Where }}
+										Where: "{{ . }}",
 									{{- end }}
 								},
 							{{- end }}

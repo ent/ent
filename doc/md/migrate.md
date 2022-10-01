@@ -1,6 +1,6 @@
 ---
 id: migrate
-title: Database Migration
+title: Automatic Migration
 ---
 
 The migration support for `ent` provides the option for keeping the database schema
@@ -80,12 +80,8 @@ the object ID to be unique.
 To enable the Universal-IDs support for your project, pass the `WithGlobalUniqueID` option to the migration.
 
 :::note
-Be aware, that `WithGlobalUniqueID` and [versioned migration](versioned-migrations.md) files are not working together.
-When using `WithGlobalUniqueID`, the allocated ranges are computed dynamically when creating the diff between a deployed 
-database and the current schema. In cases where multiple deployments exist, the allocated ranges for the same type might 
-be different from each other, depending on when the deployment took part. If you only have one deployment or all 
-deployments have the exact same data in the `ent_types` table, you can use `WithUniversalID` instead. This will enable a
-file based type range store instead of a database-table as source of truth.
+Versioned-migration users should follow [the documentation](versioned-migrations.mdx#a-word-on-global-unique-ids)
+when using `WithGlobalUniqueID` on MySQL 5.*.
 :::
 
 ```go
@@ -122,7 +118,7 @@ Note that if this option is enabled, the maximum number of possible tables is **
 ## Offline Mode
 
 **With Atlas becoming the default migration engine soon, offline migration will be replaced
-by [versioned migrations](versioned-migrations.md).**
+by [versioned migrations](versioned-migrations.mdx).**
 
 Offline mode allows you to write the schema changes to an `io.Writer` before executing them on the database.
 It's useful for verifying the SQL commands before they're executed on the database, or to get an SQL script

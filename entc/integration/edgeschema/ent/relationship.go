@@ -50,8 +50,7 @@ type RelationshipEdges struct {
 func (e RelationshipEdges) UserOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.User == nil {
-			// The edge user was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.User, nil
@@ -64,8 +63,7 @@ func (e RelationshipEdges) UserOrErr() (*User, error) {
 func (e RelationshipEdges) RelativeOrErr() (*User, error) {
 	if e.loadedTypes[1] {
 		if e.Relative == nil {
-			// The edge relative was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Relative, nil
@@ -78,8 +76,7 @@ func (e RelationshipEdges) RelativeOrErr() (*User, error) {
 func (e RelationshipEdges) InfoOrErr() (*RelationshipInfo, error) {
 	if e.loadedTypes[2] {
 		if e.Info == nil {
-			// The edge info was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: relationshipinfo.Label}
 		}
 		return e.Info, nil
@@ -88,8 +85,8 @@ func (e RelationshipEdges) InfoOrErr() (*RelationshipInfo, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Relationship) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*Relationship) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
 		case relationship.FieldWeight, relationship.FieldUserID, relationship.FieldRelativeID, relationship.FieldInfoID:
@@ -103,7 +100,7 @@ func (*Relationship) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Relationship fields.
-func (r *Relationship) assignValues(columns []string, values []interface{}) error {
+func (r *Relationship) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}

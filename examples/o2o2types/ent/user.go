@@ -43,8 +43,7 @@ type UserEdges struct {
 func (e UserEdges) CardOrErr() (*Card, error) {
 	if e.loadedTypes[0] {
 		if e.Card == nil {
-			// The edge card was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: card.Label}
 		}
 		return e.Card, nil
@@ -53,8 +52,8 @@ func (e UserEdges) CardOrErr() (*Card, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*User) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*User) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
 		case user.FieldID, user.FieldAge:
@@ -70,7 +69,7 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the User fields.
-func (u *User) assignValues(columns []string, values []interface{}) error {
+func (u *User) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}

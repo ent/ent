@@ -266,7 +266,6 @@ func (tq *TaskQuery) Clone() *TaskQuery {
 //		GroupBy(enttask.FieldPriority).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (tq *TaskQuery) GroupBy(field string, fields ...string) *TaskGroupBy {
 	grbuild := &TaskGroupBy{config: tq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -293,7 +292,6 @@ func (tq *TaskQuery) GroupBy(field string, fields ...string) *TaskGroupBy {
 //	client.Task.Query().
 //		Select(enttask.FieldPriority).
 //		Scan(ctx, &v)
-//
 func (tq *TaskQuery) Select(fields ...string) *TaskSelect {
 	tq.fields = append(tq.fields, fields...)
 	selbuild := &TaskSelect{TaskQuery: tq}
@@ -317,7 +315,7 @@ func (tq *TaskQuery) gremlinAll(ctx context.Context) ([]*Task, error) {
 	res := &gremlin.Response{}
 	traversal := tq.gremlinQuery(ctx)
 	if len(tq.fields) > 0 {
-		fields := make([]interface{}, len(tq.fields))
+		fields := make([]any, len(tq.fields))
 		for i, f := range tq.fields {
 			fields[i] = f
 		}
@@ -401,7 +399,7 @@ func (tgb *TaskGroupBy) Aggregate(fns ...AggregateFunc) *TaskGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (tgb *TaskGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (tgb *TaskGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := tgb.path(ctx)
 	if err != nil {
 		return err
@@ -410,7 +408,7 @@ func (tgb *TaskGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return tgb.gremlinScan(ctx, v)
 }
 
-func (tgb *TaskGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
+func (tgb *TaskGroupBy) gremlinScan(ctx context.Context, v any) error {
 	res := &gremlin.Response{}
 	query, bindings := tgb.gremlinQuery().Query()
 	if err := tgb.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -428,8 +426,8 @@ func (tgb *TaskGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
 
 func (tgb *TaskGroupBy) gremlinQuery() *dsl.Traversal {
 	var (
-		trs   []interface{}
-		names []interface{}
+		trs   []any
+		names []any
 	)
 	for _, fn := range tgb.fns {
 		name, tr := fn("p", "")
@@ -456,7 +454,7 @@ type TaskSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ts *TaskSelect) Scan(ctx context.Context, v interface{}) error {
+func (ts *TaskSelect) Scan(ctx context.Context, v any) error {
 	if err := ts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -464,7 +462,7 @@ func (ts *TaskSelect) Scan(ctx context.Context, v interface{}) error {
 	return ts.gremlinScan(ctx, v)
 }
 
-func (ts *TaskSelect) gremlinScan(ctx context.Context, v interface{}) error {
+func (ts *TaskSelect) gremlinScan(ctx context.Context, v any) error {
 	var (
 		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
@@ -476,7 +474,7 @@ func (ts *TaskSelect) gremlinScan(ctx context.Context, v interface{}) error {
 			traversal = ts.gremlin.ID()
 		}
 	} else {
-		fields := make([]interface{}, len(ts.fields))
+		fields := make([]any, len(ts.fields))
 		for i, f := range ts.fields {
 			fields[i] = f
 		}

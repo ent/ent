@@ -7,8 +7,10 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/schema/task"
@@ -23,15 +25,23 @@ type Task struct {
 	ID int `json:"id,omitempty"`
 	// Priority holds the value of the "priority" field.
 	Priority task.Priority `json:"priority,omitempty"`
+	// Priorities holds the value of the "priorities" field.
+	Priorities map[string]task.Priority `json:"priorities,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt *time.Time `json:"created_at,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Task) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*Task) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case enttask.FieldPriorities:
+			values[i] = new([]byte)
 		case enttask.FieldID, enttask.FieldPriority:
 			values[i] = new(sql.NullInt64)
+		case enttask.FieldCreatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Task", columns[i])
 		}
@@ -41,7 +51,7 @@ func (*Task) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Task fields.
-func (t *Task) assignValues(columns []string, values []interface{}) error {
+func (t *Task) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -58,6 +68,21 @@ func (t *Task) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field priority", values[i])
 			} else if value.Valid {
 				t.Priority = task.Priority(value.Int64)
+			}
+		case enttask.FieldPriorities:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field priorities", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &t.Priorities); err != nil {
+					return fmt.Errorf("unmarshal field priorities: %w", err)
+				}
+			}
+		case enttask.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				t.CreatedAt = new(time.Time)
+				*t.CreatedAt = value.Time
 			}
 		}
 	}
@@ -89,6 +114,14 @@ func (t *Task) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
 	builder.WriteString("priority=")
 	builder.WriteString(fmt.Sprintf("%v", t.Priority))
+	builder.WriteString(", ")
+	builder.WriteString("priorities=")
+	builder.WriteString(fmt.Sprintf("%v", t.Priorities))
+	builder.WriteString(", ")
+	if v := t.CreatedAt; v != nil {
+		builder.WriteString("created_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

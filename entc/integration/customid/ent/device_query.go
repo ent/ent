@@ -24,13 +24,12 @@ import (
 // DeviceQuery is the builder for querying Device entities.
 type DeviceQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Device
-	// eager-loading edges.
+	limit             *int
+	offset            *int
+	unique            *bool
+	order             []OrderFunc
+	fields            []string
+	predicates        []predicate.Device
 	withActiveSession *SessionQuery
 	withSessions      *SessionQuery
 	withFKs           bool
@@ -384,10 +383,10 @@ func (dq *DeviceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Devic
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, device.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Device).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Device{config: dq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -402,66 +401,81 @@ func (dq *DeviceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Devic
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := dq.withActiveSession; query != nil {
-		ids := make([]schema.ID, 0, len(nodes))
-		nodeids := make(map[schema.ID][]*Device)
-		for i := range nodes {
-			if nodes[i].device_active_session == nil {
-				continue
-			}
-			fk := *nodes[i].device_active_session
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(session.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := dq.loadActiveSession(ctx, query, nodes, nil,
+			func(n *Device, e *Session) { n.Edges.ActiveSession = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "device_active_session" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.ActiveSession = n
-			}
-		}
 	}
-
 	if query := dq.withSessions; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[schema.ID]*Device)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Sessions = []*Session{}
-		}
-		query.withFKs = true
-		query.Where(predicate.Session(func(s *sql.Selector) {
-			s.Where(sql.InValues(device.SessionsColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := dq.loadSessions(ctx, query, nodes,
+			func(n *Device) { n.Edges.Sessions = []*Session{} },
+			func(n *Device, e *Session) { n.Edges.Sessions = append(n.Edges.Sessions, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			fk := n.device_sessions
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "device_sessions" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "device_sessions" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Sessions = append(node.Edges.Sessions, n)
+	}
+	return nodes, nil
+}
+
+func (dq *DeviceQuery) loadActiveSession(ctx context.Context, query *SessionQuery, nodes []*Device, init func(*Device), assign func(*Device, *Session)) error {
+	ids := make([]schema.ID, 0, len(nodes))
+	nodeids := make(map[schema.ID][]*Device)
+	for i := range nodes {
+		if nodes[i].device_active_session == nil {
+			continue
+		}
+		fk := *nodes[i].device_active_session
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(session.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "device_active_session" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
+}
+func (dq *DeviceQuery) loadSessions(ctx context.Context, query *SessionQuery, nodes []*Device, init func(*Device), assign func(*Device, *Session)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[schema.ID]*Device)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.InValues(device.SessionsColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.device_sessions
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "device_sessions" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "device_sessions" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (dq *DeviceQuery) sqlCount(ctx context.Context) (int, error) {
@@ -474,11 +488,14 @@ func (dq *DeviceQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (dq *DeviceQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := dq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := dq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (dq *DeviceQuery) querySpec() *sqlgraph.QuerySpec {
@@ -579,7 +596,7 @@ func (dgb *DeviceGroupBy) Aggregate(fns ...AggregateFunc) *DeviceGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (dgb *DeviceGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (dgb *DeviceGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := dgb.path(ctx)
 	if err != nil {
 		return err
@@ -588,7 +605,7 @@ func (dgb *DeviceGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return dgb.sqlScan(ctx, v)
 }
 
-func (dgb *DeviceGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (dgb *DeviceGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range dgb.fields {
 		if !device.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -635,7 +652,7 @@ type DeviceSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ds *DeviceSelect) Scan(ctx context.Context, v interface{}) error {
+func (ds *DeviceSelect) Scan(ctx context.Context, v any) error {
 	if err := ds.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -643,7 +660,7 @@ func (ds *DeviceSelect) Scan(ctx context.Context, v interface{}) error {
 	return ds.sqlScan(ctx, v)
 }
 
-func (ds *DeviceSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ds *DeviceSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ds.sql.Query()
 	if err := ds.driver.Query(ctx, query, args, rows); err != nil {

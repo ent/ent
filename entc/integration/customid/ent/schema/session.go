@@ -75,7 +75,7 @@ func (i ID) String() string {
 	return string(i[:])
 }
 
-func (i *ID) Scan(v interface{}) error {
+func (i *ID) Scan(v any) error {
 	switch v := v.(type) {
 	case []byte:
 		copy(i[:], v)

@@ -116,6 +116,8 @@ func (User) Edges() []ent.Edge {
 			Annotations(&OrderConfig{FieldName: "name"}),
 		edge.To("parent", User.Type).
 			Unique().
+			Required().
+			Immutable().
 			Field("parent_id").
 			StorageKey(edge.Column("parent_id")).
 			From("children"),
@@ -159,7 +161,7 @@ func TestMarshalSchema(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, "User", schema.Name)
 		require.Len(t, schema.Annotations, 2)
-		ant := schema.Annotations["order_config"].(map[string]interface{})
+		ant := schema.Annotations["order_config"].(map[string]any)
 		require.Equal(t, ant["FieldName"], "type annotations")
 
 		require.Len(t, schema.Fields, 9)
@@ -170,7 +172,7 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, field.TypeString, schema.Fields[1].Info.Type)
 		require.Equal(t, "unknown", schema.Fields[1].DefaultValue)
 		require.NotEmpty(t, schema.Fields[1].Annotations)
-		ant = schema.Fields[1].Annotations["order_config"].(map[string]interface{})
+		ant = schema.Fields[1].Annotations["order_config"].(map[string]any)
 		require.Equal(t, ant["FieldName"], "name")
 
 		require.Equal(t, "nillable", schema.Fields[2].Name)
@@ -213,7 +215,7 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, "Group", schema.Edges[0].Type)
 		require.False(t, schema.Edges[0].Inverse)
 		require.NotEmpty(t, schema.Edges[0].Annotations)
-		ant = schema.Edges[0].Annotations["order_config"].(map[string]interface{})
+		ant = schema.Edges[0].Annotations["order_config"].(map[string]any)
 		require.Equal(t, ant["FieldName"], "name")
 
 		require.Equal(t, "children", schema.Edges[1].Name)
@@ -222,11 +224,13 @@ func TestMarshalSchema(t *testing.T) {
 		require.True(t, schema.Edges[1].Inverse)
 		require.Equal(t, "parent", schema.Edges[1].Ref.Name)
 		require.True(t, schema.Edges[1].Ref.Unique)
+		require.True(t, schema.Edges[1].Ref.Required)
+		require.True(t, schema.Edges[1].Ref.Immutable)
 		require.Equal(t, "parent_id", schema.Edges[1].Ref.StorageKey.Columns[0])
 
-		ant = schema.Edges[2].Annotations["order_config"].(map[string]interface{})
+		ant = schema.Edges[2].Annotations["order_config"].(map[string]any)
 		require.Equal(t, ant["FieldName"], "followers")
-		ant = schema.Edges[2].Ref.Annotations["order_config"].(map[string]interface{})
+		ant = schema.Edges[2].Ref.Annotations["order_config"].(map[string]any)
 		require.Equal(t, ant["FieldName"], "following")
 
 		require.Equal(t, []string{"name", "address"}, schema.Indexes[0].Fields)
@@ -235,7 +239,7 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, []string{"parent"}, schema.Indexes[1].Edges)
 		require.Equal(t, "user_parent_name", schema.Indexes[1].StorageKey)
 		require.True(t, schema.Indexes[1].Unique)
-		ant = schema.Indexes[1].Annotations["partial_index"].(map[string]interface{})
+		ant = schema.Indexes[1].Annotations["partial_index"].(map[string]any)
 		require.Equal(t, "age > 20", ant["WhereClause"])
 
 		require.Equal(t, "some comment", schema.Fields[0].Comment)

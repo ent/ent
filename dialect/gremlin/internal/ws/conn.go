@@ -231,7 +231,7 @@ func (c *Conn) receiver() error {
 	})
 
 	// complete all in flight requests on termination
-	defer c.inflight.Range(func(id, ifr interface{}) bool {
+	defer c.inflight.Range(func(id, ifr any) bool {
 		ifr.(*inflight).result <- result{err: ErrConnClosed}
 		c.inflight.Delete(id)
 		return true

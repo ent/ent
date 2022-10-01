@@ -17,8 +17,7 @@ In the example above, you can see 2 relations declared using edges. Let's go ove
 
 1\. `pets` / `owner` edges; user's pets and pet's owner - 
 
-`ent/schema/user.go`
-```go
+```go title="ent/schema/user.go"
 package schema
 
 import (
@@ -46,9 +45,7 @@ func (User) Edges() []ent.Edge {
 }
 ```
 
-
-`ent/schema/pet.go`
-```go
+```go title="ent/schema/pet.go"
 package schema
 
 import (
@@ -93,8 +90,7 @@ more widely below.
 
 2\. `users` / `groups` edges; group's users and user's groups - 
 
-`ent/schema/group.go`
-```go
+```go title="ent/schema/group.go"
 package schema
 
 import (
@@ -122,8 +118,7 @@ func (Group) Edges() []ent.Edge {
 }
 ```
 
-`ent/schema/user.go`
-```go
+```go title="ent/schema/user.go"
 package schema
 
 import (
@@ -187,9 +182,7 @@ In this example, a user **has only one** credit-card, and a card **has only one*
 The `User` schema defines an `edge.To` card named `card`, and the `Card` schema
 defines a back-reference to this edge using `edge.From` named `owner`. 
 
-
-`ent/schema/user.go`
-```go
+```go title="ent/schema/user.go"
 // Edges of the user.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
@@ -199,8 +192,7 @@ func (User) Edges() []ent.Edge {
 }
 ```
 
-`ent/schema/card.go`
-```go
+```go title="ent/schema/card.go"
 // Edges of the Card.
 func (Card) Edges() []ent.Edge {
 	return []ent.Edge{
@@ -264,8 +256,7 @@ The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examp
 In this linked-list example, we have a **recursive relation** named `next`/`prev`. Each node in the list can
 **have only one** `next` node. If a node A points (using `next`) to node B, B can get its pointer using `prev` (the back-reference edge).   
 
-`ent/schema/node.go`
-```go
+```go title="ent/schema/node.go"
 // Edges of the Node.
 func (Node) Edges() []ent.Edge {
 	return []ent.Edge{
@@ -362,8 +353,7 @@ If user A sets its spouse (using `spouse`) to B, B can get its spouse using the 
 
 Note that there are no owner/inverse terms in cases of bidirectional edges.
 
-`ent/schema/user.go`
-```go
+```go title="ent/schema/user.go"
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
@@ -459,8 +449,7 @@ If user A adds a pet B using the `pets` edge, B can get its owner using the `own
 
 Note that this relation is also a M2O (many-to-one) from the point of view of the `Pet` schema. 
 
-`ent/schema/user.go`
-```go
+```go title="ent/schema/user.go"
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
@@ -469,8 +458,7 @@ func (User) Edges() []ent.Edge {
 }
 ```
 
-`ent/schema/pet.go`
-```go
+```go title="ent/schema/pet.go"
 // Edges of the Pet.
 func (Pet) Edges() []ent.Edge {
 	return []ent.Edge{
@@ -562,9 +550,7 @@ In this example, we have a recursive O2M relation between tree's nodes and their
 Each node in the tree **has many** children, and **has one** parent. If node A adds B to its children,
 B can get its owner using the `owner` edge.
 
-
-`ent/schema/node.go`
-```go
+```go title="ent/schema/node.go"
 // Edges of the Node.
 func (Node) Edges() []ent.Edge {
 	return []ent.Edge{
@@ -693,8 +679,7 @@ The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examp
 In this groups-users example, we have a M2M relation between groups and their users.
 Each group **has many** users, and each user can be joined to **many** groups.
 
-`ent/schema/group.go`
-```go
+```go title="ent/schema/group.go"
 // Edges of the Group.
 func (Group) Edges() []ent.Edge {
 	return []ent.Edge{
@@ -703,8 +688,7 @@ func (Group) Edges() []ent.Edge {
 }
 ```
 
-`ent/schema/user.go`
-```go
+```go title="ent/schema/user.go"
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
@@ -785,8 +769,7 @@ The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examp
 In this following-followers example, we have a M2M relation between users to their followers. Each user 
 can follow **many** users, and can have **many** followers.
 
-`ent/schema/user.go`
-```go
+```go title="ent/schema/user.go"
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
@@ -881,8 +864,7 @@ Each user can **have many** friends. If user A becomes a friend of B, B is also 
 
 Note that there are no owner/inverse terms in cases of bidirectional edges.
 
-`ent/schema/user.go`
-```go
+```go title="ent/schema/user.go"
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
@@ -937,11 +919,9 @@ The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examp
 ## Edge Field
 
 The `Field` option for edges allows users to expose foreign-keys as regular fields on the schema.
-Note that only relations that hold foreign-keys (edge-ids) are allowed to use this option. Support
-for non-foreign-key fields in join tables is in progress (as of September 2021) and can be tracked with
-this [GitHub Issue](https://github.com/ent/ent/issues/1061).
+Note that only relations that hold foreign-keys (edge-ids) are allowed to use this option.
 
-```go
+```go title="ent/schema/post.go"
 // Fields of the Post.
 func (Post) Fields() []ent.Field {
 	return []ent.Field{
@@ -1340,7 +1320,7 @@ func (UserTweet) Indexes() []ent.Index {
 
 Edges can be defined as required in the entity creation using the `Required` method on the builder.
 
-```go
+```go {7}
 // Edges of the Card.
 func (Card) Edges() []ent.Edge {
 	return []ent.Edge{
@@ -1359,6 +1339,24 @@ Note that, starting with [v0.10](https://github.com/ent/ent/releases/tag/v0.10.0
 as `NOT NULL` in the database for required edges that are not [self-reference](#o2m-same-type). In order to migrate
 existing foreign key columns, use the [Atlas Migration](migrate.md#atlas-integration) option.
 :::
+
+## Immutable
+
+Immutable edges are edges that can be set or added only in the creation of the entity.
+i.e., no setters will be generated for the update builders of the entity.
+
+```go {8}
+// Edges of the User.
+func (User) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("tenant", Tenant.Type).
+			Field("tenant_id").
+			Unique().
+			Required().
+			Immutable(),
+	}
+}
+```
 
 ## StorageKey
 
@@ -1448,13 +1446,11 @@ type Pet struct {
 
 // Edges of the Pet.
 func (Pet) Edges() []ent.Edge {
-	return []ent.Field{
+	return []ent.Edge{
 		edge.To("owner", User.Type).
 			Ref("pets").
 			Unique().
-			Annotations(entgql.Annotation{
-				OrderField: "OWNER",
-			}),
+			Annotations(entgql.RelayConnection()),
 	}
 }
 ```

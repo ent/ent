@@ -22,13 +22,12 @@ import (
 // GroupQuery is the builder for querying Group entities.
 type GroupQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Group
-	// eager-loading edges.
+	limit       *int
+	offset      *int
+	unique      *bool
+	order       []OrderFunc
+	fields      []string
+	predicates  []predicate.Group
 	withFiles   *FileQuery
 	withBlocked *UserQuery
 	withUsers   *UserQuery
@@ -375,7 +374,6 @@ func (gq *GroupQuery) WithInfo(opts ...func(*GroupInfoQuery)) *GroupQuery {
 //		GroupBy(group.FieldActive).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 	grbuild := &GroupGroupBy{config: gq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -402,7 +400,6 @@ func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 //	client.Group.Query().
 //		Select(group.FieldActive).
 //		Scan(ctx, &v)
-//
 func (gq *GroupQuery) Select(fields ...string) *GroupSelect {
 	gq.fields = append(gq.fields, fields...)
 	selbuild := &GroupSelect{GroupQuery: gq}
@@ -426,7 +423,7 @@ func (gq *GroupQuery) gremlinAll(ctx context.Context) ([]*Group, error) {
 	res := &gremlin.Response{}
 	traversal := gq.gremlinQuery(ctx)
 	if len(gq.fields) > 0 {
-		fields := make([]interface{}, len(gq.fields))
+		fields := make([]any, len(gq.fields))
 		for i, f := range gq.fields {
 			fields[i] = f
 		}
@@ -510,7 +507,7 @@ func (ggb *GroupGroupBy) Aggregate(fns ...AggregateFunc) *GroupGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (ggb *GroupGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (ggb *GroupGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := ggb.path(ctx)
 	if err != nil {
 		return err
@@ -519,7 +516,7 @@ func (ggb *GroupGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return ggb.gremlinScan(ctx, v)
 }
 
-func (ggb *GroupGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
+func (ggb *GroupGroupBy) gremlinScan(ctx context.Context, v any) error {
 	res := &gremlin.Response{}
 	query, bindings := ggb.gremlinQuery().Query()
 	if err := ggb.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -537,8 +534,8 @@ func (ggb *GroupGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
 
 func (ggb *GroupGroupBy) gremlinQuery() *dsl.Traversal {
 	var (
-		trs   []interface{}
-		names []interface{}
+		trs   []any
+		names []any
 	)
 	for _, fn := range ggb.fns {
 		name, tr := fn("p", "")
@@ -565,7 +562,7 @@ type GroupSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (gs *GroupSelect) Scan(ctx context.Context, v interface{}) error {
+func (gs *GroupSelect) Scan(ctx context.Context, v any) error {
 	if err := gs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -573,7 +570,7 @@ func (gs *GroupSelect) Scan(ctx context.Context, v interface{}) error {
 	return gs.gremlinScan(ctx, v)
 }
 
-func (gs *GroupSelect) gremlinScan(ctx context.Context, v interface{}) error {
+func (gs *GroupSelect) gremlinScan(ctx context.Context, v any) error {
 	var (
 		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
@@ -585,7 +582,7 @@ func (gs *GroupSelect) gremlinScan(ctx context.Context, v interface{}) error {
 			traversal = gs.gremlin.ID()
 		}
 	} else {
-		fields := make([]interface{}, len(gs.fields))
+		fields := make([]any, len(gs.fields))
 		for i, f := range gs.fields {
 			fields[i] = f
 		}

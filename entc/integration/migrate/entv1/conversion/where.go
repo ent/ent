@@ -35,13 +35,7 @@ func IDNEQ(id int) predicate.Conversion {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Conversion {
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(ids) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -52,13 +46,7 @@ func IDIn(ids ...int) predicate.Conversion {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.Conversion {
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(ids) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -173,34 +161,22 @@ func NameNEQ(v string) predicate.Conversion {
 
 // NameIn applies the In predicate on the "name" field.
 func NameIn(vs ...string) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldName), v...))
 	})
 }
 
 // NameNotIn applies the NotIn predicate on the "name" field.
 func NameNotIn(vs ...string) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldName), v...))
 	})
 }
@@ -298,34 +274,22 @@ func Int8ToStringNEQ(v int8) predicate.Conversion {
 
 // Int8ToStringIn applies the In predicate on the "int8_to_string" field.
 func Int8ToStringIn(vs ...int8) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldInt8ToString), v...))
 	})
 }
 
 // Int8ToStringNotIn applies the NotIn predicate on the "int8_to_string" field.
 func Int8ToStringNotIn(vs ...int8) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldInt8ToString), v...))
 	})
 }
@@ -388,34 +352,22 @@ func Uint8ToStringNEQ(v uint8) predicate.Conversion {
 
 // Uint8ToStringIn applies the In predicate on the "uint8_to_string" field.
 func Uint8ToStringIn(vs ...uint8) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldUint8ToString), v...))
 	})
 }
 
 // Uint8ToStringNotIn applies the NotIn predicate on the "uint8_to_string" field.
 func Uint8ToStringNotIn(vs ...uint8) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldUint8ToString), v...))
 	})
 }
@@ -478,34 +430,22 @@ func Int16ToStringNEQ(v int16) predicate.Conversion {
 
 // Int16ToStringIn applies the In predicate on the "int16_to_string" field.
 func Int16ToStringIn(vs ...int16) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldInt16ToString), v...))
 	})
 }
 
 // Int16ToStringNotIn applies the NotIn predicate on the "int16_to_string" field.
 func Int16ToStringNotIn(vs ...int16) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldInt16ToString), v...))
 	})
 }
@@ -568,34 +508,22 @@ func Uint16ToStringNEQ(v uint16) predicate.Conversion {
 
 // Uint16ToStringIn applies the In predicate on the "uint16_to_string" field.
 func Uint16ToStringIn(vs ...uint16) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldUint16ToString), v...))
 	})
 }
 
 // Uint16ToStringNotIn applies the NotIn predicate on the "uint16_to_string" field.
 func Uint16ToStringNotIn(vs ...uint16) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldUint16ToString), v...))
 	})
 }
@@ -658,34 +586,22 @@ func Int32ToStringNEQ(v int32) predicate.Conversion {
 
 // Int32ToStringIn applies the In predicate on the "int32_to_string" field.
 func Int32ToStringIn(vs ...int32) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldInt32ToString), v...))
 	})
 }
 
 // Int32ToStringNotIn applies the NotIn predicate on the "int32_to_string" field.
 func Int32ToStringNotIn(vs ...int32) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldInt32ToString), v...))
 	})
 }
@@ -748,34 +664,22 @@ func Uint32ToStringNEQ(v uint32) predicate.Conversion {
 
 // Uint32ToStringIn applies the In predicate on the "uint32_to_string" field.
 func Uint32ToStringIn(vs ...uint32) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldUint32ToString), v...))
 	})
 }
 
 // Uint32ToStringNotIn applies the NotIn predicate on the "uint32_to_string" field.
 func Uint32ToStringNotIn(vs ...uint32) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldUint32ToString), v...))
 	})
 }
@@ -838,34 +742,22 @@ func Int64ToStringNEQ(v int64) predicate.Conversion {
 
 // Int64ToStringIn applies the In predicate on the "int64_to_string" field.
 func Int64ToStringIn(vs ...int64) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldInt64ToString), v...))
 	})
 }
 
 // Int64ToStringNotIn applies the NotIn predicate on the "int64_to_string" field.
 func Int64ToStringNotIn(vs ...int64) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldInt64ToString), v...))
 	})
 }
@@ -928,34 +820,22 @@ func Uint64ToStringNEQ(v uint64) predicate.Conversion {
 
 // Uint64ToStringIn applies the In predicate on the "uint64_to_string" field.
 func Uint64ToStringIn(vs ...uint64) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldUint64ToString), v...))
 	})
 }
 
 // Uint64ToStringNotIn applies the NotIn predicate on the "uint64_to_string" field.
 func Uint64ToStringNotIn(vs ...uint64) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Conversion(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldUint64ToString), v...))
 	})
 }

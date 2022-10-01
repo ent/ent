@@ -7,6 +7,8 @@
 package enttask
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
@@ -38,7 +40,7 @@ func IDNEQ(id string) predicate.Task {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...string) predicate.Task {
 	return predicate.Task(func(t *dsl.Traversal) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -49,7 +51,7 @@ func IDIn(ids ...string) predicate.Task {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...string) predicate.Task {
 	return predicate.Task(func(t *dsl.Traversal) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -93,6 +95,13 @@ func Priority(v task.Priority) predicate.Task {
 	})
 }
 
+// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
+func CreatedAt(v time.Time) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreatedAt, p.EQ(v))
+	})
+}
+
 // PriorityEQ applies the EQ predicate on the "priority" field.
 func PriorityEQ(v task.Priority) predicate.Task {
 	vc := int(v)
@@ -111,7 +120,7 @@ func PriorityNEQ(v task.Priority) predicate.Task {
 
 // PriorityIn applies the In predicate on the "priority" field.
 func PriorityIn(vs ...task.Priority) predicate.Task {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = int(vs[i])
 	}
@@ -122,7 +131,7 @@ func PriorityIn(vs ...task.Priority) predicate.Task {
 
 // PriorityNotIn applies the NotIn predicate on the "priority" field.
 func PriorityNotIn(vs ...task.Priority) predicate.Task {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = int(vs[i])
 	}
@@ -163,10 +172,88 @@ func PriorityLTE(v task.Priority) predicate.Task {
 	})
 }
 
+// PrioritiesIsNil applies the IsNil predicate on the "priorities" field.
+func PrioritiesIsNil() predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldPriorities)
+	})
+}
+
+// PrioritiesNotNil applies the NotNil predicate on the "priorities" field.
+func PrioritiesNotNil() predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldPriorities)
+	})
+}
+
+// CreatedAtEQ applies the EQ predicate on the "created_at" field.
+func CreatedAtEQ(v time.Time) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreatedAt, p.EQ(v))
+	})
+}
+
+// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
+func CreatedAtNEQ(v time.Time) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreatedAt, p.NEQ(v))
+	})
+}
+
+// CreatedAtIn applies the In predicate on the "created_at" field.
+func CreatedAtIn(vs ...time.Time) predicate.Task {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreatedAt, p.Within(v...))
+	})
+}
+
+// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
+func CreatedAtNotIn(vs ...time.Time) predicate.Task {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreatedAt, p.Without(v...))
+	})
+}
+
+// CreatedAtGT applies the GT predicate on the "created_at" field.
+func CreatedAtGT(v time.Time) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreatedAt, p.GT(v))
+	})
+}
+
+// CreatedAtGTE applies the GTE predicate on the "created_at" field.
+func CreatedAtGTE(v time.Time) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreatedAt, p.GTE(v))
+	})
+}
+
+// CreatedAtLT applies the LT predicate on the "created_at" field.
+func CreatedAtLT(v time.Time) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreatedAt, p.LT(v))
+	})
+}
+
+// CreatedAtLTE applies the LTE predicate on the "created_at" field.
+func CreatedAtLTE(v time.Time) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreatedAt, p.LTE(v))
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Task) predicate.Task {
 	return predicate.Task(func(tr *dsl.Traversal) {
-		trs := make([]interface{}, 0, len(predicates))
+		trs := make([]any, 0, len(predicates))
 		for _, p := range predicates {
 			t := __.New()
 			p(t)
@@ -179,7 +266,7 @@ func And(predicates ...predicate.Task) predicate.Task {
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Task) predicate.Task {
 	return predicate.Task(func(tr *dsl.Traversal) {
-		trs := make([]interface{}, 0, len(predicates))
+		trs := make([]any, 0, len(predicates))
 		for _, p := range predicates {
 			t := __.New()
 			p(t)

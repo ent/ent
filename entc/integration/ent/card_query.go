@@ -25,17 +25,17 @@ import (
 // CardQuery is the builder for querying Card entities.
 type CardQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Card
-	// eager-loading edges.
-	withOwner *UserQuery
-	withSpec  *SpecQuery
-	withFKs   bool
-	modifiers []func(*sql.Selector)
+	limit         *int
+	offset        *int
+	unique        *bool
+	order         []OrderFunc
+	fields        []string
+	predicates    []predicate.Card
+	withOwner     *UserQuery
+	withSpec      *SpecQuery
+	withFKs       bool
+	modifiers     []func(*sql.Selector)
+	withNamedSpec map[string]*SpecQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -342,7 +342,6 @@ func (cq *CardQuery) WithSpec(opts ...func(*SpecQuery)) *CardQuery {
 //		GroupBy(card.FieldCreateTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 	grbuild := &CardGroupBy{config: cq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -369,7 +368,6 @@ func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 //	client.Card.Query().
 //		Select(card.FieldCreateTime).
 //		Scan(ctx, &v)
-//
 func (cq *CardQuery) Select(fields ...string) *CardSelect {
 	cq.fields = append(cq.fields, fields...)
 	selbuild := &CardSelect{CardQuery: cq}
@@ -410,10 +408,10 @@ func (cq *CardQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Card, e
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, card.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Card).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Card{config: cq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -431,90 +429,115 @@ func (cq *CardQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Card, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := cq.withOwner; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Card)
-		for i := range nodes {
-			if nodes[i].user_card == nil {
-				continue
-			}
-			fk := *nodes[i].user_card
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := cq.loadOwner(ctx, query, nodes, nil,
+			func(n *Card, e *User) { n.Edges.Owner = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_card" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Owner = n
-			}
-		}
 	}
-
 	if query := cq.withSpec; query != nil {
-		edgeids := make([]driver.Value, len(nodes))
-		byid := make(map[int]*Card)
-		nids := make(map[int]map[*Card]struct{})
-		for i, node := range nodes {
-			edgeids[i] = node.ID
-			byid[node.ID] = node
-			node.Edges.Spec = []*Spec{}
-		}
-		query.Where(func(s *sql.Selector) {
-			joinT := sql.Table(card.SpecTable)
-			s.Join(joinT).On(s.C(spec.FieldID), joinT.C(card.SpecPrimaryKey[0]))
-			s.Where(sql.InValues(joinT.C(card.SpecPrimaryKey[1]), edgeids...))
-			columns := s.SelectedColumns()
-			s.Select(joinT.C(card.SpecPrimaryKey[1]))
-			s.AppendSelect(columns...)
-			s.SetDistinct(false)
-		})
-		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]interface{}, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]interface{}{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []interface{}) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Card]struct{}{byid[outValue]: struct{}{}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byid[outValue]] = struct{}{}
-				return nil
-			}
-		})
-		if err != nil {
+		if err := cq.loadSpec(ctx, query, nodes,
+			func(n *Card) { n.Edges.Spec = []*Spec{} },
+			func(n *Card, e *Spec) { n.Edges.Spec = append(n.Edges.Spec, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected "spec" node returned %v`, n.ID)
-			}
-			for kn := range nodes {
-				kn.Edges.Spec = append(kn.Edges.Spec, n)
-			}
+	}
+	for name, query := range cq.withNamedSpec {
+		if err := cq.loadSpec(ctx, query, nodes,
+			func(n *Card) { n.appendNamedSpec(name) },
+			func(n *Card, e *Spec) { n.appendNamedSpec(name, e) }); err != nil {
+			return nil, err
 		}
 	}
-
 	return nodes, nil
+}
+
+func (cq *CardQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*Card, init func(*Card), assign func(*Card, *User)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Card)
+	for i := range nodes {
+		if nodes[i].user_card == nil {
+			continue
+		}
+		fk := *nodes[i].user_card
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_card" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (cq *CardQuery) loadSpec(ctx context.Context, query *SpecQuery, nodes []*Card, init func(*Card), assign func(*Card, *Spec)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Card)
+	nids := make(map[int]map[*Card]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(card.SpecTable)
+		s.Join(joinT).On(s.C(spec.FieldID), joinT.C(card.SpecPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(card.SpecPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(card.SpecPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+		assign := spec.Assign
+		values := spec.ScanValues
+		spec.ScanValues = func(columns []string) ([]any, error) {
+			values, err := values(columns[1:])
+			if err != nil {
+				return nil, err
+			}
+			return append([]any{new(sql.NullInt64)}, values...), nil
+		}
+		spec.Assign = func(columns []string, values []any) error {
+			outValue := int(values[0].(*sql.NullInt64).Int64)
+			inValue := int(values[1].(*sql.NullInt64).Int64)
+			if nids[inValue] == nil {
+				nids[inValue] = map[*Card]struct{}{byID[outValue]: struct{}{}}
+				return assign(columns[1:], values[1:])
+			}
+			nids[inValue][byID[outValue]] = struct{}{}
+			return nil
+		}
+	})
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "spec" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
 }
 
 func (cq *CardQuery) sqlCount(ctx context.Context) (int, error) {
@@ -530,11 +553,14 @@ func (cq *CardQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (cq *CardQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := cq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := cq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (cq *CardQuery) querySpec() *sqlgraph.QuerySpec {
@@ -652,6 +678,20 @@ func (cq *CardQuery) Modify(modifiers ...func(s *sql.Selector)) *CardSelect {
 	return cq.Select()
 }
 
+// WithNamedSpec tells the query-builder to eager-load the nodes that are connected to the "spec"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (cq *CardQuery) WithNamedSpec(name string, opts ...func(*SpecQuery)) *CardQuery {
+	query := &SpecQuery{config: cq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if cq.withNamedSpec == nil {
+		cq.withNamedSpec = make(map[string]*SpecQuery)
+	}
+	cq.withNamedSpec[name] = query
+	return cq
+}
+
 // CardGroupBy is the group-by builder for Card entities.
 type CardGroupBy struct {
 	config
@@ -670,7 +710,7 @@ func (cgb *CardGroupBy) Aggregate(fns ...AggregateFunc) *CardGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (cgb *CardGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (cgb *CardGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := cgb.path(ctx)
 	if err != nil {
 		return err
@@ -679,7 +719,7 @@ func (cgb *CardGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return cgb.sqlScan(ctx, v)
 }
 
-func (cgb *CardGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (cgb *CardGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range cgb.fields {
 		if !card.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -726,7 +766,7 @@ type CardSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (cs *CardSelect) Scan(ctx context.Context, v interface{}) error {
+func (cs *CardSelect) Scan(ctx context.Context, v any) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -734,7 +774,7 @@ func (cs *CardSelect) Scan(ctx context.Context, v interface{}) error {
 	return cs.sqlScan(ctx, v)
 }
 
-func (cs *CardSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (cs *CardSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := cs.sql.Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {

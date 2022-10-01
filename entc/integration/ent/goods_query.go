@@ -300,10 +300,10 @@ func (gq *GoodsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Goods,
 		nodes = []*Goods{}
 		_spec = gq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Goods).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Goods{config: gq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -336,11 +336,14 @@ func (gq *GoodsQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (gq *GoodsQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := gq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := gq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (gq *GoodsQuery) querySpec() *sqlgraph.QuerySpec {
@@ -476,7 +479,7 @@ func (ggb *GoodsGroupBy) Aggregate(fns ...AggregateFunc) *GoodsGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (ggb *GoodsGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (ggb *GoodsGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := ggb.path(ctx)
 	if err != nil {
 		return err
@@ -485,7 +488,7 @@ func (ggb *GoodsGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return ggb.sqlScan(ctx, v)
 }
 
-func (ggb *GoodsGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (ggb *GoodsGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range ggb.fields {
 		if !goods.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -532,7 +535,7 @@ type GoodsSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (gs *GoodsSelect) Scan(ctx context.Context, v interface{}) error {
+func (gs *GoodsSelect) Scan(ctx context.Context, v any) error {
 	if err := gs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -540,7 +543,7 @@ func (gs *GoodsSelect) Scan(ctx context.Context, v interface{}) error {
 	return gs.sqlScan(ctx, v)
 }
 
-func (gs *GoodsSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (gs *GoodsSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := gs.sql.Query()
 	if err := gs.driver.Query(ctx, query, args, rows); err != nil {

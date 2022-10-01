@@ -13,7 +13,7 @@ Feature flags can be provided either by CLI flags or as arguments to the `gen` p
 #### CLI
 
 ```console
-go run entgo.io/ent/cmd/ent generate --feature privacy,entql ./ent/schema
+go run -mod=mod entgo.io/ent/cmd/ent generate --feature privacy,entql ./ent/schema
 ```
 
 #### Go
@@ -51,21 +51,7 @@ func main() {
 
 ## List of Features
 
-#### Privacy Layer
-
-The privacy layer allows configuring privacy policy for queries and mutations of entities in the database.
-
-This option can added to a project using the `--feature privacy` flag, and its full documentation exists
-in the [privacy page](privacy.md).
-
-#### EntQL Filtering
-
-The `entql` option provides a generic and dynamic filtering capability at runtime for the different query builders.
-
-This option can be added to a project using the `--feature entql` flag, and more information about it exists
-in the [privacy page](privacy.md#multi-tenancy).
-
-#### Auto-Solve Merge Conflicts
+### Auto-Solve Merge Conflicts
 
 The `schema/snapshot` option tells `entc` (ent codegen) to store a snapshot of the latest schema in an internal package,
 and use it to automatically solve merge conflicts when user's schema can't be built.
@@ -73,7 +59,28 @@ and use it to automatically solve merge conflicts when user's schema can't be bu
 This option can be added to a project using the `--feature schema/snapshot` flag, but please see
 [ent/ent/issues/852](https://github.com/ent/ent/issues/852) to get more context about it.
 
-#### Schema Config
+### Privacy Layer
+
+The privacy layer allows configuring privacy policy for queries and mutations of entities in the database.
+
+This option can be added to a project using the `--feature privacy` flag, and you can learn more about in the
+[privacy](privacy.md) documentation.
+
+### EntQL Filtering
+
+The `entql` option provides a generic and dynamic filtering capability at runtime for the different query builders.
+
+This option can be added to a project using the `--feature entql` flag, and you can learn more about in the
+[privacy](privacy.md#multi-tenancy) documentation.
+
+### Named Edges
+
+The `namedges` option provides an API for preloading edges with custom names.
+
+This option can be added to a project using the `--feature namedges` flag, and you can learn more about in the
+[Eager Loading](eager-load.mdx) documentation.
+
+### Schema Config
 
 The `sql/schemaconfig` option lets you pass alternate SQL database names to models. This is useful when your models don't all live under one database and are spread out across different schemas.
 
@@ -88,7 +95,7 @@ c.User.Query().All(ctx) // SELECT * FROM `usersdb`.`users`
 c.Car.Query().All(ctx) 	// SELECT * FROM `carsdb`.`cars`
 ```
 
-#### Row-level Locks
+### Row-level Locks
 
 The `sql/lock` option lets configure row-level locking using the SQL `SELECT ... FOR {UPDATE | SHARE}` syntax.
 
@@ -114,13 +121,13 @@ tx.Pet.Query().
 	Only(ctx)
 ```
 
-#### Custom SQL Modifiers
+### Custom SQL Modifiers
 
 The `sql/modifier` option lets add custom SQL modifiers to the builders and mutate the statements before they are executed.
 
 This option can be added to a project using the `--feature sql/modifier` flag.
 
-**Example 1**
+#### Modify Example 1
 
 ```go
 client.Pet.
@@ -137,7 +144,7 @@ The above code will produce the following SQL query:
 SELECT SUM(LENGTH(name)) FROM `pet`
 ```
 
-**Example 2**
+#### Modify Example 2
 
 ```go
 var p1 []struct {
@@ -159,7 +166,7 @@ The above code will produce the following SQL query:
 SELECT `pet`.*, LENGTH(name) FROM `pet` ORDER BY `pet`.`id` ASC
 ```
 
-**Example 3**
+#### Modify Example 3
 
 ```go
 var v []struct {
@@ -203,7 +210,7 @@ ORDER BY
     DATE(created_at) DESC
 ```
 
-**Example 4**
+#### Modify Example 4
 
 ```go
 var gs []struct {
@@ -245,7 +252,65 @@ ORDER BY
     `groups`.`id` ASC
 ```
 
-#### SQL Raw API
+
+#### Modify Example 5
+
+```go
+client.User.Update().
+	Modify(func(s *sql.UpdateBuilder) {
+		s.Set(user.FieldName, sql.Expr(fmt.Sprintf("UPPER(%s)", user.FieldName)))
+	}).
+	ExecX(ctx)
+```
+
+The above code will produce the following SQL query:
+
+```sql
+UPDATE `users` SET `name` = UPPER(`name`)
+```
+
+#### Modify Example 6
+
+```go
+client.User.Update().
+	Modify(func(u *sql.UpdateBuilder) {
+		u.Set(user.FieldID, sql.ExprFunc(func(b *sql.Builder) {
+			b.Ident(user.FieldID).WriteOp(sql.OpAdd).Arg(1)
+		}))
+		u.OrderBy(sql.Desc(user.FieldID))
+	}).
+	ExecX(ctx)
+```
+
+The above code will produce the following SQL query:
+
+```sql
+UPDATE `users` SET `id` = `id` + 1 ORDER BY `id` DESC
+```
+
+#### Modify Example 7
+
+Append elements to the `values` array in a JSON column:
+
+```go
+client.User.Update().
+	Modify(func(u *sql.UpdateBuilder) {
+        sqljson.Append(u, user.FieldTags, []string{"tag1", "tag2"}, sqljson.Path("values"))
+	}).
+	ExecX(ctx)
+```
+
+The above code will produce the following SQL query:
+
+```sql
+UPDATE `users` SET `tags` = CASE
+    WHEN (JSON_TYPE(JSON_EXTRACT(`tags`, '$.values')) IS NULL OR JSON_TYPE(JSON_EXTRACT(`tags`, '$.values')) = 'NULL')
+    THEN JSON_SET(`tags`, '$.values', JSON_ARRAY(?, ?))
+    ELSE JSON_ARRAY_APPEND(`tags`, '$.values', ?, '$.values', ?) END
+    WHERE `id` = ?
+```
+
+### SQL Raw API
 
 The `sql/execquery` option allows executing statements using the `ExecContext`/`QueryContext` methods of the underlying
 driver. For full documentation, see: [DB.ExecContext](https://pkg.go.dev/database/sql#DB.ExecContext), and
@@ -276,10 +341,10 @@ Statements executed using `ExecContext`/`QueryContext` do not go through Ent, an
 application such as hooks, privacy (authorization), and validators.
 :::
 
-#### Upsert
+### Upsert
 
 The `sql/upsert` option lets configure upsert and bulk-upsert logic using the SQL `ON CONFLICT` / `ON DUPLICATE KEY`
-syntax. For full documentation, go to the [Upsert API](crud.md#upsert-one).
+syntax. For full documentation, go to the [Upsert API](crud.mdx#upsert-one).
 
 This option can be added to a project using the `--feature sql/upsert` flag.
 

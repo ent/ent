@@ -177,7 +177,6 @@ func (sc *SpecCreate) createSpec() (*Spec, *sqlgraph.CreateSpec) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (sc *SpecCreate) OnConflict(opts ...sql.ConflictOption) *SpecUpsertOne {
 	sc.conflict = opts
 	return &SpecUpsertOne{
@@ -191,7 +190,6 @@ func (sc *SpecCreate) OnConflict(opts ...sql.ConflictOption) *SpecUpsertOne {
 //	client.Spec.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (sc *SpecCreate) OnConflictColumns(columns ...string) *SpecUpsertOne {
 	sc.conflict = append(sc.conflict, sql.ConflictColumns(columns...))
 	return &SpecUpsertOne{
@@ -220,7 +218,6 @@ type (
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *SpecUpsertOne) UpdateNewValues() *SpecUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -229,10 +226,9 @@ func (u *SpecUpsertOne) UpdateNewValues() *SpecUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.Spec.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.Spec.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *SpecUpsertOne) Ignore() *SpecUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -382,7 +378,6 @@ func (scb *SpecCreateBulk) ExecX(ctx context.Context) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (scb *SpecCreateBulk) OnConflict(opts ...sql.ConflictOption) *SpecUpsertBulk {
 	scb.conflict = opts
 	return &SpecUpsertBulk{
@@ -396,7 +391,6 @@ func (scb *SpecCreateBulk) OnConflict(opts ...sql.ConflictOption) *SpecUpsertBul
 //	client.Spec.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (scb *SpecCreateBulk) OnConflictColumns(columns ...string) *SpecUpsertBulk {
 	scb.conflict = append(scb.conflict, sql.ConflictColumns(columns...))
 	return &SpecUpsertBulk{
@@ -418,7 +412,6 @@ type SpecUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *SpecUpsertBulk) UpdateNewValues() *SpecUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -430,7 +423,6 @@ func (u *SpecUpsertBulk) UpdateNewValues() *SpecUpsertBulk {
 //	client.Spec.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *SpecUpsertBulk) Ignore() *SpecUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

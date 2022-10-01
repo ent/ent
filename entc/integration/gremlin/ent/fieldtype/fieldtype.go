@@ -223,7 +223,7 @@ const DefaultRole role.Role = "READ"
 // RoleValidator is a validator for the "role" field enum values. It is called by the builders before save.
 func RoleValidator(r role.Role) error {
 	switch r {
-	case "ADMIN", "OWNER", "USER", "READ", "WRITE":
+	case "ADMIN", "OWNER", "USER", "READ", "WRITE", "READ+WRITE":
 		return nil
 	default:
 		return fmt.Errorf("fieldtype: invalid enum value for role field: %q", r)

@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -36,6 +37,26 @@ func (tc *TaskCreate) SetPriority(t task.Priority) *TaskCreate {
 func (tc *TaskCreate) SetNillablePriority(t *task.Priority) *TaskCreate {
 	if t != nil {
 		tc.SetPriority(*t)
+	}
+	return tc
+}
+
+// SetPriorities sets the "priorities" field.
+func (tc *TaskCreate) SetPriorities(m map[string]task.Priority) *TaskCreate {
+	tc.mutation.SetPriorities(m)
+	return tc
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (tc *TaskCreate) SetCreatedAt(t time.Time) *TaskCreate {
+	tc.mutation.SetCreatedAt(t)
+	return tc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (tc *TaskCreate) SetNillableCreatedAt(t *time.Time) *TaskCreate {
+	if t != nil {
+		tc.SetCreatedAt(*t)
 	}
 	return tc
 }
@@ -121,6 +142,10 @@ func (tc *TaskCreate) defaults() {
 		v := enttask.DefaultPriority
 		tc.mutation.SetPriority(v)
 	}
+	if _, ok := tc.mutation.CreatedAt(); !ok {
+		v := enttask.DefaultCreatedAt()
+		tc.mutation.SetCreatedAt(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -132,6 +157,9 @@ func (tc *TaskCreate) check() error {
 		if err := enttask.PriorityValidator(int(v)); err != nil {
 			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
+	}
+	if _, ok := tc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Task.created_at"`)}
 	}
 	return nil
 }
@@ -156,6 +184,12 @@ func (tc *TaskCreate) gremlin() *dsl.Traversal {
 	v := g.AddV(enttask.Label)
 	if value, ok := tc.mutation.Priority(); ok {
 		v.Property(dsl.Single, enttask.FieldPriority, value)
+	}
+	if value, ok := tc.mutation.Priorities(); ok {
+		v.Property(dsl.Single, enttask.FieldPriorities, value)
+	}
+	if value, ok := tc.mutation.CreatedAt(); ok {
+		v.Property(dsl.Single, enttask.FieldCreatedAt, value)
 	}
 	return v.ValueMap(true)
 }

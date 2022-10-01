@@ -276,7 +276,6 @@ func (cc *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 //			SetBeforeID(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (cc *CarCreate) OnConflict(opts ...sql.ConflictOption) *CarUpsertOne {
 	cc.conflict = opts
 	return &CarUpsertOne{
@@ -290,7 +289,6 @@ func (cc *CarCreate) OnConflict(opts ...sql.ConflictOption) *CarUpsertOne {
 //	client.Car.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (cc *CarCreate) OnConflictColumns(columns ...string) *CarUpsertOne {
 	cc.conflict = append(cc.conflict, sql.ConflictColumns(columns...))
 	return &CarUpsertOne{
@@ -382,7 +380,6 @@ func (u *CarUpsert) UpdateModel() *CarUpsert {
 //			}),
 //		).
 //		Exec(ctx)
-//
 func (u *CarUpsertOne) UpdateNewValues() *CarUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -396,10 +393,9 @@ func (u *CarUpsertOne) UpdateNewValues() *CarUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.Car.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.Car.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *CarUpsertOne) Ignore() *CarUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -624,7 +620,6 @@ func (ccb *CarCreateBulk) ExecX(ctx context.Context) {
 //			SetBeforeID(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (ccb *CarCreateBulk) OnConflict(opts ...sql.ConflictOption) *CarUpsertBulk {
 	ccb.conflict = opts
 	return &CarUpsertBulk{
@@ -638,7 +633,6 @@ func (ccb *CarCreateBulk) OnConflict(opts ...sql.ConflictOption) *CarUpsertBulk 
 //	client.Car.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (ccb *CarCreateBulk) OnConflictColumns(columns ...string) *CarUpsertBulk {
 	ccb.conflict = append(ccb.conflict, sql.ConflictColumns(columns...))
 	return &CarUpsertBulk{
@@ -663,14 +657,12 @@ type CarUpsertBulk struct {
 //			}),
 //		).
 //		Exec(ctx)
-//
 func (u *CarUpsertBulk) UpdateNewValues() *CarUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(car.FieldID)
-				return
 			}
 		}
 	}))
@@ -683,7 +675,6 @@ func (u *CarUpsertBulk) UpdateNewValues() *CarUpsertBulk {
 //	client.Car.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *CarUpsertBulk) Ignore() *CarUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

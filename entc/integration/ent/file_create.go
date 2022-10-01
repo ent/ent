@@ -90,6 +90,20 @@ func (fc *FileCreate) SetNillableOp(b *bool) *FileCreate {
 	return fc
 }
 
+// SetFieldID sets the "field_id" field.
+func (fc *FileCreate) SetFieldID(i int) *FileCreate {
+	fc.mutation.SetFieldID(i)
+	return fc
+}
+
+// SetNillableFieldID sets the "field_id" field if the given value is not nil.
+func (fc *FileCreate) SetNillableFieldID(i *int) *FileCreate {
+	if i != nil {
+		fc.SetFieldID(*i)
+	}
+	return fc
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (fc *FileCreate) SetOwnerID(id int) *FileCreate {
 	fc.mutation.SetOwnerID(id)
@@ -307,6 +321,14 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 		})
 		_node.Op = value
 	}
+	if value, ok := fc.mutation.FieldID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: file.FieldFieldID,
+		})
+		_node.FieldID = value
+	}
 	if nodes := fc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -385,7 +407,6 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 //			SetSize(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (fc *FileCreate) OnConflict(opts ...sql.ConflictOption) *FileUpsertOne {
 	fc.conflict = opts
 	return &FileUpsertOne{
@@ -399,7 +420,6 @@ func (fc *FileCreate) OnConflict(opts ...sql.ConflictOption) *FileUpsertOne {
 //	client.File.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (fc *FileCreate) OnConflictColumns(columns ...string) *FileUpsertOne {
 	fc.conflict = append(fc.conflict, sql.ConflictColumns(columns...))
 	return &FileUpsertOne{
@@ -504,6 +524,30 @@ func (u *FileUpsert) ClearOp() *FileUpsert {
 	return u
 }
 
+// SetFieldID sets the "field_id" field.
+func (u *FileUpsert) SetFieldID(v int) *FileUpsert {
+	u.Set(file.FieldFieldID, v)
+	return u
+}
+
+// UpdateFieldID sets the "field_id" field to the value that was provided on create.
+func (u *FileUpsert) UpdateFieldID() *FileUpsert {
+	u.SetExcluded(file.FieldFieldID)
+	return u
+}
+
+// AddFieldID adds v to the "field_id" field.
+func (u *FileUpsert) AddFieldID(v int) *FileUpsert {
+	u.Add(file.FieldFieldID, v)
+	return u
+}
+
+// ClearFieldID clears the value of the "field_id" field.
+func (u *FileUpsert) ClearFieldID() *FileUpsert {
+	u.SetNull(file.FieldFieldID)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -512,7 +556,6 @@ func (u *FileUpsert) ClearOp() *FileUpsert {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *FileUpsertOne) UpdateNewValues() *FileUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -521,10 +564,9 @@ func (u *FileUpsertOne) UpdateNewValues() *FileUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.File.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.File.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *FileUpsertOne) Ignore() *FileUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -641,6 +683,34 @@ func (u *FileUpsertOne) UpdateOp() *FileUpsertOne {
 func (u *FileUpsertOne) ClearOp() *FileUpsertOne {
 	return u.Update(func(s *FileUpsert) {
 		s.ClearOp()
+	})
+}
+
+// SetFieldID sets the "field_id" field.
+func (u *FileUpsertOne) SetFieldID(v int) *FileUpsertOne {
+	return u.Update(func(s *FileUpsert) {
+		s.SetFieldID(v)
+	})
+}
+
+// AddFieldID adds v to the "field_id" field.
+func (u *FileUpsertOne) AddFieldID(v int) *FileUpsertOne {
+	return u.Update(func(s *FileUpsert) {
+		s.AddFieldID(v)
+	})
+}
+
+// UpdateFieldID sets the "field_id" field to the value that was provided on create.
+func (u *FileUpsertOne) UpdateFieldID() *FileUpsertOne {
+	return u.Update(func(s *FileUpsert) {
+		s.UpdateFieldID()
+	})
+}
+
+// ClearFieldID clears the value of the "field_id" field.
+func (u *FileUpsertOne) ClearFieldID() *FileUpsertOne {
+	return u.Update(func(s *FileUpsert) {
+		s.ClearFieldID()
 	})
 }
 
@@ -778,7 +848,6 @@ func (fcb *FileCreateBulk) ExecX(ctx context.Context) {
 //			SetSize(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (fcb *FileCreateBulk) OnConflict(opts ...sql.ConflictOption) *FileUpsertBulk {
 	fcb.conflict = opts
 	return &FileUpsertBulk{
@@ -792,7 +861,6 @@ func (fcb *FileCreateBulk) OnConflict(opts ...sql.ConflictOption) *FileUpsertBul
 //	client.File.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (fcb *FileCreateBulk) OnConflictColumns(columns ...string) *FileUpsertBulk {
 	fcb.conflict = append(fcb.conflict, sql.ConflictColumns(columns...))
 	return &FileUpsertBulk{
@@ -814,7 +882,6 @@ type FileUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *FileUpsertBulk) UpdateNewValues() *FileUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -826,7 +893,6 @@ func (u *FileUpsertBulk) UpdateNewValues() *FileUpsertBulk {
 //	client.File.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *FileUpsertBulk) Ignore() *FileUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -943,6 +1009,34 @@ func (u *FileUpsertBulk) UpdateOp() *FileUpsertBulk {
 func (u *FileUpsertBulk) ClearOp() *FileUpsertBulk {
 	return u.Update(func(s *FileUpsert) {
 		s.ClearOp()
+	})
+}
+
+// SetFieldID sets the "field_id" field.
+func (u *FileUpsertBulk) SetFieldID(v int) *FileUpsertBulk {
+	return u.Update(func(s *FileUpsert) {
+		s.SetFieldID(v)
+	})
+}
+
+// AddFieldID adds v to the "field_id" field.
+func (u *FileUpsertBulk) AddFieldID(v int) *FileUpsertBulk {
+	return u.Update(func(s *FileUpsert) {
+		s.AddFieldID(v)
+	})
+}
+
+// UpdateFieldID sets the "field_id" field to the value that was provided on create.
+func (u *FileUpsertBulk) UpdateFieldID() *FileUpsertBulk {
+	return u.Update(func(s *FileUpsert) {
+		s.UpdateFieldID()
+	})
+}
+
+// ClearFieldID clears the value of the "field_id" field.
+func (u *FileUpsertBulk) ClearFieldID() *FileUpsertBulk {
+	return u.Update(func(s *FileUpsert) {
+		s.ClearFieldID()
 	})
 }
 

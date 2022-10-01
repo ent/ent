@@ -31,12 +31,14 @@ func TestEdge(t *testing.T) {
 	type Node struct{ ent.Schema }
 	e = edge.To("parent", Node.Type).
 		Unique().
+		Immutable().
 		Descriptor()
 	assert.False(e.Inverse)
 	assert.True(e.Unique)
 	assert.Equal("Node", e.Type)
 	assert.Equal("parent", e.Name)
 	assert.False(e.Required)
+	assert.True(e.Immutable)
 
 	e = edge.To("children", Node.Type).
 		From("parent").

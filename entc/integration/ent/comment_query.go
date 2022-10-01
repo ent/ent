@@ -267,7 +267,6 @@ func (cq *CommentQuery) Clone() *CommentQuery {
 //		GroupBy(comment.FieldUniqueInt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy {
 	grbuild := &CommentGroupBy{config: cq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -294,7 +293,6 @@ func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy 
 //	client.Comment.Query().
 //		Select(comment.FieldUniqueInt).
 //		Scan(ctx, &v)
-//
 func (cq *CommentQuery) Select(fields ...string) *CommentSelect {
 	cq.fields = append(cq.fields, fields...)
 	selbuild := &CommentSelect{CommentQuery: cq}
@@ -324,10 +322,10 @@ func (cq *CommentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Comm
 		nodes = []*Comment{}
 		_spec = cq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Comment).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Comment{config: cq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -360,11 +358,14 @@ func (cq *CommentQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (cq *CommentQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := cq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := cq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (cq *CommentQuery) querySpec() *sqlgraph.QuerySpec {
@@ -500,7 +501,7 @@ func (cgb *CommentGroupBy) Aggregate(fns ...AggregateFunc) *CommentGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (cgb *CommentGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (cgb *CommentGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := cgb.path(ctx)
 	if err != nil {
 		return err
@@ -509,7 +510,7 @@ func (cgb *CommentGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return cgb.sqlScan(ctx, v)
 }
 
-func (cgb *CommentGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (cgb *CommentGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range cgb.fields {
 		if !comment.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -556,7 +557,7 @@ type CommentSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (cs *CommentSelect) Scan(ctx context.Context, v interface{}) error {
+func (cs *CommentSelect) Scan(ctx context.Context, v any) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -564,7 +565,7 @@ func (cs *CommentSelect) Scan(ctx context.Context, v interface{}) error {
 	return cs.sqlScan(ctx, v)
 }
 
-func (cs *CommentSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (cs *CommentSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := cs.sql.Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {

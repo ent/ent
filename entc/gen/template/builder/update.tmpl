@@ -254,6 +254,11 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 {{ define "update/fields"}}
 	hooks []Hook
 	mutation *{{ $.MutationName }}
+	{{- /* Additional fields to add to the builder. */}}
+	{{- $tmpl := printf "dialect/%s/update/fields" $.Storage }}
+	{{- if hasTemplate $tmpl }}
+		{{- xtemplate $tmpl . }}
+	{{- end }}
 {{ end }}
 
 {{/* shared edges removal between the two updaters */}}
@@ -263,6 +268,10 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 {{ $mutation := print $receiver ".mutation" }}
 
 {{ range $e := $.EdgesWithID }}
+	{{ if $e.Immutable }}
+		{{/* Skip to the next one as immutable edges cannot be updated. */}}
+		{{continue}}
+	{{ end }}
 	{{ $func := $e.MutationClear }}
 	// {{ $func }} clears {{ if $e.Unique }}the "{{ $e.Name }}" edge{{ else }}all "{{ $e.Name }}" edges{{ end }} to the {{ $e.Type.Name }} entity.
 	func ({{ $receiver }} *{{ $builder }}) {{ $func }}() *{{ $builder }} {

@@ -29,6 +29,8 @@ type Pet struct {
 	UUID uuid.UUID `json:"uuid,omitempty"`
 	// Nickname holds the value of the "nickname" field.
 	Nickname string `json:"nickname,omitempty"`
+	// Trained holds the value of the "trained" field.
+	Trained bool `json:"trained,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PetQuery when eager-loading is set.
 	Edges     PetEdges `json:"edges"`
@@ -52,8 +54,7 @@ type PetEdges struct {
 func (e PetEdges) TeamOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.Team == nil {
-			// The edge team was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Team, nil
@@ -66,8 +67,7 @@ func (e PetEdges) TeamOrErr() (*User, error) {
 func (e PetEdges) OwnerOrErr() (*User, error) {
 	if e.loadedTypes[1] {
 		if e.Owner == nil {
-			// The edge owner was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Owner, nil
@@ -76,10 +76,12 @@ func (e PetEdges) OwnerOrErr() (*User, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Pet) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*Pet) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case pet.FieldTrained:
+			values[i] = new(sql.NullBool)
 		case pet.FieldAge:
 			values[i] = new(sql.NullFloat64)
 		case pet.FieldID:
@@ -101,7 +103,7 @@ func (*Pet) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Pet fields.
-func (pe *Pet) assignValues(columns []string, values []interface{}) error {
+func (pe *Pet) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -136,6 +138,12 @@ func (pe *Pet) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field nickname", values[i])
 			} else if value.Valid {
 				pe.Nickname = value.String
+			}
+		case pet.FieldTrained:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field trained", values[i])
+			} else if value.Valid {
+				pe.Trained = value.Bool
 			}
 		case pet.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -200,6 +208,9 @@ func (pe *Pet) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("nickname=")
 	builder.WriteString(pe.Nickname)
+	builder.WriteString(", ")
+	builder.WriteString("trained=")
+	builder.WriteString(fmt.Sprintf("%v", pe.Trained))
 	builder.WriteByte(')')
 	return builder.String()
 }

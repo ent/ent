@@ -16,7 +16,7 @@ func (c *UserClient) Debug() *UserClient {
 	return &UserClient{config: cfg}
 }
 
-func (c *UserClient) DebugLog(fn func(...interface{})) *UserClient {
+func (c *UserClient) DebugLog(fn func(...any)) *UserClient {
 	if c.debug {
 		return c
 	}

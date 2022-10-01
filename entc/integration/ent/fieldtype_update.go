@@ -16,6 +16,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/entc/integration/ent/fieldtype"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/role"
@@ -27,8 +28,9 @@ import (
 // FieldTypeUpdate is the builder for updating FieldType entities.
 type FieldTypeUpdate struct {
 	config
-	hooks    []Hook
-	mutation *FieldTypeMutation
+	hooks     []Hook
+	mutation  *FieldTypeMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the FieldTypeUpdate builder.
@@ -1227,6 +1229,12 @@ func (ftu *FieldTypeUpdate) SetStrings(s []string) *FieldTypeUpdate {
 	return ftu
 }
 
+// AppendStrings appends s to the "strings" field.
+func (ftu *FieldTypeUpdate) AppendStrings(s []string) *FieldTypeUpdate {
+	ftu.mutation.AppendStrings(s)
+	return ftu
+}
+
 // ClearStrings clears the value of the "strings" field.
 func (ftu *FieldTypeUpdate) ClearStrings() *FieldTypeUpdate {
 	ftu.mutation.ClearStrings()
@@ -1464,6 +1472,12 @@ func (ftu *FieldTypeUpdate) check() error {
 		}
 	}
 	return nil
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (ftu *FieldTypeUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *FieldTypeUpdate {
+	ftu.modifiers = append(ftu.modifiers, modifiers...)
+	return ftu
 }
 
 func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -2413,6 +2427,11 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: fieldtype.FieldStrings,
 		})
 	}
+	if value, ok := ftu.mutation.AppendedStrings(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, fieldtype.FieldStrings, value)
+		})
+	}
 	if ftu.mutation.StringsCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
@@ -2486,6 +2505,7 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: fieldtype.FieldPasswordOther,
 		})
 	}
+	_spec.AddModifiers(ftu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, ftu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{fieldtype.Label}
@@ -2500,9 +2520,10 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // FieldTypeUpdateOne is the builder for updating a single FieldType entity.
 type FieldTypeUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *FieldTypeMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *FieldTypeMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetInt sets the "int" field.
@@ -3695,6 +3716,12 @@ func (ftuo *FieldTypeUpdateOne) SetStrings(s []string) *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// AppendStrings appends s to the "strings" field.
+func (ftuo *FieldTypeUpdateOne) AppendStrings(s []string) *FieldTypeUpdateOne {
+	ftuo.mutation.AppendStrings(s)
+	return ftuo
+}
+
 // ClearStrings clears the value of the "strings" field.
 func (ftuo *FieldTypeUpdateOne) ClearStrings() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearStrings()
@@ -3945,6 +3972,12 @@ func (ftuo *FieldTypeUpdateOne) check() error {
 		}
 	}
 	return nil
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (ftuo *FieldTypeUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *FieldTypeUpdateOne {
+	ftuo.modifiers = append(ftuo.modifiers, modifiers...)
+	return ftuo
 }
 
 func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, err error) {
@@ -4911,6 +4944,11 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 			Column: fieldtype.FieldStrings,
 		})
 	}
+	if value, ok := ftuo.mutation.AppendedStrings(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, fieldtype.FieldStrings, value)
+		})
+	}
 	if ftuo.mutation.StringsCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
@@ -4984,6 +5022,7 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 			Column: fieldtype.FieldPasswordOther,
 		})
 	}
+	_spec.AddModifiers(ftuo.modifiers...)
 	_node = &FieldType{config: ftuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

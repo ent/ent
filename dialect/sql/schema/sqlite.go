@@ -6,6 +6,7 @@ package schema
 
 import (
 	"context"
+	stdsql "database/sql"
 	"fmt"
 	"strconv"
 	"strings"
@@ -19,15 +20,51 @@ import (
 	"ariga.io/atlas/sql/sqlite"
 )
 
-// SQLite is an SQLite migration driver.
-type SQLite struct {
-	dialect.Driver
-	WithForeignKeys bool
+type (
+	// SQLite is an SQLite migration driver.
+	SQLite struct {
+		dialect.Driver
+		WithForeignKeys bool
+	}
+	// SQLiteTx implements dialect.Tx.
+	SQLiteTx struct {
+		dialect.Tx
+		commit   func() error // Override Commit to toggle foreign keys back on after Commit.
+		rollback func() error // Override Rollback to toggle foreign keys back on after Rollback.
+	}
+)
+
+// Tx implements opens a transaction.
+func (d *SQLite) Tx(ctx context.Context) (dialect.Tx, error) {
+	db := &db{d}
+	if _, err := db.ExecContext(ctx, "PRAGMA foreign_keys = off"); err != nil {
+		return nil, fmt.Errorf("sqlite: set 'foreign_keys = off': %w", err)
+	}
+	t, err := d.Driver.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	tx := &tx{t}
+	cm, err := sqlite.CommitFunc(ctx, db, tx, true)
+	if err != nil {
+		return nil, err
+	}
+	return &SQLiteTx{Tx: t, commit: cm, rollback: sqlite.RollbackFunc(ctx, db, tx, true)}, nil
+}
+
+// Commit ensures foreign keys are toggled back on after commit.
+func (tx *SQLiteTx) Commit() error {
+	return tx.commit()
+}
+
+// Rollback ensures foreign keys are toggled back on after rollback.
+func (tx *SQLiteTx) Rollback() error {
+	return tx.rollback()
 }
 
 // init makes sure that foreign_keys support is enabled.
-func (d *SQLite) init(ctx context.Context, tx dialect.ExecQuerier) error {
-	on, err := exist(ctx, tx, "PRAGMA foreign_keys")
+func (d *SQLite) init(ctx context.Context) error {
+	on, err := exist(ctx, d, "PRAGMA foreign_keys")
 	if err != nil {
 		return fmt.Errorf("sqlite: check foreign_keys pragma: %w", err)
 	}
@@ -447,12 +484,35 @@ func (d *SQLite) atIndex(idx1 *Index, t2 *schema.Table, idx2 *schema.Index) erro
 		}
 		idx2.AddParts(&schema.IndexPart{C: c2})
 	}
+	if idx1.Annotation != nil && idx1.Annotation.Where != "" {
+		idx2.AddAttrs(&sqlite.IndexPredicate{P: idx1.Annotation.Where})
+	}
 	return nil
 }
 
-func (SQLite) atTypeRangeSQL(ts ...string) string {
+func (*SQLite) atTypeRangeSQL(ts ...string) string {
 	for i := range ts {
 		ts[i] = fmt.Sprintf("('%s')", ts[i])
 	}
 	return fmt.Sprintf("INSERT INTO `%s` (`type`) VALUES %s", TypeTable, strings.Join(ts, ", "))
+}
+
+type tx struct {
+	dialect.Tx
+}
+
+func (tx *tx) QueryContext(ctx context.Context, query string, args ...any) (*stdsql.Rows, error) {
+	rows := &sql.Rows{}
+	if err := tx.Query(ctx, query, args, rows); err != nil {
+		return nil, err
+	}
+	return rows.ColumnScanner.(*stdsql.Rows), nil
+}
+
+func (tx *tx) ExecContext(ctx context.Context, query string, args ...any) (stdsql.Result, error) {
+	var r stdsql.Result
+	if err := tx.Exec(ctx, query, args, &r); err != nil {
+		return nil, err
+	}
+	return r, nil
 }

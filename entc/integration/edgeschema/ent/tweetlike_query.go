@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
 
@@ -28,9 +29,8 @@ type TweetLikeQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.TweetLike
-	// eager-loading edges.
-	withTweet *TweetQuery
-	withUser  *UserQuery
+	withTweet  *TweetQuery
+	withUser   *UserQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -268,7 +268,6 @@ func (tlq *TweetLikeQuery) WithUser(opts ...func(*UserQuery)) *TweetLikeQuery {
 //		GroupBy(tweetlike.FieldLikedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (tlq *TweetLikeQuery) GroupBy(field string, fields ...string) *TweetLikeGroupBy {
 	grbuild := &TweetLikeGroupBy{config: tlq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -295,7 +294,6 @@ func (tlq *TweetLikeQuery) GroupBy(field string, fields ...string) *TweetLikeGro
 //	client.TweetLike.Query().
 //		Select(tweetlike.FieldLikedAt).
 //		Scan(ctx, &v)
-//
 func (tlq *TweetLikeQuery) Select(fields ...string) *TweetLikeSelect {
 	tlq.fields = append(tlq.fields, fields...)
 	selbuild := &TweetLikeSelect{TweetLikeQuery: tlq}
@@ -317,6 +315,12 @@ func (tlq *TweetLikeQuery) prepareQuery(ctx context.Context) error {
 		}
 		tlq.sql = prev
 	}
+	if tweetlike.Policy == nil {
+		return errors.New("ent: uninitialized tweetlike.Policy (forgotten import ent/runtime?)")
+	}
+	if err := tweetlike.Policy.EvalQuery(ctx, tlq); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -329,10 +333,10 @@ func (tlq *TweetLikeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*T
 			tlq.withUser != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*TweetLike).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &TweetLike{config: tlq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -347,60 +351,72 @@ func (tlq *TweetLikeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*T
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := tlq.withTweet; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*TweetLike)
-		for i := range nodes {
-			fk := nodes[i].TweetID
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(tweet.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := tlq.loadTweet(ctx, query, nodes, nil,
+			func(n *TweetLike, e *Tweet) { n.Edges.Tweet = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "tweet_id" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Tweet = n
-			}
-		}
 	}
-
 	if query := tlq.withUser; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*TweetLike)
-		for i := range nodes {
-			fk := nodes[i].UserID
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := tlq.loadUser(ctx, query, nodes, nil,
+			func(n *TweetLike, e *User) { n.Edges.User = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.User = n
-			}
+	}
+	return nodes, nil
+}
+
+func (tlq *TweetLikeQuery) loadTweet(ctx context.Context, query *TweetQuery, nodes []*TweetLike, init func(*TweetLike), assign func(*TweetLike, *Tweet)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*TweetLike)
+	for i := range nodes {
+		fk := nodes[i].TweetID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(tweet.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "tweet_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
+}
+func (tlq *TweetLikeQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*TweetLike, init func(*TweetLike), assign func(*TweetLike, *User)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*TweetLike)
+	for i := range nodes {
+		fk := nodes[i].UserID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (tlq *TweetLikeQuery) sqlCount(ctx context.Context) (int, error) {
@@ -411,11 +427,14 @@ func (tlq *TweetLikeQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (tlq *TweetLikeQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := tlq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := tlq.First(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (tlq *TweetLikeQuery) querySpec() *sqlgraph.QuerySpec {
@@ -509,7 +528,7 @@ func (tlgb *TweetLikeGroupBy) Aggregate(fns ...AggregateFunc) *TweetLikeGroupBy 
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (tlgb *TweetLikeGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (tlgb *TweetLikeGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := tlgb.path(ctx)
 	if err != nil {
 		return err
@@ -518,7 +537,7 @@ func (tlgb *TweetLikeGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return tlgb.sqlScan(ctx, v)
 }
 
-func (tlgb *TweetLikeGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (tlgb *TweetLikeGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range tlgb.fields {
 		if !tweetlike.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -565,7 +584,7 @@ type TweetLikeSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (tls *TweetLikeSelect) Scan(ctx context.Context, v interface{}) error {
+func (tls *TweetLikeSelect) Scan(ctx context.Context, v any) error {
 	if err := tls.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -573,7 +592,7 @@ func (tls *TweetLikeSelect) Scan(ctx context.Context, v interface{}) error {
 	return tls.sqlScan(ctx, v)
 }
 
-func (tls *TweetLikeSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (tls *TweetLikeSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := tls.sql.Query()
 	if err := tls.driver.Query(ctx, query, args, rows); err != nil {

@@ -266,7 +266,6 @@ func (miq *MixinIDQuery) Clone() *MixinIDQuery {
 //		GroupBy(mixinid.FieldSomeField).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (miq *MixinIDQuery) GroupBy(field string, fields ...string) *MixinIDGroupBy {
 	grbuild := &MixinIDGroupBy{config: miq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -293,7 +292,6 @@ func (miq *MixinIDQuery) GroupBy(field string, fields ...string) *MixinIDGroupBy
 //	client.MixinID.Query().
 //		Select(mixinid.FieldSomeField).
 //		Scan(ctx, &v)
-//
 func (miq *MixinIDQuery) Select(fields ...string) *MixinIDSelect {
 	miq.fields = append(miq.fields, fields...)
 	selbuild := &MixinIDSelect{MixinIDQuery: miq}
@@ -323,10 +321,10 @@ func (miq *MixinIDQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Mix
 		nodes = []*MixinID{}
 		_spec = miq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*MixinID).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &MixinID{config: miq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -353,11 +351,14 @@ func (miq *MixinIDQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (miq *MixinIDQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := miq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := miq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (miq *MixinIDQuery) querySpec() *sqlgraph.QuerySpec {
@@ -458,7 +459,7 @@ func (migb *MixinIDGroupBy) Aggregate(fns ...AggregateFunc) *MixinIDGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (migb *MixinIDGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (migb *MixinIDGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := migb.path(ctx)
 	if err != nil {
 		return err
@@ -467,7 +468,7 @@ func (migb *MixinIDGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return migb.sqlScan(ctx, v)
 }
 
-func (migb *MixinIDGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (migb *MixinIDGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range migb.fields {
 		if !mixinid.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -514,7 +515,7 @@ type MixinIDSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (mis *MixinIDSelect) Scan(ctx context.Context, v interface{}) error {
+func (mis *MixinIDSelect) Scan(ctx context.Context, v any) error {
 	if err := mis.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -522,7 +523,7 @@ func (mis *MixinIDSelect) Scan(ctx context.Context, v interface{}) error {
 	return mis.sqlScan(ctx, v)
 }
 
-func (mis *MixinIDSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (mis *MixinIDSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := mis.sql.Query()
 	if err := mis.driver.Query(ctx, query, args, rows); err != nil {

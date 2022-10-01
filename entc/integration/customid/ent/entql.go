@@ -9,11 +9,13 @@ package ent
 import (
 	"entgo.io/ent/entc/integration/customid/ent/account"
 	"entgo.io/ent/entc/integration/customid/ent/blob"
+	"entgo.io/ent/entc/integration/customid/ent/bloblink"
 	"entgo.io/ent/entc/integration/customid/ent/car"
 	"entgo.io/ent/entc/integration/customid/ent/device"
 	"entgo.io/ent/entc/integration/customid/ent/doc"
 	"entgo.io/ent/entc/integration/customid/ent/group"
 	"entgo.io/ent/entc/integration/customid/ent/intsid"
+	"entgo.io/ent/entc/integration/customid/ent/link"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
 	"entgo.io/ent/entc/integration/customid/ent/note"
 	"entgo.io/ent/entc/integration/customid/ent/other"
@@ -32,7 +34,7 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 15)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 17)}
 	graph.Nodes[0] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   account.Table,
@@ -64,6 +66,28 @@ var schemaGraph = func() *sqlgraph.Schema {
 	}
 	graph.Nodes[2] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
+			Table:   bloblink.Table,
+			Columns: bloblink.Columns,
+			CompositeID: []*sqlgraph.FieldSpec{
+				{
+					Type:   field.TypeUUID,
+					Column: bloblink.FieldBlobID,
+				},
+				{
+					Type:   field.TypeUUID,
+					Column: bloblink.FieldLinkID,
+				},
+			},
+		},
+		Type: "BlobLink",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			bloblink.FieldCreatedAt: {Type: field.TypeTime, Column: bloblink.FieldCreatedAt},
+			bloblink.FieldBlobID:    {Type: field.TypeUUID, Column: bloblink.FieldBlobID},
+			bloblink.FieldLinkID:    {Type: field.TypeUUID, Column: bloblink.FieldLinkID},
+		},
+	}
+	graph.Nodes[3] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
 			Table:   car.Table,
 			Columns: car.Columns,
 			ID: &sqlgraph.FieldSpec{
@@ -78,7 +102,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			car.FieldModel:    {Type: field.TypeString, Column: car.FieldModel},
 		},
 	}
-	graph.Nodes[3] = &sqlgraph.Node{
+	graph.Nodes[4] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   device.Table,
 			Columns: device.Columns,
@@ -90,7 +114,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Type:   "Device",
 		Fields: map[string]*sqlgraph.FieldSpec{},
 	}
-	graph.Nodes[4] = &sqlgraph.Node{
+	graph.Nodes[5] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   doc.Table,
 			Columns: doc.Columns,
@@ -104,7 +128,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			doc.FieldText: {Type: field.TypeString, Column: doc.FieldText},
 		},
 	}
-	graph.Nodes[5] = &sqlgraph.Node{
+	graph.Nodes[6] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   group.Table,
 			Columns: group.Columns,
@@ -116,7 +140,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Type:   "Group",
 		Fields: map[string]*sqlgraph.FieldSpec{},
 	}
-	graph.Nodes[6] = &sqlgraph.Node{
+	graph.Nodes[7] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   intsid.Table,
 			Columns: intsid.Columns,
@@ -128,7 +152,21 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Type:   "IntSID",
 		Fields: map[string]*sqlgraph.FieldSpec{},
 	}
-	graph.Nodes[7] = &sqlgraph.Node{
+	graph.Nodes[8] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table:   link.Table,
+			Columns: link.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeUUID,
+				Column: link.FieldID,
+			},
+		},
+		Type: "Link",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			link.FieldLinkInformation: {Type: field.TypeJSON, Column: link.FieldLinkInformation},
+		},
+	}
+	graph.Nodes[9] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   mixinid.Table,
 			Columns: mixinid.Columns,
@@ -143,7 +181,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			mixinid.FieldMixinField: {Type: field.TypeString, Column: mixinid.FieldMixinField},
 		},
 	}
-	graph.Nodes[8] = &sqlgraph.Node{
+	graph.Nodes[10] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   note.Table,
 			Columns: note.Columns,
@@ -157,7 +195,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			note.FieldText: {Type: field.TypeString, Column: note.FieldText},
 		},
 	}
-	graph.Nodes[9] = &sqlgraph.Node{
+	graph.Nodes[11] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   other.Table,
 			Columns: other.Columns,
@@ -169,7 +207,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Type:   "Other",
 		Fields: map[string]*sqlgraph.FieldSpec{},
 	}
-	graph.Nodes[10] = &sqlgraph.Node{
+	graph.Nodes[12] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   pet.Table,
 			Columns: pet.Columns,
@@ -181,7 +219,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Type:   "Pet",
 		Fields: map[string]*sqlgraph.FieldSpec{},
 	}
-	graph.Nodes[11] = &sqlgraph.Node{
+	graph.Nodes[13] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   revision.Table,
 			Columns: revision.Columns,
@@ -193,7 +231,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Type:   "Revision",
 		Fields: map[string]*sqlgraph.FieldSpec{},
 	}
-	graph.Nodes[12] = &sqlgraph.Node{
+	graph.Nodes[14] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   session.Table,
 			Columns: session.Columns,
@@ -205,7 +243,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Type:   "Session",
 		Fields: map[string]*sqlgraph.FieldSpec{},
 	}
-	graph.Nodes[13] = &sqlgraph.Node{
+	graph.Nodes[15] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   token.Table,
 			Columns: token.Columns,
@@ -219,7 +257,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			token.FieldBody: {Type: field.TypeString, Column: token.FieldBody},
 		},
 	}
-	graph.Nodes[14] = &sqlgraph.Node{
+	graph.Nodes[16] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
@@ -265,6 +303,42 @@ var schemaGraph = func() *sqlgraph.Schema {
 			Bidi:    true,
 		},
 		"Blob",
+		"Blob",
+	)
+	graph.MustAddE(
+		"blob_links",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   blob.BlobLinksTable,
+			Columns: []string{blob.BlobLinksColumn},
+			Bidi:    false,
+		},
+		"Blob",
+		"BlobLink",
+	)
+	graph.MustAddE(
+		"blob",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   bloblink.BlobTable,
+			Columns: []string{bloblink.BlobColumn},
+			Bidi:    false,
+		},
+		"BlobLink",
+		"Blob",
+	)
+	graph.MustAddE(
+		"link",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   bloblink.LinkTable,
+			Columns: []string{bloblink.LinkColumn},
+			Bidi:    false,
+		},
+		"BlobLink",
 		"Blob",
 	)
 	graph.MustAddE(
@@ -323,6 +397,18 @@ var schemaGraph = func() *sqlgraph.Schema {
 			Table:   doc.ChildrenTable,
 			Columns: []string{doc.ChildrenColumn},
 			Bidi:    false,
+		},
+		"Doc",
+		"Doc",
+	)
+	graph.MustAddE(
+		"related",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   doc.RelatedTable,
+			Columns: doc.RelatedPrimaryKey,
+			Bidi:    true,
 		},
 		"Doc",
 		"Doc",
@@ -653,6 +739,98 @@ func (f *BlobFilter) WhereHasLinksWith(preds ...predicate.Blob) {
 	})))
 }
 
+// WhereHasBlobLinks applies a predicate to check if query has an edge blob_links.
+func (f *BlobFilter) WhereHasBlobLinks() {
+	f.Where(entql.HasEdge("blob_links"))
+}
+
+// WhereHasBlobLinksWith applies a predicate to check if query has an edge blob_links with a given conditions (other predicates).
+func (f *BlobFilter) WhereHasBlobLinksWith(preds ...predicate.BlobLink) {
+	f.Where(entql.HasEdgeWith("blob_links", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// addPredicate implements the predicateAdder interface.
+func (blq *BlobLinkQuery) addPredicate(pred func(s *sql.Selector)) {
+	blq.predicates = append(blq.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the BlobLinkQuery builder.
+func (blq *BlobLinkQuery) Filter() *BlobLinkFilter {
+	return &BlobLinkFilter{config: blq.config, predicateAdder: blq}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *BlobLinkMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the BlobLinkMutation builder.
+func (m *BlobLinkMutation) Filter() *BlobLinkFilter {
+	return &BlobLinkFilter{config: m.config, predicateAdder: m}
+}
+
+// BlobLinkFilter provides a generic filtering capability at runtime for BlobLinkQuery.
+type BlobLinkFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *BlobLinkFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[2].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereCreatedAt applies the entql time.Time predicate on the created_at field.
+func (f *BlobLinkFilter) WhereCreatedAt(p entql.TimeP) {
+	f.Where(p.Field(bloblink.FieldCreatedAt))
+}
+
+// WhereBlobID applies the entql [16]byte predicate on the blob_id field.
+func (f *BlobLinkFilter) WhereBlobID(p entql.ValueP) {
+	f.Where(p.Field(bloblink.FieldBlobID))
+}
+
+// WhereLinkID applies the entql [16]byte predicate on the link_id field.
+func (f *BlobLinkFilter) WhereLinkID(p entql.ValueP) {
+	f.Where(p.Field(bloblink.FieldLinkID))
+}
+
+// WhereHasBlob applies a predicate to check if query has an edge blob.
+func (f *BlobLinkFilter) WhereHasBlob() {
+	f.Where(entql.HasEdge("blob"))
+}
+
+// WhereHasBlobWith applies a predicate to check if query has an edge blob with a given conditions (other predicates).
+func (f *BlobLinkFilter) WhereHasBlobWith(preds ...predicate.Blob) {
+	f.Where(entql.HasEdgeWith("blob", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// WhereHasLink applies a predicate to check if query has an edge link.
+func (f *BlobLinkFilter) WhereHasLink() {
+	f.Where(entql.HasEdge("link"))
+}
+
+// WhereHasLinkWith applies a predicate to check if query has an edge link with a given conditions (other predicates).
+func (f *BlobLinkFilter) WhereHasLinkWith(preds ...predicate.Blob) {
+	f.Where(entql.HasEdgeWith("link", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
 // addPredicate implements the predicateAdder interface.
 func (cq *CarQuery) addPredicate(pred func(s *sql.Selector)) {
 	cq.predicates = append(cq.predicates, pred)
@@ -682,7 +860,7 @@ type CarFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *CarFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[2].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[3].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -751,7 +929,7 @@ type DeviceFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *DeviceFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[3].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[4].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -819,7 +997,7 @@ type DocFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *DocFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[4].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[5].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -863,6 +1041,20 @@ func (f *DocFilter) WhereHasChildrenWith(preds ...predicate.Doc) {
 	})))
 }
 
+// WhereHasRelated applies a predicate to check if query has an edge related.
+func (f *DocFilter) WhereHasRelated() {
+	f.Where(entql.HasEdge("related"))
+}
+
+// WhereHasRelatedWith applies a predicate to check if query has an edge related with a given conditions (other predicates).
+func (f *DocFilter) WhereHasRelatedWith(preds ...predicate.Doc) {
+	f.Where(entql.HasEdgeWith("related", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
 // addPredicate implements the predicateAdder interface.
 func (gq *GroupQuery) addPredicate(pred func(s *sql.Selector)) {
 	gq.predicates = append(gq.predicates, pred)
@@ -892,7 +1084,7 @@ type GroupFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *GroupFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[5].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[6].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -946,7 +1138,7 @@ type IntSIDFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *IntSIDFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[6].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[7].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -986,6 +1178,51 @@ func (f *IntSIDFilter) WhereHasChildrenWith(preds ...predicate.IntSID) {
 }
 
 // addPredicate implements the predicateAdder interface.
+func (lq *LinkQuery) addPredicate(pred func(s *sql.Selector)) {
+	lq.predicates = append(lq.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the LinkQuery builder.
+func (lq *LinkQuery) Filter() *LinkFilter {
+	return &LinkFilter{config: lq.config, predicateAdder: lq}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *LinkMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the LinkMutation builder.
+func (m *LinkMutation) Filter() *LinkFilter {
+	return &LinkFilter{config: m.config, predicateAdder: m}
+}
+
+// LinkFilter provides a generic filtering capability at runtime for LinkQuery.
+type LinkFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *LinkFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[8].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql [16]byte predicate on the id field.
+func (f *LinkFilter) WhereID(p entql.ValueP) {
+	f.Where(p.Field(link.FieldID))
+}
+
+// WhereLinkInformation applies the entql json.RawMessage predicate on the link_information field.
+func (f *LinkFilter) WhereLinkInformation(p entql.BytesP) {
+	f.Where(p.Field(link.FieldLinkInformation))
+}
+
+// addPredicate implements the predicateAdder interface.
 func (miq *MixinIDQuery) addPredicate(pred func(s *sql.Selector)) {
 	miq.predicates = append(miq.predicates, pred)
 }
@@ -1014,7 +1251,7 @@ type MixinIDFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *MixinIDFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[7].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[9].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -1064,7 +1301,7 @@ type NoteFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *NoteFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[8].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[10].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -1137,7 +1374,7 @@ type OtherFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *OtherFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[9].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[11].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -1177,7 +1414,7 @@ type PetFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *PetFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[10].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[12].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -1273,7 +1510,7 @@ type RevisionFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *RevisionFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[11].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[13].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -1313,7 +1550,7 @@ type SessionFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *SessionFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[12].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[14].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -1367,7 +1604,7 @@ type TokenFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TokenFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[13].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[15].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -1426,7 +1663,7 @@ type UserFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[14].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[16].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})

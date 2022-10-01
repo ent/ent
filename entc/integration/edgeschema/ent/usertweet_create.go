@@ -259,7 +259,6 @@ func (utc *UserTweetCreate) createSpec() (*UserTweet, *sqlgraph.CreateSpec) {
 //			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (utc *UserTweetCreate) OnConflict(opts ...sql.ConflictOption) *UserTweetUpsertOne {
 	utc.conflict = opts
 	return &UserTweetUpsertOne{
@@ -273,7 +272,6 @@ func (utc *UserTweetCreate) OnConflict(opts ...sql.ConflictOption) *UserTweetUps
 //	client.UserTweet.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (utc *UserTweetCreate) OnConflictColumns(columns ...string) *UserTweetUpsertOne {
 	utc.conflict = append(utc.conflict, sql.ConflictColumns(columns...))
 	return &UserTweetUpsertOne{
@@ -338,7 +336,6 @@ func (u *UserTweetUpsert) UpdateTweetID() *UserTweetUpsert {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *UserTweetUpsertOne) UpdateNewValues() *UserTweetUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -347,10 +344,9 @@ func (u *UserTweetUpsertOne) UpdateNewValues() *UserTweetUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.UserTweet.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.UserTweet.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *UserTweetUpsertOne) Ignore() *UserTweetUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -548,7 +544,6 @@ func (utcb *UserTweetCreateBulk) ExecX(ctx context.Context) {
 //			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (utcb *UserTweetCreateBulk) OnConflict(opts ...sql.ConflictOption) *UserTweetUpsertBulk {
 	utcb.conflict = opts
 	return &UserTweetUpsertBulk{
@@ -562,7 +557,6 @@ func (utcb *UserTweetCreateBulk) OnConflict(opts ...sql.ConflictOption) *UserTwe
 //	client.UserTweet.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (utcb *UserTweetCreateBulk) OnConflictColumns(columns ...string) *UserTweetUpsertBulk {
 	utcb.conflict = append(utcb.conflict, sql.ConflictColumns(columns...))
 	return &UserTweetUpsertBulk{
@@ -584,7 +578,6 @@ type UserTweetUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *UserTweetUpsertBulk) UpdateNewValues() *UserTweetUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -596,7 +589,6 @@ func (u *UserTweetUpsertBulk) UpdateNewValues() *UserTweetUpsertBulk {
 //	client.UserTweet.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *UserTweetUpsertBulk) Ignore() *UserTweetUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

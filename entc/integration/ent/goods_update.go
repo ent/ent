@@ -21,8 +21,9 @@ import (
 // GoodsUpdate is the builder for updating Goods entities.
 type GoodsUpdate struct {
 	config
-	hooks    []Hook
-	mutation *GoodsMutation
+	hooks     []Hook
+	mutation  *GoodsMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the GoodsUpdate builder.
@@ -90,6 +91,12 @@ func (gu *GoodsUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (gu *GoodsUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *GoodsUpdate {
+	gu.modifiers = append(gu.modifiers, modifiers...)
+	return gu
+}
+
 func (gu *GoodsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -108,6 +115,7 @@ func (gu *GoodsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	_spec.AddModifiers(gu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, gu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{goods.Label}
@@ -122,9 +130,10 @@ func (gu *GoodsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // GoodsUpdateOne is the builder for updating a single Goods entity.
 type GoodsUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *GoodsMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *GoodsMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Mutation returns the GoodsMutation object of the builder.
@@ -199,6 +208,12 @@ func (guo *GoodsUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (guo *GoodsUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *GoodsUpdateOne {
+	guo.modifiers = append(guo.modifiers, modifiers...)
+	return guo
+}
+
 func (guo *GoodsUpdateOne) sqlSave(ctx context.Context) (_node *Goods, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -234,6 +249,7 @@ func (guo *GoodsUpdateOne) sqlSave(ctx context.Context) (_node *Goods, err error
 			}
 		}
 	}
+	_spec.AddModifiers(guo.modifiers...)
 	_node = &Goods{config: guo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

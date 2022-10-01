@@ -28,9 +28,8 @@ type CarQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Car
-	// eager-loading edges.
-	withOwner *UserQuery
-	withFKs   bool
+	withOwner  *UserQuery
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -303,7 +302,6 @@ func (cq *CarQuery) WithOwner(opts ...func(*UserQuery)) *CarQuery {
 //		GroupBy(car.FieldModel).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (cq *CarQuery) GroupBy(field string, fields ...string) *CarGroupBy {
 	grbuild := &CarGroupBy{config: cq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -330,7 +328,6 @@ func (cq *CarQuery) GroupBy(field string, fields ...string) *CarGroupBy {
 //	client.Car.Query().
 //		Select(car.FieldModel).
 //		Scan(ctx, &v)
-//
 func (cq *CarQuery) Select(fields ...string) *CarSelect {
 	cq.fields = append(cq.fields, fields...)
 	selbuild := &CarSelect{CarQuery: cq}
@@ -370,10 +367,10 @@ func (cq *CarQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Car, err
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, car.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Car).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Car{config: cq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -388,37 +385,43 @@ func (cq *CarQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Car, err
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := cq.withOwner; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Car)
-		for i := range nodes {
-			if nodes[i].user_cars == nil {
-				continue
-			}
-			fk := *nodes[i].user_cars
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := cq.loadOwner(ctx, query, nodes, nil,
+			func(n *Car, e *User) { n.Edges.Owner = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_cars" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Owner = n
-			}
+	}
+	return nodes, nil
+}
+
+func (cq *CarQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*Car, init func(*Car), assign func(*Car, *User)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Car)
+	for i := range nodes {
+		if nodes[i].user_cars == nil {
+			continue
+		}
+		fk := *nodes[i].user_cars
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_cars" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
 }
 
 func (cq *CarQuery) sqlCount(ctx context.Context) (int, error) {
@@ -431,11 +434,14 @@ func (cq *CarQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (cq *CarQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := cq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := cq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (cq *CarQuery) querySpec() *sqlgraph.QuerySpec {
@@ -536,7 +542,7 @@ func (cgb *CarGroupBy) Aggregate(fns ...AggregateFunc) *CarGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (cgb *CarGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (cgb *CarGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := cgb.path(ctx)
 	if err != nil {
 		return err
@@ -545,7 +551,7 @@ func (cgb *CarGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return cgb.sqlScan(ctx, v)
 }
 
-func (cgb *CarGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (cgb *CarGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range cgb.fields {
 		if !car.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -592,7 +598,7 @@ type CarSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (cs *CarSelect) Scan(ctx context.Context, v interface{}) error {
+func (cs *CarSelect) Scan(ctx context.Context, v any) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -600,7 +606,7 @@ func (cs *CarSelect) Scan(ctx context.Context, v interface{}) error {
 	return cs.sqlScan(ctx, v)
 }
 
-func (cs *CarSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (cs *CarSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := cs.sql.Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {

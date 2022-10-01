@@ -142,7 +142,6 @@ func (gc *GoodsCreate) createSpec() (*Goods, *sqlgraph.CreateSpec) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (gc *GoodsCreate) OnConflict(opts ...sql.ConflictOption) *GoodsUpsertOne {
 	gc.conflict = opts
 	return &GoodsUpsertOne{
@@ -156,7 +155,6 @@ func (gc *GoodsCreate) OnConflict(opts ...sql.ConflictOption) *GoodsUpsertOne {
 //	client.Goods.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (gc *GoodsCreate) OnConflictColumns(columns ...string) *GoodsUpsertOne {
 	gc.conflict = append(gc.conflict, sql.ConflictColumns(columns...))
 	return &GoodsUpsertOne{
@@ -185,7 +183,6 @@ type (
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *GoodsUpsertOne) UpdateNewValues() *GoodsUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -194,10 +191,9 @@ func (u *GoodsUpsertOne) UpdateNewValues() *GoodsUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.Goods.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.Goods.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *GoodsUpsertOne) Ignore() *GoodsUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -347,7 +343,6 @@ func (gcb *GoodsCreateBulk) ExecX(ctx context.Context) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (gcb *GoodsCreateBulk) OnConflict(opts ...sql.ConflictOption) *GoodsUpsertBulk {
 	gcb.conflict = opts
 	return &GoodsUpsertBulk{
@@ -361,7 +356,6 @@ func (gcb *GoodsCreateBulk) OnConflict(opts ...sql.ConflictOption) *GoodsUpsertB
 //	client.Goods.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (gcb *GoodsCreateBulk) OnConflictColumns(columns ...string) *GoodsUpsertBulk {
 	gcb.conflict = append(gcb.conflict, sql.ConflictColumns(columns...))
 	return &GoodsUpsertBulk{
@@ -383,7 +377,6 @@ type GoodsUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *GoodsUpsertBulk) UpdateNewValues() *GoodsUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -395,7 +388,6 @@ func (u *GoodsUpsertBulk) UpdateNewValues() *GoodsUpsertBulk {
 //	client.Goods.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *GoodsUpsertBulk) Ignore() *GoodsUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

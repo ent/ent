@@ -102,6 +102,20 @@ func (pu *PetUpdate) ClearNickname() *PetUpdate {
 	return pu
 }
 
+// SetTrained sets the "trained" field.
+func (pu *PetUpdate) SetTrained(b bool) *PetUpdate {
+	pu.mutation.SetTrained(b)
+	return pu
+}
+
+// SetNillableTrained sets the "trained" field if the given value is not nil.
+func (pu *PetUpdate) SetNillableTrained(b *bool) *PetUpdate {
+	if b != nil {
+		pu.SetTrained(*b)
+	}
+	return pu
+}
+
 // SetTeamID sets the "team" edge to the User entity by ID.
 func (pu *PetUpdate) SetTeamID(id string) *PetUpdate {
 	pu.mutation.SetTeamID(id)
@@ -254,7 +268,10 @@ func (pu *PetUpdate) gremlin() *dsl.Traversal {
 	if value, ok := pu.mutation.Nickname(); ok {
 		v.Property(dsl.Single, pet.FieldNickname, value)
 	}
-	var properties []interface{}
+	if value, ok := pu.mutation.Trained(); ok {
+		v.Property(dsl.Single, pet.FieldTrained, value)
+	}
+	var properties []any
 	if pu.mutation.UUIDCleared() {
 		properties = append(properties, pet.FieldUUID)
 	}
@@ -369,6 +386,20 @@ func (puo *PetUpdateOne) SetNillableNickname(s *string) *PetUpdateOne {
 // ClearNickname clears the value of the "nickname" field.
 func (puo *PetUpdateOne) ClearNickname() *PetUpdateOne {
 	puo.mutation.ClearNickname()
+	return puo
+}
+
+// SetTrained sets the "trained" field.
+func (puo *PetUpdateOne) SetTrained(b bool) *PetUpdateOne {
+	puo.mutation.SetTrained(b)
+	return puo
+}
+
+// SetNillableTrained sets the "trained" field if the given value is not nil.
+func (puo *PetUpdateOne) SetNillableTrained(b *bool) *PetUpdateOne {
+	if b != nil {
+		puo.SetTrained(*b)
+	}
 	return puo
 }
 
@@ -542,7 +573,10 @@ func (puo *PetUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := puo.mutation.Nickname(); ok {
 		v.Property(dsl.Single, pet.FieldNickname, value)
 	}
-	var properties []interface{}
+	if value, ok := puo.mutation.Trained(); ok {
+		v.Property(dsl.Single, pet.FieldTrained, value)
+	}
+	var properties []any
 	if puo.mutation.UUIDCleared() {
 		properties = append(properties, pet.FieldUUID)
 	}
@@ -571,7 +605,7 @@ func (puo *PetUpdateOne) gremlin(id string) *dsl.Traversal {
 		v.AddE(user.PetsLabel).From(g.V(id)).InV()
 	}
 	if len(puo.fields) > 0 {
-		fields := make([]interface{}, 0, len(puo.fields)+1)
+		fields := make([]any, 0, len(puo.fields)+1)
 		fields = append(fields, true)
 		for _, f := range puo.fields {
 			fields = append(fields, f)

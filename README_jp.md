@@ -14,7 +14,7 @@ src="https://s3.eu-central-1.amazonaws.com/entgo.io/assets/gopher_graph.png"/>
 - **Schema As Code(コードとしてのスキーマ)** - あらゆるデータベーススキーマをGoオブジェクトとしてモデル化します。
 - **任意のグラフを簡単にトラバースできます** - クエリや集約の実行、任意のグラフ構造の走査を容易に実行できます。
 - **100%静的に型付けされた明示的なAPI** - コード生成により、100%静的に型付けされた曖昧さのないAPIを提供します。
-- **マルチストレージドライバ** - MySQL、PostgreSQL、SQLite、Gremlinをサポートしています。
+- **マルチストレージドライバ** - MySQL、MariaDB、 TiDB、PostgreSQL、CockroachDB、SQLite、Gremlinをサポートしています。
 - **拡張性** - Goテンプレートを使用して簡単に拡張、カスタマイズできます。
 
 ## クイックインストール
@@ -22,12 +22,12 @@ src="https://s3.eu-central-1.amazonaws.com/entgo.io/assets/gopher_graph.png"/>
 go install entgo.io/ent/cmd/ent@latest
 ```
 
-[Go modules]を使ったインストールについては、[entgo.io website][entgo instal]をご覧ください。
+[Go modules]を使ったインストールについては、[entgo.ioのWebサイト](https://entgo.io/ja/docs/code-gen/#entc-%E3%81%A8-ent-%E3%81%AE%E3%83%90%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%B3%E3%82%92%E4%B8%80%E8%87%B4%E3%81%95%E3%81%9B%E3%82%8B)をご覧ください。
 
 ## ドキュメントとサポート
-entを開発・使用するためのドキュメントは、こちら。: https://entgo.io
+entを開発・使用するためのドキュメントは、こちら: https://entgo.io
 
-議論やサポートについては、[Issueを立てる](https://github.com/ent/ent/issues/new/choose)か、gophers Slackの[チャンネル](https://gophers.slack.com/archives/C01FMSQDT53)に参加してください。
+議論やサポートについては、[Issueを開く](https://github.com/ent/ent/issues/new/choose)か、gophers Slackの[チャンネル](https://gophers.slack.com/archives/C01FMSQDT53)に参加してください。
 
 ## entコミュニティへの参加
 `ent`の構築は、コミュニティ全体の協力なしには実現できませんでした。 私たちは、この`ent`の貢献者をリストアップした[contributorsページ](doc/md/contributors.md)を管理しています。
@@ -40,7 +40,7 @@ entを開発・使用するためのドキュメントは、こちら。: https:
 
 
 ## プロジェクトについて
-`ent`プロジェクトは、私たちが社内で使用しているエンティティフレームワークである`Ent`からインスピレーションを得ています。
+`ent`プロジェクトは、私たちが社内で使用しているエンティティフレームワークであるEntからインスピレーションを得ています。
 entは、[Facebook Connectivity][fbc]チームの[a8m](https://github.com/a8m)と[alexsn](https://github.com/alexsn)が開発・保守しています。
 本番環境では複数のチームやプロジェクトで使用されており、v1リリースまでのロードマップは[こちら](https://github.com/ent/ent/issues/46)に記載されています。
 このプロジェクトの動機については[こちら](https://entgo.io/blog/2019/10/03/introducing-ent)をご覧ください。

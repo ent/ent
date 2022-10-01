@@ -21,7 +21,7 @@ var (
 		},
 	}
 
-	// FeatureEntQL provides a feature-flag for the entql extension for ent.
+	// FeatureEntQL provides a feature-flag for the EntQL extension for ent.
 	FeatureEntQL = Feature{
 		Name:        "entql",
 		Stage:       Experimental,
@@ -30,6 +30,14 @@ var (
 		cleanup: func(c *Config) error {
 			return os.RemoveAll(filepath.Join(c.Target, "entql.go"))
 		},
+	}
+
+	// FeatureNamedEdges provides a feature-flag for eager-loading edges with dynamic names.
+	FeatureNamedEdges = Feature{
+		Name:        "namedges",
+		Stage:       Experimental,
+		Default:     false,
+		Description: "NamedEdges provides an API for eager-loading edges with dynamic names",
 	}
 
 	// FeatureSnapshot stores a snapshot of ent/schema and auto-solve merge-conflict (issue #852).
@@ -111,6 +119,7 @@ var (
 	AllFeatures = []Feature{
 		FeaturePrivacy,
 		FeatureEntQL,
+		FeatureNamedEdges,
 		FeatureSnapshot,
 		FeatureSchemaConfig,
 		FeatureLock,

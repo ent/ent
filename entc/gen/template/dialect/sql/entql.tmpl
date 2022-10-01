@@ -31,10 +31,21 @@ var schemaGraph = func() *sqlgraph.Schema {
 			NodeSpec: sqlgraph.NodeSpec{
 				Table: {{ $n.Package }}.Table,
 				Columns: {{ $n.Package }}.Columns,
-				ID: &sqlgraph.FieldSpec{
-					Type: field.{{ $n.ID.Type.ConstName }},
-					Column: {{ $n.Package }}.{{ $n.ID.Constant }},
-				},
+				{{- if $n.HasOneFieldID }}
+					ID: &sqlgraph.FieldSpec{
+						Type: field.{{ $n.ID.Type.ConstName }},
+						Column: {{ $n.Package }}.{{ $n.ID.Constant }},
+					},
+				{{- else }}
+					CompositeID: []*sqlgraph.FieldSpec{
+						{{- range $id := $n.EdgeSchema.ID }}
+							{
+								Type: field.{{ $id.Type.ConstName }},
+								Column: {{ $n.Package }}.{{ $id.Constant }},
+							},
+						{{- end }}
+					},
+				{{- end }}
 			},
 			Type: "{{ $n.Name }}",
 			Fields: map[string]*sqlgraph.FieldSpec{
@@ -110,16 +121,18 @@ type predicateAdder interface {
 		})
 	}
 
-	{{ $type := $n.ID.Type.Type.String }}
-	{{ $iface := print (pascal $type) "P" }}
-	{{- if $n.ID.IsTime }}{{ $iface = "TimeP" }}
-	{{- else if or $n.ID.IsBytes $n.ID.IsJSON }}{{ $iface = "BytesP" }}
-	{{- else if $n.ID.IsUUID }}{{ $iface = "ValueP" }}
+	{{- if $n.HasOneFieldID }}
+		{{ $type := $n.ID.Type.Type.String }}
+		{{ $iface := print (pascal $type) "P" }}
+		{{- if $n.ID.IsTime }}{{ $iface = "TimeP" }}
+		{{- else if or $n.ID.IsBytes $n.ID.IsJSON }}{{ $iface = "BytesP" }}
+		{{- else if $n.ID.IsUUID }}{{ $iface = "ValueP" }}
+		{{- end }}
+		// WhereID applies the entql {{ $type }} predicate on the id field.
+		func (f *{{ $filter }}) WhereID(p entql.{{ $iface }}) {
+			f.Where(p.Field({{ $n.Package }}.{{ $n.ID.Constant }}))
+		}
 	{{- end }}
-	// WhereID applies the entql {{ $type }} predicate on the id field.
-	func (f *{{ $filter }}) WhereID(p entql.{{ $iface }}) {
-		f.Where(p.Field({{ $n.Package }}.{{ $n.ID.Constant }}))
-	}
 
 	{{ range $f := $n.Fields }}
 		{{ $type := $f.Type.Type.String }}

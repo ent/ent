@@ -243,7 +243,6 @@ func (tc *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 //			SetValue(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (tc *TagCreate) OnConflict(opts ...sql.ConflictOption) *TagUpsertOne {
 	tc.conflict = opts
 	return &TagUpsertOne{
@@ -257,7 +256,6 @@ func (tc *TagCreate) OnConflict(opts ...sql.ConflictOption) *TagUpsertOne {
 //	client.Tag.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (tc *TagCreate) OnConflictColumns(columns ...string) *TagUpsertOne {
 	tc.conflict = append(tc.conflict, sql.ConflictColumns(columns...))
 	return &TagUpsertOne{
@@ -298,7 +296,6 @@ func (u *TagUpsert) UpdateValue() *TagUpsert {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *TagUpsertOne) UpdateNewValues() *TagUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -307,10 +304,9 @@ func (u *TagUpsertOne) UpdateNewValues() *TagUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.Tag.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.Tag.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *TagUpsertOne) Ignore() *TagUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -479,7 +475,6 @@ func (tcb *TagCreateBulk) ExecX(ctx context.Context) {
 //			SetValue(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (tcb *TagCreateBulk) OnConflict(opts ...sql.ConflictOption) *TagUpsertBulk {
 	tcb.conflict = opts
 	return &TagUpsertBulk{
@@ -493,7 +488,6 @@ func (tcb *TagCreateBulk) OnConflict(opts ...sql.ConflictOption) *TagUpsertBulk 
 //	client.Tag.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (tcb *TagCreateBulk) OnConflictColumns(columns ...string) *TagUpsertBulk {
 	tcb.conflict = append(tcb.conflict, sql.ConflictColumns(columns...))
 	return &TagUpsertBulk{
@@ -515,7 +509,6 @@ type TagUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *TagUpsertBulk) UpdateNewValues() *TagUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -527,7 +520,6 @@ func (u *TagUpsertBulk) UpdateNewValues() *TagUpsertBulk {
 //	client.Tag.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *TagUpsertBulk) Ignore() *TagUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

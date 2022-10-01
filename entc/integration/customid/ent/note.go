@@ -44,8 +44,7 @@ type NoteEdges struct {
 func (e NoteEdges) ParentOrErr() (*Note, error) {
 	if e.loadedTypes[0] {
 		if e.Parent == nil {
-			// The edge parent was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: note.Label}
 		}
 		return e.Parent, nil
@@ -63,8 +62,8 @@ func (e NoteEdges) ChildrenOrErr() ([]*Note, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Note) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*Note) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
 		case note.FieldID, note.FieldText:
@@ -80,7 +79,7 @@ func (*Note) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Note fields.
-func (n *Note) assignValues(columns []string, values []interface{}) error {
+func (n *Note) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}

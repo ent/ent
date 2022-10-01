@@ -1375,9 +1375,9 @@ type mysqlMock struct {
 }
 
 func (m mysqlMock) start(version string) {
-	m.ExpectBegin()
 	m.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
 		WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", version))
+	m.ExpectBegin()
 }
 
 func (m mysqlMock) tableExists(table string, exists bool) {

@@ -21,8 +21,9 @@ import (
 // ItemUpdate is the builder for updating Item entities.
 type ItemUpdate struct {
 	config
-	hooks    []Hook
-	mutation *ItemMutation
+	hooks     []Hook
+	mutation  *ItemMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the ItemUpdate builder.
@@ -126,6 +127,12 @@ func (iu *ItemUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (iu *ItemUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *ItemUpdate {
+	iu.modifiers = append(iu.modifiers, modifiers...)
+	return iu
+}
+
 func (iu *ItemUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -157,6 +164,7 @@ func (iu *ItemUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: item.FieldText,
 		})
 	}
+	_spec.AddModifiers(iu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, iu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{item.Label}
@@ -171,9 +179,10 @@ func (iu *ItemUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // ItemUpdateOne is the builder for updating a single Item entity.
 type ItemUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *ItemMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *ItemMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetText sets the "text" field.
@@ -284,6 +293,12 @@ func (iuo *ItemUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (iuo *ItemUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *ItemUpdateOne {
+	iuo.modifiers = append(iuo.modifiers, modifiers...)
+	return iuo
+}
+
 func (iuo *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -332,6 +347,7 @@ func (iuo *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) 
 			Column: item.FieldText,
 		})
 	}
+	_spec.AddModifiers(iuo.modifiers...)
 	_node = &Item{config: iuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

@@ -19,6 +19,8 @@ const (
 	FieldUUID = "uuid"
 	// FieldNickname holds the string denoting the nickname field in the database.
 	FieldNickname = "nickname"
+	// FieldTrained holds the string denoting the trained field in the database.
+	FieldTrained = "trained"
 	// EdgeTeam holds the string denoting the team edge name in mutations.
 	EdgeTeam = "team"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
@@ -32,6 +34,8 @@ const (
 var (
 	// DefaultAge holds the default value on creation for the "age" field.
 	DefaultAge float64
+	// DefaultTrained holds the default value on creation for the "trained" field.
+	DefaultTrained bool
 )
 
 // comment from another template.

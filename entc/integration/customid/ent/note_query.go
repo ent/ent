@@ -23,13 +23,12 @@ import (
 // NoteQuery is the builder for querying Note entities.
 type NoteQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Note
-	// eager-loading edges.
+	limit        *int
+	offset       *int
+	unique       *bool
+	order        []OrderFunc
+	fields       []string
+	predicates   []predicate.Note
 	withParent   *NoteQuery
 	withChildren *NoteQuery
 	withFKs      bool
@@ -339,7 +338,6 @@ func (nq *NoteQuery) WithChildren(opts ...func(*NoteQuery)) *NoteQuery {
 //		GroupBy(note.FieldText).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (nq *NoteQuery) GroupBy(field string, fields ...string) *NoteGroupBy {
 	grbuild := &NoteGroupBy{config: nq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -366,7 +364,6 @@ func (nq *NoteQuery) GroupBy(field string, fields ...string) *NoteGroupBy {
 //	client.Note.Query().
 //		Select(note.FieldText).
 //		Scan(ctx, &v)
-//
 func (nq *NoteQuery) Select(fields ...string) *NoteSelect {
 	nq.fields = append(nq.fields, fields...)
 	selbuild := &NoteSelect{NoteQuery: nq}
@@ -407,10 +404,10 @@ func (nq *NoteQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Note, e
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, note.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Note).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Note{config: nq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -425,66 +422,81 @@ func (nq *NoteQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Note, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := nq.withParent; query != nil {
-		ids := make([]schema.NoteID, 0, len(nodes))
-		nodeids := make(map[schema.NoteID][]*Note)
-		for i := range nodes {
-			if nodes[i].note_children == nil {
-				continue
-			}
-			fk := *nodes[i].note_children
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(note.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := nq.loadParent(ctx, query, nodes, nil,
+			func(n *Note, e *Note) { n.Edges.Parent = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "note_children" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Parent = n
-			}
-		}
 	}
-
 	if query := nq.withChildren; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[schema.NoteID]*Note)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Children = []*Note{}
-		}
-		query.withFKs = true
-		query.Where(predicate.Note(func(s *sql.Selector) {
-			s.Where(sql.InValues(note.ChildrenColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := nq.loadChildren(ctx, query, nodes,
+			func(n *Note) { n.Edges.Children = []*Note{} },
+			func(n *Note, e *Note) { n.Edges.Children = append(n.Edges.Children, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			fk := n.note_children
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "note_children" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "note_children" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Children = append(node.Edges.Children, n)
+	}
+	return nodes, nil
+}
+
+func (nq *NoteQuery) loadParent(ctx context.Context, query *NoteQuery, nodes []*Note, init func(*Note), assign func(*Note, *Note)) error {
+	ids := make([]schema.NoteID, 0, len(nodes))
+	nodeids := make(map[schema.NoteID][]*Note)
+	for i := range nodes {
+		if nodes[i].note_children == nil {
+			continue
+		}
+		fk := *nodes[i].note_children
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(note.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "note_children" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
+}
+func (nq *NoteQuery) loadChildren(ctx context.Context, query *NoteQuery, nodes []*Note, init func(*Note), assign func(*Note, *Note)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[schema.NoteID]*Note)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Note(func(s *sql.Selector) {
+		s.Where(sql.InValues(note.ChildrenColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.note_children
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "note_children" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "note_children" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (nq *NoteQuery) sqlCount(ctx context.Context) (int, error) {
@@ -497,11 +509,14 @@ func (nq *NoteQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (nq *NoteQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := nq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := nq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (nq *NoteQuery) querySpec() *sqlgraph.QuerySpec {
@@ -602,7 +617,7 @@ func (ngb *NoteGroupBy) Aggregate(fns ...AggregateFunc) *NoteGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (ngb *NoteGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (ngb *NoteGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := ngb.path(ctx)
 	if err != nil {
 		return err
@@ -611,7 +626,7 @@ func (ngb *NoteGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return ngb.sqlScan(ctx, v)
 }
 
-func (ngb *NoteGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (ngb *NoteGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range ngb.fields {
 		if !note.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -658,7 +673,7 @@ type NoteSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ns *NoteSelect) Scan(ctx context.Context, v interface{}) error {
+func (ns *NoteSelect) Scan(ctx context.Context, v any) error {
 	if err := ns.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -666,7 +681,7 @@ func (ns *NoteSelect) Scan(ctx context.Context, v interface{}) error {
 	return ns.sqlScan(ctx, v)
 }
 
-func (ns *NoteSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ns *NoteSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ns.sql.Query()
 	if err := ns.driver.Query(ctx, query, args, rows); err != nil {

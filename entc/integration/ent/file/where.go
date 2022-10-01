@@ -36,13 +36,7 @@ func IDNEQ(id int) predicate.File {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.File {
 	return predicate.File(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(ids) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -53,13 +47,7 @@ func IDIn(ids ...int) predicate.File {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.File {
 	return predicate.File(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(ids) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -146,34 +134,22 @@ func SizeNEQ(v int) predicate.File {
 
 // SizeIn applies the In predicate on the "size" field.
 func SizeIn(vs ...int) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.File(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldSize), v...))
 	})
 }
 
 // SizeNotIn applies the NotIn predicate on the "size" field.
 func SizeNotIn(vs ...int) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.File(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldSize), v...))
 	})
 }
@@ -222,34 +198,22 @@ func NameNEQ(v string) predicate.File {
 
 // NameIn applies the In predicate on the "name" field.
 func NameIn(vs ...string) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.File(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldName), v...))
 	})
 }
 
 // NameNotIn applies the NotIn predicate on the "name" field.
 func NameNotIn(vs ...string) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.File(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldName), v...))
 	})
 }
@@ -333,34 +297,22 @@ func UserNEQ(v string) predicate.File {
 
 // UserIn applies the In predicate on the "user" field.
 func UserIn(vs ...string) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.File(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldUser), v...))
 	})
 }
 
 // UserNotIn applies the NotIn predicate on the "user" field.
 func UserNotIn(vs ...string) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.File(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldUser), v...))
 	})
 }
@@ -458,34 +410,22 @@ func GroupNEQ(v string) predicate.File {
 
 // GroupIn applies the In predicate on the "group" field.
 func GroupIn(vs ...string) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.File(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldGroup), v...))
 	})
 }
 
 // GroupNotIn applies the NotIn predicate on the "group" field.
 func GroupNotIn(vs ...string) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.File(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldGroup), v...))
 	})
 }
@@ -592,6 +532,84 @@ func OpIsNil() predicate.File {
 func OpNotNil() predicate.File {
 	return predicate.File(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldOp)))
+	})
+}
+
+// FieldIDEQ applies the EQ predicate on the "field_id" field.
+func FieldIDEQ(v int) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldFieldID), v))
+	})
+}
+
+// FieldIDNEQ applies the NEQ predicate on the "field_id" field.
+func FieldIDNEQ(v int) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldFieldID), v))
+	})
+}
+
+// FieldIDIn applies the In predicate on the "field_id" field.
+func FieldIDIn(vs ...int) predicate.File {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldFieldID), v...))
+	})
+}
+
+// FieldIDNotIn applies the NotIn predicate on the "field_id" field.
+func FieldIDNotIn(vs ...int) predicate.File {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldFieldID), v...))
+	})
+}
+
+// FieldIDGT applies the GT predicate on the "field_id" field.
+func FieldIDGT(v int) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldFieldID), v))
+	})
+}
+
+// FieldIDGTE applies the GTE predicate on the "field_id" field.
+func FieldIDGTE(v int) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldFieldID), v))
+	})
+}
+
+// FieldIDLT applies the LT predicate on the "field_id" field.
+func FieldIDLT(v int) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldFieldID), v))
+	})
+}
+
+// FieldIDLTE applies the LTE predicate on the "field_id" field.
+func FieldIDLTE(v int) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldFieldID), v))
+	})
+}
+
+// FieldIDIsNil applies the IsNil predicate on the "field_id" field.
+func FieldIDIsNil() predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldFieldID)))
+	})
+}
+
+// FieldIDNotNil applies the NotNil predicate on the "field_id" field.
+func FieldIDNotNil() predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldFieldID)))
 	})
 }
 

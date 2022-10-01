@@ -869,3 +869,25 @@ div[class^='announcementBar_'] {
   );
   font-weight: bold;
 }
+
+.code-block-error-message {
+  background-color: #ff6f8780;
+  display: block;
+  margin: 0 calc(-1 * var(--ifm-pre-padding));
+  padding: 0 var(--ifm-pre-padding);
+  border-left: 3px solid #ff6f87a0;
+}
+.code-block-error-message span {
+  color: rgb(191, 199, 213)!important;
+}
+
+.code-block-info-line {
+  background-color: rgb(193 230 140 / 25%);
+  display: block;
+  margin: 0 calc(-1 * var(--ifm-pre-padding));
+  padding: 0 var(--ifm-pre-padding);
+  border-left: 3px solid rgb(193 230 140 / 80%);
+}
+.code-block-info-line span.token.comment {
+  color: #c4c4c4!important;
+}

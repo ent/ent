@@ -1556,7 +1556,6 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 //			SetInt(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (ftc *FieldTypeCreate) OnConflict(opts ...sql.ConflictOption) *FieldTypeUpsertOne {
 	ftc.conflict = opts
 	return &FieldTypeUpsertOne{
@@ -1570,7 +1569,6 @@ func (ftc *FieldTypeCreate) OnConflict(opts ...sql.ConflictOption) *FieldTypeUps
 //	client.FieldType.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (ftc *FieldTypeCreate) OnConflictColumns(columns ...string) *FieldTypeUpsertOne {
 	ftc.conflict = append(ftc.conflict, sql.ConflictColumns(columns...))
 	return &FieldTypeUpsertOne{
@@ -2895,7 +2893,6 @@ func (u *FieldTypeUpsert) ClearPasswordOther() *FieldTypeUpsert {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *FieldTypeUpsertOne) UpdateNewValues() *FieldTypeUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -2904,10 +2901,9 @@ func (u *FieldTypeUpsertOne) UpdateNewValues() *FieldTypeUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.FieldType.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.FieldType.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *FieldTypeUpsertOne) Ignore() *FieldTypeUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -4575,7 +4571,6 @@ func (ftcb *FieldTypeCreateBulk) ExecX(ctx context.Context) {
 //			SetInt(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (ftcb *FieldTypeCreateBulk) OnConflict(opts ...sql.ConflictOption) *FieldTypeUpsertBulk {
 	ftcb.conflict = opts
 	return &FieldTypeUpsertBulk{
@@ -4589,7 +4584,6 @@ func (ftcb *FieldTypeCreateBulk) OnConflict(opts ...sql.ConflictOption) *FieldTy
 //	client.FieldType.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (ftcb *FieldTypeCreateBulk) OnConflictColumns(columns ...string) *FieldTypeUpsertBulk {
 	ftcb.conflict = append(ftcb.conflict, sql.ConflictColumns(columns...))
 	return &FieldTypeUpsertBulk{
@@ -4611,7 +4605,6 @@ type FieldTypeUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *FieldTypeUpsertBulk) UpdateNewValues() *FieldTypeUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -4623,7 +4616,6 @@ func (u *FieldTypeUpsertBulk) UpdateNewValues() *FieldTypeUpsertBulk {
 //	client.FieldType.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *FieldTypeUpsertBulk) Ignore() *FieldTypeUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

@@ -26,18 +26,18 @@ import (
 // FileQuery is the builder for querying File entities.
 type FileQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.File
-	// eager-loading edges.
-	withOwner *UserQuery
-	withType  *FileTypeQuery
-	withField *FieldTypeQuery
-	withFKs   bool
-	modifiers []func(*sql.Selector)
+	limit          *int
+	offset         *int
+	unique         *bool
+	order          []OrderFunc
+	fields         []string
+	predicates     []predicate.File
+	withOwner      *UserQuery
+	withType       *FileTypeQuery
+	withField      *FieldTypeQuery
+	withFKs        bool
+	modifiers      []func(*sql.Selector)
+	withNamedField map[string]*FieldTypeQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -378,7 +378,6 @@ func (fq *FileQuery) WithField(opts ...func(*FieldTypeQuery)) *FileQuery {
 //		GroupBy(file.FieldSize).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 	grbuild := &FileGroupBy{config: fq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -405,7 +404,6 @@ func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 //	client.File.Query().
 //		Select(file.FieldSize).
 //		Scan(ctx, &v)
-//
 func (fq *FileQuery) Select(fields ...string) *FileSelect {
 	fq.fields = append(fq.fields, fields...)
 	selbuild := &FileSelect{FileQuery: fq}
@@ -447,10 +445,10 @@ func (fq *FileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*File, e
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, file.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*File).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &File{config: fq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -468,95 +466,123 @@ func (fq *FileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*File, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := fq.withOwner; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*File)
-		for i := range nodes {
-			if nodes[i].user_files == nil {
-				continue
-			}
-			fk := *nodes[i].user_files
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := fq.loadOwner(ctx, query, nodes, nil,
+			func(n *File, e *User) { n.Edges.Owner = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_files" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Owner = n
-			}
-		}
 	}
-
 	if query := fq.withType; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*File)
-		for i := range nodes {
-			if nodes[i].file_type_files == nil {
-				continue
-			}
-			fk := *nodes[i].file_type_files
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(filetype.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := fq.loadType(ctx, query, nodes, nil,
+			func(n *File, e *FileType) { n.Edges.Type = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "file_type_files" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Type = n
-			}
-		}
 	}
-
 	if query := fq.withField; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*File)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Field = []*FieldType{}
-		}
-		query.withFKs = true
-		query.Where(predicate.FieldType(func(s *sql.Selector) {
-			s.Where(sql.InValues(file.FieldColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := fq.loadField(ctx, query, nodes,
+			func(n *File) { n.Edges.Field = []*FieldType{} },
+			func(n *File, e *FieldType) { n.Edges.Field = append(n.Edges.Field, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			fk := n.file_field
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "file_field" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "file_field" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Field = append(node.Edges.Field, n)
+	}
+	for name, query := range fq.withNamedField {
+		if err := fq.loadField(ctx, query, nodes,
+			func(n *File) { n.appendNamedField(name) },
+			func(n *File, e *FieldType) { n.appendNamedField(name, e) }); err != nil {
+			return nil, err
 		}
 	}
-
 	return nodes, nil
+}
+
+func (fq *FileQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*File, init func(*File), assign func(*File, *User)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*File)
+	for i := range nodes {
+		if nodes[i].user_files == nil {
+			continue
+		}
+		fk := *nodes[i].user_files
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_files" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (fq *FileQuery) loadType(ctx context.Context, query *FileTypeQuery, nodes []*File, init func(*File), assign func(*File, *FileType)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*File)
+	for i := range nodes {
+		if nodes[i].file_type_files == nil {
+			continue
+		}
+		fk := *nodes[i].file_type_files
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(filetype.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "file_type_files" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (fq *FileQuery) loadField(ctx context.Context, query *FieldTypeQuery, nodes []*File, init func(*File), assign func(*File, *FieldType)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*File)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.InValues(file.FieldColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.file_field
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "file_field" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "file_field" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (fq *FileQuery) sqlCount(ctx context.Context) (int, error) {
@@ -572,11 +598,14 @@ func (fq *FileQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (fq *FileQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := fq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := fq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (fq *FileQuery) querySpec() *sqlgraph.QuerySpec {
@@ -694,6 +723,20 @@ func (fq *FileQuery) Modify(modifiers ...func(s *sql.Selector)) *FileSelect {
 	return fq.Select()
 }
 
+// WithNamedField tells the query-builder to eager-load the nodes that are connected to the "field"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (fq *FileQuery) WithNamedField(name string, opts ...func(*FieldTypeQuery)) *FileQuery {
+	query := &FieldTypeQuery{config: fq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if fq.withNamedField == nil {
+		fq.withNamedField = make(map[string]*FieldTypeQuery)
+	}
+	fq.withNamedField[name] = query
+	return fq
+}
+
 // FileGroupBy is the group-by builder for File entities.
 type FileGroupBy struct {
 	config
@@ -712,7 +755,7 @@ func (fgb *FileGroupBy) Aggregate(fns ...AggregateFunc) *FileGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (fgb *FileGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (fgb *FileGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := fgb.path(ctx)
 	if err != nil {
 		return err
@@ -721,7 +764,7 @@ func (fgb *FileGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return fgb.sqlScan(ctx, v)
 }
 
-func (fgb *FileGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (fgb *FileGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range fgb.fields {
 		if !file.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -768,7 +811,7 @@ type FileSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (fs *FileSelect) Scan(ctx context.Context, v interface{}) error {
+func (fs *FileSelect) Scan(ctx context.Context, v any) error {
 	if err := fs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -776,7 +819,7 @@ func (fs *FileSelect) Scan(ctx context.Context, v interface{}) error {
 	return fs.sqlScan(ctx, v)
 }
 
-func (fs *FileSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (fs *FileSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := fs.sql.Query()
 	if err := fs.driver.Query(ctx, query, args, rows); err != nil {

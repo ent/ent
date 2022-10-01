@@ -22,8 +22,9 @@ import (
 // CommentUpdate is the builder for updating Comment entities.
 type CommentUpdate struct {
 	config
-	hooks    []Hook
-	mutation *CommentMutation
+	hooks     []Hook
+	mutation  *CommentMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the CommentUpdate builder.
@@ -125,6 +126,26 @@ func (cu *CommentUpdate) ClearDir() *CommentUpdate {
 	return cu
 }
 
+// SetClient sets the "client" field.
+func (cu *CommentUpdate) SetClient(s string) *CommentUpdate {
+	cu.mutation.SetClient(s)
+	return cu
+}
+
+// SetNillableClient sets the "client" field if the given value is not nil.
+func (cu *CommentUpdate) SetNillableClient(s *string) *CommentUpdate {
+	if s != nil {
+		cu.SetClient(*s)
+	}
+	return cu
+}
+
+// ClearClient clears the value of the "client" field.
+func (cu *CommentUpdate) ClearClient() *CommentUpdate {
+	cu.mutation.ClearClient()
+	return cu
+}
+
 // Mutation returns the CommentMutation object of the builder.
 func (cu *CommentUpdate) Mutation() *CommentMutation {
 	return cu.mutation
@@ -182,6 +203,12 @@ func (cu *CommentUpdate) ExecX(ctx context.Context) {
 	if err := cu.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (cu *CommentUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *CommentUpdate {
+	cu.modifiers = append(cu.modifiers, modifiers...)
+	return cu
 }
 
 func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -276,6 +303,20 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: comment.FieldDir,
 		})
 	}
+	if value, ok := cu.mutation.GetClient(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: comment.FieldClient,
+		})
+	}
+	if cu.mutation.ClientCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: comment.FieldClient,
+		})
+	}
+	_spec.AddModifiers(cu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{comment.Label}
@@ -290,9 +331,10 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // CommentUpdateOne is the builder for updating a single Comment entity.
 type CommentUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *CommentMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *CommentMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetUniqueInt sets the "unique_int" field.
@@ -388,6 +430,26 @@ func (cuo *CommentUpdateOne) ClearDir() *CommentUpdateOne {
 	return cuo
 }
 
+// SetClient sets the "client" field.
+func (cuo *CommentUpdateOne) SetClient(s string) *CommentUpdateOne {
+	cuo.mutation.SetClient(s)
+	return cuo
+}
+
+// SetNillableClient sets the "client" field if the given value is not nil.
+func (cuo *CommentUpdateOne) SetNillableClient(s *string) *CommentUpdateOne {
+	if s != nil {
+		cuo.SetClient(*s)
+	}
+	return cuo
+}
+
+// ClearClient clears the value of the "client" field.
+func (cuo *CommentUpdateOne) ClearClient() *CommentUpdateOne {
+	cuo.mutation.ClearClient()
+	return cuo
+}
+
 // Mutation returns the CommentMutation object of the builder.
 func (cuo *CommentUpdateOne) Mutation() *CommentMutation {
 	return cuo.mutation
@@ -458,6 +520,12 @@ func (cuo *CommentUpdateOne) ExecX(ctx context.Context) {
 	if err := cuo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (cuo *CommentUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *CommentUpdateOne {
+	cuo.modifiers = append(cuo.modifiers, modifiers...)
+	return cuo
 }
 
 func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err error) {
@@ -569,6 +637,20 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 			Column: comment.FieldDir,
 		})
 	}
+	if value, ok := cuo.mutation.GetClient(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: comment.FieldClient,
+		})
+	}
+	if cuo.mutation.ClientCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: comment.FieldClient,
+		})
+	}
+	_spec.AddModifiers(cuo.modifiers...)
 	_node = &Comment{config: cuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

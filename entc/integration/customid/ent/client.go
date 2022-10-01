@@ -8,21 +8,25 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 
 	"entgo.io/ent/entc/integration/customid/ent/migrate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/entc/integration/customid/sid"
+	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
 	"github.com/google/uuid"
 
 	"entgo.io/ent/entc/integration/customid/ent/account"
 	"entgo.io/ent/entc/integration/customid/ent/blob"
+	"entgo.io/ent/entc/integration/customid/ent/bloblink"
 	"entgo.io/ent/entc/integration/customid/ent/car"
 	"entgo.io/ent/entc/integration/customid/ent/device"
 	"entgo.io/ent/entc/integration/customid/ent/doc"
 	"entgo.io/ent/entc/integration/customid/ent/group"
 	"entgo.io/ent/entc/integration/customid/ent/intsid"
+	"entgo.io/ent/entc/integration/customid/ent/link"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
 	"entgo.io/ent/entc/integration/customid/ent/note"
 	"entgo.io/ent/entc/integration/customid/ent/other"
@@ -46,6 +50,8 @@ type Client struct {
 	Account *AccountClient
 	// Blob is the client for interacting with the Blob builders.
 	Blob *BlobClient
+	// BlobLink is the client for interacting with the BlobLink builders.
+	BlobLink *BlobLinkClient
 	// Car is the client for interacting with the Car builders.
 	Car *CarClient
 	// Device is the client for interacting with the Device builders.
@@ -56,6 +62,8 @@ type Client struct {
 	Group *GroupClient
 	// IntSID is the client for interacting with the IntSID builders.
 	IntSID *IntSIDClient
+	// Link is the client for interacting with the Link builders.
+	Link *LinkClient
 	// MixinID is the client for interacting with the MixinID builders.
 	MixinID *MixinIDClient
 	// Note is the client for interacting with the Note builders.
@@ -87,11 +95,13 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Account = NewAccountClient(c.config)
 	c.Blob = NewBlobClient(c.config)
+	c.BlobLink = NewBlobLinkClient(c.config)
 	c.Car = NewCarClient(c.config)
 	c.Device = NewDeviceClient(c.config)
 	c.Doc = NewDocClient(c.config)
 	c.Group = NewGroupClient(c.config)
 	c.IntSID = NewIntSIDClient(c.config)
+	c.Link = NewLinkClient(c.config)
 	c.MixinID = NewMixinIDClient(c.config)
 	c.Note = NewNoteClient(c.config)
 	c.Other = NewOtherClient(c.config)
@@ -122,7 +132,7 @@ func Open(driverName, dataSourceName string, options ...Option) (*Client, error)
 // is used until the transaction is committed or rolled back.
 func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
-		return nil, fmt.Errorf("ent: cannot start a transaction within a transaction")
+		return nil, errors.New("ent: cannot start a transaction within a transaction")
 	}
 	tx, err := newTx(ctx, c.driver)
 	if err != nil {
@@ -135,11 +145,13 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:   cfg,
 		Account:  NewAccountClient(cfg),
 		Blob:     NewBlobClient(cfg),
+		BlobLink: NewBlobLinkClient(cfg),
 		Car:      NewCarClient(cfg),
 		Device:   NewDeviceClient(cfg),
 		Doc:      NewDocClient(cfg),
 		Group:    NewGroupClient(cfg),
 		IntSID:   NewIntSIDClient(cfg),
+		Link:     NewLinkClient(cfg),
 		MixinID:  NewMixinIDClient(cfg),
 		Note:     NewNoteClient(cfg),
 		Other:    NewOtherClient(cfg),
@@ -154,7 +166,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 // BeginTx returns a transactional client with specified options.
 func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
-		return nil, fmt.Errorf("ent: cannot start a transaction within a transaction")
+		return nil, errors.New("ent: cannot start a transaction within a transaction")
 	}
 	tx, err := c.driver.(interface {
 		BeginTx(context.Context, *sql.TxOptions) (dialect.Tx, error)
@@ -169,11 +181,13 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:   cfg,
 		Account:  NewAccountClient(cfg),
 		Blob:     NewBlobClient(cfg),
+		BlobLink: NewBlobLinkClient(cfg),
 		Car:      NewCarClient(cfg),
 		Device:   NewDeviceClient(cfg),
 		Doc:      NewDocClient(cfg),
 		Group:    NewGroupClient(cfg),
 		IntSID:   NewIntSIDClient(cfg),
+		Link:     NewLinkClient(cfg),
 		MixinID:  NewMixinIDClient(cfg),
 		Note:     NewNoteClient(cfg),
 		Other:    NewOtherClient(cfg),
@@ -191,7 +205,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 //		Account.
 //		Query().
 //		Count(ctx)
-//
 func (c *Client) Debug() *Client {
 	if c.debug {
 		return c
@@ -213,11 +226,13 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	c.Account.Use(hooks...)
 	c.Blob.Use(hooks...)
+	c.BlobLink.Use(hooks...)
 	c.Car.Use(hooks...)
 	c.Device.Use(hooks...)
 	c.Doc.Use(hooks...)
 	c.Group.Use(hooks...)
 	c.IntSID.Use(hooks...)
+	c.Link.Use(hooks...)
 	c.MixinID.Use(hooks...)
 	c.Note.Use(hooks...)
 	c.Other.Use(hooks...)
@@ -451,9 +466,98 @@ func (c *BlobClient) QueryLinks(b *Blob) *BlobQuery {
 	return query
 }
 
+// QueryBlobLinks queries the blob_links edge of a Blob.
+func (c *BlobClient) QueryBlobLinks(b *Blob) *BlobLinkQuery {
+	query := &BlobLinkQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := b.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(blob.Table, blob.FieldID, id),
+			sqlgraph.To(bloblink.Table, bloblink.BlobColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, blob.BlobLinksTable, blob.BlobLinksColumn),
+		)
+		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *BlobClient) Hooks() []Hook {
 	return c.hooks.Blob
+}
+
+// BlobLinkClient is a client for the BlobLink schema.
+type BlobLinkClient struct {
+	config
+}
+
+// NewBlobLinkClient returns a client for the BlobLink from the given config.
+func NewBlobLinkClient(c config) *BlobLinkClient {
+	return &BlobLinkClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `bloblink.Hooks(f(g(h())))`.
+func (c *BlobLinkClient) Use(hooks ...Hook) {
+	c.hooks.BlobLink = append(c.hooks.BlobLink, hooks...)
+}
+
+// Create returns a builder for creating a BlobLink entity.
+func (c *BlobLinkClient) Create() *BlobLinkCreate {
+	mutation := newBlobLinkMutation(c.config, OpCreate)
+	return &BlobLinkCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of BlobLink entities.
+func (c *BlobLinkClient) CreateBulk(builders ...*BlobLinkCreate) *BlobLinkCreateBulk {
+	return &BlobLinkCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for BlobLink.
+func (c *BlobLinkClient) Update() *BlobLinkUpdate {
+	mutation := newBlobLinkMutation(c.config, OpUpdate)
+	return &BlobLinkUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *BlobLinkClient) UpdateOne(bl *BlobLink) *BlobLinkUpdateOne {
+	mutation := newBlobLinkMutation(c.config, OpUpdateOne)
+	mutation.blob = &bl.BlobID
+	mutation.link = &bl.LinkID
+	return &BlobLinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for BlobLink.
+func (c *BlobLinkClient) Delete() *BlobLinkDelete {
+	mutation := newBlobLinkMutation(c.config, OpDelete)
+	return &BlobLinkDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Query returns a query builder for BlobLink.
+func (c *BlobLinkClient) Query() *BlobLinkQuery {
+	return &BlobLinkQuery{
+		config: c.config,
+	}
+}
+
+// QueryBlob queries the blob edge of a BlobLink.
+func (c *BlobLinkClient) QueryBlob(bl *BlobLink) *BlobQuery {
+	return c.Query().
+		Where(bloblink.BlobID(bl.BlobID), bloblink.LinkID(bl.LinkID)).
+		QueryBlob()
+}
+
+// QueryLink queries the link edge of a BlobLink.
+func (c *BlobLinkClient) QueryLink(bl *BlobLink) *BlobQuery {
+	return c.Query().
+		Where(bloblink.BlobID(bl.BlobID), bloblink.LinkID(bl.LinkID)).
+		QueryLink()
+}
+
+// Hooks returns the client hooks.
+func (c *BlobLinkClient) Hooks() []Hook {
+	return c.hooks.BlobLink
 }
 
 // CarClient is a client for the Car schema.
@@ -801,6 +905,22 @@ func (c *DocClient) QueryChildren(d *Doc) *DocQuery {
 	return query
 }
 
+// QueryRelated queries the related edge of a Doc.
+func (c *DocClient) QueryRelated(d *Doc) *DocQuery {
+	query := &DocQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := d.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(doc.Table, doc.FieldID, id),
+			sqlgraph.To(doc.Table, doc.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, doc.RelatedTable, doc.RelatedPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *DocClient) Hooks() []Hook {
 	return c.hooks.Doc
@@ -1032,6 +1152,96 @@ func (c *IntSIDClient) QueryChildren(is *IntSID) *IntSIDQuery {
 // Hooks returns the client hooks.
 func (c *IntSIDClient) Hooks() []Hook {
 	return c.hooks.IntSID
+}
+
+// LinkClient is a client for the Link schema.
+type LinkClient struct {
+	config
+}
+
+// NewLinkClient returns a client for the Link from the given config.
+func NewLinkClient(c config) *LinkClient {
+	return &LinkClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `link.Hooks(f(g(h())))`.
+func (c *LinkClient) Use(hooks ...Hook) {
+	c.hooks.Link = append(c.hooks.Link, hooks...)
+}
+
+// Create returns a builder for creating a Link entity.
+func (c *LinkClient) Create() *LinkCreate {
+	mutation := newLinkMutation(c.config, OpCreate)
+	return &LinkCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Link entities.
+func (c *LinkClient) CreateBulk(builders ...*LinkCreate) *LinkCreateBulk {
+	return &LinkCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Link.
+func (c *LinkClient) Update() *LinkUpdate {
+	mutation := newLinkMutation(c.config, OpUpdate)
+	return &LinkUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LinkClient) UpdateOne(l *Link) *LinkUpdateOne {
+	mutation := newLinkMutation(c.config, OpUpdateOne, withLink(l))
+	return &LinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LinkClient) UpdateOneID(id uuidc.UUIDC) *LinkUpdateOne {
+	mutation := newLinkMutation(c.config, OpUpdateOne, withLinkID(id))
+	return &LinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Link.
+func (c *LinkClient) Delete() *LinkDelete {
+	mutation := newLinkMutation(c.config, OpDelete)
+	return &LinkDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LinkClient) DeleteOne(l *Link) *LinkDeleteOne {
+	return c.DeleteOneID(l.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *LinkClient) DeleteOneID(id uuidc.UUIDC) *LinkDeleteOne {
+	builder := c.Delete().Where(link.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LinkDeleteOne{builder}
+}
+
+// Query returns a query builder for Link.
+func (c *LinkClient) Query() *LinkQuery {
+	return &LinkQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Link entity by its id.
+func (c *LinkClient) Get(ctx context.Context, id uuidc.UUIDC) (*Link, error) {
+	return c.Query().Where(link.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LinkClient) GetX(ctx context.Context, id uuidc.UUIDC) *Link {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *LinkClient) Hooks() []Hook {
+	return c.hooks.Link
 }
 
 // MixinIDClient is a client for the MixinID schema.

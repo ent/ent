@@ -37,6 +37,7 @@ type FileTypeEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
+	namedFiles  map[string][]*File
 }
 
 // FilesOrErr returns the Files value or an error if the edge
@@ -49,8 +50,8 @@ func (e FileTypeEdges) FilesOrErr() ([]*File, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*FileType) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*FileType) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
 		case filetype.FieldID:
@@ -66,7 +67,7 @@ func (*FileType) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the FileType fields.
-func (ft *FileType) assignValues(columns []string, values []interface{}) error {
+func (ft *FileType) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -139,6 +140,30 @@ func (ft *FileType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.State))
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedFiles returns the Files named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (ft *FileType) NamedFiles(name string) ([]*File, error) {
+	if ft.Edges.namedFiles == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := ft.Edges.namedFiles[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (ft *FileType) appendNamedFiles(name string, edges ...*File) {
+	if ft.Edges.namedFiles == nil {
+		ft.Edges.namedFiles = make(map[string][]*File)
+	}
+	if len(edges) == 0 {
+		ft.Edges.namedFiles[name] = []*File{}
+	} else {
+		ft.Edges.namedFiles[name] = append(ft.Edges.namedFiles[name], edges...)
+	}
 }
 
 // FileTypes is a parsable slice of FileType.

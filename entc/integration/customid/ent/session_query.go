@@ -29,7 +29,6 @@ type SessionQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Session
-	// eager-loading edges.
 	withDevice *DeviceQuery
 	withFKs    bool
 	// intermediate query (i.e. traversal path).
@@ -347,10 +346,10 @@ func (sq *SessionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Sess
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, session.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Session).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Session{config: sq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -365,37 +364,43 @@ func (sq *SessionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Sess
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := sq.withDevice; query != nil {
-		ids := make([]schema.ID, 0, len(nodes))
-		nodeids := make(map[schema.ID][]*Session)
-		for i := range nodes {
-			if nodes[i].device_sessions == nil {
-				continue
-			}
-			fk := *nodes[i].device_sessions
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(device.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := sq.loadDevice(ctx, query, nodes, nil,
+			func(n *Session, e *Device) { n.Edges.Device = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "device_sessions" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Device = n
-			}
+	}
+	return nodes, nil
+}
+
+func (sq *SessionQuery) loadDevice(ctx context.Context, query *DeviceQuery, nodes []*Session, init func(*Session), assign func(*Session, *Device)) error {
+	ids := make([]schema.ID, 0, len(nodes))
+	nodeids := make(map[schema.ID][]*Session)
+	for i := range nodes {
+		if nodes[i].device_sessions == nil {
+			continue
+		}
+		fk := *nodes[i].device_sessions
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(device.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "device_sessions" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
 }
 
 func (sq *SessionQuery) sqlCount(ctx context.Context) (int, error) {
@@ -408,11 +413,14 @@ func (sq *SessionQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (sq *SessionQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := sq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := sq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (sq *SessionQuery) querySpec() *sqlgraph.QuerySpec {
@@ -513,7 +521,7 @@ func (sgb *SessionGroupBy) Aggregate(fns ...AggregateFunc) *SessionGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (sgb *SessionGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (sgb *SessionGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := sgb.path(ctx)
 	if err != nil {
 		return err
@@ -522,7 +530,7 @@ func (sgb *SessionGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return sgb.sqlScan(ctx, v)
 }
 
-func (sgb *SessionGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (sgb *SessionGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range sgb.fields {
 		if !session.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -569,7 +577,7 @@ type SessionSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ss *SessionSelect) Scan(ctx context.Context, v interface{}) error {
+func (ss *SessionSelect) Scan(ctx context.Context, v any) error {
 	if err := ss.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -577,7 +585,7 @@ func (ss *SessionSelect) Scan(ctx context.Context, v interface{}) error {
 	return ss.sqlScan(ctx, v)
 }
 
-func (ss *SessionSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ss *SessionSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ss.sql.Query()
 	if err := ss.driver.Query(ctx, query, args, rows); err != nil {

@@ -23,13 +23,12 @@ import (
 // TokenQuery is the builder for querying Token entities.
 type TokenQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Token
-	// eager-loading edges.
+	limit       *int
+	offset      *int
+	unique      *bool
+	order       []OrderFunc
+	fields      []string
+	predicates  []predicate.Token
 	withAccount *AccountQuery
 	withFKs     bool
 	// intermediate query (i.e. traversal path).
@@ -304,7 +303,6 @@ func (tq *TokenQuery) WithAccount(opts ...func(*AccountQuery)) *TokenQuery {
 //		GroupBy(token.FieldBody).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (tq *TokenQuery) GroupBy(field string, fields ...string) *TokenGroupBy {
 	grbuild := &TokenGroupBy{config: tq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -331,7 +329,6 @@ func (tq *TokenQuery) GroupBy(field string, fields ...string) *TokenGroupBy {
 //	client.Token.Query().
 //		Select(token.FieldBody).
 //		Scan(ctx, &v)
-//
 func (tq *TokenQuery) Select(fields ...string) *TokenSelect {
 	tq.fields = append(tq.fields, fields...)
 	selbuild := &TokenSelect{TokenQuery: tq}
@@ -371,10 +368,10 @@ func (tq *TokenQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Token,
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, token.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Token).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Token{config: tq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -389,37 +386,43 @@ func (tq *TokenQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Token,
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := tq.withAccount; query != nil {
-		ids := make([]sid.ID, 0, len(nodes))
-		nodeids := make(map[sid.ID][]*Token)
-		for i := range nodes {
-			if nodes[i].account_token == nil {
-				continue
-			}
-			fk := *nodes[i].account_token
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(account.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := tq.loadAccount(ctx, query, nodes, nil,
+			func(n *Token, e *Account) { n.Edges.Account = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "account_token" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Account = n
-			}
+	}
+	return nodes, nil
+}
+
+func (tq *TokenQuery) loadAccount(ctx context.Context, query *AccountQuery, nodes []*Token, init func(*Token), assign func(*Token, *Account)) error {
+	ids := make([]sid.ID, 0, len(nodes))
+	nodeids := make(map[sid.ID][]*Token)
+	for i := range nodes {
+		if nodes[i].account_token == nil {
+			continue
+		}
+		fk := *nodes[i].account_token
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(account.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "account_token" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
 }
 
 func (tq *TokenQuery) sqlCount(ctx context.Context) (int, error) {
@@ -432,11 +435,14 @@ func (tq *TokenQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (tq *TokenQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := tq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := tq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (tq *TokenQuery) querySpec() *sqlgraph.QuerySpec {
@@ -537,7 +543,7 @@ func (tgb *TokenGroupBy) Aggregate(fns ...AggregateFunc) *TokenGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (tgb *TokenGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (tgb *TokenGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := tgb.path(ctx)
 	if err != nil {
 		return err
@@ -546,7 +552,7 @@ func (tgb *TokenGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return tgb.sqlScan(ctx, v)
 }
 
-func (tgb *TokenGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (tgb *TokenGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range tgb.fields {
 		if !token.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -593,7 +599,7 @@ type TokenSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ts *TokenSelect) Scan(ctx context.Context, v interface{}) error {
+func (ts *TokenSelect) Scan(ctx context.Context, v any) error {
 	if err := ts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -601,7 +607,7 @@ func (ts *TokenSelect) Scan(ctx context.Context, v interface{}) error {
 	return ts.sqlScan(ctx, v)
 }
 
-func (ts *TokenSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ts *TokenSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ts.sql.Query()
 	if err := ts.driver.Query(ctx, query, args, rows); err != nil {

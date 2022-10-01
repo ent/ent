@@ -44,6 +44,32 @@ var (
 			},
 		},
 	}
+	// BlobLinksColumns holds the columns for the "blob_links" table.
+	BlobLinksColumns = []*schema.Column{
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "blob_id", Type: field.TypeUUID},
+		{Name: "link_id", Type: field.TypeUUID},
+	}
+	// BlobLinksTable holds the schema information for the "blob_links" table.
+	BlobLinksTable = &schema.Table{
+		Name:       "blob_links",
+		Columns:    BlobLinksColumns,
+		PrimaryKey: []*schema.Column{BlobLinksColumns[1], BlobLinksColumns[2]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "blob_links_blobs_blob",
+				Columns:    []*schema.Column{BlobLinksColumns[1]},
+				RefColumns: []*schema.Column{BlobsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "blob_links_blobs_link",
+				Columns:    []*schema.Column{BlobLinksColumns[2]},
+				RefColumns: []*schema.Column{BlobsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// CarsColumns holds the columns for the "cars" table.
 	CarsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -87,9 +113,9 @@ var (
 	}
 	// DocsColumns holds the columns for the "docs" table.
 	DocsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36, SchemaType: map[string]string{"postgres": "uuid"}},
 		{Name: "text", Type: field.TypeString, Nullable: true},
-		{Name: "doc_children", Type: field.TypeString, Nullable: true, Size: 36},
+		{Name: "doc_children", Type: field.TypeString, Nullable: true, Size: 36, SchemaType: map[string]string{"postgres": "uuid"}},
 	}
 	// DocsTable holds the schema information for the "docs" table.
 	DocsTable = &schema.Table{
@@ -133,6 +159,17 @@ var (
 				OnDelete:   schema.SetNull,
 			},
 		},
+	}
+	// LinksColumns holds the columns for the "links" table.
+	LinksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "link_information", Type: field.TypeJSON},
+	}
+	// LinksTable holds the schema information for the "links" table.
+	LinksTable = &schema.Table{
+		Name:       "links",
+		Columns:    LinksColumns,
+		PrimaryKey: []*schema.Column{LinksColumns[0]},
 	}
 	// MixinIdsColumns holds the columns for the "mixin_ids" table.
 	MixinIdsColumns = []*schema.Column{
@@ -292,27 +329,27 @@ var (
 			},
 		},
 	}
-	// BlobLinksColumns holds the columns for the "blob_links" table.
-	BlobLinksColumns = []*schema.Column{
-		{Name: "blob_id", Type: field.TypeUUID},
-		{Name: "link_id", Type: field.TypeUUID},
+	// DocRelatedColumns holds the columns for the "doc_related" table.
+	DocRelatedColumns = []*schema.Column{
+		{Name: "doc_id", Type: field.TypeString, Size: 36, SchemaType: map[string]string{"postgres": "uuid"}},
+		{Name: "related_id", Type: field.TypeString, Size: 36, SchemaType: map[string]string{"postgres": "uuid"}},
 	}
-	// BlobLinksTable holds the schema information for the "blob_links" table.
-	BlobLinksTable = &schema.Table{
-		Name:       "blob_links",
-		Columns:    BlobLinksColumns,
-		PrimaryKey: []*schema.Column{BlobLinksColumns[0], BlobLinksColumns[1]},
+	// DocRelatedTable holds the schema information for the "doc_related" table.
+	DocRelatedTable = &schema.Table{
+		Name:       "doc_related",
+		Columns:    DocRelatedColumns,
+		PrimaryKey: []*schema.Column{DocRelatedColumns[0], DocRelatedColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "blob_links_blob_id",
-				Columns:    []*schema.Column{BlobLinksColumns[0]},
-				RefColumns: []*schema.Column{BlobsColumns[0]},
+				Symbol:     "doc_related_doc_id",
+				Columns:    []*schema.Column{DocRelatedColumns[0]},
+				RefColumns: []*schema.Column{DocsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:     "blob_links_link_id",
-				Columns:    []*schema.Column{BlobLinksColumns[1]},
-				RefColumns: []*schema.Column{BlobsColumns[0]},
+				Symbol:     "doc_related_related_id",
+				Columns:    []*schema.Column{DocRelatedColumns[1]},
+				RefColumns: []*schema.Column{DocsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
@@ -371,11 +408,13 @@ var (
 	Tables = []*schema.Table{
 		AccountsTable,
 		BlobsTable,
+		BlobLinksTable,
 		CarsTable,
 		DevicesTable,
 		DocsTable,
 		GroupsTable,
 		IntSiDsTable,
+		LinksTable,
 		MixinIdsTable,
 		NotesTable,
 		OthersTable,
@@ -384,7 +423,7 @@ var (
 		SessionsTable,
 		TokensTable,
 		UsersTable,
-		BlobLinksTable,
+		DocRelatedTable,
 		GroupUsersTable,
 		PetFriendsTable,
 	}
@@ -392,6 +431,8 @@ var (
 
 func init() {
 	BlobsTable.ForeignKeys[0].RefTable = BlobsTable
+	BlobLinksTable.ForeignKeys[0].RefTable = BlobsTable
+	BlobLinksTable.ForeignKeys[1].RefTable = BlobsTable
 	CarsTable.ForeignKeys[0].RefTable = PetsTable
 	DevicesTable.ForeignKeys[0].RefTable = SessionsTable
 	DocsTable.ForeignKeys[0].RefTable = DocsTable
@@ -402,8 +443,8 @@ func init() {
 	SessionsTable.ForeignKeys[0].RefTable = DevicesTable
 	TokensTable.ForeignKeys[0].RefTable = AccountsTable
 	UsersTable.ForeignKeys[0].RefTable = UsersTable
-	BlobLinksTable.ForeignKeys[0].RefTable = BlobsTable
-	BlobLinksTable.ForeignKeys[1].RefTable = BlobsTable
+	DocRelatedTable.ForeignKeys[0].RefTable = DocsTable
+	DocRelatedTable.ForeignKeys[1].RefTable = DocsTable
 	GroupUsersTable.ForeignKeys[0].RefTable = GroupsTable
 	GroupUsersTable.ForeignKeys[1].RefTable = UsersTable
 	PetFriendsTable.ForeignKeys[0].RefTable = PetsTable

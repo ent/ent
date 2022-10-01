@@ -116,6 +116,12 @@ func CustomID(t *testing.T, client *ent.Client) {
 	require.Equal(t, lnk.ID, chd.QueryLinks().OnlyX(ctx).ID)
 	require.Equal(t, lnk.ID, blb.QueryLinks().OnlyX(ctx).ID)
 	require.Len(t, client.Blob.Query().IDsX(ctx), 3)
+	links := lnk.QueryBlobLinks().AllX(ctx)
+	require.Len(t, links, 2)
+	require.Equal(t, lnk.ID, links[0].BlobID)
+	require.NotEqual(t, uuid.Nil, links[0].LinkID)
+	require.Equal(t, lnk.ID, links[1].BlobID)
+	require.NotEqual(t, uuid.Nil, links[1].LinkID)
 
 	pedro := client.Pet.Create().SetID("pedro").SetOwner(a8m).SaveX(ctx)
 	require.Equal(t, a8m.ID, pedro.QueryOwner().OnlyIDX(ctx))
@@ -242,6 +248,14 @@ func CustomID(t *testing.T, client *ent.Client) {
 		require.Equal(t, tk.ID, ta.ID)
 		require.NotNil(t, ta.Edges.Account)
 		require.Equal(t, a.ID, ta.Edges.Account.ID)
+	})
+
+	t.Run("UUID compatible", func(t *testing.T) {
+		l := client.Link.Create().SaveX(ctx)
+		require.NotEmpty(t, l.ID)
+		require.Len(t, l.LinkInformation, 1)
+		require.Equal(t, "ent", l.LinkInformation["ent"].Name)
+		require.Equal(t, "https://entgo.io/", l.LinkInformation["ent"].Link)
 	})
 }
 

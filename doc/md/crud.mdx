@@ -3,70 +3,38 @@ id: crud
 title: CRUD API
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 As mentioned in the [introduction](code-gen.md) section, running `ent` on the schemas,
 will generate the following assets:
 
 - `Client` and `Tx` objects used for interacting with the graph.
-- CRUD builders for each schema type. See [CRUD](crud.md) for more info.
+- CRUD builders for each schema type.
 - Entity object (Go struct) for each of the schema type.
 - Package containing constants and predicates used for interacting with the builders.
 - A `migrate` package for SQL dialects. See [Migration](migrate.md) for more info.
 
 ## Create A New Client
 
-**MySQL**
+<Tabs
+defaultValue="sqlite"
+values={[
+{label: 'SQLite', value: 'sqlite'},
+{label: 'PostgreSQL', value: 'postgres'},
+{label: 'MySQL', value: 'mysql'},
+{label: 'Gremlin (AWS Neptune)', value: 'gremlin'},
+]}>
+<TabItem value="sqlite">
 
 ```go
 package main
 
 import (
+	"context"
 	"log"
 
-	"<project>/ent"
-
-	_ "github.com/go-sql-driver/mysql"
-)
-
-func main() {
-	client, err := ent.Open("mysql", "<user>:<pass>@tcp(<host>:<port>)/<database>?parseTime=True")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer client.Close()
-}
-```
-
-**PostgreSQL**
-
-```go
-package main
-
-import (
-	"log"
-
-	"<project>/ent"
-
-	_ "github.com/lib/pq"
-)
-
-func main() {
-	client, err := ent.Open("postgres","host=<host> port=<port> user=<user> dbname=<database> password=<pass>")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer client.Close()
-}
-```
-
-**SQLite**
-
-```go
-package main
-
-import (
-	"log"
-
-	"<project>/ent"
+    "entdemo/ent"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -74,14 +42,75 @@ import (
 func main() {
 	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed opening connection to sqlite: %v", err)
 	}
 	defer client.Close()
+	// Run the auto migration tool.
+	if err := client.Schema.Create(context.Background()); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
 }
 ```
 
+</TabItem>
+<TabItem value="postgres">
 
-**Gremlin (AWS Neptune)**
+```go
+package main
+
+import (
+	"context"
+	"log"
+
+    "entdemo/ent"
+
+	_ "github.com/lib/pq"
+)
+
+func main() {
+	client, err := ent.Open("postgres","host=<host> port=<port> user=<user> dbname=<database> password=<pass>")
+	if err != nil {
+		log.Fatalf("failed opening connection to postgres: %v", err)
+	}
+	defer client.Close()
+	// Run the auto migration tool.
+	if err := client.Schema.Create(context.Background()); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
+}
+```
+
+</TabItem>
+<TabItem value="mysql">
+
+```go
+package main
+
+import (
+	"context"
+	"log"
+
+	"entdemo/ent"
+
+	_ "github.com/go-sql-driver/mysql"
+)
+
+func main() {
+	client, err := ent.Open("mysql", "<user>:<pass>@tcp(<host>:<port>)/<database>?parseTime=True")
+	if err != nil {
+		log.Fatalf("failed opening connection to mysql: %v", err)
+	}
+	defer client.Close()
+	// Run the auto migration tool.
+	if err := client.Schema.Create(context.Background()); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
+}
+```
+
+</TabItem>
+
+<TabItem value="gremlin">
 
 ```go
 package main
@@ -89,7 +118,7 @@ package main
 import (
 	"log"
 
-	"<project>/ent"
+	"entdemo/ent"
 )
 
 func main() {
@@ -99,6 +128,9 @@ func main() {
 	}
 }
 ```
+
+</TabItem>
+</Tabs>
 
 ## Create An Entity
 
@@ -143,9 +175,11 @@ Update an entity that was returned from the database.
 
 ```go
 a8m, err = a8m.Update().	// User update builder.
-	RemoveGroup(g2).		// Remove specific edge.
-	ClearCard().			// Clear unique edge.
-	SetAge(30).				// Set field value
+	RemoveGroup(g2).		// Remove a specific edge.
+	ClearCard().			// Clear a unique edge.
+	SetAge(30).				// Set a field value.
+	AddRank(10).            // Increment a field value.
+	AppendInts([]int{1}).   // Append values to a JSON array.
 	Save(ctx)				// Save and return.
 ```
 
@@ -447,7 +481,7 @@ _, err := client.File.
 
 ## Mutation
 
-Each generated node type has its own type of mutation. For example, all [`User` builders](crud.md#create-an-entity), share
+Each generated node type has its own type of mutation. For example, all [`User` builders](crud.mdx#create-an-entity), share
 the same generated `UserMutation` object.
 However, all builder types implement the generic <a target="_blank" href="https://pkg.go.dev/entgo.io/ent?tab=doc#Mutation">`ent.Mutation`</a> interface.
 

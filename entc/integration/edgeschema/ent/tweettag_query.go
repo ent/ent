@@ -30,9 +30,8 @@ type TweetTagQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.TweetTag
-	// eager-loading edges.
-	withTag   *TagQuery
-	withTweet *TweetQuery
+	withTag    *TagQuery
+	withTweet  *TweetQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -339,7 +338,6 @@ func (ttq *TweetTagQuery) WithTweet(opts ...func(*TweetQuery)) *TweetTagQuery {
 //		GroupBy(tweettag.FieldAddedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (ttq *TweetTagQuery) GroupBy(field string, fields ...string) *TweetTagGroupBy {
 	grbuild := &TweetTagGroupBy{config: ttq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -366,7 +364,6 @@ func (ttq *TweetTagQuery) GroupBy(field string, fields ...string) *TweetTagGroup
 //	client.TweetTag.Query().
 //		Select(tweettag.FieldAddedAt).
 //		Scan(ctx, &v)
-//
 func (ttq *TweetTagQuery) Select(fields ...string) *TweetTagSelect {
 	ttq.fields = append(ttq.fields, fields...)
 	selbuild := &TweetTagSelect{TweetTagQuery: ttq}
@@ -400,10 +397,10 @@ func (ttq *TweetTagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tw
 			ttq.withTweet != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*TweetTag).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &TweetTag{config: ttq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -418,60 +415,72 @@ func (ttq *TweetTagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tw
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := ttq.withTag; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*TweetTag)
-		for i := range nodes {
-			fk := nodes[i].TagID
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(tag.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := ttq.loadTag(ctx, query, nodes, nil,
+			func(n *TweetTag, e *Tag) { n.Edges.Tag = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "tag_id" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Tag = n
-			}
-		}
 	}
-
 	if query := ttq.withTweet; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*TweetTag)
-		for i := range nodes {
-			fk := nodes[i].TweetID
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(tweet.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := ttq.loadTweet(ctx, query, nodes, nil,
+			func(n *TweetTag, e *Tweet) { n.Edges.Tweet = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "tweet_id" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Tweet = n
-			}
+	}
+	return nodes, nil
+}
+
+func (ttq *TweetTagQuery) loadTag(ctx context.Context, query *TagQuery, nodes []*TweetTag, init func(*TweetTag), assign func(*TweetTag, *Tag)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*TweetTag)
+	for i := range nodes {
+		fk := nodes[i].TagID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(tag.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "tag_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
+}
+func (ttq *TweetTagQuery) loadTweet(ctx context.Context, query *TweetQuery, nodes []*TweetTag, init func(*TweetTag), assign func(*TweetTag, *Tweet)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*TweetTag)
+	for i := range nodes {
+		fk := nodes[i].TweetID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(tweet.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "tweet_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (ttq *TweetTagQuery) sqlCount(ctx context.Context) (int, error) {
@@ -484,11 +493,14 @@ func (ttq *TweetTagQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (ttq *TweetTagQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := ttq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := ttq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (ttq *TweetTagQuery) querySpec() *sqlgraph.QuerySpec {
@@ -589,7 +601,7 @@ func (ttgb *TweetTagGroupBy) Aggregate(fns ...AggregateFunc) *TweetTagGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (ttgb *TweetTagGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (ttgb *TweetTagGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := ttgb.path(ctx)
 	if err != nil {
 		return err
@@ -598,7 +610,7 @@ func (ttgb *TweetTagGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return ttgb.sqlScan(ctx, v)
 }
 
-func (ttgb *TweetTagGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (ttgb *TweetTagGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range ttgb.fields {
 		if !tweettag.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -645,7 +657,7 @@ type TweetTagSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (tts *TweetTagSelect) Scan(ctx context.Context, v interface{}) error {
+func (tts *TweetTagSelect) Scan(ctx context.Context, v any) error {
 	if err := tts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -653,7 +665,7 @@ func (tts *TweetTagSelect) Scan(ctx context.Context, v interface{}) error {
 	return tts.sqlScan(ctx, v)
 }
 
-func (tts *TweetTagSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (tts *TweetTagSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := tts.sql.Query()
 	if err := tts.driver.Query(ctx, query, args, rows); err != nil {

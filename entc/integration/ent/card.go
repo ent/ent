@@ -49,6 +49,7 @@ type CardEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
+	namedSpec   map[string][]*Spec
 }
 
 // OwnerOrErr returns the Owner value or an error if the edge
@@ -56,8 +57,7 @@ type CardEdges struct {
 func (e CardEdges) OwnerOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.Owner == nil {
-			// The edge owner was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Owner, nil
@@ -75,8 +75,8 @@ func (e CardEdges) SpecOrErr() ([]*Spec, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Card) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*Card) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
 		case card.FieldBalance:
@@ -98,7 +98,7 @@ func (*Card) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Card fields.
-func (c *Card) assignValues(columns []string, values []interface{}) error {
+func (c *Card) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -201,6 +201,30 @@ func (c *Card) String() string {
 	builder.WriteString(c.Name)
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedSpec returns the Spec named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (c *Card) NamedSpec(name string) ([]*Spec, error) {
+	if c.Edges.namedSpec == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := c.Edges.namedSpec[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (c *Card) appendNamedSpec(name string, edges ...*Spec) {
+	if c.Edges.namedSpec == nil {
+		c.Edges.namedSpec = make(map[string][]*Spec)
+	}
+	if len(edges) == 0 {
+		c.Edges.namedSpec[name] = []*Spec{}
+	} else {
+		c.Edges.namedSpec[name] = append(c.Edges.namedSpec[name], edges...)
+	}
 }
 
 // Cards is a parsable slice of Card.

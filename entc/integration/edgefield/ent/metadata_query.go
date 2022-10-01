@@ -23,13 +23,12 @@ import (
 // MetadataQuery is the builder for querying Metadata entities.
 type MetadataQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Metadata
-	// eager-loading edges.
+	limit        *int
+	offset       *int
+	unique       *bool
+	order        []OrderFunc
+	fields       []string
+	predicates   []predicate.Metadata
 	withUser     *UserQuery
 	withChildren *MetadataQuery
 	withParent   *MetadataQuery
@@ -373,7 +372,6 @@ func (mq *MetadataQuery) WithParent(opts ...func(*MetadataQuery)) *MetadataQuery
 //		GroupBy(metadata.FieldAge).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (mq *MetadataQuery) GroupBy(field string, fields ...string) *MetadataGroupBy {
 	grbuild := &MetadataGroupBy{config: mq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -400,7 +398,6 @@ func (mq *MetadataQuery) GroupBy(field string, fields ...string) *MetadataGroupB
 //	client.Metadata.Query().
 //		Select(metadata.FieldAge).
 //		Scan(ctx, &v)
-//
 func (mq *MetadataQuery) Select(fields ...string) *MetadataSelect {
 	mq.fields = append(mq.fields, fields...)
 	selbuild := &MetadataSelect{MetadataQuery: mq}
@@ -435,10 +432,10 @@ func (mq *MetadataQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Met
 			mq.withParent != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Metadata).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Metadata{config: mq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -453,85 +450,106 @@ func (mq *MetadataQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Met
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := mq.withUser; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Metadata)
-		for i := range nodes {
-			fk := nodes[i].ID
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := mq.loadUser(ctx, query, nodes, nil,
+			func(n *Metadata, e *User) { n.Edges.User = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "id" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.User = n
-			}
-		}
 	}
-
 	if query := mq.withChildren; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*Metadata)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Children = []*Metadata{}
-		}
-		query.Where(predicate.Metadata(func(s *sql.Selector) {
-			s.Where(sql.InValues(metadata.ChildrenColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := mq.loadChildren(ctx, query, nodes,
+			func(n *Metadata) { n.Edges.Children = []*Metadata{} },
+			func(n *Metadata, e *Metadata) { n.Edges.Children = append(n.Edges.Children, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			fk := n.ParentID
-			node, ok := nodeids[fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
-			}
-			node.Edges.Children = append(node.Edges.Children, n)
-		}
 	}
-
 	if query := mq.withParent; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Metadata)
-		for i := range nodes {
-			fk := nodes[i].ParentID
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(metadata.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := mq.loadParent(ctx, query, nodes, nil,
+			func(n *Metadata, e *Metadata) { n.Edges.Parent = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "parent_id" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Parent = n
-			}
+	}
+	return nodes, nil
+}
+
+func (mq *MetadataQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Metadata, init func(*Metadata), assign func(*Metadata, *User)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Metadata)
+	for i := range nodes {
+		fk := nodes[i].ID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
+}
+func (mq *MetadataQuery) loadChildren(ctx context.Context, query *MetadataQuery, nodes []*Metadata, init func(*Metadata), assign func(*Metadata, *Metadata)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Metadata)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.Where(predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.InValues(metadata.ChildrenColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ParentID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (mq *MetadataQuery) loadParent(ctx context.Context, query *MetadataQuery, nodes []*Metadata, init func(*Metadata), assign func(*Metadata, *Metadata)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Metadata)
+	for i := range nodes {
+		fk := nodes[i].ParentID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(metadata.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "parent_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (mq *MetadataQuery) sqlCount(ctx context.Context) (int, error) {
@@ -544,11 +562,14 @@ func (mq *MetadataQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (mq *MetadataQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := mq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := mq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (mq *MetadataQuery) querySpec() *sqlgraph.QuerySpec {
@@ -649,7 +670,7 @@ func (mgb *MetadataGroupBy) Aggregate(fns ...AggregateFunc) *MetadataGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (mgb *MetadataGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (mgb *MetadataGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := mgb.path(ctx)
 	if err != nil {
 		return err
@@ -658,7 +679,7 @@ func (mgb *MetadataGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return mgb.sqlScan(ctx, v)
 }
 
-func (mgb *MetadataGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (mgb *MetadataGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range mgb.fields {
 		if !metadata.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -705,7 +726,7 @@ type MetadataSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ms *MetadataSelect) Scan(ctx context.Context, v interface{}) error {
+func (ms *MetadataSelect) Scan(ctx context.Context, v any) error {
 	if err := ms.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -713,7 +734,7 @@ func (ms *MetadataSelect) Scan(ctx context.Context, v interface{}) error {
 	return ms.sqlScan(ctx, v)
 }
 
-func (ms *MetadataSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ms *MetadataSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ms.sql.Query()
 	if err := ms.driver.Query(ctx, query, args, rows); err != nil {

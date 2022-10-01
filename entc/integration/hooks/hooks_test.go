@@ -394,3 +394,32 @@ func TestConditions(t *testing.T) {
 	client.User.Update().Where(user.ID(alexsn.ID)).AddWorth(100).SaveX(ctx)
 	client.User.DeleteOne(alexsn).ExecX(ctx)
 }
+
+func TestRuntimeTx(t *testing.T) {
+	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
+	defer client.Close()
+	client.Card.Use(func(next ent.Mutator) ent.Mutator {
+		return hook.CardFunc(func(ctx context.Context, m *ent.CardMutation) (ent.Value, error) {
+			v, err := next.Mutate(ctx, m)
+			require.NoError(t, err)
+			tx, err := m.Tx()
+			require.NoError(t, err)
+			tx.OnCommit(func(next ent.Committer) ent.Committer {
+				return ent.CommitFunc(func(ctx context.Context, tx *ent.Tx) error {
+					// Ensure the transaction can see the created card.
+					tx.Card.GetX(ctx, v.(*ent.Card).ID)
+					// Cause the transaction to fail.
+					require.NoError(t, tx.Rollback())
+					return fmt.Errorf("fail")
+				})
+			})
+			return v, nil
+		})
+	})
+	ctx := context.Background()
+	tx, err := client.Tx(ctx)
+	require.NoError(t, err)
+	tx.Card.Create().SetNumber("9876").ExecX(ctx)
+	require.EqualError(t, tx.Commit(), "fail")
+	require.Zero(t, client.Card.Query().CountX(ctx), "database is empty")
+}

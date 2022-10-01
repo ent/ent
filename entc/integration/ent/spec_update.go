@@ -22,8 +22,9 @@ import (
 // SpecUpdate is the builder for updating Spec entities.
 type SpecUpdate struct {
 	config
-	hooks    []Hook
-	mutation *SpecMutation
+	hooks     []Hook
+	mutation  *SpecMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the SpecUpdate builder.
@@ -127,6 +128,12 @@ func (su *SpecUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (su *SpecUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *SpecUpdate {
+	su.modifiers = append(su.modifiers, modifiers...)
+	return su
+}
+
 func (su *SpecUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -199,6 +206,7 @@ func (su *SpecUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(su.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, su.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{spec.Label}
@@ -213,9 +221,10 @@ func (su *SpecUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // SpecUpdateOne is the builder for updating a single Spec entity.
 type SpecUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *SpecMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *SpecMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // AddCardIDs adds the "card" edge to the Card entity by IDs.
@@ -326,6 +335,12 @@ func (suo *SpecUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (suo *SpecUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *SpecUpdateOne {
+	suo.modifiers = append(suo.modifiers, modifiers...)
+	return suo
+}
+
 func (suo *SpecUpdateOne) sqlSave(ctx context.Context) (_node *Spec, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -415,6 +430,7 @@ func (suo *SpecUpdateOne) sqlSave(ctx context.Context) (_node *Spec, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(suo.modifiers...)
 	_node = &Spec{config: suo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

@@ -28,6 +28,8 @@ type Pet struct {
 	UUID uuid.UUID `json:"uuid,omitempty"`
 	// Nickname holds the value of the "nickname" field.
 	Nickname string `json:"nickname,omitempty"`
+	// Trained holds the value of the "trained" field.
+	Trained bool `json:"trained,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PetQuery when eager-loading is set.
 	Edges PetEdges `json:"edges"`
@@ -49,8 +51,7 @@ type PetEdges struct {
 func (e PetEdges) TeamOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.Team == nil {
-			// The edge team was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Team, nil
@@ -63,8 +64,7 @@ func (e PetEdges) TeamOrErr() (*User, error) {
 func (e PetEdges) OwnerOrErr() (*User, error) {
 	if e.loadedTypes[1] {
 		if e.Owner == nil {
-			// The edge owner was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
 		}
 		return e.Owner, nil
@@ -84,6 +84,7 @@ func (pe *Pet) FromResponse(res *gremlin.Response) error {
 		Name     string    `json:"name,omitempty"`
 		UUID     uuid.UUID `json:"uuid,omitempty"`
 		Nickname string    `json:"nickname,omitempty"`
+		Trained  bool      `json:"trained,omitempty"`
 	}
 	if err := vmap.Decode(&scanpe); err != nil {
 		return err
@@ -93,6 +94,7 @@ func (pe *Pet) FromResponse(res *gremlin.Response) error {
 	pe.Name = scanpe.Name
 	pe.UUID = scanpe.UUID
 	pe.Nickname = scanpe.Nickname
+	pe.Trained = scanpe.Trained
 	return nil
 }
 
@@ -140,6 +142,9 @@ func (pe *Pet) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("nickname=")
 	builder.WriteString(pe.Nickname)
+	builder.WriteString(", ")
+	builder.WriteString("trained=")
+	builder.WriteString(fmt.Sprintf("%v", pe.Trained))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -159,18 +164,19 @@ func (pe *Pets) FromResponse(res *gremlin.Response) error {
 		Name     string    `json:"name,omitempty"`
 		UUID     uuid.UUID `json:"uuid,omitempty"`
 		Nickname string    `json:"nickname,omitempty"`
+		Trained  bool      `json:"trained,omitempty"`
 	}
 	if err := vmap.Decode(&scanpe); err != nil {
 		return err
 	}
 	for _, v := range scanpe {
-		*pe = append(*pe, &Pet{
-			ID:       v.ID,
-			Age:      v.Age,
-			Name:     v.Name,
-			UUID:     v.UUID,
-			Nickname: v.Nickname,
-		})
+		node := &Pet{ID: v.ID}
+		node.Age = v.Age
+		node.Name = v.Name
+		node.UUID = v.UUID
+		node.Nickname = v.Nickname
+		node.Trained = v.Trained
+		*pe = append(*pe, node)
 	}
 	return nil
 }

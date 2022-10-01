@@ -35,6 +35,7 @@ type GroupInfoEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
+	namedGroups map[string][]*Group
 }
 
 // GroupsOrErr returns the Groups value or an error if the edge
@@ -47,8 +48,8 @@ func (e GroupInfoEdges) GroupsOrErr() ([]*Group, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*GroupInfo) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*GroupInfo) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
 		case groupinfo.FieldID, groupinfo.FieldMaxUsers:
@@ -64,7 +65,7 @@ func (*GroupInfo) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the GroupInfo fields.
-func (gi *GroupInfo) assignValues(columns []string, values []interface{}) error {
+func (gi *GroupInfo) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -128,6 +129,30 @@ func (gi *GroupInfo) String() string {
 	builder.WriteString(fmt.Sprintf("%v", gi.MaxUsers))
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedGroups returns the Groups named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (gi *GroupInfo) NamedGroups(name string) ([]*Group, error) {
+	if gi.Edges.namedGroups == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := gi.Edges.namedGroups[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (gi *GroupInfo) appendNamedGroups(name string, edges ...*Group) {
+	if gi.Edges.namedGroups == nil {
+		gi.Edges.namedGroups = make(map[string][]*Group)
+	}
+	if len(edges) == 0 {
+		gi.Edges.namedGroups[name] = []*Group{}
+	} else {
+		gi.Edges.namedGroups[name] = append(gi.Edges.namedGroups[name], edges...)
+	}
 }
 
 // GroupInfos is a parsable slice of GroupInfo.

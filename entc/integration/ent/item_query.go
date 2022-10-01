@@ -267,7 +267,6 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 //		GroupBy(item.FieldText).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 	grbuild := &ItemGroupBy{config: iq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -294,7 +293,6 @@ func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 //	client.Item.Query().
 //		Select(item.FieldText).
 //		Scan(ctx, &v)
-//
 func (iq *ItemQuery) Select(fields ...string) *ItemSelect {
 	iq.fields = append(iq.fields, fields...)
 	selbuild := &ItemSelect{ItemQuery: iq}
@@ -324,10 +322,10 @@ func (iq *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 		nodes = []*Item{}
 		_spec = iq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Item).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Item{config: iq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -360,11 +358,14 @@ func (iq *ItemQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (iq *ItemQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := iq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := iq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (iq *ItemQuery) querySpec() *sqlgraph.QuerySpec {
@@ -500,7 +501,7 @@ func (igb *ItemGroupBy) Aggregate(fns ...AggregateFunc) *ItemGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (igb *ItemGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (igb *ItemGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := igb.path(ctx)
 	if err != nil {
 		return err
@@ -509,7 +510,7 @@ func (igb *ItemGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return igb.sqlScan(ctx, v)
 }
 
-func (igb *ItemGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (igb *ItemGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range igb.fields {
 		if !item.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -556,7 +557,7 @@ type ItemSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (is *ItemSelect) Scan(ctx context.Context, v interface{}) error {
+func (is *ItemSelect) Scan(ctx context.Context, v any) error {
 	if err := is.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -564,7 +565,7 @@ func (is *ItemSelect) Scan(ctx context.Context, v interface{}) error {
 	return is.sqlScan(ctx, v)
 }
 
-func (is *ItemSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (is *ItemSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := is.sql.Query()
 	if err := is.driver.Query(ctx, query, args, rows); err != nil {

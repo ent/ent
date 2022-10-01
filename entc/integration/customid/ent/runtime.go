@@ -7,11 +7,15 @@
 package ent
 
 import (
+	"time"
+
 	"entgo.io/ent/entc/integration/customid/ent/account"
 	"entgo.io/ent/entc/integration/customid/ent/blob"
+	"entgo.io/ent/entc/integration/customid/ent/bloblink"
 	"entgo.io/ent/entc/integration/customid/ent/car"
 	"entgo.io/ent/entc/integration/customid/ent/device"
 	"entgo.io/ent/entc/integration/customid/ent/doc"
+	"entgo.io/ent/entc/integration/customid/ent/link"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
 	"entgo.io/ent/entc/integration/customid/ent/note"
 	"entgo.io/ent/entc/integration/customid/ent/other"
@@ -20,6 +24,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/session"
 	"entgo.io/ent/entc/integration/customid/ent/token"
 	"entgo.io/ent/entc/integration/customid/sid"
+	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
 	"github.com/google/uuid"
 )
 
@@ -51,6 +56,12 @@ func init() {
 	blobDescID := blobFields[0].Descriptor()
 	// blob.DefaultID holds the default value on creation for the id field.
 	blob.DefaultID = blobDescID.Default.(func() uuid.UUID)
+	bloblinkFields := schema.BlobLink{}.Fields()
+	_ = bloblinkFields
+	// bloblinkDescCreatedAt is the schema descriptor for created_at field.
+	bloblinkDescCreatedAt := bloblinkFields[0].Descriptor()
+	// bloblink.DefaultCreatedAt holds the default value on creation for the created_at field.
+	bloblink.DefaultCreatedAt = bloblinkDescCreatedAt.Default.(func() time.Time)
 	carMixin := schema.Car{}.Mixin()
 	carMixinFields0 := carMixin[0].Fields()
 	_ = carMixinFields0
@@ -98,6 +109,16 @@ func init() {
 			return nil
 		}
 	}()
+	linkFields := schema.Link{}.Fields()
+	_ = linkFields
+	// linkDescLinkInformation is the schema descriptor for link_information field.
+	linkDescLinkInformation := linkFields[1].Descriptor()
+	// link.DefaultLinkInformation holds the default value on creation for the link_information field.
+	link.DefaultLinkInformation = linkDescLinkInformation.Default.(map[string]schema.LinkInformation)
+	// linkDescID is the schema descriptor for id field.
+	linkDescID := linkFields[0].Descriptor()
+	// link.DefaultID holds the default value on creation for the id field.
+	link.DefaultID = linkDescID.Default.(func() uuidc.UUIDC)
 	mixinidMixin := schema.MixinID{}.Mixin()
 	mixinidMixinFields0 := mixinidMixin[0].Fields()
 	_ = mixinidMixinFields0

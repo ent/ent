@@ -55,6 +55,18 @@ func (tu *TaskUpdate) AddPriority(t task.Priority) *TaskUpdate {
 	return tu
 }
 
+// SetPriorities sets the "priorities" field.
+func (tu *TaskUpdate) SetPriorities(m map[string]task.Priority) *TaskUpdate {
+	tu.mutation.SetPriorities(m)
+	return tu
+}
+
+// ClearPriorities clears the value of the "priorities" field.
+func (tu *TaskUpdate) ClearPriorities() *TaskUpdate {
+	tu.mutation.ClearPriorities()
+	return tu
+}
+
 // Mutation returns the TaskMutation object of the builder.
 func (tu *TaskUpdate) Mutation() *TaskMutation {
 	return tu.mutation
@@ -156,6 +168,16 @@ func (tu *TaskUpdate) gremlin() *dsl.Traversal {
 	if value, ok := tu.mutation.AddedPriority(); ok {
 		v.Property(dsl.Single, enttask.FieldPriority, __.Union(__.Values(enttask.FieldPriority), __.Constant(value)).Sum())
 	}
+	if value, ok := tu.mutation.Priorities(); ok {
+		v.Property(dsl.Single, enttask.FieldPriorities, value)
+	}
+	var properties []any
+	if tu.mutation.PrioritiesCleared() {
+		properties = append(properties, enttask.FieldPriorities)
+	}
+	if len(properties) > 0 {
+		v.SideEffect(__.Properties(properties...).Drop())
+	}
 	v.Count()
 	trs = append(trs, v)
 	return dsl.Join(trs...)
@@ -187,6 +209,18 @@ func (tuo *TaskUpdateOne) SetNillablePriority(t *task.Priority) *TaskUpdateOne {
 // AddPriority adds t to the "priority" field.
 func (tuo *TaskUpdateOne) AddPriority(t task.Priority) *TaskUpdateOne {
 	tuo.mutation.AddPriority(t)
+	return tuo
+}
+
+// SetPriorities sets the "priorities" field.
+func (tuo *TaskUpdateOne) SetPriorities(m map[string]task.Priority) *TaskUpdateOne {
+	tuo.mutation.SetPriorities(m)
+	return tuo
+}
+
+// ClearPriorities clears the value of the "priorities" field.
+func (tuo *TaskUpdateOne) ClearPriorities() *TaskUpdateOne {
+	tuo.mutation.ClearPriorities()
 	return tuo
 }
 
@@ -309,8 +343,18 @@ func (tuo *TaskUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := tuo.mutation.AddedPriority(); ok {
 		v.Property(dsl.Single, enttask.FieldPriority, __.Union(__.Values(enttask.FieldPriority), __.Constant(value)).Sum())
 	}
+	if value, ok := tuo.mutation.Priorities(); ok {
+		v.Property(dsl.Single, enttask.FieldPriorities, value)
+	}
+	var properties []any
+	if tuo.mutation.PrioritiesCleared() {
+		properties = append(properties, enttask.FieldPriorities)
+	}
+	if len(properties) > 0 {
+		v.SideEffect(__.Properties(properties...).Drop())
+	}
 	if len(tuo.fields) > 0 {
-		fields := make([]interface{}, 0, len(tuo.fields)+1)
+		fields := make([]any, 0, len(tuo.fields)+1)
 		fields = append(fields, true)
 		for _, f := range tuo.fields {
 			fields = append(fields, f)

@@ -86,6 +86,21 @@ func (du *DocUpdate) AddChildren(d ...*Doc) *DocUpdate {
 	return du.AddChildIDs(ids...)
 }
 
+// AddRelatedIDs adds the "related" edge to the Doc entity by IDs.
+func (du *DocUpdate) AddRelatedIDs(ids ...schema.DocID) *DocUpdate {
+	du.mutation.AddRelatedIDs(ids...)
+	return du
+}
+
+// AddRelated adds the "related" edges to the Doc entity.
+func (du *DocUpdate) AddRelated(d ...*Doc) *DocUpdate {
+	ids := make([]schema.DocID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return du.AddRelatedIDs(ids...)
+}
+
 // Mutation returns the DocMutation object of the builder.
 func (du *DocUpdate) Mutation() *DocMutation {
 	return du.mutation
@@ -116,6 +131,27 @@ func (du *DocUpdate) RemoveChildren(d ...*Doc) *DocUpdate {
 		ids[i] = d[i].ID
 	}
 	return du.RemoveChildIDs(ids...)
+}
+
+// ClearRelated clears all "related" edges to the Doc entity.
+func (du *DocUpdate) ClearRelated() *DocUpdate {
+	du.mutation.ClearRelated()
+	return du
+}
+
+// RemoveRelatedIDs removes the "related" edge to Doc entities by IDs.
+func (du *DocUpdate) RemoveRelatedIDs(ids ...schema.DocID) *DocUpdate {
+	du.mutation.RemoveRelatedIDs(ids...)
+	return du
+}
+
+// RemoveRelated removes "related" edges to Doc entities.
+func (du *DocUpdate) RemoveRelated(d ...*Doc) *DocUpdate {
+	ids := make([]schema.DocID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return du.RemoveRelatedIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -292,6 +328,60 @@ func (du *DocUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if du.mutation.RelatedCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   doc.RelatedTable,
+			Columns: doc.RelatedPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: doc.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := du.mutation.RemovedRelatedIDs(); len(nodes) > 0 && !du.mutation.RelatedCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   doc.RelatedTable,
+			Columns: doc.RelatedPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: doc.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := du.mutation.RelatedIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   doc.RelatedTable,
+			Columns: doc.RelatedPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: doc.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, du.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{doc.Label}
@@ -365,6 +455,21 @@ func (duo *DocUpdateOne) AddChildren(d ...*Doc) *DocUpdateOne {
 	return duo.AddChildIDs(ids...)
 }
 
+// AddRelatedIDs adds the "related" edge to the Doc entity by IDs.
+func (duo *DocUpdateOne) AddRelatedIDs(ids ...schema.DocID) *DocUpdateOne {
+	duo.mutation.AddRelatedIDs(ids...)
+	return duo
+}
+
+// AddRelated adds the "related" edges to the Doc entity.
+func (duo *DocUpdateOne) AddRelated(d ...*Doc) *DocUpdateOne {
+	ids := make([]schema.DocID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return duo.AddRelatedIDs(ids...)
+}
+
 // Mutation returns the DocMutation object of the builder.
 func (duo *DocUpdateOne) Mutation() *DocMutation {
 	return duo.mutation
@@ -395,6 +500,27 @@ func (duo *DocUpdateOne) RemoveChildren(d ...*Doc) *DocUpdateOne {
 		ids[i] = d[i].ID
 	}
 	return duo.RemoveChildIDs(ids...)
+}
+
+// ClearRelated clears all "related" edges to the Doc entity.
+func (duo *DocUpdateOne) ClearRelated() *DocUpdateOne {
+	duo.mutation.ClearRelated()
+	return duo
+}
+
+// RemoveRelatedIDs removes the "related" edge to Doc entities by IDs.
+func (duo *DocUpdateOne) RemoveRelatedIDs(ids ...schema.DocID) *DocUpdateOne {
+	duo.mutation.RemoveRelatedIDs(ids...)
+	return duo
+}
+
+// RemoveRelated removes "related" edges to Doc entities.
+func (duo *DocUpdateOne) RemoveRelated(d ...*Doc) *DocUpdateOne {
+	ids := make([]schema.DocID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return duo.RemoveRelatedIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -589,6 +715,60 @@ func (duo *DocUpdateOne) sqlSave(ctx context.Context) (_node *Doc, err error) {
 			Table:   doc.ChildrenTable,
 			Columns: []string{doc.ChildrenColumn},
 			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: doc.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if duo.mutation.RelatedCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   doc.RelatedTable,
+			Columns: doc.RelatedPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: doc.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := duo.mutation.RemovedRelatedIDs(); len(nodes) > 0 && !duo.mutation.RelatedCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   doc.RelatedTable,
+			Columns: doc.RelatedPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: doc.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := duo.mutation.RelatedIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   doc.RelatedTable,
+			Columns: doc.RelatedPrimaryKey,
+			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeString,

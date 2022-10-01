@@ -288,7 +288,6 @@ func (ttc *TweetTagCreate) createSpec() (*TweetTag, *sqlgraph.CreateSpec) {
 //			SetAddedAt(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (ttc *TweetTagCreate) OnConflict(opts ...sql.ConflictOption) *TweetTagUpsertOne {
 	ttc.conflict = opts
 	return &TweetTagUpsertOne{
@@ -302,7 +301,6 @@ func (ttc *TweetTagCreate) OnConflict(opts ...sql.ConflictOption) *TweetTagUpser
 //	client.TweetTag.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (ttc *TweetTagCreate) OnConflictColumns(columns ...string) *TweetTagUpsertOne {
 	ttc.conflict = append(ttc.conflict, sql.ConflictColumns(columns...))
 	return &TweetTagUpsertOne{
@@ -370,7 +368,6 @@ func (u *TweetTagUpsert) UpdateTweetID() *TweetTagUpsert {
 //			}),
 //		).
 //		Exec(ctx)
-//
 func (u *TweetTagUpsertOne) UpdateNewValues() *TweetTagUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -384,10 +381,9 @@ func (u *TweetTagUpsertOne) UpdateNewValues() *TweetTagUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.TweetTag.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.TweetTag.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *TweetTagUpsertOne) Ignore() *TweetTagUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -586,7 +582,6 @@ func (ttcb *TweetTagCreateBulk) ExecX(ctx context.Context) {
 //			SetAddedAt(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (ttcb *TweetTagCreateBulk) OnConflict(opts ...sql.ConflictOption) *TweetTagUpsertBulk {
 	ttcb.conflict = opts
 	return &TweetTagUpsertBulk{
@@ -600,7 +595,6 @@ func (ttcb *TweetTagCreateBulk) OnConflict(opts ...sql.ConflictOption) *TweetTag
 //	client.TweetTag.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (ttcb *TweetTagCreateBulk) OnConflictColumns(columns ...string) *TweetTagUpsertBulk {
 	ttcb.conflict = append(ttcb.conflict, sql.ConflictColumns(columns...))
 	return &TweetTagUpsertBulk{
@@ -625,14 +619,12 @@ type TweetTagUpsertBulk struct {
 //			}),
 //		).
 //		Exec(ctx)
-//
 func (u *TweetTagUpsertBulk) UpdateNewValues() *TweetTagUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(tweettag.FieldID)
-				return
 			}
 		}
 	}))
@@ -645,7 +637,6 @@ func (u *TweetTagUpsertBulk) UpdateNewValues() *TweetTagUpsertBulk {
 //	client.TweetTag.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *TweetTagUpsertBulk) Ignore() *TweetTagUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

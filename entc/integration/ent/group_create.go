@@ -419,7 +419,6 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 //			SetActive(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (gc *GroupCreate) OnConflict(opts ...sql.ConflictOption) *GroupUpsertOne {
 	gc.conflict = opts
 	return &GroupUpsertOne{
@@ -433,7 +432,6 @@ func (gc *GroupCreate) OnConflict(opts ...sql.ConflictOption) *GroupUpsertOne {
 //	client.Group.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (gc *GroupCreate) OnConflictColumns(columns ...string) *GroupUpsertOne {
 	gc.conflict = append(gc.conflict, sql.ConflictColumns(columns...))
 	return &GroupUpsertOne{
@@ -540,7 +538,6 @@ func (u *GroupUpsert) UpdateName() *GroupUpsert {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *GroupUpsertOne) UpdateNewValues() *GroupUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -549,10 +546,9 @@ func (u *GroupUpsertOne) UpdateNewValues() *GroupUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.Group.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.Group.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *GroupUpsertOne) Ignore() *GroupUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -799,7 +795,6 @@ func (gcb *GroupCreateBulk) ExecX(ctx context.Context) {
 //			SetActive(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (gcb *GroupCreateBulk) OnConflict(opts ...sql.ConflictOption) *GroupUpsertBulk {
 	gcb.conflict = opts
 	return &GroupUpsertBulk{
@@ -813,7 +808,6 @@ func (gcb *GroupCreateBulk) OnConflict(opts ...sql.ConflictOption) *GroupUpsertB
 //	client.Group.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (gcb *GroupCreateBulk) OnConflictColumns(columns ...string) *GroupUpsertBulk {
 	gcb.conflict = append(gcb.conflict, sql.ConflictColumns(columns...))
 	return &GroupUpsertBulk{
@@ -835,7 +829,6 @@ type GroupUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *GroupUpsertBulk) UpdateNewValues() *GroupUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -847,7 +840,6 @@ func (u *GroupUpsertBulk) UpdateNewValues() *GroupUpsertBulk {
 //	client.Group.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *GroupUpsertBulk) Ignore() *GroupUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

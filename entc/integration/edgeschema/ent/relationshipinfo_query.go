@@ -265,7 +265,6 @@ func (riq *RelationshipInfoQuery) Clone() *RelationshipInfoQuery {
 //		GroupBy(relationshipinfo.FieldText).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (riq *RelationshipInfoQuery) GroupBy(field string, fields ...string) *RelationshipInfoGroupBy {
 	grbuild := &RelationshipInfoGroupBy{config: riq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -292,7 +291,6 @@ func (riq *RelationshipInfoQuery) GroupBy(field string, fields ...string) *Relat
 //	client.RelationshipInfo.Query().
 //		Select(relationshipinfo.FieldText).
 //		Scan(ctx, &v)
-//
 func (riq *RelationshipInfoQuery) Select(fields ...string) *RelationshipInfoSelect {
 	riq.fields = append(riq.fields, fields...)
 	selbuild := &RelationshipInfoSelect{RelationshipInfoQuery: riq}
@@ -322,10 +320,10 @@ func (riq *RelationshipInfoQuery) sqlAll(ctx context.Context, hooks ...queryHook
 		nodes = []*RelationshipInfo{}
 		_spec = riq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*RelationshipInfo).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &RelationshipInfo{config: riq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -352,11 +350,14 @@ func (riq *RelationshipInfoQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (riq *RelationshipInfoQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := riq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := riq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (riq *RelationshipInfoQuery) querySpec() *sqlgraph.QuerySpec {
@@ -457,7 +458,7 @@ func (rigb *RelationshipInfoGroupBy) Aggregate(fns ...AggregateFunc) *Relationsh
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (rigb *RelationshipInfoGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (rigb *RelationshipInfoGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := rigb.path(ctx)
 	if err != nil {
 		return err
@@ -466,7 +467,7 @@ func (rigb *RelationshipInfoGroupBy) Scan(ctx context.Context, v interface{}) er
 	return rigb.sqlScan(ctx, v)
 }
 
-func (rigb *RelationshipInfoGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (rigb *RelationshipInfoGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range rigb.fields {
 		if !relationshipinfo.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -513,7 +514,7 @@ type RelationshipInfoSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ris *RelationshipInfoSelect) Scan(ctx context.Context, v interface{}) error {
+func (ris *RelationshipInfoSelect) Scan(ctx context.Context, v any) error {
 	if err := ris.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -521,7 +522,7 @@ func (ris *RelationshipInfoSelect) Scan(ctx context.Context, v interface{}) erro
 	return ris.sqlScan(ctx, v)
 }
 
-func (ris *RelationshipInfoSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ris *RelationshipInfoSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ris.sql.Query()
 	if err := ris.driver.Query(ctx, query, args, rows); err != nil {

@@ -28,9 +28,8 @@ type CardQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Card
-	// eager-loading edges.
-	withOwner *UserQuery
-	withFKs   bool
+	withOwner  *UserQuery
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -303,7 +302,6 @@ func (cq *CardQuery) WithOwner(opts ...func(*UserQuery)) *CardQuery {
 //		GroupBy(card.FieldNumber).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 	grbuild := &CardGroupBy{config: cq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -330,7 +328,6 @@ func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 //	client.Card.Query().
 //		Select(card.FieldNumber).
 //		Scan(ctx, &v)
-//
 func (cq *CardQuery) Select(fields ...string) *CardSelect {
 	cq.fields = append(cq.fields, fields...)
 	selbuild := &CardSelect{CardQuery: cq}
@@ -370,10 +367,10 @@ func (cq *CardQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Card, e
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, card.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Card).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Card{config: cq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -388,37 +385,43 @@ func (cq *CardQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Card, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := cq.withOwner; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Card)
-		for i := range nodes {
-			if nodes[i].user_cards == nil {
-				continue
-			}
-			fk := *nodes[i].user_cards
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := cq.loadOwner(ctx, query, nodes, nil,
+			func(n *Card, e *User) { n.Edges.Owner = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_cards" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Owner = n
-			}
+	}
+	return nodes, nil
+}
+
+func (cq *CardQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*Card, init func(*Card), assign func(*Card, *User)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Card)
+	for i := range nodes {
+		if nodes[i].user_cards == nil {
+			continue
+		}
+		fk := *nodes[i].user_cards
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_cards" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
 }
 
 func (cq *CardQuery) sqlCount(ctx context.Context) (int, error) {
@@ -431,11 +434,14 @@ func (cq *CardQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (cq *CardQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := cq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := cq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (cq *CardQuery) querySpec() *sqlgraph.QuerySpec {
@@ -536,7 +542,7 @@ func (cgb *CardGroupBy) Aggregate(fns ...AggregateFunc) *CardGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (cgb *CardGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (cgb *CardGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := cgb.path(ctx)
 	if err != nil {
 		return err
@@ -545,7 +551,7 @@ func (cgb *CardGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return cgb.sqlScan(ctx, v)
 }
 
-func (cgb *CardGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (cgb *CardGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range cgb.fields {
 		if !card.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -592,7 +598,7 @@ type CardSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (cs *CardSelect) Scan(ctx context.Context, v interface{}) error {
+func (cs *CardSelect) Scan(ctx context.Context, v any) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -600,7 +606,7 @@ func (cs *CardSelect) Scan(ctx context.Context, v interface{}) error {
 	return cs.sqlScan(ctx, v)
 }
 
-func (cs *CardSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (cs *CardSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := cs.sql.Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {

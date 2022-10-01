@@ -1,6 +1,6 @@
 run:
-  go: '1.17'
-  timeout: 3m
+  go: '1.19'
+  timeout: 5m
 
 linters-settings:
   errcheck:
@@ -26,7 +26,7 @@ linters:
     - errcheck
     - funlen
     - gocritic
-    - gofmt
+    # - gofmt; Enable back when upgrading CI to Go 1.20.
     - goheader
     - gosec
     - gosimple
@@ -69,7 +69,7 @@ issues:
     - path: entc/gen/graph.go
       linters:
         - gocritic
-    - path: entc/integration/multischema/multischema_test.go
+    - path: \.go
       linters:
         - staticcheck
       text: SA1019

@@ -34,9 +34,11 @@ type DocEdges struct {
 	Parent *Doc `json:"parent,omitempty"`
 	// Children holds the value of the children edge.
 	Children []*Doc `json:"children,omitempty"`
+	// Related holds the value of the related edge.
+	Related []*Doc `json:"related,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // ParentOrErr returns the Parent value or an error if the edge
@@ -44,8 +46,7 @@ type DocEdges struct {
 func (e DocEdges) ParentOrErr() (*Doc, error) {
 	if e.loadedTypes[0] {
 		if e.Parent == nil {
-			// The edge parent was loaded in eager-loading,
-			// but was not found.
+			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: doc.Label}
 		}
 		return e.Parent, nil
@@ -62,9 +63,18 @@ func (e DocEdges) ChildrenOrErr() ([]*Doc, error) {
 	return nil, &NotLoadedError{edge: "children"}
 }
 
+// RelatedOrErr returns the Related value or an error if the edge
+// was not loaded in eager-loading.
+func (e DocEdges) RelatedOrErr() ([]*Doc, error) {
+	if e.loadedTypes[2] {
+		return e.Related, nil
+	}
+	return nil, &NotLoadedError{edge: "related"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Doc) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*Doc) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
 		case doc.FieldID:
@@ -82,7 +92,7 @@ func (*Doc) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Doc fields.
-func (d *Doc) assignValues(columns []string, values []interface{}) error {
+func (d *Doc) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -120,6 +130,11 @@ func (d *Doc) QueryParent() *DocQuery {
 // QueryChildren queries the "children" edge of the Doc entity.
 func (d *Doc) QueryChildren() *DocQuery {
 	return (&DocClient{config: d.config}).QueryChildren(d)
+}
+
+// QueryRelated queries the "related" edge of the Doc entity.
+func (d *Doc) QueryRelated() *DocQuery {
+	return (&DocClient{config: d.config}).QueryRelated(d)
 }
 
 // Update returns a builder for updating this Doc.

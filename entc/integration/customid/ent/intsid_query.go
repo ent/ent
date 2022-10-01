@@ -23,13 +23,12 @@ import (
 // IntSIDQuery is the builder for querying IntSID entities.
 type IntSIDQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.IntSID
-	// eager-loading edges.
+	limit        *int
+	offset       *int
+	unique       *bool
+	order        []OrderFunc
+	fields       []string
+	predicates   []predicate.IntSID
 	withParent   *IntSIDQuery
 	withChildren *IntSIDQuery
 	withFKs      bool
@@ -383,10 +382,10 @@ func (isq *IntSIDQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*IntS
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, intsid.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*IntSID).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &IntSID{config: isq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -401,66 +400,81 @@ func (isq *IntSIDQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*IntS
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := isq.withParent; query != nil {
-		ids := make([]sid.ID, 0, len(nodes))
-		nodeids := make(map[sid.ID][]*IntSID)
-		for i := range nodes {
-			if nodes[i].int_sid_parent == nil {
-				continue
-			}
-			fk := *nodes[i].int_sid_parent
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(intsid.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := isq.loadParent(ctx, query, nodes, nil,
+			func(n *IntSID, e *IntSID) { n.Edges.Parent = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "int_sid_parent" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Parent = n
-			}
-		}
 	}
-
 	if query := isq.withChildren; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[sid.ID]*IntSID)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Children = []*IntSID{}
-		}
-		query.withFKs = true
-		query.Where(predicate.IntSID(func(s *sql.Selector) {
-			s.Where(sql.InValues(intsid.ChildrenColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := isq.loadChildren(ctx, query, nodes,
+			func(n *IntSID) { n.Edges.Children = []*IntSID{} },
+			func(n *IntSID, e *IntSID) { n.Edges.Children = append(n.Edges.Children, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			fk := n.int_sid_parent
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "int_sid_parent" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "int_sid_parent" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Children = append(node.Edges.Children, n)
+	}
+	return nodes, nil
+}
+
+func (isq *IntSIDQuery) loadParent(ctx context.Context, query *IntSIDQuery, nodes []*IntSID, init func(*IntSID), assign func(*IntSID, *IntSID)) error {
+	ids := make([]sid.ID, 0, len(nodes))
+	nodeids := make(map[sid.ID][]*IntSID)
+	for i := range nodes {
+		if nodes[i].int_sid_parent == nil {
+			continue
+		}
+		fk := *nodes[i].int_sid_parent
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(intsid.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "int_sid_parent" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
+}
+func (isq *IntSIDQuery) loadChildren(ctx context.Context, query *IntSIDQuery, nodes []*IntSID, init func(*IntSID), assign func(*IntSID, *IntSID)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[sid.ID]*IntSID)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.IntSID(func(s *sql.Selector) {
+		s.Where(sql.InValues(intsid.ChildrenColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.int_sid_parent
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "int_sid_parent" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "int_sid_parent" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (isq *IntSIDQuery) sqlCount(ctx context.Context) (int, error) {
@@ -473,11 +487,14 @@ func (isq *IntSIDQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (isq *IntSIDQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := isq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := isq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (isq *IntSIDQuery) querySpec() *sqlgraph.QuerySpec {
@@ -578,7 +595,7 @@ func (isgb *IntSIDGroupBy) Aggregate(fns ...AggregateFunc) *IntSIDGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (isgb *IntSIDGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (isgb *IntSIDGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := isgb.path(ctx)
 	if err != nil {
 		return err
@@ -587,7 +604,7 @@ func (isgb *IntSIDGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return isgb.sqlScan(ctx, v)
 }
 
-func (isgb *IntSIDGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (isgb *IntSIDGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range isgb.fields {
 		if !intsid.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -634,7 +651,7 @@ type IntSIDSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (iss *IntSIDSelect) Scan(ctx context.Context, v interface{}) error {
+func (iss *IntSIDSelect) Scan(ctx context.Context, v any) error {
 	if err := iss.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -642,7 +659,7 @@ func (iss *IntSIDSelect) Scan(ctx context.Context, v interface{}) error {
 	return iss.sqlScan(ctx, v)
 }
 
-func (iss *IntSIDSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (iss *IntSIDSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := iss.sql.Query()
 	if err := iss.driver.Query(ctx, query, args, rows); err != nil {

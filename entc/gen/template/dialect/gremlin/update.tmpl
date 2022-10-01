@@ -95,7 +95,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 	{{- end }}
 	{{- /* clear optional fields. */}}
 	{{- with $.HasOptional }}
-		var properties []interface{}
+		var properties []any
 		{{- range $f := $.MutationFields }}
 			{{- if $f.Optional }}
 				if {{ $mutation }}.{{ $f.StructField }}Cleared() {
@@ -157,7 +157,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 	{{- end }}
 	{{- if $one }}
 		if len({{ $receiver }}.fields) > 0 {
-			fields := make([]interface{}, 0, len({{ $receiver }}.fields)+1)
+			fields := make([]any, 0, len({{ $receiver }}.fields)+1)
 			fields = append(fields, true)
 			for _, f := range {{ $receiver }}.fields {
 				fields = append(fields, f)

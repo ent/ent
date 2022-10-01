@@ -122,6 +122,33 @@ func (fu *FileUpdate) ClearOp() *FileUpdate {
 	return fu
 }
 
+// SetFieldID sets the "field_id" field.
+func (fu *FileUpdate) SetFieldID(i int) *FileUpdate {
+	fu.mutation.ResetFieldID()
+	fu.mutation.SetFieldID(i)
+	return fu
+}
+
+// SetNillableFieldID sets the "field_id" field if the given value is not nil.
+func (fu *FileUpdate) SetNillableFieldID(i *int) *FileUpdate {
+	if i != nil {
+		fu.SetFieldID(*i)
+	}
+	return fu
+}
+
+// AddFieldID adds i to the "field_id" field.
+func (fu *FileUpdate) AddFieldID(i int) *FileUpdate {
+	fu.mutation.AddFieldID(i)
+	return fu
+}
+
+// ClearFieldID clears the value of the "field_id" field.
+func (fu *FileUpdate) ClearFieldID() *FileUpdate {
+	fu.mutation.ClearFieldID()
+	return fu
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (fu *FileUpdate) SetOwnerID(id string) *FileUpdate {
 	fu.mutation.SetOwnerID(id)
@@ -329,7 +356,13 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 	if value, ok := fu.mutation.GetOp(); ok {
 		v.Property(dsl.Single, file.FieldOp, value)
 	}
-	var properties []interface{}
+	if value, ok := fu.mutation.FieldID(); ok {
+		v.Property(dsl.Single, file.FieldFieldID, value)
+	}
+	if value, ok := fu.mutation.AddedFieldID(); ok {
+		v.Property(dsl.Single, file.FieldFieldID, __.Union(__.Values(file.FieldFieldID), __.Constant(value)).Sum())
+	}
+	var properties []any
 	if fu.mutation.UserCleared() {
 		properties = append(properties, file.FieldUser)
 	}
@@ -338,6 +371,9 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 	}
 	if fu.mutation.OpCleared() {
 		properties = append(properties, file.FieldOp)
+	}
+	if fu.mutation.FieldIDCleared() {
+		properties = append(properties, file.FieldFieldID)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -474,6 +510,33 @@ func (fuo *FileUpdateOne) SetNillableOp(b *bool) *FileUpdateOne {
 // ClearOp clears the value of the "op" field.
 func (fuo *FileUpdateOne) ClearOp() *FileUpdateOne {
 	fuo.mutation.ClearOp()
+	return fuo
+}
+
+// SetFieldID sets the "field_id" field.
+func (fuo *FileUpdateOne) SetFieldID(i int) *FileUpdateOne {
+	fuo.mutation.ResetFieldID()
+	fuo.mutation.SetFieldID(i)
+	return fuo
+}
+
+// SetNillableFieldID sets the "field_id" field if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableFieldID(i *int) *FileUpdateOne {
+	if i != nil {
+		fuo.SetFieldID(*i)
+	}
+	return fuo
+}
+
+// AddFieldID adds i to the "field_id" field.
+func (fuo *FileUpdateOne) AddFieldID(i int) *FileUpdateOne {
+	fuo.mutation.AddFieldID(i)
+	return fuo
+}
+
+// ClearFieldID clears the value of the "field_id" field.
+func (fuo *FileUpdateOne) ClearFieldID() *FileUpdateOne {
+	fuo.mutation.ClearFieldID()
 	return fuo
 }
 
@@ -702,7 +765,13 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := fuo.mutation.GetOp(); ok {
 		v.Property(dsl.Single, file.FieldOp, value)
 	}
-	var properties []interface{}
+	if value, ok := fuo.mutation.FieldID(); ok {
+		v.Property(dsl.Single, file.FieldFieldID, value)
+	}
+	if value, ok := fuo.mutation.AddedFieldID(); ok {
+		v.Property(dsl.Single, file.FieldFieldID, __.Union(__.Values(file.FieldFieldID), __.Constant(value)).Sum())
+	}
+	var properties []any
 	if fuo.mutation.UserCleared() {
 		properties = append(properties, file.FieldUser)
 	}
@@ -711,6 +780,9 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if fuo.mutation.OpCleared() {
 		properties = append(properties, file.FieldOp)
+	}
+	if fuo.mutation.FieldIDCleared() {
+		properties = append(properties, file.FieldFieldID)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -741,7 +813,7 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 		})
 	}
 	if len(fuo.fields) > 0 {
-		fields := make([]interface{}, 0, len(fuo.fields)+1)
+		fields := make([]any, 0, len(fuo.fields)+1)
 		fields = append(fields, true)
 		for _, f := range fuo.fields {
 			fields = append(fields, f)

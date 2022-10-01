@@ -28,9 +28,8 @@ type PetQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Pet
-	// eager-loading edges.
-	withTeam  *UserQuery
-	withOwner *UserQuery
+	withTeam   *UserQuery
+	withOwner  *UserQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
 	path    func(context.Context) (*dsl.Traversal, error)
@@ -321,7 +320,6 @@ func (pq *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
 //		GroupBy(pet.FieldAge).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 	grbuild := &PetGroupBy{config: pq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -348,7 +346,6 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 //	client.Pet.Query().
 //		Select(pet.FieldAge).
 //		Scan(ctx, &v)
-//
 func (pq *PetQuery) Select(fields ...string) *PetSelect {
 	pq.fields = append(pq.fields, fields...)
 	selbuild := &PetSelect{PetQuery: pq}
@@ -372,7 +369,7 @@ func (pq *PetQuery) gremlinAll(ctx context.Context) ([]*Pet, error) {
 	res := &gremlin.Response{}
 	traversal := pq.gremlinQuery(ctx)
 	if len(pq.fields) > 0 {
-		fields := make([]interface{}, len(pq.fields))
+		fields := make([]any, len(pq.fields))
 		for i, f := range pq.fields {
 			fields[i] = f
 		}
@@ -456,7 +453,7 @@ func (pgb *PetGroupBy) Aggregate(fns ...AggregateFunc) *PetGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (pgb *PetGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (pgb *PetGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := pgb.path(ctx)
 	if err != nil {
 		return err
@@ -465,7 +462,7 @@ func (pgb *PetGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return pgb.gremlinScan(ctx, v)
 }
 
-func (pgb *PetGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
+func (pgb *PetGroupBy) gremlinScan(ctx context.Context, v any) error {
 	res := &gremlin.Response{}
 	query, bindings := pgb.gremlinQuery().Query()
 	if err := pgb.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -483,8 +480,8 @@ func (pgb *PetGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
 
 func (pgb *PetGroupBy) gremlinQuery() *dsl.Traversal {
 	var (
-		trs   []interface{}
-		names []interface{}
+		trs   []any
+		names []any
 	)
 	for _, fn := range pgb.fns {
 		name, tr := fn("p", "")
@@ -511,7 +508,7 @@ type PetSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ps *PetSelect) Scan(ctx context.Context, v interface{}) error {
+func (ps *PetSelect) Scan(ctx context.Context, v any) error {
 	if err := ps.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -519,7 +516,7 @@ func (ps *PetSelect) Scan(ctx context.Context, v interface{}) error {
 	return ps.gremlinScan(ctx, v)
 }
 
-func (ps *PetSelect) gremlinScan(ctx context.Context, v interface{}) error {
+func (ps *PetSelect) gremlinScan(ctx context.Context, v any) error {
 	var (
 		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
@@ -531,7 +528,7 @@ func (ps *PetSelect) gremlinScan(ctx context.Context, v interface{}) error {
 			traversal = ps.gremlin.ID()
 		}
 	} else {
-		fields := make([]interface{}, len(ps.fields))
+		fields := make([]any, len(ps.fields))
 		for i, f := range ps.fields {
 			fields[i] = f
 		}

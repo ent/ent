@@ -10,7 +10,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
 
-func ({{ $receiver }} *{{ $builder }}) sqlScan(ctx context.Context, v interface{}) error {
+func ({{ $receiver }} *{{ $builder }}) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := {{ $receiver }}.sql.Query()
 	if err := {{ $receiver }}.driver.Query(ctx, query, args, rows); err != nil {

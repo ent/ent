@@ -62,6 +62,7 @@ var (
 		{Name: "nillable_int", Type: field.TypeInt, Nullable: true},
 		{Name: "table", Type: field.TypeString, Nullable: true},
 		{Name: "dir", Type: field.TypeJSON, Nullable: true},
+		{Name: "client", Type: field.TypeString, Nullable: true},
 	}
 	// CommentsTable holds the schema information for the "comments" table.
 	CommentsTable = &schema.Table{
@@ -126,7 +127,7 @@ var (
 		{Name: "schema_float", Type: field.TypeFloat64, Nullable: true},
 		{Name: "schema_float32", Type: field.TypeFloat32, Nullable: true},
 		{Name: "null_float", Type: field.TypeFloat64, Nullable: true},
-		{Name: "role", Type: field.TypeEnum, Enums: []string{"ADMIN", "OWNER", "USER", "READ", "WRITE"}, Default: "READ"},
+		{Name: "role", Type: field.TypeEnum, Enums: []string{"ADMIN", "OWNER", "USER", "READ", "WRITE", "READ+WRITE"}, Default: "READ"},
 		{Name: "priority", Type: field.TypeEnum, Nullable: true, Enums: []string{"UNKNOWN", "LOW", "HIGH"}},
 		{Name: "optional_uuid", Type: field.TypeUUID, Nullable: true},
 		{Name: "nillable_uuid", Type: field.TypeUUID, Nullable: true},
@@ -161,6 +162,7 @@ var (
 		{Name: "user", Type: field.TypeString, Nullable: true},
 		{Name: "group", Type: field.TypeString, Nullable: true},
 		{Name: "op", Type: field.TypeBool, Nullable: true},
+		{Name: "field_id", Type: field.TypeInt, Nullable: true},
 		{Name: "file_type_files", Type: field.TypeInt, Nullable: true},
 		{Name: "group_files", Type: field.TypeInt, Nullable: true},
 		{Name: "user_files", Type: field.TypeInt, Nullable: true},
@@ -173,19 +175,19 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "files_file_types_files",
-				Columns:    []*schema.Column{FilesColumns[6]},
+				Columns:    []*schema.Column{FilesColumns[7]},
 				RefColumns: []*schema.Column{FileTypesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "files_groups_files",
-				Columns:    []*schema.Column{FilesColumns[7]},
+				Columns:    []*schema.Column{FilesColumns[8]},
 				RefColumns: []*schema.Column{GroupsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "files_users_files",
-				Columns:    []*schema.Column{FilesColumns[8]},
+				Columns:    []*schema.Column{FilesColumns[9]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -204,17 +206,17 @@ var (
 			{
 				Name:    "file_user_files_file_type_files",
 				Unique:  false,
-				Columns: []*schema.Column{FilesColumns[8], FilesColumns[6]},
+				Columns: []*schema.Column{FilesColumns[9], FilesColumns[7]},
 			},
 			{
 				Name:    "file_name_user_files_file_type_files",
 				Unique:  true,
-				Columns: []*schema.Column{FilesColumns[2], FilesColumns[8], FilesColumns[6]},
+				Columns: []*schema.Column{FilesColumns[2], FilesColumns[9], FilesColumns[7]},
 			},
 			{
 				Name:    "file_name_user_files",
 				Unique:  false,
-				Columns: []*schema.Column{FilesColumns[2], FilesColumns[8]},
+				Columns: []*schema.Column{FilesColumns[2], FilesColumns[9]},
 			},
 		},
 	}
@@ -288,6 +290,18 @@ var (
 		Columns:    ItemsColumns,
 		PrimaryKey: []*schema.Column{ItemsColumns[0]},
 	}
+	// LicensesColumns holds the columns for the "licenses" table.
+	LicensesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "bigserial"}},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+	}
+	// LicensesTable holds the schema information for the "licenses" table.
+	LicensesTable = &schema.Table{
+		Name:       "licenses",
+		Columns:    LicensesColumns,
+		PrimaryKey: []*schema.Column{LicensesColumns[0]},
+	}
 	// NodesColumns holds the columns for the "nodes" table.
 	NodesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -315,6 +329,7 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "uuid", Type: field.TypeUUID, Nullable: true},
 		{Name: "nickname", Type: field.TypeString, Nullable: true},
+		{Name: "trained", Type: field.TypeBool, Default: false},
 		{Name: "user_pets", Type: field.TypeInt, Nullable: true},
 		{Name: "user_team", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
@@ -326,13 +341,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "pet_users_pets",
-				Columns:    []*schema.Column{PetColumns[5]},
+				Columns:    []*schema.Column{PetColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "pet_users_team",
-				Columns:    []*schema.Column{PetColumns[6]},
+				Columns:    []*schema.Column{PetColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -341,7 +356,7 @@ var (
 			{
 				Name:    "pet_name_user_pets",
 				Unique:  false,
-				Columns: []*schema.Column{PetColumns[2], PetColumns[5]},
+				Columns: []*schema.Column{PetColumns[2], PetColumns[6]},
 			},
 			{
 				Name:    "pet_nickname",
@@ -364,6 +379,8 @@ var (
 	TasksColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "priority", Type: field.TypeInt, Default: 1},
+		{Name: "priorities", Type: field.TypeJSON, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
 	}
 	// TasksTable holds the schema information for the "tasks" table.
 	TasksTable = &schema.Table{
@@ -526,6 +543,7 @@ var (
 		GroupsTable,
 		GroupInfosTable,
 		ItemsTable,
+		LicensesTable,
 		NodesTable,
 		PetTable,
 		SpecsTable,
