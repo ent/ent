@@ -47,6 +47,12 @@ func TestWritePath(t *testing.T) {
 		{
 			input: sql.Select("*").
 				From(sql.Table("test")).
+				Where(sqljson.ValueEQ("j", sqljson.ValuePath("j", sqljson.DotPath("a.*.b")), sqljson.DotPath("a.*.c"))),
+			wantQuery: "SELECT * FROM `test` WHERE JSON_EXTRACT(`j`, '$.a.*.c') = JSON_EXTRACT(`j`, '$.a.*.b')",
+		},
+		{
+			input: sql.Select("*").
+				From(sql.Table("test")).
 				Where(sqljson.HasKey("j", sqljson.DotPath("a.*.c"))),
 			wantQuery: "SELECT * FROM `test` WHERE JSON_EXTRACT(`j`, '$.a.*.c') IS NOT NULL",
 		},
