@@ -28,7 +28,7 @@ func HasKey(column string, opts ...Option) *sql.Predicate {
 			path.mysqlFunc("JSON_TYPE", b)
 			b.WriteOp(sql.OpNotNull)
 		default:
-			ValuePath(b, column, opts...)
+			valuePath(b, column, opts...)
 			b.WriteOp(sql.OpNotNull)
 		}
 	})
@@ -52,7 +52,7 @@ func ValueIsNull(column string, opts ...Option) *sql.Predicate {
 				path.mysqlPath(b)
 			})
 		case dialect.Postgres:
-			ValuePath(b, column, append(opts, Cast("jsonb"))...)
+			valuePath(b, column, append(opts, Cast("jsonb"))...)
 			b.WriteOp(sql.OpEQ).WriteString("'null'::jsonb")
 		case dialect.SQLite:
 			path := identPath(column, opts...)
@@ -69,7 +69,7 @@ func ValueIsNull(column string, opts ...Option) *sql.Predicate {
 func ValueEQ(column string, arg any, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		opts = normalizePG(b, arg, opts)
-		ValuePath(b, column, opts...)
+		valuePath(b, column, opts...)
 		b.WriteOp(sql.OpEQ).Arg(arg)
 	})
 }
@@ -81,7 +81,7 @@ func ValueEQ(column string, arg any, opts ...Option) *sql.Predicate {
 func ValueNEQ(column string, arg any, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		opts = normalizePG(b, arg, opts)
-		ValuePath(b, column, opts...)
+		valuePath(b, column, opts...)
 		b.WriteOp(sql.OpNEQ).Arg(arg)
 	})
 }
@@ -93,7 +93,7 @@ func ValueNEQ(column string, arg any, opts ...Option) *sql.Predicate {
 func ValueGT(column string, arg any, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		opts = normalizePG(b, arg, opts)
-		ValuePath(b, column, opts...)
+		valuePath(b, column, opts...)
 		b.WriteOp(sql.OpGT).Arg(arg)
 	})
 }
@@ -106,7 +106,7 @@ func ValueGT(column string, arg any, opts ...Option) *sql.Predicate {
 func ValueGTE(column string, arg any, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		opts = normalizePG(b, arg, opts)
-		ValuePath(b, column, opts...)
+		valuePath(b, column, opts...)
 		b.WriteOp(sql.OpGTE).Arg(arg)
 	})
 }
@@ -118,7 +118,7 @@ func ValueGTE(column string, arg any, opts ...Option) *sql.Predicate {
 func ValueLT(column string, arg any, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		opts = normalizePG(b, arg, opts)
-		ValuePath(b, column, opts...)
+		valuePath(b, column, opts...)
 		b.WriteOp(sql.OpLT).Arg(arg)
 	})
 }
@@ -131,7 +131,7 @@ func ValueLT(column string, arg any, opts ...Option) *sql.Predicate {
 func ValueLTE(column string, arg any, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		opts = normalizePG(b, arg, opts)
-		ValuePath(b, column, opts...)
+		valuePath(b, column, opts...)
 		b.WriteOp(sql.OpLTE).Arg(arg)
 	})
 }
@@ -173,7 +173,7 @@ func ValueContains(column string, arg any, opts ...Option) *sql.Predicate {
 func StringHasPrefix(column string, prefix string, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		opts = append([]Option{Unquote(true)}, opts...)
-		ValuePath(b, column, opts...)
+		valuePath(b, column, opts...)
 		b.Join(sql.HasPrefix("", prefix))
 	})
 }
@@ -183,7 +183,7 @@ func StringHasPrefix(column string, prefix string, opts ...Option) *sql.Predicat
 func StringHasSuffix(column string, suffix string, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		opts = append([]Option{Unquote(true)}, opts...)
-		ValuePath(b, column, opts...)
+		valuePath(b, column, opts...)
 		b.Join(sql.HasSuffix("", suffix))
 	})
 }
@@ -193,7 +193,7 @@ func StringHasSuffix(column string, suffix string, opts ...Option) *sql.Predicat
 func StringContains(column string, sub string, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		opts = append([]Option{Unquote(true)}, opts...)
-		ValuePath(b, column, opts...)
+		valuePath(b, column, opts...)
 		b.Join(sql.Contains("", sub))
 	})
 }
@@ -225,7 +225,7 @@ func valueInOp(column string, args []any, opts []Option, op sql.Op) *sql.Predica
 		if len(args) > 0 {
 			opts = normalizePG(b, args[0], opts)
 		}
-		ValuePath(b, column, opts...)
+		valuePath(b, column, opts...)
 		b.WriteOp(op)
 		b.Wrap(func(b *sql.Builder) {
 			if s, ok := args[0].(*sql.Selector); ok {
@@ -307,15 +307,6 @@ func LenLTE(column string, size int, opts ...Option) *sql.Predicate {
 	})
 }
 
-// ValuePath writes to the given SQL builder the JSON path for
-// getting the value of a given JSON path.
-//
-//	sqljson.ValuePath(b, Path("a", "b", "[1]", "c"), Cast("int"))
-func ValuePath(b *sql.Builder, column string, opts ...Option) {
-	path := identPath(column, opts...)
-	path.value(b)
-}
-
 // LenPath writes to the given SQL builder the JSON path for
 // getting the length of a given JSON path.
 //
@@ -361,7 +352,7 @@ type Option func(*PathOptions)
 
 // Path sets the path to the JSON value of a column.
 //
-//	ValuePath(b, "column", Path("a", "b", "[1]", "c"))
+//	valuePath(b, "column", Path("a", "b", "[1]", "c"))
 func Path(path ...string) Option {
 	return func(p *PathOptions) {
 		p.Path = path
@@ -370,8 +361,8 @@ func Path(path ...string) Option {
 
 // DotPath is similar to Path, but accepts string with dot format.
 //
-//	ValuePath(b, "column", DotPath("a.b.c"))
-//	ValuePath(b, "column", DotPath("a.b[2].c"))
+//	valuePath(b, "column", DotPath("a.b.c"))
+//	valuePath(b, "column", DotPath("a.b[2].c"))
 //
 // Note that DotPath is ignored if the input is invalid.
 func DotPath(dotpath string) Option {
@@ -383,7 +374,7 @@ func DotPath(dotpath string) Option {
 
 // Unquote indicates that the result value should be unquoted.
 //
-//	ValuePath(b, "column", Path("a", "b", "[1]", "c"), Unquote(true))
+//	valuePath(b, "column", Path("a", "b", "[1]", "c"), Unquote(true))
 func Unquote(unquote bool) Option {
 	return func(p *PathOptions) {
 		p.Unquote = unquote
@@ -392,7 +383,7 @@ func Unquote(unquote bool) Option {
 
 // Cast indicates that the result value should be cast to the given type.
 //
-//	ValuePath(b, "column", Path("a", "b", "[1]", "c"), Cast("int"))
+//	valuePath(b, "column", Path("a", "b", "[1]", "c"), Cast("int"))
 func Cast(typ string) Option {
 	return func(p *PathOptions) {
 		p.Cast = typ
@@ -414,6 +405,32 @@ func identPath(ident string, opts ...Option) *PathOptions {
 		opts[i](path)
 	}
 	return path
+}
+
+func (p *PathOptions) Query() (string, []any) {
+	return p.Ident, nil
+}
+
+// ValuePath returns an SQL expression for getting the JSON
+// value of a column with an optional path and cast options.
+//
+//	sqljson.ValueEQ(
+//		column,
+//		sqljson.ValuePath(column, Path("a"), Cast("int")),
+//		sqljson.Path("a"),
+//	)
+func ValuePath(column string, opts ...Option) sql.Querier {
+	return sql.ExprFunc(func(b *sql.Builder) {
+		valuePath(b, column, opts...)
+	})
+}
+
+// valuePath writes to the given SQL builder the JSON path for
+// getting the value of a given JSON path.
+// Use sqljson.ValuePath for using a JSON value as an argument.
+func valuePath(b *sql.Builder, column string, opts ...Option) {
+	path := identPath(column, opts...)
+	path.value(b)
 }
 
 // value writes the path for getting the JSON value.
