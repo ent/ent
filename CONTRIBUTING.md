@@ -6,6 +6,7 @@ possible.
 
 - `dialect` - Contains SQL and Gremlin code used by the generated code.
   - `dialect/sql/schema` - Auto migration logic resides there.
+  - `dialect/sql/sqljson` - JSON extension for SQL.
 
 - `schema` - User schema API.
   - `schema/{field, edge, index, mixin}` - provides schema builders API.
