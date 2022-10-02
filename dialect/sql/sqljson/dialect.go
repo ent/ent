@@ -109,10 +109,10 @@ type postgres struct{}
 func (*postgres) Append(u *sql.UpdateBuilder, column string, elems []any, opts ...Option) {
 	setCase(u, column, when{
 		Cond: func(b *sql.Builder) {
-			ValuePath(b, column, append(opts, Cast("jsonb"))...)
+			valuePath(b, column, append(opts, Cast("jsonb"))...)
 			b.WriteOp(sql.OpIsNull)
 			b.WriteString(" OR ")
-			ValuePath(b, column, append(opts, Cast("jsonb"))...)
+			valuePath(b, column, append(opts, Cast("jsonb"))...)
 			b.WriteOp(sql.OpEQ).WriteString("'null'::jsonb")
 		},
 		Then: func(b *sql.Builder) {
