@@ -205,51 +205,27 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 	)
 	_spec.OnConflict = cc.conflict
 	if value, ok := cc.mutation.UniqueInt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: comment.FieldUniqueInt,
-		})
+		_spec.SetField(comment.FieldUniqueInt, field.TypeInt, value)
 		_node.UniqueInt = value
 	}
 	if value, ok := cc.mutation.UniqueFloat(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: comment.FieldUniqueFloat,
-		})
+		_spec.SetField(comment.FieldUniqueFloat, field.TypeFloat64, value)
 		_node.UniqueFloat = value
 	}
 	if value, ok := cc.mutation.NillableInt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: comment.FieldNillableInt,
-		})
+		_spec.SetField(comment.FieldNillableInt, field.TypeInt, value)
 		_node.NillableInt = &value
 	}
 	if value, ok := cc.mutation.Table(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: comment.FieldTable,
-		})
+		_spec.SetField(comment.FieldTable, field.TypeString, value)
 		_node.Table = value
 	}
 	if value, ok := cc.mutation.Dir(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: comment.FieldDir,
-		})
+		_spec.SetField(comment.FieldDir, field.TypeJSON, value)
 		_node.Dir = value
 	}
 	if value, ok := cc.mutation.GetClient(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: comment.FieldClient,
-		})
+		_spec.SetField(comment.FieldClient, field.TypeString, value)
 		_node.Client = value
 	}
 	return _node, _spec

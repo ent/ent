@@ -213,19 +213,11 @@ func (fc *FriendshipCreate) createSpec() (*Friendship, *sqlgraph.CreateSpec) {
 	)
 	_spec.OnConflict = fc.conflict
 	if value, ok := fc.mutation.Weight(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: friendship.FieldWeight,
-		})
+		_spec.SetField(friendship.FieldWeight, field.TypeInt, value)
 		_node.Weight = value
 	}
 	if value, ok := fc.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: friendship.FieldCreatedAt,
-		})
+		_spec.SetField(friendship.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if nodes := fc.mutation.UserIDs(); len(nodes) > 0 {

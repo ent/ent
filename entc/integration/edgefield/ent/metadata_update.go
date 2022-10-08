@@ -223,18 +223,10 @@ func (mu *MetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := mu.mutation.Age(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: metadata.FieldAge,
-		})
+		_spec.SetField(metadata.FieldAge, field.TypeInt, value)
 	}
 	if value, ok := mu.mutation.AddedAge(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: metadata.FieldAge,
-		})
+		_spec.AddField(metadata.FieldAge, field.TypeInt, value)
 	}
 	if mu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -600,18 +592,10 @@ func (muo *MetadataUpdateOne) sqlSave(ctx context.Context) (_node *Metadata, err
 		}
 	}
 	if value, ok := muo.mutation.Age(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: metadata.FieldAge,
-		})
+		_spec.SetField(metadata.FieldAge, field.TypeInt, value)
 	}
 	if value, ok := muo.mutation.AddedAge(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: metadata.FieldAge,
-		})
+		_spec.AddField(metadata.FieldAge, field.TypeInt, value)
 	}
 	if muo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

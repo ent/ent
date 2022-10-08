@@ -172,11 +172,7 @@ func (tc *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 	)
 	_spec.OnConflict = tc.conflict
 	if value, ok := tc.mutation.Value(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: tag.FieldValue,
-		})
+		_spec.SetField(tag.FieldValue, field.TypeString, value)
 		_node.Value = value
 	}
 	if nodes := tc.mutation.TweetsIDs(); len(nodes) > 0 {

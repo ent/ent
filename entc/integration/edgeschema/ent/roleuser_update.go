@@ -183,11 +183,7 @@ func (ruu *RoleUserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := ruu.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: roleuser.FieldCreatedAt,
-		})
+		_spec.SetField(roleuser.FieldCreatedAt, field.TypeTime, value)
 	}
 	if ruu.mutation.RoleCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -459,11 +455,7 @@ func (ruuo *RoleUserUpdateOne) sqlSave(ctx context.Context) (_node *RoleUser, er
 		}
 	}
 	if value, ok := ruuo.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: roleuser.FieldCreatedAt,
-		})
+		_spec.SetField(roleuser.FieldCreatedAt, field.TypeTime, value)
 	}
 	if ruuo.mutation.RoleCleared() {
 		edge := &sqlgraph.EdgeSpec{

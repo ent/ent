@@ -139,11 +139,7 @@ func (ric *RelationshipInfoCreate) createSpec() (*RelationshipInfo, *sqlgraph.Cr
 	)
 	_spec.OnConflict = ric.conflict
 	if value, ok := ric.mutation.Text(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: relationshipinfo.FieldText,
-		})
+		_spec.SetField(relationshipinfo.FieldText, field.TypeString, value)
 		_node.Text = value
 	}
 	return _node, _spec

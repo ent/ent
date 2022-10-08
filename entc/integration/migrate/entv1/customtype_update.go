@@ -129,17 +129,10 @@ func (ctu *CustomTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := ctu.mutation.Custom(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: customtype.FieldCustom,
-		})
+		_spec.SetField(customtype.FieldCustom, field.TypeString, value)
 	}
 	if ctu.mutation.CustomCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: customtype.FieldCustom,
-		})
+		_spec.ClearField(customtype.FieldCustom, field.TypeString)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ctu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -288,17 +281,10 @@ func (ctuo *CustomTypeUpdateOne) sqlSave(ctx context.Context) (_node *CustomType
 		}
 	}
 	if value, ok := ctuo.mutation.Custom(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: customtype.FieldCustom,
-		})
+		_spec.SetField(customtype.FieldCustom, field.TypeString, value)
 	}
 	if ctuo.mutation.CustomCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: customtype.FieldCustom,
-		})
+		_spec.ClearField(customtype.FieldCustom, field.TypeString)
 	}
 	_node = &CustomType{config: ctuo.config}
 	_spec.Assign = _node.assignValues

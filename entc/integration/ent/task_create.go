@@ -191,27 +191,15 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 	)
 	_spec.OnConflict = tc.conflict
 	if value, ok := tc.mutation.Priority(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: enttask.FieldPriority,
-		})
+		_spec.SetField(enttask.FieldPriority, field.TypeInt, value)
 		_node.Priority = value
 	}
 	if value, ok := tc.mutation.Priorities(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: enttask.FieldPriorities,
-		})
+		_spec.SetField(enttask.FieldPriorities, field.TypeJSON, value)
 		_node.Priorities = value
 	}
 	if value, ok := tc.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: enttask.FieldCreatedAt,
-		})
+		_spec.SetField(enttask.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = &value
 	}
 	return _node, _spec

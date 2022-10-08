@@ -282,51 +282,27 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 	)
 	_spec.OnConflict = fc.conflict
 	if value, ok := fc.mutation.Size(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: file.FieldSize,
-		})
+		_spec.SetField(file.FieldSize, field.TypeInt, value)
 		_node.Size = value
 	}
 	if value, ok := fc.mutation.Name(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: file.FieldName,
-		})
+		_spec.SetField(file.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
 	if value, ok := fc.mutation.User(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: file.FieldUser,
-		})
+		_spec.SetField(file.FieldUser, field.TypeString, value)
 		_node.User = &value
 	}
 	if value, ok := fc.mutation.Group(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: file.FieldGroup,
-		})
+		_spec.SetField(file.FieldGroup, field.TypeString, value)
 		_node.Group = value
 	}
 	if value, ok := fc.mutation.GetOp(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: file.FieldOp,
-		})
+		_spec.SetField(file.FieldOp, field.TypeBool, value)
 		_node.Op = value
 	}
 	if value, ok := fc.mutation.FieldID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: file.FieldFieldID,
-		})
+		_spec.SetField(file.FieldFieldID, field.TypeInt, value)
 		_node.FieldID = value
 	}
 	if nodes := fc.mutation.OwnerIDs(); len(nodes) > 0 {

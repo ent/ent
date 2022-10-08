@@ -208,25 +208,13 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := ftu.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: filetype.FieldName,
-		})
+		_spec.SetField(filetype.FieldName, field.TypeString, value)
 	}
 	if value, ok := ftu.mutation.GetType(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: filetype.FieldType,
-		})
+		_spec.SetField(filetype.FieldType, field.TypeEnum, value)
 	}
 	if value, ok := ftu.mutation.State(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: filetype.FieldState,
-		})
+		_spec.SetField(filetype.FieldState, field.TypeEnum, value)
 	}
 	if ftu.mutation.FilesCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -508,25 +496,13 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (_node *FileType, er
 		}
 	}
 	if value, ok := ftuo.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: filetype.FieldName,
-		})
+		_spec.SetField(filetype.FieldName, field.TypeString, value)
 	}
 	if value, ok := ftuo.mutation.GetType(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: filetype.FieldType,
-		})
+		_spec.SetField(filetype.FieldType, field.TypeEnum, value)
 	}
 	if value, ok := ftuo.mutation.State(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: filetype.FieldState,
-		})
+		_spec.SetField(filetype.FieldState, field.TypeEnum, value)
 	}
 	if ftuo.mutation.FilesCleared() {
 		edge := &sqlgraph.EdgeSpec{

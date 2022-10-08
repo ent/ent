@@ -268,43 +268,23 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 	)
 	_spec.OnConflict = cc.conflict
 	if value, ok := cc.mutation.CreateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: card.FieldCreateTime,
-		})
+		_spec.SetField(card.FieldCreateTime, field.TypeTime, value)
 		_node.CreateTime = value
 	}
 	if value, ok := cc.mutation.UpdateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: card.FieldUpdateTime,
-		})
+		_spec.SetField(card.FieldUpdateTime, field.TypeTime, value)
 		_node.UpdateTime = value
 	}
 	if value, ok := cc.mutation.Balance(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: card.FieldBalance,
-		})
+		_spec.SetField(card.FieldBalance, field.TypeFloat64, value)
 		_node.Balance = value
 	}
 	if value, ok := cc.mutation.Number(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: card.FieldNumber,
-		})
+		_spec.SetField(card.FieldNumber, field.TypeString, value)
 		_node.Number = value
 	}
 	if value, ok := cc.mutation.Name(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: card.FieldName,
-		})
+		_spec.SetField(card.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
 	if nodes := cc.mutation.OwnerIDs(); len(nodes) > 0 {

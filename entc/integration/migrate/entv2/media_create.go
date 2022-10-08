@@ -168,27 +168,15 @@ func (mc *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 		}
 	)
 	if value, ok := mc.mutation.Source(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: media.FieldSource,
-		})
+		_spec.SetField(media.FieldSource, field.TypeString, value)
 		_node.Source = value
 	}
 	if value, ok := mc.mutation.SourceURI(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: media.FieldSourceURI,
-		})
+		_spec.SetField(media.FieldSourceURI, field.TypeString, value)
 		_node.SourceURI = value
 	}
 	if value, ok := mc.mutation.Text(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: media.FieldText,
-		})
+		_spec.SetField(media.FieldText, field.TypeString, value)
 		_node.Text = value
 	}
 	return _node, _spec

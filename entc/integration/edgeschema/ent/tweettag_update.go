@@ -177,11 +177,7 @@ func (ttu *TweetTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := ttu.mutation.AddedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: tweettag.FieldAddedAt,
-		})
+		_spec.SetField(tweettag.FieldAddedAt, field.TypeTime, value)
 	}
 	if ttu.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -445,11 +441,7 @@ func (ttuo *TweetTagUpdateOne) sqlSave(ctx context.Context) (_node *TweetTag, er
 		}
 	}
 	if value, ok := ttuo.mutation.AddedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: tweettag.FieldAddedAt,
-		})
+		_spec.SetField(tweettag.FieldAddedAt, field.TypeTime, value)
 	}
 	if ttuo.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{

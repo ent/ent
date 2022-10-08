@@ -152,17 +152,10 @@ func (iu *ItemUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := iu.mutation.Text(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: item.FieldText,
-		})
+		_spec.SetField(item.FieldText, field.TypeString, value)
 	}
 	if iu.mutation.TextCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: item.FieldText,
-		})
+		_spec.ClearField(item.FieldText, field.TypeString)
 	}
 	_spec.AddModifiers(iu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, iu.driver, _spec); err != nil {
@@ -335,17 +328,10 @@ func (iuo *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) 
 		}
 	}
 	if value, ok := iuo.mutation.Text(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: item.FieldText,
-		})
+		_spec.SetField(item.FieldText, field.TypeString, value)
 	}
 	if iuo.mutation.TextCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: item.FieldText,
-		})
+		_spec.ClearField(item.FieldText, field.TypeString)
 	}
 	_spec.AddModifiers(iuo.modifiers...)
 	_node = &Item{config: iuo.config}

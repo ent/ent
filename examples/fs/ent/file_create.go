@@ -196,19 +196,11 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 		}
 	)
 	if value, ok := fc.mutation.Name(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: file.FieldName,
-		})
+		_spec.SetField(file.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
 	if value, ok := fc.mutation.Deleted(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: file.FieldDeleted,
-		})
+		_spec.SetField(file.FieldDeleted, field.TypeBool, value)
 		_node.Deleted = value
 	}
 	if nodes := fc.mutation.ParentIDs(); len(nodes) > 0 {

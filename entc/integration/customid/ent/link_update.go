@@ -116,11 +116,7 @@ func (lu *LinkUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := lu.mutation.LinkInformation(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: link.FieldLinkInformation,
-		})
+		_spec.SetField(link.FieldLinkInformation, field.TypeJSON, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, lu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -255,11 +251,7 @@ func (luo *LinkUpdateOne) sqlSave(ctx context.Context) (_node *Link, err error) 
 		}
 	}
 	if value, ok := luo.mutation.LinkInformation(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: link.FieldLinkInformation,
-		})
+		_spec.SetField(link.FieldLinkInformation, field.TypeJSON, value)
 	}
 	_node = &Link{config: luo.config}
 	_spec.Assign = _node.assignValues

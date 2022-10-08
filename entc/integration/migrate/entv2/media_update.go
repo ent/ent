@@ -169,43 +169,22 @@ func (mu *MediaUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := mu.mutation.Source(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: media.FieldSource,
-		})
+		_spec.SetField(media.FieldSource, field.TypeString, value)
 	}
 	if mu.mutation.SourceCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: media.FieldSource,
-		})
+		_spec.ClearField(media.FieldSource, field.TypeString)
 	}
 	if value, ok := mu.mutation.SourceURI(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: media.FieldSourceURI,
-		})
+		_spec.SetField(media.FieldSourceURI, field.TypeString, value)
 	}
 	if mu.mutation.SourceURICleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: media.FieldSourceURI,
-		})
+		_spec.ClearField(media.FieldSourceURI, field.TypeString)
 	}
 	if value, ok := mu.mutation.Text(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: media.FieldText,
-		})
+		_spec.SetField(media.FieldText, field.TypeString, value)
 	}
 	if mu.mutation.TextCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: media.FieldText,
-		})
+		_spec.ClearField(media.FieldText, field.TypeString)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, mu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -394,43 +373,22 @@ func (muo *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error
 		}
 	}
 	if value, ok := muo.mutation.Source(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: media.FieldSource,
-		})
+		_spec.SetField(media.FieldSource, field.TypeString, value)
 	}
 	if muo.mutation.SourceCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: media.FieldSource,
-		})
+		_spec.ClearField(media.FieldSource, field.TypeString)
 	}
 	if value, ok := muo.mutation.SourceURI(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: media.FieldSourceURI,
-		})
+		_spec.SetField(media.FieldSourceURI, field.TypeString, value)
 	}
 	if muo.mutation.SourceURICleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: media.FieldSourceURI,
-		})
+		_spec.ClearField(media.FieldSourceURI, field.TypeString)
 	}
 	if value, ok := muo.mutation.Text(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: media.FieldText,
-		})
+		_spec.SetField(media.FieldText, field.TypeString, value)
 	}
 	if muo.mutation.TextCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: media.FieldText,
-		})
+		_spec.ClearField(media.FieldText, field.TypeString)
 	}
 	_node = &Media{config: muo.config}
 	_spec.Assign = _node.assignValues

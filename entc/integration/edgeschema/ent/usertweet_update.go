@@ -177,11 +177,7 @@ func (utu *UserTweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := utu.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: usertweet.FieldCreatedAt,
-		})
+		_spec.SetField(usertweet.FieldCreatedAt, field.TypeTime, value)
 	}
 	if utu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -445,11 +441,7 @@ func (utuo *UserTweetUpdateOne) sqlSave(ctx context.Context) (_node *UserTweet, 
 		}
 	}
 	if value, ok := utuo.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: usertweet.FieldCreatedAt,
-		})
+		_spec.SetField(usertweet.FieldCreatedAt, field.TypeTime, value)
 	}
 	if utuo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

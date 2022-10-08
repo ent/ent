@@ -166,17 +166,10 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := cu.mutation.Number(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: car.FieldNumber,
-		})
+		_spec.SetField(car.FieldNumber, field.TypeString, value)
 	}
 	if cu.mutation.NumberCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: car.FieldNumber,
-		})
+		_spec.ClearField(car.FieldNumber, field.TypeString)
 	}
 	if cu.mutation.RentalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -415,17 +408,10 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 		}
 	}
 	if value, ok := cuo.mutation.Number(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: car.FieldNumber,
-		})
+		_spec.SetField(car.FieldNumber, field.TypeString, value)
 	}
 	if cuo.mutation.NumberCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: car.FieldNumber,
-		})
+		_spec.ClearField(car.FieldNumber, field.TypeString)
 	}
 	if cuo.mutation.RentalsCleared() {
 		edge := &sqlgraph.EdgeSpec{

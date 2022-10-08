@@ -183,11 +183,7 @@ func (blu *BlobLinkUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := blu.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: bloblink.FieldCreatedAt,
-		})
+		_spec.SetField(bloblink.FieldCreatedAt, field.TypeTime, value)
 	}
 	if blu.mutation.BlobCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -459,11 +455,7 @@ func (bluo *BlobLinkUpdateOne) sqlSave(ctx context.Context) (_node *BlobLink, er
 		}
 	}
 	if value, ok := bluo.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: bloblink.FieldCreatedAt,
-		})
+		_spec.SetField(bloblink.FieldCreatedAt, field.TypeTime, value)
 	}
 	if bluo.mutation.BlobCleared() {
 		edge := &sqlgraph.EdgeSpec{

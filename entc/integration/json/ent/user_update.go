@@ -249,37 +249,19 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := uu.mutation.T(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldT,
-		})
+		_spec.SetField(user.FieldT, field.TypeJSON, value)
 	}
 	if uu.mutation.TCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: user.FieldT,
-		})
+		_spec.ClearField(user.FieldT, field.TypeJSON)
 	}
 	if value, ok := uu.mutation.URL(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldURL,
-		})
+		_spec.SetField(user.FieldURL, field.TypeJSON, value)
 	}
 	if uu.mutation.URLCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: user.FieldURL,
-		})
+		_spec.ClearField(user.FieldURL, field.TypeJSON)
 	}
 	if value, ok := uu.mutation.Raw(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldRaw,
-		})
+		_spec.SetField(user.FieldRaw, field.TypeJSON, value)
 	}
 	if value, ok := uu.mutation.AppendedRaw(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
@@ -287,17 +269,10 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		})
 	}
 	if uu.mutation.RawCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: user.FieldRaw,
-		})
+		_spec.ClearField(user.FieldRaw, field.TypeJSON)
 	}
 	if value, ok := uu.mutation.Dirs(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldDirs,
-		})
+		_spec.SetField(user.FieldDirs, field.TypeJSON, value)
 	}
 	if value, ok := uu.mutation.AppendedDirs(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
@@ -305,11 +280,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		})
 	}
 	if value, ok := uu.mutation.Ints(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldInts,
-		})
+		_spec.SetField(user.FieldInts, field.TypeJSON, value)
 	}
 	if value, ok := uu.mutation.AppendedInts(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
@@ -317,17 +288,10 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		})
 	}
 	if uu.mutation.IntsCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: user.FieldInts,
-		})
+		_spec.ClearField(user.FieldInts, field.TypeJSON)
 	}
 	if value, ok := uu.mutation.Floats(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldFloats,
-		})
+		_spec.SetField(user.FieldFloats, field.TypeJSON, value)
 	}
 	if value, ok := uu.mutation.AppendedFloats(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
@@ -335,17 +299,10 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		})
 	}
 	if uu.mutation.FloatsCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: user.FieldFloats,
-		})
+		_spec.ClearField(user.FieldFloats, field.TypeJSON)
 	}
 	if value, ok := uu.mutation.Strings(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldStrings,
-		})
+		_spec.SetField(user.FieldStrings, field.TypeJSON, value)
 	}
 	if value, ok := uu.mutation.AppendedStrings(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
@@ -353,23 +310,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		})
 	}
 	if uu.mutation.StringsCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: user.FieldStrings,
-		})
+		_spec.ClearField(user.FieldStrings, field.TypeJSON)
 	}
 	if value, ok := uu.mutation.Addr(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldAddr,
-		})
+		_spec.SetField(user.FieldAddr, field.TypeJSON, value)
 	}
 	if uu.mutation.AddrCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: user.FieldAddr,
-		})
+		_spec.ClearField(user.FieldAddr, field.TypeJSON)
 	}
 	_spec.AddModifiers(uu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
@@ -634,37 +581,19 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 	}
 	if value, ok := uuo.mutation.T(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldT,
-		})
+		_spec.SetField(user.FieldT, field.TypeJSON, value)
 	}
 	if uuo.mutation.TCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: user.FieldT,
-		})
+		_spec.ClearField(user.FieldT, field.TypeJSON)
 	}
 	if value, ok := uuo.mutation.URL(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldURL,
-		})
+		_spec.SetField(user.FieldURL, field.TypeJSON, value)
 	}
 	if uuo.mutation.URLCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: user.FieldURL,
-		})
+		_spec.ClearField(user.FieldURL, field.TypeJSON)
 	}
 	if value, ok := uuo.mutation.Raw(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldRaw,
-		})
+		_spec.SetField(user.FieldRaw, field.TypeJSON, value)
 	}
 	if value, ok := uuo.mutation.AppendedRaw(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
@@ -672,17 +601,10 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		})
 	}
 	if uuo.mutation.RawCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: user.FieldRaw,
-		})
+		_spec.ClearField(user.FieldRaw, field.TypeJSON)
 	}
 	if value, ok := uuo.mutation.Dirs(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldDirs,
-		})
+		_spec.SetField(user.FieldDirs, field.TypeJSON, value)
 	}
 	if value, ok := uuo.mutation.AppendedDirs(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
@@ -690,11 +612,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		})
 	}
 	if value, ok := uuo.mutation.Ints(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldInts,
-		})
+		_spec.SetField(user.FieldInts, field.TypeJSON, value)
 	}
 	if value, ok := uuo.mutation.AppendedInts(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
@@ -702,17 +620,10 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		})
 	}
 	if uuo.mutation.IntsCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: user.FieldInts,
-		})
+		_spec.ClearField(user.FieldInts, field.TypeJSON)
 	}
 	if value, ok := uuo.mutation.Floats(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldFloats,
-		})
+		_spec.SetField(user.FieldFloats, field.TypeJSON, value)
 	}
 	if value, ok := uuo.mutation.AppendedFloats(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
@@ -720,17 +631,10 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		})
 	}
 	if uuo.mutation.FloatsCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: user.FieldFloats,
-		})
+		_spec.ClearField(user.FieldFloats, field.TypeJSON)
 	}
 	if value, ok := uuo.mutation.Strings(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldStrings,
-		})
+		_spec.SetField(user.FieldStrings, field.TypeJSON, value)
 	}
 	if value, ok := uuo.mutation.AppendedStrings(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
@@ -738,23 +642,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		})
 	}
 	if uuo.mutation.StringsCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: user.FieldStrings,
-		})
+		_spec.ClearField(user.FieldStrings, field.TypeJSON)
 	}
 	if value, ok := uuo.mutation.Addr(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldAddr,
-		})
+		_spec.SetField(user.FieldAddr, field.TypeJSON, value)
 	}
 	if uuo.mutation.AddrCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: user.FieldAddr,
-		})
+		_spec.ClearField(user.FieldAddr, field.TypeJSON)
 	}
 	_spec.AddModifiers(uuo.modifiers...)
 	_node = &User{config: uuo.config}

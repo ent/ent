@@ -141,11 +141,7 @@ func (ru *RentalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := ru.mutation.Date(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: rental.FieldDate,
-		})
+		_spec.SetField(rental.FieldDate, field.TypeTime, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ru.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -305,11 +301,7 @@ func (ruo *RentalUpdateOne) sqlSave(ctx context.Context) (_node *Rental, err err
 		}
 	}
 	if value, ok := ruo.mutation.Date(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: rental.FieldDate,
-		})
+		_spec.SetField(rental.FieldDate, field.TypeTime, value)
 	}
 	_node = &Rental{config: ruo.config}
 	_spec.Assign = _node.assignValues

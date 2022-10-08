@@ -252,38 +252,19 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := cu.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: card.FieldUpdateTime,
-		})
+		_spec.SetField(card.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := cu.mutation.Balance(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: card.FieldBalance,
-		})
+		_spec.SetField(card.FieldBalance, field.TypeFloat64, value)
 	}
 	if value, ok := cu.mutation.AddedBalance(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: card.FieldBalance,
-		})
+		_spec.AddField(card.FieldBalance, field.TypeFloat64, value)
 	}
 	if value, ok := cu.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: card.FieldName,
-		})
+		_spec.SetField(card.FieldName, field.TypeString, value)
 	}
 	if cu.mutation.NameCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: card.FieldName,
-		})
+		_spec.ClearField(card.FieldName, field.TypeString)
 	}
 	if cu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -642,38 +623,19 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (_node *Card, err error) 
 		}
 	}
 	if value, ok := cuo.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: card.FieldUpdateTime,
-		})
+		_spec.SetField(card.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := cuo.mutation.Balance(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: card.FieldBalance,
-		})
+		_spec.SetField(card.FieldBalance, field.TypeFloat64, value)
 	}
 	if value, ok := cuo.mutation.AddedBalance(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: card.FieldBalance,
-		})
+		_spec.AddField(card.FieldBalance, field.TypeFloat64, value)
 	}
 	if value, ok := cuo.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: card.FieldName,
-		})
+		_spec.SetField(card.FieldName, field.TypeString, value)
 	}
 	if cuo.mutation.NameCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: card.FieldName,
-		})
+		_spec.ClearField(card.FieldName, field.TypeString)
 	}
 	if cuo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{

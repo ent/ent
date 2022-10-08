@@ -254,43 +254,23 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 	)
 	_spec.OnConflict = pc.conflict
 	if value, ok := pc.mutation.Age(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: pet.FieldAge,
-		})
+		_spec.SetField(pet.FieldAge, field.TypeFloat64, value)
 		_node.Age = value
 	}
 	if value, ok := pc.mutation.Name(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: pet.FieldName,
-		})
+		_spec.SetField(pet.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
 	if value, ok := pc.mutation.UUID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Value:  value,
-			Column: pet.FieldUUID,
-		})
+		_spec.SetField(pet.FieldUUID, field.TypeUUID, value)
 		_node.UUID = value
 	}
 	if value, ok := pc.mutation.Nickname(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: pet.FieldNickname,
-		})
+		_spec.SetField(pet.FieldNickname, field.TypeString, value)
 		_node.Nickname = value
 	}
 	if value, ok := pc.mutation.Trained(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: pet.FieldTrained,
-		})
+		_spec.SetField(pet.FieldTrained, field.TypeBool, value)
 		_node.Trained = value
 	}
 	if nodes := pc.mutation.TeamIDs(); len(nodes) > 0 {

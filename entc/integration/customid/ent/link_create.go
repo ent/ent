@@ -178,11 +178,7 @@ func (lc *LinkCreate) createSpec() (*Link, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = &id
 	}
 	if value, ok := lc.mutation.LinkInformation(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: link.FieldLinkInformation,
-		})
+		_spec.SetField(link.FieldLinkInformation, field.TypeJSON, value)
 		_node.LinkInformation = value
 	}
 	return _node, _spec

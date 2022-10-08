@@ -169,27 +169,15 @@ func (ctc *CustomTypeCreate) createSpec() (*CustomType, *sqlgraph.CreateSpec) {
 		}
 	)
 	if value, ok := ctc.mutation.Custom(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: customtype.FieldCustom,
-		})
+		_spec.SetField(customtype.FieldCustom, field.TypeString, value)
 		_node.Custom = value
 	}
 	if value, ok := ctc.mutation.Tz0(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: customtype.FieldTz0,
-		})
+		_spec.SetField(customtype.FieldTz0, field.TypeTime, value)
 		_node.Tz0 = value
 	}
 	if value, ok := ctc.mutation.Tz3(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: customtype.FieldTz3,
-		})
+		_spec.SetField(customtype.FieldTz3, field.TypeTime, value)
 		_node.Tz3 = value
 	}
 	return _node, _spec

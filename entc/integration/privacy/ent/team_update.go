@@ -205,11 +205,7 @@ func (tu *TeamUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := tu.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: team.FieldName,
-		})
+		_spec.SetField(team.FieldName, field.TypeString, value)
 	}
 	if tu.mutation.TasksCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -540,11 +536,7 @@ func (tuo *TeamUpdateOne) sqlSave(ctx context.Context) (_node *Team, err error) 
 		}
 	}
 	if value, ok := tuo.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: team.FieldName,
-		})
+		_spec.SetField(team.FieldName, field.TypeString, value)
 	}
 	if tuo.mutation.TasksCleared() {
 		edge := &sqlgraph.EdgeSpec{

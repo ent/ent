@@ -229,35 +229,19 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 		}
 	)
 	if value, ok := cc.mutation.Number(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: card.FieldNumber,
-		})
+		_spec.SetField(card.FieldNumber, field.TypeString, value)
 		_node.Number = value
 	}
 	if value, ok := cc.mutation.Name(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: card.FieldName,
-		})
+		_spec.SetField(card.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
 	if value, ok := cc.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: card.FieldCreatedAt,
-		})
+		_spec.SetField(card.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := cc.mutation.InHook(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: card.FieldInHook,
-		})
+		_spec.SetField(card.FieldInHook, field.TypeString, value)
 		_node.InHook = value
 	}
 	if nodes := cc.mutation.OwnerIDs(); len(nodes) > 0 {

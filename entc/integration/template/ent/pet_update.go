@@ -169,31 +169,16 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := pu.mutation.Age(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: pet.FieldAge,
-		})
+		_spec.SetField(pet.FieldAge, field.TypeInt, value)
 	}
 	if value, ok := pu.mutation.AddedAge(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: pet.FieldAge,
-		})
+		_spec.AddField(pet.FieldAge, field.TypeInt, value)
 	}
 	if value, ok := pu.mutation.LicensedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: pet.FieldLicensedAt,
-		})
+		_spec.SetField(pet.FieldLicensedAt, field.TypeTime, value)
 	}
 	if pu.mutation.LicensedAtCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: pet.FieldLicensedAt,
-		})
+		_spec.ClearField(pet.FieldLicensedAt, field.TypeTime)
 	}
 	if pu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -415,31 +400,16 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 		}
 	}
 	if value, ok := puo.mutation.Age(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: pet.FieldAge,
-		})
+		_spec.SetField(pet.FieldAge, field.TypeInt, value)
 	}
 	if value, ok := puo.mutation.AddedAge(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: pet.FieldAge,
-		})
+		_spec.AddField(pet.FieldAge, field.TypeInt, value)
 	}
 	if value, ok := puo.mutation.LicensedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: pet.FieldLicensedAt,
-		})
+		_spec.SetField(pet.FieldLicensedAt, field.TypeTime, value)
 	}
 	if puo.mutation.LicensedAtCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: pet.FieldLicensedAt,
-		})
+		_spec.ClearField(pet.FieldLicensedAt, field.TypeTime)
 	}
 	if puo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{

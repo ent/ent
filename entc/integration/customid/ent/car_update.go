@@ -216,51 +216,25 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := cu.mutation.BeforeID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: car.FieldBeforeID,
-		})
+		_spec.SetField(car.FieldBeforeID, field.TypeFloat64, value)
 	}
 	if value, ok := cu.mutation.AddedBeforeID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: car.FieldBeforeID,
-		})
+		_spec.AddField(car.FieldBeforeID, field.TypeFloat64, value)
 	}
 	if cu.mutation.BeforeIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: car.FieldBeforeID,
-		})
+		_spec.ClearField(car.FieldBeforeID, field.TypeFloat64)
 	}
 	if value, ok := cu.mutation.AfterID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: car.FieldAfterID,
-		})
+		_spec.SetField(car.FieldAfterID, field.TypeFloat64, value)
 	}
 	if value, ok := cu.mutation.AddedAfterID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: car.FieldAfterID,
-		})
+		_spec.AddField(car.FieldAfterID, field.TypeFloat64, value)
 	}
 	if cu.mutation.AfterIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: car.FieldAfterID,
-		})
+		_spec.ClearField(car.FieldAfterID, field.TypeFloat64)
 	}
 	if value, ok := cu.mutation.Model(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: car.FieldModel,
-		})
+		_spec.SetField(car.FieldModel, field.TypeString, value)
 	}
 	if cu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -530,51 +504,25 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 		}
 	}
 	if value, ok := cuo.mutation.BeforeID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: car.FieldBeforeID,
-		})
+		_spec.SetField(car.FieldBeforeID, field.TypeFloat64, value)
 	}
 	if value, ok := cuo.mutation.AddedBeforeID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: car.FieldBeforeID,
-		})
+		_spec.AddField(car.FieldBeforeID, field.TypeFloat64, value)
 	}
 	if cuo.mutation.BeforeIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: car.FieldBeforeID,
-		})
+		_spec.ClearField(car.FieldBeforeID, field.TypeFloat64)
 	}
 	if value, ok := cuo.mutation.AfterID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: car.FieldAfterID,
-		})
+		_spec.SetField(car.FieldAfterID, field.TypeFloat64, value)
 	}
 	if value, ok := cuo.mutation.AddedAfterID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: car.FieldAfterID,
-		})
+		_spec.AddField(car.FieldAfterID, field.TypeFloat64, value)
 	}
 	if cuo.mutation.AfterIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: car.FieldAfterID,
-		})
+		_spec.ClearField(car.FieldAfterID, field.TypeFloat64)
 	}
 	if value, ok := cuo.mutation.Model(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: car.FieldModel,
-		})
+		_spec.SetField(car.FieldModel, field.TypeString, value)
 	}
 	if cuo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{

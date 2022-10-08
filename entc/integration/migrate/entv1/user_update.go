@@ -443,143 +443,67 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := uu.mutation.Age(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
-			Value:  value,
-			Column: user.FieldAge,
-		})
+		_spec.SetField(user.FieldAge, field.TypeInt32, value)
 	}
 	if value, ok := uu.mutation.AddedAge(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
-			Value:  value,
-			Column: user.FieldAge,
-		})
+		_spec.AddField(user.FieldAge, field.TypeInt32, value)
 	}
 	if value, ok := uu.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldName,
-		})
+		_spec.SetField(user.FieldName, field.TypeString, value)
 	}
 	if value, ok := uu.mutation.Description(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldDescription,
-		})
+		_spec.SetField(user.FieldDescription, field.TypeString, value)
 	}
 	if uu.mutation.DescriptionCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: user.FieldDescription,
-		})
+		_spec.ClearField(user.FieldDescription, field.TypeString)
 	}
 	if value, ok := uu.mutation.Nickname(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldNickname,
-		})
+		_spec.SetField(user.FieldNickname, field.TypeString, value)
 	}
 	if value, ok := uu.mutation.Address(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldAddress,
-		})
+		_spec.SetField(user.FieldAddress, field.TypeString, value)
 	}
 	if uu.mutation.AddressCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: user.FieldAddress,
-		})
+		_spec.ClearField(user.FieldAddress, field.TypeString)
 	}
 	if value, ok := uu.mutation.Renamed(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldRenamed,
-		})
+		_spec.SetField(user.FieldRenamed, field.TypeString, value)
 	}
 	if uu.mutation.RenamedCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: user.FieldRenamed,
-		})
+		_spec.ClearField(user.FieldRenamed, field.TypeString)
 	}
 	if value, ok := uu.mutation.OldToken(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldOldToken,
-		})
+		_spec.SetField(user.FieldOldToken, field.TypeString, value)
 	}
 	if value, ok := uu.mutation.Blob(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBytes,
-			Value:  value,
-			Column: user.FieldBlob,
-		})
+		_spec.SetField(user.FieldBlob, field.TypeBytes, value)
 	}
 	if uu.mutation.BlobCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBytes,
-			Column: user.FieldBlob,
-		})
+		_spec.ClearField(user.FieldBlob, field.TypeBytes)
 	}
 	if value, ok := uu.mutation.State(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: user.FieldState,
-		})
+		_spec.SetField(user.FieldState, field.TypeEnum, value)
 	}
 	if uu.mutation.StateCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Column: user.FieldState,
-		})
+		_spec.ClearField(user.FieldState, field.TypeEnum)
 	}
 	if value, ok := uu.mutation.Status(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldStatus,
-		})
+		_spec.SetField(user.FieldStatus, field.TypeString, value)
 	}
 	if uu.mutation.StatusCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: user.FieldStatus,
-		})
+		_spec.ClearField(user.FieldStatus, field.TypeString)
 	}
 	if value, ok := uu.mutation.Workplace(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldWorkplace,
-		})
+		_spec.SetField(user.FieldWorkplace, field.TypeString, value)
 	}
 	if uu.mutation.WorkplaceCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: user.FieldWorkplace,
-		})
+		_spec.ClearField(user.FieldWorkplace, field.TypeString)
 	}
 	if value, ok := uu.mutation.DropOptional(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldDropOptional,
-		})
+		_spec.SetField(user.FieldDropOptional, field.TypeString, value)
 	}
 	if uu.mutation.DropOptionalCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: user.FieldDropOptional,
-		})
+		_spec.ClearField(user.FieldDropOptional, field.TypeString)
 	}
 	if uu.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -1200,143 +1124,67 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 	}
 	if value, ok := uuo.mutation.Age(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
-			Value:  value,
-			Column: user.FieldAge,
-		})
+		_spec.SetField(user.FieldAge, field.TypeInt32, value)
 	}
 	if value, ok := uuo.mutation.AddedAge(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
-			Value:  value,
-			Column: user.FieldAge,
-		})
+		_spec.AddField(user.FieldAge, field.TypeInt32, value)
 	}
 	if value, ok := uuo.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldName,
-		})
+		_spec.SetField(user.FieldName, field.TypeString, value)
 	}
 	if value, ok := uuo.mutation.Description(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldDescription,
-		})
+		_spec.SetField(user.FieldDescription, field.TypeString, value)
 	}
 	if uuo.mutation.DescriptionCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: user.FieldDescription,
-		})
+		_spec.ClearField(user.FieldDescription, field.TypeString)
 	}
 	if value, ok := uuo.mutation.Nickname(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldNickname,
-		})
+		_spec.SetField(user.FieldNickname, field.TypeString, value)
 	}
 	if value, ok := uuo.mutation.Address(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldAddress,
-		})
+		_spec.SetField(user.FieldAddress, field.TypeString, value)
 	}
 	if uuo.mutation.AddressCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: user.FieldAddress,
-		})
+		_spec.ClearField(user.FieldAddress, field.TypeString)
 	}
 	if value, ok := uuo.mutation.Renamed(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldRenamed,
-		})
+		_spec.SetField(user.FieldRenamed, field.TypeString, value)
 	}
 	if uuo.mutation.RenamedCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: user.FieldRenamed,
-		})
+		_spec.ClearField(user.FieldRenamed, field.TypeString)
 	}
 	if value, ok := uuo.mutation.OldToken(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldOldToken,
-		})
+		_spec.SetField(user.FieldOldToken, field.TypeString, value)
 	}
 	if value, ok := uuo.mutation.Blob(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBytes,
-			Value:  value,
-			Column: user.FieldBlob,
-		})
+		_spec.SetField(user.FieldBlob, field.TypeBytes, value)
 	}
 	if uuo.mutation.BlobCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBytes,
-			Column: user.FieldBlob,
-		})
+		_spec.ClearField(user.FieldBlob, field.TypeBytes)
 	}
 	if value, ok := uuo.mutation.State(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: user.FieldState,
-		})
+		_spec.SetField(user.FieldState, field.TypeEnum, value)
 	}
 	if uuo.mutation.StateCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Column: user.FieldState,
-		})
+		_spec.ClearField(user.FieldState, field.TypeEnum)
 	}
 	if value, ok := uuo.mutation.Status(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldStatus,
-		})
+		_spec.SetField(user.FieldStatus, field.TypeString, value)
 	}
 	if uuo.mutation.StatusCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: user.FieldStatus,
-		})
+		_spec.ClearField(user.FieldStatus, field.TypeString)
 	}
 	if value, ok := uuo.mutation.Workplace(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldWorkplace,
-		})
+		_spec.SetField(user.FieldWorkplace, field.TypeString, value)
 	}
 	if uuo.mutation.WorkplaceCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: user.FieldWorkplace,
-		})
+		_spec.ClearField(user.FieldWorkplace, field.TypeString)
 	}
 	if value, ok := uuo.mutation.DropOptional(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldDropOptional,
-		})
+		_spec.SetField(user.FieldDropOptional, field.TypeString, value)
 	}
 	if uuo.mutation.DropOptionalCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: user.FieldDropOptional,
-		})
+		_spec.ClearField(user.FieldDropOptional, field.TypeString)
 	}
 	if uuo.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{

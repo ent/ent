@@ -212,27 +212,15 @@ func (ftc *FileTypeCreate) createSpec() (*FileType, *sqlgraph.CreateSpec) {
 	)
 	_spec.OnConflict = ftc.conflict
 	if value, ok := ftc.mutation.Name(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: filetype.FieldName,
-		})
+		_spec.SetField(filetype.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
 	if value, ok := ftc.mutation.GetType(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: filetype.FieldType,
-		})
+		_spec.SetField(filetype.FieldType, field.TypeEnum, value)
 		_node.Type = value
 	}
 	if value, ok := ftc.mutation.State(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: filetype.FieldState,
-		})
+		_spec.SetField(filetype.FieldState, field.TypeEnum, value)
 		_node.State = value
 	}
 	if nodes := ftc.mutation.FilesIDs(); len(nodes) > 0 {

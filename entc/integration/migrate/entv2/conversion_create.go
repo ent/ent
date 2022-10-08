@@ -252,75 +252,39 @@ func (cc *ConversionCreate) createSpec() (*Conversion, *sqlgraph.CreateSpec) {
 		}
 	)
 	if value, ok := cc.mutation.Name(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldName,
-		})
+		_spec.SetField(conversion.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
 	if value, ok := cc.mutation.Int8ToString(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldInt8ToString,
-		})
+		_spec.SetField(conversion.FieldInt8ToString, field.TypeString, value)
 		_node.Int8ToString = value
 	}
 	if value, ok := cc.mutation.Uint8ToString(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldUint8ToString,
-		})
+		_spec.SetField(conversion.FieldUint8ToString, field.TypeString, value)
 		_node.Uint8ToString = value
 	}
 	if value, ok := cc.mutation.Int16ToString(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldInt16ToString,
-		})
+		_spec.SetField(conversion.FieldInt16ToString, field.TypeString, value)
 		_node.Int16ToString = value
 	}
 	if value, ok := cc.mutation.Uint16ToString(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldUint16ToString,
-		})
+		_spec.SetField(conversion.FieldUint16ToString, field.TypeString, value)
 		_node.Uint16ToString = value
 	}
 	if value, ok := cc.mutation.Int32ToString(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldInt32ToString,
-		})
+		_spec.SetField(conversion.FieldInt32ToString, field.TypeString, value)
 		_node.Int32ToString = value
 	}
 	if value, ok := cc.mutation.Uint32ToString(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldUint32ToString,
-		})
+		_spec.SetField(conversion.FieldUint32ToString, field.TypeString, value)
 		_node.Uint32ToString = value
 	}
 	if value, ok := cc.mutation.Int64ToString(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldInt64ToString,
-		})
+		_spec.SetField(conversion.FieldInt64ToString, field.TypeString, value)
 		_node.Int64ToString = value
 	}
 	if value, ok := cc.mutation.Uint64ToString(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldUint64ToString,
-		})
+		_spec.SetField(conversion.FieldUint64ToString, field.TypeString, value)
 		_node.Uint64ToString = value
 	}
 	return _node, _spec

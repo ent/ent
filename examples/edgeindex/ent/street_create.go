@@ -156,11 +156,7 @@ func (sc *StreetCreate) createSpec() (*Street, *sqlgraph.CreateSpec) {
 		}
 	)
 	if value, ok := sc.mutation.Name(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: street.FieldName,
-		})
+		_spec.SetField(street.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
 	if nodes := sc.mutation.CityIDs(); len(nodes) > 0 {

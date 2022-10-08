@@ -170,43 +170,22 @@ func (ctu *CustomTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := ctu.mutation.Custom(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: customtype.FieldCustom,
-		})
+		_spec.SetField(customtype.FieldCustom, field.TypeString, value)
 	}
 	if ctu.mutation.CustomCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: customtype.FieldCustom,
-		})
+		_spec.ClearField(customtype.FieldCustom, field.TypeString)
 	}
 	if value, ok := ctu.mutation.Tz0(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: customtype.FieldTz0,
-		})
+		_spec.SetField(customtype.FieldTz0, field.TypeTime, value)
 	}
 	if ctu.mutation.Tz0Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: customtype.FieldTz0,
-		})
+		_spec.ClearField(customtype.FieldTz0, field.TypeTime)
 	}
 	if value, ok := ctu.mutation.Tz3(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: customtype.FieldTz3,
-		})
+		_spec.SetField(customtype.FieldTz3, field.TypeTime, value)
 	}
 	if ctu.mutation.Tz3Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: customtype.FieldTz3,
-		})
+		_spec.ClearField(customtype.FieldTz3, field.TypeTime)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ctu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -395,43 +374,22 @@ func (ctuo *CustomTypeUpdateOne) sqlSave(ctx context.Context) (_node *CustomType
 		}
 	}
 	if value, ok := ctuo.mutation.Custom(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: customtype.FieldCustom,
-		})
+		_spec.SetField(customtype.FieldCustom, field.TypeString, value)
 	}
 	if ctuo.mutation.CustomCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: customtype.FieldCustom,
-		})
+		_spec.ClearField(customtype.FieldCustom, field.TypeString)
 	}
 	if value, ok := ctuo.mutation.Tz0(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: customtype.FieldTz0,
-		})
+		_spec.SetField(customtype.FieldTz0, field.TypeTime, value)
 	}
 	if ctuo.mutation.Tz0Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: customtype.FieldTz0,
-		})
+		_spec.ClearField(customtype.FieldTz0, field.TypeTime)
 	}
 	if value, ok := ctuo.mutation.Tz3(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: customtype.FieldTz3,
-		})
+		_spec.SetField(customtype.FieldTz3, field.TypeTime, value)
 	}
 	if ctuo.mutation.Tz3Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: customtype.FieldTz3,
-		})
+		_spec.ClearField(customtype.FieldTz3, field.TypeTime)
 	}
 	_node = &CustomType{config: ctuo.config}
 	_spec.Assign = _node.assignValues

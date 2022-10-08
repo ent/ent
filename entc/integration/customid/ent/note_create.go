@@ -217,11 +217,7 @@ func (nc *NoteCreate) createSpec() (*Note, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = id
 	}
 	if value, ok := nc.mutation.Text(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: note.FieldText,
-		})
+		_spec.SetField(note.FieldText, field.TypeString, value)
 		_node.Text = value
 	}
 	if nodes := nc.mutation.ParentIDs(); len(nodes) > 0 {

@@ -185,11 +185,7 @@ func (ruc *RoleUserCreate) createSpec() (*RoleUser, *sqlgraph.CreateSpec) {
 	)
 	_spec.OnConflict = ruc.conflict
 	if value, ok := ruc.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: roleuser.FieldCreatedAt,
-		})
+		_spec.SetField(roleuser.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if nodes := ruc.mutation.RoleIDs(); len(nodes) > 0 {
