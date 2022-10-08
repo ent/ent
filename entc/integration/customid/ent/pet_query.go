@@ -599,7 +599,7 @@ func (pq *PetQuery) loadFriends(ctx context.Context, query *PetQuery, nodes []*P
 			outValue := values[0].(*sql.NullString).String
 			inValue := values[1].(*sql.NullString).String
 			if nids[inValue] == nil {
-				nids[inValue] = map[*Pet]struct{}{byID[outValue]: struct{}{}}
+				nids[inValue] = map[*Pet]struct{}{byID[outValue]: {}}
 				return assign(columns[1:], values[1:])
 			}
 			nids[inValue][byID[outValue]] = struct{}{}

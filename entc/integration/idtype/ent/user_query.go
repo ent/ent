@@ -546,7 +546,7 @@ func (uq *UserQuery) loadFollowers(ctx context.Context, query *UserQuery, nodes 
 			outValue := uint64(values[0].(*sql.NullInt64).Int64)
 			inValue := uint64(values[1].(*sql.NullInt64).Int64)
 			if nids[inValue] == nil {
-				nids[inValue] = map[*User]struct{}{byID[outValue]: struct{}{}}
+				nids[inValue] = map[*User]struct{}{byID[outValue]: {}}
 				return assign(columns[1:], values[1:])
 			}
 			nids[inValue][byID[outValue]] = struct{}{}
@@ -604,7 +604,7 @@ func (uq *UserQuery) loadFollowing(ctx context.Context, query *UserQuery, nodes 
 			outValue := uint64(values[0].(*sql.NullInt64).Int64)
 			inValue := uint64(values[1].(*sql.NullInt64).Int64)
 			if nids[inValue] == nil {
-				nids[inValue] = map[*User]struct{}{byID[outValue]: struct{}{}}
+				nids[inValue] = map[*User]struct{}{byID[outValue]: {}}
 				return assign(columns[1:], values[1:])
 			}
 			nids[inValue][byID[outValue]] = struct{}{}

@@ -300,7 +300,7 @@ func (c *FriendshipClient) GetX(ctx context.Context, id int) *Friendship {
 // QueryUser queries the user edge of a Friendship.
 func (c *FriendshipClient) QueryUser(f *Friendship) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := f.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(friendship.Table, friendship.FieldID, id),
@@ -316,7 +316,7 @@ func (c *FriendshipClient) QueryUser(f *Friendship) *UserQuery {
 // QueryFriend queries the friend edge of a Friendship.
 func (c *FriendshipClient) QueryFriend(f *Friendship) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := f.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(friendship.Table, friendship.FieldID, id),
@@ -422,7 +422,7 @@ func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
 // QueryUsers queries the users edge of a Group.
 func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gr.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, id),
@@ -438,7 +438,7 @@ func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 // QueryJoinedUsers queries the joined_users edge of a Group.
 func (c *GroupClient) QueryJoinedUsers(gr *Group) *UserGroupQuery {
 	query := &UserGroupQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gr.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, id),
@@ -714,7 +714,7 @@ func (c *RoleClient) GetX(ctx context.Context, id int) *Role {
 // QueryUser queries the user edge of a Role.
 func (c *RoleClient) QueryUser(r *Role) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := r.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(role.Table, role.FieldID, id),
@@ -730,7 +730,7 @@ func (c *RoleClient) QueryUser(r *Role) *UserQuery {
 // QueryRolesUsers queries the roles_users edge of a Role.
 func (c *RoleClient) QueryRolesUsers(r *Role) *RoleUserQuery {
 	query := &RoleUserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := r.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(role.Table, role.FieldID, id),
@@ -909,7 +909,7 @@ func (c *TagClient) GetX(ctx context.Context, id int) *Tag {
 // QueryTweets queries the tweets edge of a Tag.
 func (c *TagClient) QueryTweets(t *Tag) *TweetQuery {
 	query := &TweetQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tag.Table, tag.FieldID, id),
@@ -925,7 +925,7 @@ func (c *TagClient) QueryTweets(t *Tag) *TweetQuery {
 // QueryTweetTags queries the tweet_tags edge of a Tag.
 func (c *TagClient) QueryTweetTags(t *Tag) *TweetTagQuery {
 	query := &TweetTagQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tag.Table, tag.FieldID, id),
@@ -1031,7 +1031,7 @@ func (c *TweetClient) GetX(ctx context.Context, id int) *Tweet {
 // QueryLikedUsers queries the liked_users edge of a Tweet.
 func (c *TweetClient) QueryLikedUsers(t *Tweet) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tweet.Table, tweet.FieldID, id),
@@ -1047,7 +1047,7 @@ func (c *TweetClient) QueryLikedUsers(t *Tweet) *UserQuery {
 // QueryUser queries the user edge of a Tweet.
 func (c *TweetClient) QueryUser(t *Tweet) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tweet.Table, tweet.FieldID, id),
@@ -1063,7 +1063,7 @@ func (c *TweetClient) QueryUser(t *Tweet) *UserQuery {
 // QueryTags queries the tags edge of a Tweet.
 func (c *TweetClient) QueryTags(t *Tweet) *TagQuery {
 	query := &TagQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tweet.Table, tweet.FieldID, id),
@@ -1079,7 +1079,7 @@ func (c *TweetClient) QueryTags(t *Tweet) *TagQuery {
 // QueryLikes queries the likes edge of a Tweet.
 func (c *TweetClient) QueryLikes(t *Tweet) *TweetLikeQuery {
 	query := &TweetLikeQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tweet.Table, tweet.FieldID, id),
@@ -1095,7 +1095,7 @@ func (c *TweetClient) QueryLikes(t *Tweet) *TweetLikeQuery {
 // QueryTweetUser queries the tweet_user edge of a Tweet.
 func (c *TweetClient) QueryTweetUser(t *Tweet) *UserTweetQuery {
 	query := &UserTweetQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tweet.Table, tweet.FieldID, id),
@@ -1111,7 +1111,7 @@ func (c *TweetClient) QueryTweetUser(t *Tweet) *UserTweetQuery {
 // QueryTweetTags queries the tweet_tags edge of a Tweet.
 func (c *TweetClient) QueryTweetTags(t *Tweet) *TweetTagQuery {
 	query := &TweetTagQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tweet.Table, tweet.FieldID, id),
@@ -1291,7 +1291,7 @@ func (c *TweetTagClient) GetX(ctx context.Context, id uuid.UUID) *TweetTag {
 // QueryTag queries the tag edge of a TweetTag.
 func (c *TweetTagClient) QueryTag(tt *TweetTag) *TagQuery {
 	query := &TagQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := tt.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tweettag.Table, tweettag.FieldID, id),
@@ -1307,7 +1307,7 @@ func (c *TweetTagClient) QueryTag(tt *TweetTag) *TagQuery {
 // QueryTweet queries the tweet edge of a TweetTag.
 func (c *TweetTagClient) QueryTweet(tt *TweetTag) *TweetQuery {
 	query := &TweetQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := tt.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tweettag.Table, tweettag.FieldID, id),
@@ -1413,7 +1413,7 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 // QueryGroups queries the groups edge of a User.
 func (c *UserClient) QueryGroups(u *User) *GroupQuery {
 	query := &GroupQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -1429,7 +1429,7 @@ func (c *UserClient) QueryGroups(u *User) *GroupQuery {
 // QueryFriends queries the friends edge of a User.
 func (c *UserClient) QueryFriends(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -1445,7 +1445,7 @@ func (c *UserClient) QueryFriends(u *User) *UserQuery {
 // QueryRelatives queries the relatives edge of a User.
 func (c *UserClient) QueryRelatives(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -1461,7 +1461,7 @@ func (c *UserClient) QueryRelatives(u *User) *UserQuery {
 // QueryLikedTweets queries the liked_tweets edge of a User.
 func (c *UserClient) QueryLikedTweets(u *User) *TweetQuery {
 	query := &TweetQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -1477,7 +1477,7 @@ func (c *UserClient) QueryLikedTweets(u *User) *TweetQuery {
 // QueryTweets queries the tweets edge of a User.
 func (c *UserClient) QueryTweets(u *User) *TweetQuery {
 	query := &TweetQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -1493,7 +1493,7 @@ func (c *UserClient) QueryTweets(u *User) *TweetQuery {
 // QueryRoles queries the roles edge of a User.
 func (c *UserClient) QueryRoles(u *User) *RoleQuery {
 	query := &RoleQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -1509,7 +1509,7 @@ func (c *UserClient) QueryRoles(u *User) *RoleQuery {
 // QueryJoinedGroups queries the joined_groups edge of a User.
 func (c *UserClient) QueryJoinedGroups(u *User) *UserGroupQuery {
 	query := &UserGroupQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -1525,7 +1525,7 @@ func (c *UserClient) QueryJoinedGroups(u *User) *UserGroupQuery {
 // QueryFriendships queries the friendships edge of a User.
 func (c *UserClient) QueryFriendships(u *User) *FriendshipQuery {
 	query := &FriendshipQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -1541,7 +1541,7 @@ func (c *UserClient) QueryFriendships(u *User) *FriendshipQuery {
 // QueryRelationship queries the relationship edge of a User.
 func (c *UserClient) QueryRelationship(u *User) *RelationshipQuery {
 	query := &RelationshipQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -1557,7 +1557,7 @@ func (c *UserClient) QueryRelationship(u *User) *RelationshipQuery {
 // QueryLikes queries the likes edge of a User.
 func (c *UserClient) QueryLikes(u *User) *TweetLikeQuery {
 	query := &TweetLikeQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -1573,7 +1573,7 @@ func (c *UserClient) QueryLikes(u *User) *TweetLikeQuery {
 // QueryUserTweets queries the user_tweets edge of a User.
 func (c *UserClient) QueryUserTweets(u *User) *UserTweetQuery {
 	query := &UserTweetQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -1589,7 +1589,7 @@ func (c *UserClient) QueryUserTweets(u *User) *UserTweetQuery {
 // QueryRolesUsers queries the roles_users edge of a User.
 func (c *UserClient) QueryRolesUsers(u *User) *RoleUserQuery {
 	query := &RoleUserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -1696,7 +1696,7 @@ func (c *UserGroupClient) GetX(ctx context.Context, id int) *UserGroup {
 // QueryUser queries the user edge of a UserGroup.
 func (c *UserGroupClient) QueryUser(ug *UserGroup) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ug.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(usergroup.Table, usergroup.FieldID, id),
@@ -1712,7 +1712,7 @@ func (c *UserGroupClient) QueryUser(ug *UserGroup) *UserQuery {
 // QueryGroup queries the group edge of a UserGroup.
 func (c *UserGroupClient) QueryGroup(ug *UserGroup) *GroupQuery {
 	query := &GroupQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ug.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(usergroup.Table, usergroup.FieldID, id),
@@ -1818,7 +1818,7 @@ func (c *UserTweetClient) GetX(ctx context.Context, id int) *UserTweet {
 // QueryUser queries the user edge of a UserTweet.
 func (c *UserTweetClient) QueryUser(ut *UserTweet) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ut.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(usertweet.Table, usertweet.FieldID, id),
@@ -1834,7 +1834,7 @@ func (c *UserTweetClient) QueryUser(ut *UserTweet) *UserQuery {
 // QueryTweet queries the tweet edge of a UserTweet.
 func (c *UserTweetClient) QueryTweet(ut *UserTweet) *TweetQuery {
 	query := &TweetQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ut.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(usertweet.Table, usertweet.FieldID, id),

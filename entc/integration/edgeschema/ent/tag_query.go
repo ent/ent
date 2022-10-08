@@ -469,7 +469,7 @@ func (tq *TagQuery) loadTweets(ctx context.Context, query *TweetQuery, nodes []*
 			outValue := int(values[0].(*sql.NullInt64).Int64)
 			inValue := int(values[1].(*sql.NullInt64).Int64)
 			if nids[inValue] == nil {
-				nids[inValue] = map[*Tag]struct{}{byID[outValue]: struct{}{}}
+				nids[inValue] = map[*Tag]struct{}{byID[outValue]: {}}
 				return assign(columns[1:], values[1:])
 			}
 			nids[inValue][byID[outValue]] = struct{}{}

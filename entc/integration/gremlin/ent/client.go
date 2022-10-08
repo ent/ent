@@ -296,7 +296,7 @@ func (c *CardClient) GetX(ctx context.Context, id string) *Card {
 // QueryOwner queries the owner edge of a Card.
 func (c *CardClient) QueryOwner(ca *Card) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(ca.ID).InE(user.CardLabel).OutV()
 		return fromV, nil
@@ -307,7 +307,7 @@ func (c *CardClient) QueryOwner(ca *Card) *UserQuery {
 // QuerySpec queries the spec edge of a Card.
 func (c *CardClient) QuerySpec(ca *Card) *SpecQuery {
 	query := &SpecQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(ca.ID).InE(spec.CardLabel).OutV()
 		return fromV, nil
@@ -588,7 +588,7 @@ func (c *FileClient) GetX(ctx context.Context, id string) *File {
 // QueryOwner queries the owner edge of a File.
 func (c *FileClient) QueryOwner(f *File) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(f.ID).InE(user.FilesLabel).OutV()
 		return fromV, nil
@@ -599,7 +599,7 @@ func (c *FileClient) QueryOwner(f *File) *UserQuery {
 // QueryType queries the type edge of a File.
 func (c *FileClient) QueryType(f *File) *FileTypeQuery {
 	query := &FileTypeQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(f.ID).InE(filetype.FilesLabel).OutV()
 		return fromV, nil
@@ -610,7 +610,7 @@ func (c *FileClient) QueryType(f *File) *FileTypeQuery {
 // QueryField queries the field edge of a File.
 func (c *FileClient) QueryField(f *File) *FieldTypeQuery {
 	query := &FieldTypeQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(f.ID).OutE(file.FieldLabel).InV()
 		return fromV, nil
@@ -711,7 +711,7 @@ func (c *FileTypeClient) GetX(ctx context.Context, id string) *FileType {
 // QueryFiles queries the files edge of a FileType.
 func (c *FileTypeClient) QueryFiles(ft *FileType) *FileQuery {
 	query := &FileQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(ft.ID).OutE(filetype.FilesLabel).InV()
 		return fromV, nil
@@ -902,7 +902,7 @@ func (c *GroupClient) GetX(ctx context.Context, id string) *Group {
 // QueryFiles queries the files edge of a Group.
 func (c *GroupClient) QueryFiles(gr *Group) *FileQuery {
 	query := &FileQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(gr.ID).OutE(group.FilesLabel).InV()
 		return fromV, nil
@@ -913,7 +913,7 @@ func (c *GroupClient) QueryFiles(gr *Group) *FileQuery {
 // QueryBlocked queries the blocked edge of a Group.
 func (c *GroupClient) QueryBlocked(gr *Group) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(gr.ID).OutE(group.BlockedLabel).InV()
 		return fromV, nil
@@ -924,7 +924,7 @@ func (c *GroupClient) QueryBlocked(gr *Group) *UserQuery {
 // QueryUsers queries the users edge of a Group.
 func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(gr.ID).InE(user.GroupsLabel).OutV()
 		return fromV, nil
@@ -935,7 +935,7 @@ func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 // QueryInfo queries the info edge of a Group.
 func (c *GroupClient) QueryInfo(gr *Group) *GroupInfoQuery {
 	query := &GroupInfoQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(gr.ID).OutE(group.InfoLabel).InV()
 		return fromV, nil
@@ -1036,7 +1036,7 @@ func (c *GroupInfoClient) GetX(ctx context.Context, id string) *GroupInfo {
 // QueryGroups queries the groups edge of a GroupInfo.
 func (c *GroupInfoClient) QueryGroups(gi *GroupInfo) *GroupQuery {
 	query := &GroupQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(gi.ID).InE(group.InfoLabel).OutV()
 		return fromV, nil
@@ -1317,7 +1317,7 @@ func (c *NodeClient) GetX(ctx context.Context, id string) *Node {
 // QueryPrev queries the prev edge of a Node.
 func (c *NodeClient) QueryPrev(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(n.ID).InE(node.NextLabel).OutV()
 		return fromV, nil
@@ -1328,7 +1328,7 @@ func (c *NodeClient) QueryPrev(n *Node) *NodeQuery {
 // QueryNext queries the next edge of a Node.
 func (c *NodeClient) QueryNext(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(n.ID).OutE(node.NextLabel).InV()
 		return fromV, nil
@@ -1429,7 +1429,7 @@ func (c *PetClient) GetX(ctx context.Context, id string) *Pet {
 // QueryTeam queries the team edge of a Pet.
 func (c *PetClient) QueryTeam(pe *Pet) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(pe.ID).InE(user.TeamLabel).OutV()
 		return fromV, nil
@@ -1440,7 +1440,7 @@ func (c *PetClient) QueryTeam(pe *Pet) *UserQuery {
 // QueryOwner queries the owner edge of a Pet.
 func (c *PetClient) QueryOwner(pe *Pet) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(pe.ID).InE(user.PetsLabel).OutV()
 		return fromV, nil
@@ -1541,7 +1541,7 @@ func (c *SpecClient) GetX(ctx context.Context, id string) *Spec {
 // QueryCard queries the card edge of a Spec.
 func (c *SpecClient) QueryCard(s *Spec) *CardQuery {
 	query := &CardQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(s.ID).OutE(spec.CardLabel).InV()
 		return fromV, nil
@@ -1732,7 +1732,7 @@ func (c *UserClient) GetX(ctx context.Context, id string) *User {
 // QueryCard queries the card edge of a User.
 func (c *UserClient) QueryCard(u *User) *CardQuery {
 	query := &CardQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(u.ID).OutE(user.CardLabel).InV()
 		return fromV, nil
@@ -1743,7 +1743,7 @@ func (c *UserClient) QueryCard(u *User) *CardQuery {
 // QueryPets queries the pets edge of a User.
 func (c *UserClient) QueryPets(u *User) *PetQuery {
 	query := &PetQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(u.ID).OutE(user.PetsLabel).InV()
 		return fromV, nil
@@ -1754,7 +1754,7 @@ func (c *UserClient) QueryPets(u *User) *PetQuery {
 // QueryFiles queries the files edge of a User.
 func (c *UserClient) QueryFiles(u *User) *FileQuery {
 	query := &FileQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(u.ID).OutE(user.FilesLabel).InV()
 		return fromV, nil
@@ -1765,7 +1765,7 @@ func (c *UserClient) QueryFiles(u *User) *FileQuery {
 // QueryGroups queries the groups edge of a User.
 func (c *UserClient) QueryGroups(u *User) *GroupQuery {
 	query := &GroupQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(u.ID).OutE(user.GroupsLabel).InV()
 		return fromV, nil
@@ -1776,7 +1776,7 @@ func (c *UserClient) QueryGroups(u *User) *GroupQuery {
 // QueryFriends queries the friends edge of a User.
 func (c *UserClient) QueryFriends(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(u.ID).Both(user.FriendsLabel)
 		return fromV, nil
@@ -1787,7 +1787,7 @@ func (c *UserClient) QueryFriends(u *User) *UserQuery {
 // QueryFollowers queries the followers edge of a User.
 func (c *UserClient) QueryFollowers(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(u.ID).InE(user.FollowingLabel).OutV()
 		return fromV, nil
@@ -1798,7 +1798,7 @@ func (c *UserClient) QueryFollowers(u *User) *UserQuery {
 // QueryFollowing queries the following edge of a User.
 func (c *UserClient) QueryFollowing(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(u.ID).OutE(user.FollowingLabel).InV()
 		return fromV, nil
@@ -1809,7 +1809,7 @@ func (c *UserClient) QueryFollowing(u *User) *UserQuery {
 // QueryTeam queries the team edge of a User.
 func (c *UserClient) QueryTeam(u *User) *PetQuery {
 	query := &PetQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(u.ID).OutE(user.TeamLabel).InV()
 		return fromV, nil
@@ -1820,7 +1820,7 @@ func (c *UserClient) QueryTeam(u *User) *PetQuery {
 // QuerySpouse queries the spouse edge of a User.
 func (c *UserClient) QuerySpouse(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(u.ID).Both(user.SpouseLabel)
 		return fromV, nil
@@ -1831,7 +1831,7 @@ func (c *UserClient) QuerySpouse(u *User) *UserQuery {
 // QueryChildren queries the children edge of a User.
 func (c *UserClient) QueryChildren(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(u.ID).InE(user.ParentLabel).OutV()
 		return fromV, nil
@@ -1842,7 +1842,7 @@ func (c *UserClient) QueryChildren(u *User) *UserQuery {
 // QueryParent queries the parent edge of a User.
 func (c *UserClient) QueryParent(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(u.ID).OutE(user.ParentLabel).InV()
 		return fromV, nil

@@ -578,7 +578,7 @@ func (dq *DocQuery) loadRelated(ctx context.Context, query *DocQuery, nodes []*D
 			outValue := *values[0].(*schema.DocID)
 			inValue := *values[1].(*schema.DocID)
 			if nids[inValue] == nil {
-				nids[inValue] = map[*Doc]struct{}{byID[outValue]: struct{}{}}
+				nids[inValue] = map[*Doc]struct{}{byID[outValue]: {}}
 				return assign(columns[1:], values[1:])
 			}
 			nids[inValue][byID[outValue]] = struct{}{}

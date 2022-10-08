@@ -215,7 +215,7 @@ func (c *FileClient) GetX(ctx context.Context, id int) *File {
 // QueryParent queries the parent edge of a File.
 func (c *FileClient) QueryParent(f *File) *FileQuery {
 	query := &FileQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := f.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(file.Table, file.FieldID, id),
@@ -231,7 +231,7 @@ func (c *FileClient) QueryParent(f *File) *FileQuery {
 // QueryChildren queries the children edge of a File.
 func (c *FileClient) QueryChildren(f *File) *FileQuery {
 	query := &FileQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := f.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(file.Table, file.FieldID, id),
