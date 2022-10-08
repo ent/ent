@@ -324,7 +324,7 @@ func (c *CardClient) GetX(ctx context.Context, id int) *Card {
 // QueryOwner queries the owner edge of a Card.
 func (c *CardClient) QueryOwner(ca *Card) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ca.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(card.Table, card.FieldID, id),
@@ -340,7 +340,7 @@ func (c *CardClient) QueryOwner(ca *Card) *UserQuery {
 // QuerySpec queries the spec edge of a Card.
 func (c *CardClient) QuerySpec(ca *Card) *SpecQuery {
 	query := &SpecQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ca.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(card.Table, card.FieldID, id),
@@ -626,7 +626,7 @@ func (c *FileClient) GetX(ctx context.Context, id int) *File {
 // QueryOwner queries the owner edge of a File.
 func (c *FileClient) QueryOwner(f *File) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := f.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(file.Table, file.FieldID, id),
@@ -642,7 +642,7 @@ func (c *FileClient) QueryOwner(f *File) *UserQuery {
 // QueryType queries the type edge of a File.
 func (c *FileClient) QueryType(f *File) *FileTypeQuery {
 	query := &FileTypeQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := f.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(file.Table, file.FieldID, id),
@@ -658,7 +658,7 @@ func (c *FileClient) QueryType(f *File) *FileTypeQuery {
 // QueryField queries the field edge of a File.
 func (c *FileClient) QueryField(f *File) *FieldTypeQuery {
 	query := &FieldTypeQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := f.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(file.Table, file.FieldID, id),
@@ -764,7 +764,7 @@ func (c *FileTypeClient) GetX(ctx context.Context, id int) *FileType {
 // QueryFiles queries the files edge of a FileType.
 func (c *FileTypeClient) QueryFiles(ft *FileType) *FileQuery {
 	query := &FileQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ft.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(filetype.Table, filetype.FieldID, id),
@@ -960,7 +960,7 @@ func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
 // QueryFiles queries the files edge of a Group.
 func (c *GroupClient) QueryFiles(gr *Group) *FileQuery {
 	query := &FileQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gr.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, id),
@@ -976,7 +976,7 @@ func (c *GroupClient) QueryFiles(gr *Group) *FileQuery {
 // QueryBlocked queries the blocked edge of a Group.
 func (c *GroupClient) QueryBlocked(gr *Group) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gr.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, id),
@@ -992,7 +992,7 @@ func (c *GroupClient) QueryBlocked(gr *Group) *UserQuery {
 // QueryUsers queries the users edge of a Group.
 func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gr.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, id),
@@ -1008,7 +1008,7 @@ func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 // QueryInfo queries the info edge of a Group.
 func (c *GroupClient) QueryInfo(gr *Group) *GroupInfoQuery {
 	query := &GroupInfoQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gr.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, id),
@@ -1114,7 +1114,7 @@ func (c *GroupInfoClient) GetX(ctx context.Context, id int) *GroupInfo {
 // QueryGroups queries the groups edge of a GroupInfo.
 func (c *GroupInfoClient) QueryGroups(gi *GroupInfo) *GroupQuery {
 	query := &GroupQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gi.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(groupinfo.Table, groupinfo.FieldID, id),
@@ -1400,7 +1400,7 @@ func (c *NodeClient) GetX(ctx context.Context, id int) *Node {
 // QueryPrev queries the prev edge of a Node.
 func (c *NodeClient) QueryPrev(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := n.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(node.Table, node.FieldID, id),
@@ -1416,7 +1416,7 @@ func (c *NodeClient) QueryPrev(n *Node) *NodeQuery {
 // QueryNext queries the next edge of a Node.
 func (c *NodeClient) QueryNext(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := n.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(node.Table, node.FieldID, id),
@@ -1522,7 +1522,7 @@ func (c *PetClient) GetX(ctx context.Context, id int) *Pet {
 // QueryTeam queries the team edge of a Pet.
 func (c *PetClient) QueryTeam(pe *Pet) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := pe.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pet.Table, pet.FieldID, id),
@@ -1538,7 +1538,7 @@ func (c *PetClient) QueryTeam(pe *Pet) *UserQuery {
 // QueryOwner queries the owner edge of a Pet.
 func (c *PetClient) QueryOwner(pe *Pet) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := pe.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pet.Table, pet.FieldID, id),
@@ -1644,7 +1644,7 @@ func (c *SpecClient) GetX(ctx context.Context, id int) *Spec {
 // QueryCard queries the card edge of a Spec.
 func (c *SpecClient) QueryCard(s *Spec) *CardQuery {
 	query := &CardQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := s.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(spec.Table, spec.FieldID, id),
@@ -1840,7 +1840,7 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 // QueryCard queries the card edge of a User.
 func (c *UserClient) QueryCard(u *User) *CardQuery {
 	query := &CardQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -1856,7 +1856,7 @@ func (c *UserClient) QueryCard(u *User) *CardQuery {
 // QueryPets queries the pets edge of a User.
 func (c *UserClient) QueryPets(u *User) *PetQuery {
 	query := &PetQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -1872,7 +1872,7 @@ func (c *UserClient) QueryPets(u *User) *PetQuery {
 // QueryFiles queries the files edge of a User.
 func (c *UserClient) QueryFiles(u *User) *FileQuery {
 	query := &FileQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -1888,7 +1888,7 @@ func (c *UserClient) QueryFiles(u *User) *FileQuery {
 // QueryGroups queries the groups edge of a User.
 func (c *UserClient) QueryGroups(u *User) *GroupQuery {
 	query := &GroupQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -1904,7 +1904,7 @@ func (c *UserClient) QueryGroups(u *User) *GroupQuery {
 // QueryFriends queries the friends edge of a User.
 func (c *UserClient) QueryFriends(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -1920,7 +1920,7 @@ func (c *UserClient) QueryFriends(u *User) *UserQuery {
 // QueryFollowers queries the followers edge of a User.
 func (c *UserClient) QueryFollowers(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -1936,7 +1936,7 @@ func (c *UserClient) QueryFollowers(u *User) *UserQuery {
 // QueryFollowing queries the following edge of a User.
 func (c *UserClient) QueryFollowing(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -1952,7 +1952,7 @@ func (c *UserClient) QueryFollowing(u *User) *UserQuery {
 // QueryTeam queries the team edge of a User.
 func (c *UserClient) QueryTeam(u *User) *PetQuery {
 	query := &PetQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -1968,7 +1968,7 @@ func (c *UserClient) QueryTeam(u *User) *PetQuery {
 // QuerySpouse queries the spouse edge of a User.
 func (c *UserClient) QuerySpouse(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -1984,7 +1984,7 @@ func (c *UserClient) QuerySpouse(u *User) *UserQuery {
 // QueryChildren queries the children edge of a User.
 func (c *UserClient) QueryChildren(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -2000,7 +2000,7 @@ func (c *UserClient) QueryChildren(u *User) *UserQuery {
 // QueryParent queries the parent edge of a User.
 func (c *UserClient) QueryParent(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),

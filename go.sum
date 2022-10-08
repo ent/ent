@@ -1,9 +1,3 @@
-ariga.io/atlas v0.6.2-0.20220819114704-2060066abac7 h1:qhVEfrV5Z9XZyQJxgogBq6c2pjWUxGLU7bvFeEDY0DA=
-ariga.io/atlas v0.6.2-0.20220819114704-2060066abac7/go.mod h1:ft47uSh5hWGDCmQC9DsztZg6Xk+KagM5Ts/mZYKb9JE=
-ariga.io/atlas v0.6.5-0.20220907173155-3332f3c1b8c9 h1:hb7cCS3+idkvWRxKIiH0pBiyO9tJ9gRiecY+ohA//VY=
-ariga.io/atlas v0.6.5-0.20220907173155-3332f3c1b8c9/go.mod h1:ft47uSh5hWGDCmQC9DsztZg6Xk+KagM5Ts/mZYKb9JE=
-ariga.io/atlas v0.7.2-0.20220927063044-1d12e0ad4813 h1:KdsIBtO4ZpBAAWdg2fEpXuV5YKGpxBTWO7A9V5MM+/Y=
-ariga.io/atlas v0.7.2-0.20220927063044-1d12e0ad4813/go.mod h1:ft47uSh5hWGDCmQC9DsztZg6Xk+KagM5Ts/mZYKb9JE=
 ariga.io/atlas v0.7.2-0.20220927111110-867ee0cca56a h1:6/nt4DODfgxzHTTg3tYy7YkVzruGQGZ/kRvXpA45KUo=
 ariga.io/atlas v0.7.2-0.20220927111110-867ee0cca56a/go.mod h1:ft47uSh5hWGDCmQC9DsztZg6Xk+KagM5Ts/mZYKb9JE=
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=

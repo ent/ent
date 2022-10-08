@@ -222,7 +222,7 @@ func (c *PetClient) GetX(ctx context.Context, id int) *Pet {
 // QueryOwner queries the owner edge of a Pet.
 func (c *PetClient) QueryOwner(pe *Pet) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := pe.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pet.Table, pet.FieldID, id),
@@ -328,7 +328,7 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 // QueryPets queries the pets edge of a User.
 func (c *UserClient) QueryPets(u *User) *PetQuery {
 	query := &PetQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),

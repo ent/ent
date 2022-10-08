@@ -416,7 +416,7 @@ func (sq *SpecQuery) loadCard(ctx context.Context, query *CardQuery, nodes []*Sp
 			outValue := int(values[0].(*sql.NullInt64).Int64)
 			inValue := int(values[1].(*sql.NullInt64).Int64)
 			if nids[inValue] == nil {
-				nids[inValue] = map[*Spec]struct{}{byID[outValue]: struct{}{}}
+				nids[inValue] = map[*Spec]struct{}{byID[outValue]: {}}
 				return assign(columns[1:], values[1:])
 			}
 			nids[inValue][byID[outValue]] = struct{}{}

@@ -136,7 +136,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 					outValue := {{ with extend $ "Arg" "values[0]" "Field" $.ID "ScanType" $out }}{{ template "dialect/sql/query/eagerloading/m2massign" . }}{{ end }}
 					inValue := {{ with extend $ "Arg" "values[1]" "Field" $e.Type.ID "ScanType" $in }}{{ template "dialect/sql/query/eagerloading/m2massign" . }}{{ end }}
 					if nids[inValue] == nil {
-						nids[inValue] = map[*{{ $.Name }}]struct{}{byID[outValue]: struct{}{}}
+						nids[inValue] = map[*{{ $.Name }}]struct{}{byID[outValue]: {}}
 						return assign(columns[1:], values[1:])
 					}
 					nids[inValue][byID[outValue]] = struct{}{}

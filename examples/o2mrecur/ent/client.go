@@ -215,7 +215,7 @@ func (c *NodeClient) GetX(ctx context.Context, id int) *Node {
 // QueryParent queries the parent edge of a Node.
 func (c *NodeClient) QueryParent(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := n.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(node.Table, node.FieldID, id),
@@ -231,7 +231,7 @@ func (c *NodeClient) QueryParent(n *Node) *NodeQuery {
 // QueryChildren queries the children edge of a Node.
 func (c *NodeClient) QueryChildren(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := n.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(node.Table, node.FieldID, id),

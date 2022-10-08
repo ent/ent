@@ -644,7 +644,7 @@ func (tq *TweetQuery) loadLikedUsers(ctx context.Context, query *UserQuery, node
 			outValue := int(values[0].(*sql.NullInt64).Int64)
 			inValue := int(values[1].(*sql.NullInt64).Int64)
 			if nids[inValue] == nil {
-				nids[inValue] = map[*Tweet]struct{}{byID[outValue]: struct{}{}}
+				nids[inValue] = map[*Tweet]struct{}{byID[outValue]: {}}
 				return assign(columns[1:], values[1:])
 			}
 			nids[inValue][byID[outValue]] = struct{}{}
@@ -702,7 +702,7 @@ func (tq *TweetQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*T
 			outValue := int(values[0].(*sql.NullInt64).Int64)
 			inValue := int(values[1].(*sql.NullInt64).Int64)
 			if nids[inValue] == nil {
-				nids[inValue] = map[*Tweet]struct{}{byID[outValue]: struct{}{}}
+				nids[inValue] = map[*Tweet]struct{}{byID[outValue]: {}}
 				return assign(columns[1:], values[1:])
 			}
 			nids[inValue][byID[outValue]] = struct{}{}
@@ -760,7 +760,7 @@ func (tq *TweetQuery) loadTags(ctx context.Context, query *TagQuery, nodes []*Tw
 			outValue := int(values[0].(*sql.NullInt64).Int64)
 			inValue := int(values[1].(*sql.NullInt64).Int64)
 			if nids[inValue] == nil {
-				nids[inValue] = map[*Tweet]struct{}{byID[outValue]: struct{}{}}
+				nids[inValue] = map[*Tweet]struct{}{byID[outValue]: {}}
 				return assign(columns[1:], values[1:])
 			}
 			nids[inValue][byID[outValue]] = struct{}{}
