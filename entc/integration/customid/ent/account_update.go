@@ -169,11 +169,7 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := au.mutation.Email(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: account.FieldEmail,
-		})
+		_spec.SetField(account.FieldEmail, field.TypeString, value)
 	}
 	if au.mutation.TokenCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -414,11 +410,7 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 		}
 	}
 	if value, ok := auo.mutation.Email(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: account.FieldEmail,
-		})
+		_spec.SetField(account.FieldEmail, field.TypeString, value)
 	}
 	if auo.mutation.TokenCleared() {
 		edge := &sqlgraph.EdgeSpec{

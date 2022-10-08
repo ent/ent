@@ -191,17 +191,10 @@ func (nu *NoteUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := nu.mutation.Text(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: note.FieldText,
-		})
+		_spec.SetField(note.FieldText, field.TypeString, value)
 	}
 	if nu.mutation.TextCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: note.FieldText,
-		})
+		_spec.ClearField(note.FieldText, field.TypeString)
 	}
 	if nu.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -500,17 +493,10 @@ func (nuo *NoteUpdateOne) sqlSave(ctx context.Context) (_node *Note, err error) 
 		}
 	}
 	if value, ok := nuo.mutation.Text(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: note.FieldText,
-		})
+		_spec.SetField(note.FieldText, field.TypeString, value)
 	}
 	if nuo.mutation.TextCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: note.FieldText,
-		})
+		_spec.ClearField(note.FieldText, field.TypeString)
 	}
 	if nuo.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{

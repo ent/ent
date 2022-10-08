@@ -196,18 +196,10 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := fu.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: file.FieldName,
-		})
+		_spec.SetField(file.FieldName, field.TypeString, value)
 	}
 	if value, ok := fu.mutation.Deleted(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: file.FieldDeleted,
-		})
+		_spec.SetField(file.FieldDeleted, field.TypeBool, value)
 	}
 	if fu.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -512,18 +504,10 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 		}
 	}
 	if value, ok := fuo.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: file.FieldName,
-		})
+		_spec.SetField(file.FieldName, field.TypeString, value)
 	}
 	if value, ok := fuo.mutation.Deleted(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: file.FieldDeleted,
-		})
+		_spec.SetField(file.FieldDeleted, field.TypeBool, value)
 	}
 	if fuo.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{

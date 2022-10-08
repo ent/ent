@@ -148,18 +148,10 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := cu.mutation.Model(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: car.FieldModel,
-		})
+		_spec.SetField(car.FieldModel, field.TypeString, value)
 	}
 	if value, ok := cu.mutation.RegisteredAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: car.FieldRegisteredAt,
-		})
+		_spec.SetField(car.FieldRegisteredAt, field.TypeTime, value)
 	}
 	if cu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -360,18 +352,10 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 		}
 	}
 	if value, ok := cuo.mutation.Model(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: car.FieldModel,
-		})
+		_spec.SetField(car.FieldModel, field.TypeString, value)
 	}
 	if value, ok := cuo.mutation.RegisteredAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: car.FieldRegisteredAt,
-		})
+		_spec.SetField(car.FieldRegisteredAt, field.TypeTime, value)
 	}
 	if cuo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{

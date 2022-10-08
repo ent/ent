@@ -140,11 +140,7 @@ func (ctc *CustomTypeCreate) createSpec() (*CustomType, *sqlgraph.CreateSpec) {
 		}
 	)
 	if value, ok := ctc.mutation.Custom(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: customtype.FieldCustom,
-		})
+		_spec.SetField(customtype.FieldCustom, field.TypeString, value)
 		_node.Custom = value
 	}
 	return _node, _spec

@@ -193,11 +193,7 @@ func (ugc *UserGroupCreate) createSpec() (*UserGroup, *sqlgraph.CreateSpec) {
 	)
 	_spec.OnConflict = ugc.conflict
 	if value, ok := ugc.mutation.JoinedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: usergroup.FieldJoinedAt,
-		})
+		_spec.SetField(usergroup.FieldJoinedAt, field.TypeTime, value)
 		_node.JoinedAt = value
 	}
 	if nodes := ugc.mutation.UserIDs(); len(nodes) > 0 {

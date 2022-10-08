@@ -183,11 +183,7 @@ func (tlu *TweetLikeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := tlu.mutation.LikedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: tweetlike.FieldLikedAt,
-		})
+		_spec.SetField(tweetlike.FieldLikedAt, field.TypeTime, value)
 	}
 	if tlu.mutation.TweetCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -459,11 +455,7 @@ func (tluo *TweetLikeUpdateOne) sqlSave(ctx context.Context) (_node *TweetLike, 
 		}
 	}
 	if value, ok := tluo.mutation.LikedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: tweetlike.FieldLikedAt,
-		})
+		_spec.SetField(tweetlike.FieldLikedAt, field.TypeTime, value)
 	}
 	if tluo.mutation.TweetCleared() {
 		edge := &sqlgraph.EdgeSpec{

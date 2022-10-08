@@ -149,11 +149,7 @@ func (iu *InfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := iu.mutation.Content(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: info.FieldContent,
-		})
+		_spec.SetField(info.FieldContent, field.TypeJSON, value)
 	}
 	if value, ok := iu.mutation.AppendedContent(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
@@ -359,11 +355,7 @@ func (iuo *InfoUpdateOne) sqlSave(ctx context.Context) (_node *Info, err error) 
 		}
 	}
 	if value, ok := iuo.mutation.Content(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: info.FieldContent,
-		})
+		_spec.SetField(info.FieldContent, field.TypeJSON, value)
 	}
 	if value, ok := iuo.mutation.AppendedContent(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {

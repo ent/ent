@@ -193,18 +193,10 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := uu.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldName,
-		})
+		_spec.SetField(user.FieldName, field.TypeString, value)
 	}
 	if value, ok := uu.mutation.Foods(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldFoods,
-		})
+		_spec.SetField(user.FieldFoods, field.TypeJSON, value)
 	}
 	if value, ok := uu.mutation.AppendedFoods(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
@@ -212,10 +204,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		})
 	}
 	if uu.mutation.FoodsCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: user.FieldFoods,
-		})
+		_spec.ClearField(user.FieldFoods, field.TypeJSON)
 	}
 	if uu.mutation.GroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -480,18 +469,10 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 	}
 	if value, ok := uuo.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldName,
-		})
+		_spec.SetField(user.FieldName, field.TypeString, value)
 	}
 	if value, ok := uuo.mutation.Foods(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldFoods,
-		})
+		_spec.SetField(user.FieldFoods, field.TypeJSON, value)
 	}
 	if value, ok := uuo.mutation.AppendedFoods(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
@@ -499,10 +480,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		})
 	}
 	if uuo.mutation.FoodsCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: user.FieldFoods,
-		})
+		_spec.ClearField(user.FieldFoods, field.TypeJSON)
 	}
 	if uuo.mutation.GroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -162,25 +162,13 @@ func (fu *FriendshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := fu.mutation.Weight(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: friendship.FieldWeight,
-		})
+		_spec.SetField(friendship.FieldWeight, field.TypeInt, value)
 	}
 	if value, ok := fu.mutation.AddedWeight(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: friendship.FieldWeight,
-		})
+		_spec.AddField(friendship.FieldWeight, field.TypeInt, value)
 	}
 	if value, ok := fu.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: friendship.FieldCreatedAt,
-		})
+		_spec.SetField(friendship.FieldCreatedAt, field.TypeTime, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, fu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -361,25 +349,13 @@ func (fuo *FriendshipUpdateOne) sqlSave(ctx context.Context) (_node *Friendship,
 		}
 	}
 	if value, ok := fuo.mutation.Weight(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: friendship.FieldWeight,
-		})
+		_spec.SetField(friendship.FieldWeight, field.TypeInt, value)
 	}
 	if value, ok := fuo.mutation.AddedWeight(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: friendship.FieldWeight,
-		})
+		_spec.AddField(friendship.FieldWeight, field.TypeInt, value)
 	}
 	if value, ok := fuo.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: friendship.FieldCreatedAt,
-		})
+		_spec.SetField(friendship.FieldCreatedAt, field.TypeTime, value)
 	}
 	_node = &Friendship{config: fuo.config}
 	_spec.Assign = _node.assignValues

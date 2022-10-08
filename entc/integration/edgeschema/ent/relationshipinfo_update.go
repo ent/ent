@@ -115,11 +115,7 @@ func (riu *RelationshipInfoUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 	}
 	if value, ok := riu.mutation.Text(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: relationshipinfo.FieldText,
-		})
+		_spec.SetField(relationshipinfo.FieldText, field.TypeString, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, riu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -254,11 +250,7 @@ func (riuo *RelationshipInfoUpdateOne) sqlSave(ctx context.Context) (_node *Rela
 		}
 	}
 	if value, ok := riuo.mutation.Text(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: relationshipinfo.FieldText,
-		})
+		_spec.SetField(relationshipinfo.FieldText, field.TypeString, value)
 	}
 	_node = &RelationshipInfo{config: riuo.config}
 	_spec.Assign = _node.assignValues

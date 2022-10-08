@@ -154,11 +154,7 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 		}
 	)
 	if value, ok := cc.mutation.Text(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: comment.FieldText,
-		})
+		_spec.SetField(comment.FieldText, field.TypeString, value)
 		_node.Text = value
 	}
 	if nodes := cc.mutation.PostIDs(); len(nodes) > 0 {

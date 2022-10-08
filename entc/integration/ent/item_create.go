@@ -187,11 +187,7 @@ func (ic *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = id
 	}
 	if value, ok := ic.mutation.Text(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: item.FieldText,
-		})
+		_spec.SetField(item.FieldText, field.TypeString, value)
 		_node.Text = value
 	}
 	return _node, _spec

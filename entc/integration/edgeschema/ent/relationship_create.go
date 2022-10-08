@@ -203,11 +203,7 @@ func (rc *RelationshipCreate) createSpec() (*Relationship, *sqlgraph.CreateSpec)
 	)
 	_spec.OnConflict = rc.conflict
 	if value, ok := rc.mutation.Weight(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: relationship.FieldWeight,
-		})
+		_spec.SetField(relationship.FieldWeight, field.TypeInt, value)
 		_node.Weight = value
 	}
 	if nodes := rc.mutation.UserIDs(); len(nodes) > 0 {

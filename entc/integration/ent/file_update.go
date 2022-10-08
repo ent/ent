@@ -335,84 +335,40 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := fu.mutation.Size(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: file.FieldSize,
-		})
+		_spec.SetField(file.FieldSize, field.TypeInt, value)
 	}
 	if value, ok := fu.mutation.AddedSize(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: file.FieldSize,
-		})
+		_spec.AddField(file.FieldSize, field.TypeInt, value)
 	}
 	if value, ok := fu.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: file.FieldName,
-		})
+		_spec.SetField(file.FieldName, field.TypeString, value)
 	}
 	if value, ok := fu.mutation.User(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: file.FieldUser,
-		})
+		_spec.SetField(file.FieldUser, field.TypeString, value)
 	}
 	if fu.mutation.UserCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: file.FieldUser,
-		})
+		_spec.ClearField(file.FieldUser, field.TypeString)
 	}
 	if value, ok := fu.mutation.Group(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: file.FieldGroup,
-		})
+		_spec.SetField(file.FieldGroup, field.TypeString, value)
 	}
 	if fu.mutation.GroupCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: file.FieldGroup,
-		})
+		_spec.ClearField(file.FieldGroup, field.TypeString)
 	}
 	if value, ok := fu.mutation.GetOp(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: file.FieldOp,
-		})
+		_spec.SetField(file.FieldOp, field.TypeBool, value)
 	}
 	if fu.mutation.OpCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: file.FieldOp,
-		})
+		_spec.ClearField(file.FieldOp, field.TypeBool)
 	}
 	if value, ok := fu.mutation.FieldID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: file.FieldFieldID,
-		})
+		_spec.SetField(file.FieldFieldID, field.TypeInt, value)
 	}
 	if value, ok := fu.mutation.AddedFieldID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: file.FieldFieldID,
-		})
+		_spec.AddField(file.FieldFieldID, field.TypeInt, value)
 	}
 	if fu.mutation.FieldIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: file.FieldFieldID,
-		})
+		_spec.ClearField(file.FieldFieldID, field.TypeInt)
 	}
 	if fu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -889,84 +845,40 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 		}
 	}
 	if value, ok := fuo.mutation.Size(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: file.FieldSize,
-		})
+		_spec.SetField(file.FieldSize, field.TypeInt, value)
 	}
 	if value, ok := fuo.mutation.AddedSize(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: file.FieldSize,
-		})
+		_spec.AddField(file.FieldSize, field.TypeInt, value)
 	}
 	if value, ok := fuo.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: file.FieldName,
-		})
+		_spec.SetField(file.FieldName, field.TypeString, value)
 	}
 	if value, ok := fuo.mutation.User(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: file.FieldUser,
-		})
+		_spec.SetField(file.FieldUser, field.TypeString, value)
 	}
 	if fuo.mutation.UserCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: file.FieldUser,
-		})
+		_spec.ClearField(file.FieldUser, field.TypeString)
 	}
 	if value, ok := fuo.mutation.Group(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: file.FieldGroup,
-		})
+		_spec.SetField(file.FieldGroup, field.TypeString, value)
 	}
 	if fuo.mutation.GroupCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: file.FieldGroup,
-		})
+		_spec.ClearField(file.FieldGroup, field.TypeString)
 	}
 	if value, ok := fuo.mutation.GetOp(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: file.FieldOp,
-		})
+		_spec.SetField(file.FieldOp, field.TypeBool, value)
 	}
 	if fuo.mutation.OpCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: file.FieldOp,
-		})
+		_spec.ClearField(file.FieldOp, field.TypeBool)
 	}
 	if value, ok := fuo.mutation.FieldID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: file.FieldFieldID,
-		})
+		_spec.SetField(file.FieldFieldID, field.TypeInt, value)
 	}
 	if value, ok := fuo.mutation.AddedFieldID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: file.FieldFieldID,
-		})
+		_spec.AddField(file.FieldFieldID, field.TypeInt, value)
 	}
 	if fuo.mutation.FieldIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: file.FieldFieldID,
-		})
+		_spec.ClearField(file.FieldFieldID, field.TypeInt)
 	}
 	if fuo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{

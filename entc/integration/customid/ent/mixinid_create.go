@@ -182,19 +182,11 @@ func (mic *MixinIDCreate) createSpec() (*MixinID, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = &id
 	}
 	if value, ok := mic.mutation.SomeField(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: mixinid.FieldSomeField,
-		})
+		_spec.SetField(mixinid.FieldSomeField, field.TypeString, value)
 		_node.SomeField = value
 	}
 	if value, ok := mic.mutation.MixinField(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: mixinid.FieldMixinField,
-		})
+		_spec.SetField(mixinid.FieldMixinField, field.TypeString, value)
 		_node.MixinField = value
 	}
 	return _node, _spec

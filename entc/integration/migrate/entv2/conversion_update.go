@@ -289,121 +289,58 @@ func (cu *ConversionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := cu.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldName,
-		})
+		_spec.SetField(conversion.FieldName, field.TypeString, value)
 	}
 	if cu.mutation.NameCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: conversion.FieldName,
-		})
+		_spec.ClearField(conversion.FieldName, field.TypeString)
 	}
 	if value, ok := cu.mutation.Int8ToString(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldInt8ToString,
-		})
+		_spec.SetField(conversion.FieldInt8ToString, field.TypeString, value)
 	}
 	if cu.mutation.Int8ToStringCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: conversion.FieldInt8ToString,
-		})
+		_spec.ClearField(conversion.FieldInt8ToString, field.TypeString)
 	}
 	if value, ok := cu.mutation.Uint8ToString(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldUint8ToString,
-		})
+		_spec.SetField(conversion.FieldUint8ToString, field.TypeString, value)
 	}
 	if cu.mutation.Uint8ToStringCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: conversion.FieldUint8ToString,
-		})
+		_spec.ClearField(conversion.FieldUint8ToString, field.TypeString)
 	}
 	if value, ok := cu.mutation.Int16ToString(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldInt16ToString,
-		})
+		_spec.SetField(conversion.FieldInt16ToString, field.TypeString, value)
 	}
 	if cu.mutation.Int16ToStringCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: conversion.FieldInt16ToString,
-		})
+		_spec.ClearField(conversion.FieldInt16ToString, field.TypeString)
 	}
 	if value, ok := cu.mutation.Uint16ToString(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldUint16ToString,
-		})
+		_spec.SetField(conversion.FieldUint16ToString, field.TypeString, value)
 	}
 	if cu.mutation.Uint16ToStringCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: conversion.FieldUint16ToString,
-		})
+		_spec.ClearField(conversion.FieldUint16ToString, field.TypeString)
 	}
 	if value, ok := cu.mutation.Int32ToString(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldInt32ToString,
-		})
+		_spec.SetField(conversion.FieldInt32ToString, field.TypeString, value)
 	}
 	if cu.mutation.Int32ToStringCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: conversion.FieldInt32ToString,
-		})
+		_spec.ClearField(conversion.FieldInt32ToString, field.TypeString)
 	}
 	if value, ok := cu.mutation.Uint32ToString(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldUint32ToString,
-		})
+		_spec.SetField(conversion.FieldUint32ToString, field.TypeString, value)
 	}
 	if cu.mutation.Uint32ToStringCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: conversion.FieldUint32ToString,
-		})
+		_spec.ClearField(conversion.FieldUint32ToString, field.TypeString)
 	}
 	if value, ok := cu.mutation.Int64ToString(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldInt64ToString,
-		})
+		_spec.SetField(conversion.FieldInt64ToString, field.TypeString, value)
 	}
 	if cu.mutation.Int64ToStringCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: conversion.FieldInt64ToString,
-		})
+		_spec.ClearField(conversion.FieldInt64ToString, field.TypeString)
 	}
 	if value, ok := cu.mutation.Uint64ToString(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldUint64ToString,
-		})
+		_spec.SetField(conversion.FieldUint64ToString, field.TypeString, value)
 	}
 	if cu.mutation.Uint64ToStringCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: conversion.FieldUint64ToString,
-		})
+		_spec.ClearField(conversion.FieldUint64ToString, field.TypeString)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -712,121 +649,58 @@ func (cuo *ConversionUpdateOne) sqlSave(ctx context.Context) (_node *Conversion,
 		}
 	}
 	if value, ok := cuo.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldName,
-		})
+		_spec.SetField(conversion.FieldName, field.TypeString, value)
 	}
 	if cuo.mutation.NameCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: conversion.FieldName,
-		})
+		_spec.ClearField(conversion.FieldName, field.TypeString)
 	}
 	if value, ok := cuo.mutation.Int8ToString(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldInt8ToString,
-		})
+		_spec.SetField(conversion.FieldInt8ToString, field.TypeString, value)
 	}
 	if cuo.mutation.Int8ToStringCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: conversion.FieldInt8ToString,
-		})
+		_spec.ClearField(conversion.FieldInt8ToString, field.TypeString)
 	}
 	if value, ok := cuo.mutation.Uint8ToString(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldUint8ToString,
-		})
+		_spec.SetField(conversion.FieldUint8ToString, field.TypeString, value)
 	}
 	if cuo.mutation.Uint8ToStringCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: conversion.FieldUint8ToString,
-		})
+		_spec.ClearField(conversion.FieldUint8ToString, field.TypeString)
 	}
 	if value, ok := cuo.mutation.Int16ToString(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldInt16ToString,
-		})
+		_spec.SetField(conversion.FieldInt16ToString, field.TypeString, value)
 	}
 	if cuo.mutation.Int16ToStringCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: conversion.FieldInt16ToString,
-		})
+		_spec.ClearField(conversion.FieldInt16ToString, field.TypeString)
 	}
 	if value, ok := cuo.mutation.Uint16ToString(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldUint16ToString,
-		})
+		_spec.SetField(conversion.FieldUint16ToString, field.TypeString, value)
 	}
 	if cuo.mutation.Uint16ToStringCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: conversion.FieldUint16ToString,
-		})
+		_spec.ClearField(conversion.FieldUint16ToString, field.TypeString)
 	}
 	if value, ok := cuo.mutation.Int32ToString(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldInt32ToString,
-		})
+		_spec.SetField(conversion.FieldInt32ToString, field.TypeString, value)
 	}
 	if cuo.mutation.Int32ToStringCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: conversion.FieldInt32ToString,
-		})
+		_spec.ClearField(conversion.FieldInt32ToString, field.TypeString)
 	}
 	if value, ok := cuo.mutation.Uint32ToString(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldUint32ToString,
-		})
+		_spec.SetField(conversion.FieldUint32ToString, field.TypeString, value)
 	}
 	if cuo.mutation.Uint32ToStringCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: conversion.FieldUint32ToString,
-		})
+		_spec.ClearField(conversion.FieldUint32ToString, field.TypeString)
 	}
 	if value, ok := cuo.mutation.Int64ToString(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldInt64ToString,
-		})
+		_spec.SetField(conversion.FieldInt64ToString, field.TypeString, value)
 	}
 	if cuo.mutation.Int64ToStringCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: conversion.FieldInt64ToString,
-		})
+		_spec.ClearField(conversion.FieldInt64ToString, field.TypeString)
 	}
 	if value, ok := cuo.mutation.Uint64ToString(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: conversion.FieldUint64ToString,
-		})
+		_spec.SetField(conversion.FieldUint64ToString, field.TypeString, value)
 	}
 	if cuo.mutation.Uint64ToStringCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: conversion.FieldUint64ToString,
-		})
+		_spec.ClearField(conversion.FieldUint64ToString, field.TypeString)
 	}
 	_node = &Conversion{config: cuo.config}
 	_spec.Assign = _node.assignValues

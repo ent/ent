@@ -219,11 +219,7 @@ func (mc *MetadataCreate) createSpec() (*Metadata, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = id
 	}
 	if value, ok := mc.mutation.Age(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: metadata.FieldAge,
-		})
+		_spec.SetField(metadata.FieldAge, field.TypeInt, value)
 		_node.Age = value
 	}
 	if nodes := mc.mutation.UserIDs(); len(nodes) > 0 {

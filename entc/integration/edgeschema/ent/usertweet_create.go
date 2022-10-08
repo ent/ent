@@ -193,11 +193,7 @@ func (utc *UserTweetCreate) createSpec() (*UserTweet, *sqlgraph.CreateSpec) {
 	)
 	_spec.OnConflict = utc.conflict
 	if value, ok := utc.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: usertweet.FieldCreatedAt,
-		})
+		_spec.SetField(usertweet.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if nodes := utc.mutation.UserIDs(); len(nodes) > 0 {

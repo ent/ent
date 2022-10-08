@@ -182,11 +182,7 @@ func (nc *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 	)
 	_spec.OnConflict = nc.conflict
 	if value, ok := nc.mutation.Value(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: node.FieldValue,
-		})
+		_spec.SetField(node.FieldValue, field.TypeInt, value)
 		_node.Value = value
 	}
 	if nodes := nc.mutation.PrevIDs(); len(nodes) > 0 {

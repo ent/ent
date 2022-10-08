@@ -185,11 +185,7 @@ func (blc *BlobLinkCreate) createSpec() (*BlobLink, *sqlgraph.CreateSpec) {
 	)
 	_spec.OnConflict = blc.conflict
 	if value, ok := blc.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: bloblink.FieldCreatedAt,
-		})
+		_spec.SetField(bloblink.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if nodes := blc.mutation.BlobIDs(); len(nodes) > 0 {

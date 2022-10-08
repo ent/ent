@@ -173,11 +173,7 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 		}
 	)
 	if value, ok := tc.mutation.Name(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: team.FieldName,
-		})
+		_spec.SetField(team.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
 	if nodes := tc.mutation.TasksIDs(); len(nodes) > 0 {

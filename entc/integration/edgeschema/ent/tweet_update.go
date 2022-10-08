@@ -300,11 +300,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := tu.mutation.Text(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: tweet.FieldText,
-		})
+		_spec.SetField(tweet.FieldText, field.TypeString, value)
 	}
 	if tu.mutation.LikedUsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -934,11 +930,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 		}
 	}
 	if value, ok := tuo.mutation.Text(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: tweet.FieldText,
-		})
+		_spec.SetField(tweet.FieldText, field.TypeString, value)
 	}
 	if tuo.mutation.LikedUsersCleared() {
 		edge := &sqlgraph.EdgeSpec{

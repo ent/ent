@@ -214,27 +214,15 @@ func (cc *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = id
 	}
 	if value, ok := cc.mutation.BeforeID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: car.FieldBeforeID,
-		})
+		_spec.SetField(car.FieldBeforeID, field.TypeFloat64, value)
 		_node.BeforeID = value
 	}
 	if value, ok := cc.mutation.AfterID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: car.FieldAfterID,
-		})
+		_spec.SetField(car.FieldAfterID, field.TypeFloat64, value)
 		_node.AfterID = value
 	}
 	if value, ok := cc.mutation.Model(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: car.FieldModel,
-		})
+		_spec.SetField(car.FieldModel, field.TypeString, value)
 		_node.Model = value
 	}
 	if nodes := cc.mutation.OwnerIDs(); len(nodes) > 0 {

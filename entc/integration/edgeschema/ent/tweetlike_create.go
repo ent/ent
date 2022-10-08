@@ -191,11 +191,7 @@ func (tlc *TweetLikeCreate) createSpec() (*TweetLike, *sqlgraph.CreateSpec) {
 	)
 	_spec.OnConflict = tlc.conflict
 	if value, ok := tlc.mutation.LikedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: tweetlike.FieldLikedAt,
-		})
+		_spec.SetField(tweetlike.FieldLikedAt, field.TypeTime, value)
 		_node.LikedAt = value
 	}
 	if nodes := tlc.mutation.TweetIDs(); len(nodes) > 0 {

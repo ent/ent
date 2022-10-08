@@ -132,11 +132,7 @@ func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := lu.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: license.FieldUpdateTime,
-		})
+		_spec.SetField(license.FieldUpdateTime, field.TypeTime, value)
 	}
 	_spec.AddModifiers(lu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, lu.driver, _spec); err != nil {
@@ -288,11 +284,7 @@ func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err e
 		}
 	}
 	if value, ok := luo.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: license.FieldUpdateTime,
-		})
+		_spec.SetField(license.FieldUpdateTime, field.TypeTime, value)
 	}
 	_spec.AddModifiers(luo.modifiers...)
 	_node = &License{config: luo.config}

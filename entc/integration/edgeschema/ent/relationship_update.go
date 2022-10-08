@@ -220,18 +220,10 @@ func (ru *RelationshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := ru.mutation.Weight(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: relationship.FieldWeight,
-		})
+		_spec.SetField(relationship.FieldWeight, field.TypeInt, value)
 	}
 	if value, ok := ru.mutation.AddedWeight(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: relationship.FieldWeight,
-		})
+		_spec.AddField(relationship.FieldWeight, field.TypeInt, value)
 	}
 	if ru.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -576,18 +568,10 @@ func (ruo *RelationshipUpdateOne) sqlSave(ctx context.Context) (_node *Relations
 		}
 	}
 	if value, ok := ruo.mutation.Weight(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: relationship.FieldWeight,
-		})
+		_spec.SetField(relationship.FieldWeight, field.TypeInt, value)
 	}
 	if value, ok := ruo.mutation.AddedWeight(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: relationship.FieldWeight,
-		})
+		_spec.AddField(relationship.FieldWeight, field.TypeInt, value)
 	}
 	if ruo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

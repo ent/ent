@@ -372,6 +372,15 @@ type (
 	}
 )
 
+// SetField appends a new field setter to the create spec.
+func (u *CreateSpec) SetField(column string, t field.Type, value driver.Value) {
+	u.Fields = append(u.Fields, &FieldSpec{
+		Column: column,
+		Type:   t,
+		Value:  value,
+	})
+}
+
 // CreateNode applies the CreateSpec on the graph. The operation creates a new
 // record in the database, and connects it to other nodes specified in spec.Edges.
 func CreateNode(ctx context.Context, drv dialect.Driver, spec *CreateSpec) error {
@@ -423,6 +432,32 @@ func (u *UpdateSpec) AddModifier(m func(*sql.UpdateBuilder)) {
 // AddModifiers adds a list of statement modifiers to the spec.
 func (u *UpdateSpec) AddModifiers(m ...func(*sql.UpdateBuilder)) {
 	u.Modifiers = append(u.Modifiers, m...)
+}
+
+// SetField appends a new field setter to the update spec.
+func (u *UpdateSpec) SetField(column string, t field.Type, value driver.Value) {
+	u.Fields.Set = append(u.Fields.Set, &FieldSpec{
+		Column: column,
+		Type:   t,
+		Value:  value,
+	})
+}
+
+// AddField appends a new field adder to the update spec.
+func (u *UpdateSpec) AddField(column string, t field.Type, value driver.Value) {
+	u.Fields.Add = append(u.Fields.Add, &FieldSpec{
+		Column: column,
+		Type:   t,
+		Value:  value,
+	})
+}
+
+// ClearField appends a new field cleaner (set to NULL) to the update spec.
+func (u *UpdateSpec) ClearField(column string, t field.Type) {
+	u.Fields.Clear = append(u.Fields.Clear, &FieldSpec{
+		Column: column,
+		Type:   t,
+	})
 }
 
 // UpdateNode applies the UpdateSpec on one node in the graph.

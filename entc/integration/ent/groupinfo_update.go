@@ -180,25 +180,13 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := giu.mutation.Desc(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: groupinfo.FieldDesc,
-		})
+		_spec.SetField(groupinfo.FieldDesc, field.TypeString, value)
 	}
 	if value, ok := giu.mutation.MaxUsers(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: groupinfo.FieldMaxUsers,
-		})
+		_spec.SetField(groupinfo.FieldMaxUsers, field.TypeInt, value)
 	}
 	if value, ok := giu.mutation.AddedMaxUsers(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: groupinfo.FieldMaxUsers,
-		})
+		_spec.AddField(groupinfo.FieldMaxUsers, field.TypeInt, value)
 	}
 	if giu.mutation.GroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -452,25 +440,13 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (_node *GroupInfo, 
 		}
 	}
 	if value, ok := giuo.mutation.Desc(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: groupinfo.FieldDesc,
-		})
+		_spec.SetField(groupinfo.FieldDesc, field.TypeString, value)
 	}
 	if value, ok := giuo.mutation.MaxUsers(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: groupinfo.FieldMaxUsers,
-		})
+		_spec.SetField(groupinfo.FieldMaxUsers, field.TypeInt, value)
 	}
 	if value, ok := giuo.mutation.AddedMaxUsers(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: groupinfo.FieldMaxUsers,
-		})
+		_spec.AddField(groupinfo.FieldMaxUsers, field.TypeInt, value)
 	}
 	if giuo.mutation.GroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{

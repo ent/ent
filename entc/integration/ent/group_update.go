@@ -347,58 +347,28 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := gu.mutation.Active(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: group.FieldActive,
-		})
+		_spec.SetField(group.FieldActive, field.TypeBool, value)
 	}
 	if value, ok := gu.mutation.Expire(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: group.FieldExpire,
-		})
+		_spec.SetField(group.FieldExpire, field.TypeTime, value)
 	}
 	if value, ok := gu.mutation.GetType(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: group.FieldType,
-		})
+		_spec.SetField(group.FieldType, field.TypeString, value)
 	}
 	if gu.mutation.TypeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: group.FieldType,
-		})
+		_spec.ClearField(group.FieldType, field.TypeString)
 	}
 	if value, ok := gu.mutation.MaxUsers(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: group.FieldMaxUsers,
-		})
+		_spec.SetField(group.FieldMaxUsers, field.TypeInt, value)
 	}
 	if value, ok := gu.mutation.AddedMaxUsers(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: group.FieldMaxUsers,
-		})
+		_spec.AddField(group.FieldMaxUsers, field.TypeInt, value)
 	}
 	if gu.mutation.MaxUsersCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: group.FieldMaxUsers,
-		})
+		_spec.ClearField(group.FieldMaxUsers, field.TypeInt)
 	}
 	if value, ok := gu.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: group.FieldName,
-		})
+		_spec.SetField(group.FieldName, field.TypeString, value)
 	}
 	if gu.mutation.FilesCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -959,58 +929,28 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 		}
 	}
 	if value, ok := guo.mutation.Active(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: group.FieldActive,
-		})
+		_spec.SetField(group.FieldActive, field.TypeBool, value)
 	}
 	if value, ok := guo.mutation.Expire(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: group.FieldExpire,
-		})
+		_spec.SetField(group.FieldExpire, field.TypeTime, value)
 	}
 	if value, ok := guo.mutation.GetType(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: group.FieldType,
-		})
+		_spec.SetField(group.FieldType, field.TypeString, value)
 	}
 	if guo.mutation.TypeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: group.FieldType,
-		})
+		_spec.ClearField(group.FieldType, field.TypeString)
 	}
 	if value, ok := guo.mutation.MaxUsers(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: group.FieldMaxUsers,
-		})
+		_spec.SetField(group.FieldMaxUsers, field.TypeInt, value)
 	}
 	if value, ok := guo.mutation.AddedMaxUsers(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: group.FieldMaxUsers,
-		})
+		_spec.AddField(group.FieldMaxUsers, field.TypeInt, value)
 	}
 	if guo.mutation.MaxUsersCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: group.FieldMaxUsers,
-		})
+		_spec.ClearField(group.FieldMaxUsers, field.TypeInt)
 	}
 	if value, ok := guo.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: group.FieldName,
-		})
+		_spec.SetField(group.FieldName, field.TypeString, value)
 	}
 	if guo.mutation.FilesCleared() {
 		edge := &sqlgraph.EdgeSpec{

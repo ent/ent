@@ -203,67 +203,35 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 	)
 	if value, ok := uc.mutation.T(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldT,
-		})
+		_spec.SetField(user.FieldT, field.TypeJSON, value)
 		_node.T = value
 	}
 	if value, ok := uc.mutation.URL(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldURL,
-		})
+		_spec.SetField(user.FieldURL, field.TypeJSON, value)
 		_node.URL = value
 	}
 	if value, ok := uc.mutation.Raw(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldRaw,
-		})
+		_spec.SetField(user.FieldRaw, field.TypeJSON, value)
 		_node.Raw = value
 	}
 	if value, ok := uc.mutation.Dirs(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldDirs,
-		})
+		_spec.SetField(user.FieldDirs, field.TypeJSON, value)
 		_node.Dirs = value
 	}
 	if value, ok := uc.mutation.Ints(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldInts,
-		})
+		_spec.SetField(user.FieldInts, field.TypeJSON, value)
 		_node.Ints = value
 	}
 	if value, ok := uc.mutation.Floats(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldFloats,
-		})
+		_spec.SetField(user.FieldFloats, field.TypeJSON, value)
 		_node.Floats = value
 	}
 	if value, ok := uc.mutation.Strings(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldStrings,
-		})
+		_spec.SetField(user.FieldStrings, field.TypeJSON, value)
 		_node.Strings = value
 	}
 	if value, ok := uc.mutation.Addr(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: user.FieldAddr,
-		})
+		_spec.SetField(user.FieldAddr, field.TypeJSON, value)
 		_node.Addr = value
 	}
 	return _node, _spec

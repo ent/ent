@@ -189,11 +189,7 @@ func (pc *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 		}
 	)
 	if value, ok := pc.mutation.Text(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: post.FieldText,
-		})
+		_spec.SetField(post.FieldText, field.TypeString, value)
 		_node.Text = value
 	}
 	if nodes := pc.mutation.AuthorIDs(); len(nodes) > 0 {

@@ -190,19 +190,11 @@ func (lc *LicenseCreate) createSpec() (*License, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = id
 	}
 	if value, ok := lc.mutation.CreateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: license.FieldCreateTime,
-		})
+		_spec.SetField(license.FieldCreateTime, field.TypeTime, value)
 		_node.CreateTime = value
 	}
 	if value, ok := lc.mutation.UpdateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: license.FieldUpdateTime,
-		})
+		_spec.SetField(license.FieldUpdateTime, field.TypeTime, value)
 		_node.UpdateTime = value
 	}
 	return _node, _spec

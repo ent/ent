@@ -147,11 +147,7 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := cu.mutation.Text(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: comment.FieldText,
-		})
+		_spec.SetField(comment.FieldText, field.TypeString, value)
 	}
 	if cu.mutation.PostCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -352,11 +348,7 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 		}
 	}
 	if value, ok := cuo.mutation.Text(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: comment.FieldText,
-		})
+		_spec.SetField(comment.FieldText, field.TypeString, value)
 	}
 	if cuo.mutation.PostCleared() {
 		edge := &sqlgraph.EdgeSpec{
