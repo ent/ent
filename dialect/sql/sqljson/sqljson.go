@@ -147,7 +147,7 @@ func ValueContains(column string, arg any, opts ...Option) *sql.Predicate {
 		case dialect.MySQL:
 			b.WriteString("JSON_CONTAINS").Wrap(func(b *sql.Builder) {
 				b.Ident(column).Comma()
-				b.Arg(marshal(arg)).Comma()
+				b.Arg(marshalArg(arg)).Comma()
 				path.mysqlPath(b)
 			})
 			b.WriteOp(sql.OpEQ).Arg(1)
@@ -163,7 +163,7 @@ func ValueContains(column string, arg any, opts ...Option) *sql.Predicate {
 			opts = normalizePG(b, arg, opts)
 			path.Cast = "jsonb"
 			path.value(b)
-			b.WriteString(" @> ").Arg(marshal(arg))
+			b.WriteString(" @> ").Arg(marshalArg(arg))
 		}
 	})
 }
@@ -642,8 +642,8 @@ func allString(v []any) bool {
 	return true
 }
 
-// marshal stringifies the given argument to a valid JSON document.
-func marshal(arg any) any {
+// marshalArg stringifies the given argument to a valid JSON document.
+func marshalArg(arg any) any {
 	if buf, err := json.Marshal(arg); err == nil {
 		arg = string(buf)
 	}

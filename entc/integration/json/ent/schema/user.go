@@ -28,6 +28,9 @@ func (User) Fields() []ent.Field {
 			Optional(),
 		field.JSON("url", &url.URL{}).
 			Optional(),
+		field.JSON("URLs", []*url.URL{}).
+			StorageKey("urls").
+			Optional(),
 		field.JSON("raw", json.RawMessage{}).
 			Optional(),
 		field.JSON("dirs", []http.Dir{}).

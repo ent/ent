@@ -110,6 +110,20 @@ func URLNotNil() predicate.User {
 	})
 }
 
+// URLsIsNil applies the IsNil predicate on the "URLs" field.
+func URLsIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldURLs)))
+	})
+}
+
+// URLsNotNil applies the NotNil predicate on the "URLs" field.
+func URLsNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldURLs)))
+	})
+}
+
 // RawIsNil applies the IsNil predicate on the "raw" field.
 func RawIsNil() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

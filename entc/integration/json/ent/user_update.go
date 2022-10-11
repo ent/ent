@@ -61,6 +61,24 @@ func (uu *UserUpdate) ClearURL() *UserUpdate {
 	return uu
 }
 
+// SetURLs sets the "URLs" field.
+func (uu *UserUpdate) SetURLs(u []*url.URL) *UserUpdate {
+	uu.mutation.SetURLs(u)
+	return uu
+}
+
+// AppendURLs appends u to the "URLs" field.
+func (uu *UserUpdate) AppendURLs(u []*url.URL) *UserUpdate {
+	uu.mutation.AppendURLs(u)
+	return uu
+}
+
+// ClearURLs clears the value of the "URLs" field.
+func (uu *UserUpdate) ClearURLs() *UserUpdate {
+	uu.mutation.ClearURLs()
+	return uu
+}
+
 // SetRaw sets the "raw" field.
 func (uu *UserUpdate) SetRaw(jm json.RawMessage) *UserUpdate {
 	uu.mutation.SetRaw(jm)
@@ -260,6 +278,17 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if uu.mutation.URLCleared() {
 		_spec.ClearField(user.FieldURL, field.TypeJSON)
 	}
+	if value, ok := uu.mutation.URLs(); ok {
+		_spec.SetField(user.FieldURLs, field.TypeJSON, value)
+	}
+	if value, ok := uu.mutation.AppendedURLs(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldURLs, value)
+		})
+	}
+	if uu.mutation.URLsCleared() {
+		_spec.ClearField(user.FieldURLs, field.TypeJSON)
+	}
 	if value, ok := uu.mutation.Raw(); ok {
 		_spec.SetField(user.FieldRaw, field.TypeJSON, value)
 	}
@@ -360,6 +389,24 @@ func (uuo *UserUpdateOne) SetURL(u *url.URL) *UserUpdateOne {
 // ClearURL clears the value of the "url" field.
 func (uuo *UserUpdateOne) ClearURL() *UserUpdateOne {
 	uuo.mutation.ClearURL()
+	return uuo
+}
+
+// SetURLs sets the "URLs" field.
+func (uuo *UserUpdateOne) SetURLs(u []*url.URL) *UserUpdateOne {
+	uuo.mutation.SetURLs(u)
+	return uuo
+}
+
+// AppendURLs appends u to the "URLs" field.
+func (uuo *UserUpdateOne) AppendURLs(u []*url.URL) *UserUpdateOne {
+	uuo.mutation.AppendURLs(u)
+	return uuo
+}
+
+// ClearURLs clears the value of the "URLs" field.
+func (uuo *UserUpdateOne) ClearURLs() *UserUpdateOne {
+	uuo.mutation.ClearURLs()
 	return uuo
 }
 
@@ -591,6 +638,17 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if uuo.mutation.URLCleared() {
 		_spec.ClearField(user.FieldURL, field.TypeJSON)
+	}
+	if value, ok := uuo.mutation.URLs(); ok {
+		_spec.SetField(user.FieldURLs, field.TypeJSON, value)
+	}
+	if value, ok := uuo.mutation.AppendedURLs(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldURLs, value)
+		})
+	}
+	if uuo.mutation.URLsCleared() {
+		_spec.ClearField(user.FieldURLs, field.TypeJSON)
 	}
 	if value, ok := uuo.mutation.Raw(); ok {
 		_spec.SetField(user.FieldRaw, field.TypeJSON, value)
