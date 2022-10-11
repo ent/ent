@@ -27,15 +27,15 @@ in table columns. For example, in MySQL you can create a table such as:
 CREATE TABLE t1 (jdoc JSON);
 ```
 
-In this column, users may store JSON objects of arbitrary schema:
+In this column, users may store JSON objects of an arbitrary schema:
 
 ```sql
 INSERT INTO t1 VALUES('{"key1": "value1", "key2": "value2"}');
 ```
 
 Because JSON documents can always be expressed as strings, they can
-be stored in regular VARCHAR or TEXT columns, but when a column is declared
-with the JSON type the database enforces the correctness of the JSON
+be stored in regular VARCHAR or TEXT columns. However, when a column is declared
+with the JSON type, the database enforces the correctness of the JSON
 syntax. For example, if we try to write an incorrect JSON document to
 this MySQL table: 
 ```sql
@@ -108,9 +108,9 @@ func TestEntJSON(t *testing.T) {
 ### Appending values to fields in JSON columns
 
 In many cases, it is useful to append a value to a list in a JSON column.
-Preferably, appends are implemented in a way that is _atomic_, that is, without
+Preferably, appends are implemented in a way that is _atomic_, meaning, without
 needing to read the current value and writing the entire new value. The reason
-for this, is that if two calls try to append the value concurrently, both will
+for this is that if two calls try to append the value concurrently, both will
 read the same _current_ value from the database, and write their own updated version
 roughly at the same time. Unless [optimistic locking](2021-07-22-database-locking-techniques-with-ent.md)
 is used, both writes will succeed, but the final result will only include one of
@@ -122,7 +122,7 @@ is similar to how counters are incremented in many applications. Instead of runn
 ```sql
 SELECT points from leaderboard where user='rotemtam' 
 ```
-Reading the result (lets say its 1000), incrementing the value  in process (1000+1=1001) and writing the new sum
+Reading the result (lets say its 1000), incrementing the value in process (1000+1=1001) and writing the new sum
 verbatim:
 ```sql
 UPDATE leaderboard SET points=1001 where user='rotemtam'
@@ -132,11 +132,11 @@ Developers can use a query such as:
 UPDATE leaderboard SET points=points+1 where user='rotemtam'
 ```
 
-In a similar way, to avoid the need to synchronize writes using optimistic locking
-or some other mechanism, let's see how we can leverage the database's capability to
+To avoid the need to synchronize writes using optimistic locking
+or some other mechanism, let's see how we can similarly leverage the database's capability to
 perform them concurrently in a safe manner.
 
-Two things to note as we are constructing this query. First, the syntax for working
+There are two things to note as we are constructing this query. First, the syntax for working
 with JSON values varies a bit between different database vendors, as you will see in
 the examples below. Second, a query for appending a value to a list in a JSON document
 needs to handle at least two edge cases:
@@ -217,7 +217,7 @@ func (User) Fields() []ent.Field {
 ```
 
 Ent will generate a method `AppendTags` on the update mutation builders.
-You can use them as such:
+You can use them like so:
 ```go
 func TestAppend(t *testing.T) {
 	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
@@ -283,7 +283,7 @@ func TestAppendSubfield(t *testing.T) {
 
 In this post we discussed JSON fields in SQL and Ent in general. Next,
 we discussed how appending values to a JSON field can be done atomically
-in popular SQL databases. Finally, we showed how to use do this using Ent.
+in popular SQL databases. Finally, we showed how to do this using Ent.
 Do you think Remove/Slice operations are necessary? Let us know what you think!
 
 :::note For more Ent news and updates:
