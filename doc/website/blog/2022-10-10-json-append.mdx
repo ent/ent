@@ -7,6 +7,7 @@ authorTwitter: _rtam
 image: "https://entgo.io/images/assets/ent-json-append.png"
 ---
 
+
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
@@ -69,12 +70,14 @@ the desired field name as well as the backing Go type. For example:
 
 ```go
 type Tag struct {
-	Name string `json:"name"`
+	Name    string    `json:"name"`
 	Created time.Time `json:"created"`
 }
 
-func (User) BlogPost() []ent.Field {
-	field.JSON("tags", []Tag{})
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.JSON("tags", []Tag{}),
+	}
 }
 ```
 
@@ -86,9 +89,9 @@ func TestEntJSON(t *testing.T) {
 	ctx := context.Background()
 	// Insert a user with two comments.
 	client.User.Create().
-		SetComments([]schema.Comment{
-			{Title: "hello", Created: time.Now()},
-			{Title: "goodbye", Created: time.Now()},
+		SetTags([]schema.Tag{
+			{Name: "hello", Created: time.Now()},
+			{Name: "goodbye", Created: time.Now()},
 		}).
 		SaveX(ctx)
 
