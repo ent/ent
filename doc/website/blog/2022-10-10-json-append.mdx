@@ -266,7 +266,7 @@ func TestAppendSubfield(t *testing.T) {
 	// highlight-start
 	u.Update().
 		Modify(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, user.FieldMeta, []string{"goodbye"}, sqljson.DotPath(".tags"))
+			sqljson.Append(u, user.FieldMeta, []string{"goodbye"}, sqljson.Path("tags"))
 		}).
 		ExecX(ctx)
 	// highlight-end
