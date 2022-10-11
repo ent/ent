@@ -68,13 +68,13 @@ With Ent, users may define JSON fields in schemas using `field.JSON` by passing
 the desired field name as well as the backing Go type. For example:
 
 ```go
-type Comment struct {
-	Title string `json:"title"`
-	Body string `json:"body"`
+type Tag struct {
+	Name string `json:"name"`
+	Created time.Time `json:"created"`
 }
 
 func (User) BlogPost() []ent.Field {
-	field.JSON("comments", []Comment{})
+	field.JSON("tags", []Comment{})
 }
 ```
 
@@ -87,16 +87,16 @@ func TestEntJSON(t *testing.T) {
 	// Insert a user with two comments.
 	client.User.Create().
 		SetComments([]schema.Comment{
-			{Title: "hello"},
-			{Title: "goodbye"},
+			{Title: "hello", Created: time.Now()},
+			{Title: "goodbye", Created: time.Now()},
 		}).
 		SaveX(ctx)
 
-	// Count how many users have more than one comment.
+	// Count how many users have more than zero tags.
 	count := client.User.Query().
 		Where(func(s *sql.Selector) {
 			s.Where(
-				sqljson.LenGT(user.FieldComments, 0, sqljson.DotPath(".")),
+				sqljson.LenGT(user.FieldTags, 0, sqljson.DotPath(".")),
 			)
 		}).
 		CountX(ctx)
