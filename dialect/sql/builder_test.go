@@ -2146,6 +2146,21 @@ func TestWindowFunction(t *testing.T) {
 	require.Equal(t, []any{2}, args)
 }
 
+func TestWindowFunction_Select(t *testing.T) {
+	posts := Table("posts")
+	q := Select().
+		AppendSelect("*").
+		AppendSelectExprAs(
+			Window(func(b *Builder) {
+				b.WriteString(Sum(posts.C("duration")))
+			}).PartitionBy("author_id").OrderBy("id"), "duration").
+		From(posts)
+
+	query, args := q.Query()
+	require.Equal(t, "SELECT *, (SUM(`posts`.`duration`) OVER (PARTITION BY `author_id` ORDER BY `id`)) AS `duration` FROM `posts`", query)
+	require.Nil(t, args)
+}
+
 func TestSelector_UnqualifiedColumns(t *testing.T) {
 	t1, t2 := Table("t1"), Table("t2")
 	s := Select(t1.C("a"), t2.C("b"))
