@@ -3331,22 +3331,19 @@ func (b *Builder) Arg(a any) *Builder {
 		b.Join(a)
 		return b
 	}
-	b.total++
-	b.args = append(b.args, a)
 	// Default placeholder param (MySQL and SQLite).
-	param := "?"
+	format := "?"
 	if b.postgres() {
 		// Postgres' arguments are referenced using the syntax $n.
 		// $1 refers to the 1st argument, $2 to the 2nd, and so on.
-		param = "$" + strconv.Itoa(b.total)
+		format = "$" + strconv.Itoa(b.total+1)
 	}
 	if f, ok := a.(ParamFormatter); ok {
-		param = f.FormatParam(param, &StmtInfo{
+		format = f.FormatParam(format, &StmtInfo{
 			Dialect: b.dialect,
 		})
 	}
-	b.WriteString(param)
-	return b
+	return b.Argf(format, a)
 }
 
 // Args appends a list of arguments to the builder.
@@ -3357,6 +3354,29 @@ func (b *Builder) Args(a ...any) *Builder {
 		}
 		b.Arg(a[i])
 	}
+	return b
+}
+
+// Argf appends an input argument to the builder
+// with the given format. For example:
+//
+//	FormatArg("JSON(?)", b).
+//	FormatArg("ST_GeomFromText(?)", geom)
+func (b *Builder) Argf(format string, a any) *Builder {
+	switch a := a.(type) {
+	case nil:
+		b.WriteString("NULL")
+		return b
+	case *raw:
+		b.WriteString(a.s)
+		return b
+	case Querier:
+		b.Join(a)
+		return b
+	}
+	b.total++
+	b.args = append(b.args, a)
+	b.WriteString(format)
 	return b
 }
 

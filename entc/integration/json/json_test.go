@@ -45,14 +45,15 @@ func TestMySQL(t *testing.T) {
 
 			URL(t, client)
 			Dirs(t, client)
-			Ints(t, client)
 			Floats(t, client)
 			NetAddr(t, client)
 			RawMessage(t, client)
 			// Skip tests with JSON functions for old MySQL versions.
 			if version != "56" {
-				Predicates(t, client)
+				URLs(t, client)
+				Ints(t, client)
 				Strings(t, client)
+				Predicates(t, client)
 			}
 		})
 	}
@@ -108,6 +109,7 @@ func TestPostgres(t *testing.T) {
 			require.NoError(t, err)
 
 			URL(t, client)
+			URLs(t, client)
 			Dirs(t, client)
 			Ints(t, client)
 			Floats(t, client)
@@ -127,6 +129,7 @@ func TestSQLite(t *testing.T) {
 	require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
 
 	URL(t, client)
+	URLs(t, client)
 	Dirs(t, client)
 	Ints(t, client)
 	Floats(t, client)
@@ -153,6 +156,8 @@ func Ints(t *testing.T, client *ent.Client) {
 	require.Equal(t, []int{1, 2, 3}, usr.Ints)
 	usr = client.User.GetX(ctx, usr.ID)
 	require.Equal(t, []int{1, 2, 3}, usr.Ints)
+	usr = usr.Update().AppendInts([]int{4, 5, 6}).SaveX(ctx)
+	require.Equal(t, []int{1, 2, 3, 4, 5, 6}, usr.Ints)
 }
 
 func Floats(t *testing.T, client *ent.Client) {
@@ -197,6 +202,7 @@ func Strings(t *testing.T, client *ent.Client) {
 		// Set a 'null' (or an undefined) value.
 		usr.Update().ClearStrings().ClearT().ExecX(ctx)
 		usr.Update().SetStrings(nil).SetT(&schema.T{Ls: nil}).ExecX(ctx)
+		usr = client.User.GetX(ctx, usr.ID)
 		usr = usr.Update().Modify(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldStrings, []string{"foo"})
 			sqljson.Append(u, user.FieldT, []string{"foo"}, sqljson.Path("ls"))
@@ -295,6 +301,24 @@ func URL(t *testing.T, client *ent.Client) {
 	usr = client.User.Create().SetURL(u).SaveX(ctx)
 	require.Equal(t, u, usr.URL)
 	require.Equal(t, u, client.User.GetX(ctx, usr.ID).URL)
+}
+
+func URLs(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	u1, err := url.Parse("https://github.com/a8m")
+	require.NoError(t, err)
+	u2, err := url.Parse("https://github.com/ent")
+	require.NoError(t, err)
+	usr := client.User.Create().SetURLs([]*url.URL{u1}).SaveX(ctx)
+	require.NoError(t, err)
+	require.Len(t, usr.URLs, 1)
+	require.Equal(t, u1, usr.URLs[0])
+	usr = client.User.GetX(ctx, usr.ID)
+	require.Equal(t, u1, usr.URLs[0])
+	usr = usr.Update().AppendURLs([]*url.URL{u2}).SaveX(ctx)
+	require.Len(t, usr.URLs, 2)
+	require.Equal(t, u1, usr.URLs[0])
+	require.Equal(t, u2, usr.URLs[1])
 }
 
 func Predicates(t *testing.T, client *ent.Client) {

@@ -42,6 +42,8 @@ type UserMutation struct {
 	id            *int
 	t             **schema.T
 	url           **url.URL
+	_URLs         *[]*url.URL
+	append_URLs   []*url.URL
 	raw           *json.RawMessage
 	appendraw     json.RawMessage
 	dirs          *[]http.Dir
@@ -253,6 +255,71 @@ func (m *UserMutation) URLCleared() bool {
 func (m *UserMutation) ResetURL() {
 	m.url = nil
 	delete(m.clearedFields, user.FieldURL)
+}
+
+// SetURLs sets the "URLs" field.
+func (m *UserMutation) SetURLs(u []*url.URL) {
+	m._URLs = &u
+	m.append_URLs = nil
+}
+
+// URLs returns the value of the "URLs" field in the mutation.
+func (m *UserMutation) URLs() (r []*url.URL, exists bool) {
+	v := m._URLs
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldURLs returns the old "URLs" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldURLs(ctx context.Context) (v []*url.URL, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldURLs is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldURLs requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldURLs: %w", err)
+	}
+	return oldValue.URLs, nil
+}
+
+// AppendURLs adds u to the "URLs" field.
+func (m *UserMutation) AppendURLs(u []*url.URL) {
+	m.append_URLs = append(m.append_URLs, u...)
+}
+
+// AppendedURLs returns the list of values that were appended to the "URLs" field in this mutation.
+func (m *UserMutation) AppendedURLs() ([]*url.URL, bool) {
+	if len(m.append_URLs) == 0 {
+		return nil, false
+	}
+	return m.append_URLs, true
+}
+
+// ClearURLs clears the value of the "URLs" field.
+func (m *UserMutation) ClearURLs() {
+	m._URLs = nil
+	m.append_URLs = nil
+	m.clearedFields[user.FieldURLs] = struct{}{}
+}
+
+// URLsCleared returns if the "URLs" field was cleared in this mutation.
+func (m *UserMutation) URLsCleared() bool {
+	_, ok := m.clearedFields[user.FieldURLs]
+	return ok
+}
+
+// ResetURLs resets all changes to the "URLs" field.
+func (m *UserMutation) ResetURLs() {
+	m._URLs = nil
+	m.append_URLs = nil
+	delete(m.clearedFields, user.FieldURLs)
 }
 
 // SetRaw sets the "raw" field.
@@ -634,12 +701,15 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 9)
 	if m.t != nil {
 		fields = append(fields, user.FieldT)
 	}
 	if m.url != nil {
 		fields = append(fields, user.FieldURL)
+	}
+	if m._URLs != nil {
+		fields = append(fields, user.FieldURLs)
 	}
 	if m.raw != nil {
 		fields = append(fields, user.FieldRaw)
@@ -671,6 +741,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.T()
 	case user.FieldURL:
 		return m.URL()
+	case user.FieldURLs:
+		return m.URLs()
 	case user.FieldRaw:
 		return m.Raw()
 	case user.FieldDirs:
@@ -696,6 +768,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldT(ctx)
 	case user.FieldURL:
 		return m.OldURL(ctx)
+	case user.FieldURLs:
+		return m.OldURLs(ctx)
 	case user.FieldRaw:
 		return m.OldRaw(ctx)
 	case user.FieldDirs:
@@ -730,6 +804,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetURL(v)
+		return nil
+	case user.FieldURLs:
+		v, ok := value.([]*url.URL)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetURLs(v)
 		return nil
 	case user.FieldRaw:
 		v, ok := value.(json.RawMessage)
@@ -809,6 +890,9 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldURL) {
 		fields = append(fields, user.FieldURL)
 	}
+	if m.FieldCleared(user.FieldURLs) {
+		fields = append(fields, user.FieldURLs)
+	}
 	if m.FieldCleared(user.FieldRaw) {
 		fields = append(fields, user.FieldRaw)
 	}
@@ -844,6 +928,9 @@ func (m *UserMutation) ClearField(name string) error {
 	case user.FieldURL:
 		m.ClearURL()
 		return nil
+	case user.FieldURLs:
+		m.ClearURLs()
+		return nil
 	case user.FieldRaw:
 		m.ClearRaw()
 		return nil
@@ -872,6 +959,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldURL:
 		m.ResetURL()
+		return nil
+	case user.FieldURLs:
+		m.ResetURLs()
 		return nil
 	case user.FieldRaw:
 		m.ResetRaw()

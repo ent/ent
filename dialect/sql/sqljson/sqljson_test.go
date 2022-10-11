@@ -457,17 +457,17 @@ func TestAppend(t *testing.T) {
 				sqljson.Append(u, "c", []string{"a"})
 				return u
 			}(),
-			wantQuery: "UPDATE `t` SET `c` = CASE WHEN (JSON_TYPE(`c`, '$') IS NULL OR JSON_TYPE(`c`, '$') = 'null') THEN JSON_ARRAY(?) ELSE JSON_INSERT(`c`, '$[#]', ?) END",
-			wantArgs:  []any{"a", "a"},
+			wantQuery: "UPDATE `t` SET `c` = CASE WHEN (JSON_TYPE(`c`, '$') IS NULL OR JSON_TYPE(`c`, '$') = 'null') THEN ? ELSE JSON_INSERT(`c`, '$[#]', ?) END",
+			wantArgs:  []any{`["a"]`, "a"},
 		},
 		{
 			input: func() sql.Querier {
 				u := sql.Dialect(dialect.SQLite).Update("t")
-				sqljson.Append(u, "c", []string{"a"}, sqljson.Path("a"))
+				sqljson.Append(u, "c", []any{"a", struct{}{}}, sqljson.Path("a"))
 				return u
 			}(),
-			wantQuery: "UPDATE `t` SET `c` = CASE WHEN (JSON_TYPE(`c`, '$.a') IS NULL OR JSON_TYPE(`c`, '$.a') = 'null') THEN JSON_SET(`c`, '$.a', JSON_ARRAY(?)) ELSE JSON_INSERT(`c`, '$.a[#]', ?) END",
-			wantArgs:  []any{"a", "a"},
+			wantQuery: "UPDATE `t` SET `c` = CASE WHEN (JSON_TYPE(`c`, '$.a') IS NULL OR JSON_TYPE(`c`, '$.a') = 'null') THEN JSON_SET(`c`, '$.a', JSON(?)) ELSE JSON_INSERT(`c`, '$.a[#]', ?, '$.a[#]', JSON(?)) END",
+			wantArgs:  []any{`["a",{}]`, "a", "{}"},
 		},
 		{
 			input: func() sql.Querier {

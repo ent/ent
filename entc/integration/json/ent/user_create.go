@@ -39,6 +39,12 @@ func (uc *UserCreate) SetURL(u *url.URL) *UserCreate {
 	return uc
 }
 
+// SetURLs sets the "URLs" field.
+func (uc *UserCreate) SetURLs(u []*url.URL) *UserCreate {
+	uc.mutation.SetURLs(u)
+	return uc
+}
+
 // SetRaw sets the "raw" field.
 func (uc *UserCreate) SetRaw(jm json.RawMessage) *UserCreate {
 	uc.mutation.SetRaw(jm)
@@ -209,6 +215,10 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.URL(); ok {
 		_spec.SetField(user.FieldURL, field.TypeJSON, value)
 		_node.URL = value
+	}
+	if value, ok := uc.mutation.URLs(); ok {
+		_spec.SetField(user.FieldURLs, field.TypeJSON, value)
+		_node.URLs = value
 	}
 	if value, ok := uc.mutation.Raw(); ok {
 		_spec.SetField(user.FieldRaw, field.TypeJSON, value)
