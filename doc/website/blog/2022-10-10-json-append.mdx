@@ -96,7 +96,7 @@ func TestEntJSON(t *testing.T) {
 	count := client.User.Query().
 		Where(func(s *sql.Selector) {
 			s.Where(
-				sqljson.LenGT(user.FieldTags, 0, sqljson.DotPath(".")),
+				sqljson.LenGT(user.FieldTags, 0),
 			)
 		}).
 		CountX(ctx)
