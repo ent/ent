@@ -74,7 +74,7 @@ type Tag struct {
 }
 
 func (User) BlogPost() []ent.Field {
-	field.JSON("tags", []Comment{})
+	field.JSON("tags", []Tag{})
 }
 ```
 
