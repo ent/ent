@@ -228,9 +228,7 @@ func TestAppend(t *testing.T) {
 		SaveX(ctx)
 
 	// highlight-start
-	u.Update().
-		AppendTags([]string{"goodbye"}).
-		ExecX(ctx)
+	u.Update().AppendTags([]string{"goodbye"}).ExecX(ctx)
 	// highlight-end
 
 	again := client.User.GetX(ctx, u.ID)
