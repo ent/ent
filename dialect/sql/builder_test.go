@@ -303,6 +303,16 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []any{"foo"},
 		},
 		{
+			input:     Dialect(dialect.Postgres).Update("users").Set("name", "foo").Returning("*"),
+			wantQuery: `UPDATE "users" SET "name" = $1 RETURNING *`,
+			wantArgs:  []any{"foo"},
+		},
+		{
+			input:     Dialect(dialect.Postgres).Update("users").Set("name", "foo").Returning("id", "name"),
+			wantQuery: `UPDATE "users" SET "name" = $1 RETURNING "id", "name"`,
+			wantArgs:  []any{"foo"},
+		},
+		{
 			input:     Dialect(dialect.Postgres).Update("users").Set("name", "foo").Schema("mydb"),
 			wantQuery: `UPDATE "mydb"."users" SET "name" = $1`,
 			wantArgs:  []any{"foo"},
@@ -316,6 +326,11 @@ func TestBuilder(t *testing.T) {
 			input:     Update("users").Set("name", "foo").Set("age", 10),
 			wantQuery: "UPDATE `users` SET `name` = ?, `age` = ?",
 			wantArgs:  []any{"foo", 10},
+		},
+		{
+			input:     Dialect(dialect.SQLite).Update("users").Set("name", "foo").Returning("id", "name"),
+			wantQuery: "UPDATE `users` SET `name` = ? RETURNING `id`, `name`",
+			wantArgs:  []any{"foo"},
 		},
 		{
 			input:     Dialect(dialect.Postgres).Update("users").Set("name", "foo").Set("age", 10),
