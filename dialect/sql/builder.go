@@ -3519,11 +3519,6 @@ func (b Builder) sqlite() bool {
 	return b.Dialect() == dialect.SQLite
 }
 
-// mysql reports if the builder dialect is MySQL.
-func (b Builder) mysql() bool {
-	return b.Dialect() == dialect.MySQL
-}
-
 // fromIdent sets the builder dialect from the identifier format.
 func (b *Builder) fromIdent(ident string) {
 	if strings.Contains(ident, `"`) {
