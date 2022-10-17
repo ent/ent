@@ -82,6 +82,16 @@ var drivers = []*Storage{
 		SchemaMode: Unique,
 		OpCode:     opCodes(gremlinCode[:]),
 	},
+	{
+		Name:      "dynamodb",
+		IdentName: "DynamoDB",
+		Builder:   reflect.TypeOf(nil),
+		Dialects:  []string{"dialect.DynamoDB"},
+		Imports: []string{
+			"entgo.io/ent/dialect/dynamodb",
+			"entgo.io/ent/dialect/dynamodb/graph",
+		},
+	},
 }
 
 // NewStorage returns a the storage driver type from the given string.
