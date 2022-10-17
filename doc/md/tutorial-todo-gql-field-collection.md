@@ -125,7 +125,11 @@ GraphQL and generates edge-resolvers for the nodes under the `gql_edge.go` file:
 
 ```go title="ent/gql_edge.go"
 func (t *Todo) Children(ctx context.Context) ([]*Todo, error) {
-	result, err := t.Edges.ChildrenOrErr()
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = t.NamedChildren(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = t.Edges.ChildrenOrErr()
+	}
 	if IsNotLoaded(err) {
 		result, err = t.QueryChildren().All(ctx)
 	}
