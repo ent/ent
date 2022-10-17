@@ -1033,6 +1033,7 @@ type UpdateBuilder struct {
 	returning []string
 	values    []any
 	order     []any
+	limit     *int
 	prefix    Queries
 }
 
@@ -1119,6 +1120,17 @@ func (u *UpdateBuilder) OrderBy(columns ...string) *UpdateBuilder {
 	return u
 }
 
+// Limit appends the `LIMIT` clause to the `UPDATE` statement.
+// Supported by SQLite and MySQL.
+func (u *UpdateBuilder) Limit(limit int) *UpdateBuilder {
+	if u.postgres() {
+		u.AddError(errors.New("LIMIT is not supported by PostgreSQL"))
+		return u
+	}
+	u.limit = &limit
+	return u
+}
+
 // Prefix prefixes the UPDATE statement with list of statements.
 func (u *UpdateBuilder) Prefix(stmts ...Querier) *UpdateBuilder {
 	u.prefix = append(u.prefix, stmts...)
@@ -1147,8 +1159,12 @@ func (u *UpdateBuilder) Query() (string, []any) {
 		b.WriteString(" WHERE ")
 		b.Join(u.where)
 	}
-	joinOrder(u.order, &b)
 	joinReturning(u.returning, &b)
+	joinOrder(u.order, &b)
+	if u.limit != nil {
+		b.WriteString(" LIMIT ")
+		b.WriteString(strconv.Itoa(*u.limit))
+	}
 	return b.String(), b.args
 }
 
