@@ -28,7 +28,7 @@ type User struct {
 	// URL holds the value of the "url" field.
 	URL *url.URL `json:"url,omitempty"`
 	// URLs holds the value of the "URLs" field.
-	URLs []*url.URL `json:"URLs,omitempty"`
+	URLs []*url.URL `json:"urls,omitempty"`
 	// Raw holds the value of the "raw" field.
 	Raw json.RawMessage `json:"raw,omitempty"`
 	// Dirs holds the value of the "dirs" field.

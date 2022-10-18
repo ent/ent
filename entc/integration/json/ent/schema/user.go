@@ -30,6 +30,7 @@ func (User) Fields() []ent.Field {
 			Optional(),
 		field.JSON("URLs", []*url.URL{}).
 			StorageKey("urls").
+			StructTag(`json:"urls,omitempty"`).
 			Optional(),
 		field.JSON("raw", json.RawMessage{}).
 			Optional(),
