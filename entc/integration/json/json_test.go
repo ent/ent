@@ -55,6 +55,7 @@ func TestMySQL(t *testing.T) {
 				Strings(t, client)
 				Predicates(t, client)
 			}
+			Scan(t, client)
 		})
 	}
 }
@@ -86,6 +87,7 @@ func TestMaria(t *testing.T) {
 			NetAddr(t, client)
 			RawMessage(t, client)
 			Predicates(t, client)
+			Scan(t, client)
 		})
 	}
 }
@@ -117,6 +119,7 @@ func TestPostgres(t *testing.T) {
 			NetAddr(t, client)
 			RawMessage(t, client)
 			Predicates(t, client)
+			Scan(t, client)
 		})
 	}
 }
@@ -137,6 +140,7 @@ func TestSQLite(t *testing.T) {
 	NetAddr(t, client)
 	RawMessage(t, client)
 	Predicates(t, client)
+	Scan(t, client)
 }
 
 func Ints(t *testing.T, client *ent.Client) {
@@ -595,4 +599,25 @@ func Predicates(t *testing.T, client *ent.Client) {
 		}).CountX(ctx)
 		require.Equal(t, 4, n)
 	})
+}
+
+func Scan(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	all := client.User.Query().Order(ent.Asc(user.FieldID)).AllX(ctx)
+	require.NotEmpty(t, all)
+	var scanned []*ent.User
+	// Select all non-sensitive fields.
+	client.User.Query().Order(ent.Asc(user.FieldID)).Select(user.Columns[:len(user.Columns)-2]...).ScanX(ctx, &scanned)
+	require.Equal(t, len(all), len(scanned))
+	for i := range all {
+		require.Equal(t, all[i].ID, scanned[i].ID)
+		require.Equal(t, all[i].T, scanned[i].T)
+		require.Equal(t, all[i].URL, scanned[i].URL)
+		require.Equal(t, all[i].URLs, scanned[i].URLs)
+		require.Equal(t, all[i].Dirs, scanned[i].Dirs)
+		require.Equal(t, all[i].Raw, scanned[i].Raw)
+		require.Equal(t, all[i].Ints, scanned[i].Ints)
+		require.Equal(t, all[i].Floats, scanned[i].Floats)
+		require.Equal(t, all[i].Strings, scanned[i].Strings)
+	}
 }

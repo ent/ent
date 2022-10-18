@@ -7,6 +7,7 @@ package sql
 import (
 	"database/sql"
 	"database/sql/driver"
+	"encoding/json"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -137,6 +138,71 @@ func TestScanSlice(t *testing.T) {
 	err = ScanSlice(toRows(mock), &pp)
 	require.EqualError(t, err, "sql/scan: missing struct field for column: id (id)")
 	require.Empty(t, pp)
+}
+
+func TestScanJSON(t *testing.T) {
+	mock := sqlmock.NewRows([]string{"v", "p"}).
+		AddRow([]byte(`{"i": 1, "s":"a8m"}`), []byte(`{"i": 1, "s":"a8m"}`)).
+		AddRow([]byte(`{"i": 2, "s":"tmr"}`), []byte(`{"i": 2, "s":"tmr"}`)).
+		AddRow([]byte(nil), []byte(`null`)).
+		AddRow(nil, nil)
+	var v1 []*struct {
+		V struct {
+			I int    `json:"i"`
+			S string `json:"s"`
+		} `json:"v"`
+		P *struct {
+			I int    `json:"i"`
+			S string `json:"s"`
+		} `json:"p"`
+	}
+	require.NoError(t, ScanSlice(toRows(mock), &v1))
+	require.Equal(t, 1, v1[0].V.I)
+	require.Equal(t, "a8m", v1[0].V.S)
+	require.Equal(t, v1[0].V, *v1[0].P)
+	require.Equal(t, 2, v1[1].V.I)
+	require.Equal(t, "tmr", v1[1].V.S)
+	require.Equal(t, v1[1].V, *v1[1].P)
+	require.Equal(t, 0, v1[2].V.I)
+	require.Equal(t, "", v1[2].V.S)
+	require.Nil(t, v1[2].P)
+	require.Equal(t, 0, v1[3].V.I)
+	require.Equal(t, "", v1[3].V.S)
+	require.Nil(t, v1[3].P)
+
+	mock = sqlmock.NewRows([]string{"v", "p"}).
+		AddRow([]byte(`[1]`), []byte(`[1]`)).
+		AddRow([]byte(`[2]`), []byte(`[2]`))
+	var v2 []*struct {
+		V []int  `json:"v"`
+		P *[]int `json:"p"`
+	}
+	require.NoError(t, ScanSlice(toRows(mock), &v2))
+	require.Equal(t, []int{1}, v2[0].V)
+	require.Equal(t, v2[0].V, *v2[0].P)
+	require.Equal(t, []int{2}, v2[1].V)
+	require.Equal(t, v2[1].V, *v2[1].P)
+
+	mock = sqlmock.NewRows([]string{"v", "p"}).
+		AddRow([]byte(`null`), []byte(`{}`)).
+		AddRow(nil, nil)
+	var v3 []*struct {
+		V json.RawMessage  `json:"v"`
+		P *json.RawMessage `json:"p"`
+	}
+	require.NoError(t, ScanSlice(toRows(mock), &v3))
+	require.Equal(t, json.RawMessage("null"), v3[0].V)
+	require.Equal(t, json.RawMessage("{}"), *v3[0].P)
+	require.Equal(t, json.RawMessage(nil), v3[1].V)
+	require.Nil(t, v3[1].P)
+
+	// Unmarshal errors.
+	mock = sqlmock.NewRows([]string{"v", "p"}).
+		AddRow([]byte(`{invalid}`), []byte(`{}`))
+	require.EqualError(t, ScanSlice(toRows(mock), &v1), `unmarshal field "V": invalid character 'i' looking for beginning of object key string`)
+	mock = sqlmock.NewRows([]string{"v", "p"}).
+		AddRow([]byte(``), []byte(``))
+	require.EqualError(t, ScanSlice(toRows(mock), &v1), `unmarshal field "V": unexpected end of JSON input`)
 }
 
 func TestScanNestedStruct(t *testing.T) {
