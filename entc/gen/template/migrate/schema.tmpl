@@ -211,29 +211,27 @@ func init() {
 }
 
 {{ end }}
-{{ end }}
 {{- if eq $.Storage.Name "dynamodb" }}
-	{{- range $t := $.Tables }}
+var (
+	{{- range $t := $.DyTables }}
 		{{- /* find type node in the graph of this table, if exists */}}
 		{{- $node := index $.Nodes 0 }}
 		{{- range $n := $.Nodes }}{{ if eq $t.Name $n.Table }}{{ $node = $n }}{{ end }}{{ end }}
-		{{- $columns := pascal $t.Name | printf "%sColumns" }}
-		// {{ $columns }} holds the columns for the "{{ $t.Name }}" table.
-		{{ $columns }} = []*schema.Column{
-			{{- range $c := $t.Columns }}
-				{ Name: "{{ $c.Name }}", Type: field.{{ $c.Type.ConstName }},
+		{{- $attrs := pascal $t.Name | printf "%sAttributes" }}
+		// {{ $attrs }}  holds the attributes for the "{{ $t.Name }} " table.
+		{{ $attrs }} = []*schema.Attribute{
+			{{- range $c := $t.Attributes }}
+				{ Name: "{{ $c.Name }}", Type: field.{{ $c.Type.ConstName }}},
 			{{- end }}
 		}
 		{{- $table := pascal $t.Name | printf "%sTable" }}
 		// {{ $table }} holds the schema information for the "{{ $t.Name }}" table.
 		{{ $table }} = &schema.Table{
 			Name: "{{ $t.Name }}",
-			Columns: {{ $columns }},
-			PrimaryKey: []*schema.Column{
-				{{- range $pk := $t.PrimaryKey }}
-					{{- range $i, $c := $t.Columns }}
-						{{- if eq $pk.Name $c.Name }}{{ $columns }}[{{ $i }}],{{ end }}
-					{{- end }}
+			Attributes: {{ $attrs }},
+			PrimaryKey: []*schema.KeySchema{
+				{{- range $ks := $t.PrimaryKey }}
+					{ AttributeName: "{{ $ks.AttributeName }}", KeyType: schema.KeyType("{{ $ks.KeyType }}")},
 				{{- end }}
 			},
 		}
@@ -244,4 +242,6 @@ func init() {
 			{{ pascal $t.Name | printf "%sTable" }},
 		{{- end }}
 	}
+)
+{{ end }}
 {{ end }}
