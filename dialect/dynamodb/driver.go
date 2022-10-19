@@ -36,7 +36,7 @@ func Open(dialect, source string) (*Driver, error) {
 		config.WithEndpointResolverWithOptions(
 			aws.EndpointResolverWithOptionsFunc(
 				func(service, region string, options ...interface{}) (aws.Endpoint, error) {
-					return aws.Endpoint{URL: "localhost:8000"}, nil
+					return aws.Endpoint{URL: source}, nil
 				}),
 		))
 	if err != nil {
