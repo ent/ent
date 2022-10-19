@@ -9,9 +9,6 @@ import (
 	"entgo.io/ent/dialect/dynamodb"
 )
 
-// MigrateOption is just to complement existing schema template for now.
-type MigrateOption interface{}
-
 // Atlas is the migration engine.
 type Atlas struct {
 	dialect string
@@ -45,4 +42,35 @@ func (a *Atlas) Create(ctx context.Context, tables ...*Table) (err error) {
 		}
 	}
 	return nil
+}
+
+// MigrateOption allows configuring Atlas using functional arguments.
+type MigrateOption func(*Atlas)
+
+// WithGlobalUniqueID is a noop fuction for now.
+func WithGlobalUniqueID(b bool) MigrateOption {
+	return func(a *Atlas) {
+		return
+	}
+}
+
+// WithDropColumn is a noop fuction for now.
+func WithDropColumn(b bool) MigrateOption {
+	return func(a *Atlas) {
+		return
+	}
+}
+
+// WithDropIndex is a noop fuction for now.
+func WithDropIndex(b bool) MigrateOption {
+	return func(a *Atlas) {
+		return
+	}
+}
+
+// WithForeignKeys is a noop fuction for now.
+func WithForeignKeys(b bool) MigrateOption {
+	return func(a *Atlas) {
+		return
+	}
 }
