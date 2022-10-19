@@ -4,8 +4,8 @@ go 1.19
 
 require (
 	ariga.io/atlas v0.7.3-0.20221011160332-3ca609863edd
-	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.17.1
 	github.com/DATA-DOG/go-sqlmock v1.5.0
+	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.17.1
 	github.com/go-openapi/inflect v0.19.0
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/google/uuid v1.3.0
@@ -26,10 +26,13 @@ require (
 )
 
 require (
+	github.com/aws/aws-sdk-go-v2 v1.16.16
+	github.com/aws/aws-sdk-go-v2/config v1.17.8
+)
+
+require (
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
-	github.com/aws/aws-sdk-go-v2 v1.16.16 // indirect
-	github.com/aws/aws-sdk-go-v2/config v1.17.8 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.12.21 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.12.17 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.23 // indirect

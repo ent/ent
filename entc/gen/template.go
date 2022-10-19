@@ -45,56 +45,56 @@ type (
 var (
 	// Templates holds the template information for a file that the graph is generating.
 	Templates = []TypeTemplate{
-		{
-			Name:   "create",
-			Format: pkgf("%s_create.go"),
-			ExtendPatterns: []string{
-				"dialect/*/create/fields/additional/*",
-				"dialect/*/create_bulk/fields/additional/*",
-			},
-		},
-		{
-			Name:   "update",
-			Format: pkgf("%s_update.go"),
-		},
-		{
-			Name:   "delete",
-			Format: pkgf("%s_delete.go"),
-		},
-		{
-			Name:   "query",
-			Format: pkgf("%s_query.go"),
-			ExtendPatterns: []string{
-				"dialect/*/query/fields/additional/*",
-			},
-		},
-		{
-			Name:   "model",
-			Format: pkgf("%s.go"),
-		},
-		{
-			Name:   "where",
-			Format: pkgf("%s/where.go"),
-			ExtendPatterns: []string{
-				"where/additional/*",
-			},
-		},
-		{
-			Name: "meta",
-			Format: func(t *Type) string {
-				return fmt.Sprintf("%[1]s/%[1]s.go", t.PackageDir())
-			},
-			ExtendPatterns: []string{
-				"meta/additional/*",
-			},
-		},
+		//{
+		//	Name:   "create",
+		//	Format: pkgf("%s_create.go"),
+		//	ExtendPatterns: []string{
+		//		"dialect/*/create/fields/additional/*",
+		//		"dialect/*/create_bulk/fields/additional/*",
+		//	},
+		//},
+		//{
+		//	Name:   "update",
+		//	Format: pkgf("%s_update.go"),
+		//},
+		//{
+		//	Name:   "delete",
+		//	Format: pkgf("%s_delete.go"),
+		//},
+		//{
+		//	Name:   "query",
+		//	Format: pkgf("%s_query.go"),
+		//	ExtendPatterns: []string{
+		//		"dialect/*/query/fields/additional/*",
+		//	},
+		//},
+		//{
+		//	Name:   "model",
+		//	Format: pkgf("%s.go"),
+		//},
+		//{
+		//	Name:   "where",
+		//	Format: pkgf("%s/where.go"),
+		//	ExtendPatterns: []string{
+		//		"where/additional/*",
+		//	},
+		//},
+		//{
+		//	Name: "meta",
+		//	Format: func(t *Type) string {
+		//		return fmt.Sprintf("%[1]s/%[1]s.go", t.PackageDir())
+		//	},
+		//	ExtendPatterns: []string{
+		//		"meta/additional/*",
+		//	},
+		//},
 	}
 	// GraphTemplates holds the templates applied on the graph.
 	GraphTemplates = []GraphTemplate{
-		{
-			Name:   "base",
-			Format: "ent.go",
-		},
+		//{
+		//	Name:   "base",
+		//	Format: "ent.go",
+		//},
 		{
 			Name:   "client",
 			Format: "client.go",
@@ -103,14 +103,14 @@ var (
 				"dialect/*/query/fields/init/*",
 			},
 		},
-		{
-			Name:   "context",
-			Format: "context.go",
-		},
-		{
-			Name:   "tx",
-			Format: "tx.go",
-		},
+		//{
+		//	Name:   "context",
+		//	Format: "context.go",
+		//},
+		//{
+		//	Name:   "tx",
+		//	Format: "tx.go",
+		//},
 		{
 			Name:   "config",
 			Format: "config.go",
@@ -118,10 +118,10 @@ var (
 				"dialect/*/config/*/*",
 			},
 		},
-		{
-			Name:   "mutation",
-			Format: "mutation.go",
-		},
+		//{
+		//	Name:   "mutation",
+		//	Format: "mutation.go",
+		//},
 		{
 			Name:   "migrate",
 			Format: "migrate/migrate.go",
@@ -132,28 +132,28 @@ var (
 			Format: "migrate/schema.go",
 			Skip:   func(g *Graph) bool { return !g.SupportMigrate() },
 		},
-		{
-			Name:   "predicate",
-			Format: "predicate/predicate.go",
-		},
-		{
-			Name:   "hook",
-			Format: "hook/hook.go",
-		},
-		{
-			Name:   "privacy",
-			Format: "privacy/privacy.go",
-			Skip: func(g *Graph) bool {
-				return !g.featureEnabled(FeaturePrivacy)
-			},
-		},
-		{
-			Name:   "entql",
-			Format: "entql.go",
-			Skip: func(g *Graph) bool {
-				return !g.featureEnabled(FeatureEntQL)
-			},
-		},
+		//{
+		//	Name:   "predicate",
+		//	Format: "predicate/predicate.go",
+		//},
+		//{
+		//	Name:   "hook",
+		//	Format: "hook/hook.go",
+		//},
+		//{
+		//	Name:   "privacy",
+		//	Format: "privacy/privacy.go",
+		//	Skip: func(g *Graph) bool {
+		//		return !g.featureEnabled(FeaturePrivacy)
+		//	},
+		//},
+		//{
+		//	Name:   "entql",
+		//	Format: "entql.go",
+		//	Skip: func(g *Graph) bool {
+		//		return !g.featureEnabled(FeatureEntQL)
+		//	},
+		//},
 		{
 			Name:   "runtime/ent",
 			Format: "runtime.go",
