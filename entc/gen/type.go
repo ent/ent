@@ -18,6 +18,7 @@ import (
 	"unicode"
 
 	"entgo.io/ent"
+	dyschema "entgo.io/ent/dialect/dynamodb/schema"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/entc/load"
@@ -1340,6 +1341,14 @@ func (f Field) Column() *schema.Column {
 		c.SchemaType = f.def.SchemaType
 	}
 	return c
+}
+
+// DyAttribute converts template Field to DynamoDB attribute.
+func (f Field) DyAttribute() *dyschema.Attribute {
+	return &dyschema.Attribute{
+		Name: f.Name,
+		Type: f.Type.Type,
+	}
 }
 
 // incremental returns if the column has an incremental behavior.

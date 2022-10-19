@@ -18,6 +18,7 @@ import (
 	"strings"
 	"text/template/parse"
 
+	dyschema "entgo.io/ent/dialect/dynamodb/schema"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/entc/load"
 	"entgo.io/ent/schema/field"
@@ -558,6 +559,47 @@ func (g *Graph) edgeSchemas() error {
 		}
 	}
 	return nil
+}
+
+// DyTables returns the schema definitions of DynamoDB tables for the graph.
+func (g *Graph) DyTables() (all []*dyschema.Table, err error) {
+	tables := make(map[string]*dyschema.Table)
+	for _, n := range g.Nodes {
+		table := dyschema.NewTable(n.Table())
+		for _, f := range n.Fields {
+			if !f.IsEdgeField() {
+				table.AddAttribute(f.DyAttribute())
+			}
+		}
+		tables[table.Name] = table
+		all = append(all, table)
+	}
+
+	// Append primary key to tables.
+	for _, n := range g.Nodes {
+		table := tables[n.Table()]
+		for _, idx := range n.Indexes {
+			// Assume each index contains two columns:
+			// The first column is the partition key for DynamoDB table
+			// The second column (if exists) is the sort key.
+			if len(idx.Columns) == 1 {
+				table.AddKeySchema(&dyschema.KeySchema{
+					AttributeName: idx.Columns[0],
+					KeyType:       dyschema.KeyTypeHash,
+				})
+			} else if len(idx.Columns) == 2 {
+				table.AddKeySchema(&dyschema.KeySchema{
+					AttributeName: idx.Columns[0],
+					KeyType:       dyschema.KeyTypeHash,
+				})
+				table.AddKeySchema(&dyschema.KeySchema{
+					AttributeName: idx.Columns[1],
+					KeyType:       dyschema.KeyTypeRange,
+				})
+			}
+		}
+	}
+	return all, nil
 }
 
 // Tables returns the schema definitions of SQL tables for the graph.
