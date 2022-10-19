@@ -158,10 +158,10 @@ var (
 			Name:   "runtime/ent",
 			Format: "runtime.go",
 		},
-		{
-			Name:   "enttest",
-			Format: "enttest/enttest.go",
-		},
+		//{
+		//	Name:   "enttest",
+		//	Format: "enttest/enttest.go",
+		//},
 		{
 			Name:   "runtime/pkg",
 			Format: "runtime/runtime.go",
