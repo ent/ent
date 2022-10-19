@@ -2,14 +2,13 @@
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
-package graph
+package dynamodbgraph
 
 import (
 	"context"
 	"fmt"
 
 	"entgo.io/ent/dialect"
-	"entgo.io/ent/dialect/dynamodb"
 	"entgo.io/ent/schema/field"
 )
 
@@ -113,12 +112,12 @@ func CreateNode(ctx context.Context, drv dialect.Driver, spec *CreateSpec) error
 }
 
 func (c *creator) node(ctx context.Context, tx dialect.ExecQuerier) error {
-	createTable := dynamodb.CreateTable(c.Table)
-	var res dynamodb.CreateTableResult
-	op, args := createTable.Op()
-	if err := tx.Exec(ctx, op, args, &res); err != nil {
-		return err
-	}
+	//createTable := dynamodb.CreateTable(c.Table)
+	//var res dynamodb.CreateTableResult
+	//op, args := createTable.Op()
+	//if err := tx.Exec(ctx, op, args, &res); err != nil {
+	//	return err
+	//}
 	return nil
 }
 

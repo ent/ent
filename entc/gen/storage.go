@@ -89,8 +89,9 @@ var drivers = []*Storage{
 		Dialects:  []string{"dialect.DynamoDB"},
 		Imports: []string{
 			"entgo.io/ent/dialect/dynamodb",
-			"entgo.io/ent/dialect/dynamodb/graph",
+			"entgo.io/ent/dialect/dynamodb/dynamodbgraph",
 		},
+		SchemaMode: Migrate,
 	},
 }
 
