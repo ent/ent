@@ -35,7 +35,8 @@ func (a *Atlas) Create(ctx context.Context, tables ...*Table) (err error) {
 		for _, ks := range t.PrimaryKey {
 			ct.AddKeySchemaElement(ks.AttributeName, types.KeyType(ks.KeyType))
 		}
-		ct.SetProvisionedThroughput(t.ReadCapacity, t.WriteCapacity)
+		// ProvisionedThroughput is required. Use hardcoded values for now.
+		ct.SetProvisionedThroughput(10, 10)
 		op, args := ct.Op()
 		if err := a.driver.Exec(ctx, op, args, nil); err != nil {
 			return err

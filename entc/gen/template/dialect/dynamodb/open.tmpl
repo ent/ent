@@ -7,11 +7,10 @@ in the LICENSE file in the root directory of this source tree.
 {{/* gotype: entgo.io/ent/entc/gen.Graph */}}
 
 {{ define "dialect/dynamodb/client/open" }}
-	c, err := dynamodb.NewClient(dataSourceName)
+	drv, err := dynamodb.Open(driverName, dataSourceName)
 	if err != nil {
 		return nil, err
 	}
 
-	drv := dynamodb.NewDriver(driverName, c)
 	return NewClient(append(options, Driver(drv))...), nil
 {{ end }}

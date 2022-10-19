@@ -64,7 +64,7 @@ func (c *CreateTableBuilder) SetProvisionedThroughput(readCap, writeCap int) *Cr
 
 // Op returns name and input for CreateTable operation
 func (c *CreateTableBuilder) Op() (string, interface{}) {
-	return CreateTableOperation, CreateTableArgs{
+	return CreateTableOperation, &CreateTableArgs{
 		Name: c.tableName,
 		Opts: &dynamodb.CreateTableInput{
 			TableName:             aws.String(c.tableName),
