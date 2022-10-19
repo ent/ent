@@ -72,6 +72,7 @@ func (c Client) Query(ctx context.Context, op string, args, v any) error {
 	return c.run(ctx, op, args, v)
 }
 
+// run decides which SDK command to call
 func (c Client) run(ctx context.Context, op string, args, v interface{}) error {
 	switch op {
 	case CreateTableOperation:
@@ -91,6 +92,7 @@ func (c Client) run(ctx context.Context, op string, args, v interface{}) error {
 	}
 }
 
+// Client wrap a DynamoDB client from AWS SDK to implement dialect.ExecQuerier
 type Client struct {
 	*dynamodb.Client
 }
