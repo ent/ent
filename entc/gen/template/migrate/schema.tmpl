@@ -18,10 +18,11 @@ import (
 	{{- end }}
 
 	"entgo.io/ent/dialect/entsql"
-	"entgo.io/ent/dialect/sql/schema"
+	"entgo.io/ent/dialect/{{ $.Storage.Name }}/schema"
 	"entgo.io/ent/schema/field"
 )
 
+{{ if eq $.Storage.Name "sql" }}
 var (
 	{{- range $t := $.Tables }}
 		{{- /* find type node in the graph of this table, if exists */}}
@@ -209,4 +210,38 @@ func init() {
 	{{- end }}
 }
 
+{{ end }}
+{{- if eq $.Storage.Name "dynamodb" }}
+var (
+	{{- range $t := $.DyTables }}
+		{{- /* find type node in the graph of this table, if exists */}}
+		{{- $node := index $.Nodes 0 }}
+		{{- range $n := $.Nodes }}{{ if eq $t.Name $n.Table }}{{ $node = $n }}{{ end }}{{ end }}
+		{{- $attrs := pascal $t.Name | printf "%sAttributes" }}
+		// {{ $attrs }}  holds the attributes for the "{{ $t.Name }} " table.
+		{{ $attrs }} = []*schema.Attribute{
+			{{- range $c := $t.Attributes }}
+				{ Name: "{{ $c.Name }}", Type: field.{{ $c.Type.ConstName }}},
+			{{- end }}
+		}
+		{{- $table := pascal $t.Name | printf "%sTable" }}
+		// {{ $table }} holds the schema information for the "{{ $t.Name }}" table.
+		{{ $table }} = &schema.Table{
+			Name: "{{ $t.Name }}",
+			Attributes: {{ $attrs }},
+			PrimaryKey: []*schema.KeySchema{
+				{{- range $ks := $t.PrimaryKey }}
+					{ AttributeName: "{{ $ks.AttributeName }}", KeyType: schema.KeyType("{{ $ks.KeyType }}")},
+				{{- end }}
+			},
+		}
+	{{- end }}
+	// Tables holds all the tables in the schema.
+	Tables = []*schema.Table{
+		{{- range $t := $.Tables }}
+			{{ pascal $t.Name | printf "%sTable" }},
+		{{- end }}
+	}
+)
+{{ end }}
 {{ end }}

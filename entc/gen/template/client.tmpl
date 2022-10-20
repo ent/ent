@@ -14,10 +14,10 @@ type Client struct {
 		// Schema is the client for creating, migrating and dropping schema.
 		Schema *migrate.Schema
 	{{- end }}
-	{{- range $n := $.Nodes }}
-		// {{ $n.Name }} is the client for interacting with the {{ $n.Name }} builders.
-		{{ $n.Name }} *{{ $n.Name }}Client
-	{{- end }}
+{{/*	{{- range $n := $.Nodes }}*/}}
+{{/*		// {{ $n.Name }} is the client for interacting with the {{ $n.Name }} builders.*/}}
+{{/*		{{ $n.Name }} *{{ $n.Name }}Client*/}}
+{{/*	{{- end }}*/}}
 	{{- template "client/fields/additional" $ }}
 	{{- with $tmpls := matchTemplate "client/fields/additional/*" }}
 		{{- range $tmpl := $tmpls }}
@@ -39,9 +39,9 @@ func (c *Client) init() {
 	{{- if $.SupportMigrate }}
 		c.Schema = migrate.NewSchema(c.driver)
 	{{- end }}
-	{{- range $n := $.Nodes }}
-    	c.{{ $n.Name }} = New{{ $n.Name }}Client(c.config)
-	{{- end }}
+{{/*	{{- range $n := $.Nodes }}*/}}
+{{/*    	c.{{ $n.Name }} = New{{ $n.Name }}Client(c.config)*/}}
+{{/*	{{- end }}*/}}
 }
 {{ end }}
 
@@ -54,9 +54,9 @@ import (
 	"log"
 
 	"{{ $.Config.Package }}/migrate"
-	{{ range $n := $.Nodes }}
-		{{ $n.PackageAlias }} "{{ $n.Config.Package }}/{{ $n.PackageDir }}"
-	{{- end }}
+{{/*	{{ range $n := $.Nodes }}*/}}
+{{/*		{{ $n.PackageAlias }} "{{ $n.Config.Package }}/{{ $n.PackageDir }}"*/}}
+{{/*	{{- end }}*/}}
 
 	"entgo.io/ent/dialect"
 	{{ range $import := $.Storage.Imports -}}
@@ -78,7 +78,7 @@ func Open(driverName, dataSourceName string, options ...Option) (*Client, error)
 		return nil, fmt.Errorf("unsupported driver: %q", driverName)
 	}
 }
-
+{{ if ne $.Config.Storage.Name "dynamodb" }}
 // Tx returns a new transactional client. The provided context
 // is used until the transaction is committed or rolled back.
 func (c *Client) Tx(ctx context.Context) (*Tx, error) {
@@ -285,6 +285,7 @@ func (c *{{ $client }}) Hooks() []Hook {
 	{{- end }}
 }
 
+{{ end }}
 {{ end }}
 {{ end }}
 
