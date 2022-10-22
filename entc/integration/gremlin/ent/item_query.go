@@ -299,6 +299,11 @@ func (iq *ItemQuery) Select(fields ...string) *ItemSelect {
 	return selbuild
 }
 
+// Aggregate returns a ItemSelect configured with the given aggregations.
+func (iq *ItemQuery) Aggregate(fns ...AggregateFunc) *ItemSelect {
+	return iq.Select().Aggregate(fns...)
+}
+
 func (iq *ItemQuery) prepareQuery(ctx context.Context) error {
 	if iq.path != nil {
 		prev, err := iq.path(ctx)
@@ -450,6 +455,12 @@ type ItemSelect struct {
 	selector
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+}
+
+// Aggregate adds the given aggregation functions to the selector query.
+func (is *ItemSelect) Aggregate(fns ...AggregateFunc) *ItemSelect {
+	is.fns = append(is.fns, fns...)
+	return is
 }
 
 // Scan applies the selector query and scans the result into the given value.

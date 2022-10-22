@@ -408,6 +408,11 @@ func (bq *BlobQuery) Select(fields ...string) *BlobSelect {
 	return selbuild
 }
 
+// Aggregate returns a BlobSelect configured with the given aggregations.
+func (bq *BlobQuery) Aggregate(fns ...AggregateFunc) *BlobSelect {
+	return bq.Select().Aggregate(fns...)
+}
+
 func (bq *BlobQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range bq.fields {
 		if !blob.ValidColumn(f) {
@@ -749,8 +754,6 @@ func (bgb *BlobGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range bgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(bgb.fields)+len(bgb.fns))
 		for _, f := range bgb.fields {
@@ -770,6 +773,12 @@ type BlobSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (bs *BlobSelect) Aggregate(fns ...AggregateFunc) *BlobSelect {
+	bs.fns = append(bs.fns, fns...)
+	return bs
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (bs *BlobSelect) Scan(ctx context.Context, v any) error {
 	if err := bs.prepareQuery(ctx); err != nil {
@@ -780,6 +789,16 @@ func (bs *BlobSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (bs *BlobSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(bs.fns))
+	for _, fn := range bs.fns {
+		aggregation = append(aggregation, fn(bs.sql))
+	}
+	switch n := len(*bs.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		bs.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		bs.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := bs.sql.Query()
 	if err := bs.driver.Query(ctx, query, args, rows); err != nil {

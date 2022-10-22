@@ -370,6 +370,11 @@ func (nq *NodeQuery) Select(fields ...string) *NodeSelect {
 	return selbuild
 }
 
+// Aggregate returns a NodeSelect configured with the given aggregations.
+func (nq *NodeQuery) Aggregate(fns ...AggregateFunc) *NodeSelect {
+	return nq.Select().Aggregate(fns...)
+}
+
 func (nq *NodeQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range nq.fields {
 		if !node.ValidColumn(f) {
@@ -631,8 +636,6 @@ func (ngb *NodeGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range ngb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(ngb.fields)+len(ngb.fns))
 		for _, f := range ngb.fields {
@@ -652,6 +655,12 @@ type NodeSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ns *NodeSelect) Aggregate(fns ...AggregateFunc) *NodeSelect {
+	ns.fns = append(ns.fns, fns...)
+	return ns
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (ns *NodeSelect) Scan(ctx context.Context, v any) error {
 	if err := ns.prepareQuery(ctx); err != nil {
@@ -662,6 +671,16 @@ func (ns *NodeSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (ns *NodeSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ns.fns))
+	for _, fn := range ns.fns {
+		aggregation = append(aggregation, fn(ns.sql))
+	}
+	switch n := len(*ns.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ns.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ns.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ns.sql.Query()
 	if err := ns.driver.Query(ctx, query, args, rows); err != nil {

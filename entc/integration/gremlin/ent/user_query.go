@@ -596,6 +596,11 @@ func (uq *UserQuery) Select(fields ...string) *UserSelect {
 	return selbuild
 }
 
+// Aggregate returns a UserSelect configured with the given aggregations.
+func (uq *UserQuery) Aggregate(fns ...AggregateFunc) *UserSelect {
+	return uq.Select().Aggregate(fns...)
+}
+
 func (uq *UserQuery) prepareQuery(ctx context.Context) error {
 	if uq.path != nil {
 		prev, err := uq.path(ctx)
@@ -747,6 +752,12 @@ type UserSelect struct {
 	selector
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+}
+
+// Aggregate adds the given aggregation functions to the selector query.
+func (us *UserSelect) Aggregate(fns ...AggregateFunc) *UserSelect {
+	us.fns = append(us.fns, fns...)
+	return us
 }
 
 // Scan applies the selector query and scans the result into the given value.

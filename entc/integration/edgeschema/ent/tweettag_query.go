@@ -372,6 +372,11 @@ func (ttq *TweetTagQuery) Select(fields ...string) *TweetTagSelect {
 	return selbuild
 }
 
+// Aggregate returns a TweetTagSelect configured with the given aggregations.
+func (ttq *TweetTagQuery) Aggregate(fns ...AggregateFunc) *TweetTagSelect {
+	return ttq.Select().Aggregate(fns...)
+}
+
 func (ttq *TweetTagQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range ttq.fields {
 		if !tweettag.ValidColumn(f) {
@@ -635,8 +640,6 @@ func (ttgb *TweetTagGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range ttgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(ttgb.fields)+len(ttgb.fns))
 		for _, f := range ttgb.fields {
@@ -656,6 +659,12 @@ type TweetTagSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (tts *TweetTagSelect) Aggregate(fns ...AggregateFunc) *TweetTagSelect {
+	tts.fns = append(tts.fns, fns...)
+	return tts
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (tts *TweetTagSelect) Scan(ctx context.Context, v any) error {
 	if err := tts.prepareQuery(ctx); err != nil {
@@ -666,6 +675,16 @@ func (tts *TweetTagSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (tts *TweetTagSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(tts.fns))
+	for _, fn := range tts.fns {
+		aggregation = append(aggregation, fn(tts.sql))
+	}
+	switch n := len(*tts.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		tts.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		tts.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := tts.sql.Query()
 	if err := tts.driver.Query(ctx, query, args, rows); err != nil {

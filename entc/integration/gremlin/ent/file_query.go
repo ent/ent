@@ -382,6 +382,11 @@ func (fq *FileQuery) Select(fields ...string) *FileSelect {
 	return selbuild
 }
 
+// Aggregate returns a FileSelect configured with the given aggregations.
+func (fq *FileQuery) Aggregate(fns ...AggregateFunc) *FileSelect {
+	return fq.Select().Aggregate(fns...)
+}
+
 func (fq *FileQuery) prepareQuery(ctx context.Context) error {
 	if fq.path != nil {
 		prev, err := fq.path(ctx)
@@ -533,6 +538,12 @@ type FileSelect struct {
 	selector
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+}
+
+// Aggregate adds the given aggregation functions to the selector query.
+func (fs *FileSelect) Aggregate(fns ...AggregateFunc) *FileSelect {
+	fs.fns = append(fs.fns, fns...)
+	return fs
 }
 
 // Scan applies the selector query and scans the result into the given value.

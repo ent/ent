@@ -407,6 +407,11 @@ func (dq *DocQuery) Select(fields ...string) *DocSelect {
 	return selbuild
 }
 
+// Aggregate returns a DocSelect configured with the given aggregations.
+func (dq *DocQuery) Aggregate(fns ...AggregateFunc) *DocSelect {
+	return dq.Select().Aggregate(fns...)
+}
+
 func (dq *DocQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range dq.fields {
 		if !doc.ValidColumn(f) {
@@ -752,8 +757,6 @@ func (dgb *DocGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range dgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(dgb.fields)+len(dgb.fns))
 		for _, f := range dgb.fields {
@@ -773,6 +776,12 @@ type DocSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ds *DocSelect) Aggregate(fns ...AggregateFunc) *DocSelect {
+	ds.fns = append(ds.fns, fns...)
+	return ds
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (ds *DocSelect) Scan(ctx context.Context, v any) error {
 	if err := ds.prepareQuery(ctx); err != nil {
@@ -783,6 +792,16 @@ func (ds *DocSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (ds *DocSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ds.fns))
+	for _, fn := range ds.fns {
+		aggregation = append(aggregation, fn(ds.sql))
+	}
+	switch n := len(*ds.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ds.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ds.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ds.sql.Query()
 	if err := ds.driver.Query(ctx, query, args, rows); err != nil {

@@ -353,6 +353,11 @@ func (nq *NodeQuery) Select(fields ...string) *NodeSelect {
 	return selbuild
 }
 
+// Aggregate returns a NodeSelect configured with the given aggregations.
+func (nq *NodeQuery) Aggregate(fns ...AggregateFunc) *NodeSelect {
+	return nq.Select().Aggregate(fns...)
+}
+
 func (nq *NodeQuery) prepareQuery(ctx context.Context) error {
 	if nq.path != nil {
 		prev, err := nq.path(ctx)
@@ -504,6 +509,12 @@ type NodeSelect struct {
 	selector
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+}
+
+// Aggregate adds the given aggregation functions to the selector query.
+func (ns *NodeSelect) Aggregate(fns ...AggregateFunc) *NodeSelect {
+	ns.fns = append(ns.fns, fns...)
+	return ns
 }
 
 // Scan applies the selector query and scans the result into the given value.

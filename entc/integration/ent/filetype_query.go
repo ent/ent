@@ -339,6 +339,11 @@ func (ftq *FileTypeQuery) Select(fields ...string) *FileTypeSelect {
 	return selbuild
 }
 
+// Aggregate returns a FileTypeSelect configured with the given aggregations.
+func (ftq *FileTypeQuery) Aggregate(fns ...AggregateFunc) *FileTypeSelect {
+	return ftq.Select().Aggregate(fns...)
+}
+
 func (ftq *FileTypeQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range ftq.fields {
 		if !filetype.ValidColumn(f) {
@@ -637,8 +642,6 @@ func (ftgb *FileTypeGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range ftgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(ftgb.fields)+len(ftgb.fns))
 		for _, f := range ftgb.fields {
@@ -658,6 +661,12 @@ type FileTypeSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (fts *FileTypeSelect) Aggregate(fns ...AggregateFunc) *FileTypeSelect {
+	fts.fns = append(fts.fns, fns...)
+	return fts
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (fts *FileTypeSelect) Scan(ctx context.Context, v any) error {
 	if err := fts.prepareQuery(ctx); err != nil {
@@ -668,6 +677,16 @@ func (fts *FileTypeSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (fts *FileTypeSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(fts.fns))
+	for _, fn := range fts.fns {
+		aggregation = append(aggregation, fn(fts.sql))
+	}
+	switch n := len(*fts.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		fts.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		fts.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := fts.sql.Query()
 	if err := fts.driver.Query(ctx, query, args, rows); err != nil {

@@ -339,6 +339,11 @@ func (giq *GroupInfoQuery) Select(fields ...string) *GroupInfoSelect {
 	return selbuild
 }
 
+// Aggregate returns a GroupInfoSelect configured with the given aggregations.
+func (giq *GroupInfoQuery) Aggregate(fns ...AggregateFunc) *GroupInfoSelect {
+	return giq.Select().Aggregate(fns...)
+}
+
 func (giq *GroupInfoQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range giq.fields {
 		if !groupinfo.ValidColumn(f) {
@@ -637,8 +642,6 @@ func (gigb *GroupInfoGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range gigb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(gigb.fields)+len(gigb.fns))
 		for _, f := range gigb.fields {
@@ -658,6 +661,12 @@ type GroupInfoSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (gis *GroupInfoSelect) Aggregate(fns ...AggregateFunc) *GroupInfoSelect {
+	gis.fns = append(gis.fns, fns...)
+	return gis
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (gis *GroupInfoSelect) Scan(ctx context.Context, v any) error {
 	if err := gis.prepareQuery(ctx); err != nil {
@@ -668,6 +677,16 @@ func (gis *GroupInfoSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (gis *GroupInfoSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(gis.fns))
+	for _, fn := range gis.fns {
+		aggregation = append(aggregation, fn(gis.sql))
+	}
+	switch n := len(*gis.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		gis.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		gis.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := gis.sql.Query()
 	if err := gis.driver.Query(ctx, query, args, rows); err != nil {

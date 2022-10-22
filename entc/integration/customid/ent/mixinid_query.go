@@ -300,6 +300,11 @@ func (miq *MixinIDQuery) Select(fields ...string) *MixinIDSelect {
 	return selbuild
 }
 
+// Aggregate returns a MixinIDSelect configured with the given aggregations.
+func (miq *MixinIDQuery) Aggregate(fns ...AggregateFunc) *MixinIDSelect {
+	return miq.Select().Aggregate(fns...)
+}
+
 func (miq *MixinIDQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range miq.fields {
 		if !mixinid.ValidColumn(f) {
@@ -493,8 +498,6 @@ func (migb *MixinIDGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range migb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(migb.fields)+len(migb.fns))
 		for _, f := range migb.fields {
@@ -514,6 +517,12 @@ type MixinIDSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (mis *MixinIDSelect) Aggregate(fns ...AggregateFunc) *MixinIDSelect {
+	mis.fns = append(mis.fns, fns...)
+	return mis
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (mis *MixinIDSelect) Scan(ctx context.Context, v any) error {
 	if err := mis.prepareQuery(ctx); err != nil {
@@ -524,6 +533,16 @@ func (mis *MixinIDSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (mis *MixinIDSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(mis.fns))
+	for _, fn := range mis.fns {
+		aggregation = append(aggregation, fn(mis.sql))
+	}
+	switch n := len(*mis.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		mis.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		mis.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := mis.sql.Query()
 	if err := mis.driver.Query(ctx, query, args, rows); err != nil {

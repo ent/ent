@@ -301,6 +301,11 @@ func (ruq *RoleUserQuery) Select(fields ...string) *RoleUserSelect {
 	return selbuild
 }
 
+// Aggregate returns a RoleUserSelect configured with the given aggregations.
+func (ruq *RoleUserQuery) Aggregate(fns ...AggregateFunc) *RoleUserSelect {
+	return ruq.Select().Aggregate(fns...)
+}
+
 func (ruq *RoleUserQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range ruq.fields {
 		if !roleuser.ValidColumn(f) {
@@ -555,8 +560,6 @@ func (rugb *RoleUserGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range rugb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(rugb.fields)+len(rugb.fns))
 		for _, f := range rugb.fields {
@@ -576,6 +579,12 @@ type RoleUserSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (rus *RoleUserSelect) Aggregate(fns ...AggregateFunc) *RoleUserSelect {
+	rus.fns = append(rus.fns, fns...)
+	return rus
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (rus *RoleUserSelect) Scan(ctx context.Context, v any) error {
 	if err := rus.prepareQuery(ctx); err != nil {
@@ -586,6 +595,16 @@ func (rus *RoleUserSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (rus *RoleUserSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(rus.fns))
+	for _, fn := range rus.fns {
+		aggregation = append(aggregation, fn(rus.sql))
+	}
+	switch n := len(*rus.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		rus.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		rus.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := rus.sql.Query()
 	if err := rus.driver.Query(ctx, query, args, rows); err != nil {

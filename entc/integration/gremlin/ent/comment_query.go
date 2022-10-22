@@ -299,6 +299,11 @@ func (cq *CommentQuery) Select(fields ...string) *CommentSelect {
 	return selbuild
 }
 
+// Aggregate returns a CommentSelect configured with the given aggregations.
+func (cq *CommentQuery) Aggregate(fns ...AggregateFunc) *CommentSelect {
+	return cq.Select().Aggregate(fns...)
+}
+
 func (cq *CommentQuery) prepareQuery(ctx context.Context) error {
 	if cq.path != nil {
 		prev, err := cq.path(ctx)
@@ -450,6 +455,12 @@ type CommentSelect struct {
 	selector
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+}
+
+// Aggregate adds the given aggregation functions to the selector query.
+func (cs *CommentSelect) Aggregate(fns ...AggregateFunc) *CommentSelect {
+	cs.fns = append(cs.fns, fns...)
+	return cs
 }
 
 // Scan applies the selector query and scans the result into the given value.

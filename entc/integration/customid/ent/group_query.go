@@ -314,6 +314,11 @@ func (gq *GroupQuery) Select(fields ...string) *GroupSelect {
 	return selbuild
 }
 
+// Aggregate returns a GroupSelect configured with the given aggregations.
+func (gq *GroupQuery) Aggregate(fns ...AggregateFunc) *GroupSelect {
+	return gq.Select().Aggregate(fns...)
+}
+
 func (gq *GroupQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range gq.fields {
 		if !group.ValidColumn(f) {
@@ -577,8 +582,6 @@ func (ggb *GroupGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range ggb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(ggb.fields)+len(ggb.fns))
 		for _, f := range ggb.fields {
@@ -598,6 +601,12 @@ type GroupSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (gs *GroupSelect) Aggregate(fns ...AggregateFunc) *GroupSelect {
+	gs.fns = append(gs.fns, fns...)
+	return gs
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (gs *GroupSelect) Scan(ctx context.Context, v any) error {
 	if err := gs.prepareQuery(ctx); err != nil {
@@ -608,6 +617,16 @@ func (gs *GroupSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (gs *GroupSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(gs.fns))
+	for _, fn := range gs.fns {
+		aggregation = append(aggregation, fn(gs.sql))
+	}
+	switch n := len(*gs.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		gs.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		gs.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := gs.sql.Query()
 	if err := gs.driver.Query(ctx, query, args, rows); err != nil {

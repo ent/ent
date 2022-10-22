@@ -408,6 +408,11 @@ func (gq *GroupQuery) Select(fields ...string) *GroupSelect {
 	return selbuild
 }
 
+// Aggregate returns a GroupSelect configured with the given aggregations.
+func (gq *GroupQuery) Aggregate(fns ...AggregateFunc) *GroupSelect {
+	return gq.Select().Aggregate(fns...)
+}
+
 func (gq *GroupQuery) prepareQuery(ctx context.Context) error {
 	if gq.path != nil {
 		prev, err := gq.path(ctx)
@@ -559,6 +564,12 @@ type GroupSelect struct {
 	selector
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+}
+
+// Aggregate adds the given aggregation functions to the selector query.
+func (gs *GroupSelect) Aggregate(fns ...AggregateFunc) *GroupSelect {
+	gs.fns = append(gs.fns, fns...)
+	return gs
 }
 
 // Scan applies the selector query and scans the result into the given value.

@@ -299,6 +299,11 @@ func (ctq *CustomTypeQuery) Select(fields ...string) *CustomTypeSelect {
 	return selbuild
 }
 
+// Aggregate returns a CustomTypeSelect configured with the given aggregations.
+func (ctq *CustomTypeQuery) Aggregate(fns ...AggregateFunc) *CustomTypeSelect {
+	return ctq.Select().Aggregate(fns...)
+}
+
 func (ctq *CustomTypeQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range ctq.fields {
 		if !customtype.ValidColumn(f) {
@@ -492,8 +497,6 @@ func (ctgb *CustomTypeGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range ctgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(ctgb.fields)+len(ctgb.fns))
 		for _, f := range ctgb.fields {
@@ -513,6 +516,12 @@ type CustomTypeSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (cts *CustomTypeSelect) Aggregate(fns ...AggregateFunc) *CustomTypeSelect {
+	cts.fns = append(cts.fns, fns...)
+	return cts
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (cts *CustomTypeSelect) Scan(ctx context.Context, v any) error {
 	if err := cts.prepareQuery(ctx); err != nil {
@@ -523,6 +532,16 @@ func (cts *CustomTypeSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (cts *CustomTypeSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(cts.fns))
+	for _, fn := range cts.fns {
+		aggregation = append(aggregation, fn(cts.sql))
+	}
+	switch n := len(*cts.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		cts.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		cts.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := cts.sql.Query()
 	if err := cts.driver.Query(ctx, query, args, rows); err != nil {

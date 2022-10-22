@@ -327,6 +327,11 @@ func (giq *GroupInfoQuery) Select(fields ...string) *GroupInfoSelect {
 	return selbuild
 }
 
+// Aggregate returns a GroupInfoSelect configured with the given aggregations.
+func (giq *GroupInfoQuery) Aggregate(fns ...AggregateFunc) *GroupInfoSelect {
+	return giq.Select().Aggregate(fns...)
+}
+
 func (giq *GroupInfoQuery) prepareQuery(ctx context.Context) error {
 	if giq.path != nil {
 		prev, err := giq.path(ctx)
@@ -478,6 +483,12 @@ type GroupInfoSelect struct {
 	selector
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+}
+
+// Aggregate adds the given aggregation functions to the selector query.
+func (gis *GroupInfoSelect) Aggregate(fns ...AggregateFunc) *GroupInfoSelect {
+	gis.fns = append(gis.fns, fns...)
+	return gis
 }
 
 // Scan applies the selector query and scans the result into the given value.

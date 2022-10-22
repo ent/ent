@@ -304,6 +304,11 @@ func (sq *SpecQuery) Select(fields ...string) *SpecSelect {
 	return selbuild
 }
 
+// Aggregate returns a SpecSelect configured with the given aggregations.
+func (sq *SpecQuery) Aggregate(fns ...AggregateFunc) *SpecSelect {
+	return sq.Select().Aggregate(fns...)
+}
+
 func (sq *SpecQuery) prepareQuery(ctx context.Context) error {
 	if sq.path != nil {
 		prev, err := sq.path(ctx)
@@ -455,6 +460,12 @@ type SpecSelect struct {
 	selector
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+}
+
+// Aggregate adds the given aggregation functions to the selector query.
+func (ss *SpecSelect) Aggregate(fns ...AggregateFunc) *SpecSelect {
+	ss.fns = append(ss.fns, fns...)
+	return ss
 }
 
 // Scan applies the selector query and scans the result into the given value.

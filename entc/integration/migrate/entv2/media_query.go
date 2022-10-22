@@ -299,6 +299,11 @@ func (mq *MediaQuery) Select(fields ...string) *MediaSelect {
 	return selbuild
 }
 
+// Aggregate returns a MediaSelect configured with the given aggregations.
+func (mq *MediaQuery) Aggregate(fns ...AggregateFunc) *MediaSelect {
+	return mq.Select().Aggregate(fns...)
+}
+
 func (mq *MediaQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range mq.fields {
 		if !media.ValidColumn(f) {
@@ -492,8 +497,6 @@ func (mgb *MediaGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range mgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(mgb.fields)+len(mgb.fns))
 		for _, f := range mgb.fields {
@@ -513,6 +516,12 @@ type MediaSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ms *MediaSelect) Aggregate(fns ...AggregateFunc) *MediaSelect {
+	ms.fns = append(ms.fns, fns...)
+	return ms
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (ms *MediaSelect) Scan(ctx context.Context, v any) error {
 	if err := ms.prepareQuery(ctx); err != nil {
@@ -523,6 +532,16 @@ func (ms *MediaSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (ms *MediaSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ms.fns))
+	for _, fn := range ms.fns {
+		aggregation = append(aggregation, fn(ms.sql))
+	}
+	switch n := len(*ms.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ms.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ms.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ms.sql.Query()
 	if err := ms.driver.Query(ctx, query, args, rows); err != nil {
