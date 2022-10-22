@@ -314,6 +314,11 @@ func (bq *BlogQuery) Select(fields ...string) *BlogSelect {
 	return selbuild
 }
 
+// Aggregate returns a BlogSelect configured with the given aggregations.
+func (bq *BlogQuery) Aggregate(fns ...AggregateFunc) *BlogSelect {
+	return bq.Select().Aggregate(fns...)
+}
+
 func (bq *BlogQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range bq.fields {
 		if !blog.ValidColumn(f) {
@@ -550,8 +555,6 @@ func (bgb *BlogGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range bgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(bgb.fields)+len(bgb.fns))
 		for _, f := range bgb.fields {
@@ -571,6 +574,12 @@ type BlogSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (bs *BlogSelect) Aggregate(fns ...AggregateFunc) *BlogSelect {
+	bs.fns = append(bs.fns, fns...)
+	return bs
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (bs *BlogSelect) Scan(ctx context.Context, v any) error {
 	if err := bs.prepareQuery(ctx); err != nil {
@@ -581,6 +590,16 @@ func (bs *BlogSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (bs *BlogSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(bs.fns))
+	for _, fn := range bs.fns {
+		aggregation = append(aggregation, fn(bs.sql))
+	}
+	switch n := len(*bs.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		bs.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		bs.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := bs.sql.Query()
 	if err := bs.driver.Query(ctx, query, args, rows); err != nil {

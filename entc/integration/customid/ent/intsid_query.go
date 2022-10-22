@@ -350,6 +350,11 @@ func (isq *IntSIDQuery) Select(fields ...string) *IntSIDSelect {
 	return selbuild
 }
 
+// Aggregate returns a IntSIDSelect configured with the given aggregations.
+func (isq *IntSIDQuery) Aggregate(fns ...AggregateFunc) *IntSIDSelect {
+	return isq.Select().Aggregate(fns...)
+}
+
 func (isq *IntSIDQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range isq.fields {
 		if !intsid.ValidColumn(f) {
@@ -629,8 +634,6 @@ func (isgb *IntSIDGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range isgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(isgb.fields)+len(isgb.fns))
 		for _, f := range isgb.fields {
@@ -650,6 +653,12 @@ type IntSIDSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (iss *IntSIDSelect) Aggregate(fns ...AggregateFunc) *IntSIDSelect {
+	iss.fns = append(iss.fns, fns...)
+	return iss
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (iss *IntSIDSelect) Scan(ctx context.Context, v any) error {
 	if err := iss.prepareQuery(ctx); err != nil {
@@ -660,6 +669,16 @@ func (iss *IntSIDSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (iss *IntSIDSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(iss.fns))
+	for _, fn := range iss.fns {
+		aggregation = append(aggregation, fn(iss.sql))
+	}
+	switch n := len(*iss.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		iss.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		iss.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := iss.sql.Query()
 	if err := iss.driver.Query(ctx, query, args, rows); err != nil {

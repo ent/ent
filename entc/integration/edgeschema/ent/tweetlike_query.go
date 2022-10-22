@@ -302,6 +302,11 @@ func (tlq *TweetLikeQuery) Select(fields ...string) *TweetLikeSelect {
 	return selbuild
 }
 
+// Aggregate returns a TweetLikeSelect configured with the given aggregations.
+func (tlq *TweetLikeQuery) Aggregate(fns ...AggregateFunc) *TweetLikeSelect {
+	return tlq.Select().Aggregate(fns...)
+}
+
 func (tlq *TweetLikeQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range tlq.fields {
 		if !tweetlike.ValidColumn(f) {
@@ -562,8 +567,6 @@ func (tlgb *TweetLikeGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range tlgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(tlgb.fields)+len(tlgb.fns))
 		for _, f := range tlgb.fields {
@@ -583,6 +586,12 @@ type TweetLikeSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (tls *TweetLikeSelect) Aggregate(fns ...AggregateFunc) *TweetLikeSelect {
+	tls.fns = append(tls.fns, fns...)
+	return tls
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (tls *TweetLikeSelect) Scan(ctx context.Context, v any) error {
 	if err := tls.prepareQuery(ctx); err != nil {
@@ -593,6 +602,16 @@ func (tls *TweetLikeSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (tls *TweetLikeSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(tls.fns))
+	for _, fn := range tls.fns {
+		aggregation = append(aggregation, fn(tls.sql))
+	}
+	switch n := len(*tls.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		tls.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		tls.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := tls.sql.Query()
 	if err := tls.driver.Query(ctx, query, args, rows); err != nil {

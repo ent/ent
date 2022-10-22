@@ -299,6 +299,11 @@ func (lq *LicenseQuery) Select(fields ...string) *LicenseSelect {
 	return selbuild
 }
 
+// Aggregate returns a LicenseSelect configured with the given aggregations.
+func (lq *LicenseQuery) Aggregate(fns ...AggregateFunc) *LicenseSelect {
+	return lq.Select().Aggregate(fns...)
+}
+
 func (lq *LicenseQuery) prepareQuery(ctx context.Context) error {
 	if lq.path != nil {
 		prev, err := lq.path(ctx)
@@ -450,6 +455,12 @@ type LicenseSelect struct {
 	selector
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+}
+
+// Aggregate adds the given aggregation functions to the selector query.
+func (ls *LicenseSelect) Aggregate(fns ...AggregateFunc) *LicenseSelect {
+	ls.fns = append(ls.fns, fns...)
+	return ls
 }
 
 // Scan applies the selector query and scans the result into the given value.

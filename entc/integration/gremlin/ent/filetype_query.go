@@ -326,6 +326,11 @@ func (ftq *FileTypeQuery) Select(fields ...string) *FileTypeSelect {
 	return selbuild
 }
 
+// Aggregate returns a FileTypeSelect configured with the given aggregations.
+func (ftq *FileTypeQuery) Aggregate(fns ...AggregateFunc) *FileTypeSelect {
+	return ftq.Select().Aggregate(fns...)
+}
+
 func (ftq *FileTypeQuery) prepareQuery(ctx context.Context) error {
 	if ftq.path != nil {
 		prev, err := ftq.path(ctx)
@@ -477,6 +482,12 @@ type FileTypeSelect struct {
 	selector
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+}
+
+// Aggregate adds the given aggregation functions to the selector query.
+func (fts *FileTypeSelect) Aggregate(fns ...AggregateFunc) *FileTypeSelect {
+	fts.fns = append(fts.fns, fns...)
+	return fts
 }
 
 // Scan applies the selector query and scans the result into the given value.

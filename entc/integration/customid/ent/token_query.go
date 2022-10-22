@@ -337,6 +337,11 @@ func (tq *TokenQuery) Select(fields ...string) *TokenSelect {
 	return selbuild
 }
 
+// Aggregate returns a TokenSelect configured with the given aggregations.
+func (tq *TokenQuery) Aggregate(fns ...AggregateFunc) *TokenSelect {
+	return tq.Select().Aggregate(fns...)
+}
+
 func (tq *TokenQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range tq.fields {
 		if !token.ValidColumn(f) {
@@ -577,8 +582,6 @@ func (tgb *TokenGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range tgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(tgb.fields)+len(tgb.fns))
 		for _, f := range tgb.fields {
@@ -598,6 +601,12 @@ type TokenSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ts *TokenSelect) Aggregate(fns ...AggregateFunc) *TokenSelect {
+	ts.fns = append(ts.fns, fns...)
+	return ts
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (ts *TokenSelect) Scan(ctx context.Context, v any) error {
 	if err := ts.prepareQuery(ctx); err != nil {
@@ -608,6 +617,16 @@ func (ts *TokenSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (ts *TokenSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ts.fns))
+	for _, fn := range ts.fns {
+		aggregation = append(aggregation, fn(ts.sql))
+	}
+	switch n := len(*ts.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ts.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ts.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ts.sql.Query()
 	if err := ts.driver.Query(ctx, query, args, rows); err != nil {

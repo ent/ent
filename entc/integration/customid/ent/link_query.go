@@ -300,6 +300,11 @@ func (lq *LinkQuery) Select(fields ...string) *LinkSelect {
 	return selbuild
 }
 
+// Aggregate returns a LinkSelect configured with the given aggregations.
+func (lq *LinkQuery) Aggregate(fns ...AggregateFunc) *LinkSelect {
+	return lq.Select().Aggregate(fns...)
+}
+
 func (lq *LinkQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range lq.fields {
 		if !link.ValidColumn(f) {
@@ -493,8 +498,6 @@ func (lgb *LinkGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range lgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(lgb.fields)+len(lgb.fns))
 		for _, f := range lgb.fields {
@@ -514,6 +517,12 @@ type LinkSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ls *LinkSelect) Aggregate(fns ...AggregateFunc) *LinkSelect {
+	ls.fns = append(ls.fns, fns...)
+	return ls
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (ls *LinkSelect) Scan(ctx context.Context, v any) error {
 	if err := ls.prepareQuery(ctx); err != nil {
@@ -524,6 +533,16 @@ func (ls *LinkSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (ls *LinkSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ls.fns))
+	for _, fn := range ls.fns {
+		aggregation = append(aggregation, fn(ls.sql))
+	}
+	switch n := len(*ls.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ls.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ls.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ls.sql.Query()
 	if err := ls.driver.Query(ctx, query, args, rows); err != nil {

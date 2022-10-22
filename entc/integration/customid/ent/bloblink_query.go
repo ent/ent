@@ -301,6 +301,11 @@ func (blq *BlobLinkQuery) Select(fields ...string) *BlobLinkSelect {
 	return selbuild
 }
 
+// Aggregate returns a BlobLinkSelect configured with the given aggregations.
+func (blq *BlobLinkQuery) Aggregate(fns ...AggregateFunc) *BlobLinkSelect {
+	return blq.Select().Aggregate(fns...)
+}
+
 func (blq *BlobLinkQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range blq.fields {
 		if !bloblink.ValidColumn(f) {
@@ -555,8 +560,6 @@ func (blgb *BlobLinkGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range blgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(blgb.fields)+len(blgb.fns))
 		for _, f := range blgb.fields {
@@ -576,6 +579,12 @@ type BlobLinkSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (bls *BlobLinkSelect) Aggregate(fns ...AggregateFunc) *BlobLinkSelect {
+	bls.fns = append(bls.fns, fns...)
+	return bls
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (bls *BlobLinkSelect) Scan(ctx context.Context, v any) error {
 	if err := bls.prepareQuery(ctx); err != nil {
@@ -586,6 +595,16 @@ func (bls *BlobLinkSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (bls *BlobLinkSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(bls.fns))
+	for _, fn := range bls.fns {
+		aggregation = append(aggregation, fn(bls.sql))
+	}
+	switch n := len(*bls.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		bls.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		bls.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := bls.sql.Query()
 	if err := bls.driver.Query(ctx, query, args, rows); err != nil {

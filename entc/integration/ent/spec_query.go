@@ -317,6 +317,11 @@ func (sq *SpecQuery) Select(fields ...string) *SpecSelect {
 	return selbuild
 }
 
+// Aggregate returns a SpecSelect configured with the given aggregations.
+func (sq *SpecQuery) Aggregate(fns ...AggregateFunc) *SpecSelect {
+	return sq.Select().Aggregate(fns...)
+}
+
 func (sq *SpecQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range sq.fields {
 		if !spec.ValidColumn(f) {
@@ -642,8 +647,6 @@ func (sgb *SpecGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range sgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(sgb.fields)+len(sgb.fns))
 		for _, f := range sgb.fields {
@@ -663,6 +666,12 @@ type SpecSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ss *SpecSelect) Aggregate(fns ...AggregateFunc) *SpecSelect {
+	ss.fns = append(ss.fns, fns...)
+	return ss
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (ss *SpecSelect) Scan(ctx context.Context, v any) error {
 	if err := ss.prepareQuery(ctx); err != nil {
@@ -673,6 +682,16 @@ func (ss *SpecSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (ss *SpecSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ss.fns))
+	for _, fn := range ss.fns {
+		aggregation = append(aggregation, fn(ss.sql))
+	}
+	switch n := len(*ss.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ss.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ss.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ss.sql.Query()
 	if err := ss.driver.Query(ctx, query, args, rows); err != nil {

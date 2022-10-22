@@ -131,6 +131,7 @@ var (
 		Sanity,
 		Paging,
 		Select,
+		Aggregate,
 		Delete,
 		Upsert,
 		Relation,
@@ -756,6 +757,59 @@ func Select(t *testing.T, client *ent.Client) {
 		}).
 		ExecX(ctx)
 	require.True(allUpper(), "at names must be upper-cased")
+}
+
+func Aggregate(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	a8m := client.User.Create().SetAge(1).SetName("a8m").SaveX(ctx)
+	nat := client.User.Create().SetAge(1).SetName("nati").SetSpouse(a8m).SaveX(ctx)
+	owners := []*ent.User{a8m, nat}
+	for i := 1; i <= 10; i++ {
+		client.Pet.Create().SetName(fmt.Sprintf("pet%d", i)).SetAge(float64(i)).SetOwner(owners[i%2]).SaveX(ctx)
+	}
+	s1 := client.Pet.Query().Aggregate(ent.Sum(pet.FieldAge)).IntX(ctx)
+	require.Equal(t, 55, s1)
+	s2 := client.Pet.Query().Where(pet.HasOwner()).Aggregate(ent.Sum(pet.FieldAge)).IntX(ctx)
+	require.Equal(t, s1, s2)
+
+	// Aggregate traversals.
+	require.Equal(t, 30, a8m.QueryPets().Aggregate(ent.Sum(pet.FieldAge)).IntX(ctx))
+	require.Equal(t, 25, nat.QueryPets().Aggregate(ent.Sum(pet.FieldAge)).IntX(ctx))
+	require.Equal(t, 25, a8m.QuerySpouse().QueryPets().Aggregate(ent.Sum(pet.FieldAge)).IntX(ctx))
+	require.Equal(t, 30, nat.QuerySpouse().QueryPets().Aggregate(ent.Sum(pet.FieldAge)).IntX(ctx))
+
+	// Aggregate 2 fields.
+	var vs1 []struct{ Sum, Count int }
+	client.Pet.Query().
+		Aggregate(
+			ent.Sum(pet.FieldAge),
+			ent.Count(),
+		).
+		ScanX(ctx, &vs1)
+	require.Len(t, vs1, 1)
+	require.Equal(t, 55, vs1[0].Sum)
+	require.Equal(t, 10, vs1[0].Count)
+
+	// Aggregate 4 fields.
+	var vs2 []struct {
+		Sum, Min, Max, Count int
+		Avg                  float64
+	}
+	client.Pet.Query().
+		Aggregate(
+			ent.Sum(pet.FieldAge),
+			ent.Min(pet.FieldAge),
+			ent.Max(pet.FieldAge),
+			ent.Mean(pet.FieldAge),
+			ent.Count(),
+		).
+		ScanX(ctx, &vs2)
+	require.Len(t, vs2, 1)
+	require.Equal(t, 55, vs2[0].Sum)
+	require.Equal(t, 1, vs2[0].Min)
+	require.Equal(t, 10, vs2[0].Max)
+	require.Equal(t, 10, vs2[0].Count)
+	require.Equal(t, 5.5, vs2[0].Avg)
 }
 
 func ExecQuery(t *testing.T, client *ent.Client) {

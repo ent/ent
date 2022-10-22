@@ -371,6 +371,11 @@ func (ugq *UserGroupQuery) Select(fields ...string) *UserGroupSelect {
 	return selbuild
 }
 
+// Aggregate returns a UserGroupSelect configured with the given aggregations.
+func (ugq *UserGroupQuery) Aggregate(fns ...AggregateFunc) *UserGroupSelect {
+	return ugq.Select().Aggregate(fns...)
+}
+
 func (ugq *UserGroupQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range ugq.fields {
 		if !usergroup.ValidColumn(f) {
@@ -634,8 +639,6 @@ func (uggb *UserGroupGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range uggb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(uggb.fields)+len(uggb.fns))
 		for _, f := range uggb.fields {
@@ -655,6 +658,12 @@ type UserGroupSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ugs *UserGroupSelect) Aggregate(fns ...AggregateFunc) *UserGroupSelect {
+	ugs.fns = append(ugs.fns, fns...)
+	return ugs
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (ugs *UserGroupSelect) Scan(ctx context.Context, v any) error {
 	if err := ugs.prepareQuery(ctx); err != nil {
@@ -665,6 +674,16 @@ func (ugs *UserGroupSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (ugs *UserGroupSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ugs.fns))
+	for _, fn := range ugs.fns {
+		aggregation = append(aggregation, fn(ugs.sql))
+	}
+	switch n := len(*ugs.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ugs.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ugs.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ugs.sql.Query()
 	if err := ugs.driver.Query(ctx, query, args, rows); err != nil {

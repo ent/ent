@@ -355,6 +355,11 @@ func (cq *CardQuery) Select(fields ...string) *CardSelect {
 	return selbuild
 }
 
+// Aggregate returns a CardSelect configured with the given aggregations.
+func (cq *CardQuery) Aggregate(fns ...AggregateFunc) *CardSelect {
+	return cq.Select().Aggregate(fns...)
+}
+
 func (cq *CardQuery) prepareQuery(ctx context.Context) error {
 	if cq.path != nil {
 		prev, err := cq.path(ctx)
@@ -506,6 +511,12 @@ type CardSelect struct {
 	selector
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+}
+
+// Aggregate adds the given aggregation functions to the selector query.
+func (cs *CardSelect) Aggregate(fns ...AggregateFunc) *CardSelect {
+	cs.fns = append(cs.fns, fns...)
+	return cs
 }
 
 // Scan applies the selector query and scans the result into the given value.

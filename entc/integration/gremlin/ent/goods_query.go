@@ -277,6 +277,11 @@ func (gq *GoodsQuery) Select(fields ...string) *GoodsSelect {
 	return selbuild
 }
 
+// Aggregate returns a GoodsSelect configured with the given aggregations.
+func (gq *GoodsQuery) Aggregate(fns ...AggregateFunc) *GoodsSelect {
+	return gq.Select().Aggregate(fns...)
+}
+
 func (gq *GoodsQuery) prepareQuery(ctx context.Context) error {
 	if gq.path != nil {
 		prev, err := gq.path(ctx)
@@ -428,6 +433,12 @@ type GoodsSelect struct {
 	selector
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+}
+
+// Aggregate adds the given aggregation functions to the selector query.
+func (gs *GoodsSelect) Aggregate(fns ...AggregateFunc) *GoodsSelect {
+	gs.fns = append(gs.fns, fns...)
+	return gs
 }
 
 // Scan applies the selector query and scans the result into the given value.

@@ -299,6 +299,11 @@ func (riq *RelationshipInfoQuery) Select(fields ...string) *RelationshipInfoSele
 	return selbuild
 }
 
+// Aggregate returns a RelationshipInfoSelect configured with the given aggregations.
+func (riq *RelationshipInfoQuery) Aggregate(fns ...AggregateFunc) *RelationshipInfoSelect {
+	return riq.Select().Aggregate(fns...)
+}
+
 func (riq *RelationshipInfoQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range riq.fields {
 		if !relationshipinfo.ValidColumn(f) {
@@ -492,8 +497,6 @@ func (rigb *RelationshipInfoGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range rigb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(rigb.fields)+len(rigb.fns))
 		for _, f := range rigb.fields {
@@ -513,6 +516,12 @@ type RelationshipInfoSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ris *RelationshipInfoSelect) Aggregate(fns ...AggregateFunc) *RelationshipInfoSelect {
+	ris.fns = append(ris.fns, fns...)
+	return ris
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (ris *RelationshipInfoSelect) Scan(ctx context.Context, v any) error {
 	if err := ris.prepareQuery(ctx); err != nil {
@@ -523,6 +532,16 @@ func (ris *RelationshipInfoSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (ris *RelationshipInfoSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ris.fns))
+	for _, fn := range ris.fns {
+		aggregation = append(aggregation, fn(ris.sql))
+	}
+	switch n := len(*ris.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ris.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ris.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ris.sql.Query()
 	if err := ris.driver.Query(ctx, query, args, rows); err != nil {

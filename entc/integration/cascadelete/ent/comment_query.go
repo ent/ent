@@ -335,6 +335,11 @@ func (cq *CommentQuery) Select(fields ...string) *CommentSelect {
 	return selbuild
 }
 
+// Aggregate returns a CommentSelect configured with the given aggregations.
+func (cq *CommentQuery) Aggregate(fns ...AggregateFunc) *CommentSelect {
+	return cq.Select().Aggregate(fns...)
+}
+
 func (cq *CommentQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range cq.fields {
 		if !comment.ValidColumn(f) {
@@ -565,8 +570,6 @@ func (cgb *CommentGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range cgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(cgb.fields)+len(cgb.fns))
 		for _, f := range cgb.fields {
@@ -586,6 +589,12 @@ type CommentSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (cs *CommentSelect) Aggregate(fns ...AggregateFunc) *CommentSelect {
+	cs.fns = append(cs.fns, fns...)
+	return cs
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (cs *CommentSelect) Scan(ctx context.Context, v any) error {
 	if err := cs.prepareQuery(ctx); err != nil {
@@ -596,6 +605,16 @@ func (cs *CommentSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (cs *CommentSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(cs.fns))
+	for _, fn := range cs.fns {
+		aggregation = append(aggregation, fn(cs.sql))
+	}
+	switch n := len(*cs.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		cs.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		cs.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := cs.sql.Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {

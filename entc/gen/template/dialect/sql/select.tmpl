@@ -11,6 +11,17 @@ in the LICENSE file in the root directory of this source tree.
 {{ $receiver := receiver $builder }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len({{ $receiver}}.fns))
+	for _, fn := range {{ $receiver }}.fns {
+		aggregation = append(aggregation, fn({{ $receiver }}.sql))
+	}
+	switch n := len(*{{ $receiver }}.selector.flds); {
+	{{- /* If no columns were selected, the default selection is the aggregation.*/}}
+	case n == 0 && len(aggregation) > 0:
+		{{ $receiver }}.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		{{ $receiver }}.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := {{ $receiver }}.sql.Query()
 	if err := {{ $receiver }}.driver.Query(ctx, query, args, rows); err != nil {

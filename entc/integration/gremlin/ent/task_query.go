@@ -300,6 +300,11 @@ func (tq *TaskQuery) Select(fields ...string) *TaskSelect {
 	return selbuild
 }
 
+// Aggregate returns a TaskSelect configured with the given aggregations.
+func (tq *TaskQuery) Aggregate(fns ...AggregateFunc) *TaskSelect {
+	return tq.Select().Aggregate(fns...)
+}
+
 func (tq *TaskQuery) prepareQuery(ctx context.Context) error {
 	if tq.path != nil {
 		prev, err := tq.path(ctx)
@@ -451,6 +456,12 @@ type TaskSelect struct {
 	selector
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+}
+
+// Aggregate adds the given aggregation functions to the selector query.
+func (ts *TaskSelect) Aggregate(fns ...AggregateFunc) *TaskSelect {
+	ts.fns = append(ts.fns, fns...)
+	return ts
 }
 
 // Scan applies the selector query and scans the result into the given value.

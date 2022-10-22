@@ -354,6 +354,11 @@ func (pq *PetQuery) Select(fields ...string) *PetSelect {
 	return selbuild
 }
 
+// Aggregate returns a PetSelect configured with the given aggregations.
+func (pq *PetQuery) Aggregate(fns ...AggregateFunc) *PetSelect {
+	return pq.Select().Aggregate(fns...)
+}
+
 func (pq *PetQuery) prepareQuery(ctx context.Context) error {
 	if pq.path != nil {
 		prev, err := pq.path(ctx)
@@ -505,6 +510,12 @@ type PetSelect struct {
 	selector
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+}
+
+// Aggregate adds the given aggregation functions to the selector query.
+func (ps *PetSelect) Aggregate(fns ...AggregateFunc) *PetSelect {
+	ps.fns = append(ps.fns, fns...)
+	return ps
 }
 
 // Scan applies the selector query and scans the result into the given value.

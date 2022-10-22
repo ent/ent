@@ -351,6 +351,11 @@ func (dq *DeviceQuery) Select(fields ...string) *DeviceSelect {
 	return selbuild
 }
 
+// Aggregate returns a DeviceSelect configured with the given aggregations.
+func (dq *DeviceQuery) Aggregate(fns ...AggregateFunc) *DeviceSelect {
+	return dq.Select().Aggregate(fns...)
+}
+
 func (dq *DeviceQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range dq.fields {
 		if !device.ValidColumn(f) {
@@ -630,8 +635,6 @@ func (dgb *DeviceGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range dgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(dgb.fields)+len(dgb.fns))
 		for _, f := range dgb.fields {
@@ -651,6 +654,12 @@ type DeviceSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ds *DeviceSelect) Aggregate(fns ...AggregateFunc) *DeviceSelect {
+	ds.fns = append(ds.fns, fns...)
+	return ds
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (ds *DeviceSelect) Scan(ctx context.Context, v any) error {
 	if err := ds.prepareQuery(ctx); err != nil {
@@ -661,6 +670,16 @@ func (ds *DeviceSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (ds *DeviceSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ds.fns))
+	for _, fn := range ds.fns {
+		aggregation = append(aggregation, fn(ds.sql))
+	}
+	switch n := len(*ds.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ds.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ds.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ds.sql.Query()
 	if err := ds.driver.Query(ctx, query, args, rows); err != nil {

@@ -372,6 +372,11 @@ func (tq *TagQuery) Select(fields ...string) *TagSelect {
 	return selbuild
 }
 
+// Aggregate returns a TagSelect configured with the given aggregations.
+func (tq *TagQuery) Aggregate(fns ...AggregateFunc) *TagSelect {
+	return tq.Select().Aggregate(fns...)
+}
+
 func (tq *TagQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range tq.fields {
 		if !tag.ValidColumn(f) {
@@ -670,8 +675,6 @@ func (tgb *TagGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range tgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(tgb.fields)+len(tgb.fns))
 		for _, f := range tgb.fields {
@@ -691,6 +694,12 @@ type TagSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ts *TagSelect) Aggregate(fns ...AggregateFunc) *TagSelect {
+	ts.fns = append(ts.fns, fns...)
+	return ts
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (ts *TagSelect) Scan(ctx context.Context, v any) error {
 	if err := ts.prepareQuery(ctx); err != nil {
@@ -701,6 +710,16 @@ func (ts *TagSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (ts *TagSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ts.fns))
+	for _, fn := range ts.fns {
+		aggregation = append(aggregation, fn(ts.sql))
+	}
+	switch n := len(*ts.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ts.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ts.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ts.sql.Query()
 	if err := ts.driver.Query(ctx, query, args, rows); err != nil {
