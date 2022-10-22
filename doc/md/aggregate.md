@@ -3,6 +3,44 @@ id: aggregate
 title: Aggregation
 ---
 
+## Aggregation
+
+The `Aggregate` option allows adding one or more aggregation functions.
+
+```go
+package main
+
+import (
+	"context"
+
+	"<project>/ent"
+	"<project>/ent/payment"
+	"<project>/ent/pet"
+)
+
+func Do(ctx context.Context, client *ent.Client) {
+	// Aggregate one field.
+	sum, err := client.Payment.Query().
+		Aggregate(
+			ent.Sum(payment.Amount),
+		).
+		Int(ctx)
+
+	// Aggregate multiple fields.
+	var v []struct {
+		Sum, Min, Max, Count int
+	}
+	err := client.Pet.Query().
+		Aggregate(
+			ent.Sum(pet.FieldAge),
+			ent.Min(pet.FieldAge),
+			ent.Max(pet.FieldAge),
+			ent.Count(),
+		).
+		Scan(ctx, &v)
+}
+```
+
 ## Group By
 
 Group by `name` and `age` fields of all users, and sum their total age.
