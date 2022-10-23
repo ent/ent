@@ -6,6 +6,7 @@ package dynamodb
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -30,15 +31,22 @@ func NewDriver(dialect string, c Client) *Driver {
 
 // Open returns a dialect.Driver that implements the ent/dialect.Driver interface.
 func Open(dialect, source string) (*Driver, error) {
-	awsCfg, err := config.LoadDefaultConfig(
-		context.TODO(),
-		config.WithRegion("us-east-1"),
-		config.WithEndpointResolverWithOptions(
+	var (
+		awsCfg                aws.Config
+		err                   error
+		endpointUrlOptionFunc config.LoadOptionsFunc
+	)
+	if source != "" {
+		endpointUrlOptionFunc = config.WithEndpointResolverWithOptions(
 			aws.EndpointResolverWithOptionsFunc(
 				func(service, region string, options ...interface{}) (aws.Endpoint, error) {
 					return aws.Endpoint{URL: source}, nil
 				}),
-		))
+		)
+		awsCfg, err = config.LoadDefaultConfig(context.TODO(), endpointUrlOptionFunc)
+	} else {
+		awsCfg, err = config.LoadDefaultConfig(context.TODO())
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -79,14 +87,20 @@ func (c Client) run(ctx context.Context, op string, args, v interface{}) error {
 		createTableArgs := args.(*CreateTableArgs)
 		_, err := c.CreateTable(ctx, createTableArgs.Opts)
 		if err != nil {
-			return err
-		} else {
-			waiter := dynamodb.NewTableExistsWaiter(c)
-			err = waiter.Wait(ctx, &dynamodb.DescribeTableInput{
-				TableName: aws.String(createTableArgs.Name),
-			}, 10*time.Second)
-			return err
+			var inUseEx *types.ResourceInUseException
+			if !errors.As(err, &inUseEx) {
+				return err
+			}
 		}
+		waiter := dynamodb.NewTableExistsWaiter(c)
+		err = waiter.Wait(ctx, &dynamodb.DescribeTableInput{
+			TableName: aws.String(createTableArgs.Name),
+		}, 30*time.Second)
+		return err
+	case PutItemOperation:
+		putItemArgs := args.(*PutItemArgs)
+		_, err := c.PutItem(ctx, putItemArgs.Opts)
+		return err
 	default:
 		return fmt.Errorf("%s operation is unsupported", op)
 	}
@@ -97,8 +111,6 @@ type Client struct {
 	*dynamodb.Client
 }
 
-var _ dialect.Driver = (*Driver)(nil)
-
-type (
-	CreateTableResult *types.TableDescription
+var (
+	_ dialect.Driver = (*Driver)(nil)
 )
