@@ -24,7 +24,7 @@ type (
 	Mutation   = ent.Mutation
 	MutateFunc = ent.MutateFunc
 )
-
+{{- if ne $.Config.Storage.Name "dynamodb" }}
 {{ $tmpl := printf "dialect/%s/order/signature" $.Storage }}
 {{ xtemplate $tmpl . }}
 
@@ -72,7 +72,7 @@ func As(fn AggregateFunc, end string) AggregateFunc {
 		{{ end -}}
 	}
 {{ end }}
-
+{{ end }}
 // ValidationError returns when validating a field or edge fails.
 type ValidationError struct {
 	Name string // Field or edge name.
@@ -189,8 +189,7 @@ func IsConstraintError(err error) bool {
 	var e *ConstraintError
 	return errors.As(err, &e)
 }
-
-
+{{ if ne $.Config.Storage.Name "dynamodb" }}
 // selector embedded by the different Select/GroupBy builders.
 type selector struct {
     label string
@@ -267,4 +266,5 @@ func (s *selector) ScanX(ctx context.Context, v any) {
 	{{ xtemplate $tmpl $ }}
 {{ end }}
 
+{{ end }}
 {{ end }}

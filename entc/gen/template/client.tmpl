@@ -14,10 +14,10 @@ type Client struct {
 		// Schema is the client for creating, migrating and dropping schema.
 		Schema *migrate.Schema
 	{{- end }}
-{{/*	{{- range $n := $.Nodes }}*/}}
-{{/*		// {{ $n.Name }} is the client for interacting with the {{ $n.Name }} builders.*/}}
-{{/*		{{ $n.Name }} *{{ $n.Name }}Client*/}}
-{{/*	{{- end }}*/}}
+	{{- range $n := $.Nodes }}
+		// {{ $n.Name }} is the client for interacting with the {{ $n.Name }} builders.
+		{{ $n.Name }} *{{ $n.Name }}Client
+	{{- end }}
 	{{- template "client/fields/additional" $ }}
 	{{- with $tmpls := matchTemplate "client/fields/additional/*" }}
 		{{- range $tmpl := $tmpls }}
@@ -39,9 +39,9 @@ func (c *Client) init() {
 	{{- if $.SupportMigrate }}
 		c.Schema = migrate.NewSchema(c.driver)
 	{{- end }}
-{{/*	{{- range $n := $.Nodes }}*/}}
-{{/*    	c.{{ $n.Name }} = New{{ $n.Name }}Client(c.config)*/}}
-{{/*	{{- end }}*/}}
+	{{- range $n := $.Nodes }}
+    	c.{{ $n.Name }} = New{{ $n.Name }}Client(c.config)
+	{{- end }}
 }
 {{ end }}
 
@@ -142,6 +142,7 @@ func (c *Client) Use(hooks ...Hook) {
 		{{- xtemplate $tmpl $ }}
 	{{- end }}
 {{- end }}
+{{- end }}
 
 {{ range $n := $.Nodes }}
 {{ $client := print $n.Name "Client" }}
@@ -157,11 +158,13 @@ func New{{ $client }}(c config) *{{ $client }} {
 	return &{{ $client }}{config: c}
 }
 
+{{- if ne $.Config.Storage.Name "dynamodb" }}
 // Use adds a list of mutation hooks to the hooks stack.
 // A call to `Use(f, g, h)` equals to `{{ $n.Package }}.Hooks(f(g(h())))`.
 func (c *{{ $client }}) Use(hooks ...Hook) {
 	c.hooks.{{ $n.Name }} = append(c.hooks.{{ $n.Name }}, hooks...)
 }
+{{- end }}
 
 // Create returns a builder for creating a {{ $n.Name }} entity.
 func (c *{{ $client }}) Create() *{{ $n.CreateName }} {
@@ -169,6 +172,7 @@ func (c *{{ $client }}) Create() *{{ $n.CreateName }} {
 	return &{{ $n.CreateName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+{{- if ne $.Config.Storage.Name "dynamodb" }}
 // CreateBulk returns a builder for creating a bulk of {{ $n.Name }} entities.
 func (c *{{ $client }}) CreateBulk(builders ...*{{ $n.CreateName }}) *{{ $n.CreateBulkName }} {
 	return &{{ $n.CreateBulkName }}{config: c.config, builders: builders}
@@ -274,7 +278,7 @@ func (c *{{ $client }}) {{ $func }}({{ $arg }} *{{ $n.Name }}) *{{ $builder }} {
 	{{- end }}
 }
 {{ end }}
-
+{{ end }}
 // Hooks returns the client hooks.
 func (c *{{ $client }}) Hooks() []Hook {
 	{{- if or $n.NumHooks $n.NumPolicy }}
@@ -285,7 +289,6 @@ func (c *{{ $client }}) Hooks() []Hook {
 	{{- end }}
 }
 
-{{ end }}
 {{ end }}
 {{ end }}
 

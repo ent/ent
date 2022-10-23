@@ -12,30 +12,33 @@ import (
 
 const (
 	CreateTableOperation = "CreateTable"
+	PutItemOperation     = "PutItem"
 )
 
-// CreateTableArgs contains input for CreateTable operation
-type CreateTableArgs struct {
-	Name string
-	Opts *dynamodb.CreateTableInput
-}
+type (
+	// CreateTableArgs contains input for CreateTable operation.
+	CreateTableArgs struct {
+		Name string
+		Opts *dynamodb.CreateTableInput
+	}
 
-// CreateTableBuilder is the builder for CreateTableArgs
-type CreateTableBuilder struct {
-	attributeDefinitions []types.AttributeDefinition
-	keySchema            []types.KeySchemaElement
-	provisiondThroughput *types.ProvisionedThroughput
-	tableName            string
-}
+	// CreateTableBuilder is the builder for CreateTableArgs.
+	CreateTableBuilder struct {
+		attributeDefinitions []types.AttributeDefinition
+		keySchema            []types.KeySchemaElement
+		provisiondThroughput *types.ProvisionedThroughput
+		tableName            string
+	}
+)
 
-// CreateTable returns a builder for CreateTable operation
+// CreateTable returns a builder for CreateTable operation.
 func CreateTable(name string) *CreateTableBuilder {
 	return &CreateTableBuilder{
 		tableName: name,
 	}
 }
 
-// AddAttribute adds one attribute to the table
+// AddAttribute adds one attribute to the table.
 func (c *CreateTableBuilder) AddAttribute(attributeName string, attributeType types.ScalarAttributeType) *CreateTableBuilder {
 	c.attributeDefinitions = append(c.attributeDefinitions, types.AttributeDefinition{
 		AttributeName: aws.String(attributeName),
@@ -44,7 +47,7 @@ func (c *CreateTableBuilder) AddAttribute(attributeName string, attributeType ty
 	return c
 }
 
-// AddKeySchemaElement adds one element to the key schema of the table
+// AddKeySchemaElement adds one element to the key schema of the table.
 func (c *CreateTableBuilder) AddKeySchemaElement(attributeName string, keyType types.KeyType) *CreateTableBuilder {
 	c.keySchema = append(c.keySchema, types.KeySchemaElement{
 		AttributeName: aws.String(attributeName),
@@ -53,7 +56,7 @@ func (c *CreateTableBuilder) AddKeySchemaElement(attributeName string, keyType t
 	return c
 }
 
-// SetProvisionedThroughput sets the provisioned throughput of the table
+// SetProvisionedThroughput sets the provisioned throughput of the table.
 func (c *CreateTableBuilder) SetProvisionedThroughput(readCap, writeCap int) *CreateTableBuilder {
 	c.provisiondThroughput = &types.ProvisionedThroughput{
 		ReadCapacityUnits:  aws.Int64(int64(readCap)),
@@ -62,7 +65,7 @@ func (c *CreateTableBuilder) SetProvisionedThroughput(readCap, writeCap int) *Cr
 	return c
 }
 
-// Op returns name and input for CreateTable operation
+// Op returns name and input for CreateTable operation.
 func (c *CreateTableBuilder) Op() (string, interface{}) {
 	return CreateTableOperation, &CreateTableArgs{
 		Name: c.tableName,
@@ -71,6 +74,42 @@ func (c *CreateTableBuilder) Op() (string, interface{}) {
 			AttributeDefinitions:  c.attributeDefinitions,
 			KeySchema:             c.keySchema,
 			ProvisionedThroughput: c.provisiondThroughput,
+		},
+	}
+}
+
+type (
+	// PutItemArgs contains input for PutItem operation.
+	PutItemArgs struct {
+		Opts *dynamodb.PutItemInput
+	}
+
+	// PutItemBuilder is the builder for PutItemArgs.
+	PutItemBuilder struct {
+		item      map[string]types.AttributeValue
+		tableName string
+	}
+)
+
+// PutItem returns a builder for PutItem operation.
+func PutItem(tableName string) *PutItemBuilder {
+	return &PutItemBuilder{
+		tableName: tableName,
+	}
+}
+
+// SetItem provides the data of the item to be put to that table.
+func (p *PutItemBuilder) SetItem(i map[string]types.AttributeValue) *PutItemBuilder {
+	p.item = i
+	return p
+}
+
+// Op returns name and input for PutItem operation.
+func (p *PutItemBuilder) Op() (string, interface{}) {
+	return PutItemOperation, &PutItemArgs{
+		Opts: &dynamodb.PutItemInput{
+			TableName: aws.String(p.tableName),
+			Item:      p.item,
 		},
 	}
 }

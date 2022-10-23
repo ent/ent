@@ -95,6 +95,7 @@ func new{{ $mutation }}(c config, op Op, opts ...{{ $mutationOption }}) *{{ $mut
 
 {{ with $n.HasOneFieldID }}
 	{{ $opt := print "with" $n.Name "ID" }}
+	{{ if ne $.Config.Storage.Name "dynamodb"}}
 	// {{ $opt }} sets the ID field of the mutation.
 	func {{ $opt }}(id {{ $n.ID.Type }}) {{ $mutationOption }} {
 		return func(m *{{ $mutation }}) {
@@ -116,6 +117,7 @@ func new{{ $mutation }}(c config, op Op, opts ...{{ $mutationOption }}) *{{ $mut
 			m.{{ $n.ID.BuilderField }} = &id
 		}
 	}
+	{{ end }}
 
 	{{ $opt = print "with" $n.Name }}
 	// {{ $opt }} sets the old {{ $n.Name }} of the mutation.
@@ -136,7 +138,7 @@ func (m {{ $mutation }}) Client() *Client {
 	client.init()
 	return client
 }
-
+{{ if ne $.Config.Storage.Name "dynamodb"}}
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
 func (m {{ $mutation }}) Tx() (*Tx, error) {
@@ -147,6 +149,7 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 	tx.init()
 	return tx, nil
 }
+{{ end }}
 
 {{ with $n.HasOneFieldID }}
 	{{ if $n.ID.UserDefined }}
@@ -166,6 +169,7 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 		return *m.{{ $n.ID.BuilderField }}, true
 	}
 
+	{{ if ne $.Config.Storage.Name "dynamodb"}}
 	// IDs queries the database and returns the entity ids that match the mutation's predicate.
 	// That means, if the mutation is applied within a transaction with an isolation level such
 	// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
@@ -184,6 +188,7 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 			return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 		}
 	}
+	{{ end }}
 {{ end }}
 
 {{ range $f := $n.Fields }}
