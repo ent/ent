@@ -34,7 +34,7 @@ const (
 	{{- $tmpl := printf "dialect/%s/meta/constants" $.Storage }}
 	{{- xtemplate $tmpl $ }}
 )
-
+{{- if ne $.Config.Storage.Name "dynamodb" }}
 {{ $tmpl = printf "dialect/%s/meta/variables" $.Storage }}
 {{ if hasTemplate $tmpl }}
 	{{ xtemplate $tmpl $ }}
@@ -148,7 +148,7 @@ const (
 		{{ xtemplate $tmpl $ }}
 	{{ end }}
 {{ end }}
-
+{{ end }}
 {{ end }}
 
 {{/* A template that can be overridden in order to add additional code for the type package. */}}

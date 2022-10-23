@@ -54,7 +54,7 @@ type {{ $.Name }} struct {
 	{{- /* Additional fields to add by the user. */}}
 	{{- template "model/fields/additional" $ }}
 }
-
+{{- if ne $.Config.Storage.Name "dynamodb"}}
 {{- with $.Edges }}
 // {{ $.Name }}Edges holds the relations/edges for other nodes in the graph.
 type {{ $.Name }}Edges struct {
@@ -136,6 +136,7 @@ func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 		{{ $receiver }}[_i].config = cfg
 	}
 }
+{{ end }}
 {{ end }}
 
 {{/* A template to generate a fmt.Stringer implementation. */}}

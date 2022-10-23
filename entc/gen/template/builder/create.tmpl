@@ -186,7 +186,7 @@ func ({{ $receiver }} *{{ $builder }}) check() error {
 		{{ xtemplate $tmpl $ }}
 	{{- end }}
 {{- end }}
-
+{{- if ne $.Config.Storage.Name "dynamodb" }}
 {{ $bulk := printf "%sCreateBulk" (pascal $.Name) }}
 {{ $receiver = receiver $bulk }}
 
@@ -200,12 +200,12 @@ type {{ $bulk }} struct {
 		{{- xtemplate $tmpl . }}
 	{{- end }}
 }
-
 {{/* If the storage driver supports bulk creation */}}
 {{ $tmpl = printf "dialect/%s/create_bulk" $.Storage }}
 {{ if hasTemplate $tmpl }}
 	{{ with extend $ "Builder" $bulk "Receiver" $receiver }}
 		{{ xtemplate $tmpl . }}
 	{{ end }}
+{{ end }}
 {{ end }}
 {{ end }}

@@ -45,14 +45,14 @@ type (
 var (
 	// Templates holds the template information for a file that the graph is generating.
 	Templates = []TypeTemplate{
-		//{
-		//	Name:   "create",
-		//	Format: pkgf("%s_create.go"),
-		//	ExtendPatterns: []string{
-		//		"dialect/*/create/fields/additional/*",
-		//		"dialect/*/create_bulk/fields/additional/*",
-		//	},
-		//},
+		{
+			Name:   "create",
+			Format: pkgf("%s_create.go"),
+			ExtendPatterns: []string{
+				"dialect/*/create/fields/additional/*",
+				"dialect/*/create_bulk/fields/additional/*",
+			},
+		},
 		//{
 		//	Name:   "update",
 		//	Format: pkgf("%s_update.go"),
@@ -68,10 +68,10 @@ var (
 		//		"dialect/*/query/fields/additional/*",
 		//	},
 		//},
-		//{
-		//	Name:   "model",
-		//	Format: pkgf("%s.go"),
-		//},
+		{
+			Name:   "model",
+			Format: pkgf("%s.go"),
+		},
 		//{
 		//	Name:   "where",
 		//	Format: pkgf("%s/where.go"),
@@ -79,22 +79,22 @@ var (
 		//		"where/additional/*",
 		//	},
 		//},
-		//{
-		//	Name: "meta",
-		//	Format: func(t *Type) string {
-		//		return fmt.Sprintf("%[1]s/%[1]s.go", t.PackageDir())
-		//	},
-		//	ExtendPatterns: []string{
-		//		"meta/additional/*",
-		//	},
-		//},
+		{
+			Name: "meta",
+			Format: func(t *Type) string {
+				return fmt.Sprintf("%[1]s/%[1]s.go", t.PackageDir())
+			},
+			ExtendPatterns: []string{
+				"meta/additional/*",
+			},
+		},
 	}
 	// GraphTemplates holds the templates applied on the graph.
 	GraphTemplates = []GraphTemplate{
-		//{
-		//	Name:   "base",
-		//	Format: "ent.go",
-		//},
+		{
+			Name:   "base",
+			Format: "ent.go",
+		},
 		{
 			Name:   "client",
 			Format: "client.go",
@@ -118,10 +118,10 @@ var (
 				"dialect/*/config/*/*",
 			},
 		},
-		//{
-		//	Name:   "mutation",
-		//	Format: "mutation.go",
-		//},
+		{
+			Name:   "mutation",
+			Format: "mutation.go",
+		},
 		{
 			Name:   "migrate",
 			Format: "migrate/migrate.go",
