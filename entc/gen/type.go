@@ -710,18 +710,13 @@ func (t *Type) setupFKs() error {
 		}
 		// Special case for checking if the FK is already defined as the defined field (see issue 1288, 2205).
 		if key, _ := e.StorageKey(); key != nil && len(key.Columns) == 1 {
-			var definedField *Field
 			colName := key.Columns[0]
-
 			if colName == refid.StorageKey() {
-				definedField = refid
-			} else if df, ok := owner.fields[colName]; ok {
-				definedField = df
-			}
-
-			if definedField != nil {
-				fk.Field = definedField
+				fk.Field = refid
 				fk.UserDefined = true
+			} else if df, ok := owner.fields[colName]; ok {
+				fk.Field = df
+				fk.UserDefined = df.UserDefined
 			}
 		}
 		owner.addFK(fk)
