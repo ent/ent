@@ -7,43 +7,40 @@
 package migrate
 
 import (
-	"entgo.io/ent/dialect/sql/schema"
+	"entgo.io/ent/dialect/dynamodb/schema"
 	"entgo.io/ent/schema/field"
 )
 
 var (
-	// CardsColumns holds the columns for the "cards" table.
-	CardsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+	// CardsAttributes  holds the attributes for the "cards " table.
+	CardsAttributes = []*schema.Attribute{
+		{Name: "id", Type: field.TypeInt},
 		{Name: "expired", Type: field.TypeTime},
 		{Name: "number", Type: field.TypeString},
-		{Name: "user_card", Type: field.TypeInt, Unique: true},
 	}
 	// CardsTable holds the schema information for the "cards" table.
 	CardsTable = &schema.Table{
 		Name:       "cards",
-		Columns:    CardsColumns,
-		PrimaryKey: []*schema.Column{CardsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "cards_users_card",
-				Columns:    []*schema.Column{CardsColumns[3]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
+		Attributes: CardsAttributes,
+		PrimaryKey: []*schema.KeySchema{
+			{AttributeName: "number", KeyType: schema.KeyType("HASH")},
+			{AttributeName: "expired", KeyType: schema.KeyType("RANGE")},
 		},
 	}
-	// UsersColumns holds the columns for the "users" table.
-	UsersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+	// UsersAttributes  holds the attributes for the "users " table.
+	UsersAttributes = []*schema.Attribute{
+		{Name: "id", Type: field.TypeInt},
 		{Name: "age", Type: field.TypeInt},
 		{Name: "name", Type: field.TypeString},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
 		Name:       "users",
-		Columns:    UsersColumns,
-		PrimaryKey: []*schema.Column{UsersColumns[0]},
+		Attributes: UsersAttributes,
+		PrimaryKey: []*schema.KeySchema{
+			{AttributeName: "name", KeyType: schema.KeyType("HASH")},
+			{AttributeName: "age", KeyType: schema.KeyType("RANGE")},
+		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
@@ -51,7 +48,3 @@ var (
 		UsersTable,
 	}
 )
-
-func init() {
-	CardsTable.ForeignKeys[0].RefTable = UsersTable
-}

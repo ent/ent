@@ -8,6 +8,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // Card holds the schema definition for the Card entity.
@@ -33,5 +34,12 @@ func (Card) Edges() []ent.Edge {
 			// to make this edge required on entity creation.
 			// i.e. Card cannot be created without its owner.
 			Required(),
+	}
+}
+
+// Indexes of the Card.
+func (Card) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("number", "expired").Unique(),
 	}
 }
