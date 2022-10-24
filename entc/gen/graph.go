@@ -566,6 +566,7 @@ func (g *Graph) DyTables() (all []*dyschema.Table, err error) {
 	tables := make(map[string]*dyschema.Table)
 	for _, n := range g.Nodes {
 		table := dyschema.NewTable(n.Table())
+		table.AddAttribute(n.ID.DyAttribute())
 		for _, f := range n.Fields {
 			if !f.IsEdgeField() {
 				table.AddAttribute(f.DyAttribute())
