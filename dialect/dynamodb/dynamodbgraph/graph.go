@@ -134,8 +134,14 @@ func (c *creator) node(ctx context.Context) error {
 // to DynamoBD attributes and build steps in dynamodb.PutItemBuilder.
 func (c *creator) insert() error {
 	item := make(map[string]types.AttributeValue)
+	var err error
+	if c.CreateSpec.ID != nil {
+		item[c.CreateSpec.ID.Key], err = attributevalue.Marshal(c.CreateSpec.ID.Value)
+		if err != nil {
+			return err
+		}
+	}
 	for _, fs := range c.CreateSpec.Fields {
-		var err error
 		item[fs.Key], err = attributevalue.Marshal(fs.Value)
 		if err != nil {
 			return err
