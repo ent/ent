@@ -453,8 +453,7 @@ func (t Type) MixedInFields() []int {
 		fields = append(fields, t.ID)
 	}
 	for _, f := range fields {
-		if f.Position != nil && f.Position.MixedIn &&
-			(f.Default || f.UpdateDefault || f.Validators > 0) {
+		if f.Position != nil && f.Position.MixedIn && (f.Default || f.UpdateDefault || f.Validators > 0) {
 			idx[f.Position.MixinIndex] = struct{}{}
 		}
 	}
@@ -621,20 +620,11 @@ func (t *Type) AddIndex(idx *load.Index) error {
 	switch ant := entsqlIndexAnnotate(idx.Annotations); {
 	case ant == nil:
 	case len(ant.PrefixColumns) != 0 && ant.Prefix != 0:
-		return fmt.Errorf(
-			"index %q cannot contain both entsql.Prefix and entsql.PrefixColumn in annotation",
-			index.Name,
-		)
+		return fmt.Errorf("index %q cannot contain both entsql.Prefix and entsql.PrefixColumn in annotation", index.Name)
 	case ant.Prefix != 0 && len(idx.Fields)+len(idx.Edges) != 1:
-		return fmt.Errorf(
-			"entsql.Prefix is used in a multicolumn index %q. Use entsql.PrefixColumn instead",
-			index.Name,
-		)
+		return fmt.Errorf("entsql.Prefix is used in a multicolumn index %q. Use entsql.PrefixColumn instead", index.Name)
 	case len(ant.PrefixColumns) > len(idx.Fields)+len(idx.Fields):
-		return fmt.Errorf(
-			"index %q has more entsql.PrefixColumn than column in its definitions",
-			index.Name,
-		)
+		return fmt.Errorf("index %q has more entsql.PrefixColumn than column in its definitions", index.Name)
 	}
 	for _, name := range idx.Fields {
 		var f *Field
@@ -659,11 +649,7 @@ func (t *Type) AddIndex(idx *load.Index) error {
 		case ed.Rel.Type == O2O && !ed.IsInverse():
 			return fmt.Errorf("non-inverse edge (edge.From) for index %q on O2O relation", name)
 		case ed.Rel.Type != M2O && ed.Rel.Type != O2O:
-			return fmt.Errorf(
-				"relation %s for inverse edge %q is not one of (O2O, M2O)",
-				ed.Rel.Type,
-				name,
-			)
+			return fmt.Errorf("relation %s for inverse edge %q is not one of (O2O, M2O)", ed.Rel.Type, name)
 		default:
 			index.Columns = append(index.Columns, ed.Rel.Column())
 		}
@@ -686,11 +672,7 @@ func (t *Type) setupFKs() error {
 			return fmt.Errorf("%q edge: %w", e.Name, err)
 		}
 		if ef := e.def.Field; ef != "" && !e.OwnFK() {
-			return fmt.Errorf(
-				"edge %q has a field %q but it is not holding a foreign key",
-				e.Name,
-				ef,
-			)
+			return fmt.Errorf("edge %q has a field %q but it is not holding a foreign key", e.Name, ef)
 		}
 		if e.IsInverse() || e.M2M() {
 			continue
@@ -731,9 +713,9 @@ func (t *Type) setupFKs() error {
 			var definedField *Field
 			colName := key.Columns[0]
 
-			if colName == refid.StorageKey() { // colName == "id"
+			if colName == refid.StorageKey() {
 				definedField = refid
-			} else if df, ok := owner.fields[colName]; ok { // colName == "defined field"
+			} else if df, ok := owner.fields[colName]; ok {
 				definedField = df
 			}
 
@@ -757,38 +739,16 @@ func (t *Type) setupFieldEdge(fk *ForeignKey, fkOwner *Edge, fkName string) erro
 	case !ok:
 		return fmt.Errorf("field %q was not found in the schema for edge %q", fkName, fkOwner.Name)
 	case tf.Optional && !fkOwner.Optional:
-		return fmt.Errorf(
-			"edge-field %q was set as Optional, but edge %q is not",
-			fkName,
-			fkOwner.Name,
-		)
+		return fmt.Errorf("edge-field %q was set as Optional, but edge %q is not", fkName, fkOwner.Name)
 	case !tf.Optional && fkOwner.Optional:
-		return fmt.Errorf(
-			"edge %q was set as Optional, but edge-field %q is not",
-			fkOwner.Name,
-			fkName,
-		)
+		return fmt.Errorf("edge %q was set as Optional, but edge-field %q is not", fkOwner.Name, fkName)
 	case tf.Immutable && !fkOwner.Immutable:
-		return fmt.Errorf(
-			"edge-field %q was set as Immutable, but edge %q is not",
-			fkName,
-			fkOwner.Name,
-		)
+		return fmt.Errorf("edge-field %q was set as Immutable, but edge %q is not", fkName, fkOwner.Name)
 	case !tf.Immutable && fkOwner.Immutable:
-		return fmt.Errorf(
-			"edge %q was set as Immutable, but edge-field %q is not",
-			fkOwner.Name,
-			fkName,
-		)
+		return fmt.Errorf("edge %q was set as Immutable, but edge-field %q is not", fkOwner.Name, fkName)
 	}
 	if t1, t2 := tf.Type.Type, fkOwner.Type.ID.Type.Type; t1 != t2 {
-		return fmt.Errorf(
-			"mismatch field type between edge field %q and id of type %q (%s != %s)",
-			fkName,
-			fkOwner.Type.Name,
-			t1,
-			t2,
-		)
+		return fmt.Errorf("mismatch field type between edge field %q and id of type %q (%s != %s)", fkName, fkOwner.Type.Name, t1, t2)
 	}
 	fk.UserDefined = true
 	tf.fk, fk.Field = fk, tf
@@ -867,19 +827,14 @@ func (t Type) MutationName() string {
 // SiblingImports returns all sibling packages that are needed for the different builders.
 func (t Type) SiblingImports() []struct{ Alias, Path string } {
 	var (
-		imports = []struct{ Alias, Path string }{
-			{Alias: t.PackageAlias(), Path: path.Join(t.Config.Package, t.PackageDir())},
-		}
-		seen = map[string]bool{imports[0].Path: true}
+		imports = []struct{ Alias, Path string }{{Alias: t.PackageAlias(), Path: path.Join(t.Config.Package, t.PackageDir())}}
+		seen    = map[string]bool{imports[0].Path: true}
 	)
 	for _, e := range t.Edges {
 		p := path.Join(t.Config.Package, e.Type.PackageDir())
 		if !seen[p] {
 			seen[p] = true
-			imports = append(
-				imports,
-				struct{ Alias, Path string }{Alias: e.Type.PackageAlias(), Path: p},
-			)
+			imports = append(imports, struct{ Alias, Path string }{Alias: e.Type.PackageAlias(), Path: p})
 		}
 	}
 	return imports
@@ -970,12 +925,7 @@ func (t *Type) checkField(tf *Field, f *load.Field) (err error) {
 			f.Info.Ident = fmt.Sprintf("%s.%s", t.PackageDir(), pascal(f.Name))
 		}
 	case tf.Validators > 0 && !tf.ConvertedToBasic():
-		err = fmt.Errorf(
-			"GoType %q for field %q must be converted to the basic %q type for validators",
-			tf.Type,
-			f.Name,
-			tf.Type.Type,
-		)
+		err = fmt.Errorf("GoType %q for field %q must be converted to the basic %q type for validators", tf.Type, f.Name, tf.Type.Type)
 	}
 	return err
 }
@@ -1852,11 +1802,7 @@ func (e *Edge) setStorageKey() error {
 	case len(key.Columns) == 1 && rel.Type == M2M:
 		return fmt.Errorf("%s edge have 2 columns. Use edge.Columns(to, from) instead", e.Rel.Type)
 	case len(key.Columns) > 1 && rel.Type != M2M:
-		return fmt.Errorf(
-			"%s edge does not have 2 columns. Use edge.Column(%s) instead",
-			e.Rel.Type,
-			key.Columns[0],
-		)
+		return fmt.Errorf("%s edge does not have 2 columns. Use edge.Column(%s) instead", e.Rel.Type, key.Columns[0])
 	}
 	if key.Table != "" {
 		e.Rel.Table = key.Table
