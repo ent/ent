@@ -18,7 +18,6 @@ import (
 	"unicode"
 
 	"entgo.io/ent"
-	dyschema "entgo.io/ent/dialect/dynamodb/schema"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/entc/load"
@@ -1343,14 +1342,6 @@ func (f Field) Column() *schema.Column {
 	return c
 }
 
-// DyAttribute converts template Field to DynamoDB attribute.
-func (f Field) DyAttribute() *dyschema.Attribute {
-	return &dyschema.Attribute{
-		Name: f.Name,
-		Type: f.Type.Type,
-	}
-}
-
 // incremental returns if the column has an incremental behavior.
 // If no value is defined externally, we use a provided def flag
 func (f Field) incremental(def bool) bool {
@@ -1648,9 +1639,6 @@ func (e Edge) InverseTableConstant() string { return pascal(e.Name) + "InverseTa
 
 // ColumnConstant returns the constant name of the relation column.
 func (e Edge) ColumnConstant() string { return pascal(e.Name) + "Column" }
-
-// AttributeConstant returns the attribute name of the relation column.
-func (e Edge) AttributeConstant() string { return pascal(e.Name) + "Attribute" }
 
 // PKConstant returns the constant name of the primary key. Used for M2M edges.
 func (e Edge) PKConstant() string { return pascal(e.Name) + "PrimaryKey" }
