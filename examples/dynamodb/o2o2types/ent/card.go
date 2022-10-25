@@ -21,7 +21,8 @@ type Card struct {
 	Number string `json:"number,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CardQuery when eager-loading is set.
-	Edges CardEdges `json:"edges"`
+	Edges     CardEdges `json:"edges"`
+	user_card *int
 }
 
 // CardEdges holds the relations/edges for other nodes in the graph.
