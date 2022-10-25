@@ -24,6 +24,6 @@ const (
 	// CardInverseTable is the table name for the Card entity.
 	// It exists in this package in order to avoid circular dependency with the "card" package.
 	CardInverseTable = "cards"
-	// CardColumn is the table column denoting the card relation/edge.
-	CardColumn = "user_card"
+	// CardAttribute is the table column denoting the card relation/edge.
+	CardAttribute = "user_card"
 )
