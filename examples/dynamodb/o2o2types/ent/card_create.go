@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/dynamodb/dynamodbgraph"
 	"entgo.io/ent/examples/dynamodb/o2o2types/ent/card"
+	"entgo.io/ent/examples/dynamodb/o2o2types/ent/user"
 	"entgo.io/ent/schema/field"
 )
 
@@ -179,6 +180,26 @@ func (cc *CardCreate) createSpec() (*Card, *dynamodbgraph.CreateSpec) {
 			Key:   card.FieldNumber,
 		})
 		_node.Number = value
+	}
+	if nodes := cc.mutation.OwnerIDs(); len(nodes) > 0 {
+		edge := &dynamodbgraph.EdgeSpec{
+			Rel:        dynamodbgraph.O2O,
+			Inverse:    true,
+			Table:      card.OwnerTable,
+			Attributes: []string{card.OwnerAttribute},
+			Bidi:       false,
+			Target: &dynamodbgraph.EdgeTarget{
+				IDSpec: &dynamodbgraph.FieldSpec{
+					Type: field.TypeInt,
+					Key:  user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.user_card = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

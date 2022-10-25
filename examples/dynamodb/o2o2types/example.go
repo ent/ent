@@ -36,6 +36,7 @@ func main() {
 func Do(ctx context.Context, client *ent.Client) error {
 	a8m, err := client.User.
 		Create().
+		SetID(1).
 		SetAge(30).
 		SetName("Mashraki").
 		Save(ctx)
@@ -49,6 +50,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 	}
 	_, err = client.Card.
 		Create().
+		SetID(1).
 		SetOwner(a8m).
 		SetNumber("1020").
 		SetExpired(expired).
