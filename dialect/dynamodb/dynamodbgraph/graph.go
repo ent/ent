@@ -41,12 +41,12 @@ type (
 
 	// EdgeSpec holds the information for updating a field in the database.
 	EdgeSpec struct {
-		Rel     Rel
-		Inverse bool
-		Table   string
-		Keys    []string
-		Bidi    bool        // bidirectional edge.
-		Target  *EdgeTarget // target nodes.
+		Rel        Rel
+		Inverse    bool
+		Table      string
+		Attributes []string
+		Bidi       bool        // bidirectional edge.
+		Target     *EdgeTarget // target nodes.
 	}
 
 	// EdgeSpecs used for perform common operations on list of edges.

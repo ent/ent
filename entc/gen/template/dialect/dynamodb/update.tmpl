@@ -1,0 +1,29 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{/* gotype: entgo.io/ent/entc/gen.Type*/}}
+
+{{ define "dialect/dynamodb/defedge" }}
+	{{- $e := $.Scope.Edge -}}
+	edge := &dynamodbgraph.EdgeSpec{
+		Rel: dynamodbgraph.{{ $e.Rel.Type }},
+		Inverse: {{ $e.IsInverse }},
+		Table: {{ $.Package }}.{{ $e.TableConstant }},
+		Attributes: {{ if $e.M2M }}{{ $.Package }}.{{ $e.AttributeConstant }}{{ else }}[]string{ {{ $.Package }}.{{ $e.AttributeConstant }} }{{ end }},
+		Bidi: {{ $e.Bidi }},
+		Target: &dynamodbgraph.EdgeTarget{
+			IDSpec: &dynamodbgraph.FieldSpec{
+				Type: field.{{ $e.Type.ID.Type.ConstName }},
+				Key: {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }},
+			},
+		},
+	}
+	{{- with $.Scope.Nodes }}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+	{{- end }}
+{{- end }}
