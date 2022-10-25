@@ -54,7 +54,6 @@ type {{ $.Name }} struct {
 	{{- /* Additional fields to add by the user. */}}
 	{{- template "model/fields/additional" $ }}
 }
-{{- if ne $.Config.Storage.Name "dynamodb"}}
 {{- with $.Edges }}
 // {{ $.Name }}Edges holds the relations/edges for other nodes in the graph.
 type {{ $.Name }}Edges struct {
@@ -68,7 +67,7 @@ type {{ $.Name }}Edges struct {
 	{{- /* Additional fields to add by the user. */}}
 	{{- template "model/edges/fields/additional" $ }}
 }
-
+{{- if ne $.Config.Storage.Name "dynamodb"}}
 {{- range $i, $e := . }}
 	// {{ $e.StructField }}OrErr returns the {{ $e.StructField }} value or an error if the edge
 	// was not loaded in eager-loading{{ if $e.Unique }}, or loaded but was not found{{ end }}.
@@ -86,7 +85,8 @@ type {{ $.Name }}Edges struct {
 	}
 {{- end }}
 {{- end }}
-
+{{- end }}
+{{- if ne $.Config.Storage.Name "dynamodb"}}
 {{ $tmpl = printf "dialect/%s/decode/one" $.Storage }}
 {{ xtemplate $tmpl $ }}
 

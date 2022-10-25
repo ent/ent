@@ -19,3 +19,12 @@ type User struct {
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges UserEdges `json:"edges"`
 }
+
+// UserEdges holds the relations/edges for other nodes in the graph.
+type UserEdges struct {
+	// Card holds the value of the card edge.
+	Card *Card `json:"card,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
