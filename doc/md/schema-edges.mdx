@@ -160,6 +160,8 @@ edge is also a *M2M* (many-to-many) relationship.
 A schema that defines an edge using the `edge.To` builder owns the relation,
 unlike using the `edge.From` builder that gives only a back-reference for the relation (with a different name).
 
+In case of O2M and M2O the edge with M owns the foreign key. In case of O2O the edge with `edge.From` owns the foreign key.
+
 Let's go over a few examples that show how to define different relation types using edges.
 
 ## Relationship
