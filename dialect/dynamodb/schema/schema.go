@@ -66,7 +66,7 @@ func (c *Attribute) dynamoType() types.ScalarAttributeType {
 	switch c.Type {
 	case field.TypeInt:
 		return types.ScalarAttributeTypeN
-	case field.TypeString:
+	case field.TypeString, field.TypeTime:
 		return types.ScalarAttributeTypeS
 	case field.TypeBytes:
 		return types.ScalarAttributeTypeB
