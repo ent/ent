@@ -710,18 +710,29 @@ func (t *Type) setupFKs() error {
 		}
 		// Special case for checking if the FK is already defined as the defined field (see issue 1288, 2205).
 		if key, _ := e.StorageKey(); key != nil && len(key.Columns) == 1 {
-			colName := key.Columns[0]
-			if colName == refid.StorageKey() {
+			key := key.Columns[0]
+			if key == refid.StorageKey() {
 				fk.Field = refid
 				fk.UserDefined = true
-			} else if df, ok := owner.fields[colName]; ok {
-				fk.Field = df
-				fk.UserDefined = df.UserDefined
+			} else if f, ok := owner.getFieldFromStorageKey(key); ok {
+				if err := owner.setupFieldEdge(fk, e, f.Name); err != nil {
+					return err
+				}
 			}
 		}
 		owner.addFK(fk)
 	}
 	return nil
+}
+
+// getFieldFromStorageKey return *Field from given storageKey.
+func (t *Type) getFieldFromStorageKey(storageKey string) (*Field, bool) {
+	for i := range t.Fields {
+		if t.Fields[i].StorageKey() == storageKey {
+			return t.Fields[i], true
+		}
+	}
+	return nil, false
 }
 
 // setupEdgeField check the field-edge validity and configures it and its foreign-key.
