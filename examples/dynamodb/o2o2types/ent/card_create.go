@@ -36,6 +36,12 @@ func (cc *CardCreate) SetNumber(s string) *CardCreate {
 	return cc
 }
 
+// SetID sets the "id" field.
+func (cc *CardCreate) SetID(i int) *CardCreate {
+	cc.mutation.SetID(i)
+	return cc
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (cc *CardCreate) SetOwnerID(id int) *CardCreate {
 	cc.mutation.SetOwnerID(id)
@@ -154,6 +160,10 @@ func (cc *CardCreate) createSpec() (*Card, *dynamodbgraph.CreateSpec) {
 			},
 		}
 	)
+	if id, ok := cc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
 	if value, ok := cc.mutation.Expired(); ok {
 		_spec.Fields = append(_spec.Fields, &dynamodbgraph.FieldSpec{
 			Type:  field.TypeTime,

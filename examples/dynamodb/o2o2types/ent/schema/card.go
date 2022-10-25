@@ -19,6 +19,7 @@ type Card struct {
 // Fields of the Card.
 func (Card) Fields() []ent.Field {
 	return []ent.Field{
+		field.Int("id"),
 		field.Time("expired"),
 		field.String("number"),
 	}

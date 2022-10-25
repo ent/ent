@@ -85,6 +85,12 @@ func (m CardMutation) Client() *Client {
 	return client
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Card entities.
+func (m *CardMutation) SetID(id int) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
 func (m *CardMutation) ID() (id int, exists bool) {
@@ -464,6 +470,12 @@ func (m UserMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of User entities.
+func (m *UserMutation) SetID(id int) {
+	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available

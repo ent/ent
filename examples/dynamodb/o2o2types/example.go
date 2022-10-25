@@ -10,15 +10,14 @@ import (
 	"log"
 	"time"
 
-	"entgo.io/ent/examples/o2o2types/ent"
+	"entgo.io/ent/examples/dynamodb/o2o2types/ent"
 )
 
-func Example_O2O2Types() {
+func main() {
 	client, err := ent.Open("dynamodb", "")
 	if err != nil {
-		log.Fatalf("failed opening connection to sqlite: %v", err)
+		log.Fatalf("failed opening connection to dynamodb: %v", err)
 	}
-	defer client.Close()
 	ctx := context.Background()
 	// Run the auto migration tool.
 	if err := client.Schema.Create(ctx); err != nil {
@@ -48,7 +47,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 	if err != nil {
 		return err
 	}
-	card1, err := client.Card.
+	_, err = client.Card.
 		Create().
 		SetOwner(a8m).
 		SetNumber("1020").
@@ -57,20 +56,20 @@ func Do(ctx context.Context, client *ent.Client) error {
 	if err != nil {
 		return fmt.Errorf("creating card: %w", err)
 	}
-	fmt.Println("card:", card1)
-	// Only returns the card of the user,
-	// and expects that there's only one.
-	card2, err := a8m.QueryCard().Only(ctx)
-	if err != nil {
-		return fmt.Errorf("querying card: %w", err)
-	}
-	fmt.Println("card:", card2)
-	// The Card entity is able to query its owner using
-	// its back-reference.
-	owner, err := card2.QueryOwner().Only(ctx)
-	if err != nil {
-		return fmt.Errorf("querying owner: %w", err)
-	}
-	fmt.Println("owner:", owner)
+	//fmt.Println("card:", card1)
+	//// Only returns the card of the user,
+	//// and expects that there's only one.
+	//card2, err := a8m.QueryCard().Only(ctx)
+	//if err != nil {
+	//	return fmt.Errorf("querying card: %w", err)
+	//}
+	//fmt.Println("card:", card2)
+	//// The Card entity is able to query its owner using
+	//// its back-reference.
+	//owner, err := card2.QueryOwner().Only(ctx)
+	//if err != nil {
+	//	return fmt.Errorf("querying owner: %w", err)
+	//}
+	//fmt.Println("owner:", owner)
 	return nil
 }

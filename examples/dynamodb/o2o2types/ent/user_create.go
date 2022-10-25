@@ -35,6 +35,12 @@ func (uc *UserCreate) SetName(s string) *UserCreate {
 	return uc
 }
 
+// SetID sets the "id" field.
+func (uc *UserCreate) SetID(i int) *UserCreate {
+	uc.mutation.SetID(i)
+	return uc
+}
+
 // SetCardID sets the "card" edge to the Card entity by ID.
 func (uc *UserCreate) SetCardID(id int) *UserCreate {
 	uc.mutation.SetCardID(id)
@@ -158,6 +164,10 @@ func (uc *UserCreate) createSpec() (*User, *dynamodbgraph.CreateSpec) {
 			},
 		}
 	)
+	if id, ok := uc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
 	if value, ok := uc.mutation.Age(); ok {
 		_spec.Fields = append(_spec.Fields, &dynamodbgraph.FieldSpec{
 			Type:  field.TypeInt,
