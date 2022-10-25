@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"testing"
 
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/entc/load"
 	"entgo.io/ent/schema/field"
 
@@ -515,4 +516,65 @@ func TestDependencyAnnotation_Build(t *testing.T) {
 		require.NoError(t, d.Build())
 		require.Equal(t, tt.field, d.Field)
 	}
+}
+
+func TestGraph_AnnotationOnDelete(t *testing.T) {
+	ondeleteAnn := entsql.Annotation{OnDelete: entsql.Cascade}
+	ann := dict(ondeleteAnn.Name(), ondeleteAnn)
+	require := require.New(t)
+
+	// pets relation is o2m. Delete annotation should be pet but is on user
+	_, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, &load.Schema{
+		Name: "User",
+		Edges: []*load.Edge{
+			{Name: "pets", Type: "Pet", Annotations: ann},
+		},
+	}, &load.Schema{Name: "Pet"})
+	require.Error(err, "not owner of foreign key")
+
+	// pets relation is o2m. Delete annotation should be on pet userEdge
+	userEdge := &load.Edge{Name: "pets", Type: "Pet"}
+	_, err = NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, &load.Schema{
+		Name:  "User",
+		Edges: []*load.Edge{userEdge},
+	}, &load.Schema{
+		Name: "Pet",
+		Edges: []*load.Edge{
+			{Name: "owner", Type: "User", Unique: true, Ref: userEdge, Annotations: ann},
+		}})
+	require.NoError(err)
+
+	// pets relation is m2o. Delete annotation should be on user edge
+	userEdge = &load.Edge{Name: "pets", Unique: true, Type: "Pet"}
+	_, err = NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, &load.Schema{
+		Name:  "User",
+		Edges: []*load.Edge{userEdge},
+	}, &load.Schema{
+		Name: "Pet",
+		Edges: []*load.Edge{
+			{Name: "owner", Type: "User", Ref: userEdge, Annotations: ann},
+		}})
+	require.Error(err, "not owner of foreign key")
+
+	// pets relation is m2o. Delete annotation should be on user edge
+	_, err = NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, &load.Schema{
+		Name: "User",
+		Edges: []*load.Edge{
+			{Name: "pet", Type: "Pet", Unique: true, Annotations: ann},
+		},
+	}, &load.Schema{
+		Name: "Pet"})
+	require.NoError(err)
+
+	// pets relation is o2o. Delete annotation should be on pet edge
+	userEdge = &load.Edge{Name: "pets", Unique: true, Type: "Pet"}
+	_, err = NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, &load.Schema{
+		Name:  "User",
+		Edges: []*load.Edge{userEdge},
+	}, &load.Schema{
+		Name: "Pet",
+		Edges: []*load.Edge{
+			{Name: "owner", Type: "User", Unique: true, Ref: userEdge, Annotations: ann},
+		}})
+	require.NoError(err)
 }

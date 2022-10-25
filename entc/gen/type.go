@@ -678,6 +678,11 @@ func (t *Type) setupFKs() error {
 			continue
 		}
 		owner, refid := t, e.Type.ID
+
+		if err := owner.checkOnDeleteAnnotation(e); err != nil {
+			return err
+		}
+
 		if !e.OwnFK() {
 			owner, refid = e.Type, t.ID
 		}
@@ -714,6 +719,16 @@ func (t *Type) setupFKs() error {
 			fk.UserDefined = true
 		}
 		owner.addFK(fk)
+	}
+	return nil
+}
+
+// checkOnDeleteAnnotation checks that onDelete annotation is on the correct edge
+func (t *Type) checkOnDeleteAnnotation(fkOwner *Edge) error {
+	if ant := fkOwner.EntSQL(); ant != nil && ant.OnDelete != "" {
+		if !fkOwner.OwnFK() {
+			return errors.New("not owner of foreign key. OnDelete annotation has to be on other side of edge")
+		}
 	}
 	return nil
 }
