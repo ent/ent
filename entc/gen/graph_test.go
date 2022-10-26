@@ -301,18 +301,44 @@ func TestFKColumns(t *testing.T) {
 			{Name: "big_pets", Type: "Pet", StorageKey: &edge.StorageKey{Columns: []string{"user_of_big_pet_id"}}},
 		},
 	}
+
 	require := require.New(t)
 	graph, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, user, &load.Schema{
 		Name: "Pet",
-		Fields: []*load.Field{
-			{Name: "user_of_big_pet_id", Info: &field.TypeInfo{Type: field.TypeInt}, Optional: true},
-		},
-		Edges: []*load.Edge{
-			{Name: "user_of_big_pet", Type: "User", Unique: true},
-		},
 	})
 	require.NoError(err)
 	t1 := graph.Nodes[0]
+	for i, r := range []Relation{
+		{Type: O2M, Table: "pets", Columns: []string{"user_pets"}},
+		{Type: M2O, Table: "users", Columns: []string{"user_pet"}},
+		{Type: O2O, Table: "users", Columns: []string{"user_parent"}},
+		{Type: O2M, Table: "pets", Columns: []string{"user_of_big_pet_id"}},
+	} {
+		require.Equal(r.Type, t1.Edges[i].Rel.Type)
+		require.Equal(r.Table, t1.Edges[i].Rel.Table)
+		require.Equal(r.Columns, t1.Edges[i].Rel.Columns)
+	}
+
+	for i, r := range []bool{false, false, false, false} {
+		require.Equal(r, t1.Edges[i].Rel.fk.UserDefined)
+	}
+
+	// Adding inverse edges.
+	graph, err = NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, user,
+		&load.Schema{
+			Name: "Pet",
+			Fields: []*load.Field{
+				{Name: "user_of_big_pet_id", Info: &field.TypeInfo{Type: field.TypeInt}, Optional: true},
+			},
+			Edges: []*load.Edge{
+				{Name: "owner", Type: "User", RefName: "pets", Inverse: true, Unique: true},
+				{Name: "team", Type: "User", RefName: "pet", Inverse: true},
+				{Name: "user_of_big_pet", Type: "User", Unique: true, Inverse: true, RefName: "big_pets"},
+			},
+		},
+	)
+	require.NoError(err)
+	t1, t2 := graph.Nodes[0], graph.Nodes[1]
 	for i, r := range []Relation{
 		{Type: O2M, Table: "pets", Columns: []string{"user_pets"}},
 		{Type: M2O, Table: "users", Columns: []string{"user_pet"}},
@@ -328,33 +354,18 @@ func TestFKColumns(t *testing.T) {
 		require.Equal(r, t1.Edges[i].Rel.fk.UserDefined)
 	}
 
-	// Adding inverse edges.
-	graph, err = NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, user,
-		&load.Schema{
-			Name: "Pet",
-			Edges: []*load.Edge{
-				{Name: "owner", Type: "User", RefName: "pets", Inverse: true, Unique: true},
-				{Name: "team", Type: "User", RefName: "pet", Inverse: true},
-			},
-		},
-	)
-	require.NoError(err)
-	t1, t2 := graph.Nodes[0], graph.Nodes[1]
-	for i, r := range []Relation{
-		{Type: O2M, Table: "pets", Columns: []string{"user_pets"}},
-		{Type: M2O, Table: "users", Columns: []string{"user_pet"}},
-	} {
-		require.Equal(r.Type, t1.Edges[i].Rel.Type)
-		require.Equal(r.Table, t1.Edges[i].Rel.Table)
-		require.Equal(r.Columns, t1.Edges[i].Rel.Columns)
-	}
 	for i, r := range []Relation{
 		{Type: M2O, Table: "pets", Columns: []string{"user_pets"}},
 		{Type: O2M, Table: "users", Columns: []string{"user_pet"}},
+		{Type: M2O, Table: "pets", Columns: []string{"user_of_big_pet_id"}},
 	} {
 		require.Equal(r.Type, t2.Edges[i].Rel.Type)
 		require.Equal(r.Table, t2.Edges[i].Rel.Table)
 		require.Equal(r.Columns, t2.Edges[i].Rel.Columns)
+	}
+
+	for i, r := range []bool{false, false, true} {
+		require.Equal(r, t2.Edges[i].Rel.fk.UserDefined)
 	}
 }
 
