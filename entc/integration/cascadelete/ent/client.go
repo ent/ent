@@ -197,7 +197,7 @@ func (c *CommentClient) DeleteOne(co *Comment) *CommentDeleteOne {
 	return c.DeleteOneID(co.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *CommentClient) DeleteOneID(id int) *CommentDeleteOne {
 	builder := c.Delete().Where(comment.ID(id))
 	builder.mutation.id = &id
@@ -303,7 +303,7 @@ func (c *PostClient) DeleteOne(po *Post) *PostDeleteOne {
 	return c.DeleteOneID(po.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *PostClient) DeleteOneID(id int) *PostDeleteOne {
 	builder := c.Delete().Where(post.ID(id))
 	builder.mutation.id = &id
@@ -425,7 +425,7 @@ func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
 	return c.DeleteOneID(u.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id

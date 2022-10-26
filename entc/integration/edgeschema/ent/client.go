@@ -268,7 +268,7 @@ func (c *FriendshipClient) DeleteOne(f *Friendship) *FriendshipDeleteOne {
 	return c.DeleteOneID(f.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *FriendshipClient) DeleteOneID(id int) *FriendshipDeleteOne {
 	builder := c.Delete().Where(friendship.ID(id))
 	builder.mutation.id = &id
@@ -390,7 +390,7 @@ func (c *GroupClient) DeleteOne(gr *Group) *GroupDeleteOne {
 	return c.DeleteOneID(gr.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
 	builder := c.Delete().Where(group.ID(id))
 	builder.mutation.id = &id
@@ -592,7 +592,7 @@ func (c *RelationshipInfoClient) DeleteOne(ri *RelationshipInfo) *RelationshipIn
 	return c.DeleteOneID(ri.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *RelationshipInfoClient) DeleteOneID(id int) *RelationshipInfoDeleteOne {
 	builder := c.Delete().Where(relationshipinfo.ID(id))
 	builder.mutation.id = &id
@@ -682,7 +682,7 @@ func (c *RoleClient) DeleteOne(r *Role) *RoleDeleteOne {
 	return c.DeleteOneID(r.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *RoleClient) DeleteOneID(id int) *RoleDeleteOne {
 	builder := c.Delete().Where(role.ID(id))
 	builder.mutation.id = &id
@@ -877,7 +877,7 @@ func (c *TagClient) DeleteOne(t *Tag) *TagDeleteOne {
 	return c.DeleteOneID(t.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *TagClient) DeleteOneID(id int) *TagDeleteOne {
 	builder := c.Delete().Where(tag.ID(id))
 	builder.mutation.id = &id
@@ -999,7 +999,7 @@ func (c *TweetClient) DeleteOne(t *Tweet) *TweetDeleteOne {
 	return c.DeleteOneID(t.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *TweetClient) DeleteOneID(id int) *TweetDeleteOne {
 	builder := c.Delete().Where(tweet.ID(id))
 	builder.mutation.id = &id
@@ -1259,7 +1259,7 @@ func (c *TweetTagClient) DeleteOne(tt *TweetTag) *TweetTagDeleteOne {
 	return c.DeleteOneID(tt.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *TweetTagClient) DeleteOneID(id uuid.UUID) *TweetTagDeleteOne {
 	builder := c.Delete().Where(tweettag.ID(id))
 	builder.mutation.id = &id
@@ -1381,7 +1381,7 @@ func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
 	return c.DeleteOneID(u.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id
@@ -1664,7 +1664,7 @@ func (c *UserGroupClient) DeleteOne(ug *UserGroup) *UserGroupDeleteOne {
 	return c.DeleteOneID(ug.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *UserGroupClient) DeleteOneID(id int) *UserGroupDeleteOne {
 	builder := c.Delete().Where(usergroup.ID(id))
 	builder.mutation.id = &id
@@ -1786,7 +1786,7 @@ func (c *UserTweetClient) DeleteOne(ut *UserTweet) *UserTweetDeleteOne {
 	return c.DeleteOneID(ut.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *UserTweetClient) DeleteOneID(id int) *UserTweetDeleteOne {
 	builder := c.Delete().Where(usertweet.ID(id))
 	builder.mutation.id = &id

@@ -240,7 +240,7 @@ func (c *CarClient) DeleteOne(ca *Car) *CarDeleteOne {
 	return c.DeleteOneID(ca.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *CarClient) DeleteOneID(id uuid.UUID) *CarDeleteOne {
 	builder := c.Delete().Where(car.ID(id))
 	builder.mutation.id = &id
@@ -346,7 +346,7 @@ func (c *CardClient) DeleteOne(ca *Card) *CardDeleteOne {
 	return c.DeleteOneID(ca.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *CardClient) DeleteOneID(id int) *CardDeleteOne {
 	builder := c.Delete().Where(card.ID(id))
 	builder.mutation.id = &id
@@ -452,7 +452,7 @@ func (c *InfoClient) DeleteOne(i *Info) *InfoDeleteOne {
 	return c.DeleteOneID(i.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *InfoClient) DeleteOneID(id int) *InfoDeleteOne {
 	builder := c.Delete().Where(info.ID(id))
 	builder.mutation.id = &id
@@ -558,7 +558,7 @@ func (c *MetadataClient) DeleteOne(m *Metadata) *MetadataDeleteOne {
 	return c.DeleteOneID(m.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *MetadataClient) DeleteOneID(id int) *MetadataDeleteOne {
 	builder := c.Delete().Where(metadata.ID(id))
 	builder.mutation.id = &id
@@ -696,7 +696,7 @@ func (c *NodeClient) DeleteOne(n *Node) *NodeDeleteOne {
 	return c.DeleteOneID(n.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *NodeClient) DeleteOneID(id int) *NodeDeleteOne {
 	builder := c.Delete().Where(node.ID(id))
 	builder.mutation.id = &id
@@ -818,7 +818,7 @@ func (c *PetClient) DeleteOne(pe *Pet) *PetDeleteOne {
 	return c.DeleteOneID(pe.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *PetClient) DeleteOneID(id int) *PetDeleteOne {
 	builder := c.Delete().Where(pet.ID(id))
 	builder.mutation.id = &id
@@ -924,7 +924,7 @@ func (c *PostClient) DeleteOne(po *Post) *PostDeleteOne {
 	return c.DeleteOneID(po.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *PostClient) DeleteOneID(id int) *PostDeleteOne {
 	builder := c.Delete().Where(post.ID(id))
 	builder.mutation.id = &id
@@ -1030,7 +1030,7 @@ func (c *RentalClient) DeleteOne(r *Rental) *RentalDeleteOne {
 	return c.DeleteOneID(r.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *RentalClient) DeleteOneID(id int) *RentalDeleteOne {
 	builder := c.Delete().Where(rental.ID(id))
 	builder.mutation.id = &id
@@ -1152,7 +1152,7 @@ func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
 	return c.DeleteOneID(u.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id

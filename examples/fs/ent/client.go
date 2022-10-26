@@ -183,7 +183,7 @@ func (c *FileClient) DeleteOne(f *File) *FileDeleteOne {
 	return c.DeleteOneID(f.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *FileClient) DeleteOneID(id int) *FileDeleteOne {
 	builder := c.Delete().Where(file.ID(id))
 	builder.mutation.id = &id
