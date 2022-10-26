@@ -9,4 +9,18 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/dynamodb/meta/constants" }}
 	// Table holds the table name of the {{ lower $.Name }} in the database.
 	Table = "{{ $.Table }}"
+	{{- range $e := $.Edges }}
+		// {{ $e.TableConstant }} is the table that holds the {{ $e.Name }} relation/edge.
+		{{- if $e.M2M }} The primary key declared below.{{ end }}
+		{{ $e.TableConstant }} = "{{ $e.Rel.Table }}"
+		{{- if ne $.Table $e.Type.Table }}
+			// {{ $e.InverseTableConstant }} is the table name for the {{ $e.Type.Name }} entity.
+			// It exists in this package in order to avoid circular dependency with the "{{ $e.Type.Package }}" package.
+			{{ $e.InverseTableConstant }} = "{{ $e.Type.Table }}"
+		{{- end }}
+		{{- if not $e.M2M }}
+			// {{ $e.AttributeConstant }} is the table column denoting the {{ $e.Name }} relation/edge.
+			{{ $e.AttributeConstant }} = "{{ $e.Rel.Column }}"
+		{{- end }}
+	{{- end }}
 {{ end }}

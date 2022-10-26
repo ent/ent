@@ -12,7 +12,8 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/dynamodb/dynamodbgraph"
-	"entgo.io/ent/examples/dynamodb/start/ent/user"
+	"entgo.io/ent/examples/dynamodb/o2o2types/ent/card"
+	"entgo.io/ent/examples/dynamodb/o2o2types/ent/user"
 	"entgo.io/ent/schema/field"
 )
 
@@ -23,15 +24,15 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
-// SetName sets the "name" field.
-func (uc *UserCreate) SetName(s string) *UserCreate {
-	uc.mutation.SetName(s)
-	return uc
-}
-
 // SetAge sets the "age" field.
 func (uc *UserCreate) SetAge(i int) *UserCreate {
 	uc.mutation.SetAge(i)
+	return uc
+}
+
+// SetName sets the "name" field.
+func (uc *UserCreate) SetName(s string) *UserCreate {
+	uc.mutation.SetName(s)
 	return uc
 }
 
@@ -39,6 +40,25 @@ func (uc *UserCreate) SetAge(i int) *UserCreate {
 func (uc *UserCreate) SetID(i int) *UserCreate {
 	uc.mutation.SetID(i)
 	return uc
+}
+
+// SetCardID sets the "card" edge to the Card entity by ID.
+func (uc *UserCreate) SetCardID(id int) *UserCreate {
+	uc.mutation.SetCardID(id)
+	return uc
+}
+
+// SetNillableCardID sets the "card" edge to the Card entity by ID if the given value is not nil.
+func (uc *UserCreate) SetNillableCardID(id *int) *UserCreate {
+	if id != nil {
+		uc = uc.SetCardID(*id)
+	}
+	return uc
+}
+
+// SetCard sets the "card" edge to the Card entity.
+func (uc *UserCreate) SetCard(c *Card) *UserCreate {
+	return uc.SetCardID(c.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -117,11 +137,11 @@ func (uc *UserCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
-	if _, ok := uc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "User.name"`)}
-	}
 	if _, ok := uc.mutation.Age(); !ok {
 		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "User.age"`)}
+	}
+	if _, ok := uc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "User.name"`)}
 	}
 	return nil
 }
@@ -149,6 +169,14 @@ func (uc *UserCreate) createSpec() (*User, *dynamodbgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
+	if value, ok := uc.mutation.Age(); ok {
+		_spec.Fields = append(_spec.Fields, &dynamodbgraph.FieldSpec{
+			Type:  field.TypeInt,
+			Value: value,
+			Key:   user.FieldAge,
+		})
+		_node.Age = value
+	}
 	if value, ok := uc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &dynamodbgraph.FieldSpec{
 			Type:  field.TypeString,
@@ -157,13 +185,24 @@ func (uc *UserCreate) createSpec() (*User, *dynamodbgraph.CreateSpec) {
 		})
 		_node.Name = value
 	}
-	if value, ok := uc.mutation.Age(); ok {
-		_spec.Fields = append(_spec.Fields, &dynamodbgraph.FieldSpec{
-			Type:  field.TypeInt,
-			Value: value,
-			Key:   user.FieldAge,
-		})
-		_node.Age = value
+	if nodes := uc.mutation.CardIDs(); len(nodes) > 0 {
+		edge := &dynamodbgraph.EdgeSpec{
+			Rel:        dynamodbgraph.O2O,
+			Inverse:    false,
+			Table:      user.CardTable,
+			Attributes: []string{user.CardAttribute},
+			Bidi:       false,
+			Target: &dynamodbgraph.EdgeTarget{
+				IDSpec: &dynamodbgraph.FieldSpec{
+					Type: field.TypeInt,
+					Key:  card.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

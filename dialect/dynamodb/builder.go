@@ -10,6 +10,21 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
+// RootBuilder is the constructor for all DynamoDB operation builders.
+type RootBuilder struct{}
+
+func (d RootBuilder) CreateTable(name string) *CreateTableBuilder {
+	return &CreateTableBuilder{
+		tableName: name,
+	}
+}
+
+func (d RootBuilder) PutItem(tableName string) *PutItemBuilder {
+	return &PutItemBuilder{
+		tableName: tableName,
+	}
+}
+
 const (
 	CreateTableOperation = "CreateTable"
 	PutItemOperation     = "PutItem"

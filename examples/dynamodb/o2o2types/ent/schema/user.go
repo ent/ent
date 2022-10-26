@@ -6,6 +6,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 )
@@ -19,8 +20,16 @@ type User struct {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id"),
-		field.String("name"),
 		field.Int("age"),
+		field.String("name"),
+	}
+}
+
+// Edges of the User.
+func (User) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("card", Card.Type).
+			Unique(),
 	}
 }
 

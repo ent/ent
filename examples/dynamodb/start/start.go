@@ -30,6 +30,7 @@ func main() {
 func CreateUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	u, err := client.User.
 		Create().
+		SetID(1).
 		SetAge(30).
 		SetName("a8m").
 		Save(ctx)

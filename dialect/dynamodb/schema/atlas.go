@@ -13,11 +13,12 @@ import (
 type Atlas struct {
 	dialect string
 	driver  dialect.Driver
+	builder dynamodb.RootBuilder
 }
 
 // NewMigrate creates a new Atlas for DynamoDB dialect.
 func NewMigrate(drv dialect.Driver, opts ...MigrateOption) (*Atlas, error) {
-	a := &Atlas{driver: drv}
+	a := &Atlas{driver: drv, builder: dynamodb.RootBuilder{}}
 	for _, opt := range opts {
 		opt(a)
 	}
@@ -25,15 +26,19 @@ func NewMigrate(drv dialect.Driver, opts ...MigrateOption) (*Atlas, error) {
 	return a, nil
 }
 
-// Create creates all schema resources in the database.
+// Create reads variables in migrate/schema.go
+// and creates all schema resources in the database.
 func (a *Atlas) Create(ctx context.Context, tables ...*Table) (err error) {
 	for _, t := range tables {
-		ct := dynamodb.CreateTable(t.Name)
-		for _, a := range t.Attributes {
-			ct.AddAttribute(a.Name, a.dynamoType())
-		}
+		ct := a.builder.CreateTable(t.Name)
 		for _, ks := range t.PrimaryKey {
-			ct.AddKeySchemaElement(ks.AttributeName, types.KeyType(ks.KeyType))
+			// The map of t.attributes is empty.
+			for _, a := range t.Attributes {
+				if a.Name == ks.AttributeName {
+					ct.AddAttribute(a.Name, a.dynamoType())
+					ct.AddKeySchemaElement(ks.AttributeName, types.KeyType(ks.KeyType))
+				}
+			}
 		}
 		// ProvisionedThroughput is required. Use hardcoded values for now.
 		ct.SetProvisionedThroughput(10, 10)

@@ -256,15 +256,15 @@ func (s *selector) ScanX(ctx context.Context, v any) {
 {{ end }}
 
 {{/* expand error types and global helpers. */}}
-{{ $tmpl = printf "dialect/%s/errors" $.Storage }}
-{{ if hasTemplate $tmpl }}
-	{{ xtemplate $tmpl $ }}
-{{ end }}
+{{/*{{ $tmpl = printf "dialect/%s/errors" $.Storage }}*/}}
+{{/*{{ if hasTemplate $tmpl }}*/}}
+{{/*	{{ xtemplate $tmpl $ }}*/}}
+{{/*{{ end }}*/}}
 
-{{ $tmpl = printf "dialect/%s/globals" $.Storage }}
-{{ if hasTemplate $tmpl }}
-	{{ xtemplate $tmpl $ }}
-{{ end }}
+{{/*{{ $tmpl = printf "dialect/%s/globals" $.Storage }}*/}}
+{{/*{{ if hasTemplate $tmpl }}*/}}
+{{/*	{{ xtemplate $tmpl $ }}*/}}
+{{/*{{ end }}*/}}
 
 {{ end }}
 {{ end }}

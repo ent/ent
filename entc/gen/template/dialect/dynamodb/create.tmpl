@@ -46,7 +46,6 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *dynamodbgra
 			_node.{{ $f.StructField }} = {{ if $f.Nillable }}&{{ end }}value
 		}
 	{{- end }}
-	{{- if ne $.Config.Storage.Name "dynamodb" }}
 	{{- range $e := $.Edges }}
 		if nodes := {{ $mutation }}.{{ $e.StructField }}IDs(); len(nodes) > 0 {
 			{{- with extend $ "Edge" $e "Nodes" true "Zero" "nil" }}
@@ -58,7 +57,6 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *dynamodbgra
 			{{- end }}
 			_spec.Edges = append(_spec.Edges, edge)
 		}
-	{{- end }}
 	{{- end }}
 	return _node, _spec
 }
