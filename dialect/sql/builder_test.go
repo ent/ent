@@ -1664,6 +1664,21 @@ func TestSelector_OrderByExpr(t *testing.T) {
 		Query()
 	require.Equal(t, "SELECT * FROM `users` WHERE `age` > ? ORDER BY `name`, CASE WHEN id=? THEN id WHEN id=? THEN name END DESC", query)
 	require.Equal(t, []any{28, 1, 2}, args)
+
+	query, args = Dialect(dialect.Postgres).
+		Select("*").
+		From(Table("users")).
+		Where(GT("age", 28)).
+		OrderBy("name").
+		OrderExpr(ExprFunc(func(b *Builder) {
+			b.WriteString("CASE")
+			b.WriteString(" WHEN ").Ident("id").WriteOp(OpEQ).Arg(1).WriteString(" THEN ").Ident("id")
+			b.WriteString(" WHEN ").Ident("id").WriteOp(OpEQ).Arg(2).WriteString(" THEN ").Ident("name")
+			b.WriteString(" END DESC")
+		})).
+		Query()
+	require.Equal(t, `SELECT * FROM "users" WHERE "age" > $1 ORDER BY "name", CASE WHEN "id" = $2 THEN "id" WHEN "id" = $3 THEN "name" END DESC`, query)
+	require.Equal(t, []any{28, 1, 2}, args)
 }
 
 func TestSelector_SelectExpr(t *testing.T) {
