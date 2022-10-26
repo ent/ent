@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"entgo.io/ent/entc/load"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 
 	"github.com/stretchr/testify/require"
@@ -297,20 +298,34 @@ func TestFKColumns(t *testing.T) {
 			{Name: "pets", Type: "Pet"},
 			{Name: "pet", Type: "Pet", Unique: true},
 			{Name: "parent", Type: "User", Unique: true},
+			{Name: "big_pets", Type: "Pet", StorageKey: &edge.StorageKey{Columns: []string{"user_of_big_pet_id"}}},
 		},
 	}
 	require := require.New(t)
-	graph, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, user, &load.Schema{Name: "Pet"})
+	graph, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, user, &load.Schema{
+		Name: "Pet",
+		Fields: []*load.Field{
+			{Name: "user_of_big_pet_id", Info: &field.TypeInfo{Type: field.TypeInt}, Optional: true},
+		},
+		Edges: []*load.Edge{
+			{Name: "user_of_big_pet", Type: "User", Unique: true},
+		},
+	})
 	require.NoError(err)
 	t1 := graph.Nodes[0]
 	for i, r := range []Relation{
 		{Type: O2M, Table: "pets", Columns: []string{"user_pets"}},
 		{Type: M2O, Table: "users", Columns: []string{"user_pet"}},
 		{Type: O2O, Table: "users", Columns: []string{"user_parent"}},
+		{Type: O2M, Table: "pets", Columns: []string{"user_of_big_pet_id"}},
 	} {
 		require.Equal(r.Type, t1.Edges[i].Rel.Type)
 		require.Equal(r.Table, t1.Edges[i].Rel.Table)
 		require.Equal(r.Columns, t1.Edges[i].Rel.Columns)
+	}
+
+	for i, r := range []bool{false, false, false, true} {
+		require.Equal(r, t1.Edges[i].Rel.fk.UserDefined)
 	}
 
 	// Adding inverse edges.
