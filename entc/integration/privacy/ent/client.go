@@ -197,7 +197,7 @@ func (c *TaskClient) DeleteOne(t *Task) *TaskDeleteOne {
 	return c.DeleteOneID(t.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *TaskClient) DeleteOneID(id int) *TaskDeleteOne {
 	builder := c.Delete().Where(task.ID(id))
 	builder.mutation.id = &id
@@ -320,7 +320,7 @@ func (c *TeamClient) DeleteOne(t *Team) *TeamDeleteOne {
 	return c.DeleteOneID(t.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *TeamClient) DeleteOneID(id int) *TeamDeleteOne {
 	builder := c.Delete().Where(team.ID(id))
 	builder.mutation.id = &id
@@ -443,7 +443,7 @@ func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
 	return c.DeleteOneID(u.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id
