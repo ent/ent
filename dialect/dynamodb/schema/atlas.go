@@ -13,11 +13,12 @@ import (
 type Atlas struct {
 	dialect string
 	driver  dialect.Driver
+	builder dynamodb.RootBuilder
 }
 
 // NewMigrate creates a new Atlas for DynamoDB dialect.
 func NewMigrate(drv dialect.Driver, opts ...MigrateOption) (*Atlas, error) {
-	a := &Atlas{driver: drv}
+	a := &Atlas{driver: drv, builder: dynamodb.RootBuilder{}}
 	for _, opt := range opts {
 		opt(a)
 	}
@@ -29,7 +30,7 @@ func NewMigrate(drv dialect.Driver, opts ...MigrateOption) (*Atlas, error) {
 // and creates all schema resources in the database.
 func (a *Atlas) Create(ctx context.Context, tables ...*Table) (err error) {
 	for _, t := range tables {
-		ct := dynamodb.CreateTable(t.Name)
+		ct := a.builder.CreateTable(t.Name)
 		for _, ks := range t.PrimaryKey {
 			// The map of t.attributes is empty.
 			for _, a := range t.Attributes {
