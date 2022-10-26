@@ -93,61 +93,95 @@ func (r Rel) String() (s string) {
 type (
 	graph struct {
 		tx dialect.ExecQuerier
+		dynamodb.RootBuilder
 	}
 
 	creator struct {
 		graph
 		*CreateSpec
-		*dynamodb.PutItemBuilder
+		data map[string]types.AttributeValue
 	}
 )
 
 // CreateNode applies the CreateSpec on the graph.
-func CreateNode(ctx context.Context, drv dialect.Driver, spec *CreateSpec) error {
+func CreateNode(ctx context.Context, drv dialect.Driver, spec *CreateSpec) (err error) {
 	tx, err := drv.Tx(ctx)
 	if err != nil {
 		return err
 	}
-	gr := graph{tx: tx}
+	gr := graph{tx: tx, RootBuilder: dynamodb.RootBuilder{}}
 	cr := &creator{
-		CreateSpec:     spec,
-		graph:          gr,
-		PutItemBuilder: dynamodb.PutItem(spec.Table),
+		CreateSpec: spec,
+		graph:      gr,
+		data:       make(map[string]types.AttributeValue),
 	}
-	if err := cr.node(ctx); err != nil {
+	if err = cr.node(ctx); err != nil {
 		return rollback(tx, err)
 	}
 	return tx.Commit()
 }
 
 // node is the controller to create a single node in the graph.
-func (c *creator) node(ctx context.Context) error {
-	err := c.insert()
-	if err != nil {
+func (c *creator) node(ctx context.Context) (err error) {
+	if err = c.insert(ctx); err != nil {
 		return err
 	}
-	op, args := c.Op()
-	return c.tx.Exec(ctx, op, args, nil)
+	edges := EdgeSpecs(c.CreateSpec.Edges).GroupRel()
+	if err = c.graph.addFKEdges(ctx, []interface{}{c.ID.Value}, append(edges[O2M], edges[O2O]...)); err != nil {
+		return err
+	}
+	return nil
 }
 
 // insert returns potential errors during process of marshaling CreateSpec
 // to DynamoBD attributes and build steps in dynamodb.PutItemBuilder.
-func (c *creator) insert() error {
-	item := make(map[string]types.AttributeValue)
-	var err error
+func (c *creator) insert(ctx context.Context) (err error) {
+	edges, fields, putItemBuilder := EdgeSpecs(c.CreateSpec.Edges).GroupRel(), c.CreateSpec.Fields, c.PutItem(c.Table)
+	// ID field is not included in CreateSpec.Fields
 	if c.CreateSpec.ID != nil {
-		item[c.CreateSpec.ID.Key], err = attributevalue.Marshal(c.CreateSpec.ID.Value)
-		if err != nil {
+		fields = append(fields, c.CreateSpec.ID)
+	}
+	if err = setTableAttributes(fields, edges, c.data); err != nil {
+		return err
+	}
+	putItemBuilder.SetItem(c.data)
+	op, args := putItemBuilder.Op()
+	return c.tx.Exec(ctx, op, args, nil)
+}
+
+// setTableAttributes is shared between updater and creator.
+func setTableAttributes(fields []*FieldSpec, edges map[Rel][]*EdgeSpec, data map[string]types.AttributeValue) (err error) {
+	for _, f := range fields {
+		if data[f.Key], err = attributevalue.Marshal(f.Value); err != nil {
 			return err
 		}
 	}
-	for _, fs := range c.CreateSpec.Fields {
-		item[fs.Key], err = attributevalue.Marshal(fs.Value)
-		if err != nil {
+	for _, e := range edges[M2O] {
+		if data[e.Attributes[0]], err = attributevalue.Marshal(e.Target.Nodes[0]); err != nil {
 			return err
 		}
 	}
-	c.SetItem(item)
+	for _, e := range edges[O2O] {
+		if e.Inverse || e.Bidi {
+			if data[e.Attributes[0]], err = attributevalue.Marshal(e.Target.Nodes[0]); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (g *graph) addFKEdges(ctx context.Context, ids []interface{}, edges []*EdgeSpec) (err error) {
+	if len(ids) > 1 && len(edges) != 0 {
+		// O2M and O2O edges are defined by a FK in the "other" collection.
+		// Therefore, ids[i+1] will override ids[i] which is invalid.
+		return fmt.Errorf("unable to link FK edge to more than 1 node: %v", ids)
+	}
+	for _, edge := range edges {
+		if edge.Rel == O2O && edge.Inverse {
+			continue
+		}
+	}
 	return nil
 }
 
@@ -157,4 +191,13 @@ func rollback(tx dialect.Tx, err error) error {
 		err = fmt.Errorf("%s: %v", err.Error(), rerr)
 	}
 	return err
+}
+
+// GroupRel groups edges by their relation type.
+func (es EdgeSpecs) GroupRel() map[Rel][]*EdgeSpec {
+	edges := make(map[Rel][]*EdgeSpec)
+	for _, edge := range es {
+		edges[edge.Rel] = append(edges[edge.Rel], edge)
+	}
+	return edges
 }
