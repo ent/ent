@@ -13,8 +13,12 @@ const (
 	FieldID = "id"
 	// FieldOwnerID holds the string denoting the owner_id field in the database.
 	FieldOwnerID = "owner_id"
+	// FieldPreviousOwnerID holds the string denoting the previous_owner_id field in the database.
+	FieldPreviousOwnerID = "previous_owner_id"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
+	// EdgePreviousOwner holds the string denoting the previous_owner edge name in mutations.
+	EdgePreviousOwner = "previous_owner"
 	// Table holds the table name of the pet in the database.
 	Table = "pets"
 	// OwnerTable is the table that holds the owner relation/edge.
@@ -24,12 +28,20 @@ const (
 	OwnerInverseTable = "users"
 	// OwnerColumn is the table column denoting the owner relation/edge.
 	OwnerColumn = "owner_id"
+	// PreviousOwnerTable is the table that holds the previous_owner relation/edge.
+	PreviousOwnerTable = "pets"
+	// PreviousOwnerInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	PreviousOwnerInverseTable = "users"
+	// PreviousOwnerColumn is the table column denoting the previous_owner relation/edge.
+	PreviousOwnerColumn = "previous_owner_id"
 )
 
 // Columns holds all SQL columns for pet fields.
 var Columns = []string{
 	FieldID,
 	FieldOwnerID,
+	FieldPreviousOwnerID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

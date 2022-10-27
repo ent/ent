@@ -119,6 +119,7 @@ var (
 	PetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "owner_id", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"sqlite3": "integer"}},
+		{Name: "previous_owner_id", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"sqlite3": "integer"}},
 	}
 	// PetsTable holds the schema information for the "pets" table.
 	PetsTable = &schema.Table{
@@ -129,6 +130,12 @@ var (
 			{
 				Symbol:     "pets_users_pets",
 				Columns:    []*schema.Column{PetsColumns[1]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "pets_users_previous_pets",
+				Columns:    []*schema.Column{PetsColumns[2]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -242,6 +249,7 @@ func init() {
 	MetadataTable.ForeignKeys[1].RefTable = UsersTable
 	NodesTable.ForeignKeys[0].RefTable = NodesTable
 	PetsTable.ForeignKeys[0].RefTable = UsersTable
+	PetsTable.ForeignKeys[1].RefTable = UsersTable
 	PostsTable.ForeignKeys[0].RefTable = UsersTable
 	RentalsTable.ForeignKeys[0].RefTable = CarsTable
 	RentalsTable.ForeignKeys[1].RefTable = UsersTable

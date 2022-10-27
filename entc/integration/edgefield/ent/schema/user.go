@@ -36,6 +36,7 @@ func (User) Fields() []ent.Field {
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("pets", Pet.Type),
+		edge.To("previous_pets", Pet.Type).StorageKey(edge.Column("previous_owner_id")),
 		edge.To("children", User.Type).
 			From("parent").
 			Field("parent_id").

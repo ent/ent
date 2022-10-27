@@ -71,6 +71,21 @@ func (uu *UserUpdate) AddPets(p ...*Pet) *UserUpdate {
 	return uu.AddPetIDs(ids...)
 }
 
+// AddPreviousPetIDs adds the "previous_pets" edge to the Pet entity by IDs.
+func (uu *UserUpdate) AddPreviousPetIDs(ids ...int) *UserUpdate {
+	uu.mutation.AddPreviousPetIDs(ids...)
+	return uu
+}
+
+// AddPreviousPets adds the "previous_pets" edges to the Pet entity.
+func (uu *UserUpdate) AddPreviousPets(p ...*Pet) *UserUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return uu.AddPreviousPetIDs(ids...)
+}
+
 // AddChildIDs adds the "children" edge to the User entity by IDs.
 func (uu *UserUpdate) AddChildIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddChildIDs(ids...)
@@ -183,6 +198,27 @@ func (uu *UserUpdate) RemovePets(p ...*Pet) *UserUpdate {
 		ids[i] = p[i].ID
 	}
 	return uu.RemovePetIDs(ids...)
+}
+
+// ClearPreviousPets clears all "previous_pets" edges to the Pet entity.
+func (uu *UserUpdate) ClearPreviousPets() *UserUpdate {
+	uu.mutation.ClearPreviousPets()
+	return uu
+}
+
+// RemovePreviousPetIDs removes the "previous_pets" edge to Pet entities by IDs.
+func (uu *UserUpdate) RemovePreviousPetIDs(ids ...int) *UserUpdate {
+	uu.mutation.RemovePreviousPetIDs(ids...)
+	return uu
+}
+
+// RemovePreviousPets removes "previous_pets" edges to Pet entities.
+func (uu *UserUpdate) RemovePreviousPets(p ...*Pet) *UserUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return uu.RemovePreviousPetIDs(ids...)
 }
 
 // ClearChildren clears all "children" edges to the User entity.
@@ -379,6 +415,60 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Inverse: false,
 			Table:   user.PetsTable,
 			Columns: []string{user.PetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: pet.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.PreviousPetsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PreviousPetsTable,
+			Columns: []string{user.PreviousPetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: pet.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedPreviousPetsIDs(); len(nodes) > 0 && !uu.mutation.PreviousPetsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PreviousPetsTable,
+			Columns: []string{user.PreviousPetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: pet.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.PreviousPetsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PreviousPetsTable,
+			Columns: []string{user.PreviousPetsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -713,6 +803,21 @@ func (uuo *UserUpdateOne) AddPets(p ...*Pet) *UserUpdateOne {
 	return uuo.AddPetIDs(ids...)
 }
 
+// AddPreviousPetIDs adds the "previous_pets" edge to the Pet entity by IDs.
+func (uuo *UserUpdateOne) AddPreviousPetIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.AddPreviousPetIDs(ids...)
+	return uuo
+}
+
+// AddPreviousPets adds the "previous_pets" edges to the Pet entity.
+func (uuo *UserUpdateOne) AddPreviousPets(p ...*Pet) *UserUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return uuo.AddPreviousPetIDs(ids...)
+}
+
 // AddChildIDs adds the "children" edge to the User entity by IDs.
 func (uuo *UserUpdateOne) AddChildIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddChildIDs(ids...)
@@ -825,6 +930,27 @@ func (uuo *UserUpdateOne) RemovePets(p ...*Pet) *UserUpdateOne {
 		ids[i] = p[i].ID
 	}
 	return uuo.RemovePetIDs(ids...)
+}
+
+// ClearPreviousPets clears all "previous_pets" edges to the Pet entity.
+func (uuo *UserUpdateOne) ClearPreviousPets() *UserUpdateOne {
+	uuo.mutation.ClearPreviousPets()
+	return uuo
+}
+
+// RemovePreviousPetIDs removes the "previous_pets" edge to Pet entities by IDs.
+func (uuo *UserUpdateOne) RemovePreviousPetIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.RemovePreviousPetIDs(ids...)
+	return uuo
+}
+
+// RemovePreviousPets removes "previous_pets" edges to Pet entities.
+func (uuo *UserUpdateOne) RemovePreviousPets(p ...*Pet) *UserUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return uuo.RemovePreviousPetIDs(ids...)
 }
 
 // ClearChildren clears all "children" edges to the User entity.
@@ -1051,6 +1177,60 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Inverse: false,
 			Table:   user.PetsTable,
 			Columns: []string{user.PetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: pet.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.PreviousPetsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PreviousPetsTable,
+			Columns: []string{user.PreviousPetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: pet.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedPreviousPetsIDs(); len(nodes) > 0 && !uuo.mutation.PreviousPetsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PreviousPetsTable,
+			Columns: []string{user.PreviousPetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: pet.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.PreviousPetsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PreviousPetsTable,
+			Columns: []string{user.PreviousPetsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

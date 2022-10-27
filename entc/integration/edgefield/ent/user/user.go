@@ -17,6 +17,8 @@ const (
 	FieldSpouseID = "spouse_id"
 	// EdgePets holds the string denoting the pets edge name in mutations.
 	EdgePets = "pets"
+	// EdgePreviousPets holds the string denoting the previous_pets edge name in mutations.
+	EdgePreviousPets = "previous_pets"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
 	// EdgeChildren holds the string denoting the children edge name in mutations.
@@ -40,6 +42,13 @@ const (
 	PetsInverseTable = "pets"
 	// PetsColumn is the table column denoting the pets relation/edge.
 	PetsColumn = "owner_id"
+	// PreviousPetsTable is the table that holds the previous_pets relation/edge.
+	PreviousPetsTable = "pets"
+	// PreviousPetsInverseTable is the table name for the Pet entity.
+	// It exists in this package in order to avoid circular dependency with the "pet" package.
+	PreviousPetsInverseTable = "pets"
+	// PreviousPetsColumn is the table column denoting the previous_pets relation/edge.
+	PreviousPetsColumn = "previous_owner_id"
 	// ParentTable is the table that holds the parent relation/edge.
 	ParentTable = "users"
 	// ParentColumn is the table column denoting the parent relation/edge.

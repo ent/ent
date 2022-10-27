@@ -225,6 +225,34 @@ func HasPetsWith(preds ...predicate.Pet) predicate.User {
 	})
 }
 
+// HasPreviousPets applies the HasEdge predicate on the "previous_pets" edge.
+func HasPreviousPets() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(PreviousPetsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PreviousPetsTable, PreviousPetsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPreviousPetsWith applies the HasEdge predicate on the "previous_pets" edge with a given conditions (other predicates).
+func HasPreviousPetsWith(preds ...predicate.Pet) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(PreviousPetsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PreviousPetsTable, PreviousPetsColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasParent applies the HasEdge predicate on the "parent" edge.
 func HasParent() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

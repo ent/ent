@@ -90,6 +90,13 @@ func OwnerID(v int) predicate.Pet {
 	})
 }
 
+// PreviousOwnerID applies equality check predicate on the "previous_owner_id" field. It's identical to PreviousOwnerIDEQ.
+func PreviousOwnerID(v int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPreviousOwnerID), v))
+	})
+}
+
 // OwnerIDEQ applies the EQ predicate on the "owner_id" field.
 func OwnerIDEQ(v int) predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {
@@ -140,6 +147,56 @@ func OwnerIDNotNil() predicate.Pet {
 	})
 }
 
+// PreviousOwnerIDEQ applies the EQ predicate on the "previous_owner_id" field.
+func PreviousOwnerIDEQ(v int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPreviousOwnerID), v))
+	})
+}
+
+// PreviousOwnerIDNEQ applies the NEQ predicate on the "previous_owner_id" field.
+func PreviousOwnerIDNEQ(v int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldPreviousOwnerID), v))
+	})
+}
+
+// PreviousOwnerIDIn applies the In predicate on the "previous_owner_id" field.
+func PreviousOwnerIDIn(vs ...int) predicate.Pet {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldPreviousOwnerID), v...))
+	})
+}
+
+// PreviousOwnerIDNotIn applies the NotIn predicate on the "previous_owner_id" field.
+func PreviousOwnerIDNotIn(vs ...int) predicate.Pet {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldPreviousOwnerID), v...))
+	})
+}
+
+// PreviousOwnerIDIsNil applies the IsNil predicate on the "previous_owner_id" field.
+func PreviousOwnerIDIsNil() predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldPreviousOwnerID)))
+	})
+}
+
+// PreviousOwnerIDNotNil applies the NotNil predicate on the "previous_owner_id" field.
+func PreviousOwnerIDNotNil() predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldPreviousOwnerID)))
+	})
+}
+
 // HasOwner applies the HasEdge predicate on the "owner" edge.
 func HasOwner() predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {
@@ -159,6 +216,34 @@ func HasOwnerWith(preds ...predicate.User) predicate.Pet {
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(OwnerInverseTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, OwnerTable, OwnerColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasPreviousOwner applies the HasEdge predicate on the "previous_owner" edge.
+func HasPreviousOwner() predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(PreviousOwnerTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, PreviousOwnerTable, PreviousOwnerColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPreviousOwnerWith applies the HasEdge predicate on the "previous_owner" edge with a given conditions (other predicates).
+func HasPreviousOwnerWith(preds ...predicate.User) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(PreviousOwnerInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, PreviousOwnerTable, PreviousOwnerColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

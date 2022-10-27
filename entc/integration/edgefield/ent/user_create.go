@@ -76,6 +76,21 @@ func (uc *UserCreate) AddPets(p ...*Pet) *UserCreate {
 	return uc.AddPetIDs(ids...)
 }
 
+// AddPreviousPetIDs adds the "previous_pets" edge to the Pet entity by IDs.
+func (uc *UserCreate) AddPreviousPetIDs(ids ...int) *UserCreate {
+	uc.mutation.AddPreviousPetIDs(ids...)
+	return uc
+}
+
+// AddPreviousPets adds the "previous_pets" edges to the Pet entity.
+func (uc *UserCreate) AddPreviousPets(p ...*Pet) *UserCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return uc.AddPreviousPetIDs(ids...)
+}
+
 // SetParent sets the "parent" edge to the User entity.
 func (uc *UserCreate) SetParent(u *User) *UserCreate {
 	return uc.SetParentID(u.ID)
@@ -284,6 +299,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Inverse: false,
 			Table:   user.PetsTable,
 			Columns: []string{user.PetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: pet.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.PreviousPetsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PreviousPetsTable,
+			Columns: []string{user.PreviousPetsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

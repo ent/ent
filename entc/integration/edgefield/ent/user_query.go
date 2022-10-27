@@ -27,20 +27,21 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	limit        *int
-	offset       *int
-	unique       *bool
-	order        []OrderFunc
-	fields       []string
-	predicates   []predicate.User
-	withPets     *PetQuery
-	withParent   *UserQuery
-	withChildren *UserQuery
-	withSpouse   *UserQuery
-	withCard     *CardQuery
-	withMetadata *MetadataQuery
-	withInfo     *InfoQuery
-	withRentals  *RentalQuery
+	limit            *int
+	offset           *int
+	unique           *bool
+	order            []OrderFunc
+	fields           []string
+	predicates       []predicate.User
+	withPets         *PetQuery
+	withPreviousPets *PetQuery
+	withParent       *UserQuery
+	withChildren     *UserQuery
+	withSpouse       *UserQuery
+	withCard         *CardQuery
+	withMetadata     *MetadataQuery
+	withInfo         *InfoQuery
+	withRentals      *RentalQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -92,6 +93,28 @@ func (uq *UserQuery) QueryPets() *PetQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(pet.Table, pet.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.PetsTable, user.PetsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPreviousPets chains the current query on the "previous_pets" edge.
+func (uq *UserQuery) QueryPreviousPets() *PetQuery {
+	query := &PetQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(pet.Table, pet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.PreviousPetsTable, user.PreviousPetsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -429,19 +452,20 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:       uq.config,
-		limit:        uq.limit,
-		offset:       uq.offset,
-		order:        append([]OrderFunc{}, uq.order...),
-		predicates:   append([]predicate.User{}, uq.predicates...),
-		withPets:     uq.withPets.Clone(),
-		withParent:   uq.withParent.Clone(),
-		withChildren: uq.withChildren.Clone(),
-		withSpouse:   uq.withSpouse.Clone(),
-		withCard:     uq.withCard.Clone(),
-		withMetadata: uq.withMetadata.Clone(),
-		withInfo:     uq.withInfo.Clone(),
-		withRentals:  uq.withRentals.Clone(),
+		config:           uq.config,
+		limit:            uq.limit,
+		offset:           uq.offset,
+		order:            append([]OrderFunc{}, uq.order...),
+		predicates:       append([]predicate.User{}, uq.predicates...),
+		withPets:         uq.withPets.Clone(),
+		withPreviousPets: uq.withPreviousPets.Clone(),
+		withParent:       uq.withParent.Clone(),
+		withChildren:     uq.withChildren.Clone(),
+		withSpouse:       uq.withSpouse.Clone(),
+		withCard:         uq.withCard.Clone(),
+		withMetadata:     uq.withMetadata.Clone(),
+		withInfo:         uq.withInfo.Clone(),
+		withRentals:      uq.withRentals.Clone(),
 		// clone intermediate query.
 		sql:    uq.sql.Clone(),
 		path:   uq.path,
@@ -457,6 +481,17 @@ func (uq *UserQuery) WithPets(opts ...func(*PetQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withPets = query
+	return uq
+}
+
+// WithPreviousPets tells the query-builder to eager-load the nodes that are connected to
+// the "previous_pets" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithPreviousPets(opts ...func(*PetQuery)) *UserQuery {
+	query := &PetQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withPreviousPets = query
 	return uq
 }
 
@@ -610,8 +645,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [8]bool{
+		loadedTypes = [9]bool{
 			uq.withPets != nil,
+			uq.withPreviousPets != nil,
 			uq.withParent != nil,
 			uq.withChildren != nil,
 			uq.withSpouse != nil,
@@ -643,6 +679,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := uq.loadPets(ctx, query, nodes,
 			func(n *User) { n.Edges.Pets = []*Pet{} },
 			func(n *User, e *Pet) { n.Edges.Pets = append(n.Edges.Pets, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withPreviousPets; query != nil {
+		if err := uq.loadPreviousPets(ctx, query, nodes,
+			func(n *User) { n.Edges.PreviousPets = []*Pet{} },
+			func(n *User, e *Pet) { n.Edges.PreviousPets = append(n.Edges.PreviousPets, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -716,6 +759,33 @@ func (uq *UserQuery) loadPets(ctx context.Context, query *PetQuery, nodes []*Use
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "owner_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadPreviousPets(ctx context.Context, query *PetQuery, nodes []*User, init func(*User), assign func(*User, *Pet)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.Where(predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.InValues(user.PreviousPetsColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.PreviousOwnerID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "previous_owner_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

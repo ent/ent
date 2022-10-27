@@ -34,6 +34,8 @@ type User struct {
 type UserEdges struct {
 	// Pets holds the value of the pets edge.
 	Pets []*Pet `json:"pets,omitempty"`
+	// PreviousPets holds the value of the previous_pets edge.
+	PreviousPets []*Pet `json:"previous_pets,omitempty"`
 	// The parent edge and its field are immutable
 	Parent *User `json:"parent,omitempty"`
 	// Children holds the value of the children edge.
@@ -50,7 +52,7 @@ type UserEdges struct {
 	Rentals []*Rental `json:"rentals,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [8]bool
+	loadedTypes [9]bool
 }
 
 // PetsOrErr returns the Pets value or an error if the edge
@@ -62,10 +64,19 @@ func (e UserEdges) PetsOrErr() ([]*Pet, error) {
 	return nil, &NotLoadedError{edge: "pets"}
 }
 
+// PreviousPetsOrErr returns the PreviousPets value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) PreviousPetsOrErr() ([]*Pet, error) {
+	if e.loadedTypes[1] {
+		return e.PreviousPets, nil
+	}
+	return nil, &NotLoadedError{edge: "previous_pets"}
+}
+
 // ParentOrErr returns the Parent value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e UserEdges) ParentOrErr() (*User, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		if e.Parent == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
@@ -78,7 +89,7 @@ func (e UserEdges) ParentOrErr() (*User, error) {
 // ChildrenOrErr returns the Children value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) ChildrenOrErr() ([]*User, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[3] {
 		return e.Children, nil
 	}
 	return nil, &NotLoadedError{edge: "children"}
@@ -87,7 +98,7 @@ func (e UserEdges) ChildrenOrErr() ([]*User, error) {
 // SpouseOrErr returns the Spouse value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e UserEdges) SpouseOrErr() (*User, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		if e.Spouse == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: user.Label}
@@ -100,7 +111,7 @@ func (e UserEdges) SpouseOrErr() (*User, error) {
 // CardOrErr returns the Card value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e UserEdges) CardOrErr() (*Card, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[5] {
 		if e.Card == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: card.Label}
@@ -113,7 +124,7 @@ func (e UserEdges) CardOrErr() (*Card, error) {
 // MetadataOrErr returns the Metadata value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e UserEdges) MetadataOrErr() (*Metadata, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[6] {
 		if e.Metadata == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: metadata.Label}
@@ -126,7 +137,7 @@ func (e UserEdges) MetadataOrErr() (*Metadata, error) {
 // InfoOrErr returns the Info value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) InfoOrErr() ([]*Info, error) {
-	if e.loadedTypes[6] {
+	if e.loadedTypes[7] {
 		return e.Info, nil
 	}
 	return nil, &NotLoadedError{edge: "info"}
@@ -135,7 +146,7 @@ func (e UserEdges) InfoOrErr() ([]*Info, error) {
 // RentalsOrErr returns the Rentals value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) RentalsOrErr() ([]*Rental, error) {
-	if e.loadedTypes[7] {
+	if e.loadedTypes[8] {
 		return e.Rentals, nil
 	}
 	return nil, &NotLoadedError{edge: "rentals"}
@@ -189,6 +200,11 @@ func (u *User) assignValues(columns []string, values []any) error {
 // QueryPets queries the "pets" edge of the User entity.
 func (u *User) QueryPets() *PetQuery {
 	return (&UserClient{config: u.config}).QueryPets(u)
+}
+
+// QueryPreviousPets queries the "previous_pets" edge of the User entity.
+func (u *User) QueryPreviousPets() *PetQuery {
+	return (&UserClient{config: u.config}).QueryPreviousPets(u)
 }
 
 // QueryParent queries the "parent" edge of the User entity.

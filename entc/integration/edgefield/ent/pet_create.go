@@ -37,9 +37,28 @@ func (pc *PetCreate) SetNillableOwnerID(i *int) *PetCreate {
 	return pc
 }
 
+// SetPreviousOwnerID sets the "previous_owner_id" field.
+func (pc *PetCreate) SetPreviousOwnerID(i int) *PetCreate {
+	pc.mutation.SetPreviousOwnerID(i)
+	return pc
+}
+
+// SetNillablePreviousOwnerID sets the "previous_owner_id" field if the given value is not nil.
+func (pc *PetCreate) SetNillablePreviousOwnerID(i *int) *PetCreate {
+	if i != nil {
+		pc.SetPreviousOwnerID(*i)
+	}
+	return pc
+}
+
 // SetOwner sets the "owner" edge to the User entity.
 func (pc *PetCreate) SetOwner(u *User) *PetCreate {
 	return pc.SetOwnerID(u.ID)
+}
+
+// SetPreviousOwner sets the "previous_owner" edge to the User entity.
+func (pc *PetCreate) SetPreviousOwner(u *User) *PetCreate {
+	return pc.SetPreviousOwnerID(u.ID)
 }
 
 // Mutation returns the PetMutation object of the builder.
@@ -163,6 +182,26 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.OwnerID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.mutation.PreviousOwnerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pet.PreviousOwnerTable,
+			Columns: []string{pet.PreviousOwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.PreviousOwnerID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
