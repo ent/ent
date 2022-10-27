@@ -213,10 +213,15 @@ func scanStruct(typ reflect.Type, columns []string) (*rowScan, error) {
 		names[columnName(f)] = []int{i}
 	}
 	for _, c := range columns {
-		// Normalize columns if necessary, for example: COUNT(*) => count.
-		name := strings.ToLower(strings.Split(c, "(")[0])
-		idx, ok := names[name]
-		if !ok {
+		var idx []int
+		// Normalize columns if necessary,
+		// for example: COUNT(*) => count.
+		switch name := strings.Split(c, "(")[0]; {
+		case names[name] != nil:
+			idx = names[name]
+		case names[strings.ToLower(name)] != nil:
+			idx = names[strings.ToLower(name)]
+		default:
 			return nil, fmt.Errorf("sql/scan: missing struct field for column: %s (%s)", c, name)
 		}
 		idxs = append(idxs, idx)
