@@ -533,7 +533,8 @@ func (c *RelationshipClient) QueryInfo(r *Relationship) *RelationshipInfoQuery {
 
 // Hooks returns the client hooks.
 func (c *RelationshipClient) Hooks() []Hook {
-	return c.hooks.Relationship
+	hooks := c.hooks.Relationship
+	return append(hooks[:len(hooks):len(hooks)], relationship.Hooks[:]...)
 }
 
 // RelationshipInfoClient is a client for the RelationshipInfo schema.

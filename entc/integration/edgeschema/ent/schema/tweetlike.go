@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"entgo.io/ent"
-	"entgo.io/ent/entc/integration/privacy/ent/privacy"
+	"entgo.io/ent/entc/integration/edgeschema/ent/privacy"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"

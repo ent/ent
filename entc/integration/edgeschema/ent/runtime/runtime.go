@@ -47,6 +47,15 @@ func init() {
 	groupDescName := groupFields[0].Descriptor()
 	// group.DefaultName holds the default value on creation for the name field.
 	group.DefaultName = groupDescName.Default.(string)
+	relationship.Policy = privacy.NewPolicies(schema.Relationship{})
+	relationship.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := relationship.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
 	relationshipFields := schema.Relationship{}.Fields()
 	_ = relationshipFields
 	// relationshipDescWeight is the schema descriptor for weight field.
