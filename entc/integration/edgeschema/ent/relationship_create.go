@@ -93,7 +93,9 @@ func (rc *RelationshipCreate) Save(ctx context.Context) (*Relationship, error) {
 		err  error
 		node *Relationship
 	)
-	rc.defaults()
+	if err := rc.defaults(); err != nil {
+		return nil, err
+	}
 	if len(rc.hooks) == 0 {
 		if err = rc.check(); err != nil {
 			return nil, err
@@ -156,11 +158,12 @@ func (rc *RelationshipCreate) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (rc *RelationshipCreate) defaults() {
+func (rc *RelationshipCreate) defaults() error {
 	if _, ok := rc.mutation.Weight(); !ok {
 		v := relationship.DefaultWeight
 		rc.mutation.SetWeight(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.

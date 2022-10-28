@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
 	"entgo.io/ent/entc/integration/edgeschema/ent/migrate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
+	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
 	_ "entgo.io/ent/entc/integration/edgeschema/ent/runtime"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
@@ -295,4 +296,20 @@ func TestEdgeSchemaEntQL(t *testing.T) {
 	q2.Filter().Where(entql.HasEdgeWith("likes", entql.FieldEQ(tweetlike.FieldTweetID, tweets[1].ID)))
 	require.Equal(t, 1, q1.CountX(ctx))
 	require.Equal(t, 1, q2.CountX(ctx))
+
+	u1 := client.User.Create().SetName("u1").SaveX(ctx)
+	u2 := client.User.Create().SetName("u2").AddRelatives(u1).SaveX(ctx)
+	client.User.Create().SetName("u3").AddRelatives(u2).ExecX(ctx)
+	require.Equal(t, 4, client.Relationship.Query().CountX(ctx))
+	require.Zero(t, client.Relationship.Query().Where(relationship.HasInfo()).CountX(ctx))
+	ri := client.RelationshipInfo.Create().SetText("parent").SaveX(ctx)
+	rl1 := client.Relationship.Query().FirstX(ctx).Update().SetInfo(ri).SaveX(ctx)
+	require.Equal(t, 1, client.Relationship.Query().Where(relationship.HasInfo()).CountX(ctx))
+	// Using EntQL.
+	q3 := client.Relationship.Query()
+	q3.Filter().WhereHasInfoWith(relationshipinfo.ID(ri.ID))
+	rl2 := q3.OnlyX(ctx)
+	require.Equal(t, rl1.UserID, rl2.UserID)
+	require.Equal(t, rl1.RelativeID, rl2.RelativeID)
+	require.Equal(t, rl1.InfoID, rl2.InfoID)
 }
