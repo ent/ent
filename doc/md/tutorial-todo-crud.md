@@ -50,6 +50,16 @@ func (Todo) Fields() []ent.Field {
 }
 ```
 
+Update your imports to look like this:
+```
+import (
+	"time"
+
+	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
+)
+```
+
 After adding these fields, we need to run the code-generation as before:
 
 ```console
