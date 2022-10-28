@@ -30,6 +30,7 @@ const (
 // Table schema definition for SQL dialects.
 type Table struct {
 	Name        string
+	Comment     string
 	Columns     []*Column
 	columns     map[string]*Column
 	Indexes     []*Index
@@ -292,6 +293,7 @@ type Column struct {
 	Default    any               // default value.
 	Enums      []string          // enum values.
 	Collation  string            // collation type (utf8mb4_unicode_ci, utf8mb4_general_ci)
+	Comment    string            // column comment
 	typ        string            // row column type (used for Rows.Scan).
 	indexes    Indexes           // linked indexes.
 	foreign    *ForeignKey       // linked foreign-key.
