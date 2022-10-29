@@ -51,7 +51,7 @@ func (Todo) Fields() []ent.Field {
 ```
 
 Update your imports to look like this:
-```
+```go
 import (
 	"time"
 
