@@ -708,12 +708,20 @@ func (t *Type) setupFKs() error {
 				}
 			}
 		}
-		// Special case for checking if the FK is already defined as the ID field (see issue 1288).
+		// Special case for checking if the FK is already defined as the ID field (Issue 1288).
 		if key, _ := e.StorageKey(); key != nil && len(key.Columns) == 1 && key.Columns[0] == refid.StorageKey() {
 			fk.Field = refid
 			fk.UserDefined = true
 		}
 		owner.addFK(fk)
+		// In case the user wants to set the column name using the StorageKey option, make sure they
+		// do it using the edge-field option if both back-ref edge and field are defined (Issue 1288).
+		if e.def.StorageKey != nil && len(e.def.StorageKey.Columns) > 0 && !e.OwnFK() && e.Ref != nil && e.Type.fields[e.Rel.Column()] != nil {
+			return fmt.Errorf(
+				"column %q definition on edge %[2]q should be replaced with Field(%[1]q) on its reference %[3]q",
+				e.Rel.Column(), e.Name, e.Ref.Name,
+			)
+		}
 	}
 	return nil
 }

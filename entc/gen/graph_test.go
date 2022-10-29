@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"entgo.io/ent/entc/load"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 
 	"github.com/stretchr/testify/require"
@@ -341,6 +342,33 @@ func TestFKColumns(t *testing.T) {
 		require.Equal(r.Table, t2.Edges[i].Rel.Table)
 		require.Equal(r.Columns, t2.Edges[i].Rel.Columns)
 	}
+}
+
+func TestEnsureCorrectFK(t *testing.T) {
+	var (
+		user = &load.Schema{
+			Name: "User",
+			Edges: []*load.Edge{
+				{Name: "pets", Type: "Pet", StorageKey: &edge.StorageKey{Columns: []string{"owner_id"}}},
+			},
+		}
+		pet = &load.Schema{
+			Name: "Pet",
+			Fields: []*load.Field{
+				{Name: "owner_id", Info: &field.TypeInfo{Type: field.TypeInt}, Nillable: true, Optional: true},
+			},
+			Edges: []*load.Edge{
+				{Name: "owner", Type: "User", RefName: "pets", Inverse: true, Unique: true},
+			},
+		}
+	)
+	_, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, user, pet)
+	require.EqualError(t, err, `entc/gen: set "User" foreign-keys: column "owner_id" definition on edge "pets" should be replaced with Field("owner_id") on its reference "owner"`)
+
+	user.Edges[0].StorageKey = nil
+	pet.Edges[0].Field = "owner_id"
+	_, err = NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, user, pet)
+	require.NoError(t, err)
 }
 
 func TestGraph_Gen(t *testing.T) {
