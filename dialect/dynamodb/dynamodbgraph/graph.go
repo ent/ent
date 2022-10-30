@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	sdk "github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 
 	"entgo.io/ent/dialect"
@@ -177,9 +178,29 @@ func (g *graph) addFKEdges(ctx context.Context, ids []interface{}, edges []*Edge
 		// Therefore, ids[i+1] will override ids[i] which is invalid.
 		return fmt.Errorf("unable to link FK edge to more than 1 node: %v", ids)
 	}
+	id := ids[0]
 	for _, edge := range edges {
 		if edge.Rel == O2O && edge.Inverse {
 			continue
+		}
+		for _, n := range edge.Target.Nodes {
+			keyVal, err := attributevalue.Marshal(n)
+			if err != nil {
+				return fmt.Errorf("key type not supported: %v has type %T", n, n)
+			}
+			query, err := g.Update(edge.Table).
+				WithKey(edge.Target.IDSpec.Key, keyVal).
+				Set(edge.Attributes[0], id).
+				Where(dynamodb.NotExist(edge.Attributes[0])).
+				Query(types.ReturnValueAllNew)
+			if err != nil {
+				return fmt.Errorf("build update query for table %s: %w", edge.Table, err)
+			}
+			op, input := query.Op()
+			var output sdk.UpdateItemOutput
+			if err := g.tx.Exec(ctx, op, input, &output); err != nil {
+				return fmt.Errorf("add %s edge for table %s: %w", edge.Rel, edge.Table, err)
+			}
 		}
 	}
 	return nil
