@@ -33,11 +33,9 @@ type Pet struct {
 type PetEdges struct {
 	// Owner holds the value of the owner edge.
 	Owner *User `json:"owner,omitempty"`
-	// PreviousOwner holds the value of the previous_owner edge.
-	PreviousOwner *User `json:"previous_owner,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [1]bool
 }
 
 // OwnerOrErr returns the Owner value or an error if the edge
@@ -51,19 +49,6 @@ func (e PetEdges) OwnerOrErr() (*User, error) {
 		return e.Owner, nil
 	}
 	return nil, &NotLoadedError{edge: "owner"}
-}
-
-// PreviousOwnerOrErr returns the PreviousOwner value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e PetEdges) PreviousOwnerOrErr() (*User, error) {
-	if e.loadedTypes[1] {
-		if e.PreviousOwner == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: user.Label}
-		}
-		return e.PreviousOwner, nil
-	}
-	return nil, &NotLoadedError{edge: "previous_owner"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -114,11 +99,6 @@ func (pe *Pet) assignValues(columns []string, values []any) error {
 // QueryOwner queries the "owner" edge of the Pet entity.
 func (pe *Pet) QueryOwner() *UserQuery {
 	return (&PetClient{config: pe.config}).QueryOwner(pe)
-}
-
-// QueryPreviousOwner queries the "previous_owner" edge of the Pet entity.
-func (pe *Pet) QueryPreviousOwner() *UserQuery {
-	return (&PetClient{config: pe.config}).QueryPreviousOwner(pe)
 }
 
 // Update returns a builder for updating this Pet.

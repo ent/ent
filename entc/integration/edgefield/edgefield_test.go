@@ -30,7 +30,7 @@ func TestEdgeField(t *testing.T) {
 	require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
 
 	a8m := client.User.Create().SaveX(ctx)
-	p1 := client.Pet.Create().SetOwner(a8m).SetPreviousOwner(a8m).SaveX(ctx)
+	p1 := client.Pet.Create().SetOwner(a8m).SetPreviousOwnerID(a8m.ID).SaveX(ctx)
 	require.Equal(t, a8m.ID, p1.OwnerID)
 	require.Equal(t, a8m.ID, p1.PreviousOwnerID)
 	f1 := client.Pet.Query().Where(pet.OwnerID(a8m.ID)).OnlyX(ctx)
@@ -94,9 +94,9 @@ func TestEdgeField(t *testing.T) {
 	client.Pet.Update().ClearOwnerID().ExecX(ctx)
 	require.Zero(t, client.Pet.Query().QueryOwner().CountX(ctx))
 
-	require.NotZero(t, client.Pet.Query().QueryPreviousOwner().CountX(ctx))
+	require.NotZero(t, client.User.Query().QueryPreviousPets().CountX(ctx))
 	client.Pet.Update().ClearPreviousOwnerID().ExecX(ctx)
-	require.Zero(t, client.Pet.Query().QueryPreviousOwner().CountX(ctx))
+	require.Zero(t, client.User.Query().QueryPreviousPets().CountX(ctx))
 
 	require.False(t, client.Rental.Query().ExistX(ctx))
 	car1 := client.Car.Create().SetNumber("102030").SaveX(ctx)

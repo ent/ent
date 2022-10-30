@@ -32,8 +32,8 @@ func (Pet) Edges() []ent.Edge {
 			Ref("pets").
 			Field("owner_id").
 			Unique(),
-		edge.From("previous_owner", User.Type).
-			Ref("previous_pets").
-			Unique(),
+		// edge.From("previous_owner", User.Type).
+		// 	Ref("previous_pets").
+		// 	Unique(),
 	}
 }

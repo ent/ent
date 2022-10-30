@@ -225,34 +225,6 @@ func HasOwnerWith(preds ...predicate.User) predicate.Pet {
 	})
 }
 
-// HasPreviousOwner applies the HasEdge predicate on the "previous_owner" edge.
-func HasPreviousOwner() predicate.Pet {
-	return predicate.Pet(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PreviousOwnerTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, PreviousOwnerTable, PreviousOwnerColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasPreviousOwnerWith applies the HasEdge predicate on the "previous_owner" edge with a given conditions (other predicates).
-func HasPreviousOwnerWith(preds ...predicate.User) predicate.Pet {
-	return predicate.Pet(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PreviousOwnerInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, PreviousOwnerTable, PreviousOwnerColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Pet) predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {

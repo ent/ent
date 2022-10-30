@@ -2507,17 +2507,16 @@ func (m *NodeMutation) ResetEdge(name string) error {
 // PetMutation represents an operation that mutates the Pet nodes in the graph.
 type PetMutation struct {
 	config
-	op                    Op
-	typ                   string
-	id                    *int
-	clearedFields         map[string]struct{}
-	owner                 *int
-	clearedowner          bool
-	previous_owner        *int
-	clearedprevious_owner bool
-	done                  bool
-	oldValue              func(context.Context) (*Pet, error)
-	predicates            []predicate.Pet
+	op                Op
+	typ               string
+	id                *int
+	previous_owner_id *int
+	clearedFields     map[string]struct{}
+	owner             *int
+	clearedowner      bool
+	done              bool
+	oldValue          func(context.Context) (*Pet, error)
+	predicates        []predicate.Pet
 }
 
 var _ ent.Mutation = (*PetMutation)(nil)
@@ -2669,12 +2668,12 @@ func (m *PetMutation) ResetOwnerID() {
 
 // SetPreviousOwnerID sets the "previous_owner_id" field.
 func (m *PetMutation) SetPreviousOwnerID(i int) {
-	m.previous_owner = &i
+	m.previous_owner_id = &i
 }
 
 // PreviousOwnerID returns the value of the "previous_owner_id" field in the mutation.
 func (m *PetMutation) PreviousOwnerID() (r int, exists bool) {
-	v := m.previous_owner
+	v := m.previous_owner_id
 	if v == nil {
 		return
 	}
@@ -2700,7 +2699,7 @@ func (m *PetMutation) OldPreviousOwnerID(ctx context.Context) (v int, err error)
 
 // ClearPreviousOwnerID clears the value of the "previous_owner_id" field.
 func (m *PetMutation) ClearPreviousOwnerID() {
-	m.previous_owner = nil
+	m.previous_owner_id = nil
 	m.clearedFields[pet.FieldPreviousOwnerID] = struct{}{}
 }
 
@@ -2712,7 +2711,7 @@ func (m *PetMutation) PreviousOwnerIDCleared() bool {
 
 // ResetPreviousOwnerID resets all changes to the "previous_owner_id" field.
 func (m *PetMutation) ResetPreviousOwnerID() {
-	m.previous_owner = nil
+	m.previous_owner_id = nil
 	delete(m.clearedFields, pet.FieldPreviousOwnerID)
 }
 
@@ -2742,32 +2741,6 @@ func (m *PetMutation) ResetOwner() {
 	m.clearedowner = false
 }
 
-// ClearPreviousOwner clears the "previous_owner" edge to the User entity.
-func (m *PetMutation) ClearPreviousOwner() {
-	m.clearedprevious_owner = true
-}
-
-// PreviousOwnerCleared reports if the "previous_owner" edge to the User entity was cleared.
-func (m *PetMutation) PreviousOwnerCleared() bool {
-	return m.PreviousOwnerIDCleared() || m.clearedprevious_owner
-}
-
-// PreviousOwnerIDs returns the "previous_owner" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// PreviousOwnerID instead. It exists only for internal usage by the builders.
-func (m *PetMutation) PreviousOwnerIDs() (ids []int) {
-	if id := m.previous_owner; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetPreviousOwner resets all changes to the "previous_owner" edge.
-func (m *PetMutation) ResetPreviousOwner() {
-	m.previous_owner = nil
-	m.clearedprevious_owner = false
-}
-
 // Where appends a list predicates to the PetMutation builder.
 func (m *PetMutation) Where(ps ...predicate.Pet) {
 	m.predicates = append(m.predicates, ps...)
@@ -2791,7 +2764,7 @@ func (m *PetMutation) Fields() []string {
 	if m.owner != nil {
 		fields = append(fields, pet.FieldOwnerID)
 	}
-	if m.previous_owner != nil {
+	if m.previous_owner_id != nil {
 		fields = append(fields, pet.FieldPreviousOwnerID)
 	}
 	return fields
@@ -2921,12 +2894,9 @@ func (m *PetMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PetMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 1)
 	if m.owner != nil {
 		edges = append(edges, pet.EdgeOwner)
-	}
-	if m.previous_owner != nil {
-		edges = append(edges, pet.EdgePreviousOwner)
 	}
 	return edges
 }
@@ -2939,17 +2909,13 @@ func (m *PetMutation) AddedIDs(name string) []ent.Value {
 		if id := m.owner; id != nil {
 			return []ent.Value{*id}
 		}
-	case pet.EdgePreviousOwner:
-		if id := m.previous_owner; id != nil {
-			return []ent.Value{*id}
-		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PetMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 1)
 	return edges
 }
 
@@ -2961,12 +2927,9 @@ func (m *PetMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PetMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 1)
 	if m.clearedowner {
 		edges = append(edges, pet.EdgeOwner)
-	}
-	if m.clearedprevious_owner {
-		edges = append(edges, pet.EdgePreviousOwner)
 	}
 	return edges
 }
@@ -2977,8 +2940,6 @@ func (m *PetMutation) EdgeCleared(name string) bool {
 	switch name {
 	case pet.EdgeOwner:
 		return m.clearedowner
-	case pet.EdgePreviousOwner:
-		return m.clearedprevious_owner
 	}
 	return false
 }
@@ -2990,9 +2951,6 @@ func (m *PetMutation) ClearEdge(name string) error {
 	case pet.EdgeOwner:
 		m.ClearOwner()
 		return nil
-	case pet.EdgePreviousOwner:
-		m.ClearPreviousOwner()
-		return nil
 	}
 	return fmt.Errorf("unknown Pet unique edge %s", name)
 }
@@ -3003,9 +2961,6 @@ func (m *PetMutation) ResetEdge(name string) error {
 	switch name {
 	case pet.EdgeOwner:
 		m.ResetOwner()
-		return nil
-	case pet.EdgePreviousOwner:
-		m.ResetPreviousOwner()
 		return nil
 	}
 	return fmt.Errorf("unknown Pet edge %s", name)

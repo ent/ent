@@ -333,7 +333,6 @@ func TestFKColumns(t *testing.T) {
 			Edges: []*load.Edge{
 				{Name: "owner", Type: "User", RefName: "pets", Inverse: true, Unique: true},
 				{Name: "team", Type: "User", RefName: "pet", Inverse: true},
-				{Name: "user_of_big_pet", Type: "User", Unique: true, Inverse: true, RefName: "big_pets"},
 			},
 		},
 	)
@@ -357,14 +356,13 @@ func TestFKColumns(t *testing.T) {
 	for i, r := range []Relation{
 		{Type: M2O, Table: "pets", Columns: []string{"user_pets"}},
 		{Type: O2M, Table: "users", Columns: []string{"user_pet"}},
-		{Type: M2O, Table: "pets", Columns: []string{"user_of_big_pet_id"}},
 	} {
 		require.Equal(r.Type, t2.Edges[i].Rel.Type)
 		require.Equal(r.Table, t2.Edges[i].Rel.Table)
 		require.Equal(r.Columns, t2.Edges[i].Rel.Columns)
 	}
 
-	for i, r := range []bool{false, false, true} {
+	for i, r := range []bool{false, false} {
 		require.Equal(r, t2.Edges[i].Rel.fk.UserDefined)
 	}
 }

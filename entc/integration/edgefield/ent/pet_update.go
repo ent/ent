@@ -77,11 +77,6 @@ func (pu *PetUpdate) SetOwner(u *User) *PetUpdate {
 	return pu.SetOwnerID(u.ID)
 }
 
-// SetPreviousOwner sets the "previous_owner" edge to the User entity.
-func (pu *PetUpdate) SetPreviousOwner(u *User) *PetUpdate {
-	return pu.SetPreviousOwnerID(u.ID)
-}
-
 // Mutation returns the PetMutation object of the builder.
 func (pu *PetUpdate) Mutation() *PetMutation {
 	return pu.mutation
@@ -90,12 +85,6 @@ func (pu *PetUpdate) Mutation() *PetMutation {
 // ClearOwner clears the "owner" edge to the User entity.
 func (pu *PetUpdate) ClearOwner() *PetUpdate {
 	pu.mutation.ClearOwner()
-	return pu
-}
-
-// ClearPreviousOwner clears the "previous_owner" edge to the User entity.
-func (pu *PetUpdate) ClearPreviousOwner() *PetUpdate {
-	pu.mutation.ClearPreviousOwner()
 	return pu
 }
 
@@ -171,6 +160,12 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := pu.mutation.PreviousOwnerID(); ok {
+		_spec.SetField(pet.FieldPreviousOwnerID, field.TypeInt, value)
+	}
+	if pu.mutation.PreviousOwnerIDCleared() {
+		_spec.ClearField(pet.FieldPreviousOwnerID, field.TypeInt)
+	}
 	if pu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -193,41 +188,6 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Inverse: true,
 			Table:   pet.OwnerTable,
 			Columns: []string{pet.OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if pu.mutation.PreviousOwnerCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   pet.PreviousOwnerTable,
-			Columns: []string{pet.PreviousOwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := pu.mutation.PreviousOwnerIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   pet.PreviousOwnerTable,
-			Columns: []string{pet.PreviousOwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -305,11 +265,6 @@ func (puo *PetUpdateOne) SetOwner(u *User) *PetUpdateOne {
 	return puo.SetOwnerID(u.ID)
 }
 
-// SetPreviousOwner sets the "previous_owner" edge to the User entity.
-func (puo *PetUpdateOne) SetPreviousOwner(u *User) *PetUpdateOne {
-	return puo.SetPreviousOwnerID(u.ID)
-}
-
 // Mutation returns the PetMutation object of the builder.
 func (puo *PetUpdateOne) Mutation() *PetMutation {
 	return puo.mutation
@@ -318,12 +273,6 @@ func (puo *PetUpdateOne) Mutation() *PetMutation {
 // ClearOwner clears the "owner" edge to the User entity.
 func (puo *PetUpdateOne) ClearOwner() *PetUpdateOne {
 	puo.mutation.ClearOwner()
-	return puo
-}
-
-// ClearPreviousOwner clears the "previous_owner" edge to the User entity.
-func (puo *PetUpdateOne) ClearPreviousOwner() *PetUpdateOne {
-	puo.mutation.ClearPreviousOwner()
 	return puo
 }
 
@@ -429,6 +378,12 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 			}
 		}
 	}
+	if value, ok := puo.mutation.PreviousOwnerID(); ok {
+		_spec.SetField(pet.FieldPreviousOwnerID, field.TypeInt, value)
+	}
+	if puo.mutation.PreviousOwnerIDCleared() {
+		_spec.ClearField(pet.FieldPreviousOwnerID, field.TypeInt)
+	}
 	if puo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -451,41 +406,6 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 			Inverse: true,
 			Table:   pet.OwnerTable,
 			Columns: []string{pet.OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if puo.mutation.PreviousOwnerCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   pet.PreviousOwnerTable,
-			Columns: []string{pet.PreviousOwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := puo.mutation.PreviousOwnerIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   pet.PreviousOwnerTable,
-			Columns: []string{pet.PreviousOwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

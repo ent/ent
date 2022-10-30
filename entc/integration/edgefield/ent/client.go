@@ -863,22 +863,6 @@ func (c *PetClient) QueryOwner(pe *Pet) *UserQuery {
 	return query
 }
 
-// QueryPreviousOwner queries the previous_owner edge of a Pet.
-func (c *PetClient) QueryPreviousOwner(pe *Pet) *UserQuery {
-	query := &UserQuery{config: c.config}
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pe.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(pet.Table, pet.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, pet.PreviousOwnerTable, pet.PreviousOwnerColumn),
-		)
-		fromV = sqlgraph.Neighbors(pe.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // Hooks returns the client hooks.
 func (c *PetClient) Hooks() []Hook {
 	return c.hooks.Pet

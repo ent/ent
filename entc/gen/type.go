@@ -545,7 +545,7 @@ func (t Type) ImmutableFields() []*Field {
 func (t Type) MutationFields() []*Field {
 	fields := make([]*Field, 0, len(t.Fields))
 	for _, f := range t.Fields {
-		if !f.IsEdgeField() {
+		if _, err := f.Edge(); err != nil {
 			fields = append(fields, f)
 		}
 	}
@@ -998,11 +998,7 @@ func (f Field) DefaultFunc() bool { return f.def.DefaultKind == reflect.Func }
 
 // BuilderField returns the struct member of the field in the builder.
 func (f Field) BuilderField() string {
-	if f.IsEdgeField() {
-		e, err := f.Edge()
-		if err != nil {
-			panic(err)
-		}
+	if e, err := f.Edge(); err == nil {
 		return e.BuilderField()
 	}
 	return builderField(f.Name)
@@ -1193,10 +1189,16 @@ func (f Field) Edge() (*Edge, error) {
 	if !f.IsEdgeField() {
 		return nil, fmt.Errorf("field %q is not an edge-field (missing foreign-key)", f.Name)
 	}
+
+	pointToEdge := f.fk.Edge.Ref
 	if e := f.fk.Edge; e.OwnFK() {
-		return e, nil
+		pointToEdge = e
 	}
-	return f.fk.Edge.Ref, nil
+	if pointToEdge == nil {
+		return nil, fmt.Errorf("field %q is an edge-field without back-ref (missing edge.From)", f.Name)
+	}
+
+	return pointToEdge, nil
 }
 
 // Sensitive returns true if the field is a sensitive field.
