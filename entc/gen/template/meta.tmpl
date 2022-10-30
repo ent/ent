@@ -34,11 +34,11 @@ const (
 	{{- $tmpl := printf "dialect/%s/meta/constants" $.Storage }}
 	{{- xtemplate $tmpl $ }}
 )
-{{- if ne $.Config.Storage.Name "dynamodb" }}
 {{ $tmpl = printf "dialect/%s/meta/variables" $.Storage }}
 {{ if hasTemplate $tmpl }}
 	{{ xtemplate $tmpl $ }}
 {{ end }}
+{{- if ne $.Config.Storage.Name "dynamodb" }}
 
 {{ $tmpl = printf "dialect/%s/meta/functions" $.Storage }}
 {{ if hasTemplate $tmpl }}
