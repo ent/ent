@@ -36,6 +36,6 @@ func (User) Edges() []ent.Edge {
 // Indexes of the User.
 func (User) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("name", "age").Unique(),
+		index.Fields("id").Unique(),
 	}
 }

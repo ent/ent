@@ -11,34 +11,30 @@ import (
 	"entgo.io/ent/schema/index"
 )
 
-// Card holds the schema definition for the Card entity.
-type Card struct {
+// Pet holds the schema definition for the Pet entity.
+type Pet struct {
 	ent.Schema
 }
 
-// Fields of the Card.
-func (Card) Fields() []ent.Field {
+// Fields of the Pet.
+func (Pet) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id"),
-		field.Time("expired"),
-		field.String("number"),
+		field.String("name"),
 	}
 }
 
-// Edges of the Card.
-func (Card) Edges() []ent.Edge {
+// Edges of the Pet.
+func (Pet) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("owner", User.Type).
-			Ref("card").
+			Ref("pets").
 			Unique(),
-		// We add the "Required" method to the builder
-		// to make this edge required on entity creation.
-		// i.e. Card cannot be created without its owner.
 	}
 }
 
-// Indexes of the Card.
-func (Card) Indexes() []ent.Index {
+// Indexes of the Pet.
+func (Pet) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("id").Unique(),
 	}

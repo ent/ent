@@ -101,9 +101,45 @@ func (c Client) run(ctx context.Context, op string, args, v interface{}) error {
 		putItemArgs := args.(*PutItemArgs)
 		_, err := c.PutItem(ctx, putItemArgs.Opts)
 		return err
+	case UpdateItemOperation:
+		return c.updateItem(ctx, args, v)
+	case BatchWriteOperation:
+		return c.batchWrite(ctx, args, v)
 	default:
 		return fmt.Errorf("%s operation is unsupported", op)
 	}
+}
+
+func (c Client) updateItem(ctx context.Context, args, v interface{}) (err error) {
+	output := v.(*dynamodb.UpdateItemOutput)
+	input := args.(*dynamodb.UpdateItemInput)
+	updateOutput, err := c.UpdateItem(ctx, input)
+	if err != nil {
+		return err
+	}
+	*output = *updateOutput
+	return nil
+}
+
+func (c Client) batchWrite(ctx context.Context, args, v interface{}) (err error) {
+	batchWriteArgs := args.(*BatchWriteItemArgs)
+	requestItems := make(map[string][]types.WriteRequest)
+	for tableName, ops := range batchWriteArgs.operationMap {
+		for _, op := range ops {
+			opName, opArgs := op.Op()
+			switch opName {
+			case PutItemOperation:
+				input := opArgs.(*PutItemArgs)
+				requestItems[tableName] = append(requestItems[tableName], types.WriteRequest{
+					PutRequest: &types.PutRequest{Item: input.Opts.Item},
+				})
+			}
+		}
+	}
+	_, err = c.BatchWriteItem(ctx, &dynamodb.BatchWriteItemInput{
+		RequestItems: requestItems,
+	})
+	return err
 }
 
 // Client wrap a DynamoDB client from AWS SDK to implement dialect.ExecQuerier

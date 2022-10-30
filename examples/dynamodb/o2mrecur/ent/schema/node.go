@@ -11,30 +11,30 @@ import (
 	"entgo.io/ent/schema/index"
 )
 
-// User holds the schema definition for the User entity.
-type User struct {
+// Node holds the schema definition for the Node entity.
+type Node struct {
 	ent.Schema
 }
 
-// Fields of the User.
-func (User) Fields() []ent.Field {
+// Fields of the Node.
+func (Node) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id"),
-		field.Int("age"),
-		field.String("name"),
+		field.Int("value"),
 	}
 }
 
-// Edges of the User.
-func (User) Edges() []ent.Edge {
+// Edges of the Node.
+func (Node) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("spouse", User.Type).
+		edge.To("children", Node.Type).
+			From("parent").
 			Unique(),
 	}
 }
 
-// Indexes of the User.
-func (User) Indexes() []ent.Index {
+// Indexes of the Node.
+func (Node) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("id").Unique(),
 	}

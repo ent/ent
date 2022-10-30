@@ -12,16 +12,15 @@ import (
 )
 
 var (
-	// CardsAttributes  holds the attributes for the "cards " table.
-	CardsAttributes = []*schema.Attribute{
+	// PetsAttributes  holds the attributes for the "pets " table.
+	PetsAttributes = []*schema.Attribute{
 		{Name: "id", Type: field.TypeInt},
-		{Name: "expired", Type: field.TypeTime},
-		{Name: "number", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString},
 	}
-	// CardsTable holds the schema information for the "cards" table.
-	CardsTable = &schema.Table{
-		Name:       "cards",
-		Attributes: CardsAttributes,
+	// PetsTable holds the schema information for the "pets" table.
+	PetsTable = &schema.Table{
+		Name:       "pets",
+		Attributes: PetsAttributes,
 		PrimaryKey: []*schema.KeySchema{
 			{AttributeName: "id", KeyType: schema.KeyType("HASH")},
 		},
@@ -42,7 +41,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		CardsTable,
+		PetsTable,
 		UsersTable,
 	}
 )
