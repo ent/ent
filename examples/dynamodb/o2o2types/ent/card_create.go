@@ -49,6 +49,14 @@ func (cc *CardCreate) SetOwnerID(id int) *CardCreate {
 	return cc
 }
 
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
+func (cc *CardCreate) SetNillableOwnerID(id *int) *CardCreate {
+	if id != nil {
+		cc = cc.SetOwnerID(*id)
+	}
+	return cc
+}
+
 // SetOwner sets the "owner" edge to the User entity.
 func (cc *CardCreate) SetOwner(u *User) *CardCreate {
 	return cc.SetOwnerID(u.ID)
@@ -135,9 +143,6 @@ func (cc *CardCreate) check() error {
 	}
 	if _, ok := cc.mutation.Number(); !ok {
 		return &ValidationError{Name: "number", err: errors.New(`ent: missing required field "Card.number"`)}
-	}
-	if _, ok := cc.mutation.OwnerID(); !ok {
-		return &ValidationError{Name: "owner", err: errors.New(`ent: missing required edge "Card.owner"`)}
 	}
 	return nil
 }

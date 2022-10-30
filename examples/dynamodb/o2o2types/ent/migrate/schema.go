@@ -23,8 +23,7 @@ var (
 		Name:       "cards",
 		Attributes: CardsAttributes,
 		PrimaryKey: []*schema.KeySchema{
-			{AttributeName: "number", KeyType: schema.KeyType("HASH")},
-			{AttributeName: "expired", KeyType: schema.KeyType("RANGE")},
+			{AttributeName: "id", KeyType: schema.KeyType("HASH")},
 		},
 	}
 	// UsersAttributes  holds the attributes for the "users " table.
@@ -38,8 +37,7 @@ var (
 		Name:       "users",
 		Attributes: UsersAttributes,
 		PrimaryKey: []*schema.KeySchema{
-			{AttributeName: "name", KeyType: schema.KeyType("HASH")},
-			{AttributeName: "age", KeyType: schema.KeyType("RANGE")},
+			{AttributeName: "id", KeyType: schema.KeyType("HASH")},
 		},
 	}
 	// Tables holds all the tables in the schema.

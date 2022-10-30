@@ -30,17 +30,16 @@ func (Card) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("owner", User.Type).
 			Ref("card").
-			Unique().
-			// We add the "Required" method to the builder
-			// to make this edge required on entity creation.
-			// i.e. Card cannot be created without its owner.
-			Required(),
+			Unique(),
+		// We add the "Required" method to the builder
+		// to make this edge required on entity creation.
+		// i.e. Card cannot be created without its owner.
 	}
 }
 
 // Indexes of the Card.
 func (Card) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("number", "expired").Unique(),
+		index.Fields("id").Unique(),
 	}
 }
