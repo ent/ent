@@ -13,7 +13,7 @@ import (
 	"entgo.io/ent/examples/dynamodb/o2o2types/ent"
 )
 
-func main() {
+func Example_O2O2Types() {
 	client, err := ent.Open("dynamodb", "")
 	if err != nil {
 		log.Fatalf("failed opening connection to dynamodb: %v", err)
