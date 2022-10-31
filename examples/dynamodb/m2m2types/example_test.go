@@ -11,7 +11,7 @@ import (
 	"entgo.io/ent/examples/dynamodb/m2m2types/ent"
 )
 
-func main() {
+func Example_M2M2Types() {
 	client, err := ent.Open("dynamodb", "")
 	if err != nil {
 		log.Fatalf("failed opening connection to dynamodb: %v", err)
