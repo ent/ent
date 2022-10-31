@@ -69,13 +69,6 @@ func ValueIsNull(column string, opts ...Option) *sql.Predicate {
 func ValueIsNotNull(column string, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		switch b.Dialect() {
-		case dialect.MySQL:
-			path := identPath(column, opts...)
-			b.WriteString("not JSON_CONTAINS").Wrap(func(b *sql.Builder) {
-				b.Ident(column).Comma()
-				b.WriteString("'null'").Comma()
-				path.mysqlPath(b)
-			})
 		case dialect.Postgres:
 			valuePath(b, column, append(opts, Cast("jsonb"))...)
 			b.WriteOp(sql.OpNEQ).WriteString("'null'::jsonb")
@@ -83,6 +76,13 @@ func ValueIsNotNull(column string, opts ...Option) *sql.Predicate {
 			path := identPath(column, opts...)
 			path.mysqlFunc("JSON_TYPE", b)
 			b.WriteOp(sql.OpNEQ).WriteString("'null'")
+		case dialect.MySQL:
+			path := identPath(column, opts...)
+			b.WriteString("not JSON_CONTAINS").Wrap(func(b *sql.Builder) {
+				b.Ident(column).Comma()
+				b.WriteString("'null'").Comma()
+				path.mysqlPath(b)
+			})
 		}
 	})
 }
