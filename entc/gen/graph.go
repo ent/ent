@@ -512,14 +512,15 @@ func (g *Graph) edgeSchemas() error {
 			// Edges from src/dest table are always O2M. One row to many
 			// rows in the join table. Hence, a many-to-many relationship.
 			n.Edges = append(n.Edges, &Edge{
-				def:       &load.Edge{},
-				Name:      e.def.Through.N,
-				Type:      typ,
-				Inverse:   ref.Name,
-				Ref:       ref,
-				Owner:     n,
-				Optional:  true,
-				StructTag: structTag(e.def.Through.N, ""),
+				def:         &load.Edge{},
+				Name:        e.def.Through.N,
+				Type:        typ,
+				Inverse:     ref.Name,
+				Ref:         ref,
+				Owner:       n,
+				Optional:    true,
+				StructTag:   structTag(e.def.Through.N, ""),
+				Annotations: e.Annotations,
 				Rel: Relation{
 					Type:    O2M,
 					fk:      ref.Rel.fk,
