@@ -32,11 +32,7 @@ in the LICENSE file in the root directory of this source tree.
 				{{- if $e.M2M }}
 					// {{ $e.AttributeConstant }} and {{ $e.AttributeConstant }}2 are the collection keys denoting the
 					// primary key for the {{ $e.Name }} relation (M2M).
-					{{- if $e.Bidi }}
-						{{ $e.AttributeConstant }} = []string{"{{ index $e.Rel.Columns 1 }}", "{{ index $e.Rel.Columns 1 }}"}
-					{{- else }}
-						{{ $e.AttributeConstant }} = []string{"{{ index $e.Rel.Columns 0 }}", "{{ index $e.Rel.Columns 1 }}"}
-					{{- end }}
+					{{ $e.AttributeConstant }} = []string{"{{ index $e.Rel.Columns 0 }}", "{{ index $e.Rel.Columns 1 }}"}
 				{{- end }}
 			{{- end }}
 		)
