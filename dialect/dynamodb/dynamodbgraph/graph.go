@@ -131,6 +131,9 @@ func (c *creator) node(ctx context.Context) (err error) {
 	if err = c.graph.addFKEdges(ctx, []interface{}{c.ID.Value}, append(edges[O2M], edges[O2O]...)); err != nil {
 		return err
 	}
+	if err = c.graph.addM2MEdges(ctx, []interface{}{c.ID.Value}, edges[M2M]); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -202,6 +205,39 @@ func (g *graph) addFKEdges(ctx context.Context, ids []interface{}, edges []*Edge
 				return fmt.Errorf("add %s edge for table %s: %w", edge.Rel, edge.Table, err)
 			}
 		}
+	}
+	return nil
+}
+
+func (g *graph) addM2MEdges(ctx context.Context, ids []interface{}, edges []*EdgeSpec) (err error) {
+	if len(edges) == 0 {
+		return nil
+	}
+	batchWrite := dynamodb.BatchWriteItem()
+	for _, e := range edges {
+		m2mTable := e.Table
+		fromIds, toIds := e.Target.Nodes, ids
+		if e.Inverse {
+			fromIds, toIds = toIds, fromIds
+		}
+		toAttr, fromAttr := e.Attributes[0], e.Attributes[1]
+		for _, fromId := range fromIds {
+			for _, toId := range toIds {
+				data := make(map[string]types.AttributeValue)
+				if data[toAttr], err = attributevalue.Marshal(toId); err != nil {
+					return fmt.Errorf("add m2m edge: %w", err)
+				}
+				if data[fromAttr], err = attributevalue.Marshal(fromId); err != nil {
+					return fmt.Errorf("add m2m edge: %w", err)
+				}
+				batchWrite.Append(m2mTable, g.PutItem(m2mTable).SetItem(data))
+			}
+		}
+	}
+	op, input := batchWrite.Op()
+	var output sdk.BatchWriteItemOutput
+	if err := g.tx.Exec(ctx, op, input, &output); err != nil {
+		return fmt.Errorf("add m2m edge: %w", err)
 	}
 	return nil
 }

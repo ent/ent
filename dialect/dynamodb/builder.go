@@ -200,7 +200,9 @@ type (
 
 // BatchWriteItem returns a builder for BatchWriteItem operation.
 func BatchWriteItem() *BatchWriteItemBuilder {
-	return &BatchWriteItemBuilder{}
+	return &BatchWriteItemBuilder{
+		requestMap: make(map[string][]Oper),
+	}
 }
 
 // Append appends a WriteRequest to BatchWriteItem.
