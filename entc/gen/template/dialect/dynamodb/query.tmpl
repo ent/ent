@@ -1,0 +1,310 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{/* gotype: entgo.io/ent/entc/gen.typeScope */}}
+
+{{/* Additional fields for the builder. */}}
+{{ define "dialect/dynamodb/query/fields" }}
+	{{- with $.ForeignKeys }}
+		withFKs bool
+	{{- end }}
+{{- end }}
+
+{{ define "dialect/dynamodb/query" }}
+{{ $pkg := $.Scope.Package }}
+{{ $builder := pascal $.Scope.Builder }}
+{{ $receiver := receiver $builder }}
+
+func ({{ $receiver }} *{{ $builder }}) dynamodbAll(ctx context.Context) ([]*{{ $.Name }}, error) {
+	var (
+		nodes = []*{{ $.Name }}{}
+		_node *{{ $.Name }}
+		{{- with $.ForeignKeys }}
+			withFKs = {{ $receiver }}.withFKs
+		{{- end }}
+		_spec = {{ $receiver }}.querySpec()
+		{{- with $.Edges }}
+			loadedTypes = [{{ len . }}]bool{
+				{{- range $e := . }}
+					{{ $receiver }}.with{{ pascal $e.Name }} != nil,
+				{{- end }}
+			}
+		{{- end }}
+	)
+	{{- with $.ForeignKeys }}
+			{{- with $.FKEdges }}
+				if {{ range $i, $e := . }}{{ if gt $i 0 }} || {{ end }}{{ $receiver }}.with{{ pascal $e.Name }} != nil{{ end }} {
+					withFKs = true
+				}
+			{{- end }}
+			if withFKs {
+				_spec.Node.Keys = append(_spec.Node.Keys, {{ $.Package }}.ForeignKeys...)
+			}
+	{{- end }}
+
+	_spec.Document = _node.document
+	_spec.Assign = func(docs ...interface{}) error {
+		for _, doc := range docs {
+			node := &{{ $.Name }}{}
+			if err := node.FromDocument(doc); err != nil {
+				return err
+			}
+			{{- with $.Edges }}
+			node.Edges.loadedTypes = loadedTypes
+			{{- end }}
+			node.config = {{ $receiver }}.config
+			nodes = append(nodes, node)
+		}
+
+		return nil
+	}
+	if err := dynamodbgraph.QueryNodes(ctx, {{ $receiver }}.driver, _spec); err != nil {
+		return nil, err
+	}
+	if len(nodes) == 0 {
+		return nodes, nil
+	}
+	{{- range $e := $.Edges }}
+		{{- with extend $ "Rec" $receiver "Edge" $e }}
+			{{ template "dialect/dynamodb/query/eagerloading" . }}
+		{{- end }}
+	{{- end }}
+	return nodes, nil
+}
+
+func ({{ $receiver }} *{{ $builder }}) dynamodbCount(ctx context.Context) (int, error) {
+	_spec := {{ $receiver }}.querySpec()
+	return dynamodbgraph.CountNodes(ctx, {{ $receiver }}.driver, _spec)
+}
+
+func ({{ $receiver }} *{{ $builder }}) dynamodbExist(ctx context.Context) (bool, error) {
+	n, err := {{ $receiver }}.dynamodbCount(ctx)
+	if err != nil {
+		return false, ferrs.Errorf("{{ $pkg }}: check existence: %v", err)
+	}
+	return n > 0, nil
+}
+
+func ({{ $receiver }} *{{ $builder }}) querySpec() *dynamodbgraph.QuerySpec {
+	_spec := &dynamodbgraph.QuerySpec{
+		Node: &dynamodbgraph.NodeSpec{
+			Collection: {{ $.Package }}.Collection,
+			Keys: {{ $.Package }}.Keys,
+			ID: &dynamodbgraph.FieldSpec{
+				Type: field.{{ $.ID.Type.ConstName }},
+				Key: {{ $.Package }}.{{ $.ID.Constant }},
+			},
+		},
+		From: {{ $receiver }}.dynamodb,
+	}
+	if ps := {{ $receiver }}.predicates; len(ps) > 0 {
+		_spec.Predicate = func(selector *dynamodb.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	if limit := {{ $receiver }}.limit; limit != nil {
+		_spec.Limit = *limit
+	}
+	if offset := {{ $receiver }}.offset; offset != nil {
+		_spec.Offset = *offset
+	}
+	if ps := {{ $receiver }}.order; len(ps) > 0 {
+		_spec.Order = func(selector *dynamodb.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	return _spec
+}
+
+func ({{ $receiver }} *{{ $builder }}) dynamodbQuery(ctx context.Context) *dynamodb.Selector {
+	c1 := {{ $.Package }}.Collection
+	selector := dynamodb.Select({{ $.Package }}.Keys...).From(c1)
+	if {{ $receiver }}.dynamodb != nil {
+		selector = {{ $receiver }}.dynamodb
+		selector.Select({{ $.Package }}.Keys...)
+	}
+	for _, p := range {{ $receiver }}.predicates {
+		p(selector)
+	}
+	for _, p := range {{ $receiver }}.order {
+		p(selector)
+	}
+	if offset := {{ $receiver }}.offset; offset != nil {
+		// limit is mandatory for offset clause. We start
+		// with default value, and override it below if needed.
+		selector.Offset(*offset).Limit(math.MaxInt32)
+	}
+	if limit := {{ $receiver }}.limit; limit != nil {
+		selector.Limit(*limit)
+	}
+	return selector
+}
+{{ end }}
+
+{{/* query/path defines the query generation for path of a given edge. */}}
+{{ define "dialect/dynamodb/query/path" }}
+	{{- $n := $ }} {{/* the node we start the query from. */}}
+	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
+	{{- $ident := $.Scope.Ident -}}
+	{{- $receiver := $.Scope.Receiver }}
+	selector := {{ $receiver }}.dynamodbQuery(ctx)
+	step := dynamodbgraph.NewStep(
+		dynamodbgraph.From({{ $n.Package }}.Collection, {{ $n.Package }}.{{ $n.ID.Constant }}, selector),
+		dynamodbgraph.To({{ $e.Type.Package }}.Collection, {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}, {{ $e.Type.Package }}.Keys),
+		dynamodbgraph.Edge(dynamodbgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $e.Bidi }}, {{ $n.Package }}.{{ $e.AttributeConstant }},
+			{{- if $e.M2M -}}
+				{{ $n.Package }}.{{ $e.AttributeConstant }}...
+			{{- else -}}
+				{{ $n.Package }}.{{ $e.AttributeConstant }}
+			{{- end -}}
+		),
+	)
+	{{ $ident }} = dynamodbgraph.SetNeighbors(step)
+{{ end }}
+
+{{/* query/from defines the query generation for an edge query from a given node. */}}
+{{ define "dialect/dynamodb/query/from" }}
+	{{- $n := $ }} {{/* the node we start the query from. */}}
+	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
+	{{- $ident := $.Scope.Ident -}}
+	{{- $receiver := $.Scope.Receiver -}}
+	id := {{ $receiver }}.ID
+	step := dynamodbgraph.NewStep(
+	dynamodbgraph.From({{ $n.Package }}.Collection, {{ $n.Package }}.{{ $n.ID.Constant }}, id),
+	dynamodbgraph.To({{ $e.Type.Package }}.Collection, {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}, []string{}),
+	dynamodbgraph.Edge(dynamodbgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $e.Bidi }}, {{ $n.Package }}.{{ $e.AttributeConstant }},
+			{{- if $e.M2M -}}
+				{{ $n.Package }}.{{ $e.AttributeConstant }}...
+			{{- else -}}
+				{{ $n.Package }}.{{ $e.AttributeConstant }}
+			{{- end -}}
+		),
+	)
+	{{ $ident }} = dynamodbgraph.Neighbors(step, {{ $receiver }}.config.driver)
+{{ end }}
+
+{{ define "dialect/dynamodb/query/eagerloading" }}
+	{{- $e := $.Scope.Edge }}
+	{{- $receiver := $.Scope.Rec }}
+	if query := {{ $receiver }}.with{{ pascal $e.Name }}; query != nil {
+		{{- if $e.M2M }}
+			var (
+				edgeids []{{ $e.Type.ID.Type }}
+				edges = make(map[{{ $e.Type.ID.Type }}][]*{{ $.Name }})
+			)
+
+			for _, node := range nodes {
+				node.Edges.{{ $e.StructField }} = []*{{ $e.Type.Name }}{}
+				edgeids = append(edgeids, node.{{ $e.Key }}...)
+				for _, id := range node.{{ $e.Key }} {
+					edges[id] = append(edges[id], node)
+				}
+			}
+
+			query.Where({{ $e.Type.Package }}.IDIn(edgeids...))
+			neighbors, err := query.All(ctx)
+			if err != nil {
+				return nil, err
+			}
+			for _, n := range neighbors {
+				nodes, ok := edges[n.ID]
+				if !ok {
+					return nil, ferrs.Errorf(`unexpected "{{ $e.Name }}" node returned %v`, n.ID)
+				}
+				for i := range nodes {
+					nodes[i].Edges.{{ $e.StructField }} = append(nodes[i].Edges.{{ $e.StructField }}, n)
+				}
+			}
+		{{- else if $e.OwnFK }}
+			ids := make([]{{ $e.Type.ID.Type }}, 0, len(nodes))
+			nodeids := make(map[{{ $e.Type.ID.Type }}][]*{{ $.Name }})
+			for i := range nodes {
+				{{- $fk := $e.ForeignKey }}
+				{{- if $fk.Field.Nillable }}
+					if nodes[i].{{ $fk.StructField }} == nil {
+						continue
+					}
+				{{- end }}
+				fk := {{ if $fk.Field.Nillable }}*{{ end }}nodes[i].{{ $fk.StructField }}
+				if _, ok := nodeids[fk]; !ok {
+					ids = append(ids, fk)
+				}
+				nodeids[fk] = append(nodeids[fk], nodes[i])
+			}
+			query.Where({{ $e.Type.Package }}.IDIn(ids...))
+			neighbors, err := query.All(ctx)
+			if err != nil {
+				return nil, err
+			}
+			for _, n := range neighbors {
+				nodes, ok := nodeids[n.ID]
+				if !ok {
+					return nil, ferrs.Errorf(`unexpected foreign-key "{{ $fk.StructField }}" returned %v`, n.ID)
+				}
+				for i := range nodes {
+					nodes[i].Edges.{{ $e.StructField }} = n
+				}
+			}
+		{{- else }}
+			fks := make([]interface{}, 0, len(nodes))
+			nodeids := make(map[{{ $.ID.Type }}]*{{ $.Name }})
+			for i := range nodes {
+				fks = append(fks, nodes[i].ID)
+				nodeids[nodes[i].ID] = nodes[i]
+				{{- if $e.O2M }}
+					nodes[i].Edges.{{ $e.StructField }} = []*{{ $e.Type.Name }}{}
+				{{- end }}
+			}
+			query.withFKs = true
+			query.Where(predicate.{{ $e.Type.Name }}(func(s *dynamodb.Selector) {
+				s.Where(dynamodb.In({{ $.Package }}.{{ $e.AttributeConstant }}, fks...))
+			}))
+			neighbors, err := query.All(ctx)
+			if err != nil {
+				return nil, err
+			}
+			for _, n := range neighbors {
+				{{- $fk := $e.ForeignKey }}
+				fk := n.{{ $fk.StructField }}
+				{{- if $fk.Field.Nillable }}
+				if fk == nil {
+					return nil, ferrs.Errorf(`foreign-key "{{ $fk.StructField }}" is nil for node %v`, n.ID)
+				}
+				{{- end }}
+				node, ok := nodeids[{{ if $fk.Field.Nillable }}*{{ end }}fk]
+				if !ok {
+					return nil, ferrs.Errorf(`unexpected foreign-key "{{ $fk.StructField }}" returned %v for node %v`, {{ if $fk.Field.Nillable }}*{{ end }}fk, n.ID)
+				}
+				node.Edges.{{ $e.StructField }} = {{ if $e.Unique }}n{{ else }}append(node.Edges.{{ $e.StructField }}, n){{ end }}
+			}
+		{{- end }}
+	}
+{{ end }}
+
+{{ define "dialect/dynamodb/query/eagerloading/m2massign" }}
+	{{- $arg := $.Scope.Arg }}
+	{{- $field := $.Scope.Field }}
+	{{- $nulltype := $.Scope.NullType }}
+	{{- if hasPrefix $nulltype "dynamodb" -}}
+		{{ $field.NullTypeField $arg -}}
+	{{- else -}}
+		{{ if not $field.Nillable }}*{{ end }}{{ $arg }}
+	{{- end }}
+{{- end }}
+
+{{ define "dialect/dynamodb/query/preparecheck" }}
+	{{- $pkg := $.Scope.Package }}
+	{{- $receiver := $.Scope.Receiver }}
+	for _, f := range {{ $receiver }}.fields {
+		if !{{ $.Package }}.ValidKey(f) {
+			return &ValidationError{Name: f, err: ferrs.Errorf("{{ $pkg }}: invalid field %q for query", f)}
+		}
+	}
+{{- end }}

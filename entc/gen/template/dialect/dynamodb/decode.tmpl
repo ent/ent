@@ -1,0 +1,68 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{/* gotype: cloud.cdgfossil.com/cc-ent/entc/gen.Type */}}
+
+{{ define "dialect/dynamodb/decode/one" }}
+{{ $receiver := $.Receiver }}
+
+{{- $docName := print $.Name "Document" }}
+// {{ $docName }} represents document schema in MongoDB.
+type {{ $docName }} struct {
+	ID   {{ $.ID.Type }}  `bson:"{{ $.ID.StorageKey }},omitempty"`
+	{{ range $_, $f := $.Fields }}
+		{{- $f.StructField }} {{ if $f.Nillable }}*{{ end }}{{ $f.Type }} `bson:"{{ $f.StorageKey }},omitempty"`
+	{{ end }}
+	{{- range $fk := $.UnexportedForeignKeys }}
+		{{- $f := $fk.Field }}
+		{{ $f.StructField }} {{ if $f.Nillable }}*{{ end }}{{ $f.Type }} `bson:"{{ $f.StorageKey }},omitempty"`
+	{{- end }}
+
+	{{- with $.NumM2M }}
+		{{ range $e := $.Edges }}
+			{{- if $e.M2M }}
+				{{ $e.Key | pascal }} []{{ $e.Type.ID.Type }} `bson:"{{ $e.Key }},omitempty"`
+			{{- end }}
+		{{- end }}
+	{{- end }}
+}
+
+// document returns the object for receiving document from dynamodb.
+func (*{{ $.Name }}) document() interface{} {
+	return &{{ $docName }}{}
+}
+
+// FromDocument scans the dynamodb response document into {{ $.Name }}.
+func ({{ $receiver }} *{{ $.Name }}) FromDocument(idoc interface{}) error {
+	doc := idoc.(*{{ $docName }})
+	{{ $receiver }}.ID = doc.ID
+	{{ range $_, $f := $.Fields }}
+		{{- $receiver }}.{{ $f.StructField }} = doc.{{ $f.StructField }}
+	{{ end -}}
+
+	{{- range $fk := $.UnexportedForeignKeys }}
+		{{- $f := $fk.Field }}
+		{{ $receiver }}.{{ $f.Name }} = doc.{{ $f.StructField }}
+	{{- end }}
+
+	{{- with $.NumM2M }}
+		{{ range $e := $.Edges }}
+			{{- if $e.M2M }}
+				{{ $receiver }}.{{ $e.Key }} = doc.{{ $e.Key | pascal }}
+			{{- end }}
+		{{- end }}
+	{{- end }}
+
+	return nil
+}
+
+{{ end }}
+
+{{ define "dialect/dynamodb/decode/field" }}
+{{- end }}
+
+{{ define "dialect/dynamodb/decode/many" }}
+{{ end }}

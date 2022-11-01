@@ -1,0 +1,135 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{/* gotype: entgo.io/ent/entc/gen.typeScope */}}
+
+{{ define "dialect/dynamodb/predicate/id" -}}
+	func(s *dynamodb.Selector) {
+		s.Where(dynamodb.EQ({{ $.ID.Constant }}, id))
+	}
+{{- end }}
+
+{{ define "dialect/dynamodb/predicate/id/ops" -}}
+	{{- $op := $.Scope.Op -}}
+	{{- $arg := $.Scope.Arg -}}
+	{{- $storage := $.Scope.Storage -}}
+	func(s *dynamodb.Selector) {
+		{{- if $op.Variadic }}
+			v := make([]interface{}, len({{ $arg }}))
+			for i := range v {
+				v[i] = {{ $arg }}[i]
+			}
+		{{- end }}
+		s.Where(dynamodb.{{ call $storage.OpCode $op }}({{ $.ID.Constant }}, {{ if $op.Variadic }}v...{{ else }}id{{ end }}))
+	}
+{{- end }}
+
+{{ define "dialect/dynamodb/predicate/field" -}}
+	{{- $f := $.Scope.Field -}}
+	{{- $arg := $.Scope.Arg -}}
+	func(s *dynamodb.Selector) {
+		s.Where(dynamodb.EQ({{ $f.Constant }}, {{ $arg }}))
+	}
+{{- end }}
+
+{{ define "dialect/dynamodb/predicate/field/ops" -}}
+	{{- $f := $.Scope.Field -}}
+	{{- $op := $.Scope.Op -}}
+	{{- $arg := $.Scope.Arg -}}
+	{{- $storage := $.Scope.Storage -}}
+	func(s *dynamodb.Selector) {
+		s.Where(dynamodb.{{ call $storage.OpCode $op }}({{ $f.Constant }}{{ if not $op.Niladic }}, {{ $arg }}{{ if $op.Variadic }}...{{ end }}{{ end }}))
+	}
+{{- end }}
+
+{{ define "dialect/dynamodb/predicate/edge/has" -}}
+	{{- $e := $.Scope.Edge -}}
+	{{- $refid := $.ID.Constant }}{{ if ne $e.Type.ID.StorageKey $.ID.StorageKey }}{{ $refid = print $e.Type.Name "FieldID" }}{{ end -}}
+	func(s *dynamodb.Selector) {
+		step := dynamodbgraph.NewStep(
+        dynamodbgraph.From(Table, {{ $.ID.Constant }}),
+        dynamodbgraph.To({{ $e.AttributeConstant }}, {{ $refid }}, []string{}),
+        dynamodbgraph.Edge(dynamodbgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $e.Bidi }}, {{ $e.AttributeConstant }},
+				{{- if $e.M2M -}}
+					{{ $e.AttributesConstant }}...
+				{{- else -}}
+					{{ $e.AttributeConstant }}
+				{{- end -}}
+			),
+		)
+        dynamodbgraph.HasNeighbors(s, step)
+	}
+{{- end }}
+
+{{ define "dialect/dynamodb/predicate/edge/haswith" -}}
+	{{- $e := $.Scope.Edge -}}
+	{{- $refid := $.ID.Constant }}{{ if ne $e.Type.ID.StorageKey $.ID.StorageKey }}{{ $refid = print $e.Type.Name "FieldID" }}{{ end -}}
+	func(s *dynamodb.Selector) {
+		step := dynamodbgraph.NewStep(
+            dynamodbgraph.From(Table, {{ $.ID.Constant }}),
+            dynamodbgraph.To({{ if ne $.Table $e.Type.Table }}{{ $e.InverseTableConstant }}{{ else }}Table{{ end }}, {{ $refid }}, []string{}),
+            dynamodbgraph.Edge(dynamodbgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $e.Bidi }}, {{ $e.TableConstant }},
+				{{- if $e.M2M -}}
+					{{ $e.AttributesConstant }}...
+				{{- else -}}
+					{{ $e.AttributeConstant }}
+				{{- end -}}
+			),
+		)
+		dynamodbgraph.HasNeighborsWith(s, step, func(s *dynamodb.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	}
+{{- end }}
+
+{{ define "dialect/dynamodb/predicate/and" -}}
+	func(s *dynamodb.Selector) {
+		if len(predicates) == 0 {
+ 			return
+ 		}
+
+ 		var ps []*dynamodb.Predicate
+ 		for _, p := range predicates {
+ 			selector := dynamodb.Select().Setwd(s.Getwd())
+ 			p(selector)
+
+ 			ps = append(ps, selector.P())
+			s.AppendStages(selector.Stages()...)
+ 		}
+ 		s.Where(dynamodb.And(ps...))
+	}
+{{- end }}
+
+{{ define "dialect/dynamodb/predicate/or" -}}
+	func(s *dynamodb.Selector) {
+		if len(predicates) == 0 {
+ 			return
+ 		}
+
+ 		var ps []*dynamodb.Predicate
+ 		for _, p := range predicates {
+ 			selector := dynamodb.Select().Setwd(s.Getwd())
+ 			p(selector)
+
+ 			ps = append(ps, selector.P())
+			s.AppendStages(selector.Stages()...)
+ 		}
+ 		s.Where(dynamodb.Or(ps...))
+	}
+{{- end }}
+
+{{ define "dialect/dynamodb/predicate/not" -}}
+	func(s *dynamodb.Selector) {
+		selector := dynamodb.Select().Setwd(s.Getwd()).Not()
+		p(selector)
+
+		s.AppendStages(selector.Pipeline()...)
+
+		s.Where(selector.P())
+	}
+{{- end }}
