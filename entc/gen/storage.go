@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"entgo.io/ent/dialect/dynamodb"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/sql"
 )
@@ -85,13 +86,14 @@ var drivers = []*Storage{
 	{
 		Name:      "dynamodb",
 		IdentName: "DynamoDB",
-		Builder:   reflect.TypeOf(nil),
+		Builder:   reflect.TypeOf(&dynamodb.Selector{}),
 		Dialects:  []string{"dialect.DynamoDB"},
 		Imports: []string{
 			"entgo.io/ent/dialect/dynamodb",
 			"entgo.io/ent/dialect/dynamodb/dynamodbgraph",
 		},
 		SchemaMode: Migrate,
+		OpCode:     opCodes(nil),
 	},
 }
 
