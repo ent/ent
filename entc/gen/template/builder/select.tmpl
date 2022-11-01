@@ -1,0 +1,99 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{/* gotype: entgo.io/ent/entc/gen.Type */}}
+
+{{ define "dialect/dynamodb/select" }}
+{{ $builder := pascal $.Scope.Builder }}
+{{ $receiver := receiver $builder }}
+
+func ({{ $receiver }} *{{ $builder }}) dynamodbScan(ctx context.Context, v interface{}) error {
+	selector := {{ $receiver }}.dynamodbQuery()
+
+	var cur *dynamodb.Cursor
+	op, args := selector.Op()
+	if err := {{ $receiver }}.driver.Query(ctx, op, args, &cur); err != nil {
+		return err
+	}
+
+	var docs []bson.M
+	for cur.Next(ctx) {
+		var doc bson.M
+		if err := cur.Decode(&doc); err != nil {
+			return ferrs.Wrap(err)
+		}
+
+		docs = append(docs, doc)
+	}
+	if err := cur.Err(); err != nil {
+		return ferrs.Wrap(err)
+	}
+
+	if err := cur.Close(ctx); err != nil {
+		return ferrs.Wrap(err)
+	}
+
+	{{- $isPrimitiveIDType := false }}
+	key := {{ $receiver }}.fields[0]
+	switch vv := v.(type) {
+	{{- range $_, $t := primitives }}
+	case *[]{{ $t }}:
+		for _, doc := range docs {
+			if i, ok := doc[key]; ok {
+				{{- if eq $t "int" }}
+				switch v := i.(type) {
+				case int:
+					*vv = append(*vv, v)
+				case int32:
+					*vv = append(*vv, int(v))
+				}
+				{{- else }}
+				if v, ok := i.({{ $t }}); ok {
+					*vv = append(*vv, v)
+				}
+				{{- end }}
+			}
+		}
+		{{- if eq $t $.ID.Type.String }}
+			{{- $isPrimitiveIDType = true }}
+		{{- end }}
+	{{- end }}
+	{{- if not $isPrimitiveIDType }}
+	case *[]{{ $.ID.Type }}:
+		for _, doc := range docs {
+			if i, ok := doc[key]; ok {
+				{{- if eq $.ID.Type.String "objectid.ObjectID" }}
+				if v, ok := i.(dynamodb.ObjectID); ok {
+					*vv = append(*vv, objectid.ObjectID(v))
+				}
+				{{- else if eq $.ID.Type.String "uuid.UUID" }}
+				if vb, ok := i.(dynamodb.Binary); ok {
+					v := uuid.UUID{}
+					if err := v.UnmarshalBinary(vb.Data); err != nil {
+						return ferrs.Wrap(err)
+					}
+					*vv = append(*vv, v)
+				}
+				{{- else if eq $.ID.Type.String "shortid.ShortID" }}
+				if v, ok := i.(string); ok {
+					*vv = append(*vv, shortid.ShortID(v))
+				}
+				{{- end }}
+			}
+		}
+	{{- end }}
+	}
+
+	return nil
+}
+
+
+func ({{ $receiver }} *{{ $builder }}) dynamodbQuery() *dynamodb.Selector {
+	selector := {{ $receiver }}.dynamodb
+	selector.Select({{ $receiver }}.fields...)
+	return selector
+}
+{{ end }}

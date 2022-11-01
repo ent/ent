@@ -439,9 +439,11 @@ func ({{ $groupReceiver }} *{{ $groupBuilder }}) Scan(ctx context.Context, v any
 	return {{ $groupReceiver }}.{{ $.Storage }}Scan(ctx, v)
 }
 
+{{ if ne $.Config.Storage.Name "dynamodb" }}
 {{ with extend $ "Builder" $groupBuilder }}
 	{{ $tmpl := printf "dialect/%s/group" $.Storage }}
 	{{ xtemplate $tmpl . }}
+{{ end }}
 {{ end }}
 
 {{/* select builder */}}
