@@ -61,24 +61,24 @@ var (
 		//	Name:   "delete",
 		//	Format: pkgf("%s_delete.go"),
 		//},
-		//{
-		//	Name:   "query",
-		//	Format: pkgf("%s_query.go"),
-		//	ExtendPatterns: []string{
-		//		"dialect/*/query/fields/additional/*",
-		//	},
-		//},
+		{
+			Name:   "query",
+			Format: pkgf("%s_query.go"),
+			ExtendPatterns: []string{
+				"dialect/*/query/fields/additional/*",
+			},
+		},
 		{
 			Name:   "model",
 			Format: pkgf("%s.go"),
 		},
-		//{
-		//	Name:   "where",
-		//	Format: pkgf("%s/where.go"),
-		//	ExtendPatterns: []string{
-		//		"where/additional/*",
-		//	},
-		//},
+		{
+			Name:   "where",
+			Format: pkgf("%s/where.go"),
+			ExtendPatterns: []string{
+				"where/additional/*",
+			},
+		},
 		{
 			Name: "meta",
 			Format: func(t *Type) string {
@@ -132,10 +132,10 @@ var (
 			Format: "migrate/schema.go",
 			Skip:   func(g *Graph) bool { return !g.SupportMigrate() },
 		},
-		//{
-		//	Name:   "predicate",
-		//	Format: "predicate/predicate.go",
-		//},
+		{
+			Name:   "predicate",
+			Format: "predicate/predicate.go",
+		},
 		//{
 		//	Name:   "hook",
 		//	Format: "hook/hook.go",
