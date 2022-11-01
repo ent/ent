@@ -54,9 +54,9 @@ import (
 	"log"
 
 	"{{ $.Config.Package }}/migrate"
-{{/*	{{ range $n := $.Nodes }}*/}}
-{{/*		{{ $n.PackageAlias }} "{{ $n.Config.Package }}/{{ $n.PackageDir }}"*/}}
-{{/*	{{- end }}*/}}
+	{{ range $n := $.Nodes }}
+		{{ $n.PackageAlias }} "{{ $n.Config.Package }}/{{ $n.PackageDir }}"
+	{{- end }}
 
 	"entgo.io/ent/dialect"
 	{{ range $import := $.Storage.Imports -}}
@@ -158,13 +158,11 @@ func New{{ $client }}(c config) *{{ $client }} {
 	return &{{ $client }}{config: c}
 }
 
-{{- if ne $.Config.Storage.Name "dynamodb" }}
 // Use adds a list of mutation hooks to the hooks stack.
 // A call to `Use(f, g, h)` equals to `{{ $n.Package }}.Hooks(f(g(h())))`.
 func (c *{{ $client }}) Use(hooks ...Hook) {
 	c.hooks.{{ $n.Name }} = append(c.hooks.{{ $n.Name }}, hooks...)
 }
-{{- end }}
 
 // Create returns a builder for creating a {{ $n.Name }} entity.
 func (c *{{ $client }}) Create() *{{ $n.CreateName }} {
@@ -225,7 +223,7 @@ func (c *{{ $client }}) Delete() *{{ $n.DeleteName }} {
 		return &{{ $n.DeleteOneName }}{builder}
 	}
 {{ end }}
-
+{{ end }}
 // Query returns a query builder for {{ $n.Name }}.
 func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
 	return &{{ $n.QueryName }}{
@@ -277,7 +275,6 @@ func (c *{{ $client }}) {{ $func }}({{ $arg }} *{{ $n.Name }}) *{{ $builder }} {
 			{{ $func }}()
 	{{- end }}
 }
-{{ end }}
 {{ end }}
 // Hooks returns the client hooks.
 func (c *{{ $client }}) Hooks() []Hook {
