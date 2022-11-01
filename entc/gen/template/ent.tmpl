@@ -86,7 +86,6 @@ type {{ $.Name }}Edges struct {
 {{- end }}
 {{- end }}
 {{- end }}
-{{- if ne $.Config.Storage.Name "dynamodb"}}
 {{ $tmpl = printf "dialect/%s/decode/one" $.Storage }}
 {{ xtemplate $tmpl $ }}
 
@@ -99,7 +98,7 @@ type {{ $.Name }}Edges struct {
 		return (&{{ $.Name }}Client{config: {{ $receiver }}.config}).{{ $func }}({{ $receiver }})
 	}
 {{ end }}
-
+{{- if ne $.Config.Storage.Name "dynamodb"}}
 // Update returns a builder for updating this {{ $.Name }}.
 // Note that you need to call {{ $.Name }}.Unwrap() before calling this method if this {{ $.Name }}
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -117,6 +116,7 @@ func ({{ $receiver }} *{{ $.Name }}) Unwrap() *{{ $.Name }} {
 	{{ $receiver }}.config.driver = _tx.drv
 	return {{ $receiver }}
 }
+{{ end }}
 
 {{ template "model/stringer" $ }}
 
@@ -136,7 +136,6 @@ func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 		{{ $receiver }}[_i].config = cfg
 	}
 }
-{{ end }}
 {{ end }}
 
 {{/* A template to generate a fmt.Stringer implementation. */}}
