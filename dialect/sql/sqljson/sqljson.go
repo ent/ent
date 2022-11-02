@@ -78,7 +78,7 @@ func ValueIsNotNull(column string, opts ...Option) *sql.Predicate {
 			b.WriteOp(sql.OpNEQ).WriteString("'null'")
 		case dialect.MySQL:
 			path := identPath(column, opts...)
-			b.WriteString("(not JSON_CONTAINS").Wrap(func(b *sql.Builder) {
+			b.WriteString("NOT(JSON_CONTAINS").Wrap(func(b *sql.Builder) {
 				b.Ident(column).Comma()
 				b.WriteString("'null'").Comma()
 				path.mysqlPath(b)

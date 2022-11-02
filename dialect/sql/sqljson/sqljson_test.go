@@ -268,7 +268,7 @@ func TestWritePath(t *testing.T) {
 				Select("*").
 				From(sql.Table("users")).
 				Where(sqljson.ValueIsNotNull("c", sqljson.Path("a"))),
-			wantQuery: "SELECT * FROM `users` WHERE (not JSON_CONTAINS(`c`, 'null', '$.a'))",
+			wantQuery: "SELECT * FROM `users` WHERE NOT(JSON_CONTAINS(`c`, 'null', '$.a'))",
 		},
 		{
 			input: sql.Dialect(dialect.SQLite).
