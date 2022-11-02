@@ -480,7 +480,7 @@ func Predicates(t *testing.T, client *ent.Client) {
 		require.Equal(t, users[0].ID, u1.ID)
 
 		u2 := client.User.Query().Where(func(s *sql.Selector) {
-			s.Where(sql.Not(sqljson.ValueIsNull(user.FieldURL, sqljson.Path("User"))))
+			s.Where(sqljson.ValueIsNotNull(user.FieldURL, sqljson.Path("User")))
 		}).OnlyX(ctx)
 		require.Equal(t, users[1].ID, u2.ID)
 
