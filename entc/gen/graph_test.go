@@ -344,6 +344,40 @@ func TestFKColumns(t *testing.T) {
 	}
 }
 
+func TestAbortDuplicateFK(t *testing.T) {
+	var (
+		user = &load.Schema{
+			Name: "User",
+			Edges: []*load.Edge{
+				{Name: "pets", Type: "Pet", StorageKey: &edge.StorageKey{Symbols: []string{"owner_id"}}},
+				{Name: "cars", Type: "Car", StorageKey: &edge.StorageKey{Symbols: []string{"owner_id"}}},
+			},
+		}
+		pet = &load.Schema{
+			Name: "Pet",
+			Fields: []*load.Field{
+				{Name: "owner_id", Info: &field.TypeInfo{Type: field.TypeInt}, Nillable: true, Optional: true},
+			},
+			Edges: []*load.Edge{
+				{Name: "owner", Type: "User", RefName: "pets", Inverse: true, Unique: true},
+			},
+		}
+		car = &load.Schema{
+			Name: "Car",
+			Fields: []*load.Field{
+				{Name: "owner_id", Info: &field.TypeInfo{Type: field.TypeInt}, Nillable: true, Optional: true},
+			},
+			Edges: []*load.Edge{
+				{Name: "owner", Type: "User", RefName: "cars", Inverse: true, Unique: true},
+			},
+		}
+	)
+	g, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, user, pet, car)
+	require.NoError(t, err)
+	_, err = g.Tables()
+	require.EqualError(t, err, `duplicate foreign-key symbol "owner_id" found in tables "cars" and "pets"`)
+}
+
 func TestEnsureCorrectFK(t *testing.T) {
 	var (
 		user = &load.Schema{
