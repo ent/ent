@@ -8,8 +8,8 @@ linters-settings:
   dupl:
     threshold: 100
   funlen:
-    lines: 115
-    statements: 115
+    lines: 120
+    statements: 120
   goheader:
     template: |-
       Copyright 2019-present Facebook Inc. All rights reserved.

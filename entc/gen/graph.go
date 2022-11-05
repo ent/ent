@@ -680,6 +680,9 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 			index.Annotation = entsqlIndexAnnotate(idx.Annotations)
 		}
 	}
+	if err := ensureUniqueFKs(tables); err != nil {
+		return nil, err
+	}
 	return
 }
 
@@ -730,6 +733,29 @@ func fkSymbols(e *Edge, c1, c2 *schema.Column) (string, string) {
 		}
 	}
 	return s1, s2
+}
+
+// ensureUniqueNames ensures constraint names are unique.
+func ensureUniqueFKs(tables map[string]*schema.Table) error {
+	fks := make(map[string]*schema.Table)
+	for _, t := range tables {
+		for _, fk := range t.ForeignKeys {
+			switch other, ok := fks[fk.Symbol]; {
+			case !ok:
+				fks[fk.Symbol] = t
+			case ok && other.Name != t.Name:
+				a, b := t.Name, other.Name
+				// Keep reporting order consistent.
+				if a > b {
+					a, b = b, a
+				}
+				return fmt.Errorf("duplicate foreign-key symbol %q found in tables %q and %q", fk.Symbol, a, b)
+			case ok:
+				return fmt.Errorf("duplicate foreign-key symbol %q found in table %q", fk.Symbol, t.Name)
+			}
+		}
+	}
+	return nil
 }
 
 // deleteAction returns the referential action for DELETE operations of the given edge.
