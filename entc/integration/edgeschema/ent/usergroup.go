@@ -176,3 +176,11 @@ func (ug UserGroups) config(cfg config) {
 		ug[_i].config = cfg
 	}
 }
+
+func (ug UserGroups) IDs() []int {
+	ids := make([]int, len(ug))
+	for _i := range ug {
+		ids[_i] = ug[_i].ID
+	}
+	return ids
+}

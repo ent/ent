@@ -135,3 +135,11 @@ func (i Infos) config(cfg config) {
 		i[_i].config = cfg
 	}
 }
+
+func (i Infos) IDs() []int {
+	ids := make([]int, len(i))
+	for _i := range i {
+		ids[_i] = i[_i].ID
+	}
+	return ids
+}

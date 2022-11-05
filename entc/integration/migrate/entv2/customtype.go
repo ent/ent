@@ -126,3 +126,11 @@ func (ct CustomTypes) config(cfg config) {
 		ct[_i].config = cfg
 	}
 }
+
+func (ct CustomTypes) IDs() []int {
+	ids := make([]int, len(ct))
+	for _i := range ct {
+		ids[_i] = ct[_i].ID
+	}
+	return ids
+}

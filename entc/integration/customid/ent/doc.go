@@ -174,3 +174,11 @@ func (d Docs) config(cfg config) {
 		d[_i].config = cfg
 	}
 }
+
+func (d Docs) IDs() []schema.DocID {
+	ids := make([]schema.DocID, len(d))
+	for _i := range d {
+		ids[_i] = d[_i].ID
+	}
+	return ids
+}

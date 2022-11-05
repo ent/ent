@@ -136,7 +136,19 @@ func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 		{{ $receiver }}[_i].config = cfg
 	}
 }
-{{ end }}
+
+{{- if $.HasOneFieldID }}
+
+func ({{ $receiver }} {{ $slice }}) IDs() []{{ $.ID.Type }} {
+  ids := make([]{{ $.ID.Type }},len({{ $receiver }}))
+	for _i := range {{ $receiver }} {
+		ids[_i] = {{ $receiver}}[_i].ID
+	}
+	return ids
+}
+{{- end }}
+
+{{- end }}
 
 {{/* A template to generate a fmt.Stringer implementation. */}}
 {{ define "model/stringer" }}

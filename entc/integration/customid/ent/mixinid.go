@@ -113,3 +113,11 @@ func (mi MixinIDs) config(cfg config) {
 		mi[_i].config = cfg
 	}
 }
+
+func (mi MixinIDs) IDs() []uuid.UUID {
+	ids := make([]uuid.UUID, len(mi))
+	for _i := range mi {
+		ids[_i] = mi[_i].ID
+	}
+	return ids
+}

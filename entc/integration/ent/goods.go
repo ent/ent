@@ -89,3 +89,11 @@ func (_go GoodsSlice) config(cfg config) {
 		_go[_i].config = cfg
 	}
 }
+
+func (_go GoodsSlice) IDs() []int {
+	ids := make([]int, len(_go))
+	for _i := range _go {
+		ids[_i] = _go[_i].ID
+	}
+	return ids
+}

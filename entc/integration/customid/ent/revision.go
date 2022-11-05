@@ -89,3 +89,11 @@ func (r Revisions) config(cfg config) {
 		r[_i].config = cfg
 	}
 }
+
+func (r Revisions) IDs() []string {
+	ids := make([]string, len(r))
+	for _i := range r {
+		ids[_i] = r[_i].ID
+	}
+	return ids
+}

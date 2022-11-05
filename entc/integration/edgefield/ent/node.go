@@ -160,3 +160,11 @@ func (n Nodes) config(cfg config) {
 		n[_i].config = cfg
 	}
 }
+
+func (n Nodes) IDs() []int {
+	ids := make([]int, len(n))
+	for _i := range n {
+		ids[_i] = n[_i].ID
+	}
+	return ids
+}

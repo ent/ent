@@ -184,3 +184,11 @@ func (c Cards) config(cfg config) {
 		c[_i].config = cfg
 	}
 }
+
+func (c Cards) IDs() []string {
+	ids := make([]string, len(c))
+	for _i := range c {
+		ids[_i] = c[_i].ID
+	}
+	return ids
+}

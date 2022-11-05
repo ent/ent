@@ -123,3 +123,11 @@ func (m MediaSlice) config(cfg config) {
 		m[_i].config = cfg
 	}
 }
+
+func (m MediaSlice) IDs() []int {
+	ids := make([]int, len(m))
+	for _i := range m {
+		ids[_i] = m[_i].ID
+	}
+	return ids
+}

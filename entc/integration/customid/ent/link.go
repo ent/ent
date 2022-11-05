@@ -105,3 +105,11 @@ func (l Links) config(cfg config) {
 		l[_i].config = cfg
 	}
 }
+
+func (l Links) IDs() []uuidc.UUIDC {
+	ids := make([]uuidc.UUIDC, len(l))
+	for _i := range l {
+		ids[_i] = l[_i].ID
+	}
+	return ids
+}

@@ -284,3 +284,11 @@ func (f Files) config(cfg config) {
 		f[_i].config = cfg
 	}
 }
+
+func (f Files) IDs() []int {
+	ids := make([]int, len(f))
+	for _i := range f {
+		ids[_i] = f[_i].ID
+	}
+	return ids
+}

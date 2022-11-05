@@ -99,3 +99,11 @@ func (i Items) config(cfg config) {
 		i[_i].config = cfg
 	}
 }
+
+func (i Items) IDs() []string {
+	ids := make([]string, len(i))
+	for _i := range i {
+		ids[_i] = i[_i].ID
+	}
+	return ids
+}

@@ -186,3 +186,11 @@ func (pe Pets) config(cfg config) {
 		pe[_i].config = cfg
 	}
 }
+
+func (pe Pets) IDs() []string {
+	ids := make([]string, len(pe))
+	for _i := range pe {
+		ids[_i] = pe[_i].ID
+	}
+	return ids
+}

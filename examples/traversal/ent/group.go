@@ -158,3 +158,11 @@ func (gr Groups) config(cfg config) {
 		gr[_i].config = cfg
 	}
 }
+
+func (gr Groups) IDs() []int {
+	ids := make([]int, len(gr))
+	for _i := range gr {
+		ids[_i] = gr[_i].ID
+	}
+	return ids
+}

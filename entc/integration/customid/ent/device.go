@@ -147,3 +147,11 @@ func (d Devices) config(cfg config) {
 		d[_i].config = cfg
 	}
 }
+
+func (d Devices) IDs() []schema.ID {
+	ids := make([]schema.ID, len(d))
+	for _i := range d {
+		ids[_i] = d[_i].ID
+	}
+	return ids
+}

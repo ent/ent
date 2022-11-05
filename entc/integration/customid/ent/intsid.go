@@ -146,3 +146,11 @@ func (is IntSIDs) config(cfg config) {
 		is[_i].config = cfg
 	}
 }
+
+func (is IntSIDs) IDs() []sid.ID {
+	ids := make([]sid.ID, len(is))
+	for _i := range is {
+		ids[_i] = is[_i].ID
+	}
+	return ids
+}

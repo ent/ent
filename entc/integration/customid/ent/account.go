@@ -128,3 +128,11 @@ func (a Accounts) config(cfg config) {
 		a[_i].config = cfg
 	}
 }
+
+func (a Accounts) IDs() []sid.ID {
+	ids := make([]sid.ID, len(a))
+	for _i := range a {
+		ids[_i] = a[_i].ID
+	}
+	return ids
+}

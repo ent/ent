@@ -89,3 +89,11 @@ func (o Others) config(cfg config) {
 		o[_i].config = cfg
 	}
 }
+
+func (o Others) IDs() []sid.ID {
+	ids := make([]sid.ID, len(o))
+	for _i := range o {
+		ids[_i] = o[_i].ID
+	}
+	return ids
+}

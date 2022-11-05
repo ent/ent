@@ -142,3 +142,11 @@ func (s Streets) config(cfg config) {
 		s[_i].config = cfg
 	}
 }
+
+func (s Streets) IDs() []int {
+	ids := make([]int, len(s))
+	for _i := range s {
+		ids[_i] = s[_i].ID
+	}
+	return ids
+}

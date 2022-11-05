@@ -124,3 +124,11 @@ func (u Users) config(cfg config) {
 		u[_i].config = cfg
 	}
 }
+
+func (u Users) IDs() []int {
+	ids := make([]int, len(u))
+	for _i := range u {
+		ids[_i] = u[_i].ID
+	}
+	return ids
+}

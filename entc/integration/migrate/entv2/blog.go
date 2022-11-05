@@ -115,3 +115,11 @@ func (b Blogs) config(cfg config) {
 		b[_i].config = cfg
 	}
 }
+
+func (b Blogs) IDs() []int {
+	ids := make([]int, len(b))
+	for _i := range b {
+		ids[_i] = b[_i].ID
+	}
+	return ids
+}

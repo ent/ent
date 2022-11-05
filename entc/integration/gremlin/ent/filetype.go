@@ -143,3 +143,11 @@ func (ft FileTypes) config(cfg config) {
 		ft[_i].config = cfg
 	}
 }
+
+func (ft FileTypes) IDs() []string {
+	ids := make([]string, len(ft))
+	for _i := range ft {
+		ids[_i] = ft[_i].ID
+	}
+	return ids
+}

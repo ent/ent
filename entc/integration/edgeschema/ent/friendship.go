@@ -186,3 +186,11 @@ func (f Friendships) config(cfg config) {
 		f[_i].config = cfg
 	}
 }
+
+func (f Friendships) IDs() []int {
+	ids := make([]int, len(f))
+	for _i := range f {
+		ids[_i] = f[_i].ID
+	}
+	return ids
+}

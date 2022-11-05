@@ -101,3 +101,11 @@ func (t Tenants) config(cfg config) {
 		t[_i].config = cfg
 	}
 }
+
+func (t Tenants) IDs() []int {
+	ids := make([]int, len(t))
+	for _i := range t {
+		ids[_i] = t[_i].ID
+	}
+	return ids
+}

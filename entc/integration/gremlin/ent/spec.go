@@ -116,3 +116,11 @@ func (s Specs) config(cfg config) {
 		s[_i].config = cfg
 	}
 }
+
+func (s Specs) IDs() []string {
+	ids := make([]string, len(s))
+	for _i := range s {
+		ids[_i] = s[_i].ID
+	}
+	return ids
+}

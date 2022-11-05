@@ -179,3 +179,11 @@ func (tt TweetTags) config(cfg config) {
 		tt[_i].config = cfg
 	}
 }
+
+func (tt TweetTags) IDs() []uuid.UUID {
+	ids := make([]uuid.UUID, len(tt))
+	for _i := range tt {
+		ids[_i] = tt[_i].ID
+	}
+	return ids
+}

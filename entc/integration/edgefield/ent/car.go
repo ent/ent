@@ -128,3 +128,11 @@ func (c Cars) config(cfg config) {
 		c[_i].config = cfg
 	}
 }
+
+func (c Cars) IDs() []uuid.UUID {
+	ids := make([]uuid.UUID, len(c))
+	for _i := range c {
+		ids[_i] = c[_i].ID
+	}
+	return ids
+}

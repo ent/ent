@@ -143,3 +143,11 @@ func (t Tokens) config(cfg config) {
 		t[_i].config = cfg
 	}
 }
+
+func (t Tokens) IDs() []sid.ID {
+	ids := make([]sid.ID, len(t))
+	for _i := range t {
+		ids[_i] = t[_i].ID
+	}
+	return ids
+}
