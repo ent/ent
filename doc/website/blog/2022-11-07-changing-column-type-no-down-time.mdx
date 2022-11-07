@@ -1,0 +1,130 @@
+---
+title: Changing column type with no downtime to production database
+authors: Ronen Lubin
+tags: [ent, atlas, migrations]
+---
+
+The last feature we added for Ariga Cloud required changing the value of an ent field from unstructured blob to
+structured json in order to reduce the load of decoding each object on the server upon reading.
+Our ent schema for the object looked like this:
+``` go
+func (User) Fields() []ent.Field {
+    return []ent.Field{
+        field.Bytes("meta", &Meta{}),
+    }
+}
+```
+
+What were the steps we took to change the underlying database type with no downtime to our production database?
+
+### Creating json column with ent:
+First we add new [ent json type](https://entgo.io/blog/2022/10/10/json-append)  the user schema
+``` go
+type Meta struct {
+	Time struct {
+		CreateTime  time.Time `json:"createTime"`
+		UpdateTime time.Time `json:"updateTime"`
+	} `json:"time"`
+}
+
+func (User) Fields() []ent.Field {
+    return []ent.Field{
+        field.Bytes("meta", &Meta{}),
+        field.JSON("meta_json", &Meta{}),
+    }
+}
+```
+
+Then we ran go generate using [atlas version migration](https://entgo.io/docs/versioned-migrations) feature enabled
+```
+go run ent/entc.go migrate
+```
+
+### Start writing to the new column
+After generating the json type Instead of writing to the old field:
+``` go
+u, err := c.User.Create().
+SetMeta(input.Meta).
+Save(ctx)
+```
+
+We switch writing to the new json field.
+``` go
+var meta schema.Meta
+if err = json.Unmarshal(input.Meta, &meta); err != nil {
+	return nil, err
+}
+u, err := c.User.Create().
+SetMetaJson(meta).
+Save(ctx)
+```
+
+After changing the writing we deploy to production.
+
+### Backfill values from old column
+Now in our production Database we have 2 columns, one storing the meta object as a blob and one storing it as a JSON.
+The second column may have null values since the json column was only added recently, therefore we need to backfill the
+old column values to the new column.
+
+Now we create a sql migration file that will fill values in the new json column from the old blob column.
+Creating new migration file:
+```
+atlas migrate new --dir file://ent/migrations
+```
+For every row in the users table with a null meta_json (i.e: rows added before the creation of the new column) if we can
+parse the meta object into valid json, we fill the ‘meta_json’ and if not we fill an empty json.
+
+Our next step is to edit the migration file:
+``` mysql
+UPDATE users
+SET meta_json = CASE
+        -- when meta is valid json store it as is.
+        WHEN JSON_VALID(cast(meta as char)) = 1 THEN cast(cast(meta as char) as json)
+        -- if meta is not valid json, store it as an empty object.
+        ELSE JSON_SET('{"Time": {}}')
+    END
+WHERE meta_json is null;
+
+```
+And then deploying to production again.
+
+### Redirect reads to the new column and delete old blob column
+Now when we have values in the `meta_json` column we can change the reads from the old field to the new field.
+
+Instead of unmarshalling the data from meta on each read:
+```	 go
+var meta schema.Meta
+if err = json.Unmarshal(user.Meta, &meta); err != nil {
+	return nil, err
+}
+if meta.Time.CreateTime.Before(time.Unix(0, 0)) {
+	return nil, errors.New("invalid create time")
+}
+```
+
+Just use the meta_json field:
+``` go
+if user.MetaJson.Time.CreateTime.Before(time.Unix(0, 0)) {
+	return nil, errors.New("invalid create time")
+}
+```
+
+We can also remove from the ent schema the field describing the old column.
+```  go
+func (User) Fields() []ent.Field {
+    return []ent.Field{
+        field.JSON("meta_json", &Meta{}),
+    }
+}
+```
+
+Generating the ent schema again.
+```
+go run ent/entc.go migrate
+```
+
+For the last time, merging our code to the version control and deploying to production.
+
+### Wrapping up:
+In this post, we discussed how to change column type in the production database without downtime using atlas version
+migration integrated with ent.
