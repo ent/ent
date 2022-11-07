@@ -336,6 +336,11 @@ func (cq *CardQuery) Select(fields ...string) *CardSelect {
 	return selbuild
 }
 
+// Aggregate returns a CardSelect configured with the given aggregations.
+func (cq *CardQuery) Aggregate(fns ...AggregateFunc) *CardSelect {
+	return cq.Select().Aggregate(fns...)
+}
+
 func (cq *CardQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range cq.fields {
 		if !card.ValidColumn(f) {
@@ -367,10 +372,10 @@ func (cq *CardQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Card, e
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, card.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Card).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Card{config: cq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -434,11 +439,14 @@ func (cq *CardQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (cq *CardQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := cq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := cq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (cq *CardQuery) querySpec() *sqlgraph.QuerySpec {
@@ -539,7 +547,7 @@ func (cgb *CardGroupBy) Aggregate(fns ...AggregateFunc) *CardGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (cgb *CardGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (cgb *CardGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := cgb.path(ctx)
 	if err != nil {
 		return err
@@ -548,7 +556,7 @@ func (cgb *CardGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return cgb.sqlScan(ctx, v)
 }
 
-func (cgb *CardGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (cgb *CardGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range cgb.fields {
 		if !card.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -573,8 +581,6 @@ func (cgb *CardGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range cgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(cgb.fields)+len(cgb.fns))
 		for _, f := range cgb.fields {
@@ -594,8 +600,14 @@ type CardSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (cs *CardSelect) Aggregate(fns ...AggregateFunc) *CardSelect {
+	cs.fns = append(cs.fns, fns...)
+	return cs
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (cs *CardSelect) Scan(ctx context.Context, v interface{}) error {
+func (cs *CardSelect) Scan(ctx context.Context, v any) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -603,7 +615,17 @@ func (cs *CardSelect) Scan(ctx context.Context, v interface{}) error {
 	return cs.sqlScan(ctx, v)
 }
 
-func (cs *CardSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (cs *CardSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(cs.fns))
+	for _, fn := range cs.fns {
+		aggregation = append(aggregation, fn(cs.sql))
+	}
+	switch n := len(*cs.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		cs.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		cs.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := cs.sql.Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {

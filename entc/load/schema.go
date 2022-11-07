@@ -18,14 +18,14 @@ import (
 
 // Schema represents an ent.Schema that was loaded from a complied user package.
 type Schema struct {
-	Name        string                 `json:"name,omitempty"`
-	Config      ent.Config             `json:"config,omitempty"`
-	Edges       []*Edge                `json:"edges,omitempty"`
-	Fields      []*Field               `json:"fields,omitempty"`
-	Indexes     []*Index               `json:"indexes,omitempty"`
-	Hooks       []*Position            `json:"hooks,omitempty"`
-	Policy      []*Position            `json:"policy,omitempty"`
-	Annotations map[string]interface{} `json:"annotations,omitempty"`
+	Name        string         `json:"name,omitempty"`
+	Config      ent.Config     `json:"config,omitempty"`
+	Edges       []*Edge        `json:"edges,omitempty"`
+	Fields      []*Field       `json:"fields,omitempty"`
+	Indexes     []*Index       `json:"indexes,omitempty"`
+	Hooks       []*Position    `json:"hooks,omitempty"`
+	Policy      []*Position    `json:"policy,omitempty"`
+	Annotations map[string]any `json:"annotations,omitempty"`
 }
 
 // Position describes a position in the schema.
@@ -46,7 +46,7 @@ type Field struct {
 	Nillable      bool                    `json:"nillable,omitempty"`
 	Optional      bool                    `json:"optional,omitempty"`
 	Default       bool                    `json:"default,omitempty"`
-	DefaultValue  interface{}             `json:"default_value,omitempty"`
+	DefaultValue  any                     `json:"default_value,omitempty"`
 	DefaultKind   reflect.Kind            `json:"default_kind,omitempty"`
 	UpdateDefault bool                    `json:"update_default,omitempty"`
 	Immutable     bool                    `json:"immutable,omitempty"`
@@ -55,7 +55,7 @@ type Field struct {
 	Position      *Position               `json:"position,omitempty"`
 	Sensitive     bool                    `json:"sensitive,omitempty"`
 	SchemaType    map[string]string       `json:"schema_type,omitempty"`
-	Annotations   map[string]interface{}  `json:"annotations,omitempty"`
+	Annotations   map[string]any          `json:"annotations,omitempty"`
 	Comment       string                  `json:"comment,omitempty"`
 }
 
@@ -71,18 +71,19 @@ type Edge struct {
 	Unique      bool                   `json:"unique,omitempty"`
 	Inverse     bool                   `json:"inverse,omitempty"`
 	Required    bool                   `json:"required,omitempty"`
+	Immutable   bool                   `json:"immutable,omitempty"`
 	StorageKey  *edge.StorageKey       `json:"storage_key,omitempty"`
-	Annotations map[string]interface{} `json:"annotations,omitempty"`
+	Annotations map[string]any         `json:"annotations,omitempty"`
 	Comment     string                 `json:"comment,omitempty"`
 }
 
 // Index represents an ent.Index that was loaded from a complied user package.
 type Index struct {
-	Unique      bool                   `json:"unique,omitempty"`
-	Edges       []string               `json:"edges,omitempty"`
-	Fields      []string               `json:"fields,omitempty"`
-	StorageKey  string                 `json:"storage_key,omitempty"`
-	Annotations map[string]interface{} `json:"annotations,omitempty"`
+	Unique      bool           `json:"unique,omitempty"`
+	Edges       []string       `json:"edges,omitempty"`
+	Fields      []string       `json:"fields,omitempty"`
+	StorageKey  string         `json:"storage_key,omitempty"`
+	Annotations map[string]any `json:"annotations,omitempty"`
 }
 
 // NewEdge creates an loaded edge from edge descriptor.
@@ -95,11 +96,12 @@ func NewEdge(ed *edge.Descriptor) *Edge {
 		Unique:      ed.Unique,
 		Inverse:     ed.Inverse,
 		Required:    ed.Required,
+		Immutable:   ed.Immutable,
 		RefName:     ed.RefName,
 		Through:     ed.Through,
 		StorageKey:  ed.StorageKey,
 		Comment:     ed.Comment,
-		Annotations: make(map[string]interface{}),
+		Annotations: make(map[string]any),
 	}
 	for _, at := range ed.Annotations {
 		ne.addAnnotation(at)
@@ -131,7 +133,7 @@ func NewField(fd *field.Descriptor) (*Field, error) {
 		Validators:    len(fd.Validators),
 		Sensitive:     fd.Sensitive,
 		SchemaType:    fd.SchemaType,
-		Annotations:   make(map[string]interface{}),
+		Annotations:   make(map[string]any),
 		Comment:       fd.Comment,
 	}
 	for _, at := range fd.Annotations {
@@ -161,7 +163,7 @@ func NewIndex(idx *index.Descriptor) *Index {
 		Fields:      idx.Fields,
 		Unique:      idx.Unique,
 		StorageKey:  idx.StorageKey,
-		Annotations: make(map[string]interface{}),
+		Annotations: make(map[string]any),
 	}
 	for _, at := range idx.Annotations {
 		ni.addAnnotation(at)
@@ -175,7 +177,7 @@ func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 	s := &Schema{
 		Config:      schema.Config(),
 		Name:        indirect(reflect.TypeOf(schema)).Name(),
-		Annotations: make(map[string]interface{}),
+		Annotations: make(map[string]any),
 	}
 	if err := s.loadMixin(schema); err != nil {
 		return nil, fmt.Errorf("schema %q: %w", s.Name, err)
@@ -355,7 +357,7 @@ func (f *Field) addAnnotation(an schema.Annotation) {
 	addAnnotation(f.Annotations, an)
 }
 
-func addAnnotation(annotations map[string]interface{}, an schema.Annotation) {
+func addAnnotation(annotations map[string]any, an schema.Annotation) {
 	curr, ok := annotations[an.Name()]
 	if !ok {
 		annotations[an.Name()] = an

@@ -28,6 +28,10 @@ func (User) Fields() []ent.Field {
 			Optional(),
 		field.JSON("url", &url.URL{}).
 			Optional(),
+		field.JSON("URLs", []*url.URL{}).
+			StorageKey("urls").
+			StructTag(`json:"urls,omitempty"`).
+			Optional(),
 		field.JSON("raw", json.RawMessage{}).
 			Optional(),
 		field.JSON("dirs", []http.Dir{}).
@@ -53,8 +57,10 @@ type T struct {
 	B  bool     `json:"b,omitempty"`
 	S  string   `json:"s,omitempty"`
 	T  *T       `json:"t,omitempty"`
-	Li []int    `json:"li,omitempty"`
-	Ls []string `json:"ls,omitempty"`
+	Li []int    `json:"li"`
+	Ls []string `json:"ls"`
+	// Do not omit empty or null maps.
+	M map[string]any `json:"m"`
 }
 
 type Addr struct{ net.Addr }

@@ -335,6 +335,11 @@ func (iq *InfoQuery) Select(fields ...string) *InfoSelect {
 	return selbuild
 }
 
+// Aggregate returns a InfoSelect configured with the given aggregations.
+func (iq *InfoQuery) Aggregate(fns ...AggregateFunc) *InfoSelect {
+	return iq.Select().Aggregate(fns...)
+}
+
 func (iq *InfoQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range iq.fields {
 		if !info.ValidColumn(f) {
@@ -359,10 +364,10 @@ func (iq *InfoQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Info, e
 			iq.withUser != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Info).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Info{config: iq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -423,11 +428,14 @@ func (iq *InfoQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (iq *InfoQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := iq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := iq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (iq *InfoQuery) querySpec() *sqlgraph.QuerySpec {
@@ -528,7 +536,7 @@ func (igb *InfoGroupBy) Aggregate(fns ...AggregateFunc) *InfoGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (igb *InfoGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (igb *InfoGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := igb.path(ctx)
 	if err != nil {
 		return err
@@ -537,7 +545,7 @@ func (igb *InfoGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return igb.sqlScan(ctx, v)
 }
 
-func (igb *InfoGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (igb *InfoGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range igb.fields {
 		if !info.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -562,8 +570,6 @@ func (igb *InfoGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range igb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(igb.fields)+len(igb.fns))
 		for _, f := range igb.fields {
@@ -583,8 +589,14 @@ type InfoSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (is *InfoSelect) Aggregate(fns ...AggregateFunc) *InfoSelect {
+	is.fns = append(is.fns, fns...)
+	return is
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (is *InfoSelect) Scan(ctx context.Context, v interface{}) error {
+func (is *InfoSelect) Scan(ctx context.Context, v any) error {
 	if err := is.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -592,7 +604,17 @@ func (is *InfoSelect) Scan(ctx context.Context, v interface{}) error {
 	return is.sqlScan(ctx, v)
 }
 
-func (is *InfoSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (is *InfoSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(is.fns))
+	for _, fn := range is.fns {
+		aggregation = append(aggregation, fn(is.sql))
+	}
+	switch n := len(*is.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		is.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		is.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := is.sql.Query()
 	if err := is.driver.Query(ctx, query, args, rows); err != nil {

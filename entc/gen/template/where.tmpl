@@ -71,7 +71,7 @@ in the LICENSE file in the root directory of this source tree.
 		// {{ $func }} applies the {{ $op.Name }} predicate on the {{ quote $f.Name }} field.
 		func {{ $func }}({{ if not $op.Niladic }}{{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $type }}{{ end }}) predicate.{{ $.Name }} {
 			{{- if $op.Variadic }}
-				v := make([]interface{}, len({{ $arg }}))
+				v := make([]any, len({{ $arg }}))
 				for i := range v {
 					{{- if and $f.HasGoType (not $f.Type.Valuer) }}
 						v[i] = {{ $f.BasicType (printf "%s[i]" $arg) }}

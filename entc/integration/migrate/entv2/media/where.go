@@ -35,7 +35,7 @@ func IDNEQ(id int) predicate.Media {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Media {
 	return predicate.Media(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -46,7 +46,7 @@ func IDIn(ids ...int) predicate.Media {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.Media {
 	return predicate.Media(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -119,7 +119,7 @@ func SourceNEQ(v string) predicate.Media {
 
 // SourceIn applies the In predicate on the "source" field.
 func SourceIn(vs ...string) predicate.Media {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -130,7 +130,7 @@ func SourceIn(vs ...string) predicate.Media {
 
 // SourceNotIn applies the NotIn predicate on the "source" field.
 func SourceNotIn(vs ...string) predicate.Media {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -232,7 +232,7 @@ func SourceURINEQ(v string) predicate.Media {
 
 // SourceURIIn applies the In predicate on the "source_uri" field.
 func SourceURIIn(vs ...string) predicate.Media {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -243,7 +243,7 @@ func SourceURIIn(vs ...string) predicate.Media {
 
 // SourceURINotIn applies the NotIn predicate on the "source_uri" field.
 func SourceURINotIn(vs ...string) predicate.Media {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -345,7 +345,7 @@ func TextNEQ(v string) predicate.Media {
 
 // TextIn applies the In predicate on the "text" field.
 func TextIn(vs ...string) predicate.Media {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -356,7 +356,7 @@ func TextIn(vs ...string) predicate.Media {
 
 // TextNotIn applies the NotIn predicate on the "text" field.
 func TextNotIn(vs ...string) predicate.Media {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

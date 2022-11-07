@@ -29,6 +29,8 @@ type Comment struct {
 	Table string `json:"table,omitempty"`
 	// Dir holds the value of the "dir" field.
 	Dir schemadir.Dir `json:"dir,omitempty"`
+	// Client holds the value of the "client" field.
+	Client string `json:"client,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into Comment.
@@ -44,6 +46,7 @@ func (c *Comment) FromResponse(res *gremlin.Response) error {
 		NillableInt *int          `json:"nillable_int,omitempty"`
 		Table       string        `json:"table,omitempty"`
 		Dir         schemadir.Dir `json:"dir,omitempty"`
+		Client      string        `json:"client,omitempty"`
 	}
 	if err := vmap.Decode(&scanc); err != nil {
 		return err
@@ -54,6 +57,7 @@ func (c *Comment) FromResponse(res *gremlin.Response) error {
 	c.NillableInt = scanc.NillableInt
 	c.Table = scanc.Table
 	c.Dir = scanc.Dir
+	c.Client = scanc.Client
 	return nil
 }
 
@@ -96,6 +100,9 @@ func (c *Comment) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("dir=")
 	builder.WriteString(fmt.Sprintf("%v", c.Dir))
+	builder.WriteString(", ")
+	builder.WriteString("client=")
+	builder.WriteString(c.Client)
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -116,19 +123,20 @@ func (c *Comments) FromResponse(res *gremlin.Response) error {
 		NillableInt *int          `json:"nillable_int,omitempty"`
 		Table       string        `json:"table,omitempty"`
 		Dir         schemadir.Dir `json:"dir,omitempty"`
+		Client      string        `json:"client,omitempty"`
 	}
 	if err := vmap.Decode(&scanc); err != nil {
 		return err
 	}
 	for _, v := range scanc {
-		*c = append(*c, &Comment{
-			ID:          v.ID,
-			UniqueInt:   v.UniqueInt,
-			UniqueFloat: v.UniqueFloat,
-			NillableInt: v.NillableInt,
-			Table:       v.Table,
-			Dir:         v.Dir,
-		})
+		node := &Comment{ID: v.ID}
+		node.UniqueInt = v.UniqueInt
+		node.UniqueFloat = v.UniqueFloat
+		node.NillableInt = v.NillableInt
+		node.Table = v.Table
+		node.Dir = v.Dir
+		node.Client = v.Client
+		*c = append(*c, node)
 	}
 	return nil
 }

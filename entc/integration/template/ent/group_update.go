@@ -122,18 +122,10 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := gu.mutation.MaxUsers(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: group.FieldMaxUsers,
-		})
+		_spec.SetField(group.FieldMaxUsers, field.TypeInt, value)
 	}
 	if value, ok := gu.mutation.AddedMaxUsers(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: group.FieldMaxUsers,
-		})
+		_spec.AddField(group.FieldMaxUsers, field.TypeInt, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, gu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -275,18 +267,10 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 		}
 	}
 	if value, ok := guo.mutation.MaxUsers(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: group.FieldMaxUsers,
-		})
+		_spec.SetField(group.FieldMaxUsers, field.TypeInt, value)
 	}
 	if value, ok := guo.mutation.AddedMaxUsers(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: group.FieldMaxUsers,
-		})
+		_spec.AddField(group.FieldMaxUsers, field.TypeInt, value)
 	}
 	_node = &Group{config: guo.config}
 	_spec.Assign = _node.assignValues

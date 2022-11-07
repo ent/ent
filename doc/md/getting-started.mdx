@@ -24,29 +24,20 @@ If your project directory is outside [GOPATH](https://github.com/golang/go/wiki/
 GOPATH, setup a [Go module](https://github.com/golang/go/wiki/Modules#quick-start) project as follows:
 
 ```console
-go mod init <project>
+go mod init entdemo
 ```
-
-## Installation
-
-```console
-go install entgo.io/ent/cmd/ent@latest
-```
-
-After installing `ent` codegen tool, use `go run entgo.io/ent/cmd/ent <command>` to execute
-commands.
 
 ## Create Your First Schema
 
 Go to the root directory of your project, and run:
 
 ```console
-go run entgo.io/ent/cmd/ent init User
+go run -mod=mod entgo.io/ent/cmd/ent init User
 ```
 
-The command above will generate the schema for `User` under `<project>/ent/schema/` directory:
+The command above will generate the schema for `User` under `entdemo/ent/schema/` directory:
 
-```go title="<project>/ent/schema/user.go"
+```go title="entdemo/ent/schema/user.go"
 
 package schema
 
@@ -71,7 +62,7 @@ func (User) Edges() []ent.Edge {
 
 Add 2 fields to the `User` schema:
 
-```go title="<project>/ent/schema/user.go"
+```go title="entdemo/ent/schema/user.go"
 
 package schema
 
@@ -134,14 +125,14 @@ values={[
 ]}>
 <TabItem value="sqlite">
 
-```go title="<project>/start/start.go"
+```go title="entdemo/start.go"
 package main
 
 import (
 	"context"
 	"log"
 
-	"<project>/ent"
+    "entdemo/ent"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -162,14 +153,14 @@ func main() {
 </TabItem>
 <TabItem value="postgres">
 
-```go title="<project>/start/start.go"
+```go title="entdemo/start.go"
 package main
 
 import (
 	"context"
 	"log"
 
-	"<project>/ent"
+    "entdemo/ent"
 
 	_ "github.com/lib/pq"
 )
@@ -190,14 +181,14 @@ func main() {
 </TabItem>
 <TabItem value="mysql">
 
-```go title="<project>/start/start.go"
+```go title="entdemo/start/start.go"
 package main
 
 import (
 	"context"
 	"log"
 
-	"<project>/ent"
+	"entdemo/ent"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -220,7 +211,7 @@ func main() {
 
 Now, we're ready to create our user. Let's call this function `CreateUser` for the sake of example:
 
-```go title="<project>/start/start.go"
+```go title="entdemo/start.go"
 func CreateUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	u, err := client.User.
 		Create().
@@ -240,14 +231,14 @@ func CreateUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 `ent` generates a package for each entity schema that contains its predicates, default values, validators
 and additional information about storage elements (column names, primary keys, etc).
 
-```go title="<project>/start/start.go"
+```go title="entdemo/start.go"
 package main
 
 import (
 	"log"
 
-	"<project>/ent"
-	"<project>/ent/user"
+	"entdemo/ent"
+	"entdemo/ent/user"
 )
 
 func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
@@ -267,17 +258,18 @@ func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 
 
 ## Add Your First Edge (Relation)
+
 In this part of the tutorial, we want to declare an edge (relation) to another entity in the schema.  
 Let's create 2 additional entities named `Car` and `Group` with a few fields. We use `ent` CLI
 to generate the initial schemas:
 
 ```console
-go run entgo.io/ent/cmd/ent init Car Group
+go run -mod=mod entgo.io/ent/cmd/ent init Car Group
 ```
 
 And then we add the rest of the fields manually:
 
-```go title="<project>/ent/schema/car.go"
+```go title="entdemo/ent/schema/car.go"
 // Fields of the Car.
 func (Car) Fields() []ent.Field {
 	return []ent.Field{
@@ -287,7 +279,7 @@ func (Car) Fields() []ent.Field {
 }
 ```
 
-```go title="<project>/ent/schema/group.go"
+```go title="entdemo/ent/schema/group.go"
 // Fields of the Group.
 func (Group) Fields() []ent.Field {
 	return []ent.Field{
@@ -305,7 +297,7 @@ can **have 1 or more** cars, but a car **has only one** owner (one-to-many relat
 
 Let's add the `"cars"` edge to the `User` schema, and run `go generate ./ent`:
 
-```go title="<project>/ent/schema/user.go"
+```go title="entdemo/ent/schema/user.go"
 
 // Edges of the User.
 func (User) Edges() []ent.Edge {
@@ -317,12 +309,12 @@ func (User) Edges() []ent.Edge {
 
 We continue our example by creating 2 cars and adding them to a user.
 
-```go title="<project>/start/start.go"
+```go title="entdemo/start.go"
 
 import (
-	"<project>/ent"
-	"<project>/ent/car"
-	"<project>/ent/user"
+	"entdemo/ent"
+	"entdemo/ent/car"
+	"entdemo/ent/user"
 )
 
 func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
@@ -365,12 +357,12 @@ func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
 ```
 But what about querying the `cars` edge (relation)? Here's how we do it:
 
-```go title="<project>/start/start.go"
+```go title="entdemo/start.go"
 import (
 	"log"
 
-	"<project>/ent"
-	"<project>/ent/car"
+	"entdemo/ent"
+	"entdemo/ent/car"
 )
 
 func QueryCars(ctx context.Context, a8m *ent.User) error {
@@ -405,7 +397,7 @@ edge in the database. It's just a back-reference to the real edge (relation).
 Let's add an inverse edge named `owner` to the `Car` schema, reference it to the `cars` edge
 in the `User` schema, and run `go generate ./ent`.
 
-```go title="<project>/ent/schema/car.go"
+```go title="entdemo/ent/schema/car.go"
 // Edges of the Car.
 func (Car) Edges() []ent.Edge {
 	return []ent.Edge{
@@ -422,13 +414,13 @@ func (Car) Edges() []ent.Edge {
 ```
 We'll continue the user/cars example above by querying the inverse edge.
 
-```go title="<project>/start/start.go"
+```go title="entdemo/start.go"
 import (
 	"fmt"
 	"log"
 
-	"<project>/ent"
-	"<project>/ent/user"
+	"entdemo/ent"
+	"entdemo/ent/user"
 )
 
 func QueryCarUsers(ctx context.Context, a8m *ent.User) error {
@@ -459,7 +451,7 @@ a simple "many-to-many" relationship. In the above illustration, the `Group` sch
 of the `users` edge (relation), and the `User` entity has a back-reference/inverse edge to this
 relationship named `groups`. Let's define this relationship in our schemas:
 
-```go title="<project>/ent/schema/group.go"
+```go title="entdemo/ent/schema/group.go"
 // Edges of the Group.
 func (Group) Edges() []ent.Edge {
    return []ent.Edge{
@@ -468,7 +460,7 @@ func (Group) Edges() []ent.Edge {
 }
 ```
 
-```go title="<project>/ent/schema/user.go"
+```go title="entdemo/ent/schema/user.go"
 // Edges of the User.
 func (User) Edges() []ent.Edge {
    return []ent.Edge{
@@ -495,7 +487,7 @@ entities and relations). Let's create the following graph using the framework:
 ![re-graph](https://entgo.io/images/assets/re_graph_getting_started.png)
 
 
-```go title="<project>/start/start.go"
+```go title="entdemo/start.go"
 func CreateGraph(ctx context.Context, client *ent.Client) error {
 	// First, create the users.
 	a8m, err := client.User.
@@ -571,12 +563,12 @@ Now when we have a graph with data, we can run a few queries on it:
 
 1. Get all user's cars within the group named "GitHub":
 
-	```go title="<project>/start/start.go"
+	```go title="entdemo/start.go"
 	import (
 		"log"
 		
-		"<project>/ent"
-		"<project>/ent/group"
+		"entdemo/ent"
+		"entdemo/ent/group"
 	)
 
 	func QueryGithub(ctx context.Context, client *ent.Client) error {
@@ -597,12 +589,12 @@ Now when we have a graph with data, we can run a few queries on it:
 
 2. Change the query above, so that the source of the traversal is the user *Ariel*:
    
-	```go title="<project>/start/start.go"
+	```go title="entdemo/start.go"
 	import (
 		"log"
 		
-		"<project>/ent"
-		"<project>/ent/car"
+		"entdemo/ent"
+		"entdemo/ent/car"
 	)
 
 	func QueryArielCars(ctx context.Context, client *ent.Client) error {
@@ -635,12 +627,12 @@ Now when we have a graph with data, we can run a few queries on it:
 
 3. Get all groups that have users (query with a look-aside predicate):
 
-	```go title="<project>/start/start.go"
+	```go title="entdemo/start.go"
 	import (
 		"log"
 		
-		"<project>/ent"
-		"<project>/ent/group"
+		"entdemo/ent"
+		"entdemo/ent/group"
 	)
 
 	func QueryGroupWithUsers(ctx context.Context, client *ent.Client) error {

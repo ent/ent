@@ -67,6 +67,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			comment.FieldNillableInt: {Type: field.TypeInt, Column: comment.FieldNillableInt},
 			comment.FieldTable:       {Type: field.TypeString, Column: comment.FieldTable},
 			comment.FieldDir:         {Type: field.TypeJSON, Column: comment.FieldDir},
+			comment.FieldClient:      {Type: field.TypeString, Column: comment.FieldClient},
 		},
 	}
 	graph.Nodes[2] = &sqlgraph.Node{
@@ -250,8 +251,11 @@ var schemaGraph = func() *sqlgraph.Schema {
 				Column: license.FieldID,
 			},
 		},
-		Type:   "License",
-		Fields: map[string]*sqlgraph.FieldSpec{},
+		Type: "License",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			license.FieldCreateTime: {Type: field.TypeTime, Column: license.FieldCreateTime},
+			license.FieldUpdateTime: {Type: field.TypeTime, Column: license.FieldUpdateTime},
+		},
 	}
 	graph.Nodes[10] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
@@ -310,6 +314,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Fields: map[string]*sqlgraph.FieldSpec{
 			enttask.FieldPriority:   {Type: field.TypeInt, Column: enttask.FieldPriority},
 			enttask.FieldPriorities: {Type: field.TypeJSON, Column: enttask.FieldPriorities},
+			enttask.FieldCreatedAt:  {Type: field.TypeTime, Column: enttask.FieldCreatedAt},
 		},
 	}
 	graph.Nodes[14] = &sqlgraph.Node{
@@ -825,6 +830,11 @@ func (f *CommentFilter) WhereTable(p entql.StringP) {
 // WhereDir applies the entql json.RawMessage predicate on the dir field.
 func (f *CommentFilter) WhereDir(p entql.BytesP) {
 	f.Where(p.Field(comment.FieldDir))
+}
+
+// WhereClient applies the entql string predicate on the client field.
+func (f *CommentFilter) WhereClient(p entql.StringP) {
+	f.Where(p.Field(comment.FieldClient))
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1683,6 +1693,16 @@ func (f *LicenseFilter) WhereID(p entql.IntP) {
 	f.Where(p.Field(license.FieldID))
 }
 
+// WhereCreateTime applies the entql time.Time predicate on the create_time field.
+func (f *LicenseFilter) WhereCreateTime(p entql.TimeP) {
+	f.Where(p.Field(license.FieldCreateTime))
+}
+
+// WhereUpdateTime applies the entql time.Time predicate on the update_time field.
+func (f *LicenseFilter) WhereUpdateTime(p entql.TimeP) {
+	f.Where(p.Field(license.FieldUpdateTime))
+}
+
 // addPredicate implements the predicateAdder interface.
 func (nq *NodeQuery) addPredicate(pred func(s *sql.Selector)) {
 	nq.predicates = append(nq.predicates, pred)
@@ -1951,6 +1971,11 @@ func (f *TaskFilter) WherePriority(p entql.IntP) {
 // WherePriorities applies the entql json.RawMessage predicate on the priorities field.
 func (f *TaskFilter) WherePriorities(p entql.BytesP) {
 	f.Where(p.Field(enttask.FieldPriorities))
+}
+
+// WhereCreatedAt applies the entql time.Time predicate on the created_at field.
+func (f *TaskFilter) WhereCreatedAt(p entql.TimeP) {
+	f.Where(p.Field(enttask.FieldCreatedAt))
 }
 
 // addPredicate implements the predicateAdder interface.

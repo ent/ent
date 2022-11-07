@@ -36,7 +36,7 @@ func IDNEQ(id int) predicate.Metadata {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Metadata {
 	return predicate.Metadata(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -47,7 +47,7 @@ func IDIn(ids ...int) predicate.Metadata {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.Metadata {
 	return predicate.Metadata(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -113,7 +113,7 @@ func AgeNEQ(v int) predicate.Metadata {
 
 // AgeIn applies the In predicate on the "age" field.
 func AgeIn(vs ...int) predicate.Metadata {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -124,7 +124,7 @@ func AgeIn(vs ...int) predicate.Metadata {
 
 // AgeNotIn applies the NotIn predicate on the "age" field.
 func AgeNotIn(vs ...int) predicate.Metadata {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -177,7 +177,7 @@ func ParentIDNEQ(v int) predicate.Metadata {
 
 // ParentIDIn applies the In predicate on the "parent_id" field.
 func ParentIDIn(vs ...int) predicate.Metadata {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -188,7 +188,7 @@ func ParentIDIn(vs ...int) predicate.Metadata {
 
 // ParentIDNotIn applies the NotIn predicate on the "parent_id" field.
 func ParentIDNotIn(vs ...int) predicate.Metadata {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

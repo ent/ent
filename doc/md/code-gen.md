@@ -17,7 +17,7 @@ go get -d entgo.io/ent/cmd/ent
 In order to generate one or more schema templates, run `ent init` as follows:
 
 ```bash
-go run entgo.io/ent/cmd/ent init User Pet
+go run -mod=mod entgo.io/ent/cmd/ent init User Pet
 ```
 
 `init` will create the 2 schemas (`user.go` and `pet.go`) under the `ent/schema` directory.
@@ -38,7 +38,7 @@ go generate ./ent
 The `generate` command generates the following assets for the schemas:
 
 - `Client` and `Tx` objects used for interacting with the graph.
-- CRUD builders for each schema type. See [CRUD](crud.md) for more info.
+- CRUD builders for each schema type. See [CRUD](crud.mdx) for more info.
 - Entity object (Go struct) for each of the schema types.
 - Package containing constants and predicates used for interacting with the builders.
 - A `migrate` package for SQL dialects. See [Migration](migrate.md) for more info.
@@ -110,7 +110,7 @@ a file with the same name as the template. The flag format supports  `file`, `di
 as follows:
 
 ```console
-go run entgo.io/ent/cmd/ent generate --template <dir-path> --template glob="path/to/*.tmpl" ./ent/schema
+go run -mod=mod entgo.io/ent/cmd/ent generate --template <dir-path> --template glob="path/to/*.tmpl" ./ent/schema
 ```
 
 More information and examples can be found in the [external templates doc](templates.md).
@@ -153,7 +153,7 @@ The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examp
 In order to get a description of your graph schema, run:
 
 ```bash
-go run entgo.io/ent/cmd/ent describe ./ent/schema
+go run -mod=mod entgo.io/ent/cmd/ent describe ./ent/schema
 ```
 
 An example for the output is as follows:

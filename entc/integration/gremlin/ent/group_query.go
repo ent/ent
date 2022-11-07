@@ -408,6 +408,11 @@ func (gq *GroupQuery) Select(fields ...string) *GroupSelect {
 	return selbuild
 }
 
+// Aggregate returns a GroupSelect configured with the given aggregations.
+func (gq *GroupQuery) Aggregate(fns ...AggregateFunc) *GroupSelect {
+	return gq.Select().Aggregate(fns...)
+}
+
 func (gq *GroupQuery) prepareQuery(ctx context.Context) error {
 	if gq.path != nil {
 		prev, err := gq.path(ctx)
@@ -423,7 +428,7 @@ func (gq *GroupQuery) gremlinAll(ctx context.Context) ([]*Group, error) {
 	res := &gremlin.Response{}
 	traversal := gq.gremlinQuery(ctx)
 	if len(gq.fields) > 0 {
-		fields := make([]interface{}, len(gq.fields))
+		fields := make([]any, len(gq.fields))
 		for i, f := range gq.fields {
 			fields[i] = f
 		}
@@ -507,7 +512,7 @@ func (ggb *GroupGroupBy) Aggregate(fns ...AggregateFunc) *GroupGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (ggb *GroupGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (ggb *GroupGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := ggb.path(ctx)
 	if err != nil {
 		return err
@@ -516,7 +521,7 @@ func (ggb *GroupGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return ggb.gremlinScan(ctx, v)
 }
 
-func (ggb *GroupGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
+func (ggb *GroupGroupBy) gremlinScan(ctx context.Context, v any) error {
 	res := &gremlin.Response{}
 	query, bindings := ggb.gremlinQuery().Query()
 	if err := ggb.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -534,8 +539,8 @@ func (ggb *GroupGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
 
 func (ggb *GroupGroupBy) gremlinQuery() *dsl.Traversal {
 	var (
-		trs   []interface{}
-		names []interface{}
+		trs   []any
+		names []any
 	)
 	for _, fn := range ggb.fns {
 		name, tr := fn("p", "")
@@ -561,8 +566,14 @@ type GroupSelect struct {
 	gremlin *dsl.Traversal
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (gs *GroupSelect) Aggregate(fns ...AggregateFunc) *GroupSelect {
+	gs.fns = append(gs.fns, fns...)
+	return gs
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (gs *GroupSelect) Scan(ctx context.Context, v interface{}) error {
+func (gs *GroupSelect) Scan(ctx context.Context, v any) error {
 	if err := gs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -570,7 +581,7 @@ func (gs *GroupSelect) Scan(ctx context.Context, v interface{}) error {
 	return gs.gremlinScan(ctx, v)
 }
 
-func (gs *GroupSelect) gremlinScan(ctx context.Context, v interface{}) error {
+func (gs *GroupSelect) gremlinScan(ctx context.Context, v any) error {
 	var (
 		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
@@ -582,7 +593,7 @@ func (gs *GroupSelect) gremlinScan(ctx context.Context, v interface{}) error {
 			traversal = gs.gremlin.ID()
 		}
 	} else {
-		fields := make([]interface{}, len(gs.fields))
+		fields := make([]any, len(gs.fields))
 		for i, f := range gs.fields {
 			fields[i] = f
 		}

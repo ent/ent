@@ -81,11 +81,7 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 	{{- end }}
 	{{- range $f := $.MutationFields }}
 		if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
-			_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-				Type: field.{{ $f.Type.ConstName }},
-				Value: value,
-				Column: {{ $.Package }}.{{ $f.Constant }},
-			})
+			_spec.SetField({{ $.Package }}.{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, value)
 			_node.{{ $f.StructField }} = {{ if $f.NillableValue }}&{{ end }}value
 		}
 	{{- end }}

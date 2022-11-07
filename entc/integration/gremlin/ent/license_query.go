@@ -253,6 +253,18 @@ func (lq *LicenseQuery) Clone() *LicenseQuery {
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		CreateTime time.Time `json:"create_time,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.License.Query().
+//		GroupBy(license.FieldCreateTime).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
 func (lq *LicenseQuery) GroupBy(field string, fields ...string) *LicenseGroupBy {
 	grbuild := &LicenseGroupBy{config: lq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -269,12 +281,27 @@ func (lq *LicenseQuery) GroupBy(field string, fields ...string) *LicenseGroupBy 
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		CreateTime time.Time `json:"create_time,omitempty"`
+//	}
+//
+//	client.License.Query().
+//		Select(license.FieldCreateTime).
+//		Scan(ctx, &v)
 func (lq *LicenseQuery) Select(fields ...string) *LicenseSelect {
 	lq.fields = append(lq.fields, fields...)
 	selbuild := &LicenseSelect{LicenseQuery: lq}
 	selbuild.label = license.Label
 	selbuild.flds, selbuild.scan = &lq.fields, selbuild.Scan
 	return selbuild
+}
+
+// Aggregate returns a LicenseSelect configured with the given aggregations.
+func (lq *LicenseQuery) Aggregate(fns ...AggregateFunc) *LicenseSelect {
+	return lq.Select().Aggregate(fns...)
 }
 
 func (lq *LicenseQuery) prepareQuery(ctx context.Context) error {
@@ -292,7 +319,7 @@ func (lq *LicenseQuery) gremlinAll(ctx context.Context) ([]*License, error) {
 	res := &gremlin.Response{}
 	traversal := lq.gremlinQuery(ctx)
 	if len(lq.fields) > 0 {
-		fields := make([]interface{}, len(lq.fields))
+		fields := make([]any, len(lq.fields))
 		for i, f := range lq.fields {
 			fields[i] = f
 		}
@@ -376,7 +403,7 @@ func (lgb *LicenseGroupBy) Aggregate(fns ...AggregateFunc) *LicenseGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (lgb *LicenseGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (lgb *LicenseGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := lgb.path(ctx)
 	if err != nil {
 		return err
@@ -385,7 +412,7 @@ func (lgb *LicenseGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return lgb.gremlinScan(ctx, v)
 }
 
-func (lgb *LicenseGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
+func (lgb *LicenseGroupBy) gremlinScan(ctx context.Context, v any) error {
 	res := &gremlin.Response{}
 	query, bindings := lgb.gremlinQuery().Query()
 	if err := lgb.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -403,8 +430,8 @@ func (lgb *LicenseGroupBy) gremlinScan(ctx context.Context, v interface{}) error
 
 func (lgb *LicenseGroupBy) gremlinQuery() *dsl.Traversal {
 	var (
-		trs   []interface{}
-		names []interface{}
+		trs   []any
+		names []any
 	)
 	for _, fn := range lgb.fns {
 		name, tr := fn("p", "")
@@ -430,8 +457,14 @@ type LicenseSelect struct {
 	gremlin *dsl.Traversal
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ls *LicenseSelect) Aggregate(fns ...AggregateFunc) *LicenseSelect {
+	ls.fns = append(ls.fns, fns...)
+	return ls
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (ls *LicenseSelect) Scan(ctx context.Context, v interface{}) error {
+func (ls *LicenseSelect) Scan(ctx context.Context, v any) error {
 	if err := ls.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -439,7 +472,7 @@ func (ls *LicenseSelect) Scan(ctx context.Context, v interface{}) error {
 	return ls.gremlinScan(ctx, v)
 }
 
-func (ls *LicenseSelect) gremlinScan(ctx context.Context, v interface{}) error {
+func (ls *LicenseSelect) gremlinScan(ctx context.Context, v any) error {
 	var (
 		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
@@ -451,7 +484,7 @@ func (ls *LicenseSelect) gremlinScan(ctx context.Context, v interface{}) error {
 			traversal = ls.gremlin.ID()
 		}
 	} else {
-		fields := make([]interface{}, len(ls.fields))
+		fields := make([]any, len(ls.fields))
 		for i, f := range ls.fields {
 			fields[i] = f
 		}

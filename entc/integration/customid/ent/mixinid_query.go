@@ -300,6 +300,11 @@ func (miq *MixinIDQuery) Select(fields ...string) *MixinIDSelect {
 	return selbuild
 }
 
+// Aggregate returns a MixinIDSelect configured with the given aggregations.
+func (miq *MixinIDQuery) Aggregate(fns ...AggregateFunc) *MixinIDSelect {
+	return miq.Select().Aggregate(fns...)
+}
+
 func (miq *MixinIDQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range miq.fields {
 		if !mixinid.ValidColumn(f) {
@@ -321,10 +326,10 @@ func (miq *MixinIDQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Mix
 		nodes = []*MixinID{}
 		_spec = miq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*MixinID).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &MixinID{config: miq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -351,11 +356,14 @@ func (miq *MixinIDQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (miq *MixinIDQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := miq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := miq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (miq *MixinIDQuery) querySpec() *sqlgraph.QuerySpec {
@@ -456,7 +464,7 @@ func (migb *MixinIDGroupBy) Aggregate(fns ...AggregateFunc) *MixinIDGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (migb *MixinIDGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (migb *MixinIDGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := migb.path(ctx)
 	if err != nil {
 		return err
@@ -465,7 +473,7 @@ func (migb *MixinIDGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return migb.sqlScan(ctx, v)
 }
 
-func (migb *MixinIDGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (migb *MixinIDGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range migb.fields {
 		if !mixinid.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -490,8 +498,6 @@ func (migb *MixinIDGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range migb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(migb.fields)+len(migb.fns))
 		for _, f := range migb.fields {
@@ -511,8 +517,14 @@ type MixinIDSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (mis *MixinIDSelect) Aggregate(fns ...AggregateFunc) *MixinIDSelect {
+	mis.fns = append(mis.fns, fns...)
+	return mis
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (mis *MixinIDSelect) Scan(ctx context.Context, v interface{}) error {
+func (mis *MixinIDSelect) Scan(ctx context.Context, v any) error {
 	if err := mis.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -520,7 +532,17 @@ func (mis *MixinIDSelect) Scan(ctx context.Context, v interface{}) error {
 	return mis.sqlScan(ctx, v)
 }
 
-func (mis *MixinIDSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (mis *MixinIDSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(mis.fns))
+	for _, fn := range mis.fns {
+		aggregation = append(aggregation, fn(mis.sql))
+	}
+	switch n := len(*mis.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		mis.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		mis.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := mis.sql.Query()
 	if err := mis.driver.Query(ctx, query, args, rows); err != nil {

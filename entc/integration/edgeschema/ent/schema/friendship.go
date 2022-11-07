@@ -25,8 +25,10 @@ func (Friendship) Fields() []ent.Field {
 			Default(1),
 		field.Time("created_at").
 			Default(time.Now),
-		field.Int("user_id"),
-		field.Int("friend_id"),
+		field.Int("user_id").
+			Immutable(),
+		field.Int("friend_id").
+			Immutable(),
 	}
 }
 
@@ -34,12 +36,14 @@ func (Friendship) Fields() []ent.Field {
 func (Friendship) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("user", User.Type).
-			Required().
 			Unique().
+			Required().
+			Immutable().
 			Field("user_id"),
 		edge.To("friend", User.Type).
-			Required().
 			Unique().
+			Required().
+			Immutable().
 			Field("friend_id"),
 	}
 }

@@ -34,6 +34,9 @@ type Group func(*sql.Selector)
 // IntSID is the predicate function for intsid builders.
 type IntSID func(*sql.Selector)
 
+// Link is the predicate function for link builders.
+type Link func(*sql.Selector)
+
 // MixinID is the predicate function for mixinid builders.
 type MixinID func(*sql.Selector)
 

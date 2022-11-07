@@ -339,6 +339,11 @@ func (pq *PetQuery) Select(fields ...string) *PetSelect {
 	return selbuild
 }
 
+// Aggregate returns a PetSelect configured with the given aggregations.
+func (pq *PetQuery) Aggregate(fns ...AggregateFunc) *PetSelect {
+	return pq.Select().Aggregate(fns...)
+}
+
 func (pq *PetQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range pq.fields {
 		if !pet.ValidColumn(f) {
@@ -370,10 +375,10 @@ func (pq *PetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pet, err
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, pet.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Pet).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Pet{config: pq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -443,11 +448,14 @@ func (pq *PetQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (pq *PetQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := pq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := pq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {
@@ -556,7 +564,7 @@ func (pgb *PetGroupBy) Aggregate(fns ...AggregateFunc) *PetGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (pgb *PetGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (pgb *PetGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := pgb.path(ctx)
 	if err != nil {
 		return err
@@ -565,7 +573,7 @@ func (pgb *PetGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return pgb.sqlScan(ctx, v)
 }
 
-func (pgb *PetGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (pgb *PetGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range pgb.fields {
 		if !pet.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -590,8 +598,6 @@ func (pgb *PetGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range pgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(pgb.fields)+len(pgb.fns))
 		for _, f := range pgb.fields {
@@ -611,8 +617,14 @@ type PetSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ps *PetSelect) Aggregate(fns ...AggregateFunc) *PetSelect {
+	ps.fns = append(ps.fns, fns...)
+	return ps
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (ps *PetSelect) Scan(ctx context.Context, v interface{}) error {
+func (ps *PetSelect) Scan(ctx context.Context, v any) error {
 	if err := ps.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -620,7 +632,17 @@ func (ps *PetSelect) Scan(ctx context.Context, v interface{}) error {
 	return ps.sqlScan(ctx, v)
 }
 
-func (ps *PetSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ps *PetSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ps.fns))
+	for _, fn := range ps.fns {
+		aggregation = append(aggregation, fn(ps.sql))
+	}
+	switch n := len(*ps.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ps.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ps.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ps.sql.Query()
 	if err := ps.driver.Query(ctx, query, args, rows); err != nil {

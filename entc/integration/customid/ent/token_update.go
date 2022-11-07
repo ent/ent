@@ -153,11 +153,7 @@ func (tu *TokenUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := tu.mutation.Body(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: token.FieldBody,
-		})
+		_spec.SetField(token.FieldBody, field.TypeString, value)
 	}
 	if tu.mutation.AccountCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -363,11 +359,7 @@ func (tuo *TokenUpdateOne) sqlSave(ctx context.Context) (_node *Token, err error
 		}
 	}
 	if value, ok := tuo.mutation.Body(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: token.FieldBody,
-		})
+		_spec.SetField(token.FieldBody, field.TypeString, value)
 	}
 	if tuo.mutation.AccountCleared() {
 		edge := &sqlgraph.EdgeSpec{

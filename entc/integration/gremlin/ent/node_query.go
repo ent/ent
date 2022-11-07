@@ -353,6 +353,11 @@ func (nq *NodeQuery) Select(fields ...string) *NodeSelect {
 	return selbuild
 }
 
+// Aggregate returns a NodeSelect configured with the given aggregations.
+func (nq *NodeQuery) Aggregate(fns ...AggregateFunc) *NodeSelect {
+	return nq.Select().Aggregate(fns...)
+}
+
 func (nq *NodeQuery) prepareQuery(ctx context.Context) error {
 	if nq.path != nil {
 		prev, err := nq.path(ctx)
@@ -368,7 +373,7 @@ func (nq *NodeQuery) gremlinAll(ctx context.Context) ([]*Node, error) {
 	res := &gremlin.Response{}
 	traversal := nq.gremlinQuery(ctx)
 	if len(nq.fields) > 0 {
-		fields := make([]interface{}, len(nq.fields))
+		fields := make([]any, len(nq.fields))
 		for i, f := range nq.fields {
 			fields[i] = f
 		}
@@ -452,7 +457,7 @@ func (ngb *NodeGroupBy) Aggregate(fns ...AggregateFunc) *NodeGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (ngb *NodeGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (ngb *NodeGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := ngb.path(ctx)
 	if err != nil {
 		return err
@@ -461,7 +466,7 @@ func (ngb *NodeGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return ngb.gremlinScan(ctx, v)
 }
 
-func (ngb *NodeGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
+func (ngb *NodeGroupBy) gremlinScan(ctx context.Context, v any) error {
 	res := &gremlin.Response{}
 	query, bindings := ngb.gremlinQuery().Query()
 	if err := ngb.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -479,8 +484,8 @@ func (ngb *NodeGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
 
 func (ngb *NodeGroupBy) gremlinQuery() *dsl.Traversal {
 	var (
-		trs   []interface{}
-		names []interface{}
+		trs   []any
+		names []any
 	)
 	for _, fn := range ngb.fns {
 		name, tr := fn("p", "")
@@ -506,8 +511,14 @@ type NodeSelect struct {
 	gremlin *dsl.Traversal
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ns *NodeSelect) Aggregate(fns ...AggregateFunc) *NodeSelect {
+	ns.fns = append(ns.fns, fns...)
+	return ns
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (ns *NodeSelect) Scan(ctx context.Context, v interface{}) error {
+func (ns *NodeSelect) Scan(ctx context.Context, v any) error {
 	if err := ns.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -515,7 +526,7 @@ func (ns *NodeSelect) Scan(ctx context.Context, v interface{}) error {
 	return ns.gremlinScan(ctx, v)
 }
 
-func (ns *NodeSelect) gremlinScan(ctx context.Context, v interface{}) error {
+func (ns *NodeSelect) gremlinScan(ctx context.Context, v any) error {
 	var (
 		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
@@ -527,7 +538,7 @@ func (ns *NodeSelect) gremlinScan(ctx context.Context, v interface{}) error {
 			traversal = ns.gremlin.ID()
 		}
 	} else {
-		fields := make([]interface{}, len(ns.fields))
+		fields := make([]any, len(ns.fields))
 		for i, f := range ns.fields {
 			fields[i] = f
 		}

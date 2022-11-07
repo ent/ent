@@ -171,19 +171,11 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 		}
 	)
 	if value, ok := pc.mutation.Age(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: pet.FieldAge,
-		})
+		_spec.SetField(pet.FieldAge, field.TypeInt, value)
 		_node.Age = value
 	}
 	if value, ok := pc.mutation.LicensedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: pet.FieldLicensedAt,
-		})
+		_spec.SetField(pet.FieldLicensedAt, field.TypeTime, value)
 		_node.LicensedAt = &value
 	}
 	if nodes := pc.mutation.OwnerIDs(); len(nodes) > 0 {

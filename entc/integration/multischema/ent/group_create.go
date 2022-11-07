@@ -170,11 +170,7 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	)
 	_spec.Schema = gc.schemaConfig.Group
 	if value, ok := gc.mutation.Name(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: group.FieldName,
-		})
+		_spec.SetField(group.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
 	if nodes := gc.mutation.UsersIDs(); len(nodes) > 0 {

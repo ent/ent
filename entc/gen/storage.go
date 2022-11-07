@@ -54,6 +54,7 @@ var drivers = []*Storage{
 		Imports: []string{
 			"entgo.io/ent/dialect/sql",
 			"entgo.io/ent/dialect/sql/sqlgraph",
+			"entgo.io/ent/dialect/sql/sqljson",
 			"entgo.io/ent/schema/field",
 		},
 		SchemaMode: Unique | Indexes | Cascade | Migrate,

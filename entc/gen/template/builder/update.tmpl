@@ -248,13 +248,6 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 	{{- end }}
 {{- end }}
 
-{{- /* Support adding update methods by global templates. */}}
-{{- with $tmpls := matchTemplate "update/additional/*" }}
-	{{- range $tmpl := $tmpls }}
-		{{ xtemplate $tmpl $ }}
-	{{- end }}
-{{- end }}
-
 {{ end }}
 
 {{/* shared struct fields between the two updaters */}}
@@ -275,6 +268,10 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 {{ $mutation := print $receiver ".mutation" }}
 
 {{ range $e := $.EdgesWithID }}
+	{{ if $e.Immutable }}
+		{{/* Skip to the next one as immutable edges cannot be updated. */}}
+		{{continue}}
+	{{ end }}
 	{{ $func := $e.MutationClear }}
 	// {{ $func }} clears {{ if $e.Unique }}the "{{ $e.Name }}" edge{{ else }}all "{{ $e.Name }}" edges{{ end }} to the {{ $e.Type.Name }} entity.
 	func ({{ $receiver }} *{{ $builder }}) {{ $func }}() *{{ $builder }} {

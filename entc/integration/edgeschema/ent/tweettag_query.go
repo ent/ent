@@ -372,6 +372,11 @@ func (ttq *TweetTagQuery) Select(fields ...string) *TweetTagSelect {
 	return selbuild
 }
 
+// Aggregate returns a TweetTagSelect configured with the given aggregations.
+func (ttq *TweetTagQuery) Aggregate(fns ...AggregateFunc) *TweetTagSelect {
+	return ttq.Select().Aggregate(fns...)
+}
+
 func (ttq *TweetTagQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range ttq.fields {
 		if !tweettag.ValidColumn(f) {
@@ -397,10 +402,10 @@ func (ttq *TweetTagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tw
 			ttq.withTweet != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*TweetTag).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &TweetTag{config: ttq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -493,11 +498,14 @@ func (ttq *TweetTagQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (ttq *TweetTagQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := ttq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := ttq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (ttq *TweetTagQuery) querySpec() *sqlgraph.QuerySpec {
@@ -598,7 +606,7 @@ func (ttgb *TweetTagGroupBy) Aggregate(fns ...AggregateFunc) *TweetTagGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (ttgb *TweetTagGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (ttgb *TweetTagGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := ttgb.path(ctx)
 	if err != nil {
 		return err
@@ -607,7 +615,7 @@ func (ttgb *TweetTagGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return ttgb.sqlScan(ctx, v)
 }
 
-func (ttgb *TweetTagGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (ttgb *TweetTagGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range ttgb.fields {
 		if !tweettag.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -632,8 +640,6 @@ func (ttgb *TweetTagGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range ttgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(ttgb.fields)+len(ttgb.fns))
 		for _, f := range ttgb.fields {
@@ -653,8 +659,14 @@ type TweetTagSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (tts *TweetTagSelect) Aggregate(fns ...AggregateFunc) *TweetTagSelect {
+	tts.fns = append(tts.fns, fns...)
+	return tts
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (tts *TweetTagSelect) Scan(ctx context.Context, v interface{}) error {
+func (tts *TweetTagSelect) Scan(ctx context.Context, v any) error {
 	if err := tts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -662,7 +674,17 @@ func (tts *TweetTagSelect) Scan(ctx context.Context, v interface{}) error {
 	return tts.sqlScan(ctx, v)
 }
 
-func (tts *TweetTagSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (tts *TweetTagSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(tts.fns))
+	for _, fn := range tts.fns {
+		aggregation = append(aggregation, fn(tts.sql))
+	}
+	switch n := len(*tts.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		tts.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		tts.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := tts.sql.Query()
 	if err := tts.driver.Query(ctx, query, args, rows); err != nil {

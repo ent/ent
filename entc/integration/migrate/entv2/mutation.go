@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"entgo.io/ent/entc/integration/migrate/entv2/blog"
 	"entgo.io/ent/entc/integration/migrate/entv2/car"
 	"entgo.io/ent/entc/integration/migrate/entv2/conversion"
 	"entgo.io/ent/entc/integration/migrate/entv2/customtype"
@@ -33,6 +34,7 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
+	TypeBlog       = "Blog"
 	TypeCar        = "Car"
 	TypeConversion = "Conversion"
 	TypeCustomType = "CustomType"
@@ -41,6 +43,354 @@ const (
 	TypePet        = "Pet"
 	TypeUser       = "User"
 )
+
+// BlogMutation represents an operation that mutates the Blog nodes in the graph.
+type BlogMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	clearedFields map[string]struct{}
+	admins        map[int]struct{}
+	removedadmins map[int]struct{}
+	clearedadmins bool
+	done          bool
+	oldValue      func(context.Context) (*Blog, error)
+	predicates    []predicate.Blog
+}
+
+var _ ent.Mutation = (*BlogMutation)(nil)
+
+// blogOption allows management of the mutation configuration using functional options.
+type blogOption func(*BlogMutation)
+
+// newBlogMutation creates new mutation for the Blog entity.
+func newBlogMutation(c config, op Op, opts ...blogOption) *BlogMutation {
+	m := &BlogMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeBlog,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withBlogID sets the ID field of the mutation.
+func withBlogID(id int) blogOption {
+	return func(m *BlogMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Blog
+		)
+		m.oldValue = func(ctx context.Context) (*Blog, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Blog.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withBlog sets the old Blog of the mutation.
+func withBlog(node *Blog) blogOption {
+	return func(m *BlogMutation) {
+		m.oldValue = func(context.Context) (*Blog, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m BlogMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m BlogMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("entv2: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Blog entities.
+func (m *BlogMutation) SetID(id int) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *BlogMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *BlogMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Blog.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// AddAdminIDs adds the "admins" edge to the User entity by ids.
+func (m *BlogMutation) AddAdminIDs(ids ...int) {
+	if m.admins == nil {
+		m.admins = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.admins[ids[i]] = struct{}{}
+	}
+}
+
+// ClearAdmins clears the "admins" edge to the User entity.
+func (m *BlogMutation) ClearAdmins() {
+	m.clearedadmins = true
+}
+
+// AdminsCleared reports if the "admins" edge to the User entity was cleared.
+func (m *BlogMutation) AdminsCleared() bool {
+	return m.clearedadmins
+}
+
+// RemoveAdminIDs removes the "admins" edge to the User entity by IDs.
+func (m *BlogMutation) RemoveAdminIDs(ids ...int) {
+	if m.removedadmins == nil {
+		m.removedadmins = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.admins, ids[i])
+		m.removedadmins[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedAdmins returns the removed IDs of the "admins" edge to the User entity.
+func (m *BlogMutation) RemovedAdminsIDs() (ids []int) {
+	for id := range m.removedadmins {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// AdminsIDs returns the "admins" edge IDs in the mutation.
+func (m *BlogMutation) AdminsIDs() (ids []int) {
+	for id := range m.admins {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetAdmins resets all changes to the "admins" edge.
+func (m *BlogMutation) ResetAdmins() {
+	m.admins = nil
+	m.clearedadmins = false
+	m.removedadmins = nil
+}
+
+// Where appends a list predicates to the BlogMutation builder.
+func (m *BlogMutation) Where(ps ...predicate.Blog) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *BlogMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Blog).
+func (m *BlogMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *BlogMutation) Fields() []string {
+	fields := make([]string, 0, 0)
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *BlogMutation) Field(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *BlogMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	return nil, fmt.Errorf("unknown Blog field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BlogMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Blog field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *BlogMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *BlogMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BlogMutation) AddField(name string, value ent.Value) error {
+	return fmt.Errorf("unknown Blog numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *BlogMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *BlogMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *BlogMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Blog nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *BlogMutation) ResetField(name string) error {
+	return fmt.Errorf("unknown Blog field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *BlogMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.admins != nil {
+		edges = append(edges, blog.EdgeAdmins)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *BlogMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case blog.EdgeAdmins:
+		ids := make([]ent.Value, 0, len(m.admins))
+		for id := range m.admins {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *BlogMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removedadmins != nil {
+		edges = append(edges, blog.EdgeAdmins)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *BlogMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case blog.EdgeAdmins:
+		ids := make([]ent.Value, 0, len(m.removedadmins))
+		for id := range m.removedadmins {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *BlogMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedadmins {
+		edges = append(edges, blog.EdgeAdmins)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *BlogMutation) EdgeCleared(name string) bool {
+	switch name {
+	case blog.EdgeAdmins:
+		return m.clearedadmins
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *BlogMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Blog unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *BlogMutation) ResetEdge(name string) error {
+	switch name {
+	case blog.EdgeAdmins:
+		m.ResetAdmins()
+		return nil
+	}
+	return fmt.Errorf("unknown Blog edge %s", name)
+}
 
 // CarMutation represents an operation that mutates the Car nodes in the graph.
 type CarMutation struct {
@@ -398,8 +748,6 @@ func (m *CarMutation) RemovedEdges() []string {
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *CarMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 
@@ -2924,8 +3272,6 @@ func (m *PetMutation) RemovedEdges() []string {
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *PetMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 
@@ -2978,6 +3324,7 @@ type UserMutation struct {
 	id             *int
 	mixed_string   *string
 	mixed_enum     *user.MixedEnum
+	active         *bool
 	age            *int
 	addage         *int
 	name           *string
@@ -3182,6 +3529,42 @@ func (m *UserMutation) OldMixedEnum(ctx context.Context) (v user.MixedEnum, err 
 // ResetMixedEnum resets all changes to the "mixed_enum" field.
 func (m *UserMutation) ResetMixedEnum() {
 	m.mixed_enum = nil
+}
+
+// SetActive sets the "active" field.
+func (m *UserMutation) SetActive(b bool) {
+	m.active = &b
+}
+
+// Active returns the value of the "active" field in the mutation.
+func (m *UserMutation) Active() (r bool, exists bool) {
+	v := m.active
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActive returns the old "active" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldActive(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActive is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActive requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActive: %w", err)
+	}
+	return oldValue.Active, nil
+}
+
+// ResetActive resets all changes to the "active" field.
+func (m *UserMutation) ResetActive() {
+	m.active = nil
 }
 
 // SetAge sets the "age" field.
@@ -4001,12 +4384,15 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 17)
+	fields := make([]string, 0, 18)
 	if m.mixed_string != nil {
 		fields = append(fields, user.FieldMixedString)
 	}
 	if m.mixed_enum != nil {
 		fields = append(fields, user.FieldMixedEnum)
+	}
+	if m.active != nil {
+		fields = append(fields, user.FieldActive)
 	}
 	if m.age != nil {
 		fields = append(fields, user.FieldAge)
@@ -4065,6 +4451,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.MixedString()
 	case user.FieldMixedEnum:
 		return m.MixedEnum()
+	case user.FieldActive:
+		return m.Active()
 	case user.FieldAge:
 		return m.Age()
 	case user.FieldName:
@@ -4108,6 +4496,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldMixedString(ctx)
 	case user.FieldMixedEnum:
 		return m.OldMixedEnum(ctx)
+	case user.FieldActive:
+		return m.OldActive(ctx)
 	case user.FieldAge:
 		return m.OldAge(ctx)
 	case user.FieldName:
@@ -4160,6 +4550,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetMixedEnum(v)
+		return nil
+	case user.FieldActive:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActive(v)
 		return nil
 	case user.FieldAge:
 		v, ok := value.(int)
@@ -4380,6 +4777,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldMixedEnum:
 		m.ResetMixedEnum()
+		return nil
+	case user.FieldActive:
+		m.ResetActive()
 		return nil
 	case user.FieldAge:
 		m.ResetAge()

@@ -36,7 +36,7 @@ func IDNEQ(id int) predicate.Car {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Car {
 	return predicate.Car(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -47,7 +47,7 @@ func IDIn(ids ...int) predicate.Car {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.Car {
 	return predicate.Car(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -120,7 +120,7 @@ func BeforeIDNEQ(v float64) predicate.Car {
 
 // BeforeIDIn applies the In predicate on the "before_id" field.
 func BeforeIDIn(vs ...float64) predicate.Car {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -131,7 +131,7 @@ func BeforeIDIn(vs ...float64) predicate.Car {
 
 // BeforeIDNotIn applies the NotIn predicate on the "before_id" field.
 func BeforeIDNotIn(vs ...float64) predicate.Car {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -198,7 +198,7 @@ func AfterIDNEQ(v float64) predicate.Car {
 
 // AfterIDIn applies the In predicate on the "after_id" field.
 func AfterIDIn(vs ...float64) predicate.Car {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -209,7 +209,7 @@ func AfterIDIn(vs ...float64) predicate.Car {
 
 // AfterIDNotIn applies the NotIn predicate on the "after_id" field.
 func AfterIDNotIn(vs ...float64) predicate.Car {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -276,7 +276,7 @@ func ModelNEQ(v string) predicate.Car {
 
 // ModelIn applies the In predicate on the "model" field.
 func ModelIn(vs ...string) predicate.Car {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -287,7 +287,7 @@ func ModelIn(vs ...string) predicate.Car {
 
 // ModelNotIn applies the NotIn predicate on the "model" field.
 func ModelNotIn(vs ...string) predicate.Car {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

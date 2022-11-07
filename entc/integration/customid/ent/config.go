@@ -21,7 +21,7 @@ type config struct {
 	// debug enable a debug logging.
 	debug bool
 	// log used for logging on debug mode.
-	log func(...interface{})
+	log func(...any)
 	// hooks to execute on mutations.
 	hooks *hooks
 }
@@ -36,6 +36,7 @@ type hooks struct {
 	Doc      []ent.Hook
 	Group    []ent.Hook
 	IntSID   []ent.Hook
+	Link     []ent.Hook
 	MixinID  []ent.Hook
 	Note     []ent.Hook
 	Other    []ent.Hook
@@ -64,7 +65,7 @@ func Debug() Option {
 }
 
 // Log sets the logging function for debug mode.
-func Log(fn func(...interface{})) Option {
+func Log(fn func(...any)) Option {
 	return func(c *config) {
 		c.log = fn
 	}

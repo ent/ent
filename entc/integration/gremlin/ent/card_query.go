@@ -355,6 +355,11 @@ func (cq *CardQuery) Select(fields ...string) *CardSelect {
 	return selbuild
 }
 
+// Aggregate returns a CardSelect configured with the given aggregations.
+func (cq *CardQuery) Aggregate(fns ...AggregateFunc) *CardSelect {
+	return cq.Select().Aggregate(fns...)
+}
+
 func (cq *CardQuery) prepareQuery(ctx context.Context) error {
 	if cq.path != nil {
 		prev, err := cq.path(ctx)
@@ -370,7 +375,7 @@ func (cq *CardQuery) gremlinAll(ctx context.Context) ([]*Card, error) {
 	res := &gremlin.Response{}
 	traversal := cq.gremlinQuery(ctx)
 	if len(cq.fields) > 0 {
-		fields := make([]interface{}, len(cq.fields))
+		fields := make([]any, len(cq.fields))
 		for i, f := range cq.fields {
 			fields[i] = f
 		}
@@ -454,7 +459,7 @@ func (cgb *CardGroupBy) Aggregate(fns ...AggregateFunc) *CardGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (cgb *CardGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (cgb *CardGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := cgb.path(ctx)
 	if err != nil {
 		return err
@@ -463,7 +468,7 @@ func (cgb *CardGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return cgb.gremlinScan(ctx, v)
 }
 
-func (cgb *CardGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
+func (cgb *CardGroupBy) gremlinScan(ctx context.Context, v any) error {
 	res := &gremlin.Response{}
 	query, bindings := cgb.gremlinQuery().Query()
 	if err := cgb.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -481,8 +486,8 @@ func (cgb *CardGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
 
 func (cgb *CardGroupBy) gremlinQuery() *dsl.Traversal {
 	var (
-		trs   []interface{}
-		names []interface{}
+		trs   []any
+		names []any
 	)
 	for _, fn := range cgb.fns {
 		name, tr := fn("p", "")
@@ -508,8 +513,14 @@ type CardSelect struct {
 	gremlin *dsl.Traversal
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (cs *CardSelect) Aggregate(fns ...AggregateFunc) *CardSelect {
+	cs.fns = append(cs.fns, fns...)
+	return cs
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (cs *CardSelect) Scan(ctx context.Context, v interface{}) error {
+func (cs *CardSelect) Scan(ctx context.Context, v any) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -517,7 +528,7 @@ func (cs *CardSelect) Scan(ctx context.Context, v interface{}) error {
 	return cs.gremlinScan(ctx, v)
 }
 
-func (cs *CardSelect) gremlinScan(ctx context.Context, v interface{}) error {
+func (cs *CardSelect) gremlinScan(ctx context.Context, v any) error {
 	var (
 		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
@@ -529,7 +540,7 @@ func (cs *CardSelect) gremlinScan(ctx context.Context, v interface{}) error {
 			traversal = cs.gremlin.ID()
 		}
 	} else {
-		fields := make([]interface{}, len(cs.fields))
+		fields := make([]any, len(cs.fields))
 		for i, f := range cs.fields {
 			fields[i] = f
 		}

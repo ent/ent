@@ -299,6 +299,11 @@ func (mq *MediaQuery) Select(fields ...string) *MediaSelect {
 	return selbuild
 }
 
+// Aggregate returns a MediaSelect configured with the given aggregations.
+func (mq *MediaQuery) Aggregate(fns ...AggregateFunc) *MediaSelect {
+	return mq.Select().Aggregate(fns...)
+}
+
 func (mq *MediaQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range mq.fields {
 		if !media.ValidColumn(f) {
@@ -320,10 +325,10 @@ func (mq *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media,
 		nodes = []*Media{}
 		_spec = mq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Media).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Media{config: mq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -350,11 +355,14 @@ func (mq *MediaQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (mq *MediaQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := mq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := mq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("entv2: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (mq *MediaQuery) querySpec() *sqlgraph.QuerySpec {
@@ -455,7 +463,7 @@ func (mgb *MediaGroupBy) Aggregate(fns ...AggregateFunc) *MediaGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (mgb *MediaGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (mgb *MediaGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := mgb.path(ctx)
 	if err != nil {
 		return err
@@ -464,7 +472,7 @@ func (mgb *MediaGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return mgb.sqlScan(ctx, v)
 }
 
-func (mgb *MediaGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (mgb *MediaGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range mgb.fields {
 		if !media.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -489,8 +497,6 @@ func (mgb *MediaGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range mgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(mgb.fields)+len(mgb.fns))
 		for _, f := range mgb.fields {
@@ -510,8 +516,14 @@ type MediaSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ms *MediaSelect) Aggregate(fns ...AggregateFunc) *MediaSelect {
+	ms.fns = append(ms.fns, fns...)
+	return ms
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (ms *MediaSelect) Scan(ctx context.Context, v interface{}) error {
+func (ms *MediaSelect) Scan(ctx context.Context, v any) error {
 	if err := ms.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -519,7 +531,17 @@ func (ms *MediaSelect) Scan(ctx context.Context, v interface{}) error {
 	return ms.sqlScan(ctx, v)
 }
 
-func (ms *MediaSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ms *MediaSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ms.fns))
+	for _, fn := range ms.fns {
+		aggregation = append(aggregation, fn(ms.sql))
+	}
+	switch n := len(*ms.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ms.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ms.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ms.sql.Query()
 	if err := ms.driver.Query(ctx, query, args, rows); err != nil {

@@ -382,6 +382,11 @@ func (fq *FileQuery) Select(fields ...string) *FileSelect {
 	return selbuild
 }
 
+// Aggregate returns a FileSelect configured with the given aggregations.
+func (fq *FileQuery) Aggregate(fns ...AggregateFunc) *FileSelect {
+	return fq.Select().Aggregate(fns...)
+}
+
 func (fq *FileQuery) prepareQuery(ctx context.Context) error {
 	if fq.path != nil {
 		prev, err := fq.path(ctx)
@@ -397,7 +402,7 @@ func (fq *FileQuery) gremlinAll(ctx context.Context) ([]*File, error) {
 	res := &gremlin.Response{}
 	traversal := fq.gremlinQuery(ctx)
 	if len(fq.fields) > 0 {
-		fields := make([]interface{}, len(fq.fields))
+		fields := make([]any, len(fq.fields))
 		for i, f := range fq.fields {
 			fields[i] = f
 		}
@@ -481,7 +486,7 @@ func (fgb *FileGroupBy) Aggregate(fns ...AggregateFunc) *FileGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (fgb *FileGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (fgb *FileGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := fgb.path(ctx)
 	if err != nil {
 		return err
@@ -490,7 +495,7 @@ func (fgb *FileGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return fgb.gremlinScan(ctx, v)
 }
 
-func (fgb *FileGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
+func (fgb *FileGroupBy) gremlinScan(ctx context.Context, v any) error {
 	res := &gremlin.Response{}
 	query, bindings := fgb.gremlinQuery().Query()
 	if err := fgb.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -508,8 +513,8 @@ func (fgb *FileGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
 
 func (fgb *FileGroupBy) gremlinQuery() *dsl.Traversal {
 	var (
-		trs   []interface{}
-		names []interface{}
+		trs   []any
+		names []any
 	)
 	for _, fn := range fgb.fns {
 		name, tr := fn("p", "")
@@ -535,8 +540,14 @@ type FileSelect struct {
 	gremlin *dsl.Traversal
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (fs *FileSelect) Aggregate(fns ...AggregateFunc) *FileSelect {
+	fs.fns = append(fs.fns, fns...)
+	return fs
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (fs *FileSelect) Scan(ctx context.Context, v interface{}) error {
+func (fs *FileSelect) Scan(ctx context.Context, v any) error {
 	if err := fs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -544,7 +555,7 @@ func (fs *FileSelect) Scan(ctx context.Context, v interface{}) error {
 	return fs.gremlinScan(ctx, v)
 }
 
-func (fs *FileSelect) gremlinScan(ctx context.Context, v interface{}) error {
+func (fs *FileSelect) gremlinScan(ctx context.Context, v any) error {
 	var (
 		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
@@ -556,7 +567,7 @@ func (fs *FileSelect) gremlinScan(ctx context.Context, v interface{}) error {
 			traversal = fs.gremlin.ID()
 		}
 	} else {
-		fields := make([]interface{}, len(fs.fields))
+		fields := make([]any, len(fs.fields))
 		for i, f := range fs.fields {
 			fields[i] = f
 		}

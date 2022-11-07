@@ -304,6 +304,11 @@ func (sq *SpecQuery) Select(fields ...string) *SpecSelect {
 	return selbuild
 }
 
+// Aggregate returns a SpecSelect configured with the given aggregations.
+func (sq *SpecQuery) Aggregate(fns ...AggregateFunc) *SpecSelect {
+	return sq.Select().Aggregate(fns...)
+}
+
 func (sq *SpecQuery) prepareQuery(ctx context.Context) error {
 	if sq.path != nil {
 		prev, err := sq.path(ctx)
@@ -319,7 +324,7 @@ func (sq *SpecQuery) gremlinAll(ctx context.Context) ([]*Spec, error) {
 	res := &gremlin.Response{}
 	traversal := sq.gremlinQuery(ctx)
 	if len(sq.fields) > 0 {
-		fields := make([]interface{}, len(sq.fields))
+		fields := make([]any, len(sq.fields))
 		for i, f := range sq.fields {
 			fields[i] = f
 		}
@@ -403,7 +408,7 @@ func (sgb *SpecGroupBy) Aggregate(fns ...AggregateFunc) *SpecGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (sgb *SpecGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (sgb *SpecGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := sgb.path(ctx)
 	if err != nil {
 		return err
@@ -412,7 +417,7 @@ func (sgb *SpecGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return sgb.gremlinScan(ctx, v)
 }
 
-func (sgb *SpecGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
+func (sgb *SpecGroupBy) gremlinScan(ctx context.Context, v any) error {
 	res := &gremlin.Response{}
 	query, bindings := sgb.gremlinQuery().Query()
 	if err := sgb.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -430,8 +435,8 @@ func (sgb *SpecGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
 
 func (sgb *SpecGroupBy) gremlinQuery() *dsl.Traversal {
 	var (
-		trs   []interface{}
-		names []interface{}
+		trs   []any
+		names []any
 	)
 	for _, fn := range sgb.fns {
 		name, tr := fn("p", "")
@@ -457,8 +462,14 @@ type SpecSelect struct {
 	gremlin *dsl.Traversal
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ss *SpecSelect) Aggregate(fns ...AggregateFunc) *SpecSelect {
+	ss.fns = append(ss.fns, fns...)
+	return ss
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (ss *SpecSelect) Scan(ctx context.Context, v interface{}) error {
+func (ss *SpecSelect) Scan(ctx context.Context, v any) error {
 	if err := ss.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -466,7 +477,7 @@ func (ss *SpecSelect) Scan(ctx context.Context, v interface{}) error {
 	return ss.gremlinScan(ctx, v)
 }
 
-func (ss *SpecSelect) gremlinScan(ctx context.Context, v interface{}) error {
+func (ss *SpecSelect) gremlinScan(ctx context.Context, v any) error {
 	var (
 		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
@@ -478,7 +489,7 @@ func (ss *SpecSelect) gremlinScan(ctx context.Context, v interface{}) error {
 			traversal = ss.gremlin.ID()
 		}
 	} else {
-		fields := make([]interface{}, len(ss.fields))
+		fields := make([]any, len(ss.fields))
 		for i, f := range ss.fields {
 			fields[i] = f
 		}

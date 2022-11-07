@@ -284,43 +284,23 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	)
 	_spec.OnConflict = gc.conflict
 	if value, ok := gc.mutation.Active(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: group.FieldActive,
-		})
+		_spec.SetField(group.FieldActive, field.TypeBool, value)
 		_node.Active = value
 	}
 	if value, ok := gc.mutation.Expire(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: group.FieldExpire,
-		})
+		_spec.SetField(group.FieldExpire, field.TypeTime, value)
 		_node.Expire = value
 	}
 	if value, ok := gc.mutation.GetType(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: group.FieldType,
-		})
+		_spec.SetField(group.FieldType, field.TypeString, value)
 		_node.Type = &value
 	}
 	if value, ok := gc.mutation.MaxUsers(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: group.FieldMaxUsers,
-		})
+		_spec.SetField(group.FieldMaxUsers, field.TypeInt, value)
 		_node.MaxUsers = value
 	}
 	if value, ok := gc.mutation.Name(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: group.FieldName,
-		})
+		_spec.SetField(group.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
 	if nodes := gc.mutation.FilesIDs(); len(nodes) > 0 {

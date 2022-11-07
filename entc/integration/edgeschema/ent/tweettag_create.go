@@ -222,11 +222,7 @@ func (ttc *TweetTagCreate) createSpec() (*TweetTag, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = &id
 	}
 	if value, ok := ttc.mutation.AddedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: tweettag.FieldAddedAt,
-		})
+		_spec.SetField(tweettag.FieldAddedAt, field.TypeTime, value)
 		_node.AddedAt = value
 	}
 	if nodes := ttc.mutation.TagIDs(); len(nodes) > 0 {
@@ -625,7 +621,6 @@ func (u *TweetTagUpsertBulk) UpdateNewValues() *TweetTagUpsertBulk {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(tweettag.FieldID)
-				return
 			}
 		}
 	}))

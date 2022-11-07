@@ -66,7 +66,7 @@ func BenchmarkMarshalInterface(b *testing.B) {
 		b.Fatal(err)
 	}
 
-	var obj interface{}
+	var obj any
 	if err = jsoniter.Unmarshal(data, &obj); err != nil {
 		b.Fatal(err)
 	}
@@ -87,7 +87,7 @@ func BenchmarkUnmarshalInterface(b *testing.B) {
 		b.Fatal(err)
 	}
 
-	var obj interface{}
+	var obj any
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {

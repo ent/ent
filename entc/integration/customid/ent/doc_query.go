@@ -407,6 +407,11 @@ func (dq *DocQuery) Select(fields ...string) *DocSelect {
 	return selbuild
 }
 
+// Aggregate returns a DocSelect configured with the given aggregations.
+func (dq *DocQuery) Aggregate(fns ...AggregateFunc) *DocSelect {
+	return dq.Select().Aggregate(fns...)
+}
+
 func (dq *DocQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range dq.fields {
 		if !doc.ValidColumn(f) {
@@ -440,10 +445,10 @@ func (dq *DocQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Doc, err
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, doc.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Doc).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Doc{config: dq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -567,18 +572,18 @@ func (dq *DocQuery) loadRelated(ctx context.Context, query *DocQuery, nodes []*D
 	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
 		assign := spec.Assign
 		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]interface{}, error) {
+		spec.ScanValues = func(columns []string) ([]any, error) {
 			values, err := values(columns[1:])
 			if err != nil {
 				return nil, err
 			}
-			return append([]interface{}{new(schema.DocID)}, values...), nil
+			return append([]any{new(schema.DocID)}, values...), nil
 		}
-		spec.Assign = func(columns []string, values []interface{}) error {
+		spec.Assign = func(columns []string, values []any) error {
 			outValue := *values[0].(*schema.DocID)
 			inValue := *values[1].(*schema.DocID)
 			if nids[inValue] == nil {
-				nids[inValue] = map[*Doc]struct{}{byID[outValue]: struct{}{}}
+				nids[inValue] = map[*Doc]struct{}{byID[outValue]: {}}
 				return assign(columns[1:], values[1:])
 			}
 			nids[inValue][byID[outValue]] = struct{}{}
@@ -610,11 +615,14 @@ func (dq *DocQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (dq *DocQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := dq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := dq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (dq *DocQuery) querySpec() *sqlgraph.QuerySpec {
@@ -715,7 +723,7 @@ func (dgb *DocGroupBy) Aggregate(fns ...AggregateFunc) *DocGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (dgb *DocGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (dgb *DocGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := dgb.path(ctx)
 	if err != nil {
 		return err
@@ -724,7 +732,7 @@ func (dgb *DocGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return dgb.sqlScan(ctx, v)
 }
 
-func (dgb *DocGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (dgb *DocGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range dgb.fields {
 		if !doc.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -749,8 +757,6 @@ func (dgb *DocGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range dgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(dgb.fields)+len(dgb.fns))
 		for _, f := range dgb.fields {
@@ -770,8 +776,14 @@ type DocSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ds *DocSelect) Aggregate(fns ...AggregateFunc) *DocSelect {
+	ds.fns = append(ds.fns, fns...)
+	return ds
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (ds *DocSelect) Scan(ctx context.Context, v interface{}) error {
+func (ds *DocSelect) Scan(ctx context.Context, v any) error {
 	if err := ds.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -779,7 +791,17 @@ func (ds *DocSelect) Scan(ctx context.Context, v interface{}) error {
 	return ds.sqlScan(ctx, v)
 }
 
-func (ds *DocSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ds *DocSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ds.fns))
+	for _, fn := range ds.fns {
+		aggregation = append(aggregation, fn(ds.sql))
+	}
+	switch n := len(*ds.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ds.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ds.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ds.sql.Query()
 	if err := ds.driver.Query(ctx, query, args, rows); err != nil {

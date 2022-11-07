@@ -268,43 +268,23 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 	)
 	_spec.OnConflict = cc.conflict
 	if value, ok := cc.mutation.CreateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: card.FieldCreateTime,
-		})
+		_spec.SetField(card.FieldCreateTime, field.TypeTime, value)
 		_node.CreateTime = value
 	}
 	if value, ok := cc.mutation.UpdateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: card.FieldUpdateTime,
-		})
+		_spec.SetField(card.FieldUpdateTime, field.TypeTime, value)
 		_node.UpdateTime = value
 	}
 	if value, ok := cc.mutation.Balance(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: card.FieldBalance,
-		})
+		_spec.SetField(card.FieldBalance, field.TypeFloat64, value)
 		_node.Balance = value
 	}
 	if value, ok := cc.mutation.Number(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: card.FieldNumber,
-		})
+		_spec.SetField(card.FieldNumber, field.TypeString, value)
 		_node.Number = value
 	}
 	if value, ok := cc.mutation.Name(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: card.FieldName,
-		})
+		_spec.SetField(card.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
 	if nodes := cc.mutation.OwnerIDs(); len(nodes) > 0 {
@@ -398,18 +378,6 @@ type (
 	}
 )
 
-// SetCreateTime sets the "create_time" field.
-func (u *CardUpsert) SetCreateTime(v time.Time) *CardUpsert {
-	u.Set(card.FieldCreateTime, v)
-	return u
-}
-
-// UpdateCreateTime sets the "create_time" field to the value that was provided on create.
-func (u *CardUpsert) UpdateCreateTime() *CardUpsert {
-	u.SetExcluded(card.FieldCreateTime)
-	return u
-}
-
 // SetUpdateTime sets the "update_time" field.
 func (u *CardUpsert) SetUpdateTime(v time.Time) *CardUpsert {
 	u.Set(card.FieldUpdateTime, v)
@@ -437,18 +405,6 @@ func (u *CardUpsert) UpdateBalance() *CardUpsert {
 // AddBalance adds v to the "balance" field.
 func (u *CardUpsert) AddBalance(v float64) *CardUpsert {
 	u.Add(card.FieldBalance, v)
-	return u
-}
-
-// SetNumber sets the "number" field.
-func (u *CardUpsert) SetNumber(v string) *CardUpsert {
-	u.Set(card.FieldNumber, v)
-	return u
-}
-
-// UpdateNumber sets the "number" field to the value that was provided on create.
-func (u *CardUpsert) UpdateNumber() *CardUpsert {
-	u.SetExcluded(card.FieldNumber)
 	return u
 }
 
@@ -518,20 +474,6 @@ func (u *CardUpsertOne) Update(set func(*CardUpsert)) *CardUpsertOne {
 	return u
 }
 
-// SetCreateTime sets the "create_time" field.
-func (u *CardUpsertOne) SetCreateTime(v time.Time) *CardUpsertOne {
-	return u.Update(func(s *CardUpsert) {
-		s.SetCreateTime(v)
-	})
-}
-
-// UpdateCreateTime sets the "create_time" field to the value that was provided on create.
-func (u *CardUpsertOne) UpdateCreateTime() *CardUpsertOne {
-	return u.Update(func(s *CardUpsert) {
-		s.UpdateCreateTime()
-	})
-}
-
 // SetUpdateTime sets the "update_time" field.
 func (u *CardUpsertOne) SetUpdateTime(v time.Time) *CardUpsertOne {
 	return u.Update(func(s *CardUpsert) {
@@ -564,20 +506,6 @@ func (u *CardUpsertOne) AddBalance(v float64) *CardUpsertOne {
 func (u *CardUpsertOne) UpdateBalance() *CardUpsertOne {
 	return u.Update(func(s *CardUpsert) {
 		s.UpdateBalance()
-	})
-}
-
-// SetNumber sets the "number" field.
-func (u *CardUpsertOne) SetNumber(v string) *CardUpsertOne {
-	return u.Update(func(s *CardUpsert) {
-		s.SetNumber(v)
-	})
-}
-
-// UpdateNumber sets the "number" field to the value that was provided on create.
-func (u *CardUpsertOne) UpdateNumber() *CardUpsertOne {
-	return u.Update(func(s *CardUpsert) {
-		s.UpdateNumber()
 	})
 }
 
@@ -812,20 +740,6 @@ func (u *CardUpsertBulk) Update(set func(*CardUpsert)) *CardUpsertBulk {
 	return u
 }
 
-// SetCreateTime sets the "create_time" field.
-func (u *CardUpsertBulk) SetCreateTime(v time.Time) *CardUpsertBulk {
-	return u.Update(func(s *CardUpsert) {
-		s.SetCreateTime(v)
-	})
-}
-
-// UpdateCreateTime sets the "create_time" field to the value that was provided on create.
-func (u *CardUpsertBulk) UpdateCreateTime() *CardUpsertBulk {
-	return u.Update(func(s *CardUpsert) {
-		s.UpdateCreateTime()
-	})
-}
-
 // SetUpdateTime sets the "update_time" field.
 func (u *CardUpsertBulk) SetUpdateTime(v time.Time) *CardUpsertBulk {
 	return u.Update(func(s *CardUpsert) {
@@ -858,20 +772,6 @@ func (u *CardUpsertBulk) AddBalance(v float64) *CardUpsertBulk {
 func (u *CardUpsertBulk) UpdateBalance() *CardUpsertBulk {
 	return u.Update(func(s *CardUpsert) {
 		s.UpdateBalance()
-	})
-}
-
-// SetNumber sets the "number" field.
-func (u *CardUpsertBulk) SetNumber(v string) *CardUpsertBulk {
-	return u.Update(func(s *CardUpsert) {
-		s.SetNumber(v)
-	})
-}
-
-// UpdateNumber sets the "number" field to the value that was provided on create.
-func (u *CardUpsertBulk) UpdateNumber() *CardUpsertBulk {
-	return u.Update(func(s *CardUpsert) {
-		s.UpdateNumber()
 	})
 }
 

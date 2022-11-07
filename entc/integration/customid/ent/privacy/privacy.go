@@ -31,17 +31,17 @@ var (
 )
 
 // Allowf returns an formatted wrapped Allow decision.
-func Allowf(format string, a ...interface{}) error {
+func Allowf(format string, a ...any) error {
 	return fmt.Errorf(format+": %w", append(a, Allow)...)
 }
 
 // Denyf returns an formatted wrapped Deny decision.
-func Denyf(format string, a ...interface{}) error {
+func Denyf(format string, a ...any) error {
 	return fmt.Errorf(format+": %w", append(a, Deny)...)
 }
 
 // Skipf returns an formatted wrapped Skip decision.
-func Skipf(format string, a ...interface{}) error {
+func Skipf(format string, a ...any) error {
 	return fmt.Errorf(format+": %w", append(a, Skip)...)
 }
 
@@ -346,6 +346,30 @@ func (f IntSIDMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation
 	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.IntSIDMutation", m)
 }
 
+// The LinkQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type LinkQueryRuleFunc func(context.Context, *ent.LinkQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f LinkQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.LinkQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("ent/privacy: unexpected query type %T, expect *ent.LinkQuery", q)
+}
+
+// The LinkMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type LinkMutationRuleFunc func(context.Context, *ent.LinkMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f LinkMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	if m, ok := m.(*ent.LinkMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.LinkMutation", m)
+}
+
 // The MixinIDQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
 type MixinIDQueryRuleFunc func(context.Context, *ent.MixinIDQuery) error
@@ -589,6 +613,8 @@ func queryFilter(q ent.Query) (Filter, error) {
 		return q.Filter(), nil
 	case *ent.IntSIDQuery:
 		return q.Filter(), nil
+	case *ent.LinkQuery:
+		return q.Filter(), nil
 	case *ent.MixinIDQuery:
 		return q.Filter(), nil
 	case *ent.NoteQuery:
@@ -627,6 +653,8 @@ func mutationFilter(m ent.Mutation) (Filter, error) {
 	case *ent.GroupMutation:
 		return m.Filter(), nil
 	case *ent.IntSIDMutation:
+		return m.Filter(), nil
+	case *ent.LinkMutation:
 		return m.Filter(), nil
 	case *ent.MixinIDMutation:
 		return m.Filter(), nil

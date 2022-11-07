@@ -6,6 +6,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/entc/integration/edgeschema/ent/privacy"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -70,5 +71,17 @@ func (Relationship) Indexes() []ent.Index {
 		// than one relationship object (and edge schema).
 		index.Edges("info").
 			Unique(),
+	}
+}
+
+// Policy defines the privacy policy of the Relationship.
+func (Relationship) Policy() ent.Policy {
+	return privacy.Policy{
+		Mutation: privacy.MutationPolicy{
+			privacy.AlwaysAllowRule(),
+		},
+		Query: privacy.QueryPolicy{
+			privacy.AlwaysAllowRule(),
+		},
 	}
 }

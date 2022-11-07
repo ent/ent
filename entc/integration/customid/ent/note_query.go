@@ -372,6 +372,11 @@ func (nq *NoteQuery) Select(fields ...string) *NoteSelect {
 	return selbuild
 }
 
+// Aggregate returns a NoteSelect configured with the given aggregations.
+func (nq *NoteQuery) Aggregate(fns ...AggregateFunc) *NoteSelect {
+	return nq.Select().Aggregate(fns...)
+}
+
 func (nq *NoteQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range nq.fields {
 		if !note.ValidColumn(f) {
@@ -404,10 +409,10 @@ func (nq *NoteQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Note, e
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, note.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Note).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Note{config: nq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -509,11 +514,14 @@ func (nq *NoteQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (nq *NoteQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := nq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := nq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (nq *NoteQuery) querySpec() *sqlgraph.QuerySpec {
@@ -614,7 +622,7 @@ func (ngb *NoteGroupBy) Aggregate(fns ...AggregateFunc) *NoteGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (ngb *NoteGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (ngb *NoteGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := ngb.path(ctx)
 	if err != nil {
 		return err
@@ -623,7 +631,7 @@ func (ngb *NoteGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return ngb.sqlScan(ctx, v)
 }
 
-func (ngb *NoteGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (ngb *NoteGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range ngb.fields {
 		if !note.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -648,8 +656,6 @@ func (ngb *NoteGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range ngb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(ngb.fields)+len(ngb.fns))
 		for _, f := range ngb.fields {
@@ -669,8 +675,14 @@ type NoteSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ns *NoteSelect) Aggregate(fns ...AggregateFunc) *NoteSelect {
+	ns.fns = append(ns.fns, fns...)
+	return ns
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (ns *NoteSelect) Scan(ctx context.Context, v interface{}) error {
+func (ns *NoteSelect) Scan(ctx context.Context, v any) error {
 	if err := ns.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -678,7 +690,17 @@ func (ns *NoteSelect) Scan(ctx context.Context, v interface{}) error {
 	return ns.sqlScan(ctx, v)
 }
 
-func (ns *NoteSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ns *NoteSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ns.fns))
+	for _, fn := range ns.fns {
+		aggregation = append(aggregation, fn(ns.sql))
+	}
+	switch n := len(*ns.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ns.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ns.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ns.sql.Query()
 	if err := ns.driver.Query(ctx, query, args, rows); err != nil {

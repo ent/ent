@@ -177,11 +177,7 @@ func (ugu *UserGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := ugu.mutation.JoinedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: usergroup.FieldJoinedAt,
-		})
+		_spec.SetField(usergroup.FieldJoinedAt, field.TypeTime, value)
 	}
 	if ugu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -445,11 +441,7 @@ func (uguo *UserGroupUpdateOne) sqlSave(ctx context.Context) (_node *UserGroup, 
 		}
 	}
 	if value, ok := uguo.mutation.JoinedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: usergroup.FieldJoinedAt,
-		})
+		_spec.SetField(usergroup.FieldJoinedAt, field.TypeTime, value)
 	}
 	if uguo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

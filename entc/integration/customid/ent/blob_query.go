@@ -408,6 +408,11 @@ func (bq *BlobQuery) Select(fields ...string) *BlobSelect {
 	return selbuild
 }
 
+// Aggregate returns a BlobSelect configured with the given aggregations.
+func (bq *BlobQuery) Aggregate(fns ...AggregateFunc) *BlobSelect {
+	return bq.Select().Aggregate(fns...)
+}
+
 func (bq *BlobQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range bq.fields {
 		if !blob.ValidColumn(f) {
@@ -441,10 +446,10 @@ func (bq *BlobQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Blob, e
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, blob.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Blob).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Blob{config: bq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -537,18 +542,18 @@ func (bq *BlobQuery) loadLinks(ctx context.Context, query *BlobQuery, nodes []*B
 	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
 		assign := spec.Assign
 		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]interface{}, error) {
+		spec.ScanValues = func(columns []string) ([]any, error) {
 			values, err := values(columns[1:])
 			if err != nil {
 				return nil, err
 			}
-			return append([]interface{}{new(uuid.UUID)}, values...), nil
+			return append([]any{new(uuid.UUID)}, values...), nil
 		}
-		spec.Assign = func(columns []string, values []interface{}) error {
+		spec.Assign = func(columns []string, values []any) error {
 			outValue := *values[0].(*uuid.UUID)
 			inValue := *values[1].(*uuid.UUID)
 			if nids[inValue] == nil {
-				nids[inValue] = map[*Blob]struct{}{byID[outValue]: struct{}{}}
+				nids[inValue] = map[*Blob]struct{}{byID[outValue]: {}}
 				return assign(columns[1:], values[1:])
 			}
 			nids[inValue][byID[outValue]] = struct{}{}
@@ -607,11 +612,14 @@ func (bq *BlobQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (bq *BlobQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := bq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := bq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (bq *BlobQuery) querySpec() *sqlgraph.QuerySpec {
@@ -712,7 +720,7 @@ func (bgb *BlobGroupBy) Aggregate(fns ...AggregateFunc) *BlobGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (bgb *BlobGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (bgb *BlobGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := bgb.path(ctx)
 	if err != nil {
 		return err
@@ -721,7 +729,7 @@ func (bgb *BlobGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return bgb.sqlScan(ctx, v)
 }
 
-func (bgb *BlobGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (bgb *BlobGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range bgb.fields {
 		if !blob.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -746,8 +754,6 @@ func (bgb *BlobGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range bgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(bgb.fields)+len(bgb.fns))
 		for _, f := range bgb.fields {
@@ -767,8 +773,14 @@ type BlobSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (bs *BlobSelect) Aggregate(fns ...AggregateFunc) *BlobSelect {
+	bs.fns = append(bs.fns, fns...)
+	return bs
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (bs *BlobSelect) Scan(ctx context.Context, v interface{}) error {
+func (bs *BlobSelect) Scan(ctx context.Context, v any) error {
 	if err := bs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -776,7 +788,17 @@ func (bs *BlobSelect) Scan(ctx context.Context, v interface{}) error {
 	return bs.sqlScan(ctx, v)
 }
 
-func (bs *BlobSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (bs *BlobSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(bs.fns))
+	for _, fn := range bs.fns {
+		aggregation = append(aggregation, fn(bs.sql))
+	}
+	switch n := len(*bs.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		bs.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		bs.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := bs.sql.Query()
 	if err := bs.driver.Query(ctx, query, args, rows); err != nil {

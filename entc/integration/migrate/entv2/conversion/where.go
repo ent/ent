@@ -35,7 +35,7 @@ func IDNEQ(id int) predicate.Conversion {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Conversion {
 	return predicate.Conversion(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -46,7 +46,7 @@ func IDIn(ids ...int) predicate.Conversion {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.Conversion {
 	return predicate.Conversion(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -161,7 +161,7 @@ func NameNEQ(v string) predicate.Conversion {
 
 // NameIn applies the In predicate on the "name" field.
 func NameIn(vs ...string) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -172,7 +172,7 @@ func NameIn(vs ...string) predicate.Conversion {
 
 // NameNotIn applies the NotIn predicate on the "name" field.
 func NameNotIn(vs ...string) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -274,7 +274,7 @@ func Int8ToStringNEQ(v string) predicate.Conversion {
 
 // Int8ToStringIn applies the In predicate on the "int8_to_string" field.
 func Int8ToStringIn(vs ...string) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -285,7 +285,7 @@ func Int8ToStringIn(vs ...string) predicate.Conversion {
 
 // Int8ToStringNotIn applies the NotIn predicate on the "int8_to_string" field.
 func Int8ToStringNotIn(vs ...string) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -387,7 +387,7 @@ func Uint8ToStringNEQ(v string) predicate.Conversion {
 
 // Uint8ToStringIn applies the In predicate on the "uint8_to_string" field.
 func Uint8ToStringIn(vs ...string) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -398,7 +398,7 @@ func Uint8ToStringIn(vs ...string) predicate.Conversion {
 
 // Uint8ToStringNotIn applies the NotIn predicate on the "uint8_to_string" field.
 func Uint8ToStringNotIn(vs ...string) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -500,7 +500,7 @@ func Int16ToStringNEQ(v string) predicate.Conversion {
 
 // Int16ToStringIn applies the In predicate on the "int16_to_string" field.
 func Int16ToStringIn(vs ...string) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -511,7 +511,7 @@ func Int16ToStringIn(vs ...string) predicate.Conversion {
 
 // Int16ToStringNotIn applies the NotIn predicate on the "int16_to_string" field.
 func Int16ToStringNotIn(vs ...string) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -613,7 +613,7 @@ func Uint16ToStringNEQ(v string) predicate.Conversion {
 
 // Uint16ToStringIn applies the In predicate on the "uint16_to_string" field.
 func Uint16ToStringIn(vs ...string) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -624,7 +624,7 @@ func Uint16ToStringIn(vs ...string) predicate.Conversion {
 
 // Uint16ToStringNotIn applies the NotIn predicate on the "uint16_to_string" field.
 func Uint16ToStringNotIn(vs ...string) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -726,7 +726,7 @@ func Int32ToStringNEQ(v string) predicate.Conversion {
 
 // Int32ToStringIn applies the In predicate on the "int32_to_string" field.
 func Int32ToStringIn(vs ...string) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -737,7 +737,7 @@ func Int32ToStringIn(vs ...string) predicate.Conversion {
 
 // Int32ToStringNotIn applies the NotIn predicate on the "int32_to_string" field.
 func Int32ToStringNotIn(vs ...string) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -839,7 +839,7 @@ func Uint32ToStringNEQ(v string) predicate.Conversion {
 
 // Uint32ToStringIn applies the In predicate on the "uint32_to_string" field.
 func Uint32ToStringIn(vs ...string) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -850,7 +850,7 @@ func Uint32ToStringIn(vs ...string) predicate.Conversion {
 
 // Uint32ToStringNotIn applies the NotIn predicate on the "uint32_to_string" field.
 func Uint32ToStringNotIn(vs ...string) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -952,7 +952,7 @@ func Int64ToStringNEQ(v string) predicate.Conversion {
 
 // Int64ToStringIn applies the In predicate on the "int64_to_string" field.
 func Int64ToStringIn(vs ...string) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -963,7 +963,7 @@ func Int64ToStringIn(vs ...string) predicate.Conversion {
 
 // Int64ToStringNotIn applies the NotIn predicate on the "int64_to_string" field.
 func Int64ToStringNotIn(vs ...string) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1065,7 +1065,7 @@ func Uint64ToStringNEQ(v string) predicate.Conversion {
 
 // Uint64ToStringIn applies the In predicate on the "uint64_to_string" field.
 func Uint64ToStringIn(vs ...string) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1076,7 +1076,7 @@ func Uint64ToStringIn(vs ...string) predicate.Conversion {
 
 // Uint64ToStringNotIn applies the NotIn predicate on the "uint64_to_string" field.
 func Uint64ToStringNotIn(vs ...string) predicate.Conversion {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

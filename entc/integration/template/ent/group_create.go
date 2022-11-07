@@ -136,11 +136,7 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 		}
 	)
 	if value, ok := gc.mutation.MaxUsers(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: group.FieldMaxUsers,
-		})
+		_spec.SetField(group.FieldMaxUsers, field.TypeInt, value)
 		_node.MaxUsers = value
 	}
 	return _node, _spec

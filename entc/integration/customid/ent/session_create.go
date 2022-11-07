@@ -475,7 +475,6 @@ func (u *SessionUpsertBulk) UpdateNewValues() *SessionUpsertBulk {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(session.FieldID)
-				return
 			}
 		}
 	}))

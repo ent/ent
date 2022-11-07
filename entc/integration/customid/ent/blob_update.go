@@ -206,25 +206,13 @@ func (bu *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := bu.mutation.UUID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Value:  value,
-			Column: blob.FieldUUID,
-		})
+		_spec.SetField(blob.FieldUUID, field.TypeUUID, value)
 	}
 	if value, ok := bu.mutation.Count(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: blob.FieldCount,
-		})
+		_spec.SetField(blob.FieldCount, field.TypeInt, value)
 	}
 	if value, ok := bu.mutation.AddedCount(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: blob.FieldCount,
-		})
+		_spec.AddField(blob.FieldCount, field.TypeInt, value)
 	}
 	if bu.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -550,25 +538,13 @@ func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (_node *Blob, err error) 
 		}
 	}
 	if value, ok := buo.mutation.UUID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Value:  value,
-			Column: blob.FieldUUID,
-		})
+		_spec.SetField(blob.FieldUUID, field.TypeUUID, value)
 	}
 	if value, ok := buo.mutation.Count(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: blob.FieldCount,
-		})
+		_spec.SetField(blob.FieldCount, field.TypeInt, value)
 	}
 	if value, ok := buo.mutation.AddedCount(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: blob.FieldCount,
-		})
+		_spec.AddField(blob.FieldCount, field.TypeInt, value)
 	}
 	if buo.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{

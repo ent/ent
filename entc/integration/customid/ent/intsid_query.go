@@ -350,6 +350,11 @@ func (isq *IntSIDQuery) Select(fields ...string) *IntSIDSelect {
 	return selbuild
 }
 
+// Aggregate returns a IntSIDSelect configured with the given aggregations.
+func (isq *IntSIDQuery) Aggregate(fns ...AggregateFunc) *IntSIDSelect {
+	return isq.Select().Aggregate(fns...)
+}
+
 func (isq *IntSIDQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range isq.fields {
 		if !intsid.ValidColumn(f) {
@@ -382,10 +387,10 @@ func (isq *IntSIDQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*IntS
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, intsid.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*IntSID).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &IntSID{config: isq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -487,11 +492,14 @@ func (isq *IntSIDQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (isq *IntSIDQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := isq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := isq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (isq *IntSIDQuery) querySpec() *sqlgraph.QuerySpec {
@@ -592,7 +600,7 @@ func (isgb *IntSIDGroupBy) Aggregate(fns ...AggregateFunc) *IntSIDGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (isgb *IntSIDGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (isgb *IntSIDGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := isgb.path(ctx)
 	if err != nil {
 		return err
@@ -601,7 +609,7 @@ func (isgb *IntSIDGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return isgb.sqlScan(ctx, v)
 }
 
-func (isgb *IntSIDGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (isgb *IntSIDGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range isgb.fields {
 		if !intsid.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -626,8 +634,6 @@ func (isgb *IntSIDGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range isgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(isgb.fields)+len(isgb.fns))
 		for _, f := range isgb.fields {
@@ -647,8 +653,14 @@ type IntSIDSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (iss *IntSIDSelect) Aggregate(fns ...AggregateFunc) *IntSIDSelect {
+	iss.fns = append(iss.fns, fns...)
+	return iss
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (iss *IntSIDSelect) Scan(ctx context.Context, v interface{}) error {
+func (iss *IntSIDSelect) Scan(ctx context.Context, v any) error {
 	if err := iss.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -656,7 +668,17 @@ func (iss *IntSIDSelect) Scan(ctx context.Context, v interface{}) error {
 	return iss.sqlScan(ctx, v)
 }
 
-func (iss *IntSIDSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (iss *IntSIDSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(iss.fns))
+	for _, fn := range iss.fns {
+		aggregation = append(aggregation, fn(iss.sql))
+	}
+	switch n := len(*iss.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		iss.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		iss.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := iss.sql.Query()
 	if err := iss.driver.Query(ctx, query, args, rows); err != nil {

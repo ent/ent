@@ -254,44 +254,22 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := tu.mutation.Title(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: task.FieldTitle,
-		})
+		_spec.SetField(task.FieldTitle, field.TypeString, value)
 	}
 	if value, ok := tu.mutation.Description(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: task.FieldDescription,
-		})
+		_spec.SetField(task.FieldDescription, field.TypeString, value)
 	}
 	if tu.mutation.DescriptionCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: task.FieldDescription,
-		})
+		_spec.ClearField(task.FieldDescription, field.TypeString)
 	}
 	if value, ok := tu.mutation.Status(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: task.FieldStatus,
-		})
+		_spec.SetField(task.FieldStatus, field.TypeEnum, value)
 	}
 	if value, ok := tu.mutation.UUID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Value:  value,
-			Column: task.FieldUUID,
-		})
+		_spec.SetField(task.FieldUUID, field.TypeUUID, value)
 	}
 	if tu.mutation.UUIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Column: task.FieldUUID,
-		})
+		_spec.ClearField(task.FieldUUID, field.TypeUUID)
 	}
 	if tu.mutation.TeamsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -651,44 +629,22 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 		}
 	}
 	if value, ok := tuo.mutation.Title(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: task.FieldTitle,
-		})
+		_spec.SetField(task.FieldTitle, field.TypeString, value)
 	}
 	if value, ok := tuo.mutation.Description(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: task.FieldDescription,
-		})
+		_spec.SetField(task.FieldDescription, field.TypeString, value)
 	}
 	if tuo.mutation.DescriptionCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: task.FieldDescription,
-		})
+		_spec.ClearField(task.FieldDescription, field.TypeString)
 	}
 	if value, ok := tuo.mutation.Status(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: task.FieldStatus,
-		})
+		_spec.SetField(task.FieldStatus, field.TypeEnum, value)
 	}
 	if value, ok := tuo.mutation.UUID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Value:  value,
-			Column: task.FieldUUID,
-		})
+		_spec.SetField(task.FieldUUID, field.TypeUUID, value)
 	}
 	if tuo.mutation.UUIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Column: task.FieldUUID,
-		})
+		_spec.ClearField(task.FieldUUID, field.TypeUUID)
 	}
 	if tuo.mutation.TeamsCleared() {
 		edge := &sqlgraph.EdgeSpec{

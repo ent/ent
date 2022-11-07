@@ -200,14 +200,13 @@ func (gr *Groups) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	for _, v := range scangr {
-		*gr = append(*gr, &Group{
-			ID:       v.ID,
-			Active:   v.Active,
-			Expire:   time.Unix(0, v.Expire),
-			Type:     v.Type,
-			MaxUsers: v.MaxUsers,
-			Name:     v.Name,
-		})
+		node := &Group{ID: v.ID}
+		node.Active = v.Active
+		node.Expire = time.Unix(0, v.Expire)
+		node.Type = v.Type
+		node.MaxUsers = v.MaxUsers
+		node.Name = v.Name
+		*gr = append(*gr, node)
 	}
 	return nil
 }

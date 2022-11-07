@@ -203,7 +203,7 @@ func (nu *NodeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := nu.mutation.AddedValue(); ok {
 		v.Property(dsl.Single, node.FieldValue, __.Union(__.Values(node.FieldValue), __.Constant(value)).Sum())
 	}
-	var properties []interface{}
+	var properties []any
 	if nu.mutation.ValueCleared() {
 		properties = append(properties, node.FieldValue)
 	}
@@ -443,7 +443,7 @@ func (nuo *NodeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := nuo.mutation.AddedValue(); ok {
 		v.Property(dsl.Single, node.FieldValue, __.Union(__.Values(node.FieldValue), __.Constant(value)).Sum())
 	}
-	var properties []interface{}
+	var properties []any
 	if nuo.mutation.ValueCleared() {
 		properties = append(properties, node.FieldValue)
 	}
@@ -473,7 +473,7 @@ func (nuo *NodeUpdateOne) gremlin(id string) *dsl.Traversal {
 		})
 	}
 	if len(nuo.fields) > 0 {
-		fields := make([]interface{}, 0, len(nuo.fields)+1)
+		fields := make([]any, 0, len(nuo.fields)+1)
 		fields = append(fields, true)
 		for _, f := range nuo.fields {
 			fields = append(fields, f)

@@ -301,6 +301,11 @@ func (ruq *RoleUserQuery) Select(fields ...string) *RoleUserSelect {
 	return selbuild
 }
 
+// Aggregate returns a RoleUserSelect configured with the given aggregations.
+func (ruq *RoleUserQuery) Aggregate(fns ...AggregateFunc) *RoleUserSelect {
+	return ruq.Select().Aggregate(fns...)
+}
+
 func (ruq *RoleUserQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range ruq.fields {
 		if !roleuser.ValidColumn(f) {
@@ -326,10 +331,10 @@ func (ruq *RoleUserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Ro
 			ruq.withUser != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*RoleUser).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &RoleUser{config: ruq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -420,11 +425,14 @@ func (ruq *RoleUserQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (ruq *RoleUserQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := ruq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := ruq.First(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (ruq *RoleUserQuery) querySpec() *sqlgraph.QuerySpec {
@@ -518,7 +526,7 @@ func (rugb *RoleUserGroupBy) Aggregate(fns ...AggregateFunc) *RoleUserGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (rugb *RoleUserGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (rugb *RoleUserGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := rugb.path(ctx)
 	if err != nil {
 		return err
@@ -527,7 +535,7 @@ func (rugb *RoleUserGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return rugb.sqlScan(ctx, v)
 }
 
-func (rugb *RoleUserGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (rugb *RoleUserGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range rugb.fields {
 		if !roleuser.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -552,8 +560,6 @@ func (rugb *RoleUserGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range rugb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(rugb.fields)+len(rugb.fns))
 		for _, f := range rugb.fields {
@@ -573,8 +579,14 @@ type RoleUserSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (rus *RoleUserSelect) Aggregate(fns ...AggregateFunc) *RoleUserSelect {
+	rus.fns = append(rus.fns, fns...)
+	return rus
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (rus *RoleUserSelect) Scan(ctx context.Context, v interface{}) error {
+func (rus *RoleUserSelect) Scan(ctx context.Context, v any) error {
 	if err := rus.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -582,7 +594,17 @@ func (rus *RoleUserSelect) Scan(ctx context.Context, v interface{}) error {
 	return rus.sqlScan(ctx, v)
 }
 
-func (rus *RoleUserSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (rus *RoleUserSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(rus.fns))
+	for _, fn := range rus.fns {
+		aggregation = append(aggregation, fn(rus.sql))
+	}
+	switch n := len(*rus.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		rus.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		rus.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := rus.sql.Query()
 	if err := rus.driver.Query(ctx, query, args, rows); err != nil {

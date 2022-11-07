@@ -26,9 +26,18 @@ func ({{ $receiver }} *{{ $.Name }}) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	{{ $receiver }}.ID = {{ $scan }}.ID
-	{{ range $f := $.Fields }}
-		{{- $receiver }}.{{ $f.StructField }} = {{ if and $f.IsTime (not $f.HasGoType) }}time.Unix(0, {{ $scan }}.{{ $f.StructField }}) {{ else }}{{- $scan }}.{{ $f.StructField }}{{ end }}
-	{{ end -}}
+	{{- range $i, $f := $.Fields }}
+		{{- if and $f.IsTime (not $f.HasGoType) }}
+			{{- if $f.Nillable }}
+				v{{ $i }} := time.Unix(0, {{ $scan }}.{{ $f.StructField }})
+				{{ $receiver }}.{{ $f.StructField }} = &v{{ $i }}
+			{{- else }}
+				{{ $receiver }}.{{ $f.StructField }} = time.Unix(0, {{ $scan }}.{{ $f.StructField }})
+			{{- end }}
+		{{- else }}
+			{{ $receiver }}.{{ $f.StructField }} = {{ $scan }}.{{ $f.StructField }}
+		{{- end }}
+	{{- end }}
 	return nil
 }
 {{ end }}
@@ -54,12 +63,20 @@ func ({{ $receiver }} *{{ $slice }}) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	for _, v := range {{ $scan }} {
-		*{{ $receiver }} = append(*{{ $receiver }}, &{{ $.Name }}{
-			ID: v.ID,
-			{{- range $f := $.Fields }}
-				{{ $f.StructField }}: {{- if and $f.IsTime (not $f.HasGoType) }}time.Unix(0, v.{{ $f.StructField }}) {{ else }}v.{{ $f.StructField }}{{ end }},
+		node := &{{ $.Name }}{ID: v.ID}
+		{{- range $i, $f := $.Fields }}
+			{{- if and $f.IsTime (not $f.HasGoType) }}
+				{{- if $f.Nillable }}
+					v{{ $i }} := time.Unix(0, v.{{ $f.StructField }})
+					node.{{ $f.StructField }} = &v{{ $i }}
+				{{- else }}
+					node.{{ $f.StructField }} = time.Unix(0, v.{{ $f.StructField }})
+				{{- end }}
+			{{- else }}
+				node.{{ $f.StructField }} = v.{{ $f.StructField }}
 			{{- end }}
-		})
+		{{- end }}
+		*{{ $receiver }} = append(*{{ $receiver }}, node)
 	}
 	return nil
 }

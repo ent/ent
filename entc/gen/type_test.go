@@ -281,7 +281,7 @@ func TestField_DefaultName(t *testing.T) {
 
 func TestField_incremental(t *testing.T) {
 	tests := []struct {
-		annotations map[string]interface{}
+		annotations map[string]any
 		def         bool
 		expected    bool
 	}{

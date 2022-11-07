@@ -302,6 +302,11 @@ func (ftq *FieldTypeQuery) Select(fields ...string) *FieldTypeSelect {
 	return selbuild
 }
 
+// Aggregate returns a FieldTypeSelect configured with the given aggregations.
+func (ftq *FieldTypeQuery) Aggregate(fns ...AggregateFunc) *FieldTypeSelect {
+	return ftq.Select().Aggregate(fns...)
+}
+
 func (ftq *FieldTypeQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range ftq.fields {
 		if !fieldtype.ValidColumn(f) {
@@ -327,10 +332,10 @@ func (ftq *FieldTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*F
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, fieldtype.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*FieldType).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &FieldType{config: ftq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -363,11 +368,14 @@ func (ftq *FieldTypeQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (ftq *FieldTypeQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := ftq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := ftq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (ftq *FieldTypeQuery) querySpec() *sqlgraph.QuerySpec {
@@ -503,7 +511,7 @@ func (ftgb *FieldTypeGroupBy) Aggregate(fns ...AggregateFunc) *FieldTypeGroupBy 
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (ftgb *FieldTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (ftgb *FieldTypeGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := ftgb.path(ctx)
 	if err != nil {
 		return err
@@ -512,7 +520,7 @@ func (ftgb *FieldTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return ftgb.sqlScan(ctx, v)
 }
 
-func (ftgb *FieldTypeGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (ftgb *FieldTypeGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range ftgb.fields {
 		if !fieldtype.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -537,8 +545,6 @@ func (ftgb *FieldTypeGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range ftgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(ftgb.fields)+len(ftgb.fns))
 		for _, f := range ftgb.fields {
@@ -558,8 +564,14 @@ type FieldTypeSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (fts *FieldTypeSelect) Aggregate(fns ...AggregateFunc) *FieldTypeSelect {
+	fts.fns = append(fts.fns, fns...)
+	return fts
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (fts *FieldTypeSelect) Scan(ctx context.Context, v interface{}) error {
+func (fts *FieldTypeSelect) Scan(ctx context.Context, v any) error {
 	if err := fts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -567,7 +579,17 @@ func (fts *FieldTypeSelect) Scan(ctx context.Context, v interface{}) error {
 	return fts.sqlScan(ctx, v)
 }
 
-func (fts *FieldTypeSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (fts *FieldTypeSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(fts.fns))
+	for _, fn := range fts.fns {
+		aggregation = append(aggregation, fn(fts.sql))
+	}
+	switch n := len(*fts.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		fts.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		fts.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := fts.sql.Query()
 	if err := fts.driver.Query(ctx, query, args, rows); err != nil {

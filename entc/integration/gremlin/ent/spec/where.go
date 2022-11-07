@@ -37,7 +37,7 @@ func IDNEQ(id string) predicate.Spec {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...string) predicate.Spec {
 	return predicate.Spec(func(t *dsl.Traversal) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -48,7 +48,7 @@ func IDIn(ids ...string) predicate.Spec {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...string) predicate.Spec {
 	return predicate.Spec(func(t *dsl.Traversal) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -105,7 +105,7 @@ func HasCardWith(preds ...predicate.Card) predicate.Spec {
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Spec) predicate.Spec {
 	return predicate.Spec(func(tr *dsl.Traversal) {
-		trs := make([]interface{}, 0, len(predicates))
+		trs := make([]any, 0, len(predicates))
 		for _, p := range predicates {
 			t := __.New()
 			p(t)
@@ -118,7 +118,7 @@ func And(predicates ...predicate.Spec) predicate.Spec {
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Spec) predicate.Spec {
 	return predicate.Spec(func(tr *dsl.Traversal) {
-		trs := make([]interface{}, 0, len(predicates))
+		trs := make([]any, 0, len(predicates))
 		for _, p := range predicates {
 			t := __.New()
 			p(t)

@@ -161,17 +161,10 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := cu.mutation.Number(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: card.FieldNumber,
-		})
+		_spec.SetField(card.FieldNumber, field.TypeString, value)
 	}
 	if cu.mutation.NumberCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: card.FieldNumber,
-		})
+		_spec.ClearField(card.FieldNumber, field.TypeString)
 	}
 	if cu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -386,17 +379,10 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (_node *Card, err error) 
 		}
 	}
 	if value, ok := cuo.mutation.Number(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: card.FieldNumber,
-		})
+		_spec.SetField(card.FieldNumber, field.TypeString, value)
 	}
 	if cuo.mutation.NumberCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: card.FieldNumber,
-		})
+		_spec.ClearField(card.FieldNumber, field.TypeString)
 	}
 	if cuo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{

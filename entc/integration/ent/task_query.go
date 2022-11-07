@@ -302,6 +302,11 @@ func (tq *TaskQuery) Select(fields ...string) *TaskSelect {
 	return selbuild
 }
 
+// Aggregate returns a TaskSelect configured with the given aggregations.
+func (tq *TaskQuery) Aggregate(fns ...AggregateFunc) *TaskSelect {
+	return tq.Select().Aggregate(fns...)
+}
+
 func (tq *TaskQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range tq.fields {
 		if !enttask.ValidColumn(f) {
@@ -323,10 +328,10 @@ func (tq *TaskQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Task, e
 		nodes = []*Task{}
 		_spec = tq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Task).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Task{config: tq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -359,11 +364,14 @@ func (tq *TaskQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (tq *TaskQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := tq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := tq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (tq *TaskQuery) querySpec() *sqlgraph.QuerySpec {
@@ -499,7 +507,7 @@ func (tgb *TaskGroupBy) Aggregate(fns ...AggregateFunc) *TaskGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (tgb *TaskGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (tgb *TaskGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := tgb.path(ctx)
 	if err != nil {
 		return err
@@ -508,7 +516,7 @@ func (tgb *TaskGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return tgb.sqlScan(ctx, v)
 }
 
-func (tgb *TaskGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (tgb *TaskGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range tgb.fields {
 		if !enttask.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -533,8 +541,6 @@ func (tgb *TaskGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range tgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(tgb.fields)+len(tgb.fns))
 		for _, f := range tgb.fields {
@@ -554,8 +560,14 @@ type TaskSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ts *TaskSelect) Aggregate(fns ...AggregateFunc) *TaskSelect {
+	ts.fns = append(ts.fns, fns...)
+	return ts
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (ts *TaskSelect) Scan(ctx context.Context, v interface{}) error {
+func (ts *TaskSelect) Scan(ctx context.Context, v any) error {
 	if err := ts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -563,7 +575,17 @@ func (ts *TaskSelect) Scan(ctx context.Context, v interface{}) error {
 	return ts.sqlScan(ctx, v)
 }
 
-func (ts *TaskSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ts *TaskSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ts.fns))
+	for _, fn := range ts.fns {
+		aggregation = append(aggregation, fn(ts.sql))
+	}
+	switch n := len(*ts.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ts.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ts.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ts.sql.Query()
 	if err := ts.driver.Query(ctx, query, args, rows); err != nil {

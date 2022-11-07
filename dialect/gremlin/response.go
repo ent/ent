@@ -16,13 +16,13 @@ import (
 type Response struct {
 	RequestID string `json:"requestId" graphson:"g:UUID"`
 	Status    struct {
-		Code       int                    `json:"code"`
-		Attributes map[string]interface{} `json:"attributes"`
-		Message    string                 `json:"message"`
+		Code       int            `json:"code"`
+		Attributes map[string]any `json:"attributes"`
+		Message    string         `json:"message"`
 	} `json:"status"`
 	Result struct {
-		Data graphson.RawMessage    `json:"data"`
-		Meta map[string]interface{} `json:"meta"`
+		Data graphson.RawMessage `json:"data"`
+		Meta map[string]any      `json:"meta"`
 	} `json:"result"`
 }
 
@@ -45,7 +45,7 @@ func (rsp *Response) Err() error {
 }
 
 // ReadVal reads gremlin response data into v.
-func (rsp *Response) ReadVal(v interface{}) error {
+func (rsp *Response) ReadVal(v any) error {
 	if err := rsp.Err(); err != nil {
 		return err
 	}

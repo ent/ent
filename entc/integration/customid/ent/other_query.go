@@ -278,6 +278,11 @@ func (oq *OtherQuery) Select(fields ...string) *OtherSelect {
 	return selbuild
 }
 
+// Aggregate returns a OtherSelect configured with the given aggregations.
+func (oq *OtherQuery) Aggregate(fns ...AggregateFunc) *OtherSelect {
+	return oq.Select().Aggregate(fns...)
+}
+
 func (oq *OtherQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range oq.fields {
 		if !other.ValidColumn(f) {
@@ -299,10 +304,10 @@ func (oq *OtherQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Other,
 		nodes = []*Other{}
 		_spec = oq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Other).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Other{config: oq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -329,11 +334,14 @@ func (oq *OtherQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (oq *OtherQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := oq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := oq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (oq *OtherQuery) querySpec() *sqlgraph.QuerySpec {
@@ -434,7 +442,7 @@ func (ogb *OtherGroupBy) Aggregate(fns ...AggregateFunc) *OtherGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (ogb *OtherGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (ogb *OtherGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := ogb.path(ctx)
 	if err != nil {
 		return err
@@ -443,7 +451,7 @@ func (ogb *OtherGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return ogb.sqlScan(ctx, v)
 }
 
-func (ogb *OtherGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (ogb *OtherGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range ogb.fields {
 		if !other.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -468,8 +476,6 @@ func (ogb *OtherGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range ogb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(ogb.fields)+len(ogb.fns))
 		for _, f := range ogb.fields {
@@ -489,8 +495,14 @@ type OtherSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (os *OtherSelect) Aggregate(fns ...AggregateFunc) *OtherSelect {
+	os.fns = append(os.fns, fns...)
+	return os
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (os *OtherSelect) Scan(ctx context.Context, v interface{}) error {
+func (os *OtherSelect) Scan(ctx context.Context, v any) error {
 	if err := os.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -498,7 +510,17 @@ func (os *OtherSelect) Scan(ctx context.Context, v interface{}) error {
 	return os.sqlScan(ctx, v)
 }
 
-func (os *OtherSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (os *OtherSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(os.fns))
+	for _, fn := range os.fns {
+		aggregation = append(aggregation, fn(os.sql))
+	}
+	switch n := len(*os.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		os.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		os.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := os.sql.Query()
 	if err := os.driver.Query(ctx, query, args, rows); err != nil {

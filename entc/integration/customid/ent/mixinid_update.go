@@ -121,18 +121,10 @@ func (miu *MixinIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := miu.mutation.SomeField(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: mixinid.FieldSomeField,
-		})
+		_spec.SetField(mixinid.FieldSomeField, field.TypeString, value)
 	}
 	if value, ok := miu.mutation.MixinField(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: mixinid.FieldMixinField,
-		})
+		_spec.SetField(mixinid.FieldMixinField, field.TypeString, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, miu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -273,18 +265,10 @@ func (miuo *MixinIDUpdateOne) sqlSave(ctx context.Context) (_node *MixinID, err 
 		}
 	}
 	if value, ok := miuo.mutation.SomeField(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: mixinid.FieldSomeField,
-		})
+		_spec.SetField(mixinid.FieldSomeField, field.TypeString, value)
 	}
 	if value, ok := miuo.mutation.MixinField(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: mixinid.FieldMixinField,
-		})
+		_spec.SetField(mixinid.FieldMixinField, field.TypeString, value)
 	}
 	_node = &MixinID{config: miuo.config}
 	_spec.Assign = _node.assignValues

@@ -10,7 +10,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
 
-func ({{ $receiver }} *{{ $builder }}) gremlinScan(ctx context.Context, v interface{}) error {
+func ({{ $receiver }} *{{ $builder }}) gremlinScan(ctx context.Context, v any) error {
 	res := &gremlin.Response{}
 	query, bindings := {{ $receiver }}.gremlinQuery().Query()
 	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -29,8 +29,8 @@ func ({{ $receiver }} *{{ $builder }}) gremlinScan(ctx context.Context, v interf
 
 func ({{ $receiver }} *{{ $builder }}) gremlinQuery() *dsl.Traversal {
 	var (
-		trs []interface{}
-		names []interface{}
+		trs []any
+		names []any
 	)
 	for _, fn := range {{ $receiver }}.fns {
 		name, tr := fn("p", "")

@@ -51,7 +51,7 @@ func LikedAtNEQ(v time.Time) predicate.TweetLike {
 
 // LikedAtIn applies the In predicate on the "liked_at" field.
 func LikedAtIn(vs ...time.Time) predicate.TweetLike {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -62,7 +62,7 @@ func LikedAtIn(vs ...time.Time) predicate.TweetLike {
 
 // LikedAtNotIn applies the NotIn predicate on the "liked_at" field.
 func LikedAtNotIn(vs ...time.Time) predicate.TweetLike {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -115,7 +115,7 @@ func UserIDNEQ(v int) predicate.TweetLike {
 
 // UserIDIn applies the In predicate on the "user_id" field.
 func UserIDIn(vs ...int) predicate.TweetLike {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -126,7 +126,7 @@ func UserIDIn(vs ...int) predicate.TweetLike {
 
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
 func UserIDNotIn(vs ...int) predicate.TweetLike {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -151,7 +151,7 @@ func TweetIDNEQ(v int) predicate.TweetLike {
 
 // TweetIDIn applies the In predicate on the "tweet_id" field.
 func TweetIDIn(vs ...int) predicate.TweetLike {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -162,7 +162,7 @@ func TweetIDIn(vs ...int) predicate.TweetLike {
 
 // TweetIDNotIn applies the NotIn predicate on the "tweet_id" field.
 func TweetIDNotIn(vs ...int) predicate.TweetLike {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

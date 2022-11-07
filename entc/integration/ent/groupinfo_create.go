@@ -181,19 +181,11 @@ func (gic *GroupInfoCreate) createSpec() (*GroupInfo, *sqlgraph.CreateSpec) {
 	)
 	_spec.OnConflict = gic.conflict
 	if value, ok := gic.mutation.Desc(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: groupinfo.FieldDesc,
-		})
+		_spec.SetField(groupinfo.FieldDesc, field.TypeString, value)
 		_node.Desc = value
 	}
 	if value, ok := gic.mutation.MaxUsers(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: groupinfo.FieldMaxUsers,
-		})
+		_spec.SetField(groupinfo.FieldMaxUsers, field.TypeInt, value)
 		_node.MaxUsers = value
 	}
 	if nodes := gic.mutation.GroupsIDs(); len(nodes) > 0 {

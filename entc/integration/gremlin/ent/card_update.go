@@ -268,7 +268,7 @@ func (cu *CardUpdate) gremlin() *dsl.Traversal {
 	if value, ok := cu.mutation.Name(); ok {
 		v.Property(dsl.Single, card.FieldName, value)
 	}
-	var properties []interface{}
+	var properties []any
 	if cu.mutation.NameCleared() {
 		properties = append(properties, card.FieldName)
 	}
@@ -566,7 +566,7 @@ func (cuo *CardUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := cuo.mutation.Name(); ok {
 		v.Property(dsl.Single, card.FieldName, value)
 	}
-	var properties []interface{}
+	var properties []any
 	if cuo.mutation.NameCleared() {
 		properties = append(properties, card.FieldName)
 	}
@@ -592,7 +592,7 @@ func (cuo *CardUpdateOne) gremlin(id string) *dsl.Traversal {
 		v.AddE(spec.CardLabel).From(g.V(id)).InV()
 	}
 	if len(cuo.fields) > 0 {
-		fields := make([]interface{}, 0, len(cuo.fields)+1)
+		fields := make([]any, 0, len(cuo.fields)+1)
 		fields = append(fields, true)
 		for _, f := range cuo.fields {
 			fields = append(fields, f)

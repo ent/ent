@@ -37,7 +37,7 @@ func IDNEQ(id string) predicate.Goods {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...string) predicate.Goods {
 	return predicate.Goods(func(t *dsl.Traversal) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -48,7 +48,7 @@ func IDIn(ids ...string) predicate.Goods {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...string) predicate.Goods {
 	return predicate.Goods(func(t *dsl.Traversal) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -87,7 +87,7 @@ func IDLTE(id string) predicate.Goods {
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Goods) predicate.Goods {
 	return predicate.Goods(func(tr *dsl.Traversal) {
-		trs := make([]interface{}, 0, len(predicates))
+		trs := make([]any, 0, len(predicates))
 		for _, p := range predicates {
 			t := __.New()
 			p(t)
@@ -100,7 +100,7 @@ func And(predicates ...predicate.Goods) predicate.Goods {
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Goods) predicate.Goods {
 	return predicate.Goods(func(tr *dsl.Traversal) {
-		trs := make([]interface{}, 0, len(predicates))
+		trs := make([]any, 0, len(predicates))
 		for _, p := range predicates {
 			t := __.New()
 			p(t)

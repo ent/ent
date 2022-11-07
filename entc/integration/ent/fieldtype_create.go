@@ -1018,523 +1018,263 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 	)
 	_spec.OnConflict = ftc.conflict
 	if value, ok := ftc.mutation.Int(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: fieldtype.FieldInt,
-		})
+		_spec.SetField(fieldtype.FieldInt, field.TypeInt, value)
 		_node.Int = value
 	}
 	if value, ok := ftc.mutation.Int8(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt8,
-			Value:  value,
-			Column: fieldtype.FieldInt8,
-		})
+		_spec.SetField(fieldtype.FieldInt8, field.TypeInt8, value)
 		_node.Int8 = value
 	}
 	if value, ok := ftc.mutation.Int16(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt16,
-			Value:  value,
-			Column: fieldtype.FieldInt16,
-		})
+		_spec.SetField(fieldtype.FieldInt16, field.TypeInt16, value)
 		_node.Int16 = value
 	}
 	if value, ok := ftc.mutation.Int32(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
-			Value:  value,
-			Column: fieldtype.FieldInt32,
-		})
+		_spec.SetField(fieldtype.FieldInt32, field.TypeInt32, value)
 		_node.Int32 = value
 	}
 	if value, ok := ftc.mutation.Int64(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: fieldtype.FieldInt64,
-		})
+		_spec.SetField(fieldtype.FieldInt64, field.TypeInt64, value)
 		_node.Int64 = value
 	}
 	if value, ok := ftc.mutation.OptionalInt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: fieldtype.FieldOptionalInt,
-		})
+		_spec.SetField(fieldtype.FieldOptionalInt, field.TypeInt, value)
 		_node.OptionalInt = value
 	}
 	if value, ok := ftc.mutation.OptionalInt8(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt8,
-			Value:  value,
-			Column: fieldtype.FieldOptionalInt8,
-		})
+		_spec.SetField(fieldtype.FieldOptionalInt8, field.TypeInt8, value)
 		_node.OptionalInt8 = value
 	}
 	if value, ok := ftc.mutation.OptionalInt16(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt16,
-			Value:  value,
-			Column: fieldtype.FieldOptionalInt16,
-		})
+		_spec.SetField(fieldtype.FieldOptionalInt16, field.TypeInt16, value)
 		_node.OptionalInt16 = value
 	}
 	if value, ok := ftc.mutation.OptionalInt32(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
-			Value:  value,
-			Column: fieldtype.FieldOptionalInt32,
-		})
+		_spec.SetField(fieldtype.FieldOptionalInt32, field.TypeInt32, value)
 		_node.OptionalInt32 = value
 	}
 	if value, ok := ftc.mutation.OptionalInt64(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: fieldtype.FieldOptionalInt64,
-		})
+		_spec.SetField(fieldtype.FieldOptionalInt64, field.TypeInt64, value)
 		_node.OptionalInt64 = value
 	}
 	if value, ok := ftc.mutation.NillableInt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: fieldtype.FieldNillableInt,
-		})
+		_spec.SetField(fieldtype.FieldNillableInt, field.TypeInt, value)
 		_node.NillableInt = &value
 	}
 	if value, ok := ftc.mutation.NillableInt8(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt8,
-			Value:  value,
-			Column: fieldtype.FieldNillableInt8,
-		})
+		_spec.SetField(fieldtype.FieldNillableInt8, field.TypeInt8, value)
 		_node.NillableInt8 = &value
 	}
 	if value, ok := ftc.mutation.NillableInt16(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt16,
-			Value:  value,
-			Column: fieldtype.FieldNillableInt16,
-		})
+		_spec.SetField(fieldtype.FieldNillableInt16, field.TypeInt16, value)
 		_node.NillableInt16 = &value
 	}
 	if value, ok := ftc.mutation.NillableInt32(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
-			Value:  value,
-			Column: fieldtype.FieldNillableInt32,
-		})
+		_spec.SetField(fieldtype.FieldNillableInt32, field.TypeInt32, value)
 		_node.NillableInt32 = &value
 	}
 	if value, ok := ftc.mutation.NillableInt64(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: fieldtype.FieldNillableInt64,
-		})
+		_spec.SetField(fieldtype.FieldNillableInt64, field.TypeInt64, value)
 		_node.NillableInt64 = &value
 	}
 	if value, ok := ftc.mutation.ValidateOptionalInt32(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
-			Value:  value,
-			Column: fieldtype.FieldValidateOptionalInt32,
-		})
+		_spec.SetField(fieldtype.FieldValidateOptionalInt32, field.TypeInt32, value)
 		_node.ValidateOptionalInt32 = value
 	}
 	if value, ok := ftc.mutation.OptionalUint(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint,
-			Value:  value,
-			Column: fieldtype.FieldOptionalUint,
-		})
+		_spec.SetField(fieldtype.FieldOptionalUint, field.TypeUint, value)
 		_node.OptionalUint = value
 	}
 	if value, ok := ftc.mutation.OptionalUint8(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint8,
-			Value:  value,
-			Column: fieldtype.FieldOptionalUint8,
-		})
+		_spec.SetField(fieldtype.FieldOptionalUint8, field.TypeUint8, value)
 		_node.OptionalUint8 = value
 	}
 	if value, ok := ftc.mutation.OptionalUint16(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint16,
-			Value:  value,
-			Column: fieldtype.FieldOptionalUint16,
-		})
+		_spec.SetField(fieldtype.FieldOptionalUint16, field.TypeUint16, value)
 		_node.OptionalUint16 = value
 	}
 	if value, ok := ftc.mutation.OptionalUint32(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint32,
-			Value:  value,
-			Column: fieldtype.FieldOptionalUint32,
-		})
+		_spec.SetField(fieldtype.FieldOptionalUint32, field.TypeUint32, value)
 		_node.OptionalUint32 = value
 	}
 	if value, ok := ftc.mutation.OptionalUint64(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: fieldtype.FieldOptionalUint64,
-		})
+		_spec.SetField(fieldtype.FieldOptionalUint64, field.TypeUint64, value)
 		_node.OptionalUint64 = value
 	}
 	if value, ok := ftc.mutation.State(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: fieldtype.FieldState,
-		})
+		_spec.SetField(fieldtype.FieldState, field.TypeEnum, value)
 		_node.State = value
 	}
 	if value, ok := ftc.mutation.OptionalFloat(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: fieldtype.FieldOptionalFloat,
-		})
+		_spec.SetField(fieldtype.FieldOptionalFloat, field.TypeFloat64, value)
 		_node.OptionalFloat = value
 	}
 	if value, ok := ftc.mutation.OptionalFloat32(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat32,
-			Value:  value,
-			Column: fieldtype.FieldOptionalFloat32,
-		})
+		_spec.SetField(fieldtype.FieldOptionalFloat32, field.TypeFloat32, value)
 		_node.OptionalFloat32 = value
 	}
 	if value, ok := ftc.mutation.Text(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: fieldtype.FieldText,
-		})
+		_spec.SetField(fieldtype.FieldText, field.TypeString, value)
 		_node.Text = value
 	}
 	if value, ok := ftc.mutation.Datetime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: fieldtype.FieldDatetime,
-		})
+		_spec.SetField(fieldtype.FieldDatetime, field.TypeTime, value)
 		_node.Datetime = value
 	}
 	if value, ok := ftc.mutation.Decimal(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: fieldtype.FieldDecimal,
-		})
+		_spec.SetField(fieldtype.FieldDecimal, field.TypeFloat64, value)
 		_node.Decimal = value
 	}
 	if value, ok := ftc.mutation.LinkOther(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeOther,
-			Value:  value,
-			Column: fieldtype.FieldLinkOther,
-		})
+		_spec.SetField(fieldtype.FieldLinkOther, field.TypeOther, value)
 		_node.LinkOther = value
 	}
 	if value, ok := ftc.mutation.LinkOtherFunc(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeOther,
-			Value:  value,
-			Column: fieldtype.FieldLinkOtherFunc,
-		})
+		_spec.SetField(fieldtype.FieldLinkOtherFunc, field.TypeOther, value)
 		_node.LinkOtherFunc = value
 	}
 	if value, ok := ftc.mutation.MAC(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: fieldtype.FieldMAC,
-		})
+		_spec.SetField(fieldtype.FieldMAC, field.TypeString, value)
 		_node.MAC = value
 	}
 	if value, ok := ftc.mutation.StringArray(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeOther,
-			Value:  value,
-			Column: fieldtype.FieldStringArray,
-		})
+		_spec.SetField(fieldtype.FieldStringArray, field.TypeOther, value)
 		_node.StringArray = value
 	}
 	if value, ok := ftc.mutation.Password(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: fieldtype.FieldPassword,
-		})
+		_spec.SetField(fieldtype.FieldPassword, field.TypeString, value)
 		_node.Password = value
 	}
 	if value, ok := ftc.mutation.StringScanner(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: fieldtype.FieldStringScanner,
-		})
+		_spec.SetField(fieldtype.FieldStringScanner, field.TypeString, value)
 		_node.StringScanner = &value
 	}
 	if value, ok := ftc.mutation.Duration(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: fieldtype.FieldDuration,
-		})
+		_spec.SetField(fieldtype.FieldDuration, field.TypeInt64, value)
 		_node.Duration = value
 	}
 	if value, ok := ftc.mutation.Dir(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: fieldtype.FieldDir,
-		})
+		_spec.SetField(fieldtype.FieldDir, field.TypeString, value)
 		_node.Dir = value
 	}
 	if value, ok := ftc.mutation.Ndir(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: fieldtype.FieldNdir,
-		})
+		_spec.SetField(fieldtype.FieldNdir, field.TypeString, value)
 		_node.Ndir = &value
 	}
 	if value, ok := ftc.mutation.Str(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: fieldtype.FieldStr,
-		})
+		_spec.SetField(fieldtype.FieldStr, field.TypeString, value)
 		_node.Str = value
 	}
 	if value, ok := ftc.mutation.NullStr(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: fieldtype.FieldNullStr,
-		})
+		_spec.SetField(fieldtype.FieldNullStr, field.TypeString, value)
 		_node.NullStr = value
 	}
 	if value, ok := ftc.mutation.Link(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: fieldtype.FieldLink,
-		})
+		_spec.SetField(fieldtype.FieldLink, field.TypeString, value)
 		_node.Link = value
 	}
 	if value, ok := ftc.mutation.NullLink(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: fieldtype.FieldNullLink,
-		})
+		_spec.SetField(fieldtype.FieldNullLink, field.TypeString, value)
 		_node.NullLink = value
 	}
 	if value, ok := ftc.mutation.Active(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: fieldtype.FieldActive,
-		})
+		_spec.SetField(fieldtype.FieldActive, field.TypeBool, value)
 		_node.Active = value
 	}
 	if value, ok := ftc.mutation.NullActive(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: fieldtype.FieldNullActive,
-		})
+		_spec.SetField(fieldtype.FieldNullActive, field.TypeBool, value)
 		_node.NullActive = &value
 	}
 	if value, ok := ftc.mutation.Deleted(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: fieldtype.FieldDeleted,
-		})
+		_spec.SetField(fieldtype.FieldDeleted, field.TypeBool, value)
 		_node.Deleted = value
 	}
 	if value, ok := ftc.mutation.DeletedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: fieldtype.FieldDeletedAt,
-		})
+		_spec.SetField(fieldtype.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = value
 	}
 	if value, ok := ftc.mutation.RawData(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBytes,
-			Value:  value,
-			Column: fieldtype.FieldRawData,
-		})
+		_spec.SetField(fieldtype.FieldRawData, field.TypeBytes, value)
 		_node.RawData = value
 	}
 	if value, ok := ftc.mutation.Sensitive(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBytes,
-			Value:  value,
-			Column: fieldtype.FieldSensitive,
-		})
+		_spec.SetField(fieldtype.FieldSensitive, field.TypeBytes, value)
 		_node.Sensitive = value
 	}
 	if value, ok := ftc.mutation.IP(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBytes,
-			Value:  value,
-			Column: fieldtype.FieldIP,
-		})
+		_spec.SetField(fieldtype.FieldIP, field.TypeBytes, value)
 		_node.IP = value
 	}
 	if value, ok := ftc.mutation.NullInt64(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: fieldtype.FieldNullInt64,
-		})
+		_spec.SetField(fieldtype.FieldNullInt64, field.TypeInt, value)
 		_node.NullInt64 = value
 	}
 	if value, ok := ftc.mutation.SchemaInt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: fieldtype.FieldSchemaInt,
-		})
+		_spec.SetField(fieldtype.FieldSchemaInt, field.TypeInt, value)
 		_node.SchemaInt = value
 	}
 	if value, ok := ftc.mutation.SchemaInt8(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt8,
-			Value:  value,
-			Column: fieldtype.FieldSchemaInt8,
-		})
+		_spec.SetField(fieldtype.FieldSchemaInt8, field.TypeInt8, value)
 		_node.SchemaInt8 = value
 	}
 	if value, ok := ftc.mutation.SchemaInt64(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: fieldtype.FieldSchemaInt64,
-		})
+		_spec.SetField(fieldtype.FieldSchemaInt64, field.TypeInt64, value)
 		_node.SchemaInt64 = value
 	}
 	if value, ok := ftc.mutation.SchemaFloat(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: fieldtype.FieldSchemaFloat,
-		})
+		_spec.SetField(fieldtype.FieldSchemaFloat, field.TypeFloat64, value)
 		_node.SchemaFloat = value
 	}
 	if value, ok := ftc.mutation.SchemaFloat32(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat32,
-			Value:  value,
-			Column: fieldtype.FieldSchemaFloat32,
-		})
+		_spec.SetField(fieldtype.FieldSchemaFloat32, field.TypeFloat32, value)
 		_node.SchemaFloat32 = value
 	}
 	if value, ok := ftc.mutation.NullFloat(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: fieldtype.FieldNullFloat,
-		})
+		_spec.SetField(fieldtype.FieldNullFloat, field.TypeFloat64, value)
 		_node.NullFloat = value
 	}
 	if value, ok := ftc.mutation.Role(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: fieldtype.FieldRole,
-		})
+		_spec.SetField(fieldtype.FieldRole, field.TypeEnum, value)
 		_node.Role = value
 	}
 	if value, ok := ftc.mutation.Priority(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: fieldtype.FieldPriority,
-		})
+		_spec.SetField(fieldtype.FieldPriority, field.TypeEnum, value)
 		_node.Priority = value
 	}
 	if value, ok := ftc.mutation.OptionalUUID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Value:  value,
-			Column: fieldtype.FieldOptionalUUID,
-		})
+		_spec.SetField(fieldtype.FieldOptionalUUID, field.TypeUUID, value)
 		_node.OptionalUUID = value
 	}
 	if value, ok := ftc.mutation.NillableUUID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Value:  value,
-			Column: fieldtype.FieldNillableUUID,
-		})
+		_spec.SetField(fieldtype.FieldNillableUUID, field.TypeUUID, value)
 		_node.NillableUUID = &value
 	}
 	if value, ok := ftc.mutation.Strings(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: fieldtype.FieldStrings,
-		})
+		_spec.SetField(fieldtype.FieldStrings, field.TypeJSON, value)
 		_node.Strings = value
 	}
 	if value, ok := ftc.mutation.Pair(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBytes,
-			Value:  value,
-			Column: fieldtype.FieldPair,
-		})
+		_spec.SetField(fieldtype.FieldPair, field.TypeBytes, value)
 		_node.Pair = value
 	}
 	if value, ok := ftc.mutation.NilPair(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBytes,
-			Value:  value,
-			Column: fieldtype.FieldNilPair,
-		})
+		_spec.SetField(fieldtype.FieldNilPair, field.TypeBytes, value)
 		_node.NilPair = value
 	}
 	if value, ok := ftc.mutation.Vstring(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: fieldtype.FieldVstring,
-		})
+		_spec.SetField(fieldtype.FieldVstring, field.TypeString, value)
 		_node.Vstring = value
 	}
 	if value, ok := ftc.mutation.Triple(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: fieldtype.FieldTriple,
-		})
+		_spec.SetField(fieldtype.FieldTriple, field.TypeString, value)
 		_node.Triple = value
 	}
 	if value, ok := ftc.mutation.BigInt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: fieldtype.FieldBigInt,
-		})
+		_spec.SetField(fieldtype.FieldBigInt, field.TypeInt, value)
 		_node.BigInt = value
 	}
 	if value, ok := ftc.mutation.PasswordOther(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeOther,
-			Value:  value,
-			Column: fieldtype.FieldPasswordOther,
-		})
+		_spec.SetField(fieldtype.FieldPasswordOther, field.TypeOther, value)
 		_node.PasswordOther = value
 	}
 	return _node, _spec

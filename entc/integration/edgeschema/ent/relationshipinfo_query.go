@@ -299,6 +299,11 @@ func (riq *RelationshipInfoQuery) Select(fields ...string) *RelationshipInfoSele
 	return selbuild
 }
 
+// Aggregate returns a RelationshipInfoSelect configured with the given aggregations.
+func (riq *RelationshipInfoQuery) Aggregate(fns ...AggregateFunc) *RelationshipInfoSelect {
+	return riq.Select().Aggregate(fns...)
+}
+
 func (riq *RelationshipInfoQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range riq.fields {
 		if !relationshipinfo.ValidColumn(f) {
@@ -320,10 +325,10 @@ func (riq *RelationshipInfoQuery) sqlAll(ctx context.Context, hooks ...queryHook
 		nodes = []*RelationshipInfo{}
 		_spec = riq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*RelationshipInfo).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &RelationshipInfo{config: riq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -350,11 +355,14 @@ func (riq *RelationshipInfoQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (riq *RelationshipInfoQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := riq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := riq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (riq *RelationshipInfoQuery) querySpec() *sqlgraph.QuerySpec {
@@ -455,7 +463,7 @@ func (rigb *RelationshipInfoGroupBy) Aggregate(fns ...AggregateFunc) *Relationsh
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (rigb *RelationshipInfoGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (rigb *RelationshipInfoGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := rigb.path(ctx)
 	if err != nil {
 		return err
@@ -464,7 +472,7 @@ func (rigb *RelationshipInfoGroupBy) Scan(ctx context.Context, v interface{}) er
 	return rigb.sqlScan(ctx, v)
 }
 
-func (rigb *RelationshipInfoGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (rigb *RelationshipInfoGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range rigb.fields {
 		if !relationshipinfo.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -489,8 +497,6 @@ func (rigb *RelationshipInfoGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range rigb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(rigb.fields)+len(rigb.fns))
 		for _, f := range rigb.fields {
@@ -510,8 +516,14 @@ type RelationshipInfoSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ris *RelationshipInfoSelect) Aggregate(fns ...AggregateFunc) *RelationshipInfoSelect {
+	ris.fns = append(ris.fns, fns...)
+	return ris
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (ris *RelationshipInfoSelect) Scan(ctx context.Context, v interface{}) error {
+func (ris *RelationshipInfoSelect) Scan(ctx context.Context, v any) error {
 	if err := ris.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -519,7 +531,17 @@ func (ris *RelationshipInfoSelect) Scan(ctx context.Context, v interface{}) erro
 	return ris.sqlScan(ctx, v)
 }
 
-func (ris *RelationshipInfoSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ris *RelationshipInfoSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ris.fns))
+	for _, fn := range ris.fns {
+		aggregation = append(aggregation, fn(ris.sql))
+	}
+	switch n := len(*ris.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ris.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ris.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ris.sql.Query()
 	if err := ris.driver.Query(ctx, query, args, rows); err != nil {

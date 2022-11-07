@@ -192,7 +192,7 @@ type Pair struct {
 	K, V []byte
 }
 
-func (*Pair) Scan(interface{}) error      { return nil }
+func (*Pair) Scan(any) error              { return nil }
 func (Pair) Value() (driver.Value, error) { return nil, nil }
 
 func TestBytes(t *testing.T) {
@@ -282,6 +282,9 @@ func TestBytes_DefaultFunc(t *testing.T) {
 	f4 := func() net.IPMask { return net.IPMask("ffff:ff80::") }
 	fd = field.Bytes("ip").GoType(net.IP("127.0.0.1")).DefaultFunc(f4).Descriptor()
 	assert.Error(t, fd.Err, "`var _ net.IP = f4()` should fail")
+
+	fd = field.Bytes("ip").GoType(net.IP("127.0.0.1")).DefaultFunc(net.IP("127.0.0.1")).Descriptor()
+	assert.EqualError(t, fd.Err, `field.Bytes("ip").DefaultFunc expects func but got slice`)
 }
 
 func TestString_DefaultFunc(t *testing.T) {
@@ -304,11 +307,14 @@ func TestString_DefaultFunc(t *testing.T) {
 	f4 := func() S { return "" }
 	fd = field.String("str").GoType(http.Dir("/tmp")).DefaultFunc(f4).Descriptor()
 	assert.Error(t, fd.Err, "`var _ http.Dir = f4()` should fail")
+
+	fd = field.String("str").GoType(http.Dir("/tmp")).DefaultFunc("/tmp").Descriptor()
+	assert.EqualError(t, fd.Err, `field.String("str").DefaultFunc expects func but got string`)
 }
 
 type VString string
 
-func (s *VString) Scan(interface{}) error {
+func (s *VString) Scan(any) error {
 	return nil
 }
 
@@ -522,7 +528,7 @@ func TestJSON(t *testing.T) {
 	assert.Equal(t, "net/url", fd.Info.PkgPath)
 	assert.Equal(t, "url", fd.Info.PkgName)
 	fd = field.JSON("addr", net.Addr(nil)).Descriptor()
-	assert.EqualError(t, fd.Err, "expect a Go value as JSON type, but got nil")
+	assert.EqualError(t, fd.Err, "expect a Go value as JSON type but got nil")
 }
 
 func TestField_Tag(t *testing.T) {
@@ -559,7 +565,7 @@ func (i RoleInt) Value() (driver.Value, error) {
 	return i.String(), nil
 }
 
-func (i *RoleInt) Scan(val interface{}) error {
+func (i *RoleInt) Scan(val any) error {
 	switch v := val.(type) {
 	case string:
 		switch v {
@@ -655,7 +661,7 @@ func TestField_UUID(t *testing.T) {
 type custom struct {
 }
 
-func (c *custom) Scan(_ interface{}) (err error) {
+func (c *custom) Scan(_ any) (err error) {
 	return nil
 }
 
@@ -724,7 +730,7 @@ func (e UserRole) MarshalGQL(w io.Writer) {
 }
 
 // UnmarshalGQL implements graphql.Unmarshaler interface.
-func (e *UserRole) UnmarshalGQL(val interface{}) error {
+func (e *UserRole) UnmarshalGQL(val any) error {
 	str, ok := val.(string)
 	if !ok {
 		return fmt.Errorf("enum %T must be a string", val)
@@ -740,14 +746,14 @@ func (e *UserRole) UnmarshalGQL(val interface{}) error {
 
 type Scalar struct{}
 
-func (Scalar) MarshalGQL(io.Writer)            {}
-func (*Scalar) UnmarshalGQL(interface{}) error { return nil }
-func (Scalar) Value() (driver.Value, error)    { return nil, nil }
+func (Scalar) MarshalGQL(io.Writer)         {}
+func (*Scalar) UnmarshalGQL(any) error      { return nil }
+func (Scalar) Value() (driver.Value, error) { return nil, nil }
 
 func TestRType_Implements(t *testing.T) {
 	type (
 		marshaler   interface{ MarshalGQL(w io.Writer) }
-		unmarshaler interface{ UnmarshalGQL(v interface{}) error }
+		unmarshaler interface{ UnmarshalGQL(v any) error }
 		codec       interface {
 			marshaler
 			unmarshaler

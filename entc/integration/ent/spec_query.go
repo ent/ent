@@ -317,6 +317,11 @@ func (sq *SpecQuery) Select(fields ...string) *SpecSelect {
 	return selbuild
 }
 
+// Aggregate returns a SpecSelect configured with the given aggregations.
+func (sq *SpecQuery) Aggregate(fns ...AggregateFunc) *SpecSelect {
+	return sq.Select().Aggregate(fns...)
+}
+
 func (sq *SpecQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range sq.fields {
 		if !spec.ValidColumn(f) {
@@ -341,10 +346,10 @@ func (sq *SpecQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Spec, e
 			sq.withCard != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Spec).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Spec{config: sq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -405,18 +410,18 @@ func (sq *SpecQuery) loadCard(ctx context.Context, query *CardQuery, nodes []*Sp
 	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
 		assign := spec.Assign
 		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]interface{}, error) {
+		spec.ScanValues = func(columns []string) ([]any, error) {
 			values, err := values(columns[1:])
 			if err != nil {
 				return nil, err
 			}
-			return append([]interface{}{new(sql.NullInt64)}, values...), nil
+			return append([]any{new(sql.NullInt64)}, values...), nil
 		}
-		spec.Assign = func(columns []string, values []interface{}) error {
+		spec.Assign = func(columns []string, values []any) error {
 			outValue := int(values[0].(*sql.NullInt64).Int64)
 			inValue := int(values[1].(*sql.NullInt64).Int64)
 			if nids[inValue] == nil {
-				nids[inValue] = map[*Spec]struct{}{byID[outValue]: struct{}{}}
+				nids[inValue] = map[*Spec]struct{}{byID[outValue]: {}}
 				return assign(columns[1:], values[1:])
 			}
 			nids[inValue][byID[outValue]] = struct{}{}
@@ -451,11 +456,14 @@ func (sq *SpecQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (sq *SpecQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := sq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := sq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (sq *SpecQuery) querySpec() *sqlgraph.QuerySpec {
@@ -605,7 +613,7 @@ func (sgb *SpecGroupBy) Aggregate(fns ...AggregateFunc) *SpecGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (sgb *SpecGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (sgb *SpecGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := sgb.path(ctx)
 	if err != nil {
 		return err
@@ -614,7 +622,7 @@ func (sgb *SpecGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return sgb.sqlScan(ctx, v)
 }
 
-func (sgb *SpecGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (sgb *SpecGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range sgb.fields {
 		if !spec.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -639,8 +647,6 @@ func (sgb *SpecGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range sgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(sgb.fields)+len(sgb.fns))
 		for _, f := range sgb.fields {
@@ -660,8 +666,14 @@ type SpecSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ss *SpecSelect) Aggregate(fns ...AggregateFunc) *SpecSelect {
+	ss.fns = append(ss.fns, fns...)
+	return ss
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (ss *SpecSelect) Scan(ctx context.Context, v interface{}) error {
+func (ss *SpecSelect) Scan(ctx context.Context, v any) error {
 	if err := ss.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -669,7 +681,17 @@ func (ss *SpecSelect) Scan(ctx context.Context, v interface{}) error {
 	return ss.sqlScan(ctx, v)
 }
 
-func (ss *SpecSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ss *SpecSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ss.fns))
+	for _, fn := range ss.fns {
+		aggregation = append(aggregation, fn(ss.sql))
+	}
+	switch n := len(*ss.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ss.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ss.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ss.sql.Query()
 	if err := ss.driver.Query(ctx, query, args, rows); err != nil {

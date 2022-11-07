@@ -19,6 +19,8 @@ const (
 	FieldT = "t"
 	// FieldURL holds the string denoting the url field in the database.
 	FieldURL = "url"
+	// FieldURLs holds the string denoting the urls field in the database.
+	FieldURLs = "urls"
 	// FieldRaw holds the string denoting the raw field in the database.
 	FieldRaw = "raw"
 	// FieldDirs holds the string denoting the dirs field in the database.
@@ -40,6 +42,7 @@ var Columns = []string{
 	FieldID,
 	FieldT,
 	FieldURL,
+	FieldURLs,
 	FieldRaw,
 	FieldDirs,
 	FieldInts,

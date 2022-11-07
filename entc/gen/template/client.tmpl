@@ -213,7 +213,7 @@ func (c *{{ $client }}) Delete() *{{ $n.DeleteName }} {
 		return c.DeleteOneID({{ $rec }}.ID)
 	}
 
-	// DeleteOne returns a builder for deleting the given entity by its id.
+	// DeleteOneID returns a builder for deleting the given entity by its id.
 	func (c *{{ $client }}) DeleteOneID(id {{ $n.ID.Type }}) *{{ $n.DeleteOneName }} {
 		builder := c.Delete().Where({{ $n.Package }}.ID(id))
 		builder.mutation.id = &id
@@ -258,7 +258,7 @@ func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
 func (c *{{ $client }}) {{ $func }}({{ $arg }} *{{ $n.Name }}) *{{ $builder }} {
 	{{- if $n.HasOneFieldID }}
 		query := &{{ $builder }}{config: c.config}
-		query.path = func(ctx context.Context) (fromV {{ $.Storage.Builder }}, _ error) {
+		query.path = func(context.Context) (fromV {{ $.Storage.Builder }}, _ error) {
 			{{- with extend $n "Receiver" $arg "Edge" $e "Ident" "fromV" }}
 				{{ $tmpl := printf "dialect/%s/query/from" $.Storage }}
 				{{- xtemplate $tmpl . -}}

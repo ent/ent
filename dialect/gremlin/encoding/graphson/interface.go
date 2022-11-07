@@ -55,7 +55,7 @@ func (dec efaceDecoder) decode(ptr unsafe.Pointer, iter *jsoniter.Iterator) {
 	it := config.BorrowIterator(data)
 	defer config.ReturnIterator(it)
 
-	var val interface{}
+	var val any
 	if rtype != nil {
 		val = rtype.New()
 		it.ReadVal(val)
@@ -120,13 +120,13 @@ func (efaceDecoder) reflectType(typ Type) reflect2.Type {
 }
 
 func (efaceDecoder) reflectSlice(data []byte) (reflect2.Type, error) {
-	var elem interface{}
-	if err := Unmarshal(data, &[...]*interface{}{&elem}); err != nil {
+	var elem any
+	if err := Unmarshal(data, &[...]*any{&elem}); err != nil {
 		return nil, fmt.Errorf("cannot read first list element: %w", err)
 	}
 
 	if elem == nil {
-		return reflect2.TypeOf([]interface{}{}), nil
+		return reflect2.TypeOf([]any{}), nil
 	}
 
 	sliceType := reflect.SliceOf(reflect.TypeOf(elem))
@@ -134,16 +134,16 @@ func (efaceDecoder) reflectSlice(data []byte) (reflect2.Type, error) {
 }
 
 func (efaceDecoder) reflectMap(data []byte) (reflect2.Type, error) {
-	var key, elem interface{}
+	var key, elem any
 	if err := Unmarshal(
 		bytes.Replace(data, []byte(mapType), []byte(listType), 1),
-		&[...]*interface{}{&key, &elem},
+		&[...]*any{&key, &elem},
 	); err != nil {
 		return nil, fmt.Errorf("cannot unmarshal first map item: %w", err)
 	}
 
 	if key == nil {
-		return reflect2.TypeOf(map[interface{}]interface{}{}), nil
+		return reflect2.TypeOf(map[any]any{}), nil
 	} else if elem == nil {
 		return nil, errors.New("expect map element, but found only key")
 	}

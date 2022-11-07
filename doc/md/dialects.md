@@ -25,9 +25,9 @@ The integration with CRDB is currently tested on versions `v21.2.11`.
 
 ## SQLite
 
-SQLite supports all _"append-only"_ features mentioned in the [Migration](migrate.md) section. 
-However, dropping or modifying resources, like [drop-index](migrate.md#drop-resources) are not
-supported by default by SQLite, and will be added in the future using a [temporary table](https://www.sqlite.org/lang_altertable.html#otheralter).
+Using [Atlas](https://github.ariga/atlas), the SQLite driver supports all the features that
+are mentioned in the [Migration](migrate.md) section. Note that some changes, like column modification,
+are performed on a temporary table using the sequence of operations described in [SQLite official documentation](https://www.sqlite.org/lang_altertable.html#otheralter).
 
 ## Gremlin
 

@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -31,6 +32,12 @@ func (lu *LicenseUpdate) Where(ps ...predicate.License) *LicenseUpdate {
 	return lu
 }
 
+// SetUpdateTime sets the "update_time" field.
+func (lu *LicenseUpdate) SetUpdateTime(t time.Time) *LicenseUpdate {
+	lu.mutation.SetUpdateTime(t)
+	return lu
+}
+
 // Mutation returns the LicenseMutation object of the builder.
 func (lu *LicenseUpdate) Mutation() *LicenseMutation {
 	return lu.mutation
@@ -42,6 +49,7 @@ func (lu *LicenseUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
+	lu.defaults()
 	if len(lu.hooks) == 0 {
 		affected, err = lu.gremlinSave(ctx)
 	} else {
@@ -90,6 +98,14 @@ func (lu *LicenseUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (lu *LicenseUpdate) defaults() {
+	if _, ok := lu.mutation.UpdateTime(); !ok {
+		v := license.UpdateDefaultUpdateTime()
+		lu.mutation.SetUpdateTime(v)
+	}
+}
+
 func (lu *LicenseUpdate) gremlinSave(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := lu.gremlin().Query()
@@ -110,6 +126,9 @@ func (lu *LicenseUpdate) gremlin() *dsl.Traversal {
 	var (
 		trs []*dsl.Traversal
 	)
+	if value, ok := lu.mutation.UpdateTime(); ok {
+		v.Property(dsl.Single, license.FieldUpdateTime, value)
+	}
 	v.Count()
 	trs = append(trs, v)
 	return dsl.Join(trs...)
@@ -121,6 +140,12 @@ type LicenseUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *LicenseMutation
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (luo *LicenseUpdateOne) SetUpdateTime(t time.Time) *LicenseUpdateOne {
+	luo.mutation.SetUpdateTime(t)
+	return luo
 }
 
 // Mutation returns the LicenseMutation object of the builder.
@@ -141,6 +166,7 @@ func (luo *LicenseUpdateOne) Save(ctx context.Context) (*License, error) {
 		err  error
 		node *License
 	)
+	luo.defaults()
 	if len(luo.hooks) == 0 {
 		node, err = luo.gremlinSave(ctx)
 	} else {
@@ -195,6 +221,14 @@ func (luo *LicenseUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (luo *LicenseUpdateOne) defaults() {
+	if _, ok := luo.mutation.UpdateTime(); !ok {
+		v := license.UpdateDefaultUpdateTime()
+		luo.mutation.SetUpdateTime(v)
+	}
+}
+
 func (luo *LicenseUpdateOne) gremlinSave(ctx context.Context) (*License, error) {
 	res := &gremlin.Response{}
 	id, ok := luo.mutation.ID()
@@ -220,8 +254,11 @@ func (luo *LicenseUpdateOne) gremlin(id int) *dsl.Traversal {
 	var (
 		trs []*dsl.Traversal
 	)
+	if value, ok := luo.mutation.UpdateTime(); ok {
+		v.Property(dsl.Single, license.FieldUpdateTime, value)
+	}
 	if len(luo.fields) > 0 {
-		fields := make([]interface{}, 0, len(luo.fields)+1)
+		fields := make([]any, 0, len(luo.fields)+1)
 		fields = append(fields, true)
 		for _, f := range luo.fields {
 			fields = append(fields, f)

@@ -25,7 +25,8 @@ func (User) Fields() []ent.Field {
 			}).
 			Immutable(),
 		field.Int("parent_id").
-			Optional(),
+			Optional().
+			Immutable(),
 		field.Int("spouse_id").
 			Optional(),
 	}
@@ -38,6 +39,8 @@ func (User) Edges() []ent.Edge {
 		edge.To("children", User.Type).
 			From("parent").
 			Field("parent_id").
+			Immutable().
+			Comment("The parent edge and its field are immutable").
 			Unique(),
 		edge.To("spouse", User.Type).
 			Field("spouse_id").

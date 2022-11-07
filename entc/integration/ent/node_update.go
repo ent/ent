@@ -193,24 +193,13 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := nu.mutation.Value(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: node.FieldValue,
-		})
+		_spec.SetField(node.FieldValue, field.TypeInt, value)
 	}
 	if value, ok := nu.mutation.AddedValue(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: node.FieldValue,
-		})
+		_spec.AddField(node.FieldValue, field.TypeInt, value)
 	}
 	if nu.mutation.ValueCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: node.FieldValue,
-		})
+		_spec.ClearField(node.FieldValue, field.TypeInt)
 	}
 	if nu.mutation.PrevCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -282,7 +271,7 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_spec.Modifiers = nu.modifiers
+	_spec.AddModifiers(nu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, nu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{node.Label}
@@ -494,24 +483,13 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (_node *Node, err error) 
 		}
 	}
 	if value, ok := nuo.mutation.Value(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: node.FieldValue,
-		})
+		_spec.SetField(node.FieldValue, field.TypeInt, value)
 	}
 	if value, ok := nuo.mutation.AddedValue(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: node.FieldValue,
-		})
+		_spec.AddField(node.FieldValue, field.TypeInt, value)
 	}
 	if nuo.mutation.ValueCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: node.FieldValue,
-		})
+		_spec.ClearField(node.FieldValue, field.TypeInt)
 	}
 	if nuo.mutation.PrevCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -583,7 +561,7 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (_node *Node, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_spec.Modifiers = nuo.modifiers
+	_spec.AddModifiers(nuo.modifiers...)
 	_node = &Node{config: nuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

@@ -29,5 +29,7 @@ func (Comment) Fields() []ent.Field {
 			Optional(),
 		field.JSON("dir", schemadir.Dir("")).
 			Optional(),
+		field.String("client").
+			Optional(),
 	}
 }

@@ -36,7 +36,7 @@ var (
 
 {{- range $decision := list "Allow" "Deny" "Skip" }}
 	// {{ $decision }}f returns an formatted wrapped {{ $decision }} decision.
-	func {{ $decision }}f(format string, a ...interface{}) error {
+	func {{ $decision }}f(format string, a ...any) error {
 		return fmt.Errorf(format+": %w", append(a, {{ $decision }})...)
 	}
 {{- end }}

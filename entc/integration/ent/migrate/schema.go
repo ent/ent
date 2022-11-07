@@ -62,6 +62,7 @@ var (
 		{Name: "nillable_int", Type: field.TypeInt, Nullable: true},
 		{Name: "table", Type: field.TypeString, Nullable: true},
 		{Name: "dir", Type: field.TypeJSON, Nullable: true},
+		{Name: "client", Type: field.TypeString, Nullable: true},
 	}
 	// CommentsTable holds the schema information for the "comments" table.
 	CommentsTable = &schema.Table{
@@ -292,6 +293,8 @@ var (
 	// LicensesColumns holds the columns for the "licenses" table.
 	LicensesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "bigserial"}},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 	}
 	// LicensesTable holds the schema information for the "licenses" table.
 	LicensesTable = &schema.Table{
@@ -377,6 +380,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "priority", Type: field.TypeInt, Default: 1},
 		{Name: "priorities", Type: field.TypeJSON, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
 	}
 	// TasksTable holds the schema information for the "tasks" table.
 	TasksTable = &schema.Table{

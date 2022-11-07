@@ -190,7 +190,7 @@ func (c *CityClient) DeleteOne(ci *City) *CityDeleteOne {
 	return c.DeleteOneID(ci.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *CityClient) DeleteOneID(id int) *CityDeleteOne {
 	builder := c.Delete().Where(city.ID(id))
 	builder.mutation.id = &id
@@ -222,7 +222,7 @@ func (c *CityClient) GetX(ctx context.Context, id int) *City {
 // QueryStreets queries the streets edge of a City.
 func (c *CityClient) QueryStreets(ci *City) *StreetQuery {
 	query := &StreetQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ci.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(city.Table, city.FieldID, id),
@@ -296,7 +296,7 @@ func (c *StreetClient) DeleteOne(s *Street) *StreetDeleteOne {
 	return c.DeleteOneID(s.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *StreetClient) DeleteOneID(id int) *StreetDeleteOne {
 	builder := c.Delete().Where(street.ID(id))
 	builder.mutation.id = &id
@@ -328,7 +328,7 @@ func (c *StreetClient) GetX(ctx context.Context, id int) *Street {
 // QueryCity queries the city edge of a Street.
 func (c *StreetClient) QueryCity(s *Street) *CityQuery {
 	query := &CityQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := s.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(street.Table, street.FieldID, id),

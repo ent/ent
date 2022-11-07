@@ -196,15 +196,14 @@ func (f *Files) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	for _, v := range scanf {
-		*f = append(*f, &File{
-			ID:      v.ID,
-			Size:    v.Size,
-			Name:    v.Name,
-			User:    v.User,
-			Group:   v.Group,
-			Op:      v.Op,
-			FieldID: v.FieldID,
-		})
+		node := &File{ID: v.ID}
+		node.Size = v.Size
+		node.Name = v.Name
+		node.User = v.User
+		node.Group = v.Group
+		node.Op = v.Op
+		node.FieldID = v.FieldID
+		*f = append(*f, node)
 	}
 	return nil
 }

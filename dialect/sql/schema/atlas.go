@@ -164,7 +164,7 @@ func (a *Atlas) NamedDiff(ctx context.Context, name string, tables ...*Table) er
 		a.sqlDialect = nil
 		a.atDriver = nil
 	}()
-	if err := a.sqlDialect.init(ctx, a.sqlDialect); err != nil {
+	if err := a.sqlDialect.init(ctx); err != nil {
 		return err
 	}
 	if a.universalID {
@@ -310,7 +310,6 @@ func (f DiffFunc) Diff(current, desired *schema.Schema) ([]schema.Change, error)
 //			return changes, nil
 //		})
 //	})
-//
 func WithDiffHook(hooks ...DiffHook) MigrateOption {
 	return func(a *Atlas) {
 		a.diffHooks = append(a.diffHooks, hooks...)
@@ -321,7 +320,6 @@ func WithDiffHook(hooks ...DiffHook) MigrateOption {
 // returned by the Differ before executing migration planning.
 //
 //	SkipChanges(schema.DropTable|schema.DropColumn)
-//
 func WithSkipChanges(skip ChangeKind) MigrateOption {
 	return func(a *Atlas) {
 		a.skip = skip
@@ -488,7 +486,6 @@ func (f ApplyFunc) Apply(ctx context.Context, conn dialect.ExecQuerier, plan *mi
 //			return next.Apply(ctx, conn, plan)
 //		})
 //	})
-//
 func WithApplyHook(hooks ...ApplyHook) MigrateOption {
 	return func(a *Atlas) {
 		a.applyHook = append(a.applyHook, hooks...)
@@ -608,7 +605,18 @@ func (a *Atlas) init() error {
 		a.diffHooks = append(a.diffHooks, withoutForeignKeys)
 	}
 	if a.dir != nil && a.fmt == nil {
-		a.fmt = sqltool.GolangMigrateFormatter
+		switch a.dir.(type) {
+		case *sqltool.GooseDir:
+			a.fmt = sqltool.GooseFormatter
+		case *sqltool.DBMateDir:
+			a.fmt = sqltool.DBMateFormatter
+		case *sqltool.FlywayDir:
+			a.fmt = sqltool.FlywayFormatter
+		case *sqltool.LiquibaseDir:
+			a.fmt = sqltool.LiquibaseFormatter
+		default: // migrate.LocalDir, sqltool.GolangMigrateDir and custom ones
+			a.fmt = sqltool.GolangMigrateFormatter
+		}
 	}
 	if a.mode == ModeReplay {
 		// ModeReplay requires a migration directory.
@@ -648,13 +656,13 @@ func (a *Atlas) create(ctx context.Context, tables ...*Table) (err error) {
 		}
 	}
 	defer func() { a.sqlDialect = nil }()
+	if err := a.sqlDialect.init(ctx); err != nil {
+		return err
+	}
 	// Open a transaction for backwards compatibility,
 	// even if the migration is not transactional.
 	tx, err := a.sqlDialect.Tx(ctx)
 	if err != nil {
-		return err
-	}
-	if err := a.sqlDialect.init(ctx, tx); err != nil {
 		return err
 	}
 	a.atDriver, err = a.sqlDialect.atOpen(tx)
@@ -773,7 +781,7 @@ func (a *Atlas) loadTypes(ctx context.Context, conn dialect.ExecQuerier) ([]stri
 
 type db struct{ dialect.ExecQuerier }
 
-func (d *db) QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
+func (d *db) QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error) {
 	rows := &entsql.Rows{}
 	if err := d.ExecQuerier.Query(ctx, query, args, rows); err != nil {
 		return nil, err
@@ -781,7 +789,7 @@ func (d *db) QueryContext(ctx context.Context, query string, args ...interface{}
 	return rows.ColumnScanner.(*sql.Rows), nil
 }
 
-func (d *db) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
+func (d *db) ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error) {
 	var r sql.Result
 	if err := d.ExecQuerier.Exec(ctx, query, args, &r); err != nil {
 		return nil, err
@@ -795,7 +803,7 @@ func (a *Atlas) tables(tables []*Table) ([]*schema.Table, error) {
 	for i, et := range tables {
 		at := schema.NewTable(et.Name)
 		a.sqlDialect.atTable(et, at)
-		if a.universalID && et.Name != TypeTable {
+		if a.universalID && et.Name != TypeTable && len(et.PrimaryKey) == 1 {
 			r, err := a.pkRange(et)
 			if err != nil {
 				return nil, err

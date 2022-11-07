@@ -249,6 +249,14 @@ func CustomID(t *testing.T, client *ent.Client) {
 		require.NotNil(t, ta.Edges.Account)
 		require.Equal(t, a.ID, ta.Edges.Account.ID)
 	})
+
+	t.Run("UUID compatible", func(t *testing.T) {
+		l := client.Link.Create().SaveX(ctx)
+		require.NotEmpty(t, l.ID)
+		require.Len(t, l.LinkInformation, 1)
+		require.Equal(t, "ent", l.LinkInformation["ent"].Name)
+		require.Equal(t, "https://entgo.io/", l.LinkInformation["ent"].Link)
+	})
 }
 
 func BytesID(t *testing.T, client *ent.Client) {

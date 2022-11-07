@@ -48,10 +48,10 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 				_spec.Node.Columns = append(_spec.Node.Columns, {{ $.Package }}.ForeignKeys...)
 			}
 	{{- end }}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*{{ $.Name }}).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &{{ $.Name }}{config: {{ $receiver }}.config}
 		nodes = append(nodes, node)
 		{{- with $.Edges }}
@@ -125,18 +125,18 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 				values := spec.ScanValues
 				{{- $out := "sql.NullInt64" }}{{ if $.ID.UserDefined }}{{ $out = $.ID.ScanType }}{{ end }}
 				{{- $in := "sql.NullInt64" }}{{ if $e.Type.ID.UserDefined }}{{ $in = $e.Type.ID.ScanType }}{{ end }}
-				spec.ScanValues = func(columns []string) ([]interface{}, error) {
+				spec.ScanValues = func(columns []string) ([]any, error) {
 					values, err := values(columns[1:])
 					if err != nil {
 						return nil, err
 					}
-					return append([]interface{}{new({{ $out }})}, values...), nil
+					return append([]any{new({{ $out }})}, values...), nil
 				}
-				spec.Assign = func(columns []string, values []interface{}) error {
+				spec.Assign = func(columns []string, values []any) error {
 					outValue := {{ with extend $ "Arg" "values[0]" "Field" $.ID "ScanType" $out }}{{ template "dialect/sql/query/eagerloading/m2massign" . }}{{ end }}
 					inValue := {{ with extend $ "Arg" "values[1]" "Field" $e.Type.ID "ScanType" $in }}{{ template "dialect/sql/query/eagerloading/m2massign" . }}{{ end }}
 					if nids[inValue] == nil {
-						nids[inValue] = map[*{{ $.Name }}]struct{}{byID[outValue]: struct{}{}}
+						nids[inValue] = map[*{{ $.Name }}]struct{}{byID[outValue]: {}}
 						return assign(columns[1:], values[1:])
 					}
 					nids[inValue][byID[outValue]] = struct{}{}
@@ -249,11 +249,14 @@ func ({{ $receiver }} *{{ $builder }}) sqlCount(ctx context.Context) (int, error
 }
 
 func ({{ $receiver }} *{{ $builder }}) sqlExist(ctx context.Context) (bool, error) {
-	n, err := {{ $receiver }}.sqlCount(ctx)
-	if err != nil {
+	switch _, err := {{ $receiver }}.First{{ if $.HasOneFieldID }}ID{{ end }}(ctx);{
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("{{ $pkg }}: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {

@@ -337,6 +337,11 @@ func (aq *AccountQuery) Select(fields ...string) *AccountSelect {
 	return selbuild
 }
 
+// Aggregate returns a AccountSelect configured with the given aggregations.
+func (aq *AccountQuery) Aggregate(fns ...AggregateFunc) *AccountSelect {
+	return aq.Select().Aggregate(fns...)
+}
+
 func (aq *AccountQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range aq.fields {
 		if !account.ValidColumn(f) {
@@ -361,10 +366,10 @@ func (aq *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Acco
 			aq.withToken != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Account).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Account{config: aq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -431,11 +436,14 @@ func (aq *AccountQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (aq *AccountQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := aq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := aq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (aq *AccountQuery) querySpec() *sqlgraph.QuerySpec {
@@ -536,7 +544,7 @@ func (agb *AccountGroupBy) Aggregate(fns ...AggregateFunc) *AccountGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (agb *AccountGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (agb *AccountGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := agb.path(ctx)
 	if err != nil {
 		return err
@@ -545,7 +553,7 @@ func (agb *AccountGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return agb.sqlScan(ctx, v)
 }
 
-func (agb *AccountGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (agb *AccountGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range agb.fields {
 		if !account.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -570,8 +578,6 @@ func (agb *AccountGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range agb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(agb.fields)+len(agb.fns))
 		for _, f := range agb.fields {
@@ -591,8 +597,14 @@ type AccountSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (as *AccountSelect) Aggregate(fns ...AggregateFunc) *AccountSelect {
+	as.fns = append(as.fns, fns...)
+	return as
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (as *AccountSelect) Scan(ctx context.Context, v interface{}) error {
+func (as *AccountSelect) Scan(ctx context.Context, v any) error {
 	if err := as.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -600,7 +612,17 @@ func (as *AccountSelect) Scan(ctx context.Context, v interface{}) error {
 	return as.sqlScan(ctx, v)
 }
 
-func (as *AccountSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (as *AccountSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(as.fns))
+	for _, fn := range as.fns {
+		aggregation = append(aggregation, fn(as.sql))
+	}
+	switch n := len(*as.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		as.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		as.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := as.sql.Query()
 	if err := as.driver.Query(ctx, query, args, rows); err != nil {

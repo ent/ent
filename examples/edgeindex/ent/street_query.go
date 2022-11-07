@@ -336,6 +336,11 @@ func (sq *StreetQuery) Select(fields ...string) *StreetSelect {
 	return selbuild
 }
 
+// Aggregate returns a StreetSelect configured with the given aggregations.
+func (sq *StreetQuery) Aggregate(fns ...AggregateFunc) *StreetSelect {
+	return sq.Select().Aggregate(fns...)
+}
+
 func (sq *StreetQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range sq.fields {
 		if !street.ValidColumn(f) {
@@ -367,10 +372,10 @@ func (sq *StreetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Stree
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, street.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Street).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Street{config: sq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -434,11 +439,14 @@ func (sq *StreetQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (sq *StreetQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := sq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := sq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (sq *StreetQuery) querySpec() *sqlgraph.QuerySpec {
@@ -539,7 +547,7 @@ func (sgb *StreetGroupBy) Aggregate(fns ...AggregateFunc) *StreetGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (sgb *StreetGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (sgb *StreetGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := sgb.path(ctx)
 	if err != nil {
 		return err
@@ -548,7 +556,7 @@ func (sgb *StreetGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return sgb.sqlScan(ctx, v)
 }
 
-func (sgb *StreetGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (sgb *StreetGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range sgb.fields {
 		if !street.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -573,8 +581,6 @@ func (sgb *StreetGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range sgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(sgb.fields)+len(sgb.fns))
 		for _, f := range sgb.fields {
@@ -594,8 +600,14 @@ type StreetSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ss *StreetSelect) Aggregate(fns ...AggregateFunc) *StreetSelect {
+	ss.fns = append(ss.fns, fns...)
+	return ss
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (ss *StreetSelect) Scan(ctx context.Context, v interface{}) error {
+func (ss *StreetSelect) Scan(ctx context.Context, v any) error {
 	if err := ss.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -603,7 +615,17 @@ func (ss *StreetSelect) Scan(ctx context.Context, v interface{}) error {
 	return ss.sqlScan(ctx, v)
 }
 
-func (ss *StreetSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ss *StreetSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ss.fns))
+	for _, fn := range ss.fns {
+		aggregation = append(aggregation, fn(ss.sql))
+	}
+	switch n := len(*ss.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ss.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ss.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ss.sql.Query()
 	if err := ss.driver.Query(ctx, query, args, rows); err != nil {

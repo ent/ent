@@ -368,6 +368,11 @@ func ({{ $receiver }} *{{ $builder }}) Select(fields ...string) *{{ $selectBuild
 	return selbuild
 }
 
+// Aggregate returns a {{ $selectBuilder }} configured with the given aggregations.
+func ({{ $receiver }} *{{ $builder }}) Aggregate(fns ...AggregateFunc) *{{ $selectBuilder }} {
+	return {{ $receiver }}.Select().Aggregate(fns...)
+}
+
 func ({{ $receiver }} *{{ $builder }}) prepareQuery(ctx context.Context) error {
 	{{- /* Optional prepare checks per dialect. */}}
 	{{- $tmpl = printf "dialect/%s/query/preparecheck" $.Storage }}
@@ -430,7 +435,7 @@ func ({{ $groupReceiver }} *{{ $groupBuilder }}) Aggregate(fns ...AggregateFunc)
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func ({{ $groupReceiver }} *{{ $groupBuilder }}) Scan(ctx context.Context, v interface{}) error {
+func ({{ $groupReceiver }} *{{ $groupBuilder }}) Scan(ctx context.Context, v any) error {
 	query, err := {{ $groupReceiver }}.path(ctx)
 	if err != nil {
 		return err
@@ -456,8 +461,15 @@ type {{ $selectBuilder }} struct {
 	{{ $.Storage }} {{ $.Storage.Builder }}
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func ({{ $selectReceiver }} *{{ $selectBuilder }}) Aggregate(fns ...AggregateFunc) *{{ $selectBuilder }} {
+	{{ $selectReceiver }}.fns = append({{ $selectReceiver }}.fns, fns...)
+	return {{ $selectReceiver }}
+}
+
+
 // Scan applies the selector query and scans the result into the given value.
-func ({{ $selectReceiver }} *{{ $selectBuilder }}) Scan(ctx context.Context, v interface{}) error {
+func ({{ $selectReceiver }} *{{ $selectBuilder }}) Scan(ctx context.Context, v any) error {
 	if err := {{ $selectReceiver }}.prepareQuery(ctx); err != nil {
 		return err
 	}

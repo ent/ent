@@ -919,9 +919,7 @@ The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examp
 ## Edge Field
 
 The `Field` option for edges allows users to expose foreign-keys as regular fields on the schema.
-Note that only relations that hold foreign-keys (edge-ids) are allowed to use this option. Support
-for non-foreign-key fields in join tables is in progress (as of September 2021) and can be tracked with
-this [GitHub Issue](https://github.com/ent/ent/issues/1061).
+Note that only relations that hold foreign-keys (edge-ids) are allowed to use this option.
 
 ```go title="ent/schema/post.go"
 // Fields of the Post.
@@ -1342,6 +1340,24 @@ as `NOT NULL` in the database for required edges that are not [self-reference](#
 existing foreign key columns, use the [Atlas Migration](migrate.md#atlas-integration) option.
 :::
 
+## Immutable
+
+Immutable edges are edges that can be set or added only in the creation of the entity.
+i.e., no setters will be generated for the update builders of the entity.
+
+```go {8}
+// Edges of the User.
+func (User) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("tenant", Tenant.Type).
+			Field("tenant_id").
+			Unique().
+			Required().
+			Immutable(),
+	}
+}
+```
+
 ## StorageKey
 
 By default, Ent configures edge storage-keys by the edge-owner (the schema that holds the `edge.To`), and not the by
@@ -1430,7 +1446,7 @@ type Pet struct {
 
 // Edges of the Pet.
 func (Pet) Edges() []ent.Edge {
-	return []ent.Field{
+	return []ent.Edge{
 		edge.To("owner", User.Type).
 			Ref("pets").
 			Unique().

@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -23,6 +24,34 @@ type LicenseCreate struct {
 	mutation *LicenseMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
+}
+
+// SetCreateTime sets the "create_time" field.
+func (lc *LicenseCreate) SetCreateTime(t time.Time) *LicenseCreate {
+	lc.mutation.SetCreateTime(t)
+	return lc
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (lc *LicenseCreate) SetNillableCreateTime(t *time.Time) *LicenseCreate {
+	if t != nil {
+		lc.SetCreateTime(*t)
+	}
+	return lc
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (lc *LicenseCreate) SetUpdateTime(t time.Time) *LicenseCreate {
+	lc.mutation.SetUpdateTime(t)
+	return lc
+}
+
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (lc *LicenseCreate) SetNillableUpdateTime(t *time.Time) *LicenseCreate {
+	if t != nil {
+		lc.SetUpdateTime(*t)
+	}
+	return lc
 }
 
 // SetID sets the "id" field.
@@ -42,6 +71,7 @@ func (lc *LicenseCreate) Save(ctx context.Context) (*License, error) {
 		err  error
 		node *License
 	)
+	lc.defaults()
 	if len(lc.hooks) == 0 {
 		if err = lc.check(); err != nil {
 			return nil, err
@@ -105,8 +135,26 @@ func (lc *LicenseCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (lc *LicenseCreate) defaults() {
+	if _, ok := lc.mutation.CreateTime(); !ok {
+		v := license.DefaultCreateTime()
+		lc.mutation.SetCreateTime(v)
+	}
+	if _, ok := lc.mutation.UpdateTime(); !ok {
+		v := license.DefaultUpdateTime()
+		lc.mutation.SetUpdateTime(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (lc *LicenseCreate) check() error {
+	if _, ok := lc.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "License.create_time"`)}
+	}
+	if _, ok := lc.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "License.update_time"`)}
+	}
 	return nil
 }
 
@@ -141,6 +189,14 @@ func (lc *LicenseCreate) createSpec() (*License, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
+	if value, ok := lc.mutation.CreateTime(); ok {
+		_spec.SetField(license.FieldCreateTime, field.TypeTime, value)
+		_node.CreateTime = value
+	}
+	if value, ok := lc.mutation.UpdateTime(); ok {
+		_spec.SetField(license.FieldUpdateTime, field.TypeTime, value)
+		_node.UpdateTime = value
+	}
 	return _node, _spec
 }
 
@@ -148,11 +204,17 @@ func (lc *LicenseCreate) createSpec() (*License, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.License.Create().
+//		SetCreateTime(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
 //			sql.ResolveWithNewValues(),
 //		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.LicenseUpsert) {
+//			SetCreateTime(v+v).
+//		}).
 //		Exec(ctx)
 func (lc *LicenseCreate) OnConflict(opts ...sql.ConflictOption) *LicenseUpsertOne {
 	lc.conflict = opts
@@ -187,6 +249,18 @@ type (
 	}
 )
 
+// SetUpdateTime sets the "update_time" field.
+func (u *LicenseUpsert) SetUpdateTime(v time.Time) *LicenseUpsert {
+	u.Set(license.FieldUpdateTime, v)
+	return u
+}
+
+// UpdateUpdateTime sets the "update_time" field to the value that was provided on create.
+func (u *LicenseUpsert) UpdateUpdateTime() *LicenseUpsert {
+	u.SetExcluded(license.FieldUpdateTime)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -203,6 +277,9 @@ func (u *LicenseUpsertOne) UpdateNewValues() *LicenseUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		if _, exists := u.create.mutation.ID(); exists {
 			s.SetIgnore(license.FieldID)
+		}
+		if _, exists := u.create.mutation.CreateTime(); exists {
+			s.SetIgnore(license.FieldCreateTime)
 		}
 	}))
 	return u
@@ -233,6 +310,20 @@ func (u *LicenseUpsertOne) Update(set func(*LicenseUpsert)) *LicenseUpsertOne {
 		set(&LicenseUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (u *LicenseUpsertOne) SetUpdateTime(v time.Time) *LicenseUpsertOne {
+	return u.Update(func(s *LicenseUpsert) {
+		s.SetUpdateTime(v)
+	})
+}
+
+// UpdateUpdateTime sets the "update_time" field to the value that was provided on create.
+func (u *LicenseUpsertOne) UpdateUpdateTime() *LicenseUpsertOne {
+	return u.Update(func(s *LicenseUpsert) {
+		s.UpdateUpdateTime()
+	})
 }
 
 // Exec executes the query.
@@ -283,6 +374,7 @@ func (lcb *LicenseCreateBulk) Save(ctx context.Context) ([]*License, error) {
 	for i := range lcb.builders {
 		func(i int, root context.Context) {
 			builder := lcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*LicenseMutation)
 				if !ok {
@@ -362,6 +454,11 @@ func (lcb *LicenseCreateBulk) ExecX(ctx context.Context) {
 //			// the was proposed for insertion.
 //			sql.ResolveWithNewValues(),
 //		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.LicenseUpsert) {
+//			SetCreateTime(v+v).
+//		}).
 //		Exec(ctx)
 func (lcb *LicenseCreateBulk) OnConflict(opts ...sql.ConflictOption) *LicenseUpsertBulk {
 	lcb.conflict = opts
@@ -406,7 +503,9 @@ func (u *LicenseUpsertBulk) UpdateNewValues() *LicenseUpsertBulk {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(license.FieldID)
-				return
+			}
+			if _, exists := b.mutation.CreateTime(); exists {
+				s.SetIgnore(license.FieldCreateTime)
 			}
 		}
 	}))
@@ -438,6 +537,20 @@ func (u *LicenseUpsertBulk) Update(set func(*LicenseUpsert)) *LicenseUpsertBulk 
 		set(&LicenseUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (u *LicenseUpsertBulk) SetUpdateTime(v time.Time) *LicenseUpsertBulk {
+	return u.Update(func(s *LicenseUpsert) {
+		s.SetUpdateTime(v)
+	})
+}
+
+// UpdateUpdateTime sets the "update_time" field to the value that was provided on create.
+func (u *LicenseUpsertBulk) UpdateUpdateTime() *LicenseUpsertBulk {
+	return u.Update(func(s *LicenseUpsert) {
+		s.UpdateUpdateTime()
+	})
 }
 
 // Exec executes the query.

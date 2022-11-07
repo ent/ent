@@ -90,6 +90,10 @@ type (
 		//
 		// Note that the mapping is from the annotation-name (e.g. "GQL") to a JSON decoded object.
 		Annotations Annotations
+
+		// BuildFlags holds a list of custom build flags to use
+		// when loading the schema packages.
+		BuildFlags []string
 	}
 
 	// Graph holds the nodes/entities of the loaded graph schema. Note that, it doesn't
@@ -131,7 +135,7 @@ type (
 	// on the Config object.
 	// The mapping is from the annotation name (e.g. "EntGQL") to the annotation itself.
 	// Note that, annotations that are defined in the schema must be JSON encoded/decoded.
-	Annotations map[string]interface{}
+	Annotations map[string]any
 )
 
 // Generate calls f(g).
@@ -291,6 +295,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Owner:       t,
 				Unique:      e.Unique,
 				Optional:    !e.Required,
+				Immutable:   e.Immutable,
 				StructTag:   structTag(e.Name, e.Tag),
 				Annotations: e.Annotations,
 			})
@@ -305,6 +310,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Inverse:     e.RefName,
 				Unique:      e.Unique,
 				Optional:    !e.Required,
+				Immutable:   e.Immutable,
 				StructTag:   structTag(e.Name, e.Tag),
 				Annotations: e.Annotations,
 			})
@@ -321,6 +327,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Inverse:     ref.Name,
 				Unique:      e.Unique,
 				Optional:    !e.Required,
+				Immutable:   e.Immutable,
 				StructTag:   structTag(e.Name, e.Tag),
 				Annotations: e.Annotations,
 			}
@@ -332,6 +339,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Name:        ref.Name,
 				Unique:      ref.Unique,
 				Optional:    !ref.Required,
+				Immutable:   ref.Immutable,
 				StructTag:   structTag(ref.Name, ref.Tag),
 				Annotations: ref.Annotations,
 			}
@@ -343,28 +351,27 @@ func (g *Graph) addEdges(schema *load.Schema) {
 	}
 }
 
-// resolve resolves the type reference and relation of edges.
+// resolve the type references and relations of its edges.
 // It fails if one of the references is missing or invalid.
 //
-// relation definitions between A and B, where A is the owner of
+// Relation definitions between A and B, where A is the owner of
 // the edge and B uses this edge as a back-reference:
 //
-// 	O2O
-// 	 - A have a unique edge (E) to B, and B have a back-reference unique edge (E') for E.
-// 	 - A have a unique edge (E) to A.
+//	O2O
+//	 - A have a unique edge (E) to B, and B have a back-reference unique edge (E') for E.
+//	 - A have a unique edge (E) to A.
 //
-// 	O2M (The "Many" side, keeps a reference to the "One" side).
-// 	 - A have an edge (E) to B (not unique), and B doesn't have a back-reference edge for E.
-// 	 - A have an edge (E) to B (not unique), and B have a back-reference unique edge (E') for E.
+//	O2M (The "Many" side, keeps a reference to the "One" side).
+//	 - A have an edge (E) to B (not unique), and B doesn't have a back-reference edge for E.
+//	 - A have an edge (E) to B (not unique), and B have a back-reference unique edge (E') for E.
 //
-// 	M2O (The "Many" side, holds the reference to the "One" side).
-// 	 - A have a unique edge (E) to B, and B doesn't have a back-reference edge for E.
-// 	 - A have a unique edge (E) to B, and B have a back-reference non-unique edge (E') for E.
+//	M2O (The "Many" side, holds the reference to the "One" side).
+//	 - A have a unique edge (E) to B, and B doesn't have a back-reference edge for E.
+//	 - A have a unique edge (E) to B, and B have a back-reference non-unique edge (E') for E.
 //
-// 	M2M
-// 	 - A have an edge (E) to B (not unique), and B have a back-reference non-unique edge (E') for E.
-// 	 - A have an edge (E) to A (not unique).
-//
+//	M2M
+//	 - A have an edge (E) to B (not unique), and B have a back-reference non-unique edge (E') for E.
+//	 - A have an edge (E) to A (not unique).
 func (g *Graph) resolve(t *Type) error {
 	for _, e := range t.Edges {
 		switch {
@@ -505,14 +512,15 @@ func (g *Graph) edgeSchemas() error {
 			// Edges from src/dest table are always O2M. One row to many
 			// rows in the join table. Hence, a many-to-many relationship.
 			n.Edges = append(n.Edges, &Edge{
-				def:       &load.Edge{},
-				Name:      e.def.Through.N,
-				Type:      typ,
-				Inverse:   ref.Name,
-				Ref:       ref,
-				Owner:     n,
-				Optional:  true,
-				StructTag: structTag(e.def.Through.N, ""),
+				def:         &load.Edge{},
+				Name:        e.def.Through.N,
+				Type:        typ,
+				Inverse:     ref.Name,
+				Ref:         ref,
+				Owner:       n,
+				Optional:    true,
+				StructTag:   structTag(e.def.Through.N, ""),
+				Annotations: e.Annotations,
 				Rel: Relation{
 					Type:    O2M,
 					fk:      ref.Rel.fk,
@@ -673,6 +681,9 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 			index.Annotation = entsqlIndexAnnotate(idx.Annotations)
 		}
 	}
+	if err := ensureUniqueFKs(tables); err != nil {
+		return nil, err
+	}
 	return
 }
 
@@ -723,6 +734,29 @@ func fkSymbols(e *Edge, c1, c2 *schema.Column) (string, string) {
 		}
 	}
 	return s1, s2
+}
+
+// ensureUniqueNames ensures constraint names are unique.
+func ensureUniqueFKs(tables map[string]*schema.Table) error {
+	fks := make(map[string]*schema.Table)
+	for _, t := range tables {
+		for _, fk := range t.ForeignKeys {
+			switch other, ok := fks[fk.Symbol]; {
+			case !ok:
+				fks[fk.Symbol] = t
+			case ok && other.Name != t.Name:
+				a, b := t.Name, other.Name
+				// Keep reporting order consistent.
+				if a > b {
+					a, b = b, a
+				}
+				return fmt.Errorf("duplicate foreign-key symbol %q found in tables %q and %q", fk.Symbol, a, b)
+			case ok:
+				return fmt.Errorf("duplicate foreign-key symbol %q found in table %q", fk.Symbol, t.Name)
+			}
+		}
+	}
+	return nil
 }
 
 // deleteAction returns the referential action for DELETE operations of the given edge.
@@ -861,7 +895,6 @@ func (Config) ModuleInfo() (m debug.Module) {
 //	{{ with $.FeatureEnabled "privacy" }}
 //		...
 //	{{ end }}
-//
 func (c Config) FeatureEnabled(name string) (bool, error) {
 	for _, f := range AllFeatures {
 		if name == f.Name {
@@ -998,14 +1031,14 @@ func (a assets) format() error {
 }
 
 // expect panics if the condition is false.
-func expect(cond bool, msg string, args ...interface{}) {
+func expect(cond bool, msg string, args ...any) {
 	if !cond {
 		panic(graphError{fmt.Sprintf(msg, args...)})
 	}
 }
 
 // check panics if the error is not nil.
-func check(err error, msg string, args ...interface{}) {
+func check(err error, msg string, args ...any) {
 	if err != nil {
 		args = append(args, err)
 		panic(graphError{fmt.Sprintf(msg+": %s", args...)})

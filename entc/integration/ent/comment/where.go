@@ -35,7 +35,7 @@ func IDNEQ(id int) predicate.Comment {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -46,7 +46,7 @@ func IDIn(ids ...int) predicate.Comment {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -103,6 +103,13 @@ func NillableInt(v int) predicate.Comment {
 	})
 }
 
+// Client applies equality check predicate on the "client" field. It's identical to ClientEQ.
+func Client(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldClient), v))
+	})
+}
+
 // UniqueIntEQ applies the EQ predicate on the "unique_int" field.
 func UniqueIntEQ(v int) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
@@ -119,7 +126,7 @@ func UniqueIntNEQ(v int) predicate.Comment {
 
 // UniqueIntIn applies the In predicate on the "unique_int" field.
 func UniqueIntIn(vs ...int) predicate.Comment {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -130,7 +137,7 @@ func UniqueIntIn(vs ...int) predicate.Comment {
 
 // UniqueIntNotIn applies the NotIn predicate on the "unique_int" field.
 func UniqueIntNotIn(vs ...int) predicate.Comment {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -183,7 +190,7 @@ func UniqueFloatNEQ(v float64) predicate.Comment {
 
 // UniqueFloatIn applies the In predicate on the "unique_float" field.
 func UniqueFloatIn(vs ...float64) predicate.Comment {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -194,7 +201,7 @@ func UniqueFloatIn(vs ...float64) predicate.Comment {
 
 // UniqueFloatNotIn applies the NotIn predicate on the "unique_float" field.
 func UniqueFloatNotIn(vs ...float64) predicate.Comment {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -247,7 +254,7 @@ func NillableIntNEQ(v int) predicate.Comment {
 
 // NillableIntIn applies the In predicate on the "nillable_int" field.
 func NillableIntIn(vs ...int) predicate.Comment {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -258,7 +265,7 @@ func NillableIntIn(vs ...int) predicate.Comment {
 
 // NillableIntNotIn applies the NotIn predicate on the "nillable_int" field.
 func NillableIntNotIn(vs ...int) predicate.Comment {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -325,7 +332,7 @@ func TableNEQ(v string) predicate.Comment {
 
 // TableIn applies the In predicate on the "table" field.
 func TableIn(vs ...string) predicate.Comment {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -336,7 +343,7 @@ func TableIn(vs ...string) predicate.Comment {
 
 // TableNotIn applies the NotIn predicate on the "table" field.
 func TableNotIn(vs ...string) predicate.Comment {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -433,6 +440,119 @@ func DirIsNil() predicate.Comment {
 func DirNotNil() predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldDir)))
+	})
+}
+
+// ClientEQ applies the EQ predicate on the "client" field.
+func ClientEQ(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldClient), v))
+	})
+}
+
+// ClientNEQ applies the NEQ predicate on the "client" field.
+func ClientNEQ(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldClient), v))
+	})
+}
+
+// ClientIn applies the In predicate on the "client" field.
+func ClientIn(vs ...string) predicate.Comment {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldClient), v...))
+	})
+}
+
+// ClientNotIn applies the NotIn predicate on the "client" field.
+func ClientNotIn(vs ...string) predicate.Comment {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldClient), v...))
+	})
+}
+
+// ClientGT applies the GT predicate on the "client" field.
+func ClientGT(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldClient), v))
+	})
+}
+
+// ClientGTE applies the GTE predicate on the "client" field.
+func ClientGTE(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldClient), v))
+	})
+}
+
+// ClientLT applies the LT predicate on the "client" field.
+func ClientLT(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldClient), v))
+	})
+}
+
+// ClientLTE applies the LTE predicate on the "client" field.
+func ClientLTE(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldClient), v))
+	})
+}
+
+// ClientContains applies the Contains predicate on the "client" field.
+func ClientContains(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldClient), v))
+	})
+}
+
+// ClientHasPrefix applies the HasPrefix predicate on the "client" field.
+func ClientHasPrefix(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldClient), v))
+	})
+}
+
+// ClientHasSuffix applies the HasSuffix predicate on the "client" field.
+func ClientHasSuffix(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldClient), v))
+	})
+}
+
+// ClientIsNil applies the IsNil predicate on the "client" field.
+func ClientIsNil() predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldClient)))
+	})
+}
+
+// ClientNotNil applies the NotNil predicate on the "client" field.
+func ClientNotNil() predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldClient)))
+	})
+}
+
+// ClientEqualFold applies the EqualFold predicate on the "client" field.
+func ClientEqualFold(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldClient), v))
+	})
+}
+
+// ClientContainsFold applies the ContainsFold predicate on the "client" field.
+func ClientContainsFold(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldClient), v))
 	})
 }
 

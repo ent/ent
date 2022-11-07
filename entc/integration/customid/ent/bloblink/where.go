@@ -52,7 +52,7 @@ func CreatedAtNEQ(v time.Time) predicate.BlobLink {
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
 func CreatedAtIn(vs ...time.Time) predicate.BlobLink {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -63,7 +63,7 @@ func CreatedAtIn(vs ...time.Time) predicate.BlobLink {
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
 func CreatedAtNotIn(vs ...time.Time) predicate.BlobLink {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -116,7 +116,7 @@ func BlobIDNEQ(v uuid.UUID) predicate.BlobLink {
 
 // BlobIDIn applies the In predicate on the "blob_id" field.
 func BlobIDIn(vs ...uuid.UUID) predicate.BlobLink {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -127,7 +127,7 @@ func BlobIDIn(vs ...uuid.UUID) predicate.BlobLink {
 
 // BlobIDNotIn applies the NotIn predicate on the "blob_id" field.
 func BlobIDNotIn(vs ...uuid.UUID) predicate.BlobLink {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -152,7 +152,7 @@ func LinkIDNEQ(v uuid.UUID) predicate.BlobLink {
 
 // LinkIDIn applies the In predicate on the "link_id" field.
 func LinkIDIn(vs ...uuid.UUID) predicate.BlobLink {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -163,7 +163,7 @@ func LinkIDIn(vs ...uuid.UUID) predicate.BlobLink {
 
 // LinkIDNotIn applies the NotIn predicate on the "link_id" field.
 func LinkIDNotIn(vs ...uuid.UUID) predicate.BlobLink {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

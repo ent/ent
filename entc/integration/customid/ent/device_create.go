@@ -509,7 +509,6 @@ func (u *DeviceUpsertBulk) UpdateNewValues() *DeviceUpsertBulk {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(device.FieldID)
-				return
 			}
 		}
 	}))

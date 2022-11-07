@@ -19,9 +19,6 @@ import (
 	"testing"
 	"text/template"
 
-	"ariga.io/atlas/sql/migrate"
-	atlas "ariga.io/atlas/sql/schema"
-	"ariga.io/atlas/sql/sqltool"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/schema"
@@ -29,6 +26,7 @@ import (
 	migratev1 "entgo.io/ent/entc/integration/migrate/entv1/migrate"
 	userv1 "entgo.io/ent/entc/integration/migrate/entv1/user"
 	"entgo.io/ent/entc/integration/migrate/entv2"
+	"entgo.io/ent/entc/integration/migrate/entv2/blog"
 	"entgo.io/ent/entc/integration/migrate/entv2/conversion"
 	"entgo.io/ent/entc/integration/migrate/entv2/customtype"
 	migratev2 "entgo.io/ent/entc/integration/migrate/entv2/migrate"
@@ -36,6 +34,12 @@ import (
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
 	"entgo.io/ent/entc/integration/migrate/versioned"
 	vmigrate "entgo.io/ent/entc/integration/migrate/versioned/migrate"
+
+	"ariga.io/atlas/sql/migrate"
+	"ariga.io/atlas/sql/postgres"
+	atlas "ariga.io/atlas/sql/schema"
+	"ariga.io/atlas/sql/sqltool"
+	"entgo.io/ent/schema/field"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
@@ -49,9 +53,9 @@ func TestMySQL(t *testing.T) {
 			require.NoError(t, err)
 			defer root.Close()
 			ctx := context.Background()
-			err = root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS migrate", []interface{}{}, new(sql.Result))
+			err = root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS migrate", []any{}, new(sql.Result))
 			require.NoError(t, err, "creating database")
-			defer root.Exec(ctx, "DROP DATABASE IF EXISTS migrate", []interface{}{}, new(sql.Result))
+			defer root.Exec(ctx, "DROP DATABASE IF EXISTS migrate", []any{}, new(sql.Result))
 
 			drv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/migrate?parseTime=True", port))
 			require.NoError(t, err, "connecting to migrate database")
@@ -66,12 +70,12 @@ func TestMySQL(t *testing.T) {
 			NicknameSearch(t, clientv2)
 			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_name = ? AND column_name = ?")
 
-			require.NoError(t, err, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []interface{}{}, new(sql.Result)))
-			require.NoError(t, root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS versioned_migrate", []interface{}{}, new(sql.Result)))
-			defer root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []interface{}{}, new(sql.Result))
-			require.NoError(t, err, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate_dev", []interface{}{}, new(sql.Result)))
-			require.NoError(t, root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS versioned_migrate_dev", []interface{}{}, new(sql.Result)))
-			defer root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate_dev", []interface{}{}, new(sql.Result))
+			require.NoError(t, err, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []any{}, new(sql.Result)))
+			require.NoError(t, root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS versioned_migrate", []any{}, new(sql.Result)))
+			defer root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []any{}, new(sql.Result))
+			require.NoError(t, err, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate_dev", []any{}, new(sql.Result)))
+			require.NoError(t, root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS versioned_migrate_dev", []any{}, new(sql.Result)))
+			defer root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate_dev", []any{}, new(sql.Result))
 			vdrv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/versioned_migrate?parseTime=True", port))
 			require.NoError(t, err, "connecting to versioned migrate database")
 			defer vdrv.Close()
@@ -91,34 +95,57 @@ func TestPostgres(t *testing.T) {
 			require.NoError(t, err)
 			defer root.Close()
 			ctx := context.Background()
-			err = root.Exec(ctx, "DROP DATABASE IF EXISTS migrate", []interface{}{}, new(sql.Result))
+			err = root.Exec(ctx, "DROP DATABASE IF EXISTS migrate", []any{}, new(sql.Result))
 			require.NoError(t, err)
-			err = root.Exec(ctx, "CREATE DATABASE migrate", []interface{}{}, new(sql.Result))
+			err = root.Exec(ctx, "CREATE DATABASE migrate", []any{}, new(sql.Result))
 			require.NoError(t, err, "creating database")
-			defer root.Exec(ctx, "DROP DATABASE migrate", []interface{}{}, new(sql.Result))
+			defer root.Exec(ctx, "DROP DATABASE migrate", []any{}, new(sql.Result))
 
 			drv, err := sql.Open(dialect.Postgres, dsn+" dbname=migrate")
 			require.NoError(t, err, "connecting to migrate database")
 			defer drv.Close()
 
-			err = drv.Exec(ctx, "CREATE TYPE customtype as range (subtype = time)", []interface{}{}, new(sql.Result))
+			err = drv.Exec(ctx, "CREATE TYPE customtype as range (subtype = time)", []any{}, new(sql.Result))
 			require.NoError(t, err, "creating custom type")
 
 			clientv1 := entv1.NewClient(entv1.Driver(drv))
 			clientv2 := entv2.NewClient(entv2.Driver(drv))
-			V1ToV2(t, drv.Dialect(), clientv1, clientv2)
+			V1ToV2(
+				t, drv.Dialect(), clientv1, clientv2,
+				// A diff hook to ensure foreign-keys that point to
+				// serial columns are configured to integer types.
+				func(next schema.Differ) schema.Differ {
+					return schema.DiffFunc(func(current, desired *atlas.Schema) ([]atlas.Change, error) {
+						blogs, ok := desired.Table(blog.Table)
+						require.True(t, ok)
+						id, ok := blogs.Column(blog.FieldID)
+						require.True(t, ok)
+						require.IsType(t, &postgres.SerialType{}, id.Type.Type)
+						users, ok := desired.Table(user.Table)
+						require.True(t, ok)
+						fk, ok := users.Column(blog.AdminsColumn)
+						require.True(t, ok)
+						require.IsType(t, &atlas.IntegerType{}, fk.Type.Type)
+						return next.Diff(current, desired)
+					})
+				},
+			)
 			CheckConstraint(t, clientv2)
 			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_name = $1 AND column_name = $2")
+			PartialIndexes(t, drv, "select indexdef from pg_indexes where indexname=$1", "CREATE INDEX user_phone ON public.users USING btree (phone) WHERE active")
+			if version != "10" {
+				IncludeColumns(t, drv)
+			}
 
 			vdrv, err := sql.Open(dialect.Postgres, dsn+" dbname=versioned_migrate")
 			require.NoError(t, err, "connecting to versioned migrate database")
 			defer vdrv.Close()
-			require.NoError(t, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []interface{}{}, new(sql.Result)))
-			require.NoError(t, root.Exec(ctx, "CREATE DATABASE versioned_migrate", []interface{}{}, new(sql.Result)))
-			defer root.Exec(ctx, "DROP DATABASE versioned_migrate", []interface{}{}, new(sql.Result))
-			require.NoError(t, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate_dev", []interface{}{}, new(sql.Result)))
-			require.NoError(t, root.Exec(ctx, "CREATE DATABASE versioned_migrate_dev", []interface{}{}, new(sql.Result)))
-			defer root.Exec(ctx, "DROP DATABASE versioned_migrate_dev", []interface{}{}, new(sql.Result))
+			require.NoError(t, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []any{}, new(sql.Result)))
+			require.NoError(t, root.Exec(ctx, "CREATE DATABASE versioned_migrate", []any{}, new(sql.Result)))
+			defer root.Exec(ctx, "DROP DATABASE versioned_migrate", []any{}, new(sql.Result))
+			require.NoError(t, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate_dev", []any{}, new(sql.Result)))
+			require.NoError(t, root.Exec(ctx, "CREATE DATABASE versioned_migrate_dev", []any{}, new(sql.Result)))
+			defer root.Exec(ctx, "DROP DATABASE versioned_migrate_dev", []any{}, new(sql.Result))
 			Versioned(t, vdrv,
 				fmt.Sprintf("postgres://postgres:pass@localhost:%d/versioned_migrate_dev?sslmode=disable&search_path=public", port),
 				versioned.NewClient(versioned.Driver(vdrv)),
@@ -174,13 +201,15 @@ func TestSQLite(t *testing.T) {
 
 	SanityV2(t, drv.Dialect(), client)
 	u := client.User.Create().SetAge(1).SetName("x").SetNickname("x'").SetPhone("y").SaveX(ctx)
-	idRange(t, client.Car.Create().SetOwner(u).SaveX(ctx).ID, 0, 1<<32)
-	idRange(t, client.Conversion.Create().SaveX(ctx).ID, 1<<32-1, 2<<32)
-	idRange(t, client.CustomType.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
-	idRange(t, client.Group.Create().SaveX(ctx).ID, 3<<32-1, 4<<32)
-	idRange(t, client.Media.Create().SaveX(ctx).ID, 4<<32-1, 5<<32)
-	idRange(t, client.Pet.Create().SaveX(ctx).ID, 5<<32-1, 6<<32)
-	idRange(t, u.ID, 6<<32-1, 7<<32)
+	idRange(t, client.Blog.Create().SaveX(ctx).ID, 0, 1<<32)
+	idRange(t, client.Car.Create().SetOwner(u).SaveX(ctx).ID, 1<<32-1, 2<<32)
+	idRange(t, client.Conversion.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
+	idRange(t, client.CustomType.Create().SaveX(ctx).ID, 3<<32-1, 4<<32)
+	idRange(t, client.Group.Create().SaveX(ctx).ID, 4<<32-1, 5<<32)
+	idRange(t, client.Media.Create().SaveX(ctx).ID, 5<<32-1, 6<<32)
+	idRange(t, client.Pet.Create().SaveX(ctx).ID, 6<<32-1, 7<<32)
+	idRange(t, u.ID, 7<<32-1, 8<<32)
+	PartialIndexes(t, drv, "select sql from sqlite_master where name=?", "CREATE INDEX `user_phone` ON `users` (`phone`) WHERE active")
 
 	// Override the default behavior of LIKE in SQLite.
 	// https://www.sqlite.org/pragma.html#pragma_case_sensitive_like
@@ -194,6 +223,75 @@ func TestSQLite(t *testing.T) {
 	require.NoError(t, err)
 	defer vdrv.Close()
 	Versioned(t, vdrv, "sqlite3://file?mode=memory&cache=shared&_fk=1", versioned.NewClient(versioned.Driver(vdrv)))
+}
+
+// https://github.com/ent/ent/issues/2954
+func TestSQLite_ForeignKeyTx(t *testing.T) {
+	var (
+		usersColumns = []*schema.Column{
+			{Name: "id", Type: field.TypeInt, Increment: true},
+			{Name: "name", Type: field.TypeString},
+		}
+		usersTable = &schema.Table{
+			Name:       "users",
+			Columns:    usersColumns,
+			PrimaryKey: []*schema.Column{usersColumns[0]},
+		}
+		userFollowingColumns = []*schema.Column{
+			{Name: "user_id", Type: field.TypeInt},
+			{Name: "follower_id", Type: field.TypeInt},
+		}
+		userFollowingTable = &schema.Table{
+			Name:       "user_following",
+			Columns:    userFollowingColumns,
+			PrimaryKey: []*schema.Column{userFollowingColumns[0], userFollowingColumns[1]},
+			ForeignKeys: []*schema.ForeignKey{
+				{
+					Symbol:     "user_following_user_id",
+					Columns:    []*schema.Column{userFollowingColumns[0]},
+					RefColumns: []*schema.Column{usersColumns[0]},
+					OnDelete:   schema.Cascade,
+				},
+				{
+					Symbol:     "user_following_follower_id",
+					Columns:    []*schema.Column{userFollowingColumns[1]},
+					RefColumns: []*schema.Column{usersColumns[0]},
+					OnDelete:   schema.Cascade,
+				},
+			},
+		}
+	)
+	userFollowingTable.ForeignKeys[0].RefTable = usersTable
+	userFollowingTable.ForeignKeys[1].RefTable = usersTable
+
+	drv, err := sql.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	require.NoError(t, err)
+	defer drv.Close()
+	ctx := context.Background()
+	m, err := schema.NewMigrate(drv)
+	require.NoError(t, err)
+
+	// Migrate once.
+	require.NoError(t, m.Create(ctx, usersTable, userFollowingTable))
+
+	// Add data.
+	var exec = func(stmt string) {
+		_, err := drv.DB().ExecContext(ctx, stmt)
+		require.NoError(t, err)
+	}
+	exec("INSERT INTO `users` (`id`, `name`) VALUES (1, 'Ariel'), (2, 'Jannik');")
+	exec("INSERT INTO `user_following` (`user_id`, `follower_id`) VALUES (1,2), (2,1);")
+	var n int
+	require.NoError(t, drv.DB().QueryRow("SELECT COUNT(*) FROM `user_following`").Scan(&n))
+	require.Equal(t, 2, n)
+
+	// Modify a column in the users table.
+	usersTable.Columns[1].Nullable = true
+	require.NoError(t, m.Create(ctx, usersTable, userFollowingTable))
+
+	// Ensure the data in the join table does still exist.
+	require.NoError(t, drv.DB().QueryRow("SELECT COUNT(*) FROM `user_following`").Scan(&n))
+	require.Equal(t, 2, n)
 }
 
 func TestStorageKey(t *testing.T) {
@@ -282,7 +380,7 @@ func Versioned(t *testing.T, drv sql.ExecQuerier, devURL string, client *version
 	require.ErrorIs(t, client.Schema.Diff(ctx, opts...), migrate.ErrChecksumMismatch)
 
 	// Diffing by replaying on the current connection -> not clean.
-	hf, err := migrate.HashSum(dir)
+	hf, err := dir.Checksum()
 	require.NoError(t, err)
 	require.NoError(t, migrate.WriteSumFile(dir, hf))
 	require.ErrorAs(t, client.Schema.Diff(ctx, opts...), &migrate.NotCleanError{})
@@ -307,7 +405,7 @@ func Versioned(t *testing.T, drv sql.ExecQuerier, devURL string, client *version
 	require.Equal(t, string(f1), string(f2))
 }
 
-func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv2.Client) {
+func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv2.Client, hooks ...schema.DiffHook) {
 	ctx := context.Background()
 
 	// Run migration and execute queries on v1.
@@ -323,7 +421,7 @@ func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv
 	clientv1.Conversion.DeleteOne(c1).ExecX(ctx)
 
 	// Run migration and execute queries on v2.
-	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithDiffHook(renameTokenColumn), schema.WithApplyHook(fillNulls(dialect))))
+	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithDiffHook(append(hooks, renameTokenColumn)...), schema.WithApplyHook(fillNulls(dialect))))
 	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true)), "should not create additional resources on multiple runs")
 	SanityV2(t, dialect, clientv2)
 	clientv2.Conversion.CreateBulk(clientv2.Conversion.Create(), clientv2.Conversion.Create(), clientv2.Conversion.Create()).ExecX(ctx)
@@ -334,9 +432,9 @@ func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv
 	// Since "users" created in the migration of v1, it will occupy the range of 1<<32-1 ... 2<<32-1,
 	// even though they are ordered differently in the migration of v2 (groups, pets, users).
 	idRange(t, u.ID, 3<<32-1, 4<<32)
-	idRange(t, clientv2.Group.Create().SaveX(ctx).ID, 4<<32-1, 5<<32)
-	idRange(t, clientv2.Media.Create().SaveX(ctx).ID, 5<<32-1, 6<<32)
-	idRange(t, clientv2.Pet.Create().SaveX(ctx).ID, 6<<32-1, 7<<32)
+	idRange(t, clientv2.Group.Create().SaveX(ctx).ID, 5<<32-1, 6<<32)
+	idRange(t, clientv2.Media.Create().SaveX(ctx).ID, 6<<32-1, 7<<32)
+	idRange(t, clientv2.Pet.Create().SaveX(ctx).ID, 7<<32-1, 8<<32)
 
 	// SQL specific predicates.
 	EqualFold(t, clientv2)
@@ -560,6 +658,24 @@ func TimePrecision(t *testing.T, drv *sql.Driver, query string) {
 	require.NoError(t, err)
 	require.Equalf(t, 3, p, "custom_types field %q", customtype.FieldTz3)
 	require.NoError(t, rows.Close())
+}
+
+func IncludeColumns(t *testing.T, drv *sql.Driver) {
+	rows, err := drv.QueryContext(context.Background(), "select indexdef from pg_indexes where indexname='user_workplace'")
+	require.NoError(t, err)
+	d, err := sql.ScanString(rows)
+	require.NoError(t, err)
+	require.NoError(t, rows.Close())
+	require.Equal(t, d, "CREATE INDEX user_workplace ON public.users USING btree (workplace) INCLUDE (nickname)")
+}
+
+func PartialIndexes(t *testing.T, drv *sql.Driver, query, def string) {
+	rows, err := drv.QueryContext(context.Background(), query, "user_phone")
+	require.NoError(t, err)
+	d, err := sql.ScanString(rows)
+	require.NoError(t, err)
+	require.NoError(t, rows.Close())
+	require.Equal(t, d, def)
 }
 
 func idRange(t *testing.T, id, l, h int) {

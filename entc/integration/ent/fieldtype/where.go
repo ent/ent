@@ -42,7 +42,7 @@ func IDNEQ(id int) predicate.FieldType {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -53,7 +53,7 @@ func IDIn(ids ...int) predicate.FieldType {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -543,7 +543,7 @@ func IntNEQ(v int) predicate.FieldType {
 
 // IntIn applies the In predicate on the "int" field.
 func IntIn(vs ...int) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -554,7 +554,7 @@ func IntIn(vs ...int) predicate.FieldType {
 
 // IntNotIn applies the NotIn predicate on the "int" field.
 func IntNotIn(vs ...int) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -607,7 +607,7 @@ func Int8NEQ(v int8) predicate.FieldType {
 
 // Int8In applies the In predicate on the "int8" field.
 func Int8In(vs ...int8) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -618,7 +618,7 @@ func Int8In(vs ...int8) predicate.FieldType {
 
 // Int8NotIn applies the NotIn predicate on the "int8" field.
 func Int8NotIn(vs ...int8) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -671,7 +671,7 @@ func Int16NEQ(v int16) predicate.FieldType {
 
 // Int16In applies the In predicate on the "int16" field.
 func Int16In(vs ...int16) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -682,7 +682,7 @@ func Int16In(vs ...int16) predicate.FieldType {
 
 // Int16NotIn applies the NotIn predicate on the "int16" field.
 func Int16NotIn(vs ...int16) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -735,7 +735,7 @@ func Int32NEQ(v int32) predicate.FieldType {
 
 // Int32In applies the In predicate on the "int32" field.
 func Int32In(vs ...int32) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -746,7 +746,7 @@ func Int32In(vs ...int32) predicate.FieldType {
 
 // Int32NotIn applies the NotIn predicate on the "int32" field.
 func Int32NotIn(vs ...int32) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -799,7 +799,7 @@ func Int64NEQ(v int64) predicate.FieldType {
 
 // Int64In applies the In predicate on the "int64" field.
 func Int64In(vs ...int64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -810,7 +810,7 @@ func Int64In(vs ...int64) predicate.FieldType {
 
 // Int64NotIn applies the NotIn predicate on the "int64" field.
 func Int64NotIn(vs ...int64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -863,7 +863,7 @@ func OptionalIntNEQ(v int) predicate.FieldType {
 
 // OptionalIntIn applies the In predicate on the "optional_int" field.
 func OptionalIntIn(vs ...int) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -874,7 +874,7 @@ func OptionalIntIn(vs ...int) predicate.FieldType {
 
 // OptionalIntNotIn applies the NotIn predicate on the "optional_int" field.
 func OptionalIntNotIn(vs ...int) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -941,7 +941,7 @@ func OptionalInt8NEQ(v int8) predicate.FieldType {
 
 // OptionalInt8In applies the In predicate on the "optional_int8" field.
 func OptionalInt8In(vs ...int8) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -952,7 +952,7 @@ func OptionalInt8In(vs ...int8) predicate.FieldType {
 
 // OptionalInt8NotIn applies the NotIn predicate on the "optional_int8" field.
 func OptionalInt8NotIn(vs ...int8) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1019,7 +1019,7 @@ func OptionalInt16NEQ(v int16) predicate.FieldType {
 
 // OptionalInt16In applies the In predicate on the "optional_int16" field.
 func OptionalInt16In(vs ...int16) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1030,7 +1030,7 @@ func OptionalInt16In(vs ...int16) predicate.FieldType {
 
 // OptionalInt16NotIn applies the NotIn predicate on the "optional_int16" field.
 func OptionalInt16NotIn(vs ...int16) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1097,7 +1097,7 @@ func OptionalInt32NEQ(v int32) predicate.FieldType {
 
 // OptionalInt32In applies the In predicate on the "optional_int32" field.
 func OptionalInt32In(vs ...int32) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1108,7 +1108,7 @@ func OptionalInt32In(vs ...int32) predicate.FieldType {
 
 // OptionalInt32NotIn applies the NotIn predicate on the "optional_int32" field.
 func OptionalInt32NotIn(vs ...int32) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1175,7 +1175,7 @@ func OptionalInt64NEQ(v int64) predicate.FieldType {
 
 // OptionalInt64In applies the In predicate on the "optional_int64" field.
 func OptionalInt64In(vs ...int64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1186,7 +1186,7 @@ func OptionalInt64In(vs ...int64) predicate.FieldType {
 
 // OptionalInt64NotIn applies the NotIn predicate on the "optional_int64" field.
 func OptionalInt64NotIn(vs ...int64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1253,7 +1253,7 @@ func NillableIntNEQ(v int) predicate.FieldType {
 
 // NillableIntIn applies the In predicate on the "nillable_int" field.
 func NillableIntIn(vs ...int) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1264,7 +1264,7 @@ func NillableIntIn(vs ...int) predicate.FieldType {
 
 // NillableIntNotIn applies the NotIn predicate on the "nillable_int" field.
 func NillableIntNotIn(vs ...int) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1331,7 +1331,7 @@ func NillableInt8NEQ(v int8) predicate.FieldType {
 
 // NillableInt8In applies the In predicate on the "nillable_int8" field.
 func NillableInt8In(vs ...int8) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1342,7 +1342,7 @@ func NillableInt8In(vs ...int8) predicate.FieldType {
 
 // NillableInt8NotIn applies the NotIn predicate on the "nillable_int8" field.
 func NillableInt8NotIn(vs ...int8) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1409,7 +1409,7 @@ func NillableInt16NEQ(v int16) predicate.FieldType {
 
 // NillableInt16In applies the In predicate on the "nillable_int16" field.
 func NillableInt16In(vs ...int16) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1420,7 +1420,7 @@ func NillableInt16In(vs ...int16) predicate.FieldType {
 
 // NillableInt16NotIn applies the NotIn predicate on the "nillable_int16" field.
 func NillableInt16NotIn(vs ...int16) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1487,7 +1487,7 @@ func NillableInt32NEQ(v int32) predicate.FieldType {
 
 // NillableInt32In applies the In predicate on the "nillable_int32" field.
 func NillableInt32In(vs ...int32) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1498,7 +1498,7 @@ func NillableInt32In(vs ...int32) predicate.FieldType {
 
 // NillableInt32NotIn applies the NotIn predicate on the "nillable_int32" field.
 func NillableInt32NotIn(vs ...int32) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1565,7 +1565,7 @@ func NillableInt64NEQ(v int64) predicate.FieldType {
 
 // NillableInt64In applies the In predicate on the "nillable_int64" field.
 func NillableInt64In(vs ...int64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1576,7 +1576,7 @@ func NillableInt64In(vs ...int64) predicate.FieldType {
 
 // NillableInt64NotIn applies the NotIn predicate on the "nillable_int64" field.
 func NillableInt64NotIn(vs ...int64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1643,7 +1643,7 @@ func ValidateOptionalInt32NEQ(v int32) predicate.FieldType {
 
 // ValidateOptionalInt32In applies the In predicate on the "validate_optional_int32" field.
 func ValidateOptionalInt32In(vs ...int32) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1654,7 +1654,7 @@ func ValidateOptionalInt32In(vs ...int32) predicate.FieldType {
 
 // ValidateOptionalInt32NotIn applies the NotIn predicate on the "validate_optional_int32" field.
 func ValidateOptionalInt32NotIn(vs ...int32) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1721,7 +1721,7 @@ func OptionalUintNEQ(v uint) predicate.FieldType {
 
 // OptionalUintIn applies the In predicate on the "optional_uint" field.
 func OptionalUintIn(vs ...uint) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1732,7 +1732,7 @@ func OptionalUintIn(vs ...uint) predicate.FieldType {
 
 // OptionalUintNotIn applies the NotIn predicate on the "optional_uint" field.
 func OptionalUintNotIn(vs ...uint) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1799,7 +1799,7 @@ func OptionalUint8NEQ(v uint8) predicate.FieldType {
 
 // OptionalUint8In applies the In predicate on the "optional_uint8" field.
 func OptionalUint8In(vs ...uint8) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1810,7 +1810,7 @@ func OptionalUint8In(vs ...uint8) predicate.FieldType {
 
 // OptionalUint8NotIn applies the NotIn predicate on the "optional_uint8" field.
 func OptionalUint8NotIn(vs ...uint8) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1877,7 +1877,7 @@ func OptionalUint16NEQ(v uint16) predicate.FieldType {
 
 // OptionalUint16In applies the In predicate on the "optional_uint16" field.
 func OptionalUint16In(vs ...uint16) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1888,7 +1888,7 @@ func OptionalUint16In(vs ...uint16) predicate.FieldType {
 
 // OptionalUint16NotIn applies the NotIn predicate on the "optional_uint16" field.
 func OptionalUint16NotIn(vs ...uint16) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1955,7 +1955,7 @@ func OptionalUint32NEQ(v uint32) predicate.FieldType {
 
 // OptionalUint32In applies the In predicate on the "optional_uint32" field.
 func OptionalUint32In(vs ...uint32) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -1966,7 +1966,7 @@ func OptionalUint32In(vs ...uint32) predicate.FieldType {
 
 // OptionalUint32NotIn applies the NotIn predicate on the "optional_uint32" field.
 func OptionalUint32NotIn(vs ...uint32) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -2033,7 +2033,7 @@ func OptionalUint64NEQ(v uint64) predicate.FieldType {
 
 // OptionalUint64In applies the In predicate on the "optional_uint64" field.
 func OptionalUint64In(vs ...uint64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -2044,7 +2044,7 @@ func OptionalUint64In(vs ...uint64) predicate.FieldType {
 
 // OptionalUint64NotIn applies the NotIn predicate on the "optional_uint64" field.
 func OptionalUint64NotIn(vs ...uint64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -2111,7 +2111,7 @@ func StateNEQ(v State) predicate.FieldType {
 
 // StateIn applies the In predicate on the "state" field.
 func StateIn(vs ...State) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -2122,7 +2122,7 @@ func StateIn(vs ...State) predicate.FieldType {
 
 // StateNotIn applies the NotIn predicate on the "state" field.
 func StateNotIn(vs ...State) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -2161,7 +2161,7 @@ func OptionalFloatNEQ(v float64) predicate.FieldType {
 
 // OptionalFloatIn applies the In predicate on the "optional_float" field.
 func OptionalFloatIn(vs ...float64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -2172,7 +2172,7 @@ func OptionalFloatIn(vs ...float64) predicate.FieldType {
 
 // OptionalFloatNotIn applies the NotIn predicate on the "optional_float" field.
 func OptionalFloatNotIn(vs ...float64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -2239,7 +2239,7 @@ func OptionalFloat32NEQ(v float32) predicate.FieldType {
 
 // OptionalFloat32In applies the In predicate on the "optional_float32" field.
 func OptionalFloat32In(vs ...float32) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -2250,7 +2250,7 @@ func OptionalFloat32In(vs ...float32) predicate.FieldType {
 
 // OptionalFloat32NotIn applies the NotIn predicate on the "optional_float32" field.
 func OptionalFloat32NotIn(vs ...float32) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -2317,7 +2317,7 @@ func TextNEQ(v string) predicate.FieldType {
 
 // TextIn applies the In predicate on the "text" field.
 func TextIn(vs ...string) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -2328,7 +2328,7 @@ func TextIn(vs ...string) predicate.FieldType {
 
 // TextNotIn applies the NotIn predicate on the "text" field.
 func TextNotIn(vs ...string) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -2430,7 +2430,7 @@ func DatetimeNEQ(v time.Time) predicate.FieldType {
 
 // DatetimeIn applies the In predicate on the "datetime" field.
 func DatetimeIn(vs ...time.Time) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -2441,7 +2441,7 @@ func DatetimeIn(vs ...time.Time) predicate.FieldType {
 
 // DatetimeNotIn applies the NotIn predicate on the "datetime" field.
 func DatetimeNotIn(vs ...time.Time) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -2508,7 +2508,7 @@ func DecimalNEQ(v float64) predicate.FieldType {
 
 // DecimalIn applies the In predicate on the "decimal" field.
 func DecimalIn(vs ...float64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -2519,7 +2519,7 @@ func DecimalIn(vs ...float64) predicate.FieldType {
 
 // DecimalNotIn applies the NotIn predicate on the "decimal" field.
 func DecimalNotIn(vs ...float64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -2586,7 +2586,7 @@ func LinkOtherNEQ(v *schema.Link) predicate.FieldType {
 
 // LinkOtherIn applies the In predicate on the "link_other" field.
 func LinkOtherIn(vs ...*schema.Link) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -2597,7 +2597,7 @@ func LinkOtherIn(vs ...*schema.Link) predicate.FieldType {
 
 // LinkOtherNotIn applies the NotIn predicate on the "link_other" field.
 func LinkOtherNotIn(vs ...*schema.Link) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -2664,7 +2664,7 @@ func LinkOtherFuncNEQ(v *schema.Link) predicate.FieldType {
 
 // LinkOtherFuncIn applies the In predicate on the "link_other_func" field.
 func LinkOtherFuncIn(vs ...*schema.Link) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -2675,7 +2675,7 @@ func LinkOtherFuncIn(vs ...*schema.Link) predicate.FieldType {
 
 // LinkOtherFuncNotIn applies the NotIn predicate on the "link_other_func" field.
 func LinkOtherFuncNotIn(vs ...*schema.Link) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -2742,7 +2742,7 @@ func MACNEQ(v schema.MAC) predicate.FieldType {
 
 // MACIn applies the In predicate on the "mac" field.
 func MACIn(vs ...schema.MAC) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -2753,7 +2753,7 @@ func MACIn(vs ...schema.MAC) predicate.FieldType {
 
 // MACNotIn applies the NotIn predicate on the "mac" field.
 func MACNotIn(vs ...schema.MAC) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -2860,7 +2860,7 @@ func StringArrayNEQ(v schema.Strings) predicate.FieldType {
 
 // StringArrayIn applies the In predicate on the "string_array" field.
 func StringArrayIn(vs ...schema.Strings) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -2871,7 +2871,7 @@ func StringArrayIn(vs ...schema.Strings) predicate.FieldType {
 
 // StringArrayNotIn applies the NotIn predicate on the "string_array" field.
 func StringArrayNotIn(vs ...schema.Strings) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -2938,7 +2938,7 @@ func PasswordNEQ(v string) predicate.FieldType {
 
 // PasswordIn applies the In predicate on the "password" field.
 func PasswordIn(vs ...string) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -2949,7 +2949,7 @@ func PasswordIn(vs ...string) predicate.FieldType {
 
 // PasswordNotIn applies the NotIn predicate on the "password" field.
 func PasswordNotIn(vs ...string) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -3051,7 +3051,7 @@ func StringScannerNEQ(v schema.StringScanner) predicate.FieldType {
 
 // StringScannerIn applies the In predicate on the "string_scanner" field.
 func StringScannerIn(vs ...schema.StringScanner) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -3062,7 +3062,7 @@ func StringScannerIn(vs ...schema.StringScanner) predicate.FieldType {
 
 // StringScannerNotIn applies the NotIn predicate on the "string_scanner" field.
 func StringScannerNotIn(vs ...schema.StringScanner) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -3171,7 +3171,7 @@ func DurationNEQ(v time.Duration) predicate.FieldType {
 
 // DurationIn applies the In predicate on the "duration" field.
 func DurationIn(vs ...time.Duration) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = int64(vs[i])
 	}
@@ -3182,7 +3182,7 @@ func DurationIn(vs ...time.Duration) predicate.FieldType {
 
 // DurationNotIn applies the NotIn predicate on the "duration" field.
 func DurationNotIn(vs ...time.Duration) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = int64(vs[i])
 	}
@@ -3255,7 +3255,7 @@ func DirNEQ(v http.Dir) predicate.FieldType {
 
 // DirIn applies the In predicate on the "dir" field.
 func DirIn(vs ...http.Dir) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = string(vs[i])
 	}
@@ -3266,7 +3266,7 @@ func DirIn(vs ...http.Dir) predicate.FieldType {
 
 // DirNotIn applies the NotIn predicate on the "dir" field.
 func DirNotIn(vs ...http.Dir) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = string(vs[i])
 	}
@@ -3365,7 +3365,7 @@ func NdirNEQ(v http.Dir) predicate.FieldType {
 
 // NdirIn applies the In predicate on the "ndir" field.
 func NdirIn(vs ...http.Dir) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = string(vs[i])
 	}
@@ -3376,7 +3376,7 @@ func NdirIn(vs ...http.Dir) predicate.FieldType {
 
 // NdirNotIn applies the NotIn predicate on the "ndir" field.
 func NdirNotIn(vs ...http.Dir) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = string(vs[i])
 	}
@@ -3487,7 +3487,7 @@ func StrNEQ(v sql.NullString) predicate.FieldType {
 
 // StrIn applies the In predicate on the "str" field.
 func StrIn(vs ...sql.NullString) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -3498,7 +3498,7 @@ func StrIn(vs ...sql.NullString) predicate.FieldType {
 
 // StrNotIn applies the NotIn predicate on the "str" field.
 func StrNotIn(vs ...sql.NullString) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -3605,7 +3605,7 @@ func NullStrNEQ(v *sql.NullString) predicate.FieldType {
 
 // NullStrIn applies the In predicate on the "null_str" field.
 func NullStrIn(vs ...*sql.NullString) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -3616,7 +3616,7 @@ func NullStrIn(vs ...*sql.NullString) predicate.FieldType {
 
 // NullStrNotIn applies the NotIn predicate on the "null_str" field.
 func NullStrNotIn(vs ...*sql.NullString) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -3723,7 +3723,7 @@ func LinkNEQ(v schema.Link) predicate.FieldType {
 
 // LinkIn applies the In predicate on the "link" field.
 func LinkIn(vs ...schema.Link) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -3734,7 +3734,7 @@ func LinkIn(vs ...schema.Link) predicate.FieldType {
 
 // LinkNotIn applies the NotIn predicate on the "link" field.
 func LinkNotIn(vs ...schema.Link) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -3841,7 +3841,7 @@ func NullLinkNEQ(v *schema.Link) predicate.FieldType {
 
 // NullLinkIn applies the In predicate on the "null_link" field.
 func NullLinkIn(vs ...*schema.Link) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -3852,7 +3852,7 @@ func NullLinkIn(vs ...*schema.Link) predicate.FieldType {
 
 // NullLinkNotIn applies the NotIn predicate on the "null_link" field.
 func NullLinkNotIn(vs ...*schema.Link) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -4047,7 +4047,7 @@ func DeletedAtNEQ(v *sql.NullTime) predicate.FieldType {
 
 // DeletedAtIn applies the In predicate on the "deleted_at" field.
 func DeletedAtIn(vs ...*sql.NullTime) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -4058,7 +4058,7 @@ func DeletedAtIn(vs ...*sql.NullTime) predicate.FieldType {
 
 // DeletedAtNotIn applies the NotIn predicate on the "deleted_at" field.
 func DeletedAtNotIn(vs ...*sql.NullTime) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -4125,7 +4125,7 @@ func RawDataNEQ(v []byte) predicate.FieldType {
 
 // RawDataIn applies the In predicate on the "raw_data" field.
 func RawDataIn(vs ...[]byte) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -4136,7 +4136,7 @@ func RawDataIn(vs ...[]byte) predicate.FieldType {
 
 // RawDataNotIn applies the NotIn predicate on the "raw_data" field.
 func RawDataNotIn(vs ...[]byte) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -4203,7 +4203,7 @@ func SensitiveNEQ(v []byte) predicate.FieldType {
 
 // SensitiveIn applies the In predicate on the "sensitive" field.
 func SensitiveIn(vs ...[]byte) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -4214,7 +4214,7 @@ func SensitiveIn(vs ...[]byte) predicate.FieldType {
 
 // SensitiveNotIn applies the NotIn predicate on the "sensitive" field.
 func SensitiveNotIn(vs ...[]byte) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -4283,7 +4283,7 @@ func IPNEQ(v net.IP) predicate.FieldType {
 
 // IPIn applies the In predicate on the "ip" field.
 func IPIn(vs ...net.IP) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = []byte(vs[i])
 	}
@@ -4294,7 +4294,7 @@ func IPIn(vs ...net.IP) predicate.FieldType {
 
 // IPNotIn applies the NotIn predicate on the "ip" field.
 func IPNotIn(vs ...net.IP) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = []byte(vs[i])
 	}
@@ -4365,7 +4365,7 @@ func NullInt64NEQ(v *sql.NullInt64) predicate.FieldType {
 
 // NullInt64In applies the In predicate on the "null_int64" field.
 func NullInt64In(vs ...*sql.NullInt64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -4376,7 +4376,7 @@ func NullInt64In(vs ...*sql.NullInt64) predicate.FieldType {
 
 // NullInt64NotIn applies the NotIn predicate on the "null_int64" field.
 func NullInt64NotIn(vs ...*sql.NullInt64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -4445,7 +4445,7 @@ func SchemaIntNEQ(v schema.Int) predicate.FieldType {
 
 // SchemaIntIn applies the In predicate on the "schema_int" field.
 func SchemaIntIn(vs ...schema.Int) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = int(vs[i])
 	}
@@ -4456,7 +4456,7 @@ func SchemaIntIn(vs ...schema.Int) predicate.FieldType {
 
 // SchemaIntNotIn applies the NotIn predicate on the "schema_int" field.
 func SchemaIntNotIn(vs ...schema.Int) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = int(vs[i])
 	}
@@ -4529,7 +4529,7 @@ func SchemaInt8NEQ(v schema.Int8) predicate.FieldType {
 
 // SchemaInt8In applies the In predicate on the "schema_int8" field.
 func SchemaInt8In(vs ...schema.Int8) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = int8(vs[i])
 	}
@@ -4540,7 +4540,7 @@ func SchemaInt8In(vs ...schema.Int8) predicate.FieldType {
 
 // SchemaInt8NotIn applies the NotIn predicate on the "schema_int8" field.
 func SchemaInt8NotIn(vs ...schema.Int8) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = int8(vs[i])
 	}
@@ -4613,7 +4613,7 @@ func SchemaInt64NEQ(v schema.Int64) predicate.FieldType {
 
 // SchemaInt64In applies the In predicate on the "schema_int64" field.
 func SchemaInt64In(vs ...schema.Int64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = int64(vs[i])
 	}
@@ -4624,7 +4624,7 @@ func SchemaInt64In(vs ...schema.Int64) predicate.FieldType {
 
 // SchemaInt64NotIn applies the NotIn predicate on the "schema_int64" field.
 func SchemaInt64NotIn(vs ...schema.Int64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = int64(vs[i])
 	}
@@ -4697,7 +4697,7 @@ func SchemaFloatNEQ(v schema.Float64) predicate.FieldType {
 
 // SchemaFloatIn applies the In predicate on the "schema_float" field.
 func SchemaFloatIn(vs ...schema.Float64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = float64(vs[i])
 	}
@@ -4708,7 +4708,7 @@ func SchemaFloatIn(vs ...schema.Float64) predicate.FieldType {
 
 // SchemaFloatNotIn applies the NotIn predicate on the "schema_float" field.
 func SchemaFloatNotIn(vs ...schema.Float64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = float64(vs[i])
 	}
@@ -4781,7 +4781,7 @@ func SchemaFloat32NEQ(v schema.Float32) predicate.FieldType {
 
 // SchemaFloat32In applies the In predicate on the "schema_float32" field.
 func SchemaFloat32In(vs ...schema.Float32) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = float32(vs[i])
 	}
@@ -4792,7 +4792,7 @@ func SchemaFloat32In(vs ...schema.Float32) predicate.FieldType {
 
 // SchemaFloat32NotIn applies the NotIn predicate on the "schema_float32" field.
 func SchemaFloat32NotIn(vs ...schema.Float32) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = float32(vs[i])
 	}
@@ -4863,7 +4863,7 @@ func NullFloatNEQ(v *sql.NullFloat64) predicate.FieldType {
 
 // NullFloatIn applies the In predicate on the "null_float" field.
 func NullFloatIn(vs ...*sql.NullFloat64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -4874,7 +4874,7 @@ func NullFloatIn(vs ...*sql.NullFloat64) predicate.FieldType {
 
 // NullFloatNotIn applies the NotIn predicate on the "null_float" field.
 func NullFloatNotIn(vs ...*sql.NullFloat64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -4943,7 +4943,7 @@ func RoleNEQ(v role.Role) predicate.FieldType {
 
 // RoleIn applies the In predicate on the "role" field.
 func RoleIn(vs ...role.Role) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -4954,7 +4954,7 @@ func RoleIn(vs ...role.Role) predicate.FieldType {
 
 // RoleNotIn applies the NotIn predicate on the "role" field.
 func RoleNotIn(vs ...role.Role) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -4979,7 +4979,7 @@ func PriorityNEQ(v role.Priority) predicate.FieldType {
 
 // PriorityIn applies the In predicate on the "priority" field.
 func PriorityIn(vs ...role.Priority) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -4990,7 +4990,7 @@ func PriorityIn(vs ...role.Priority) predicate.FieldType {
 
 // PriorityNotIn applies the NotIn predicate on the "priority" field.
 func PriorityNotIn(vs ...role.Priority) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -5029,7 +5029,7 @@ func OptionalUUIDNEQ(v uuid.UUID) predicate.FieldType {
 
 // OptionalUUIDIn applies the In predicate on the "optional_uuid" field.
 func OptionalUUIDIn(vs ...uuid.UUID) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -5040,7 +5040,7 @@ func OptionalUUIDIn(vs ...uuid.UUID) predicate.FieldType {
 
 // OptionalUUIDNotIn applies the NotIn predicate on the "optional_uuid" field.
 func OptionalUUIDNotIn(vs ...uuid.UUID) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -5107,7 +5107,7 @@ func NillableUUIDNEQ(v uuid.UUID) predicate.FieldType {
 
 // NillableUUIDIn applies the In predicate on the "nillable_uuid" field.
 func NillableUUIDIn(vs ...uuid.UUID) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -5118,7 +5118,7 @@ func NillableUUIDIn(vs ...uuid.UUID) predicate.FieldType {
 
 // NillableUUIDNotIn applies the NotIn predicate on the "nillable_uuid" field.
 func NillableUUIDNotIn(vs ...uuid.UUID) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -5199,7 +5199,7 @@ func PairNEQ(v schema.Pair) predicate.FieldType {
 
 // PairIn applies the In predicate on the "pair" field.
 func PairIn(vs ...schema.Pair) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -5210,7 +5210,7 @@ func PairIn(vs ...schema.Pair) predicate.FieldType {
 
 // PairNotIn applies the NotIn predicate on the "pair" field.
 func PairNotIn(vs ...schema.Pair) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -5263,7 +5263,7 @@ func NilPairNEQ(v *schema.Pair) predicate.FieldType {
 
 // NilPairIn applies the In predicate on the "nil_pair" field.
 func NilPairIn(vs ...*schema.Pair) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -5274,7 +5274,7 @@ func NilPairIn(vs ...*schema.Pair) predicate.FieldType {
 
 // NilPairNotIn applies the NotIn predicate on the "nil_pair" field.
 func NilPairNotIn(vs ...*schema.Pair) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -5341,7 +5341,7 @@ func VstringNEQ(v schema.VString) predicate.FieldType {
 
 // VstringIn applies the In predicate on the "vstring" field.
 func VstringIn(vs ...schema.VString) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -5352,7 +5352,7 @@ func VstringIn(vs ...schema.VString) predicate.FieldType {
 
 // VstringNotIn applies the NotIn predicate on the "vstring" field.
 func VstringNotIn(vs ...schema.VString) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -5445,7 +5445,7 @@ func TripleNEQ(v schema.Triple) predicate.FieldType {
 
 // TripleIn applies the In predicate on the "triple" field.
 func TripleIn(vs ...schema.Triple) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -5456,7 +5456,7 @@ func TripleIn(vs ...schema.Triple) predicate.FieldType {
 
 // TripleNotIn applies the NotIn predicate on the "triple" field.
 func TripleNotIn(vs ...schema.Triple) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -5509,7 +5509,7 @@ func BigIntNEQ(v schema.BigInt) predicate.FieldType {
 
 // BigIntIn applies the In predicate on the "big_int" field.
 func BigIntIn(vs ...schema.BigInt) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -5520,7 +5520,7 @@ func BigIntIn(vs ...schema.BigInt) predicate.FieldType {
 
 // BigIntNotIn applies the NotIn predicate on the "big_int" field.
 func BigIntNotIn(vs ...schema.BigInt) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -5587,7 +5587,7 @@ func PasswordOtherNEQ(v schema.Password) predicate.FieldType {
 
 // PasswordOtherIn applies the In predicate on the "password_other" field.
 func PasswordOtherIn(vs ...schema.Password) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -5598,7 +5598,7 @@ func PasswordOtherIn(vs ...schema.Password) predicate.FieldType {
 
 // PasswordOtherNotIn applies the NotIn predicate on the "password_other" field.
 func PasswordOtherNotIn(vs ...schema.Password) predicate.FieldType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

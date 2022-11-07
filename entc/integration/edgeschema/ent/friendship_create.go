@@ -213,19 +213,11 @@ func (fc *FriendshipCreate) createSpec() (*Friendship, *sqlgraph.CreateSpec) {
 	)
 	_spec.OnConflict = fc.conflict
 	if value, ok := fc.mutation.Weight(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: friendship.FieldWeight,
-		})
+		_spec.SetField(friendship.FieldWeight, field.TypeInt, value)
 		_node.Weight = value
 	}
 	if value, ok := fc.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: friendship.FieldCreatedAt,
-		})
+		_spec.SetField(friendship.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if nodes := fc.mutation.UserIDs(); len(nodes) > 0 {
@@ -350,30 +342,6 @@ func (u *FriendshipUpsert) UpdateCreatedAt() *FriendshipUpsert {
 	return u
 }
 
-// SetUserID sets the "user_id" field.
-func (u *FriendshipUpsert) SetUserID(v int) *FriendshipUpsert {
-	u.Set(friendship.FieldUserID, v)
-	return u
-}
-
-// UpdateUserID sets the "user_id" field to the value that was provided on create.
-func (u *FriendshipUpsert) UpdateUserID() *FriendshipUpsert {
-	u.SetExcluded(friendship.FieldUserID)
-	return u
-}
-
-// SetFriendID sets the "friend_id" field.
-func (u *FriendshipUpsert) SetFriendID(v int) *FriendshipUpsert {
-	u.Set(friendship.FieldFriendID, v)
-	return u
-}
-
-// UpdateFriendID sets the "friend_id" field to the value that was provided on create.
-func (u *FriendshipUpsert) UpdateFriendID() *FriendshipUpsert {
-	u.SetExcluded(friendship.FieldFriendID)
-	return u
-}
-
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -384,6 +352,14 @@ func (u *FriendshipUpsert) UpdateFriendID() *FriendshipUpsert {
 //		Exec(ctx)
 func (u *FriendshipUpsertOne) UpdateNewValues() *FriendshipUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.UserID(); exists {
+			s.SetIgnore(friendship.FieldUserID)
+		}
+		if _, exists := u.create.mutation.FriendID(); exists {
+			s.SetIgnore(friendship.FieldFriendID)
+		}
+	}))
 	return u
 }
 
@@ -446,34 +422,6 @@ func (u *FriendshipUpsertOne) SetCreatedAt(v time.Time) *FriendshipUpsertOne {
 func (u *FriendshipUpsertOne) UpdateCreatedAt() *FriendshipUpsertOne {
 	return u.Update(func(s *FriendshipUpsert) {
 		s.UpdateCreatedAt()
-	})
-}
-
-// SetUserID sets the "user_id" field.
-func (u *FriendshipUpsertOne) SetUserID(v int) *FriendshipUpsertOne {
-	return u.Update(func(s *FriendshipUpsert) {
-		s.SetUserID(v)
-	})
-}
-
-// UpdateUserID sets the "user_id" field to the value that was provided on create.
-func (u *FriendshipUpsertOne) UpdateUserID() *FriendshipUpsertOne {
-	return u.Update(func(s *FriendshipUpsert) {
-		s.UpdateUserID()
-	})
-}
-
-// SetFriendID sets the "friend_id" field.
-func (u *FriendshipUpsertOne) SetFriendID(v int) *FriendshipUpsertOne {
-	return u.Update(func(s *FriendshipUpsert) {
-		s.SetFriendID(v)
-	})
-}
-
-// UpdateFriendID sets the "friend_id" field to the value that was provided on create.
-func (u *FriendshipUpsertOne) UpdateFriendID() *FriendshipUpsertOne {
-	return u.Update(func(s *FriendshipUpsert) {
-		s.UpdateFriendID()
 	})
 }
 
@@ -647,6 +595,16 @@ type FriendshipUpsertBulk struct {
 //		Exec(ctx)
 func (u *FriendshipUpsertBulk) UpdateNewValues() *FriendshipUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.UserID(); exists {
+				s.SetIgnore(friendship.FieldUserID)
+			}
+			if _, exists := b.mutation.FriendID(); exists {
+				s.SetIgnore(friendship.FieldFriendID)
+			}
+		}
+	}))
 	return u
 }
 
@@ -709,34 +667,6 @@ func (u *FriendshipUpsertBulk) SetCreatedAt(v time.Time) *FriendshipUpsertBulk {
 func (u *FriendshipUpsertBulk) UpdateCreatedAt() *FriendshipUpsertBulk {
 	return u.Update(func(s *FriendshipUpsert) {
 		s.UpdateCreatedAt()
-	})
-}
-
-// SetUserID sets the "user_id" field.
-func (u *FriendshipUpsertBulk) SetUserID(v int) *FriendshipUpsertBulk {
-	return u.Update(func(s *FriendshipUpsert) {
-		s.SetUserID(v)
-	})
-}
-
-// UpdateUserID sets the "user_id" field to the value that was provided on create.
-func (u *FriendshipUpsertBulk) UpdateUserID() *FriendshipUpsertBulk {
-	return u.Update(func(s *FriendshipUpsert) {
-		s.UpdateUserID()
-	})
-}
-
-// SetFriendID sets the "friend_id" field.
-func (u *FriendshipUpsertBulk) SetFriendID(v int) *FriendshipUpsertBulk {
-	return u.Update(func(s *FriendshipUpsert) {
-		s.SetFriendID(v)
-	})
-}
-
-// UpdateFriendID sets the "friend_id" field to the value that was provided on create.
-func (u *FriendshipUpsertBulk) UpdateFriendID() *FriendshipUpsertBulk {
-	return u.Update(func(s *FriendshipUpsert) {
-		s.UpdateFriendID()
 	})
 }
 

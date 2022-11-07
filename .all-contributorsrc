@@ -817,6 +817,33 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "water-a",
+      "name": "water-a",
+      "avatar_url": "https://avatars.githubusercontent.com/u/38114545?v=4",
+      "profile": "https://github.com/water-a",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "jhwz",
+      "name": "jhwz",
+      "avatar_url": "https://avatars.githubusercontent.com/u/52683873?v=4",
+      "profile": "https://github.com/jhwz",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "kortschak",
+      "name": "Dan Kortschak",
+      "avatar_url": "https://avatars.githubusercontent.com/u/275221?v=4",
+      "profile": "https://kortschak.io/",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -37,7 +37,7 @@ func IDNEQ(id string) predicate.Item {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...string) predicate.Item {
 	return predicate.Item(func(t *dsl.Traversal) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -48,7 +48,7 @@ func IDIn(ids ...string) predicate.Item {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...string) predicate.Item {
 	return predicate.Item(func(t *dsl.Traversal) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -107,7 +107,7 @@ func TextNEQ(v string) predicate.Item {
 
 // TextIn applies the In predicate on the "text" field.
 func TextIn(vs ...string) predicate.Item {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -118,7 +118,7 @@ func TextIn(vs ...string) predicate.Item {
 
 // TextNotIn applies the NotIn predicate on the "text" field.
 func TextNotIn(vs ...string) predicate.Item {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -193,7 +193,7 @@ func TextNotNil() predicate.Item {
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Item) predicate.Item {
 	return predicate.Item(func(tr *dsl.Traversal) {
-		trs := make([]interface{}, 0, len(predicates))
+		trs := make([]any, 0, len(predicates))
 		for _, p := range predicates {
 			t := __.New()
 			p(t)
@@ -206,7 +206,7 @@ func And(predicates ...predicate.Item) predicate.Item {
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Item) predicate.Item {
 	return predicate.Item(func(tr *dsl.Traversal) {
-		trs := make([]interface{}, 0, len(predicates))
+		trs := make([]any, 0, len(predicates))
 		for _, p := range predicates {
 			t := __.New()
 			p(t)

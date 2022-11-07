@@ -170,14 +170,13 @@ func (pe *Pets) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	for _, v := range scanpe {
-		*pe = append(*pe, &Pet{
-			ID:       v.ID,
-			Age:      v.Age,
-			Name:     v.Name,
-			UUID:     v.UUID,
-			Nickname: v.Nickname,
-			Trained:  v.Trained,
-		})
+		node := &Pet{ID: v.ID}
+		node.Age = v.Age
+		node.Name = v.Name
+		node.UUID = v.UUID
+		node.Nickname = v.Nickname
+		node.Trained = v.Trained
+		*pe = append(*pe, node)
 	}
 	return nil
 }

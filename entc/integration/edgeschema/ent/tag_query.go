@@ -372,6 +372,11 @@ func (tq *TagQuery) Select(fields ...string) *TagSelect {
 	return selbuild
 }
 
+// Aggregate returns a TagSelect configured with the given aggregations.
+func (tq *TagQuery) Aggregate(fns ...AggregateFunc) *TagSelect {
+	return tq.Select().Aggregate(fns...)
+}
+
 func (tq *TagQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range tq.fields {
 		if !tag.ValidColumn(f) {
@@ -397,10 +402,10 @@ func (tq *TagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tag, err
 			tq.withTweetTags != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Tag).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Tag{config: tq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -458,18 +463,18 @@ func (tq *TagQuery) loadTweets(ctx context.Context, query *TweetQuery, nodes []*
 	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
 		assign := spec.Assign
 		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]interface{}, error) {
+		spec.ScanValues = func(columns []string) ([]any, error) {
 			values, err := values(columns[1:])
 			if err != nil {
 				return nil, err
 			}
-			return append([]interface{}{new(sql.NullInt64)}, values...), nil
+			return append([]any{new(sql.NullInt64)}, values...), nil
 		}
-		spec.Assign = func(columns []string, values []interface{}) error {
+		spec.Assign = func(columns []string, values []any) error {
 			outValue := int(values[0].(*sql.NullInt64).Int64)
 			inValue := int(values[1].(*sql.NullInt64).Int64)
 			if nids[inValue] == nil {
-				nids[inValue] = map[*Tag]struct{}{byID[outValue]: struct{}{}}
+				nids[inValue] = map[*Tag]struct{}{byID[outValue]: {}}
 				return assign(columns[1:], values[1:])
 			}
 			nids[inValue][byID[outValue]] = struct{}{}
@@ -528,11 +533,14 @@ func (tq *TagQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (tq *TagQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := tq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := tq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (tq *TagQuery) querySpec() *sqlgraph.QuerySpec {
@@ -633,7 +641,7 @@ func (tgb *TagGroupBy) Aggregate(fns ...AggregateFunc) *TagGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (tgb *TagGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (tgb *TagGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := tgb.path(ctx)
 	if err != nil {
 		return err
@@ -642,7 +650,7 @@ func (tgb *TagGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return tgb.sqlScan(ctx, v)
 }
 
-func (tgb *TagGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (tgb *TagGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range tgb.fields {
 		if !tag.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -667,8 +675,6 @@ func (tgb *TagGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range tgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(tgb.fields)+len(tgb.fns))
 		for _, f := range tgb.fields {
@@ -688,8 +694,14 @@ type TagSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ts *TagSelect) Aggregate(fns ...AggregateFunc) *TagSelect {
+	ts.fns = append(ts.fns, fns...)
+	return ts
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (ts *TagSelect) Scan(ctx context.Context, v interface{}) error {
+func (ts *TagSelect) Scan(ctx context.Context, v any) error {
 	if err := ts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -697,7 +709,17 @@ func (ts *TagSelect) Scan(ctx context.Context, v interface{}) error {
 	return ts.sqlScan(ctx, v)
 }
 
-func (ts *TagSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ts *TagSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ts.fns))
+	for _, fn := range ts.fns {
+		aggregation = append(aggregation, fn(ts.sql))
+	}
+	switch n := len(*ts.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ts.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ts.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ts.sql.Query()
 	if err := ts.driver.Query(ctx, query, args, rows); err != nil {

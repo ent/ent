@@ -336,6 +336,11 @@ func (cq *CityQuery) Select(fields ...string) *CitySelect {
 	return selbuild
 }
 
+// Aggregate returns a CitySelect configured with the given aggregations.
+func (cq *CityQuery) Aggregate(fns ...AggregateFunc) *CitySelect {
+	return cq.Select().Aggregate(fns...)
+}
+
 func (cq *CityQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range cq.fields {
 		if !city.ValidColumn(f) {
@@ -360,10 +365,10 @@ func (cq *CityQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*City, e
 			cq.withStreets != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*City).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &City{config: cq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -430,11 +435,14 @@ func (cq *CityQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (cq *CityQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := cq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := cq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (cq *CityQuery) querySpec() *sqlgraph.QuerySpec {
@@ -535,7 +543,7 @@ func (cgb *CityGroupBy) Aggregate(fns ...AggregateFunc) *CityGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (cgb *CityGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (cgb *CityGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := cgb.path(ctx)
 	if err != nil {
 		return err
@@ -544,7 +552,7 @@ func (cgb *CityGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return cgb.sqlScan(ctx, v)
 }
 
-func (cgb *CityGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (cgb *CityGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range cgb.fields {
 		if !city.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -569,8 +577,6 @@ func (cgb *CityGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range cgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(cgb.fields)+len(cgb.fns))
 		for _, f := range cgb.fields {
@@ -590,8 +596,14 @@ type CitySelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (cs *CitySelect) Aggregate(fns ...AggregateFunc) *CitySelect {
+	cs.fns = append(cs.fns, fns...)
+	return cs
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (cs *CitySelect) Scan(ctx context.Context, v interface{}) error {
+func (cs *CitySelect) Scan(ctx context.Context, v any) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -599,7 +611,17 @@ func (cs *CitySelect) Scan(ctx context.Context, v interface{}) error {
 	return cs.sqlScan(ctx, v)
 }
 
-func (cs *CitySelect) sqlScan(ctx context.Context, v interface{}) error {
+func (cs *CitySelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(cs.fns))
+	for _, fn := range cs.fns {
+		aggregation = append(aggregation, fn(cs.sql))
+	}
+	switch n := len(*cs.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		cs.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		cs.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := cs.sql.Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {

@@ -255,6 +255,18 @@ func (lq *LicenseQuery) Clone() *LicenseQuery {
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		CreateTime time.Time `json:"create_time,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.License.Query().
+//		GroupBy(license.FieldCreateTime).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
 func (lq *LicenseQuery) GroupBy(field string, fields ...string) *LicenseGroupBy {
 	grbuild := &LicenseGroupBy{config: lq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -271,12 +283,27 @@ func (lq *LicenseQuery) GroupBy(field string, fields ...string) *LicenseGroupBy 
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		CreateTime time.Time `json:"create_time,omitempty"`
+//	}
+//
+//	client.License.Query().
+//		Select(license.FieldCreateTime).
+//		Scan(ctx, &v)
 func (lq *LicenseQuery) Select(fields ...string) *LicenseSelect {
 	lq.fields = append(lq.fields, fields...)
 	selbuild := &LicenseSelect{LicenseQuery: lq}
 	selbuild.label = license.Label
 	selbuild.flds, selbuild.scan = &lq.fields, selbuild.Scan
 	return selbuild
+}
+
+// Aggregate returns a LicenseSelect configured with the given aggregations.
+func (lq *LicenseQuery) Aggregate(fns ...AggregateFunc) *LicenseSelect {
+	return lq.Select().Aggregate(fns...)
 }
 
 func (lq *LicenseQuery) prepareQuery(ctx context.Context) error {
@@ -300,10 +327,10 @@ func (lq *LicenseQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Lice
 		nodes = []*License{}
 		_spec = lq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*License).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &License{config: lq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -336,11 +363,14 @@ func (lq *LicenseQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (lq *LicenseQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := lq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := lq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (lq *LicenseQuery) querySpec() *sqlgraph.QuerySpec {
@@ -476,7 +506,7 @@ func (lgb *LicenseGroupBy) Aggregate(fns ...AggregateFunc) *LicenseGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (lgb *LicenseGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (lgb *LicenseGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := lgb.path(ctx)
 	if err != nil {
 		return err
@@ -485,7 +515,7 @@ func (lgb *LicenseGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return lgb.sqlScan(ctx, v)
 }
 
-func (lgb *LicenseGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (lgb *LicenseGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range lgb.fields {
 		if !license.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -510,8 +540,6 @@ func (lgb *LicenseGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range lgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(lgb.fields)+len(lgb.fns))
 		for _, f := range lgb.fields {
@@ -531,8 +559,14 @@ type LicenseSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ls *LicenseSelect) Aggregate(fns ...AggregateFunc) *LicenseSelect {
+	ls.fns = append(ls.fns, fns...)
+	return ls
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (ls *LicenseSelect) Scan(ctx context.Context, v interface{}) error {
+func (ls *LicenseSelect) Scan(ctx context.Context, v any) error {
 	if err := ls.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -540,7 +574,17 @@ func (ls *LicenseSelect) Scan(ctx context.Context, v interface{}) error {
 	return ls.sqlScan(ctx, v)
 }
 
-func (ls *LicenseSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ls *LicenseSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ls.fns))
+	for _, fn := range ls.fns {
+		aggregation = append(aggregation, fn(ls.sql))
+	}
+	switch n := len(*ls.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ls.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ls.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ls.sql.Query()
 	if err := ls.driver.Query(ctx, query, args, rows); err != nil {

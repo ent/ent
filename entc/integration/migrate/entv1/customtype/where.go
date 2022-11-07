@@ -35,7 +35,7 @@ func IDNEQ(id int) predicate.CustomType {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.CustomType {
 	return predicate.CustomType(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -46,7 +46,7 @@ func IDIn(ids ...int) predicate.CustomType {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.CustomType {
 	return predicate.CustomType(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -105,7 +105,7 @@ func CustomNEQ(v string) predicate.CustomType {
 
 // CustomIn applies the In predicate on the "custom" field.
 func CustomIn(vs ...string) predicate.CustomType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -116,7 +116,7 @@ func CustomIn(vs ...string) predicate.CustomType {
 
 // CustomNotIn applies the NotIn predicate on the "custom" field.
 func CustomNotIn(vs ...string) predicate.CustomType {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

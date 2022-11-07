@@ -315,3 +315,11 @@ sqljson.StringHasSuffix(user.FieldURL, ".com", sqljson.Path("host"))
 sqljson.StringHasPrefix(user.FieldData, "20", sqljson.DotPath("attributes[0].status_code"))
 ```
 
+#### Check if a JSON value is equal to any of the values in a list
+
+```go
+sqljson.ValueIn(user.FieldURL, []any{"https", "ftp"}, sqljson.Path("Scheme"))
+
+sqljson.ValueNotIn(user.FieldURL, []any{"github", "gitlab"}, sqljson.Path("Host"))
+```
+

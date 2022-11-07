@@ -582,7 +582,6 @@ func (u *PetUpsertBulk) UpdateNewValues() *PetUpsertBulk {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(pet.FieldID)
-				return
 			}
 		}
 	}))

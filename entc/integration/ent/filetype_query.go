@@ -339,6 +339,11 @@ func (ftq *FileTypeQuery) Select(fields ...string) *FileTypeSelect {
 	return selbuild
 }
 
+// Aggregate returns a FileTypeSelect configured with the given aggregations.
+func (ftq *FileTypeQuery) Aggregate(fns ...AggregateFunc) *FileTypeSelect {
+	return ftq.Select().Aggregate(fns...)
+}
+
 func (ftq *FileTypeQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range ftq.fields {
 		if !filetype.ValidColumn(f) {
@@ -363,10 +368,10 @@ func (ftq *FileTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Fi
 			ftq.withFiles != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*FileType).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &FileType{config: ftq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -446,11 +451,14 @@ func (ftq *FileTypeQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (ftq *FileTypeQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := ftq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := ftq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (ftq *FileTypeQuery) querySpec() *sqlgraph.QuerySpec {
@@ -600,7 +608,7 @@ func (ftgb *FileTypeGroupBy) Aggregate(fns ...AggregateFunc) *FileTypeGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (ftgb *FileTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (ftgb *FileTypeGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := ftgb.path(ctx)
 	if err != nil {
 		return err
@@ -609,7 +617,7 @@ func (ftgb *FileTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return ftgb.sqlScan(ctx, v)
 }
 
-func (ftgb *FileTypeGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (ftgb *FileTypeGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range ftgb.fields {
 		if !filetype.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -634,8 +642,6 @@ func (ftgb *FileTypeGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range ftgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(ftgb.fields)+len(ftgb.fns))
 		for _, f := range ftgb.fields {
@@ -655,8 +661,14 @@ type FileTypeSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (fts *FileTypeSelect) Aggregate(fns ...AggregateFunc) *FileTypeSelect {
+	fts.fns = append(fts.fns, fns...)
+	return fts
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (fts *FileTypeSelect) Scan(ctx context.Context, v interface{}) error {
+func (fts *FileTypeSelect) Scan(ctx context.Context, v any) error {
 	if err := fts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -664,7 +676,17 @@ func (fts *FileTypeSelect) Scan(ctx context.Context, v interface{}) error {
 	return fts.sqlScan(ctx, v)
 }
 
-func (fts *FileTypeSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (fts *FileTypeSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(fts.fns))
+	for _, fn := range fts.fns {
+		aggregation = append(aggregation, fn(fts.sql))
+	}
+	switch n := len(*fts.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		fts.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		fts.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := fts.sql.Query()
 	if err := fts.driver.Query(ctx, query, args, rows); err != nil {

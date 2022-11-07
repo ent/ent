@@ -301,6 +301,11 @@ func (blq *BlobLinkQuery) Select(fields ...string) *BlobLinkSelect {
 	return selbuild
 }
 
+// Aggregate returns a BlobLinkSelect configured with the given aggregations.
+func (blq *BlobLinkQuery) Aggregate(fns ...AggregateFunc) *BlobLinkSelect {
+	return blq.Select().Aggregate(fns...)
+}
+
 func (blq *BlobLinkQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range blq.fields {
 		if !bloblink.ValidColumn(f) {
@@ -326,10 +331,10 @@ func (blq *BlobLinkQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bl
 			blq.withLink != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*BlobLink).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &BlobLink{config: blq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -420,11 +425,14 @@ func (blq *BlobLinkQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (blq *BlobLinkQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := blq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := blq.First(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (blq *BlobLinkQuery) querySpec() *sqlgraph.QuerySpec {
@@ -518,7 +526,7 @@ func (blgb *BlobLinkGroupBy) Aggregate(fns ...AggregateFunc) *BlobLinkGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (blgb *BlobLinkGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (blgb *BlobLinkGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := blgb.path(ctx)
 	if err != nil {
 		return err
@@ -527,7 +535,7 @@ func (blgb *BlobLinkGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return blgb.sqlScan(ctx, v)
 }
 
-func (blgb *BlobLinkGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (blgb *BlobLinkGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range blgb.fields {
 		if !bloblink.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -552,8 +560,6 @@ func (blgb *BlobLinkGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range blgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(blgb.fields)+len(blgb.fns))
 		for _, f := range blgb.fields {
@@ -573,8 +579,14 @@ type BlobLinkSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (bls *BlobLinkSelect) Aggregate(fns ...AggregateFunc) *BlobLinkSelect {
+	bls.fns = append(bls.fns, fns...)
+	return bls
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (bls *BlobLinkSelect) Scan(ctx context.Context, v interface{}) error {
+func (bls *BlobLinkSelect) Scan(ctx context.Context, v any) error {
 	if err := bls.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -582,7 +594,17 @@ func (bls *BlobLinkSelect) Scan(ctx context.Context, v interface{}) error {
 	return bls.sqlScan(ctx, v)
 }
 
-func (bls *BlobLinkSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (bls *BlobLinkSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(bls.fns))
+	for _, fn := range bls.fns {
+		aggregation = append(aggregation, fn(bls.sql))
+	}
+	switch n := len(*bls.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		bls.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		bls.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := bls.sql.Query()
 	if err := bls.driver.Query(ctx, query, args, rows); err != nil {

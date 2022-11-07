@@ -19,7 +19,8 @@ import (
 		"{{ $.Config.Package }}/predicate"
 		{{- if $.HasOneFieldID }}
 			{{- with $.ID.Type.PkgPath }}
-				"{{ . }}"
+				{{- $name := $.ID.Type.PkgName }}
+				{{ if ne $name (base $.ID.Type.PkgPath) }}{{ $name }} {{ end}}"{{ . }}"
 			{{- end }}
 		{{- end }}
 		{{- /* Import external packages */}}

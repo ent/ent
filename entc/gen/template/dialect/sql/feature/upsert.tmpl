@@ -108,7 +108,7 @@ type (
 	}
 )
 
-{{ range $f := $.Fields }}
+{{ range $f := $.MutableFields }}
 	{{ $func := print "Set" $f.StructField }}
 	// {{ $func }} sets the "{{ $f.Name }}" field.
 	func (u *{{ $upsertSet }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsertSet }} {
@@ -338,7 +338,6 @@ func (u *{{ $upsertBulk }}) UpdateNewValues() *{{ $upsertBulk }} {
 				{{- if $udfID }}
 					if _, exists := b.mutation.ID(); exists {
 						s.SetIgnore({{ $.Package }}.{{ $.ID.Constant }})
-						return
 					}
 				{{- end }}
 				{{- range $f := $.ImmutableFields }}
@@ -409,7 +408,7 @@ func (u *{{ $upsertBulk }}) ExecX(ctx context.Context) {
 {{ $upsert := $.Scope.Upsert }}
 {{ $upsertSet := $.Scope.UpsertSet }}
 
-{{ range $f := $.Fields }}
+{{ range $f := $.MutableFields }}
     {{ $func := print "Set" $f.StructField }}
     // {{ $func }} sets the "{{ $f.Name }}" field.
 	func (u *{{ $upsert }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsert }} {

@@ -232,11 +232,7 @@ func (dc *DocCreate) createSpec() (*Doc, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = &id
 	}
 	if value, ok := dc.mutation.Text(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: doc.FieldText,
-		})
+		_spec.SetField(doc.FieldText, field.TypeString, value)
 		_node.Text = value
 	}
 	if nodes := dc.mutation.ParentIDs(); len(nodes) > 0 {
@@ -614,7 +610,6 @@ func (u *DocUpsertBulk) UpdateNewValues() *DocUpsertBulk {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(doc.FieldID)
-				return
 			}
 		}
 	}))

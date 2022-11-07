@@ -191,11 +191,7 @@ func (rc *RentalCreate) createSpec() (*Rental, *sqlgraph.CreateSpec) {
 		}
 	)
 	if value, ok := rc.mutation.Date(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: rental.FieldDate,
-		})
+		_spec.SetField(rental.FieldDate, field.TypeTime, value)
 		_node.Date = value
 	}
 	if nodes := rc.mutation.UserIDs(); len(nodes) > 0 {

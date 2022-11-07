@@ -351,6 +351,11 @@ func (dq *DeviceQuery) Select(fields ...string) *DeviceSelect {
 	return selbuild
 }
 
+// Aggregate returns a DeviceSelect configured with the given aggregations.
+func (dq *DeviceQuery) Aggregate(fns ...AggregateFunc) *DeviceSelect {
+	return dq.Select().Aggregate(fns...)
+}
+
 func (dq *DeviceQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range dq.fields {
 		if !device.ValidColumn(f) {
@@ -383,10 +388,10 @@ func (dq *DeviceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Devic
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, device.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Device).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Device{config: dq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -488,11 +493,14 @@ func (dq *DeviceQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (dq *DeviceQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := dq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := dq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (dq *DeviceQuery) querySpec() *sqlgraph.QuerySpec {
@@ -593,7 +601,7 @@ func (dgb *DeviceGroupBy) Aggregate(fns ...AggregateFunc) *DeviceGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (dgb *DeviceGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (dgb *DeviceGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := dgb.path(ctx)
 	if err != nil {
 		return err
@@ -602,7 +610,7 @@ func (dgb *DeviceGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return dgb.sqlScan(ctx, v)
 }
 
-func (dgb *DeviceGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (dgb *DeviceGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range dgb.fields {
 		if !device.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -627,8 +635,6 @@ func (dgb *DeviceGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range dgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(dgb.fields)+len(dgb.fns))
 		for _, f := range dgb.fields {
@@ -648,8 +654,14 @@ type DeviceSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ds *DeviceSelect) Aggregate(fns ...AggregateFunc) *DeviceSelect {
+	ds.fns = append(ds.fns, fns...)
+	return ds
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (ds *DeviceSelect) Scan(ctx context.Context, v interface{}) error {
+func (ds *DeviceSelect) Scan(ctx context.Context, v any) error {
 	if err := ds.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -657,7 +669,17 @@ func (ds *DeviceSelect) Scan(ctx context.Context, v interface{}) error {
 	return ds.sqlScan(ctx, v)
 }
 
-func (ds *DeviceSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ds *DeviceSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ds.fns))
+	for _, fn := range ds.fns {
+		aggregation = append(aggregation, fn(ds.sql))
+	}
+	switch n := len(*ds.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ds.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ds.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ds.sql.Query()
 	if err := ds.driver.Query(ctx, query, args, rows); err != nil {

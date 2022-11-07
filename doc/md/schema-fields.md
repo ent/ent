@@ -194,6 +194,7 @@ func (Card) Fields() []ent.Field {
 ```
 
 ## Go Type
+
 The default type for fields are the basic Go types. For example, for string fields, the type is `string`,
 and for time fields, the type is `time.Time`. The `GoType` method provides an option to override the
 default ent type with a custom one.
@@ -439,13 +440,12 @@ func (User) Fields() []ent.Field {
 ```
 
 ## Nillable
-Sometimes you want to be able to distinguish between the zero value of fields
-and `nil`; for example, if the database column contains `0` or `NULL`.
-The `Nillable` option exists exactly for this.
+Sometimes you want to be able to distinguish between the zero value of fields and `nil`.
+For example, if the database column contains `0` or `NULL`.  The `Nillable` option exists exactly for this.
 
 If you have an `Optional` field of type `T`, setting it to `Nillable` will generate
 a struct field with type `*T`. Hence, if the database returns `NULL` for this field,
-the struct field will be `nil`. Otherwise, it will contain a pointer to the actual data.
+the struct field will be `nil`. Otherwise, it will contain a pointer to the actual value.
 
 For example, given this schema:
 ```go
@@ -464,8 +464,7 @@ func (User) Fields() []ent.Field {
 
 The generated struct for the `User` entity will be as follows:
 
-```go
-// ent/user.go
+```go title="ent/user.go"
 package ent
 
 // User entity.
@@ -476,16 +475,62 @@ type User struct {
 }
 ```
 
+#### `Nillable` required fields
+
+`Nillable` fields are also helpful for avoiding zero values in JSON marshaling for fields that have not been
+`Select`ed in the query. For example, a `time.Time` field.
+
+```go
+// Fields of the task.
+func (Task) Fields() []ent.Field {
+	return []ent.Field{
+		field.Time("created_at").
+			Default(time.Now),
+		field.Time("nillable_created_at").
+            Default(time.Now).
+			Nillable(),
+	}
+}
+```
+
+The generated struct for the `Task` entity will be as follows:
+
+```go title="ent/task.go"
+package ent
+
+// Task entity.
+type Task struct {
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// NillableCreatedAt holds the value of the "nillable_created_at" field.
+	NillableCreatedAt *time.Time `json:"nillable_created_at,omitempty"`
+}
+```
+
+And the result of `json.Marshal` is:
+
+```go
+b, _ := json.Marshal(Task{})
+fmt.Printf("%s\n", b)
+//highlight-next-line-info
+// {"created_at":"0001-01-01T00:00:00Z"}
+
+now := time.Now()
+b, _ = json.Marshal(Task{CreatedAt: now, NillableCreatedAt: &now})
+fmt.Printf("%s\n", b)
+//highlight-next-line-info
+// {"created_at":"2009-11-10T23:00:00Z","nillable_created_at":"2009-11-10T23:00:00Z"}
+```
+
 ## Immutable
 
 Immutable fields are fields that can be set only in the creation of the entity.
-i.e., no setters will be generated for the entity updater.
+i.e., no setters will be generated for the update builders of the entity.
 
-```go
+```go {6}
 // Fields of the user.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name"),
 		field.Time("created_at").
 			Default(time.Now).
 			Immutable(),
@@ -497,11 +542,10 @@ func (User) Fields() []ent.Field {
 Fields can be defined as unique using the `Unique` method.
 Note that unique fields cannot have default values.
 
-```go
+```go {5}
 // Fields of the user.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name"),
 		field.String("nickname").
 			Unique(),
 	}
@@ -751,7 +795,7 @@ func (p Level) Value() (driver.Value, error) {
 }
 
 // Scan tells our code how to read the enum into our type.
-func (p *Level) Scan(val interface{}) error {
+func (p *Level) Scan(val any) error {
 	var s string
 	switch v := val.(type) {
 	case nil:

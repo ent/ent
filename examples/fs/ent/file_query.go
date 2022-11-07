@@ -370,6 +370,11 @@ func (fq *FileQuery) Select(fields ...string) *FileSelect {
 	return selbuild
 }
 
+// Aggregate returns a FileSelect configured with the given aggregations.
+func (fq *FileQuery) Aggregate(fns ...AggregateFunc) *FileSelect {
+	return fq.Select().Aggregate(fns...)
+}
+
 func (fq *FileQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range fq.fields {
 		if !file.ValidColumn(f) {
@@ -395,10 +400,10 @@ func (fq *FileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*File, e
 			fq.withChildren != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*File).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &File{config: fq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -493,11 +498,14 @@ func (fq *FileQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (fq *FileQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := fq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := fq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (fq *FileQuery) querySpec() *sqlgraph.QuerySpec {
@@ -598,7 +606,7 @@ func (fgb *FileGroupBy) Aggregate(fns ...AggregateFunc) *FileGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (fgb *FileGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (fgb *FileGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := fgb.path(ctx)
 	if err != nil {
 		return err
@@ -607,7 +615,7 @@ func (fgb *FileGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return fgb.sqlScan(ctx, v)
 }
 
-func (fgb *FileGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (fgb *FileGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range fgb.fields {
 		if !file.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -632,8 +640,6 @@ func (fgb *FileGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range fgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(fgb.fields)+len(fgb.fns))
 		for _, f := range fgb.fields {
@@ -653,8 +659,14 @@ type FileSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (fs *FileSelect) Aggregate(fns ...AggregateFunc) *FileSelect {
+	fs.fns = append(fs.fns, fns...)
+	return fs
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (fs *FileSelect) Scan(ctx context.Context, v interface{}) error {
+func (fs *FileSelect) Scan(ctx context.Context, v any) error {
 	if err := fs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -662,7 +674,17 @@ func (fs *FileSelect) Scan(ctx context.Context, v interface{}) error {
 	return fs.sqlScan(ctx, v)
 }
 
-func (fs *FileSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (fs *FileSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(fs.fns))
+	for _, fn := range fs.fns {
+		aggregation = append(aggregation, fn(fs.sql))
+	}
+	switch n := len(*fs.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		fs.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		fs.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := fs.sql.Query()
 	if err := fs.driver.Query(ctx, query, args, rows); err != nil {

@@ -7,7 +7,7 @@ The `Hooks` option allows adding custom logic before and after operations that m
 
 ## Mutation
 
-A mutation operation is an operation that mutate the database. For example, adding
+A mutation operation is an operation that mutates the database. For example, adding
 a new node to the graph, remove an edge between 2 nodes or delete multiple nodes. 
 
 There are 5 types of mutations:
@@ -17,7 +17,7 @@ There are 5 types of mutations:
 - `DeleteOne` - Delete a node from the graph.
 - `Delete` - Delete all nodes that match a predicate.
 
-Each generated node type has its own type of mutation. For example, all [`User` builders](crud.md#create-an-entity), share
+Each generated node type has its own type of mutation. For example, all [`User` builders](crud.mdx#create-an-entity), share
 the same generated `UserMutation` object.
 
 However, all builder types implement the generic <a target="_blank" href="https://pkg.go.dev/entgo.io/ent?tab=doc#Mutation">`ent.Mutation`</a> interface.

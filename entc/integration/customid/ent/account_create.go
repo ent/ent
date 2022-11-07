@@ -194,11 +194,7 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = &id
 	}
 	if value, ok := ac.mutation.Email(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: account.FieldEmail,
-		})
+		_spec.SetField(account.FieldEmail, field.TypeString, value)
 		_node.Email = value
 	}
 	if nodes := ac.mutation.TokenIDs(); len(nodes) > 0 {
@@ -524,7 +520,6 @@ func (u *AccountUpsertBulk) UpdateNewValues() *AccountUpsertBulk {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(account.FieldID)
-				return
 			}
 		}
 	}))

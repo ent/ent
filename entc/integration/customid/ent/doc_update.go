@@ -227,17 +227,10 @@ func (du *DocUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := du.mutation.Text(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: doc.FieldText,
-		})
+		_spec.SetField(doc.FieldText, field.TypeString, value)
 	}
 	if du.mutation.TextCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: doc.FieldText,
-		})
+		_spec.ClearField(doc.FieldText, field.TypeString)
 	}
 	if du.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -626,17 +619,10 @@ func (duo *DocUpdateOne) sqlSave(ctx context.Context) (_node *Doc, err error) {
 		}
 	}
 	if value, ok := duo.mutation.Text(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: doc.FieldText,
-		})
+		_spec.SetField(doc.FieldText, field.TypeString, value)
 	}
 	if duo.mutation.TextCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: doc.FieldText,
-		})
+		_spec.ClearField(doc.FieldText, field.TypeString)
 	}
 	if duo.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{

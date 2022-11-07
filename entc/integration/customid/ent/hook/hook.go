@@ -117,6 +117,19 @@ func (f IntSIDFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, erro
 	return f(ctx, mv)
 }
 
+// The LinkFunc type is an adapter to allow the use of ordinary
+// function as Link mutator.
+type LinkFunc func(context.Context, *ent.LinkMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LinkFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.LinkMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LinkMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The MixinIDFunc type is an adapter to allow the use of ordinary
 // function as MixinID mutator.
 type MixinIDFunc func(context.Context, *ent.MixinIDMutation) (ent.Value, error)

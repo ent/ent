@@ -354,6 +354,11 @@ func (pq *PetQuery) Select(fields ...string) *PetSelect {
 	return selbuild
 }
 
+// Aggregate returns a PetSelect configured with the given aggregations.
+func (pq *PetQuery) Aggregate(fns ...AggregateFunc) *PetSelect {
+	return pq.Select().Aggregate(fns...)
+}
+
 func (pq *PetQuery) prepareQuery(ctx context.Context) error {
 	if pq.path != nil {
 		prev, err := pq.path(ctx)
@@ -369,7 +374,7 @@ func (pq *PetQuery) gremlinAll(ctx context.Context) ([]*Pet, error) {
 	res := &gremlin.Response{}
 	traversal := pq.gremlinQuery(ctx)
 	if len(pq.fields) > 0 {
-		fields := make([]interface{}, len(pq.fields))
+		fields := make([]any, len(pq.fields))
 		for i, f := range pq.fields {
 			fields[i] = f
 		}
@@ -453,7 +458,7 @@ func (pgb *PetGroupBy) Aggregate(fns ...AggregateFunc) *PetGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (pgb *PetGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (pgb *PetGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := pgb.path(ctx)
 	if err != nil {
 		return err
@@ -462,7 +467,7 @@ func (pgb *PetGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return pgb.gremlinScan(ctx, v)
 }
 
-func (pgb *PetGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
+func (pgb *PetGroupBy) gremlinScan(ctx context.Context, v any) error {
 	res := &gremlin.Response{}
 	query, bindings := pgb.gremlinQuery().Query()
 	if err := pgb.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -480,8 +485,8 @@ func (pgb *PetGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
 
 func (pgb *PetGroupBy) gremlinQuery() *dsl.Traversal {
 	var (
-		trs   []interface{}
-		names []interface{}
+		trs   []any
+		names []any
 	)
 	for _, fn := range pgb.fns {
 		name, tr := fn("p", "")
@@ -507,8 +512,14 @@ type PetSelect struct {
 	gremlin *dsl.Traversal
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ps *PetSelect) Aggregate(fns ...AggregateFunc) *PetSelect {
+	ps.fns = append(ps.fns, fns...)
+	return ps
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (ps *PetSelect) Scan(ctx context.Context, v interface{}) error {
+func (ps *PetSelect) Scan(ctx context.Context, v any) error {
 	if err := ps.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -516,7 +527,7 @@ func (ps *PetSelect) Scan(ctx context.Context, v interface{}) error {
 	return ps.gremlinScan(ctx, v)
 }
 
-func (ps *PetSelect) gremlinScan(ctx context.Context, v interface{}) error {
+func (ps *PetSelect) gremlinScan(ctx context.Context, v any) error {
 	var (
 		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
@@ -528,7 +539,7 @@ func (ps *PetSelect) gremlinScan(ctx context.Context, v interface{}) error {
 			traversal = ps.gremlin.ID()
 		}
 	} else {
-		fields := make([]interface{}, len(ps.fields))
+		fields := make([]any, len(ps.fields))
 		for i, f := range ps.fields {
 			fields[i] = f
 		}

@@ -299,6 +299,11 @@ func (ctq *CustomTypeQuery) Select(fields ...string) *CustomTypeSelect {
 	return selbuild
 }
 
+// Aggregate returns a CustomTypeSelect configured with the given aggregations.
+func (ctq *CustomTypeQuery) Aggregate(fns ...AggregateFunc) *CustomTypeSelect {
+	return ctq.Select().Aggregate(fns...)
+}
+
 func (ctq *CustomTypeQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range ctq.fields {
 		if !customtype.ValidColumn(f) {
@@ -320,10 +325,10 @@ func (ctq *CustomTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 		nodes = []*CustomType{}
 		_spec = ctq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*CustomType).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &CustomType{config: ctq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -350,11 +355,14 @@ func (ctq *CustomTypeQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (ctq *CustomTypeQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := ctq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := ctq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("entv1: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (ctq *CustomTypeQuery) querySpec() *sqlgraph.QuerySpec {
@@ -455,7 +463,7 @@ func (ctgb *CustomTypeGroupBy) Aggregate(fns ...AggregateFunc) *CustomTypeGroupB
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (ctgb *CustomTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (ctgb *CustomTypeGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := ctgb.path(ctx)
 	if err != nil {
 		return err
@@ -464,7 +472,7 @@ func (ctgb *CustomTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return ctgb.sqlScan(ctx, v)
 }
 
-func (ctgb *CustomTypeGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (ctgb *CustomTypeGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range ctgb.fields {
 		if !customtype.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -489,8 +497,6 @@ func (ctgb *CustomTypeGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range ctgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(ctgb.fields)+len(ctgb.fns))
 		for _, f := range ctgb.fields {
@@ -510,8 +516,14 @@ type CustomTypeSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (cts *CustomTypeSelect) Aggregate(fns ...AggregateFunc) *CustomTypeSelect {
+	cts.fns = append(cts.fns, fns...)
+	return cts
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (cts *CustomTypeSelect) Scan(ctx context.Context, v interface{}) error {
+func (cts *CustomTypeSelect) Scan(ctx context.Context, v any) error {
 	if err := cts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -519,7 +531,17 @@ func (cts *CustomTypeSelect) Scan(ctx context.Context, v interface{}) error {
 	return cts.sqlScan(ctx, v)
 }
 
-func (cts *CustomTypeSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (cts *CustomTypeSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(cts.fns))
+	for _, fn := range cts.fns {
+		aggregation = append(aggregation, fn(cts.sql))
+	}
+	switch n := len(*cts.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		cts.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		cts.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := cts.sql.Query()
 	if err := cts.driver.Query(ctx, query, args, rows); err != nil {

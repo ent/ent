@@ -25,8 +25,10 @@ func (Rental) Fields() []ent.Field {
 	return []ent.Field{
 		field.Time("date").
 			Default(time.Now),
-		field.Int("user_id"),
-		field.UUID("car_id", uuid.UUID{}),
+		field.Int("user_id").
+			Immutable(),
+		field.UUID("car_id", uuid.UUID{}).
+			Immutable(),
 	}
 }
 
@@ -37,12 +39,14 @@ func (Rental) Edges() []ent.Edge {
 			Ref("rentals").
 			Field("user_id").
 			Unique().
-			Required(),
+			Required().
+			Immutable(),
 		edge.From("car", Car.Type).
 			Ref("rentals").
 			Field("car_id").
 			Unique().
-			Required(),
+			Required().
+			Immutable(),
 	}
 }
 

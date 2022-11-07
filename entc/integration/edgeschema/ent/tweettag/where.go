@@ -39,7 +39,7 @@ func IDNEQ(id uuid.UUID) predicate.TweetTag {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.TweetTag {
 	return predicate.TweetTag(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -50,7 +50,7 @@ func IDIn(ids ...uuid.UUID) predicate.TweetTag {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.TweetTag {
 	return predicate.TweetTag(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -123,7 +123,7 @@ func AddedAtNEQ(v time.Time) predicate.TweetTag {
 
 // AddedAtIn applies the In predicate on the "added_at" field.
 func AddedAtIn(vs ...time.Time) predicate.TweetTag {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -134,7 +134,7 @@ func AddedAtIn(vs ...time.Time) predicate.TweetTag {
 
 // AddedAtNotIn applies the NotIn predicate on the "added_at" field.
 func AddedAtNotIn(vs ...time.Time) predicate.TweetTag {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -187,7 +187,7 @@ func TagIDNEQ(v int) predicate.TweetTag {
 
 // TagIDIn applies the In predicate on the "tag_id" field.
 func TagIDIn(vs ...int) predicate.TweetTag {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -198,7 +198,7 @@ func TagIDIn(vs ...int) predicate.TweetTag {
 
 // TagIDNotIn applies the NotIn predicate on the "tag_id" field.
 func TagIDNotIn(vs ...int) predicate.TweetTag {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -223,7 +223,7 @@ func TweetIDNEQ(v int) predicate.TweetTag {
 
 // TweetIDIn applies the In predicate on the "tweet_id" field.
 func TweetIDIn(vs ...int) predicate.TweetTag {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -234,7 +234,7 @@ func TweetIDIn(vs ...int) predicate.TweetTag {
 
 // TweetIDNotIn applies the NotIn predicate on the "tweet_id" field.
 func TweetIDNotIn(vs ...int) predicate.TweetTag {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

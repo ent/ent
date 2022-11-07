@@ -37,7 +37,7 @@ func IDNEQ(id sid.ID) predicate.IntSID {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...sid.ID) predicate.IntSID {
 	return predicate.IntSID(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -48,7 +48,7 @@ func IDIn(ids ...sid.ID) predicate.IntSID {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...sid.ID) predicate.IntSID {
 	return predicate.IntSID(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}

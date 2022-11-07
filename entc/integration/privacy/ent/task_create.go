@@ -240,35 +240,19 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 		}
 	)
 	if value, ok := tc.mutation.Title(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: task.FieldTitle,
-		})
+		_spec.SetField(task.FieldTitle, field.TypeString, value)
 		_node.Title = value
 	}
 	if value, ok := tc.mutation.Description(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: task.FieldDescription,
-		})
+		_spec.SetField(task.FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
 	if value, ok := tc.mutation.Status(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: task.FieldStatus,
-		})
+		_spec.SetField(task.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
 	}
 	if value, ok := tc.mutation.UUID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Value:  value,
-			Column: task.FieldUUID,
-		})
+		_spec.SetField(task.FieldUUID, field.TypeUUID, value)
 		_node.UUID = value
 	}
 	if nodes := tc.mutation.TeamsIDs(); len(nodes) > 0 {

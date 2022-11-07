@@ -101,32 +101,32 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 	{{- range $f := $.MutationFields }}
 			{{- if or (not $f.Immutable) $f.UpdateDefault }}
 				if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
-					_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-						Type: field.{{ $f.Type.ConstName }},
-						Value: value,
-						Column: {{ $.Package }}.{{ $f.Constant }},
-					})
+					_spec.SetField({{ $.Package }}.{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, value)
 				}
 				{{- if $f.SupportsMutationAdd }}
-					if value, ok := {{ $mutation }}.Added{{ $f.StructField }}(); ok {
-						_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-							Type: field.{{ $f.Type.ConstName }},
-							Value: value,
-							Column: {{ $.Package }}.{{ $f.Constant }},
+					if value, ok := {{ $mutation }}.{{ $f.MutationAdded }}(); ok {
+						_spec.AddField({{ $.Package }}.{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, value)
+					}
+				{{- end }}
+				{{- if $f.SupportsMutationAppend }}
+					if value, ok := {{ $mutation }}.{{ $f.MutationAppended }}(); ok {
+						_spec.AddModifier(func(u *sql.UpdateBuilder) {
+							sqljson.Append(u, {{ $.Package }}.{{ $f.Constant }}, value)
 						})
 					}
 				{{- end }}
 			{{- end }}
 			{{- if $f.Optional }}
 				if {{ $mutation }}.{{ $f.StructField }}Cleared() {
-					_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-						Type: field.{{ $f.Type.ConstName }},
-						Column: {{ $.Package }}.{{ $f.Constant }},
-					})
+					_spec.ClearField({{ $.Package }}.{{ $f.Constant }}, field.{{ $f.Type.ConstName }})
 				}
 			{{- end }}
 	{{- end }}
 	{{- range $e := $.EdgesWithID }}
+		{{- if $e.Immutable }}
+			{{- /* Skip to the next one as immutable edges cannot be updated. */}}
+			{{- continue}}
+		{{- end }}
 		if {{ $mutation }}.{{ $e.MutationCleared }}() {
 			{{- with extend $ "Edge" $e }}
 				{{ template "dialect/sql/defedge" . }}

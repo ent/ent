@@ -8,6 +8,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/mixin"
 
 	"ariga.io/atlas/sql/postgres"
 )
@@ -15,6 +16,12 @@ import (
 // License holds the schema definition for the License entity.
 type License struct {
 	ent.Schema
+}
+
+func (License) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		mixin.Time{},
+	}
 }
 
 // Fields of the License.

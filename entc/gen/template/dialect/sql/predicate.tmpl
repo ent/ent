@@ -18,7 +18,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{- $storage := $.Scope.Storage -}}
 	func(s *sql.Selector) {
 		{{- if $op.Variadic }}
-			v := make([]interface{}, len({{ $arg }}))
+			v := make([]any, len({{ $arg }}))
 			for i := range v {
 				v[i] = {{ $arg }}[i]
 			}

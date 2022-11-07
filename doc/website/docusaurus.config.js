@@ -62,6 +62,9 @@ const config = {
           showLastUpdateTime: true,
           sidebarPath: require.resolve('./sidebars.js'),
         },
+        gtag: {
+          trackingID: "UA-189726777-1",
+        },
         "blog": {
           "feedOptions": {
             "type": 'all',
@@ -72,7 +75,7 @@ const config = {
           "blogSidebarTitle": 'All our posts',
         },
         "theme": {
-          "customCss": ["../src/css/custom.css"],
+          "customCss": require.resolve('./src/css/custom.css'),
         }
       }
     ]
@@ -81,16 +84,29 @@ const config = {
   "themeConfig": {
     prism: {
       additionalLanguages: ['gotemplate', 'protobuf'],
+      magicComments: [
+        {
+          className: 'theme-code-block-highlighted-line',
+          line: 'highlight-next-line',
+          block: {start: 'highlight-start', end: 'highlight-end'},
+        },
+        {
+          className: 'code-block-error-message',
+          line: 'highlight-next-line-error-message',
+        },
+        {
+          className: 'code-block-info-line',
+          line: 'highlight-next-line-info',
+        },
+      ],
     },
     algolia: {
-      apiKey: "bfc8175da1bd5078f1c02e5c8a6fe782",
+      appId: "8OIT9XHKR1",
+      apiKey: "42c78b88ab39bda9adad782eba9e2aa2",
       indexName: "entgo",
     },
     colorMode: {
       disableSwitch: false,
-    },
-    googleAnalytics: {
-      trackingID: 'UA-189726777-1',
     },
     "navbar": {
       "title": "",
@@ -223,13 +239,6 @@ const config = {
       <br/>
       Design by Moriah Rich, illustration by Ariel Mashraki.
       `,
-    },
-    "algolia": {
-      "apiKey": "bfc8175da1bd5078f1c02e5c8a6fe782",
-      "indexName": "entgo"
-    },
-    "gtag": {
-      "trackingID": "UA-189726777-1"
     },
     announcementBar: {
       id: 'announcementBar-1', // Increment on change

@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -44,6 +45,20 @@ func (tc *TaskCreate) SetNillablePriority(t *task.Priority) *TaskCreate {
 // SetPriorities sets the "priorities" field.
 func (tc *TaskCreate) SetPriorities(m map[string]task.Priority) *TaskCreate {
 	tc.mutation.SetPriorities(m)
+	return tc
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (tc *TaskCreate) SetCreatedAt(t time.Time) *TaskCreate {
+	tc.mutation.SetCreatedAt(t)
+	return tc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (tc *TaskCreate) SetNillableCreatedAt(t *time.Time) *TaskCreate {
+	if t != nil {
+		tc.SetCreatedAt(*t)
+	}
 	return tc
 }
 
@@ -128,6 +143,10 @@ func (tc *TaskCreate) defaults() {
 		v := enttask.DefaultPriority
 		tc.mutation.SetPriority(v)
 	}
+	if _, ok := tc.mutation.CreatedAt(); !ok {
+		v := enttask.DefaultCreatedAt()
+		tc.mutation.SetCreatedAt(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -139,6 +158,9 @@ func (tc *TaskCreate) check() error {
 		if err := enttask.PriorityValidator(int(v)); err != nil {
 			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
+	}
+	if _, ok := tc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Task.created_at"`)}
 	}
 	return nil
 }
@@ -169,20 +191,16 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 	)
 	_spec.OnConflict = tc.conflict
 	if value, ok := tc.mutation.Priority(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: enttask.FieldPriority,
-		})
+		_spec.SetField(enttask.FieldPriority, field.TypeInt, value)
 		_node.Priority = value
 	}
 	if value, ok := tc.mutation.Priorities(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: enttask.FieldPriorities,
-		})
+		_spec.SetField(enttask.FieldPriorities, field.TypeJSON, value)
 		_node.Priorities = value
+	}
+	if value, ok := tc.mutation.CreatedAt(); ok {
+		_spec.SetField(enttask.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = &value
 	}
 	return _node, _spec
 }
@@ -282,6 +300,11 @@ func (u *TaskUpsert) ClearPriorities() *TaskUpsert {
 //		Exec(ctx)
 func (u *TaskUpsertOne) UpdateNewValues() *TaskUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.CreatedAt(); exists {
+			s.SetIgnore(enttask.FieldCreatedAt)
+		}
+	}))
 	return u
 }
 
@@ -524,6 +547,13 @@ type TaskUpsertBulk struct {
 //		Exec(ctx)
 func (u *TaskUpsertBulk) UpdateNewValues() *TaskUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.CreatedAt(); exists {
+				s.SetIgnore(enttask.FieldCreatedAt)
+			}
+		}
+	}))
 	return u
 }
 

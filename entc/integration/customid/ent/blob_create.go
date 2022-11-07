@@ -240,19 +240,11 @@ func (bc *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = &id
 	}
 	if value, ok := bc.mutation.UUID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Value:  value,
-			Column: blob.FieldUUID,
-		})
+		_spec.SetField(blob.FieldUUID, field.TypeUUID, value)
 		_node.UUID = value
 	}
 	if value, ok := bc.mutation.Count(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: blob.FieldCount,
-		})
+		_spec.SetField(blob.FieldCount, field.TypeInt, value)
 		_node.Count = value
 	}
 	if nodes := bc.mutation.ParentIDs(); len(nodes) > 0 {
@@ -641,7 +633,6 @@ func (u *BlobUpsertBulk) UpdateNewValues() *BlobUpsertBulk {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(blob.FieldID)
-				return
 			}
 		}
 	}))

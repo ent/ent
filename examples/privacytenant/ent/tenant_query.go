@@ -300,6 +300,11 @@ func (tq *TenantQuery) Select(fields ...string) *TenantSelect {
 	return selbuild
 }
 
+// Aggregate returns a TenantSelect configured with the given aggregations.
+func (tq *TenantQuery) Aggregate(fns ...AggregateFunc) *TenantSelect {
+	return tq.Select().Aggregate(fns...)
+}
+
 func (tq *TenantQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range tq.fields {
 		if !tenant.ValidColumn(f) {
@@ -327,10 +332,10 @@ func (tq *TenantQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tenan
 		nodes = []*Tenant{}
 		_spec = tq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Tenant).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Tenant{config: tq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -357,11 +362,14 @@ func (tq *TenantQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (tq *TenantQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := tq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := tq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (tq *TenantQuery) querySpec() *sqlgraph.QuerySpec {
@@ -462,7 +470,7 @@ func (tgb *TenantGroupBy) Aggregate(fns ...AggregateFunc) *TenantGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (tgb *TenantGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (tgb *TenantGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := tgb.path(ctx)
 	if err != nil {
 		return err
@@ -471,7 +479,7 @@ func (tgb *TenantGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return tgb.sqlScan(ctx, v)
 }
 
-func (tgb *TenantGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (tgb *TenantGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range tgb.fields {
 		if !tenant.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -496,8 +504,6 @@ func (tgb *TenantGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range tgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(tgb.fields)+len(tgb.fns))
 		for _, f := range tgb.fields {
@@ -517,8 +523,14 @@ type TenantSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ts *TenantSelect) Aggregate(fns ...AggregateFunc) *TenantSelect {
+	ts.fns = append(ts.fns, fns...)
+	return ts
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (ts *TenantSelect) Scan(ctx context.Context, v interface{}) error {
+func (ts *TenantSelect) Scan(ctx context.Context, v any) error {
 	if err := ts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -526,7 +538,17 @@ func (ts *TenantSelect) Scan(ctx context.Context, v interface{}) error {
 	return ts.sqlScan(ctx, v)
 }
 
-func (ts *TenantSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ts *TenantSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ts.fns))
+	for _, fn := range ts.fns {
+		aggregation = append(aggregation, fn(ts.sql))
+	}
+	switch n := len(*ts.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ts.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ts.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ts.sql.Query()
 	if err := ts.driver.Query(ctx, query, args, rows); err != nil {

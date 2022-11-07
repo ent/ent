@@ -193,11 +193,7 @@ func (tc *TokenCreate) createSpec() (*Token, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = &id
 	}
 	if value, ok := tc.mutation.Body(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: token.FieldBody,
-		})
+		_spec.SetField(token.FieldBody, field.TypeString, value)
 		_node.Body = value
 	}
 	if nodes := tc.mutation.AccountIDs(); len(nodes) > 0 {
@@ -524,7 +520,6 @@ func (u *TokenUpsertBulk) UpdateNewValues() *TokenUpsertBulk {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(token.FieldID)
-				return
 			}
 		}
 	}))

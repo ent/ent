@@ -11,7 +11,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ $pkg := base $.Config.Package }}
 
 // Code implements the dsl.Node interface.
-func (e ConstraintError) Code() (string, []interface{}) {
+func (e ConstraintError) Code() (string, []any) {
 	return strconv.Quote(e.prefix() + e.msg), nil
 }
 
@@ -34,7 +34,7 @@ func (e *ConstraintError) UnmarshalGraphson(b []byte) error {
 func (ConstraintError) prefix() string { return "Error: " }
 
 // NewErrUniqueField creates a constraint error for unique fields.
-func NewErrUniqueField(label, field string, v interface{}) *ConstraintError {
+func NewErrUniqueField(label, field string, v any) *ConstraintError {
 	return &ConstraintError{msg: fmt.Sprintf("field %s.%s with value: %#v", label, field, v)}
 }
 

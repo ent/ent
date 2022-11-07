@@ -151,7 +151,7 @@ func mergeSchema(local, other *load.Schema) {
 		local.Config.Table = other.Config.Table
 	}
 	if local.Annotations == nil && other.Annotations != nil {
-		local.Annotations = make(map[string]interface{})
+		local.Annotations = make(map[string]any)
 	}
 	for ant := range other.Annotations {
 		if _, ok := local.Annotations[ant]; !ok {
@@ -188,7 +188,7 @@ func mergeSchema(local, other *load.Schema) {
 // the "other" field, that may be necessary for code-generation.
 func mergeField(local, other *load.Field) {
 	if local.Annotations == nil && other.Annotations != nil {
-		local.Annotations = make(map[string]interface{})
+		local.Annotations = make(map[string]any)
 	}
 	for ant := range other.Annotations {
 		if _, ok := local.Annotations[ant]; !ok {
@@ -204,7 +204,7 @@ func mergeField(local, other *load.Field) {
 // the "other" edge, that may be necessary for code-generation.
 func mergeEdge(local, other *load.Edge) {
 	if local.Annotations == nil && other.Annotations != nil {
-		local.Annotations = make(map[string]interface{})
+		local.Annotations = make(map[string]any)
 	}
 	for ant := range other.Annotations {
 		if _, ok := local.Annotations[ant]; !ok {

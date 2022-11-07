@@ -299,6 +299,11 @@ func (cq *ConversionQuery) Select(fields ...string) *ConversionSelect {
 	return selbuild
 }
 
+// Aggregate returns a ConversionSelect configured with the given aggregations.
+func (cq *ConversionQuery) Aggregate(fns ...AggregateFunc) *ConversionSelect {
+	return cq.Select().Aggregate(fns...)
+}
+
 func (cq *ConversionQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range cq.fields {
 		if !conversion.ValidColumn(f) {
@@ -320,10 +325,10 @@ func (cq *ConversionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*C
 		nodes = []*Conversion{}
 		_spec = cq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Conversion).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Conversion{config: cq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
@@ -350,11 +355,14 @@ func (cq *ConversionQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (cq *ConversionQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := cq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := cq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("entv2: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (cq *ConversionQuery) querySpec() *sqlgraph.QuerySpec {
@@ -455,7 +463,7 @@ func (cgb *ConversionGroupBy) Aggregate(fns ...AggregateFunc) *ConversionGroupBy
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (cgb *ConversionGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (cgb *ConversionGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := cgb.path(ctx)
 	if err != nil {
 		return err
@@ -464,7 +472,7 @@ func (cgb *ConversionGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return cgb.sqlScan(ctx, v)
 }
 
-func (cgb *ConversionGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (cgb *ConversionGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range cgb.fields {
 		if !conversion.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -489,8 +497,6 @@ func (cgb *ConversionGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range cgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(cgb.fields)+len(cgb.fns))
 		for _, f := range cgb.fields {
@@ -510,8 +516,14 @@ type ConversionSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (cs *ConversionSelect) Aggregate(fns ...AggregateFunc) *ConversionSelect {
+	cs.fns = append(cs.fns, fns...)
+	return cs
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (cs *ConversionSelect) Scan(ctx context.Context, v interface{}) error {
+func (cs *ConversionSelect) Scan(ctx context.Context, v any) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -519,7 +531,17 @@ func (cs *ConversionSelect) Scan(ctx context.Context, v interface{}) error {
 	return cs.sqlScan(ctx, v)
 }
 
-func (cs *ConversionSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (cs *ConversionSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(cs.fns))
+	for _, fn := range cs.fns {
+		aggregation = append(aggregation, fn(cs.sql))
+	}
+	switch n := len(*cs.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		cs.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		cs.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := cs.sql.Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {

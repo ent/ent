@@ -37,7 +37,7 @@ func IDNEQ(id uuid.UUID) predicate.Blob {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.Blob {
 	return predicate.Blob(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -48,7 +48,7 @@ func IDIn(ids ...uuid.UUID) predicate.Blob {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.Blob {
 	return predicate.Blob(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -114,7 +114,7 @@ func UUIDNEQ(v uuid.UUID) predicate.Blob {
 
 // UUIDIn applies the In predicate on the "uuid" field.
 func UUIDIn(vs ...uuid.UUID) predicate.Blob {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -125,7 +125,7 @@ func UUIDIn(vs ...uuid.UUID) predicate.Blob {
 
 // UUIDNotIn applies the NotIn predicate on the "uuid" field.
 func UUIDNotIn(vs ...uuid.UUID) predicate.Blob {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -178,7 +178,7 @@ func CountNEQ(v int) predicate.Blob {
 
 // CountIn applies the In predicate on the "count" field.
 func CountIn(vs ...int) predicate.Blob {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -189,7 +189,7 @@ func CountIn(vs ...int) predicate.Blob {
 
 // CountNotIn applies the NotIn predicate on the "count" field.
 func CountNotIn(vs ...int) predicate.Blob {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

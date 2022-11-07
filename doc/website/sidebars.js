@@ -43,8 +43,8 @@ module.exports = {
       label: 'Migration',
       items: [
         'migrate',
-        'dialects',
         'versioned-migrations',
+        'dialects',
       ],
       collapsed: false,
     },
@@ -56,6 +56,7 @@ module.exports = {
         'extensions',
         'graphql',
         'sql-integration',
+        'ci',
         'testing',
         'faq',
         'feature-flags',

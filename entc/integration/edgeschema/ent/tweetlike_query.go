@@ -302,6 +302,11 @@ func (tlq *TweetLikeQuery) Select(fields ...string) *TweetLikeSelect {
 	return selbuild
 }
 
+// Aggregate returns a TweetLikeSelect configured with the given aggregations.
+func (tlq *TweetLikeQuery) Aggregate(fns ...AggregateFunc) *TweetLikeSelect {
+	return tlq.Select().Aggregate(fns...)
+}
+
 func (tlq *TweetLikeQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range tlq.fields {
 		if !tweetlike.ValidColumn(f) {
@@ -333,10 +338,10 @@ func (tlq *TweetLikeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*T
 			tlq.withUser != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*TweetLike).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &TweetLike{config: tlq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -427,11 +432,14 @@ func (tlq *TweetLikeQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (tlq *TweetLikeQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := tlq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := tlq.First(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (tlq *TweetLikeQuery) querySpec() *sqlgraph.QuerySpec {
@@ -525,7 +533,7 @@ func (tlgb *TweetLikeGroupBy) Aggregate(fns ...AggregateFunc) *TweetLikeGroupBy 
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (tlgb *TweetLikeGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (tlgb *TweetLikeGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := tlgb.path(ctx)
 	if err != nil {
 		return err
@@ -534,7 +542,7 @@ func (tlgb *TweetLikeGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return tlgb.sqlScan(ctx, v)
 }
 
-func (tlgb *TweetLikeGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (tlgb *TweetLikeGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range tlgb.fields {
 		if !tweetlike.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -559,8 +567,6 @@ func (tlgb *TweetLikeGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range tlgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(tlgb.fields)+len(tlgb.fns))
 		for _, f := range tlgb.fields {
@@ -580,8 +586,14 @@ type TweetLikeSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (tls *TweetLikeSelect) Aggregate(fns ...AggregateFunc) *TweetLikeSelect {
+	tls.fns = append(tls.fns, fns...)
+	return tls
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (tls *TweetLikeSelect) Scan(ctx context.Context, v interface{}) error {
+func (tls *TweetLikeSelect) Scan(ctx context.Context, v any) error {
 	if err := tls.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -589,7 +601,17 @@ func (tls *TweetLikeSelect) Scan(ctx context.Context, v interface{}) error {
 	return tls.sqlScan(ctx, v)
 }
 
-func (tls *TweetLikeSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (tls *TweetLikeSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(tls.fns))
+	for _, fn := range tls.fns {
+		aggregation = append(aggregation, fn(tls.sql))
+	}
+	switch n := len(*tls.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		tls.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		tls.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := tls.sql.Query()
 	if err := tls.driver.Query(ctx, query, args, rows); err != nil {

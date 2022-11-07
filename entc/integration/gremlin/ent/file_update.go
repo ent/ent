@@ -362,7 +362,7 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 	if value, ok := fu.mutation.AddedFieldID(); ok {
 		v.Property(dsl.Single, file.FieldFieldID, __.Union(__.Values(file.FieldFieldID), __.Constant(value)).Sum())
 	}
-	var properties []interface{}
+	var properties []any
 	if fu.mutation.UserCleared() {
 		properties = append(properties, file.FieldUser)
 	}
@@ -771,7 +771,7 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := fuo.mutation.AddedFieldID(); ok {
 		v.Property(dsl.Single, file.FieldFieldID, __.Union(__.Values(file.FieldFieldID), __.Constant(value)).Sum())
 	}
-	var properties []interface{}
+	var properties []any
 	if fuo.mutation.UserCleared() {
 		properties = append(properties, file.FieldUser)
 	}
@@ -813,7 +813,7 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 		})
 	}
 	if len(fuo.fields) > 0 {
-		fields := make([]interface{}, 0, len(fuo.fields)+1)
+		fields := make([]any, 0, len(fuo.fields)+1)
 		fields = append(fields, true)
 		for _, f := range fuo.fields {
 			fields = append(fields, f)

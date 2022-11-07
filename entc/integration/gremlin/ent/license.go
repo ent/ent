@@ -9,15 +9,20 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/gremlin"
 )
 
 // License is the model entity for the License schema.
 type License struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into License.
@@ -27,12 +32,16 @@ func (l *License) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanl struct {
-		ID int `json:"id,omitempty"`
+		ID         int   `json:"id,omitempty"`
+		CreateTime int64 `json:"create_time,omitempty"`
+		UpdateTime int64 `json:"update_time,omitempty"`
 	}
 	if err := vmap.Decode(&scanl); err != nil {
 		return err
 	}
 	l.ID = scanl.ID
+	l.CreateTime = time.Unix(0, scanl.CreateTime)
+	l.UpdateTime = time.Unix(0, scanl.UpdateTime)
 	return nil
 }
 
@@ -58,7 +67,12 @@ func (l *License) Unwrap() *License {
 func (l *License) String() string {
 	var builder strings.Builder
 	builder.WriteString("License(")
-	builder.WriteString(fmt.Sprintf("id=%v", l.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", l.ID))
+	builder.WriteString("create_time=")
+	builder.WriteString(l.CreateTime.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("update_time=")
+	builder.WriteString(l.UpdateTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -73,15 +87,18 @@ func (l *Licenses) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanl []struct {
-		ID int `json:"id,omitempty"`
+		ID         int   `json:"id,omitempty"`
+		CreateTime int64 `json:"create_time,omitempty"`
+		UpdateTime int64 `json:"update_time,omitempty"`
 	}
 	if err := vmap.Decode(&scanl); err != nil {
 		return err
 	}
 	for _, v := range scanl {
-		*l = append(*l, &License{
-			ID: v.ID,
-		})
+		node := &License{ID: v.ID}
+		node.CreateTime = time.Unix(0, v.CreateTime)
+		node.UpdateTime = time.Unix(0, v.UpdateTime)
+		*l = append(*l, node)
 	}
 	return nil
 }

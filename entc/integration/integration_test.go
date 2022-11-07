@@ -33,12 +33,13 @@ import (
 	"entgo.io/ent/entc/integration/ent/groupinfo"
 	"entgo.io/ent/entc/integration/ent/hook"
 	"entgo.io/ent/entc/integration/ent/item"
+	"entgo.io/ent/entc/integration/ent/license"
 	"entgo.io/ent/entc/integration/ent/migrate"
 	"entgo.io/ent/entc/integration/ent/node"
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/schema"
+	enttask "entgo.io/ent/entc/integration/ent/task"
 	"entgo.io/ent/entc/integration/ent/user"
-	"entgo.io/ent/entc/integration/privacy/ent/task"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/lib/pq"
@@ -130,6 +131,7 @@ var (
 		Sanity,
 		Paging,
 		Select,
+		Aggregate,
 		Delete,
 		Upsert,
 		Relation,
@@ -155,6 +157,7 @@ var (
 		Mutation,
 		CreateBulk,
 		ConstraintChecks,
+		NillableRequired,
 	}
 )
 
@@ -296,6 +299,10 @@ func Sanity(t *testing.T, client *ent.Client) {
 		require.True(client.Pet.Query().Where(pet.NameContainsFold("A")).ExistX(ctx))
 		require.False(client.Pet.Query().Where(pet.NameContainsFold("%A")).ExistX(ctx))
 		require.False(client.Pet.Query().Where(pet.NameContainsFold("A%")).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameEqualFold("A_\\")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameEqualFold("%A_\\")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameEqualFold("A_\\%")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameEqualFold("A%")).ExistX(ctx))
 	})
 }
 
@@ -326,7 +333,7 @@ func Upsert(t *testing.T, client *ent.Client) {
 		SetAge(33).
 		SetPhone("0000").
 		OnConflictColumns(user.FieldPhone).
-		// Override some of the fields with custom update.
+		// Override some fields with custom update.
 		Update(func(u *ent.UserUpsert) {
 			// Age was set to the new value (33).
 			u.UpdateAge()
@@ -445,9 +452,31 @@ func Upsert(t *testing.T, client *ent.Client) {
 			IDX(ctx)
 	}
 
+	// Ensure immutable fields were not changed during upsert.
 	c2 := client.Card.GetX(ctx, id)
 	require.Equal(t, c1.CreateTime.Unix(), c2.CreateTime.Unix())
 	require.NotEqual(t, c1.UpdateTime.Unix(), c2.UpdateTime.Unix())
+
+	// Ensure immutable fields were not changed during bulk upsert.
+	l1 := client.License.Create().SetCreateTime(ts).SetUpdateTime(ts).SaveX(ctx)
+	client.License.CreateBulk(client.License.Create().SetID(l1.ID)).
+		OnConflictColumns(license.FieldID).
+		UpdateNewValues().
+		ExecX(ctx)
+	l2 := client.License.GetX(ctx, l1.ID)
+	require.Equal(t, l1.CreateTime.Unix(), l2.CreateTime.Unix())
+	require.NotEqual(t, l1.UpdateTime.Unix(), l2.UpdateTime.Unix())
+
+	c3 := client.Card.Create().SetName("a8m").SetNumber("405060").SaveX(ctx)
+	client.Card.Create().SetNumber(c3.Number).OnConflictColumns(card.FieldNumber).ClearName().UpdateNewValues().ExecX(ctx)
+	require.Empty(t, client.Card.GetX(ctx, c3.ID).Name)
+	c3.Update().SetName("a8m").ExecX(ctx)
+	client.Card.CreateBulk(client.Card.Create().SetNumber(c3.Number), client.Card.Create().SetNumber("708090").SetName("m8a")).
+		OnConflictColumns(card.FieldNumber).
+		UpdateNewValues().
+		ExecX(ctx)
+	require.Empty(t, client.Card.GetX(ctx, c3.ID).Name, "existing name fields should be cleared when not set (= set to nil)")
+	require.NotEmpty(t, client.Card.Query().Where(card.Number("708090")).OnlyX(ctx).Name, "new record should set their name")
 }
 
 func Clone(t *testing.T, client *ent.Client) {
@@ -730,6 +759,59 @@ func Select(t *testing.T, client *ent.Client) {
 	require.True(allUpper(), "at names must be upper-cased")
 }
 
+func Aggregate(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	a8m := client.User.Create().SetAge(1).SetName("a8m").SaveX(ctx)
+	nat := client.User.Create().SetAge(1).SetName("nati").SetSpouse(a8m).SaveX(ctx)
+	owners := []*ent.User{a8m, nat}
+	for i := 1; i <= 10; i++ {
+		client.Pet.Create().SetName(fmt.Sprintf("pet%d", i)).SetAge(float64(i)).SetOwner(owners[i%2]).SaveX(ctx)
+	}
+	s1 := client.Pet.Query().Aggregate(ent.Sum(pet.FieldAge)).IntX(ctx)
+	require.Equal(t, 55, s1)
+	s2 := client.Pet.Query().Where(pet.HasOwner()).Aggregate(ent.Sum(pet.FieldAge)).IntX(ctx)
+	require.Equal(t, s1, s2)
+
+	// Aggregate traversals.
+	require.Equal(t, 30, a8m.QueryPets().Aggregate(ent.Sum(pet.FieldAge)).IntX(ctx))
+	require.Equal(t, 25, nat.QueryPets().Aggregate(ent.Sum(pet.FieldAge)).IntX(ctx))
+	require.Equal(t, 25, a8m.QuerySpouse().QueryPets().Aggregate(ent.Sum(pet.FieldAge)).IntX(ctx))
+	require.Equal(t, 30, nat.QuerySpouse().QueryPets().Aggregate(ent.Sum(pet.FieldAge)).IntX(ctx))
+
+	// Aggregate 2 fields.
+	var vs1 []struct{ Sum, Count int }
+	client.Pet.Query().
+		Aggregate(
+			ent.Sum(pet.FieldAge),
+			ent.Count(),
+		).
+		ScanX(ctx, &vs1)
+	require.Len(t, vs1, 1)
+	require.Equal(t, 55, vs1[0].Sum)
+	require.Equal(t, 10, vs1[0].Count)
+
+	// Aggregate 4 fields.
+	var vs2 []struct {
+		Sum, Min, Max, Count int
+		Avg                  float64
+	}
+	client.Pet.Query().
+		Aggregate(
+			ent.Sum(pet.FieldAge),
+			ent.Min(pet.FieldAge),
+			ent.Max(pet.FieldAge),
+			ent.Mean(pet.FieldAge),
+			ent.Count(),
+		).
+		ScanX(ctx, &vs2)
+	require.Len(t, vs2, 1)
+	require.Equal(t, 55, vs2[0].Sum)
+	require.Equal(t, 1, vs2[0].Min)
+	require.Equal(t, 10, vs2[0].Max)
+	require.Equal(t, 10, vs2[0].Count)
+	require.Equal(t, 5.5, vs2[0].Avg)
+}
+
 func ExecQuery(t *testing.T, client *ent.Client) {
 	require := require.New(t)
 	ctx := context.Background()
@@ -741,13 +823,24 @@ func ExecQuery(t *testing.T, client *ent.Client) {
 	require.NoError(err)
 	tx.Task.Create().ExecX(ctx)
 	require.Equal(1, tx.Task.Query().CountX(ctx))
-	rows, err = tx.QueryContext(ctx, "SELECT COUNT(*) FROM "+task.Table)
+	rows, err = tx.QueryContext(ctx, "SELECT COUNT(*) FROM "+enttask.Table)
 	require.NoError(err)
 	count, err := sql.ScanInt(rows)
 	require.NoError(err)
 	require.NoError(rows.Close())
 	require.Equal(1, count)
 	require.NoError(tx.Commit())
+}
+
+func NillableRequired(t *testing.T, client *ent.Client) {
+	require := require.New(t)
+	ctx := context.Background()
+	client.Task.Create().ExecX(ctx)
+	tk := client.Task.Query().OnlyX(ctx)
+	require.NotNil(tk.CreatedAt, "field value should be populated by default by the database")
+	require.False(reflect.ValueOf(tk.Update()).MethodByName("SetNillableCreatedAt").IsValid(), "immutable-nillable should not have SetNillable setter on update")
+	tk = client.Task.Query().Select(enttask.FieldID, enttask.FieldPriority).OnlyX(ctx)
+	require.Nil(tk.CreatedAt, "field should not be populated when it is not selected")
 }
 
 func Predicate(t *testing.T, client *ent.Client) {
@@ -1545,17 +1638,17 @@ func DefaultValue(t *testing.T, client *ent.Client) {
 func ImmutableValue(t *testing.T, client *ent.Client) {
 	tests := []struct {
 		name    string
-		updater func() interface{}
+		updater func() any
 	}{
 		{
 			name: "Update",
-			updater: func() interface{} {
+			updater: func() any {
 				return client.Card.Update()
 			},
 		},
 		{
 			name: "UpdateOne",
-			updater: func() interface{} {
+			updater: func() any {
 				return client.Card.Create().SetNumber("42").SaveX(context.Background()).Update()
 			},
 		},
@@ -1900,7 +1993,18 @@ func (f writerFunc) Write(p []byte) (int, error) { return f(p) }
 func NoSchemaChanges(t *testing.T, client *ent.Client) {
 	w := writerFunc(func(p []byte) (int, error) {
 		stmt := strings.Trim(string(p), "\n;")
-		if stmt != "BEGIN" && stmt != "COMMIT" {
+		ok := []string{"BEGIN", "COMMIT"}
+		if strings.Contains(t.Name(), "SQLite") {
+			ok = append(ok, "PRAGMA foreign_keys = off", "PRAGMA foreign_keys = on")
+		}
+		if !func() bool {
+			for _, s := range ok {
+				if s == stmt {
+					return true
+				}
+			}
+			return false
+		}() {
 			t.Errorf("expect no statement to execute. got: %q", stmt)
 		}
 		return len(p), nil

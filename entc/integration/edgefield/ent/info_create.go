@@ -169,11 +169,7 @@ func (ic *InfoCreate) createSpec() (*Info, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = id
 	}
 	if value, ok := ic.mutation.Content(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: info.FieldContent,
-		})
+		_spec.SetField(info.FieldContent, field.TypeJSON, value)
 		_node.Content = value
 	}
 	if nodes := ic.mutation.UserIDs(); len(nodes) > 0 {

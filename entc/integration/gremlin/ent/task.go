@@ -9,6 +9,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/entc/integration/ent/schema/task"
@@ -23,6 +24,8 @@ type Task struct {
 	Priority task.Priority `json:"priority,omitempty"`
 	// Priorities holds the value of the "priorities" field.
 	Priorities map[string]task.Priority `json:"priorities,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt *time.Time `json:"created_at,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into Task.
@@ -35,6 +38,7 @@ func (t *Task) FromResponse(res *gremlin.Response) error {
 		ID         string                   `json:"id,omitempty"`
 		Priority   task.Priority            `json:"priority,omitempty"`
 		Priorities map[string]task.Priority `json:"priorities,omitempty"`
+		CreatedAt  int64                    `json:"created_at,omitempty"`
 	}
 	if err := vmap.Decode(&scant); err != nil {
 		return err
@@ -42,6 +46,8 @@ func (t *Task) FromResponse(res *gremlin.Response) error {
 	t.ID = scant.ID
 	t.Priority = scant.Priority
 	t.Priorities = scant.Priorities
+	v2 := time.Unix(0, scant.CreatedAt)
+	t.CreatedAt = &v2
 	return nil
 }
 
@@ -73,6 +79,11 @@ func (t *Task) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("priorities=")
 	builder.WriteString(fmt.Sprintf("%v", t.Priorities))
+	builder.WriteString(", ")
+	if v := t.CreatedAt; v != nil {
+		builder.WriteString("created_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -90,16 +101,18 @@ func (t *Tasks) FromResponse(res *gremlin.Response) error {
 		ID         string                   `json:"id,omitempty"`
 		Priority   task.Priority            `json:"priority,omitempty"`
 		Priorities map[string]task.Priority `json:"priorities,omitempty"`
+		CreatedAt  int64                    `json:"created_at,omitempty"`
 	}
 	if err := vmap.Decode(&scant); err != nil {
 		return err
 	}
 	for _, v := range scant {
-		*t = append(*t, &Task{
-			ID:         v.ID,
-			Priority:   v.Priority,
-			Priorities: v.Priorities,
-		})
+		node := &Task{ID: v.ID}
+		node.Priority = v.Priority
+		node.Priorities = v.Priorities
+		v2 := time.Unix(0, v.CreatedAt)
+		node.CreatedAt = &v2
+		*t = append(*t, node)
 	}
 	return nil
 }

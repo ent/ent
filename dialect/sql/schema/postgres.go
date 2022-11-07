@@ -29,9 +29,9 @@ type Postgres struct {
 
 // init loads the Postgres version from the database for later use in the migration process.
 // It returns an error if the server version is lower than v10.
-func (d *Postgres) init(ctx context.Context, tx dialect.ExecQuerier) error {
+func (d *Postgres) init(ctx context.Context) error {
 	rows := &sql.Rows{}
-	if err := tx.Query(ctx, "SHOW server_version_num", []interface{}{}, rows); err != nil {
+	if err := d.Query(ctx, "SHOW server_version_num", []any{}, rows); err != nil {
 		return fmt.Errorf("querying server version %w", err)
 	}
 	defer rows.Close()
@@ -87,7 +87,7 @@ func (d *Postgres) setRange(ctx context.Context, conn dialect.ExecQuerier, t *Ta
 	if len(t.PrimaryKey) == 1 {
 		pk = t.PrimaryKey[0].Name
 	}
-	return conn.Exec(ctx, fmt.Sprintf("ALTER TABLE %q ALTER COLUMN %q RESTART WITH %d", t.Name, pk, value), []interface{}{}, nil)
+	return conn.Exec(ctx, fmt.Sprintf("ALTER TABLE %q ALTER COLUMN %q RESTART WITH %d", t.Name, pk, value), []any{}, nil)
 }
 
 // table loads the current table description from the database.
@@ -181,9 +181,9 @@ ORDER BY index_name, seq_in_index;
 `
 
 // indexesQuery returns the query (and its placeholders) for getting table indexes.
-func (d *Postgres) indexesQuery(table string) (string, []interface{}) {
+func (d *Postgres) indexesQuery(table string) (string, []any) {
 	if d.schema != "" {
-		return fmt.Sprintf(indexesQuery, "$1", table), []interface{}{d.schema}
+		return fmt.Sprintf(indexesQuery, "$1", table), []any{d.schema}
 	}
 	return fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", table), nil
 }
@@ -602,7 +602,7 @@ func (d *Postgres) foreignKeys(ctx context.Context, tx dialect.Tx, tables []*Tab
 	for _, t := range tables {
 		rows := &sql.Rows{}
 		query := fmt.Sprintf(fkQuery, t.Name)
-		if err := tx.Query(ctx, query, []interface{}{}, rows); err != nil {
+		if err := tx.Query(ctx, query, []any{}, rows); err != nil {
 			return fmt.Errorf("querying foreign keys for table %s: %w", t.Name, err)
 		}
 		defer rows.Close()
@@ -690,6 +690,9 @@ func (d *Postgres) atTypeC(c1 *Column, c2 *schema.Column) error {
 			return err
 		}
 		c2.Type.Type = t
+		if s, ok := t.(*postgres.SerialType); c1.foreign != nil && ok {
+			c2.Type.Type = s.IntegerType()
+		}
 		return nil
 	}
 	var t schema.Type
@@ -784,6 +787,20 @@ func (d *Postgres) atIndex(idx1 *Index, t2 *schema.Table, idx2 *schema.Index) er
 	}
 	if t, ok := indexType(idx1, dialect.Postgres); ok {
 		idx2.AddAttrs(&postgres.IndexType{T: t})
+	}
+	if ant, supportsInclude := idx1.Annotation, compareVersions(d.version, "11.0.0") >= 0; ant != nil && len(ant.IncludeColumns) > 0 && supportsInclude {
+		columns := make([]*schema.Column, len(ant.IncludeColumns))
+		for i, ic := range ant.IncludeColumns {
+			c, ok := t2.Column(ic)
+			if !ok {
+				return fmt.Errorf("include column %q was not found for index %q", ic, idx1.Name)
+			}
+			columns[i] = c
+		}
+		idx2.AddAttrs(&postgres.IndexInclude{Columns: columns})
+	}
+	if idx1.Annotation != nil && idx1.Annotation.Where != "" {
+		idx2.AddAttrs(&postgres.IndexPredicate{P: idx1.Annotation.Where})
 	}
 	return nil
 }

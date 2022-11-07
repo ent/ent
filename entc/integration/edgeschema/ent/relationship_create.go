@@ -93,7 +93,9 @@ func (rc *RelationshipCreate) Save(ctx context.Context) (*Relationship, error) {
 		err  error
 		node *Relationship
 	)
-	rc.defaults()
+	if err := rc.defaults(); err != nil {
+		return nil, err
+	}
 	if len(rc.hooks) == 0 {
 		if err = rc.check(); err != nil {
 			return nil, err
@@ -156,11 +158,12 @@ func (rc *RelationshipCreate) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (rc *RelationshipCreate) defaults() {
+func (rc *RelationshipCreate) defaults() error {
 	if _, ok := rc.mutation.Weight(); !ok {
 		v := relationship.DefaultWeight
 		rc.mutation.SetWeight(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -203,11 +206,7 @@ func (rc *RelationshipCreate) createSpec() (*Relationship, *sqlgraph.CreateSpec)
 	)
 	_spec.OnConflict = rc.conflict
 	if value, ok := rc.mutation.Weight(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: relationship.FieldWeight,
-		})
+		_spec.SetField(relationship.FieldWeight, field.TypeInt, value)
 		_node.Weight = value
 	}
 	if nodes := rc.mutation.UserIDs(); len(nodes) > 0 {

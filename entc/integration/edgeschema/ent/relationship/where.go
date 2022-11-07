@@ -56,7 +56,7 @@ func WeightNEQ(v int) predicate.Relationship {
 
 // WeightIn applies the In predicate on the "weight" field.
 func WeightIn(vs ...int) predicate.Relationship {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -67,7 +67,7 @@ func WeightIn(vs ...int) predicate.Relationship {
 
 // WeightNotIn applies the NotIn predicate on the "weight" field.
 func WeightNotIn(vs ...int) predicate.Relationship {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -120,7 +120,7 @@ func UserIDNEQ(v int) predicate.Relationship {
 
 // UserIDIn applies the In predicate on the "user_id" field.
 func UserIDIn(vs ...int) predicate.Relationship {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -131,7 +131,7 @@ func UserIDIn(vs ...int) predicate.Relationship {
 
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
 func UserIDNotIn(vs ...int) predicate.Relationship {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -156,7 +156,7 @@ func RelativeIDNEQ(v int) predicate.Relationship {
 
 // RelativeIDIn applies the In predicate on the "relative_id" field.
 func RelativeIDIn(vs ...int) predicate.Relationship {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -167,7 +167,7 @@ func RelativeIDIn(vs ...int) predicate.Relationship {
 
 // RelativeIDNotIn applies the NotIn predicate on the "relative_id" field.
 func RelativeIDNotIn(vs ...int) predicate.Relationship {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -192,7 +192,7 @@ func InfoIDNEQ(v int) predicate.Relationship {
 
 // InfoIDIn applies the In predicate on the "info_id" field.
 func InfoIDIn(vs ...int) predicate.Relationship {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -203,7 +203,7 @@ func InfoIDIn(vs ...int) predicate.Relationship {
 
 // InfoIDNotIn applies the NotIn predicate on the "info_id" field.
 func InfoIDNotIn(vs ...int) predicate.Relationship {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

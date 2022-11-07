@@ -27,7 +27,7 @@ import (
 // LoadGraph loads the schema package from the given schema path,
 // and constructs a *gen.Graph.
 func LoadGraph(schemaPath string, cfg *gen.Config) (*gen.Graph, error) {
-	spec, err := (&load.Config{Path: schemaPath}).Load()
+	spec, err := (&load.Config{Path: schemaPath, BuildFlags: cfg.BuildFlags}).Load()
 	if err != nil {
 		return nil, err
 	}
@@ -154,6 +154,20 @@ func Annotations(annotations ...Annotation) Option {
 	}
 }
 
+// BuildFlags appends the given build flags to the codegen config.
+func BuildFlags(flags ...string) Option {
+	return func(cfg *gen.Config) error {
+		cfg.BuildFlags = append(cfg.BuildFlags, flags...)
+		return nil
+	}
+}
+
+// BuildTags appends the given build tags as build flags to the codegen
+// config.
+func BuildTags(tags ...string) Option {
+	return BuildFlags("-tags", strings.Join(tags, ","))
+}
+
 // TemplateFiles parses the named files and associates the resulting templates
 // with codegen templates.
 func TemplateFiles(filenames ...string) Option {
@@ -271,7 +285,7 @@ type DependencyOption func(*gen.Dependency) error
 
 // DependencyType sets the type of the struct field in
 // the generated builders for the configured dependency.
-func DependencyType(v interface{}) DependencyOption {
+func DependencyType(v any) DependencyOption {
 	return func(d *gen.Dependency) error {
 		if v == nil {
 			return errors.New("nil dependency type")

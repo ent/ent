@@ -126,6 +126,26 @@ func (cu *CommentUpdate) ClearDir() *CommentUpdate {
 	return cu
 }
 
+// SetClient sets the "client" field.
+func (cu *CommentUpdate) SetClient(s string) *CommentUpdate {
+	cu.mutation.SetClient(s)
+	return cu
+}
+
+// SetNillableClient sets the "client" field if the given value is not nil.
+func (cu *CommentUpdate) SetNillableClient(s *string) *CommentUpdate {
+	if s != nil {
+		cu.SetClient(*s)
+	}
+	return cu
+}
+
+// ClearClient clears the value of the "client" field.
+func (cu *CommentUpdate) ClearClient() *CommentUpdate {
+	cu.mutation.ClearClient()
+	return cu
+}
+
 // Mutation returns the CommentMutation object of the builder.
 func (cu *CommentUpdate) Mutation() *CommentMutation {
 	return cu.mutation
@@ -210,80 +230,45 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := cu.mutation.UniqueInt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: comment.FieldUniqueInt,
-		})
+		_spec.SetField(comment.FieldUniqueInt, field.TypeInt, value)
 	}
 	if value, ok := cu.mutation.AddedUniqueInt(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: comment.FieldUniqueInt,
-		})
+		_spec.AddField(comment.FieldUniqueInt, field.TypeInt, value)
 	}
 	if value, ok := cu.mutation.UniqueFloat(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: comment.FieldUniqueFloat,
-		})
+		_spec.SetField(comment.FieldUniqueFloat, field.TypeFloat64, value)
 	}
 	if value, ok := cu.mutation.AddedUniqueFloat(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: comment.FieldUniqueFloat,
-		})
+		_spec.AddField(comment.FieldUniqueFloat, field.TypeFloat64, value)
 	}
 	if value, ok := cu.mutation.NillableInt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: comment.FieldNillableInt,
-		})
+		_spec.SetField(comment.FieldNillableInt, field.TypeInt, value)
 	}
 	if value, ok := cu.mutation.AddedNillableInt(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: comment.FieldNillableInt,
-		})
+		_spec.AddField(comment.FieldNillableInt, field.TypeInt, value)
 	}
 	if cu.mutation.NillableIntCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: comment.FieldNillableInt,
-		})
+		_spec.ClearField(comment.FieldNillableInt, field.TypeInt)
 	}
 	if value, ok := cu.mutation.Table(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: comment.FieldTable,
-		})
+		_spec.SetField(comment.FieldTable, field.TypeString, value)
 	}
 	if cu.mutation.TableCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: comment.FieldTable,
-		})
+		_spec.ClearField(comment.FieldTable, field.TypeString)
 	}
 	if value, ok := cu.mutation.Dir(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: comment.FieldDir,
-		})
+		_spec.SetField(comment.FieldDir, field.TypeJSON, value)
 	}
 	if cu.mutation.DirCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: comment.FieldDir,
-		})
+		_spec.ClearField(comment.FieldDir, field.TypeJSON)
 	}
-	_spec.Modifiers = cu.modifiers
+	if value, ok := cu.mutation.GetClient(); ok {
+		_spec.SetField(comment.FieldClient, field.TypeString, value)
+	}
+	if cu.mutation.ClientCleared() {
+		_spec.ClearField(comment.FieldClient, field.TypeString)
+	}
+	_spec.AddModifiers(cu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{comment.Label}
@@ -394,6 +379,26 @@ func (cuo *CommentUpdateOne) SetNillableDir(s *schemadir.Dir) *CommentUpdateOne 
 // ClearDir clears the value of the "dir" field.
 func (cuo *CommentUpdateOne) ClearDir() *CommentUpdateOne {
 	cuo.mutation.ClearDir()
+	return cuo
+}
+
+// SetClient sets the "client" field.
+func (cuo *CommentUpdateOne) SetClient(s string) *CommentUpdateOne {
+	cuo.mutation.SetClient(s)
+	return cuo
+}
+
+// SetNillableClient sets the "client" field if the given value is not nil.
+func (cuo *CommentUpdateOne) SetNillableClient(s *string) *CommentUpdateOne {
+	if s != nil {
+		cuo.SetClient(*s)
+	}
+	return cuo
+}
+
+// ClearClient clears the value of the "client" field.
+func (cuo *CommentUpdateOne) ClearClient() *CommentUpdateOne {
+	cuo.mutation.ClearClient()
 	return cuo
 }
 
@@ -511,80 +516,45 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 		}
 	}
 	if value, ok := cuo.mutation.UniqueInt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: comment.FieldUniqueInt,
-		})
+		_spec.SetField(comment.FieldUniqueInt, field.TypeInt, value)
 	}
 	if value, ok := cuo.mutation.AddedUniqueInt(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: comment.FieldUniqueInt,
-		})
+		_spec.AddField(comment.FieldUniqueInt, field.TypeInt, value)
 	}
 	if value, ok := cuo.mutation.UniqueFloat(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: comment.FieldUniqueFloat,
-		})
+		_spec.SetField(comment.FieldUniqueFloat, field.TypeFloat64, value)
 	}
 	if value, ok := cuo.mutation.AddedUniqueFloat(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: comment.FieldUniqueFloat,
-		})
+		_spec.AddField(comment.FieldUniqueFloat, field.TypeFloat64, value)
 	}
 	if value, ok := cuo.mutation.NillableInt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: comment.FieldNillableInt,
-		})
+		_spec.SetField(comment.FieldNillableInt, field.TypeInt, value)
 	}
 	if value, ok := cuo.mutation.AddedNillableInt(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: comment.FieldNillableInt,
-		})
+		_spec.AddField(comment.FieldNillableInt, field.TypeInt, value)
 	}
 	if cuo.mutation.NillableIntCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: comment.FieldNillableInt,
-		})
+		_spec.ClearField(comment.FieldNillableInt, field.TypeInt)
 	}
 	if value, ok := cuo.mutation.Table(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: comment.FieldTable,
-		})
+		_spec.SetField(comment.FieldTable, field.TypeString, value)
 	}
 	if cuo.mutation.TableCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: comment.FieldTable,
-		})
+		_spec.ClearField(comment.FieldTable, field.TypeString)
 	}
 	if value, ok := cuo.mutation.Dir(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: comment.FieldDir,
-		})
+		_spec.SetField(comment.FieldDir, field.TypeJSON, value)
 	}
 	if cuo.mutation.DirCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: comment.FieldDir,
-		})
+		_spec.ClearField(comment.FieldDir, field.TypeJSON)
 	}
-	_spec.Modifiers = cuo.modifiers
+	if value, ok := cuo.mutation.GetClient(); ok {
+		_spec.SetField(comment.FieldClient, field.TypeString, value)
+	}
+	if cuo.mutation.ClientCleared() {
+		_spec.ClearField(comment.FieldClient, field.TypeString)
+	}
+	_spec.AddModifiers(cuo.modifiers...)
 	_node = &Comment{config: cuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

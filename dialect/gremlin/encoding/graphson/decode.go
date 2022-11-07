@@ -18,19 +18,19 @@ type decodeExtension struct {
 
 // Unmarshal parses the graphson encoded data and stores the result
 // in the value pointed to by v.
-func Unmarshal(data []byte, v interface{}) error {
+func Unmarshal(data []byte, v any) error {
 	return config.Unmarshal(data, v)
 }
 
 // UnmarshalFromString parses the graphson encoded str and stores the result
 // in the value pointed to by v.
-func UnmarshalFromString(str string, v interface{}) error {
+func UnmarshalFromString(str string, v any) error {
 	return config.UnmarshalFromString(str, v)
 }
 
 // Decoder defines a graphson decoder.
 type Decoder interface {
-	Decode(interface{}) error
+	Decode(any) error
 }
 
 // NewDecoder create a graphson decoder.

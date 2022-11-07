@@ -14,7 +14,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinAll(ctx context.Context) ([]*{{ $.
 	res := &gremlin.Response{}
 	traversal := {{ $receiver }}.gremlinQuery(ctx)
 	if len({{ $receiver }}.fields) > 0 {
-		fields := make([]interface{}, len({{ $receiver }}.fields))
+		fields := make([]any, len({{ $receiver }}.fields))
 		for i, f := range {{ $receiver }}.fields {
 			fields[i] = f
 		}

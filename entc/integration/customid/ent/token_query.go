@@ -337,6 +337,11 @@ func (tq *TokenQuery) Select(fields ...string) *TokenSelect {
 	return selbuild
 }
 
+// Aggregate returns a TokenSelect configured with the given aggregations.
+func (tq *TokenQuery) Aggregate(fns ...AggregateFunc) *TokenSelect {
+	return tq.Select().Aggregate(fns...)
+}
+
 func (tq *TokenQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range tq.fields {
 		if !token.ValidColumn(f) {
@@ -368,10 +373,10 @@ func (tq *TokenQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Token,
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, token.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Token).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Token{config: tq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -435,11 +440,14 @@ func (tq *TokenQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (tq *TokenQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := tq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := tq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (tq *TokenQuery) querySpec() *sqlgraph.QuerySpec {
@@ -540,7 +548,7 @@ func (tgb *TokenGroupBy) Aggregate(fns ...AggregateFunc) *TokenGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (tgb *TokenGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (tgb *TokenGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := tgb.path(ctx)
 	if err != nil {
 		return err
@@ -549,7 +557,7 @@ func (tgb *TokenGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return tgb.sqlScan(ctx, v)
 }
 
-func (tgb *TokenGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (tgb *TokenGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range tgb.fields {
 		if !token.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -574,8 +582,6 @@ func (tgb *TokenGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range tgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(tgb.fields)+len(tgb.fns))
 		for _, f := range tgb.fields {
@@ -595,8 +601,14 @@ type TokenSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ts *TokenSelect) Aggregate(fns ...AggregateFunc) *TokenSelect {
+	ts.fns = append(ts.fns, fns...)
+	return ts
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (ts *TokenSelect) Scan(ctx context.Context, v interface{}) error {
+func (ts *TokenSelect) Scan(ctx context.Context, v any) error {
 	if err := ts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -604,7 +616,17 @@ func (ts *TokenSelect) Scan(ctx context.Context, v interface{}) error {
 	return ts.sqlScan(ctx, v)
 }
 
-func (ts *TokenSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ts *TokenSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ts.fns))
+	for _, fn := range ts.fns {
+		aggregation = append(aggregation, fn(ts.sql))
+	}
+	switch n := len(*ts.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ts.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ts.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ts.sql.Query()
 	if err := ts.driver.Query(ctx, query, args, rows); err != nil {
