@@ -44,7 +44,7 @@ func (p Config) node(t *gen.Type) {
 		b      strings.Builder
 		id     []*gen.Field
 		table  = tablewriter.NewWriter(&b)
-		header = []string{"Field", "Type", "Unique", "Optional", "Nillable", "Default", "UpdateDefault", "Immutable", "StructTag", "Validators"}
+		header = []string{"Field", "Type", "Unique", "Optional", "Nillable", "Default", "UpdateDefault", "Immutable", "StructTag", "Validators", "Comment"}
 	)
 	b.WriteString(t.Name + ":\n")
 	table.SetAutoFormatHeaders(false)
@@ -55,19 +55,20 @@ func (p Config) node(t *gen.Type) {
 	for _, f := range append(id, t.Fields...) {
 		v := reflect.ValueOf(*f)
 		row := make([]string, len(header))
-		for i := range row {
+		for i := 0; i < len(row)-1; i++ {
 			field := v.FieldByNameFunc(func(name string) bool {
 				// The first field is mapped from "Name" to "Field".
 				return name == "Name" && i == 0 || name == header[i]
 			})
 			row[i] = fmt.Sprint(field.Interface())
 		}
+		row[len(row)-1] = f.Comment()
 		table.Append(row)
 	}
 	table.Render()
 	table = tablewriter.NewWriter(&b)
 	table.SetAutoFormatHeaders(false)
-	table.SetHeader([]string{"Edge", "Type", "Inverse", "BackRef", "Relation", "Unique", "Optional"})
+	table.SetHeader([]string{"Edge", "Type", "Inverse", "BackRef", "Relation", "Unique", "Optional", "Comment"})
 	for _, e := range t.Edges {
 		table.Append([]string{
 			e.Name,
@@ -77,6 +78,7 @@ func (p Config) node(t *gen.Type) {
 			e.Rel.Type.String(),
 			strconv.FormatBool(e.Unique),
 			strconv.FormatBool(e.Optional),
+			e.Comment(),
 		})
 	}
 	if table.NumLines() > 0 {

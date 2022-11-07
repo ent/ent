@@ -1719,7 +1719,7 @@ func (e Edge) Field() *Field {
 
 // Comment returns the comment of the edge.
 func (e Edge) Comment() string {
-	if e.def.Comment != "" {
+	if e.def != nil {
 		return e.def.Comment
 	}
 	return ""
