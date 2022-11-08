@@ -7,8 +7,10 @@ package field
 import (
 	"database/sql"
 	"database/sql/driver"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"hash"
 	"math"
 	"reflect"
 	"regexp"
@@ -185,6 +187,17 @@ func (b *stringBuilder) Match(re *regexp.Regexp) *stringBuilder {
 		}
 		return nil
 	})
+	return b
+}
+
+// Encrypts the value using the crypto package.
+//
+//	field.String("password").Encrypt(md5.New(),sha1.new())
+func (b *stringBuilder) Encrypt(Hash ...hash.Hash) *stringBuilder {
+	for _, hash := range Hash {
+		hash.Write([]byte(b.desc.Name))
+		b.desc.Name = hex.EncodeToString(hash.Sum(nil))
+	}
 	return b
 }
 
