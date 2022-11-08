@@ -261,6 +261,33 @@ type IndexAnnotation struct {
 	//
 	Types map[string]string
 
+	// OpClass defines the operator class for a single string column index.
+	// In PostgreSQL, the following annotation maps to:
+	//
+	//	index.Fields("column").
+	//		Annotation(
+	//			entsql.IndexType("BRIN"),
+	//			entsql.OpClass("int8_bloom_ops"),
+	//		)
+	//
+	//	CREATE INDEX "table_column" ON "table" USING BRIN ("column" int8_bloom_ops)
+	//
+	OpClass string
+
+	// OpClassColumns defines operator-classes for a multi-column index.
+	// In PostgreSQL, the following annotation maps to:
+	//
+	//	index.Fields("c1", "c2", "c3").
+	//		Annotation(
+	//			entsql.IndexType("BRIN"),
+	//			entsql.OpClassColumn("c1", "int8_bloom_ops"),
+	//			entsql.OpClassColumn("c2", "int8_minmax_multi_ops(values_per_range=8)"),
+	//		)
+	//
+	//	CREATE INDEX "table_column" ON "table" USING BRIN ("c1" int8_bloom_ops, "c2" int8_minmax_multi_ops(values_per_range=8), "c3")
+	//
+	OpClassColumns map[string]string
+
 	// IndexWhere allows configuring partial indexes in SQLite and PostgreSQL.
 	// Read more: https://postgresql.org/docs/current/indexes-partial.html.
 	//
@@ -303,6 +330,41 @@ func PrefixColumn(name string, prefix uint) *IndexAnnotation {
 	return &IndexAnnotation{
 		PrefixColumns: map[string]uint{
 			name: prefix,
+		},
+	}
+}
+
+// OpClass defines the operator class for a single string column index.
+// In PostgreSQL, the following annotation maps to:
+//
+//	index.Fields("column").
+//		Annotation(
+//			entsql.IndexType("BRIN"),
+//			entsql.OpClass("int8_bloom_ops"),
+//		)
+//
+//	CREATE INDEX "table_column" ON "table" USING BRIN ("column" int8_bloom_ops)
+func OpClass(op string) *IndexAnnotation {
+	return &IndexAnnotation{
+		OpClass: op,
+	}
+}
+
+// OpClassColumn returns a new index annotation with column operator
+// class for multi-column indexes. In PostgreSQL, the following annotation maps to:
+//
+//	index.Fields("c1", "c2", "c3").
+//		Annotation(
+//			entsql.IndexType("BRIN"),
+//			entsql.OpClassColumn("c1", "int8_bloom_ops"),
+//			entsql.OpClassColumn("c2", "int8_minmax_multi_ops(values_per_range=8)"),
+//		)
+//
+//	CREATE INDEX "table_column" ON "table" USING BRIN ("c1" int8_bloom_ops, "c2" int8_minmax_multi_ops(values_per_range=8), "c3")
+func OpClassColumn(name, op string) *IndexAnnotation {
+	return &IndexAnnotation{
+		OpClassColumns: map[string]string{
+			name: op,
 		},
 	}
 }
@@ -421,6 +483,17 @@ func (a IndexAnnotation) Merge(other schema.Annotation) schema.Annotation {
 		}
 		for column, prefix := range ant.PrefixColumns {
 			a.PrefixColumns[column] = prefix
+		}
+	}
+	if ant.OpClass != "" {
+		a.OpClass = ant.OpClass
+	}
+	if ant.OpClassColumns != nil {
+		if a.OpClassColumns == nil {
+			a.OpClassColumns = make(map[string]string)
+		}
+		for column, op := range ant.OpClassColumns {
+			a.OpClassColumns[column] = op
 		}
 	}
 	if ant.Desc {

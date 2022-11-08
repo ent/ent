@@ -764,7 +764,7 @@ func (d *MySQL) indexModified(old, new *Index) bool {
 	return false
 }
 
-// indexParts returns a map holding the sub_part mapping if exist.
+// indexParts returns a map holding the sub_part mapping if exists.
 func indexParts(idx *Index) map[string]uint {
 	parts := make(map[string]uint)
 	if idx.Annotation == nil {
