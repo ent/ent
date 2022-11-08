@@ -87,7 +87,7 @@ func (c *Config) Load() (*SchemaSpec, error) {
 		return nil, fmt.Errorf("entc/load: write file %s: %w", target, err)
 	}
 	defer os.RemoveAll(".entc")
-	out, err := run(target)
+	out, err := run(target, c.BuildFlags)
 	if err != nil {
 		return nil, err
 	}
@@ -201,8 +201,11 @@ func filename(pkg string) string {
 }
 
 // run 'go run' command and return its output.
-func run(target string) (string, error) {
-	cmd := exec.Command("go", "run", target)
+func run(target string, buildFlags []string) (string, error) {
+	args := []string{"run"}
+	args = append(args, buildFlags...)
+	args = append(args, target)
+	cmd := exec.Command("go", args...)
 	stderr := bytes.NewBuffer(nil)
 	stdout := bytes.NewBuffer(nil)
 	cmd.Stderr = stderr
