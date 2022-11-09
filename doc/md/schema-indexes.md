@@ -244,6 +244,11 @@ func (User) Indexes() []ent.Index {
 		index.Fields("nickname").
 			Annotations(
 				entsql.IndexWhere("active"),
+			),	
+		// Define a custom operator class.
+		index.Fields("phone").
+			Annotations(
+				entsql.OpClass("bpchar_pattern_ops"),
 			),
     }
 }
@@ -264,11 +269,14 @@ CREATE FULLTEXT INDEX `users_c5` ON `users` (`c5`)
 -- PostgreSQL only.
 CREATE INDEX "users_c5" ON "users" USING GIN ("c5")
 
--- include index-only scan on PostgreSQL.
+-- Include index-only scan on PostgreSQL.
 CREATE INDEX "users_workplace" ON "users" ("workplace") INCLUDE ("address")
 
 -- Define partial index on SQLite and PostgreSQL.
-CREATE INDEX "user_nickname" ON "users" ("nickname") WHERE "active"
+CREATE INDEX "users_nickname" ON "users" ("nickname") WHERE "active"
+
+-- PostgreSQL only.
+CREATE INDEX "users_phone" ON "users" ("phone" bpchar_pattern_ops)
 ```
 
 
