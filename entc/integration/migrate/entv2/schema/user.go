@@ -161,6 +161,11 @@ func (User) Indexes() []ent.Index {
 			Annotations(
 				entsql.IndexWhere("active"),
 			),
+		// For PostgreSQL, operator classes can be configured for each field.
+		index.Fields("age", "phone").
+			Annotations(
+				entsql.OpClassColumn("phone", "bpchar_pattern_ops"),
+			),
 	}
 }
 

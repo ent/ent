@@ -224,6 +224,16 @@ var (
 					Where: "active",
 				},
 			},
+			{
+				Name:    "user_age_phone",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[4], UsersColumns[8]},
+				Annotation: &entsql.IndexAnnotation{
+					OpClassColumns: map[string]string{
+						UsersColumns[8].Name: "bpchar_pattern_ops",
+					},
+				},
+			},
 		},
 	}
 	// FriendsColumns holds the columns for the "friends" table.

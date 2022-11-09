@@ -777,13 +777,39 @@ func (d *Postgres) atIncrementT(t *schema.Table, v int64) {
 	t.AddAttrs(&postgres.Identity{Sequence: &postgres.Sequence{Start: v}})
 }
 
+// indexOpClass returns a map holding the operator-class mapping if exists.
+func indexOpClass(idx *Index) map[string]string {
+	opc := make(map[string]string)
+	if idx.Annotation == nil {
+		return opc
+	}
+	// If operator-class (without a name) was defined on
+	// the annotation, map it to the single column index.
+	if idx.Annotation.OpClass != "" && len(idx.Columns) == 1 {
+		opc[idx.Columns[0].Name] = idx.Annotation.OpClass
+	}
+	for column, op := range idx.Annotation.OpClassColumns {
+		opc[column] = op
+	}
+	return opc
+}
+
 func (d *Postgres) atIndex(idx1 *Index, t2 *schema.Table, idx2 *schema.Index) error {
+	opc := indexOpClass(idx1)
 	for _, c1 := range idx1.Columns {
 		c2, ok := t2.Column(c1.Name)
 		if !ok {
 			return fmt.Errorf("unexpected index %q column: %q", idx1.Name, c1.Name)
 		}
-		idx2.AddParts(&schema.IndexPart{C: c2})
+		part := &schema.IndexPart{C: c2}
+		if v, ok := opc[c1.Name]; ok {
+			var op postgres.IndexOpClass
+			if err := op.UnmarshalText([]byte(v)); err != nil {
+				return fmt.Errorf("unmarshaling operator-class %q for column %q: %v", v, c1.Name, err)
+			}
+			part.Attrs = append(part.Attrs, &op)
+		}
+		idx2.AddParts(part)
 	}
 	if t, ok := indexType(idx1, dialect.Postgres); ok {
 		idx2.AddAttrs(&postgres.IndexType{T: t})

@@ -115,6 +115,21 @@ var (
 											{{- end }}
 										},
 									{{- end }}
+									{{- with $ant.OpClass }}
+										OpClass: "{{ . }}",
+									{{- end }}
+									{{- with $keys := keys $ant.OpClassColumns }}
+										OpClassColumns: map[string]string{
+											{{- range $k := $keys }}
+												{{- /* Use the column reference instead of using raw string. */}}
+												{{- range $i, $c := $t.Columns }}
+													{{- if eq $k $c.Name }}
+														{{ $columns }}[{{ $i }}].Name: "{{ index $ant.OpClassColumns $k }}",
+													{{ end }}
+												{{- end }}
+											{{- end }}
+										},
+									{{- end }}
 									{{- with $ant.Desc }}
 										Desc: {{ . }},
 									{{- end }}

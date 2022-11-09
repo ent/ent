@@ -133,6 +133,7 @@ func TestPostgres(t *testing.T) {
 			CheckConstraint(t, clientv2)
 			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_name = $1 AND column_name = $2")
 			PartialIndexes(t, drv, "select indexdef from pg_indexes where indexname=$1", "CREATE INDEX user_phone ON public.users USING btree (phone) WHERE active")
+			IndexOpClass(t, drv)
 			if version != "10" {
 				IncludeColumns(t, drv)
 			}
@@ -667,6 +668,15 @@ func IncludeColumns(t *testing.T, drv *sql.Driver) {
 	require.NoError(t, err)
 	require.NoError(t, rows.Close())
 	require.Equal(t, d, "CREATE INDEX user_workplace ON public.users USING btree (workplace) INCLUDE (nickname)")
+}
+
+func IndexOpClass(t *testing.T, drv *sql.Driver) {
+	rows, err := drv.QueryContext(context.Background(), "select indexdef from pg_indexes where indexname='user_age_phone'")
+	require.NoError(t, err)
+	d, err := sql.ScanString(rows)
+	require.NoError(t, err)
+	require.NoError(t, rows.Close())
+	require.Equal(t, d, "CREATE INDEX user_age_phone ON public.users USING btree (age, phone bpchar_pattern_ops)")
 }
 
 func PartialIndexes(t *testing.T, drv *sql.Driver, query, def string) {
