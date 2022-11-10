@@ -400,6 +400,11 @@ func (d *SQLite) atTable(t1 *Table, t2 *schema.Table) {
 	}
 }
 
+func (d *SQLite) supportsDefault(*Column) bool {
+	// SQLite supports default values for all standard types.
+	return true
+}
+
 func (d *SQLite) atTypeC(c1 *Column, c2 *schema.Column) error {
 	if c1.SchemaType != nil && c1.SchemaType[dialect.SQLite] != "" {
 		t, err := sqlite.ParseType(strings.ToLower(c1.SchemaType[dialect.SQLite]))

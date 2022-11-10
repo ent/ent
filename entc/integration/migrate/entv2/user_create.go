@@ -210,6 +210,12 @@ func (uc *UserCreate) SetNillableWorkplace(s *string) *UserCreate {
 	return uc
 }
 
+// SetRoles sets the "roles" field.
+func (uc *UserCreate) SetRoles(s []string) *UserCreate {
+	uc.mutation.SetRoles(s)
+	return uc
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (uc *UserCreate) SetCreatedAt(t time.Time) *UserCreate {
 	uc.mutation.SetCreatedAt(t)
@@ -568,6 +574,10 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.Workplace(); ok {
 		_spec.SetField(user.FieldWorkplace, field.TypeString, value)
 		_node.Workplace = value
+	}
+	if value, ok := uc.mutation.Roles(); ok {
+		_spec.SetField(user.FieldRoles, field.TypeJSON, value)
+		_node.Roles = value
 	}
 	if value, ok := uc.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)

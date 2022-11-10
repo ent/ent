@@ -48,6 +48,8 @@ const (
 	FieldStatus = "status"
 	// FieldWorkplace holds the string denoting the workplace field in the database.
 	FieldWorkplace = "workplace"
+	// FieldRoles holds the string denoting the roles field in the database.
+	FieldRoles = "roles"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldDropOptional holds the string denoting the drop_optional field in the database.
@@ -101,6 +103,7 @@ var Columns = []string{
 	FieldState,
 	FieldStatus,
 	FieldWorkplace,
+	FieldRoles,
 	FieldCreatedAt,
 	FieldDropOptional,
 }

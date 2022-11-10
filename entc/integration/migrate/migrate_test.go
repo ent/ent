@@ -133,6 +133,7 @@ func TestPostgres(t *testing.T) {
 			CheckConstraint(t, clientv2)
 			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_name = $1 AND column_name = $2")
 			PartialIndexes(t, drv, "select indexdef from pg_indexes where indexname=$1", "CREATE INDEX user_phone ON public.users USING btree (phone) WHERE active")
+			JSONDefault(t, drv, `SELECT column_default FROM information_schema.columns WHERE table_name = 'users' AND column_name = $1`)
 			IndexOpClass(t, drv)
 			if version != "10" {
 				IncludeColumns(t, drv)
@@ -211,6 +212,7 @@ func TestSQLite(t *testing.T) {
 	idRange(t, client.Pet.Create().SaveX(ctx).ID, 6<<32-1, 7<<32)
 	idRange(t, u.ID, 7<<32-1, 8<<32)
 	PartialIndexes(t, drv, "select sql from sqlite_master where name=?", "CREATE INDEX `user_phone` ON `users` (`phone`) WHERE active")
+	JSONDefault(t, drv, "SELECT `dflt_value` FROM `pragma_table_info`('users') WHERE `name` = ?")
 
 	// Override the default behavior of LIKE in SQLite.
 	// https://www.sqlite.org/pragma.html#pragma_case_sensitive_like
@@ -659,6 +661,16 @@ func TimePrecision(t *testing.T, drv *sql.Driver, query string) {
 	require.NoError(t, err)
 	require.Equalf(t, 3, p, "custom_types field %q", customtype.FieldTz3)
 	require.NoError(t, rows.Close())
+}
+
+func JSONDefault(t *testing.T, drv *sql.Driver, query string) {
+	ctx := context.Background()
+	rows, err := drv.QueryContext(ctx, query, user.FieldRoles)
+	require.NoError(t, err)
+	s, err := sql.ScanString(rows)
+	require.NoError(t, err)
+	require.NoError(t, rows.Close())
+	require.NotEmpty(t, s)
 }
 
 func IncludeColumns(t *testing.T, drv *sql.Driver) {

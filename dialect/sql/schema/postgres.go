@@ -642,6 +642,9 @@ func (d *Postgres) foreignKeys(ctx context.Context, tx dialect.Tx, tables []*Tab
 				t.AddForeignKey(newFk)
 			}
 		}
+		if err := rows.Close(); err != nil {
+			return err
+		}
 		if err := rows.Err(); err != nil {
 			return err
 		}
@@ -681,6 +684,11 @@ func (d *Postgres) atTable(t1 *Table, t2 *schema.Table) {
 	if t1.Annotation != nil {
 		setAtChecks(t1, t2)
 	}
+}
+
+func (d *Postgres) supportsDefault(*Column) bool {
+	// PostgreSQL supports default values for all standard types.
+	return true
 }
 
 func (d *Postgres) atTypeC(c1 *Column, c2 *schema.Column) error {

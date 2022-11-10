@@ -578,6 +578,7 @@ func (a *Atlas) StateReader(tables ...*Table) migrate.StateReaderFunc {
 type atBuilder interface {
 	atOpen(dialect.ExecQuerier) (migrate.Driver, error)
 	atTable(*Table, *schema.Table)
+	supportsDefault(*Column) bool
 	atTypeC(*Column, *schema.Column) error
 	atUniqueC(*Table, *Column, *schema.Table, *schema.Column)
 	atIncrementC(*schema.Table, *schema.Column)
@@ -866,14 +867,8 @@ func (a *Atlas) aColumns(et *Table, at *schema.Table) error {
 		if err := a.sqlDialect.atTypeC(c1, c2); err != nil {
 			return err
 		}
-		if c1.Default != nil && c1.supportDefault() {
-			// Has default and the database supports adding this default.
-			x := fmt.Sprint(c1.Default)
-			if v, ok := c1.Default.(string); ok && c1.Type != field.TypeUUID && c1.Type != field.TypeTime {
-				// Escape single quote by replacing each with 2.
-				x = fmt.Sprintf("'%s'", strings.ReplaceAll(v, "'", "''"))
-			}
-			c2.SetDefault(&schema.RawExpr{X: x})
+		if err := a.atDefault(c1, c2); err != nil {
+			return err
 		}
 		if c1.Unique && (len(et.PrimaryKey) != 1 || et.PrimaryKey[0] != c1) {
 			a.sqlDialect.atUniqueC(et, c1, at, c2)
@@ -882,6 +877,31 @@ func (a *Atlas) aColumns(et *Table, at *schema.Table) error {
 			a.sqlDialect.atIncrementC(at, c2)
 		}
 		at.AddColumns(c2)
+	}
+	return nil
+}
+
+func (a *Atlas) atDefault(c1 *Column, c2 *schema.Column) error {
+	if x, ok := c1.Default.(*schema.RawExpr); ok {
+		c2.SetDefault(x)
+		return nil
+	}
+	switch {
+	case c1.Default == nil:
+	case c1.Type == field.TypeJSON && a.sqlDialect.supportsDefault(c1):
+		s, ok := c1.Default.(string)
+		if !ok {
+			return fmt.Errorf("invalid default value for JSON column %q: %v", c1.Name, c1.Default)
+		}
+		c2.SetDefault(&schema.Literal{V: strings.ReplaceAll(s, "'", "''")})
+	case c1.supportDefault():
+		// Keep backwards compatibility with the old default value format.
+		x := fmt.Sprint(c1.Default)
+		if v, ok := c1.Default.(string); ok && c1.Type != field.TypeUUID && c1.Type != field.TypeTime {
+			// Escape single quote by replacing each with 2.
+			x = fmt.Sprintf("'%s'", strings.ReplaceAll(v, "'", "''"))
+		}
+		c2.SetDefault(&schema.RawExpr{X: x})
 	}
 	return nil
 }

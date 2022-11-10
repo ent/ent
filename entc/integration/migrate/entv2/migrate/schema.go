@@ -157,6 +157,7 @@ var (
 		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"logged_in", "logged_out", "online"}, Default: "logged_in"},
 		{Name: "status", Type: field.TypeEnum, Nullable: true, Enums: []string{"done", "pending"}},
 		{Name: "workplace", Type: field.TypeString, Nullable: true},
+		{Name: "roles", Type: field.TypeJSON, Nullable: true, Default: "[]"},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "drop_optional", Type: field.TypeString},
 		{Name: "blog_admins", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
@@ -169,7 +170,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "users_blogs_admins",
-				Columns:    []*schema.Column{UsersColumns[19]},
+				Columns:    []*schema.Column{UsersColumns[20]},
 				RefColumns: []*schema.Column{BlogsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
