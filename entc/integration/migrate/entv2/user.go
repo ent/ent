@@ -7,6 +7,7 @@
 package entv2
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -53,6 +54,8 @@ type User struct {
 	Status user.Status `json:"status,omitempty"`
 	// Workplace holds the value of the "workplace" field.
 	Workplace string `json:"workplace,omitempty"`
+	// Roles holds the value of the "roles" field.
+	Roles []string `json:"roles,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// DropOptional holds the value of the "drop_optional" field.
@@ -112,7 +115,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldBuffer, user.FieldBlob:
+		case user.FieldBuffer, user.FieldBlob, user.FieldRoles:
 			values[i] = new([]byte)
 		case user.FieldActive:
 			values[i] = new(sql.NullBool)
@@ -241,6 +244,14 @@ func (u *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				u.Workplace = value.String
 			}
+		case user.FieldRoles:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field roles", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &u.Roles); err != nil {
+					return fmt.Errorf("unmarshal field roles: %w", err)
+				}
+			}
 		case user.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
@@ -350,6 +361,9 @@ func (u *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("workplace=")
 	builder.WriteString(u.Workplace)
+	builder.WriteString(", ")
+	builder.WriteString("roles=")
+	builder.WriteString(fmt.Sprintf("%v", u.Roles))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(u.CreatedAt.Format(time.ANSIC))

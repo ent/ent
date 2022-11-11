@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/entc/integration/migrate/entv2/car"
 	"entgo.io/ent/entc/integration/migrate/entv2/pet"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
@@ -264,6 +265,24 @@ func (uu *UserUpdate) SetNillableWorkplace(s *string) *UserUpdate {
 // ClearWorkplace clears the value of the "workplace" field.
 func (uu *UserUpdate) ClearWorkplace() *UserUpdate {
 	uu.mutation.ClearWorkplace()
+	return uu
+}
+
+// SetRoles sets the "roles" field.
+func (uu *UserUpdate) SetRoles(s []string) *UserUpdate {
+	uu.mutation.SetRoles(s)
+	return uu
+}
+
+// AppendRoles appends s to the "roles" field.
+func (uu *UserUpdate) AppendRoles(s []string) *UserUpdate {
+	uu.mutation.AppendRoles(s)
+	return uu
+}
+
+// ClearRoles clears the value of the "roles" field.
+func (uu *UserUpdate) ClearRoles() *UserUpdate {
+	uu.mutation.ClearRoles()
 	return uu
 }
 
@@ -576,6 +595,17 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if uu.mutation.WorkplaceCleared() {
 		_spec.ClearField(user.FieldWorkplace, field.TypeString)
+	}
+	if value, ok := uu.mutation.Roles(); ok {
+		_spec.SetField(user.FieldRoles, field.TypeJSON, value)
+	}
+	if value, ok := uu.mutation.AppendedRoles(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldRoles, value)
+		})
+	}
+	if uu.mutation.RolesCleared() {
+		_spec.ClearField(user.FieldRoles, field.TypeJSON)
 	}
 	if value, ok := uu.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
@@ -978,6 +1008,24 @@ func (uuo *UserUpdateOne) ClearWorkplace() *UserUpdateOne {
 	return uuo
 }
 
+// SetRoles sets the "roles" field.
+func (uuo *UserUpdateOne) SetRoles(s []string) *UserUpdateOne {
+	uuo.mutation.SetRoles(s)
+	return uuo
+}
+
+// AppendRoles appends s to the "roles" field.
+func (uuo *UserUpdateOne) AppendRoles(s []string) *UserUpdateOne {
+	uuo.mutation.AppendRoles(s)
+	return uuo
+}
+
+// ClearRoles clears the value of the "roles" field.
+func (uuo *UserUpdateOne) ClearRoles() *UserUpdateOne {
+	uuo.mutation.ClearRoles()
+	return uuo
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (uuo *UserUpdateOne) SetCreatedAt(t time.Time) *UserUpdateOne {
 	uuo.mutation.SetCreatedAt(t)
@@ -1317,6 +1365,17 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if uuo.mutation.WorkplaceCleared() {
 		_spec.ClearField(user.FieldWorkplace, field.TypeString)
+	}
+	if value, ok := uuo.mutation.Roles(); ok {
+		_spec.SetField(user.FieldRoles, field.TypeJSON, value)
+	}
+	if value, ok := uuo.mutation.AppendedRoles(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldRoles, value)
+		})
+	}
+	if uuo.mutation.RolesCleared() {
+		_spec.ClearField(user.FieldRoles, field.TypeJSON)
 	}
 	if value, ok := uuo.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)

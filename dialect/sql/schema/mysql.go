@@ -814,6 +814,11 @@ func (d *MySQL) atTable(t1 *Table, t2 *schema.Table) {
 	}
 }
 
+func (d *MySQL) supportsDefault(c *Column) bool {
+	_, maria := d.mariadb()
+	return c.supportDefault() || maria
+}
+
 func (d *MySQL) atTypeC(c1 *Column, c2 *schema.Column) error {
 	if c1.SchemaType != nil && c1.SchemaType[dialect.MySQL] != "" {
 		t, err := mysql.ParseType(strings.ToLower(c1.SchemaType[dialect.MySQL]))
