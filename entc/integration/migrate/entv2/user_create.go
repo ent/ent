@@ -216,6 +216,34 @@ func (uc *UserCreate) SetRoles(s []string) *UserCreate {
 	return uc
 }
 
+// SetDefaultExpr sets the "default_expr" field.
+func (uc *UserCreate) SetDefaultExpr(s string) *UserCreate {
+	uc.mutation.SetDefaultExpr(s)
+	return uc
+}
+
+// SetNillableDefaultExpr sets the "default_expr" field if the given value is not nil.
+func (uc *UserCreate) SetNillableDefaultExpr(s *string) *UserCreate {
+	if s != nil {
+		uc.SetDefaultExpr(*s)
+	}
+	return uc
+}
+
+// SetDefaultExprs sets the "default_exprs" field.
+func (uc *UserCreate) SetDefaultExprs(s string) *UserCreate {
+	uc.mutation.SetDefaultExprs(s)
+	return uc
+}
+
+// SetNillableDefaultExprs sets the "default_exprs" field if the given value is not nil.
+func (uc *UserCreate) SetNillableDefaultExprs(s *string) *UserCreate {
+	if s != nil {
+		uc.SetDefaultExprs(*s)
+	}
+	return uc
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (uc *UserCreate) SetCreatedAt(t time.Time) *UserCreate {
 	uc.mutation.SetCreatedAt(t)
@@ -578,6 +606,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.Roles(); ok {
 		_spec.SetField(user.FieldRoles, field.TypeJSON, value)
 		_node.Roles = value
+	}
+	if value, ok := uc.mutation.DefaultExpr(); ok {
+		_spec.SetField(user.FieldDefaultExpr, field.TypeString, value)
+		_node.DefaultExpr = value
+	}
+	if value, ok := uc.mutation.DefaultExprs(); ok {
+		_spec.SetField(user.FieldDefaultExprs, field.TypeString, value)
+		_node.DefaultExprs = value
 	}
 	if value, ok := uc.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)

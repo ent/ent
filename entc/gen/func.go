@@ -320,6 +320,7 @@ func aggregate() map[string]bool {
 
 // keys returns the given map keys.
 func keys(v reflect.Value) ([]string, error) {
+	v = indirect(v)
 	if k := v.Type().Kind(); k != reflect.Map {
 		return nil, fmt.Errorf("expect map for keys, got: %s", k)
 	}

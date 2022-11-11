@@ -297,6 +297,10 @@ type Column struct {
 	foreign    *ForeignKey       // linked foreign-key.
 }
 
+// Expr represents a raw expression. It is used to distinguish between
+// literal values and raw expressions when defining default values.
+type Expr string
+
 // UniqueKey returns boolean indicates if this column is a unique key.
 // Used by the migration tool when parsing the `DESCRIBE TABLE` output Go objects.
 func (c *Column) UniqueKey() bool { return c.Key == UniqueKey }

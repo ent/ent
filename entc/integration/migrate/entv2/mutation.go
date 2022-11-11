@@ -3341,6 +3341,8 @@ type UserMutation struct {
 	workplace      *string
 	roles          *[]string
 	appendroles    []string
+	default_expr   *string
+	default_exprs  *string
 	created_at     *time.Time
 	drop_optional  *string
 	clearedFields  map[string]struct{}
@@ -4213,6 +4215,104 @@ func (m *UserMutation) ResetRoles() {
 	delete(m.clearedFields, user.FieldRoles)
 }
 
+// SetDefaultExpr sets the "default_expr" field.
+func (m *UserMutation) SetDefaultExpr(s string) {
+	m.default_expr = &s
+}
+
+// DefaultExpr returns the value of the "default_expr" field in the mutation.
+func (m *UserMutation) DefaultExpr() (r string, exists bool) {
+	v := m.default_expr
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDefaultExpr returns the old "default_expr" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldDefaultExpr(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDefaultExpr is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDefaultExpr requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDefaultExpr: %w", err)
+	}
+	return oldValue.DefaultExpr, nil
+}
+
+// ClearDefaultExpr clears the value of the "default_expr" field.
+func (m *UserMutation) ClearDefaultExpr() {
+	m.default_expr = nil
+	m.clearedFields[user.FieldDefaultExpr] = struct{}{}
+}
+
+// DefaultExprCleared returns if the "default_expr" field was cleared in this mutation.
+func (m *UserMutation) DefaultExprCleared() bool {
+	_, ok := m.clearedFields[user.FieldDefaultExpr]
+	return ok
+}
+
+// ResetDefaultExpr resets all changes to the "default_expr" field.
+func (m *UserMutation) ResetDefaultExpr() {
+	m.default_expr = nil
+	delete(m.clearedFields, user.FieldDefaultExpr)
+}
+
+// SetDefaultExprs sets the "default_exprs" field.
+func (m *UserMutation) SetDefaultExprs(s string) {
+	m.default_exprs = &s
+}
+
+// DefaultExprs returns the value of the "default_exprs" field in the mutation.
+func (m *UserMutation) DefaultExprs() (r string, exists bool) {
+	v := m.default_exprs
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDefaultExprs returns the old "default_exprs" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldDefaultExprs(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDefaultExprs is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDefaultExprs requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDefaultExprs: %w", err)
+	}
+	return oldValue.DefaultExprs, nil
+}
+
+// ClearDefaultExprs clears the value of the "default_exprs" field.
+func (m *UserMutation) ClearDefaultExprs() {
+	m.default_exprs = nil
+	m.clearedFields[user.FieldDefaultExprs] = struct{}{}
+}
+
+// DefaultExprsCleared returns if the "default_exprs" field was cleared in this mutation.
+func (m *UserMutation) DefaultExprsCleared() bool {
+	_, ok := m.clearedFields[user.FieldDefaultExprs]
+	return ok
+}
+
+// ResetDefaultExprs resets all changes to the "default_exprs" field.
+func (m *UserMutation) ResetDefaultExprs() {
+	m.default_exprs = nil
+	delete(m.clearedFields, user.FieldDefaultExprs)
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (m *UserMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -4451,7 +4551,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 19)
+	fields := make([]string, 0, 21)
 	if m.mixed_string != nil {
 		fields = append(fields, user.FieldMixedString)
 	}
@@ -4503,6 +4603,12 @@ func (m *UserMutation) Fields() []string {
 	if m.roles != nil {
 		fields = append(fields, user.FieldRoles)
 	}
+	if m.default_expr != nil {
+		fields = append(fields, user.FieldDefaultExpr)
+	}
+	if m.default_exprs != nil {
+		fields = append(fields, user.FieldDefaultExprs)
+	}
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
 	}
@@ -4551,6 +4657,10 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Workplace()
 	case user.FieldRoles:
 		return m.Roles()
+	case user.FieldDefaultExpr:
+		return m.DefaultExpr()
+	case user.FieldDefaultExprs:
+		return m.DefaultExprs()
 	case user.FieldCreatedAt:
 		return m.CreatedAt()
 	case user.FieldDropOptional:
@@ -4598,6 +4708,10 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldWorkplace(ctx)
 	case user.FieldRoles:
 		return m.OldRoles(ctx)
+	case user.FieldDefaultExpr:
+		return m.OldDefaultExpr(ctx)
+	case user.FieldDefaultExprs:
+		return m.OldDefaultExprs(ctx)
 	case user.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case user.FieldDropOptional:
@@ -4730,6 +4844,20 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetRoles(v)
 		return nil
+	case user.FieldDefaultExpr:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDefaultExpr(v)
+		return nil
+	case user.FieldDefaultExprs:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDefaultExprs(v)
+		return nil
 	case user.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -4813,6 +4941,12 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldRoles) {
 		fields = append(fields, user.FieldRoles)
 	}
+	if m.FieldCleared(user.FieldDefaultExpr) {
+		fields = append(fields, user.FieldDefaultExpr)
+	}
+	if m.FieldCleared(user.FieldDefaultExprs) {
+		fields = append(fields, user.FieldDefaultExprs)
+	}
 	return fields
 }
 
@@ -4850,6 +4984,12 @@ func (m *UserMutation) ClearField(name string) error {
 		return nil
 	case user.FieldRoles:
 		m.ClearRoles()
+		return nil
+	case user.FieldDefaultExpr:
+		m.ClearDefaultExpr()
+		return nil
+	case user.FieldDefaultExprs:
+		m.ClearDefaultExprs()
 		return nil
 	}
 	return fmt.Errorf("unknown User nullable field %s", name)
@@ -4909,6 +5049,12 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldRoles:
 		m.ResetRoles()
+		return nil
+	case user.FieldDefaultExpr:
+		m.ResetDefaultExpr()
+		return nil
+	case user.FieldDefaultExprs:
+		m.ResetDefaultExprs()
 		return nil
 	case user.FieldCreatedAt:
 		m.ResetCreatedAt()

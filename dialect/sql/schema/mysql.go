@@ -816,7 +816,15 @@ func (d *MySQL) atTable(t1 *Table, t2 *schema.Table) {
 
 func (d *MySQL) supportsDefault(c *Column) bool {
 	_, maria := d.mariadb()
-	return c.supportDefault() || maria
+	switch c.Default.(type) {
+	case Expr, map[string]Expr:
+		if maria {
+			return compareVersions(d.version, "10.2.0") >= 0
+		}
+		return c.supportDefault() && compareVersions(d.version, "8.0.0") >= 0
+	default:
+		return c.supportDefault() || maria
+	}
 }
 
 func (d *MySQL) atTypeC(c1 *Column, c2 *schema.Column) error {

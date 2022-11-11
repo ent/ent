@@ -66,6 +66,7 @@ func TestMySQL(t *testing.T) {
 			V1ToV2(t, drv.Dialect(), clientv1, clientv2)
 			if version == "8" {
 				CheckConstraint(t, clientv2)
+				DefaultExpr(t, drv, "SELECT column_default FROM information_schema.columns WHERE table_name = 'users' AND column_name = ?", "lower(_utf8mb4\\'hello\\')", "to_base64(_utf8mb4\\'ent\\')")
 			}
 			NicknameSearch(t, clientv2)
 			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_name = ? AND column_name = ?")
@@ -134,6 +135,7 @@ func TestPostgres(t *testing.T) {
 			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_name = $1 AND column_name = $2")
 			PartialIndexes(t, drv, "select indexdef from pg_indexes where indexname=$1", "CREATE INDEX user_phone ON public.users USING btree (phone) WHERE active")
 			JSONDefault(t, drv, `SELECT column_default FROM information_schema.columns WHERE table_name = 'users' AND column_name = $1`)
+			DefaultExpr(t, drv, `SELECT column_default FROM information_schema.columns WHERE table_name = 'users' AND column_name = $1`, "lower('hello'::text)", "md5('ent'::text)")
 			IndexOpClass(t, drv)
 			if version != "10" {
 				IncludeColumns(t, drv)
@@ -213,6 +215,7 @@ func TestSQLite(t *testing.T) {
 	idRange(t, u.ID, 7<<32-1, 8<<32)
 	PartialIndexes(t, drv, "select sql from sqlite_master where name=?", "CREATE INDEX `user_phone` ON `users` (`phone`) WHERE active")
 	JSONDefault(t, drv, "SELECT `dflt_value` FROM `pragma_table_info`('users') WHERE `name` = ?")
+	DefaultExpr(t, drv, "SELECT `dflt_value` FROM `pragma_table_info`('users') WHERE `name` = ?", "lower('hello')", "hex('ent')")
 
 	// Override the default behavior of LIKE in SQLite.
 	// https://www.sqlite.org/pragma.html#pragma_case_sensitive_like
@@ -671,6 +674,22 @@ func JSONDefault(t *testing.T, drv *sql.Driver, query string) {
 	require.NoError(t, err)
 	require.NoError(t, rows.Close())
 	require.NotEmpty(t, s)
+}
+
+func DefaultExpr(t *testing.T, drv *sql.Driver, query string, expected1, expected2 string) {
+	ctx := context.Background()
+	rows, err := drv.QueryContext(ctx, query, user.FieldDefaultExpr)
+	require.NoError(t, err)
+	s, err := sql.ScanString(rows)
+	require.NoError(t, err)
+	require.NoError(t, rows.Close())
+	require.Equal(t, expected1, s)
+	rows, err = drv.QueryContext(ctx, query, user.FieldDefaultExprs)
+	require.NoError(t, err)
+	s, err = sql.ScanString(rows)
+	require.NoError(t, err)
+	require.NoError(t, rows.Close())
+	require.Equal(t, expected2, s)
 }
 
 func IncludeColumns(t *testing.T, drv *sql.Driver) {

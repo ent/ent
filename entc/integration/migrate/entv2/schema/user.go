@@ -103,6 +103,16 @@ func (User) Fields() []ent.Field {
 		field.Strings("roles").
 			Optional().
 			Annotations(entsql.Annotation{Default: `[]`}),
+		field.String("default_expr").
+			Optional().
+			Annotations(entsql.DefaultExpr("lower('hello')")),
+		field.String("default_exprs").
+			Optional().
+			Annotations(entsql.DefaultExprs(map[string]string{
+				dialect.MySQL:    "TO_BASE64('ent')",
+				dialect.SQLite:   "hex('ent')",
+				dialect.Postgres: "md5('ent')",
+			})),
 		// add a new column with generated values by the database.
 		field.Time("created_at").
 			Default(time.Now).
