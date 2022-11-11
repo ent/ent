@@ -35,18 +35,43 @@ type Annotation struct {
 	//
 	Collation string `json:"collation,omitempty"`
 
-	// Default specifies the default value of a column. Note that using this option
-	// will override the default behavior of the code-generation. For example:
+	// Default specifies a literal default value of a column. Note that using
+	// this option overrides the default behavior of the code-generation.
 	//
 	//	entsql.Annotation{
-	//		Default: "CURRENT_TIMESTAMP",
-	//	}
-	//
-	//	entsql.Annotation{
-	//		Default: "uuid_generate_v4()",
+	//		Default: `{"key":"value"}`,
 	//	}
 	//
 	Default string `json:"default,omitempty"`
+
+	// DefaultExpr specifies an expression default value of a column. Using this option,
+	// users can define custom expressions to be set as database default values. Note that
+	// using this option overrides the default behavior of the code-generation.
+	//
+	//	entsql.Annotation{
+	//		DefaultExpr: "CURRENT_TIMESTAMP",
+	//	}
+	//
+	//	entsql.Annotation{
+	//		DefaultExpr: "uuid_generate_v4()",
+	//	}
+	//
+	//	entsql.Annotation{
+	//		DefaultExpr: "(a + b)",
+	//	}
+	//
+	DefaultExpr string `json:"default_expr,omitempty"`
+
+	// DefaultExpr specifies an expression default value of a column per dialect.
+	// See, DefaultExpr for full doc.
+	//
+	//	entsql.Annotation{
+	//		DefaultExprs: map[string]string{
+	//			dialect.MySQL:    "uuid()",
+	//			dialect.Postgres: "uuid_generate_v4",
+	//		}
+	//
+	DefaultExprs map[string]string `json:"default_exprs,omitempty"`
 
 	// Options defines the additional table options. For example:
 	//
@@ -111,6 +136,39 @@ func (Annotation) Name() string {
 	return "EntSQL"
 }
 
+// DefaultExpr specifies an expression default value for the annotated column.
+// Using this option, users can define custom expressions to be set as database
+// default values.Note that using this option overrides the default behavior of
+// the code-generation.
+//
+//	field.UUID("id", uuid.Nil).
+//		Default(uuid.New).
+//		Annotations(
+//			entsql.DefaultExpr("uuid_generate_v4()"),
+//		)
+func DefaultExpr(expr string) *Annotation {
+	return &Annotation{
+		DefaultExpr: expr,
+	}
+}
+
+// DefaultExprs specifies an expression default value for the annotated
+// column per dialect. See, DefaultExpr for full doc.
+//
+//	field.UUID("id", uuid.Nil).
+//		Default(uuid.New).
+//		Annotations(
+//			entsql.DefaultExprs(map[string]string{
+//				dialect.MySQL:    "uuid()",
+//				dialect.Postgres: "uuid_generate_v4()",
+//			}),
+//		)
+func DefaultExprs(exprs map[string]string) *Annotation {
+	return &Annotation{
+		DefaultExprs: exprs,
+	}
+}
+
 // Merge implements the schema.Merger interface.
 func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	var ant Annotation
@@ -132,6 +190,20 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	}
 	if c := ant.Collation; c != "" {
 		a.Collation = c
+	}
+	if d := ant.Default; d != "" {
+		a.Default = d
+	}
+	if d := ant.DefaultExpr; d != "" {
+		a.DefaultExpr = d
+	}
+	if d := ant.DefaultExprs; d != nil {
+		if a.DefaultExprs == nil {
+			a.DefaultExprs = make(map[string]string)
+		}
+		for dialect, x := range d {
+			a.DefaultExprs[dialect] = x
+		}
 	}
 	if o := ant.Options; o != "" {
 		a.Options = o
@@ -514,7 +586,12 @@ func (a IndexAnnotation) Merge(other schema.Annotation) schema.Annotation {
 		a.Type = ant.Type
 	}
 	if ant.Types != nil {
-		a.Types = ant.Types
+		if a.Types == nil {
+			a.Types = make(map[string]string)
+		}
+		for dialect, t := range ant.Types {
+			a.Types[dialect] = t
+		}
 	}
 	if ant.Where != "" {
 		a.Where = ant.Where

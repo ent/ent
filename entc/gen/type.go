@@ -905,7 +905,7 @@ func ValidSchemaName(name string) error {
 
 // checkField checks the schema field.
 func (t *Type) checkField(tf *Field, f *load.Field) (err error) {
-	switch {
+	switch ant := tf.EntSQL(); {
 	case f.Name == "":
 		err = fmt.Errorf("field name cannot be empty")
 	case f.Info == nil || !f.Info.Valid():
@@ -923,6 +923,8 @@ func (t *Type) checkField(tf *Field, f *load.Field) (err error) {
 		}
 	case tf.Validators > 0 && !tf.ConvertedToBasic():
 		err = fmt.Errorf("GoType %q for field %q must be converted to the basic %q type for validators", tf.Type, f.Name, tf.Type.Type)
+	case ant != nil && ant.Default != "" && (ant.DefaultExpr != "" || ant.DefaultExprs != nil):
+		err = fmt.Errorf("field %q cannot have both default value and default expression annotations", f.Name)
 	}
 	return err
 }
@@ -1336,8 +1338,18 @@ func (f Field) Column() *schema.Column {
 	}
 	// Override the default-value defined in the
 	// schema if it was provided by an annotation.
-	if ant := f.EntSQL(); ant != nil && ant.Default != "" {
+	switch ant := f.EntSQL(); {
+	case ant == nil:
+	case ant.Default != "":
 		c.Default = ant.Default
+	case ant.DefaultExpr != "":
+		c.Default = schema.Expr(ant.DefaultExpr)
+	case ant.DefaultExprs != nil:
+		x := make(map[string]schema.Expr)
+		for k, v := range ant.DefaultExprs {
+			x[k] = schema.Expr(v)
+		}
+		c.Default = x
 	}
 	// Override the collation defined in the
 	// schema if it was provided by an annotation.

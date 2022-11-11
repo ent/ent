@@ -38,9 +38,18 @@ var (
 				{{- with $c.Size }} Size: {{ . }},{{ end }}
 				{{- with $c.Attr }} Attr: "{{ . }}",{{ end }}
 				{{- with $c.Enums }} Enums: []string{ {{ range $e := . }}"{{ $e }}",{{ end }} },{{ end }}
-				{{- if not (isNil $c.Default) }} Default: {{ quote $c.Default }},{{ end }}
+				{{- if not (isNil $c.Default) -}}
+					{{- $t := printf "%T" $c.Default -}}
+					{{- if eq $t "schema.Expr" -}}
+						Default: schema.Expr("{{ $c.Default }}"),
+					{{- else if eq $t "map[string]schema.Expr" -}}
+						Default: map[string]schema.Expr{ {{ range $k := keys $c.Default }} "{{ $k }}": "{{ index $c.Default $k }}",{{ end }} },
+					{{- else -}}
+						Default: {{ quote $c.Default }},
+					{{- end -}}
+				{{- end }}
 				{{- if $c.Collation }} Collation: "{{ $c.Collation }}",{{ end }}
-				{{- with $c.SchemaType }} SchemaType: map[string]string{ {{ range $k, $v := . }}"{{ $k }}": "{{ $v }}",{{ end }}}{{ end }}},
+				{{- with $c.SchemaType }} SchemaType: map[string]string{ {{ range $k := keys . }}"{{ $k }}": "{{ index $c.SchemaType $k }}",{{ end }}}{{ end }}},
 			{{- end }}
 		}
 		{{- $table := pascal $t.Name | printf "%sTable" }}

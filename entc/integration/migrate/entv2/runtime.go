@@ -55,11 +55,11 @@ func init() {
 	// user.BlobValidator is a validator for the "blob" field. It is called by the builders before save.
 	user.BlobValidator = userDescBlob.Validators[0].(func([]byte) error)
 	// userDescCreatedAt is the schema descriptor for created_at field.
-	userDescCreatedAt := userFields[16].Descriptor()
+	userDescCreatedAt := userFields[18].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
 	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
 	// userDescDropOptional is the schema descriptor for drop_optional field.
-	userDescDropOptional := userFields[17].Descriptor()
+	userDescDropOptional := userFields[19].Descriptor()
 	// user.DefaultDropOptional holds the default value on creation for the drop_optional field.
 	user.DefaultDropOptional = userDescDropOptional.Default.(func() string)
 }

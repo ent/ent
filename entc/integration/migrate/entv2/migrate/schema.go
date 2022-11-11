@@ -158,6 +158,8 @@ var (
 		{Name: "status", Type: field.TypeEnum, Nullable: true, Enums: []string{"done", "pending"}},
 		{Name: "workplace", Type: field.TypeString, Nullable: true},
 		{Name: "roles", Type: field.TypeJSON, Nullable: true, Default: "[]"},
+		{Name: "default_expr", Type: field.TypeString, Nullable: true, Default: schema.Expr("lower('hello')")},
+		{Name: "default_exprs", Type: field.TypeString, Nullable: true, Default: map[string]schema.Expr{"mysql": "TO_BASE64('ent')", "postgres": "md5('ent')", "sqlite3": "hex('ent')"}},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "drop_optional", Type: field.TypeString},
 		{Name: "blog_admins", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
@@ -170,7 +172,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "users_blogs_admins",
-				Columns:    []*schema.Column{UsersColumns[20]},
+				Columns:    []*schema.Column{UsersColumns[22]},
 				RefColumns: []*schema.Column{BlogsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
