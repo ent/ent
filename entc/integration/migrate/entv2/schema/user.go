@@ -102,7 +102,7 @@ func (User) Fields() []ent.Field {
 		// JSON field with database-default value.
 		field.Strings("roles").
 			Optional().
-			Annotations(entsql.Annotation{Default: `[]`}),
+			Annotations(entsql.Default(`[]`)),
 		field.String("default_expr").
 			Optional().
 			Annotations(entsql.DefaultExpr("lower('hello')")),

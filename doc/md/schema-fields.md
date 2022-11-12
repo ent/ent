@@ -302,10 +302,10 @@ func (User) Fields() []ent.Field {
 }
 ```
 
-SQL-specific expressions like function calls can be added to default value configuration using the
+SQL-specific literals or expressions like function calls can be added to default value configuration using the
 [`entsql.Annotation`](https://pkg.go.dev/entgo.io/ent@master/dialect/entsql#Annotation):
 
-```go
+```go {9,16,23-27}
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
@@ -313,9 +313,27 @@ func (User) Fields() []ent.Field {
 		// as a default value to all previous rows.
 		field.Time("created_at").
 			Default(time.Now).
-			Annotations(&entsql.Annotation{
-				Default: "CURRENT_TIMESTAMP",
-			}),
+			Annotations(
+				entsql.Default("CURRENT_TIMESTAMP"),
+			),
+		// Add a new field with a default value
+		// expression that works on all dialects.
+		field.String("field").
+			Optional().
+			Annotations(
+				entsql.DefaultExpr("lower(other_field)"),
+			),
+		// Add a new field with custom default value
+		// expression for each dialect.
+		field.String("default_exprs").
+			Optional().
+			Annotations(
+				entsql.DefaultExprs(map[string]string{
+				    dialect.MySQL:    "TO_BASE64('ent')",
+				    dialect.SQLite:   "hex('ent')",
+				    dialect.Postgres: "md5('ent')",
+			    }),
+			),
 	}
 }
 ```
