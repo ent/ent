@@ -416,6 +416,7 @@ func (gq *GroupQuery) loadUsers(ctx context.Context, query *UserQuery, nodes []*
 	}
 	query.Where(func(s *sql.Selector) {
 		joinT := sql.Table(group.UsersTable)
+		joinT.Schema(gq.schemaConfig.GroupUsers)
 		s.Join(joinT).On(s.C(user.FieldID), joinT.C(group.UsersPrimaryKey[1]))
 		s.Where(sql.InValues(joinT.C(group.UsersPrimaryKey[0]), edgeIDs...))
 		columns := s.SelectedColumns()

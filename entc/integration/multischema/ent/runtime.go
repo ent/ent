@@ -7,6 +7,9 @@
 package ent
 
 import (
+	"time"
+
+	"entgo.io/ent/entc/integration/multischema/ent/friendship"
 	"entgo.io/ent/entc/integration/multischema/ent/group"
 	"entgo.io/ent/entc/integration/multischema/ent/pet"
 	"entgo.io/ent/entc/integration/multischema/ent/schema"
@@ -17,6 +20,16 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	friendshipFields := schema.Friendship{}.Fields()
+	_ = friendshipFields
+	// friendshipDescWeight is the schema descriptor for weight field.
+	friendshipDescWeight := friendshipFields[0].Descriptor()
+	// friendship.DefaultWeight holds the default value on creation for the weight field.
+	friendship.DefaultWeight = friendshipDescWeight.Default.(int)
+	// friendshipDescCreatedAt is the schema descriptor for created_at field.
+	friendshipDescCreatedAt := friendshipFields[1].Descriptor()
+	// friendship.DefaultCreatedAt holds the default value on creation for the created_at field.
+	friendship.DefaultCreatedAt = friendshipDescCreatedAt.Default.(func() time.Time)
 	groupFields := schema.Group{}.Fields()
 	_ = groupFields
 	// groupDescName is the schema descriptor for name field.

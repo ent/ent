@@ -13,6 +13,19 @@ import (
 	"entgo.io/ent/entc/integration/multischema/ent"
 )
 
+// The FriendshipFunc type is an adapter to allow the use of ordinary
+// function as Friendship mutator.
+type FriendshipFunc func(context.Context, *ent.FriendshipMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f FriendshipFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.FriendshipMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FriendshipMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The GroupFunc type is an adapter to allow the use of ordinary
 // function as Group mutator.
 type GroupFunc func(context.Context, *ent.GroupMutation) (ent.Value, error)
