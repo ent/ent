@@ -136,6 +136,18 @@ func (Annotation) Name() string {
 	return "EntSQL"
 }
 
+// Default specifies a literal default value of a column. Note that using
+// this option overrides the default behavior of the code-generation.
+//
+//	entsql.Annotation{
+//		Default: `{"key":"value"}`,
+//	}
+func Default(literal string) *Annotation {
+	return &Annotation{
+		Default: literal,
+	}
+}
+
 // DefaultExpr specifies an expression default value for the annotated column.
 // Using this option, users can define custom expressions to be set as database
 // default values.Note that using this option overrides the default behavior of
