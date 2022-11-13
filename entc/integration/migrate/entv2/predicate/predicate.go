@@ -33,3 +33,6 @@ type Pet func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
+
+// Zoo is the predicate function for zoo builders.
+type Zoo func(*sql.Selector)

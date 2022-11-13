@@ -32,6 +32,7 @@ import (
 	migratev2 "entgo.io/ent/entc/integration/migrate/entv2/migrate"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
+	"entgo.io/ent/entc/integration/migrate/entv2/zoo"
 	"entgo.io/ent/entc/integration/migrate/versioned"
 	vmigrate "entgo.io/ent/entc/integration/migrate/versioned/migrate"
 
@@ -66,10 +67,11 @@ func TestMySQL(t *testing.T) {
 			V1ToV2(t, drv.Dialect(), clientv1, clientv2)
 			if version == "8" {
 				CheckConstraint(t, clientv2)
-				DefaultExpr(t, drv, "SELECT column_default FROM information_schema.columns WHERE table_name = 'users' AND column_name = ?", "lower(_utf8mb4\\'hello\\')", "to_base64(_utf8mb4\\'ent\\')")
+				DefaultExpr(t, drv, "SELECT column_default FROM information_schema.columns WHERE table_schema = 'migrate' AND table_name = 'users' AND column_name = ?", "lower(_utf8mb4\\'hello\\')", "to_base64(_utf8mb4\\'ent\\')")
+				PKDefault(t, drv, "SELECT column_default FROM information_schema.columns WHERE table_schema = 'migrate' AND table_name = 'zoos' AND column_name = ?", "floor((rand() * ~((1 << 31))))")
 			}
 			NicknameSearch(t, clientv2)
-			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_name = ? AND column_name = ?")
+			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_schema = 'migrate' AND table_name = ? AND column_name = ?")
 
 			require.NoError(t, err, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []any{}, new(sql.Result)))
 			require.NoError(t, root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS versioned_migrate", []any{}, new(sql.Result)))
@@ -136,6 +138,7 @@ func TestPostgres(t *testing.T) {
 			PartialIndexes(t, drv, "select indexdef from pg_indexes where indexname=$1", "CREATE INDEX user_phone ON public.users USING btree (phone) WHERE active")
 			JSONDefault(t, drv, `SELECT column_default FROM information_schema.columns WHERE table_name = 'users' AND column_name = $1`)
 			DefaultExpr(t, drv, `SELECT column_default FROM information_schema.columns WHERE table_name = 'users' AND column_name = $1`, "lower('hello'::text)", "md5('ent'::text)")
+			PKDefault(t, drv, `SELECT column_default FROM information_schema.columns WHERE table_name = 'zoos' AND column_name = $1`, "floor((random() * ((~ (1 << 31)))::double precision))")
 			IndexOpClass(t, drv)
 			if version != "10" {
 				IncludeColumns(t, drv)
@@ -216,6 +219,7 @@ func TestSQLite(t *testing.T) {
 	PartialIndexes(t, drv, "select sql from sqlite_master where name=?", "CREATE INDEX `user_phone` ON `users` (`phone`) WHERE active")
 	JSONDefault(t, drv, "SELECT `dflt_value` FROM `pragma_table_info`('users') WHERE `name` = ?")
 	DefaultExpr(t, drv, "SELECT `dflt_value` FROM `pragma_table_info`('users') WHERE `name` = ?", "lower('hello')", "hex('ent')")
+	PKDefault(t, drv, "SELECT `dflt_value` FROM `pragma_table_info`('zoos') WHERE `name` = ?", "abs(random())")
 
 	// Override the default behavior of LIKE in SQLite.
 	// https://www.sqlite.org/pragma.html#pragma_case_sensitive_like
@@ -690,6 +694,16 @@ func DefaultExpr(t *testing.T, drv *sql.Driver, query string, expected1, expecte
 	require.NoError(t, err)
 	require.NoError(t, rows.Close())
 	require.Equal(t, expected2, s)
+}
+
+func PKDefault(t *testing.T, drv *sql.Driver, query string, expected string) {
+	ctx := context.Background()
+	rows, err := drv.QueryContext(ctx, query, zoo.FieldID)
+	require.NoError(t, err)
+	s, err := sql.ScanString(rows)
+	require.NoError(t, err)
+	require.NoError(t, rows.Close())
+	require.Equal(t, expected, s)
 }
 
 func IncludeColumns(t *testing.T, drv *sql.Driver) {

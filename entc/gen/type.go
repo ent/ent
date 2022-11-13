@@ -1401,8 +1401,18 @@ func (f Field) PK() *schema.Column {
 	}
 	// Override the default-value defined in the
 	// schema if it was provided by an annotation.
-	if ant := f.EntSQL(); ant != nil && ant.Default != "" {
+	switch ant := f.EntSQL(); {
+	case ant == nil:
+	case ant.Default != "":
 		c.Default = ant.Default
+	case ant.DefaultExpr != "":
+		c.Default = schema.Expr(ant.DefaultExpr)
+	case ant.DefaultExprs != nil:
+		x := make(map[string]schema.Expr)
+		for k, v := range ant.DefaultExprs {
+			x[k] = schema.Expr(v)
+		}
+		c.Default = x
 	}
 	if f.def != nil {
 		c.SchemaType = f.def.SchemaType

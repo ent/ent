@@ -7,6 +7,7 @@ package schema
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 	"unicode"
@@ -769,7 +770,10 @@ func (d *Postgres) atImplicitIndexName(idx *Index, t1 *Table, c1 *Column) bool {
 }
 
 func (d *Postgres) atIncrementC(t *schema.Table, c *schema.Column) {
-	if _, ok := c.Type.Type.(*postgres.SerialType); ok {
+	// Skip marking this column as an identity in case it is
+	// serial type or a default was already defined for it.
+	if _, ok := c.Type.Type.(*postgres.SerialType); ok || c.Default != nil {
+		t.Attrs = removeAttr(t.Attrs, reflect.TypeOf(&postgres.Identity{}))
 		return
 	}
 	id := &postgres.Identity{}

@@ -36,6 +36,7 @@ type hooks struct {
 	Media      []ent.Hook
 	Pet        []ent.Hook
 	User       []ent.Hook
+	Zoo        []ent.Hook
 }
 
 // Options applies the options on the config object.

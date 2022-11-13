@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -932,8 +933,12 @@ func (d *MySQL) atUniqueC(t1 *Table, c1 *Column, t2 *schema.Table, c2 *schema.Co
 	t2.AddIndexes(schema.NewUniqueIndex(c1.Name).AddColumns(c2))
 }
 
-func (d *MySQL) atIncrementC(_ *schema.Table, c *schema.Column) {
-	c.AddAttrs(&mysql.AutoIncrement{})
+func (d *MySQL) atIncrementC(t *schema.Table, c *schema.Column) {
+	if c.Default != nil {
+		t.Attrs = removeAttr(t.Attrs, reflect.TypeOf(&mysql.AutoIncrement{}))
+	} else {
+		c.AddAttrs(&mysql.AutoIncrement{})
+	}
 }
 
 func (d *MySQL) atIncrementT(t *schema.Table, v int64) {

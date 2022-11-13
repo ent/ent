@@ -239,6 +239,16 @@ var (
 			},
 		},
 	}
+	// ZoosColumns holds the columns for the "zoos" table.
+	ZoosColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, Default: map[string]schema.Expr{"mysql": "floor(rand() * ~(1<<31))", "postgres": "floor(random() * ~(1<<31))", "sqlite3": "abs(random())"}},
+	}
+	// ZoosTable holds the schema information for the "zoos" table.
+	ZoosTable = &schema.Table{
+		Name:       "zoos",
+		Columns:    ZoosColumns,
+		PrimaryKey: []*schema.Column{ZoosColumns[0]},
+	}
 	// FriendsColumns holds the columns for the "friends" table.
 	FriendsColumns = []*schema.Column{
 		{Name: "user", Type: field.TypeInt},
@@ -274,6 +284,7 @@ var (
 		MediaTable,
 		PetsTable,
 		UsersTable,
+		ZoosTable,
 		FriendsTable,
 	}
 )
