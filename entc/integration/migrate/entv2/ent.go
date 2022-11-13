@@ -22,6 +22,7 @@ import (
 	"entgo.io/ent/entc/integration/migrate/entv2/media"
 	"entgo.io/ent/entc/integration/migrate/entv2/pet"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
+	"entgo.io/ent/entc/integration/migrate/entv2/zoo"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -50,6 +51,7 @@ func columnChecker(table string) func(string) error {
 		media.Table:      media.ValidColumn,
 		pet.Table:        pet.ValidColumn,
 		user.Table:       user.ValidColumn,
+		zoo.Table:        zoo.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

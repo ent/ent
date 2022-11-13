@@ -2,6 +2,8 @@ ariga.io/atlas v0.7.3-0.20221011160332-3ca609863edd h1:c3F2jvvEZzsoH/KUpDNhTsCVe
 ariga.io/atlas v0.7.3-0.20221011160332-3ca609863edd/go.mod h1:ft47uSh5hWGDCmQC9DsztZg6Xk+KagM5Ts/mZYKb9JE=
 ariga.io/atlas v0.8.2-0.20221108073928-ba5d4f596240 h1:Skxqk163AiuhtDEmAfF2/dvaDJTB7rNKEiGP+m1fOHw=
 ariga.io/atlas v0.8.2-0.20221108073928-ba5d4f596240/go.mod h1:ft47uSh5hWGDCmQC9DsztZg6Xk+KagM5Ts/mZYKb9JE=
+ariga.io/atlas v0.8.2-0.20221113160047-09851f798b12 h1:ocnzGNr1PmOM/UYxlHmhYj/tb7/z4rkN/0v0/qc8aVU=
+ariga.io/atlas v0.8.2-0.20221113160047-09851f798b12/go.mod h1:ft47uSh5hWGDCmQC9DsztZg6Xk+KagM5Ts/mZYKb9JE=
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/DATA-DOG/go-sqlmock v1.5.0 h1:Shsta01QNfFxHCfpW6YH2STWB0MudeXXEWMr20OEh60=

@@ -8,6 +8,7 @@ import (
 	"context"
 	stdsql "database/sql"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -473,8 +474,12 @@ func (d *SQLite) atImplicitIndexName(idx *Index, t1 *Table, c1 *Column) bool {
 	return err == nil && i > 0
 }
 
-func (d *SQLite) atIncrementC(_ *schema.Table, c *schema.Column) {
-	c.AddAttrs(&sqlite.AutoIncrement{})
+func (d *SQLite) atIncrementC(t *schema.Table, c *schema.Column) {
+	if c.Default != nil {
+		t.Attrs = removeAttr(t.Attrs, reflect.TypeOf(&sqlite.AutoIncrement{}))
+	} else {
+		c.AddAttrs(&sqlite.AutoIncrement{})
+	}
 }
 
 func (d *SQLite) atIncrementT(t *schema.Table, v int64) {
