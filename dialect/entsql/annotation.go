@@ -136,6 +136,30 @@ func (Annotation) Name() string {
 	return "EntSQL"
 }
 
+// Check allows injecting custom "DDL" for setting an unnamed "CHECK" clause in "CREATE TABLE".
+//
+//	entsql.Annotation{
+//		Check: "(`age` < 10)",
+//	}
+func Check(c string) *Annotation {
+	return &Annotation{
+		Check: c,
+	}
+}
+
+// Checks allows injecting custom "DDL" for setting named "CHECK" clauses in "CREATE TABLE".
+//
+//	entsql.Annotation{
+//		Checks: map[string]string{
+//			"valid_discount": "price > discount_price",
+//		},
+//	}
+func Checks(c map[string]string) *Annotation {
+	return &Annotation{
+		Checks: c,
+	}
+}
+
 // Default specifies a literal default value of a column. Note that using
 // this option overrides the default behavior of the code-generation.
 //
