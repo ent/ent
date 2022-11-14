@@ -470,16 +470,19 @@ Let's run `atlas migrate lint` with the necessary parameters to run migration li
 go run -mod=mod ariga.io/atlas/cmd/atlas@master migrate lint \
   --dev-url="mysql://root:pass@localhost:3306/test" \
   --dir="file://ent/migrate/migrations" \
-  --dir-format="golang-migrate" \
   --latest=1
 ```
 
 An output of such a run might look as follows:
 
-```text
-Destructive changes detected in file 20220814125800_name.up.sql:
+```text {3,7}
+20221114090322_add_age.sql: data dependent changes detected:
 
-	L1: Dropping table "posts"
+	L2: Adding a non-nullable "double" column "age" on table "users" without a default value implicitly sets existing rows with 0
+
+20221114101516_add_name.sql: data dependent changes detected:
+
+	L2: Adding a non-nullable "varchar" column "name" on table "users" without a default value implicitly sets existing rows with ""
 ```
 
 
