@@ -15,7 +15,7 @@ achieve similar benefits, we will now add a script to our project that will
 automatically plan migration files for us based on the changes to our schema. 
 
 To do this, Ent uses [Atlas](https://atlasgo.io), an open-source tool for managing database
-schemas that was created by the same people behind Ent. 
+schemas, created by the same people behind Ent. 
 
 If you have been following our example repo, we have been using SQLite as our database
 until this point. To demonstrate a more realistic use case, we will now switch to MySQL.

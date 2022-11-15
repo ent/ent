@@ -46,12 +46,12 @@ Download latest release.
 curl -LO https://release.ariga.io/atlas/atlas-darwin-amd64-latest
 ```
 
-Make the atlas binary executable.
+Make the Atlas binary executable.
 ```shell
 chmod +x ./atlas-darwin-amd64-latest
 ```
 
-Move the atlas binary to a file location on your system PATH.
+Move the Atlas binary to a file location on your system PATH.
 ```shell
 sudo mv ./atlas-darwin-amd64-latest /usr/local/bin/atlas
 ```
@@ -67,7 +67,7 @@ Download latest release.
 curl -LO https://release.ariga.io/atlas/atlas-linux-amd64-latest
 ```
 
-Move the atlas binary to a file location on your system PATH.
+Move the Atlas binary to a file location on your system PATH.
 ```shell
 sudo install -o root -g root -m 0755 ./atlas-linux-amd64-latest /usr/local/bin/atlas
 ```
@@ -76,7 +76,7 @@ sudo install -o root -g root -m 0755 ./atlas-linux-amd64-latest /usr/local/bin/a
 <TabItem value="windows">
 
 Download the [latest release](https://release.ariga.io/atlas/atlas-windows-amd64-latest.exe) and
-move the atlas binary to a file location on your system PATH.
+move the Atlas binary to a file location on your system PATH.
 
 
 </TabItem>
@@ -106,7 +106,7 @@ Error: sql/migrate: connected database is not clean: found table "atlas_schema_r
 ```
 
 This error is expected, as this is the first time we are running Atlas on this database, but as the error said
-we need to "baseline" the database. This means that we tell Atlas that the databas is already at a certain state
+we need to "baseline" the database. This means that we tell Atlas that the database is already at a certain state
 that correlates with one of the versions in the migration directory.
 
 To fix this, we use the `--baseline` flag to tell Atlas that the database is already at
