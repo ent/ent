@@ -90,7 +90,7 @@ a repository on each change that is committed to a repository.
 
 One of the powerful features of GitHub Actions is its extensibility: it is
 very easy to package a piece of functionality as a module (called an "action")
-that can later be re-used by many projects.
+that can later be reused by many projects.
 
 Teams using GitHub that wish to ensure all changes to their database schema are safe
 can use the [`atlas-action`](https://github.com/ariga/atlas-action) GitHub Action.
@@ -99,7 +99,7 @@ This action is used for [linting migration directories](/versioned/lint)
 using the `atlas migrate lint` command. This command  validates and analyzes the contents
 of migration directories and generates insights and diagnostics on the selected changes:
 
-* Ensure the migration history can be replayed from any point at time.
+* Ensure the migration history can be replayed from any point in time.
 * Protect from unexpected history changes when concurrent migrations are written to the migration directory by
   multiple team members.
 * Detect whether destructive or irreversible changes have been made or whether they are dependent on tables'
@@ -170,7 +170,7 @@ Re-hash the migration directory:
 atlas migrate hash --dir file://ent/migrate/migrations
 ```
 
-Re-running `atlas migrate lint` we can see that the migration directory doesn't
+Re-running `atlas migrate lint`, we can see that the migration directory doesn't
 contain any unsafe changes:
 
 ```text
@@ -196,7 +196,7 @@ automatic migration to versioned migrations. To recap, we learned how to:
 * Create a script to automatically plan migrations based on our desired Ent schema
 * Upgrade our production database to use versioned migrations with Atlas
 * Plan custom migrations for our project
-* Verifying migrations are safe using `atlas migrate lint`
+* Verify migrations safely using `atlas migrate lint`
 
 :::note For more Ent news and updates:
 
