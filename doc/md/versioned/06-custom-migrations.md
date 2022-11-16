@@ -55,7 +55,7 @@ to re-hash the contents and resolve the error
 
 Error: checksum mismatch
 ```
-Atlas introduces the concept of [migration directory integrity](/concepts/migration-directory-integrity)
+Atlas introduces the concept of [migration directory integrity](https://atlasgo.io/concepts/migration-directory-integrity)
 as a means to enforce a linear migration history. This way, if multiple developers work on the 
 same project in parallel, they can be sure that their merged migration history is correct.
 

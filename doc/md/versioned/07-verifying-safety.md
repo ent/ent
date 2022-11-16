@@ -19,41 +19,60 @@ we will show how to use it to verify that our migration is safe to run.
 ## Linting the migration directory
 
 To lint our migration directory we can use the `atlas migrate lint` command.
-To demonstrate this, let's add a migration that drops the `blogs` table:
+To demonstrate this, let's see what happens if we decide to change the `Title` field in the `User`
+model from optional to required:
+
+```diff
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name"),
+		field.String("email").
+		  Unique(),
+--		field.String("title").
+--         Optional(),
+++		field.String("title"),
+	}
+}
+
+```
+
+Let's re-run codegn:
 
 ```shell
-atlas migrate new drop_blogs --dir file://ent/migrate/migrations
-```
-Edit the newly created migration file and add the following SQL statement:
-
-```sql
-drop table blogs;
+go generate ./...
 ```
 
-Re-hash the migration directory:
+Next, let's automatically generate a new migration:
 
-```text
-atlas migrate hash --dir file://ent/migrate/migrations
+```shell
+go run -mod=mod ent/migrate/main.go user_title_required```
+```
+
+A new migration file was created in the `ent/migrate/migrations` directory:
+
+```sql title="ent/migrate/migrations/20221116051710_user_title_required.sql"
+-- modify "users" table
+ALTER TABLE `users` MODIFY COLUMN `title` varchar(255) NOT NULL;
 ```
 
 Now, let's lint the migration directory:
 
 ```shell
-atlas migrate lint --dir file://ent/migrate/migrations --latest 1
+atlas migrate lint --dev-url mysql://root:pass@localhost:3306/dev --dir file://ent/migrate/migrations --latest 1
 ```
 
-Atlas reports that the migration is unsafe to run:
+Atlas reports that the migration may be unsafe to run:
 
 ```text
-20221115124032_drop_blogs.sql: destructive changes detected:
+20221116051710_user_title_required.sql: data dependent changes detected:
 
-        L1: Dropping table "blogs"
-
+        L2: Modifying nullable column "title" to non-nullable might fail in case it contains NULL values
 ```
+
 Atlas detected that the migration is unsafe to run and prevented us from running it.
-In this case, Atlas classified this change as a destructive change. Destructive changes are
-changes that cause data loss and are not reversible. In this case, the `blogs` table is dropped,
-while the table may be recreated, it will not be restored with the original data.
+In this case, Atlas classified this change as a data dependent change. This means that the change
+might fail, depending on the concrete data in the database.
 
 Atlas can detect many more types of issues, for a full list, see the [Atlas documentation](https://atlasgo.io/lint/analyzers).
 
@@ -129,16 +148,25 @@ jobs:
           dev-url: mysql://root:pass@localhost:3306/dev
 ```
 Now, whenever we make a pull request with a potentially unsafe migration, the Atlas
-GitHub action will run and report the linting results. For example, for our destructive change:
-![](https://atlasgo.io/uploads/images/atlas-ci-report-comment.png)
+GitHub action will run and report the linting results. For example, for our data-dependent change:
+![](https://atlasgo.io/uploads/images/atlas-ci-report-dd.png)
 
 For more in depth documentation, see the [atlas-action](https://atlasgo.io/integrations/github-actions)
 docs on the Atlas website.
 
-Let's fix the issue by removing our dangerous migration and re-hashing the
-migration directory:
-```text
-rm ent/migrate/migrations/20221115124032_drop_blogs.sql
+Let's fix the issue by back-filling the `title` column. Add the following
+statement to the migration file:
+
+```sql title="ent/migrate/migrations/20221116051710_user_title_required.sql"
+-- modify "users" table
+UPDATE `users` SET `title` = "" WHERE `title` IS NULL;
+
+ALTER TABLE `users` MODIFY COLUMN `title` varchar(255) NOT NULL;
+```
+
+Re-hash the migration directory:
+
+```shell
 atlas migrate hash --dir file://ent/migrate/migrations
 ```
 
@@ -150,6 +178,11 @@ atlas migrate lint --dev-url mysql://root:pass@localhost:3306/dev --dir file://e
 ```
 
 Because no issues are found, the command will exit with a zero exit code and no output. 
+
+When we commit this change to GitHub, the Atlas GitHub action will run and report that
+the issue is resolved:
+
+![](https://atlasgo.io/uploads/images/atlas-ci-report-noissue.png)
 
 ## Conclusion
 

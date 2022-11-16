@@ -19,9 +19,12 @@ to our `User` entity, adding a new optional field named `title`:
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name"),
-		// highlight-next-line
-		field.String("email").Unique(), // <-- Our new field
-		field.String("title").Optional(),
+		// highlight-start
+		field.String("email"). // <-- Our new field
+            Unique(),
+        // highlight-end
+		field.String("title").
+            Optional(),
 	}
 }
 ```

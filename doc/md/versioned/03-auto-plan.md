@@ -84,9 +84,14 @@ func main() {
     }
 }
 ```
+
+:::info
+
 Notice that you need to make some modifications to the script above in the highlighted lines.
 Edit the import path of the `migrate` package to match your project and to supply the connection 
 string to your Dev database.
+
+:::
 
 To run the script, first create a `migrations` directory in the `ent/migrate` directory of your
 project:
