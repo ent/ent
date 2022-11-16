@@ -82,10 +82,9 @@ func TestMySQL(t *testing.T) {
 			vdrv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/versioned_migrate?parseTime=True", port))
 			require.NoError(t, err, "connecting to versioned migrate database")
 			defer vdrv.Close()
-			Versioned(t, vdrv,
-				fmt.Sprintf("mysql://root:pass@localhost:%d/versioned_migrate_dev?parseTime=True", port),
-				versioned.NewClient(versioned.Driver(vdrv)),
-			)
+			devURL := fmt.Sprintf("mysql://root:pass@localhost:%d/versioned_migrate_dev?parseTime=True", port)
+			Versioned(t, vdrv, devURL, versioned.NewClient(versioned.Driver(vdrv)))
+			ConsistentVersioned(t, devURL)
 		})
 	}
 }
@@ -98,17 +97,17 @@ func TestPostgres(t *testing.T) {
 			require.NoError(t, err)
 			defer root.Close()
 			ctx := context.Background()
-			err = root.Exec(ctx, "DROP DATABASE IF EXISTS migrate", []any{}, new(sql.Result))
+			err = root.Exec(ctx, "DROP DATABASE IF EXISTS migrate", []any{}, nil)
 			require.NoError(t, err)
-			err = root.Exec(ctx, "CREATE DATABASE migrate", []any{}, new(sql.Result))
+			err = root.Exec(ctx, "CREATE DATABASE migrate", []any{}, nil)
 			require.NoError(t, err, "creating database")
-			defer root.Exec(ctx, "DROP DATABASE migrate", []any{}, new(sql.Result))
+			defer root.Exec(ctx, "DROP DATABASE migrate", []any{}, nil)
 
 			drv, err := sql.Open(dialect.Postgres, dsn+" dbname=migrate")
 			require.NoError(t, err, "connecting to migrate database")
 			defer drv.Close()
 
-			err = drv.Exec(ctx, "CREATE TYPE customtype as range (subtype = time)", []any{}, new(sql.Result))
+			err = drv.Exec(ctx, "CREATE TYPE customtype as range (subtype = time)", []any{}, nil)
 			require.NoError(t, err, "creating custom type")
 
 			clientv1 := entv1.NewClient(entv1.Driver(drv))
@@ -147,16 +146,21 @@ func TestPostgres(t *testing.T) {
 			vdrv, err := sql.Open(dialect.Postgres, dsn+" dbname=versioned_migrate")
 			require.NoError(t, err, "connecting to versioned migrate database")
 			defer vdrv.Close()
-			require.NoError(t, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []any{}, new(sql.Result)))
+			require.NoError(t, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []any{}, nil))
 			require.NoError(t, root.Exec(ctx, "CREATE DATABASE versioned_migrate", []any{}, new(sql.Result)))
 			defer root.Exec(ctx, "DROP DATABASE versioned_migrate", []any{}, new(sql.Result))
-			require.NoError(t, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate_dev", []any{}, new(sql.Result)))
+			require.NoError(t, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate_dev", []any{}, nil))
 			require.NoError(t, root.Exec(ctx, "CREATE DATABASE versioned_migrate_dev", []any{}, new(sql.Result)))
 			defer root.Exec(ctx, "DROP DATABASE versioned_migrate_dev", []any{}, new(sql.Result))
-			Versioned(t, vdrv,
-				fmt.Sprintf("postgres://postgres:pass@localhost:%d/versioned_migrate_dev?sslmode=disable&search_path=public", port),
-				versioned.NewClient(versioned.Driver(vdrv)),
-			)
+			devURL := fmt.Sprintf("postgres://postgres:pass@localhost:%d/versioned_migrate_dev?sslmode=disable&search_path=public", port)
+			Versioned(t, vdrv, devURL, versioned.NewClient(versioned.Driver(vdrv)))
+			// Create the necessary custom types for the versioned schema.
+			dev, err := sql.Open(dialect.Postgres, dsn+" dbname=versioned_migrate_dev")
+			require.NoError(t, err, "connecting to versioned_migrate_dev database")
+			defer dev.Close()
+			err = dev.Exec(ctx, "CREATE TYPE customtype as range (subtype = time)", []any{}, nil)
+			require.NoError(t, err, "creating custom type on dev database")
+			ConsistentVersioned(t, devURL)
 		})
 	}
 }
@@ -165,7 +169,6 @@ func TestSQLite(t *testing.T) {
 	drv, err := sql.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	require.NoError(t, err)
 	defer drv.Close()
-
 	ctx := context.Background()
 	client := entv2.NewClient(entv2.Driver(drv))
 	require.NoError(
@@ -308,6 +311,32 @@ func TestStorageKey(t *testing.T) {
 	require.Equal(t, "user_pet_id", migratev2.PetsTable.ForeignKeys[0].Symbol)
 	require.Equal(t, "user_friend_id1", migratev2.FriendsTable.ForeignKeys[0].Symbol)
 	require.Equal(t, "user_friend_id2", migratev2.FriendsTable.ForeignKeys[1].Symbol)
+}
+
+func ConsistentVersioned(t *testing.T, devURL string) {
+	p := t.TempDir()
+	ctx := context.Background()
+	dir, err := migrate.NewLocalDir(p)
+	require.NoError(t, err)
+	opts := []schema.MigrateOption{
+		schema.WithDir(dir),                                 // provide migration directory
+		schema.WithMigrationMode(schema.ModeReplay),         // provide migration mode
+		schema.WithDialect(strings.Split(devURL, "://")[0]), // Ent dialect to use
+		schema.WithFormatter(migrate.DefaultFormatter),      // Default Atlas formatter
+	}
+	// Run diff should generate a single SQL file containing the diff.
+	err = migratev2.NamedDiff(ctx, devURL, "first", opts...)
+	require.NoError(t, err)
+	files, err := dir.Files()
+	require.NoError(t, err)
+	require.Len(t, files, 1)
+	require.NotEmpty(t, files[0].Bytes())
+	// Re-run diff should not generate any new files.
+	err = migratev2.NamedDiff(ctx, devURL, "second", opts...)
+	require.NoError(t, err)
+	files, err = dir.Files()
+	require.NoError(t, err)
+	require.Len(t, files, 1)
 }
 
 func Versioned(t *testing.T, drv sql.ExecQuerier, devURL string, client *versioned.Client) {
