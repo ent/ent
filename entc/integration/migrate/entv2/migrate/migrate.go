@@ -58,6 +58,38 @@ func Create(ctx context.Context, s *Schema, tables []*schema.Table, opts ...sche
 	return migrate.Create(ctx, tables...)
 }
 
+// Diff compares the state read from a database connection or migration directory with
+// the state defined by the Ent schema. Changes will be written to new migration files.
+func Diff(ctx context.Context, url string, opts ...schema.MigrateOption) error {
+	return NamedDiff(ctx, url, "changes", opts...)
+}
+
+// NamedDiff compares the state read from a database connection or migration directory with
+// the state defined by the Ent schema. Changes will be written to new named migration files.
+func NamedDiff(ctx context.Context, url, name string, opts ...schema.MigrateOption) error {
+	return schema.Diff(ctx, url, name, Tables, opts...)
+}
+
+// Diff creates a migration file containing the statements to resolve the diff
+// between the Ent schema and the connected database.
+func (s *Schema) Diff(ctx context.Context, opts ...schema.MigrateOption) error {
+	migrate, err := schema.NewMigrate(s.drv, opts...)
+	if err != nil {
+		return fmt.Errorf("ent/migrate: %w", err)
+	}
+	return migrate.Diff(ctx, Tables...)
+}
+
+// NamedDiff creates a named migration file containing the statements to resolve the diff
+// between the Ent schema and the connected database.
+func (s *Schema) NamedDiff(ctx context.Context, name string, opts ...schema.MigrateOption) error {
+	migrate, err := schema.NewMigrate(s.drv, opts...)
+	if err != nil {
+		return fmt.Errorf("ent/migrate: %w", err)
+	}
+	return migrate.NamedDiff(ctx, name, Tables...)
+}
+
 // WriteTo writes the schema changes to w instead of running them against the database.
 //
 //	if err := client.Schema.WriteTo(context.Background(), os.Stdout); err != nil {

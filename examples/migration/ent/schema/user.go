@@ -23,9 +23,10 @@ func (User) Fields() []ent.Field {
 // Annotations of the User.
 func (User) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		// Unnamed check constraints should be identical to their definition in the
-		// database (i.e. normalized). See: https://atlasgo.io/concepts/dev-database.
-		entsql.Check("(`age` > 0)"),
+		// In case schema.ModeInspect is used without a dev-database, unnamed check constraints
+		// should be normalized (i.e. identical to their definition in the database). In this
+		// case, it is entsql.Check("(`age` > 0)"). See: https://atlasgo.io/concepts/dev-database.
+		entsql.Check("age > 0"),
 
 		// Named check constraints are compared by their name.
 		// Thus, the definition does not need to be normalized.

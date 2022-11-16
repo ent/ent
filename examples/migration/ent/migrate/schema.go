@@ -33,7 +33,7 @@ var (
 
 func init() {
 	UsersTable.Annotation = &entsql.Annotation{
-		Check: "(`age` > 0)",
+		Check: "age > 0",
 	}
 	UsersTable.Annotation.Checks = map[string]string{
 		"name_not_empty": "name <> ''",
