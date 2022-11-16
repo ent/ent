@@ -47,8 +47,8 @@ func main() {
 	// Run migration.
 	// highlight-next-line
 	if err := client.Schema.Create(ctx); err != nil {
-        log.Fatalf("failed creating schema resources: %v", err)
-    }
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
 	// ... Continue with server start.
 }
 ```
