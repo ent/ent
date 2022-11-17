@@ -59,10 +59,17 @@ import (
     _ "github.com/go-sql-driver/mysql"
 )
 
+const (
+	dir = "ent/migrate/migrations"
+)
+
 func main() {
     ctx := context.Background()
     // Create a local migration directory able to understand Atlas migration file format for replay.
-    dir, err := atlas.NewLocalDir("ent/migrate/migrations")
+    if err := os.MkdirAll(dir, 0755); err != nil {
+		log.Fatalf("creating migration directory: %v", err)
+	}
+    dir, err := atlas.NewLocalDir(dir)
     if err != nil {
         log.Fatalf("failed creating atlas migration directory: %v", err)
     }
@@ -78,7 +85,7 @@ func main() {
     }
     // Generate migrations using Atlas support for MySQL (note the Ent dialect option passed above).
     //highlight-next-line
-    err = migrate.NamedDiff(ctx, "mysql://root:pass@localhost:3306/test", os.Args[1], opts...)
+    err = migrate.NamedDiff(ctx, "mysql://root:pass@localhost:3306/dev", os.Args[1], opts...)
     if err != nil {
         log.Fatalf("failed generating migration file: %v", err)
     }
