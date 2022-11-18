@@ -14,13 +14,13 @@ import (
 	"math"
 	"strings"
 	"time"
-	{{- /* Ignore generting on graph specififc templates */}}
-	{{- if not (eq $.Config.Package $.Package) }}
+	{{- /* Ignore generting on graph templates (e.g. config.tmpl, client.tmpl, etc). */}}
+	{{- if ne $.Config.Package $.Package }}
 		"{{ $.Config.Package }}/predicate"
 		{{- if $.HasOneFieldID }}
 			{{- with $.ID.Type.PkgPath }}
 				{{- $name := $.ID.Type.PkgName }}
-				{{ if ne $name (base $.ID.Type.PkgPath) }}{{ $name }} {{ end}}"{{ . }}"
+				{{ if ne $name (base $.ID.Type.PkgPath) }}{{ $name }} {{ end }}"{{ . }}"
 			{{- end }}
 		{{- end }}
 		{{- /* Import external packages */}}
@@ -39,12 +39,14 @@ import (
 
 {{/* A template for importing fields with custom types */}}
 {{ define "import/types" -}}
+	{{- $seen := dict }}
 	{{- $fields := $.Fields }}{{ if $.HasOneFieldID }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}{{ end }}
 	{{- range $f := $fields }}
 		{{- $pkg := $f.Type.PkgPath }}
-		{{- if and $pkg (not (hasImport (base $pkg))) }}
+		{{- if and $pkg (not (hasImport (base $pkg))) (not (hasKey $seen $pkg)) }}
 			{{- $name := $f.Type.PkgName }}
 			{{ if ne $name (base $pkg) }}{{ $name }} {{ end}}"{{ $pkg }}"
+			{{- $seen = set $seen $pkg true }}
 		{{- end }}
 	{{- end }}
 {{- end }}
