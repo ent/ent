@@ -219,7 +219,6 @@ var (
 		"time":    "time",
 		"ent":     "entgo.io/ent",
 		"dialect": "entgo.io/ent/dialect",
-		"schema":  "entgo.io/ent/schema",
 		"field":   "entgo.io/ent/schema/field",
 	}
 )
