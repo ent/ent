@@ -1454,15 +1454,15 @@ func TestBatchCreate(t *testing.T) {
 					WithArgs(false, 32, "a8m", 2, 30, "nati").
 					WillReturnResult(sqlmock.NewResult(10, 2))
 				// Insert M2M inverse-edges.
-				m.ExpectExec(escape("INSERT INTO `group_users` (`group_id`, `user_id`) VALUES (?, ?), (?, ?)")).
+				m.ExpectExec(escape("INSERT INTO `group_users` (`group_id`, `user_id`) VALUES (?, ?), (?, ?) ON DUPLICATE KEY UPDATE `group_id` = `group_users`.`group_id`, `user_id` = `group_users`.`user_id`")).
 					WithArgs(2, 10, 2, 11).
 					WillReturnResult(sqlmock.NewResult(2, 2))
 				// Insert M2M bidirectional edges.
-				m.ExpectExec(escape("INSERT INTO `user_friends` (`user_id`, `friend_id`) VALUES (?, ?), (?, ?), (?, ?), (?, ?)")).
+				m.ExpectExec(escape("INSERT INTO `user_friends` (`user_id`, `friend_id`) VALUES (?, ?), (?, ?), (?, ?), (?, ?) ON DUPLICATE KEY UPDATE `user_id` = `user_friends`.`user_id`, `friend_id` = `user_friends`.`friend_id`")).
 					WithArgs(10, 2, 2, 10, 11, 2, 2, 11).
 					WillReturnResult(sqlmock.NewResult(2, 2))
 				// Insert M2M edges.
-				m.ExpectExec(escape("INSERT INTO `user_products` (`user_id`, `product_id`) VALUES (?, ?), (?, ?)")).
+				m.ExpectExec(escape("INSERT INTO `user_products` (`user_id`, `product_id`) VALUES (?, ?), (?, ?) ON DUPLICATE KEY UPDATE `user_id` = `user_products`.`user_id`, `product_id` = `user_products`.`product_id`")).
 					WithArgs(10, 2, 11, 2).
 					WillReturnResult(sqlmock.NewResult(2, 2))
 				// Update FKs exist in different tables.
