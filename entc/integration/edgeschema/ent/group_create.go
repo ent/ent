@@ -14,6 +14,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
+	"entgo.io/ent/entc/integration/edgeschema/ent/grouptag"
+	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
 	"entgo.io/ent/schema/field"
@@ -56,6 +58,21 @@ func (gc *GroupCreate) AddUsers(u ...*User) *GroupCreate {
 	return gc.AddUserIDs(ids...)
 }
 
+// AddTagIDs adds the "tags" edge to the Tag entity by IDs.
+func (gc *GroupCreate) AddTagIDs(ids ...int) *GroupCreate {
+	gc.mutation.AddTagIDs(ids...)
+	return gc
+}
+
+// AddTags adds the "tags" edges to the Tag entity.
+func (gc *GroupCreate) AddTags(t ...*Tag) *GroupCreate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return gc.AddTagIDs(ids...)
+}
+
 // AddJoinedUserIDs adds the "joined_users" edge to the UserGroup entity by IDs.
 func (gc *GroupCreate) AddJoinedUserIDs(ids ...int) *GroupCreate {
 	gc.mutation.AddJoinedUserIDs(ids...)
@@ -69,6 +86,21 @@ func (gc *GroupCreate) AddJoinedUsers(u ...*UserGroup) *GroupCreate {
 		ids[i] = u[i].ID
 	}
 	return gc.AddJoinedUserIDs(ids...)
+}
+
+// AddGroupTagIDs adds the "group_tags" edge to the GroupTag entity by IDs.
+func (gc *GroupCreate) AddGroupTagIDs(ids ...int) *GroupCreate {
+	gc.mutation.AddGroupTagIDs(ids...)
+	return gc
+}
+
+// AddGroupTags adds the "group_tags" edges to the GroupTag entity.
+func (gc *GroupCreate) AddGroupTags(g ...*GroupTag) *GroupCreate {
+	ids := make([]int, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return gc.AddGroupTagIDs(ids...)
 }
 
 // Mutation returns the GroupMutation object of the builder.
@@ -214,6 +246,25 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := gc.mutation.TagsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   group.TagsTable,
+			Columns: group.TagsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: tag.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := gc.mutation.JoinedUsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -225,6 +276,25 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: usergroup.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := gc.mutation.GroupTagsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   group.GroupTagsTable,
+			Columns: []string{group.GroupTagsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: grouptag.FieldID,
 				},
 			},
 		}

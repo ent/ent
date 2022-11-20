@@ -202,6 +202,30 @@ func (f GroupMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation)
 	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.GroupMutation", m)
 }
 
+// The GroupTagQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type GroupTagQueryRuleFunc func(context.Context, *ent.GroupTagQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f GroupTagQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.GroupTagQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("ent/privacy: unexpected query type %T, expect *ent.GroupTagQuery", q)
+}
+
+// The GroupTagMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type GroupTagMutationRuleFunc func(context.Context, *ent.GroupTagMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f GroupTagMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	if m, ok := m.(*ent.GroupTagMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.GroupTagMutation", m)
+}
+
 // The RelationshipQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
 type RelationshipQueryRuleFunc func(context.Context, *ent.RelationshipQuery) error
@@ -505,6 +529,8 @@ func queryFilter(q ent.Query) (Filter, error) {
 		return q.Filter(), nil
 	case *ent.GroupQuery:
 		return q.Filter(), nil
+	case *ent.GroupTagQuery:
+		return q.Filter(), nil
 	case *ent.RelationshipQuery:
 		return q.Filter(), nil
 	case *ent.RelationshipInfoQuery:
@@ -537,6 +563,8 @@ func mutationFilter(m ent.Mutation) (Filter, error) {
 	case *ent.FriendshipMutation:
 		return m.Filter(), nil
 	case *ent.GroupMutation:
+		return m.Filter(), nil
+	case *ent.GroupTagMutation:
 		return m.Filter(), nil
 	case *ent.RelationshipMutation:
 		return m.Filter(), nil

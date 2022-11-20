@@ -1129,7 +1129,7 @@ func TestCreateNode(t *testing.T) {
 				m.ExpectExec(escape("INSERT INTO `groups` (`name`) VALUES (?)")).
 					WithArgs("GitHub").
 					WillReturnResult(sqlmock.NewResult(1, 1))
-				m.ExpectExec(escape("INSERT INTO `group_users` (`group_id`, `user_id`) VALUES (?, ?)")).
+				m.ExpectExec(escape("INSERT INTO `group_users` (`group_id`, `user_id`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `group_id` = `group_users`.`group_id`, `user_id` = `group_users`.`user_id`")).
 					WithArgs(1, 2).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				m.ExpectCommit()
@@ -1175,7 +1175,7 @@ func TestCreateNode(t *testing.T) {
 				m.ExpectExec(escape("INSERT INTO `users` (`name`) VALUES (?)")).
 					WithArgs("mashraki").
 					WillReturnResult(sqlmock.NewResult(1, 1))
-				m.ExpectExec(escape("INSERT INTO `group_users` (`group_id`, `user_id`) VALUES (?, ?)")).
+				m.ExpectExec(escape("INSERT INTO `group_users` (`group_id`, `user_id`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `group_id` = `group_users`.`group_id`, `user_id` = `group_users`.`user_id`")).
 					WithArgs(2, 1).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				m.ExpectCommit()
@@ -1198,7 +1198,7 @@ func TestCreateNode(t *testing.T) {
 				m.ExpectExec(escape("INSERT INTO `users` (`name`) VALUES (?)")).
 					WithArgs("mashraki").
 					WillReturnResult(sqlmock.NewResult(1, 1))
-				m.ExpectExec(escape("INSERT INTO `user_friends` (`user_id`, `friend_id`) VALUES (?, ?), (?, ?)")).
+				m.ExpectExec(escape("INSERT INTO `user_friends` (`user_id`, `friend_id`) VALUES (?, ?), (?, ?) ON DUPLICATE KEY UPDATE `user_id` = `user_friends`.`user_id`, `friend_id` = `user_friends`.`friend_id`")).
 					WithArgs(1, 2, 2, 1).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				m.ExpectCommit()
@@ -1247,10 +1247,10 @@ func TestCreateNode(t *testing.T) {
 				m.ExpectExec(escape("INSERT INTO `users` (`name`) VALUES (?)")).
 					WithArgs("mashraki").
 					WillReturnResult(sqlmock.NewResult(1, 1))
-				m.ExpectExec(escape("INSERT INTO `group_users` (`group_id`, `user_id`) VALUES (?, ?), (?, ?)")).
+				m.ExpectExec(escape("INSERT INTO `group_users` (`group_id`, `user_id`) VALUES (?, ?), (?, ?) ON DUPLICATE KEY UPDATE `group_id` = `group_users`.`group_id`, `user_id` = `group_users`.`user_id`")).
 					WithArgs(4, 1, 5, 1).
 					WillReturnResult(sqlmock.NewResult(1, 1))
-				m.ExpectExec(escape("INSERT INTO `user_friends` (`user_id`, `friend_id`) VALUES (?, ?), (?, ?), (?, ?), (?, ?)")).
+				m.ExpectExec(escape("INSERT INTO `user_friends` (`user_id`, `friend_id`) VALUES (?, ?), (?, ?), (?, ?), (?, ?) ON DUPLICATE KEY UPDATE `user_id` = `user_friends`.`user_id`, `friend_id` = `user_friends`.`friend_id`")).
 					WithArgs(1, 2, 2, 1, 1, 3, 3, 1).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				m.ExpectCommit()
@@ -1260,7 +1260,7 @@ func TestCreateNode(t *testing.T) {
 			name: "schema",
 			spec: &CreateSpec{
 				Table:  "users",
-				Schema: "mydb",
+				Schema: "test",
 				ID:     &FieldSpec{Column: "id", Type: field.TypeInt},
 				Fields: []*FieldSpec{
 					{Column: "age", Type: field.TypeInt, Value: 30},
@@ -1268,7 +1268,7 @@ func TestCreateNode(t *testing.T) {
 				},
 			},
 			expect: func(m sqlmock.Sqlmock) {
-				m.ExpectExec(escape("INSERT INTO `mydb`.`users` (`age`, `name`) VALUES (?, ?)")).
+				m.ExpectExec(escape("INSERT INTO `test`.`users` (`age`, `name`) VALUES (?, ?)")).
 					WithArgs(30, "a8m").
 					WillReturnResult(sqlmock.NewResult(1, 1))
 			},
