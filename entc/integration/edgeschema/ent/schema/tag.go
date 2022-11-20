@@ -27,5 +27,7 @@ func (Tag) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("tweets", Tweet.Type).
 			Through("tweet_tags", TweetTag.Type),
+		edge.To("groups", Group.Type).
+			Through("group_tags", GroupTag.Type),
 	}
 }

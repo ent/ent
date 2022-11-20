@@ -217,6 +217,34 @@ func HasUsersWith(preds ...predicate.User) predicate.Group {
 	})
 }
 
+// HasTags applies the HasEdge predicate on the "tags" edge.
+func HasTags() predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(TagsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, TagsTable, TagsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasTagsWith applies the HasEdge predicate on the "tags" edge with a given conditions (other predicates).
+func HasTagsWith(preds ...predicate.Tag) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(TagsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, TagsTable, TagsPrimaryKey...),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasJoinedUsers applies the HasEdge predicate on the "joined_users" edge.
 func HasJoinedUsers() predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
@@ -236,6 +264,34 @@ func HasJoinedUsersWith(preds ...predicate.UserGroup) predicate.Group {
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(JoinedUsersInverseTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, JoinedUsersTable, JoinedUsersColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasGroupTags applies the HasEdge predicate on the "group_tags" edge.
+func HasGroupTags() predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(GroupTagsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, GroupTagsTable, GroupTagsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasGroupTagsWith applies the HasEdge predicate on the "group_tags" edge with a given conditions (other predicates).
+func HasGroupTagsWith(preds ...predicate.GroupTag) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(GroupTagsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, GroupTagsTable, GroupTagsColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

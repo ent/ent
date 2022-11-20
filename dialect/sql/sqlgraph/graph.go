@@ -1287,7 +1287,8 @@ func (g *graph) addM2MEdges(ctx context.Context, ids []driver.Value, edges EdgeS
 			columns = edges[0].Columns
 			values  = make([]any, 0, len(edges[0].Target.Fields))
 		)
-		// Specs are generated equally for all edges from the same type.
+		// Additional fields, such as edge-schema fields. Note, we use the first index,
+		// because Ent generates the same spec fields for all edges from the same type.
 		for _, f := range edges[0].Target.Fields {
 			values = append(values, f.Value)
 			columns = append(columns, f.Column)
@@ -1309,6 +1310,11 @@ func (g *graph) addM2MEdges(ctx context.Context, ids []driver.Value, edges EdgeS
 					insert.Values(append([]any{pair[1], pair[0]}, values...)...)
 				}
 			}
+		}
+		// Ignore conflicts only if edges do not contain extra fields, because these fields
+		// can hold different values on different insertions (e.g. time.Now() or uuid.New()).
+		if len(edges[0].Target.Fields) == 0 {
+			insert.OnConflict(sql.DoNothing())
 		}
 		query, args := insert.Query()
 		if err := g.tx.Exec(ctx, query, args, nil); err != nil {

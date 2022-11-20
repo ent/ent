@@ -39,6 +39,19 @@ func (f GroupFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error
 	return f(ctx, mv)
 }
 
+// The GroupTagFunc type is an adapter to allow the use of ordinary
+// function as GroupTag mutator.
+type GroupTagFunc func(context.Context, *ent.GroupTagMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f GroupTagFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.GroupTagMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GroupTagMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The RelationshipFunc type is an adapter to allow the use of ordinary
 // function as Relationship mutator.
 type RelationshipFunc func(context.Context, *ent.RelationshipMutation) (ent.Value, error)

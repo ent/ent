@@ -777,7 +777,7 @@ func ConflictWhere(p *Predicate) ConflictOption {
 	}
 }
 
-// UpdateWhere allows setting the an update condition. Only rows
+// UpdateWhere allows setting the update condition. Only rows
 // for which this expression returns true will be updated.
 func UpdateWhere(p *Predicate) ConflictOption {
 	return func(c *conflict) {
@@ -985,8 +985,10 @@ func (i *InsertBuilder) writeConflict(b *Builder) {
 	switch i.Dialect() {
 	case dialect.MySQL:
 		b.WriteString(" ON DUPLICATE KEY UPDATE ")
+		// Fallback to ResolveWithIgnore() as MySQL
+		// does not support the "DO NOTHING" clause.
 		if i.conflict.action.nothing {
-			b.AddError(fmt.Errorf("invalid CONFLICT action ('DO NOTHING')"))
+			i.OnConflict(ResolveWithIgnore())
 		}
 	case dialect.SQLite, dialect.Postgres:
 		b.WriteString(" ON CONFLICT")

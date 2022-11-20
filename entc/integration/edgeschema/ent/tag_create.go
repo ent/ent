@@ -13,6 +13,8 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/edgeschema/ent/group"
+	"entgo.io/ent/entc/integration/edgeschema/ent/grouptag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
@@ -49,6 +51,21 @@ func (tc *TagCreate) AddTweets(t ...*Tweet) *TagCreate {
 	return tc.AddTweetIDs(ids...)
 }
 
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
+func (tc *TagCreate) AddGroupIDs(ids ...int) *TagCreate {
+	tc.mutation.AddGroupIDs(ids...)
+	return tc
+}
+
+// AddGroups adds the "groups" edges to the Group entity.
+func (tc *TagCreate) AddGroups(g ...*Group) *TagCreate {
+	ids := make([]int, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return tc.AddGroupIDs(ids...)
+}
+
 // AddTweetTagIDs adds the "tweet_tags" edge to the TweetTag entity by IDs.
 func (tc *TagCreate) AddTweetTagIDs(ids ...uuid.UUID) *TagCreate {
 	tc.mutation.AddTweetTagIDs(ids...)
@@ -62,6 +79,21 @@ func (tc *TagCreate) AddTweetTags(t ...*TweetTag) *TagCreate {
 		ids[i] = t[i].ID
 	}
 	return tc.AddTweetTagIDs(ids...)
+}
+
+// AddGroupTagIDs adds the "group_tags" edge to the GroupTag entity by IDs.
+func (tc *TagCreate) AddGroupTagIDs(ids ...int) *TagCreate {
+	tc.mutation.AddGroupTagIDs(ids...)
+	return tc
+}
+
+// AddGroupTags adds the "group_tags" edges to the GroupTag entity.
+func (tc *TagCreate) AddGroupTags(g ...*GroupTag) *TagCreate {
+	ids := make([]int, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return tc.AddGroupTagIDs(ids...)
 }
 
 // Mutation returns the TagMutation object of the builder.
@@ -201,6 +233,25 @@ func (tc *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := tc.mutation.GroupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   tag.GroupsTable,
+			Columns: tag.GroupsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: group.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := tc.mutation.TweetTagsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -212,6 +263,25 @@ func (tc *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: tweettag.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.GroupTagsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   tag.GroupTagsTable,
+			Columns: []string{tag.GroupTagsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: grouptag.FieldID,
 				},
 			},
 		}

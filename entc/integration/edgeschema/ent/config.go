@@ -30,6 +30,7 @@ type config struct {
 type hooks struct {
 	Friendship       []ent.Hook
 	Group            []ent.Hook
+	GroupTag         []ent.Hook
 	Relationship     []ent.Hook
 	RelationshipInfo []ent.Hook
 	Role             []ent.Hook

@@ -29,5 +29,8 @@ func (Group) Edges() []ent.Edge {
 		edge.From("users", User.Type).
 			Ref("groups").
 			Through("joined_users", UserGroup.Type),
+		edge.From("tags", Tag.Type).
+			Ref("groups").
+			Through("group_tags", GroupTag.Type),
 	}
 }

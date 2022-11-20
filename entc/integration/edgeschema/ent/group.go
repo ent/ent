@@ -30,11 +30,15 @@ type Group struct {
 type GroupEdges struct {
 	// Users holds the value of the users edge.
 	Users []*User `json:"users,omitempty"`
+	// Tags holds the value of the tags edge.
+	Tags []*Tag `json:"tags,omitempty"`
 	// JoinedUsers holds the value of the joined_users edge.
 	JoinedUsers []*UserGroup `json:"joined_users,omitempty"`
+	// GroupTags holds the value of the group_tags edge.
+	GroupTags []*GroupTag `json:"group_tags,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [4]bool
 }
 
 // UsersOrErr returns the Users value or an error if the edge
@@ -46,13 +50,31 @@ func (e GroupEdges) UsersOrErr() ([]*User, error) {
 	return nil, &NotLoadedError{edge: "users"}
 }
 
+// TagsOrErr returns the Tags value or an error if the edge
+// was not loaded in eager-loading.
+func (e GroupEdges) TagsOrErr() ([]*Tag, error) {
+	if e.loadedTypes[1] {
+		return e.Tags, nil
+	}
+	return nil, &NotLoadedError{edge: "tags"}
+}
+
 // JoinedUsersOrErr returns the JoinedUsers value or an error if the edge
 // was not loaded in eager-loading.
 func (e GroupEdges) JoinedUsersOrErr() ([]*UserGroup, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		return e.JoinedUsers, nil
 	}
 	return nil, &NotLoadedError{edge: "joined_users"}
+}
+
+// GroupTagsOrErr returns the GroupTags value or an error if the edge
+// was not loaded in eager-loading.
+func (e GroupEdges) GroupTagsOrErr() ([]*GroupTag, error) {
+	if e.loadedTypes[3] {
+		return e.GroupTags, nil
+	}
+	return nil, &NotLoadedError{edge: "group_tags"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -101,9 +123,19 @@ func (gr *Group) QueryUsers() *UserQuery {
 	return (&GroupClient{config: gr.config}).QueryUsers(gr)
 }
 
+// QueryTags queries the "tags" edge of the Group entity.
+func (gr *Group) QueryTags() *TagQuery {
+	return (&GroupClient{config: gr.config}).QueryTags(gr)
+}
+
 // QueryJoinedUsers queries the "joined_users" edge of the Group entity.
 func (gr *Group) QueryJoinedUsers() *UserGroupQuery {
 	return (&GroupClient{config: gr.config}).QueryJoinedUsers(gr)
+}
+
+// QueryGroupTags queries the "group_tags" edge of the Group entity.
+func (gr *Group) QueryGroupTags() *GroupTagQuery {
+	return (&GroupClient{config: gr.config}).QueryGroupTags(gr)
 }
 
 // Update returns a builder for updating this Group.
