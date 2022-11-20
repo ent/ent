@@ -760,6 +760,22 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
+:::note
+Calling `AddGroups` (a M2M edge) will result in a no-op in case the edge already exists and is
+not an [EdgeSchema](#edge-schema):
+
+```go {6}
+a8m := client.User.
+	Create().
+	SetName("a8m").
+	AddGroups(
+		hub,
+		hub, // no-op.
+	).
+	SaveX(ctx)
+```
+:::
+
 The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/m2m2types).
 
 ## M2M Same Type
@@ -852,8 +868,23 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/m2mrecur).
+:::note
+Calling `AddFollowers` (a M2M edge) will result in a no-op in case the edge already exists and is
+not an [EdgeSchema](#edge-schema):
 
+```go {6}
+a8m := client.User.
+	Create().
+	SetName("a8m").
+	AddFollowers(
+		nati,
+		nati, // no-op.
+	).
+	SaveX(ctx)
+```
+:::
+
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/m2mrecur).
 
 ## M2M Bidirectional
 
@@ -913,6 +944,22 @@ func Do(ctx context.Context, client *ent.Client) error {
 	return nil
 }
 ```
+
+:::note
+Calling `AddFriends` (a M2M bidirectional edge) will result in a no-op in case the edge already exists and is
+not an [EdgeSchema](#edge-schema):
+
+```go {6}
+a8m := client.User.
+	Create().
+	SetName("a8m").
+	AddFriends(
+		nati,
+		nati, // no-op.
+	).
+	SaveX(ctx)
+```
+:::
 
 The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/m2mbidi).
 
