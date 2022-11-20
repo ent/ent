@@ -34,10 +34,24 @@ func TestEdgeSchemaWithID(t *testing.T) {
 	ctx := context.Background()
 	require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
 
+	// Create one.
 	hub, lab := client.Group.Create().SetName("GitHub").SaveX(ctx), client.Group.Create().SetName("GitLab").SaveX(ctx)
 	a8m, nat := client.User.Create().SetName("a8m").AddGroups(hub, lab).SaveX(ctx), client.User.Create().SetName("nati").AddGroups(hub).SaveX(ctx)
 	require.Equal(t, 2, a8m.QueryGroups().CountX(ctx))
 	require.Equal(t, 1, nat.QueryGroups().CountX(ctx))
+
+	// Create batch (ignore duplicate groups).
+	foobar := client.User.CreateBulk(
+		client.User.Create().SetName("foo").AddGroups(hub, lab, hub, lab),
+		client.User.Create().SetName("bar").AddGroups(hub, lab, hub, hub),
+	).SaveX(ctx)
+	for _, u := range foobar {
+		require.Equal(t, 2, u.QueryGroups().CountX(ctx))
+		require.Equal(t, 2, u.QueryJoinedGroups().CountX(ctx))
+		edges := u.QueryJoinedGroups().AllX(ctx)
+		require.False(t, edges[0].JoinedAt.IsZero())
+		require.False(t, edges[1].JoinedAt.IsZero())
+	}
 
 	err = hub.Update().AddUsers(nat).Exec(ctx)
 	require.True(t, ent.IsConstraintError(err), "duplicate edge error, because edge exists with a different 'joined_at' value")
@@ -219,6 +233,30 @@ func TestEdgeSchemaBidiCompositeID(t *testing.T) {
 	err = u1.Update().AddRelatives(u2).Exec(ctx)
 	require.True(t, ent.IsConstraintError(err), "duplicate edge error, because edge may contain a different 'weight' value in the database")
 	require.EqualError(t, errors.Unwrap(err), "add m2m edge for table relationships: UNIQUE constraint failed: relationships.user_id, relationships.relative_id")
+
+	u4u5 := client.User.CreateBulk(
+		client.User.Create().SetName("u4").AddRelatives(u1, u2, u3),
+		client.User.Create().SetName("u5").AddRelatives(u1, u2, u3),
+	).SaveX(ctx)
+	for _, u := range u4u5 {
+		require.Equal(t, 3, u.QueryRelatives().CountX(ctx))
+		edges := u.QueryRelationship().AllX(ctx)
+		require.Len(t, edges, 3)
+		require.NotZero(t, edges[0].Weight)
+		require.NotZero(t, edges[1].Weight)
+		require.NotZero(t, edges[2].Weight)
+
+		err := u.Update().AddRelatives(u3).Exec(ctx)
+		require.True(t, ent.IsConstraintError(err), "duplicate edge error, because edge may contain a different 'weight' value in the database")
+		require.EqualError(t, errors.Unwrap(err), "add m2m edge for table relationships: UNIQUE constraint failed: relationships.user_id, relationships.relative_id")
+
+		// Currently, the foreign-key action is configured as "NO ACTION" rather than "CASCADE", because
+		// we do not clear edge-schema records when nodes are deleted, as they are treated as real nodes
+		// (with additional fields) and not just as connections. Therefore, these we clear these edges
+		// before deleting the record to avoid getting constraint violation.
+		u.Update().ClearRelatives().ExecX(ctx)
+		client.User.DeleteOne(u).ExecX(ctx)
+	}
 
 	var v []struct {
 		UserID int `sql:"user_id"`
