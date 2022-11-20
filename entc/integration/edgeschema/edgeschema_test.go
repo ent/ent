@@ -36,8 +36,8 @@ func TestEdgeSchemaWithID(t *testing.T) {
 
 	// Create one.
 	hub, lab := client.Group.Create().SetName("GitHub").SaveX(ctx), client.Group.Create().SetName("GitLab").SaveX(ctx)
-	a8m, nat := client.User.Create().SetName("a8m").AddGroups(hub, lab).SaveX(ctx), client.User.Create().SetName("nati").AddGroups(hub).SaveX(ctx)
-	require.Equal(t, 2, a8m.QueryGroups().CountX(ctx))
+	a8m, nat := client.User.Create().SetName("a8m").AddGroups(hub, lab, hub).SaveX(ctx), client.User.Create().SetName("nati").AddGroups(hub, hub).SaveX(ctx)
+	require.Equal(t, 2, a8m.QueryGroups().CountX(ctx), "should not create duplicates")
 	require.Equal(t, 1, nat.QueryGroups().CountX(ctx))
 
 	// Create batch (ignore duplicate groups).
