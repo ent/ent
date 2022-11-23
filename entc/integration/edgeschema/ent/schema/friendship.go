@@ -52,5 +52,12 @@ func (Friendship) Edges() []ent.Edge {
 func (Friendship) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("created_at"),
+		// By default, Ent generates a unique index named <T>_<FK1>_<FK2>
+		// for edge-schemas with an ID field to enforce the uniqueness of
+		// the edges reside in the join table. However, in this case it is
+		// skipped because we define it explicitly in the definition below.
+		index.Fields("user_id", "friend_id").
+			Unique().
+			StorageKey("friendships_edge"),
 	}
 }

@@ -41,14 +41,14 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "friendship_user_id_friend_id",
-				Unique:  true,
-				Columns: []*schema.Column{FriendshipsColumns[3], FriendshipsColumns[4]},
-			},
-			{
 				Name:    "friendship_created_at",
 				Unique:  false,
 				Columns: []*schema.Column{FriendshipsColumns[2]},
+			},
+			{
+				Name:    "friendships_edge",
+				Unique:  true,
+				Columns: []*schema.Column{FriendshipsColumns[3], FriendshipsColumns[4]},
 			},
 		},
 	}
@@ -345,14 +345,14 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "usertweet_user_id_tweet_id",
-				Unique:  true,
-				Columns: []*schema.Column{UserTweetsColumns[2], UserTweetsColumns[3]},
-			},
-			{
 				Name:    "usertweet_tweet_id",
 				Unique:  true,
 				Columns: []*schema.Column{UserTweetsColumns[3]},
+			},
+			{
+				Name:    "usertweet_user_id_tweet_id",
+				Unique:  true,
+				Columns: []*schema.Column{UserTweetsColumns[2], UserTweetsColumns[3]},
 			},
 		},
 	}
