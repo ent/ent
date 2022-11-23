@@ -160,10 +160,10 @@ func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 	for _, t := range g.Nodes {
 		check(t.setupFKs(), "set %q foreign-keys", t.Name)
 	}
-	check(g.edgeSchemas(), "resolving edges")
 	for i := range schemas {
 		g.addIndexes(schemas[i])
 	}
+	check(g.edgeSchemas(), "resolving edges")
 	aliases(g)
 	g.defaults()
 	return
@@ -544,7 +544,7 @@ func (g *Graph) edgeSchemas() error {
 			}
 			hasI := func() bool {
 				for _, idx := range typ.Indexes {
-					if !idx.Unique && len(idx.Columns) != 2 {
+					if !idx.Unique || len(idx.Columns) != 2 {
 						continue
 					}
 					c1, c2 := idx.Columns[0], idx.Columns[1]
