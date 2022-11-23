@@ -979,7 +979,9 @@ func (a *Atlas) aIndexes(et *Table, at *schema.Table) error {
 		}
 		pk = append(pk, c2)
 	}
-	at.SetPrimaryKey(schema.NewPrimaryKey(pk...))
+	if len(pk) > 0 {
+		at.SetPrimaryKey(schema.NewPrimaryKey(pk...))
+	}
 	// Rest of indexes.
 	for _, idx1 := range et.Indexes {
 		idx2 := schema.NewIndex(idx1.Name).
