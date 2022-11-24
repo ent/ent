@@ -2138,7 +2138,7 @@ type Selector struct {
 	limit     *int
 	offset    *int
 	distinct  bool
-	union     []union
+	setops    []setOperation
 	prefix    Queries
 	lock      *LockOptions
 }
@@ -2424,42 +2424,112 @@ func (s *Selector) join(kind string, t TableView) *Selector {
 	return s
 }
 
-// unionType describes an UNION type.
-type unionType string
+// dupStrategy describes set operation's duplication handling strategy
+type dupStrategy string
 
 const (
-	unionAll      unionType = "ALL"
-	unionDistinct unionType = "DISTINCT"
+	dupStrategyAll      dupStrategy = "ALL"
+	dupStrategyDistinct dupStrategy = "DISTINCT"
 )
 
-// union query option.
-type union struct {
-	unionType
+type setOperationType string
+
+const (
+	setOperationTypeUnion     setOperationType = "UNION"
+	setOperationTypeExcept    setOperationType = "EXCEPT"
+	setOperationTypeIntersect setOperationType = "INTERSECT"
+)
+
+// setOperation holds set operation data
+type setOperation struct {
+	setOperationType
+	dupStrategy
 	TableView
 }
 
 // Union appends the UNION clause to the query.
 func (s *Selector) Union(t TableView) *Selector {
-	s.union = append(s.union, union{
-		TableView: t,
+	s.setops = append(s.setops, setOperation{
+		setOperationType: setOperationTypeUnion,
+		TableView:        t,
 	})
 	return s
 }
 
 // UnionAll appends the UNION ALL clause to the query.
 func (s *Selector) UnionAll(t TableView) *Selector {
-	s.union = append(s.union, union{
-		unionType: unionAll,
-		TableView: t,
+	s.setops = append(s.setops, setOperation{
+		setOperationType: setOperationTypeUnion,
+		dupStrategy:      dupStrategyAll,
+		TableView:        t,
 	})
 	return s
 }
 
 // UnionDistinct appends the UNION DISTINCT clause to the query.
 func (s *Selector) UnionDistinct(t TableView) *Selector {
-	s.union = append(s.union, union{
-		unionType: unionDistinct,
-		TableView: t,
+	s.setops = append(s.setops, setOperation{
+		setOperationType: setOperationTypeUnion,
+		dupStrategy:      dupStrategyDistinct,
+		TableView:        t,
+	})
+	return s
+}
+
+// Except appends the EXCEPT clause to the query.
+func (s *Selector) Except(t TableView) *Selector {
+	s.setops = append(s.setops, setOperation{
+		setOperationType: setOperationTypeExcept,
+		TableView:        t,
+	})
+	return s
+}
+
+// ExceptAll appends the EXCEPT ALL clause to the query.
+func (s *Selector) ExceptAll(t TableView) *Selector {
+	s.setops = append(s.setops, setOperation{
+		setOperationType: setOperationTypeExcept,
+		dupStrategy:      dupStrategyAll,
+		TableView:        t,
+	})
+	return s
+}
+
+// ExceptDistinct appends the EXCEPT DISTINCT clause to the query.
+func (s *Selector) ExceptDistinct(t TableView) *Selector {
+	s.setops = append(s.setops, setOperation{
+		setOperationType: setOperationTypeExcept,
+		dupStrategy:      dupStrategyDistinct,
+		TableView:        t,
+	})
+	return s
+}
+
+// Intersect appends the INTERSECT clause to the query.
+func (s *Selector) Intersect(t TableView) *Selector {
+	s.setops = append(s.setops, setOperation{
+		setOperationType: setOperationTypeIntersect,
+		TableView:        t,
+	})
+	return s
+}
+
+// IntersectAll appends the INTERSECT ALL clause to the query.
+func (s *Selector) IntersectAll(t TableView) *Selector {
+	s.setops = append(s.setops, setOperation{
+		setOperationType: setOperationTypeIntersect,
+		dupStrategy:      dupStrategyAll,
+		TableView:        t,
+	})
+	return s
+}
+
+// IntersectDistinct appends the INTERSECT DISTINCT clause to the query.
+func (s *Selector) IntersectDistinct(t TableView) *Selector {
+	s.setops = append(s.setops, setOperation{
+		setOperationType: setOperationTypeIntersect,
+		dupStrategy:      dupStrategyDistinct,
+		TableView:        t,
 	})
 	return s
 }
@@ -2779,8 +2849,8 @@ func (s *Selector) Query() (string, []any) {
 		b.WriteString(" HAVING ")
 		b.Join(s.having)
 	}
-	if len(s.union) > 0 {
-		s.joinUnion(&b)
+	if len(s.setops) > 0 {
+		s.joinSetOperation(&b)
 	}
 	joinOrder(s.order, &b)
 	if s.limit != nil {
@@ -2822,11 +2892,11 @@ func (s *Selector) joinLock(b *Builder) {
 	}
 }
 
-func (s *Selector) joinUnion(b *Builder) {
-	for _, union := range s.union {
-		b.WriteString(" UNION ")
-		if union.unionType != "" {
-			b.WriteString(string(union.unionType) + " ")
+func (s *Selector) joinSetOperation(b *Builder) {
+	for _, union := range s.setops {
+		b.WriteString(" " + string(union.setOperationType) + " ")
+		if union.dupStrategy != "" {
+			b.WriteString(string(union.dupStrategy) + " ")
 		}
 		switch view := union.TableView.(type) {
 		case *SelectTable:
