@@ -246,7 +246,7 @@ func TestMigrate_Diff(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, m.Diff(ctx, &Table{Name: "users"}))
 	v := time.Now().UTC().Format("20060102150405")
-	requireFileEqual(t, filepath.Join(p, v+"_changes.up.sql"), "-- create \"users\" table\nCREATE TABLE `users` (, PRIMARY KEY ());\n")
+	requireFileEqual(t, filepath.Join(p, v+"_changes.up.sql"), "-- create \"users\" table\nCREATE TABLE `users` ();\n")
 	requireFileEqual(t, filepath.Join(p, v+"_changes.down.sql"), "-- reverse: create \"users\" table\nDROP TABLE `users`;\n")
 	require.FileExists(t, filepath.Join(p, migrate.HashFileName))
 
@@ -257,7 +257,7 @@ func TestMigrate_Diff(t *testing.T) {
 	m, err = NewMigrate(db, WithDir(d))
 	require.NoError(t, err)
 	require.NoError(t, m.Diff(ctx, &Table{Name: "users"}))
-	requireFileEqual(t, filepath.Join(p, v+"_changes.up.sql"), "-- create \"users\" table\nCREATE TABLE `users` (, PRIMARY KEY ());\n")
+	requireFileEqual(t, filepath.Join(p, v+"_changes.up.sql"), "-- create \"users\" table\nCREATE TABLE `users` ();\n")
 	requireFileEqual(t, filepath.Join(p, v+"_changes.down.sql"), "-- reverse: create \"users\" table\nDROP TABLE `users`;\n")
 	require.FileExists(t, filepath.Join(p, migrate.HashFileName))
 	require.NoError(t, d.WriteFile("tmp.sql", nil))
