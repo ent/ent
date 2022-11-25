@@ -17,6 +17,8 @@ func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.Float("age"),
 		field.String("name"),
+		field.Strings("tags").
+			Optional(),
 	}
 }
 

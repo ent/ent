@@ -97,6 +97,7 @@ const config = {
         {
           className: 'code-block-info-line',
           line: 'highlight-next-line-info',
+          block: {start: 'highlight-info-start', end: 'highlight-info-end'},
         },
       ],
     },
