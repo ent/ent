@@ -1687,11 +1687,11 @@ func escape(w string) (string, bool) {
 	}
 	var b strings.Builder
 	b.Grow(len(w) + n)
-	for i := range w {
+	for i, character := range w {
 		if c := w[i]; c == '%' || c == '_' || c == '\\' {
 			b.WriteByte('\\')
 		}
-		b.WriteByte(w[i])
+		b.WriteRune(character)
 	}
 	return b.String(), true
 }
