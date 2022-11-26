@@ -2067,6 +2067,11 @@ func TestEscapePatterns(t *testing.T) {
 		Query()
 	require.Equal(t, "UPDATE `users` SET `name` = NULL WHERE `nickname` LIKE ? ESCAPE ? OR `nickname` LIKE ? ESCAPE ? OR `nickname` LIKE ? ESCAPE ? OR LOWER(`nickname`) LIKE ? ESCAPE ?", q)
 	require.Equal(t, []any{"\\%a8m\\%%", "\\", "%\\_alexsn\\_", "\\", "%\\\\pedro\\\\%", "\\", "%\\%abcd\\%efg%", "\\"}, args)
+
+	q, args = Select("*").From(Table("dataset")).
+		Where(Contains("title", "_第一")).Query()
+	require.Equal(t, "SELECT * FROM `dataset` WHERE `title` LIKE ?", q)
+	require.Equal(t, []any{"%\\_第一%"}, args)
 }
 
 func TestReusePredicates(t *testing.T) {
