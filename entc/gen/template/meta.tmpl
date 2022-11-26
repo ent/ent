@@ -126,6 +126,14 @@ const (
 		func ({{ $receiver }} {{ $enum }}) String() string {
 			return string({{ $receiver }})
 		}
+
+		func ({{ $receiver }} {{ $enum }}) Values() []string {
+			return []string{
+				{{- range $e := $f.Enums }}
+					"{{ $e.Value }}",
+				{{- end }}
+			}
+		}
 	{{ end }}
 
 
