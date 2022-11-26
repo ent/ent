@@ -25,7 +25,7 @@ The integration with CRDB is currently tested on versions `v21.2.11`.
 
 ## SQLite
 
-Using [Atlas](https://github.ariga/atlas), the SQLite driver supports all the features that
+Using [Atlas](https://github.com/ariga/atlas), the SQLite driver supports all the features that
 are mentioned in the [Migration](migrate.md) section. Note that some changes, like column modification,
 are performed on a temporary table using the sequence of operations described in [SQLite official documentation](https://www.sqlite.org/lang_altertable.html#otheralter).
 
