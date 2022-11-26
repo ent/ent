@@ -160,10 +160,10 @@ func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 	for _, t := range g.Nodes {
 		check(t.setupFKs(), "set %q foreign-keys", t.Name)
 	}
-	check(g.edgeSchemas(), "resolving edges")
 	for i := range schemas {
 		g.addIndexes(schemas[i])
 	}
+	check(g.edgeSchemas(), "resolving edges")
 	aliases(g)
 	g.defaults()
 	return
@@ -512,14 +512,15 @@ func (g *Graph) edgeSchemas() error {
 			// Edges from src/dest table are always O2M. One row to many
 			// rows in the join table. Hence, a many-to-many relationship.
 			n.Edges = append(n.Edges, &Edge{
-				def:       &load.Edge{},
-				Name:      e.def.Through.N,
-				Type:      typ,
-				Inverse:   ref.Name,
-				Ref:       ref,
-				Owner:     n,
-				Optional:  true,
-				StructTag: structTag(e.def.Through.N, ""),
+				def:         &load.Edge{},
+				Name:        e.def.Through.N,
+				Type:        typ,
+				Inverse:     ref.Name,
+				Ref:         ref,
+				Owner:       n,
+				Optional:    true,
+				StructTag:   structTag(e.def.Through.N, ""),
+				Annotations: e.Annotations,
 				Rel: Relation{
 					Type:    O2M,
 					fk:      ref.Rel.fk,
@@ -543,7 +544,7 @@ func (g *Graph) edgeSchemas() error {
 			}
 			hasI := func() bool {
 				for _, idx := range typ.Indexes {
-					if !idx.Unique && len(idx.Columns) != 2 {
+					if !idx.Unique || len(idx.Columns) != 2 {
 						continue
 					}
 					c1, c2 := idx.Columns[0], idx.Columns[1]
@@ -680,6 +681,9 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 			index.Annotation = entsqlIndexAnnotate(idx.Annotations)
 		}
 	}
+	if err := ensureUniqueFKs(tables); err != nil {
+		return nil, err
+	}
 	return
 }
 
@@ -730,6 +734,29 @@ func fkSymbols(e *Edge, c1, c2 *schema.Column) (string, string) {
 		}
 	}
 	return s1, s2
+}
+
+// ensureUniqueNames ensures constraint names are unique.
+func ensureUniqueFKs(tables map[string]*schema.Table) error {
+	fks := make(map[string]*schema.Table)
+	for _, t := range tables {
+		for _, fk := range t.ForeignKeys {
+			switch other, ok := fks[fk.Symbol]; {
+			case !ok:
+				fks[fk.Symbol] = t
+			case ok && other.Name != t.Name:
+				a, b := t.Name, other.Name
+				// Keep reporting order consistent.
+				if a > b {
+					a, b = b, a
+				}
+				return fmt.Errorf("duplicate foreign-key symbol %q found in tables %q and %q", fk.Symbol, a, b)
+			case ok:
+				return fmt.Errorf("duplicate foreign-key symbol %q found in table %q", fk.Symbol, t.Name)
+			}
+		}
+	}
+	return nil
 }
 
 // deleteAction returns the referential action for DELETE operations of the given edge.

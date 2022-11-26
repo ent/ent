@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -764,7 +765,7 @@ func (d *MySQL) indexModified(old, new *Index) bool {
 	return false
 }
 
-// indexParts returns a map holding the sub_part mapping if exist.
+// indexParts returns a map holding the sub_part mapping if exists.
 func indexParts(idx *Index) map[string]uint {
 	parts := make(map[string]uint)
 	if idx.Annotation == nil {
@@ -811,6 +812,19 @@ func (d *MySQL) atTable(t1 *Table, t2 *schema.Table) {
 	}
 	if compareVersions(v1, v2) >= 0 {
 		setAtChecks(t1, t2)
+	}
+}
+
+func (d *MySQL) supportsDefault(c *Column) bool {
+	_, maria := d.mariadb()
+	switch c.Default.(type) {
+	case Expr, map[string]Expr:
+		if maria {
+			return compareVersions(d.version, "10.2.0") >= 0
+		}
+		return c.supportDefault() && compareVersions(d.version, "8.0.0") >= 0
+	default:
+		return c.supportDefault() || maria
 	}
 }
 
@@ -919,8 +933,12 @@ func (d *MySQL) atUniqueC(t1 *Table, c1 *Column, t2 *schema.Table, c2 *schema.Co
 	t2.AddIndexes(schema.NewUniqueIndex(c1.Name).AddColumns(c2))
 }
 
-func (d *MySQL) atIncrementC(_ *schema.Table, c *schema.Column) {
-	c.AddAttrs(&mysql.AutoIncrement{})
+func (d *MySQL) atIncrementC(t *schema.Table, c *schema.Column) {
+	if c.Default != nil {
+		t.Attrs = removeAttr(t.Attrs, reflect.TypeOf(&mysql.AutoIncrement{}))
+	} else {
+		c.AddAttrs(&mysql.AutoIncrement{})
+	}
 }
 
 func (d *MySQL) atIncrementT(t *schema.Table, v int64) {

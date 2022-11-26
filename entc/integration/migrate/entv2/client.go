@@ -22,6 +22,7 @@ import (
 	"entgo.io/ent/entc/integration/migrate/entv2/media"
 	"entgo.io/ent/entc/integration/migrate/entv2/pet"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
+	"entgo.io/ent/entc/integration/migrate/entv2/zoo"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -49,6 +50,8 @@ type Client struct {
 	Pet *PetClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// Zoo is the client for interacting with the Zoo builders.
+	Zoo *ZooClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -70,6 +73,7 @@ func (c *Client) init() {
 	c.Media = NewMediaClient(c.config)
 	c.Pet = NewPetClient(c.config)
 	c.User = NewUserClient(c.config)
+	c.Zoo = NewZooClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -111,6 +115,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Media:      NewMediaClient(cfg),
 		Pet:        NewPetClient(cfg),
 		User:       NewUserClient(cfg),
+		Zoo:        NewZooClient(cfg),
 	}, nil
 }
 
@@ -138,6 +143,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Media:      NewMediaClient(cfg),
 		Pet:        NewPetClient(cfg),
 		User:       NewUserClient(cfg),
+		Zoo:        NewZooClient(cfg),
 	}, nil
 }
 
@@ -174,6 +180,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Media.Use(hooks...)
 	c.Pet.Use(hooks...)
 	c.User.Use(hooks...)
+	c.Zoo.Use(hooks...)
 }
 
 // BlogClient is a client for the Blog schema.
@@ -232,7 +239,7 @@ func (c *BlogClient) DeleteOne(b *Blog) *BlogDeleteOne {
 	return c.DeleteOneID(b.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *BlogClient) DeleteOneID(id int) *BlogDeleteOne {
 	builder := c.Delete().Where(blog.ID(id))
 	builder.mutation.id = &id
@@ -338,7 +345,7 @@ func (c *CarClient) DeleteOne(ca *Car) *CarDeleteOne {
 	return c.DeleteOneID(ca.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *CarClient) DeleteOneID(id int) *CarDeleteOne {
 	builder := c.Delete().Where(car.ID(id))
 	builder.mutation.id = &id
@@ -444,7 +451,7 @@ func (c *ConversionClient) DeleteOne(co *Conversion) *ConversionDeleteOne {
 	return c.DeleteOneID(co.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *ConversionClient) DeleteOneID(id int) *ConversionDeleteOne {
 	builder := c.Delete().Where(conversion.ID(id))
 	builder.mutation.id = &id
@@ -534,7 +541,7 @@ func (c *CustomTypeClient) DeleteOne(ct *CustomType) *CustomTypeDeleteOne {
 	return c.DeleteOneID(ct.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *CustomTypeClient) DeleteOneID(id int) *CustomTypeDeleteOne {
 	builder := c.Delete().Where(customtype.ID(id))
 	builder.mutation.id = &id
@@ -624,7 +631,7 @@ func (c *GroupClient) DeleteOne(gr *Group) *GroupDeleteOne {
 	return c.DeleteOneID(gr.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
 	builder := c.Delete().Where(group.ID(id))
 	builder.mutation.id = &id
@@ -714,7 +721,7 @@ func (c *MediaClient) DeleteOne(m *Media) *MediaDeleteOne {
 	return c.DeleteOneID(m.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *MediaClient) DeleteOneID(id int) *MediaDeleteOne {
 	builder := c.Delete().Where(media.ID(id))
 	builder.mutation.id = &id
@@ -804,7 +811,7 @@ func (c *PetClient) DeleteOne(pe *Pet) *PetDeleteOne {
 	return c.DeleteOneID(pe.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *PetClient) DeleteOneID(id int) *PetDeleteOne {
 	builder := c.Delete().Where(pet.ID(id))
 	builder.mutation.id = &id
@@ -910,7 +917,7 @@ func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
 	return c.DeleteOneID(u.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id
@@ -990,4 +997,94 @@ func (c *UserClient) QueryFriends(u *User) *UserQuery {
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
+}
+
+// ZooClient is a client for the Zoo schema.
+type ZooClient struct {
+	config
+}
+
+// NewZooClient returns a client for the Zoo from the given config.
+func NewZooClient(c config) *ZooClient {
+	return &ZooClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `zoo.Hooks(f(g(h())))`.
+func (c *ZooClient) Use(hooks ...Hook) {
+	c.hooks.Zoo = append(c.hooks.Zoo, hooks...)
+}
+
+// Create returns a builder for creating a Zoo entity.
+func (c *ZooClient) Create() *ZooCreate {
+	mutation := newZooMutation(c.config, OpCreate)
+	return &ZooCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Zoo entities.
+func (c *ZooClient) CreateBulk(builders ...*ZooCreate) *ZooCreateBulk {
+	return &ZooCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Zoo.
+func (c *ZooClient) Update() *ZooUpdate {
+	mutation := newZooMutation(c.config, OpUpdate)
+	return &ZooUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ZooClient) UpdateOne(z *Zoo) *ZooUpdateOne {
+	mutation := newZooMutation(c.config, OpUpdateOne, withZoo(z))
+	return &ZooUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ZooClient) UpdateOneID(id int) *ZooUpdateOne {
+	mutation := newZooMutation(c.config, OpUpdateOne, withZooID(id))
+	return &ZooUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Zoo.
+func (c *ZooClient) Delete() *ZooDelete {
+	mutation := newZooMutation(c.config, OpDelete)
+	return &ZooDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ZooClient) DeleteOne(z *Zoo) *ZooDeleteOne {
+	return c.DeleteOneID(z.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ZooClient) DeleteOneID(id int) *ZooDeleteOne {
+	builder := c.Delete().Where(zoo.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ZooDeleteOne{builder}
+}
+
+// Query returns a query builder for Zoo.
+func (c *ZooClient) Query() *ZooQuery {
+	return &ZooQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Zoo entity by its id.
+func (c *ZooClient) Get(ctx context.Context, id int) (*Zoo, error) {
+	return c.Query().Where(zoo.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ZooClient) GetX(ctx context.Context, id int) *Zoo {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ZooClient) Hooks() []Hook {
+	return c.hooks.Zoo
 }

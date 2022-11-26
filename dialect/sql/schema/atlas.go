@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"reflect"
 	"sort"
 	"strings"
 
@@ -173,50 +174,18 @@ func (a *Atlas) NamedDiff(ctx context.Context, name string, tables ...*Table) er
 			AddColumn(&Column{Name: "type", Type: field.TypeString, Unique: true}),
 		)
 	}
+	var (
+		err  error
+		plan *migrate.Plan
+	)
 	switch a.mode {
 	case ModeInspect:
-		// Do nothing here, simply inspect later on.
+		plan, err = a.planInspect(ctx, a.sqlDialect, name, tables)
 	case ModeReplay:
-		// We consider a database clean if there are no tables in the connected schema.
-		s, err := a.atDriver.InspectSchema(ctx, "", nil)
-		if err != nil {
-			return err
-		}
-		if len(s.Tables) > 0 {
-			return migrate.NotCleanError{Reason: fmt.Sprintf("found table %q", s.Tables[0].Name)}
-		}
-		// Clean up once done.
-		defer func() {
-			// We clean a database by dropping all tables inside the connected schema.
-			s, err = a.atDriver.InspectSchema(ctx, "", nil)
-			if err != nil {
-				return
-			}
-			tbls := make([]schema.Change, len(s.Tables))
-			for i, t := range s.Tables {
-				tbls[i] = &schema.DropTable{T: t}
-			}
-			if err2 := a.atDriver.ApplyChanges(ctx, tbls); err2 != nil {
-				if err != nil {
-					err = fmt.Errorf("%v: %w", err2, err)
-					return
-				}
-				err = err2
-				return
-			}
-		}()
-		// Replay the migration directory on the database.
-		ex, err := migrate.NewExecutor(a.atDriver, a.dir, &migrate.NopRevisionReadWriter{})
-		if err != nil {
-			return err
-		}
-		if err := ex.ExecuteN(ctx, 0); err != nil && !errors.Is(err, migrate.ErrNoPendingFiles) {
-			return err
-		}
+		plan, err = a.planReplay(ctx, name, tables)
 	default:
 		return fmt.Errorf("unknown migration mode: %q", a.mode)
 	}
-	plan, err := a.plan(ctx, a.sqlDialect, name, tables)
 	if err != nil {
 		return err
 	}
@@ -225,6 +194,23 @@ func (a *Atlas) NamedDiff(ctx context.Context, name string, tables ...*Table) er
 		return nil
 	}
 	return migrate.NewPlanner(nil, a.dir, opts...).WritePlan(plan)
+}
+
+func (a *Atlas) cleanSchema(ctx context.Context, name string, err0 error) (err error) {
+	defer func() {
+		if err0 != nil {
+			err = fmt.Errorf("%v: %w", err0, err)
+		}
+	}()
+	s, err := a.atDriver.InspectSchema(ctx, name, nil)
+	if err != nil {
+		return err
+	}
+	drop := make([]schema.Change, len(s.Tables))
+	for i, t := range s.Tables {
+		drop[i] = &schema.DropTable{T: t}
+	}
+	return a.atDriver.ApplyChanges(ctx, drop)
 }
 
 // VerifyTableRange ensures, that the defined autoincrement starting value is set for each table as defined by the
@@ -578,6 +564,7 @@ func (a *Atlas) StateReader(tables ...*Table) migrate.StateReaderFunc {
 type atBuilder interface {
 	atOpen(dialect.ExecQuerier) (migrate.Driver, error)
 	atTable(*Table, *schema.Table)
+	supportsDefault(*Column) bool
 	atTypeC(*Column, *schema.Column) error
 	atUniqueC(*Table, *Column, *schema.Table, *schema.Column)
 	atIncrementC(*schema.Table, *schema.Column)
@@ -671,7 +658,7 @@ func (a *Atlas) create(ctx context.Context, tables ...*Table) (err error) {
 	}
 	defer func() { a.atDriver = nil }()
 	if err := func() error {
-		plan, err := a.plan(ctx, tx, "changes", tables)
+		plan, err := a.planInspect(ctx, tx, "changes", tables)
 		if err != nil {
 			return err
 		}
@@ -701,10 +688,9 @@ func (a *Atlas) create(ctx context.Context, tables ...*Table) (err error) {
 	return tx.Commit()
 }
 
-// plan creates the current state by inspecting the connected database, computing the current state of the Ent schema
+// planInspect creates the current state by inspecting the connected database, computing the current state of the Ent schema
 // and proceeds to diff the changes to create a migration plan.
-// before diffing.
-func (a *Atlas) plan(ctx context.Context, conn dialect.ExecQuerier, name string, tables []*Table) (*migrate.Plan, error) {
+func (a *Atlas) planInspect(ctx context.Context, conn dialect.ExecQuerier, name string, tables []*Table) (*migrate.Plan, error) {
 	current, err := a.atDriver.InspectSchema(ctx, "", &schema.InspectOptions{
 		Tables: func() (t []string) {
 			for i := range tables {
@@ -724,26 +710,89 @@ func (a *Atlas) plan(ctx context.Context, conn dialect.ExecQuerier, name string,
 		}
 		a.types = types
 	}
-	desired, err := a.StateReader(tables...).ReadState(ctx)
+	realm, err := a.StateReader(tables...).ReadState(ctx)
 	if err != nil {
 		return nil, err
 	}
-	// Diff changes.
-	changes, err := (&diffDriver{a.atDriver, a.diffHooks}).SchemaDiff(current, &schema.Schema{
-		Name:   current.Name,
-		Attrs:  current.Attrs,
-		Tables: desired.Schemas[0].Tables,
-	})
+	desired := realm.Schemas[0]
+	desired.Name, desired.Attrs = current.Name, current.Attrs
+	return a.diff(ctx, name, current, desired, a.types[len(types):])
+}
+
+func (a *Atlas) planReplay(ctx context.Context, name string, tables []*Table) (*migrate.Plan, error) {
+	// We consider a database clean if there are no tables in the connected schema.
+	s, err := a.atDriver.InspectSchema(ctx, "", nil)
 	if err != nil {
 		return nil, err
 	}
-	// Plan changes.
-	plan, err := a.atDriver.PlanChanges(ctx, name, changes)
+	if len(s.Tables) > 0 {
+		return nil, migrate.NotCleanError{Reason: fmt.Sprintf("found table %q", s.Tables[0].Name)}
+	}
+	// Replay the migration directory on the database.
+	ex, err := migrate.NewExecutor(a.atDriver, a.dir, &migrate.NopRevisionReadWriter{})
 	if err != nil {
 		return nil, err
 	}
-	// Insert new types.
-	newTypes := a.types[len(types):]
+	if err := ex.ExecuteN(ctx, 0); err != nil && !errors.Is(err, migrate.ErrNoPendingFiles) {
+		return nil, a.cleanSchema(ctx, "", err)
+	}
+	// Inspect the current schema (migration directory).
+	current, err := a.atDriver.InspectSchema(ctx, "", nil)
+	if err != nil {
+		return nil, a.cleanSchema(ctx, "", err)
+	}
+	var types []string
+	if a.universalID {
+		if types, err = a.loadTypes(ctx, a.sqlDialect); err != nil && !errors.Is(err, errTypeTableNotFound) {
+			return nil, a.cleanSchema(ctx, "", err)
+		}
+		a.types = types
+	}
+	if err := a.cleanSchema(ctx, "", nil); err != nil {
+		return nil, fmt.Errorf("clean schemas after migration replaying: %w", err)
+	}
+	desired, err := a.tables(tables)
+	if err != nil {
+		return nil, err
+	}
+	// In case of replay mode, normalize the desired state (i.e. ent/schema).
+	if nr, ok := a.atDriver.(schema.Normalizer); ok {
+		ns, err := nr.NormalizeSchema(ctx, schema.New(current.Name).AddTables(desired...))
+		if err != nil {
+			return nil, err
+		}
+		if len(ns.Tables) != len(desired) {
+			return nil, fmt.Errorf("unexpected number of tables after normalization: %d != %d", len(ns.Tables), len(desired))
+		}
+		// Ensure all tables exist in the normalized format and the order is preserved.
+		for i, t := range desired {
+			d, ok := ns.Table(t.Name)
+			if !ok {
+				return nil, fmt.Errorf("table %q not found after normalization", t.Name)
+			}
+			desired[i] = d
+		}
+	}
+	return a.diff(ctx, name, current,
+		&schema.Schema{Name: current.Name, Attrs: current.Attrs, Tables: desired}, a.types[len(types):],
+		// For BC reason, we omit the schema qualifier from the migration scripts,
+		// but that is currently limiting versioned migration to a single schema.
+		func(opts *migrate.PlanOptions) {
+			var noQualifier string
+			opts.SchemaQualifier = &noQualifier
+		},
+	)
+}
+
+func (a *Atlas) diff(ctx context.Context, name string, current, desired *schema.Schema, newTypes []string, opts ...migrate.PlanOption) (*migrate.Plan, error) {
+	changes, err := (&diffDriver{a.atDriver, a.diffHooks}).SchemaDiff(current, desired)
+	if err != nil {
+		return nil, err
+	}
+	plan, err := a.atDriver.PlanChanges(ctx, name, changes, opts...)
+	if err != nil {
+		return nil, err
+	}
 	if len(newTypes) > 0 {
 		plan.Changes = append(plan.Changes, &migrate.Change{
 			Cmd:     a.sqlDialect.atTypeRangeSQL(newTypes...),
@@ -866,14 +915,8 @@ func (a *Atlas) aColumns(et *Table, at *schema.Table) error {
 		if err := a.sqlDialect.atTypeC(c1, c2); err != nil {
 			return err
 		}
-		if c1.Default != nil && c1.supportDefault() {
-			// Has default and the database supports adding this default.
-			x := fmt.Sprint(c1.Default)
-			if v, ok := c1.Default.(string); ok && c1.Type != field.TypeUUID && c1.Type != field.TypeTime {
-				// Escape single quote by replacing each with 2.
-				x = fmt.Sprintf("'%s'", strings.ReplaceAll(v, "'", "''"))
-			}
-			c2.SetDefault(&schema.RawExpr{X: x})
+		if err := a.atDefault(c1, c2); err != nil {
+			return err
 		}
 		if c1.Unique && (len(et.PrimaryKey) != 1 || et.PrimaryKey[0] != c1) {
 			a.sqlDialect.atUniqueC(et, c1, at, c2)
@@ -882,6 +925,46 @@ func (a *Atlas) aColumns(et *Table, at *schema.Table) error {
 			a.sqlDialect.atIncrementC(at, c2)
 		}
 		at.AddColumns(c2)
+	}
+	return nil
+}
+
+func (a *Atlas) atDefault(c1 *Column, c2 *schema.Column) error {
+	if c1.Default == nil || !a.sqlDialect.supportsDefault(c1) {
+		return nil
+	}
+	switch x := c1.Default.(type) {
+	case Expr:
+		if len(x) > 1 && (x[0] != '(' || x[len(x)-1] != ')') {
+			x = "(" + x + ")"
+		}
+		c2.SetDefault(&schema.RawExpr{X: string(x)})
+	case map[string]Expr:
+		d, ok := x[a.sqlDialect.Dialect()]
+		if !ok {
+			return nil
+		}
+		if len(d) > 1 && (d[0] != '(' || d[len(d)-1] != ')') {
+			d = "(" + d + ")"
+		}
+		c2.SetDefault(&schema.RawExpr{X: string(d)})
+	default:
+		switch {
+		case c1.Type == field.TypeJSON:
+			s, ok := c1.Default.(string)
+			if !ok {
+				return fmt.Errorf("invalid default value for JSON column %q: %v", c1.Name, c1.Default)
+			}
+			c2.SetDefault(&schema.Literal{V: strings.ReplaceAll(s, "'", "''")})
+		default:
+			// Keep backwards compatibility with the old default value format.
+			x := fmt.Sprint(c1.Default)
+			if v, ok := c1.Default.(string); ok && c1.Type != field.TypeUUID && c1.Type != field.TypeTime {
+				// Escape single quote by replacing each with 2.
+				x = fmt.Sprintf("'%s'", strings.ReplaceAll(v, "'", "''"))
+			}
+			c2.SetDefault(&schema.RawExpr{X: x})
+		}
 	}
 	return nil
 }
@@ -1066,4 +1149,17 @@ func (a *Atlas) legacyMigrate() (*Migrate, error) {
 		return nil, fmt.Errorf("sql/schema: unsupported dialect %q", a.dialect)
 	}
 	return m, nil
+}
+
+// removeAttr is a temporary patch due to compiler errors we get by using the generic
+// schema.RemoveAttr function (<autogenerated>:1: internal compiler error: panic: ...).
+// Can be removed in Go 1.20. See: https://github.com/golang/go/issues/54302.
+func removeAttr(attrs []schema.Attr, t reflect.Type) []schema.Attr {
+	f := make([]schema.Attr, 0, len(attrs))
+	for _, a := range attrs {
+		if reflect.TypeOf(a) != t {
+			f = append(f, a)
+		}
+	}
+	return f
 }

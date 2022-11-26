@@ -140,6 +140,17 @@ func TestScanSlice(t *testing.T) {
 	require.Empty(t, pp)
 }
 
+func TestScanSlice_CamelTags(t *testing.T) {
+	mock := sqlmock.NewRows([]string{"nickName"}).
+		AddRow("foo").
+		AddRow("bar")
+	var v []*struct {
+		NickName string `json:"nickName"`
+	}
+	require.NoError(t, ScanSlice(toRows(mock), &v))
+	require.Equal(t, "foo", v[0].NickName)
+}
+
 func TestScanJSON(t *testing.T) {
 	mock := sqlmock.NewRows([]string{"v", "p"}).
 		AddRow([]byte(`{"i": 1, "s":"a8m"}`), []byte(`{"i": 1, "s":"a8m"}`)).

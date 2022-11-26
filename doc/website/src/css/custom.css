@@ -300,7 +300,7 @@ body .homeContainer .homeWrapper {
 #er-following-followers,
 #er-user-friends,
 #er-city-streets {
-  height: 230px;
+  max-height: 270px!important;
 }
 
 @media only screen and (max-width: 1500px) {
@@ -889,5 +889,5 @@ div[class^='announcementBar_'] {
   border-left: 3px solid rgb(193 230 140 / 80%);
 }
 .code-block-info-line span.token.comment {
-  color: #c4c4c4!important;
+  color: #c4c4c4 !important;
 }

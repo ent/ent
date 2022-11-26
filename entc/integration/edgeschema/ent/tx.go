@@ -20,6 +20,8 @@ type Tx struct {
 	Friendship *FriendshipClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
+	// GroupTag is the client for interacting with the GroupTag builders.
+	GroupTag *GroupTagClient
 	// Relationship is the client for interacting with the Relationship builders.
 	Relationship *RelationshipClient
 	// RelationshipInfo is the client for interacting with the RelationshipInfo builders.
@@ -175,6 +177,7 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Friendship = NewFriendshipClient(tx.config)
 	tx.Group = NewGroupClient(tx.config)
+	tx.GroupTag = NewGroupTagClient(tx.config)
 	tx.Relationship = NewRelationshipClient(tx.config)
 	tx.RelationshipInfo = NewRelationshipInfoClient(tx.config)
 	tx.Role = NewRoleClient(tx.config)

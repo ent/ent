@@ -4,6 +4,8 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
 {{- define "dialect/sql/internal/schemaconfig" -}}
 {{ with extend $ "Package" "internal" -}}
 	{{ template "header" . }}
@@ -16,7 +18,8 @@ type SchemaConfig struct {
 	{{- range $n := $.Nodes }}
 		{{ $n.Name }} string // {{ $n.Name }} table.
 		{{- range $e := $n.Edges }}
-			{{- if and $e.M2M (not $e.Inverse) }}
+			{{- /* Skip adding join-table in case the edge is inverse or already defined as an edge-schema. */}}
+			{{- if and $e.M2M (not $e.Inverse) (not $e.Through) }}
 				{{ $n.Name }}{{ $e.StructField }} string // {{ $n.Name }}-{{ $e.Name }}->{{ $e.Type.Name }} table.
 			{{- end }}
 		{{- end }}
@@ -88,8 +91,8 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 	{{- template "dialect/sql/spec/ctxschemaconfig" . }}
 {{- end }}
 
-{{- define "dialect/sql/query/eagerloading/spec/schemaconfig" }}
-	{{- with extend $ "Ident" "_spec.Edge" }}
+{{- define "dialect/sql/query/eagerloading/join/schemaconfig" }}
+	{{- with extend $ "Ident" "joinT" "CallSet" true }}
 		{{- template "dialect/sql/defedge/spec/schemaconfig" . }}
 	{{- end }}
 {{- end }}
@@ -104,13 +107,19 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 		{{- if $e.OwnFK }}
 			{{- $schema = $.Name }}
 		{{- else if $e.M2M }}
-			{{- if $e.Inverse }}
+			{{- if $e.Through }}
+				{{- $schema = $e.Through.Name }}
+			{{- else if $e.Inverse }}
 				{{- $schema = print $e.Type.Name (pascal $e.Inverse) }}
 			{{- else }}
 				{{- $schema = print $.Name $e.StructField }}
 			{{- end }}
 		{{- end }}
-		{{ $ident }}.Schema = {{ $receiver }}.schemaConfig.{{ $schema }}
+		{{- if $.Scope.CallSet }}
+			{{ $ident }}.Schema({{ $receiver }}.schemaConfig.{{ $schema }})
+		{{- else }}
+			{{ $ident }}.Schema = {{ $receiver }}.schemaConfig.{{ $schema }}
+		{{- end }}
 	{{- end }}
 {{- end }}
 
@@ -173,7 +182,9 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 	{{- if $e.OwnFK }}
 		{{- $schema = $.Name }}
 	{{- else if $e.M2M }}
-		{{- if $e.Inverse }}
+		{{- if $e.Through }}
+			{{- $schema = $e.Through.Name }}
+		{{- else if $e.Inverse }}
 			{{- $schema = print $e.Type.Name (pascal $e.Inverse) }}
 		{{- else }}
 			{{- $schema = print $.Name $e.StructField }}

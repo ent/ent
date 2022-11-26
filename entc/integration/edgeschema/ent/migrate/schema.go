@@ -41,14 +41,14 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "friendship_user_id_friend_id",
-				Unique:  true,
-				Columns: []*schema.Column{FriendshipsColumns[3], FriendshipsColumns[4]},
-			},
-			{
 				Name:    "friendship_created_at",
 				Unique:  false,
 				Columns: []*schema.Column{FriendshipsColumns[2]},
+			},
+			{
+				Name:    "friendships_edge",
+				Unique:  true,
+				Columns: []*schema.Column{FriendshipsColumns[3], FriendshipsColumns[4]},
 			},
 		},
 	}
@@ -62,6 +62,39 @@ var (
 		Name:       "groups",
 		Columns:    GroupsColumns,
 		PrimaryKey: []*schema.Column{GroupsColumns[0]},
+	}
+	// GroupTagsColumns holds the columns for the "group_tags" table.
+	GroupTagsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "tag_id", Type: field.TypeInt},
+		{Name: "group_id", Type: field.TypeInt},
+	}
+	// GroupTagsTable holds the schema information for the "group_tags" table.
+	GroupTagsTable = &schema.Table{
+		Name:       "group_tags",
+		Columns:    GroupTagsColumns,
+		PrimaryKey: []*schema.Column{GroupTagsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "group_tags_tags_tag",
+				Columns:    []*schema.Column{GroupTagsColumns[1]},
+				RefColumns: []*schema.Column{TagsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "group_tags_groups_group",
+				Columns:    []*schema.Column{GroupTagsColumns[2]},
+				RefColumns: []*schema.Column{GroupsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "grouptag_tag_id_group_id",
+				Unique:  true,
+				Columns: []*schema.Column{GroupTagsColumns[1], GroupTagsColumns[2]},
+			},
+		},
 	}
 	// RelationshipsColumns holds the columns for the "relationships" table.
 	RelationshipsColumns = []*schema.Column{
@@ -312,14 +345,14 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "usertweet_user_id_tweet_id",
-				Unique:  true,
-				Columns: []*schema.Column{UserTweetsColumns[2], UserTweetsColumns[3]},
-			},
-			{
 				Name:    "usertweet_tweet_id",
 				Unique:  true,
 				Columns: []*schema.Column{UserTweetsColumns[3]},
+			},
+			{
+				Name:    "usertweet_user_id_tweet_id",
+				Unique:  true,
+				Columns: []*schema.Column{UserTweetsColumns[2], UserTweetsColumns[3]},
 			},
 		},
 	}
@@ -327,6 +360,7 @@ var (
 	Tables = []*schema.Table{
 		FriendshipsTable,
 		GroupsTable,
+		GroupTagsTable,
 		RelationshipsTable,
 		RelationshipInfosTable,
 		RolesTable,
@@ -344,6 +378,8 @@ var (
 func init() {
 	FriendshipsTable.ForeignKeys[0].RefTable = UsersTable
 	FriendshipsTable.ForeignKeys[1].RefTable = UsersTable
+	GroupTagsTable.ForeignKeys[0].RefTable = TagsTable
+	GroupTagsTable.ForeignKeys[1].RefTable = GroupsTable
 	RelationshipsTable.ForeignKeys[0].RefTable = UsersTable
 	RelationshipsTable.ForeignKeys[1].RefTable = UsersTable
 	RelationshipsTable.ForeignKeys[2].RefTable = RelationshipInfosTable

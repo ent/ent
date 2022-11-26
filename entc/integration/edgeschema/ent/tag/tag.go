@@ -15,8 +15,12 @@ const (
 	FieldValue = "value"
 	// EdgeTweets holds the string denoting the tweets edge name in mutations.
 	EdgeTweets = "tweets"
+	// EdgeGroups holds the string denoting the groups edge name in mutations.
+	EdgeGroups = "groups"
 	// EdgeTweetTags holds the string denoting the tweet_tags edge name in mutations.
 	EdgeTweetTags = "tweet_tags"
+	// EdgeGroupTags holds the string denoting the group_tags edge name in mutations.
+	EdgeGroupTags = "group_tags"
 	// Table holds the table name of the tag in the database.
 	Table = "tags"
 	// TweetsTable is the table that holds the tweets relation/edge. The primary key declared below.
@@ -24,6 +28,11 @@ const (
 	// TweetsInverseTable is the table name for the Tweet entity.
 	// It exists in this package in order to avoid circular dependency with the "tweet" package.
 	TweetsInverseTable = "tweets"
+	// GroupsTable is the table that holds the groups relation/edge. The primary key declared below.
+	GroupsTable = "group_tags"
+	// GroupsInverseTable is the table name for the Group entity.
+	// It exists in this package in order to avoid circular dependency with the "group" package.
+	GroupsInverseTable = "groups"
 	// TweetTagsTable is the table that holds the tweet_tags relation/edge.
 	TweetTagsTable = "tweet_tags"
 	// TweetTagsInverseTable is the table name for the TweetTag entity.
@@ -31,6 +40,13 @@ const (
 	TweetTagsInverseTable = "tweet_tags"
 	// TweetTagsColumn is the table column denoting the tweet_tags relation/edge.
 	TweetTagsColumn = "tag_id"
+	// GroupTagsTable is the table that holds the group_tags relation/edge.
+	GroupTagsTable = "group_tags"
+	// GroupTagsInverseTable is the table name for the GroupTag entity.
+	// It exists in this package in order to avoid circular dependency with the "grouptag" package.
+	GroupTagsInverseTable = "group_tags"
+	// GroupTagsColumn is the table column denoting the group_tags relation/edge.
+	GroupTagsColumn = "tag_id"
 )
 
 // Columns holds all SQL columns for tag fields.
@@ -43,6 +59,9 @@ var (
 	// TweetsPrimaryKey and TweetsColumn2 are the table columns denoting the
 	// primary key for the tweets relation (M2M).
 	TweetsPrimaryKey = []string{"tag_id", "tweet_id"}
+	// GroupsPrimaryKey and GroupsColumn2 are the table columns denoting the
+	// primary key for the groups relation (M2M).
+	GroupsPrimaryKey = []string{"tag_id", "group_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).

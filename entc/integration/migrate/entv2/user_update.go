@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/entc/integration/migrate/entv2/car"
 	"entgo.io/ent/entc/integration/migrate/entv2/pet"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
@@ -264,6 +265,64 @@ func (uu *UserUpdate) SetNillableWorkplace(s *string) *UserUpdate {
 // ClearWorkplace clears the value of the "workplace" field.
 func (uu *UserUpdate) ClearWorkplace() *UserUpdate {
 	uu.mutation.ClearWorkplace()
+	return uu
+}
+
+// SetRoles sets the "roles" field.
+func (uu *UserUpdate) SetRoles(s []string) *UserUpdate {
+	uu.mutation.SetRoles(s)
+	return uu
+}
+
+// AppendRoles appends s to the "roles" field.
+func (uu *UserUpdate) AppendRoles(s []string) *UserUpdate {
+	uu.mutation.AppendRoles(s)
+	return uu
+}
+
+// ClearRoles clears the value of the "roles" field.
+func (uu *UserUpdate) ClearRoles() *UserUpdate {
+	uu.mutation.ClearRoles()
+	return uu
+}
+
+// SetDefaultExpr sets the "default_expr" field.
+func (uu *UserUpdate) SetDefaultExpr(s string) *UserUpdate {
+	uu.mutation.SetDefaultExpr(s)
+	return uu
+}
+
+// SetNillableDefaultExpr sets the "default_expr" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableDefaultExpr(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetDefaultExpr(*s)
+	}
+	return uu
+}
+
+// ClearDefaultExpr clears the value of the "default_expr" field.
+func (uu *UserUpdate) ClearDefaultExpr() *UserUpdate {
+	uu.mutation.ClearDefaultExpr()
+	return uu
+}
+
+// SetDefaultExprs sets the "default_exprs" field.
+func (uu *UserUpdate) SetDefaultExprs(s string) *UserUpdate {
+	uu.mutation.SetDefaultExprs(s)
+	return uu
+}
+
+// SetNillableDefaultExprs sets the "default_exprs" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableDefaultExprs(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetDefaultExprs(*s)
+	}
+	return uu
+}
+
+// ClearDefaultExprs clears the value of the "default_exprs" field.
+func (uu *UserUpdate) ClearDefaultExprs() *UserUpdate {
+	uu.mutation.ClearDefaultExprs()
 	return uu
 }
 
@@ -576,6 +635,29 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if uu.mutation.WorkplaceCleared() {
 		_spec.ClearField(user.FieldWorkplace, field.TypeString)
+	}
+	if value, ok := uu.mutation.Roles(); ok {
+		_spec.SetField(user.FieldRoles, field.TypeJSON, value)
+	}
+	if value, ok := uu.mutation.AppendedRoles(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldRoles, value)
+		})
+	}
+	if uu.mutation.RolesCleared() {
+		_spec.ClearField(user.FieldRoles, field.TypeJSON)
+	}
+	if value, ok := uu.mutation.DefaultExpr(); ok {
+		_spec.SetField(user.FieldDefaultExpr, field.TypeString, value)
+	}
+	if uu.mutation.DefaultExprCleared() {
+		_spec.ClearField(user.FieldDefaultExpr, field.TypeString)
+	}
+	if value, ok := uu.mutation.DefaultExprs(); ok {
+		_spec.SetField(user.FieldDefaultExprs, field.TypeString, value)
+	}
+	if uu.mutation.DefaultExprsCleared() {
+		_spec.ClearField(user.FieldDefaultExprs, field.TypeString)
 	}
 	if value, ok := uu.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
@@ -978,6 +1060,64 @@ func (uuo *UserUpdateOne) ClearWorkplace() *UserUpdateOne {
 	return uuo
 }
 
+// SetRoles sets the "roles" field.
+func (uuo *UserUpdateOne) SetRoles(s []string) *UserUpdateOne {
+	uuo.mutation.SetRoles(s)
+	return uuo
+}
+
+// AppendRoles appends s to the "roles" field.
+func (uuo *UserUpdateOne) AppendRoles(s []string) *UserUpdateOne {
+	uuo.mutation.AppendRoles(s)
+	return uuo
+}
+
+// ClearRoles clears the value of the "roles" field.
+func (uuo *UserUpdateOne) ClearRoles() *UserUpdateOne {
+	uuo.mutation.ClearRoles()
+	return uuo
+}
+
+// SetDefaultExpr sets the "default_expr" field.
+func (uuo *UserUpdateOne) SetDefaultExpr(s string) *UserUpdateOne {
+	uuo.mutation.SetDefaultExpr(s)
+	return uuo
+}
+
+// SetNillableDefaultExpr sets the "default_expr" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableDefaultExpr(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetDefaultExpr(*s)
+	}
+	return uuo
+}
+
+// ClearDefaultExpr clears the value of the "default_expr" field.
+func (uuo *UserUpdateOne) ClearDefaultExpr() *UserUpdateOne {
+	uuo.mutation.ClearDefaultExpr()
+	return uuo
+}
+
+// SetDefaultExprs sets the "default_exprs" field.
+func (uuo *UserUpdateOne) SetDefaultExprs(s string) *UserUpdateOne {
+	uuo.mutation.SetDefaultExprs(s)
+	return uuo
+}
+
+// SetNillableDefaultExprs sets the "default_exprs" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableDefaultExprs(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetDefaultExprs(*s)
+	}
+	return uuo
+}
+
+// ClearDefaultExprs clears the value of the "default_exprs" field.
+func (uuo *UserUpdateOne) ClearDefaultExprs() *UserUpdateOne {
+	uuo.mutation.ClearDefaultExprs()
+	return uuo
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (uuo *UserUpdateOne) SetCreatedAt(t time.Time) *UserUpdateOne {
 	uuo.mutation.SetCreatedAt(t)
@@ -1317,6 +1457,29 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if uuo.mutation.WorkplaceCleared() {
 		_spec.ClearField(user.FieldWorkplace, field.TypeString)
+	}
+	if value, ok := uuo.mutation.Roles(); ok {
+		_spec.SetField(user.FieldRoles, field.TypeJSON, value)
+	}
+	if value, ok := uuo.mutation.AppendedRoles(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldRoles, value)
+		})
+	}
+	if uuo.mutation.RolesCleared() {
+		_spec.ClearField(user.FieldRoles, field.TypeJSON)
+	}
+	if value, ok := uuo.mutation.DefaultExpr(); ok {
+		_spec.SetField(user.FieldDefaultExpr, field.TypeString, value)
+	}
+	if uuo.mutation.DefaultExprCleared() {
+		_spec.ClearField(user.FieldDefaultExpr, field.TypeString)
+	}
+	if value, ok := uuo.mutation.DefaultExprs(); ok {
+		_spec.SetField(user.FieldDefaultExprs, field.TypeString, value)
+	}
+	if uuo.mutation.DefaultExprsCleared() {
+		_spec.ClearField(user.FieldDefaultExprs, field.TypeString)
 	}
 	if value, ok := uuo.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)

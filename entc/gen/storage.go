@@ -52,6 +52,7 @@ var drivers = []*Storage{
 		Builder:   reflect.TypeOf(&sql.Selector{}),
 		Dialects:  []string{"dialect.SQLite", "dialect.MySQL", "dialect.Postgres"},
 		Imports: []string{
+			"database/sql/driver",
 			"entgo.io/ent/dialect/sql",
 			"entgo.io/ent/dialect/sql/sqlgraph",
 			"entgo.io/ent/dialect/sql/sqljson",

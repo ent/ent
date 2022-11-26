@@ -157,6 +157,9 @@ var (
 		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"logged_in", "logged_out", "online"}, Default: "logged_in"},
 		{Name: "status", Type: field.TypeEnum, Nullable: true, Enums: []string{"done", "pending"}},
 		{Name: "workplace", Type: field.TypeString, Nullable: true},
+		{Name: "roles", Type: field.TypeJSON, Nullable: true, Default: "[]"},
+		{Name: "default_expr", Type: field.TypeString, Nullable: true, Default: schema.Expr("lower('hello')")},
+		{Name: "default_exprs", Type: field.TypeString, Nullable: true, Default: map[string]schema.Expr{"mysql": "TO_BASE64('ent')", "postgres": "md5('ent')", "sqlite3": "hex('ent')"}},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "drop_optional", Type: field.TypeString},
 		{Name: "blog_admins", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
@@ -169,7 +172,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "users_blogs_admins",
-				Columns:    []*schema.Column{UsersColumns[19]},
+				Columns:    []*schema.Column{UsersColumns[22]},
 				RefColumns: []*schema.Column{BlogsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -224,7 +227,27 @@ var (
 					Where: "active",
 				},
 			},
+			{
+				Name:    "user_age_phone",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[4], UsersColumns[8]},
+				Annotation: &entsql.IndexAnnotation{
+					OpClassColumns: map[string]string{
+						UsersColumns[8].Name: "bpchar_pattern_ops",
+					},
+				},
+			},
 		},
+	}
+	// ZoosColumns holds the columns for the "zoos" table.
+	ZoosColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, Default: map[string]schema.Expr{"mysql": "floor(rand() * ~(1<<31))", "postgres": "floor(random() * ~(1<<31))", "sqlite3": "abs(random())"}},
+	}
+	// ZoosTable holds the schema information for the "zoos" table.
+	ZoosTable = &schema.Table{
+		Name:       "zoos",
+		Columns:    ZoosColumns,
+		PrimaryKey: []*schema.Column{ZoosColumns[0]},
 	}
 	// FriendsColumns holds the columns for the "friends" table.
 	FriendsColumns = []*schema.Column{
@@ -261,6 +284,7 @@ var (
 		MediaTable,
 		PetsTable,
 		UsersTable,
+		ZoosTable,
 		FriendsTable,
 	}
 )

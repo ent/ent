@@ -29,5 +29,7 @@ func (User) Edges() []ent.Edge {
 		edge.To("pets", Pet.Type),
 		edge.From("groups", Group.Type).
 			Ref("users"),
+		edge.To("friends", User.Type).
+			Through("friendships", Friendship.Type),
 	}
 }

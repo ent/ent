@@ -183,7 +183,7 @@ func (c *NodeClient) DeleteOne(n *Node) *NodeDeleteOne {
 	return c.DeleteOneID(n.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *NodeClient) DeleteOneID(id int) *NodeDeleteOne {
 	builder := c.Delete().Where(node.ID(id))
 	builder.mutation.id = &id

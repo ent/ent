@@ -191,6 +191,7 @@ var (
 		"dialect/sql/query/all/nodes/*",
 		"dialect/sql/query/from/*",
 		"dialect/sql/query/path/*",
+		"dialect/sql/query/*/*/*",
 		"import/additional/*",
 		"model/additional/*",
 		"model/comment/additional/*",
@@ -218,7 +219,6 @@ var (
 		"time":    "time",
 		"ent":     "entgo.io/ent",
 		"dialect": "entgo.io/ent/dialect",
-		"schema":  "entgo.io/ent/schema",
 		"field":   "entgo.io/ent/schema/field",
 	}
 )

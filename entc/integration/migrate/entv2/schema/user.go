@@ -99,6 +99,20 @@ func (User) Fields() []ent.Field {
 		// remove the max-length constraint from varchar.
 		field.String("workplace").
 			Optional(),
+		// JSON field with database-default value.
+		field.Strings("roles").
+			Optional().
+			Annotations(entsql.Default(`[]`)),
+		field.String("default_expr").
+			Optional().
+			Annotations(entsql.DefaultExpr("lower('hello')")),
+		field.String("default_exprs").
+			Optional().
+			Annotations(entsql.DefaultExprs(map[string]string{
+				dialect.MySQL:    "TO_BASE64('ent')",
+				dialect.SQLite:   "hex('ent')",
+				dialect.Postgres: "md5('ent')",
+			})),
 		// add a new column with generated values by the database.
 		field.Time("created_at").
 			Default(time.Now).
@@ -160,6 +174,11 @@ func (User) Indexes() []ent.Index {
 		index.Fields("phone").
 			Annotations(
 				entsql.IndexWhere("active"),
+			),
+		// For PostgreSQL, operator classes can be configured for each field.
+		index.Fields("age", "phone").
+			Annotations(
+				entsql.OpClassColumn("phone", "bpchar_pattern_ops"),
 			),
 	}
 }

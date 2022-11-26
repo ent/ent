@@ -15,6 +15,7 @@ import (
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/friendship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
+	"entgo.io/ent/entc/integration/edgeschema/ent/grouptag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
@@ -43,6 +44,7 @@ const (
 	// Node types.
 	TypeFriendship       = "Friendship"
 	TypeGroup            = "Group"
+	TypeGroupTag         = "GroupTag"
 	TypeRelationship     = "Relationship"
 	TypeRelationshipInfo = "RelationshipInfo"
 	TypeRole             = "Role"
@@ -674,9 +676,15 @@ type GroupMutation struct {
 	users               map[int]struct{}
 	removedusers        map[int]struct{}
 	clearedusers        bool
+	tags                map[int]struct{}
+	removedtags         map[int]struct{}
+	clearedtags         bool
 	joined_users        map[int]struct{}
 	removedjoined_users map[int]struct{}
 	clearedjoined_users bool
+	group_tags          map[int]struct{}
+	removedgroup_tags   map[int]struct{}
+	clearedgroup_tags   bool
 	done                bool
 	oldValue            func(context.Context) (*Group, error)
 	predicates          []predicate.Group
@@ -870,6 +878,60 @@ func (m *GroupMutation) ResetUsers() {
 	m.removedusers = nil
 }
 
+// AddTagIDs adds the "tags" edge to the Tag entity by ids.
+func (m *GroupMutation) AddTagIDs(ids ...int) {
+	if m.tags == nil {
+		m.tags = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.tags[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTags clears the "tags" edge to the Tag entity.
+func (m *GroupMutation) ClearTags() {
+	m.clearedtags = true
+}
+
+// TagsCleared reports if the "tags" edge to the Tag entity was cleared.
+func (m *GroupMutation) TagsCleared() bool {
+	return m.clearedtags
+}
+
+// RemoveTagIDs removes the "tags" edge to the Tag entity by IDs.
+func (m *GroupMutation) RemoveTagIDs(ids ...int) {
+	if m.removedtags == nil {
+		m.removedtags = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.tags, ids[i])
+		m.removedtags[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTags returns the removed IDs of the "tags" edge to the Tag entity.
+func (m *GroupMutation) RemovedTagsIDs() (ids []int) {
+	for id := range m.removedtags {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TagsIDs returns the "tags" edge IDs in the mutation.
+func (m *GroupMutation) TagsIDs() (ids []int) {
+	for id := range m.tags {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTags resets all changes to the "tags" edge.
+func (m *GroupMutation) ResetTags() {
+	m.tags = nil
+	m.clearedtags = false
+	m.removedtags = nil
+}
+
 // AddJoinedUserIDs adds the "joined_users" edge to the UserGroup entity by ids.
 func (m *GroupMutation) AddJoinedUserIDs(ids ...int) {
 	if m.joined_users == nil {
@@ -922,6 +984,60 @@ func (m *GroupMutation) ResetJoinedUsers() {
 	m.joined_users = nil
 	m.clearedjoined_users = false
 	m.removedjoined_users = nil
+}
+
+// AddGroupTagIDs adds the "group_tags" edge to the GroupTag entity by ids.
+func (m *GroupMutation) AddGroupTagIDs(ids ...int) {
+	if m.group_tags == nil {
+		m.group_tags = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.group_tags[ids[i]] = struct{}{}
+	}
+}
+
+// ClearGroupTags clears the "group_tags" edge to the GroupTag entity.
+func (m *GroupMutation) ClearGroupTags() {
+	m.clearedgroup_tags = true
+}
+
+// GroupTagsCleared reports if the "group_tags" edge to the GroupTag entity was cleared.
+func (m *GroupMutation) GroupTagsCleared() bool {
+	return m.clearedgroup_tags
+}
+
+// RemoveGroupTagIDs removes the "group_tags" edge to the GroupTag entity by IDs.
+func (m *GroupMutation) RemoveGroupTagIDs(ids ...int) {
+	if m.removedgroup_tags == nil {
+		m.removedgroup_tags = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.group_tags, ids[i])
+		m.removedgroup_tags[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedGroupTags returns the removed IDs of the "group_tags" edge to the GroupTag entity.
+func (m *GroupMutation) RemovedGroupTagsIDs() (ids []int) {
+	for id := range m.removedgroup_tags {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// GroupTagsIDs returns the "group_tags" edge IDs in the mutation.
+func (m *GroupMutation) GroupTagsIDs() (ids []int) {
+	for id := range m.group_tags {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetGroupTags resets all changes to the "group_tags" edge.
+func (m *GroupMutation) ResetGroupTags() {
+	m.group_tags = nil
+	m.clearedgroup_tags = false
+	m.removedgroup_tags = nil
 }
 
 // Where appends a list predicates to the GroupMutation builder.
@@ -1042,12 +1158,18 @@ func (m *GroupMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *GroupMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 4)
 	if m.users != nil {
 		edges = append(edges, group.EdgeUsers)
 	}
+	if m.tags != nil {
+		edges = append(edges, group.EdgeTags)
+	}
 	if m.joined_users != nil {
 		edges = append(edges, group.EdgeJoinedUsers)
+	}
+	if m.group_tags != nil {
+		edges = append(edges, group.EdgeGroupTags)
 	}
 	return edges
 }
@@ -1062,9 +1184,21 @@ func (m *GroupMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case group.EdgeTags:
+		ids := make([]ent.Value, 0, len(m.tags))
+		for id := range m.tags {
+			ids = append(ids, id)
+		}
+		return ids
 	case group.EdgeJoinedUsers:
 		ids := make([]ent.Value, 0, len(m.joined_users))
 		for id := range m.joined_users {
+			ids = append(ids, id)
+		}
+		return ids
+	case group.EdgeGroupTags:
+		ids := make([]ent.Value, 0, len(m.group_tags))
+		for id := range m.group_tags {
 			ids = append(ids, id)
 		}
 		return ids
@@ -1074,12 +1208,18 @@ func (m *GroupMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *GroupMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 4)
 	if m.removedusers != nil {
 		edges = append(edges, group.EdgeUsers)
 	}
+	if m.removedtags != nil {
+		edges = append(edges, group.EdgeTags)
+	}
 	if m.removedjoined_users != nil {
 		edges = append(edges, group.EdgeJoinedUsers)
+	}
+	if m.removedgroup_tags != nil {
+		edges = append(edges, group.EdgeGroupTags)
 	}
 	return edges
 }
@@ -1094,9 +1234,21 @@ func (m *GroupMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case group.EdgeTags:
+		ids := make([]ent.Value, 0, len(m.removedtags))
+		for id := range m.removedtags {
+			ids = append(ids, id)
+		}
+		return ids
 	case group.EdgeJoinedUsers:
 		ids := make([]ent.Value, 0, len(m.removedjoined_users))
 		for id := range m.removedjoined_users {
+			ids = append(ids, id)
+		}
+		return ids
+	case group.EdgeGroupTags:
+		ids := make([]ent.Value, 0, len(m.removedgroup_tags))
+		for id := range m.removedgroup_tags {
 			ids = append(ids, id)
 		}
 		return ids
@@ -1106,12 +1258,18 @@ func (m *GroupMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *GroupMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 4)
 	if m.clearedusers {
 		edges = append(edges, group.EdgeUsers)
 	}
+	if m.clearedtags {
+		edges = append(edges, group.EdgeTags)
+	}
 	if m.clearedjoined_users {
 		edges = append(edges, group.EdgeJoinedUsers)
+	}
+	if m.clearedgroup_tags {
+		edges = append(edges, group.EdgeGroupTags)
 	}
 	return edges
 }
@@ -1122,8 +1280,12 @@ func (m *GroupMutation) EdgeCleared(name string) bool {
 	switch name {
 	case group.EdgeUsers:
 		return m.clearedusers
+	case group.EdgeTags:
+		return m.clearedtags
 	case group.EdgeJoinedUsers:
 		return m.clearedjoined_users
+	case group.EdgeGroupTags:
+		return m.clearedgroup_tags
 	}
 	return false
 }
@@ -1143,11 +1305,483 @@ func (m *GroupMutation) ResetEdge(name string) error {
 	case group.EdgeUsers:
 		m.ResetUsers()
 		return nil
+	case group.EdgeTags:
+		m.ResetTags()
+		return nil
 	case group.EdgeJoinedUsers:
 		m.ResetJoinedUsers()
 		return nil
+	case group.EdgeGroupTags:
+		m.ResetGroupTags()
+		return nil
 	}
 	return fmt.Errorf("unknown Group edge %s", name)
+}
+
+// GroupTagMutation represents an operation that mutates the GroupTag nodes in the graph.
+type GroupTagMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	clearedFields map[string]struct{}
+	tag           *int
+	clearedtag    bool
+	group         *int
+	clearedgroup  bool
+	done          bool
+	oldValue      func(context.Context) (*GroupTag, error)
+	predicates    []predicate.GroupTag
+}
+
+var _ ent.Mutation = (*GroupTagMutation)(nil)
+
+// grouptagOption allows management of the mutation configuration using functional options.
+type grouptagOption func(*GroupTagMutation)
+
+// newGroupTagMutation creates new mutation for the GroupTag entity.
+func newGroupTagMutation(c config, op Op, opts ...grouptagOption) *GroupTagMutation {
+	m := &GroupTagMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeGroupTag,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withGroupTagID sets the ID field of the mutation.
+func withGroupTagID(id int) grouptagOption {
+	return func(m *GroupTagMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *GroupTag
+		)
+		m.oldValue = func(ctx context.Context) (*GroupTag, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().GroupTag.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withGroupTag sets the old GroupTag of the mutation.
+func withGroupTag(node *GroupTag) grouptagOption {
+	return func(m *GroupTagMutation) {
+		m.oldValue = func(context.Context) (*GroupTag, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m GroupTagMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m GroupTagMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *GroupTagMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *GroupTagMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().GroupTag.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetTagID sets the "tag_id" field.
+func (m *GroupTagMutation) SetTagID(i int) {
+	m.tag = &i
+}
+
+// TagID returns the value of the "tag_id" field in the mutation.
+func (m *GroupTagMutation) TagID() (r int, exists bool) {
+	v := m.tag
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTagID returns the old "tag_id" field's value of the GroupTag entity.
+// If the GroupTag object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GroupTagMutation) OldTagID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTagID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTagID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTagID: %w", err)
+	}
+	return oldValue.TagID, nil
+}
+
+// ResetTagID resets all changes to the "tag_id" field.
+func (m *GroupTagMutation) ResetTagID() {
+	m.tag = nil
+}
+
+// SetGroupID sets the "group_id" field.
+func (m *GroupTagMutation) SetGroupID(i int) {
+	m.group = &i
+}
+
+// GroupID returns the value of the "group_id" field in the mutation.
+func (m *GroupTagMutation) GroupID() (r int, exists bool) {
+	v := m.group
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGroupID returns the old "group_id" field's value of the GroupTag entity.
+// If the GroupTag object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GroupTagMutation) OldGroupID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGroupID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGroupID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGroupID: %w", err)
+	}
+	return oldValue.GroupID, nil
+}
+
+// ResetGroupID resets all changes to the "group_id" field.
+func (m *GroupTagMutation) ResetGroupID() {
+	m.group = nil
+}
+
+// ClearTag clears the "tag" edge to the Tag entity.
+func (m *GroupTagMutation) ClearTag() {
+	m.clearedtag = true
+}
+
+// TagCleared reports if the "tag" edge to the Tag entity was cleared.
+func (m *GroupTagMutation) TagCleared() bool {
+	return m.clearedtag
+}
+
+// TagIDs returns the "tag" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TagID instead. It exists only for internal usage by the builders.
+func (m *GroupTagMutation) TagIDs() (ids []int) {
+	if id := m.tag; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTag resets all changes to the "tag" edge.
+func (m *GroupTagMutation) ResetTag() {
+	m.tag = nil
+	m.clearedtag = false
+}
+
+// ClearGroup clears the "group" edge to the Group entity.
+func (m *GroupTagMutation) ClearGroup() {
+	m.clearedgroup = true
+}
+
+// GroupCleared reports if the "group" edge to the Group entity was cleared.
+func (m *GroupTagMutation) GroupCleared() bool {
+	return m.clearedgroup
+}
+
+// GroupIDs returns the "group" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// GroupID instead. It exists only for internal usage by the builders.
+func (m *GroupTagMutation) GroupIDs() (ids []int) {
+	if id := m.group; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetGroup resets all changes to the "group" edge.
+func (m *GroupTagMutation) ResetGroup() {
+	m.group = nil
+	m.clearedgroup = false
+}
+
+// Where appends a list predicates to the GroupTagMutation builder.
+func (m *GroupTagMutation) Where(ps ...predicate.GroupTag) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *GroupTagMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (GroupTag).
+func (m *GroupTagMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *GroupTagMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.tag != nil {
+		fields = append(fields, grouptag.FieldTagID)
+	}
+	if m.group != nil {
+		fields = append(fields, grouptag.FieldGroupID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *GroupTagMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case grouptag.FieldTagID:
+		return m.TagID()
+	case grouptag.FieldGroupID:
+		return m.GroupID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *GroupTagMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case grouptag.FieldTagID:
+		return m.OldTagID(ctx)
+	case grouptag.FieldGroupID:
+		return m.OldGroupID(ctx)
+	}
+	return nil, fmt.Errorf("unknown GroupTag field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *GroupTagMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case grouptag.FieldTagID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTagID(v)
+		return nil
+	case grouptag.FieldGroupID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGroupID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown GroupTag field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *GroupTagMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *GroupTagMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *GroupTagMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown GroupTag numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *GroupTagMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *GroupTagMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *GroupTagMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown GroupTag nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *GroupTagMutation) ResetField(name string) error {
+	switch name {
+	case grouptag.FieldTagID:
+		m.ResetTagID()
+		return nil
+	case grouptag.FieldGroupID:
+		m.ResetGroupID()
+		return nil
+	}
+	return fmt.Errorf("unknown GroupTag field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *GroupTagMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.tag != nil {
+		edges = append(edges, grouptag.EdgeTag)
+	}
+	if m.group != nil {
+		edges = append(edges, grouptag.EdgeGroup)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *GroupTagMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case grouptag.EdgeTag:
+		if id := m.tag; id != nil {
+			return []ent.Value{*id}
+		}
+	case grouptag.EdgeGroup:
+		if id := m.group; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *GroupTagMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *GroupTagMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *GroupTagMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedtag {
+		edges = append(edges, grouptag.EdgeTag)
+	}
+	if m.clearedgroup {
+		edges = append(edges, grouptag.EdgeGroup)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *GroupTagMutation) EdgeCleared(name string) bool {
+	switch name {
+	case grouptag.EdgeTag:
+		return m.clearedtag
+	case grouptag.EdgeGroup:
+		return m.clearedgroup
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *GroupTagMutation) ClearEdge(name string) error {
+	switch name {
+	case grouptag.EdgeTag:
+		m.ClearTag()
+		return nil
+	case grouptag.EdgeGroup:
+		m.ClearGroup()
+		return nil
+	}
+	return fmt.Errorf("unknown GroupTag unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *GroupTagMutation) ResetEdge(name string) error {
+	switch name {
+	case grouptag.EdgeTag:
+		m.ResetTag()
+		return nil
+	case grouptag.EdgeGroup:
+		m.ResetGroup()
+		return nil
+	}
+	return fmt.Errorf("unknown GroupTag edge %s", name)
 }
 
 // RelationshipMutation represents an operation that mutates the Relationship nodes in the graph.
@@ -2865,9 +3499,15 @@ type TagMutation struct {
 	tweets            map[int]struct{}
 	removedtweets     map[int]struct{}
 	clearedtweets     bool
+	groups            map[int]struct{}
+	removedgroups     map[int]struct{}
+	clearedgroups     bool
 	tweet_tags        map[uuid.UUID]struct{}
 	removedtweet_tags map[uuid.UUID]struct{}
 	clearedtweet_tags bool
+	group_tags        map[int]struct{}
+	removedgroup_tags map[int]struct{}
+	clearedgroup_tags bool
 	done              bool
 	oldValue          func(context.Context) (*Tag, error)
 	predicates        []predicate.Tag
@@ -3061,6 +3701,60 @@ func (m *TagMutation) ResetTweets() {
 	m.removedtweets = nil
 }
 
+// AddGroupIDs adds the "groups" edge to the Group entity by ids.
+func (m *TagMutation) AddGroupIDs(ids ...int) {
+	if m.groups == nil {
+		m.groups = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.groups[ids[i]] = struct{}{}
+	}
+}
+
+// ClearGroups clears the "groups" edge to the Group entity.
+func (m *TagMutation) ClearGroups() {
+	m.clearedgroups = true
+}
+
+// GroupsCleared reports if the "groups" edge to the Group entity was cleared.
+func (m *TagMutation) GroupsCleared() bool {
+	return m.clearedgroups
+}
+
+// RemoveGroupIDs removes the "groups" edge to the Group entity by IDs.
+func (m *TagMutation) RemoveGroupIDs(ids ...int) {
+	if m.removedgroups == nil {
+		m.removedgroups = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.groups, ids[i])
+		m.removedgroups[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedGroups returns the removed IDs of the "groups" edge to the Group entity.
+func (m *TagMutation) RemovedGroupsIDs() (ids []int) {
+	for id := range m.removedgroups {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// GroupsIDs returns the "groups" edge IDs in the mutation.
+func (m *TagMutation) GroupsIDs() (ids []int) {
+	for id := range m.groups {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetGroups resets all changes to the "groups" edge.
+func (m *TagMutation) ResetGroups() {
+	m.groups = nil
+	m.clearedgroups = false
+	m.removedgroups = nil
+}
+
 // AddTweetTagIDs adds the "tweet_tags" edge to the TweetTag entity by ids.
 func (m *TagMutation) AddTweetTagIDs(ids ...uuid.UUID) {
 	if m.tweet_tags == nil {
@@ -3113,6 +3807,60 @@ func (m *TagMutation) ResetTweetTags() {
 	m.tweet_tags = nil
 	m.clearedtweet_tags = false
 	m.removedtweet_tags = nil
+}
+
+// AddGroupTagIDs adds the "group_tags" edge to the GroupTag entity by ids.
+func (m *TagMutation) AddGroupTagIDs(ids ...int) {
+	if m.group_tags == nil {
+		m.group_tags = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.group_tags[ids[i]] = struct{}{}
+	}
+}
+
+// ClearGroupTags clears the "group_tags" edge to the GroupTag entity.
+func (m *TagMutation) ClearGroupTags() {
+	m.clearedgroup_tags = true
+}
+
+// GroupTagsCleared reports if the "group_tags" edge to the GroupTag entity was cleared.
+func (m *TagMutation) GroupTagsCleared() bool {
+	return m.clearedgroup_tags
+}
+
+// RemoveGroupTagIDs removes the "group_tags" edge to the GroupTag entity by IDs.
+func (m *TagMutation) RemoveGroupTagIDs(ids ...int) {
+	if m.removedgroup_tags == nil {
+		m.removedgroup_tags = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.group_tags, ids[i])
+		m.removedgroup_tags[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedGroupTags returns the removed IDs of the "group_tags" edge to the GroupTag entity.
+func (m *TagMutation) RemovedGroupTagsIDs() (ids []int) {
+	for id := range m.removedgroup_tags {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// GroupTagsIDs returns the "group_tags" edge IDs in the mutation.
+func (m *TagMutation) GroupTagsIDs() (ids []int) {
+	for id := range m.group_tags {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetGroupTags resets all changes to the "group_tags" edge.
+func (m *TagMutation) ResetGroupTags() {
+	m.group_tags = nil
+	m.clearedgroup_tags = false
+	m.removedgroup_tags = nil
 }
 
 // Where appends a list predicates to the TagMutation builder.
@@ -3233,12 +3981,18 @@ func (m *TagMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TagMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 4)
 	if m.tweets != nil {
 		edges = append(edges, tag.EdgeTweets)
 	}
+	if m.groups != nil {
+		edges = append(edges, tag.EdgeGroups)
+	}
 	if m.tweet_tags != nil {
 		edges = append(edges, tag.EdgeTweetTags)
+	}
+	if m.group_tags != nil {
+		edges = append(edges, tag.EdgeGroupTags)
 	}
 	return edges
 }
@@ -3253,9 +4007,21 @@ func (m *TagMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case tag.EdgeGroups:
+		ids := make([]ent.Value, 0, len(m.groups))
+		for id := range m.groups {
+			ids = append(ids, id)
+		}
+		return ids
 	case tag.EdgeTweetTags:
 		ids := make([]ent.Value, 0, len(m.tweet_tags))
 		for id := range m.tweet_tags {
+			ids = append(ids, id)
+		}
+		return ids
+	case tag.EdgeGroupTags:
+		ids := make([]ent.Value, 0, len(m.group_tags))
+		for id := range m.group_tags {
 			ids = append(ids, id)
 		}
 		return ids
@@ -3265,12 +4031,18 @@ func (m *TagMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TagMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 4)
 	if m.removedtweets != nil {
 		edges = append(edges, tag.EdgeTweets)
 	}
+	if m.removedgroups != nil {
+		edges = append(edges, tag.EdgeGroups)
+	}
 	if m.removedtweet_tags != nil {
 		edges = append(edges, tag.EdgeTweetTags)
+	}
+	if m.removedgroup_tags != nil {
+		edges = append(edges, tag.EdgeGroupTags)
 	}
 	return edges
 }
@@ -3285,9 +4057,21 @@ func (m *TagMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case tag.EdgeGroups:
+		ids := make([]ent.Value, 0, len(m.removedgroups))
+		for id := range m.removedgroups {
+			ids = append(ids, id)
+		}
+		return ids
 	case tag.EdgeTweetTags:
 		ids := make([]ent.Value, 0, len(m.removedtweet_tags))
 		for id := range m.removedtweet_tags {
+			ids = append(ids, id)
+		}
+		return ids
+	case tag.EdgeGroupTags:
+		ids := make([]ent.Value, 0, len(m.removedgroup_tags))
+		for id := range m.removedgroup_tags {
 			ids = append(ids, id)
 		}
 		return ids
@@ -3297,12 +4081,18 @@ func (m *TagMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TagMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 4)
 	if m.clearedtweets {
 		edges = append(edges, tag.EdgeTweets)
 	}
+	if m.clearedgroups {
+		edges = append(edges, tag.EdgeGroups)
+	}
 	if m.clearedtweet_tags {
 		edges = append(edges, tag.EdgeTweetTags)
+	}
+	if m.clearedgroup_tags {
+		edges = append(edges, tag.EdgeGroupTags)
 	}
 	return edges
 }
@@ -3313,8 +4103,12 @@ func (m *TagMutation) EdgeCleared(name string) bool {
 	switch name {
 	case tag.EdgeTweets:
 		return m.clearedtweets
+	case tag.EdgeGroups:
+		return m.clearedgroups
 	case tag.EdgeTweetTags:
 		return m.clearedtweet_tags
+	case tag.EdgeGroupTags:
+		return m.clearedgroup_tags
 	}
 	return false
 }
@@ -3334,8 +4128,14 @@ func (m *TagMutation) ResetEdge(name string) error {
 	case tag.EdgeTweets:
 		m.ResetTweets()
 		return nil
+	case tag.EdgeGroups:
+		m.ResetGroups()
+		return nil
 	case tag.EdgeTweetTags:
 		m.ResetTweetTags()
+		return nil
+	case tag.EdgeGroupTags:
+		m.ResetGroupTags()
 		return nil
 	}
 	return fmt.Errorf("unknown Tag edge %s", name)

@@ -7,6 +7,7 @@ package schema
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 	"unicode"
@@ -642,6 +643,9 @@ func (d *Postgres) foreignKeys(ctx context.Context, tx dialect.Tx, tables []*Tab
 				t.AddForeignKey(newFk)
 			}
 		}
+		if err := rows.Close(); err != nil {
+			return err
+		}
 		if err := rows.Err(); err != nil {
 			return err
 		}
@@ -681,6 +685,11 @@ func (d *Postgres) atTable(t1 *Table, t2 *schema.Table) {
 	if t1.Annotation != nil {
 		setAtChecks(t1, t2)
 	}
+}
+
+func (d *Postgres) supportsDefault(*Column) bool {
+	// PostgreSQL supports default values for all standard types.
+	return true
 }
 
 func (d *Postgres) atTypeC(c1 *Column, c2 *schema.Column) error {
@@ -761,7 +770,10 @@ func (d *Postgres) atImplicitIndexName(idx *Index, t1 *Table, c1 *Column) bool {
 }
 
 func (d *Postgres) atIncrementC(t *schema.Table, c *schema.Column) {
-	if _, ok := c.Type.Type.(*postgres.SerialType); ok {
+	// Skip marking this column as an identity in case it is
+	// serial type or a default was already defined for it.
+	if _, ok := c.Type.Type.(*postgres.SerialType); ok || c.Default != nil {
+		t.Attrs = removeAttr(t.Attrs, reflect.TypeOf(&postgres.Identity{}))
 		return
 	}
 	id := &postgres.Identity{}
@@ -777,13 +789,39 @@ func (d *Postgres) atIncrementT(t *schema.Table, v int64) {
 	t.AddAttrs(&postgres.Identity{Sequence: &postgres.Sequence{Start: v}})
 }
 
+// indexOpClass returns a map holding the operator-class mapping if exists.
+func indexOpClass(idx *Index) map[string]string {
+	opc := make(map[string]string)
+	if idx.Annotation == nil {
+		return opc
+	}
+	// If operator-class (without a name) was defined on
+	// the annotation, map it to the single column index.
+	if idx.Annotation.OpClass != "" && len(idx.Columns) == 1 {
+		opc[idx.Columns[0].Name] = idx.Annotation.OpClass
+	}
+	for column, op := range idx.Annotation.OpClassColumns {
+		opc[column] = op
+	}
+	return opc
+}
+
 func (d *Postgres) atIndex(idx1 *Index, t2 *schema.Table, idx2 *schema.Index) error {
+	opc := indexOpClass(idx1)
 	for _, c1 := range idx1.Columns {
 		c2, ok := t2.Column(c1.Name)
 		if !ok {
 			return fmt.Errorf("unexpected index %q column: %q", idx1.Name, c1.Name)
 		}
-		idx2.AddParts(&schema.IndexPart{C: c2})
+		part := &schema.IndexPart{C: c2}
+		if v, ok := opc[c1.Name]; ok {
+			var op postgres.IndexOpClass
+			if err := op.UnmarshalText([]byte(v)); err != nil {
+				return fmt.Errorf("unmarshaling operator-class %q for column %q: %v", v, c1.Name, err)
+			}
+			part.Attrs = append(part.Attrs, &op)
+		}
+		idx2.AddParts(part)
 	}
 	if t, ok := indexType(idx1, dialect.Postgres); ok {
 		idx2.AddAttrs(&postgres.IndexType{T: t})

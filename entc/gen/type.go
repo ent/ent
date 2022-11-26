@@ -708,12 +708,20 @@ func (t *Type) setupFKs() error {
 				}
 			}
 		}
-		// Special case for checking if the FK is already defined as the ID field (see issue 1288).
+		// Special case for checking if the FK is already defined as the ID field (Issue 1288).
 		if key, _ := e.StorageKey(); key != nil && len(key.Columns) == 1 && key.Columns[0] == refid.StorageKey() {
 			fk.Field = refid
 			fk.UserDefined = true
 		}
 		owner.addFK(fk)
+		// In case the user wants to set the column name using the StorageKey option, make sure they
+		// do it using the edge-field option if both back-ref edge and field are defined (Issue 1288).
+		if e.def.StorageKey != nil && len(e.def.StorageKey.Columns) > 0 && !e.OwnFK() && e.Ref != nil && e.Type.fields[e.Rel.Column()] != nil {
+			return fmt.Errorf(
+				"column %q definition on edge %[2]q should be replaced with Field(%[1]q) on its reference %[3]q",
+				e.Rel.Column(), e.Name, e.Ref.Name,
+			)
+		}
 	}
 	return nil
 }
@@ -897,7 +905,7 @@ func ValidSchemaName(name string) error {
 
 // checkField checks the schema field.
 func (t *Type) checkField(tf *Field, f *load.Field) (err error) {
-	switch {
+	switch ant := tf.EntSQL(); {
 	case f.Name == "":
 		err = fmt.Errorf("field name cannot be empty")
 	case f.Info == nil || !f.Info.Valid():
@@ -915,6 +923,8 @@ func (t *Type) checkField(tf *Field, f *load.Field) (err error) {
 		}
 	case tf.Validators > 0 && !tf.ConvertedToBasic():
 		err = fmt.Errorf("GoType %q for field %q must be converted to the basic %q type for validators", tf.Type, f.Name, tf.Type.Type)
+	case ant != nil && ant.Default != "" && (ant.DefaultExpr != "" || ant.DefaultExprs != nil):
+		err = fmt.Errorf("field %q cannot have both default value and default expression annotations", f.Name)
 	}
 	return err
 }
@@ -1328,8 +1338,18 @@ func (f Field) Column() *schema.Column {
 	}
 	// Override the default-value defined in the
 	// schema if it was provided by an annotation.
-	if ant := f.EntSQL(); ant != nil && ant.Default != "" {
+	switch ant := f.EntSQL(); {
+	case ant == nil:
+	case ant.Default != "":
 		c.Default = ant.Default
+	case ant.DefaultExpr != "":
+		c.Default = schema.Expr(ant.DefaultExpr)
+	case ant.DefaultExprs != nil:
+		x := make(map[string]schema.Expr)
+		for k, v := range ant.DefaultExprs {
+			x[k] = schema.Expr(v)
+		}
+		c.Default = x
 	}
 	// Override the collation defined in the
 	// schema if it was provided by an annotation.
@@ -1381,8 +1401,18 @@ func (f Field) PK() *schema.Column {
 	}
 	// Override the default-value defined in the
 	// schema if it was provided by an annotation.
-	if ant := f.EntSQL(); ant != nil && ant.Default != "" {
+	switch ant := f.EntSQL(); {
+	case ant == nil:
+	case ant.Default != "":
 		c.Default = ant.Default
+	case ant.DefaultExpr != "":
+		c.Default = schema.Expr(ant.DefaultExpr)
+	case ant.DefaultExprs != nil:
+		x := make(map[string]schema.Expr)
+		for k, v := range ant.DefaultExprs {
+			x[k] = schema.Expr(v)
+		}
+		c.Default = x
 	}
 	if f.def != nil {
 		c.SchemaType = f.def.SchemaType
@@ -1711,7 +1741,7 @@ func (e Edge) Field() *Field {
 
 // Comment returns the comment of the edge.
 func (e Edge) Comment() string {
-	if e.def.Comment != "" {
+	if e.def != nil {
 		return e.def.Comment
 	}
 	return ""

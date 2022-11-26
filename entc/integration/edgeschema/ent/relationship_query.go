@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
 
@@ -353,6 +354,12 @@ func (rq *RelationshipQuery) prepareQuery(ctx context.Context) error {
 			return err
 		}
 		rq.sql = prev
+	}
+	if relationship.Policy == nil {
+		return errors.New("ent: uninitialized relationship.Policy (forgotten import ent/runtime?)")
+	}
+	if err := relationship.Policy.EvalQuery(ctx, rq); err != nil {
+		return err
 	}
 	return nil
 }

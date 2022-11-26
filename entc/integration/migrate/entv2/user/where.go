@@ -176,6 +176,20 @@ func Workplace(v string) predicate.User {
 	})
 }
 
+// DefaultExpr applies equality check predicate on the "default_expr" field. It's identical to DefaultExprEQ.
+func DefaultExpr(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDefaultExpr), v))
+	})
+}
+
+// DefaultExprs applies equality check predicate on the "default_exprs" field. It's identical to DefaultExprsEQ.
+func DefaultExprs(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDefaultExprs), v))
+	})
+}
+
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -1490,6 +1504,246 @@ func WorkplaceEqualFold(v string) predicate.User {
 func WorkplaceContainsFold(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldWorkplace), v))
+	})
+}
+
+// RolesIsNil applies the IsNil predicate on the "roles" field.
+func RolesIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldRoles)))
+	})
+}
+
+// RolesNotNil applies the NotNil predicate on the "roles" field.
+func RolesNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldRoles)))
+	})
+}
+
+// DefaultExprEQ applies the EQ predicate on the "default_expr" field.
+func DefaultExprEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDefaultExpr), v))
+	})
+}
+
+// DefaultExprNEQ applies the NEQ predicate on the "default_expr" field.
+func DefaultExprNEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldDefaultExpr), v))
+	})
+}
+
+// DefaultExprIn applies the In predicate on the "default_expr" field.
+func DefaultExprIn(vs ...string) predicate.User {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldDefaultExpr), v...))
+	})
+}
+
+// DefaultExprNotIn applies the NotIn predicate on the "default_expr" field.
+func DefaultExprNotIn(vs ...string) predicate.User {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldDefaultExpr), v...))
+	})
+}
+
+// DefaultExprGT applies the GT predicate on the "default_expr" field.
+func DefaultExprGT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldDefaultExpr), v))
+	})
+}
+
+// DefaultExprGTE applies the GTE predicate on the "default_expr" field.
+func DefaultExprGTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldDefaultExpr), v))
+	})
+}
+
+// DefaultExprLT applies the LT predicate on the "default_expr" field.
+func DefaultExprLT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldDefaultExpr), v))
+	})
+}
+
+// DefaultExprLTE applies the LTE predicate on the "default_expr" field.
+func DefaultExprLTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldDefaultExpr), v))
+	})
+}
+
+// DefaultExprContains applies the Contains predicate on the "default_expr" field.
+func DefaultExprContains(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldDefaultExpr), v))
+	})
+}
+
+// DefaultExprHasPrefix applies the HasPrefix predicate on the "default_expr" field.
+func DefaultExprHasPrefix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldDefaultExpr), v))
+	})
+}
+
+// DefaultExprHasSuffix applies the HasSuffix predicate on the "default_expr" field.
+func DefaultExprHasSuffix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldDefaultExpr), v))
+	})
+}
+
+// DefaultExprIsNil applies the IsNil predicate on the "default_expr" field.
+func DefaultExprIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldDefaultExpr)))
+	})
+}
+
+// DefaultExprNotNil applies the NotNil predicate on the "default_expr" field.
+func DefaultExprNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldDefaultExpr)))
+	})
+}
+
+// DefaultExprEqualFold applies the EqualFold predicate on the "default_expr" field.
+func DefaultExprEqualFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldDefaultExpr), v))
+	})
+}
+
+// DefaultExprContainsFold applies the ContainsFold predicate on the "default_expr" field.
+func DefaultExprContainsFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldDefaultExpr), v))
+	})
+}
+
+// DefaultExprsEQ applies the EQ predicate on the "default_exprs" field.
+func DefaultExprsEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDefaultExprs), v))
+	})
+}
+
+// DefaultExprsNEQ applies the NEQ predicate on the "default_exprs" field.
+func DefaultExprsNEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldDefaultExprs), v))
+	})
+}
+
+// DefaultExprsIn applies the In predicate on the "default_exprs" field.
+func DefaultExprsIn(vs ...string) predicate.User {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldDefaultExprs), v...))
+	})
+}
+
+// DefaultExprsNotIn applies the NotIn predicate on the "default_exprs" field.
+func DefaultExprsNotIn(vs ...string) predicate.User {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldDefaultExprs), v...))
+	})
+}
+
+// DefaultExprsGT applies the GT predicate on the "default_exprs" field.
+func DefaultExprsGT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldDefaultExprs), v))
+	})
+}
+
+// DefaultExprsGTE applies the GTE predicate on the "default_exprs" field.
+func DefaultExprsGTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldDefaultExprs), v))
+	})
+}
+
+// DefaultExprsLT applies the LT predicate on the "default_exprs" field.
+func DefaultExprsLT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldDefaultExprs), v))
+	})
+}
+
+// DefaultExprsLTE applies the LTE predicate on the "default_exprs" field.
+func DefaultExprsLTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldDefaultExprs), v))
+	})
+}
+
+// DefaultExprsContains applies the Contains predicate on the "default_exprs" field.
+func DefaultExprsContains(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldDefaultExprs), v))
+	})
+}
+
+// DefaultExprsHasPrefix applies the HasPrefix predicate on the "default_exprs" field.
+func DefaultExprsHasPrefix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldDefaultExprs), v))
+	})
+}
+
+// DefaultExprsHasSuffix applies the HasSuffix predicate on the "default_exprs" field.
+func DefaultExprsHasSuffix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldDefaultExprs), v))
+	})
+}
+
+// DefaultExprsIsNil applies the IsNil predicate on the "default_exprs" field.
+func DefaultExprsIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldDefaultExprs)))
+	})
+}
+
+// DefaultExprsNotNil applies the NotNil predicate on the "default_exprs" field.
+func DefaultExprsNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldDefaultExprs)))
+	})
+}
+
+// DefaultExprsEqualFold applies the EqualFold predicate on the "default_exprs" field.
+func DefaultExprsEqualFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldDefaultExprs), v))
+	})
+}
+
+// DefaultExprsContainsFold applies the ContainsFold predicate on the "default_exprs" field.
+func DefaultExprsContainsFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldDefaultExprs), v))
 	})
 }
 

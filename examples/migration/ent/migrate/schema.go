@@ -7,6 +7,7 @@
 package migrate
 
 import (
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/schema/field"
 )
@@ -15,6 +16,8 @@ var (
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "age", Type: field.TypeFloat64},
+		{Name: "name", Type: field.TypeString},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -29,4 +32,10 @@ var (
 )
 
 func init() {
+	UsersTable.Annotation = &entsql.Annotation{
+		Check: "age > 0",
+	}
+	UsersTable.Annotation.Checks = map[string]string{
+		"name_not_empty": "name <> ''",
+	}
 }

@@ -213,7 +213,7 @@ func (c *{{ $client }}) Delete() *{{ $n.DeleteName }} {
 		return c.DeleteOneID({{ $rec }}.ID)
 	}
 
-	// DeleteOne returns a builder for deleting the given entity by its id.
+	// DeleteOneID returns a builder for deleting the given entity by its id.
 	func (c *{{ $client }}) DeleteOneID(id {{ $n.ID.Type }}) *{{ $n.DeleteOneName }} {
 		builder := c.Delete().Where({{ $n.Package }}.ID(id))
 		builder.mutation.id = &id

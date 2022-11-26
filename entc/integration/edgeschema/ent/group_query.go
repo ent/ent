@@ -15,7 +15,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
+	"entgo.io/ent/entc/integration/edgeschema/ent/grouptag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
 	"entgo.io/ent/schema/field"
@@ -31,7 +33,9 @@ type GroupQuery struct {
 	fields          []string
 	predicates      []predicate.Group
 	withUsers       *UserQuery
+	withTags        *TagQuery
 	withJoinedUsers *UserGroupQuery
+	withGroupTags   *GroupTagQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -90,6 +94,28 @@ func (gq *GroupQuery) QueryUsers() *UserQuery {
 	return query
 }
 
+// QueryTags chains the current query on the "tags" edge.
+func (gq *GroupQuery) QueryTags() *TagQuery {
+	query := &TagQuery{config: gq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := gq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, selector),
+			sqlgraph.To(tag.Table, tag.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, group.TagsTable, group.TagsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // QueryJoinedUsers chains the current query on the "joined_users" edge.
 func (gq *GroupQuery) QueryJoinedUsers() *UserGroupQuery {
 	query := &UserGroupQuery{config: gq.config}
@@ -105,6 +131,28 @@ func (gq *GroupQuery) QueryJoinedUsers() *UserGroupQuery {
 			sqlgraph.From(group.Table, group.FieldID, selector),
 			sqlgraph.To(usergroup.Table, usergroup.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, group.JoinedUsersTable, group.JoinedUsersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryGroupTags chains the current query on the "group_tags" edge.
+func (gq *GroupQuery) QueryGroupTags() *GroupTagQuery {
+	query := &GroupTagQuery{config: gq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := gq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, selector),
+			sqlgraph.To(grouptag.Table, grouptag.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, group.GroupTagsTable, group.GroupTagsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 		return fromU, nil
@@ -294,7 +342,9 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		order:           append([]OrderFunc{}, gq.order...),
 		predicates:      append([]predicate.Group{}, gq.predicates...),
 		withUsers:       gq.withUsers.Clone(),
+		withTags:        gq.withTags.Clone(),
 		withJoinedUsers: gq.withJoinedUsers.Clone(),
+		withGroupTags:   gq.withGroupTags.Clone(),
 		// clone intermediate query.
 		sql:    gq.sql.Clone(),
 		path:   gq.path,
@@ -313,6 +363,17 @@ func (gq *GroupQuery) WithUsers(opts ...func(*UserQuery)) *GroupQuery {
 	return gq
 }
 
+// WithTags tells the query-builder to eager-load the nodes that are connected to
+// the "tags" edge. The optional arguments are used to configure the query builder of the edge.
+func (gq *GroupQuery) WithTags(opts ...func(*TagQuery)) *GroupQuery {
+	query := &TagQuery{config: gq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	gq.withTags = query
+	return gq
+}
+
 // WithJoinedUsers tells the query-builder to eager-load the nodes that are connected to
 // the "joined_users" edge. The optional arguments are used to configure the query builder of the edge.
 func (gq *GroupQuery) WithJoinedUsers(opts ...func(*UserGroupQuery)) *GroupQuery {
@@ -321,6 +382,17 @@ func (gq *GroupQuery) WithJoinedUsers(opts ...func(*UserGroupQuery)) *GroupQuery
 		opt(query)
 	}
 	gq.withJoinedUsers = query
+	return gq
+}
+
+// WithGroupTags tells the query-builder to eager-load the nodes that are connected to
+// the "group_tags" edge. The optional arguments are used to configure the query builder of the edge.
+func (gq *GroupQuery) WithGroupTags(opts ...func(*GroupTagQuery)) *GroupQuery {
+	query := &GroupTagQuery{config: gq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	gq.withGroupTags = query
 	return gq
 }
 
@@ -397,9 +469,11 @@ func (gq *GroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Group,
 	var (
 		nodes       = []*Group{}
 		_spec       = gq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [4]bool{
 			gq.withUsers != nil,
+			gq.withTags != nil,
 			gq.withJoinedUsers != nil,
+			gq.withGroupTags != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -427,10 +501,24 @@ func (gq *GroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Group,
 			return nil, err
 		}
 	}
+	if query := gq.withTags; query != nil {
+		if err := gq.loadTags(ctx, query, nodes,
+			func(n *Group) { n.Edges.Tags = []*Tag{} },
+			func(n *Group, e *Tag) { n.Edges.Tags = append(n.Edges.Tags, e) }); err != nil {
+			return nil, err
+		}
+	}
 	if query := gq.withJoinedUsers; query != nil {
 		if err := gq.loadJoinedUsers(ctx, query, nodes,
 			func(n *Group) { n.Edges.JoinedUsers = []*UserGroup{} },
 			func(n *Group, e *UserGroup) { n.Edges.JoinedUsers = append(n.Edges.JoinedUsers, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := gq.withGroupTags; query != nil {
+		if err := gq.loadGroupTags(ctx, query, nodes,
+			func(n *Group) { n.Edges.GroupTags = []*GroupTag{} },
+			func(n *Group, e *GroupTag) { n.Edges.GroupTags = append(n.Edges.GroupTags, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -495,6 +583,64 @@ func (gq *GroupQuery) loadUsers(ctx context.Context, query *UserQuery, nodes []*
 	}
 	return nil
 }
+func (gq *GroupQuery) loadTags(ctx context.Context, query *TagQuery, nodes []*Group, init func(*Group), assign func(*Group, *Tag)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Group)
+	nids := make(map[int]map[*Group]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(group.TagsTable)
+		s.Join(joinT).On(s.C(tag.FieldID), joinT.C(group.TagsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(group.TagsPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(group.TagsPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+		assign := spec.Assign
+		values := spec.ScanValues
+		spec.ScanValues = func(columns []string) ([]any, error) {
+			values, err := values(columns[1:])
+			if err != nil {
+				return nil, err
+			}
+			return append([]any{new(sql.NullInt64)}, values...), nil
+		}
+		spec.Assign = func(columns []string, values []any) error {
+			outValue := int(values[0].(*sql.NullInt64).Int64)
+			inValue := int(values[1].(*sql.NullInt64).Int64)
+			if nids[inValue] == nil {
+				nids[inValue] = map[*Group]struct{}{byID[outValue]: {}}
+				return assign(columns[1:], values[1:])
+			}
+			nids[inValue][byID[outValue]] = struct{}{}
+			return nil
+		}
+	})
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "tags" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
 func (gq *GroupQuery) loadJoinedUsers(ctx context.Context, query *UserGroupQuery, nodes []*Group, init func(*Group), assign func(*Group, *UserGroup)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Group)
@@ -507,6 +653,33 @@ func (gq *GroupQuery) loadJoinedUsers(ctx context.Context, query *UserGroupQuery
 	}
 	query.Where(predicate.UserGroup(func(s *sql.Selector) {
 		s.Where(sql.InValues(group.JoinedUsersColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.GroupID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "group_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (gq *GroupQuery) loadGroupTags(ctx context.Context, query *GroupTagQuery, nodes []*Group, init func(*Group), assign func(*Group, *GroupTag)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Group)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.Where(predicate.GroupTag(func(s *sql.Selector) {
+		s.Where(sql.InValues(group.GroupTagsColumn, fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

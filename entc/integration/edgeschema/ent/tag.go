@@ -30,11 +30,15 @@ type Tag struct {
 type TagEdges struct {
 	// Tweets holds the value of the tweets edge.
 	Tweets []*Tweet `json:"tweets,omitempty"`
+	// Groups holds the value of the groups edge.
+	Groups []*Group `json:"groups,omitempty"`
 	// TweetTags holds the value of the tweet_tags edge.
 	TweetTags []*TweetTag `json:"tweet_tags,omitempty"`
+	// GroupTags holds the value of the group_tags edge.
+	GroupTags []*GroupTag `json:"group_tags,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [4]bool
 }
 
 // TweetsOrErr returns the Tweets value or an error if the edge
@@ -46,13 +50,31 @@ func (e TagEdges) TweetsOrErr() ([]*Tweet, error) {
 	return nil, &NotLoadedError{edge: "tweets"}
 }
 
+// GroupsOrErr returns the Groups value or an error if the edge
+// was not loaded in eager-loading.
+func (e TagEdges) GroupsOrErr() ([]*Group, error) {
+	if e.loadedTypes[1] {
+		return e.Groups, nil
+	}
+	return nil, &NotLoadedError{edge: "groups"}
+}
+
 // TweetTagsOrErr returns the TweetTags value or an error if the edge
 // was not loaded in eager-loading.
 func (e TagEdges) TweetTagsOrErr() ([]*TweetTag, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		return e.TweetTags, nil
 	}
 	return nil, &NotLoadedError{edge: "tweet_tags"}
+}
+
+// GroupTagsOrErr returns the GroupTags value or an error if the edge
+// was not loaded in eager-loading.
+func (e TagEdges) GroupTagsOrErr() ([]*GroupTag, error) {
+	if e.loadedTypes[3] {
+		return e.GroupTags, nil
+	}
+	return nil, &NotLoadedError{edge: "group_tags"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -101,9 +123,19 @@ func (t *Tag) QueryTweets() *TweetQuery {
 	return (&TagClient{config: t.config}).QueryTweets(t)
 }
 
+// QueryGroups queries the "groups" edge of the Tag entity.
+func (t *Tag) QueryGroups() *GroupQuery {
+	return (&TagClient{config: t.config}).QueryGroups(t)
+}
+
 // QueryTweetTags queries the "tweet_tags" edge of the Tag entity.
 func (t *Tag) QueryTweetTags() *TweetTagQuery {
 	return (&TagClient{config: t.config}).QueryTweetTags(t)
+}
+
+// QueryGroupTags queries the "group_tags" edge of the Tag entity.
+func (t *Tag) QueryGroupTags() *GroupTagQuery {
+	return (&TagClient{config: t.config}).QueryGroupTags(t)
 }
 
 // Update returns a builder for updating this Tag.

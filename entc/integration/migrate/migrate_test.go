@@ -32,6 +32,7 @@ import (
 	migratev2 "entgo.io/ent/entc/integration/migrate/entv2/migrate"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
+	"entgo.io/ent/entc/integration/migrate/entv2/zoo"
 	"entgo.io/ent/entc/integration/migrate/versioned"
 	vmigrate "entgo.io/ent/entc/integration/migrate/versioned/migrate"
 
@@ -66,9 +67,11 @@ func TestMySQL(t *testing.T) {
 			V1ToV2(t, drv.Dialect(), clientv1, clientv2)
 			if version == "8" {
 				CheckConstraint(t, clientv2)
+				DefaultExpr(t, drv, "SELECT column_default FROM information_schema.columns WHERE table_schema = 'migrate' AND table_name = 'users' AND column_name = ?", "lower(_utf8mb4\\'hello\\')", "to_base64(_utf8mb4\\'ent\\')")
+				PKDefault(t, drv, "SELECT column_default FROM information_schema.columns WHERE table_schema = 'migrate' AND table_name = 'zoos' AND column_name = ?", "floor((rand() * ~((1 << 31))))")
 			}
 			NicknameSearch(t, clientv2)
-			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_name = ? AND column_name = ?")
+			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_schema = 'migrate' AND table_name = ? AND column_name = ?")
 
 			require.NoError(t, err, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []any{}, new(sql.Result)))
 			require.NoError(t, root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS versioned_migrate", []any{}, new(sql.Result)))
@@ -79,10 +82,9 @@ func TestMySQL(t *testing.T) {
 			vdrv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/versioned_migrate?parseTime=True", port))
 			require.NoError(t, err, "connecting to versioned migrate database")
 			defer vdrv.Close()
-			Versioned(t, vdrv,
-				fmt.Sprintf("mysql://root:pass@localhost:%d/versioned_migrate_dev?parseTime=True", port),
-				versioned.NewClient(versioned.Driver(vdrv)),
-			)
+			devURL := fmt.Sprintf("mysql://root:pass@localhost:%d/versioned_migrate_dev?parseTime=True", port)
+			Versioned(t, vdrv, devURL, versioned.NewClient(versioned.Driver(vdrv)))
+			ConsistentVersioned(t, devURL)
 		})
 	}
 }
@@ -95,17 +97,17 @@ func TestPostgres(t *testing.T) {
 			require.NoError(t, err)
 			defer root.Close()
 			ctx := context.Background()
-			err = root.Exec(ctx, "DROP DATABASE IF EXISTS migrate", []any{}, new(sql.Result))
+			err = root.Exec(ctx, "DROP DATABASE IF EXISTS migrate", []any{}, nil)
 			require.NoError(t, err)
-			err = root.Exec(ctx, "CREATE DATABASE migrate", []any{}, new(sql.Result))
+			err = root.Exec(ctx, "CREATE DATABASE migrate", []any{}, nil)
 			require.NoError(t, err, "creating database")
-			defer root.Exec(ctx, "DROP DATABASE migrate", []any{}, new(sql.Result))
+			defer root.Exec(ctx, "DROP DATABASE migrate", []any{}, nil)
 
 			drv, err := sql.Open(dialect.Postgres, dsn+" dbname=migrate")
 			require.NoError(t, err, "connecting to migrate database")
 			defer drv.Close()
 
-			err = drv.Exec(ctx, "CREATE TYPE customtype as range (subtype = time)", []any{}, new(sql.Result))
+			err = drv.Exec(ctx, "CREATE TYPE customtype as range (subtype = time)", []any{}, nil)
 			require.NoError(t, err, "creating custom type")
 
 			clientv1 := entv1.NewClient(entv1.Driver(drv))
@@ -133,6 +135,10 @@ func TestPostgres(t *testing.T) {
 			CheckConstraint(t, clientv2)
 			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_name = $1 AND column_name = $2")
 			PartialIndexes(t, drv, "select indexdef from pg_indexes where indexname=$1", "CREATE INDEX user_phone ON public.users USING btree (phone) WHERE active")
+			JSONDefault(t, drv, `SELECT column_default FROM information_schema.columns WHERE table_name = 'users' AND column_name = $1`)
+			DefaultExpr(t, drv, `SELECT column_default FROM information_schema.columns WHERE table_name = 'users' AND column_name = $1`, "lower('hello'::text)", "md5('ent'::text)")
+			PKDefault(t, drv, `SELECT column_default FROM information_schema.columns WHERE table_name = 'zoos' AND column_name = $1`, "floor((random() * ((~ (1 << 31)))::double precision))")
+			IndexOpClass(t, drv)
 			if version != "10" {
 				IncludeColumns(t, drv)
 			}
@@ -140,16 +146,21 @@ func TestPostgres(t *testing.T) {
 			vdrv, err := sql.Open(dialect.Postgres, dsn+" dbname=versioned_migrate")
 			require.NoError(t, err, "connecting to versioned migrate database")
 			defer vdrv.Close()
-			require.NoError(t, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []any{}, new(sql.Result)))
+			require.NoError(t, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []any{}, nil))
 			require.NoError(t, root.Exec(ctx, "CREATE DATABASE versioned_migrate", []any{}, new(sql.Result)))
 			defer root.Exec(ctx, "DROP DATABASE versioned_migrate", []any{}, new(sql.Result))
-			require.NoError(t, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate_dev", []any{}, new(sql.Result)))
+			require.NoError(t, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate_dev", []any{}, nil))
 			require.NoError(t, root.Exec(ctx, "CREATE DATABASE versioned_migrate_dev", []any{}, new(sql.Result)))
 			defer root.Exec(ctx, "DROP DATABASE versioned_migrate_dev", []any{}, new(sql.Result))
-			Versioned(t, vdrv,
-				fmt.Sprintf("postgres://postgres:pass@localhost:%d/versioned_migrate_dev?sslmode=disable&search_path=public", port),
-				versioned.NewClient(versioned.Driver(vdrv)),
-			)
+			devURL := fmt.Sprintf("postgres://postgres:pass@localhost:%d/versioned_migrate_dev?sslmode=disable&search_path=public", port)
+			Versioned(t, vdrv, devURL, versioned.NewClient(versioned.Driver(vdrv)))
+			// Create the necessary custom types for the versioned schema.
+			dev, err := sql.Open(dialect.Postgres, dsn+" dbname=versioned_migrate_dev")
+			require.NoError(t, err, "connecting to versioned_migrate_dev database")
+			defer dev.Close()
+			err = dev.Exec(ctx, "CREATE TYPE customtype as range (subtype = time)", []any{}, nil)
+			require.NoError(t, err, "creating custom type on dev database")
+			ConsistentVersioned(t, devURL)
 		})
 	}
 }
@@ -158,7 +169,6 @@ func TestSQLite(t *testing.T) {
 	drv, err := sql.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	require.NoError(t, err)
 	defer drv.Close()
-
 	ctx := context.Background()
 	client := entv2.NewClient(entv2.Driver(drv))
 	require.NoError(
@@ -210,6 +220,9 @@ func TestSQLite(t *testing.T) {
 	idRange(t, client.Pet.Create().SaveX(ctx).ID, 6<<32-1, 7<<32)
 	idRange(t, u.ID, 7<<32-1, 8<<32)
 	PartialIndexes(t, drv, "select sql from sqlite_master where name=?", "CREATE INDEX `user_phone` ON `users` (`phone`) WHERE active")
+	JSONDefault(t, drv, "SELECT `dflt_value` FROM `pragma_table_info`('users') WHERE `name` = ?")
+	DefaultExpr(t, drv, "SELECT `dflt_value` FROM `pragma_table_info`('users') WHERE `name` = ?", "lower('hello')", "hex('ent')")
+	PKDefault(t, drv, "SELECT `dflt_value` FROM `pragma_table_info`('zoos') WHERE `name` = ?", "abs(random())")
 
 	// Override the default behavior of LIKE in SQLite.
 	// https://www.sqlite.org/pragma.html#pragma_case_sensitive_like
@@ -298,6 +311,32 @@ func TestStorageKey(t *testing.T) {
 	require.Equal(t, "user_pet_id", migratev2.PetsTable.ForeignKeys[0].Symbol)
 	require.Equal(t, "user_friend_id1", migratev2.FriendsTable.ForeignKeys[0].Symbol)
 	require.Equal(t, "user_friend_id2", migratev2.FriendsTable.ForeignKeys[1].Symbol)
+}
+
+func ConsistentVersioned(t *testing.T, devURL string) {
+	p := t.TempDir()
+	ctx := context.Background()
+	dir, err := migrate.NewLocalDir(p)
+	require.NoError(t, err)
+	opts := []schema.MigrateOption{
+		schema.WithDir(dir),                                 // provide migration directory
+		schema.WithMigrationMode(schema.ModeReplay),         // provide migration mode
+		schema.WithDialect(strings.Split(devURL, "://")[0]), // Ent dialect to use
+		schema.WithFormatter(migrate.DefaultFormatter),      // Default Atlas formatter
+	}
+	// Run diff should generate a single SQL file containing the diff.
+	err = migratev2.NamedDiff(ctx, devURL, "first", opts...)
+	require.NoError(t, err)
+	files, err := dir.Files()
+	require.NoError(t, err)
+	require.Len(t, files, 1)
+	require.NotEmpty(t, files[0].Bytes())
+	// Re-run diff should not generate any new files.
+	err = migratev2.NamedDiff(ctx, devURL, "second", opts...)
+	require.NoError(t, err)
+	files, err = dir.Files()
+	require.NoError(t, err)
+	require.Len(t, files, 1)
 }
 
 func Versioned(t *testing.T, drv sql.ExecQuerier, devURL string, client *versioned.Client) {
@@ -660,6 +699,42 @@ func TimePrecision(t *testing.T, drv *sql.Driver, query string) {
 	require.NoError(t, rows.Close())
 }
 
+func JSONDefault(t *testing.T, drv *sql.Driver, query string) {
+	ctx := context.Background()
+	rows, err := drv.QueryContext(ctx, query, user.FieldRoles)
+	require.NoError(t, err)
+	s, err := sql.ScanString(rows)
+	require.NoError(t, err)
+	require.NoError(t, rows.Close())
+	require.NotEmpty(t, s)
+}
+
+func DefaultExpr(t *testing.T, drv *sql.Driver, query string, expected1, expected2 string) {
+	ctx := context.Background()
+	rows, err := drv.QueryContext(ctx, query, user.FieldDefaultExpr)
+	require.NoError(t, err)
+	s, err := sql.ScanString(rows)
+	require.NoError(t, err)
+	require.NoError(t, rows.Close())
+	require.Equal(t, expected1, s)
+	rows, err = drv.QueryContext(ctx, query, user.FieldDefaultExprs)
+	require.NoError(t, err)
+	s, err = sql.ScanString(rows)
+	require.NoError(t, err)
+	require.NoError(t, rows.Close())
+	require.Equal(t, expected2, s)
+}
+
+func PKDefault(t *testing.T, drv *sql.Driver, query string, expected string) {
+	ctx := context.Background()
+	rows, err := drv.QueryContext(ctx, query, zoo.FieldID)
+	require.NoError(t, err)
+	s, err := sql.ScanString(rows)
+	require.NoError(t, err)
+	require.NoError(t, rows.Close())
+	require.Equal(t, expected, s)
+}
+
 func IncludeColumns(t *testing.T, drv *sql.Driver) {
 	rows, err := drv.QueryContext(context.Background(), "select indexdef from pg_indexes where indexname='user_workplace'")
 	require.NoError(t, err)
@@ -667,6 +742,15 @@ func IncludeColumns(t *testing.T, drv *sql.Driver) {
 	require.NoError(t, err)
 	require.NoError(t, rows.Close())
 	require.Equal(t, d, "CREATE INDEX user_workplace ON public.users USING btree (workplace) INCLUDE (nickname)")
+}
+
+func IndexOpClass(t *testing.T, drv *sql.Driver) {
+	rows, err := drv.QueryContext(context.Background(), "select indexdef from pg_indexes where indexname='user_age_phone'")
+	require.NoError(t, err)
+	d, err := sql.ScanString(rows)
+	require.NoError(t, err)
+	require.NoError(t, rows.Close())
+	require.Equal(t, d, "CREATE INDEX user_age_phone ON public.users USING btree (age, phone bpchar_pattern_ops)")
 }
 
 func PartialIndexes(t *testing.T, drv *sql.Driver, query, def string) {

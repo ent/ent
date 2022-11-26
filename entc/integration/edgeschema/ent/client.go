@@ -17,6 +17,7 @@ import (
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/friendship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
+	"entgo.io/ent/entc/integration/edgeschema/ent/grouptag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
 	"entgo.io/ent/entc/integration/edgeschema/ent/role"
@@ -43,6 +44,8 @@ type Client struct {
 	Friendship *FriendshipClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
+	// GroupTag is the client for interacting with the GroupTag builders.
+	GroupTag *GroupTagClient
 	// Relationship is the client for interacting with the Relationship builders.
 	Relationship *RelationshipClient
 	// RelationshipInfo is the client for interacting with the RelationshipInfo builders.
@@ -80,6 +83,7 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Friendship = NewFriendshipClient(c.config)
 	c.Group = NewGroupClient(c.config)
+	c.GroupTag = NewGroupTagClient(c.config)
 	c.Relationship = NewRelationshipClient(c.config)
 	c.RelationshipInfo = NewRelationshipInfoClient(c.config)
 	c.Role = NewRoleClient(c.config)
@@ -126,6 +130,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:           cfg,
 		Friendship:       NewFriendshipClient(cfg),
 		Group:            NewGroupClient(cfg),
+		GroupTag:         NewGroupTagClient(cfg),
 		Relationship:     NewRelationshipClient(cfg),
 		RelationshipInfo: NewRelationshipInfoClient(cfg),
 		Role:             NewRoleClient(cfg),
@@ -158,6 +163,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:           cfg,
 		Friendship:       NewFriendshipClient(cfg),
 		Group:            NewGroupClient(cfg),
+		GroupTag:         NewGroupTagClient(cfg),
 		Relationship:     NewRelationshipClient(cfg),
 		RelationshipInfo: NewRelationshipInfoClient(cfg),
 		Role:             NewRoleClient(cfg),
@@ -199,6 +205,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	c.Friendship.Use(hooks...)
 	c.Group.Use(hooks...)
+	c.GroupTag.Use(hooks...)
 	c.Relationship.Use(hooks...)
 	c.RelationshipInfo.Use(hooks...)
 	c.Role.Use(hooks...)
@@ -268,7 +275,7 @@ func (c *FriendshipClient) DeleteOne(f *Friendship) *FriendshipDeleteOne {
 	return c.DeleteOneID(f.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *FriendshipClient) DeleteOneID(id int) *FriendshipDeleteOne {
 	builder := c.Delete().Where(friendship.ID(id))
 	builder.mutation.id = &id
@@ -390,7 +397,7 @@ func (c *GroupClient) DeleteOne(gr *Group) *GroupDeleteOne {
 	return c.DeleteOneID(gr.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
 	builder := c.Delete().Where(group.ID(id))
 	builder.mutation.id = &id
@@ -435,6 +442,22 @@ func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 	return query
 }
 
+// QueryTags queries the tags edge of a Group.
+func (c *GroupClient) QueryTags(gr *Group) *TagQuery {
+	query := &TagQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := gr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, id),
+			sqlgraph.To(tag.Table, tag.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, group.TagsTable, group.TagsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(gr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryJoinedUsers queries the joined_users edge of a Group.
 func (c *GroupClient) QueryJoinedUsers(gr *Group) *UserGroupQuery {
 	query := &UserGroupQuery{config: c.config}
@@ -451,9 +474,147 @@ func (c *GroupClient) QueryJoinedUsers(gr *Group) *UserGroupQuery {
 	return query
 }
 
+// QueryGroupTags queries the group_tags edge of a Group.
+func (c *GroupClient) QueryGroupTags(gr *Group) *GroupTagQuery {
+	query := &GroupTagQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := gr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, id),
+			sqlgraph.To(grouptag.Table, grouptag.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, group.GroupTagsTable, group.GroupTagsColumn),
+		)
+		fromV = sqlgraph.Neighbors(gr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *GroupClient) Hooks() []Hook {
 	return c.hooks.Group
+}
+
+// GroupTagClient is a client for the GroupTag schema.
+type GroupTagClient struct {
+	config
+}
+
+// NewGroupTagClient returns a client for the GroupTag from the given config.
+func NewGroupTagClient(c config) *GroupTagClient {
+	return &GroupTagClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `grouptag.Hooks(f(g(h())))`.
+func (c *GroupTagClient) Use(hooks ...Hook) {
+	c.hooks.GroupTag = append(c.hooks.GroupTag, hooks...)
+}
+
+// Create returns a builder for creating a GroupTag entity.
+func (c *GroupTagClient) Create() *GroupTagCreate {
+	mutation := newGroupTagMutation(c.config, OpCreate)
+	return &GroupTagCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of GroupTag entities.
+func (c *GroupTagClient) CreateBulk(builders ...*GroupTagCreate) *GroupTagCreateBulk {
+	return &GroupTagCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for GroupTag.
+func (c *GroupTagClient) Update() *GroupTagUpdate {
+	mutation := newGroupTagMutation(c.config, OpUpdate)
+	return &GroupTagUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *GroupTagClient) UpdateOne(gt *GroupTag) *GroupTagUpdateOne {
+	mutation := newGroupTagMutation(c.config, OpUpdateOne, withGroupTag(gt))
+	return &GroupTagUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *GroupTagClient) UpdateOneID(id int) *GroupTagUpdateOne {
+	mutation := newGroupTagMutation(c.config, OpUpdateOne, withGroupTagID(id))
+	return &GroupTagUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for GroupTag.
+func (c *GroupTagClient) Delete() *GroupTagDelete {
+	mutation := newGroupTagMutation(c.config, OpDelete)
+	return &GroupTagDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *GroupTagClient) DeleteOne(gt *GroupTag) *GroupTagDeleteOne {
+	return c.DeleteOneID(gt.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *GroupTagClient) DeleteOneID(id int) *GroupTagDeleteOne {
+	builder := c.Delete().Where(grouptag.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &GroupTagDeleteOne{builder}
+}
+
+// Query returns a query builder for GroupTag.
+func (c *GroupTagClient) Query() *GroupTagQuery {
+	return &GroupTagQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a GroupTag entity by its id.
+func (c *GroupTagClient) Get(ctx context.Context, id int) (*GroupTag, error) {
+	return c.Query().Where(grouptag.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *GroupTagClient) GetX(ctx context.Context, id int) *GroupTag {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTag queries the tag edge of a GroupTag.
+func (c *GroupTagClient) QueryTag(gt *GroupTag) *TagQuery {
+	query := &TagQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := gt.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(grouptag.Table, grouptag.FieldID, id),
+			sqlgraph.To(tag.Table, tag.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, grouptag.TagTable, grouptag.TagColumn),
+		)
+		fromV = sqlgraph.Neighbors(gt.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryGroup queries the group edge of a GroupTag.
+func (c *GroupTagClient) QueryGroup(gt *GroupTag) *GroupQuery {
+	query := &GroupQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := gt.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(grouptag.Table, grouptag.FieldID, id),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, grouptag.GroupTable, grouptag.GroupColumn),
+		)
+		fromV = sqlgraph.Neighbors(gt.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *GroupTagClient) Hooks() []Hook {
+	return c.hooks.GroupTag
 }
 
 // RelationshipClient is a client for the Relationship schema.
@@ -533,7 +694,8 @@ func (c *RelationshipClient) QueryInfo(r *Relationship) *RelationshipInfoQuery {
 
 // Hooks returns the client hooks.
 func (c *RelationshipClient) Hooks() []Hook {
-	return c.hooks.Relationship
+	hooks := c.hooks.Relationship
+	return append(hooks[:len(hooks):len(hooks)], relationship.Hooks[:]...)
 }
 
 // RelationshipInfoClient is a client for the RelationshipInfo schema.
@@ -592,7 +754,7 @@ func (c *RelationshipInfoClient) DeleteOne(ri *RelationshipInfo) *RelationshipIn
 	return c.DeleteOneID(ri.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *RelationshipInfoClient) DeleteOneID(id int) *RelationshipInfoDeleteOne {
 	builder := c.Delete().Where(relationshipinfo.ID(id))
 	builder.mutation.id = &id
@@ -682,7 +844,7 @@ func (c *RoleClient) DeleteOne(r *Role) *RoleDeleteOne {
 	return c.DeleteOneID(r.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *RoleClient) DeleteOneID(id int) *RoleDeleteOne {
 	builder := c.Delete().Where(role.ID(id))
 	builder.mutation.id = &id
@@ -877,7 +1039,7 @@ func (c *TagClient) DeleteOne(t *Tag) *TagDeleteOne {
 	return c.DeleteOneID(t.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *TagClient) DeleteOneID(id int) *TagDeleteOne {
 	builder := c.Delete().Where(tag.ID(id))
 	builder.mutation.id = &id
@@ -922,6 +1084,22 @@ func (c *TagClient) QueryTweets(t *Tag) *TweetQuery {
 	return query
 }
 
+// QueryGroups queries the groups edge of a Tag.
+func (c *TagClient) QueryGroups(t *Tag) *GroupQuery {
+	query := &GroupQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tag.Table, tag.FieldID, id),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, tag.GroupsTable, tag.GroupsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryTweetTags queries the tweet_tags edge of a Tag.
 func (c *TagClient) QueryTweetTags(t *Tag) *TweetTagQuery {
 	query := &TweetTagQuery{config: c.config}
@@ -931,6 +1109,22 @@ func (c *TagClient) QueryTweetTags(t *Tag) *TweetTagQuery {
 			sqlgraph.From(tag.Table, tag.FieldID, id),
 			sqlgraph.To(tweettag.Table, tweettag.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, tag.TweetTagsTable, tag.TweetTagsColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryGroupTags queries the group_tags edge of a Tag.
+func (c *TagClient) QueryGroupTags(t *Tag) *GroupTagQuery {
+	query := &GroupTagQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tag.Table, tag.FieldID, id),
+			sqlgraph.To(grouptag.Table, grouptag.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, tag.GroupTagsTable, tag.GroupTagsColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -999,7 +1193,7 @@ func (c *TweetClient) DeleteOne(t *Tweet) *TweetDeleteOne {
 	return c.DeleteOneID(t.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *TweetClient) DeleteOneID(id int) *TweetDeleteOne {
 	builder := c.Delete().Where(tweet.ID(id))
 	builder.mutation.id = &id
@@ -1259,7 +1453,7 @@ func (c *TweetTagClient) DeleteOne(tt *TweetTag) *TweetTagDeleteOne {
 	return c.DeleteOneID(tt.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *TweetTagClient) DeleteOneID(id uuid.UUID) *TweetTagDeleteOne {
 	builder := c.Delete().Where(tweettag.ID(id))
 	builder.mutation.id = &id
@@ -1381,7 +1575,7 @@ func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
 	return c.DeleteOneID(u.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id
@@ -1664,7 +1858,7 @@ func (c *UserGroupClient) DeleteOne(ug *UserGroup) *UserGroupDeleteOne {
 	return c.DeleteOneID(ug.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *UserGroupClient) DeleteOneID(id int) *UserGroupDeleteOne {
 	builder := c.Delete().Where(usergroup.ID(id))
 	builder.mutation.id = &id
@@ -1786,7 +1980,7 @@ func (c *UserTweetClient) DeleteOne(ut *UserTweet) *UserTweetDeleteOne {
 	return c.DeleteOneID(ut.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *UserTweetClient) DeleteOneID(id int) *UserTweetDeleteOne {
 	builder := c.Delete().Where(usertweet.ID(id))
 	builder.mutation.id = &id

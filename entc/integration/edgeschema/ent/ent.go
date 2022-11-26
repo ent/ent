@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/friendship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
+	"entgo.io/ent/entc/integration/edgeschema/ent/grouptag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
 	"entgo.io/ent/entc/integration/edgeschema/ent/role"
@@ -49,6 +50,7 @@ func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
 		friendship.Table:       friendship.ValidColumn,
 		group.Table:            group.ValidColumn,
+		grouptag.Table:         grouptag.ValidColumn,
 		relationship.Table:     relationship.ValidColumn,
 		relationshipinfo.Table: relationshipinfo.ValidColumn,
 		role.Table:             role.ValidColumn,
