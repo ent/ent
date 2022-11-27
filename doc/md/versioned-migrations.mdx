@@ -704,7 +704,7 @@ You have a checksum error in your migration directory.
 This happens if you manually create or edit a migration file.
 Please check your migration files and run
 
-'atlas migrate hash --force'
+'atlas migrate hash'
 
 to re-hash the contents and resolve the error.
 
@@ -716,7 +716,7 @@ file:
 
 ```shell
 # Recompute the sum file.
-atlas migrate hash --dir file://<path-to-your-migration-directory> --force
+atlas migrate hash --dir file://<path-to-your-migration-directory>
 ```
 
 Back to the problem above, if team A would land their changes on master first and team B would now attempt to land

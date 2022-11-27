@@ -18,6 +18,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "age", Type: field.TypeFloat64},
 		{Name: "name", Type: field.TypeString},
+		{Name: "tags", Type: field.TypeJSON, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

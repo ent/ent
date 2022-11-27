@@ -259,6 +259,20 @@ func NameContainsFold(v string) predicate.User {
 	})
 }
 
+// TagsIsNil applies the IsNil predicate on the "tags" field.
+func TagsIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldTags)))
+	})
+}
+
+// TagsNotNil applies the NotNil predicate on the "tags" field.
+func TagsNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldTags)))
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(func(s *sql.Selector) {

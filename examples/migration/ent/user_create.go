@@ -35,6 +35,12 @@ func (uc *UserCreate) SetName(s string) *UserCreate {
 	return uc
 }
 
+// SetTags sets the "tags" field.
+func (uc *UserCreate) SetTags(s []string) *UserCreate {
+	uc.mutation.SetTags(s)
+	return uc
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uc *UserCreate) Mutation() *UserMutation {
 	return uc.mutation
@@ -151,6 +157,10 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.Name(); ok {
 		_spec.SetField(user.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := uc.mutation.Tags(); ok {
+		_spec.SetField(user.FieldTags, field.TypeJSON, value)
+		_node.Tags = value
 	}
 	return _node, _spec
 }

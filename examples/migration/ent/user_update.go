@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/examples/migration/ent/predicate"
 	"entgo.io/ent/examples/migration/ent/user"
 	"entgo.io/ent/schema/field"
@@ -47,6 +48,24 @@ func (uu *UserUpdate) AddAge(f float64) *UserUpdate {
 // SetName sets the "name" field.
 func (uu *UserUpdate) SetName(s string) *UserUpdate {
 	uu.mutation.SetName(s)
+	return uu
+}
+
+// SetTags sets the "tags" field.
+func (uu *UserUpdate) SetTags(s []string) *UserUpdate {
+	uu.mutation.SetTags(s)
+	return uu
+}
+
+// AppendTags appends s to the "tags" field.
+func (uu *UserUpdate) AppendTags(s []string) *UserUpdate {
+	uu.mutation.AppendTags(s)
+	return uu
+}
+
+// ClearTags clears the value of the "tags" field.
+func (uu *UserUpdate) ClearTags() *UserUpdate {
+	uu.mutation.ClearTags()
 	return uu
 }
 
@@ -136,6 +155,17 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := uu.mutation.Name(); ok {
 		_spec.SetField(user.FieldName, field.TypeString, value)
 	}
+	if value, ok := uu.mutation.Tags(); ok {
+		_spec.SetField(user.FieldTags, field.TypeJSON, value)
+	}
+	if value, ok := uu.mutation.AppendedTags(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldTags, value)
+		})
+	}
+	if uu.mutation.TagsCleared() {
+		_spec.ClearField(user.FieldTags, field.TypeJSON)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -171,6 +201,24 @@ func (uuo *UserUpdateOne) AddAge(f float64) *UserUpdateOne {
 // SetName sets the "name" field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
 	uuo.mutation.SetName(s)
+	return uuo
+}
+
+// SetTags sets the "tags" field.
+func (uuo *UserUpdateOne) SetTags(s []string) *UserUpdateOne {
+	uuo.mutation.SetTags(s)
+	return uuo
+}
+
+// AppendTags appends s to the "tags" field.
+func (uuo *UserUpdateOne) AppendTags(s []string) *UserUpdateOne {
+	uuo.mutation.AppendTags(s)
+	return uuo
+}
+
+// ClearTags clears the value of the "tags" field.
+func (uuo *UserUpdateOne) ClearTags() *UserUpdateOne {
+	uuo.mutation.ClearTags()
 	return uuo
 }
 
@@ -289,6 +337,17 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if value, ok := uuo.mutation.Name(); ok {
 		_spec.SetField(user.FieldName, field.TypeString, value)
+	}
+	if value, ok := uuo.mutation.Tags(); ok {
+		_spec.SetField(user.FieldTags, field.TypeJSON, value)
+	}
+	if value, ok := uuo.mutation.AppendedTags(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldTags, value)
+		})
+	}
+	if uuo.mutation.TagsCleared() {
+		_spec.ClearField(user.FieldTags, field.TypeJSON)
 	}
 	_node = &User{config: uuo.config}
 	_spec.Assign = _node.assignValues
