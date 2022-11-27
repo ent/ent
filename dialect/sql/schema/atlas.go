@@ -979,6 +979,7 @@ func (a *Atlas) aIndexes(et *Table, at *schema.Table) error {
 		}
 		pk = append(pk, c2)
 	}
+	// CreateFunc might clear the primary keys.
 	if len(pk) > 0 {
 		at.SetPrimaryKey(schema.NewPrimaryKey(pk...))
 	}
