@@ -1716,34 +1716,96 @@ func TestSelector_SelectExpr(t *testing.T) {
 }
 
 func TestSelector_Union(t *testing.T) {
-	query, args := Dialect(dialect.Postgres).
-		Select("*").
-		From(Table("users")).
-		Where(EQ("active", true)).
-		Union(
-			Select("*").
-				From(Table("old_users1")).
-				Where(
-					And(
-						EQ("is_active", true),
-						GT("age", 20),
-					),
-				),
-		).
-		UnionAll(
-			Select("*").
-				From(Table("old_users2")).
-				Where(
-					And(
-						EQ("is_active", "true"),
-						LT("age", 18),
-					),
-				),
-		).
-		Query()
-	require.Equal(t, `SELECT * FROM "users" WHERE "active" UNION SELECT * FROM "old_users1" WHERE "is_active" AND "age" > $1 UNION ALL SELECT * FROM "old_users2" WHERE "is_active" = $2 AND "age" < $3`, query)
-	require.Equal(t, []any{20, "true", 18}, args)
+    query, args := Dialect(dialect.Postgres).
+        Select("*").
+        From(Table("users")).
+        Where(EQ("active", true)).
+        Union(
+            Select("*").
+                From(Table("old_users1")).
+                Where(
+                    And(
+                        EQ("is_active", true),
+                        GT("age", 20),
+                    ),
+                ),
+        ).
+        UnionAll(
+            Select("*").
+                From(Table("old_users2")).
+                Where(
+                    And(
+                        EQ("is_active", "true"),
+                        LT("age", 18),
+                    ),
+                ),
+        ).
+        Query()
+    require.Equal(t, `SELECT * FROM "users" WHERE "active" UNION SELECT * FROM "old_users1" WHERE "is_active" AND "age" > $1 UNION ALL SELECT * FROM "old_users2" WHERE "is_active" = $2 AND "age" < $3`, query)
+    require.Equal(t, []any{20, "true", 18}, args)
+}
 
+func TestSelector_Except(t *testing.T) {
+    query, args := Dialect(dialect.Postgres).
+        Select("*").
+        From(Table("users")).
+        Where(EQ("active", true)).
+        Except(
+            Select("*").
+                From(Table("old_users1")).
+                Where(
+                    And(
+                        EQ("is_active", true),
+                        GT("age", 20),
+                    ),
+                ),
+        ).
+        ExceptAll(
+            Select("*").
+                From(Table("old_users2")).
+                Where(
+                    And(
+                        EQ("is_active", "true"),
+                        LT("age", 18),
+                    ),
+                ),
+        ).
+        Query()
+    require.Equal(t, `SELECT * FROM "users" WHERE "active" EXCEPT SELECT * FROM "old_users1" WHERE "is_active" AND "age" > $1 EXCEPT ALL SELECT * FROM "old_users2" WHERE "is_active" = $2 AND "age" < $3`, query)
+    require.Equal(t, []any{20, "true", 18}, args)
+}
+
+func TestSelector_Intersect(t *testing.T) {
+    query, args := Dialect(dialect.Postgres).
+        Select("*").
+        From(Table("users")).
+        Where(EQ("active", true)).
+        Intersect(
+            Select("*").
+                From(Table("old_users1")).
+                Where(
+                    And(
+                        EQ("is_active", true),
+                        GT("age", 20),
+                    ),
+                ),
+        ).
+        IntersectAll(
+            Select("*").
+                From(Table("old_users2")).
+                Where(
+                    And(
+                        EQ("is_active", "true"),
+                        LT("age", 18),
+                    ),
+                ),
+        ).
+        Query()
+    require.Equal(t, `SELECT * FROM "users" WHERE "active" INTERSECT SELECT * FROM "old_users1" WHERE "is_active" AND "age" > $1 INTERSECT ALL SELECT * FROM "old_users2" WHERE "is_active" = $2 AND "age" < $3`, query)
+    require.Equal(t, []any{20, "true", 18}, args)
+}
+
+func TestSelector_SetOperatorWithRecursive(t *testing.T) {
 	t1, t2, t3 := Table("files"), Table("files"), Table("path")
 	n := Queries{
 		WithRecursive("path", "id", "name", "parent_id").
@@ -1768,7 +1830,7 @@ func TestSelector_Union(t *testing.T) {
 		Select(t3.Columns("id", "name", "parent_id")...).
 			From(t3),
 	}
-	query, args = n.Query()
+	query, args := n.Query()
 	require.Equal(t, "WITH RECURSIVE `path`(`id`, `name`, `parent_id`) AS (SELECT `files`.`id`, `files`.`name`, `files`.`parent_id` FROM `files` WHERE `files`.`parent_id` IS NULL AND NOT `files`.`deleted` UNION ALL SELECT `files`.`id`, `files`.`name`, `files`.`parent_id` FROM `files` JOIN `path` AS `t1` ON `files`.`parent_id` = `t1`.`id` WHERE NOT `files`.`deleted`) SELECT `t1`.`id`, `t1`.`name`, `t1`.`parent_id` FROM `path` AS `t1`", query)
 	require.Nil(t, args)
 }
