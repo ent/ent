@@ -280,6 +280,9 @@ func (d *MySQL) cType(c *Column) (t string) {
 		t = fmt.Sprintf("enum(%s)", strings.Join(values, ", "))
 	case field.TypeUUID:
 		t = "char(36) binary"
+		if d.supportsUUID() {
+			t = "uuid"
+		}
 	case field.TypeOther:
 		t = c.typ
 	default:
@@ -828,6 +831,11 @@ func (d *MySQL) supportsDefault(c *Column) bool {
 	}
 }
 
+func (d *MySQL) supportsUUID() bool {
+	_, maria := d.mariadb()
+	return maria && compareVersions(d.version, "10.7.0") >= 0
+}
+
 func (d *MySQL) atTypeC(c1 *Column, c2 *schema.Column) error {
 	if c1.SchemaType != nil && c1.SchemaType[dialect.MySQL] != "" {
 		t, err := mysql.ParseType(strings.ToLower(c1.SchemaType[dialect.MySQL]))
@@ -905,10 +913,15 @@ func (d *MySQL) atTypeC(c1 *Column, c2 *schema.Column) error {
 	case field.TypeEnum:
 		t = &schema.EnumType{T: mysql.TypeEnum, Values: c1.Enums}
 	case field.TypeUUID:
-		// "CHAR(X) BINARY" is treated as "CHAR(X) COLLATE latin1_bin", and in MySQL < 8,
-		// and "COLLATE utf8mb4_bin" in MySQL >= 8. However we already set the table to
-		t = &schema.StringType{T: mysql.TypeChar, Size: 36}
-		c2.SetCollation("utf8mb4_bin")
+		if d.supportsUUID() {
+			// Native support for the uuid type
+			t = &schema.UUIDType{T: mysql.TypeUUID}
+		} else {
+			// "CHAR(X) BINARY" is treated as "CHAR(X) COLLATE latin1_bin", and in MySQL < 8,
+			// and "COLLATE utf8mb4_bin" in MySQL >= 8. However we already set the table to
+			t = &schema.StringType{T: mysql.TypeChar, Size: 36}
+			c2.SetCollation("utf8mb4_bin")
+		}
 	default:
 		t, err := mysql.ParseType(strings.ToLower(c1.typ))
 		if err != nil {
