@@ -2138,7 +2138,7 @@ type Selector struct {
 	limit     *int
 	offset    *int
 	distinct  bool
-	setops    []setOperation
+	setOps    []setOp
 	prefix    Queries
 	lock      *LockOptions
 }
@@ -2424,113 +2424,92 @@ func (s *Selector) join(kind string, t TableView) *Selector {
 	return s
 }
 
-// dupStrategy describes set operation's duplication handling strategy
-type dupStrategy string
-
-const (
-	dupStrategyAll      dupStrategy = "ALL"
-	dupStrategyDistinct dupStrategy = "DISTINCT"
+type (
+	// setOp represents a set/compound operation.
+	setOp struct {
+		Type      setOpType // Set operation type.
+		All       bool      // Quantifier was set to ALL (defaults to DISTINCT).
+		TableView           // Query or table to operate on.
+	}
+	// setOpType is a set operation type.
+	setOpType string
 )
 
-type setOperationType string
-
 const (
-	setOperationTypeUnion     setOperationType = "UNION"
-	setOperationTypeExcept    setOperationType = "EXCEPT"
-	setOperationTypeIntersect setOperationType = "INTERSECT"
+	setOpTypeUnion     setOpType = "UNION"
+	setOpTypeExcept    setOpType = "EXCEPT"
+	setOpTypeIntersect setOpType = "INTERSECT"
 )
 
-// setOperation holds set operation data
-type setOperation struct {
-	setOperationType
-	dupStrategy
-	TableView
-}
-
-// Union appends the UNION clause to the query.
+// Union appends the UNION (DISTINCT) clause to the query.
 func (s *Selector) Union(t TableView) *Selector {
-	s.setops = append(s.setops, setOperation{
-		setOperationType: setOperationTypeUnion,
-		TableView:        t,
+	s.setOps = append(s.setOps, setOp{
+		Type:      setOpTypeUnion,
+		TableView: t,
 	})
 	return s
 }
 
 // UnionAll appends the UNION ALL clause to the query.
 func (s *Selector) UnionAll(t TableView) *Selector {
-	s.setops = append(s.setops, setOperation{
-		setOperationType: setOperationTypeUnion,
-		dupStrategy:      dupStrategyAll,
-		TableView:        t,
+	s.setOps = append(s.setOps, setOp{
+		Type:      setOpTypeUnion,
+		All:       true,
+		TableView: t,
 	})
 	return s
 }
 
 // UnionDistinct appends the UNION DISTINCT clause to the query.
+// Deprecated: use Union instead as by default, duplicate rows
+// are eliminated unless ALL is specified.
 func (s *Selector) UnionDistinct(t TableView) *Selector {
-	s.setops = append(s.setops, setOperation{
-		setOperationType: setOperationTypeUnion,
-		dupStrategy:      dupStrategyDistinct,
-		TableView:        t,
-	})
-	return s
+	return s.Union(t)
 }
 
 // Except appends the EXCEPT clause to the query.
 func (s *Selector) Except(t TableView) *Selector {
-	s.setops = append(s.setops, setOperation{
-		setOperationType: setOperationTypeExcept,
-		TableView:        t,
+	s.setOps = append(s.setOps, setOp{
+		Type:      setOpTypeExcept,
+		TableView: t,
 	})
 	return s
 }
 
 // ExceptAll appends the EXCEPT ALL clause to the query.
 func (s *Selector) ExceptAll(t TableView) *Selector {
-	s.setops = append(s.setops, setOperation{
-		setOperationType: setOperationTypeExcept,
-		dupStrategy:      dupStrategyAll,
-		TableView:        t,
-	})
-	return s
-}
-
-// ExceptDistinct appends the EXCEPT DISTINCT clause to the query.
-func (s *Selector) ExceptDistinct(t TableView) *Selector {
-	s.setops = append(s.setops, setOperation{
-		setOperationType: setOperationTypeExcept,
-		dupStrategy:      dupStrategyDistinct,
-		TableView:        t,
-	})
+	if s.sqlite() {
+		s.AddError(errors.New("EXCEPT ALL is not supported by SQLite"))
+	} else {
+		s.setOps = append(s.setOps, setOp{
+			Type:      setOpTypeExcept,
+			All:       true,
+			TableView: t,
+		})
+	}
 	return s
 }
 
 // Intersect appends the INTERSECT clause to the query.
 func (s *Selector) Intersect(t TableView) *Selector {
-	s.setops = append(s.setops, setOperation{
-		setOperationType: setOperationTypeIntersect,
-		TableView:        t,
+	s.setOps = append(s.setOps, setOp{
+		Type:      setOpTypeIntersect,
+		TableView: t,
 	})
 	return s
 }
 
 // IntersectAll appends the INTERSECT ALL clause to the query.
 func (s *Selector) IntersectAll(t TableView) *Selector {
-	s.setops = append(s.setops, setOperation{
-		setOperationType: setOperationTypeIntersect,
-		dupStrategy:      dupStrategyAll,
-		TableView:        t,
-	})
-	return s
-}
-
-// IntersectDistinct appends the INTERSECT DISTINCT clause to the query.
-func (s *Selector) IntersectDistinct(t TableView) *Selector {
-	s.setops = append(s.setops, setOperation{
-		setOperationType: setOperationTypeIntersect,
-		dupStrategy:      dupStrategyDistinct,
-		TableView:        t,
-	})
+	if s.sqlite() {
+		s.AddError(errors.New("INTERSECT ALL is not supported by SQLite"))
+	} else {
+		s.setOps = append(s.setOps, setOp{
+			Type:      setOpTypeIntersect,
+			All:       true,
+			TableView: t,
+		})
+	}
 	return s
 }
 
@@ -2849,8 +2828,8 @@ func (s *Selector) Query() (string, []any) {
 		b.WriteString(" HAVING ")
 		b.Join(s.having)
 	}
-	if len(s.setops) > 0 {
-		s.joinSetOperation(&b)
+	if len(s.setOps) > 0 {
+		s.joinSetOps(&b)
 	}
 	joinOrder(s.order, &b)
 	if s.limit != nil {
@@ -2892,13 +2871,13 @@ func (s *Selector) joinLock(b *Builder) {
 	}
 }
 
-func (s *Selector) joinSetOperation(b *Builder) {
-	for _, union := range s.setops {
-		b.WriteString(" " + string(union.setOperationType) + " ")
-		if union.dupStrategy != "" {
-			b.WriteString(string(union.dupStrategy) + " ")
+func (s *Selector) joinSetOps(b *Builder) {
+	for _, op := range s.setOps {
+		b.WriteString(" " + string(op.Type) + " ")
+		if op.All {
+			b.WriteString("ALL ")
 		}
-		switch view := union.TableView.(type) {
+		switch view := op.TableView.(type) {
 		case *SelectTable:
 			view.SetDialect(s.dialect)
 			b.WriteString(view.ref())
