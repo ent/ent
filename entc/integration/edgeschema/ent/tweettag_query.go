@@ -29,6 +29,7 @@ type TweetTagQuery struct {
 	unique     *bool
 	order      []OrderFunc
 	fields     []string
+	inters     []Interceptor
 	predicates []predicate.TweetTag
 	withTag    *TagQuery
 	withTweet  *TweetQuery
@@ -43,13 +44,13 @@ func (ttq *TweetTagQuery) Where(ps ...predicate.TweetTag) *TweetTagQuery {
 	return ttq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (ttq *TweetTagQuery) Limit(limit int) *TweetTagQuery {
 	ttq.limit = &limit
 	return ttq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (ttq *TweetTagQuery) Offset(offset int) *TweetTagQuery {
 	ttq.offset = &offset
 	return ttq
@@ -62,7 +63,7 @@ func (ttq *TweetTagQuery) Unique(unique bool) *TweetTagQuery {
 	return ttq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (ttq *TweetTagQuery) Order(o ...OrderFunc) *TweetTagQuery {
 	ttq.order = append(ttq.order, o...)
 	return ttq
@@ -70,7 +71,7 @@ func (ttq *TweetTagQuery) Order(o ...OrderFunc) *TweetTagQuery {
 
 // QueryTag chains the current query on the "tag" edge.
 func (ttq *TweetTagQuery) QueryTag() *TagQuery {
-	query := &TagQuery{config: ttq.config}
+	query := (&TagClient{config: ttq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := ttq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -92,7 +93,7 @@ func (ttq *TweetTagQuery) QueryTag() *TagQuery {
 
 // QueryTweet chains the current query on the "tweet" edge.
 func (ttq *TweetTagQuery) QueryTweet() *TweetQuery {
-	query := &TweetQuery{config: ttq.config}
+	query := (&TweetClient{config: ttq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := ttq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -115,7 +116,7 @@ func (ttq *TweetTagQuery) QueryTweet() *TweetQuery {
 // First returns the first TweetTag entity from the query.
 // Returns a *NotFoundError when no TweetTag was found.
 func (ttq *TweetTagQuery) First(ctx context.Context) (*TweetTag, error) {
-	nodes, err := ttq.Limit(1).All(ctx)
+	nodes, err := ttq.Limit(1).All(newQueryContext(ctx, TypeTweetTag, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +139,7 @@ func (ttq *TweetTagQuery) FirstX(ctx context.Context) *TweetTag {
 // Returns a *NotFoundError when no TweetTag ID was found.
 func (ttq *TweetTagQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = ttq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = ttq.Limit(1).IDs(newQueryContext(ctx, TypeTweetTag, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -161,7 +162,7 @@ func (ttq *TweetTagQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one TweetTag entity is found.
 // Returns a *NotFoundError when no TweetTag entities are found.
 func (ttq *TweetTagQuery) Only(ctx context.Context) (*TweetTag, error) {
-	nodes, err := ttq.Limit(2).All(ctx)
+	nodes, err := ttq.Limit(2).All(newQueryContext(ctx, TypeTweetTag, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +190,7 @@ func (ttq *TweetTagQuery) OnlyX(ctx context.Context) *TweetTag {
 // Returns a *NotFoundError when no entities are found.
 func (ttq *TweetTagQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = ttq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = ttq.Limit(2).IDs(newQueryContext(ctx, TypeTweetTag, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -214,10 +215,12 @@ func (ttq *TweetTagQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of TweetTags.
 func (ttq *TweetTagQuery) All(ctx context.Context) ([]*TweetTag, error) {
+	ctx = newQueryContext(ctx, TypeTweetTag, "All")
 	if err := ttq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return ttq.sqlAll(ctx)
+	qr := querierAll[[]*TweetTag, *TweetTagQuery]()
+	return withInterceptors[[]*TweetTag](ctx, ttq, qr, ttq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -232,6 +235,7 @@ func (ttq *TweetTagQuery) AllX(ctx context.Context) []*TweetTag {
 // IDs executes the query and returns a list of TweetTag IDs.
 func (ttq *TweetTagQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	var ids []uuid.UUID
+	ctx = newQueryContext(ctx, TypeTweetTag, "IDs")
 	if err := ttq.Select(tweettag.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -249,10 +253,11 @@ func (ttq *TweetTagQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (ttq *TweetTagQuery) Count(ctx context.Context) (int, error) {
+	ctx = newQueryContext(ctx, TypeTweetTag, "Count")
 	if err := ttq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return ttq.sqlCount(ctx)
+	return withInterceptors[int](ctx, ttq, querierCount[*TweetTagQuery](), ttq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -266,6 +271,7 @@ func (ttq *TweetTagQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (ttq *TweetTagQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = newQueryContext(ctx, TypeTweetTag, "Exist")
 	switch _, err := ttq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -309,7 +315,7 @@ func (ttq *TweetTagQuery) Clone() *TweetTagQuery {
 // WithTag tells the query-builder to eager-load the nodes that are connected to
 // the "tag" edge. The optional arguments are used to configure the query builder of the edge.
 func (ttq *TweetTagQuery) WithTag(opts ...func(*TagQuery)) *TweetTagQuery {
-	query := &TagQuery{config: ttq.config}
+	query := (&TagClient{config: ttq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -320,7 +326,7 @@ func (ttq *TweetTagQuery) WithTag(opts ...func(*TagQuery)) *TweetTagQuery {
 // WithTweet tells the query-builder to eager-load the nodes that are connected to
 // the "tweet" edge. The optional arguments are used to configure the query builder of the edge.
 func (ttq *TweetTagQuery) WithTweet(opts ...func(*TweetQuery)) *TweetTagQuery {
-	query := &TweetQuery{config: ttq.config}
+	query := (&TweetClient{config: ttq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -343,16 +349,11 @@ func (ttq *TweetTagQuery) WithTweet(opts ...func(*TweetQuery)) *TweetTagQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (ttq *TweetTagQuery) GroupBy(field string, fields ...string) *TweetTagGroupBy {
-	grbuild := &TweetTagGroupBy{config: ttq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := ttq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return ttq.sqlQuery(ctx), nil
-	}
+	ttq.fields = append([]string{field}, fields...)
+	grbuild := &TweetTagGroupBy{build: ttq}
+	grbuild.flds = &ttq.fields
 	grbuild.label = tweettag.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -370,10 +371,10 @@ func (ttq *TweetTagQuery) GroupBy(field string, fields ...string) *TweetTagGroup
 //		Scan(ctx, &v)
 func (ttq *TweetTagQuery) Select(fields ...string) *TweetTagSelect {
 	ttq.fields = append(ttq.fields, fields...)
-	selbuild := &TweetTagSelect{TweetTagQuery: ttq}
-	selbuild.label = tweettag.Label
-	selbuild.flds, selbuild.scan = &ttq.fields, selbuild.Scan
-	return selbuild
+	sbuild := &TweetTagSelect{TweetTagQuery: ttq}
+	sbuild.label = tweettag.Label
+	sbuild.flds, sbuild.scan = &ttq.fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a TweetTagSelect configured with the given aggregations.
@@ -382,6 +383,16 @@ func (ttq *TweetTagQuery) Aggregate(fns ...AggregateFunc) *TweetTagSelect {
 }
 
 func (ttq *TweetTagQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range ttq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, ttq); err != nil {
+				return err
+			}
+		}
+	}
 	for _, f := range ttq.fields {
 		if !tweettag.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
@@ -583,13 +594,8 @@ func (ttq *TweetTagQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // TweetTagGroupBy is the group-by builder for TweetTag entities.
 type TweetTagGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *TweetTagQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -598,58 +604,46 @@ func (ttgb *TweetTagGroupBy) Aggregate(fns ...AggregateFunc) *TweetTagGroupBy {
 	return ttgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (ttgb *TweetTagGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := ttgb.path(ctx)
-	if err != nil {
+	ctx = newQueryContext(ctx, TypeTweetTag, "GroupBy")
+	if err := ttgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ttgb.sql = query
-	return ttgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*TweetTagQuery, *TweetTagGroupBy](ctx, ttgb.build, ttgb, ttgb.build.inters, v)
 }
 
-func (ttgb *TweetTagGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range ttgb.fields {
-		if !tweettag.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (ttgb *TweetTagGroupBy) sqlScan(ctx context.Context, root *TweetTagQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(ttgb.fns))
+	for _, fn := range ttgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := ttgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*ttgb.flds)+len(ttgb.fns))
+		for _, f := range *ttgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*ttgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ttgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := ttgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (ttgb *TweetTagGroupBy) sqlQuery() *sql.Selector {
-	selector := ttgb.sql.Select()
-	aggregation := make([]string, 0, len(ttgb.fns))
-	for _, fn := range ttgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(ttgb.fields)+len(ttgb.fns))
-		for _, f := range ttgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(ttgb.fields...)...)
-}
-
 // TweetTagSelect is the builder for selecting fields of TweetTag entities.
 type TweetTagSelect struct {
 	*TweetTagQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -660,26 +654,27 @@ func (tts *TweetTagSelect) Aggregate(fns ...AggregateFunc) *TweetTagSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (tts *TweetTagSelect) Scan(ctx context.Context, v any) error {
+	ctx = newQueryContext(ctx, TypeTweetTag, "Select")
 	if err := tts.prepareQuery(ctx); err != nil {
 		return err
 	}
-	tts.sql = tts.TweetTagQuery.sqlQuery(ctx)
-	return tts.sqlScan(ctx, v)
+	return scanWithInterceptors[*TweetTagQuery, *TweetTagSelect](ctx, tts.TweetTagQuery, tts, tts.inters, v)
 }
 
-func (tts *TweetTagSelect) sqlScan(ctx context.Context, v any) error {
+func (tts *TweetTagSelect) sqlScan(ctx context.Context, root *TweetTagQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(tts.fns))
 	for _, fn := range tts.fns {
-		aggregation = append(aggregation, fn(tts.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*tts.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		tts.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		tts.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := tts.sql.Query()
+	query, args := selector.Query()
 	if err := tts.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

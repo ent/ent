@@ -24,28 +24,51 @@ type config struct {
 	log func(...any)
 	// hooks to execute on mutations.
 	hooks *hooks
+	// interceptors to execute on queries.
+	inters *inters
 }
 
-// hooks per client, for fast access.
-type hooks struct {
-	Account  []ent.Hook
-	Blob     []ent.Hook
-	BlobLink []ent.Hook
-	Car      []ent.Hook
-	Device   []ent.Hook
-	Doc      []ent.Hook
-	Group    []ent.Hook
-	IntSID   []ent.Hook
-	Link     []ent.Hook
-	MixinID  []ent.Hook
-	Note     []ent.Hook
-	Other    []ent.Hook
-	Pet      []ent.Hook
-	Revision []ent.Hook
-	Session  []ent.Hook
-	Token    []ent.Hook
-	User     []ent.Hook
-}
+// hooks and interceptors per client, for fast access.
+type (
+	hooks struct {
+		Account  []ent.Hook
+		Blob     []ent.Hook
+		BlobLink []ent.Hook
+		Car      []ent.Hook
+		Device   []ent.Hook
+		Doc      []ent.Hook
+		Group    []ent.Hook
+		IntSID   []ent.Hook
+		Link     []ent.Hook
+		MixinID  []ent.Hook
+		Note     []ent.Hook
+		Other    []ent.Hook
+		Pet      []ent.Hook
+		Revision []ent.Hook
+		Session  []ent.Hook
+		Token    []ent.Hook
+		User     []ent.Hook
+	}
+	inters struct {
+		Account  []ent.Interceptor
+		Blob     []ent.Interceptor
+		BlobLink []ent.Interceptor
+		Car      []ent.Interceptor
+		Device   []ent.Interceptor
+		Doc      []ent.Interceptor
+		Group    []ent.Interceptor
+		IntSID   []ent.Interceptor
+		Link     []ent.Interceptor
+		MixinID  []ent.Interceptor
+		Note     []ent.Interceptor
+		Other    []ent.Interceptor
+		Pet      []ent.Interceptor
+		Revision []ent.Interceptor
+		Session  []ent.Interceptor
+		Token    []ent.Interceptor
+		User     []ent.Interceptor
+	}
+)
 
 // Options applies the options on the config object.
 func (c *config) options(opts ...Option) {

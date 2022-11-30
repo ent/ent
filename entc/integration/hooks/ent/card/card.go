@@ -77,7 +77,8 @@ func ValidColumn(column string) bool {
 //
 //	import _ "entgo.io/ent/entc/integration/hooks/ent/runtime"
 var (
-	Hooks [3]ent.Hook
+	Hooks        [3]ent.Hook
+	Interceptors [1]ent.Interceptor
 	// DefaultNumber holds the default value on creation for the "number" field.
 	DefaultNumber string
 	// NumberValidator is a validator for the "number" field. It is called by the builders before save.

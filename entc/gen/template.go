@@ -148,6 +148,13 @@ var (
 			},
 		},
 		{
+			Name:   "intercept",
+			Format: "intercept/intercept.go",
+			Skip: func(g *Graph) bool {
+				return !g.featureEnabled(FeatureIntercept)
+			},
+		},
+		{
 			Name:   "entql",
 			Format: "entql.go",
 			Skip: func(g *Graph) bool {

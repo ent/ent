@@ -28,6 +28,7 @@ type PetQuery struct {
 	unique     *bool
 	order      []OrderFunc
 	fields     []string
+	inters     []Interceptor
 	predicates []predicate.Pet
 	withTeam   *UserQuery
 	withOwner  *UserQuery
@@ -42,13 +43,13 @@ func (pq *PetQuery) Where(ps ...predicate.Pet) *PetQuery {
 	return pq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (pq *PetQuery) Limit(limit int) *PetQuery {
 	pq.limit = &limit
 	return pq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (pq *PetQuery) Offset(offset int) *PetQuery {
 	pq.offset = &offset
 	return pq
@@ -61,7 +62,7 @@ func (pq *PetQuery) Unique(unique bool) *PetQuery {
 	return pq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (pq *PetQuery) Order(o ...OrderFunc) *PetQuery {
 	pq.order = append(pq.order, o...)
 	return pq
@@ -69,7 +70,7 @@ func (pq *PetQuery) Order(o ...OrderFunc) *PetQuery {
 
 // QueryTeam chains the current query on the "team" edge.
 func (pq *PetQuery) QueryTeam() *UserQuery {
-	query := &UserQuery{config: pq.config}
+	query := (&UserClient{config: pq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := pq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -83,7 +84,7 @@ func (pq *PetQuery) QueryTeam() *UserQuery {
 
 // QueryOwner chains the current query on the "owner" edge.
 func (pq *PetQuery) QueryOwner() *UserQuery {
-	query := &UserQuery{config: pq.config}
+	query := (&UserClient{config: pq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := pq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -98,7 +99,7 @@ func (pq *PetQuery) QueryOwner() *UserQuery {
 // First returns the first Pet entity from the query.
 // Returns a *NotFoundError when no Pet was found.
 func (pq *PetQuery) First(ctx context.Context) (*Pet, error) {
-	nodes, err := pq.Limit(1).All(ctx)
+	nodes, err := pq.Limit(1).All(newQueryContext(ctx, TypePet, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +122,7 @@ func (pq *PetQuery) FirstX(ctx context.Context) *Pet {
 // Returns a *NotFoundError when no Pet ID was found.
 func (pq *PetQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = pq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = pq.Limit(1).IDs(newQueryContext(ctx, TypePet, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -144,7 +145,7 @@ func (pq *PetQuery) FirstIDX(ctx context.Context) string {
 // Returns a *NotSingularError when more than one Pet entity is found.
 // Returns a *NotFoundError when no Pet entities are found.
 func (pq *PetQuery) Only(ctx context.Context) (*Pet, error) {
-	nodes, err := pq.Limit(2).All(ctx)
+	nodes, err := pq.Limit(2).All(newQueryContext(ctx, TypePet, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -172,7 +173,7 @@ func (pq *PetQuery) OnlyX(ctx context.Context) *Pet {
 // Returns a *NotFoundError when no entities are found.
 func (pq *PetQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = pq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = pq.Limit(2).IDs(newQueryContext(ctx, TypePet, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -197,10 +198,12 @@ func (pq *PetQuery) OnlyIDX(ctx context.Context) string {
 
 // All executes the query and returns a list of Pets.
 func (pq *PetQuery) All(ctx context.Context) ([]*Pet, error) {
+	ctx = newQueryContext(ctx, TypePet, "All")
 	if err := pq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return pq.gremlinAll(ctx)
+	qr := querierAll[[]*Pet, *PetQuery]()
+	return withInterceptors[[]*Pet](ctx, pq, qr, pq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -215,6 +218,7 @@ func (pq *PetQuery) AllX(ctx context.Context) []*Pet {
 // IDs executes the query and returns a list of Pet IDs.
 func (pq *PetQuery) IDs(ctx context.Context) ([]string, error) {
 	var ids []string
+	ctx = newQueryContext(ctx, TypePet, "IDs")
 	if err := pq.Select(pet.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -232,10 +236,11 @@ func (pq *PetQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (pq *PetQuery) Count(ctx context.Context) (int, error) {
+	ctx = newQueryContext(ctx, TypePet, "Count")
 	if err := pq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return pq.gremlinCount(ctx)
+	return withInterceptors[int](ctx, pq, querierCount[*PetQuery](), pq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -249,6 +254,7 @@ func (pq *PetQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (pq *PetQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = newQueryContext(ctx, TypePet, "Exist")
 	switch _, err := pq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -292,7 +298,7 @@ func (pq *PetQuery) Clone() *PetQuery {
 // WithTeam tells the query-builder to eager-load the nodes that are connected to
 // the "team" edge. The optional arguments are used to configure the query builder of the edge.
 func (pq *PetQuery) WithTeam(opts ...func(*UserQuery)) *PetQuery {
-	query := &UserQuery{config: pq.config}
+	query := (&UserClient{config: pq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -303,7 +309,7 @@ func (pq *PetQuery) WithTeam(opts ...func(*UserQuery)) *PetQuery {
 // WithOwner tells the query-builder to eager-load the nodes that are connected to
 // the "owner" edge. The optional arguments are used to configure the query builder of the edge.
 func (pq *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
-	query := &UserQuery{config: pq.config}
+	query := (&UserClient{config: pq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -326,16 +332,11 @@ func (pq *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
-	grbuild := &PetGroupBy{config: pq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
-		if err := pq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return pq.gremlinQuery(ctx), nil
-	}
+	pq.fields = append([]string{field}, fields...)
+	grbuild := &PetGroupBy{build: pq}
+	grbuild.flds = &pq.fields
 	grbuild.label = pet.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -353,10 +354,10 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 //		Scan(ctx, &v)
 func (pq *PetQuery) Select(fields ...string) *PetSelect {
 	pq.fields = append(pq.fields, fields...)
-	selbuild := &PetSelect{PetQuery: pq}
-	selbuild.label = pet.Label
-	selbuild.flds, selbuild.scan = &pq.fields, selbuild.Scan
-	return selbuild
+	sbuild := &PetSelect{PetQuery: pq}
+	sbuild.label = pet.Label
+	sbuild.flds, sbuild.scan = &pq.fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a PetSelect configured with the given aggregations.
@@ -365,6 +366,16 @@ func (pq *PetQuery) Aggregate(fns ...AggregateFunc) *PetSelect {
 }
 
 func (pq *PetQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range pq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, pq); err != nil {
+				return err
+			}
+		}
+	}
 	if pq.path != nil {
 		prev, err := pq.path(ctx)
 		if err != nil {
@@ -375,7 +386,7 @@ func (pq *PetQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (pq *PetQuery) gremlinAll(ctx context.Context) ([]*Pet, error) {
+func (pq *PetQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Pet, error) {
 	res := &gremlin.Response{}
 	traversal := pq.gremlinQuery(ctx)
 	if len(pq.fields) > 0 {
@@ -438,13 +449,8 @@ func (pq *PetQuery) gremlinQuery(context.Context) *dsl.Traversal {
 
 // PetGroupBy is the group-by builder for Pet entities.
 type PetGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	gremlin *dsl.Traversal
-	path    func(context.Context) (*dsl.Traversal, error)
+	build *PetQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -453,33 +459,16 @@ func (pgb *PetGroupBy) Aggregate(fns ...AggregateFunc) *PetGroupBy {
 	return pgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (pgb *PetGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := pgb.path(ctx)
-	if err != nil {
+	ctx = newQueryContext(ctx, TypePet, "GroupBy")
+	if err := pgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	pgb.gremlin = query
-	return pgb.gremlinScan(ctx, v)
+	return scanWithInterceptors[*PetQuery, *PetGroupBy](ctx, pgb.build, pgb, pgb.build.inters, v)
 }
 
-func (pgb *PetGroupBy) gremlinScan(ctx context.Context, v any) error {
-	res := &gremlin.Response{}
-	query, bindings := pgb.gremlinQuery().Query()
-	if err := pgb.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(pgb.fields)+len(pgb.fns) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
-}
-
-func (pgb *PetGroupBy) gremlinQuery() *dsl.Traversal {
+func (pgb *PetGroupBy) gremlinScan(ctx context.Context, root *PetQuery, v any) error {
 	var (
 		trs   []any
 		names []any
@@ -489,23 +478,34 @@ func (pgb *PetGroupBy) gremlinQuery() *dsl.Traversal {
 		trs = append(trs, tr)
 		names = append(names, name)
 	}
-	for _, f := range pgb.fields {
+	for _, f := range *pgb.flds {
 		names = append(names, f)
 		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
 	}
-	return pgb.gremlin.Group().
-		By(__.Values(pgb.fields...).Fold()).
+	query, bindings := root.gremlinQuery(ctx).Group().
+		By(__.Values(*pgb.flds...).Fold()).
 		By(__.Fold().Match(trs...).Select(names...)).
 		Select(dsl.Values).
-		Next()
+		Next().
+		Query()
+	res := &gremlin.Response{}
+	if err := pgb.build.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	if len(*pgb.flds)+len(pgb.fns) == 1 {
+		return res.ReadVal(v)
+	}
+	vm, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	return vm.Decode(v)
 }
 
 // PetSelect is the builder for selecting fields of Pet entities.
 type PetSelect struct {
 	*PetQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	gremlin *dsl.Traversal
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -516,36 +516,36 @@ func (ps *PetSelect) Aggregate(fns ...AggregateFunc) *PetSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ps *PetSelect) Scan(ctx context.Context, v any) error {
+	ctx = newQueryContext(ctx, TypePet, "Select")
 	if err := ps.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ps.gremlin = ps.PetQuery.gremlinQuery(ctx)
-	return ps.gremlinScan(ctx, v)
+	return scanWithInterceptors[*PetQuery, *PetSelect](ctx, ps.PetQuery, ps, ps.inters, v)
 }
 
-func (ps *PetSelect) gremlinScan(ctx context.Context, v any) error {
+func (ps *PetSelect) gremlinScan(ctx context.Context, root *PetQuery, v any) error {
 	var (
-		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
+		traversal = root.gremlinQuery(ctx)
 	)
 	if len(ps.fields) == 1 {
 		if ps.fields[0] != pet.FieldID {
-			traversal = ps.gremlin.Values(ps.fields...)
+			traversal = traversal.Values(ps.fields...)
 		} else {
-			traversal = ps.gremlin.ID()
+			traversal = traversal.ID()
 		}
 	} else {
 		fields := make([]any, len(ps.fields))
 		for i, f := range ps.fields {
 			fields[i] = f
 		}
-		traversal = ps.gremlin.ValueMap(fields...)
+		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
 	if err := ps.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
-	if len(ps.fields) == 1 {
+	if len(root.fields) == 1 {
 		return res.ReadVal(v)
 	}
 	vm, err := res.ReadValueMap()

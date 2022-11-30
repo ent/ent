@@ -27,6 +27,7 @@ type GoodsQuery struct {
 	unique     *bool
 	order      []OrderFunc
 	fields     []string
+	inters     []Interceptor
 	predicates []predicate.Goods
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
@@ -39,13 +40,13 @@ func (gq *GoodsQuery) Where(ps ...predicate.Goods) *GoodsQuery {
 	return gq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (gq *GoodsQuery) Limit(limit int) *GoodsQuery {
 	gq.limit = &limit
 	return gq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (gq *GoodsQuery) Offset(offset int) *GoodsQuery {
 	gq.offset = &offset
 	return gq
@@ -58,7 +59,7 @@ func (gq *GoodsQuery) Unique(unique bool) *GoodsQuery {
 	return gq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (gq *GoodsQuery) Order(o ...OrderFunc) *GoodsQuery {
 	gq.order = append(gq.order, o...)
 	return gq
@@ -67,7 +68,7 @@ func (gq *GoodsQuery) Order(o ...OrderFunc) *GoodsQuery {
 // First returns the first Goods entity from the query.
 // Returns a *NotFoundError when no Goods was found.
 func (gq *GoodsQuery) First(ctx context.Context) (*Goods, error) {
-	nodes, err := gq.Limit(1).All(ctx)
+	nodes, err := gq.Limit(1).All(newQueryContext(ctx, TypeGoods, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +91,7 @@ func (gq *GoodsQuery) FirstX(ctx context.Context) *Goods {
 // Returns a *NotFoundError when no Goods ID was found.
 func (gq *GoodsQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = gq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = gq.Limit(1).IDs(newQueryContext(ctx, TypeGoods, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -113,7 +114,7 @@ func (gq *GoodsQuery) FirstIDX(ctx context.Context) string {
 // Returns a *NotSingularError when more than one Goods entity is found.
 // Returns a *NotFoundError when no Goods entities are found.
 func (gq *GoodsQuery) Only(ctx context.Context) (*Goods, error) {
-	nodes, err := gq.Limit(2).All(ctx)
+	nodes, err := gq.Limit(2).All(newQueryContext(ctx, TypeGoods, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +142,7 @@ func (gq *GoodsQuery) OnlyX(ctx context.Context) *Goods {
 // Returns a *NotFoundError when no entities are found.
 func (gq *GoodsQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = gq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = gq.Limit(2).IDs(newQueryContext(ctx, TypeGoods, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -166,10 +167,12 @@ func (gq *GoodsQuery) OnlyIDX(ctx context.Context) string {
 
 // All executes the query and returns a list of GoodsSlice.
 func (gq *GoodsQuery) All(ctx context.Context) ([]*Goods, error) {
+	ctx = newQueryContext(ctx, TypeGoods, "All")
 	if err := gq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return gq.gremlinAll(ctx)
+	qr := querierAll[[]*Goods, *GoodsQuery]()
+	return withInterceptors[[]*Goods](ctx, gq, qr, gq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -184,6 +187,7 @@ func (gq *GoodsQuery) AllX(ctx context.Context) []*Goods {
 // IDs executes the query and returns a list of Goods IDs.
 func (gq *GoodsQuery) IDs(ctx context.Context) ([]string, error) {
 	var ids []string
+	ctx = newQueryContext(ctx, TypeGoods, "IDs")
 	if err := gq.Select(goods.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -201,10 +205,11 @@ func (gq *GoodsQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (gq *GoodsQuery) Count(ctx context.Context) (int, error) {
+	ctx = newQueryContext(ctx, TypeGoods, "Count")
 	if err := gq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return gq.gremlinCount(ctx)
+	return withInterceptors[int](ctx, gq, querierCount[*GoodsQuery](), gq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -218,6 +223,7 @@ func (gq *GoodsQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (gq *GoodsQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = newQueryContext(ctx, TypeGoods, "Exist")
 	switch _, err := gq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -259,16 +265,11 @@ func (gq *GoodsQuery) Clone() *GoodsQuery {
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (gq *GoodsQuery) GroupBy(field string, fields ...string) *GoodsGroupBy {
-	grbuild := &GoodsGroupBy{config: gq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
-		if err := gq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return gq.gremlinQuery(ctx), nil
-	}
+	gq.fields = append([]string{field}, fields...)
+	grbuild := &GoodsGroupBy{build: gq}
+	grbuild.flds = &gq.fields
 	grbuild.label = goods.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -276,10 +277,10 @@ func (gq *GoodsQuery) GroupBy(field string, fields ...string) *GoodsGroupBy {
 // instead of selecting all fields in the entity.
 func (gq *GoodsQuery) Select(fields ...string) *GoodsSelect {
 	gq.fields = append(gq.fields, fields...)
-	selbuild := &GoodsSelect{GoodsQuery: gq}
-	selbuild.label = goods.Label
-	selbuild.flds, selbuild.scan = &gq.fields, selbuild.Scan
-	return selbuild
+	sbuild := &GoodsSelect{GoodsQuery: gq}
+	sbuild.label = goods.Label
+	sbuild.flds, sbuild.scan = &gq.fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a GoodsSelect configured with the given aggregations.
@@ -288,6 +289,16 @@ func (gq *GoodsQuery) Aggregate(fns ...AggregateFunc) *GoodsSelect {
 }
 
 func (gq *GoodsQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range gq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, gq); err != nil {
+				return err
+			}
+		}
+	}
 	if gq.path != nil {
 		prev, err := gq.path(ctx)
 		if err != nil {
@@ -298,7 +309,7 @@ func (gq *GoodsQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (gq *GoodsQuery) gremlinAll(ctx context.Context) ([]*Goods, error) {
+func (gq *GoodsQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Goods, error) {
 	res := &gremlin.Response{}
 	traversal := gq.gremlinQuery(ctx)
 	if len(gq.fields) > 0 {
@@ -361,13 +372,8 @@ func (gq *GoodsQuery) gremlinQuery(context.Context) *dsl.Traversal {
 
 // GoodsGroupBy is the group-by builder for Goods entities.
 type GoodsGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	gremlin *dsl.Traversal
-	path    func(context.Context) (*dsl.Traversal, error)
+	build *GoodsQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -376,33 +382,16 @@ func (ggb *GoodsGroupBy) Aggregate(fns ...AggregateFunc) *GoodsGroupBy {
 	return ggb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (ggb *GoodsGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := ggb.path(ctx)
-	if err != nil {
+	ctx = newQueryContext(ctx, TypeGoods, "GroupBy")
+	if err := ggb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ggb.gremlin = query
-	return ggb.gremlinScan(ctx, v)
+	return scanWithInterceptors[*GoodsQuery, *GoodsGroupBy](ctx, ggb.build, ggb, ggb.build.inters, v)
 }
 
-func (ggb *GoodsGroupBy) gremlinScan(ctx context.Context, v any) error {
-	res := &gremlin.Response{}
-	query, bindings := ggb.gremlinQuery().Query()
-	if err := ggb.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(ggb.fields)+len(ggb.fns) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
-}
-
-func (ggb *GoodsGroupBy) gremlinQuery() *dsl.Traversal {
+func (ggb *GoodsGroupBy) gremlinScan(ctx context.Context, root *GoodsQuery, v any) error {
 	var (
 		trs   []any
 		names []any
@@ -412,23 +401,34 @@ func (ggb *GoodsGroupBy) gremlinQuery() *dsl.Traversal {
 		trs = append(trs, tr)
 		names = append(names, name)
 	}
-	for _, f := range ggb.fields {
+	for _, f := range *ggb.flds {
 		names = append(names, f)
 		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
 	}
-	return ggb.gremlin.Group().
-		By(__.Values(ggb.fields...).Fold()).
+	query, bindings := root.gremlinQuery(ctx).Group().
+		By(__.Values(*ggb.flds...).Fold()).
 		By(__.Fold().Match(trs...).Select(names...)).
 		Select(dsl.Values).
-		Next()
+		Next().
+		Query()
+	res := &gremlin.Response{}
+	if err := ggb.build.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	if len(*ggb.flds)+len(ggb.fns) == 1 {
+		return res.ReadVal(v)
+	}
+	vm, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	return vm.Decode(v)
 }
 
 // GoodsSelect is the builder for selecting fields of Goods entities.
 type GoodsSelect struct {
 	*GoodsQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	gremlin *dsl.Traversal
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -439,36 +439,36 @@ func (gs *GoodsSelect) Aggregate(fns ...AggregateFunc) *GoodsSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (gs *GoodsSelect) Scan(ctx context.Context, v any) error {
+	ctx = newQueryContext(ctx, TypeGoods, "Select")
 	if err := gs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	gs.gremlin = gs.GoodsQuery.gremlinQuery(ctx)
-	return gs.gremlinScan(ctx, v)
+	return scanWithInterceptors[*GoodsQuery, *GoodsSelect](ctx, gs.GoodsQuery, gs, gs.inters, v)
 }
 
-func (gs *GoodsSelect) gremlinScan(ctx context.Context, v any) error {
+func (gs *GoodsSelect) gremlinScan(ctx context.Context, root *GoodsQuery, v any) error {
 	var (
-		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
+		traversal = root.gremlinQuery(ctx)
 	)
 	if len(gs.fields) == 1 {
 		if gs.fields[0] != goods.FieldID {
-			traversal = gs.gremlin.Values(gs.fields...)
+			traversal = traversal.Values(gs.fields...)
 		} else {
-			traversal = gs.gremlin.ID()
+			traversal = traversal.ID()
 		}
 	} else {
 		fields := make([]any, len(gs.fields))
 		for i, f := range gs.fields {
 			fields[i] = f
 		}
-		traversal = gs.gremlin.ValueMap(fields...)
+		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
 	if err := gs.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
-	if len(gs.fields) == 1 {
+	if len(root.fields) == 1 {
 		return res.ReadVal(v)
 	}
 	vm, err := res.ReadValueMap()

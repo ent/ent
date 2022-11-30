@@ -26,6 +26,7 @@ type RevisionQuery struct {
 	unique     *bool
 	order      []OrderFunc
 	fields     []string
+	inters     []Interceptor
 	predicates []predicate.Revision
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -38,13 +39,13 @@ func (rq *RevisionQuery) Where(ps ...predicate.Revision) *RevisionQuery {
 	return rq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (rq *RevisionQuery) Limit(limit int) *RevisionQuery {
 	rq.limit = &limit
 	return rq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (rq *RevisionQuery) Offset(offset int) *RevisionQuery {
 	rq.offset = &offset
 	return rq
@@ -57,7 +58,7 @@ func (rq *RevisionQuery) Unique(unique bool) *RevisionQuery {
 	return rq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (rq *RevisionQuery) Order(o ...OrderFunc) *RevisionQuery {
 	rq.order = append(rq.order, o...)
 	return rq
@@ -66,7 +67,7 @@ func (rq *RevisionQuery) Order(o ...OrderFunc) *RevisionQuery {
 // First returns the first Revision entity from the query.
 // Returns a *NotFoundError when no Revision was found.
 func (rq *RevisionQuery) First(ctx context.Context) (*Revision, error) {
-	nodes, err := rq.Limit(1).All(ctx)
+	nodes, err := rq.Limit(1).All(newQueryContext(ctx, TypeRevision, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +90,7 @@ func (rq *RevisionQuery) FirstX(ctx context.Context) *Revision {
 // Returns a *NotFoundError when no Revision ID was found.
 func (rq *RevisionQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = rq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = rq.Limit(1).IDs(newQueryContext(ctx, TypeRevision, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -112,7 +113,7 @@ func (rq *RevisionQuery) FirstIDX(ctx context.Context) string {
 // Returns a *NotSingularError when more than one Revision entity is found.
 // Returns a *NotFoundError when no Revision entities are found.
 func (rq *RevisionQuery) Only(ctx context.Context) (*Revision, error) {
-	nodes, err := rq.Limit(2).All(ctx)
+	nodes, err := rq.Limit(2).All(newQueryContext(ctx, TypeRevision, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +141,7 @@ func (rq *RevisionQuery) OnlyX(ctx context.Context) *Revision {
 // Returns a *NotFoundError when no entities are found.
 func (rq *RevisionQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = rq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = rq.Limit(2).IDs(newQueryContext(ctx, TypeRevision, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -165,10 +166,12 @@ func (rq *RevisionQuery) OnlyIDX(ctx context.Context) string {
 
 // All executes the query and returns a list of Revisions.
 func (rq *RevisionQuery) All(ctx context.Context) ([]*Revision, error) {
+	ctx = newQueryContext(ctx, TypeRevision, "All")
 	if err := rq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return rq.sqlAll(ctx)
+	qr := querierAll[[]*Revision, *RevisionQuery]()
+	return withInterceptors[[]*Revision](ctx, rq, qr, rq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -183,6 +186,7 @@ func (rq *RevisionQuery) AllX(ctx context.Context) []*Revision {
 // IDs executes the query and returns a list of Revision IDs.
 func (rq *RevisionQuery) IDs(ctx context.Context) ([]string, error) {
 	var ids []string
+	ctx = newQueryContext(ctx, TypeRevision, "IDs")
 	if err := rq.Select(revision.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -200,10 +204,11 @@ func (rq *RevisionQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (rq *RevisionQuery) Count(ctx context.Context) (int, error) {
+	ctx = newQueryContext(ctx, TypeRevision, "Count")
 	if err := rq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return rq.sqlCount(ctx)
+	return withInterceptors[int](ctx, rq, querierCount[*RevisionQuery](), rq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -217,6 +222,7 @@ func (rq *RevisionQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (rq *RevisionQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = newQueryContext(ctx, TypeRevision, "Exist")
 	switch _, err := rq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -258,16 +264,11 @@ func (rq *RevisionQuery) Clone() *RevisionQuery {
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (rq *RevisionQuery) GroupBy(field string, fields ...string) *RevisionGroupBy {
-	grbuild := &RevisionGroupBy{config: rq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := rq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return rq.sqlQuery(ctx), nil
-	}
+	rq.fields = append([]string{field}, fields...)
+	grbuild := &RevisionGroupBy{build: rq}
+	grbuild.flds = &rq.fields
 	grbuild.label = revision.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -275,10 +276,10 @@ func (rq *RevisionQuery) GroupBy(field string, fields ...string) *RevisionGroupB
 // instead of selecting all fields in the entity.
 func (rq *RevisionQuery) Select(fields ...string) *RevisionSelect {
 	rq.fields = append(rq.fields, fields...)
-	selbuild := &RevisionSelect{RevisionQuery: rq}
-	selbuild.label = revision.Label
-	selbuild.flds, selbuild.scan = &rq.fields, selbuild.Scan
-	return selbuild
+	sbuild := &RevisionSelect{RevisionQuery: rq}
+	sbuild.label = revision.Label
+	sbuild.flds, sbuild.scan = &rq.fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a RevisionSelect configured with the given aggregations.
@@ -287,6 +288,16 @@ func (rq *RevisionQuery) Aggregate(fns ...AggregateFunc) *RevisionSelect {
 }
 
 func (rq *RevisionQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range rq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, rq); err != nil {
+				return err
+			}
+		}
+	}
 	for _, f := range rq.fields {
 		if !revision.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
@@ -418,13 +429,8 @@ func (rq *RevisionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // RevisionGroupBy is the group-by builder for Revision entities.
 type RevisionGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *RevisionQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -433,58 +439,46 @@ func (rgb *RevisionGroupBy) Aggregate(fns ...AggregateFunc) *RevisionGroupBy {
 	return rgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (rgb *RevisionGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := rgb.path(ctx)
-	if err != nil {
+	ctx = newQueryContext(ctx, TypeRevision, "GroupBy")
+	if err := rgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	rgb.sql = query
-	return rgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*RevisionQuery, *RevisionGroupBy](ctx, rgb.build, rgb, rgb.build.inters, v)
 }
 
-func (rgb *RevisionGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range rgb.fields {
-		if !revision.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (rgb *RevisionGroupBy) sqlScan(ctx context.Context, root *RevisionQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(rgb.fns))
+	for _, fn := range rgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := rgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*rgb.flds)+len(rgb.fns))
+		for _, f := range *rgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*rgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := rgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := rgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (rgb *RevisionGroupBy) sqlQuery() *sql.Selector {
-	selector := rgb.sql.Select()
-	aggregation := make([]string, 0, len(rgb.fns))
-	for _, fn := range rgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(rgb.fields)+len(rgb.fns))
-		for _, f := range rgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(rgb.fields...)...)
-}
-
 // RevisionSelect is the builder for selecting fields of Revision entities.
 type RevisionSelect struct {
 	*RevisionQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -495,26 +489,27 @@ func (rs *RevisionSelect) Aggregate(fns ...AggregateFunc) *RevisionSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (rs *RevisionSelect) Scan(ctx context.Context, v any) error {
+	ctx = newQueryContext(ctx, TypeRevision, "Select")
 	if err := rs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	rs.sql = rs.RevisionQuery.sqlQuery(ctx)
-	return rs.sqlScan(ctx, v)
+	return scanWithInterceptors[*RevisionQuery, *RevisionSelect](ctx, rs.RevisionQuery, rs, rs.inters, v)
 }
 
-func (rs *RevisionSelect) sqlScan(ctx context.Context, v any) error {
+func (rs *RevisionSelect) sqlScan(ctx context.Context, root *RevisionQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(rs.fns))
 	for _, fn := range rs.fns {
-		aggregation = append(aggregation, fn(rs.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*rs.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		rs.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		rs.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := rs.sql.Query()
+	query, args := selector.Query()
 	if err := rs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

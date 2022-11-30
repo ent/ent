@@ -29,6 +29,7 @@ type AccountQuery struct {
 	unique     *bool
 	order      []OrderFunc
 	fields     []string
+	inters     []Interceptor
 	predicates []predicate.Account
 	withToken  *TokenQuery
 	// intermediate query (i.e. traversal path).
@@ -42,13 +43,13 @@ func (aq *AccountQuery) Where(ps ...predicate.Account) *AccountQuery {
 	return aq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (aq *AccountQuery) Limit(limit int) *AccountQuery {
 	aq.limit = &limit
 	return aq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (aq *AccountQuery) Offset(offset int) *AccountQuery {
 	aq.offset = &offset
 	return aq
@@ -61,7 +62,7 @@ func (aq *AccountQuery) Unique(unique bool) *AccountQuery {
 	return aq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (aq *AccountQuery) Order(o ...OrderFunc) *AccountQuery {
 	aq.order = append(aq.order, o...)
 	return aq
@@ -69,7 +70,7 @@ func (aq *AccountQuery) Order(o ...OrderFunc) *AccountQuery {
 
 // QueryToken chains the current query on the "token" edge.
 func (aq *AccountQuery) QueryToken() *TokenQuery {
-	query := &TokenQuery{config: aq.config}
+	query := (&TokenClient{config: aq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := aq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -92,7 +93,7 @@ func (aq *AccountQuery) QueryToken() *TokenQuery {
 // First returns the first Account entity from the query.
 // Returns a *NotFoundError when no Account was found.
 func (aq *AccountQuery) First(ctx context.Context) (*Account, error) {
-	nodes, err := aq.Limit(1).All(ctx)
+	nodes, err := aq.Limit(1).All(newQueryContext(ctx, TypeAccount, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +116,7 @@ func (aq *AccountQuery) FirstX(ctx context.Context) *Account {
 // Returns a *NotFoundError when no Account ID was found.
 func (aq *AccountQuery) FirstID(ctx context.Context) (id sid.ID, err error) {
 	var ids []sid.ID
-	if ids, err = aq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = aq.Limit(1).IDs(newQueryContext(ctx, TypeAccount, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -138,7 +139,7 @@ func (aq *AccountQuery) FirstIDX(ctx context.Context) sid.ID {
 // Returns a *NotSingularError when more than one Account entity is found.
 // Returns a *NotFoundError when no Account entities are found.
 func (aq *AccountQuery) Only(ctx context.Context) (*Account, error) {
-	nodes, err := aq.Limit(2).All(ctx)
+	nodes, err := aq.Limit(2).All(newQueryContext(ctx, TypeAccount, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +167,7 @@ func (aq *AccountQuery) OnlyX(ctx context.Context) *Account {
 // Returns a *NotFoundError when no entities are found.
 func (aq *AccountQuery) OnlyID(ctx context.Context) (id sid.ID, err error) {
 	var ids []sid.ID
-	if ids, err = aq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = aq.Limit(2).IDs(newQueryContext(ctx, TypeAccount, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -191,10 +192,12 @@ func (aq *AccountQuery) OnlyIDX(ctx context.Context) sid.ID {
 
 // All executes the query and returns a list of Accounts.
 func (aq *AccountQuery) All(ctx context.Context) ([]*Account, error) {
+	ctx = newQueryContext(ctx, TypeAccount, "All")
 	if err := aq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return aq.sqlAll(ctx)
+	qr := querierAll[[]*Account, *AccountQuery]()
+	return withInterceptors[[]*Account](ctx, aq, qr, aq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -209,6 +212,7 @@ func (aq *AccountQuery) AllX(ctx context.Context) []*Account {
 // IDs executes the query and returns a list of Account IDs.
 func (aq *AccountQuery) IDs(ctx context.Context) ([]sid.ID, error) {
 	var ids []sid.ID
+	ctx = newQueryContext(ctx, TypeAccount, "IDs")
 	if err := aq.Select(account.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -226,10 +230,11 @@ func (aq *AccountQuery) IDsX(ctx context.Context) []sid.ID {
 
 // Count returns the count of the given query.
 func (aq *AccountQuery) Count(ctx context.Context) (int, error) {
+	ctx = newQueryContext(ctx, TypeAccount, "Count")
 	if err := aq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return aq.sqlCount(ctx)
+	return withInterceptors[int](ctx, aq, querierCount[*AccountQuery](), aq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -243,6 +248,7 @@ func (aq *AccountQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (aq *AccountQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = newQueryContext(ctx, TypeAccount, "Exist")
 	switch _, err := aq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -285,7 +291,7 @@ func (aq *AccountQuery) Clone() *AccountQuery {
 // WithToken tells the query-builder to eager-load the nodes that are connected to
 // the "token" edge. The optional arguments are used to configure the query builder of the edge.
 func (aq *AccountQuery) WithToken(opts ...func(*TokenQuery)) *AccountQuery {
-	query := &TokenQuery{config: aq.config}
+	query := (&TokenClient{config: aq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -308,16 +314,11 @@ func (aq *AccountQuery) WithToken(opts ...func(*TokenQuery)) *AccountQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (aq *AccountQuery) GroupBy(field string, fields ...string) *AccountGroupBy {
-	grbuild := &AccountGroupBy{config: aq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := aq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return aq.sqlQuery(ctx), nil
-	}
+	aq.fields = append([]string{field}, fields...)
+	grbuild := &AccountGroupBy{build: aq}
+	grbuild.flds = &aq.fields
 	grbuild.label = account.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -335,10 +336,10 @@ func (aq *AccountQuery) GroupBy(field string, fields ...string) *AccountGroupBy 
 //		Scan(ctx, &v)
 func (aq *AccountQuery) Select(fields ...string) *AccountSelect {
 	aq.fields = append(aq.fields, fields...)
-	selbuild := &AccountSelect{AccountQuery: aq}
-	selbuild.label = account.Label
-	selbuild.flds, selbuild.scan = &aq.fields, selbuild.Scan
-	return selbuild
+	sbuild := &AccountSelect{AccountQuery: aq}
+	sbuild.label = account.Label
+	sbuild.flds, sbuild.scan = &aq.fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a AccountSelect configured with the given aggregations.
@@ -347,6 +348,16 @@ func (aq *AccountQuery) Aggregate(fns ...AggregateFunc) *AccountSelect {
 }
 
 func (aq *AccountQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range aq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, aq); err != nil {
+				return err
+			}
+		}
+	}
 	for _, f := range aq.fields {
 		if !account.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
@@ -521,13 +532,8 @@ func (aq *AccountQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // AccountGroupBy is the group-by builder for Account entities.
 type AccountGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *AccountQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -536,58 +542,46 @@ func (agb *AccountGroupBy) Aggregate(fns ...AggregateFunc) *AccountGroupBy {
 	return agb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (agb *AccountGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := agb.path(ctx)
-	if err != nil {
+	ctx = newQueryContext(ctx, TypeAccount, "GroupBy")
+	if err := agb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	agb.sql = query
-	return agb.sqlScan(ctx, v)
+	return scanWithInterceptors[*AccountQuery, *AccountGroupBy](ctx, agb.build, agb, agb.build.inters, v)
 }
 
-func (agb *AccountGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range agb.fields {
-		if !account.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (agb *AccountGroupBy) sqlScan(ctx context.Context, root *AccountQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(agb.fns))
+	for _, fn := range agb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := agb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*agb.flds)+len(agb.fns))
+		for _, f := range *agb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*agb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := agb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := agb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (agb *AccountGroupBy) sqlQuery() *sql.Selector {
-	selector := agb.sql.Select()
-	aggregation := make([]string, 0, len(agb.fns))
-	for _, fn := range agb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(agb.fields)+len(agb.fns))
-		for _, f := range agb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(agb.fields...)...)
-}
-
 // AccountSelect is the builder for selecting fields of Account entities.
 type AccountSelect struct {
 	*AccountQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -598,26 +592,27 @@ func (as *AccountSelect) Aggregate(fns ...AggregateFunc) *AccountSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (as *AccountSelect) Scan(ctx context.Context, v any) error {
+	ctx = newQueryContext(ctx, TypeAccount, "Select")
 	if err := as.prepareQuery(ctx); err != nil {
 		return err
 	}
-	as.sql = as.AccountQuery.sqlQuery(ctx)
-	return as.sqlScan(ctx, v)
+	return scanWithInterceptors[*AccountQuery, *AccountSelect](ctx, as.AccountQuery, as, as.inters, v)
 }
 
-func (as *AccountSelect) sqlScan(ctx context.Context, v any) error {
+func (as *AccountSelect) sqlScan(ctx context.Context, root *AccountQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(as.fns))
 	for _, fn := range as.fns {
-		aggregation = append(aggregation, fn(as.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*as.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		as.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		as.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := as.sql.Query()
+	query, args := selector.Query()
 	if err := as.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

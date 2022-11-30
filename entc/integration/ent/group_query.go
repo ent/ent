@@ -31,6 +31,7 @@ type GroupQuery struct {
 	unique           *bool
 	order            []OrderFunc
 	fields           []string
+	inters           []Interceptor
 	predicates       []predicate.Group
 	withFiles        *FileQuery
 	withBlocked      *UserQuery
@@ -52,13 +53,13 @@ func (gq *GroupQuery) Where(ps ...predicate.Group) *GroupQuery {
 	return gq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (gq *GroupQuery) Limit(limit int) *GroupQuery {
 	gq.limit = &limit
 	return gq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (gq *GroupQuery) Offset(offset int) *GroupQuery {
 	gq.offset = &offset
 	return gq
@@ -71,7 +72,7 @@ func (gq *GroupQuery) Unique(unique bool) *GroupQuery {
 	return gq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (gq *GroupQuery) Order(o ...OrderFunc) *GroupQuery {
 	gq.order = append(gq.order, o...)
 	return gq
@@ -79,7 +80,7 @@ func (gq *GroupQuery) Order(o ...OrderFunc) *GroupQuery {
 
 // QueryFiles chains the current query on the "files" edge.
 func (gq *GroupQuery) QueryFiles() *FileQuery {
-	query := &FileQuery{config: gq.config}
+	query := (&FileClient{config: gq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -101,7 +102,7 @@ func (gq *GroupQuery) QueryFiles() *FileQuery {
 
 // QueryBlocked chains the current query on the "blocked" edge.
 func (gq *GroupQuery) QueryBlocked() *UserQuery {
-	query := &UserQuery{config: gq.config}
+	query := (&UserClient{config: gq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -123,7 +124,7 @@ func (gq *GroupQuery) QueryBlocked() *UserQuery {
 
 // QueryUsers chains the current query on the "users" edge.
 func (gq *GroupQuery) QueryUsers() *UserQuery {
-	query := &UserQuery{config: gq.config}
+	query := (&UserClient{config: gq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -145,7 +146,7 @@ func (gq *GroupQuery) QueryUsers() *UserQuery {
 
 // QueryInfo chains the current query on the "info" edge.
 func (gq *GroupQuery) QueryInfo() *GroupInfoQuery {
-	query := &GroupInfoQuery{config: gq.config}
+	query := (&GroupInfoClient{config: gq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -168,7 +169,7 @@ func (gq *GroupQuery) QueryInfo() *GroupInfoQuery {
 // First returns the first Group entity from the query.
 // Returns a *NotFoundError when no Group was found.
 func (gq *GroupQuery) First(ctx context.Context) (*Group, error) {
-	nodes, err := gq.Limit(1).All(ctx)
+	nodes, err := gq.Limit(1).All(newQueryContext(ctx, TypeGroup, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -191,7 +192,7 @@ func (gq *GroupQuery) FirstX(ctx context.Context) *Group {
 // Returns a *NotFoundError when no Group ID was found.
 func (gq *GroupQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = gq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = gq.Limit(1).IDs(newQueryContext(ctx, TypeGroup, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -214,7 +215,7 @@ func (gq *GroupQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Group entity is found.
 // Returns a *NotFoundError when no Group entities are found.
 func (gq *GroupQuery) Only(ctx context.Context) (*Group, error) {
-	nodes, err := gq.Limit(2).All(ctx)
+	nodes, err := gq.Limit(2).All(newQueryContext(ctx, TypeGroup, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -242,7 +243,7 @@ func (gq *GroupQuery) OnlyX(ctx context.Context) *Group {
 // Returns a *NotFoundError when no entities are found.
 func (gq *GroupQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = gq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = gq.Limit(2).IDs(newQueryContext(ctx, TypeGroup, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -267,10 +268,12 @@ func (gq *GroupQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Groups.
 func (gq *GroupQuery) All(ctx context.Context) ([]*Group, error) {
+	ctx = newQueryContext(ctx, TypeGroup, "All")
 	if err := gq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return gq.sqlAll(ctx)
+	qr := querierAll[[]*Group, *GroupQuery]()
+	return withInterceptors[[]*Group](ctx, gq, qr, gq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -285,6 +288,7 @@ func (gq *GroupQuery) AllX(ctx context.Context) []*Group {
 // IDs executes the query and returns a list of Group IDs.
 func (gq *GroupQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
+	ctx = newQueryContext(ctx, TypeGroup, "IDs")
 	if err := gq.Select(group.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -302,10 +306,11 @@ func (gq *GroupQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (gq *GroupQuery) Count(ctx context.Context) (int, error) {
+	ctx = newQueryContext(ctx, TypeGroup, "Count")
 	if err := gq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return gq.sqlCount(ctx)
+	return withInterceptors[int](ctx, gq, querierCount[*GroupQuery](), gq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -319,6 +324,7 @@ func (gq *GroupQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (gq *GroupQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = newQueryContext(ctx, TypeGroup, "Exist")
 	switch _, err := gq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -364,7 +370,7 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 // WithFiles tells the query-builder to eager-load the nodes that are connected to
 // the "files" edge. The optional arguments are used to configure the query builder of the edge.
 func (gq *GroupQuery) WithFiles(opts ...func(*FileQuery)) *GroupQuery {
-	query := &FileQuery{config: gq.config}
+	query := (&FileClient{config: gq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -375,7 +381,7 @@ func (gq *GroupQuery) WithFiles(opts ...func(*FileQuery)) *GroupQuery {
 // WithBlocked tells the query-builder to eager-load the nodes that are connected to
 // the "blocked" edge. The optional arguments are used to configure the query builder of the edge.
 func (gq *GroupQuery) WithBlocked(opts ...func(*UserQuery)) *GroupQuery {
-	query := &UserQuery{config: gq.config}
+	query := (&UserClient{config: gq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -386,7 +392,7 @@ func (gq *GroupQuery) WithBlocked(opts ...func(*UserQuery)) *GroupQuery {
 // WithUsers tells the query-builder to eager-load the nodes that are connected to
 // the "users" edge. The optional arguments are used to configure the query builder of the edge.
 func (gq *GroupQuery) WithUsers(opts ...func(*UserQuery)) *GroupQuery {
-	query := &UserQuery{config: gq.config}
+	query := (&UserClient{config: gq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -397,7 +403,7 @@ func (gq *GroupQuery) WithUsers(opts ...func(*UserQuery)) *GroupQuery {
 // WithInfo tells the query-builder to eager-load the nodes that are connected to
 // the "info" edge. The optional arguments are used to configure the query builder of the edge.
 func (gq *GroupQuery) WithInfo(opts ...func(*GroupInfoQuery)) *GroupQuery {
-	query := &GroupInfoQuery{config: gq.config}
+	query := (&GroupInfoClient{config: gq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -420,16 +426,11 @@ func (gq *GroupQuery) WithInfo(opts ...func(*GroupInfoQuery)) *GroupQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
-	grbuild := &GroupGroupBy{config: gq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := gq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return gq.sqlQuery(ctx), nil
-	}
+	gq.fields = append([]string{field}, fields...)
+	grbuild := &GroupGroupBy{build: gq}
+	grbuild.flds = &gq.fields
 	grbuild.label = group.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -447,10 +448,10 @@ func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 //		Scan(ctx, &v)
 func (gq *GroupQuery) Select(fields ...string) *GroupSelect {
 	gq.fields = append(gq.fields, fields...)
-	selbuild := &GroupSelect{GroupQuery: gq}
-	selbuild.label = group.Label
-	selbuild.flds, selbuild.scan = &gq.fields, selbuild.Scan
-	return selbuild
+	sbuild := &GroupSelect{GroupQuery: gq}
+	sbuild.label = group.Label
+	sbuild.flds, sbuild.scan = &gq.fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a GroupSelect configured with the given aggregations.
@@ -459,6 +460,16 @@ func (gq *GroupQuery) Aggregate(fns ...AggregateFunc) *GroupSelect {
 }
 
 func (gq *GroupQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range gq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, gq); err != nil {
+				return err
+			}
+		}
+	}
 	for _, f := range gq.fields {
 		if !group.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
@@ -844,7 +855,7 @@ func (gq *GroupQuery) Modify(modifiers ...func(s *sql.Selector)) *GroupSelect {
 // WithNamedFiles tells the query-builder to eager-load the nodes that are connected to the "files"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (gq *GroupQuery) WithNamedFiles(name string, opts ...func(*FileQuery)) *GroupQuery {
-	query := &FileQuery{config: gq.config}
+	query := (&FileClient{config: gq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -858,7 +869,7 @@ func (gq *GroupQuery) WithNamedFiles(name string, opts ...func(*FileQuery)) *Gro
 // WithNamedBlocked tells the query-builder to eager-load the nodes that are connected to the "blocked"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (gq *GroupQuery) WithNamedBlocked(name string, opts ...func(*UserQuery)) *GroupQuery {
-	query := &UserQuery{config: gq.config}
+	query := (&UserClient{config: gq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -872,7 +883,7 @@ func (gq *GroupQuery) WithNamedBlocked(name string, opts ...func(*UserQuery)) *G
 // WithNamedUsers tells the query-builder to eager-load the nodes that are connected to the "users"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (gq *GroupQuery) WithNamedUsers(name string, opts ...func(*UserQuery)) *GroupQuery {
-	query := &UserQuery{config: gq.config}
+	query := (&UserClient{config: gq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -885,13 +896,8 @@ func (gq *GroupQuery) WithNamedUsers(name string, opts ...func(*UserQuery)) *Gro
 
 // GroupGroupBy is the group-by builder for Group entities.
 type GroupGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *GroupQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -900,58 +906,46 @@ func (ggb *GroupGroupBy) Aggregate(fns ...AggregateFunc) *GroupGroupBy {
 	return ggb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (ggb *GroupGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := ggb.path(ctx)
-	if err != nil {
+	ctx = newQueryContext(ctx, TypeGroup, "GroupBy")
+	if err := ggb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ggb.sql = query
-	return ggb.sqlScan(ctx, v)
+	return scanWithInterceptors[*GroupQuery, *GroupGroupBy](ctx, ggb.build, ggb, ggb.build.inters, v)
 }
 
-func (ggb *GroupGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range ggb.fields {
-		if !group.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (ggb *GroupGroupBy) sqlScan(ctx context.Context, root *GroupQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(ggb.fns))
+	for _, fn := range ggb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := ggb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*ggb.flds)+len(ggb.fns))
+		for _, f := range *ggb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*ggb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ggb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := ggb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (ggb *GroupGroupBy) sqlQuery() *sql.Selector {
-	selector := ggb.sql.Select()
-	aggregation := make([]string, 0, len(ggb.fns))
-	for _, fn := range ggb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(ggb.fields)+len(ggb.fns))
-		for _, f := range ggb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(ggb.fields...)...)
-}
-
 // GroupSelect is the builder for selecting fields of Group entities.
 type GroupSelect struct {
 	*GroupQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -962,26 +956,27 @@ func (gs *GroupSelect) Aggregate(fns ...AggregateFunc) *GroupSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (gs *GroupSelect) Scan(ctx context.Context, v any) error {
+	ctx = newQueryContext(ctx, TypeGroup, "Select")
 	if err := gs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	gs.sql = gs.GroupQuery.sqlQuery(ctx)
-	return gs.sqlScan(ctx, v)
+	return scanWithInterceptors[*GroupQuery, *GroupSelect](ctx, gs.GroupQuery, gs, gs.inters, v)
 }
 
-func (gs *GroupSelect) sqlScan(ctx context.Context, v any) error {
+func (gs *GroupSelect) sqlScan(ctx context.Context, root *GroupQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(gs.fns))
 	for _, fn := range gs.fns {
-		aggregation = append(aggregation, fn(gs.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*gs.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		gs.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		gs.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := gs.sql.Query()
+	query, args := selector.Query()
 	if err := gs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

@@ -38,7 +38,7 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	cfg := config{log: log.Println, hooks: &hooks{}}
+	cfg := config{log: log.Println, hooks: &hooks{}, inters: &inters{}}
 	cfg.options(opts...)
 	client := &Client{config: cfg}
 	client.init()
@@ -141,6 +141,14 @@ func (c *Client) Use(hooks ...Hook) {
 	c.User.Use(hooks...)
 }
 
+// Intercept adds the query interceptors to all the entity clients.
+// In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
+func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.Task.Intercept(interceptors...)
+	c.Team.Intercept(interceptors...)
+	c.User.Intercept(interceptors...)
+}
+
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
@@ -169,6 +177,12 @@ func NewTaskClient(c config) *TaskClient {
 // A call to `Use(f, g, h)` equals to `task.Hooks(f(g(h())))`.
 func (c *TaskClient) Use(hooks ...Hook) {
 	c.hooks.Task = append(c.hooks.Task, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `task.Intercept(f(g(h())))`.
+func (c *TaskClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Task = append(c.inters.Task, interceptors...)
 }
 
 // Create returns a builder for creating a Task entity.
@@ -223,6 +237,7 @@ func (c *TaskClient) DeleteOneID(id int) *TaskDeleteOne {
 func (c *TaskClient) Query() *TaskQuery {
 	return &TaskQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -242,7 +257,7 @@ func (c *TaskClient) GetX(ctx context.Context, id int) *Task {
 
 // QueryTeams queries the teams edge of a Task.
 func (c *TaskClient) QueryTeams(t *Task) *TeamQuery {
-	query := &TeamQuery{config: c.config}
+	query := (&TeamClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
@@ -258,7 +273,7 @@ func (c *TaskClient) QueryTeams(t *Task) *TeamQuery {
 
 // QueryOwner queries the owner edge of a Task.
 func (c *TaskClient) QueryOwner(t *Task) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
@@ -276,6 +291,11 @@ func (c *TaskClient) QueryOwner(t *Task) *UserQuery {
 func (c *TaskClient) Hooks() []Hook {
 	hooks := c.hooks.Task
 	return append(hooks[:len(hooks):len(hooks)], task.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *TaskClient) Interceptors() []Interceptor {
+	return c.inters.Task
 }
 
 func (c *TaskClient) mutate(ctx context.Context, m *TaskMutation) (Value, error) {
@@ -307,6 +327,12 @@ func NewTeamClient(c config) *TeamClient {
 // A call to `Use(f, g, h)` equals to `team.Hooks(f(g(h())))`.
 func (c *TeamClient) Use(hooks ...Hook) {
 	c.hooks.Team = append(c.hooks.Team, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `team.Intercept(f(g(h())))`.
+func (c *TeamClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Team = append(c.inters.Team, interceptors...)
 }
 
 // Create returns a builder for creating a Team entity.
@@ -361,6 +387,7 @@ func (c *TeamClient) DeleteOneID(id int) *TeamDeleteOne {
 func (c *TeamClient) Query() *TeamQuery {
 	return &TeamQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -380,7 +407,7 @@ func (c *TeamClient) GetX(ctx context.Context, id int) *Team {
 
 // QueryTasks queries the tasks edge of a Team.
 func (c *TeamClient) QueryTasks(t *Team) *TaskQuery {
-	query := &TaskQuery{config: c.config}
+	query := (&TaskClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
@@ -396,7 +423,7 @@ func (c *TeamClient) QueryTasks(t *Team) *TaskQuery {
 
 // QueryUsers queries the users edge of a Team.
 func (c *TeamClient) QueryUsers(t *Team) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
@@ -414,6 +441,11 @@ func (c *TeamClient) QueryUsers(t *Team) *UserQuery {
 func (c *TeamClient) Hooks() []Hook {
 	hooks := c.hooks.Team
 	return append(hooks[:len(hooks):len(hooks)], team.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *TeamClient) Interceptors() []Interceptor {
+	return c.inters.Team
 }
 
 func (c *TeamClient) mutate(ctx context.Context, m *TeamMutation) (Value, error) {
@@ -445,6 +477,12 @@ func NewUserClient(c config) *UserClient {
 // A call to `Use(f, g, h)` equals to `user.Hooks(f(g(h())))`.
 func (c *UserClient) Use(hooks ...Hook) {
 	c.hooks.User = append(c.hooks.User, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `user.Intercept(f(g(h())))`.
+func (c *UserClient) Intercept(interceptors ...Interceptor) {
+	c.inters.User = append(c.inters.User, interceptors...)
 }
 
 // Create returns a builder for creating a User entity.
@@ -499,6 +537,7 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -518,7 +557,7 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 
 // QueryTeams queries the teams edge of a User.
 func (c *UserClient) QueryTeams(u *User) *TeamQuery {
-	query := &TeamQuery{config: c.config}
+	query := (&TeamClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -534,7 +573,7 @@ func (c *UserClient) QueryTeams(u *User) *TeamQuery {
 
 // QueryTasks queries the tasks edge of a User.
 func (c *UserClient) QueryTasks(u *User) *TaskQuery {
-	query := &TaskQuery{config: c.config}
+	query := (&TaskClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -552,6 +591,11 @@ func (c *UserClient) QueryTasks(u *User) *TaskQuery {
 func (c *UserClient) Hooks() []Hook {
 	hooks := c.hooks.User
 	return append(hooks[:len(hooks):len(hooks)], user.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *UserClient) Interceptors() []Interceptor {
+	return c.inters.User
 }
 
 func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error) {

@@ -6,7 +6,7 @@ in the LICENSE file in the root directory of this source tree.
 
 {{/* gotype: entgo.io/ent/entc/gen.Type */}}
 
-{{/* Templates used by the "namededges" feature-flag to allow eager-loading edges with dynamic names.. */}}
+{{/* Templates used by the "namedges" feature-flag to allow eager-loading edges with dynamic names. */}}
 
 {{ define "dialect/sql/model/edges/fields/additional/namedges" }}
     {{- if $.FeatureEnabled "namedges" }}
@@ -74,7 +74,7 @@ in the LICENSE file in the root directory of this source tree.
                 // {{ $func }} tells the query-builder to eager-load the nodes that are connected to the "{{ $e.Name }}"
                 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
                 func ({{ $receiver }} *{{ $builder }}) {{ $func }}(name string, opts ...func(*{{ $ebuilder }})) *{{ $builder }} {
-                    query := &{{ $ebuilder }}{config: {{ $receiver }}.config}
+                    query := (&{{ $e.Type.ClientName }}{config: {{ $receiver }}.config}).Query()
                     for _, opt := range opts {
                         opt(query)
                     }

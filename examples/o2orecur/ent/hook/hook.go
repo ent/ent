@@ -19,11 +19,10 @@ type NodeFunc func(context.Context, *ent.NodeMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
 func (f NodeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.NodeMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.NodeMutation", m)
+	if mv, ok := m.(*ent.NodeMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.NodeMutation", m)
 }
 
 // Condition is a hook condition function.

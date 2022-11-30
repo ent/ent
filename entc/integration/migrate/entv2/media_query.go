@@ -26,6 +26,7 @@ type MediaQuery struct {
 	unique     *bool
 	order      []OrderFunc
 	fields     []string
+	inters     []Interceptor
 	predicates []predicate.Media
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -38,13 +39,13 @@ func (mq *MediaQuery) Where(ps ...predicate.Media) *MediaQuery {
 	return mq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (mq *MediaQuery) Limit(limit int) *MediaQuery {
 	mq.limit = &limit
 	return mq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (mq *MediaQuery) Offset(offset int) *MediaQuery {
 	mq.offset = &offset
 	return mq
@@ -57,7 +58,7 @@ func (mq *MediaQuery) Unique(unique bool) *MediaQuery {
 	return mq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (mq *MediaQuery) Order(o ...OrderFunc) *MediaQuery {
 	mq.order = append(mq.order, o...)
 	return mq
@@ -66,7 +67,7 @@ func (mq *MediaQuery) Order(o ...OrderFunc) *MediaQuery {
 // First returns the first Media entity from the query.
 // Returns a *NotFoundError when no Media was found.
 func (mq *MediaQuery) First(ctx context.Context) (*Media, error) {
-	nodes, err := mq.Limit(1).All(ctx)
+	nodes, err := mq.Limit(1).All(newQueryContext(ctx, TypeMedia, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +90,7 @@ func (mq *MediaQuery) FirstX(ctx context.Context) *Media {
 // Returns a *NotFoundError when no Media ID was found.
 func (mq *MediaQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = mq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = mq.Limit(1).IDs(newQueryContext(ctx, TypeMedia, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -112,7 +113,7 @@ func (mq *MediaQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Media entity is found.
 // Returns a *NotFoundError when no Media entities are found.
 func (mq *MediaQuery) Only(ctx context.Context) (*Media, error) {
-	nodes, err := mq.Limit(2).All(ctx)
+	nodes, err := mq.Limit(2).All(newQueryContext(ctx, TypeMedia, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +141,7 @@ func (mq *MediaQuery) OnlyX(ctx context.Context) *Media {
 // Returns a *NotFoundError when no entities are found.
 func (mq *MediaQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = mq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = mq.Limit(2).IDs(newQueryContext(ctx, TypeMedia, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -165,10 +166,12 @@ func (mq *MediaQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of MediaSlice.
 func (mq *MediaQuery) All(ctx context.Context) ([]*Media, error) {
+	ctx = newQueryContext(ctx, TypeMedia, "All")
 	if err := mq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return mq.sqlAll(ctx)
+	qr := querierAll[[]*Media, *MediaQuery]()
+	return withInterceptors[[]*Media](ctx, mq, qr, mq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -183,6 +186,7 @@ func (mq *MediaQuery) AllX(ctx context.Context) []*Media {
 // IDs executes the query and returns a list of Media IDs.
 func (mq *MediaQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
+	ctx = newQueryContext(ctx, TypeMedia, "IDs")
 	if err := mq.Select(media.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -200,10 +204,11 @@ func (mq *MediaQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (mq *MediaQuery) Count(ctx context.Context) (int, error) {
+	ctx = newQueryContext(ctx, TypeMedia, "Count")
 	if err := mq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return mq.sqlCount(ctx)
+	return withInterceptors[int](ctx, mq, querierCount[*MediaQuery](), mq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -217,6 +222,7 @@ func (mq *MediaQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (mq *MediaQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = newQueryContext(ctx, TypeMedia, "Exist")
 	switch _, err := mq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -270,16 +276,11 @@ func (mq *MediaQuery) Clone() *MediaQuery {
 //		Aggregate(entv2.Count()).
 //		Scan(ctx, &v)
 func (mq *MediaQuery) GroupBy(field string, fields ...string) *MediaGroupBy {
-	grbuild := &MediaGroupBy{config: mq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := mq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return mq.sqlQuery(ctx), nil
-	}
+	mq.fields = append([]string{field}, fields...)
+	grbuild := &MediaGroupBy{build: mq}
+	grbuild.flds = &mq.fields
 	grbuild.label = media.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -297,10 +298,10 @@ func (mq *MediaQuery) GroupBy(field string, fields ...string) *MediaGroupBy {
 //		Scan(ctx, &v)
 func (mq *MediaQuery) Select(fields ...string) *MediaSelect {
 	mq.fields = append(mq.fields, fields...)
-	selbuild := &MediaSelect{MediaQuery: mq}
-	selbuild.label = media.Label
-	selbuild.flds, selbuild.scan = &mq.fields, selbuild.Scan
-	return selbuild
+	sbuild := &MediaSelect{MediaQuery: mq}
+	sbuild.label = media.Label
+	sbuild.flds, sbuild.scan = &mq.fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a MediaSelect configured with the given aggregations.
@@ -309,6 +310,16 @@ func (mq *MediaQuery) Aggregate(fns ...AggregateFunc) *MediaSelect {
 }
 
 func (mq *MediaQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range mq.inters {
+		if inter == nil {
+			return fmt.Errorf("entv2: uninitialized interceptor (forgotten import entv2/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, mq); err != nil {
+				return err
+			}
+		}
+	}
 	for _, f := range mq.fields {
 		if !media.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("entv2: invalid field %q for query", f)}
@@ -440,13 +451,8 @@ func (mq *MediaQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // MediaGroupBy is the group-by builder for Media entities.
 type MediaGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *MediaQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -455,58 +461,46 @@ func (mgb *MediaGroupBy) Aggregate(fns ...AggregateFunc) *MediaGroupBy {
 	return mgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (mgb *MediaGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := mgb.path(ctx)
-	if err != nil {
+	ctx = newQueryContext(ctx, TypeMedia, "GroupBy")
+	if err := mgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	mgb.sql = query
-	return mgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*MediaQuery, *MediaGroupBy](ctx, mgb.build, mgb, mgb.build.inters, v)
 }
 
-func (mgb *MediaGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range mgb.fields {
-		if !media.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (mgb *MediaGroupBy) sqlScan(ctx context.Context, root *MediaQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(mgb.fns))
+	for _, fn := range mgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := mgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*mgb.flds)+len(mgb.fns))
+		for _, f := range *mgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*mgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := mgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := mgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (mgb *MediaGroupBy) sqlQuery() *sql.Selector {
-	selector := mgb.sql.Select()
-	aggregation := make([]string, 0, len(mgb.fns))
-	for _, fn := range mgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(mgb.fields)+len(mgb.fns))
-		for _, f := range mgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(mgb.fields...)...)
-}
-
 // MediaSelect is the builder for selecting fields of Media entities.
 type MediaSelect struct {
 	*MediaQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -517,26 +511,27 @@ func (ms *MediaSelect) Aggregate(fns ...AggregateFunc) *MediaSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ms *MediaSelect) Scan(ctx context.Context, v any) error {
+	ctx = newQueryContext(ctx, TypeMedia, "Select")
 	if err := ms.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ms.sql = ms.MediaQuery.sqlQuery(ctx)
-	return ms.sqlScan(ctx, v)
+	return scanWithInterceptors[*MediaQuery, *MediaSelect](ctx, ms.MediaQuery, ms, ms.inters, v)
 }
 
-func (ms *MediaSelect) sqlScan(ctx context.Context, v any) error {
+func (ms *MediaSelect) sqlScan(ctx context.Context, root *MediaQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(ms.fns))
 	for _, fn := range ms.fns {
-		aggregation = append(aggregation, fn(ms.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*ms.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		ms.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		ms.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := ms.sql.Query()
+	query, args := selector.Query()
 	if err := ms.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

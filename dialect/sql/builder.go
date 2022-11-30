@@ -1762,7 +1762,7 @@ func (p *Predicate) Contains(col, substr string) *Predicate {
 	return p.escapedLike(col, "%", "%", substr)
 }
 
-// ContainsFold is a helper predicate that checks substring using the LIKE predicate.
+// ContainsFold is a helper predicate that checks substring using the LIKE predicate with case-folding.
 func ContainsFold(col, sub string) *Predicate { return P().ContainsFold(col, sub) }
 
 // ContainsFold is a helper predicate that applies the LIKE predicate with case-folding.

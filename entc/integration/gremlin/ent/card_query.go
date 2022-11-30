@@ -29,6 +29,7 @@ type CardQuery struct {
 	unique     *bool
 	order      []OrderFunc
 	fields     []string
+	inters     []Interceptor
 	predicates []predicate.Card
 	withOwner  *UserQuery
 	withSpec   *SpecQuery
@@ -43,13 +44,13 @@ func (cq *CardQuery) Where(ps ...predicate.Card) *CardQuery {
 	return cq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (cq *CardQuery) Limit(limit int) *CardQuery {
 	cq.limit = &limit
 	return cq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (cq *CardQuery) Offset(offset int) *CardQuery {
 	cq.offset = &offset
 	return cq
@@ -62,7 +63,7 @@ func (cq *CardQuery) Unique(unique bool) *CardQuery {
 	return cq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (cq *CardQuery) Order(o ...OrderFunc) *CardQuery {
 	cq.order = append(cq.order, o...)
 	return cq
@@ -70,7 +71,7 @@ func (cq *CardQuery) Order(o ...OrderFunc) *CardQuery {
 
 // QueryOwner chains the current query on the "owner" edge.
 func (cq *CardQuery) QueryOwner() *UserQuery {
-	query := &UserQuery{config: cq.config}
+	query := (&UserClient{config: cq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -84,7 +85,7 @@ func (cq *CardQuery) QueryOwner() *UserQuery {
 
 // QuerySpec chains the current query on the "spec" edge.
 func (cq *CardQuery) QuerySpec() *SpecQuery {
-	query := &SpecQuery{config: cq.config}
+	query := (&SpecClient{config: cq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -99,7 +100,7 @@ func (cq *CardQuery) QuerySpec() *SpecQuery {
 // First returns the first Card entity from the query.
 // Returns a *NotFoundError when no Card was found.
 func (cq *CardQuery) First(ctx context.Context) (*Card, error) {
-	nodes, err := cq.Limit(1).All(ctx)
+	nodes, err := cq.Limit(1).All(newQueryContext(ctx, TypeCard, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +123,7 @@ func (cq *CardQuery) FirstX(ctx context.Context) *Card {
 // Returns a *NotFoundError when no Card ID was found.
 func (cq *CardQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = cq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = cq.Limit(1).IDs(newQueryContext(ctx, TypeCard, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -145,7 +146,7 @@ func (cq *CardQuery) FirstIDX(ctx context.Context) string {
 // Returns a *NotSingularError when more than one Card entity is found.
 // Returns a *NotFoundError when no Card entities are found.
 func (cq *CardQuery) Only(ctx context.Context) (*Card, error) {
-	nodes, err := cq.Limit(2).All(ctx)
+	nodes, err := cq.Limit(2).All(newQueryContext(ctx, TypeCard, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -173,7 +174,7 @@ func (cq *CardQuery) OnlyX(ctx context.Context) *Card {
 // Returns a *NotFoundError when no entities are found.
 func (cq *CardQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = cq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = cq.Limit(2).IDs(newQueryContext(ctx, TypeCard, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -198,10 +199,12 @@ func (cq *CardQuery) OnlyIDX(ctx context.Context) string {
 
 // All executes the query and returns a list of Cards.
 func (cq *CardQuery) All(ctx context.Context) ([]*Card, error) {
+	ctx = newQueryContext(ctx, TypeCard, "All")
 	if err := cq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return cq.gremlinAll(ctx)
+	qr := querierAll[[]*Card, *CardQuery]()
+	return withInterceptors[[]*Card](ctx, cq, qr, cq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -216,6 +219,7 @@ func (cq *CardQuery) AllX(ctx context.Context) []*Card {
 // IDs executes the query and returns a list of Card IDs.
 func (cq *CardQuery) IDs(ctx context.Context) ([]string, error) {
 	var ids []string
+	ctx = newQueryContext(ctx, TypeCard, "IDs")
 	if err := cq.Select(card.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -233,10 +237,11 @@ func (cq *CardQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (cq *CardQuery) Count(ctx context.Context) (int, error) {
+	ctx = newQueryContext(ctx, TypeCard, "Count")
 	if err := cq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return cq.gremlinCount(ctx)
+	return withInterceptors[int](ctx, cq, querierCount[*CardQuery](), cq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -250,6 +255,7 @@ func (cq *CardQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (cq *CardQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = newQueryContext(ctx, TypeCard, "Exist")
 	switch _, err := cq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -293,7 +299,7 @@ func (cq *CardQuery) Clone() *CardQuery {
 // WithOwner tells the query-builder to eager-load the nodes that are connected to
 // the "owner" edge. The optional arguments are used to configure the query builder of the edge.
 func (cq *CardQuery) WithOwner(opts ...func(*UserQuery)) *CardQuery {
-	query := &UserQuery{config: cq.config}
+	query := (&UserClient{config: cq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -304,7 +310,7 @@ func (cq *CardQuery) WithOwner(opts ...func(*UserQuery)) *CardQuery {
 // WithSpec tells the query-builder to eager-load the nodes that are connected to
 // the "spec" edge. The optional arguments are used to configure the query builder of the edge.
 func (cq *CardQuery) WithSpec(opts ...func(*SpecQuery)) *CardQuery {
-	query := &SpecQuery{config: cq.config}
+	query := (&SpecClient{config: cq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -327,16 +333,11 @@ func (cq *CardQuery) WithSpec(opts ...func(*SpecQuery)) *CardQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
-	grbuild := &CardGroupBy{config: cq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
-		if err := cq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return cq.gremlinQuery(ctx), nil
-	}
+	cq.fields = append([]string{field}, fields...)
+	grbuild := &CardGroupBy{build: cq}
+	grbuild.flds = &cq.fields
 	grbuild.label = card.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -354,10 +355,10 @@ func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 //		Scan(ctx, &v)
 func (cq *CardQuery) Select(fields ...string) *CardSelect {
 	cq.fields = append(cq.fields, fields...)
-	selbuild := &CardSelect{CardQuery: cq}
-	selbuild.label = card.Label
-	selbuild.flds, selbuild.scan = &cq.fields, selbuild.Scan
-	return selbuild
+	sbuild := &CardSelect{CardQuery: cq}
+	sbuild.label = card.Label
+	sbuild.flds, sbuild.scan = &cq.fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a CardSelect configured with the given aggregations.
@@ -366,6 +367,16 @@ func (cq *CardQuery) Aggregate(fns ...AggregateFunc) *CardSelect {
 }
 
 func (cq *CardQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range cq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, cq); err != nil {
+				return err
+			}
+		}
+	}
 	if cq.path != nil {
 		prev, err := cq.path(ctx)
 		if err != nil {
@@ -376,7 +387,7 @@ func (cq *CardQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (cq *CardQuery) gremlinAll(ctx context.Context) ([]*Card, error) {
+func (cq *CardQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Card, error) {
 	res := &gremlin.Response{}
 	traversal := cq.gremlinQuery(ctx)
 	if len(cq.fields) > 0 {
@@ -439,13 +450,8 @@ func (cq *CardQuery) gremlinQuery(context.Context) *dsl.Traversal {
 
 // CardGroupBy is the group-by builder for Card entities.
 type CardGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	gremlin *dsl.Traversal
-	path    func(context.Context) (*dsl.Traversal, error)
+	build *CardQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -454,33 +460,16 @@ func (cgb *CardGroupBy) Aggregate(fns ...AggregateFunc) *CardGroupBy {
 	return cgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (cgb *CardGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := cgb.path(ctx)
-	if err != nil {
+	ctx = newQueryContext(ctx, TypeCard, "GroupBy")
+	if err := cgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cgb.gremlin = query
-	return cgb.gremlinScan(ctx, v)
+	return scanWithInterceptors[*CardQuery, *CardGroupBy](ctx, cgb.build, cgb, cgb.build.inters, v)
 }
 
-func (cgb *CardGroupBy) gremlinScan(ctx context.Context, v any) error {
-	res := &gremlin.Response{}
-	query, bindings := cgb.gremlinQuery().Query()
-	if err := cgb.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(cgb.fields)+len(cgb.fns) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
-}
-
-func (cgb *CardGroupBy) gremlinQuery() *dsl.Traversal {
+func (cgb *CardGroupBy) gremlinScan(ctx context.Context, root *CardQuery, v any) error {
 	var (
 		trs   []any
 		names []any
@@ -490,23 +479,34 @@ func (cgb *CardGroupBy) gremlinQuery() *dsl.Traversal {
 		trs = append(trs, tr)
 		names = append(names, name)
 	}
-	for _, f := range cgb.fields {
+	for _, f := range *cgb.flds {
 		names = append(names, f)
 		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
 	}
-	return cgb.gremlin.Group().
-		By(__.Values(cgb.fields...).Fold()).
+	query, bindings := root.gremlinQuery(ctx).Group().
+		By(__.Values(*cgb.flds...).Fold()).
 		By(__.Fold().Match(trs...).Select(names...)).
 		Select(dsl.Values).
-		Next()
+		Next().
+		Query()
+	res := &gremlin.Response{}
+	if err := cgb.build.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	if len(*cgb.flds)+len(cgb.fns) == 1 {
+		return res.ReadVal(v)
+	}
+	vm, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	return vm.Decode(v)
 }
 
 // CardSelect is the builder for selecting fields of Card entities.
 type CardSelect struct {
 	*CardQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	gremlin *dsl.Traversal
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -517,36 +517,36 @@ func (cs *CardSelect) Aggregate(fns ...AggregateFunc) *CardSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (cs *CardSelect) Scan(ctx context.Context, v any) error {
+	ctx = newQueryContext(ctx, TypeCard, "Select")
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cs.gremlin = cs.CardQuery.gremlinQuery(ctx)
-	return cs.gremlinScan(ctx, v)
+	return scanWithInterceptors[*CardQuery, *CardSelect](ctx, cs.CardQuery, cs, cs.inters, v)
 }
 
-func (cs *CardSelect) gremlinScan(ctx context.Context, v any) error {
+func (cs *CardSelect) gremlinScan(ctx context.Context, root *CardQuery, v any) error {
 	var (
-		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
+		traversal = root.gremlinQuery(ctx)
 	)
 	if len(cs.fields) == 1 {
 		if cs.fields[0] != card.FieldID {
-			traversal = cs.gremlin.Values(cs.fields...)
+			traversal = traversal.Values(cs.fields...)
 		} else {
-			traversal = cs.gremlin.ID()
+			traversal = traversal.ID()
 		}
 	} else {
 		fields := make([]any, len(cs.fields))
 		for i, f := range cs.fields {
 			fields[i] = f
 		}
-		traversal = cs.gremlin.ValueMap(fields...)
+		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
 	if err := cs.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
-	if len(cs.fields) == 1 {
+	if len(root.fields) == 1 {
 		return res.ReadVal(v)
 	}
 	vm, err := res.ReadValueMap()

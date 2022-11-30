@@ -27,6 +27,7 @@ type CommentQuery struct {
 	unique     *bool
 	order      []OrderFunc
 	fields     []string
+	inters     []Interceptor
 	predicates []predicate.Comment
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
@@ -39,13 +40,13 @@ func (cq *CommentQuery) Where(ps ...predicate.Comment) *CommentQuery {
 	return cq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (cq *CommentQuery) Limit(limit int) *CommentQuery {
 	cq.limit = &limit
 	return cq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (cq *CommentQuery) Offset(offset int) *CommentQuery {
 	cq.offset = &offset
 	return cq
@@ -58,7 +59,7 @@ func (cq *CommentQuery) Unique(unique bool) *CommentQuery {
 	return cq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (cq *CommentQuery) Order(o ...OrderFunc) *CommentQuery {
 	cq.order = append(cq.order, o...)
 	return cq
@@ -67,7 +68,7 @@ func (cq *CommentQuery) Order(o ...OrderFunc) *CommentQuery {
 // First returns the first Comment entity from the query.
 // Returns a *NotFoundError when no Comment was found.
 func (cq *CommentQuery) First(ctx context.Context) (*Comment, error) {
-	nodes, err := cq.Limit(1).All(ctx)
+	nodes, err := cq.Limit(1).All(newQueryContext(ctx, TypeComment, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +91,7 @@ func (cq *CommentQuery) FirstX(ctx context.Context) *Comment {
 // Returns a *NotFoundError when no Comment ID was found.
 func (cq *CommentQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = cq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = cq.Limit(1).IDs(newQueryContext(ctx, TypeComment, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -113,7 +114,7 @@ func (cq *CommentQuery) FirstIDX(ctx context.Context) string {
 // Returns a *NotSingularError when more than one Comment entity is found.
 // Returns a *NotFoundError when no Comment entities are found.
 func (cq *CommentQuery) Only(ctx context.Context) (*Comment, error) {
-	nodes, err := cq.Limit(2).All(ctx)
+	nodes, err := cq.Limit(2).All(newQueryContext(ctx, TypeComment, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +142,7 @@ func (cq *CommentQuery) OnlyX(ctx context.Context) *Comment {
 // Returns a *NotFoundError when no entities are found.
 func (cq *CommentQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = cq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = cq.Limit(2).IDs(newQueryContext(ctx, TypeComment, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -166,10 +167,12 @@ func (cq *CommentQuery) OnlyIDX(ctx context.Context) string {
 
 // All executes the query and returns a list of Comments.
 func (cq *CommentQuery) All(ctx context.Context) ([]*Comment, error) {
+	ctx = newQueryContext(ctx, TypeComment, "All")
 	if err := cq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return cq.gremlinAll(ctx)
+	qr := querierAll[[]*Comment, *CommentQuery]()
+	return withInterceptors[[]*Comment](ctx, cq, qr, cq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -184,6 +187,7 @@ func (cq *CommentQuery) AllX(ctx context.Context) []*Comment {
 // IDs executes the query and returns a list of Comment IDs.
 func (cq *CommentQuery) IDs(ctx context.Context) ([]string, error) {
 	var ids []string
+	ctx = newQueryContext(ctx, TypeComment, "IDs")
 	if err := cq.Select(comment.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -201,10 +205,11 @@ func (cq *CommentQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (cq *CommentQuery) Count(ctx context.Context) (int, error) {
+	ctx = newQueryContext(ctx, TypeComment, "Count")
 	if err := cq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return cq.gremlinCount(ctx)
+	return withInterceptors[int](ctx, cq, querierCount[*CommentQuery](), cq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -218,6 +223,7 @@ func (cq *CommentQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (cq *CommentQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = newQueryContext(ctx, TypeComment, "Exist")
 	switch _, err := cq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -271,16 +277,11 @@ func (cq *CommentQuery) Clone() *CommentQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy {
-	grbuild := &CommentGroupBy{config: cq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
-		if err := cq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return cq.gremlinQuery(ctx), nil
-	}
+	cq.fields = append([]string{field}, fields...)
+	grbuild := &CommentGroupBy{build: cq}
+	grbuild.flds = &cq.fields
 	grbuild.label = comment.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -298,10 +299,10 @@ func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy 
 //		Scan(ctx, &v)
 func (cq *CommentQuery) Select(fields ...string) *CommentSelect {
 	cq.fields = append(cq.fields, fields...)
-	selbuild := &CommentSelect{CommentQuery: cq}
-	selbuild.label = comment.Label
-	selbuild.flds, selbuild.scan = &cq.fields, selbuild.Scan
-	return selbuild
+	sbuild := &CommentSelect{CommentQuery: cq}
+	sbuild.label = comment.Label
+	sbuild.flds, sbuild.scan = &cq.fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a CommentSelect configured with the given aggregations.
@@ -310,6 +311,16 @@ func (cq *CommentQuery) Aggregate(fns ...AggregateFunc) *CommentSelect {
 }
 
 func (cq *CommentQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range cq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, cq); err != nil {
+				return err
+			}
+		}
+	}
 	if cq.path != nil {
 		prev, err := cq.path(ctx)
 		if err != nil {
@@ -320,7 +331,7 @@ func (cq *CommentQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (cq *CommentQuery) gremlinAll(ctx context.Context) ([]*Comment, error) {
+func (cq *CommentQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Comment, error) {
 	res := &gremlin.Response{}
 	traversal := cq.gremlinQuery(ctx)
 	if len(cq.fields) > 0 {
@@ -383,13 +394,8 @@ func (cq *CommentQuery) gremlinQuery(context.Context) *dsl.Traversal {
 
 // CommentGroupBy is the group-by builder for Comment entities.
 type CommentGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	gremlin *dsl.Traversal
-	path    func(context.Context) (*dsl.Traversal, error)
+	build *CommentQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -398,33 +404,16 @@ func (cgb *CommentGroupBy) Aggregate(fns ...AggregateFunc) *CommentGroupBy {
 	return cgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (cgb *CommentGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := cgb.path(ctx)
-	if err != nil {
+	ctx = newQueryContext(ctx, TypeComment, "GroupBy")
+	if err := cgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cgb.gremlin = query
-	return cgb.gremlinScan(ctx, v)
+	return scanWithInterceptors[*CommentQuery, *CommentGroupBy](ctx, cgb.build, cgb, cgb.build.inters, v)
 }
 
-func (cgb *CommentGroupBy) gremlinScan(ctx context.Context, v any) error {
-	res := &gremlin.Response{}
-	query, bindings := cgb.gremlinQuery().Query()
-	if err := cgb.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(cgb.fields)+len(cgb.fns) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
-}
-
-func (cgb *CommentGroupBy) gremlinQuery() *dsl.Traversal {
+func (cgb *CommentGroupBy) gremlinScan(ctx context.Context, root *CommentQuery, v any) error {
 	var (
 		trs   []any
 		names []any
@@ -434,23 +423,34 @@ func (cgb *CommentGroupBy) gremlinQuery() *dsl.Traversal {
 		trs = append(trs, tr)
 		names = append(names, name)
 	}
-	for _, f := range cgb.fields {
+	for _, f := range *cgb.flds {
 		names = append(names, f)
 		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
 	}
-	return cgb.gremlin.Group().
-		By(__.Values(cgb.fields...).Fold()).
+	query, bindings := root.gremlinQuery(ctx).Group().
+		By(__.Values(*cgb.flds...).Fold()).
 		By(__.Fold().Match(trs...).Select(names...)).
 		Select(dsl.Values).
-		Next()
+		Next().
+		Query()
+	res := &gremlin.Response{}
+	if err := cgb.build.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	if len(*cgb.flds)+len(cgb.fns) == 1 {
+		return res.ReadVal(v)
+	}
+	vm, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	return vm.Decode(v)
 }
 
 // CommentSelect is the builder for selecting fields of Comment entities.
 type CommentSelect struct {
 	*CommentQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	gremlin *dsl.Traversal
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -461,36 +461,36 @@ func (cs *CommentSelect) Aggregate(fns ...AggregateFunc) *CommentSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (cs *CommentSelect) Scan(ctx context.Context, v any) error {
+	ctx = newQueryContext(ctx, TypeComment, "Select")
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cs.gremlin = cs.CommentQuery.gremlinQuery(ctx)
-	return cs.gremlinScan(ctx, v)
+	return scanWithInterceptors[*CommentQuery, *CommentSelect](ctx, cs.CommentQuery, cs, cs.inters, v)
 }
 
-func (cs *CommentSelect) gremlinScan(ctx context.Context, v any) error {
+func (cs *CommentSelect) gremlinScan(ctx context.Context, root *CommentQuery, v any) error {
 	var (
-		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
+		traversal = root.gremlinQuery(ctx)
 	)
 	if len(cs.fields) == 1 {
 		if cs.fields[0] != comment.FieldID {
-			traversal = cs.gremlin.Values(cs.fields...)
+			traversal = traversal.Values(cs.fields...)
 		} else {
-			traversal = cs.gremlin.ID()
+			traversal = traversal.ID()
 		}
 	} else {
 		fields := make([]any, len(cs.fields))
 		for i, f := range cs.fields {
 			fields[i] = f
 		}
-		traversal = cs.gremlin.ValueMap(fields...)
+		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
 	if err := cs.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
-	if len(cs.fields) == 1 {
+	if len(root.fields) == 1 {
 		return res.ReadVal(v)
 	}
 	vm, err := res.ReadValueMap()

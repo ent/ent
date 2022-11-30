@@ -121,6 +121,7 @@ var (
 		migrate.WithDropColumn(true),
 	)
 	tests = [...]func(*testing.T, *ent.Client){
+		Sanity,
 		NoSchemaChanges,
 		Tx,
 		Lock,
@@ -128,7 +129,6 @@ var (
 		Types,
 		Clone,
 		EntQL,
-		Sanity,
 		Paging,
 		Select,
 		Aggregate,
@@ -1146,7 +1146,7 @@ func Relation(t *testing.T, client *ent.Client) {
 	_, err = client.Group.Query().Select("unknown_field").String(ctx)
 	require.EqualError(err, "ent: invalid field \"unknown_field\" for query")
 	_, err = client.Group.Query().GroupBy("unknown_field").String(ctx)
-	require.EqualError(err, "invalid field \"unknown_field\" for group-by")
+	require.EqualError(err, "ent: invalid field \"unknown_field\" for query")
 	_, err = client.User.Query().Order(ent.Asc("invalid")).Only(ctx)
 	require.EqualError(err, "ent: unknown column \"invalid\" for table \"users\"")
 	_, err = client.User.Query().Order(ent.Asc("invalid")).QueryFollowing().Only(ctx)

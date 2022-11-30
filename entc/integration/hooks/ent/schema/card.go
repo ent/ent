@@ -100,3 +100,13 @@ func (Card) Edges() []ent.Edge {
 			Unique(),
 	}
 }
+
+func (Card) Interceptors() []ent.Interceptor {
+	return []ent.Interceptor{
+		ent.InterceptFunc(func(next ent.Querier) ent.Querier {
+			return ent.QuerierFunc(func(ctx context.Context, q ent.Query) (ent.Value, error) {
+				return next.Query(ctx, q)
+			})
+		}),
+	}
+}

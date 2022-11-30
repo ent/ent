@@ -37,6 +37,8 @@ type config struct {
 	log func(...any)
 	// hooks to execute on mutations.
 	hooks *hooks
+	// interceptors to execute on queries.
+	inters *inters
 	{{- /* Additional dependency fields. */}}
 	{{- range $dep := $deps }}
 		{{ $dep.Field }} {{ $dep.Type }}
@@ -51,12 +53,19 @@ type config struct {
 	{{- end }}
 }
 
-// hooks per client, for fast access.
-type hooks struct {
-	{{- range $n := $.Nodes }}
-    	{{ $n.Name }} []ent.Hook
-	{{- end }}
-}
+// hooks and interceptors per client, for fast access.
+type (
+	hooks struct {
+		{{- range $n := $.Nodes }}
+    		{{ $n.Name }} []ent.Hook
+		{{- end }}
+	}
+	inters struct {
+		{{- range $n := $.Nodes }}
+			{{ $n.Name }} []ent.Interceptor
+		{{- end }}
+	}
+)
 
 // Options applies the options on the config object.
 func (c *config) options(opts ...Option) {

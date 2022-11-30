@@ -20,7 +20,7 @@ func NewUUIDC() UUIDC {
 	}
 }
 
-func (u *UUIDC) Scan(src interface{}) error {
+func (u *UUIDC) Scan(src any) error {
 	return u.uuid.Scan(src)
 }
 
