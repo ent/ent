@@ -218,10 +218,14 @@ func (miq *MixinIDQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (miq *MixinIDQuery) Exist(ctx context.Context) (bool, error) {
-	if err := miq.prepareQuery(ctx); err != nil {
-		return false, err
+	switch _, err := miq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return miq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -353,17 +357,6 @@ func (miq *MixinIDQuery) sqlCount(ctx context.Context) (int, error) {
 		_spec.Unique = miq.unique != nil && *miq.unique
 	}
 	return sqlgraph.CountNodes(ctx, miq.driver, _spec)
-}
-
-func (miq *MixinIDQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := miq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
 }
 
 func (miq *MixinIDQuery) querySpec() *sqlgraph.QuerySpec {

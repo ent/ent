@@ -256,10 +256,14 @@ func ({{ $receiver }} *{{ $builder }}) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func ({{ $receiver }} *{{ $builder }}) Exist(ctx context.Context) (bool, error) {
-	if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
-		return false, err
+	switch _, err := {{ $receiver }}.First{{ if $.HasOneFieldID }}ID{{ end }}(ctx);{
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("{{ $pkg }}: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return {{ $receiver }}.{{ $.Storage }}Exist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.

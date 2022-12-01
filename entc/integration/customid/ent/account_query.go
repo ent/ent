@@ -243,10 +243,14 @@ func (aq *AccountQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (aq *AccountQuery) Exist(ctx context.Context) (bool, error) {
-	if err := aq.prepareQuery(ctx); err != nil {
-		return false, err
+	switch _, err := aq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return aq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -433,17 +437,6 @@ func (aq *AccountQuery) sqlCount(ctx context.Context) (int, error) {
 		_spec.Unique = aq.unique != nil && *aq.unique
 	}
 	return sqlgraph.CountNodes(ctx, aq.driver, _spec)
-}
-
-func (aq *AccountQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := aq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
 }
 
 func (aq *AccountQuery) querySpec() *sqlgraph.QuerySpec {

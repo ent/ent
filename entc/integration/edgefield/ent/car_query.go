@@ -243,10 +243,14 @@ func (cq *CarQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (cq *CarQuery) Exist(ctx context.Context) (bool, error) {
-	if err := cq.prepareQuery(ctx); err != nil {
-		return false, err
+	switch _, err := cq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return cq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -429,17 +433,6 @@ func (cq *CarQuery) sqlCount(ctx context.Context) (int, error) {
 		_spec.Unique = cq.unique != nil && *cq.unique
 	}
 	return sqlgraph.CountNodes(ctx, cq.driver, _spec)
-}
-
-func (cq *CarQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := cq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
 }
 
 func (cq *CarQuery) querySpec() *sqlgraph.QuerySpec {

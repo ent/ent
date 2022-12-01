@@ -217,10 +217,14 @@ func (zq *ZooQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (zq *ZooQuery) Exist(ctx context.Context) (bool, error) {
-	if err := zq.prepareQuery(ctx); err != nil {
-		return false, err
+	switch _, err := zq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("entv2: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return zq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -330,17 +334,6 @@ func (zq *ZooQuery) sqlCount(ctx context.Context) (int, error) {
 		_spec.Unique = zq.unique != nil && *zq.unique
 	}
 	return sqlgraph.CountNodes(ctx, zq.driver, _spec)
-}
-
-func (zq *ZooQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := zq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("entv2: check existence: %w", err)
-	default:
-		return true, nil
-	}
 }
 
 func (zq *ZooQuery) querySpec() *sqlgraph.QuerySpec {
