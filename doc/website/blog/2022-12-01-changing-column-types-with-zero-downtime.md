@@ -4,8 +4,6 @@ author: Ronen Lubin (ronenlu)
 authorURL: "https://github.com/ronenlu"
 authorImageURL: "https://avatars.githubusercontent.com/u/63970571?v=4"
 ---
-
-### Motivation:
 Changing a column's type in a database schema might seem trivial at first glance, but it is actually a risky operation
 that can cause compatibility issues between the server and the database. In this blogpost,
 I will explore how developers can perform this type of change without causing downtime to their application.
@@ -18,7 +16,6 @@ for more efficient queries.
 The original schema looked like this on our cloud product’s schema visualization diagram:
 
 ![tutorial image 1](https://entgo.io/images/assets/migrate-column-type/users_table.png)
-
 
 In our case, we couldn't just copy the data naively to the new column, since the data is not compatible
 with the new column type (blob data may not be convertible to JSON).
