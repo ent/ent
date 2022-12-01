@@ -266,10 +266,14 @@ func (ttq *TweetTagQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (ttq *TweetTagQuery) Exist(ctx context.Context) (bool, error) {
-	if err := ttq.prepareQuery(ctx); err != nil {
-		return false, err
+	switch _, err := ttq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return ttq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -495,17 +499,6 @@ func (ttq *TweetTagQuery) sqlCount(ctx context.Context) (int, error) {
 		_spec.Unique = ttq.unique != nil && *ttq.unique
 	}
 	return sqlgraph.CountNodes(ctx, ttq.driver, _spec)
-}
-
-func (ttq *TweetTagQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := ttq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
 }
 
 func (ttq *TweetTagQuery) querySpec() *sqlgraph.QuerySpec {

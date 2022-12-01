@@ -43,15 +43,6 @@ func ({{ $receiver }} *{{ $builder }}) gremlinCount(ctx context.Context) (int, e
 	return res.ReadInt()
 }
 
-func ({{ $receiver }} *{{ $builder }}) gremlinExist(ctx context.Context) (bool, error) {
-	res := &gremlin.Response{}
-	query, bindings := {{ $receiver }}.gremlinQuery(ctx).HasNext().Query()
-	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
-		return false, err
-	}
-	return res.ReadBool()
-}
-
 func ({{ $receiver }} *{{ $builder }}) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel({{ $.Package }}.Label)
 	if {{ $receiver }}.gremlin != nil {

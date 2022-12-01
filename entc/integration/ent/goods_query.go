@@ -219,10 +219,14 @@ func (gq *GoodsQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (gq *GoodsQuery) Exist(ctx context.Context) (bool, error) {
-	if err := gq.prepareQuery(ctx); err != nil {
-		return false, err
+	switch _, err := gq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return gq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -338,17 +342,6 @@ func (gq *GoodsQuery) sqlCount(ctx context.Context) (int, error) {
 		_spec.Unique = gq.unique != nil && *gq.unique
 	}
 	return sqlgraph.CountNodes(ctx, gq.driver, _spec)
-}
-
-func (gq *GoodsQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := gq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
 }
 
 func (gq *GoodsQuery) querySpec() *sqlgraph.QuerySpec {

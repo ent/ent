@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"fmt"
 	"math"
 
 	"entgo.io/ent/dialect/gremlin"
@@ -248,10 +249,14 @@ func (pq *PetQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (pq *PetQuery) Exist(ctx context.Context) (bool, error) {
-	if err := pq.prepareQuery(ctx); err != nil {
-		return false, err
+	switch _, err := pq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return pq.gremlinExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -401,15 +406,6 @@ func (pq *PetQuery) gremlinCount(ctx context.Context) (int, error) {
 		return 0, err
 	}
 	return res.ReadInt()
-}
-
-func (pq *PetQuery) gremlinExist(ctx context.Context) (bool, error) {
-	res := &gremlin.Response{}
-	query, bindings := pq.gremlinQuery(ctx).HasNext().Query()
-	if err := pq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return false, err
-	}
-	return res.ReadBool()
 }
 
 func (pq *PetQuery) gremlinQuery(context.Context) *dsl.Traversal {

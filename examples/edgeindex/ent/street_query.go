@@ -242,10 +242,14 @@ func (sq *StreetQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (sq *StreetQuery) Exist(ctx context.Context) (bool, error) {
-	if err := sq.prepareQuery(ctx); err != nil {
-		return false, err
+	switch _, err := sq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return sq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -436,17 +440,6 @@ func (sq *StreetQuery) sqlCount(ctx context.Context) (int, error) {
 		_spec.Unique = sq.unique != nil && *sq.unique
 	}
 	return sqlgraph.CountNodes(ctx, sq.driver, _spec)
-}
-
-func (sq *StreetQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := sq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
 }
 
 func (sq *StreetQuery) querySpec() *sqlgraph.QuerySpec {

@@ -265,10 +265,14 @@ func (utq *UserTweetQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (utq *UserTweetQuery) Exist(ctx context.Context) (bool, error) {
-	if err := utq.prepareQuery(ctx); err != nil {
-		return false, err
+	switch _, err := utq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return utq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -494,17 +498,6 @@ func (utq *UserTweetQuery) sqlCount(ctx context.Context) (int, error) {
 		_spec.Unique = utq.unique != nil && *utq.unique
 	}
 	return sqlgraph.CountNodes(ctx, utq.driver, _spec)
-}
-
-func (utq *UserTweetQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := utq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
 }
 
 func (utq *UserTweetQuery) querySpec() *sqlgraph.QuerySpec {

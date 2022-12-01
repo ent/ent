@@ -314,10 +314,14 @@ func (tq *TagQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (tq *TagQuery) Exist(ctx context.Context) (bool, error) {
-	if err := tq.prepareQuery(ctx); err != nil {
-		return false, err
+	switch _, err := tq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return tq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -703,17 +707,6 @@ func (tq *TagQuery) sqlCount(ctx context.Context) (int, error) {
 		_spec.Unique = tq.unique != nil && *tq.unique
 	}
 	return sqlgraph.CountNodes(ctx, tq.driver, _spec)
-}
-
-func (tq *TagQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := tq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
 }
 
 func (tq *TagQuery) querySpec() *sqlgraph.QuerySpec {

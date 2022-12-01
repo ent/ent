@@ -267,10 +267,14 @@ func (dq *DeviceQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (dq *DeviceQuery) Exist(ctx context.Context) (bool, error) {
-	if err := dq.prepareQuery(ctx); err != nil {
-		return false, err
+	switch _, err := dq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return dq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -490,17 +494,6 @@ func (dq *DeviceQuery) sqlCount(ctx context.Context) (int, error) {
 		_spec.Unique = dq.unique != nil && *dq.unique
 	}
 	return sqlgraph.CountNodes(ctx, dq.driver, _spec)
-}
-
-func (dq *DeviceQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := dq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
 }
 
 func (dq *DeviceQuery) querySpec() *sqlgraph.QuerySpec {

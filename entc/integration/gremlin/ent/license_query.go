@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"fmt"
 	"math"
 
 	"entgo.io/ent/dialect/gremlin"
@@ -217,10 +218,14 @@ func (lq *LicenseQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (lq *LicenseQuery) Exist(ctx context.Context) (bool, error) {
-	if err := lq.prepareQuery(ctx); err != nil {
-		return false, err
+	switch _, err := lq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return lq.gremlinExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -346,15 +351,6 @@ func (lq *LicenseQuery) gremlinCount(ctx context.Context) (int, error) {
 		return 0, err
 	}
 	return res.ReadInt()
-}
-
-func (lq *LicenseQuery) gremlinExist(ctx context.Context) (bool, error) {
-	res := &gremlin.Response{}
-	query, bindings := lq.gremlinQuery(ctx).HasNext().Query()
-	if err := lq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return false, err
-	}
-	return res.ReadBool()
 }
 
 func (lq *LicenseQuery) gremlinQuery(context.Context) *dsl.Traversal {

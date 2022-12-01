@@ -217,10 +217,14 @@ func (ctq *CustomTypeQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (ctq *CustomTypeQuery) Exist(ctx context.Context) (bool, error) {
-	if err := ctq.prepareQuery(ctx); err != nil {
-		return false, err
+	switch _, err := ctq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("entv1: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return ctq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -352,17 +356,6 @@ func (ctq *CustomTypeQuery) sqlCount(ctx context.Context) (int, error) {
 		_spec.Unique = ctq.unique != nil && *ctq.unique
 	}
 	return sqlgraph.CountNodes(ctx, ctq.driver, _spec)
-}
-
-func (ctq *CustomTypeQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := ctq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("entv1: check existence: %w", err)
-	default:
-		return true, nil
-	}
 }
 
 func (ctq *CustomTypeQuery) querySpec() *sqlgraph.QuerySpec {

@@ -219,10 +219,14 @@ func (rq *RelationshipQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (rq *RelationshipQuery) Exist(ctx context.Context) (bool, error) {
-	if err := rq.prepareQuery(ctx); err != nil {
-		return false, err
+	switch _, err := rq.First(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return rq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -497,17 +501,6 @@ func (rq *RelationshipQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec.Unique = false
 	_spec.Node.Columns = nil
 	return sqlgraph.CountNodes(ctx, rq.driver, _spec)
-}
-
-func (rq *RelationshipQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := rq.First(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
 }
 
 func (rq *RelationshipQuery) querySpec() *sqlgraph.QuerySpec {

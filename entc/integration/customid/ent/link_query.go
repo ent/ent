@@ -218,10 +218,14 @@ func (lq *LinkQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (lq *LinkQuery) Exist(ctx context.Context) (bool, error) {
-	if err := lq.prepareQuery(ctx); err != nil {
-		return false, err
+	switch _, err := lq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return lq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -353,17 +357,6 @@ func (lq *LinkQuery) sqlCount(ctx context.Context) (int, error) {
 		_spec.Unique = lq.unique != nil && *lq.unique
 	}
 	return sqlgraph.CountNodes(ctx, lq.driver, _spec)
-}
-
-func (lq *LinkQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := lq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
 }
 
 func (lq *LinkQuery) querySpec() *sqlgraph.QuerySpec {

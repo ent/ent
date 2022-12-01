@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"fmt"
 	"math"
 
 	"entgo.io/ent/dialect/gremlin"
@@ -232,10 +233,14 @@ func (ftq *FileTypeQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (ftq *FileTypeQuery) Exist(ctx context.Context) (bool, error) {
-	if err := ftq.prepareQuery(ctx); err != nil {
-		return false, err
+	switch _, err := ftq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return ftq.gremlinExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -373,15 +378,6 @@ func (ftq *FileTypeQuery) gremlinCount(ctx context.Context) (int, error) {
 		return 0, err
 	}
 	return res.ReadInt()
-}
-
-func (ftq *FileTypeQuery) gremlinExist(ctx context.Context) (bool, error) {
-	res := &gremlin.Response{}
-	query, bindings := ftq.gremlinQuery(ctx).HasNext().Query()
-	if err := ftq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return false, err
-	}
-	return res.ReadBool()
 }
 
 func (ftq *FileTypeQuery) gremlinQuery(context.Context) *dsl.Traversal {
