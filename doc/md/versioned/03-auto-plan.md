@@ -143,7 +143,7 @@ that are supported:
 * [Flyway](https://flywaydb.org)
 * [Liquibase](https://www.liquibase.org)
 * [dbmate](https://github.com/amacneil/dbmate)
-To learn more about how to use these tools with Ent, see the
-* [docs](https://entgo.io/docs/versioned-migrations#create-a-migration-files-generator) on this subject.
+
+To learn more about how to use these tools with Ent, see the [docs](https://entgo.io/docs/versioned-migrations#create-a-migration-files-generator) on this subject.
 
 Next, let's see how to upgrade an existing production database to be managed with versioned migrations. 
