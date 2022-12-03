@@ -60,7 +60,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
         with:
-          go-version: '1.19'
+          go-version: '1.19.3'
       - uses: actions/cache@v3
         with:
           path: ~/go/pkg/mod
@@ -75,6 +75,7 @@ jobs:
           if [ -n "$status" ]; then
             echo "you need to run 'go generate ./...' and commit the changes"
             echo "$status"
+            git --no-pager diff
             exit 1
           fi
 
