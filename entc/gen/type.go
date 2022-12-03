@@ -280,6 +280,13 @@ func (t Type) HasOneFieldID() bool {
 	return !t.HasCompositeID()
 }
 
+func (t Type) HasSoftDeleteField() bool {
+	return t.Config.SoftDeleteField != ""
+}
+func (t Type) SoftDeleteField() string {
+	return t.Config.SoftDeleteField
+}
+
 // Label returns Gremlin label name of the node/type.
 func (t Type) Label() string {
 	return snake(t.Name)

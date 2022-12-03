@@ -27,8 +27,19 @@ import (
 // {{ $builder }} is the builder for updating {{ $.Name }} entities.
 type {{ $builder }} struct {
 	config
+    {{- if $.HasSoftDeleteField }}
+    softdelete  bool
+    {{- end }}
 	{{- template "update/fields" $ -}}
 }
+
+{{- if $.HasSoftDeleteField }}
+// SoftDelete adds a new predicate for the {{ $builder }} builder.
+func ({{ $receiver }} *{{ $builder }}) SoftDelete() *{{ $builder }} {
+	{{ $receiver}}.softdelete = true
+	return {{ $receiver }}
+}
+{{- end}}
 
 // Where appends a list predicates to the {{ $builder }} builder.
 func ({{ $receiver}} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} {
@@ -50,6 +61,11 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (int, error) {
 		err error
 		affected int
 	)
+    {{- if $.HasSoftDeleteField }}
+        if !{{ $receiver }}.softdelete {
+            {{ $receiver }}.mutation.predicates = append({{ $receiver }}.mutation.predicates, {{ $.Package }}.{{ $.SoftDeleteField }}IsNil() )   
+        }
+	{{- end }}
 	{{- if $.HasUpdateDefault }}
 		{{- if $runtimeRequired }}
 			if err := {{ $receiver }}.defaults(); err != nil {

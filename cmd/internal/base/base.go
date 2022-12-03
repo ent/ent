@@ -127,12 +127,13 @@ func DescribeCmd() *cobra.Command {
 // GenerateCmd returns the generate command for ent/c packages.
 func GenerateCmd(postRun ...func(*gen.Config)) *cobra.Command {
 	var (
-		cfg       gen.Config
-		storage   string
-		features  []string
-		templates []string
-		idtype    = IDType(field.TypeInt)
-		cmd       = &cobra.Command{
+		cfg             gen.Config
+		storage         string
+		features        []string
+		templates       []string
+		idtype          = IDType(field.TypeInt)
+		softdeletefield string
+		cmd             = &cobra.Command{
 			Use:   "generate [flags] path",
 			Short: "generate go code for the schema directory",
 			Example: examples(
@@ -170,6 +171,7 @@ func GenerateCmd(postRun ...func(*gen.Config)) *cobra.Command {
 					}
 					cfg.Package = pkgPath
 				}
+				cfg.SoftDeleteField = softdeletefield
 				cfg.IDType = &field.TypeInfo{Type: field.Type(idtype)}
 				if err := entc.Generate(path[0], &cfg, opts...); err != nil {
 					log.Fatalln(err)
@@ -182,6 +184,7 @@ func GenerateCmd(postRun ...func(*gen.Config)) *cobra.Command {
 	)
 	cmd.Flags().Var(&idtype, "idtype", "type of the id field")
 	cmd.Flags().StringVar(&storage, "storage", "sql", "storage driver to support in codegen")
+	cmd.Flags().StringVar(&softdeletefield, "softdelete", "", "soft delete field")
 	cmd.Flags().StringVar(&cfg.Header, "header", "", "override codegen header")
 	cmd.Flags().StringVar(&cfg.Target, "target", "", "target directory for codegen")
 	cmd.Flags().StringSliceVarP(&features, "feature", "", nil, "extend codegen with additional features")

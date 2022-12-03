@@ -26,7 +26,19 @@ type {{ $builder }} struct {
 	config
 	hooks      []Hook
 	mutation   *{{ $.MutationName }}
+    {{- if $.HasSoftDeleteField }}
+    up *{{ $.UpdateName }}
+    {{- end }}
+
 }
+
+{{- if $.HasSoftDeleteField }}
+// SoftDelete adds a new predicate for the {{ $builder }} builder.
+func ({{ $receiver }} *{{ $builder }}) SoftDelete() *{{ $builder }} {
+	{{ $receiver}}.up = nil
+	return {{ $receiver }}
+}
+{{- end}}
 
 // Where appends a list predicates to the {{ $builder }} builder.
 func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} {
@@ -36,6 +48,13 @@ func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func ({{ $receiver}} *{{ $builder }}) Exec(ctx context.Context) (int, error) {
+    {{- if $.HasSoftDeleteField }}
+        if {{ $receiver }}.up !=nil{
+          {{ $receiver }}.up.mutation = {{ $receiver}}.mutation
+          {{ $receiver }}.up.Set{{ $.SoftDeleteField }}(int(time.Now().UnixNano()))
+          return {{ $receiver }}.up.Save(ctx)
+        }
+    {{- end}}
 	var (
 		err error
 		affected int
@@ -94,6 +113,14 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) int {
 type {{ $onebuilder }} struct {
 	{{ $receiver }} *{{ $builder }}
 }
+
+{{- if $.HasSoftDeleteField }}
+// SoftDelete adds a new predicate for the {{ $builder }} builder.
+func ({{ $oneReceiver }} *{{ $onebuilder }}) SoftDelete() *{{ $onebuilder }} {
+	{{ $oneReceiver }}.{{ $receiver}}.SoftDelete()
+	return {{ $oneReceiver }}
+}
+{{- end}}
 
 // Exec executes the deletion query.
 func ({{ $oneReceiver }} *{{ $onebuilder }}) Exec(ctx context.Context) error {

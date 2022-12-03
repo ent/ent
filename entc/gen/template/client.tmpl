@@ -204,7 +204,11 @@ func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $n.UpdateOneNam
 // Delete returns a delete builder for {{ $n.Name }}.
 func (c *{{ $client }}) Delete() *{{ $n.DeleteName }} {
 	mutation := new{{ $n.MutationName }}(c.config, OpDelete)
-	return &{{ $n.DeleteName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
+    {{- if $n.HasSoftDeleteField }}
+	    return &{{ $n.DeleteName }}{config: c.config, hooks: c.Hooks(), mutation: mutation, up: c.Update()}
+    {{- else}}
+	    return &{{ $n.DeleteName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
+    {{- end }}
 }
 
 {{ with $n.HasOneFieldID }}
@@ -224,14 +228,7 @@ func (c *{{ $client }}) Delete() *{{ $n.DeleteName }} {
 
 // Query returns a query builder for {{ $n.Name }}.
 func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
-	return &{{ $n.QueryName }}{
-		config: c.config,
-		{{- with $tmpls := matchTemplate (printf "dialect/%s/query/fields/init/*" $.Storage) }}
-			{{- range $tmpl := $tmpls }}
-				{{- xtemplate $tmpl $n }}
-			{{- end }}
-		{{- end }}
-	}
+	return new{{ $n.QueryName }}(c.config)
 }
 
 {{ with $n.HasOneFieldID }}
@@ -257,7 +254,7 @@ func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
 // Query{{ pascal $e.Name }} queries the {{ $e.Name }} edge of a {{ $n.Name }}.
 func (c *{{ $client }}) {{ $func }}({{ $arg }} *{{ $n.Name }}) *{{ $builder }} {
 	{{- if $n.HasOneFieldID }}
-		query := &{{ $builder }}{config: c.config}
+		query := c.Query()
 		query.path = func(context.Context) (fromV {{ $.Storage.Builder }}, _ error) {
 			{{- with extend $n "Receiver" $arg "Edge" $e "Ident" "fromV" }}
 				{{ $tmpl := printf "dialect/%s/query/from" $.Storage }}

@@ -31,6 +31,9 @@ type {{ $builder }} struct {
 	order		[]OrderFunc
 	fields		[]string
 	predicates 	[]predicate.{{ $.Name }}
+    {{- if $.HasSoftDeleteField }}
+    softdelete  bool
+    {{- end }}
 	{{- /* Eager loading fields. */}}
 	{{- range $e := $.Edges }}
 		{{ $e.EagerLoadField }} *{{ $e.Type.QueryName }}
@@ -44,6 +47,19 @@ type {{ $builder }} struct {
 	{{ $.Storage }} {{ $.Storage.Builder }}
 	path func(context.Context) ({{ $.Storage.Builder }}, error)
 }
+func new{{ $builder }}(config config) *{{ $builder}} {
+    return &{{ $builder }}{
+		config: config,
+    }
+}
+
+{{- if $.HasSoftDeleteField }}
+// SoftDelete adds a new predicate for the {{ $builder }} builder.
+func ({{ $receiver }} *{{ $builder }}) SoftDelete() *{{ $builder }} {
+	{{ $receiver}}.softdelete = true
+	return {{ $receiver }}
+}
+{{- end}}
 
 // Where adds a new predicate for the {{ $builder }} builder.
 func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} {
@@ -399,6 +415,11 @@ func ({{ $receiver }} *{{ $builder }}) prepareQuery(ctx context.Context) error {
 		if err := {{ $.Package }}.Policy.EvalQuery(ctx, {{ $receiver }}); err != nil {
 			return err
 		}
+	{{- end }}
+    {{- if $.HasSoftDeleteField }}
+        if !{{ $receiver }}.softdelete {
+            {{ $receiver }}.predicates = append({{ $receiver }}.predicates, {{ $.Package }}.{{ $.SoftDeleteField }}IsNil() )   
+        }
 	{{- end }}
 	return nil
 }
