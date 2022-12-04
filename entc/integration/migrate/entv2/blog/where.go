@@ -88,7 +88,6 @@ func HasAdmins() predicate.Blog {
 	return predicate.Blog(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(AdminsTable, UserFieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, AdminsTable, AdminsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

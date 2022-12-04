@@ -265,7 +265,6 @@ func HasCard() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(CardTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, CardTable, CardColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

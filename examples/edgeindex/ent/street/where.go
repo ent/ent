@@ -194,7 +194,6 @@ func HasCity() predicate.Street {
 	return predicate.Street(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(CityTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, CityTable, CityColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

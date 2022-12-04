@@ -89,7 +89,6 @@ func HasActiveSession() predicate.Device {
 	return predicate.Device(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ActiveSessionTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, ActiveSessionTable, ActiveSessionColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -117,7 +116,6 @@ func HasSessions() predicate.Device {
 	return predicate.Device(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(SessionsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, SessionsTable, SessionsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

@@ -195,7 +195,6 @@ func HasToken() predicate.Account {
 	return predicate.Account(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TokenTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, TokenTable, TokenColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

@@ -159,7 +159,6 @@ func HasPrev() predicate.Node {
 	return predicate.Node(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PrevTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, PrevTable, PrevColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -187,7 +186,6 @@ func HasNext() predicate.Node {
 	return predicate.Node(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(NextTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, NextTable, NextColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

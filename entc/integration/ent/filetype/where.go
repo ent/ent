@@ -266,7 +266,6 @@ func HasFiles() predicate.FileType {
 	return predicate.FileType(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(FilesTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, FilesTable, FilesColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

@@ -231,7 +231,6 @@ func HasUser() predicate.Relationship {
 	return predicate.Relationship(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, UserColumn),
-			sqlgraph.To(UserInverseTable, UserFieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, UserTable, UserColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -259,7 +258,6 @@ func HasRelative() predicate.Relationship {
 	return predicate.Relationship(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, RelativeColumn),
-			sqlgraph.To(RelativeInverseTable, UserFieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, RelativeTable, RelativeColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -287,7 +285,6 @@ func HasInfo() predicate.Relationship {
 	return predicate.Relationship(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, InfoColumn),
-			sqlgraph.To(InfoInverseTable, RelationshipInfoFieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, InfoTable, InfoColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

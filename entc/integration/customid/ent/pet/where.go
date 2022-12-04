@@ -88,7 +88,6 @@ func HasOwner() predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(OwnerTable, UserFieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, OwnerTable, OwnerColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -116,7 +115,6 @@ func HasCars() predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(CarsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, CarsTable, CarsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -144,7 +142,6 @@ func HasFriends() predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(FriendsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, FriendsTable, FriendsPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -172,7 +169,6 @@ func HasBestFriend() predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(BestFriendTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, BestFriendTable, BestFriendColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

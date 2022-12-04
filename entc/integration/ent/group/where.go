@@ -493,7 +493,6 @@ func HasFiles() predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(FilesTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, FilesTable, FilesColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -521,7 +520,6 @@ func HasBlocked() predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(BlockedTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, BlockedTable, BlockedColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -549,7 +547,6 @@ func HasUsers() predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UsersTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, UsersTable, UsersPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -577,7 +574,6 @@ func HasInfo() predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(InfoTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, InfoTable, InfoColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

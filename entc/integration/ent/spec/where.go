@@ -88,7 +88,6 @@ func HasCard() predicate.Spec {
 	return predicate.Spec(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(CardTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, CardTable, CardPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)

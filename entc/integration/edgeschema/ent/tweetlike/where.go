@@ -176,7 +176,6 @@ func HasTweet() predicate.TweetLike {
 	return predicate.TweetLike(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, TweetColumn),
-			sqlgraph.To(TweetInverseTable, TweetFieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, TweetTable, TweetColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -204,7 +203,6 @@ func HasUser() predicate.TweetLike {
 	return predicate.TweetLike(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, UserColumn),
-			sqlgraph.To(UserInverseTable, UserFieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, UserTable, UserColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

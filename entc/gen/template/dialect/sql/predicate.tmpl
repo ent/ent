@@ -52,16 +52,8 @@ in the LICENSE file in the root directory of this source tree.
 			{{- if $.HasCompositeID }}
 				{{- /* Query that goes from the edge schema. */}}
 				sqlgraph.From(Table, {{ $e.ColumnConstant }}),
-				sqlgraph.To({{ $e.InverseTableConstant }}, {{ print $e.Type.Name "FieldID" }}),
 			{{- else }}
 				sqlgraph.From(Table, {{ $.ID.Constant }}),
-				{{- if $e.Type.HasOneFieldID }}
-					{{- $refid := $.ID.Constant }}{{ if ne $e.Type.ID.StorageKey $.ID.StorageKey }}{{ $refid = print $e.Type.Name "FieldID" }}{{ end }}
-					sqlgraph.To({{ $e.TableConstant }}, {{ $refid }}),
-				{{- else }}
-					{{- /* Query that goes to the edge schema. */}}
-					sqlgraph.To({{ $e.TableConstant }}, {{ $e.ColumnConstant }}),
-				{{- end }}
 			{{- end }}
 			sqlgraph.Edge(sqlgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $e.TableConstant }},
 				{{- if $e.M2M -}}
@@ -77,6 +69,7 @@ in the LICENSE file in the root directory of this source tree.
 				{{- xtemplate $tmpl $ }}
 			{{- end }}
 		{{- end }}
+		{{- /* sqlgraph.To is meaningless on Has<E> (without predicates), because unlike Has<E>With no predicates are applied on the "other" table. */}}
 		sqlgraph.HasNeighbors(s, step)
 	}
 {{- end }}

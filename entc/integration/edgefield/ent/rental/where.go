@@ -248,7 +248,6 @@ func HasUser() predicate.Rental {
 	return predicate.Rental(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UserTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -276,7 +275,6 @@ func HasCar() predicate.Rental {
 	return predicate.Rental(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(CarTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, CarTable, CarColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
