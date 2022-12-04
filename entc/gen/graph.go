@@ -143,6 +143,15 @@ func (f GenerateFunc) Generate(g *Graph) error {
 	return f(g)
 }
 
+// Set sets an annotation a new annotation in the map.
+// A new map is created if the receiver is nil.
+func (a *Annotations) Set(k string, v any) {
+	if *a == nil {
+		*a = make(Annotations)
+	}
+	(*a)[k] = v
+}
+
 // NewGraph creates a new Graph for the code generation from the given schema definitions.
 // It fails if one of the schemas is invalid.
 func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {

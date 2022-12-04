@@ -13,7 +13,7 @@ type Annotation struct {
 	// of the `Edges` field in the generated entity. For example:
 	//
 	//	edge.Annotation{
-	//		StructTag: `json: "pet_edges"`
+	//		StructTag: `json:"pet_edges"`
 	//	}
 	//
 	StructTag string
