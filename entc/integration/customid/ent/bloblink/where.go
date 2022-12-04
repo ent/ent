@@ -177,7 +177,6 @@ func HasBlob() predicate.BlobLink {
 	return predicate.BlobLink(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, BlobColumn),
-			sqlgraph.To(BlobInverseTable, BlobFieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, BlobTable, BlobColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -205,7 +204,6 @@ func HasLink() predicate.BlobLink {
 	return predicate.BlobLink(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, LinkColumn),
-			sqlgraph.To(LinkInverseTable, BlobFieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, LinkTable, LinkColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

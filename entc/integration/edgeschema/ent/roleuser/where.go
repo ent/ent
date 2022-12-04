@@ -176,7 +176,6 @@ func HasRole() predicate.RoleUser {
 	return predicate.RoleUser(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, RoleColumn),
-			sqlgraph.To(RoleInverseTable, RoleFieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, RoleTable, RoleColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -204,7 +203,6 @@ func HasUser() predicate.RoleUser {
 	return predicate.RoleUser(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, UserColumn),
-			sqlgraph.To(UserInverseTable, UserFieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, UserTable, UserColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

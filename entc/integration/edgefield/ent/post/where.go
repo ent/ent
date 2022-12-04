@@ -251,7 +251,6 @@ func HasAuthor() predicate.Post {
 	return predicate.Post(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(AuthorTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, AuthorTable, AuthorColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

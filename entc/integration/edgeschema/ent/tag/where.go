@@ -194,7 +194,6 @@ func HasTweets() predicate.Tag {
 	return predicate.Tag(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TweetsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, TweetsTable, TweetsPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -222,7 +221,6 @@ func HasGroups() predicate.Tag {
 	return predicate.Tag(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(GroupsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, GroupsTable, GroupsPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -250,7 +248,6 @@ func HasTweetTags() predicate.Tag {
 	return predicate.Tag(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TweetTagsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, TweetTagsTable, TweetTagsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -278,7 +275,6 @@ func HasGroupTags() predicate.Tag {
 	return predicate.Tag(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(GroupTagsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, GroupTagsTable, GroupTagsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

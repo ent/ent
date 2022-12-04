@@ -248,7 +248,6 @@ func HasTag() predicate.TweetTag {
 	return predicate.TweetTag(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TagTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, TagTable, TagColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -276,7 +275,6 @@ func HasTweet() predicate.TweetTag {
 	return predicate.TweetTag(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TweetTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, TweetTable, TweetColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

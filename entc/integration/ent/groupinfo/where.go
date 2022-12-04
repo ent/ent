@@ -265,7 +265,6 @@ func HasGroups() predicate.GroupInfo {
 	return predicate.GroupInfo(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(GroupsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, GroupsTable, GroupsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

@@ -1662,6 +1662,7 @@ func (e Edge) LabelConstant() string {
 func (e Edge) InverseLabelConstant() string { return pascal(e.Name) + "InverseLabel" }
 
 // TableConstant returns the constant name of the relation table.
+// The value id Edge.Rel.Table, which is table that holds the relation/edge.
 func (e Edge) TableConstant() string { return pascal(e.Name) + "Table" }
 
 // InverseTableConstant returns the constant name of the other/inverse type of the relation.

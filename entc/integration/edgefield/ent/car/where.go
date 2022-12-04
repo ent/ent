@@ -209,7 +209,6 @@ func HasRentals() predicate.Car {
 	return predicate.Car(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(RentalsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, RentalsTable, RentalsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

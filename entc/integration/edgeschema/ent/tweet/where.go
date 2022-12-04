@@ -194,7 +194,6 @@ func HasLikedUsers() predicate.Tweet {
 	return predicate.Tweet(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(LikedUsersTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, LikedUsersTable, LikedUsersPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -222,7 +221,6 @@ func HasUser() predicate.Tweet {
 	return predicate.Tweet(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UserTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, UserTable, UserPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -250,7 +248,6 @@ func HasTags() predicate.Tweet {
 	return predicate.Tweet(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TagsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, TagsTable, TagsPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -278,7 +275,6 @@ func HasLikes() predicate.Tweet {
 	return predicate.Tweet(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(LikesTable, LikesColumn),
 			sqlgraph.Edge(sqlgraph.O2M, true, LikesTable, LikesColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -306,7 +302,6 @@ func HasTweetUser() predicate.Tweet {
 	return predicate.Tweet(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TweetUserTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, TweetUserTable, TweetUserColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -334,7 +329,6 @@ func HasTweetTags() predicate.Tweet {
 	return predicate.Tweet(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TweetTagsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, TweetTagsTable, TweetTagsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

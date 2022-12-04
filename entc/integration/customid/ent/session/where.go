@@ -89,7 +89,6 @@ func HasDevice() predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(DeviceTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, DeviceTable, DeviceColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

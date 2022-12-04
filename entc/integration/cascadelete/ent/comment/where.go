@@ -237,7 +237,6 @@ func HasPost() predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PostTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, PostTable, PostColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

@@ -618,7 +618,6 @@ func HasOwner() predicate.File {
 	return predicate.File(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(OwnerTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, OwnerTable, OwnerColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -646,7 +645,6 @@ func HasType() predicate.File {
 	return predicate.File(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TypeTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, TypeTable, TypeColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -674,7 +672,6 @@ func HasField() predicate.File {
 	return predicate.File(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(FieldTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, FieldTable, FieldColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

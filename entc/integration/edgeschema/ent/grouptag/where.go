@@ -174,7 +174,6 @@ func HasTag() predicate.GroupTag {
 	return predicate.GroupTag(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TagTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, TagTable, TagColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -202,7 +201,6 @@ func HasGroup() predicate.GroupTag {
 	return predicate.GroupTag(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(GroupTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, GroupTable, GroupColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

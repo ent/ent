@@ -202,7 +202,6 @@ func HasPets() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PetsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, PetsTable, PetsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -230,7 +229,6 @@ func HasParent() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ParentTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, ParentTable, ParentColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -258,7 +256,6 @@ func HasChildren() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ChildrenTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, ChildrenTable, ChildrenColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -286,7 +283,6 @@ func HasSpouse() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(SpouseTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, SpouseTable, SpouseColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -314,7 +310,6 @@ func HasCard() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(CardTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, CardTable, CardColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -342,7 +337,6 @@ func HasMetadata() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(MetadataTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, MetadataTable, MetadataColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -370,7 +364,6 @@ func HasInfo() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(InfoTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, InfoTable, InfoColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -398,7 +391,6 @@ func HasRentals() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(RentalsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, RentalsTable, RentalsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

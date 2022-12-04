@@ -470,7 +470,6 @@ func HasCards() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(CardsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, CardsTable, CardsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -498,7 +497,6 @@ func HasFriends() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(FriendsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, FriendsTable, FriendsPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -526,7 +524,6 @@ func HasBestFriend() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(BestFriendTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, BestFriendTable, BestFriendColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

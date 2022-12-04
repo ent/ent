@@ -231,7 +231,6 @@ func HasParent() predicate.Blob {
 	return predicate.Blob(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ParentTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, ParentTable, ParentColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -259,7 +258,6 @@ func HasLinks() predicate.Blob {
 	return predicate.Blob(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(LinksTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, LinksTable, LinksPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -287,7 +285,6 @@ func HasBlobLinks() predicate.Blob {
 	return predicate.Blob(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(BlobLinksTable, BlobLinksColumn),
 			sqlgraph.Edge(sqlgraph.O2M, true, BlobLinksTable, BlobLinksColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
