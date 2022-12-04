@@ -31,7 +31,11 @@ func (zd *ZooDelete) Where(ps ...predicate.Zoo) *ZooDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (zd *ZooDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, ZooMutation](ctx, zd.sqlExec, zd.mutation, zd.hooks)
+	return withHooks[int, ZooMutation](ctx, zd.exec, zd.mutation, zd.hooks)
+}
+
+func (zd *ZooDelete) exec(ctx context.Context) (int, error) {
+	return zd.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

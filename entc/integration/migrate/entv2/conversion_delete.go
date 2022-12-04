@@ -31,7 +31,11 @@ func (cd *ConversionDelete) Where(ps ...predicate.Conversion) *ConversionDelete 
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (cd *ConversionDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, ConversionMutation](ctx, cd.sqlExec, cd.mutation, cd.hooks)
+	return withHooks[int, ConversionMutation](ctx, cd.exec, cd.mutation, cd.hooks)
+}
+
+func (cd *ConversionDelete) exec(ctx context.Context) (int, error) {
+	return cd.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

@@ -31,7 +31,11 @@ func (rd *RevisionDelete) Where(ps ...predicate.Revision) *RevisionDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (rd *RevisionDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, RevisionMutation](ctx, rd.sqlExec, rd.mutation, rd.hooks)
+	return withHooks[int, RevisionMutation](ctx, rd.exec, rd.mutation, rd.hooks)
+}
+
+func (rd *RevisionDelete) exec(ctx context.Context) (int, error) {
+	return rd.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

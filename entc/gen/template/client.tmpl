@@ -231,7 +231,11 @@ func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $n.UpdateOneNam
 // Delete returns a delete builder for {{ $n.Name }}.
 func (c *{{ $client }}) Delete() *{{ $n.DeleteName }} {
 	mutation := new{{ $n.MutationName }}(c.config, OpDelete)
-	return &{{ $n.DeleteName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
+	{{- if $n.SoftDeleteField }}
+		return &{{ $n.DeleteName }}{config: c.config, hooks: c.Hooks(), mutation: mutation, up: c.Update()}
+	{{- else}}
+		return &{{ $n.DeleteName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
+	{{- end }}
 }
 
 {{ with $n.HasOneFieldID }}
@@ -251,7 +255,7 @@ func (c *{{ $client }}) Delete() *{{ $n.DeleteName }} {
 
 // Query returns a query builder for {{ $n.Name }}.
 func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
-	return &{{ $n.QueryName }}{
+  	return &{{ $n.QueryName }}{
 		config: c.config,
 		inters: c.Interceptors(),
 		{{- with $tmpls := matchTemplate (printf "dialect/%s/query/fields/init/*" $.Storage) }}

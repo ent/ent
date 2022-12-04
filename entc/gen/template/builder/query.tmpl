@@ -32,6 +32,9 @@ type {{ $builder }} struct {
 	fields		[]string
 	inters		[]Interceptor
 	predicates 	[]predicate.{{ $.Name }}
+    {{- if $.SoftDeleteField }}
+    softdelete  bool
+    {{- end }}
 	{{- /* Eager loading fields. */}}
 	{{- range $e := $.Edges }}
 		{{ $e.EagerLoadField }} *{{ $e.Type.QueryName }}
@@ -45,6 +48,14 @@ type {{ $builder }} struct {
 	{{ $.Storage }} {{ $.Storage.Builder }}
 	path func(context.Context) ({{ $.Storage.Builder }}, error)
 }
+
+{{- if $.SoftDeleteField }}
+// Real for the {{ $builder }} builder.
+func ({{ $receiver }} *{{ $builder }}) Real() *{{ $builder }} {
+	{{ $receiver}}.softdelete = true
+	return {{ $receiver }}
+}
+{{- end}}
 
 // Where adds a new predicate for the {{ $builder }} builder.
 func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} {
@@ -410,6 +421,11 @@ func ({{ $receiver }} *{{ $builder }}) prepareQuery(ctx context.Context) error {
 		}
 		if err := {{ $.Package }}.Policy.EvalQuery(ctx, {{ $receiver }}); err != nil {
 			return err
+		}
+	{{- end }}
+	{{- if $.SoftDeleteField }}
+		if !{{ $receiver }}.softdelete {
+			{{ $receiver }}.predicates = append({{ $receiver }}.predicates, {{ $.Package }}.{{ $.SoftDeleteField.StructField }}IsNil() )   
 		}
 	{{- end }}
 	return nil

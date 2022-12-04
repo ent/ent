@@ -32,7 +32,11 @@ func (pd *PetDelete) Where(ps ...predicate.Pet) *PetDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (pd *PetDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, PetMutation](ctx, pd.sqlExec, pd.mutation, pd.hooks)
+	return withHooks[int, PetMutation](ctx, pd.exec, pd.mutation, pd.hooks)
+}
+
+func (pd *PetDelete) exec(ctx context.Context) (int, error) {
+	return pd.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

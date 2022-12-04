@@ -32,7 +32,11 @@ func (ud *UserDelete) Where(ps ...predicate.User) *UserDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ud *UserDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, UserMutation](ctx, ud.gremlinExec, ud.mutation, ud.hooks)
+	return withHooks[int, UserMutation](ctx, ud.exec, ud.mutation, ud.hooks)
+}
+
+func (ud *UserDelete) exec(ctx context.Context) (int, error) {
+	return ud.gremlinExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

@@ -61,6 +61,17 @@ func Time(name string) *timeBuilder {
 	}}
 }
 
+// SoftDelete returns a new Field with type softdelete.
+func SoftDelete(name string) *timeBuilder {
+	return &timeBuilder{&Descriptor{
+		Name:       name,
+		Info:       &TypeInfo{Type: TypeTime, PkgPath: "time"},
+		SoftDelete: true,
+		Nillable:   true,
+		Optional:   true,
+	}}
+}
+
 // JSON returns a new Field with type json that is serialized to the given object.
 // For example:
 //
@@ -1126,6 +1137,7 @@ type Descriptor struct {
 	UpdateDefault any                     // default value on update.
 	Validators    []any                   // validator functions.
 	StorageKey    string                  // sql column or gremlin property.
+	SoftDelete    bool                    // enable soft delete
 	Enums         []struct{ N, V string } // enum values.
 	Sensitive     bool                    // sensitive info string field.
 	SchemaType    map[string]string       // override the schema type.

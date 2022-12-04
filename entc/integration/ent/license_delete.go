@@ -31,7 +31,11 @@ func (ld *LicenseDelete) Where(ps ...predicate.License) *LicenseDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ld *LicenseDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, LicenseMutation](ctx, ld.sqlExec, ld.mutation, ld.hooks)
+	return withHooks[int, LicenseMutation](ctx, ld.exec, ld.mutation, ld.hooks)
+}
+
+func (ld *LicenseDelete) exec(ctx context.Context) (int, error) {
+	return ld.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

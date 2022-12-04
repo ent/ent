@@ -31,7 +31,11 @@ func (gid *GroupInfoDelete) Where(ps ...predicate.GroupInfo) *GroupInfoDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (gid *GroupInfoDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, GroupInfoMutation](ctx, gid.sqlExec, gid.mutation, gid.hooks)
+	return withHooks[int, GroupInfoMutation](ctx, gid.exec, gid.mutation, gid.hooks)
+}
+
+func (gid *GroupInfoDelete) exec(ctx context.Context) (int, error) {
+	return gid.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

@@ -31,7 +31,11 @@ func (ugd *UserGroupDelete) Where(ps ...predicate.UserGroup) *UserGroupDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ugd *UserGroupDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, UserGroupMutation](ctx, ugd.sqlExec, ugd.mutation, ugd.hooks)
+	return withHooks[int, UserGroupMutation](ctx, ugd.exec, ugd.mutation, ugd.hooks)
+}
+
+func (ugd *UserGroupDelete) exec(ctx context.Context) (int, error) {
+	return ugd.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

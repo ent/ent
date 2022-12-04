@@ -31,7 +31,11 @@ func (pd *PostDelete) Where(ps ...predicate.Post) *PostDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (pd *PostDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, PostMutation](ctx, pd.sqlExec, pd.mutation, pd.hooks)
+	return withHooks[int, PostMutation](ctx, pd.exec, pd.mutation, pd.hooks)
+}
+
+func (pd *PostDelete) exec(ctx context.Context) (int, error) {
+	return pd.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

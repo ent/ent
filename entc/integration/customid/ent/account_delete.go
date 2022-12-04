@@ -31,7 +31,11 @@ func (ad *AccountDelete) Where(ps ...predicate.Account) *AccountDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ad *AccountDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, AccountMutation](ctx, ad.sqlExec, ad.mutation, ad.hooks)
+	return withHooks[int, AccountMutation](ctx, ad.exec, ad.mutation, ad.hooks)
+}
+
+func (ad *AccountDelete) exec(ctx context.Context) (int, error) {
+	return ad.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

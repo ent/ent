@@ -31,7 +31,11 @@ func (ld *LinkDelete) Where(ps ...predicate.Link) *LinkDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ld *LinkDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, LinkMutation](ctx, ld.sqlExec, ld.mutation, ld.hooks)
+	return withHooks[int, LinkMutation](ctx, ld.exec, ld.mutation, ld.hooks)
+}
+
+func (ld *LinkDelete) exec(ctx context.Context) (int, error) {
+	return ld.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

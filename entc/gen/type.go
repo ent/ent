@@ -42,6 +42,8 @@ type (
 		alias string
 		// ID holds the ID field of this type.
 		ID *Field
+		// SoftDelete holds the SoftDelete field of this type.
+		SoftDelete *Field
 		// Fields holds all the primitive fields of this type.
 		Fields []*Field
 		fields map[string]*Field
@@ -89,6 +91,8 @@ type (
 		Immutable bool
 		// StructTag of the field. default to "json".
 		StructTag string
+		// SoftDelete Indicates whether the field is a soft-delete field.
+		SoftDelete bool
 		// Validators holds the number of validators the field have.
 		Validators int
 		// Position info of the field.
@@ -248,6 +252,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 			UpdateDefault: f.UpdateDefault,
 			Immutable:     f.Immutable,
 			StructTag:     structTag(f.Name, f.Tag),
+			SoftDelete:    f.SoftDelete,
 			Validators:    f.Validators,
 			UserDefined:   true,
 			Annotations:   f.Annotations,
@@ -264,6 +269,12 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 		} else {
 			typ.Fields = append(typ.Fields, tf)
 			typ.fields[f.Name] = tf
+		}
+		if tf.SoftDelete {
+			if typ.SoftDelete != nil {
+				return nil, errors.New("softdelete field only one")
+			}
+			typ.SoftDelete = tf
 		}
 	}
 	return typ, nil
@@ -283,6 +294,11 @@ func (t Type) HasCompositeID() bool {
 // HasOneFieldID indicates if the type has an ID with one field (not composite).
 func (t Type) HasOneFieldID() bool {
 	return !t.HasCompositeID()
+}
+
+// SoftDeleteField get soft delete field
+func (t Type) SoftDeleteField() *Field {
+	return t.SoftDelete
 }
 
 // Label returns Gremlin label name of the node/type.

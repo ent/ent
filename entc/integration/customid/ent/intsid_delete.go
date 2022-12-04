@@ -31,7 +31,11 @@ func (isd *IntSIDDelete) Where(ps ...predicate.IntSID) *IntSIDDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (isd *IntSIDDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, IntSIDMutation](ctx, isd.sqlExec, isd.mutation, isd.hooks)
+	return withHooks[int, IntSIDMutation](ctx, isd.exec, isd.mutation, isd.hooks)
+}
+
+func (isd *IntSIDDelete) exec(ctx context.Context) (int, error) {
+	return isd.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

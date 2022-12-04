@@ -31,7 +31,11 @@ func (sd *StreetDelete) Where(ps ...predicate.Street) *StreetDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (sd *StreetDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, StreetMutation](ctx, sd.sqlExec, sd.mutation, sd.hooks)
+	return withHooks[int, StreetMutation](ctx, sd.exec, sd.mutation, sd.hooks)
+}
+
+func (sd *StreetDelete) exec(ctx context.Context) (int, error) {
+	return sd.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

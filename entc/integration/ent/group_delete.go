@@ -31,7 +31,11 @@ func (gd *GroupDelete) Where(ps ...predicate.Group) *GroupDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (gd *GroupDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, GroupMutation](ctx, gd.sqlExec, gd.mutation, gd.hooks)
+	return withHooks[int, GroupMutation](ctx, gd.exec, gd.mutation, gd.hooks)
+}
+
+func (gd *GroupDelete) exec(ctx context.Context) (int, error) {
+	return gd.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

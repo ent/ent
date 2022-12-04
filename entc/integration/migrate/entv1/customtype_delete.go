@@ -31,7 +31,11 @@ func (ctd *CustomTypeDelete) Where(ps ...predicate.CustomType) *CustomTypeDelete
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ctd *CustomTypeDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, CustomTypeMutation](ctx, ctd.sqlExec, ctd.mutation, ctd.hooks)
+	return withHooks[int, CustomTypeMutation](ctx, ctd.exec, ctd.mutation, ctd.hooks)
+}
+
+func (ctd *CustomTypeDelete) exec(ctx context.Context) (int, error) {
+	return ctd.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

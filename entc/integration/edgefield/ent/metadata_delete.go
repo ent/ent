@@ -31,7 +31,11 @@ func (md *MetadataDelete) Where(ps ...predicate.Metadata) *MetadataDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (md *MetadataDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, MetadataMutation](ctx, md.sqlExec, md.mutation, md.hooks)
+	return withHooks[int, MetadataMutation](ctx, md.exec, md.mutation, md.hooks)
+}
+
+func (md *MetadataDelete) exec(ctx context.Context) (int, error) {
+	return md.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

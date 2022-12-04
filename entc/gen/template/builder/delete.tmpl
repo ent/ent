@@ -26,7 +26,19 @@ type {{ $builder }} struct {
 	config
 	hooks      []Hook
 	mutation   *{{ $.MutationName }}
+	{{- if $.SoftDeleteField }}
+	up *{{ $.UpdateName }}
+	{{- end }}
+
 }
+
+{{- if $.SoftDeleteField }}
+// Real for the {{ $builder }} builder.
+func ({{ $receiver }} *{{ $builder }}) Real() *{{ $builder }} {
+	{{ $receiver}}.up = nil
+	return {{ $receiver }}
+}
+{{- end}}
 
 // Where appends a list predicates to the {{ $builder }} builder.
 func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} {
@@ -36,7 +48,18 @@ func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func ({{ $receiver }} *{{ $builder }}) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, {{ $.MutationName }}](ctx, {{ $receiver }}.{{ $.Storage }}Exec, {{ $mutation }}, {{ $receiver }}.hooks)
+	return withHooks[int, {{ $.MutationName }}](ctx, {{ $receiver }}.exec, {{ $mutation }}, {{ $receiver }}.hooks)
+}
+
+func ({{ $receiver }} *{{ $builder }}) exec(ctx context.Context) (int,error) {
+    {{- if $.SoftDeleteField }}
+    	if {{ $receiver }}.up !=nil{
+        	{{ $receiver }}.up.mutation = {{ $receiver}}.mutation
+        	{{ $receiver }}.up.Set{{ $.SoftDeleteField.StructField }}(time.Now())
+        	return {{ $receiver }}.up.Save(ctx)
+        }
+    {{- end}}
+    return {{ $receiver }}.{{ $.Storage }}Exec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -67,6 +90,14 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) int {
 type {{ $onebuilder }} struct {
 	{{ $receiver }} *{{ $builder }}
 }
+
+{{- if $.SoftDeleteField }}
+// Real for the {{ $builder }} builder.
+func ({{ $oneReceiver }} *{{ $onebuilder }}) Real() *{{ $onebuilder }} {
+	{{ $oneReceiver }}.{{ $receiver}}.Real()
+	return {{ $oneReceiver }}
+}
+{{- end}}
 
 // Exec executes the deletion query.
 func ({{ $oneReceiver }} *{{ $onebuilder }}) Exec(ctx context.Context) error {

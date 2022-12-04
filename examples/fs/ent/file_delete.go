@@ -31,7 +31,11 @@ func (fd *FileDelete) Where(ps ...predicate.File) *FileDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (fd *FileDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, FileMutation](ctx, fd.sqlExec, fd.mutation, fd.hooks)
+	return withHooks[int, FileMutation](ctx, fd.exec, fd.mutation, fd.hooks)
+}
+
+func (fd *FileDelete) exec(ctx context.Context) (int, error) {
+	return fd.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

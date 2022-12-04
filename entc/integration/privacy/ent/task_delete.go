@@ -31,7 +31,11 @@ func (td *TaskDelete) Where(ps ...predicate.Task) *TaskDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (td *TaskDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, TaskMutation](ctx, td.sqlExec, td.mutation, td.hooks)
+	return withHooks[int, TaskMutation](ctx, td.exec, td.mutation, td.hooks)
+}
+
+func (td *TaskDelete) exec(ctx context.Context) (int, error) {
+	return td.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

@@ -31,7 +31,11 @@ func (gtd *GroupTagDelete) Where(ps ...predicate.GroupTag) *GroupTagDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (gtd *GroupTagDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, GroupTagMutation](ctx, gtd.sqlExec, gtd.mutation, gtd.hooks)
+	return withHooks[int, GroupTagMutation](ctx, gtd.exec, gtd.mutation, gtd.hooks)
+}
+
+func (gtd *GroupTagDelete) exec(ctx context.Context) (int, error) {
+	return gtd.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
