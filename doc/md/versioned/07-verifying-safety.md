@@ -37,7 +37,7 @@ func (User) Fields() []ent.Field {
 
 ```
 
-Let's re-run code-gen:
+Let's re-run codegen:
 
 ```shell
 go generate ./...
