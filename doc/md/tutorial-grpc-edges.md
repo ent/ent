@@ -110,10 +110,10 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 
-	"github.com/rotemtam/ent-grpc-example/ent/category"
-	"github.com/rotemtam/ent-grpc-example/ent/enttest"
-	"github.com/rotemtam/ent-grpc-example/ent/proto/entpb"
-	"github.com/rotemtam/ent-grpc-example/ent/user"
+	"ent-grpc-example/ent/category"
+	"ent-grpc-example/ent/enttest"
+	"ent-grpc-example/ent/proto/entpb"
+	"ent-grpc-example/ent/user"
 )
 
 func TestServiceWithEdges(t *testing.T) {
