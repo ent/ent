@@ -197,6 +197,11 @@ func (m *CarMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *CarMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (Car).
 func (m *CarMutation) Type() string {
 	return m.typ
@@ -1098,6 +1103,11 @@ func (m *ConversionMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *ConversionMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (Conversion).
 func (m *ConversionMutation) Type() string {
 	return m.typ
@@ -1712,6 +1722,11 @@ func (m *CustomTypeMutation) Where(ps ...predicate.CustomType) {
 // Op returns the operation name.
 func (m *CustomTypeMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CustomTypeMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (CustomType).
@@ -2750,6 +2765,11 @@ func (m *UserMutation) Where(ps ...predicate.User) {
 // Op returns the operation name.
 func (m *UserMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *UserMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (User).

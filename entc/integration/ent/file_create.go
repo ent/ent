@@ -78,7 +78,7 @@ func (fc *FileCreate) SetNillableGroup(s *string) *FileCreate {
 
 // SetOp sets the "op" field.
 func (fc *FileCreate) SetOp(b bool) *FileCreate {
-	fc.mutation.SetOp(b)
+	fc.mutation.SetOpField(b)
 	return fc
 }
 

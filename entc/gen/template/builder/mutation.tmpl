@@ -411,6 +411,11 @@ func (m *{{ $mutation }}) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *{{ $mutation }}) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation ({{ $n.Name }}).
 func (m *{{ $mutation }}) Type() string {
 	return m.typ
@@ -479,7 +484,7 @@ func (m *{{ $mutation }}) SetField(name string, value ent.Value) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field %s", value, name)
 			}
-			m.Set{{ $f.StructField }}(v)
+			m.{{ $f.MutationSet }}(v)
 			return nil
 	{{- end }}
 	}

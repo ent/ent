@@ -427,6 +427,11 @@ func (m *TaskMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *TaskMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (Task).
 func (m *TaskMutation) Type() string {
 	return m.typ
@@ -970,6 +975,11 @@ func (m *TeamMutation) Where(ps ...predicate.Team) {
 // Op returns the operation name.
 func (m *TeamMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TeamMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Team).
@@ -1529,6 +1539,11 @@ func (m *UserMutation) Where(ps ...predicate.User) {
 // Op returns the operation name.
 func (m *UserMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *UserMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (User).

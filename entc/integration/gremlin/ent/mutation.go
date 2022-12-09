@@ -503,6 +503,11 @@ func (m *CardMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *CardMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (Card).
 func (m *CardMutation) Type() string {
 	return m.typ
@@ -1259,6 +1264,11 @@ func (m *CommentMutation) Where(ps ...predicate.Comment) {
 // Op returns the operation name.
 func (m *CommentMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CommentMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Comment).
@@ -5500,6 +5510,11 @@ func (m *FieldTypeMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *FieldTypeMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (FieldType).
 func (m *FieldTypeMutation) Type() string {
 	return m.typ
@@ -7765,8 +7780,8 @@ func (m *FileMutation) ResetGroup() {
 	delete(m.clearedFields, file.FieldGroup)
 }
 
-// SetOp sets the "op" field.
-func (m *FileMutation) SetOp(b bool) {
+// SetOpField sets the "op" field.
+func (m *FileMutation) SetOpField(b bool) {
 	m._op = &b
 }
 
@@ -8026,6 +8041,11 @@ func (m *FileMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *FileMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (File).
 func (m *FileMutation) Type() string {
 	return m.typ
@@ -8137,7 +8157,7 @@ func (m *FileMutation) SetField(name string, value ent.Value) error {
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetOp(v)
+		m.SetOpField(v)
 		return nil
 	case file.FieldFieldID:
 		v, ok := value.(int)
@@ -8679,6 +8699,11 @@ func (m *FileTypeMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *FileTypeMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (FileType).
 func (m *FileTypeMutation) Type() string {
 	return m.typ
@@ -9021,6 +9046,11 @@ func (m *GoodsMutation) Where(ps ...predicate.Goods) {
 // Op returns the operation name.
 func (m *GoodsMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *GoodsMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Goods).
@@ -9717,6 +9747,11 @@ func (m *GroupMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *GroupMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (Group).
 func (m *GroupMutation) Type() string {
 	return m.typ
@@ -10347,6 +10382,11 @@ func (m *GroupInfoMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *GroupInfoMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (GroupInfo).
 func (m *GroupInfoMutation) Type() string {
 	return m.typ
@@ -10745,6 +10785,11 @@ func (m *ItemMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *ItemMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (Item).
 func (m *ItemMutation) Type() string {
 	return m.typ
@@ -11106,6 +11151,11 @@ func (m *LicenseMutation) Where(ps ...predicate.License) {
 // Op returns the operation name.
 func (m *LicenseMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *LicenseMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (License).
@@ -11551,6 +11601,11 @@ func (m *NodeMutation) Where(ps ...predicate.Node) {
 // Op returns the operation name.
 func (m *NodeMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *NodeMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Node).
@@ -12209,6 +12264,11 @@ func (m *PetMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *PetMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (Pet).
 func (m *PetMutation) Type() string {
 	return m.typ
@@ -12682,6 +12742,11 @@ func (m *SpecMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *SpecMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (Spec).
 func (m *SpecMutation) Type() string {
 	return m.typ
@@ -13110,6 +13175,11 @@ func (m *TaskMutation) Where(ps ...predicate.Task) {
 // Op returns the operation name.
 func (m *TaskMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TaskMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Task).
@@ -14533,6 +14603,11 @@ func (m *UserMutation) Where(ps ...predicate.User) {
 // Op returns the operation name.
 func (m *UserMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *UserMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (User).

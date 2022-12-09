@@ -401,6 +401,11 @@ func (m *FriendshipMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *FriendshipMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (Friendship).
 func (m *FriendshipMutation) Type() string {
 	return m.typ
@@ -1050,6 +1055,11 @@ func (m *GroupMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *GroupMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (Group).
 func (m *GroupMutation) Type() string {
 	return m.typ
@@ -1566,6 +1576,11 @@ func (m *GroupTagMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *GroupTagMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (GroupTag).
 func (m *GroupTagMutation) Type() string {
 	return m.typ
@@ -2038,6 +2053,11 @@ func (m *RelationshipMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *RelationshipMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (Relationship).
 func (m *RelationshipMutation) Type() string {
 	return m.typ
@@ -2476,6 +2496,11 @@ func (m *RelationshipInfoMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *RelationshipInfoMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (RelationshipInfo).
 func (m *RelationshipInfoMutation) Type() string {
 	return m.typ
@@ -2881,6 +2906,11 @@ func (m *RoleMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *RoleMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (Role).
 func (m *RoleMutation) Type() string {
 	return m.typ
@@ -3259,6 +3289,11 @@ func (m *RoleUserMutation) Where(ps ...predicate.RoleUser) {
 // Op returns the operation name.
 func (m *RoleUserMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *RoleUserMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (RoleUser).
@@ -3871,6 +3906,11 @@ func (m *TagMutation) Where(ps ...predicate.Tag) {
 // Op returns the operation name.
 func (m *TagMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TagMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Tag).
@@ -4583,6 +4623,11 @@ func (m *TweetMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *TweetMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (Tweet).
 func (m *TweetMutation) Type() string {
 	return m.typ
@@ -5048,6 +5093,11 @@ func (m *TweetLikeMutation) Where(ps ...predicate.TweetLike) {
 // Op returns the operation name.
 func (m *TweetLikeMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TweetLikeMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (TweetLike).
@@ -5566,6 +5616,11 @@ func (m *TweetTagMutation) Where(ps ...predicate.TweetTag) {
 // Op returns the operation name.
 func (m *TweetTagMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TweetTagMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (TweetTag).
@@ -6473,6 +6528,11 @@ func (m *UserMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *UserMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (User).
 func (m *UserMutation) Type() string {
 	return m.typ
@@ -7156,6 +7216,11 @@ func (m *UserGroupMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *UserGroupMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (UserGroup).
 func (m *UserGroupMutation) Type() string {
 	return m.typ
@@ -7674,6 +7739,11 @@ func (m *UserTweetMutation) Where(ps ...predicate.UserTweet) {
 // Op returns the operation name.
 func (m *UserTweetMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *UserTweetMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (UserTweet).

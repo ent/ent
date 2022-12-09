@@ -358,6 +358,11 @@ func (m *FileMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *FileMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (File).
 func (m *FileMutation) Type() string {
 	return m.typ

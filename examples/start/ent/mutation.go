@@ -270,6 +270,11 @@ func (m *CarMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *CarMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (Car).
 func (m *CarMutation) Type() string {
 	return m.typ
@@ -679,6 +684,11 @@ func (m *GroupMutation) Where(ps ...predicate.Group) {
 // Op returns the operation name.
 func (m *GroupMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *GroupMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Group).
@@ -1198,6 +1208,11 @@ func (m *UserMutation) Where(ps ...predicate.User) {
 // Op returns the operation name.
 func (m *UserMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *UserMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (User).

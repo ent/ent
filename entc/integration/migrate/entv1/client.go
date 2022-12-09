@@ -148,6 +148,22 @@ func (c *Client) Use(hooks ...Hook) {
 	c.User.Use(hooks...)
 }
 
+// Mutate implements the ent.Mutator interface.
+func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
+	switch m := m.(type) {
+	case *CarMutation:
+		return c.Car.mutate(ctx, m)
+	case *ConversionMutation:
+		return c.Conversion.mutate(ctx, m)
+	case *CustomTypeMutation:
+		return c.CustomType.mutate(ctx, m)
+	case *UserMutation:
+		return c.User.mutate(ctx, m)
+	default:
+		return nil, fmt.Errorf("entv1: unknown mutation type %T", m)
+	}
+}
+
 // CarClient is a client for the Car schema.
 type CarClient struct {
 	config
@@ -254,6 +270,21 @@ func (c *CarClient) Hooks() []Hook {
 	return c.hooks.Car
 }
 
+func (c *CarClient) mutate(ctx context.Context, m *CarMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CarCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CarUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CarUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CarDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("entv1: unknown Car mutation op: %q", m.Op())
+	}
+}
+
 // ConversionClient is a client for the Conversion schema.
 type ConversionClient struct {
 	config
@@ -344,6 +375,21 @@ func (c *ConversionClient) Hooks() []Hook {
 	return c.hooks.Conversion
 }
 
+func (c *ConversionClient) mutate(ctx context.Context, m *ConversionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ConversionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ConversionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ConversionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ConversionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("entv1: unknown Conversion mutation op: %q", m.Op())
+	}
+}
+
 // CustomTypeClient is a client for the CustomType schema.
 type CustomTypeClient struct {
 	config
@@ -432,6 +478,21 @@ func (c *CustomTypeClient) GetX(ctx context.Context, id int) *CustomType {
 // Hooks returns the client hooks.
 func (c *CustomTypeClient) Hooks() []Hook {
 	return c.hooks.CustomType
+}
+
+func (c *CustomTypeClient) mutate(ctx context.Context, m *CustomTypeMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CustomTypeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CustomTypeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CustomTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CustomTypeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("entv1: unknown CustomType mutation op: %q", m.Op())
+	}
 }
 
 // UserClient is a client for the User schema.
@@ -586,4 +647,19 @@ func (c *UserClient) QueryCar(u *User) *CarQuery {
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
+}
+
+func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&UserCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&UserUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&UserDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("entv1: unknown User mutation op: %q", m.Op())
+	}
 }

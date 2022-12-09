@@ -43,6 +43,7 @@ type CardMutation struct {
 	name          *string
 	created_at    *time.Time
 	in_hook       *string
+	expired_at    *time.Time
 	clearedFields map[string]struct{}
 	owner         *int
 	clearedowner  bool
@@ -306,6 +307,55 @@ func (m *CardMutation) ResetInHook() {
 	m.in_hook = nil
 }
 
+// SetExpiredAt sets the "expired_at" field.
+func (m *CardMutation) SetExpiredAt(t time.Time) {
+	m.expired_at = &t
+}
+
+// ExpiredAt returns the value of the "expired_at" field in the mutation.
+func (m *CardMutation) ExpiredAt() (r time.Time, exists bool) {
+	v := m.expired_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExpiredAt returns the old "expired_at" field's value of the Card entity.
+// If the Card object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CardMutation) OldExpiredAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExpiredAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExpiredAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExpiredAt: %w", err)
+	}
+	return oldValue.ExpiredAt, nil
+}
+
+// ClearExpiredAt clears the value of the "expired_at" field.
+func (m *CardMutation) ClearExpiredAt() {
+	m.expired_at = nil
+	m.clearedFields[card.FieldExpiredAt] = struct{}{}
+}
+
+// ExpiredAtCleared returns if the "expired_at" field was cleared in this mutation.
+func (m *CardMutation) ExpiredAtCleared() bool {
+	_, ok := m.clearedFields[card.FieldExpiredAt]
+	return ok
+}
+
+// ResetExpiredAt resets all changes to the "expired_at" field.
+func (m *CardMutation) ResetExpiredAt() {
+	m.expired_at = nil
+	delete(m.clearedFields, card.FieldExpiredAt)
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by id.
 func (m *CardMutation) SetOwnerID(id int) {
 	m.owner = &id
@@ -355,6 +405,11 @@ func (m *CardMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *CardMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (Card).
 func (m *CardMutation) Type() string {
 	return m.typ
@@ -364,7 +419,7 @@ func (m *CardMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CardMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.number != nil {
 		fields = append(fields, card.FieldNumber)
 	}
@@ -376,6 +431,9 @@ func (m *CardMutation) Fields() []string {
 	}
 	if m.in_hook != nil {
 		fields = append(fields, card.FieldInHook)
+	}
+	if m.expired_at != nil {
+		fields = append(fields, card.FieldExpiredAt)
 	}
 	return fields
 }
@@ -393,6 +451,8 @@ func (m *CardMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case card.FieldInHook:
 		return m.InHook()
+	case card.FieldExpiredAt:
+		return m.ExpiredAt()
 	}
 	return nil, false
 }
@@ -410,6 +470,8 @@ func (m *CardMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldCreatedAt(ctx)
 	case card.FieldInHook:
 		return m.OldInHook(ctx)
+	case card.FieldExpiredAt:
+		return m.OldExpiredAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown Card field %s", name)
 }
@@ -447,6 +509,13 @@ func (m *CardMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetInHook(v)
 		return nil
+	case card.FieldExpiredAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExpiredAt(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Card field %s", name)
 }
@@ -480,6 +549,9 @@ func (m *CardMutation) ClearedFields() []string {
 	if m.FieldCleared(card.FieldName) {
 		fields = append(fields, card.FieldName)
 	}
+	if m.FieldCleared(card.FieldExpiredAt) {
+		fields = append(fields, card.FieldExpiredAt)
+	}
 	return fields
 }
 
@@ -496,6 +568,9 @@ func (m *CardMutation) ClearField(name string) error {
 	switch name {
 	case card.FieldName:
 		m.ClearName()
+		return nil
+	case card.FieldExpiredAt:
+		m.ClearExpiredAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Card nullable field %s", name)
@@ -516,6 +591,9 @@ func (m *CardMutation) ResetField(name string) error {
 		return nil
 	case card.FieldInHook:
 		m.ResetInHook()
+		return nil
+	case card.FieldExpiredAt:
+		m.ResetExpiredAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Card field %s", name)
@@ -1085,6 +1163,11 @@ func (m *UserMutation) Where(ps ...predicate.User) {
 // Op returns the operation name.
 func (m *UserMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *UserMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (User).

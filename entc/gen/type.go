@@ -1044,7 +1044,7 @@ func (f Field) EntSQL() *entsql.Annotation {
 
 // mutMethods returns the method names of mutation interface.
 var mutMethods = func() map[string]bool {
-	names := map[string]bool{"Client": true, "Tx": true, "Where": true}
+	names := map[string]bool{"Client": true, "Tx": true, "Where": true, "SetOp": true}
 	t := reflect.TypeOf(new(ent.Mutation)).Elem()
 	for i := 0; i < t.NumMethod(); i++ {
 		names[t.Method(i).Name] = true

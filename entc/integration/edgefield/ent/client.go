@@ -184,6 +184,32 @@ func (c *Client) Use(hooks ...Hook) {
 	c.User.Use(hooks...)
 }
 
+// Mutate implements the ent.Mutator interface.
+func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
+	switch m := m.(type) {
+	case *CarMutation:
+		return c.Car.mutate(ctx, m)
+	case *CardMutation:
+		return c.Card.mutate(ctx, m)
+	case *InfoMutation:
+		return c.Info.mutate(ctx, m)
+	case *MetadataMutation:
+		return c.Metadata.mutate(ctx, m)
+	case *NodeMutation:
+		return c.Node.mutate(ctx, m)
+	case *PetMutation:
+		return c.Pet.mutate(ctx, m)
+	case *PostMutation:
+		return c.Post.mutate(ctx, m)
+	case *RentalMutation:
+		return c.Rental.mutate(ctx, m)
+	case *UserMutation:
+		return c.User.mutate(ctx, m)
+	default:
+		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
 // CarClient is a client for the Car schema.
 type CarClient struct {
 	config
@@ -288,6 +314,21 @@ func (c *CarClient) QueryRentals(ca *Car) *RentalQuery {
 // Hooks returns the client hooks.
 func (c *CarClient) Hooks() []Hook {
 	return c.hooks.Car
+}
+
+func (c *CarClient) mutate(ctx context.Context, m *CarMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CarCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CarUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CarUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CarDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Car mutation op: %q", m.Op())
+	}
 }
 
 // CardClient is a client for the Card schema.
@@ -396,6 +437,21 @@ func (c *CardClient) Hooks() []Hook {
 	return c.hooks.Card
 }
 
+func (c *CardClient) mutate(ctx context.Context, m *CardMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CardCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CardUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CardDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Card mutation op: %q", m.Op())
+	}
+}
+
 // InfoClient is a client for the Info schema.
 type InfoClient struct {
 	config
@@ -500,6 +556,21 @@ func (c *InfoClient) QueryUser(i *Info) *UserQuery {
 // Hooks returns the client hooks.
 func (c *InfoClient) Hooks() []Hook {
 	return c.hooks.Info
+}
+
+func (c *InfoClient) mutate(ctx context.Context, m *InfoMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&InfoCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&InfoUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&InfoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&InfoDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Info mutation op: %q", m.Op())
+	}
 }
 
 // MetadataClient is a client for the Metadata schema.
@@ -640,6 +711,21 @@ func (c *MetadataClient) Hooks() []Hook {
 	return c.hooks.Metadata
 }
 
+func (c *MetadataClient) mutate(ctx context.Context, m *MetadataMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&MetadataCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&MetadataUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&MetadataUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&MetadataDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Metadata mutation op: %q", m.Op())
+	}
+}
+
 // NodeClient is a client for the Node schema.
 type NodeClient struct {
 	config
@@ -762,6 +848,21 @@ func (c *NodeClient) Hooks() []Hook {
 	return c.hooks.Node
 }
 
+func (c *NodeClient) mutate(ctx context.Context, m *NodeMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&NodeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&NodeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&NodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&NodeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Node mutation op: %q", m.Op())
+	}
+}
+
 // PetClient is a client for the Pet schema.
 type PetClient struct {
 	config
@@ -868,6 +969,21 @@ func (c *PetClient) Hooks() []Hook {
 	return c.hooks.Pet
 }
 
+func (c *PetClient) mutate(ctx context.Context, m *PetMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PetCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PetUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PetDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Pet mutation op: %q", m.Op())
+	}
+}
+
 // PostClient is a client for the Post schema.
 type PostClient struct {
 	config
@@ -972,6 +1088,21 @@ func (c *PostClient) QueryAuthor(po *Post) *UserQuery {
 // Hooks returns the client hooks.
 func (c *PostClient) Hooks() []Hook {
 	return c.hooks.Post
+}
+
+func (c *PostClient) mutate(ctx context.Context, m *PostMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PostCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PostUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PostUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PostDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Post mutation op: %q", m.Op())
+	}
 }
 
 // RentalClient is a client for the Rental schema.
@@ -1094,6 +1225,21 @@ func (c *RentalClient) QueryCar(r *Rental) *CarQuery {
 // Hooks returns the client hooks.
 func (c *RentalClient) Hooks() []Hook {
 	return c.hooks.Rental
+}
+
+func (c *RentalClient) mutate(ctx context.Context, m *RentalMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&RentalCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&RentalUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&RentalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&RentalDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Rental mutation op: %q", m.Op())
+	}
 }
 
 // UserClient is a client for the User schema.
@@ -1312,4 +1458,19 @@ func (c *UserClient) QueryRentals(u *User) *RentalQuery {
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
+}
+
+func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&UserCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&UserUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&UserDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown User mutation op: %q", m.Op())
+	}
 }
