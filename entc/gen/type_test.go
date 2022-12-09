@@ -305,6 +305,7 @@ func TestBuilderField(t *testing.T) {
 		{"type", "_type"},
 		{"config", "_config"},
 		{"SSOCert", "_SSOCert"},
+		{"driver", "_driver"},
 	}
 	for _, tt := range tests {
 		require.Equal(t, tt.field, Edge{Name: tt.name}.BuilderField())
