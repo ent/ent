@@ -64,6 +64,12 @@ func TestWriteDriver(t *testing.T) {
 	err = w.Exec(ctx, `INSERT INTO "users" (name) VALUES("a8m") RETURNING id`, nil, nil)
 	require.NoError(t, err)
 	require.Equal(t, `INSERT INTO "users" (name) VALUES("a8m") RETURNING id;`+"\n", b.String())
+
+	// batchCreator uses tx.Query when doing an insert
+	b.Reset()
+	err = w.Query(ctx, `INSERT INTO "users" (name) VALUES("a8m") RETURNING id`, nil, nil)
+	require.NoError(t, err)
+	require.Equal(t, `INSERT INTO "users" (name) VALUES("a8m") RETURNING id;`+"\n", b.String())
 }
 
 func TestDirWriter(t *testing.T) {
