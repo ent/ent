@@ -110,6 +110,7 @@ func (w *WriteDriver) Query(ctx context.Context, query string, args, res any) er
 		if rr, ok := res.(*sql.Rows); ok {
 			*rr = sql.Rows{ColumnScanner: noRows{}}
 		}
+		return nil
 	}
 	switch w.Driver.(type) {
 	case nil, nopDriver:
