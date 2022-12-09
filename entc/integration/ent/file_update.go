@@ -104,7 +104,7 @@ func (fu *FileUpdate) ClearGroup() *FileUpdate {
 
 // SetOp sets the "op" field.
 func (fu *FileUpdate) SetOp(b bool) *FileUpdate {
-	fu.mutation.SetOp(b)
+	fu.mutation.SetOpField(b)
 	return fu
 }
 
@@ -584,7 +584,7 @@ func (fuo *FileUpdateOne) ClearGroup() *FileUpdateOne {
 
 // SetOp sets the "op" field.
 func (fuo *FileUpdateOne) SetOp(b bool) *FileUpdateOne {
-	fuo.mutation.SetOp(b)
+	fuo.mutation.SetOpField(b)
 	return fuo
 }
 

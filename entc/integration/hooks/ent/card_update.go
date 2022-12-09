@@ -73,6 +73,26 @@ func (cu *CardUpdate) SetInHook(s string) *CardUpdate {
 	return cu
 }
 
+// SetExpiredAt sets the "expired_at" field.
+func (cu *CardUpdate) SetExpiredAt(t time.Time) *CardUpdate {
+	cu.mutation.SetExpiredAt(t)
+	return cu
+}
+
+// SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
+func (cu *CardUpdate) SetNillableExpiredAt(t *time.Time) *CardUpdate {
+	if t != nil {
+		cu.SetExpiredAt(*t)
+	}
+	return cu
+}
+
+// ClearExpiredAt clears the value of the "expired_at" field.
+func (cu *CardUpdate) ClearExpiredAt() *CardUpdate {
+	cu.mutation.ClearExpiredAt()
+	return cu
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (cu *CardUpdate) SetOwnerID(id int) *CardUpdate {
 	cu.mutation.SetOwnerID(id)
@@ -187,6 +207,12 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := cu.mutation.InHook(); ok {
 		_spec.SetField(card.FieldInHook, field.TypeString, value)
 	}
+	if value, ok := cu.mutation.ExpiredAt(); ok {
+		_spec.SetField(card.FieldExpiredAt, field.TypeTime, value)
+	}
+	if cu.mutation.ExpiredAtCleared() {
+		_spec.ClearField(card.FieldExpiredAt, field.TypeTime)
+	}
 	if cu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -278,6 +304,26 @@ func (cuo *CardUpdateOne) SetNillableCreatedAt(t *time.Time) *CardUpdateOne {
 // SetInHook sets the "in_hook" field.
 func (cuo *CardUpdateOne) SetInHook(s string) *CardUpdateOne {
 	cuo.mutation.SetInHook(s)
+	return cuo
+}
+
+// SetExpiredAt sets the "expired_at" field.
+func (cuo *CardUpdateOne) SetExpiredAt(t time.Time) *CardUpdateOne {
+	cuo.mutation.SetExpiredAt(t)
+	return cuo
+}
+
+// SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
+func (cuo *CardUpdateOne) SetNillableExpiredAt(t *time.Time) *CardUpdateOne {
+	if t != nil {
+		cuo.SetExpiredAt(*t)
+	}
+	return cuo
+}
+
+// ClearExpiredAt clears the value of the "expired_at" field.
+func (cuo *CardUpdateOne) ClearExpiredAt() *CardUpdateOne {
+	cuo.mutation.ClearExpiredAt()
 	return cuo
 }
 
@@ -424,6 +470,12 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (_node *Card, err error) 
 	}
 	if value, ok := cuo.mutation.InHook(); ok {
 		_spec.SetField(card.FieldInHook, field.TypeString, value)
+	}
+	if value, ok := cuo.mutation.ExpiredAt(); ok {
+		_spec.SetField(card.FieldExpiredAt, field.TypeTime, value)
+	}
+	if cuo.mutation.ExpiredAtCleared() {
+		_spec.ClearField(card.FieldExpiredAt, field.TypeTime)
 	}
 	if cuo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{

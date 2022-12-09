@@ -286,6 +286,11 @@ func (m *UserMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *UserMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (User).
 func (m *UserMutation) Type() string {
 	return m.typ

@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"sort"
 	"testing"
+	"time"
 
 	"entgo.io/ent/entc/integration/hooks/ent"
 	"entgo.io/ent/entc/integration/hooks/ent/card"
@@ -103,6 +104,48 @@ func TestMutationClient(t *testing.T) {
 	a8m := client.User.Create().SetName("a8m").SaveX(ctx)
 	crd := client.Card.Create().SetNumber("1234").SetOwner(a8m).SaveX(ctx)
 	require.Equal(t, a8m.Name, crd.Name)
+}
+
+func TestMutatorClient(t *testing.T) {
+	ctx := context.Background()
+	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	defer client.Close()
+	client.Use(
+		hook.On(
+			func(next ent.Mutator) ent.Mutator {
+				return hook.CardFunc(func(ctx context.Context, m *ent.CardMutation) (ent.Value, error) {
+					op := ent.OpUpdate
+					if _, exists := m.ID(); exists && m.Op().Is(ent.OpDeleteOne) {
+						op = ent.OpUpdateOne
+					}
+					// Change the operation to update.
+					m.SetOp(op)
+					// Record when card was expired.
+					m.SetExpiredAt(time.Now())
+					// Ensure card was not expired before.
+					m.Where(card.ExpiredAtIsNil())
+					return m.Client().Mutate(ctx, m)
+				})
+			},
+			ent.OpDelete|ent.OpDeleteOne,
+		),
+	)
+	c1 := client.Card.Create().SetNumber("1234").SaveX(ctx)
+	client.Card.DeleteOne(c1).ExecX(ctx)
+	expired := client.Card.Query().OnlyX(ctx)
+	require.False(t, expired.ExpiredAt.IsZero())
+
+	client.Card.Create().SetNumber("4567").ExecX(ctx)
+	client.Card.Create().SetNumber("7890").ExecX(ctx)
+	client.Card.Delete().Where(card.Number("4567")).ExecX(ctx)
+	cards := client.Card.Query().Order(ent.Asc(card.FieldNumber)).AllX(ctx)
+	require.Len(t, cards, 3)
+	require.True(t, cards[0].ExpiredAt.Equal(expired.ExpiredAt), "expired field should not be updated")
+	require.False(t, cards[1].ExpiredAt.IsZero())
+	require.True(t, cards[2].ExpiredAt.IsZero())
+
+	client.Card.Delete().ExecX(ctx)
+	require.False(t, client.Card.Query().Where(card.ExpiredAtIsNil()).ExistX(ctx))
 }
 
 func TestMutationTx(t *testing.T) {

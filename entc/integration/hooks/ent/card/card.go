@@ -25,6 +25,8 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldInHook holds the string denoting the in_hook field in the database.
 	FieldInHook = "in_hook"
+	// FieldExpiredAt holds the string denoting the expired_at field in the database.
+	FieldExpiredAt = "expired_at"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
 	// Table holds the table name of the card in the database.
@@ -45,6 +47,7 @@ var Columns = []string{
 	FieldName,
 	FieldCreatedAt,
 	FieldInHook,
+	FieldExpiredAt,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "cards"

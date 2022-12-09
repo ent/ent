@@ -246,6 +246,11 @@ func (m *CityMutation) Op() Op {
 	return m.op
 }
 
+// SetOp allows setting the mutation operation.
+func (m *CityMutation) SetOp(op Op) {
+	m.op = op
+}
+
 // Type returns the node type of this mutation (City).
 func (m *CityMutation) Type() string {
 	return m.typ
@@ -632,6 +637,11 @@ func (m *StreetMutation) Where(ps ...predicate.Street) {
 // Op returns the operation name.
 func (m *StreetMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *StreetMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Street).

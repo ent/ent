@@ -73,6 +73,20 @@ func (cc *CardCreate) SetInHook(s string) *CardCreate {
 	return cc
 }
 
+// SetExpiredAt sets the "expired_at" field.
+func (cc *CardCreate) SetExpiredAt(t time.Time) *CardCreate {
+	cc.mutation.SetExpiredAt(t)
+	return cc
+}
+
+// SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
+func (cc *CardCreate) SetNillableExpiredAt(t *time.Time) *CardCreate {
+	if t != nil {
+		cc.SetExpiredAt(*t)
+	}
+	return cc
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (cc *CardCreate) SetOwnerID(id int) *CardCreate {
 	cc.mutation.SetOwnerID(id)
@@ -243,6 +257,10 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 	if value, ok := cc.mutation.InHook(); ok {
 		_spec.SetField(card.FieldInHook, field.TypeString, value)
 		_node.InHook = value
+	}
+	if value, ok := cc.mutation.ExpiredAt(); ok {
+		_spec.SetField(card.FieldExpiredAt, field.TypeTime, value)
+		_node.ExpiredAt = value
 	}
 	if nodes := cc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

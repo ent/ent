@@ -29,6 +29,8 @@ type Card struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// InHook is a mandatory field that is set by the hook.
 	InHook string `json:"in_hook,omitempty"`
+	// ExpiredAt holds the value of the "expired_at" field.
+	ExpiredAt time.Time `json:"expired_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CardQuery when eager-loading is set.
 	Edges      CardEdges `json:"edges"`
@@ -66,7 +68,7 @@ func (*Card) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case card.FieldNumber, card.FieldName, card.FieldInHook:
 			values[i] = new(sql.NullString)
-		case card.FieldCreatedAt:
+		case card.FieldCreatedAt, card.FieldExpiredAt:
 			values[i] = new(sql.NullTime)
 		case card.ForeignKeys[0]: // user_cards
 			values[i] = new(sql.NullInt64)
@@ -114,6 +116,12 @@ func (c *Card) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field in_hook", values[i])
 			} else if value.Valid {
 				c.InHook = value.String
+			}
+		case card.FieldExpiredAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field expired_at", values[i])
+			} else if value.Valid {
+				c.ExpiredAt = value.Time
 			}
 		case card.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -166,6 +174,9 @@ func (c *Card) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("in_hook=")
 	builder.WriteString(c.InHook)
+	builder.WriteString(", ")
+	builder.WriteString("expired_at=")
+	builder.WriteString(c.ExpiredAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

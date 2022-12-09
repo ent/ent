@@ -134,6 +134,18 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Street.Use(hooks...)
 }
 
+// Mutate implements the ent.Mutator interface.
+func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
+	switch m := m.(type) {
+	case *CityMutation:
+		return c.City.mutate(ctx, m)
+	case *StreetMutation:
+		return c.Street.mutate(ctx, m)
+	default:
+		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
 // CityClient is a client for the City schema.
 type CityClient struct {
 	config
@@ -240,6 +252,21 @@ func (c *CityClient) Hooks() []Hook {
 	return c.hooks.City
 }
 
+func (c *CityClient) mutate(ctx context.Context, m *CityMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CityCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CityUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CityDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown City mutation op: %q", m.Op())
+	}
+}
+
 // StreetClient is a client for the Street schema.
 type StreetClient struct {
 	config
@@ -344,4 +371,19 @@ func (c *StreetClient) QueryCity(s *Street) *CityQuery {
 // Hooks returns the client hooks.
 func (c *StreetClient) Hooks() []Hook {
 	return c.hooks.Street
+}
+
+func (c *StreetClient) mutate(ctx context.Context, m *StreetMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StreetCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StreetUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StreetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StreetDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Street mutation op: %q", m.Op())
+	}
 }
