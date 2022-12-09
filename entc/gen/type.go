@@ -2003,6 +2003,7 @@ var (
 		"predicates",
 		"typ",
 		"unique",
+		"driver",
 	)
 )
 
