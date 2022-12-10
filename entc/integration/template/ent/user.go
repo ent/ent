@@ -14,7 +14,7 @@ import (
 	"entgo.io/ent/entc/integration/template/ent/user"
 )
 
-// User is the model entity for the User schema.
+// User represents a user who has Pets and Friends.
 type User struct {
 	config `json:"-"`
 	// ID of the ent.

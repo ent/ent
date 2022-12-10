@@ -19,7 +19,7 @@ import (
 	{{- end }}
 )
 
-// {{ $.Name }} is the model entity for the {{ $.Name }} schema.
+{{ template "model/comment" $ }}
 {{- with $tmpls := matchTemplate "model/comment/additional/*" }}
 	{{- range $tmpl := $tmpls }}
 		{{- xtemplate $tmpl $ }}
@@ -184,6 +184,17 @@ func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 		return builder.String()
 	}
 {{ end }}
+
+{{/* A template for generating the Entity's comment. */}}
+{{- define "model/comment" }}
+	{{- if and $.Annotations.Comment $.Annotations.Comment.Text }}
+		{{- range $line := split $.Annotations.Comment.Text "\n" }}
+			// {{ $line }}
+		{{- end }}
+	{{- else }}
+		// {{ $.Name }} is the model entity for the {{ $.Name }} schema.
+	{{- end }}
+{{- end }}
 
 {{/* A template for generating the tag of the Edges struct-field. */}}
 {{- define "model/edgetags" }}
