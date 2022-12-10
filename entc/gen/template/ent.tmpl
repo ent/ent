@@ -185,10 +185,10 @@ func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 	}
 {{ end }}
 
-{{/* A template for generating the Model's comment. */}}
+{{/* A template for generating the Entity's comment. */}}
 {{- define "model/comment" }}
-	{{- if $.Annotations.Model.Comment }}
-		{{- range $line := split $.Annotations.Model.Comment "\n" }}
+	{{- if and $.Annotations.Comment $.Annotations.Comment.Text }}
+		{{- range $line := split $.Annotations.Comment.Text "\n" }}
 			// {{ $line }}
 		{{- end }}
 	{{- else }}
