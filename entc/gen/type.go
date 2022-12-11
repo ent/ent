@@ -883,6 +883,14 @@ func (t Type) RelatedTypes() []*Type {
 	return related
 }
 
+// IsUnique returns if query results should be unique.
+func (t Type) IsUnique() bool {
+	if ant := t.EntSQL(); ant != nil && ant.Unique != nil {
+		return *ant.Unique
+	}
+	return true
+}
+
 // ValidSchemaName will determine if a name is going to conflict with any
 // pre-defined names
 func ValidSchemaName(name string) error {

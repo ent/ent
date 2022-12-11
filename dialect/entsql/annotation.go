@@ -89,6 +89,18 @@ type Annotation struct {
 	//
 	Size int64 `json:"size,omitempty"`
 
+	// Unique defines if the query results should be unique When true all queries will be done
+	// with the DISTINCT keyword. For example:
+	//
+	//  uniqueEnabled := true
+	//	entsql.Annotation{
+	//		Unique: &uniqueEnabled,
+	//	}
+	//
+	// By default, this value is nil defaulting to true.
+	//
+	Unique *bool `json:"unique,omitempty"`
+
 	// Incremental defines the auto-incremental behavior of a column. For example:
 	//
 	//  incrementalEnabled := true
@@ -249,6 +261,9 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	}
 	if i := ant.Incremental; i != nil {
 		a.Incremental = i
+	}
+	if s := ant.Unique; s != nil {
+		a.Unique = s
 	}
 	if od := ant.OnDelete; od != "" {
 		a.OnDelete = od

@@ -22,8 +22,10 @@ type Mixin struct {
 
 // Annotations of the Mixin schema.
 func (Mixin) Annotations() []schema.Annotation {
+	false := false
 	return []schema.Annotation{
 		entsql.Annotation{Charset: "utf8mb4"},
+		entsql.Annotation{Unique: &false},
 	}
 }
 
