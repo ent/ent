@@ -251,7 +251,7 @@ func WithComments(w bool) *Annotation {
 }
 
 // Comment defines the column comment in the database schema.
-// and WithComments will be enabled, Comment in annotation is preferred
+// And WithComments will be enabled, Comment in annotation is preferred
 // as database column comment, and if Comment in annotation is ""
 // then field comment will be used.
 //
