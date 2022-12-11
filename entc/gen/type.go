@@ -1364,7 +1364,7 @@ func (f Field) Column() *schema.Column {
 	// and WithComments is enabled in annotation.
 	// Comment in annotation is preferred as Comment,
 	// and if Comment in annotation is "" then field comment will be used.
-	if ant := f.EntSQL(); ant != nil && *ant.WithComments == true {
+	if ant := f.EntSQL(); ant != nil && ant.WithComments != nil && *ant.WithComments {
 		if ant.Comment != "" {
 			c.Comment = ant.Comment
 		} else {
