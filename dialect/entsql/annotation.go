@@ -89,6 +89,31 @@ type Annotation struct {
 	//
 	Size int64 `json:"size,omitempty"`
 
+	// Comment defines the column comment in the database schema. For example:
+	//
+	//	entsql.Annotation{
+	//		Comment: "comment",
+	//	}
+	//
+	Comment string
+
+	// WithComments defines whether entity comments should be
+	// stored in the database schema as column comments.
+	// For example:
+	//
+	//  withCommentsEnabled := true
+	//	entsql.WithComments{
+	//		WithComments: &withCommentsEnabled,
+	//	}
+	//
+	// If WithComments is enabled, Comment in annotation is preferred
+	// as database column comment, and if Comment in annotation is ""
+	// then field comment will be used.
+	//
+	// By default, this value is nil defaulting to whatever best fits each scenario.
+	//
+	WithComments *bool `json:"withComments,omitempty"`
+
 	// Incremental defines the auto-incremental behavior of a column. For example:
 	//
 	//  incrementalEnabled := true
@@ -205,6 +230,44 @@ func DefaultExprs(exprs map[string]string) *Annotation {
 	}
 }
 
+// WithComments defines whether entity comments should be
+// stored in the database schema as well.
+//
+// If WithComments is enabled, Comment in annotation is preferred
+// as database column comment, and if Comment in annotation is ""
+// then field comment will be used.
+//
+//	func (T) Annotations() []schema.Annotation {
+//		return []schema.Annotation{
+//			// WithComments indicates that all entity comments
+//			// should be stored in the database schema as well.
+//			entsql.WithComments(true),
+//		}
+//	}
+func WithComments(w bool) *Annotation {
+	return &Annotation{
+		WithComments: &w,
+	}
+}
+
+// Comment defines the column comment in the database schema.
+// and WithComments will be enabled, Comment in annotation is preferred
+// as database column comment, and if Comment in annotation is ""
+// then field comment will be used.
+//
+//	field.String("user").
+//		Comment("user field comment").
+//		Annotations(
+//			entsql.Comments("user comment for database"),
+//		)
+func Comment(c string) *Annotation {
+	var a = new(Annotation)
+	a.Comment = c
+	a.WithComments = new(bool)
+	*a.WithComments = true
+	return a
+}
+
 // Merge implements the schema.Merger interface.
 func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	var ant Annotation
@@ -246,6 +309,12 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	}
 	if s := ant.Size; s != 0 {
 		a.Size = s
+	}
+	if c := ant.Comment; c != "" {
+		a.Comment = c
+	}
+	if c := ant.WithComments; c != nil {
+		a.WithComments = c
 	}
 	if i := ant.Incremental; i != nil {
 		a.Incremental = i

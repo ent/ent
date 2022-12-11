@@ -1359,6 +1359,18 @@ func (f Field) Column() *schema.Column {
 	if f.def != nil {
 		c.SchemaType = f.def.SchemaType
 	}
+	// Override the Comment defined in the
+	// schema if it was provided by an annotation
+	// and WithComments is enabled in annotation.
+	// Comment in annotation is preferred as Comment,
+	// and if Comment in annotation is "" then field comment will be used.
+	if ant := f.EntSQL(); ant != nil && *ant.WithComments == true {
+		if ant.Comment != "" {
+			c.Comment = ant.Comment
+		} else {
+			c.Comment = f.Comment()
+		}
+	}
 	return c
 }
 

@@ -585,6 +585,15 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 		table.SetAnnotation(n.EntSQL())
 		for _, f := range n.Fields {
 			if !f.IsEdgeField() {
+				// If schema EntSQL annotation exist, merge it into field EntSQL annotation
+				if n.EntSQL() != nil {
+					if f.EntSQL() != nil {
+						f.Annotations[n.EntSQL().Name()] = n.EntSQL().Merge(f.EntSQL())
+					} else {
+						f.Annotations = make(Annotations)
+						f.Annotations[n.EntSQL().Name()] = n.EntSQL()
+					}
+				}
 				table.AddColumn(f.Column())
 			}
 		}
