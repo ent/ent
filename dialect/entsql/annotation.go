@@ -95,7 +95,7 @@ type Annotation struct {
 	//		Comment: "comment",
 	//	}
 	//
-	Comment string
+	Comment string `json:"comment,omitempty"`
 
 	// WithComments defines whether entity comments should be
 	// stored in the database schema as column comments.

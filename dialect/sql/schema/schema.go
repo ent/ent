@@ -295,7 +295,7 @@ type Column struct {
 	typ        string            // row column type (used for Rows.Scan).
 	indexes    Indexes           // linked indexes.
 	foreign    *ForeignKey       // linked foreign-key.
-	Comment    string            // column comment
+	Comment    string            // column comment.
 }
 
 // Expr represents a raw expression. It is used to distinguish between
