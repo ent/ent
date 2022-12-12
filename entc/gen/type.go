@@ -1359,17 +1359,11 @@ func (f Field) Column() *schema.Column {
 	if f.def != nil {
 		c.SchemaType = f.def.SchemaType
 	}
-	// Override the Comment defined in the
-	// schema if it was provided by an annotation
-	// and WithComments is enabled in annotation.
-	// Comment in annotation is preferred as Comment,
-	// and if Comment in annotation is "" then field comment will be used.
+	// Override the Comment defined in the schema
+	// if WithComments is enabled in annotation.
+	// Field comment will be used as column comment.
 	if ant := f.EntSQL(); ant != nil && ant.WithComments != nil && *ant.WithComments {
-		if ant.Comment != "" {
-			c.Comment = ant.Comment
-		} else {
-			c.Comment = f.Comment()
-		}
+		c.Comment = f.Comment()
 	}
 	return c
 }
@@ -1429,17 +1423,11 @@ func (f Field) PK() *schema.Column {
 	if f.def != nil {
 		c.SchemaType = f.def.SchemaType
 	}
-	// Override the Comment defined in the
-	// schema if it was provided by an annotation
-	// and WithComments is enabled in annotation.
-	// Comment in annotation is preferred as Comment,
-	// and if Comment in annotation is "" then field comment will be used.
+	// Override the Comment defined in the schema
+	// if WithComments is enabled in annotation.
+	// Field comment will be used as column comment.
 	if ant := f.EntSQL(); ant != nil && ant.WithComments != nil && *ant.WithComments {
-		if ant.Comment != "" {
-			c.Comment = ant.Comment
-		} else {
-			c.Comment = f.Comment()
-		}
+		c.Comment = f.Comment()
 	}
 	return c
 }

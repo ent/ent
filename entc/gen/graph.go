@@ -698,7 +698,8 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 	return
 }
 
-// If node schema EntSQL annotation exist, merge it into field EntSQL annotation
+// mergeEntSQLAnnotation merge node schema EntSQL annotation into
+// field EntSQL annotation if it exists.
 func mergeEntSQLAnnotation(n *Type, f *Field) {
 	if n.EntSQL() == nil {
 		return
