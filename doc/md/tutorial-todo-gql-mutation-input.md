@@ -72,7 +72,113 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, id int, input ent.Upd
 }
 ```
 
-### Create edges with mutations
+## Test the `CreateTodo` Resolver
+
+Let's start with creating 2 todo items by executing the `createTodo` mutations twice.
+
+#### Mutation
+
+```graphql
+mutation CreateTodo {
+   createTodo(input: {text: "Create GraphQL Example", status: IN_PROGRESS, priority: 2}) {
+     id
+     text
+     createdAt
+     priority
+     parent {
+       id
+     }
+   }
+ }
+```
+
+#### Output
+
+```json
+{
+  "data": {
+    "createTodo": {
+      "id": "1",
+      "text": "Create GraphQL Example",
+      "createdAt": "2021-04-19T10:49:52+03:00",
+      "priority": 2,
+      "parent": null
+    }
+  }
+}
+```
+
+#### Mutation
+
+```graphql
+mutation CreateTodo {
+   createTodo(input: {text: "Create Tracing Example", status: IN_PROGRESS, priority: 2}) {
+     id
+     text
+     createdAt
+     priority
+     parent {
+       id
+     }
+   }
+ }
+```
+
+#### Output
+
+```json
+{
+  "data": {
+    "createTodo": {
+      "id": "2",
+      "text": "Create Tracing Example",
+      "createdAt": "2021-04-19T10:50:01+03:00",
+      "priority": 2,
+      "parent": null
+    }
+  }
+}
+```
+
+## Test the `UpdateTodo` Resolver
+
+The only thing left is to test the `UpdateTodo` resolver. Let's use it to update the `parent` of the 2nd todo item to `1`.
+
+```graphql
+mutation UpdateTodo {
+  updateTodo(id: 2, input: {parentID: 1}) {
+    id
+    text
+    createdAt
+    priority
+    parent {
+      id
+      text
+    }
+  }
+}
+```
+
+#### Output
+
+```json
+{
+  "data": {
+    "updateTodo": {
+      "id": "2",
+      "text": "Create Tracing Example",
+      "createdAt": "2021-04-19T10:50:01+03:00",
+      "priority": 1,
+      "parent": {
+        "id": "1",
+        "text": "Create GraphQL Example"
+      }
+    }
+  }
+}
+```
+
+## Create edges with mutations
 
 If you want to create the edges of a node in the same mutation, you can extend the GQL mutation input with the edge fields:
 
@@ -195,109 +301,4 @@ If you enable the debug Client, you'll see that the children are created in the 
 2022/12/14 00:27:41 Tx(7e04b00b-7941-41c5-9aee-41c8c2d85312).Exec: query=UPDATE `todos` SET `todo_parent` = ? WHERE `id` IN (?, ?) AND `todo_parent` IS NULL args=[3 1 2]
 2022/12/14 00:27:41 Tx(7e04b00b-7941-41c5-9aee-41c8c2d85312).Query: query=SELECT DISTINCT `todos`.`id`, `todos`.`text`, `todos`.`created_at`, `todos`.`status`, `todos`.`priority` FROM `todos` WHERE `todo_parent` = ? args=[3]
 2022/12/14 00:27:41 Tx(7e04b00b-7941-41c5-9aee-41c8c2d85312): committed
-```
-## Test the `CreateTodo` Resolver
-
-Let's start with creating 2 todo items by executing the `createTodo` mutations twice.
-
-#### Mutation
-
-```graphql
-mutation CreateTodo {
-   createTodo(input: {text: "Create GraphQL Example", status: IN_PROGRESS, priority: 2}) {
-     id
-     text
-     createdAt
-     priority
-     parent {
-       id
-     }
-   }
- }
-```
-
-#### Output
-
-```json
-{
-  "data": {
-    "createTodo": {
-      "id": "1",
-      "text": "Create GraphQL Example",
-      "createdAt": "2021-04-19T10:49:52+03:00",
-      "priority": 2,
-      "parent": null
-    }
-  }
-}
-```
-
-#### Mutation
-
-```graphql
-mutation CreateTodo {
-   createTodo(input: {text: "Create Tracing Example", status: IN_PROGRESS, priority: 2}) {
-     id
-     text
-     createdAt
-     priority
-     parent {
-       id
-     }
-   }
- }
-```
-
-#### Output
-
-```json
-{
-  "data": {
-    "createTodo": {
-      "id": "2",
-      "text": "Create Tracing Example",
-      "createdAt": "2021-04-19T10:50:01+03:00",
-      "priority": 2,
-      "parent": null
-    }
-  }
-}
-```
-
-## Test the `UpdateTodo` Resolver
-
-The only thing left is to test the `UpdateTodo` resolver. Let's use it to update the `parent` of the 2nd todo item to `1`.
-
-```graphql
-mutation UpdateTodo {
-  updateTodo(id: 2, input: {parentID: 1}) {
-    id
-    text
-    createdAt
-    priority
-    parent {
-      id
-      text
-    }
-  }
-}
-```
-
-#### Output
-
-```json
-{
-  "data": {
-    "updateTodo": {
-      "id": "2",
-      "text": "Create Tracing Example",
-      "createdAt": "2021-04-19T10:50:01+03:00",
-      "priority": 1,
-      "parent": {
-        "id": "1",
-        "text": "Create GraphQL Example"
-      }
-    }
-  }
-}
 ```
