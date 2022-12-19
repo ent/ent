@@ -66,7 +66,7 @@ module.exports = {
         'translations',
         'contributors',
         'writing-docs',
-        'slack'
+        'community'
       ],
       collapsed: false,
     },
