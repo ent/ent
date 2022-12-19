@@ -180,7 +180,7 @@ mutation UpdateTodo {
 
 ## Create edges with mutations
 
-If you want to create the edges of a node in the same mutation, you can extend the GQL mutation input with the edge fields:
+To create the edges of a node in the same mutation, you can extend the GQL mutation input with the edge fields:
 
 ```graphql title="extended.graphql"
 extend input CreateTodoInput {
@@ -188,12 +188,12 @@ extend input CreateTodoInput {
 }
 ```
 
-Then, you need to run code generation again:
+Next, run code generation again:
 ```go
 go generate .
 ```
 
-GQLGen will generate the resolver for the `createChildren` field, and you can use it in your resolver:
+GQLGen will generate the resolver for the `createChildren` field, allowing you to use it in your resolver:
 
 ```go title="extended.resolvers.go"
 // CreateChildren is the resolver for the createChildren field.
@@ -230,7 +230,7 @@ func (r *createTodoInputResolver) CreateChildren(ctx context.Context, obj *ent.C
 }
 ```
 
-Changes following lines to use the transactional client:
+Change the following lines to use the transactional client:
 
 ```go title="todo.resolvers.go"
 // CreateTodo is the resolver for the createTodo field.
@@ -246,7 +246,7 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, id int, input ent.Upd
 }
 ```
 
-Testing our mutation with the children:
+Test the mutation with the children:
 
 **Mutation**
 ```graphql
