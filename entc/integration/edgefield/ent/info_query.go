@@ -27,6 +27,7 @@ type InfoQuery struct {
 	unique     *bool
 	order      []OrderFunc
 	fields     []string
+	inters     []Interceptor
 	predicates []predicate.Info
 	withUser   *UserQuery
 	// intermediate query (i.e. traversal path).
@@ -40,13 +41,13 @@ func (iq *InfoQuery) Where(ps ...predicate.Info) *InfoQuery {
 	return iq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (iq *InfoQuery) Limit(limit int) *InfoQuery {
 	iq.limit = &limit
 	return iq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (iq *InfoQuery) Offset(offset int) *InfoQuery {
 	iq.offset = &offset
 	return iq
@@ -59,7 +60,7 @@ func (iq *InfoQuery) Unique(unique bool) *InfoQuery {
 	return iq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (iq *InfoQuery) Order(o ...OrderFunc) *InfoQuery {
 	iq.order = append(iq.order, o...)
 	return iq
@@ -67,7 +68,7 @@ func (iq *InfoQuery) Order(o ...OrderFunc) *InfoQuery {
 
 // QueryUser chains the current query on the "user" edge.
 func (iq *InfoQuery) QueryUser() *UserQuery {
-	query := &UserQuery{config: iq.config}
+	query := (&UserClient{config: iq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := iq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -90,7 +91,7 @@ func (iq *InfoQuery) QueryUser() *UserQuery {
 // First returns the first Info entity from the query.
 // Returns a *NotFoundError when no Info was found.
 func (iq *InfoQuery) First(ctx context.Context) (*Info, error) {
-	nodes, err := iq.Limit(1).All(ctx)
+	nodes, err := iq.Limit(1).All(newQueryContext(ctx, TypeInfo, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +114,7 @@ func (iq *InfoQuery) FirstX(ctx context.Context) *Info {
 // Returns a *NotFoundError when no Info ID was found.
 func (iq *InfoQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = iq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = iq.Limit(1).IDs(newQueryContext(ctx, TypeInfo, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -136,7 +137,7 @@ func (iq *InfoQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Info entity is found.
 // Returns a *NotFoundError when no Info entities are found.
 func (iq *InfoQuery) Only(ctx context.Context) (*Info, error) {
-	nodes, err := iq.Limit(2).All(ctx)
+	nodes, err := iq.Limit(2).All(newQueryContext(ctx, TypeInfo, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +165,7 @@ func (iq *InfoQuery) OnlyX(ctx context.Context) *Info {
 // Returns a *NotFoundError when no entities are found.
 func (iq *InfoQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = iq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = iq.Limit(2).IDs(newQueryContext(ctx, TypeInfo, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -189,10 +190,12 @@ func (iq *InfoQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Infos.
 func (iq *InfoQuery) All(ctx context.Context) ([]*Info, error) {
+	ctx = newQueryContext(ctx, TypeInfo, "All")
 	if err := iq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return iq.sqlAll(ctx)
+	qr := querierAll[[]*Info, *InfoQuery]()
+	return withInterceptors[[]*Info](ctx, iq, qr, iq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -207,6 +210,7 @@ func (iq *InfoQuery) AllX(ctx context.Context) []*Info {
 // IDs executes the query and returns a list of Info IDs.
 func (iq *InfoQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
+	ctx = newQueryContext(ctx, TypeInfo, "IDs")
 	if err := iq.Select(info.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -224,10 +228,11 @@ func (iq *InfoQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (iq *InfoQuery) Count(ctx context.Context) (int, error) {
+	ctx = newQueryContext(ctx, TypeInfo, "Count")
 	if err := iq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return iq.sqlCount(ctx)
+	return withInterceptors[int](ctx, iq, querierCount[*InfoQuery](), iq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -241,6 +246,7 @@ func (iq *InfoQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (iq *InfoQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = newQueryContext(ctx, TypeInfo, "Exist")
 	switch _, err := iq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -283,7 +289,7 @@ func (iq *InfoQuery) Clone() *InfoQuery {
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
 func (iq *InfoQuery) WithUser(opts ...func(*UserQuery)) *InfoQuery {
-	query := &UserQuery{config: iq.config}
+	query := (&UserClient{config: iq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -306,16 +312,11 @@ func (iq *InfoQuery) WithUser(opts ...func(*UserQuery)) *InfoQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (iq *InfoQuery) GroupBy(field string, fields ...string) *InfoGroupBy {
-	grbuild := &InfoGroupBy{config: iq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := iq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return iq.sqlQuery(ctx), nil
-	}
+	iq.fields = append([]string{field}, fields...)
+	grbuild := &InfoGroupBy{build: iq}
+	grbuild.flds = &iq.fields
 	grbuild.label = info.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -333,10 +334,10 @@ func (iq *InfoQuery) GroupBy(field string, fields ...string) *InfoGroupBy {
 //		Scan(ctx, &v)
 func (iq *InfoQuery) Select(fields ...string) *InfoSelect {
 	iq.fields = append(iq.fields, fields...)
-	selbuild := &InfoSelect{InfoQuery: iq}
-	selbuild.label = info.Label
-	selbuild.flds, selbuild.scan = &iq.fields, selbuild.Scan
-	return selbuild
+	sbuild := &InfoSelect{InfoQuery: iq}
+	sbuild.label = info.Label
+	sbuild.flds, sbuild.scan = &iq.fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a InfoSelect configured with the given aggregations.
@@ -345,6 +346,16 @@ func (iq *InfoQuery) Aggregate(fns ...AggregateFunc) *InfoSelect {
 }
 
 func (iq *InfoQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range iq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, iq); err != nil {
+				return err
+			}
+		}
+	}
 	for _, f := range iq.fields {
 		if !info.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
@@ -513,13 +524,8 @@ func (iq *InfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // InfoGroupBy is the group-by builder for Info entities.
 type InfoGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *InfoQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -528,58 +534,46 @@ func (igb *InfoGroupBy) Aggregate(fns ...AggregateFunc) *InfoGroupBy {
 	return igb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (igb *InfoGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := igb.path(ctx)
-	if err != nil {
+	ctx = newQueryContext(ctx, TypeInfo, "GroupBy")
+	if err := igb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	igb.sql = query
-	return igb.sqlScan(ctx, v)
+	return scanWithInterceptors[*InfoQuery, *InfoGroupBy](ctx, igb.build, igb, igb.build.inters, v)
 }
 
-func (igb *InfoGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range igb.fields {
-		if !info.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (igb *InfoGroupBy) sqlScan(ctx context.Context, root *InfoQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(igb.fns))
+	for _, fn := range igb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := igb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*igb.flds)+len(igb.fns))
+		for _, f := range *igb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*igb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := igb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := igb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (igb *InfoGroupBy) sqlQuery() *sql.Selector {
-	selector := igb.sql.Select()
-	aggregation := make([]string, 0, len(igb.fns))
-	for _, fn := range igb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(igb.fields)+len(igb.fns))
-		for _, f := range igb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(igb.fields...)...)
-}
-
 // InfoSelect is the builder for selecting fields of Info entities.
 type InfoSelect struct {
 	*InfoQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -590,26 +584,27 @@ func (is *InfoSelect) Aggregate(fns ...AggregateFunc) *InfoSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (is *InfoSelect) Scan(ctx context.Context, v any) error {
+	ctx = newQueryContext(ctx, TypeInfo, "Select")
 	if err := is.prepareQuery(ctx); err != nil {
 		return err
 	}
-	is.sql = is.InfoQuery.sqlQuery(ctx)
-	return is.sqlScan(ctx, v)
+	return scanWithInterceptors[*InfoQuery, *InfoSelect](ctx, is.InfoQuery, is, is.inters, v)
 }
 
-func (is *InfoSelect) sqlScan(ctx context.Context, v any) error {
+func (is *InfoSelect) sqlScan(ctx context.Context, root *InfoQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(is.fns))
 	for _, fn := range is.fns {
-		aggregation = append(aggregation, fn(is.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*is.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		is.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		is.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := is.sql.Query()
+	query, args := selector.Query()
 	if err := is.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

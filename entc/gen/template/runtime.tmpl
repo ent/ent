@@ -44,7 +44,7 @@ backwards-compatibility with previous versions of ent.
 
 {{ $hooks := 0 }}
 {{ range $n := $.Nodes }}
-	{{ $numHooks := $n.NumHooks }}{{ if $n.NumPolicy }}{{ $numHooks = add $numHooks 1 }}{{ end }}
+	{{ $numHooks := add $n.NumHooks $n.NumInterceptors }}{{ if $n.NumPolicy }}{{ $numHooks = add $numHooks 1 }}{{ end }}
 	{{ $hooks = add $hooks $numHooks }}
 {{ end }}
 {{ $rtpkg := false }}{{ if hasField $ "Scope" }}{{ $rtpkg = eq $.Scope.Package "runtime" }}{{ end }}
@@ -124,6 +124,29 @@ func init() {
 				{{ print $pkg ".Hooks" }}[{{ $i }}] =  {{ print $pkg "MixinHooks" $p.MixinIndex }}[{{ $p.Index }}]
 			{{- else }}
 				{{ print $pkg ".Hooks" }}[{{ $i }}] = {{ print $pkg "Hooks" }}[{{ $p.Index }}]
+			{{- end }}
+		{{- end }}
+	{{- end }}
+	{{- with $inters := $n.InterceptorPositions }}
+		{{- /* Interceptors defined in schema mixins. */}}
+		{{- with $idx := $n.MixedInInterceptors }}
+			{{- range $i := $idx }}
+				{{ print $pkg "MixinInters" $i }} := {{ $pkg }}Mixin[{{ $i }}].Interceptors()
+			{{- end }}
+		{{- end }}
+		{{- /* If there are interceptors defined in the schema. */}}
+		{{- $schemaInters := false }}{{ range $p := $inters }}{{ if not $p.MixedIn }}{{ $schemaInters = true }}{{ end }}{{ end }}
+		{{- if $schemaInters }}
+			{{ print $pkg "Inters" }} := {{ $schema }}.{{ $n.Name }}{}.Interceptors()
+		{{- end }}
+		{{- range $i, $p := $inters }}
+			{{- if $n.NumPolicy }}
+				{{ $i = add $i 1 }}
+			{{- end }}
+			{{- if $p.MixedIn }}
+				{{ print $pkg ".Interceptors" }}[{{ $i }}] =  {{ print $pkg "MixinInters" $p.MixinIndex }}[{{ $p.Index }}]
+			{{- else }}
+				{{ print $pkg ".Interceptors" }}[{{ $i }}] = {{ print $pkg "Inters" }}[{{ $p.Index }}]
 			{{- end }}
 		{{- end }}
 	{{- end }}

@@ -27,6 +27,7 @@ type LinkQuery struct {
 	unique     *bool
 	order      []OrderFunc
 	fields     []string
+	inters     []Interceptor
 	predicates []predicate.Link
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -39,13 +40,13 @@ func (lq *LinkQuery) Where(ps ...predicate.Link) *LinkQuery {
 	return lq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (lq *LinkQuery) Limit(limit int) *LinkQuery {
 	lq.limit = &limit
 	return lq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (lq *LinkQuery) Offset(offset int) *LinkQuery {
 	lq.offset = &offset
 	return lq
@@ -58,7 +59,7 @@ func (lq *LinkQuery) Unique(unique bool) *LinkQuery {
 	return lq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (lq *LinkQuery) Order(o ...OrderFunc) *LinkQuery {
 	lq.order = append(lq.order, o...)
 	return lq
@@ -67,7 +68,7 @@ func (lq *LinkQuery) Order(o ...OrderFunc) *LinkQuery {
 // First returns the first Link entity from the query.
 // Returns a *NotFoundError when no Link was found.
 func (lq *LinkQuery) First(ctx context.Context) (*Link, error) {
-	nodes, err := lq.Limit(1).All(ctx)
+	nodes, err := lq.Limit(1).All(newQueryContext(ctx, TypeLink, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +91,7 @@ func (lq *LinkQuery) FirstX(ctx context.Context) *Link {
 // Returns a *NotFoundError when no Link ID was found.
 func (lq *LinkQuery) FirstID(ctx context.Context) (id uuidc.UUIDC, err error) {
 	var ids []uuidc.UUIDC
-	if ids, err = lq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = lq.Limit(1).IDs(newQueryContext(ctx, TypeLink, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -113,7 +114,7 @@ func (lq *LinkQuery) FirstIDX(ctx context.Context) uuidc.UUIDC {
 // Returns a *NotSingularError when more than one Link entity is found.
 // Returns a *NotFoundError when no Link entities are found.
 func (lq *LinkQuery) Only(ctx context.Context) (*Link, error) {
-	nodes, err := lq.Limit(2).All(ctx)
+	nodes, err := lq.Limit(2).All(newQueryContext(ctx, TypeLink, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +142,7 @@ func (lq *LinkQuery) OnlyX(ctx context.Context) *Link {
 // Returns a *NotFoundError when no entities are found.
 func (lq *LinkQuery) OnlyID(ctx context.Context) (id uuidc.UUIDC, err error) {
 	var ids []uuidc.UUIDC
-	if ids, err = lq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = lq.Limit(2).IDs(newQueryContext(ctx, TypeLink, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -166,10 +167,12 @@ func (lq *LinkQuery) OnlyIDX(ctx context.Context) uuidc.UUIDC {
 
 // All executes the query and returns a list of Links.
 func (lq *LinkQuery) All(ctx context.Context) ([]*Link, error) {
+	ctx = newQueryContext(ctx, TypeLink, "All")
 	if err := lq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return lq.sqlAll(ctx)
+	qr := querierAll[[]*Link, *LinkQuery]()
+	return withInterceptors[[]*Link](ctx, lq, qr, lq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -184,6 +187,7 @@ func (lq *LinkQuery) AllX(ctx context.Context) []*Link {
 // IDs executes the query and returns a list of Link IDs.
 func (lq *LinkQuery) IDs(ctx context.Context) ([]uuidc.UUIDC, error) {
 	var ids []uuidc.UUIDC
+	ctx = newQueryContext(ctx, TypeLink, "IDs")
 	if err := lq.Select(link.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -201,10 +205,11 @@ func (lq *LinkQuery) IDsX(ctx context.Context) []uuidc.UUIDC {
 
 // Count returns the count of the given query.
 func (lq *LinkQuery) Count(ctx context.Context) (int, error) {
+	ctx = newQueryContext(ctx, TypeLink, "Count")
 	if err := lq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return lq.sqlCount(ctx)
+	return withInterceptors[int](ctx, lq, querierCount[*LinkQuery](), lq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -218,6 +223,7 @@ func (lq *LinkQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (lq *LinkQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = newQueryContext(ctx, TypeLink, "Exist")
 	switch _, err := lq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -271,16 +277,11 @@ func (lq *LinkQuery) Clone() *LinkQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (lq *LinkQuery) GroupBy(field string, fields ...string) *LinkGroupBy {
-	grbuild := &LinkGroupBy{config: lq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := lq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return lq.sqlQuery(ctx), nil
-	}
+	lq.fields = append([]string{field}, fields...)
+	grbuild := &LinkGroupBy{build: lq}
+	grbuild.flds = &lq.fields
 	grbuild.label = link.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -298,10 +299,10 @@ func (lq *LinkQuery) GroupBy(field string, fields ...string) *LinkGroupBy {
 //		Scan(ctx, &v)
 func (lq *LinkQuery) Select(fields ...string) *LinkSelect {
 	lq.fields = append(lq.fields, fields...)
-	selbuild := &LinkSelect{LinkQuery: lq}
-	selbuild.label = link.Label
-	selbuild.flds, selbuild.scan = &lq.fields, selbuild.Scan
-	return selbuild
+	sbuild := &LinkSelect{LinkQuery: lq}
+	sbuild.label = link.Label
+	sbuild.flds, sbuild.scan = &lq.fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a LinkSelect configured with the given aggregations.
@@ -310,6 +311,16 @@ func (lq *LinkQuery) Aggregate(fns ...AggregateFunc) *LinkSelect {
 }
 
 func (lq *LinkQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range lq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, lq); err != nil {
+				return err
+			}
+		}
+	}
 	for _, f := range lq.fields {
 		if !link.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
@@ -441,13 +452,8 @@ func (lq *LinkQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // LinkGroupBy is the group-by builder for Link entities.
 type LinkGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *LinkQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -456,58 +462,46 @@ func (lgb *LinkGroupBy) Aggregate(fns ...AggregateFunc) *LinkGroupBy {
 	return lgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (lgb *LinkGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := lgb.path(ctx)
-	if err != nil {
+	ctx = newQueryContext(ctx, TypeLink, "GroupBy")
+	if err := lgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	lgb.sql = query
-	return lgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*LinkQuery, *LinkGroupBy](ctx, lgb.build, lgb, lgb.build.inters, v)
 }
 
-func (lgb *LinkGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range lgb.fields {
-		if !link.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (lgb *LinkGroupBy) sqlScan(ctx context.Context, root *LinkQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(lgb.fns))
+	for _, fn := range lgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := lgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*lgb.flds)+len(lgb.fns))
+		for _, f := range *lgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*lgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := lgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := lgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (lgb *LinkGroupBy) sqlQuery() *sql.Selector {
-	selector := lgb.sql.Select()
-	aggregation := make([]string, 0, len(lgb.fns))
-	for _, fn := range lgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(lgb.fields)+len(lgb.fns))
-		for _, f := range lgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(lgb.fields...)...)
-}
-
 // LinkSelect is the builder for selecting fields of Link entities.
 type LinkSelect struct {
 	*LinkQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -518,26 +512,27 @@ func (ls *LinkSelect) Aggregate(fns ...AggregateFunc) *LinkSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ls *LinkSelect) Scan(ctx context.Context, v any) error {
+	ctx = newQueryContext(ctx, TypeLink, "Select")
 	if err := ls.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ls.sql = ls.LinkQuery.sqlQuery(ctx)
-	return ls.sqlScan(ctx, v)
+	return scanWithInterceptors[*LinkQuery, *LinkSelect](ctx, ls.LinkQuery, ls, ls.inters, v)
 }
 
-func (ls *LinkSelect) sqlScan(ctx context.Context, v any) error {
+func (ls *LinkSelect) sqlScan(ctx context.Context, root *LinkQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(ls.fns))
 	for _, fn := range ls.fns {
-		aggregation = append(aggregation, fn(ls.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*ls.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		ls.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		ls.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := ls.sql.Query()
+	query, args := selector.Query()
 	if err := ls.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

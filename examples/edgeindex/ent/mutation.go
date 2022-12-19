@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"sync"
 
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/examples/edgeindex/ent/city"
 	"entgo.io/ent/examples/edgeindex/ent/predicate"
 	"entgo.io/ent/examples/edgeindex/ent/street"
@@ -239,6 +240,16 @@ func (m *CityMutation) ResetStreets() {
 // Where appends a list predicates to the CityMutation builder.
 func (m *CityMutation) Where(ps ...predicate.City) {
 	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CityMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CityMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.City, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
 }
 
 // Op returns the operation name.
@@ -632,6 +643,16 @@ func (m *StreetMutation) ResetCity() {
 // Where appends a list predicates to the StreetMutation builder.
 func (m *StreetMutation) Where(ps ...predicate.Street) {
 	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the StreetMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *StreetMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Street, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
 }
 
 // Op returns the operation name.

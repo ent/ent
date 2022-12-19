@@ -55,9 +55,15 @@ func (ud *UserDelete) Exec(ctx context.Context) (int, error) {
 			}
 			mut = ud.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, ud.mutation); err != nil {
+		n, err := mut.Mutate(ctx, ud.mutation)
+		if err != nil {
 			return 0, err
 		}
+		nv, ok := n.(int)
+		if !ok {
+			return 0, fmt.Errorf("unexpected type %T returned from mutation. expected type: int", n)
+		}
+		affected = nv
 	}
 	return affected, err
 }

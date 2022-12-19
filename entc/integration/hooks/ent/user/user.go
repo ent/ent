@@ -23,8 +23,12 @@ const (
 	FieldWorth = "worth"
 	// FieldPassword holds the string denoting the password field in the database.
 	FieldPassword = "password"
+	// FieldActive holds the string denoting the active field in the database.
+	FieldActive = "active"
 	// EdgeCards holds the string denoting the cards edge name in mutations.
 	EdgeCards = "cards"
+	// EdgePets holds the string denoting the pets edge name in mutations.
+	EdgePets = "pets"
 	// EdgeFriends holds the string denoting the friends edge name in mutations.
 	EdgeFriends = "friends"
 	// EdgeBestFriend holds the string denoting the best_friend edge name in mutations.
@@ -38,6 +42,13 @@ const (
 	CardsInverseTable = "cards"
 	// CardsColumn is the table column denoting the cards relation/edge.
 	CardsColumn = "user_cards"
+	// PetsTable is the table that holds the pets relation/edge.
+	PetsTable = "pets"
+	// PetsInverseTable is the table name for the Pet entity.
+	// It exists in this package in order to avoid circular dependency with the "pet" package.
+	PetsInverseTable = "pets"
+	// PetsColumn is the table column denoting the pets relation/edge.
+	PetsColumn = "user_pets"
 	// FriendsTable is the table that holds the friends relation/edge. The primary key declared below.
 	FriendsTable = "user_friends"
 	// BestFriendTable is the table that holds the best_friend relation/edge.
@@ -53,6 +64,7 @@ var Columns = []string{
 	FieldName,
 	FieldWorth,
 	FieldPassword,
+	FieldActive,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "users"
@@ -91,4 +103,6 @@ var (
 	Hooks [2]ent.Hook
 	// DefaultVersion holds the default value on creation for the "version" field.
 	DefaultVersion int
+	// DefaultActive holds the default value on creation for the "active" field.
+	DefaultActive bool
 )

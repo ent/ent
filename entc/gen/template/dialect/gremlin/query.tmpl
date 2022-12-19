@@ -10,7 +10,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
 
-func ({{ $receiver }} *{{ $builder }}) gremlinAll(ctx context.Context) ([]*{{ $.Name }}, error) {
+func ({{ $receiver }} *{{ $builder }}) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*{{ $.Name }}, error) {
 	res := &gremlin.Response{}
 	traversal := {{ $receiver }}.gremlinQuery(ctx)
 	if len({{ $receiver }}.fields) > 0 {

@@ -30,6 +30,7 @@ module.exports = {
         'traversals',
         'eager-load',
         'hooks',
+        'interceptors',
         'privacy',
         'transactions',
         'predicates',

@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"sync"
 
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/migrate/entv1/car"
 	"entgo.io/ent/entc/integration/migrate/entv1/conversion"
 	"entgo.io/ent/entc/integration/migrate/entv1/customtype"
@@ -190,6 +191,16 @@ func (m *CarMutation) ResetOwner() {
 // Where appends a list predicates to the CarMutation builder.
 func (m *CarMutation) Where(ps ...predicate.Car) {
 	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CarMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CarMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Car, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
 }
 
 // Op returns the operation name.
@@ -1098,6 +1109,16 @@ func (m *ConversionMutation) Where(ps ...predicate.Conversion) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the ConversionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ConversionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Conversion, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *ConversionMutation) Op() Op {
 	return m.op
@@ -1717,6 +1738,16 @@ func (m *CustomTypeMutation) ResetCustom() {
 // Where appends a list predicates to the CustomTypeMutation builder.
 func (m *CustomTypeMutation) Where(ps ...predicate.CustomType) {
 	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CustomTypeMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CustomTypeMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CustomType, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
 }
 
 // Op returns the operation name.
@@ -2760,6 +2791,16 @@ func (m *UserMutation) ResetCar() {
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the UserMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *UserMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.User, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
 }
 
 // Op returns the operation name.

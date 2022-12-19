@@ -29,6 +29,7 @@ type RentalQuery struct {
 	unique     *bool
 	order      []OrderFunc
 	fields     []string
+	inters     []Interceptor
 	predicates []predicate.Rental
 	withUser   *UserQuery
 	withCar    *CarQuery
@@ -43,13 +44,13 @@ func (rq *RentalQuery) Where(ps ...predicate.Rental) *RentalQuery {
 	return rq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (rq *RentalQuery) Limit(limit int) *RentalQuery {
 	rq.limit = &limit
 	return rq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (rq *RentalQuery) Offset(offset int) *RentalQuery {
 	rq.offset = &offset
 	return rq
@@ -62,7 +63,7 @@ func (rq *RentalQuery) Unique(unique bool) *RentalQuery {
 	return rq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (rq *RentalQuery) Order(o ...OrderFunc) *RentalQuery {
 	rq.order = append(rq.order, o...)
 	return rq
@@ -70,7 +71,7 @@ func (rq *RentalQuery) Order(o ...OrderFunc) *RentalQuery {
 
 // QueryUser chains the current query on the "user" edge.
 func (rq *RentalQuery) QueryUser() *UserQuery {
-	query := &UserQuery{config: rq.config}
+	query := (&UserClient{config: rq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := rq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -92,7 +93,7 @@ func (rq *RentalQuery) QueryUser() *UserQuery {
 
 // QueryCar chains the current query on the "car" edge.
 func (rq *RentalQuery) QueryCar() *CarQuery {
-	query := &CarQuery{config: rq.config}
+	query := (&CarClient{config: rq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := rq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -115,7 +116,7 @@ func (rq *RentalQuery) QueryCar() *CarQuery {
 // First returns the first Rental entity from the query.
 // Returns a *NotFoundError when no Rental was found.
 func (rq *RentalQuery) First(ctx context.Context) (*Rental, error) {
-	nodes, err := rq.Limit(1).All(ctx)
+	nodes, err := rq.Limit(1).All(newQueryContext(ctx, TypeRental, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +139,7 @@ func (rq *RentalQuery) FirstX(ctx context.Context) *Rental {
 // Returns a *NotFoundError when no Rental ID was found.
 func (rq *RentalQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = rq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = rq.Limit(1).IDs(newQueryContext(ctx, TypeRental, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -161,7 +162,7 @@ func (rq *RentalQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Rental entity is found.
 // Returns a *NotFoundError when no Rental entities are found.
 func (rq *RentalQuery) Only(ctx context.Context) (*Rental, error) {
-	nodes, err := rq.Limit(2).All(ctx)
+	nodes, err := rq.Limit(2).All(newQueryContext(ctx, TypeRental, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +190,7 @@ func (rq *RentalQuery) OnlyX(ctx context.Context) *Rental {
 // Returns a *NotFoundError when no entities are found.
 func (rq *RentalQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = rq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = rq.Limit(2).IDs(newQueryContext(ctx, TypeRental, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -214,10 +215,12 @@ func (rq *RentalQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Rentals.
 func (rq *RentalQuery) All(ctx context.Context) ([]*Rental, error) {
+	ctx = newQueryContext(ctx, TypeRental, "All")
 	if err := rq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return rq.sqlAll(ctx)
+	qr := querierAll[[]*Rental, *RentalQuery]()
+	return withInterceptors[[]*Rental](ctx, rq, qr, rq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -232,6 +235,7 @@ func (rq *RentalQuery) AllX(ctx context.Context) []*Rental {
 // IDs executes the query and returns a list of Rental IDs.
 func (rq *RentalQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
+	ctx = newQueryContext(ctx, TypeRental, "IDs")
 	if err := rq.Select(rental.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -249,10 +253,11 @@ func (rq *RentalQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (rq *RentalQuery) Count(ctx context.Context) (int, error) {
+	ctx = newQueryContext(ctx, TypeRental, "Count")
 	if err := rq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return rq.sqlCount(ctx)
+	return withInterceptors[int](ctx, rq, querierCount[*RentalQuery](), rq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -266,6 +271,7 @@ func (rq *RentalQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (rq *RentalQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = newQueryContext(ctx, TypeRental, "Exist")
 	switch _, err := rq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -309,7 +315,7 @@ func (rq *RentalQuery) Clone() *RentalQuery {
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
 func (rq *RentalQuery) WithUser(opts ...func(*UserQuery)) *RentalQuery {
-	query := &UserQuery{config: rq.config}
+	query := (&UserClient{config: rq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -320,7 +326,7 @@ func (rq *RentalQuery) WithUser(opts ...func(*UserQuery)) *RentalQuery {
 // WithCar tells the query-builder to eager-load the nodes that are connected to
 // the "car" edge. The optional arguments are used to configure the query builder of the edge.
 func (rq *RentalQuery) WithCar(opts ...func(*CarQuery)) *RentalQuery {
-	query := &CarQuery{config: rq.config}
+	query := (&CarClient{config: rq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -343,16 +349,11 @@ func (rq *RentalQuery) WithCar(opts ...func(*CarQuery)) *RentalQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (rq *RentalQuery) GroupBy(field string, fields ...string) *RentalGroupBy {
-	grbuild := &RentalGroupBy{config: rq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := rq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return rq.sqlQuery(ctx), nil
-	}
+	rq.fields = append([]string{field}, fields...)
+	grbuild := &RentalGroupBy{build: rq}
+	grbuild.flds = &rq.fields
 	grbuild.label = rental.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -370,10 +371,10 @@ func (rq *RentalQuery) GroupBy(field string, fields ...string) *RentalGroupBy {
 //		Scan(ctx, &v)
 func (rq *RentalQuery) Select(fields ...string) *RentalSelect {
 	rq.fields = append(rq.fields, fields...)
-	selbuild := &RentalSelect{RentalQuery: rq}
-	selbuild.label = rental.Label
-	selbuild.flds, selbuild.scan = &rq.fields, selbuild.Scan
-	return selbuild
+	sbuild := &RentalSelect{RentalQuery: rq}
+	sbuild.label = rental.Label
+	sbuild.flds, sbuild.scan = &rq.fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a RentalSelect configured with the given aggregations.
@@ -382,6 +383,16 @@ func (rq *RentalQuery) Aggregate(fns ...AggregateFunc) *RentalSelect {
 }
 
 func (rq *RentalQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range rq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, rq); err != nil {
+				return err
+			}
+		}
+	}
 	for _, f := range rq.fields {
 		if !rental.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
@@ -583,13 +594,8 @@ func (rq *RentalQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // RentalGroupBy is the group-by builder for Rental entities.
 type RentalGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *RentalQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -598,58 +604,46 @@ func (rgb *RentalGroupBy) Aggregate(fns ...AggregateFunc) *RentalGroupBy {
 	return rgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (rgb *RentalGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := rgb.path(ctx)
-	if err != nil {
+	ctx = newQueryContext(ctx, TypeRental, "GroupBy")
+	if err := rgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	rgb.sql = query
-	return rgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*RentalQuery, *RentalGroupBy](ctx, rgb.build, rgb, rgb.build.inters, v)
 }
 
-func (rgb *RentalGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range rgb.fields {
-		if !rental.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (rgb *RentalGroupBy) sqlScan(ctx context.Context, root *RentalQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(rgb.fns))
+	for _, fn := range rgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := rgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*rgb.flds)+len(rgb.fns))
+		for _, f := range *rgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*rgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := rgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := rgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (rgb *RentalGroupBy) sqlQuery() *sql.Selector {
-	selector := rgb.sql.Select()
-	aggregation := make([]string, 0, len(rgb.fns))
-	for _, fn := range rgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(rgb.fields)+len(rgb.fns))
-		for _, f := range rgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(rgb.fields...)...)
-}
-
 // RentalSelect is the builder for selecting fields of Rental entities.
 type RentalSelect struct {
 	*RentalQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -660,26 +654,27 @@ func (rs *RentalSelect) Aggregate(fns ...AggregateFunc) *RentalSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (rs *RentalSelect) Scan(ctx context.Context, v any) error {
+	ctx = newQueryContext(ctx, TypeRental, "Select")
 	if err := rs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	rs.sql = rs.RentalQuery.sqlQuery(ctx)
-	return rs.sqlScan(ctx, v)
+	return scanWithInterceptors[*RentalQuery, *RentalSelect](ctx, rs.RentalQuery, rs, rs.inters, v)
 }
 
-func (rs *RentalSelect) sqlScan(ctx context.Context, v any) error {
+func (rs *RentalSelect) sqlScan(ctx context.Context, root *RentalQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(rs.fns))
 	for _, fn := range rs.fns {
-		aggregation = append(aggregation, fn(rs.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*rs.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		rs.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		rs.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := rs.sql.Query()
+	query, args := selector.Query()
 	if err := rs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

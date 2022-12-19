@@ -72,7 +72,7 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	cfg := config{log: log.Println, hooks: &hooks{}}
+	cfg := config{log: log.Println, hooks: &hooks{}, inters: &inters{}}
 	cfg.options(opts...)
 	client := &Client{config: cfg}
 	client.init()
@@ -219,6 +219,25 @@ func (c *Client) Use(hooks ...Hook) {
 	c.UserTweet.Use(hooks...)
 }
 
+// Intercept adds the query interceptors to all the entity clients.
+// In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
+func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.Friendship.Intercept(interceptors...)
+	c.Group.Intercept(interceptors...)
+	c.GroupTag.Intercept(interceptors...)
+	c.Relationship.Intercept(interceptors...)
+	c.RelationshipInfo.Intercept(interceptors...)
+	c.Role.Intercept(interceptors...)
+	c.RoleUser.Intercept(interceptors...)
+	c.Tag.Intercept(interceptors...)
+	c.Tweet.Intercept(interceptors...)
+	c.TweetLike.Intercept(interceptors...)
+	c.TweetTag.Intercept(interceptors...)
+	c.User.Intercept(interceptors...)
+	c.UserGroup.Intercept(interceptors...)
+	c.UserTweet.Intercept(interceptors...)
+}
+
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
@@ -269,6 +288,12 @@ func NewFriendshipClient(c config) *FriendshipClient {
 // A call to `Use(f, g, h)` equals to `friendship.Hooks(f(g(h())))`.
 func (c *FriendshipClient) Use(hooks ...Hook) {
 	c.hooks.Friendship = append(c.hooks.Friendship, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `friendship.Intercept(f(g(h())))`.
+func (c *FriendshipClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Friendship = append(c.inters.Friendship, interceptors...)
 }
 
 // Create returns a builder for creating a Friendship entity.
@@ -323,6 +348,7 @@ func (c *FriendshipClient) DeleteOneID(id int) *FriendshipDeleteOne {
 func (c *FriendshipClient) Query() *FriendshipQuery {
 	return &FriendshipQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -342,7 +368,7 @@ func (c *FriendshipClient) GetX(ctx context.Context, id int) *Friendship {
 
 // QueryUser queries the user edge of a Friendship.
 func (c *FriendshipClient) QueryUser(f *Friendship) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := f.ID
 		step := sqlgraph.NewStep(
@@ -358,7 +384,7 @@ func (c *FriendshipClient) QueryUser(f *Friendship) *UserQuery {
 
 // QueryFriend queries the friend edge of a Friendship.
 func (c *FriendshipClient) QueryFriend(f *Friendship) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := f.ID
 		step := sqlgraph.NewStep(
@@ -375,6 +401,11 @@ func (c *FriendshipClient) QueryFriend(f *Friendship) *UserQuery {
 // Hooks returns the client hooks.
 func (c *FriendshipClient) Hooks() []Hook {
 	return c.hooks.Friendship
+}
+
+// Interceptors returns the client interceptors.
+func (c *FriendshipClient) Interceptors() []Interceptor {
+	return c.inters.Friendship
 }
 
 func (c *FriendshipClient) mutate(ctx context.Context, m *FriendshipMutation) (Value, error) {
@@ -406,6 +437,12 @@ func NewGroupClient(c config) *GroupClient {
 // A call to `Use(f, g, h)` equals to `group.Hooks(f(g(h())))`.
 func (c *GroupClient) Use(hooks ...Hook) {
 	c.hooks.Group = append(c.hooks.Group, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `group.Intercept(f(g(h())))`.
+func (c *GroupClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Group = append(c.inters.Group, interceptors...)
 }
 
 // Create returns a builder for creating a Group entity.
@@ -460,6 +497,7 @@ func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
 func (c *GroupClient) Query() *GroupQuery {
 	return &GroupQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -479,7 +517,7 @@ func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
 
 // QueryUsers queries the users edge of a Group.
 func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gr.ID
 		step := sqlgraph.NewStep(
@@ -495,7 +533,7 @@ func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 
 // QueryTags queries the tags edge of a Group.
 func (c *GroupClient) QueryTags(gr *Group) *TagQuery {
-	query := &TagQuery{config: c.config}
+	query := (&TagClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gr.ID
 		step := sqlgraph.NewStep(
@@ -511,7 +549,7 @@ func (c *GroupClient) QueryTags(gr *Group) *TagQuery {
 
 // QueryJoinedUsers queries the joined_users edge of a Group.
 func (c *GroupClient) QueryJoinedUsers(gr *Group) *UserGroupQuery {
-	query := &UserGroupQuery{config: c.config}
+	query := (&UserGroupClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gr.ID
 		step := sqlgraph.NewStep(
@@ -527,7 +565,7 @@ func (c *GroupClient) QueryJoinedUsers(gr *Group) *UserGroupQuery {
 
 // QueryGroupTags queries the group_tags edge of a Group.
 func (c *GroupClient) QueryGroupTags(gr *Group) *GroupTagQuery {
-	query := &GroupTagQuery{config: c.config}
+	query := (&GroupTagClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gr.ID
 		step := sqlgraph.NewStep(
@@ -544,6 +582,11 @@ func (c *GroupClient) QueryGroupTags(gr *Group) *GroupTagQuery {
 // Hooks returns the client hooks.
 func (c *GroupClient) Hooks() []Hook {
 	return c.hooks.Group
+}
+
+// Interceptors returns the client interceptors.
+func (c *GroupClient) Interceptors() []Interceptor {
+	return c.inters.Group
 }
 
 func (c *GroupClient) mutate(ctx context.Context, m *GroupMutation) (Value, error) {
@@ -575,6 +618,12 @@ func NewGroupTagClient(c config) *GroupTagClient {
 // A call to `Use(f, g, h)` equals to `grouptag.Hooks(f(g(h())))`.
 func (c *GroupTagClient) Use(hooks ...Hook) {
 	c.hooks.GroupTag = append(c.hooks.GroupTag, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `grouptag.Intercept(f(g(h())))`.
+func (c *GroupTagClient) Intercept(interceptors ...Interceptor) {
+	c.inters.GroupTag = append(c.inters.GroupTag, interceptors...)
 }
 
 // Create returns a builder for creating a GroupTag entity.
@@ -629,6 +678,7 @@ func (c *GroupTagClient) DeleteOneID(id int) *GroupTagDeleteOne {
 func (c *GroupTagClient) Query() *GroupTagQuery {
 	return &GroupTagQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -648,7 +698,7 @@ func (c *GroupTagClient) GetX(ctx context.Context, id int) *GroupTag {
 
 // QueryTag queries the tag edge of a GroupTag.
 func (c *GroupTagClient) QueryTag(gt *GroupTag) *TagQuery {
-	query := &TagQuery{config: c.config}
+	query := (&TagClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gt.ID
 		step := sqlgraph.NewStep(
@@ -664,7 +714,7 @@ func (c *GroupTagClient) QueryTag(gt *GroupTag) *TagQuery {
 
 // QueryGroup queries the group edge of a GroupTag.
 func (c *GroupTagClient) QueryGroup(gt *GroupTag) *GroupQuery {
-	query := &GroupQuery{config: c.config}
+	query := (&GroupClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gt.ID
 		step := sqlgraph.NewStep(
@@ -681,6 +731,11 @@ func (c *GroupTagClient) QueryGroup(gt *GroupTag) *GroupQuery {
 // Hooks returns the client hooks.
 func (c *GroupTagClient) Hooks() []Hook {
 	return c.hooks.GroupTag
+}
+
+// Interceptors returns the client interceptors.
+func (c *GroupTagClient) Interceptors() []Interceptor {
+	return c.inters.GroupTag
 }
 
 func (c *GroupTagClient) mutate(ctx context.Context, m *GroupTagMutation) (Value, error) {
@@ -712,6 +767,12 @@ func NewRelationshipClient(c config) *RelationshipClient {
 // A call to `Use(f, g, h)` equals to `relationship.Hooks(f(g(h())))`.
 func (c *RelationshipClient) Use(hooks ...Hook) {
 	c.hooks.Relationship = append(c.hooks.Relationship, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `relationship.Intercept(f(g(h())))`.
+func (c *RelationshipClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Relationship = append(c.inters.Relationship, interceptors...)
 }
 
 // Create returns a builder for creating a Relationship entity.
@@ -749,6 +810,7 @@ func (c *RelationshipClient) Delete() *RelationshipDelete {
 func (c *RelationshipClient) Query() *RelationshipQuery {
 	return &RelationshipQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -777,6 +839,11 @@ func (c *RelationshipClient) QueryInfo(r *Relationship) *RelationshipInfoQuery {
 func (c *RelationshipClient) Hooks() []Hook {
 	hooks := c.hooks.Relationship
 	return append(hooks[:len(hooks):len(hooks)], relationship.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *RelationshipClient) Interceptors() []Interceptor {
+	return c.inters.Relationship
 }
 
 func (c *RelationshipClient) mutate(ctx context.Context, m *RelationshipMutation) (Value, error) {
@@ -808,6 +875,12 @@ func NewRelationshipInfoClient(c config) *RelationshipInfoClient {
 // A call to `Use(f, g, h)` equals to `relationshipinfo.Hooks(f(g(h())))`.
 func (c *RelationshipInfoClient) Use(hooks ...Hook) {
 	c.hooks.RelationshipInfo = append(c.hooks.RelationshipInfo, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `relationshipinfo.Intercept(f(g(h())))`.
+func (c *RelationshipInfoClient) Intercept(interceptors ...Interceptor) {
+	c.inters.RelationshipInfo = append(c.inters.RelationshipInfo, interceptors...)
 }
 
 // Create returns a builder for creating a RelationshipInfo entity.
@@ -862,6 +935,7 @@ func (c *RelationshipInfoClient) DeleteOneID(id int) *RelationshipInfoDeleteOne 
 func (c *RelationshipInfoClient) Query() *RelationshipInfoQuery {
 	return &RelationshipInfoQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -882,6 +956,11 @@ func (c *RelationshipInfoClient) GetX(ctx context.Context, id int) *Relationship
 // Hooks returns the client hooks.
 func (c *RelationshipInfoClient) Hooks() []Hook {
 	return c.hooks.RelationshipInfo
+}
+
+// Interceptors returns the client interceptors.
+func (c *RelationshipInfoClient) Interceptors() []Interceptor {
+	return c.inters.RelationshipInfo
 }
 
 func (c *RelationshipInfoClient) mutate(ctx context.Context, m *RelationshipInfoMutation) (Value, error) {
@@ -913,6 +992,12 @@ func NewRoleClient(c config) *RoleClient {
 // A call to `Use(f, g, h)` equals to `role.Hooks(f(g(h())))`.
 func (c *RoleClient) Use(hooks ...Hook) {
 	c.hooks.Role = append(c.hooks.Role, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `role.Intercept(f(g(h())))`.
+func (c *RoleClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Role = append(c.inters.Role, interceptors...)
 }
 
 // Create returns a builder for creating a Role entity.
@@ -967,6 +1052,7 @@ func (c *RoleClient) DeleteOneID(id int) *RoleDeleteOne {
 func (c *RoleClient) Query() *RoleQuery {
 	return &RoleQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -986,7 +1072,7 @@ func (c *RoleClient) GetX(ctx context.Context, id int) *Role {
 
 // QueryUser queries the user edge of a Role.
 func (c *RoleClient) QueryUser(r *Role) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := r.ID
 		step := sqlgraph.NewStep(
@@ -1002,7 +1088,7 @@ func (c *RoleClient) QueryUser(r *Role) *UserQuery {
 
 // QueryRolesUsers queries the roles_users edge of a Role.
 func (c *RoleClient) QueryRolesUsers(r *Role) *RoleUserQuery {
-	query := &RoleUserQuery{config: c.config}
+	query := (&RoleUserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := r.ID
 		step := sqlgraph.NewStep(
@@ -1019,6 +1105,11 @@ func (c *RoleClient) QueryRolesUsers(r *Role) *RoleUserQuery {
 // Hooks returns the client hooks.
 func (c *RoleClient) Hooks() []Hook {
 	return c.hooks.Role
+}
+
+// Interceptors returns the client interceptors.
+func (c *RoleClient) Interceptors() []Interceptor {
+	return c.inters.Role
 }
 
 func (c *RoleClient) mutate(ctx context.Context, m *RoleMutation) (Value, error) {
@@ -1050,6 +1141,12 @@ func NewRoleUserClient(c config) *RoleUserClient {
 // A call to `Use(f, g, h)` equals to `roleuser.Hooks(f(g(h())))`.
 func (c *RoleUserClient) Use(hooks ...Hook) {
 	c.hooks.RoleUser = append(c.hooks.RoleUser, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `roleuser.Intercept(f(g(h())))`.
+func (c *RoleUserClient) Intercept(interceptors ...Interceptor) {
+	c.inters.RoleUser = append(c.inters.RoleUser, interceptors...)
 }
 
 // Create returns a builder for creating a RoleUser entity.
@@ -1087,6 +1184,7 @@ func (c *RoleUserClient) Delete() *RoleUserDelete {
 func (c *RoleUserClient) Query() *RoleUserQuery {
 	return &RoleUserQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1107,6 +1205,11 @@ func (c *RoleUserClient) QueryUser(ru *RoleUser) *UserQuery {
 // Hooks returns the client hooks.
 func (c *RoleUserClient) Hooks() []Hook {
 	return c.hooks.RoleUser
+}
+
+// Interceptors returns the client interceptors.
+func (c *RoleUserClient) Interceptors() []Interceptor {
+	return c.inters.RoleUser
 }
 
 func (c *RoleUserClient) mutate(ctx context.Context, m *RoleUserMutation) (Value, error) {
@@ -1138,6 +1241,12 @@ func NewTagClient(c config) *TagClient {
 // A call to `Use(f, g, h)` equals to `tag.Hooks(f(g(h())))`.
 func (c *TagClient) Use(hooks ...Hook) {
 	c.hooks.Tag = append(c.hooks.Tag, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `tag.Intercept(f(g(h())))`.
+func (c *TagClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Tag = append(c.inters.Tag, interceptors...)
 }
 
 // Create returns a builder for creating a Tag entity.
@@ -1192,6 +1301,7 @@ func (c *TagClient) DeleteOneID(id int) *TagDeleteOne {
 func (c *TagClient) Query() *TagQuery {
 	return &TagQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1211,7 +1321,7 @@ func (c *TagClient) GetX(ctx context.Context, id int) *Tag {
 
 // QueryTweets queries the tweets edge of a Tag.
 func (c *TagClient) QueryTweets(t *Tag) *TweetQuery {
-	query := &TweetQuery{config: c.config}
+	query := (&TweetClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
@@ -1227,7 +1337,7 @@ func (c *TagClient) QueryTweets(t *Tag) *TweetQuery {
 
 // QueryGroups queries the groups edge of a Tag.
 func (c *TagClient) QueryGroups(t *Tag) *GroupQuery {
-	query := &GroupQuery{config: c.config}
+	query := (&GroupClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
@@ -1243,7 +1353,7 @@ func (c *TagClient) QueryGroups(t *Tag) *GroupQuery {
 
 // QueryTweetTags queries the tweet_tags edge of a Tag.
 func (c *TagClient) QueryTweetTags(t *Tag) *TweetTagQuery {
-	query := &TweetTagQuery{config: c.config}
+	query := (&TweetTagClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
@@ -1259,7 +1369,7 @@ func (c *TagClient) QueryTweetTags(t *Tag) *TweetTagQuery {
 
 // QueryGroupTags queries the group_tags edge of a Tag.
 func (c *TagClient) QueryGroupTags(t *Tag) *GroupTagQuery {
-	query := &GroupTagQuery{config: c.config}
+	query := (&GroupTagClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
@@ -1276,6 +1386,11 @@ func (c *TagClient) QueryGroupTags(t *Tag) *GroupTagQuery {
 // Hooks returns the client hooks.
 func (c *TagClient) Hooks() []Hook {
 	return c.hooks.Tag
+}
+
+// Interceptors returns the client interceptors.
+func (c *TagClient) Interceptors() []Interceptor {
+	return c.inters.Tag
 }
 
 func (c *TagClient) mutate(ctx context.Context, m *TagMutation) (Value, error) {
@@ -1307,6 +1422,12 @@ func NewTweetClient(c config) *TweetClient {
 // A call to `Use(f, g, h)` equals to `tweet.Hooks(f(g(h())))`.
 func (c *TweetClient) Use(hooks ...Hook) {
 	c.hooks.Tweet = append(c.hooks.Tweet, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `tweet.Intercept(f(g(h())))`.
+func (c *TweetClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Tweet = append(c.inters.Tweet, interceptors...)
 }
 
 // Create returns a builder for creating a Tweet entity.
@@ -1361,6 +1482,7 @@ func (c *TweetClient) DeleteOneID(id int) *TweetDeleteOne {
 func (c *TweetClient) Query() *TweetQuery {
 	return &TweetQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1380,7 +1502,7 @@ func (c *TweetClient) GetX(ctx context.Context, id int) *Tweet {
 
 // QueryLikedUsers queries the liked_users edge of a Tweet.
 func (c *TweetClient) QueryLikedUsers(t *Tweet) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
@@ -1396,7 +1518,7 @@ func (c *TweetClient) QueryLikedUsers(t *Tweet) *UserQuery {
 
 // QueryUser queries the user edge of a Tweet.
 func (c *TweetClient) QueryUser(t *Tweet) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
@@ -1412,7 +1534,7 @@ func (c *TweetClient) QueryUser(t *Tweet) *UserQuery {
 
 // QueryTags queries the tags edge of a Tweet.
 func (c *TweetClient) QueryTags(t *Tweet) *TagQuery {
-	query := &TagQuery{config: c.config}
+	query := (&TagClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
@@ -1428,7 +1550,7 @@ func (c *TweetClient) QueryTags(t *Tweet) *TagQuery {
 
 // QueryLikes queries the likes edge of a Tweet.
 func (c *TweetClient) QueryLikes(t *Tweet) *TweetLikeQuery {
-	query := &TweetLikeQuery{config: c.config}
+	query := (&TweetLikeClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
@@ -1444,7 +1566,7 @@ func (c *TweetClient) QueryLikes(t *Tweet) *TweetLikeQuery {
 
 // QueryTweetUser queries the tweet_user edge of a Tweet.
 func (c *TweetClient) QueryTweetUser(t *Tweet) *UserTweetQuery {
-	query := &UserTweetQuery{config: c.config}
+	query := (&UserTweetClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
@@ -1460,7 +1582,7 @@ func (c *TweetClient) QueryTweetUser(t *Tweet) *UserTweetQuery {
 
 // QueryTweetTags queries the tweet_tags edge of a Tweet.
 func (c *TweetClient) QueryTweetTags(t *Tweet) *TweetTagQuery {
-	query := &TweetTagQuery{config: c.config}
+	query := (&TweetTagClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
@@ -1477,6 +1599,11 @@ func (c *TweetClient) QueryTweetTags(t *Tweet) *TweetTagQuery {
 // Hooks returns the client hooks.
 func (c *TweetClient) Hooks() []Hook {
 	return c.hooks.Tweet
+}
+
+// Interceptors returns the client interceptors.
+func (c *TweetClient) Interceptors() []Interceptor {
+	return c.inters.Tweet
 }
 
 func (c *TweetClient) mutate(ctx context.Context, m *TweetMutation) (Value, error) {
@@ -1508,6 +1635,12 @@ func NewTweetLikeClient(c config) *TweetLikeClient {
 // A call to `Use(f, g, h)` equals to `tweetlike.Hooks(f(g(h())))`.
 func (c *TweetLikeClient) Use(hooks ...Hook) {
 	c.hooks.TweetLike = append(c.hooks.TweetLike, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `tweetlike.Intercept(f(g(h())))`.
+func (c *TweetLikeClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TweetLike = append(c.inters.TweetLike, interceptors...)
 }
 
 // Create returns a builder for creating a TweetLike entity.
@@ -1545,6 +1678,7 @@ func (c *TweetLikeClient) Delete() *TweetLikeDelete {
 func (c *TweetLikeClient) Query() *TweetLikeQuery {
 	return &TweetLikeQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1566,6 +1700,11 @@ func (c *TweetLikeClient) QueryUser(tl *TweetLike) *UserQuery {
 func (c *TweetLikeClient) Hooks() []Hook {
 	hooks := c.hooks.TweetLike
 	return append(hooks[:len(hooks):len(hooks)], tweetlike.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *TweetLikeClient) Interceptors() []Interceptor {
+	return c.inters.TweetLike
 }
 
 func (c *TweetLikeClient) mutate(ctx context.Context, m *TweetLikeMutation) (Value, error) {
@@ -1597,6 +1736,12 @@ func NewTweetTagClient(c config) *TweetTagClient {
 // A call to `Use(f, g, h)` equals to `tweettag.Hooks(f(g(h())))`.
 func (c *TweetTagClient) Use(hooks ...Hook) {
 	c.hooks.TweetTag = append(c.hooks.TweetTag, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `tweettag.Intercept(f(g(h())))`.
+func (c *TweetTagClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TweetTag = append(c.inters.TweetTag, interceptors...)
 }
 
 // Create returns a builder for creating a TweetTag entity.
@@ -1651,6 +1796,7 @@ func (c *TweetTagClient) DeleteOneID(id uuid.UUID) *TweetTagDeleteOne {
 func (c *TweetTagClient) Query() *TweetTagQuery {
 	return &TweetTagQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1670,7 +1816,7 @@ func (c *TweetTagClient) GetX(ctx context.Context, id uuid.UUID) *TweetTag {
 
 // QueryTag queries the tag edge of a TweetTag.
 func (c *TweetTagClient) QueryTag(tt *TweetTag) *TagQuery {
-	query := &TagQuery{config: c.config}
+	query := (&TagClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := tt.ID
 		step := sqlgraph.NewStep(
@@ -1686,7 +1832,7 @@ func (c *TweetTagClient) QueryTag(tt *TweetTag) *TagQuery {
 
 // QueryTweet queries the tweet edge of a TweetTag.
 func (c *TweetTagClient) QueryTweet(tt *TweetTag) *TweetQuery {
-	query := &TweetQuery{config: c.config}
+	query := (&TweetClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := tt.ID
 		step := sqlgraph.NewStep(
@@ -1703,6 +1849,11 @@ func (c *TweetTagClient) QueryTweet(tt *TweetTag) *TweetQuery {
 // Hooks returns the client hooks.
 func (c *TweetTagClient) Hooks() []Hook {
 	return c.hooks.TweetTag
+}
+
+// Interceptors returns the client interceptors.
+func (c *TweetTagClient) Interceptors() []Interceptor {
+	return c.inters.TweetTag
 }
 
 func (c *TweetTagClient) mutate(ctx context.Context, m *TweetTagMutation) (Value, error) {
@@ -1734,6 +1885,12 @@ func NewUserClient(c config) *UserClient {
 // A call to `Use(f, g, h)` equals to `user.Hooks(f(g(h())))`.
 func (c *UserClient) Use(hooks ...Hook) {
 	c.hooks.User = append(c.hooks.User, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `user.Intercept(f(g(h())))`.
+func (c *UserClient) Intercept(interceptors ...Interceptor) {
+	c.inters.User = append(c.inters.User, interceptors...)
 }
 
 // Create returns a builder for creating a User entity.
@@ -1788,6 +1945,7 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1807,7 +1965,7 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 
 // QueryGroups queries the groups edge of a User.
 func (c *UserClient) QueryGroups(u *User) *GroupQuery {
-	query := &GroupQuery{config: c.config}
+	query := (&GroupClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -1823,7 +1981,7 @@ func (c *UserClient) QueryGroups(u *User) *GroupQuery {
 
 // QueryFriends queries the friends edge of a User.
 func (c *UserClient) QueryFriends(u *User) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -1839,7 +1997,7 @@ func (c *UserClient) QueryFriends(u *User) *UserQuery {
 
 // QueryRelatives queries the relatives edge of a User.
 func (c *UserClient) QueryRelatives(u *User) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -1855,7 +2013,7 @@ func (c *UserClient) QueryRelatives(u *User) *UserQuery {
 
 // QueryLikedTweets queries the liked_tweets edge of a User.
 func (c *UserClient) QueryLikedTweets(u *User) *TweetQuery {
-	query := &TweetQuery{config: c.config}
+	query := (&TweetClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -1871,7 +2029,7 @@ func (c *UserClient) QueryLikedTweets(u *User) *TweetQuery {
 
 // QueryTweets queries the tweets edge of a User.
 func (c *UserClient) QueryTweets(u *User) *TweetQuery {
-	query := &TweetQuery{config: c.config}
+	query := (&TweetClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -1887,7 +2045,7 @@ func (c *UserClient) QueryTweets(u *User) *TweetQuery {
 
 // QueryRoles queries the roles edge of a User.
 func (c *UserClient) QueryRoles(u *User) *RoleQuery {
-	query := &RoleQuery{config: c.config}
+	query := (&RoleClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -1903,7 +2061,7 @@ func (c *UserClient) QueryRoles(u *User) *RoleQuery {
 
 // QueryJoinedGroups queries the joined_groups edge of a User.
 func (c *UserClient) QueryJoinedGroups(u *User) *UserGroupQuery {
-	query := &UserGroupQuery{config: c.config}
+	query := (&UserGroupClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -1919,7 +2077,7 @@ func (c *UserClient) QueryJoinedGroups(u *User) *UserGroupQuery {
 
 // QueryFriendships queries the friendships edge of a User.
 func (c *UserClient) QueryFriendships(u *User) *FriendshipQuery {
-	query := &FriendshipQuery{config: c.config}
+	query := (&FriendshipClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -1935,7 +2093,7 @@ func (c *UserClient) QueryFriendships(u *User) *FriendshipQuery {
 
 // QueryRelationship queries the relationship edge of a User.
 func (c *UserClient) QueryRelationship(u *User) *RelationshipQuery {
-	query := &RelationshipQuery{config: c.config}
+	query := (&RelationshipClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -1951,7 +2109,7 @@ func (c *UserClient) QueryRelationship(u *User) *RelationshipQuery {
 
 // QueryLikes queries the likes edge of a User.
 func (c *UserClient) QueryLikes(u *User) *TweetLikeQuery {
-	query := &TweetLikeQuery{config: c.config}
+	query := (&TweetLikeClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -1967,7 +2125,7 @@ func (c *UserClient) QueryLikes(u *User) *TweetLikeQuery {
 
 // QueryUserTweets queries the user_tweets edge of a User.
 func (c *UserClient) QueryUserTweets(u *User) *UserTweetQuery {
-	query := &UserTweetQuery{config: c.config}
+	query := (&UserTweetClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -1983,7 +2141,7 @@ func (c *UserClient) QueryUserTweets(u *User) *UserTweetQuery {
 
 // QueryRolesUsers queries the roles_users edge of a User.
 func (c *UserClient) QueryRolesUsers(u *User) *RoleUserQuery {
-	query := &RoleUserQuery{config: c.config}
+	query := (&RoleUserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -2001,6 +2159,11 @@ func (c *UserClient) QueryRolesUsers(u *User) *RoleUserQuery {
 func (c *UserClient) Hooks() []Hook {
 	hooks := c.hooks.User
 	return append(hooks[:len(hooks):len(hooks)], user.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *UserClient) Interceptors() []Interceptor {
+	return c.inters.User
 }
 
 func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error) {
@@ -2032,6 +2195,12 @@ func NewUserGroupClient(c config) *UserGroupClient {
 // A call to `Use(f, g, h)` equals to `usergroup.Hooks(f(g(h())))`.
 func (c *UserGroupClient) Use(hooks ...Hook) {
 	c.hooks.UserGroup = append(c.hooks.UserGroup, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `usergroup.Intercept(f(g(h())))`.
+func (c *UserGroupClient) Intercept(interceptors ...Interceptor) {
+	c.inters.UserGroup = append(c.inters.UserGroup, interceptors...)
 }
 
 // Create returns a builder for creating a UserGroup entity.
@@ -2086,6 +2255,7 @@ func (c *UserGroupClient) DeleteOneID(id int) *UserGroupDeleteOne {
 func (c *UserGroupClient) Query() *UserGroupQuery {
 	return &UserGroupQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -2105,7 +2275,7 @@ func (c *UserGroupClient) GetX(ctx context.Context, id int) *UserGroup {
 
 // QueryUser queries the user edge of a UserGroup.
 func (c *UserGroupClient) QueryUser(ug *UserGroup) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ug.ID
 		step := sqlgraph.NewStep(
@@ -2121,7 +2291,7 @@ func (c *UserGroupClient) QueryUser(ug *UserGroup) *UserQuery {
 
 // QueryGroup queries the group edge of a UserGroup.
 func (c *UserGroupClient) QueryGroup(ug *UserGroup) *GroupQuery {
-	query := &GroupQuery{config: c.config}
+	query := (&GroupClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ug.ID
 		step := sqlgraph.NewStep(
@@ -2138,6 +2308,11 @@ func (c *UserGroupClient) QueryGroup(ug *UserGroup) *GroupQuery {
 // Hooks returns the client hooks.
 func (c *UserGroupClient) Hooks() []Hook {
 	return c.hooks.UserGroup
+}
+
+// Interceptors returns the client interceptors.
+func (c *UserGroupClient) Interceptors() []Interceptor {
+	return c.inters.UserGroup
 }
 
 func (c *UserGroupClient) mutate(ctx context.Context, m *UserGroupMutation) (Value, error) {
@@ -2169,6 +2344,12 @@ func NewUserTweetClient(c config) *UserTweetClient {
 // A call to `Use(f, g, h)` equals to `usertweet.Hooks(f(g(h())))`.
 func (c *UserTweetClient) Use(hooks ...Hook) {
 	c.hooks.UserTweet = append(c.hooks.UserTweet, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `usertweet.Intercept(f(g(h())))`.
+func (c *UserTweetClient) Intercept(interceptors ...Interceptor) {
+	c.inters.UserTweet = append(c.inters.UserTweet, interceptors...)
 }
 
 // Create returns a builder for creating a UserTweet entity.
@@ -2223,6 +2404,7 @@ func (c *UserTweetClient) DeleteOneID(id int) *UserTweetDeleteOne {
 func (c *UserTweetClient) Query() *UserTweetQuery {
 	return &UserTweetQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -2242,7 +2424,7 @@ func (c *UserTweetClient) GetX(ctx context.Context, id int) *UserTweet {
 
 // QueryUser queries the user edge of a UserTweet.
 func (c *UserTweetClient) QueryUser(ut *UserTweet) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ut.ID
 		step := sqlgraph.NewStep(
@@ -2258,7 +2440,7 @@ func (c *UserTweetClient) QueryUser(ut *UserTweet) *UserQuery {
 
 // QueryTweet queries the tweet edge of a UserTweet.
 func (c *UserTweetClient) QueryTweet(ut *UserTweet) *TweetQuery {
-	query := &TweetQuery{config: c.config}
+	query := (&TweetClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ut.ID
 		step := sqlgraph.NewStep(
@@ -2275,6 +2457,11 @@ func (c *UserTweetClient) QueryTweet(ut *UserTweet) *TweetQuery {
 // Hooks returns the client hooks.
 func (c *UserTweetClient) Hooks() []Hook {
 	return c.hooks.UserTweet
+}
+
+// Interceptors returns the client interceptors.
+func (c *UserTweetClient) Interceptors() []Interceptor {
+	return c.inters.UserTweet
 }
 
 func (c *UserTweetClient) mutate(ctx context.Context, m *UserTweetMutation) (Value, error) {

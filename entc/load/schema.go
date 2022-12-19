@@ -18,14 +18,15 @@ import (
 
 // Schema represents an ent.Schema that was loaded from a complied user package.
 type Schema struct {
-	Name        string         `json:"name,omitempty"`
-	Config      ent.Config     `json:"config,omitempty"`
-	Edges       []*Edge        `json:"edges,omitempty"`
-	Fields      []*Field       `json:"fields,omitempty"`
-	Indexes     []*Index       `json:"indexes,omitempty"`
-	Hooks       []*Position    `json:"hooks,omitempty"`
-	Policy      []*Position    `json:"policy,omitempty"`
-	Annotations map[string]any `json:"annotations,omitempty"`
+	Name         string         `json:"name,omitempty"`
+	Config       ent.Config     `json:"config,omitempty"`
+	Edges        []*Edge        `json:"edges,omitempty"`
+	Fields       []*Field       `json:"fields,omitempty"`
+	Indexes      []*Index       `json:"indexes,omitempty"`
+	Hooks        []*Position    `json:"hooks,omitempty"`
+	Interceptors []*Position    `json:"interceptors,omitempty"`
+	Policy       []*Position    `json:"policy,omitempty"`
+	Annotations  map[string]any `json:"annotations,omitempty"`
 }
 
 // Position describes a position in the schema.
@@ -206,6 +207,9 @@ func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 	if err := s.loadHooks(schema); err != nil {
 		return nil, fmt.Errorf("schema %q: %w", s.Name, err)
 	}
+	if err := s.loadInterceptors(schema); err != nil {
+		return nil, fmt.Errorf("schema %q: %w", s.Name, err)
+	}
 	if err := s.loadPolicy(schema); err != nil {
 		return nil, fmt.Errorf("schema %q: %w", s.Name, err)
 	}
@@ -275,6 +279,17 @@ func (s *Schema) loadMixin(schema ent.Interface) error {
 				MixinIndex: i,
 			})
 		}
+		inters, err := safeInterceptors(mx)
+		if err != nil {
+			return fmt.Errorf("mixin %q: %w", name, err)
+		}
+		for j := range inters {
+			s.Interceptors = append(s.Interceptors, &Position{
+				Index:      j,
+				MixedIn:    true,
+				MixinIndex: i,
+			})
+		}
 		policy, err := safePolicy(mx)
 		if err != nil {
 			return fmt.Errorf("mixin %q: %w", name, err)
@@ -316,6 +331,20 @@ func (s *Schema) loadHooks(schema ent.Interface) error {
 	}
 	for i := range hooks {
 		s.Hooks = append(s.Hooks, &Position{
+			Index:   i,
+			MixedIn: false,
+		})
+	}
+	return nil
+}
+
+func (s *Schema) loadInterceptors(schema ent.Interface) error {
+	inters, err := safeInterceptors(schema)
+	if err != nil {
+		return err
+	}
+	for i := range inters {
+		s.Interceptors = append(s.Interceptors, &Position{
 			Index:   i,
 			MixedIn: false,
 		})
@@ -438,6 +467,17 @@ func safeHooks(schema interface{ Hooks() []ent.Hook }) (hooks []ent.Hook, err er
 		}
 	}()
 	return schema.Hooks(), nil
+}
+
+// safeInterceptors wraps the schema.Interceptors method with recover to ensure no panics in marshaling.
+func safeInterceptors(schema interface{ Interceptors() []ent.Interceptor }) (inters []ent.Interceptor, err error) {
+	defer func() {
+		if v := recover(); v != nil {
+			err = fmt.Errorf("schema.Interceptors panics: %v", v)
+			inters = nil
+		}
+	}()
+	return schema.Interceptors(), nil
 }
 
 // safePolicy wraps the schema.Policy method with recover to ensure no panics in marshaling.

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"entgo.io/ent/entc/integration/hooks/ent/card"
+	"entgo.io/ent/entc/integration/hooks/ent/pet"
 	"entgo.io/ent/entc/integration/hooks/ent/schema"
 	"entgo.io/ent/entc/integration/hooks/ent/user"
 )
@@ -24,6 +25,8 @@ func init() {
 	card.Hooks[0] = cardMixinHooks0[0]
 	card.Hooks[1] = cardHooks[0]
 	card.Hooks[2] = cardHooks[1]
+	cardInters := schema.Card{}.Interceptors()
+	card.Interceptors[0] = cardInters[0]
 	cardFields := schema.Card{}.Fields()
 	_ = cardFields
 	// cardDescNumber is the schema descriptor for number field.
@@ -36,6 +39,11 @@ func init() {
 	cardDescCreatedAt := cardFields[2].Descriptor()
 	// card.DefaultCreatedAt holds the default value on creation for the created_at field.
 	card.DefaultCreatedAt = cardDescCreatedAt.Default.(func() time.Time)
+	petMixin := schema.Pet{}.Mixin()
+	petMixinHooks0 := petMixin[0].Hooks()
+	pet.Hooks[0] = petMixinHooks0[0]
+	petMixinInters0 := petMixin[0].Interceptors()
+	pet.Interceptors[0] = petMixinInters0[0]
 	userMixin := schema.User{}.Mixin()
 	userMixinHooks0 := userMixin[0].Hooks()
 	userHooks := schema.User{}.Hooks()
@@ -49,6 +57,10 @@ func init() {
 	userDescVersion := userMixinFields0[0].Descriptor()
 	// user.DefaultVersion holds the default value on creation for the version field.
 	user.DefaultVersion = userDescVersion.Default.(int)
+	// userDescActive is the schema descriptor for active field.
+	userDescActive := userFields[3].Descriptor()
+	// user.DefaultActive holds the default value on creation for the active field.
+	user.DefaultActive = userDescActive.Default.(bool)
 }
 
 const (

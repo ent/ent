@@ -28,7 +28,7 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	cfg := config{log: log.Println, hooks: &hooks{}}
+	cfg := config{log: log.Println, hooks: &hooks{}, inters: &inters{}}
 	cfg.options(opts...)
 	client := &Client{config: cfg}
 	client.init()
@@ -137,6 +137,14 @@ func (c *Client) Use(hooks ...Hook) {
 	{{- end }}
 }
 
+// Intercept adds the query interceptors to all the entity clients.
+// In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
+func (c *Client) Intercept(interceptors ...Interceptor) {
+	{{- range $n := $.Nodes }}
+		c.{{ $n.Name }}.Intercept(interceptors...)
+	{{- end }}
+}
+
 {{- with $tmpls := matchTemplate "client/additional/*" "client/additional/*/*" }}
 	{{- range $tmpl := $tmpls }}
 		{{- xtemplate $tmpl $ }}
@@ -157,7 +165,7 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 }
 
 {{ range $n := $.Nodes }}
-{{ $client := print $n.Name "Client" }}
+{{ $client := $n.ClientName }}
 // {{ $client }} is a client for the {{ $n.Name }} schema.
 type {{ $client }} struct {
 	config
@@ -174,6 +182,12 @@ func New{{ $client }}(c config) *{{ $client }} {
 // A call to `Use(f, g, h)` equals to `{{ $n.Package }}.Hooks(f(g(h())))`.
 func (c *{{ $client }}) Use(hooks ...Hook) {
 	c.hooks.{{ $n.Name }} = append(c.hooks.{{ $n.Name }}, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `{{ $n.Package }}.Intercept(f(g(h())))`.
+func (c *{{ $client }}) Intercept(interceptors ...Interceptor) {
+	c.inters.{{ $n.Name }} = append(c.inters.{{ $n.Name }}, interceptors...)
 }
 
 // Create returns a builder for creating a {{ $n.Name }} entity.
@@ -239,6 +253,7 @@ func (c *{{ $client }}) Delete() *{{ $n.DeleteName }} {
 func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
 	return &{{ $n.QueryName }}{
 		config: c.config,
+		inters: c.Interceptors(),
 		{{- with $tmpls := matchTemplate (printf "dialect/%s/query/fields/init/*" $.Storage) }}
 			{{- range $tmpl := $tmpls }}
 				{{- xtemplate $tmpl $n }}
@@ -270,7 +285,7 @@ func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
 // Query{{ pascal $e.Name }} queries the {{ $e.Name }} edge of a {{ $n.Name }}.
 func (c *{{ $client }}) {{ $func }}({{ $arg }} *{{ $n.Name }}) *{{ $builder }} {
 	{{- if $n.HasOneFieldID }}
-		query := &{{ $builder }}{config: c.config}
+		query := (&{{ $e.Type.ClientName }}{config: c.config}).Query()
 		query.path = func(context.Context) (fromV {{ $.Storage.Builder }}, _ error) {
 			{{- with extend $n "Receiver" $arg "Edge" $e "Ident" "fromV" }}
 				{{ $tmpl := printf "dialect/%s/query/from" $.Storage }}
@@ -295,6 +310,16 @@ func (c *{{ $client }}) Hooks() []Hook {
 		return append(hooks[:len(hooks):len(hooks)], {{ $n.Package }}.Hooks[:]...)
 	{{- else }}
 		return c.hooks.{{ $n.Name }}
+	{{- end }}
+}
+
+// Interceptors returns the client interceptors.
+func (c *{{ $client }}) Interceptors() []Interceptor {
+	{{- if $n.NumInterceptors }}
+		inters := c.inters.{{ $n.Name }}
+		return append(inters[:len(inters):len(inters)], {{ $n.Package }}.Interceptors[:]...)
+	{{- else }}
+		return c.inters.{{ $n.Name }}
 	{{- end }}
 }
 

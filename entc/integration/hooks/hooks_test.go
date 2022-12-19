@@ -11,20 +11,28 @@ import (
 	"testing"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
+
+	"entgo.io/ent/dialect"
+
 	"entgo.io/ent/entc/integration/hooks/ent"
 	"entgo.io/ent/entc/integration/hooks/ent/card"
 	"entgo.io/ent/entc/integration/hooks/ent/enttest"
 	"entgo.io/ent/entc/integration/hooks/ent/hook"
+	"entgo.io/ent/entc/integration/hooks/ent/intercept"
 	"entgo.io/ent/entc/integration/hooks/ent/migrate"
+	"entgo.io/ent/entc/integration/hooks/ent/pet"
+	"entgo.io/ent/entc/integration/hooks/ent/schema"
 	"entgo.io/ent/entc/integration/hooks/ent/user"
 
+	entgo "entgo.io/ent"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
 )
 
 func TestSchemaHooks(t *testing.T) {
 	ctx := context.Background()
-	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
+	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
 	defer client.Close()
 	err := client.Card.Create().SetNumber("123").Exec(ctx)
 	require.EqualError(t, err, "card number is too short", "error is returned from hook")
@@ -49,7 +57,7 @@ func TestSchemaHooks(t *testing.T) {
 
 func TestRuntimeHooks(t *testing.T) {
 	ctx := context.Background()
-	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", enttest.WithOptions(ent.Log(t.Log)), enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
+	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1", enttest.WithOptions(ent.Log(t.Log)), enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
 	defer client.Close()
 	var calls int
 	client.Use(func(next ent.Mutator) ent.Mutator {
@@ -64,12 +72,12 @@ func TestRuntimeHooks(t *testing.T) {
 	client = client.Debug()
 	client.Card.Create().SetNumber("1234").SaveX(ctx)
 	client.User.Create().SetName("a8m").SaveX(ctx)
-	require.Equal(t, 4, calls, "debug client should keep thr same hooks")
+	require.Equal(t, 4, calls, "debug client should keep the same hooks")
 }
 
 func TestRuntimeChain(t *testing.T) {
 	ctx := context.Background()
-	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
 	defer client.Close()
 	var (
 		chain  hook.Chain
@@ -91,7 +99,7 @@ func TestRuntimeChain(t *testing.T) {
 
 func TestMutationClient(t *testing.T) {
 	ctx := context.Background()
-	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
+	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
 	defer client.Close()
 	client.Card.Use(func(next ent.Mutator) ent.Mutator {
 		return hook.CardFunc(func(ctx context.Context, m *ent.CardMutation) (ent.Value, error) {
@@ -108,7 +116,7 @@ func TestMutationClient(t *testing.T) {
 
 func TestMutatorClient(t *testing.T) {
 	ctx := context.Background()
-	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
 	defer client.Close()
 	client.Use(
 		hook.On(
@@ -118,13 +126,22 @@ func TestMutatorClient(t *testing.T) {
 					if _, exists := m.ID(); exists && m.Op().Is(ent.OpDeleteOne) {
 						op = ent.OpUpdateOne
 					}
+					// Ensure card was not expired before.
+					m.Where(card.ExpiredAtIsNil())
+					// Count the number of affected records.
+					ids, err := m.IDs(ctx)
+					if err != nil {
+						return nil, err
+					}
 					// Change the operation to update.
 					m.SetOp(op)
 					// Record when card was expired.
 					m.SetExpiredAt(time.Now())
-					// Ensure card was not expired before.
-					m.Where(card.ExpiredAtIsNil())
-					return m.Client().Mutate(ctx, m)
+					// Execute the update operation.
+					if _, err := m.Client().Mutate(ctx, m); err != nil {
+						return nil, err
+					}
+					return len(ids), nil
 				})
 			},
 			ent.OpDelete|ent.OpDeleteOne,
@@ -150,7 +167,7 @@ func TestMutatorClient(t *testing.T) {
 
 func TestMutationTx(t *testing.T) {
 	ctx := context.Background()
-	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
+	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
 	defer client.Close()
 	client.Card.Use(func(next ent.Mutator) ent.Mutator {
 		return hook.CardFunc(func(ctx context.Context, m *ent.CardMutation) (ent.Value, error) {
@@ -176,7 +193,7 @@ func TestMutationTx(t *testing.T) {
 
 func TestDeletion(t *testing.T) {
 	ctx := context.Background()
-	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
+	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
 	defer client.Close()
 	client.User.Use(func(next ent.Mutator) ent.Mutator {
 		return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
@@ -202,7 +219,7 @@ func TestDeletion(t *testing.T) {
 
 func TestMutationIDs(t *testing.T) {
 	ctx := context.Background()
-	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
 	defer client.Close()
 	count := make(map[ent.Op]int)
 	client.User.Use(
@@ -233,7 +250,7 @@ func TestMutationIDs(t *testing.T) {
 
 func TestPostCreation(t *testing.T) {
 	ctx := context.Background()
-	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
 	defer client.Close()
 	client.Card.Use(hook.On(func(next ent.Mutator) ent.Mutator {
 		return hook.CardFunc(func(ctx context.Context, m *ent.CardMutation) (ent.Value, error) {
@@ -257,7 +274,7 @@ func TestPostCreation(t *testing.T) {
 
 func TestUpdateAfterCreation(t *testing.T) {
 	ctx := context.Background()
-	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
 	defer client.Close()
 	client.User.Use(hook.On(func(next ent.Mutator) ent.Mutator {
 		return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
@@ -284,7 +301,7 @@ func TestUpdateAfterCreation(t *testing.T) {
 
 func TestUpdateAfterUpdateOne(t *testing.T) {
 	ctx := context.Background()
-	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
 	defer client.Close()
 	client.User.Use(hook.On(func(next ent.Mutator) ent.Mutator {
 		return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
@@ -316,7 +333,7 @@ func TestUpdateAfterUpdateOne(t *testing.T) {
 
 func TestOldValues(t *testing.T) {
 	ctx := context.Background()
-	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
+	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
 	defer client.Close()
 
 	// Querying old fields post mutation should fail.
@@ -402,7 +419,7 @@ func TestOldValues(t *testing.T) {
 }
 
 func TestConditions(t *testing.T) {
-	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
+	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
 	defer client.Close()
 
 	var calls int
@@ -439,7 +456,7 @@ func TestConditions(t *testing.T) {
 }
 
 func TestRuntimeTx(t *testing.T) {
-	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
+	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
 	defer client.Close()
 	client.Card.Use(func(next ent.Mutator) ent.Mutator {
 		return hook.CardFunc(func(ctx context.Context, m *ent.CardMutation) (ent.Value, error) {
@@ -465,4 +482,318 @@ func TestRuntimeTx(t *testing.T) {
 	tx.Card.Create().SetNumber("9876").ExecX(ctx)
 	require.EqualError(t, tx.Commit(), "fail")
 	require.Zero(t, client.Card.Query().CountX(ctx), "database is empty")
+}
+
+func TestInterceptor_Sanity(t *testing.T) {
+	ctx := context.Background()
+	t.Run("All", func(t *testing.T) {
+		var (
+			calls  int
+			client = enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
+		)
+		defer client.Close()
+		client.Intercept(
+			ent.InterceptFunc(func(next ent.Querier) ent.Querier {
+				return ent.QuerierFunc(func(ctx context.Context, query ent.Query) (ent.Value, error) {
+					_, err := intercept.NewQuery(query)
+					require.NoError(t, err)
+					calls++
+					nodes, err := next.Query(ctx, query)
+					require.NoError(t, err)
+					require.IsType(t, ([]*ent.User)(nil), nodes)
+					return nodes, nil
+				})
+			}),
+			intercept.TraverseFunc(func(ctx context.Context, query intercept.Query) error {
+				calls++
+				return nil
+			}),
+		)
+		client.User.Query().AllX(ctx)
+		require.Equal(t, 2, calls)
+	})
+	t.Run("Count", func(t *testing.T) {
+		var (
+			calls  int
+			client = enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
+		)
+		defer client.Close()
+		client.Intercept(
+			ent.InterceptFunc(func(next ent.Querier) ent.Querier {
+				return ent.QuerierFunc(func(ctx context.Context, query ent.Query) (ent.Value, error) {
+					calls++
+					count, err := next.Query(ctx, query)
+					require.NoError(t, err)
+					require.Equal(t, 0, count)
+					return count, nil
+				})
+			}),
+			intercept.TraverseFunc(func(ctx context.Context, query intercept.Query) error {
+				calls++
+				return nil
+			}),
+		)
+		client.User.Query().CountX(ctx)
+		require.Equal(t, 2, calls)
+	})
+	t.Run("IDs", func(t *testing.T) {
+		var (
+			calls  int
+			client = enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
+			users  = client.User.CreateBulk(
+				client.User.Create().SetName("a8m"),
+				client.User.Create().SetName("nati"),
+			).SaveX(ctx)
+		)
+		defer client.Close()
+		client.Intercept(
+			ent.InterceptFunc(func(next ent.Querier) ent.Querier {
+				return ent.QuerierFunc(func(ctx context.Context, query ent.Query) (ent.Value, error) {
+					calls++
+					ids, err := next.Query(ctx, query)
+					require.NoError(t, err)
+					// IDs() uses Select() under the hood, therefore,
+					// scanned values are returned as values and not pointers.
+					require.IsType(t, ([]int)(nil), ids)
+					require.Equal(t, []int{users[0].ID}, ids)
+					// Values can be changed and affect the return value.
+					return append(ids.([]int), 10, 20), nil
+				})
+			}),
+			intercept.TraverseFunc(func(ctx context.Context, query intercept.Query) error {
+				calls++
+				query.WhereP(user.ID(users[0].ID))
+				return nil
+			}),
+		)
+		require.Equal(t, []int{users[0].ID, 10, 20}, client.User.Query().IDsX(ctx))
+		require.Equal(t, 2, calls)
+	})
+	t.Run("GroupBy", func(t *testing.T) {
+		type n2c struct {
+			N string `sql:"name"`
+			C int    `sql:"count"`
+		}
+		var (
+			calls  int
+			client = enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
+		)
+		defer client.Close()
+		client.Intercept(
+			ent.InterceptFunc(func(next ent.Querier) ent.Querier {
+				return ent.QuerierFunc(func(ctx context.Context, query ent.Query) (ent.Value, error) {
+					calls++
+					vs, err := next.Query(ctx, query)
+					require.NoError(t, err)
+					return append(vs.([]n2c), n2c{N: "fake", C: 10}), nil
+				})
+			}),
+			intercept.TraverseFunc(func(ctx context.Context, query intercept.Query) error {
+				calls++
+				query.WhereP(card.NameNEQ("a8m"))
+				return nil
+			}),
+		)
+		client.Card.CreateBulk(
+			client.Card.Create().SetName("a8m").SetNumber("1234"),
+			client.Card.Create().SetName("a8m").SetNumber("5678"),
+			client.Card.Create().SetName("nati").SetNumber("9876"),
+		).ExecX(ctx)
+		var vs []n2c
+		require.NoError(t, client.Card.Query().GroupBy(user.FieldName).Aggregate(ent.Count()).Scan(ctx, &vs))
+		require.Equal(t, []n2c{{"nati", 1}, {"fake", 10}}, vs)
+		require.Equal(t, 2, calls)
+	})
+}
+
+func TestSoftDelete(t *testing.T) {
+	ctx := context.Background()
+	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
+	defer client.Close()
+
+	a8m := client.User.Create().SetName("a8m").SaveX(ctx)
+	pets := client.Pet.CreateBulk(
+		client.Pet.Create().SetName("a").SetOwner(a8m),
+		client.Pet.Create().SetName("b").SetOwner(a8m),
+		// Set delete_time manually.
+		client.Pet.Create().SetName("c").SetOwner(a8m).SetDeleteTime(time.Now()),
+	).SaveX(ctx)
+	require.Equal(t, []int{pets[0].ID, pets[1].ID}, client.Pet.Query().Order(ent.Asc(pet.FieldID)).IDsX(ctx))
+
+	// DeleteOne using the API.
+	client.Pet.DeleteOne(pets[1]).ExecX(ctx)
+	require.Equal(t, pets[0].ID, client.Pet.Query().OnlyIDX(ctx))
+
+	// Delete using the API.
+	n := client.Pet.Delete().ExecX(ctx)
+	require.Equal(t, 1, n)
+	require.False(t, client.Pet.Query().ExistX(ctx))
+
+	// Query entities through the interceptor.
+	require.Zero(t, client.Pet.Query().CountX(ctx))
+	require.Empty(t, client.Pet.Query().AllX(ctx))
+	// Skip soft-deleted interceptors.
+	require.Equal(t, 3, client.Pet.Query().CountX(schema.SkipSoftDelete(ctx)))
+	require.Len(t, client.Pet.Query().AllX(schema.SkipSoftDelete(ctx)), 3)
+
+	client.Pet.CreateBulk(
+		client.Pet.Create().SetName("d"),
+		client.Pet.Create().SetName("d"),
+		client.Pet.Create().SetName("d"),
+	).ExecX(ctx)
+
+	// Select entities through the interceptor.
+	names := client.Pet.Query().Unique(true).Select(pet.FieldName).StringsX(ctx)
+	require.Equal(t, []string{"d"}, names)
+	names = client.Pet.Query().Unique(true).Order(ent.Asc(pet.FieldName)).Select(pet.FieldName).StringsX(schema.SkipSoftDelete(ctx))
+	require.Equal(t, []string{"a", "b", "c", "d"}, names)
+
+	// Group by.
+	var n2c []struct {
+		N string `sql:"name"`
+		C int    `sql:"count"`
+	}
+	client.Pet.Query().GroupBy(pet.FieldName).Aggregate(ent.Count()).ScanX(ctx, &n2c)
+	require.Equal(t, "d", n2c[0].N)
+	require.Equal(t, 3, n2c[0].C)
+	n2c = nil
+	client.Pet.Query().GroupBy(pet.FieldName).Aggregate(ent.Count()).ScanX(schema.SkipSoftDelete(ctx), &n2c)
+	require.Len(t, n2c, 4)
+
+	// Edge traversals.
+	require.False(t, a8m.QueryPets().ExistX(ctx), "interceptors should be applied on edge traversals")
+	require.False(t, client.User.Query().QueryPets().ExistX(ctx))
+	require.Equal(t, 3, a8m.QueryPets().CountX(schema.SkipSoftDelete(ctx)))
+
+	// Eager-loading edges.
+	a8m = client.User.Query().WithPets().OnlyX(ctx)
+	require.Empty(t, a8m.Edges.Pets)
+}
+
+func TestTraverseUnique(t *testing.T) {
+	ctx := context.Background()
+	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
+	defer client.Close()
+
+	a8m := client.User.Create().SetName("a8m").SaveX(ctx)
+	client.Pet.CreateBulk(
+		client.Pet.Create().SetName("a").SetOwner(a8m),
+		client.Pet.Create().SetName("b").SetOwner(a8m),
+	).ExecX(ctx)
+	require.Equal(t, 1, client.Pet.Query().QueryOwner().CountX(ctx))
+
+	// Disable unique traversal using interceptors.
+	client.User.Intercept(
+		intercept.TraverseFunc(func(ctx context.Context, q intercept.Query) error {
+			q.Unique(false)
+			return nil
+		}),
+	)
+	// The JOIN with pets will return the same owner twice, one for each pet.
+	require.Equal(t, 2, client.Pet.Query().QueryOwner().CountX(ctx))
+}
+
+// The following example demonstrates how to write interceptors that
+// can be used by multiple packages/projects using generics.
+func TestSharedInterceptor(t *testing.T) {
+	ctx := context.Background()
+	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
+	defer client.Close()
+	client.User.Create().SetName("a8m").ExecX(ctx)
+	client.User.Create().SetName("nati").ExecX(ctx)
+	require.Len(t, client.User.Query().AllX(ctx), 2)
+	client.Intercept(SharedLimiter(intercept.NewQuery, 1))
+	require.Len(t, client.User.Query().AllX(ctx), 1)
+}
+
+// Project-level example. The usage of "entgo" package demonstrates how to
+// write a generic interceptor that can be  used by any ent-based project.
+func SharedLimiter[Q interface{ Limit(int) }](f func(entgo.Query) (Q, error), limit int) entgo.Interceptor {
+	return entgo.InterceptFunc(func(next entgo.Querier) entgo.Querier {
+		return entgo.QuerierFunc(func(ctx context.Context, query entgo.Query) (ent.Value, error) {
+			l, err := f(query)
+			if err != nil {
+				return nil, err
+			}
+			l.Limit(limit)
+			return next.Query(ctx, query)
+		})
+	})
+}
+
+func TestTypedTraverser(t *testing.T) {
+	ctx := context.Background()
+	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
+	defer client.Close()
+	a8m, nat := client.User.Create().SetName("a8m").SaveX(ctx), client.User.Create().SetName("nati").SetActive(false).SaveX(ctx)
+	client.Pet.CreateBulk(
+		client.Pet.Create().SetName("a").SetOwner(a8m),
+		client.Pet.Create().SetName("b").SetOwner(a8m),
+		client.Pet.Create().SetName("c").SetOwner(nat),
+	).ExecX(ctx)
+
+	// Get all pets of all users.
+	if n := client.User.Query().QueryPets().CountX(ctx); n != 3 {
+		t.Errorf("got %d pets, want 3", n)
+	}
+
+	// Add an interceptor that filters out inactive users.
+	client.User.Intercept(
+		ent.TraverseFunc(func(ctx context.Context, query ent.Query) error {
+			if q, ok := query.(*ent.UserQuery); ok {
+				q.Where(user.Active(true))
+			}
+			return nil
+		}),
+	)
+	// Only pets of active users are returned.
+	if n := client.User.Query().QueryPets().CountX(ctx); n != 2 {
+		t.Errorf("got %d pets, want 2", n)
+	}
+}
+
+func TestLimitInterceptor(t *testing.T) {
+	ctx := context.Background()
+	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
+	defer client.Close()
+	client.User.Create().SetName("a8m").SaveX(ctx)
+	client.User.Create().SetName("nati").SaveX(ctx)
+	require.Len(t, client.User.Query().AllX(ctx), 2)
+	client.Intercept(
+		intercept.Func(func(ctx context.Context, q intercept.Query) error {
+			q.Limit(1)
+			return nil
+		}),
+	)
+	require.Len(t, client.User.Query().AllX(ctx), 1)
+}
+
+func TestFilterTraverseFunc(t *testing.T) {
+	ctx := context.Background()
+	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
+	defer client.Close()
+	a8m, nat := client.User.Create().SetName("a8m").SaveX(ctx), client.User.Create().SetName("nati").SetActive(false).SaveX(ctx)
+	client.Pet.CreateBulk(
+		client.Pet.Create().SetName("a").SetOwner(a8m),
+		client.Pet.Create().SetName("b").SetOwner(a8m),
+		client.Pet.Create().SetName("c").SetOwner(nat),
+	).ExecX(ctx)
+	// Get all pets of all users.
+	if n := client.User.Query().QueryPets().CountX(ctx); n != 3 {
+		t.Errorf("got %d pets, want 3", n)
+	}
+
+	// Add an interceptor that filters out inactive users.
+	client.User.Intercept(
+		intercept.TraverseFunc(func(ctx context.Context, query intercept.Query) error {
+			query.WhereP(func(s *sql.Selector) {
+				s.Where(sql.EQ("active", true))
+			})
+			return nil
+		}),
+	)
+	// Only pets of active users are returned.
+	if n := client.User.Query().QueryPets().CountX(ctx); n != 2 {
+		t.Errorf("got %d pets, want 2", n)
+	}
 }

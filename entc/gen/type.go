@@ -442,7 +442,7 @@ func (t Type) EdgesWithID() (edges []*Edge) {
 // RuntimeMixin returns schema mixin that needs to be loaded at
 // runtime. For example, for default values, validators or hooks.
 func (t Type) RuntimeMixin() bool {
-	return len(t.MixedInFields()) > 0 || len(t.MixedInHooks()) > 0 || len(t.MixedInPolicies()) > 0
+	return len(t.MixedInFields()) > 0 || len(t.MixedInHooks()) > 0 || len(t.MixedInPolicies()) > 0 || len(t.MixedInInterceptors()) > 0
 }
 
 // MixedInFields returns the indices of mixin holds runtime code.
@@ -467,6 +467,20 @@ func (t Type) MixedInHooks() []int {
 	}
 	idx := make(map[int]struct{})
 	for _, h := range t.schema.Hooks {
+		if h.MixedIn {
+			idx[h.MixinIndex] = struct{}{}
+		}
+	}
+	return sortedKeys(idx)
+}
+
+// MixedInInterceptors returns the indices of mixin with interceptors.
+func (t Type) MixedInInterceptors() []int {
+	if t.schema == nil {
+		return nil
+	}
+	idx := make(map[int]struct{})
+	for _, h := range t.schema.Interceptors {
 		if h.MixedIn {
 			idx[h.MixinIndex] = struct{}{}
 		}
@@ -776,6 +790,11 @@ func (t *Type) addFK(fk *ForeignKey) {
 	t.ForeignKeys = append(t.ForeignKeys, fk)
 }
 
+// ClientName returns the struct name denoting the client of this type.
+func (t Type) ClientName() string {
+	return pascal(t.Name) + "Client"
+}
+
 // QueryName returns the struct name denoting the query-builder for this type.
 func (t Type) QueryName() string {
 	return pascal(t.Name) + "Query"
@@ -821,6 +840,11 @@ func (t Type) MutationName() string {
 	return pascal(t.Name) + "Mutation"
 }
 
+// TypeName returns the constant name of the type defined in mutation.go.
+func (t Type) TypeName() string {
+	return "Type" + pascal(t.Name)
+}
+
 // SiblingImports returns all sibling packages that are needed for the different builders.
 func (t Type) SiblingImports() []struct{ Alias, Path string } {
 	var (
@@ -849,6 +873,22 @@ func (t Type) NumHooks() int {
 func (t Type) HookPositions() []*load.Position {
 	if t.schema != nil {
 		return t.schema.Hooks
+	}
+	return nil
+}
+
+// NumInterceptors returns the number of interceptors declared in the type schema.
+func (t Type) NumInterceptors() int {
+	if t.schema != nil {
+		return len(t.schema.Interceptors)
+	}
+	return 0
+}
+
+// InterceptorPositions returns the position information of interceptors declared in the type schema.
+func (t Type) InterceptorPositions() []*load.Position {
+	if t.schema != nil {
+		return t.schema.Interceptors
 	}
 	return nil
 }
@@ -1973,6 +2013,7 @@ var (
 		"Desc",
 		"Driver",
 		"Hook",
+		"Interceptor",
 		"Log",
 		"MutateFunc",
 		"Mutation",
@@ -1993,6 +2034,7 @@ var (
 		"config",
 		"done",
 		"hooks",
+		"inters",
 		"limit",
 		"mutation",
 		"offset",

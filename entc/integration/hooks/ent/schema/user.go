@@ -39,6 +39,8 @@ func (User) Fields() []ent.Field {
 		field.String("password").
 			Optional().
 			Sensitive(),
+		field.Bool("active").
+			Default(true),
 	}
 }
 
@@ -46,6 +48,7 @@ func (User) Fields() []ent.Field {
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("cards", Card.Type),
+		edge.To("pets", Pet.Type),
 		edge.To("friends", User.Type),
 		edge.To("best_friend", User.Type).
 			Unique(),

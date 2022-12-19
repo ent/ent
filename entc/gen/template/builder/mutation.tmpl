@@ -34,7 +34,7 @@ const (
 
 	// Node types.
 	{{- range $n := $.Nodes }}
-		Type{{ $n.Name }} = "{{ $n.Name }}"
+		{{ $n.TypeName }} = "{{ $n.Name }}"
 	{{- end }}
 )
 
@@ -84,7 +84,7 @@ func new{{ $mutation }}(c config, op Op, opts ...{{ $mutationOption }}) *{{ $mut
 	m := &{{ $mutation }}{
 		config: c,
 		op: op,
-		typ: Type{{ $n.Name }},
+		typ: {{ $n.TypeName }},
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -404,6 +404,16 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 // Where appends a list predicates to the {{ $mutation }} builder.
 func (m *{{ $mutation }}) Where(ps ...predicate.{{ $n.Name }}) {
 	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the {{ $mutation }} builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *{{ $mutation }}) WhereP(ps ...func({{ $.Storage.Builder }})) {
+	p := make([]predicate.{{ $n.Name }}, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
 }
 
 // Op returns the operation name.

@@ -73,7 +73,7 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	cfg := config{log: log.Println, hooks: &hooks{}}
+	cfg := config{log: log.Println, hooks: &hooks{}, inters: &inters{}}
 	cfg.options(opts...)
 	client := &Client{config: cfg}
 	client.init()
@@ -198,6 +198,26 @@ func (c *Client) Use(hooks ...Hook) {
 	c.User.Use(hooks...)
 }
 
+// Intercept adds the query interceptors to all the entity clients.
+// In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
+func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.Card.Intercept(interceptors...)
+	c.Comment.Intercept(interceptors...)
+	c.FieldType.Intercept(interceptors...)
+	c.File.Intercept(interceptors...)
+	c.FileType.Intercept(interceptors...)
+	c.Goods.Intercept(interceptors...)
+	c.Group.Intercept(interceptors...)
+	c.GroupInfo.Intercept(interceptors...)
+	c.Item.Intercept(interceptors...)
+	c.License.Intercept(interceptors...)
+	c.Node.Intercept(interceptors...)
+	c.Pet.Intercept(interceptors...)
+	c.Spec.Intercept(interceptors...)
+	c.Task.Intercept(interceptors...)
+	c.User.Intercept(interceptors...)
+}
+
 // Dialect returns the driver dialect.
 func (c *Client) Dialect() string {
 	return c.driver.Dialect()
@@ -262,6 +282,12 @@ func (c *CardClient) Use(hooks ...Hook) {
 	c.hooks.Card = append(c.hooks.Card, hooks...)
 }
 
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `card.Intercept(f(g(h())))`.
+func (c *CardClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Card = append(c.inters.Card, interceptors...)
+}
+
 // Create returns a builder for creating a Card entity.
 func (c *CardClient) Create() *CardCreate {
 	mutation := newCardMutation(c.config, OpCreate)
@@ -314,6 +340,7 @@ func (c *CardClient) DeleteOneID(id string) *CardDeleteOne {
 func (c *CardClient) Query() *CardQuery {
 	return &CardQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -333,7 +360,7 @@ func (c *CardClient) GetX(ctx context.Context, id string) *Card {
 
 // QueryOwner queries the owner edge of a Card.
 func (c *CardClient) QueryOwner(ca *Card) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(ca.ID).InE(user.CardLabel).OutV()
@@ -344,7 +371,7 @@ func (c *CardClient) QueryOwner(ca *Card) *UserQuery {
 
 // QuerySpec queries the spec edge of a Card.
 func (c *CardClient) QuerySpec(ca *Card) *SpecQuery {
-	query := &SpecQuery{config: c.config}
+	query := (&SpecClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(ca.ID).InE(spec.CardLabel).OutV()
@@ -356,6 +383,11 @@ func (c *CardClient) QuerySpec(ca *Card) *SpecQuery {
 // Hooks returns the client hooks.
 func (c *CardClient) Hooks() []Hook {
 	return c.hooks.Card
+}
+
+// Interceptors returns the client interceptors.
+func (c *CardClient) Interceptors() []Interceptor {
+	return c.inters.Card
 }
 
 func (c *CardClient) mutate(ctx context.Context, m *CardMutation) (Value, error) {
@@ -387,6 +419,12 @@ func NewCommentClient(c config) *CommentClient {
 // A call to `Use(f, g, h)` equals to `comment.Hooks(f(g(h())))`.
 func (c *CommentClient) Use(hooks ...Hook) {
 	c.hooks.Comment = append(c.hooks.Comment, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `comment.Intercept(f(g(h())))`.
+func (c *CommentClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Comment = append(c.inters.Comment, interceptors...)
 }
 
 // Create returns a builder for creating a Comment entity.
@@ -441,6 +479,7 @@ func (c *CommentClient) DeleteOneID(id string) *CommentDeleteOne {
 func (c *CommentClient) Query() *CommentQuery {
 	return &CommentQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -461,6 +500,11 @@ func (c *CommentClient) GetX(ctx context.Context, id string) *Comment {
 // Hooks returns the client hooks.
 func (c *CommentClient) Hooks() []Hook {
 	return c.hooks.Comment
+}
+
+// Interceptors returns the client interceptors.
+func (c *CommentClient) Interceptors() []Interceptor {
+	return c.inters.Comment
 }
 
 func (c *CommentClient) mutate(ctx context.Context, m *CommentMutation) (Value, error) {
@@ -492,6 +536,12 @@ func NewFieldTypeClient(c config) *FieldTypeClient {
 // A call to `Use(f, g, h)` equals to `fieldtype.Hooks(f(g(h())))`.
 func (c *FieldTypeClient) Use(hooks ...Hook) {
 	c.hooks.FieldType = append(c.hooks.FieldType, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `fieldtype.Intercept(f(g(h())))`.
+func (c *FieldTypeClient) Intercept(interceptors ...Interceptor) {
+	c.inters.FieldType = append(c.inters.FieldType, interceptors...)
 }
 
 // Create returns a builder for creating a FieldType entity.
@@ -546,6 +596,7 @@ func (c *FieldTypeClient) DeleteOneID(id string) *FieldTypeDeleteOne {
 func (c *FieldTypeClient) Query() *FieldTypeQuery {
 	return &FieldTypeQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -566,6 +617,11 @@ func (c *FieldTypeClient) GetX(ctx context.Context, id string) *FieldType {
 // Hooks returns the client hooks.
 func (c *FieldTypeClient) Hooks() []Hook {
 	return c.hooks.FieldType
+}
+
+// Interceptors returns the client interceptors.
+func (c *FieldTypeClient) Interceptors() []Interceptor {
+	return c.inters.FieldType
 }
 
 func (c *FieldTypeClient) mutate(ctx context.Context, m *FieldTypeMutation) (Value, error) {
@@ -597,6 +653,12 @@ func NewFileClient(c config) *FileClient {
 // A call to `Use(f, g, h)` equals to `file.Hooks(f(g(h())))`.
 func (c *FileClient) Use(hooks ...Hook) {
 	c.hooks.File = append(c.hooks.File, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `file.Intercept(f(g(h())))`.
+func (c *FileClient) Intercept(interceptors ...Interceptor) {
+	c.inters.File = append(c.inters.File, interceptors...)
 }
 
 // Create returns a builder for creating a File entity.
@@ -651,6 +713,7 @@ func (c *FileClient) DeleteOneID(id string) *FileDeleteOne {
 func (c *FileClient) Query() *FileQuery {
 	return &FileQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -670,7 +733,7 @@ func (c *FileClient) GetX(ctx context.Context, id string) *File {
 
 // QueryOwner queries the owner edge of a File.
 func (c *FileClient) QueryOwner(f *File) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(f.ID).InE(user.FilesLabel).OutV()
@@ -681,7 +744,7 @@ func (c *FileClient) QueryOwner(f *File) *UserQuery {
 
 // QueryType queries the type edge of a File.
 func (c *FileClient) QueryType(f *File) *FileTypeQuery {
-	query := &FileTypeQuery{config: c.config}
+	query := (&FileTypeClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(f.ID).InE(filetype.FilesLabel).OutV()
@@ -692,7 +755,7 @@ func (c *FileClient) QueryType(f *File) *FileTypeQuery {
 
 // QueryField queries the field edge of a File.
 func (c *FileClient) QueryField(f *File) *FieldTypeQuery {
-	query := &FieldTypeQuery{config: c.config}
+	query := (&FieldTypeClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(f.ID).OutE(file.FieldLabel).InV()
@@ -704,6 +767,11 @@ func (c *FileClient) QueryField(f *File) *FieldTypeQuery {
 // Hooks returns the client hooks.
 func (c *FileClient) Hooks() []Hook {
 	return c.hooks.File
+}
+
+// Interceptors returns the client interceptors.
+func (c *FileClient) Interceptors() []Interceptor {
+	return c.inters.File
 }
 
 func (c *FileClient) mutate(ctx context.Context, m *FileMutation) (Value, error) {
@@ -735,6 +803,12 @@ func NewFileTypeClient(c config) *FileTypeClient {
 // A call to `Use(f, g, h)` equals to `filetype.Hooks(f(g(h())))`.
 func (c *FileTypeClient) Use(hooks ...Hook) {
 	c.hooks.FileType = append(c.hooks.FileType, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `filetype.Intercept(f(g(h())))`.
+func (c *FileTypeClient) Intercept(interceptors ...Interceptor) {
+	c.inters.FileType = append(c.inters.FileType, interceptors...)
 }
 
 // Create returns a builder for creating a FileType entity.
@@ -789,6 +863,7 @@ func (c *FileTypeClient) DeleteOneID(id string) *FileTypeDeleteOne {
 func (c *FileTypeClient) Query() *FileTypeQuery {
 	return &FileTypeQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -808,7 +883,7 @@ func (c *FileTypeClient) GetX(ctx context.Context, id string) *FileType {
 
 // QueryFiles queries the files edge of a FileType.
 func (c *FileTypeClient) QueryFiles(ft *FileType) *FileQuery {
-	query := &FileQuery{config: c.config}
+	query := (&FileClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(ft.ID).OutE(filetype.FilesLabel).InV()
@@ -820,6 +895,11 @@ func (c *FileTypeClient) QueryFiles(ft *FileType) *FileQuery {
 // Hooks returns the client hooks.
 func (c *FileTypeClient) Hooks() []Hook {
 	return c.hooks.FileType
+}
+
+// Interceptors returns the client interceptors.
+func (c *FileTypeClient) Interceptors() []Interceptor {
+	return c.inters.FileType
 }
 
 func (c *FileTypeClient) mutate(ctx context.Context, m *FileTypeMutation) (Value, error) {
@@ -851,6 +931,12 @@ func NewGoodsClient(c config) *GoodsClient {
 // A call to `Use(f, g, h)` equals to `goods.Hooks(f(g(h())))`.
 func (c *GoodsClient) Use(hooks ...Hook) {
 	c.hooks.Goods = append(c.hooks.Goods, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `goods.Intercept(f(g(h())))`.
+func (c *GoodsClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Goods = append(c.inters.Goods, interceptors...)
 }
 
 // Create returns a builder for creating a Goods entity.
@@ -905,6 +991,7 @@ func (c *GoodsClient) DeleteOneID(id string) *GoodsDeleteOne {
 func (c *GoodsClient) Query() *GoodsQuery {
 	return &GoodsQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -925,6 +1012,11 @@ func (c *GoodsClient) GetX(ctx context.Context, id string) *Goods {
 // Hooks returns the client hooks.
 func (c *GoodsClient) Hooks() []Hook {
 	return c.hooks.Goods
+}
+
+// Interceptors returns the client interceptors.
+func (c *GoodsClient) Interceptors() []Interceptor {
+	return c.inters.Goods
 }
 
 func (c *GoodsClient) mutate(ctx context.Context, m *GoodsMutation) (Value, error) {
@@ -956,6 +1048,12 @@ func NewGroupClient(c config) *GroupClient {
 // A call to `Use(f, g, h)` equals to `group.Hooks(f(g(h())))`.
 func (c *GroupClient) Use(hooks ...Hook) {
 	c.hooks.Group = append(c.hooks.Group, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `group.Intercept(f(g(h())))`.
+func (c *GroupClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Group = append(c.inters.Group, interceptors...)
 }
 
 // Create returns a builder for creating a Group entity.
@@ -1010,6 +1108,7 @@ func (c *GroupClient) DeleteOneID(id string) *GroupDeleteOne {
 func (c *GroupClient) Query() *GroupQuery {
 	return &GroupQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1029,7 +1128,7 @@ func (c *GroupClient) GetX(ctx context.Context, id string) *Group {
 
 // QueryFiles queries the files edge of a Group.
 func (c *GroupClient) QueryFiles(gr *Group) *FileQuery {
-	query := &FileQuery{config: c.config}
+	query := (&FileClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(gr.ID).OutE(group.FilesLabel).InV()
@@ -1040,7 +1139,7 @@ func (c *GroupClient) QueryFiles(gr *Group) *FileQuery {
 
 // QueryBlocked queries the blocked edge of a Group.
 func (c *GroupClient) QueryBlocked(gr *Group) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(gr.ID).OutE(group.BlockedLabel).InV()
@@ -1051,7 +1150,7 @@ func (c *GroupClient) QueryBlocked(gr *Group) *UserQuery {
 
 // QueryUsers queries the users edge of a Group.
 func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(gr.ID).InE(user.GroupsLabel).OutV()
@@ -1062,7 +1161,7 @@ func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 
 // QueryInfo queries the info edge of a Group.
 func (c *GroupClient) QueryInfo(gr *Group) *GroupInfoQuery {
-	query := &GroupInfoQuery{config: c.config}
+	query := (&GroupInfoClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(gr.ID).OutE(group.InfoLabel).InV()
@@ -1074,6 +1173,11 @@ func (c *GroupClient) QueryInfo(gr *Group) *GroupInfoQuery {
 // Hooks returns the client hooks.
 func (c *GroupClient) Hooks() []Hook {
 	return c.hooks.Group
+}
+
+// Interceptors returns the client interceptors.
+func (c *GroupClient) Interceptors() []Interceptor {
+	return c.inters.Group
 }
 
 func (c *GroupClient) mutate(ctx context.Context, m *GroupMutation) (Value, error) {
@@ -1105,6 +1209,12 @@ func NewGroupInfoClient(c config) *GroupInfoClient {
 // A call to `Use(f, g, h)` equals to `groupinfo.Hooks(f(g(h())))`.
 func (c *GroupInfoClient) Use(hooks ...Hook) {
 	c.hooks.GroupInfo = append(c.hooks.GroupInfo, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `groupinfo.Intercept(f(g(h())))`.
+func (c *GroupInfoClient) Intercept(interceptors ...Interceptor) {
+	c.inters.GroupInfo = append(c.inters.GroupInfo, interceptors...)
 }
 
 // Create returns a builder for creating a GroupInfo entity.
@@ -1159,6 +1269,7 @@ func (c *GroupInfoClient) DeleteOneID(id string) *GroupInfoDeleteOne {
 func (c *GroupInfoClient) Query() *GroupInfoQuery {
 	return &GroupInfoQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1178,7 +1289,7 @@ func (c *GroupInfoClient) GetX(ctx context.Context, id string) *GroupInfo {
 
 // QueryGroups queries the groups edge of a GroupInfo.
 func (c *GroupInfoClient) QueryGroups(gi *GroupInfo) *GroupQuery {
-	query := &GroupQuery{config: c.config}
+	query := (&GroupClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(gi.ID).InE(group.InfoLabel).OutV()
@@ -1190,6 +1301,11 @@ func (c *GroupInfoClient) QueryGroups(gi *GroupInfo) *GroupQuery {
 // Hooks returns the client hooks.
 func (c *GroupInfoClient) Hooks() []Hook {
 	return c.hooks.GroupInfo
+}
+
+// Interceptors returns the client interceptors.
+func (c *GroupInfoClient) Interceptors() []Interceptor {
+	return c.inters.GroupInfo
 }
 
 func (c *GroupInfoClient) mutate(ctx context.Context, m *GroupInfoMutation) (Value, error) {
@@ -1221,6 +1337,12 @@ func NewItemClient(c config) *ItemClient {
 // A call to `Use(f, g, h)` equals to `item.Hooks(f(g(h())))`.
 func (c *ItemClient) Use(hooks ...Hook) {
 	c.hooks.Item = append(c.hooks.Item, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `item.Intercept(f(g(h())))`.
+func (c *ItemClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Item = append(c.inters.Item, interceptors...)
 }
 
 // Create returns a builder for creating a Item entity.
@@ -1275,6 +1397,7 @@ func (c *ItemClient) DeleteOneID(id string) *ItemDeleteOne {
 func (c *ItemClient) Query() *ItemQuery {
 	return &ItemQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1295,6 +1418,11 @@ func (c *ItemClient) GetX(ctx context.Context, id string) *Item {
 // Hooks returns the client hooks.
 func (c *ItemClient) Hooks() []Hook {
 	return c.hooks.Item
+}
+
+// Interceptors returns the client interceptors.
+func (c *ItemClient) Interceptors() []Interceptor {
+	return c.inters.Item
 }
 
 func (c *ItemClient) mutate(ctx context.Context, m *ItemMutation) (Value, error) {
@@ -1326,6 +1454,12 @@ func NewLicenseClient(c config) *LicenseClient {
 // A call to `Use(f, g, h)` equals to `license.Hooks(f(g(h())))`.
 func (c *LicenseClient) Use(hooks ...Hook) {
 	c.hooks.License = append(c.hooks.License, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `license.Intercept(f(g(h())))`.
+func (c *LicenseClient) Intercept(interceptors ...Interceptor) {
+	c.inters.License = append(c.inters.License, interceptors...)
 }
 
 // Create returns a builder for creating a License entity.
@@ -1380,6 +1514,7 @@ func (c *LicenseClient) DeleteOneID(id int) *LicenseDeleteOne {
 func (c *LicenseClient) Query() *LicenseQuery {
 	return &LicenseQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1400,6 +1535,11 @@ func (c *LicenseClient) GetX(ctx context.Context, id int) *License {
 // Hooks returns the client hooks.
 func (c *LicenseClient) Hooks() []Hook {
 	return c.hooks.License
+}
+
+// Interceptors returns the client interceptors.
+func (c *LicenseClient) Interceptors() []Interceptor {
+	return c.inters.License
 }
 
 func (c *LicenseClient) mutate(ctx context.Context, m *LicenseMutation) (Value, error) {
@@ -1431,6 +1571,12 @@ func NewNodeClient(c config) *NodeClient {
 // A call to `Use(f, g, h)` equals to `node.Hooks(f(g(h())))`.
 func (c *NodeClient) Use(hooks ...Hook) {
 	c.hooks.Node = append(c.hooks.Node, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `node.Intercept(f(g(h())))`.
+func (c *NodeClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Node = append(c.inters.Node, interceptors...)
 }
 
 // Create returns a builder for creating a Node entity.
@@ -1485,6 +1631,7 @@ func (c *NodeClient) DeleteOneID(id string) *NodeDeleteOne {
 func (c *NodeClient) Query() *NodeQuery {
 	return &NodeQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1504,7 +1651,7 @@ func (c *NodeClient) GetX(ctx context.Context, id string) *Node {
 
 // QueryPrev queries the prev edge of a Node.
 func (c *NodeClient) QueryPrev(n *Node) *NodeQuery {
-	query := &NodeQuery{config: c.config}
+	query := (&NodeClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(n.ID).InE(node.NextLabel).OutV()
@@ -1515,7 +1662,7 @@ func (c *NodeClient) QueryPrev(n *Node) *NodeQuery {
 
 // QueryNext queries the next edge of a Node.
 func (c *NodeClient) QueryNext(n *Node) *NodeQuery {
-	query := &NodeQuery{config: c.config}
+	query := (&NodeClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(n.ID).OutE(node.NextLabel).InV()
@@ -1527,6 +1674,11 @@ func (c *NodeClient) QueryNext(n *Node) *NodeQuery {
 // Hooks returns the client hooks.
 func (c *NodeClient) Hooks() []Hook {
 	return c.hooks.Node
+}
+
+// Interceptors returns the client interceptors.
+func (c *NodeClient) Interceptors() []Interceptor {
+	return c.inters.Node
 }
 
 func (c *NodeClient) mutate(ctx context.Context, m *NodeMutation) (Value, error) {
@@ -1558,6 +1710,12 @@ func NewPetClient(c config) *PetClient {
 // A call to `Use(f, g, h)` equals to `pet.Hooks(f(g(h())))`.
 func (c *PetClient) Use(hooks ...Hook) {
 	c.hooks.Pet = append(c.hooks.Pet, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `pet.Intercept(f(g(h())))`.
+func (c *PetClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Pet = append(c.inters.Pet, interceptors...)
 }
 
 // Create returns a builder for creating a Pet entity.
@@ -1612,6 +1770,7 @@ func (c *PetClient) DeleteOneID(id string) *PetDeleteOne {
 func (c *PetClient) Query() *PetQuery {
 	return &PetQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1631,7 +1790,7 @@ func (c *PetClient) GetX(ctx context.Context, id string) *Pet {
 
 // QueryTeam queries the team edge of a Pet.
 func (c *PetClient) QueryTeam(pe *Pet) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(pe.ID).InE(user.TeamLabel).OutV()
@@ -1642,7 +1801,7 @@ func (c *PetClient) QueryTeam(pe *Pet) *UserQuery {
 
 // QueryOwner queries the owner edge of a Pet.
 func (c *PetClient) QueryOwner(pe *Pet) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(pe.ID).InE(user.PetsLabel).OutV()
@@ -1654,6 +1813,11 @@ func (c *PetClient) QueryOwner(pe *Pet) *UserQuery {
 // Hooks returns the client hooks.
 func (c *PetClient) Hooks() []Hook {
 	return c.hooks.Pet
+}
+
+// Interceptors returns the client interceptors.
+func (c *PetClient) Interceptors() []Interceptor {
+	return c.inters.Pet
 }
 
 func (c *PetClient) mutate(ctx context.Context, m *PetMutation) (Value, error) {
@@ -1685,6 +1849,12 @@ func NewSpecClient(c config) *SpecClient {
 // A call to `Use(f, g, h)` equals to `spec.Hooks(f(g(h())))`.
 func (c *SpecClient) Use(hooks ...Hook) {
 	c.hooks.Spec = append(c.hooks.Spec, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `spec.Intercept(f(g(h())))`.
+func (c *SpecClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Spec = append(c.inters.Spec, interceptors...)
 }
 
 // Create returns a builder for creating a Spec entity.
@@ -1739,6 +1909,7 @@ func (c *SpecClient) DeleteOneID(id string) *SpecDeleteOne {
 func (c *SpecClient) Query() *SpecQuery {
 	return &SpecQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1758,7 +1929,7 @@ func (c *SpecClient) GetX(ctx context.Context, id string) *Spec {
 
 // QueryCard queries the card edge of a Spec.
 func (c *SpecClient) QueryCard(s *Spec) *CardQuery {
-	query := &CardQuery{config: c.config}
+	query := (&CardClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(s.ID).OutE(spec.CardLabel).InV()
@@ -1770,6 +1941,11 @@ func (c *SpecClient) QueryCard(s *Spec) *CardQuery {
 // Hooks returns the client hooks.
 func (c *SpecClient) Hooks() []Hook {
 	return c.hooks.Spec
+}
+
+// Interceptors returns the client interceptors.
+func (c *SpecClient) Interceptors() []Interceptor {
+	return c.inters.Spec
 }
 
 func (c *SpecClient) mutate(ctx context.Context, m *SpecMutation) (Value, error) {
@@ -1801,6 +1977,12 @@ func NewTaskClient(c config) *TaskClient {
 // A call to `Use(f, g, h)` equals to `enttask.Hooks(f(g(h())))`.
 func (c *TaskClient) Use(hooks ...Hook) {
 	c.hooks.Task = append(c.hooks.Task, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `enttask.Intercept(f(g(h())))`.
+func (c *TaskClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Task = append(c.inters.Task, interceptors...)
 }
 
 // Create returns a builder for creating a Task entity.
@@ -1855,6 +2037,7 @@ func (c *TaskClient) DeleteOneID(id string) *TaskDeleteOne {
 func (c *TaskClient) Query() *TaskQuery {
 	return &TaskQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1875,6 +2058,11 @@ func (c *TaskClient) GetX(ctx context.Context, id string) *Task {
 // Hooks returns the client hooks.
 func (c *TaskClient) Hooks() []Hook {
 	return c.hooks.Task
+}
+
+// Interceptors returns the client interceptors.
+func (c *TaskClient) Interceptors() []Interceptor {
+	return c.inters.Task
 }
 
 func (c *TaskClient) mutate(ctx context.Context, m *TaskMutation) (Value, error) {
@@ -1906,6 +2094,12 @@ func NewUserClient(c config) *UserClient {
 // A call to `Use(f, g, h)` equals to `user.Hooks(f(g(h())))`.
 func (c *UserClient) Use(hooks ...Hook) {
 	c.hooks.User = append(c.hooks.User, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `user.Intercept(f(g(h())))`.
+func (c *UserClient) Intercept(interceptors ...Interceptor) {
+	c.inters.User = append(c.inters.User, interceptors...)
 }
 
 // Create returns a builder for creating a User entity.
@@ -1960,6 +2154,7 @@ func (c *UserClient) DeleteOneID(id string) *UserDeleteOne {
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1979,7 +2174,7 @@ func (c *UserClient) GetX(ctx context.Context, id string) *User {
 
 // QueryCard queries the card edge of a User.
 func (c *UserClient) QueryCard(u *User) *CardQuery {
-	query := &CardQuery{config: c.config}
+	query := (&CardClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(u.ID).OutE(user.CardLabel).InV()
@@ -1990,7 +2185,7 @@ func (c *UserClient) QueryCard(u *User) *CardQuery {
 
 // QueryPets queries the pets edge of a User.
 func (c *UserClient) QueryPets(u *User) *PetQuery {
-	query := &PetQuery{config: c.config}
+	query := (&PetClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(u.ID).OutE(user.PetsLabel).InV()
@@ -2001,7 +2196,7 @@ func (c *UserClient) QueryPets(u *User) *PetQuery {
 
 // QueryFiles queries the files edge of a User.
 func (c *UserClient) QueryFiles(u *User) *FileQuery {
-	query := &FileQuery{config: c.config}
+	query := (&FileClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(u.ID).OutE(user.FilesLabel).InV()
@@ -2012,7 +2207,7 @@ func (c *UserClient) QueryFiles(u *User) *FileQuery {
 
 // QueryGroups queries the groups edge of a User.
 func (c *UserClient) QueryGroups(u *User) *GroupQuery {
-	query := &GroupQuery{config: c.config}
+	query := (&GroupClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(u.ID).OutE(user.GroupsLabel).InV()
@@ -2023,7 +2218,7 @@ func (c *UserClient) QueryGroups(u *User) *GroupQuery {
 
 // QueryFriends queries the friends edge of a User.
 func (c *UserClient) QueryFriends(u *User) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(u.ID).Both(user.FriendsLabel)
@@ -2034,7 +2229,7 @@ func (c *UserClient) QueryFriends(u *User) *UserQuery {
 
 // QueryFollowers queries the followers edge of a User.
 func (c *UserClient) QueryFollowers(u *User) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(u.ID).InE(user.FollowingLabel).OutV()
@@ -2045,7 +2240,7 @@ func (c *UserClient) QueryFollowers(u *User) *UserQuery {
 
 // QueryFollowing queries the following edge of a User.
 func (c *UserClient) QueryFollowing(u *User) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(u.ID).OutE(user.FollowingLabel).InV()
@@ -2056,7 +2251,7 @@ func (c *UserClient) QueryFollowing(u *User) *UserQuery {
 
 // QueryTeam queries the team edge of a User.
 func (c *UserClient) QueryTeam(u *User) *PetQuery {
-	query := &PetQuery{config: c.config}
+	query := (&PetClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(u.ID).OutE(user.TeamLabel).InV()
@@ -2067,7 +2262,7 @@ func (c *UserClient) QueryTeam(u *User) *PetQuery {
 
 // QuerySpouse queries the spouse edge of a User.
 func (c *UserClient) QuerySpouse(u *User) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(u.ID).Both(user.SpouseLabel)
@@ -2078,7 +2273,7 @@ func (c *UserClient) QuerySpouse(u *User) *UserQuery {
 
 // QueryChildren queries the children edge of a User.
 func (c *UserClient) QueryChildren(u *User) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(u.ID).InE(user.ParentLabel).OutV()
@@ -2089,7 +2284,7 @@ func (c *UserClient) QueryChildren(u *User) *UserQuery {
 
 // QueryParent queries the parent edge of a User.
 func (c *UserClient) QueryParent(u *User) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(u.ID).OutE(user.ParentLabel).InV()
@@ -2101,6 +2296,11 @@ func (c *UserClient) QueryParent(u *User) *UserQuery {
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
+}
+
+// Interceptors returns the client interceptors.
+func (c *UserClient) Interceptors() []Interceptor {
+	return c.inters.User
 }
 
 func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error) {

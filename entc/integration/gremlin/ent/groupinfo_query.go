@@ -28,6 +28,7 @@ type GroupInfoQuery struct {
 	unique     *bool
 	order      []OrderFunc
 	fields     []string
+	inters     []Interceptor
 	predicates []predicate.GroupInfo
 	withGroups *GroupQuery
 	// intermediate query (i.e. traversal path).
@@ -41,13 +42,13 @@ func (giq *GroupInfoQuery) Where(ps ...predicate.GroupInfo) *GroupInfoQuery {
 	return giq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (giq *GroupInfoQuery) Limit(limit int) *GroupInfoQuery {
 	giq.limit = &limit
 	return giq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (giq *GroupInfoQuery) Offset(offset int) *GroupInfoQuery {
 	giq.offset = &offset
 	return giq
@@ -60,7 +61,7 @@ func (giq *GroupInfoQuery) Unique(unique bool) *GroupInfoQuery {
 	return giq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (giq *GroupInfoQuery) Order(o ...OrderFunc) *GroupInfoQuery {
 	giq.order = append(giq.order, o...)
 	return giq
@@ -68,7 +69,7 @@ func (giq *GroupInfoQuery) Order(o ...OrderFunc) *GroupInfoQuery {
 
 // QueryGroups chains the current query on the "groups" edge.
 func (giq *GroupInfoQuery) QueryGroups() *GroupQuery {
-	query := &GroupQuery{config: giq.config}
+	query := (&GroupClient{config: giq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := giq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -83,7 +84,7 @@ func (giq *GroupInfoQuery) QueryGroups() *GroupQuery {
 // First returns the first GroupInfo entity from the query.
 // Returns a *NotFoundError when no GroupInfo was found.
 func (giq *GroupInfoQuery) First(ctx context.Context) (*GroupInfo, error) {
-	nodes, err := giq.Limit(1).All(ctx)
+	nodes, err := giq.Limit(1).All(newQueryContext(ctx, TypeGroupInfo, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +107,7 @@ func (giq *GroupInfoQuery) FirstX(ctx context.Context) *GroupInfo {
 // Returns a *NotFoundError when no GroupInfo ID was found.
 func (giq *GroupInfoQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = giq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = giq.Limit(1).IDs(newQueryContext(ctx, TypeGroupInfo, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -129,7 +130,7 @@ func (giq *GroupInfoQuery) FirstIDX(ctx context.Context) string {
 // Returns a *NotSingularError when more than one GroupInfo entity is found.
 // Returns a *NotFoundError when no GroupInfo entities are found.
 func (giq *GroupInfoQuery) Only(ctx context.Context) (*GroupInfo, error) {
-	nodes, err := giq.Limit(2).All(ctx)
+	nodes, err := giq.Limit(2).All(newQueryContext(ctx, TypeGroupInfo, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +158,7 @@ func (giq *GroupInfoQuery) OnlyX(ctx context.Context) *GroupInfo {
 // Returns a *NotFoundError when no entities are found.
 func (giq *GroupInfoQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = giq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = giq.Limit(2).IDs(newQueryContext(ctx, TypeGroupInfo, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -182,10 +183,12 @@ func (giq *GroupInfoQuery) OnlyIDX(ctx context.Context) string {
 
 // All executes the query and returns a list of GroupInfos.
 func (giq *GroupInfoQuery) All(ctx context.Context) ([]*GroupInfo, error) {
+	ctx = newQueryContext(ctx, TypeGroupInfo, "All")
 	if err := giq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return giq.gremlinAll(ctx)
+	qr := querierAll[[]*GroupInfo, *GroupInfoQuery]()
+	return withInterceptors[[]*GroupInfo](ctx, giq, qr, giq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -200,6 +203,7 @@ func (giq *GroupInfoQuery) AllX(ctx context.Context) []*GroupInfo {
 // IDs executes the query and returns a list of GroupInfo IDs.
 func (giq *GroupInfoQuery) IDs(ctx context.Context) ([]string, error) {
 	var ids []string
+	ctx = newQueryContext(ctx, TypeGroupInfo, "IDs")
 	if err := giq.Select(groupinfo.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -217,10 +221,11 @@ func (giq *GroupInfoQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (giq *GroupInfoQuery) Count(ctx context.Context) (int, error) {
+	ctx = newQueryContext(ctx, TypeGroupInfo, "Count")
 	if err := giq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return giq.gremlinCount(ctx)
+	return withInterceptors[int](ctx, giq, querierCount[*GroupInfoQuery](), giq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -234,6 +239,7 @@ func (giq *GroupInfoQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (giq *GroupInfoQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = newQueryContext(ctx, TypeGroupInfo, "Exist")
 	switch _, err := giq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -276,7 +282,7 @@ func (giq *GroupInfoQuery) Clone() *GroupInfoQuery {
 // WithGroups tells the query-builder to eager-load the nodes that are connected to
 // the "groups" edge. The optional arguments are used to configure the query builder of the edge.
 func (giq *GroupInfoQuery) WithGroups(opts ...func(*GroupQuery)) *GroupInfoQuery {
-	query := &GroupQuery{config: giq.config}
+	query := (&GroupClient{config: giq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -299,16 +305,11 @@ func (giq *GroupInfoQuery) WithGroups(opts ...func(*GroupQuery)) *GroupInfoQuery
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGroupBy {
-	grbuild := &GroupInfoGroupBy{config: giq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
-		if err := giq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return giq.gremlinQuery(ctx), nil
-	}
+	giq.fields = append([]string{field}, fields...)
+	grbuild := &GroupInfoGroupBy{build: giq}
+	grbuild.flds = &giq.fields
 	grbuild.label = groupinfo.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -326,10 +327,10 @@ func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGro
 //		Scan(ctx, &v)
 func (giq *GroupInfoQuery) Select(fields ...string) *GroupInfoSelect {
 	giq.fields = append(giq.fields, fields...)
-	selbuild := &GroupInfoSelect{GroupInfoQuery: giq}
-	selbuild.label = groupinfo.Label
-	selbuild.flds, selbuild.scan = &giq.fields, selbuild.Scan
-	return selbuild
+	sbuild := &GroupInfoSelect{GroupInfoQuery: giq}
+	sbuild.label = groupinfo.Label
+	sbuild.flds, sbuild.scan = &giq.fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a GroupInfoSelect configured with the given aggregations.
@@ -338,6 +339,16 @@ func (giq *GroupInfoQuery) Aggregate(fns ...AggregateFunc) *GroupInfoSelect {
 }
 
 func (giq *GroupInfoQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range giq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, giq); err != nil {
+				return err
+			}
+		}
+	}
 	if giq.path != nil {
 		prev, err := giq.path(ctx)
 		if err != nil {
@@ -348,7 +359,7 @@ func (giq *GroupInfoQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (giq *GroupInfoQuery) gremlinAll(ctx context.Context) ([]*GroupInfo, error) {
+func (giq *GroupInfoQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*GroupInfo, error) {
 	res := &gremlin.Response{}
 	traversal := giq.gremlinQuery(ctx)
 	if len(giq.fields) > 0 {
@@ -411,13 +422,8 @@ func (giq *GroupInfoQuery) gremlinQuery(context.Context) *dsl.Traversal {
 
 // GroupInfoGroupBy is the group-by builder for GroupInfo entities.
 type GroupInfoGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	gremlin *dsl.Traversal
-	path    func(context.Context) (*dsl.Traversal, error)
+	build *GroupInfoQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -426,33 +432,16 @@ func (gigb *GroupInfoGroupBy) Aggregate(fns ...AggregateFunc) *GroupInfoGroupBy 
 	return gigb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (gigb *GroupInfoGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := gigb.path(ctx)
-	if err != nil {
+	ctx = newQueryContext(ctx, TypeGroupInfo, "GroupBy")
+	if err := gigb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	gigb.gremlin = query
-	return gigb.gremlinScan(ctx, v)
+	return scanWithInterceptors[*GroupInfoQuery, *GroupInfoGroupBy](ctx, gigb.build, gigb, gigb.build.inters, v)
 }
 
-func (gigb *GroupInfoGroupBy) gremlinScan(ctx context.Context, v any) error {
-	res := &gremlin.Response{}
-	query, bindings := gigb.gremlinQuery().Query()
-	if err := gigb.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(gigb.fields)+len(gigb.fns) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
-}
-
-func (gigb *GroupInfoGroupBy) gremlinQuery() *dsl.Traversal {
+func (gigb *GroupInfoGroupBy) gremlinScan(ctx context.Context, root *GroupInfoQuery, v any) error {
 	var (
 		trs   []any
 		names []any
@@ -462,23 +451,34 @@ func (gigb *GroupInfoGroupBy) gremlinQuery() *dsl.Traversal {
 		trs = append(trs, tr)
 		names = append(names, name)
 	}
-	for _, f := range gigb.fields {
+	for _, f := range *gigb.flds {
 		names = append(names, f)
 		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
 	}
-	return gigb.gremlin.Group().
-		By(__.Values(gigb.fields...).Fold()).
+	query, bindings := root.gremlinQuery(ctx).Group().
+		By(__.Values(*gigb.flds...).Fold()).
 		By(__.Fold().Match(trs...).Select(names...)).
 		Select(dsl.Values).
-		Next()
+		Next().
+		Query()
+	res := &gremlin.Response{}
+	if err := gigb.build.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	if len(*gigb.flds)+len(gigb.fns) == 1 {
+		return res.ReadVal(v)
+	}
+	vm, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	return vm.Decode(v)
 }
 
 // GroupInfoSelect is the builder for selecting fields of GroupInfo entities.
 type GroupInfoSelect struct {
 	*GroupInfoQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	gremlin *dsl.Traversal
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -489,36 +489,36 @@ func (gis *GroupInfoSelect) Aggregate(fns ...AggregateFunc) *GroupInfoSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (gis *GroupInfoSelect) Scan(ctx context.Context, v any) error {
+	ctx = newQueryContext(ctx, TypeGroupInfo, "Select")
 	if err := gis.prepareQuery(ctx); err != nil {
 		return err
 	}
-	gis.gremlin = gis.GroupInfoQuery.gremlinQuery(ctx)
-	return gis.gremlinScan(ctx, v)
+	return scanWithInterceptors[*GroupInfoQuery, *GroupInfoSelect](ctx, gis.GroupInfoQuery, gis, gis.inters, v)
 }
 
-func (gis *GroupInfoSelect) gremlinScan(ctx context.Context, v any) error {
+func (gis *GroupInfoSelect) gremlinScan(ctx context.Context, root *GroupInfoQuery, v any) error {
 	var (
-		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
+		traversal = root.gremlinQuery(ctx)
 	)
 	if len(gis.fields) == 1 {
 		if gis.fields[0] != groupinfo.FieldID {
-			traversal = gis.gremlin.Values(gis.fields...)
+			traversal = traversal.Values(gis.fields...)
 		} else {
-			traversal = gis.gremlin.ID()
+			traversal = traversal.ID()
 		}
 	} else {
 		fields := make([]any, len(gis.fields))
 		for i, f := range gis.fields {
 			fields[i] = f
 		}
-		traversal = gis.gremlin.ValueMap(fields...)
+		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
 	if err := gis.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
-	if len(gis.fields) == 1 {
+	if len(root.fields) == 1 {
 		return res.ReadVal(v)
 	}
 	vm, err := res.ReadValueMap()

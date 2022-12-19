@@ -56,9 +56,15 @@ func (id *ItemDelete) Exec(ctx context.Context) (int, error) {
 			}
 			mut = id.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, id.mutation); err != nil {
+		n, err := mut.Mutate(ctx, id.mutation)
+		if err != nil {
 			return 0, err
 		}
+		nv, ok := n.(int)
+		if !ok {
+			return 0, fmt.Errorf("unexpected type %T returned from mutation. expected type: int", n)
+		}
+		affected = nv
 	}
 	return affected, err
 }

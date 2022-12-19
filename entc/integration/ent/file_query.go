@@ -31,6 +31,7 @@ type FileQuery struct {
 	unique         *bool
 	order          []OrderFunc
 	fields         []string
+	inters         []Interceptor
 	predicates     []predicate.File
 	withOwner      *UserQuery
 	withType       *FileTypeQuery
@@ -49,13 +50,13 @@ func (fq *FileQuery) Where(ps ...predicate.File) *FileQuery {
 	return fq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (fq *FileQuery) Limit(limit int) *FileQuery {
 	fq.limit = &limit
 	return fq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (fq *FileQuery) Offset(offset int) *FileQuery {
 	fq.offset = &offset
 	return fq
@@ -68,7 +69,7 @@ func (fq *FileQuery) Unique(unique bool) *FileQuery {
 	return fq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (fq *FileQuery) Order(o ...OrderFunc) *FileQuery {
 	fq.order = append(fq.order, o...)
 	return fq
@@ -76,7 +77,7 @@ func (fq *FileQuery) Order(o ...OrderFunc) *FileQuery {
 
 // QueryOwner chains the current query on the "owner" edge.
 func (fq *FileQuery) QueryOwner() *UserQuery {
-	query := &UserQuery{config: fq.config}
+	query := (&UserClient{config: fq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := fq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -98,7 +99,7 @@ func (fq *FileQuery) QueryOwner() *UserQuery {
 
 // QueryType chains the current query on the "type" edge.
 func (fq *FileQuery) QueryType() *FileTypeQuery {
-	query := &FileTypeQuery{config: fq.config}
+	query := (&FileTypeClient{config: fq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := fq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -120,7 +121,7 @@ func (fq *FileQuery) QueryType() *FileTypeQuery {
 
 // QueryField chains the current query on the "field" edge.
 func (fq *FileQuery) QueryField() *FieldTypeQuery {
-	query := &FieldTypeQuery{config: fq.config}
+	query := (&FieldTypeClient{config: fq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := fq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -143,7 +144,7 @@ func (fq *FileQuery) QueryField() *FieldTypeQuery {
 // First returns the first File entity from the query.
 // Returns a *NotFoundError when no File was found.
 func (fq *FileQuery) First(ctx context.Context) (*File, error) {
-	nodes, err := fq.Limit(1).All(ctx)
+	nodes, err := fq.Limit(1).All(newQueryContext(ctx, TypeFile, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +167,7 @@ func (fq *FileQuery) FirstX(ctx context.Context) *File {
 // Returns a *NotFoundError when no File ID was found.
 func (fq *FileQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = fq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = fq.Limit(1).IDs(newQueryContext(ctx, TypeFile, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -189,7 +190,7 @@ func (fq *FileQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one File entity is found.
 // Returns a *NotFoundError when no File entities are found.
 func (fq *FileQuery) Only(ctx context.Context) (*File, error) {
-	nodes, err := fq.Limit(2).All(ctx)
+	nodes, err := fq.Limit(2).All(newQueryContext(ctx, TypeFile, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -217,7 +218,7 @@ func (fq *FileQuery) OnlyX(ctx context.Context) *File {
 // Returns a *NotFoundError when no entities are found.
 func (fq *FileQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = fq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = fq.Limit(2).IDs(newQueryContext(ctx, TypeFile, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -242,10 +243,12 @@ func (fq *FileQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Files.
 func (fq *FileQuery) All(ctx context.Context) ([]*File, error) {
+	ctx = newQueryContext(ctx, TypeFile, "All")
 	if err := fq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return fq.sqlAll(ctx)
+	qr := querierAll[[]*File, *FileQuery]()
+	return withInterceptors[[]*File](ctx, fq, qr, fq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -260,6 +263,7 @@ func (fq *FileQuery) AllX(ctx context.Context) []*File {
 // IDs executes the query and returns a list of File IDs.
 func (fq *FileQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
+	ctx = newQueryContext(ctx, TypeFile, "IDs")
 	if err := fq.Select(file.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -277,10 +281,11 @@ func (fq *FileQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (fq *FileQuery) Count(ctx context.Context) (int, error) {
+	ctx = newQueryContext(ctx, TypeFile, "Count")
 	if err := fq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return fq.sqlCount(ctx)
+	return withInterceptors[int](ctx, fq, querierCount[*FileQuery](), fq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -294,6 +299,7 @@ func (fq *FileQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (fq *FileQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = newQueryContext(ctx, TypeFile, "Exist")
 	switch _, err := fq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -338,7 +344,7 @@ func (fq *FileQuery) Clone() *FileQuery {
 // WithOwner tells the query-builder to eager-load the nodes that are connected to
 // the "owner" edge. The optional arguments are used to configure the query builder of the edge.
 func (fq *FileQuery) WithOwner(opts ...func(*UserQuery)) *FileQuery {
-	query := &UserQuery{config: fq.config}
+	query := (&UserClient{config: fq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -349,7 +355,7 @@ func (fq *FileQuery) WithOwner(opts ...func(*UserQuery)) *FileQuery {
 // WithType tells the query-builder to eager-load the nodes that are connected to
 // the "type" edge. The optional arguments are used to configure the query builder of the edge.
 func (fq *FileQuery) WithType(opts ...func(*FileTypeQuery)) *FileQuery {
-	query := &FileTypeQuery{config: fq.config}
+	query := (&FileTypeClient{config: fq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -360,7 +366,7 @@ func (fq *FileQuery) WithType(opts ...func(*FileTypeQuery)) *FileQuery {
 // WithField tells the query-builder to eager-load the nodes that are connected to
 // the "field" edge. The optional arguments are used to configure the query builder of the edge.
 func (fq *FileQuery) WithField(opts ...func(*FieldTypeQuery)) *FileQuery {
-	query := &FieldTypeQuery{config: fq.config}
+	query := (&FieldTypeClient{config: fq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -383,16 +389,11 @@ func (fq *FileQuery) WithField(opts ...func(*FieldTypeQuery)) *FileQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
-	grbuild := &FileGroupBy{config: fq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := fq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return fq.sqlQuery(ctx), nil
-	}
+	fq.fields = append([]string{field}, fields...)
+	grbuild := &FileGroupBy{build: fq}
+	grbuild.flds = &fq.fields
 	grbuild.label = file.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -410,10 +411,10 @@ func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 //		Scan(ctx, &v)
 func (fq *FileQuery) Select(fields ...string) *FileSelect {
 	fq.fields = append(fq.fields, fields...)
-	selbuild := &FileSelect{FileQuery: fq}
-	selbuild.label = file.Label
-	selbuild.flds, selbuild.scan = &fq.fields, selbuild.Scan
-	return selbuild
+	sbuild := &FileSelect{FileQuery: fq}
+	sbuild.label = file.Label
+	sbuild.flds, sbuild.scan = &fq.fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a FileSelect configured with the given aggregations.
@@ -422,6 +423,16 @@ func (fq *FileQuery) Aggregate(fns ...AggregateFunc) *FileSelect {
 }
 
 func (fq *FileQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range fq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, fq); err != nil {
+				return err
+			}
+		}
+	}
 	for _, f := range fq.fields {
 		if !file.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
@@ -724,7 +735,7 @@ func (fq *FileQuery) Modify(modifiers ...func(s *sql.Selector)) *FileSelect {
 // WithNamedField tells the query-builder to eager-load the nodes that are connected to the "field"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (fq *FileQuery) WithNamedField(name string, opts ...func(*FieldTypeQuery)) *FileQuery {
-	query := &FieldTypeQuery{config: fq.config}
+	query := (&FieldTypeClient{config: fq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -737,13 +748,8 @@ func (fq *FileQuery) WithNamedField(name string, opts ...func(*FieldTypeQuery)) 
 
 // FileGroupBy is the group-by builder for File entities.
 type FileGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *FileQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -752,58 +758,46 @@ func (fgb *FileGroupBy) Aggregate(fns ...AggregateFunc) *FileGroupBy {
 	return fgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (fgb *FileGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := fgb.path(ctx)
-	if err != nil {
+	ctx = newQueryContext(ctx, TypeFile, "GroupBy")
+	if err := fgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	fgb.sql = query
-	return fgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*FileQuery, *FileGroupBy](ctx, fgb.build, fgb, fgb.build.inters, v)
 }
 
-func (fgb *FileGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range fgb.fields {
-		if !file.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (fgb *FileGroupBy) sqlScan(ctx context.Context, root *FileQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(fgb.fns))
+	for _, fn := range fgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := fgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*fgb.flds)+len(fgb.fns))
+		for _, f := range *fgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*fgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := fgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := fgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (fgb *FileGroupBy) sqlQuery() *sql.Selector {
-	selector := fgb.sql.Select()
-	aggregation := make([]string, 0, len(fgb.fns))
-	for _, fn := range fgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(fgb.fields)+len(fgb.fns))
-		for _, f := range fgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(fgb.fields...)...)
-}
-
 // FileSelect is the builder for selecting fields of File entities.
 type FileSelect struct {
 	*FileQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -814,26 +808,27 @@ func (fs *FileSelect) Aggregate(fns ...AggregateFunc) *FileSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (fs *FileSelect) Scan(ctx context.Context, v any) error {
+	ctx = newQueryContext(ctx, TypeFile, "Select")
 	if err := fs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	fs.sql = fs.FileQuery.sqlQuery(ctx)
-	return fs.sqlScan(ctx, v)
+	return scanWithInterceptors[*FileQuery, *FileSelect](ctx, fs.FileQuery, fs, fs.inters, v)
 }
 
-func (fs *FileSelect) sqlScan(ctx context.Context, v any) error {
+func (fs *FileSelect) sqlScan(ctx context.Context, root *FileQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(fs.fns))
 	for _, fn := range fs.fns {
-		aggregation = append(aggregation, fn(fs.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*fs.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		fs.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		fs.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := fs.sql.Query()
+	query, args := selector.Query()
 	if err := fs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

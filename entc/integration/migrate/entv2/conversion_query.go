@@ -26,6 +26,7 @@ type ConversionQuery struct {
 	unique     *bool
 	order      []OrderFunc
 	fields     []string
+	inters     []Interceptor
 	predicates []predicate.Conversion
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -38,13 +39,13 @@ func (cq *ConversionQuery) Where(ps ...predicate.Conversion) *ConversionQuery {
 	return cq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (cq *ConversionQuery) Limit(limit int) *ConversionQuery {
 	cq.limit = &limit
 	return cq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (cq *ConversionQuery) Offset(offset int) *ConversionQuery {
 	cq.offset = &offset
 	return cq
@@ -57,7 +58,7 @@ func (cq *ConversionQuery) Unique(unique bool) *ConversionQuery {
 	return cq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (cq *ConversionQuery) Order(o ...OrderFunc) *ConversionQuery {
 	cq.order = append(cq.order, o...)
 	return cq
@@ -66,7 +67,7 @@ func (cq *ConversionQuery) Order(o ...OrderFunc) *ConversionQuery {
 // First returns the first Conversion entity from the query.
 // Returns a *NotFoundError when no Conversion was found.
 func (cq *ConversionQuery) First(ctx context.Context) (*Conversion, error) {
-	nodes, err := cq.Limit(1).All(ctx)
+	nodes, err := cq.Limit(1).All(newQueryContext(ctx, TypeConversion, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +90,7 @@ func (cq *ConversionQuery) FirstX(ctx context.Context) *Conversion {
 // Returns a *NotFoundError when no Conversion ID was found.
 func (cq *ConversionQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = cq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = cq.Limit(1).IDs(newQueryContext(ctx, TypeConversion, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -112,7 +113,7 @@ func (cq *ConversionQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Conversion entity is found.
 // Returns a *NotFoundError when no Conversion entities are found.
 func (cq *ConversionQuery) Only(ctx context.Context) (*Conversion, error) {
-	nodes, err := cq.Limit(2).All(ctx)
+	nodes, err := cq.Limit(2).All(newQueryContext(ctx, TypeConversion, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +141,7 @@ func (cq *ConversionQuery) OnlyX(ctx context.Context) *Conversion {
 // Returns a *NotFoundError when no entities are found.
 func (cq *ConversionQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = cq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = cq.Limit(2).IDs(newQueryContext(ctx, TypeConversion, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -165,10 +166,12 @@ func (cq *ConversionQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Conversions.
 func (cq *ConversionQuery) All(ctx context.Context) ([]*Conversion, error) {
+	ctx = newQueryContext(ctx, TypeConversion, "All")
 	if err := cq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return cq.sqlAll(ctx)
+	qr := querierAll[[]*Conversion, *ConversionQuery]()
+	return withInterceptors[[]*Conversion](ctx, cq, qr, cq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -183,6 +186,7 @@ func (cq *ConversionQuery) AllX(ctx context.Context) []*Conversion {
 // IDs executes the query and returns a list of Conversion IDs.
 func (cq *ConversionQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
+	ctx = newQueryContext(ctx, TypeConversion, "IDs")
 	if err := cq.Select(conversion.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -200,10 +204,11 @@ func (cq *ConversionQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (cq *ConversionQuery) Count(ctx context.Context) (int, error) {
+	ctx = newQueryContext(ctx, TypeConversion, "Count")
 	if err := cq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return cq.sqlCount(ctx)
+	return withInterceptors[int](ctx, cq, querierCount[*ConversionQuery](), cq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -217,6 +222,7 @@ func (cq *ConversionQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (cq *ConversionQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = newQueryContext(ctx, TypeConversion, "Exist")
 	switch _, err := cq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -270,16 +276,11 @@ func (cq *ConversionQuery) Clone() *ConversionQuery {
 //		Aggregate(entv2.Count()).
 //		Scan(ctx, &v)
 func (cq *ConversionQuery) GroupBy(field string, fields ...string) *ConversionGroupBy {
-	grbuild := &ConversionGroupBy{config: cq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := cq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return cq.sqlQuery(ctx), nil
-	}
+	cq.fields = append([]string{field}, fields...)
+	grbuild := &ConversionGroupBy{build: cq}
+	grbuild.flds = &cq.fields
 	grbuild.label = conversion.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -297,10 +298,10 @@ func (cq *ConversionQuery) GroupBy(field string, fields ...string) *ConversionGr
 //		Scan(ctx, &v)
 func (cq *ConversionQuery) Select(fields ...string) *ConversionSelect {
 	cq.fields = append(cq.fields, fields...)
-	selbuild := &ConversionSelect{ConversionQuery: cq}
-	selbuild.label = conversion.Label
-	selbuild.flds, selbuild.scan = &cq.fields, selbuild.Scan
-	return selbuild
+	sbuild := &ConversionSelect{ConversionQuery: cq}
+	sbuild.label = conversion.Label
+	sbuild.flds, sbuild.scan = &cq.fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a ConversionSelect configured with the given aggregations.
@@ -309,6 +310,16 @@ func (cq *ConversionQuery) Aggregate(fns ...AggregateFunc) *ConversionSelect {
 }
 
 func (cq *ConversionQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range cq.inters {
+		if inter == nil {
+			return fmt.Errorf("entv2: uninitialized interceptor (forgotten import entv2/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, cq); err != nil {
+				return err
+			}
+		}
+	}
 	for _, f := range cq.fields {
 		if !conversion.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("entv2: invalid field %q for query", f)}
@@ -440,13 +451,8 @@ func (cq *ConversionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // ConversionGroupBy is the group-by builder for Conversion entities.
 type ConversionGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *ConversionQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -455,58 +461,46 @@ func (cgb *ConversionGroupBy) Aggregate(fns ...AggregateFunc) *ConversionGroupBy
 	return cgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (cgb *ConversionGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := cgb.path(ctx)
-	if err != nil {
+	ctx = newQueryContext(ctx, TypeConversion, "GroupBy")
+	if err := cgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cgb.sql = query
-	return cgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*ConversionQuery, *ConversionGroupBy](ctx, cgb.build, cgb, cgb.build.inters, v)
 }
 
-func (cgb *ConversionGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range cgb.fields {
-		if !conversion.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (cgb *ConversionGroupBy) sqlScan(ctx context.Context, root *ConversionQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(cgb.fns))
+	for _, fn := range cgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := cgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*cgb.flds)+len(cgb.fns))
+		for _, f := range *cgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*cgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := cgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := cgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (cgb *ConversionGroupBy) sqlQuery() *sql.Selector {
-	selector := cgb.sql.Select()
-	aggregation := make([]string, 0, len(cgb.fns))
-	for _, fn := range cgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(cgb.fields)+len(cgb.fns))
-		for _, f := range cgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(cgb.fields...)...)
-}
-
 // ConversionSelect is the builder for selecting fields of Conversion entities.
 type ConversionSelect struct {
 	*ConversionQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -517,26 +511,27 @@ func (cs *ConversionSelect) Aggregate(fns ...AggregateFunc) *ConversionSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (cs *ConversionSelect) Scan(ctx context.Context, v any) error {
+	ctx = newQueryContext(ctx, TypeConversion, "Select")
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cs.sql = cs.ConversionQuery.sqlQuery(ctx)
-	return cs.sqlScan(ctx, v)
+	return scanWithInterceptors[*ConversionQuery, *ConversionSelect](ctx, cs.ConversionQuery, cs, cs.inters, v)
 }
 
-func (cs *ConversionSelect) sqlScan(ctx context.Context, v any) error {
+func (cs *ConversionSelect) sqlScan(ctx context.Context, root *ConversionQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(cs.fns))
 	for _, fn := range cs.fns {
-		aggregation = append(aggregation, fn(cs.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*cs.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		cs.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		cs.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := cs.sql.Query()
+	query, args := selector.Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

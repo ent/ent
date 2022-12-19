@@ -32,7 +32,7 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	cfg := config{log: log.Println, hooks: &hooks{}}
+	cfg := config{log: log.Println, hooks: &hooks{}, inters: &inters{}}
 	cfg.options(opts...)
 	client := &Client{config: cfg}
 	client.init()
@@ -127,6 +127,12 @@ func (c *Client) Use(hooks ...Hook) {
 	c.File.Use(hooks...)
 }
 
+// Intercept adds the query interceptors to all the entity clients.
+// In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
+func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.File.Intercept(interceptors...)
+}
+
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
@@ -151,6 +157,12 @@ func NewFileClient(c config) *FileClient {
 // A call to `Use(f, g, h)` equals to `file.Hooks(f(g(h())))`.
 func (c *FileClient) Use(hooks ...Hook) {
 	c.hooks.File = append(c.hooks.File, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `file.Intercept(f(g(h())))`.
+func (c *FileClient) Intercept(interceptors ...Interceptor) {
+	c.inters.File = append(c.inters.File, interceptors...)
 }
 
 // Create returns a builder for creating a File entity.
@@ -205,6 +217,7 @@ func (c *FileClient) DeleteOneID(id int) *FileDeleteOne {
 func (c *FileClient) Query() *FileQuery {
 	return &FileQuery{
 		config: c.config,
+		inters: c.Interceptors(),
 	}
 }
 
@@ -224,7 +237,7 @@ func (c *FileClient) GetX(ctx context.Context, id int) *File {
 
 // QueryParent queries the parent edge of a File.
 func (c *FileClient) QueryParent(f *File) *FileQuery {
-	query := &FileQuery{config: c.config}
+	query := (&FileClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := f.ID
 		step := sqlgraph.NewStep(
@@ -240,7 +253,7 @@ func (c *FileClient) QueryParent(f *File) *FileQuery {
 
 // QueryChildren queries the children edge of a File.
 func (c *FileClient) QueryChildren(f *File) *FileQuery {
-	query := &FileQuery{config: c.config}
+	query := (&FileClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := f.ID
 		step := sqlgraph.NewStep(
@@ -257,6 +270,11 @@ func (c *FileClient) QueryChildren(f *File) *FileQuery {
 // Hooks returns the client hooks.
 func (c *FileClient) Hooks() []Hook {
 	return c.hooks.File
+}
+
+// Interceptors returns the client interceptors.
+func (c *FileClient) Interceptors() []Interceptor {
+	return c.inters.File
 }
 
 func (c *FileClient) mutate(ctx context.Context, m *FileMutation) (Value, error) {

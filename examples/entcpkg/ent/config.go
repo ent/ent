@@ -26,15 +26,22 @@ type config struct {
 	// log used for logging on debug mode.
 	log func(...any)
 	// hooks to execute on mutations.
-	hooks      *hooks
+	hooks *hooks
+	// interceptors to execute on queries.
+	inters     *inters
 	HTTPClient *http.Client
 	Writer     io.Writer
 }
 
-// hooks per client, for fast access.
-type hooks struct {
-	User []ent.Hook
-}
+// hooks and interceptors per client, for fast access.
+type (
+	hooks struct {
+		User []ent.Hook
+	}
+	inters struct {
+		User []ent.Interceptor
+	}
+)
 
 // Options applies the options on the config object.
 func (c *config) options(opts ...Option) {

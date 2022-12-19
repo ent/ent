@@ -29,6 +29,7 @@ type PetQuery struct {
 	unique         *bool
 	order          []OrderFunc
 	fields         []string
+	inters         []Interceptor
 	predicates     []predicate.Pet
 	withOwner      *UserQuery
 	withCars       *CarQuery
@@ -46,13 +47,13 @@ func (pq *PetQuery) Where(ps ...predicate.Pet) *PetQuery {
 	return pq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (pq *PetQuery) Limit(limit int) *PetQuery {
 	pq.limit = &limit
 	return pq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (pq *PetQuery) Offset(offset int) *PetQuery {
 	pq.offset = &offset
 	return pq
@@ -65,7 +66,7 @@ func (pq *PetQuery) Unique(unique bool) *PetQuery {
 	return pq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (pq *PetQuery) Order(o ...OrderFunc) *PetQuery {
 	pq.order = append(pq.order, o...)
 	return pq
@@ -73,7 +74,7 @@ func (pq *PetQuery) Order(o ...OrderFunc) *PetQuery {
 
 // QueryOwner chains the current query on the "owner" edge.
 func (pq *PetQuery) QueryOwner() *UserQuery {
-	query := &UserQuery{config: pq.config}
+	query := (&UserClient{config: pq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := pq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -95,7 +96,7 @@ func (pq *PetQuery) QueryOwner() *UserQuery {
 
 // QueryCars chains the current query on the "cars" edge.
 func (pq *PetQuery) QueryCars() *CarQuery {
-	query := &CarQuery{config: pq.config}
+	query := (&CarClient{config: pq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := pq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -117,7 +118,7 @@ func (pq *PetQuery) QueryCars() *CarQuery {
 
 // QueryFriends chains the current query on the "friends" edge.
 func (pq *PetQuery) QueryFriends() *PetQuery {
-	query := &PetQuery{config: pq.config}
+	query := (&PetClient{config: pq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := pq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -139,7 +140,7 @@ func (pq *PetQuery) QueryFriends() *PetQuery {
 
 // QueryBestFriend chains the current query on the "best_friend" edge.
 func (pq *PetQuery) QueryBestFriend() *PetQuery {
-	query := &PetQuery{config: pq.config}
+	query := (&PetClient{config: pq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := pq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -162,7 +163,7 @@ func (pq *PetQuery) QueryBestFriend() *PetQuery {
 // First returns the first Pet entity from the query.
 // Returns a *NotFoundError when no Pet was found.
 func (pq *PetQuery) First(ctx context.Context) (*Pet, error) {
-	nodes, err := pq.Limit(1).All(ctx)
+	nodes, err := pq.Limit(1).All(newQueryContext(ctx, TypePet, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -185,7 +186,7 @@ func (pq *PetQuery) FirstX(ctx context.Context) *Pet {
 // Returns a *NotFoundError when no Pet ID was found.
 func (pq *PetQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = pq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = pq.Limit(1).IDs(newQueryContext(ctx, TypePet, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -208,7 +209,7 @@ func (pq *PetQuery) FirstIDX(ctx context.Context) string {
 // Returns a *NotSingularError when more than one Pet entity is found.
 // Returns a *NotFoundError when no Pet entities are found.
 func (pq *PetQuery) Only(ctx context.Context) (*Pet, error) {
-	nodes, err := pq.Limit(2).All(ctx)
+	nodes, err := pq.Limit(2).All(newQueryContext(ctx, TypePet, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -236,7 +237,7 @@ func (pq *PetQuery) OnlyX(ctx context.Context) *Pet {
 // Returns a *NotFoundError when no entities are found.
 func (pq *PetQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = pq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = pq.Limit(2).IDs(newQueryContext(ctx, TypePet, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -261,10 +262,12 @@ func (pq *PetQuery) OnlyIDX(ctx context.Context) string {
 
 // All executes the query and returns a list of Pets.
 func (pq *PetQuery) All(ctx context.Context) ([]*Pet, error) {
+	ctx = newQueryContext(ctx, TypePet, "All")
 	if err := pq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return pq.sqlAll(ctx)
+	qr := querierAll[[]*Pet, *PetQuery]()
+	return withInterceptors[[]*Pet](ctx, pq, qr, pq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -279,6 +282,7 @@ func (pq *PetQuery) AllX(ctx context.Context) []*Pet {
 // IDs executes the query and returns a list of Pet IDs.
 func (pq *PetQuery) IDs(ctx context.Context) ([]string, error) {
 	var ids []string
+	ctx = newQueryContext(ctx, TypePet, "IDs")
 	if err := pq.Select(pet.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -296,10 +300,11 @@ func (pq *PetQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (pq *PetQuery) Count(ctx context.Context) (int, error) {
+	ctx = newQueryContext(ctx, TypePet, "Count")
 	if err := pq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return pq.sqlCount(ctx)
+	return withInterceptors[int](ctx, pq, querierCount[*PetQuery](), pq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -313,6 +318,7 @@ func (pq *PetQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (pq *PetQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = newQueryContext(ctx, TypePet, "Exist")
 	switch _, err := pq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -358,7 +364,7 @@ func (pq *PetQuery) Clone() *PetQuery {
 // WithOwner tells the query-builder to eager-load the nodes that are connected to
 // the "owner" edge. The optional arguments are used to configure the query builder of the edge.
 func (pq *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
-	query := &UserQuery{config: pq.config}
+	query := (&UserClient{config: pq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -369,7 +375,7 @@ func (pq *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
 // WithCars tells the query-builder to eager-load the nodes that are connected to
 // the "cars" edge. The optional arguments are used to configure the query builder of the edge.
 func (pq *PetQuery) WithCars(opts ...func(*CarQuery)) *PetQuery {
-	query := &CarQuery{config: pq.config}
+	query := (&CarClient{config: pq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -380,7 +386,7 @@ func (pq *PetQuery) WithCars(opts ...func(*CarQuery)) *PetQuery {
 // WithFriends tells the query-builder to eager-load the nodes that are connected to
 // the "friends" edge. The optional arguments are used to configure the query builder of the edge.
 func (pq *PetQuery) WithFriends(opts ...func(*PetQuery)) *PetQuery {
-	query := &PetQuery{config: pq.config}
+	query := (&PetClient{config: pq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -391,7 +397,7 @@ func (pq *PetQuery) WithFriends(opts ...func(*PetQuery)) *PetQuery {
 // WithBestFriend tells the query-builder to eager-load the nodes that are connected to
 // the "best_friend" edge. The optional arguments are used to configure the query builder of the edge.
 func (pq *PetQuery) WithBestFriend(opts ...func(*PetQuery)) *PetQuery {
-	query := &PetQuery{config: pq.config}
+	query := (&PetClient{config: pq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -402,16 +408,11 @@ func (pq *PetQuery) WithBestFriend(opts ...func(*PetQuery)) *PetQuery {
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
-	grbuild := &PetGroupBy{config: pq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := pq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return pq.sqlQuery(ctx), nil
-	}
+	pq.fields = append([]string{field}, fields...)
+	grbuild := &PetGroupBy{build: pq}
+	grbuild.flds = &pq.fields
 	grbuild.label = pet.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -419,10 +420,10 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 // instead of selecting all fields in the entity.
 func (pq *PetQuery) Select(fields ...string) *PetSelect {
 	pq.fields = append(pq.fields, fields...)
-	selbuild := &PetSelect{PetQuery: pq}
-	selbuild.label = pet.Label
-	selbuild.flds, selbuild.scan = &pq.fields, selbuild.Scan
-	return selbuild
+	sbuild := &PetSelect{PetQuery: pq}
+	sbuild.label = pet.Label
+	sbuild.flds, sbuild.scan = &pq.fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a PetSelect configured with the given aggregations.
@@ -431,6 +432,16 @@ func (pq *PetQuery) Aggregate(fns ...AggregateFunc) *PetSelect {
 }
 
 func (pq *PetQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range pq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, pq); err != nil {
+				return err
+			}
+		}
+	}
 	for _, f := range pq.fields {
 		if !pet.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
@@ -750,13 +761,8 @@ func (pq *PetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // PetGroupBy is the group-by builder for Pet entities.
 type PetGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *PetQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -765,58 +771,46 @@ func (pgb *PetGroupBy) Aggregate(fns ...AggregateFunc) *PetGroupBy {
 	return pgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (pgb *PetGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := pgb.path(ctx)
-	if err != nil {
+	ctx = newQueryContext(ctx, TypePet, "GroupBy")
+	if err := pgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	pgb.sql = query
-	return pgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*PetQuery, *PetGroupBy](ctx, pgb.build, pgb, pgb.build.inters, v)
 }
 
-func (pgb *PetGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range pgb.fields {
-		if !pet.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (pgb *PetGroupBy) sqlScan(ctx context.Context, root *PetQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(pgb.fns))
+	for _, fn := range pgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := pgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*pgb.flds)+len(pgb.fns))
+		for _, f := range *pgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*pgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := pgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := pgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (pgb *PetGroupBy) sqlQuery() *sql.Selector {
-	selector := pgb.sql.Select()
-	aggregation := make([]string, 0, len(pgb.fns))
-	for _, fn := range pgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(pgb.fields)+len(pgb.fns))
-		for _, f := range pgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(pgb.fields...)...)
-}
-
 // PetSelect is the builder for selecting fields of Pet entities.
 type PetSelect struct {
 	*PetQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -827,26 +821,27 @@ func (ps *PetSelect) Aggregate(fns ...AggregateFunc) *PetSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ps *PetSelect) Scan(ctx context.Context, v any) error {
+	ctx = newQueryContext(ctx, TypePet, "Select")
 	if err := ps.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ps.sql = ps.PetQuery.sqlQuery(ctx)
-	return ps.sqlScan(ctx, v)
+	return scanWithInterceptors[*PetQuery, *PetSelect](ctx, ps.PetQuery, ps, ps.inters, v)
 }
 
-func (ps *PetSelect) sqlScan(ctx context.Context, v any) error {
+func (ps *PetSelect) sqlScan(ctx context.Context, root *PetQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(ps.fns))
 	for _, fn := range ps.fns {
-		aggregation = append(aggregation, fn(ps.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*ps.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		ps.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		ps.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := ps.sql.Query()
+	query, args := selector.Query()
 	if err := ps.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

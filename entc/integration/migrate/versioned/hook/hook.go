@@ -19,11 +19,10 @@ type GroupFunc func(context.Context, *versioned.GroupMutation) (versioned.Value,
 
 // Mutate calls f(ctx, m).
 func (f GroupFunc) Mutate(ctx context.Context, m versioned.Mutation) (versioned.Value, error) {
-	mv, ok := m.(*versioned.GroupMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *versioned.GroupMutation", m)
+	if mv, ok := m.(*versioned.GroupMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *versioned.GroupMutation", m)
 }
 
 // The UserFunc type is an adapter to allow the use of ordinary
@@ -32,11 +31,10 @@ type UserFunc func(context.Context, *versioned.UserMutation) (versioned.Value, e
 
 // Mutate calls f(ctx, m).
 func (f UserFunc) Mutate(ctx context.Context, m versioned.Mutation) (versioned.Value, error) {
-	mv, ok := m.(*versioned.UserMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *versioned.UserMutation", m)
+	if mv, ok := m.(*versioned.UserMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *versioned.UserMutation", m)
 }
 
 // Condition is a hook condition function.

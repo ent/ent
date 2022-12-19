@@ -27,6 +27,7 @@ type GoodsQuery struct {
 	unique     *bool
 	order      []OrderFunc
 	fields     []string
+	inters     []Interceptor
 	predicates []predicate.Goods
 	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
@@ -40,13 +41,13 @@ func (gq *GoodsQuery) Where(ps ...predicate.Goods) *GoodsQuery {
 	return gq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (gq *GoodsQuery) Limit(limit int) *GoodsQuery {
 	gq.limit = &limit
 	return gq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (gq *GoodsQuery) Offset(offset int) *GoodsQuery {
 	gq.offset = &offset
 	return gq
@@ -59,7 +60,7 @@ func (gq *GoodsQuery) Unique(unique bool) *GoodsQuery {
 	return gq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (gq *GoodsQuery) Order(o ...OrderFunc) *GoodsQuery {
 	gq.order = append(gq.order, o...)
 	return gq
@@ -68,7 +69,7 @@ func (gq *GoodsQuery) Order(o ...OrderFunc) *GoodsQuery {
 // First returns the first Goods entity from the query.
 // Returns a *NotFoundError when no Goods was found.
 func (gq *GoodsQuery) First(ctx context.Context) (*Goods, error) {
-	nodes, err := gq.Limit(1).All(ctx)
+	nodes, err := gq.Limit(1).All(newQueryContext(ctx, TypeGoods, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +92,7 @@ func (gq *GoodsQuery) FirstX(ctx context.Context) *Goods {
 // Returns a *NotFoundError when no Goods ID was found.
 func (gq *GoodsQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = gq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = gq.Limit(1).IDs(newQueryContext(ctx, TypeGoods, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -114,7 +115,7 @@ func (gq *GoodsQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Goods entity is found.
 // Returns a *NotFoundError when no Goods entities are found.
 func (gq *GoodsQuery) Only(ctx context.Context) (*Goods, error) {
-	nodes, err := gq.Limit(2).All(ctx)
+	nodes, err := gq.Limit(2).All(newQueryContext(ctx, TypeGoods, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +143,7 @@ func (gq *GoodsQuery) OnlyX(ctx context.Context) *Goods {
 // Returns a *NotFoundError when no entities are found.
 func (gq *GoodsQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = gq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = gq.Limit(2).IDs(newQueryContext(ctx, TypeGoods, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -167,10 +168,12 @@ func (gq *GoodsQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of GoodsSlice.
 func (gq *GoodsQuery) All(ctx context.Context) ([]*Goods, error) {
+	ctx = newQueryContext(ctx, TypeGoods, "All")
 	if err := gq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return gq.sqlAll(ctx)
+	qr := querierAll[[]*Goods, *GoodsQuery]()
+	return withInterceptors[[]*Goods](ctx, gq, qr, gq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -185,6 +188,7 @@ func (gq *GoodsQuery) AllX(ctx context.Context) []*Goods {
 // IDs executes the query and returns a list of Goods IDs.
 func (gq *GoodsQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
+	ctx = newQueryContext(ctx, TypeGoods, "IDs")
 	if err := gq.Select(goods.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -202,10 +206,11 @@ func (gq *GoodsQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (gq *GoodsQuery) Count(ctx context.Context) (int, error) {
+	ctx = newQueryContext(ctx, TypeGoods, "Count")
 	if err := gq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return gq.sqlCount(ctx)
+	return withInterceptors[int](ctx, gq, querierCount[*GoodsQuery](), gq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -219,6 +224,7 @@ func (gq *GoodsQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (gq *GoodsQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = newQueryContext(ctx, TypeGoods, "Exist")
 	switch _, err := gq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -260,16 +266,11 @@ func (gq *GoodsQuery) Clone() *GoodsQuery {
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (gq *GoodsQuery) GroupBy(field string, fields ...string) *GoodsGroupBy {
-	grbuild := &GoodsGroupBy{config: gq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := gq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return gq.sqlQuery(ctx), nil
-	}
+	gq.fields = append([]string{field}, fields...)
+	grbuild := &GoodsGroupBy{build: gq}
+	grbuild.flds = &gq.fields
 	grbuild.label = goods.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -277,10 +278,10 @@ func (gq *GoodsQuery) GroupBy(field string, fields ...string) *GoodsGroupBy {
 // instead of selecting all fields in the entity.
 func (gq *GoodsQuery) Select(fields ...string) *GoodsSelect {
 	gq.fields = append(gq.fields, fields...)
-	selbuild := &GoodsSelect{GoodsQuery: gq}
-	selbuild.label = goods.Label
-	selbuild.flds, selbuild.scan = &gq.fields, selbuild.Scan
-	return selbuild
+	sbuild := &GoodsSelect{GoodsQuery: gq}
+	sbuild.label = goods.Label
+	sbuild.flds, sbuild.scan = &gq.fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a GoodsSelect configured with the given aggregations.
@@ -289,6 +290,16 @@ func (gq *GoodsQuery) Aggregate(fns ...AggregateFunc) *GoodsSelect {
 }
 
 func (gq *GoodsQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range gq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, gq); err != nil {
+				return err
+			}
+		}
+	}
 	for _, f := range gq.fields {
 		if !goods.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
@@ -461,13 +472,8 @@ func (gq *GoodsQuery) Modify(modifiers ...func(s *sql.Selector)) *GoodsSelect {
 
 // GoodsGroupBy is the group-by builder for Goods entities.
 type GoodsGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *GoodsQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -476,58 +482,46 @@ func (ggb *GoodsGroupBy) Aggregate(fns ...AggregateFunc) *GoodsGroupBy {
 	return ggb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (ggb *GoodsGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := ggb.path(ctx)
-	if err != nil {
+	ctx = newQueryContext(ctx, TypeGoods, "GroupBy")
+	if err := ggb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ggb.sql = query
-	return ggb.sqlScan(ctx, v)
+	return scanWithInterceptors[*GoodsQuery, *GoodsGroupBy](ctx, ggb.build, ggb, ggb.build.inters, v)
 }
 
-func (ggb *GoodsGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range ggb.fields {
-		if !goods.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (ggb *GoodsGroupBy) sqlScan(ctx context.Context, root *GoodsQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(ggb.fns))
+	for _, fn := range ggb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := ggb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*ggb.flds)+len(ggb.fns))
+		for _, f := range *ggb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*ggb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ggb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := ggb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (ggb *GoodsGroupBy) sqlQuery() *sql.Selector {
-	selector := ggb.sql.Select()
-	aggregation := make([]string, 0, len(ggb.fns))
-	for _, fn := range ggb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(ggb.fields)+len(ggb.fns))
-		for _, f := range ggb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(ggb.fields...)...)
-}
-
 // GoodsSelect is the builder for selecting fields of Goods entities.
 type GoodsSelect struct {
 	*GoodsQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -538,26 +532,27 @@ func (gs *GoodsSelect) Aggregate(fns ...AggregateFunc) *GoodsSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (gs *GoodsSelect) Scan(ctx context.Context, v any) error {
+	ctx = newQueryContext(ctx, TypeGoods, "Select")
 	if err := gs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	gs.sql = gs.GoodsQuery.sqlQuery(ctx)
-	return gs.sqlScan(ctx, v)
+	return scanWithInterceptors[*GoodsQuery, *GoodsSelect](ctx, gs.GoodsQuery, gs, gs.inters, v)
 }
 
-func (gs *GoodsSelect) sqlScan(ctx context.Context, v any) error {
+func (gs *GoodsSelect) sqlScan(ctx context.Context, root *GoodsQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(gs.fns))
 	for _, fn := range gs.fns {
-		aggregation = append(aggregation, fn(gs.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*gs.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		gs.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		gs.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := gs.sql.Query()
+	query, args := selector.Query()
 	if err := gs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

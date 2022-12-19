@@ -27,6 +27,7 @@ type NodeQuery struct {
 	unique     *bool
 	order      []OrderFunc
 	fields     []string
+	inters     []Interceptor
 	predicates []predicate.Node
 	withPrev   *NodeQuery
 	withNext   *NodeQuery
@@ -41,13 +42,13 @@ func (nq *NodeQuery) Where(ps ...predicate.Node) *NodeQuery {
 	return nq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (nq *NodeQuery) Limit(limit int) *NodeQuery {
 	nq.limit = &limit
 	return nq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (nq *NodeQuery) Offset(offset int) *NodeQuery {
 	nq.offset = &offset
 	return nq
@@ -60,7 +61,7 @@ func (nq *NodeQuery) Unique(unique bool) *NodeQuery {
 	return nq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (nq *NodeQuery) Order(o ...OrderFunc) *NodeQuery {
 	nq.order = append(nq.order, o...)
 	return nq
@@ -68,7 +69,7 @@ func (nq *NodeQuery) Order(o ...OrderFunc) *NodeQuery {
 
 // QueryPrev chains the current query on the "prev" edge.
 func (nq *NodeQuery) QueryPrev() *NodeQuery {
-	query := &NodeQuery{config: nq.config}
+	query := (&NodeClient{config: nq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := nq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -82,7 +83,7 @@ func (nq *NodeQuery) QueryPrev() *NodeQuery {
 
 // QueryNext chains the current query on the "next" edge.
 func (nq *NodeQuery) QueryNext() *NodeQuery {
-	query := &NodeQuery{config: nq.config}
+	query := (&NodeClient{config: nq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := nq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -97,7 +98,7 @@ func (nq *NodeQuery) QueryNext() *NodeQuery {
 // First returns the first Node entity from the query.
 // Returns a *NotFoundError when no Node was found.
 func (nq *NodeQuery) First(ctx context.Context) (*Node, error) {
-	nodes, err := nq.Limit(1).All(ctx)
+	nodes, err := nq.Limit(1).All(newQueryContext(ctx, TypeNode, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +121,7 @@ func (nq *NodeQuery) FirstX(ctx context.Context) *Node {
 // Returns a *NotFoundError when no Node ID was found.
 func (nq *NodeQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = nq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = nq.Limit(1).IDs(newQueryContext(ctx, TypeNode, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -143,7 +144,7 @@ func (nq *NodeQuery) FirstIDX(ctx context.Context) string {
 // Returns a *NotSingularError when more than one Node entity is found.
 // Returns a *NotFoundError when no Node entities are found.
 func (nq *NodeQuery) Only(ctx context.Context) (*Node, error) {
-	nodes, err := nq.Limit(2).All(ctx)
+	nodes, err := nq.Limit(2).All(newQueryContext(ctx, TypeNode, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -171,7 +172,7 @@ func (nq *NodeQuery) OnlyX(ctx context.Context) *Node {
 // Returns a *NotFoundError when no entities are found.
 func (nq *NodeQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = nq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = nq.Limit(2).IDs(newQueryContext(ctx, TypeNode, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -196,10 +197,12 @@ func (nq *NodeQuery) OnlyIDX(ctx context.Context) string {
 
 // All executes the query and returns a list of Nodes.
 func (nq *NodeQuery) All(ctx context.Context) ([]*Node, error) {
+	ctx = newQueryContext(ctx, TypeNode, "All")
 	if err := nq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return nq.gremlinAll(ctx)
+	qr := querierAll[[]*Node, *NodeQuery]()
+	return withInterceptors[[]*Node](ctx, nq, qr, nq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -214,6 +217,7 @@ func (nq *NodeQuery) AllX(ctx context.Context) []*Node {
 // IDs executes the query and returns a list of Node IDs.
 func (nq *NodeQuery) IDs(ctx context.Context) ([]string, error) {
 	var ids []string
+	ctx = newQueryContext(ctx, TypeNode, "IDs")
 	if err := nq.Select(node.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -231,10 +235,11 @@ func (nq *NodeQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (nq *NodeQuery) Count(ctx context.Context) (int, error) {
+	ctx = newQueryContext(ctx, TypeNode, "Count")
 	if err := nq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return nq.gremlinCount(ctx)
+	return withInterceptors[int](ctx, nq, querierCount[*NodeQuery](), nq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -248,6 +253,7 @@ func (nq *NodeQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (nq *NodeQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = newQueryContext(ctx, TypeNode, "Exist")
 	switch _, err := nq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -291,7 +297,7 @@ func (nq *NodeQuery) Clone() *NodeQuery {
 // WithPrev tells the query-builder to eager-load the nodes that are connected to
 // the "prev" edge. The optional arguments are used to configure the query builder of the edge.
 func (nq *NodeQuery) WithPrev(opts ...func(*NodeQuery)) *NodeQuery {
-	query := &NodeQuery{config: nq.config}
+	query := (&NodeClient{config: nq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -302,7 +308,7 @@ func (nq *NodeQuery) WithPrev(opts ...func(*NodeQuery)) *NodeQuery {
 // WithNext tells the query-builder to eager-load the nodes that are connected to
 // the "next" edge. The optional arguments are used to configure the query builder of the edge.
 func (nq *NodeQuery) WithNext(opts ...func(*NodeQuery)) *NodeQuery {
-	query := &NodeQuery{config: nq.config}
+	query := (&NodeClient{config: nq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -325,16 +331,11 @@ func (nq *NodeQuery) WithNext(opts ...func(*NodeQuery)) *NodeQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
-	grbuild := &NodeGroupBy{config: nq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
-		if err := nq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return nq.gremlinQuery(ctx), nil
-	}
+	nq.fields = append([]string{field}, fields...)
+	grbuild := &NodeGroupBy{build: nq}
+	grbuild.flds = &nq.fields
 	grbuild.label = node.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -352,10 +353,10 @@ func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 //		Scan(ctx, &v)
 func (nq *NodeQuery) Select(fields ...string) *NodeSelect {
 	nq.fields = append(nq.fields, fields...)
-	selbuild := &NodeSelect{NodeQuery: nq}
-	selbuild.label = node.Label
-	selbuild.flds, selbuild.scan = &nq.fields, selbuild.Scan
-	return selbuild
+	sbuild := &NodeSelect{NodeQuery: nq}
+	sbuild.label = node.Label
+	sbuild.flds, sbuild.scan = &nq.fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a NodeSelect configured with the given aggregations.
@@ -364,6 +365,16 @@ func (nq *NodeQuery) Aggregate(fns ...AggregateFunc) *NodeSelect {
 }
 
 func (nq *NodeQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range nq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, nq); err != nil {
+				return err
+			}
+		}
+	}
 	if nq.path != nil {
 		prev, err := nq.path(ctx)
 		if err != nil {
@@ -374,7 +385,7 @@ func (nq *NodeQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (nq *NodeQuery) gremlinAll(ctx context.Context) ([]*Node, error) {
+func (nq *NodeQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Node, error) {
 	res := &gremlin.Response{}
 	traversal := nq.gremlinQuery(ctx)
 	if len(nq.fields) > 0 {
@@ -437,13 +448,8 @@ func (nq *NodeQuery) gremlinQuery(context.Context) *dsl.Traversal {
 
 // NodeGroupBy is the group-by builder for Node entities.
 type NodeGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	gremlin *dsl.Traversal
-	path    func(context.Context) (*dsl.Traversal, error)
+	build *NodeQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -452,33 +458,16 @@ func (ngb *NodeGroupBy) Aggregate(fns ...AggregateFunc) *NodeGroupBy {
 	return ngb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (ngb *NodeGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := ngb.path(ctx)
-	if err != nil {
+	ctx = newQueryContext(ctx, TypeNode, "GroupBy")
+	if err := ngb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ngb.gremlin = query
-	return ngb.gremlinScan(ctx, v)
+	return scanWithInterceptors[*NodeQuery, *NodeGroupBy](ctx, ngb.build, ngb, ngb.build.inters, v)
 }
 
-func (ngb *NodeGroupBy) gremlinScan(ctx context.Context, v any) error {
-	res := &gremlin.Response{}
-	query, bindings := ngb.gremlinQuery().Query()
-	if err := ngb.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(ngb.fields)+len(ngb.fns) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
-}
-
-func (ngb *NodeGroupBy) gremlinQuery() *dsl.Traversal {
+func (ngb *NodeGroupBy) gremlinScan(ctx context.Context, root *NodeQuery, v any) error {
 	var (
 		trs   []any
 		names []any
@@ -488,23 +477,34 @@ func (ngb *NodeGroupBy) gremlinQuery() *dsl.Traversal {
 		trs = append(trs, tr)
 		names = append(names, name)
 	}
-	for _, f := range ngb.fields {
+	for _, f := range *ngb.flds {
 		names = append(names, f)
 		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
 	}
-	return ngb.gremlin.Group().
-		By(__.Values(ngb.fields...).Fold()).
+	query, bindings := root.gremlinQuery(ctx).Group().
+		By(__.Values(*ngb.flds...).Fold()).
 		By(__.Fold().Match(trs...).Select(names...)).
 		Select(dsl.Values).
-		Next()
+		Next().
+		Query()
+	res := &gremlin.Response{}
+	if err := ngb.build.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	if len(*ngb.flds)+len(ngb.fns) == 1 {
+		return res.ReadVal(v)
+	}
+	vm, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	return vm.Decode(v)
 }
 
 // NodeSelect is the builder for selecting fields of Node entities.
 type NodeSelect struct {
 	*NodeQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	gremlin *dsl.Traversal
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -515,36 +515,36 @@ func (ns *NodeSelect) Aggregate(fns ...AggregateFunc) *NodeSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ns *NodeSelect) Scan(ctx context.Context, v any) error {
+	ctx = newQueryContext(ctx, TypeNode, "Select")
 	if err := ns.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ns.gremlin = ns.NodeQuery.gremlinQuery(ctx)
-	return ns.gremlinScan(ctx, v)
+	return scanWithInterceptors[*NodeQuery, *NodeSelect](ctx, ns.NodeQuery, ns, ns.inters, v)
 }
 
-func (ns *NodeSelect) gremlinScan(ctx context.Context, v any) error {
+func (ns *NodeSelect) gremlinScan(ctx context.Context, root *NodeQuery, v any) error {
 	var (
-		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
+		traversal = root.gremlinQuery(ctx)
 	)
 	if len(ns.fields) == 1 {
 		if ns.fields[0] != node.FieldID {
-			traversal = ns.gremlin.Values(ns.fields...)
+			traversal = traversal.Values(ns.fields...)
 		} else {
-			traversal = ns.gremlin.ID()
+			traversal = traversal.ID()
 		}
 	} else {
 		fields := make([]any, len(ns.fields))
 		for i, f := range ns.fields {
 			fields[i] = f
 		}
-		traversal = ns.gremlin.ValueMap(fields...)
+		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
 	if err := ns.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
-	if len(ns.fields) == 1 {
+	if len(root.fields) == 1 {
 		return res.ReadVal(v)
 	}
 	vm, err := res.ReadValueMap()

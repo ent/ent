@@ -27,6 +27,7 @@ type CarQuery struct {
 	unique     *bool
 	order      []OrderFunc
 	fields     []string
+	inters     []Interceptor
 	predicates []predicate.Car
 	withOwner  *PetQuery
 	withFKs    bool
@@ -41,13 +42,13 @@ func (cq *CarQuery) Where(ps ...predicate.Car) *CarQuery {
 	return cq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (cq *CarQuery) Limit(limit int) *CarQuery {
 	cq.limit = &limit
 	return cq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (cq *CarQuery) Offset(offset int) *CarQuery {
 	cq.offset = &offset
 	return cq
@@ -60,7 +61,7 @@ func (cq *CarQuery) Unique(unique bool) *CarQuery {
 	return cq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (cq *CarQuery) Order(o ...OrderFunc) *CarQuery {
 	cq.order = append(cq.order, o...)
 	return cq
@@ -68,7 +69,7 @@ func (cq *CarQuery) Order(o ...OrderFunc) *CarQuery {
 
 // QueryOwner chains the current query on the "owner" edge.
 func (cq *CarQuery) QueryOwner() *PetQuery {
-	query := &PetQuery{config: cq.config}
+	query := (&PetClient{config: cq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -91,7 +92,7 @@ func (cq *CarQuery) QueryOwner() *PetQuery {
 // First returns the first Car entity from the query.
 // Returns a *NotFoundError when no Car was found.
 func (cq *CarQuery) First(ctx context.Context) (*Car, error) {
-	nodes, err := cq.Limit(1).All(ctx)
+	nodes, err := cq.Limit(1).All(newQueryContext(ctx, TypeCar, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +115,7 @@ func (cq *CarQuery) FirstX(ctx context.Context) *Car {
 // Returns a *NotFoundError when no Car ID was found.
 func (cq *CarQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = cq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = cq.Limit(1).IDs(newQueryContext(ctx, TypeCar, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -137,7 +138,7 @@ func (cq *CarQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Car entity is found.
 // Returns a *NotFoundError when no Car entities are found.
 func (cq *CarQuery) Only(ctx context.Context) (*Car, error) {
-	nodes, err := cq.Limit(2).All(ctx)
+	nodes, err := cq.Limit(2).All(newQueryContext(ctx, TypeCar, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +166,7 @@ func (cq *CarQuery) OnlyX(ctx context.Context) *Car {
 // Returns a *NotFoundError when no entities are found.
 func (cq *CarQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = cq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = cq.Limit(2).IDs(newQueryContext(ctx, TypeCar, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -190,10 +191,12 @@ func (cq *CarQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Cars.
 func (cq *CarQuery) All(ctx context.Context) ([]*Car, error) {
+	ctx = newQueryContext(ctx, TypeCar, "All")
 	if err := cq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return cq.sqlAll(ctx)
+	qr := querierAll[[]*Car, *CarQuery]()
+	return withInterceptors[[]*Car](ctx, cq, qr, cq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -208,6 +211,7 @@ func (cq *CarQuery) AllX(ctx context.Context) []*Car {
 // IDs executes the query and returns a list of Car IDs.
 func (cq *CarQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
+	ctx = newQueryContext(ctx, TypeCar, "IDs")
 	if err := cq.Select(car.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -225,10 +229,11 @@ func (cq *CarQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (cq *CarQuery) Count(ctx context.Context) (int, error) {
+	ctx = newQueryContext(ctx, TypeCar, "Count")
 	if err := cq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return cq.sqlCount(ctx)
+	return withInterceptors[int](ctx, cq, querierCount[*CarQuery](), cq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -242,6 +247,7 @@ func (cq *CarQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (cq *CarQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = newQueryContext(ctx, TypeCar, "Exist")
 	switch _, err := cq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -284,7 +290,7 @@ func (cq *CarQuery) Clone() *CarQuery {
 // WithOwner tells the query-builder to eager-load the nodes that are connected to
 // the "owner" edge. The optional arguments are used to configure the query builder of the edge.
 func (cq *CarQuery) WithOwner(opts ...func(*PetQuery)) *CarQuery {
-	query := &PetQuery{config: cq.config}
+	query := (&PetClient{config: cq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -307,16 +313,11 @@ func (cq *CarQuery) WithOwner(opts ...func(*PetQuery)) *CarQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (cq *CarQuery) GroupBy(field string, fields ...string) *CarGroupBy {
-	grbuild := &CarGroupBy{config: cq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := cq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return cq.sqlQuery(ctx), nil
-	}
+	cq.fields = append([]string{field}, fields...)
+	grbuild := &CarGroupBy{build: cq}
+	grbuild.flds = &cq.fields
 	grbuild.label = car.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -334,10 +335,10 @@ func (cq *CarQuery) GroupBy(field string, fields ...string) *CarGroupBy {
 //		Scan(ctx, &v)
 func (cq *CarQuery) Select(fields ...string) *CarSelect {
 	cq.fields = append(cq.fields, fields...)
-	selbuild := &CarSelect{CarQuery: cq}
-	selbuild.label = car.Label
-	selbuild.flds, selbuild.scan = &cq.fields, selbuild.Scan
-	return selbuild
+	sbuild := &CarSelect{CarQuery: cq}
+	sbuild.label = car.Label
+	sbuild.flds, sbuild.scan = &cq.fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a CarSelect configured with the given aggregations.
@@ -346,6 +347,16 @@ func (cq *CarQuery) Aggregate(fns ...AggregateFunc) *CarSelect {
 }
 
 func (cq *CarQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range cq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, cq); err != nil {
+				return err
+			}
+		}
+	}
 	for _, f := range cq.fields {
 		if !car.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
@@ -524,13 +535,8 @@ func (cq *CarQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // CarGroupBy is the group-by builder for Car entities.
 type CarGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *CarQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -539,58 +545,46 @@ func (cgb *CarGroupBy) Aggregate(fns ...AggregateFunc) *CarGroupBy {
 	return cgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (cgb *CarGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := cgb.path(ctx)
-	if err != nil {
+	ctx = newQueryContext(ctx, TypeCar, "GroupBy")
+	if err := cgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cgb.sql = query
-	return cgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*CarQuery, *CarGroupBy](ctx, cgb.build, cgb, cgb.build.inters, v)
 }
 
-func (cgb *CarGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range cgb.fields {
-		if !car.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (cgb *CarGroupBy) sqlScan(ctx context.Context, root *CarQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(cgb.fns))
+	for _, fn := range cgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := cgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*cgb.flds)+len(cgb.fns))
+		for _, f := range *cgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*cgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := cgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := cgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (cgb *CarGroupBy) sqlQuery() *sql.Selector {
-	selector := cgb.sql.Select()
-	aggregation := make([]string, 0, len(cgb.fns))
-	for _, fn := range cgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(cgb.fields)+len(cgb.fns))
-		for _, f := range cgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(cgb.fields...)...)
-}
-
 // CarSelect is the builder for selecting fields of Car entities.
 type CarSelect struct {
 	*CarQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -601,26 +595,27 @@ func (cs *CarSelect) Aggregate(fns ...AggregateFunc) *CarSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (cs *CarSelect) Scan(ctx context.Context, v any) error {
+	ctx = newQueryContext(ctx, TypeCar, "Select")
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cs.sql = cs.CarQuery.sqlQuery(ctx)
-	return cs.sqlScan(ctx, v)
+	return scanWithInterceptors[*CarQuery, *CarSelect](ctx, cs.CarQuery, cs, cs.inters, v)
 }
 
-func (cs *CarSelect) sqlScan(ctx context.Context, v any) error {
+func (cs *CarSelect) sqlScan(ctx context.Context, root *CarQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(cs.fns))
 	for _, fn := range cs.fns {
-		aggregation = append(aggregation, fn(cs.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*cs.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		cs.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		cs.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := cs.sql.Query()
+	query, args := selector.Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

@@ -26,6 +26,7 @@ type CustomTypeQuery struct {
 	unique     *bool
 	order      []OrderFunc
 	fields     []string
+	inters     []Interceptor
 	predicates []predicate.CustomType
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -38,13 +39,13 @@ func (ctq *CustomTypeQuery) Where(ps ...predicate.CustomType) *CustomTypeQuery {
 	return ctq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (ctq *CustomTypeQuery) Limit(limit int) *CustomTypeQuery {
 	ctq.limit = &limit
 	return ctq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (ctq *CustomTypeQuery) Offset(offset int) *CustomTypeQuery {
 	ctq.offset = &offset
 	return ctq
@@ -57,7 +58,7 @@ func (ctq *CustomTypeQuery) Unique(unique bool) *CustomTypeQuery {
 	return ctq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (ctq *CustomTypeQuery) Order(o ...OrderFunc) *CustomTypeQuery {
 	ctq.order = append(ctq.order, o...)
 	return ctq
@@ -66,7 +67,7 @@ func (ctq *CustomTypeQuery) Order(o ...OrderFunc) *CustomTypeQuery {
 // First returns the first CustomType entity from the query.
 // Returns a *NotFoundError when no CustomType was found.
 func (ctq *CustomTypeQuery) First(ctx context.Context) (*CustomType, error) {
-	nodes, err := ctq.Limit(1).All(ctx)
+	nodes, err := ctq.Limit(1).All(newQueryContext(ctx, TypeCustomType, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +90,7 @@ func (ctq *CustomTypeQuery) FirstX(ctx context.Context) *CustomType {
 // Returns a *NotFoundError when no CustomType ID was found.
 func (ctq *CustomTypeQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = ctq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = ctq.Limit(1).IDs(newQueryContext(ctx, TypeCustomType, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -112,7 +113,7 @@ func (ctq *CustomTypeQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one CustomType entity is found.
 // Returns a *NotFoundError when no CustomType entities are found.
 func (ctq *CustomTypeQuery) Only(ctx context.Context) (*CustomType, error) {
-	nodes, err := ctq.Limit(2).All(ctx)
+	nodes, err := ctq.Limit(2).All(newQueryContext(ctx, TypeCustomType, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +141,7 @@ func (ctq *CustomTypeQuery) OnlyX(ctx context.Context) *CustomType {
 // Returns a *NotFoundError when no entities are found.
 func (ctq *CustomTypeQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = ctq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = ctq.Limit(2).IDs(newQueryContext(ctx, TypeCustomType, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -165,10 +166,12 @@ func (ctq *CustomTypeQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of CustomTypes.
 func (ctq *CustomTypeQuery) All(ctx context.Context) ([]*CustomType, error) {
+	ctx = newQueryContext(ctx, TypeCustomType, "All")
 	if err := ctq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return ctq.sqlAll(ctx)
+	qr := querierAll[[]*CustomType, *CustomTypeQuery]()
+	return withInterceptors[[]*CustomType](ctx, ctq, qr, ctq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -183,6 +186,7 @@ func (ctq *CustomTypeQuery) AllX(ctx context.Context) []*CustomType {
 // IDs executes the query and returns a list of CustomType IDs.
 func (ctq *CustomTypeQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
+	ctx = newQueryContext(ctx, TypeCustomType, "IDs")
 	if err := ctq.Select(customtype.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -200,10 +204,11 @@ func (ctq *CustomTypeQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (ctq *CustomTypeQuery) Count(ctx context.Context) (int, error) {
+	ctx = newQueryContext(ctx, TypeCustomType, "Count")
 	if err := ctq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return ctq.sqlCount(ctx)
+	return withInterceptors[int](ctx, ctq, querierCount[*CustomTypeQuery](), ctq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -217,6 +222,7 @@ func (ctq *CustomTypeQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (ctq *CustomTypeQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = newQueryContext(ctx, TypeCustomType, "Exist")
 	switch _, err := ctq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -270,16 +276,11 @@ func (ctq *CustomTypeQuery) Clone() *CustomTypeQuery {
 //		Aggregate(entv2.Count()).
 //		Scan(ctx, &v)
 func (ctq *CustomTypeQuery) GroupBy(field string, fields ...string) *CustomTypeGroupBy {
-	grbuild := &CustomTypeGroupBy{config: ctq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := ctq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return ctq.sqlQuery(ctx), nil
-	}
+	ctq.fields = append([]string{field}, fields...)
+	grbuild := &CustomTypeGroupBy{build: ctq}
+	grbuild.flds = &ctq.fields
 	grbuild.label = customtype.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -297,10 +298,10 @@ func (ctq *CustomTypeQuery) GroupBy(field string, fields ...string) *CustomTypeG
 //		Scan(ctx, &v)
 func (ctq *CustomTypeQuery) Select(fields ...string) *CustomTypeSelect {
 	ctq.fields = append(ctq.fields, fields...)
-	selbuild := &CustomTypeSelect{CustomTypeQuery: ctq}
-	selbuild.label = customtype.Label
-	selbuild.flds, selbuild.scan = &ctq.fields, selbuild.Scan
-	return selbuild
+	sbuild := &CustomTypeSelect{CustomTypeQuery: ctq}
+	sbuild.label = customtype.Label
+	sbuild.flds, sbuild.scan = &ctq.fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a CustomTypeSelect configured with the given aggregations.
@@ -309,6 +310,16 @@ func (ctq *CustomTypeQuery) Aggregate(fns ...AggregateFunc) *CustomTypeSelect {
 }
 
 func (ctq *CustomTypeQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range ctq.inters {
+		if inter == nil {
+			return fmt.Errorf("entv2: uninitialized interceptor (forgotten import entv2/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, ctq); err != nil {
+				return err
+			}
+		}
+	}
 	for _, f := range ctq.fields {
 		if !customtype.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("entv2: invalid field %q for query", f)}
@@ -440,13 +451,8 @@ func (ctq *CustomTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // CustomTypeGroupBy is the group-by builder for CustomType entities.
 type CustomTypeGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *CustomTypeQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -455,58 +461,46 @@ func (ctgb *CustomTypeGroupBy) Aggregate(fns ...AggregateFunc) *CustomTypeGroupB
 	return ctgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (ctgb *CustomTypeGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := ctgb.path(ctx)
-	if err != nil {
+	ctx = newQueryContext(ctx, TypeCustomType, "GroupBy")
+	if err := ctgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ctgb.sql = query
-	return ctgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*CustomTypeQuery, *CustomTypeGroupBy](ctx, ctgb.build, ctgb, ctgb.build.inters, v)
 }
 
-func (ctgb *CustomTypeGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range ctgb.fields {
-		if !customtype.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (ctgb *CustomTypeGroupBy) sqlScan(ctx context.Context, root *CustomTypeQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(ctgb.fns))
+	for _, fn := range ctgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := ctgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*ctgb.flds)+len(ctgb.fns))
+		for _, f := range *ctgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*ctgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ctgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := ctgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (ctgb *CustomTypeGroupBy) sqlQuery() *sql.Selector {
-	selector := ctgb.sql.Select()
-	aggregation := make([]string, 0, len(ctgb.fns))
-	for _, fn := range ctgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(ctgb.fields)+len(ctgb.fns))
-		for _, f := range ctgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(ctgb.fields...)...)
-}
-
 // CustomTypeSelect is the builder for selecting fields of CustomType entities.
 type CustomTypeSelect struct {
 	*CustomTypeQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -517,26 +511,27 @@ func (cts *CustomTypeSelect) Aggregate(fns ...AggregateFunc) *CustomTypeSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (cts *CustomTypeSelect) Scan(ctx context.Context, v any) error {
+	ctx = newQueryContext(ctx, TypeCustomType, "Select")
 	if err := cts.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cts.sql = cts.CustomTypeQuery.sqlQuery(ctx)
-	return cts.sqlScan(ctx, v)
+	return scanWithInterceptors[*CustomTypeQuery, *CustomTypeSelect](ctx, cts.CustomTypeQuery, cts, cts.inters, v)
 }
 
-func (cts *CustomTypeSelect) sqlScan(ctx context.Context, v any) error {
+func (cts *CustomTypeSelect) sqlScan(ctx context.Context, root *CustomTypeQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(cts.fns))
 	for _, fn := range cts.fns {
-		aggregation = append(aggregation, fn(cts.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*cts.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		cts.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		cts.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := cts.sql.Query()
+	query, args := selector.Query()
 	if err := cts.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

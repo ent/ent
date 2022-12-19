@@ -28,6 +28,7 @@ type TokenQuery struct {
 	unique      *bool
 	order       []OrderFunc
 	fields      []string
+	inters      []Interceptor
 	predicates  []predicate.Token
 	withAccount *AccountQuery
 	withFKs     bool
@@ -42,13 +43,13 @@ func (tq *TokenQuery) Where(ps ...predicate.Token) *TokenQuery {
 	return tq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (tq *TokenQuery) Limit(limit int) *TokenQuery {
 	tq.limit = &limit
 	return tq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (tq *TokenQuery) Offset(offset int) *TokenQuery {
 	tq.offset = &offset
 	return tq
@@ -61,7 +62,7 @@ func (tq *TokenQuery) Unique(unique bool) *TokenQuery {
 	return tq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (tq *TokenQuery) Order(o ...OrderFunc) *TokenQuery {
 	tq.order = append(tq.order, o...)
 	return tq
@@ -69,7 +70,7 @@ func (tq *TokenQuery) Order(o ...OrderFunc) *TokenQuery {
 
 // QueryAccount chains the current query on the "account" edge.
 func (tq *TokenQuery) QueryAccount() *AccountQuery {
-	query := &AccountQuery{config: tq.config}
+	query := (&AccountClient{config: tq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := tq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -92,7 +93,7 @@ func (tq *TokenQuery) QueryAccount() *AccountQuery {
 // First returns the first Token entity from the query.
 // Returns a *NotFoundError when no Token was found.
 func (tq *TokenQuery) First(ctx context.Context) (*Token, error) {
-	nodes, err := tq.Limit(1).All(ctx)
+	nodes, err := tq.Limit(1).All(newQueryContext(ctx, TypeToken, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +116,7 @@ func (tq *TokenQuery) FirstX(ctx context.Context) *Token {
 // Returns a *NotFoundError when no Token ID was found.
 func (tq *TokenQuery) FirstID(ctx context.Context) (id sid.ID, err error) {
 	var ids []sid.ID
-	if ids, err = tq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = tq.Limit(1).IDs(newQueryContext(ctx, TypeToken, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -138,7 +139,7 @@ func (tq *TokenQuery) FirstIDX(ctx context.Context) sid.ID {
 // Returns a *NotSingularError when more than one Token entity is found.
 // Returns a *NotFoundError when no Token entities are found.
 func (tq *TokenQuery) Only(ctx context.Context) (*Token, error) {
-	nodes, err := tq.Limit(2).All(ctx)
+	nodes, err := tq.Limit(2).All(newQueryContext(ctx, TypeToken, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +167,7 @@ func (tq *TokenQuery) OnlyX(ctx context.Context) *Token {
 // Returns a *NotFoundError when no entities are found.
 func (tq *TokenQuery) OnlyID(ctx context.Context) (id sid.ID, err error) {
 	var ids []sid.ID
-	if ids, err = tq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = tq.Limit(2).IDs(newQueryContext(ctx, TypeToken, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -191,10 +192,12 @@ func (tq *TokenQuery) OnlyIDX(ctx context.Context) sid.ID {
 
 // All executes the query and returns a list of Tokens.
 func (tq *TokenQuery) All(ctx context.Context) ([]*Token, error) {
+	ctx = newQueryContext(ctx, TypeToken, "All")
 	if err := tq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return tq.sqlAll(ctx)
+	qr := querierAll[[]*Token, *TokenQuery]()
+	return withInterceptors[[]*Token](ctx, tq, qr, tq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -209,6 +212,7 @@ func (tq *TokenQuery) AllX(ctx context.Context) []*Token {
 // IDs executes the query and returns a list of Token IDs.
 func (tq *TokenQuery) IDs(ctx context.Context) ([]sid.ID, error) {
 	var ids []sid.ID
+	ctx = newQueryContext(ctx, TypeToken, "IDs")
 	if err := tq.Select(token.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -226,10 +230,11 @@ func (tq *TokenQuery) IDsX(ctx context.Context) []sid.ID {
 
 // Count returns the count of the given query.
 func (tq *TokenQuery) Count(ctx context.Context) (int, error) {
+	ctx = newQueryContext(ctx, TypeToken, "Count")
 	if err := tq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return tq.sqlCount(ctx)
+	return withInterceptors[int](ctx, tq, querierCount[*TokenQuery](), tq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -243,6 +248,7 @@ func (tq *TokenQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (tq *TokenQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = newQueryContext(ctx, TypeToken, "Exist")
 	switch _, err := tq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -285,7 +291,7 @@ func (tq *TokenQuery) Clone() *TokenQuery {
 // WithAccount tells the query-builder to eager-load the nodes that are connected to
 // the "account" edge. The optional arguments are used to configure the query builder of the edge.
 func (tq *TokenQuery) WithAccount(opts ...func(*AccountQuery)) *TokenQuery {
-	query := &AccountQuery{config: tq.config}
+	query := (&AccountClient{config: tq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -308,16 +314,11 @@ func (tq *TokenQuery) WithAccount(opts ...func(*AccountQuery)) *TokenQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (tq *TokenQuery) GroupBy(field string, fields ...string) *TokenGroupBy {
-	grbuild := &TokenGroupBy{config: tq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := tq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return tq.sqlQuery(ctx), nil
-	}
+	tq.fields = append([]string{field}, fields...)
+	grbuild := &TokenGroupBy{build: tq}
+	grbuild.flds = &tq.fields
 	grbuild.label = token.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -335,10 +336,10 @@ func (tq *TokenQuery) GroupBy(field string, fields ...string) *TokenGroupBy {
 //		Scan(ctx, &v)
 func (tq *TokenQuery) Select(fields ...string) *TokenSelect {
 	tq.fields = append(tq.fields, fields...)
-	selbuild := &TokenSelect{TokenQuery: tq}
-	selbuild.label = token.Label
-	selbuild.flds, selbuild.scan = &tq.fields, selbuild.Scan
-	return selbuild
+	sbuild := &TokenSelect{TokenQuery: tq}
+	sbuild.label = token.Label
+	sbuild.flds, sbuild.scan = &tq.fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a TokenSelect configured with the given aggregations.
@@ -347,6 +348,16 @@ func (tq *TokenQuery) Aggregate(fns ...AggregateFunc) *TokenSelect {
 }
 
 func (tq *TokenQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range tq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, tq); err != nil {
+				return err
+			}
+		}
+	}
 	for _, f := range tq.fields {
 		if !token.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
@@ -525,13 +536,8 @@ func (tq *TokenQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // TokenGroupBy is the group-by builder for Token entities.
 type TokenGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *TokenQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -540,58 +546,46 @@ func (tgb *TokenGroupBy) Aggregate(fns ...AggregateFunc) *TokenGroupBy {
 	return tgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (tgb *TokenGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := tgb.path(ctx)
-	if err != nil {
+	ctx = newQueryContext(ctx, TypeToken, "GroupBy")
+	if err := tgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	tgb.sql = query
-	return tgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*TokenQuery, *TokenGroupBy](ctx, tgb.build, tgb, tgb.build.inters, v)
 }
 
-func (tgb *TokenGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range tgb.fields {
-		if !token.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (tgb *TokenGroupBy) sqlScan(ctx context.Context, root *TokenQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(tgb.fns))
+	for _, fn := range tgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := tgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*tgb.flds)+len(tgb.fns))
+		for _, f := range *tgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*tgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := tgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := tgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (tgb *TokenGroupBy) sqlQuery() *sql.Selector {
-	selector := tgb.sql.Select()
-	aggregation := make([]string, 0, len(tgb.fns))
-	for _, fn := range tgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(tgb.fields)+len(tgb.fns))
-		for _, f := range tgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(tgb.fields...)...)
-}
-
 // TokenSelect is the builder for selecting fields of Token entities.
 type TokenSelect struct {
 	*TokenQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -602,26 +596,27 @@ func (ts *TokenSelect) Aggregate(fns ...AggregateFunc) *TokenSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ts *TokenSelect) Scan(ctx context.Context, v any) error {
+	ctx = newQueryContext(ctx, TypeToken, "Select")
 	if err := ts.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ts.sql = ts.TokenQuery.sqlQuery(ctx)
-	return ts.sqlScan(ctx, v)
+	return scanWithInterceptors[*TokenQuery, *TokenSelect](ctx, ts.TokenQuery, ts, ts.inters, v)
 }
 
-func (ts *TokenSelect) sqlScan(ctx context.Context, v any) error {
+func (ts *TokenSelect) sqlScan(ctx context.Context, root *TokenQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(ts.fns))
 	for _, fn := range ts.fns {
-		aggregation = append(aggregation, fn(ts.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*ts.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		ts.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		ts.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := ts.sql.Query()
+	query, args := selector.Query()
 	if err := ts.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

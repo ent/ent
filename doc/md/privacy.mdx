@@ -3,6 +3,9 @@ id: privacy
 title: Privacy
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 The `Policy` option in the schema allows configuring privacy policy for queries and mutations of entities in the database.
 
 ![gopher-privacy](https://entgo.io/images/assets/gopher-privacy-opacity.png)
@@ -63,24 +66,30 @@ Now that we’ve covered the basic terms, let’s start writing some code.
 
 In order to enable the privacy option in your code generation, enable the `privacy` feature with one of two options:
 
-1\. If you are using the default go generate config, add `--feature privacy` option to the `ent/generate.go` file as follows:
+<Tabs>
+<TabItem value="cli" label="CLI" default>
 
-```go
+If you are using the default go generate config, add `--feature privacy` option to the `ent/generate.go` file as follows:
+
+```go title="ent/generate.go"
 package ent
 
 //go:generate go run -mod=mod entgo.io/ent/cmd/ent generate --feature privacy ./schema
 ```
 
 It is recommended to add the [`schema/snapshot`](features.md#auto-solve-merge-conflicts) feature-flag along with the
-`privacy` to enhance the development experience (e.g. `--feature privacy,schema/snapshot`)
+`privacy` flag to enhance the development experience, for example:
 
-2\. If you are using the configuration from the GraphQL documentation, add the feature flag as follows:
+```go
+//go:generate go run -mod=mod entgo.io/ent/cmd/ent generate --feature privacy,schema/snapshot ./schema
+```
 
-```go {20}
-// Copyright 2019-present Facebook Inc. All rights reserved.
-// This source code is licensed under the Apache 2.0 license found
-// in the LICENSE file in the root directory of this source tree.
+</TabItem>
+<TabItem value="entc" label="Go">
 
+If you are using the configuration from the GraphQL documentation, add the feature flag as follows:
+
+```go
 // +build ignore
 
 package main
@@ -91,24 +100,36 @@ import (
 
     "entgo.io/ent/entc"
     "entgo.io/ent/entc/gen"
-    "entgo.io/contrib/entgql"
 )
 
 func main() {
 	opts := []entc.Option{
         entc.FeatureNames("privacy"),
 	}
-    err := entc.Generate("./schema", &gen.Config{
-        Templates: entgql.AllTemplates,
-    }, opts...)
-	if err != nil {
+    if err := entc.Generate("./schema", &gen.Config{}, opts...); err != nil {
 		log.Fatalf("running ent codegen: %v", err)
 	}
 }
 ```
 
+
+It is recommended to add the [`schema/snapshot`](features.md#auto-solve-merge-conflicts) feature-flag along with the
+`privacy` flag to enhance the development experience, for example:
+
+```diff
+opts := []entc.Option{
+-    entc.FeatureNames("privacy"),
++    entc.FeatureNames("privacy", "schema/snapshot"),
+}
+```
+
+</TabItem>
+</Tabs>
+
+#### Privacy Policy Registration
+
 :::important
-You should notice that, similar to [schema hooks](hooks.md#hooks-registration), if you use the **`Policy`** option in your schema,
+You should notice that similar to [schema hooks](hooks.md#hooks-registration), if you use the **`Policy`** option in your schema,
 you **MUST** add the following import in the main package, because a circular import is possible between the schema package,
 and the generated ent package:
 
