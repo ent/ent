@@ -202,23 +202,15 @@ func CreatedAtNEQ(v time.Time) predicate.Task {
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
 func CreatedAtIn(vs ...time.Time) predicate.Task {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Task(func(t *dsl.Traversal) {
-		t.Has(Label, FieldCreatedAt, p.Within(v...))
+		t.Has(Label, FieldCreatedAt, p.Within(vs...))
 	})
 }
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
 func CreatedAtNotIn(vs ...time.Time) predicate.Task {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Task(func(t *dsl.Traversal) {
-		t.Has(Label, FieldCreatedAt, p.Without(v...))
+		t.Has(Label, FieldCreatedAt, p.Without(vs...))
 	})
 }
 

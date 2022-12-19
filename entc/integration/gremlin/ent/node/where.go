@@ -107,23 +107,15 @@ func ValueNEQ(v int) predicate.Node {
 
 // ValueIn applies the In predicate on the "value" field.
 func ValueIn(vs ...int) predicate.Node {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Node(func(t *dsl.Traversal) {
-		t.Has(Label, FieldValue, p.Within(v...))
+		t.Has(Label, FieldValue, p.Within(vs...))
 	})
 }
 
 // ValueNotIn applies the NotIn predicate on the "value" field.
 func ValueNotIn(vs ...int) predicate.Node {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Node(func(t *dsl.Traversal) {
-		t.Has(Label, FieldValue, p.Without(v...))
+		t.Has(Label, FieldValue, p.Without(vs...))
 	})
 }
 

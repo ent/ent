@@ -16,230 +16,142 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id int) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.UserGroup(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id int) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.UserGroup(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id int) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.UserGroup(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.UserGroup(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.UserGroup(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id int) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.UserGroup(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id int) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.UserGroup(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id int) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.UserGroup(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id int) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.UserGroup(sql.FieldLTE(FieldID, id))
 }
 
 // JoinedAt applies equality check predicate on the "joined_at" field. It's identical to JoinedAtEQ.
 func JoinedAt(v time.Time) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldJoinedAt), v))
-	})
+	return predicate.UserGroup(sql.FieldEQ(FieldJoinedAt, v))
 }
 
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
 func UserID(v int) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUserID), v))
-	})
+	return predicate.UserGroup(sql.FieldEQ(FieldUserID, v))
 }
 
 // GroupID applies equality check predicate on the "group_id" field. It's identical to GroupIDEQ.
 func GroupID(v int) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldGroupID), v))
-	})
+	return predicate.UserGroup(sql.FieldEQ(FieldGroupID, v))
 }
 
 // JoinedAtEQ applies the EQ predicate on the "joined_at" field.
 func JoinedAtEQ(v time.Time) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldJoinedAt), v))
-	})
+	return predicate.UserGroup(sql.FieldEQ(FieldJoinedAt, v))
 }
 
 // JoinedAtNEQ applies the NEQ predicate on the "joined_at" field.
 func JoinedAtNEQ(v time.Time) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldJoinedAt), v))
-	})
+	return predicate.UserGroup(sql.FieldNEQ(FieldJoinedAt, v))
 }
 
 // JoinedAtIn applies the In predicate on the "joined_at" field.
 func JoinedAtIn(vs ...time.Time) predicate.UserGroup {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldJoinedAt), v...))
-	})
+	return predicate.UserGroup(sql.FieldIn(FieldJoinedAt, vs...))
 }
 
 // JoinedAtNotIn applies the NotIn predicate on the "joined_at" field.
 func JoinedAtNotIn(vs ...time.Time) predicate.UserGroup {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldJoinedAt), v...))
-	})
+	return predicate.UserGroup(sql.FieldNotIn(FieldJoinedAt, vs...))
 }
 
 // JoinedAtGT applies the GT predicate on the "joined_at" field.
 func JoinedAtGT(v time.Time) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldJoinedAt), v))
-	})
+	return predicate.UserGroup(sql.FieldGT(FieldJoinedAt, v))
 }
 
 // JoinedAtGTE applies the GTE predicate on the "joined_at" field.
 func JoinedAtGTE(v time.Time) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldJoinedAt), v))
-	})
+	return predicate.UserGroup(sql.FieldGTE(FieldJoinedAt, v))
 }
 
 // JoinedAtLT applies the LT predicate on the "joined_at" field.
 func JoinedAtLT(v time.Time) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldJoinedAt), v))
-	})
+	return predicate.UserGroup(sql.FieldLT(FieldJoinedAt, v))
 }
 
 // JoinedAtLTE applies the LTE predicate on the "joined_at" field.
 func JoinedAtLTE(v time.Time) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldJoinedAt), v))
-	})
+	return predicate.UserGroup(sql.FieldLTE(FieldJoinedAt, v))
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.
 func UserIDEQ(v int) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUserID), v))
-	})
+	return predicate.UserGroup(sql.FieldEQ(FieldUserID, v))
 }
 
 // UserIDNEQ applies the NEQ predicate on the "user_id" field.
 func UserIDNEQ(v int) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldUserID), v))
-	})
+	return predicate.UserGroup(sql.FieldNEQ(FieldUserID, v))
 }
 
 // UserIDIn applies the In predicate on the "user_id" field.
 func UserIDIn(vs ...int) predicate.UserGroup {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldUserID), v...))
-	})
+	return predicate.UserGroup(sql.FieldIn(FieldUserID, vs...))
 }
 
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
 func UserIDNotIn(vs ...int) predicate.UserGroup {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldUserID), v...))
-	})
+	return predicate.UserGroup(sql.FieldNotIn(FieldUserID, vs...))
 }
 
 // GroupIDEQ applies the EQ predicate on the "group_id" field.
 func GroupIDEQ(v int) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldGroupID), v))
-	})
+	return predicate.UserGroup(sql.FieldEQ(FieldGroupID, v))
 }
 
 // GroupIDNEQ applies the NEQ predicate on the "group_id" field.
 func GroupIDNEQ(v int) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldGroupID), v))
-	})
+	return predicate.UserGroup(sql.FieldNEQ(FieldGroupID, v))
 }
 
 // GroupIDIn applies the In predicate on the "group_id" field.
 func GroupIDIn(vs ...int) predicate.UserGroup {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldGroupID), v...))
-	})
+	return predicate.UserGroup(sql.FieldIn(FieldGroupID, vs...))
 }
 
 // GroupIDNotIn applies the NotIn predicate on the "group_id" field.
 func GroupIDNotIn(vs ...int) predicate.UserGroup {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldGroupID), v...))
-	})
+	return predicate.UserGroup(sql.FieldNotIn(FieldGroupID, vs...))
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.

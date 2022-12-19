@@ -74,16 +74,20 @@ func NotContaining(substr string) *dsl.Traversal {
 }
 
 // Within Determines if a value is within the specified list of values.
-func Within(args ...any) *dsl.Traversal {
+func Within[T any](args ...T) *dsl.Traversal {
 	return op("within", args...)
 }
 
 // Without determines if a value is not within the specified list of values.
-func Without(args ...any) *dsl.Traversal {
+func Without[T any](args ...T) *dsl.Traversal {
 	return op("without", args...)
 }
 
-func op(name string, args ...any) *dsl.Traversal {
+func op[T any](name string, args ...T) *dsl.Traversal {
 	t := &dsl.Traversal{}
-	return t.Add(dsl.NewFunc(name, args...))
+	vs := make([]any, len(args))
+	for i, arg := range args {
+		vs[i] = arg
+	}
+	return t.Add(dsl.NewFunc(name, vs...))
 }

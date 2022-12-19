@@ -128,23 +128,15 @@ func UniqueIntNEQ(v int) predicate.Comment {
 
 // UniqueIntIn applies the In predicate on the "unique_int" field.
 func UniqueIntIn(vs ...int) predicate.Comment {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Comment(func(t *dsl.Traversal) {
-		t.Has(Label, FieldUniqueInt, p.Within(v...))
+		t.Has(Label, FieldUniqueInt, p.Within(vs...))
 	})
 }
 
 // UniqueIntNotIn applies the NotIn predicate on the "unique_int" field.
 func UniqueIntNotIn(vs ...int) predicate.Comment {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Comment(func(t *dsl.Traversal) {
-		t.Has(Label, FieldUniqueInt, p.Without(v...))
+		t.Has(Label, FieldUniqueInt, p.Without(vs...))
 	})
 }
 
@@ -192,23 +184,15 @@ func UniqueFloatNEQ(v float64) predicate.Comment {
 
 // UniqueFloatIn applies the In predicate on the "unique_float" field.
 func UniqueFloatIn(vs ...float64) predicate.Comment {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Comment(func(t *dsl.Traversal) {
-		t.Has(Label, FieldUniqueFloat, p.Within(v...))
+		t.Has(Label, FieldUniqueFloat, p.Within(vs...))
 	})
 }
 
 // UniqueFloatNotIn applies the NotIn predicate on the "unique_float" field.
 func UniqueFloatNotIn(vs ...float64) predicate.Comment {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Comment(func(t *dsl.Traversal) {
-		t.Has(Label, FieldUniqueFloat, p.Without(v...))
+		t.Has(Label, FieldUniqueFloat, p.Without(vs...))
 	})
 }
 
@@ -256,23 +240,15 @@ func NillableIntNEQ(v int) predicate.Comment {
 
 // NillableIntIn applies the In predicate on the "nillable_int" field.
 func NillableIntIn(vs ...int) predicate.Comment {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Comment(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNillableInt, p.Within(v...))
+		t.Has(Label, FieldNillableInt, p.Within(vs...))
 	})
 }
 
 // NillableIntNotIn applies the NotIn predicate on the "nillable_int" field.
 func NillableIntNotIn(vs ...int) predicate.Comment {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Comment(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNillableInt, p.Without(v...))
+		t.Has(Label, FieldNillableInt, p.Without(vs...))
 	})
 }
 
@@ -334,23 +310,15 @@ func TableNEQ(v string) predicate.Comment {
 
 // TableIn applies the In predicate on the "table" field.
 func TableIn(vs ...string) predicate.Comment {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Comment(func(t *dsl.Traversal) {
-		t.Has(Label, FieldTable, p.Within(v...))
+		t.Has(Label, FieldTable, p.Within(vs...))
 	})
 }
 
 // TableNotIn applies the NotIn predicate on the "table" field.
 func TableNotIn(vs ...string) predicate.Comment {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Comment(func(t *dsl.Traversal) {
-		t.Has(Label, FieldTable, p.Without(v...))
+		t.Has(Label, FieldTable, p.Without(vs...))
 	})
 }
 
@@ -447,23 +415,15 @@ func ClientNEQ(v string) predicate.Comment {
 
 // ClientIn applies the In predicate on the "client" field.
 func ClientIn(vs ...string) predicate.Comment {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Comment(func(t *dsl.Traversal) {
-		t.Has(Label, FieldClient, p.Within(v...))
+		t.Has(Label, FieldClient, p.Within(vs...))
 	})
 }
 
 // ClientNotIn applies the NotIn predicate on the "client" field.
 func ClientNotIn(vs ...string) predicate.Comment {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Comment(func(t *dsl.Traversal) {
-		t.Has(Label, FieldClient, p.Without(v...))
+		t.Has(Label, FieldClient, p.Without(vs...))
 	})
 }
 

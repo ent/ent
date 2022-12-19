@@ -163,23 +163,15 @@ func OptionalIntNEQ(v int) predicate.User {
 
 // OptionalIntIn applies the In predicate on the "optional_int" field.
 func OptionalIntIn(vs ...int) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.User(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalInt, p.Within(v...))
+		t.Has(Label, FieldOptionalInt, p.Within(vs...))
 	})
 }
 
 // OptionalIntNotIn applies the NotIn predicate on the "optional_int" field.
 func OptionalIntNotIn(vs ...int) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.User(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalInt, p.Without(v...))
+		t.Has(Label, FieldOptionalInt, p.Without(vs...))
 	})
 }
 
@@ -241,23 +233,15 @@ func AgeNEQ(v int) predicate.User {
 
 // AgeIn applies the In predicate on the "age" field.
 func AgeIn(vs ...int) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.User(func(t *dsl.Traversal) {
-		t.Has(Label, FieldAge, p.Within(v...))
+		t.Has(Label, FieldAge, p.Within(vs...))
 	})
 }
 
 // AgeNotIn applies the NotIn predicate on the "age" field.
 func AgeNotIn(vs ...int) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.User(func(t *dsl.Traversal) {
-		t.Has(Label, FieldAge, p.Without(v...))
+		t.Has(Label, FieldAge, p.Without(vs...))
 	})
 }
 
@@ -305,23 +289,15 @@ func NameNEQ(v string) predicate.User {
 
 // NameIn applies the In predicate on the "name" field.
 func NameIn(vs ...string) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.User(func(t *dsl.Traversal) {
-		t.Has(Label, FieldName, p.Within(v...))
+		t.Has(Label, FieldName, p.Within(vs...))
 	})
 }
 
 // NameNotIn applies the NotIn predicate on the "name" field.
 func NameNotIn(vs ...string) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.User(func(t *dsl.Traversal) {
-		t.Has(Label, FieldName, p.Without(v...))
+		t.Has(Label, FieldName, p.Without(vs...))
 	})
 }
 
@@ -390,23 +366,15 @@ func LastNEQ(v string) predicate.User {
 
 // LastIn applies the In predicate on the "last" field.
 func LastIn(vs ...string) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.User(func(t *dsl.Traversal) {
-		t.Has(Label, FieldLast, p.Within(v...))
+		t.Has(Label, FieldLast, p.Within(vs...))
 	})
 }
 
 // LastNotIn applies the NotIn predicate on the "last" field.
 func LastNotIn(vs ...string) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.User(func(t *dsl.Traversal) {
-		t.Has(Label, FieldLast, p.Without(v...))
+		t.Has(Label, FieldLast, p.Without(vs...))
 	})
 }
 
@@ -475,23 +443,15 @@ func NicknameNEQ(v string) predicate.User {
 
 // NicknameIn applies the In predicate on the "nickname" field.
 func NicknameIn(vs ...string) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.User(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNickname, p.Within(v...))
+		t.Has(Label, FieldNickname, p.Within(vs...))
 	})
 }
 
 // NicknameNotIn applies the NotIn predicate on the "nickname" field.
 func NicknameNotIn(vs ...string) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.User(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNickname, p.Without(v...))
+		t.Has(Label, FieldNickname, p.Without(vs...))
 	})
 }
 
@@ -574,23 +534,15 @@ func AddressNEQ(v string) predicate.User {
 
 // AddressIn applies the In predicate on the "address" field.
 func AddressIn(vs ...string) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.User(func(t *dsl.Traversal) {
-		t.Has(Label, FieldAddress, p.Within(v...))
+		t.Has(Label, FieldAddress, p.Within(vs...))
 	})
 }
 
 // AddressNotIn applies the NotIn predicate on the "address" field.
 func AddressNotIn(vs ...string) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.User(func(t *dsl.Traversal) {
-		t.Has(Label, FieldAddress, p.Without(v...))
+		t.Has(Label, FieldAddress, p.Without(vs...))
 	})
 }
 
@@ -673,23 +625,15 @@ func PhoneNEQ(v string) predicate.User {
 
 // PhoneIn applies the In predicate on the "phone" field.
 func PhoneIn(vs ...string) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.User(func(t *dsl.Traversal) {
-		t.Has(Label, FieldPhone, p.Within(v...))
+		t.Has(Label, FieldPhone, p.Within(vs...))
 	})
 }
 
 // PhoneNotIn applies the NotIn predicate on the "phone" field.
 func PhoneNotIn(vs ...string) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.User(func(t *dsl.Traversal) {
-		t.Has(Label, FieldPhone, p.Without(v...))
+		t.Has(Label, FieldPhone, p.Without(vs...))
 	})
 }
 
@@ -772,23 +716,15 @@ func PasswordNEQ(v string) predicate.User {
 
 // PasswordIn applies the In predicate on the "password" field.
 func PasswordIn(vs ...string) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.User(func(t *dsl.Traversal) {
-		t.Has(Label, FieldPassword, p.Within(v...))
+		t.Has(Label, FieldPassword, p.Within(vs...))
 	})
 }
 
 // PasswordNotIn applies the NotIn predicate on the "password" field.
 func PasswordNotIn(vs ...string) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.User(func(t *dsl.Traversal) {
-		t.Has(Label, FieldPassword, p.Without(v...))
+		t.Has(Label, FieldPassword, p.Without(vs...))
 	})
 }
 
@@ -871,23 +807,15 @@ func RoleNEQ(v Role) predicate.User {
 
 // RoleIn applies the In predicate on the "role" field.
 func RoleIn(vs ...Role) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.User(func(t *dsl.Traversal) {
-		t.Has(Label, FieldRole, p.Within(v...))
+		t.Has(Label, FieldRole, p.Within(vs...))
 	})
 }
 
 // RoleNotIn applies the NotIn predicate on the "role" field.
 func RoleNotIn(vs ...Role) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.User(func(t *dsl.Traversal) {
-		t.Has(Label, FieldRole, p.Without(v...))
+		t.Has(Label, FieldRole, p.Without(vs...))
 	})
 }
 
@@ -907,23 +835,15 @@ func EmploymentNEQ(v Employment) predicate.User {
 
 // EmploymentIn applies the In predicate on the "employment" field.
 func EmploymentIn(vs ...Employment) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.User(func(t *dsl.Traversal) {
-		t.Has(Label, FieldEmployment, p.Within(v...))
+		t.Has(Label, FieldEmployment, p.Within(vs...))
 	})
 }
 
 // EmploymentNotIn applies the NotIn predicate on the "employment" field.
 func EmploymentNotIn(vs ...Employment) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.User(func(t *dsl.Traversal) {
-		t.Has(Label, FieldEmployment, p.Without(v...))
+		t.Has(Label, FieldEmployment, p.Without(vs...))
 	})
 }
 
@@ -943,23 +863,15 @@ func SSOCertNEQ(v string) predicate.User {
 
 // SSOCertIn applies the In predicate on the "SSOCert" field.
 func SSOCertIn(vs ...string) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.User(func(t *dsl.Traversal) {
-		t.Has(Label, FieldSSOCert, p.Within(v...))
+		t.Has(Label, FieldSSOCert, p.Within(vs...))
 	})
 }
 
 // SSOCertNotIn applies the NotIn predicate on the "SSOCert" field.
 func SSOCertNotIn(vs ...string) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.User(func(t *dsl.Traversal) {
-		t.Has(Label, FieldSSOCert, p.Without(v...))
+		t.Has(Label, FieldSSOCert, p.Without(vs...))
 	})
 }
 

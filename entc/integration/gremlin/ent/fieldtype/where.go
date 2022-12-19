@@ -546,23 +546,15 @@ func IntNEQ(v int) predicate.FieldType {
 
 // IntIn applies the In predicate on the "int" field.
 func IntIn(vs ...int) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldInt, p.Within(v...))
+		t.Has(Label, FieldInt, p.Within(vs...))
 	})
 }
 
 // IntNotIn applies the NotIn predicate on the "int" field.
 func IntNotIn(vs ...int) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldInt, p.Without(v...))
+		t.Has(Label, FieldInt, p.Without(vs...))
 	})
 }
 
@@ -610,23 +602,15 @@ func Int8NEQ(v int8) predicate.FieldType {
 
 // Int8In applies the In predicate on the "int8" field.
 func Int8In(vs ...int8) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldInt8, p.Within(v...))
+		t.Has(Label, FieldInt8, p.Within(vs...))
 	})
 }
 
 // Int8NotIn applies the NotIn predicate on the "int8" field.
 func Int8NotIn(vs ...int8) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldInt8, p.Without(v...))
+		t.Has(Label, FieldInt8, p.Without(vs...))
 	})
 }
 
@@ -674,23 +658,15 @@ func Int16NEQ(v int16) predicate.FieldType {
 
 // Int16In applies the In predicate on the "int16" field.
 func Int16In(vs ...int16) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldInt16, p.Within(v...))
+		t.Has(Label, FieldInt16, p.Within(vs...))
 	})
 }
 
 // Int16NotIn applies the NotIn predicate on the "int16" field.
 func Int16NotIn(vs ...int16) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldInt16, p.Without(v...))
+		t.Has(Label, FieldInt16, p.Without(vs...))
 	})
 }
 
@@ -738,23 +714,15 @@ func Int32NEQ(v int32) predicate.FieldType {
 
 // Int32In applies the In predicate on the "int32" field.
 func Int32In(vs ...int32) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldInt32, p.Within(v...))
+		t.Has(Label, FieldInt32, p.Within(vs...))
 	})
 }
 
 // Int32NotIn applies the NotIn predicate on the "int32" field.
 func Int32NotIn(vs ...int32) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldInt32, p.Without(v...))
+		t.Has(Label, FieldInt32, p.Without(vs...))
 	})
 }
 
@@ -802,23 +770,15 @@ func Int64NEQ(v int64) predicate.FieldType {
 
 // Int64In applies the In predicate on the "int64" field.
 func Int64In(vs ...int64) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldInt64, p.Within(v...))
+		t.Has(Label, FieldInt64, p.Within(vs...))
 	})
 }
 
 // Int64NotIn applies the NotIn predicate on the "int64" field.
 func Int64NotIn(vs ...int64) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldInt64, p.Without(v...))
+		t.Has(Label, FieldInt64, p.Without(vs...))
 	})
 }
 
@@ -866,23 +826,15 @@ func OptionalIntNEQ(v int) predicate.FieldType {
 
 // OptionalIntIn applies the In predicate on the "optional_int" field.
 func OptionalIntIn(vs ...int) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalInt, p.Within(v...))
+		t.Has(Label, FieldOptionalInt, p.Within(vs...))
 	})
 }
 
 // OptionalIntNotIn applies the NotIn predicate on the "optional_int" field.
 func OptionalIntNotIn(vs ...int) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalInt, p.Without(v...))
+		t.Has(Label, FieldOptionalInt, p.Without(vs...))
 	})
 }
 
@@ -944,23 +896,15 @@ func OptionalInt8NEQ(v int8) predicate.FieldType {
 
 // OptionalInt8In applies the In predicate on the "optional_int8" field.
 func OptionalInt8In(vs ...int8) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalInt8, p.Within(v...))
+		t.Has(Label, FieldOptionalInt8, p.Within(vs...))
 	})
 }
 
 // OptionalInt8NotIn applies the NotIn predicate on the "optional_int8" field.
 func OptionalInt8NotIn(vs ...int8) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalInt8, p.Without(v...))
+		t.Has(Label, FieldOptionalInt8, p.Without(vs...))
 	})
 }
 
@@ -1022,23 +966,15 @@ func OptionalInt16NEQ(v int16) predicate.FieldType {
 
 // OptionalInt16In applies the In predicate on the "optional_int16" field.
 func OptionalInt16In(vs ...int16) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalInt16, p.Within(v...))
+		t.Has(Label, FieldOptionalInt16, p.Within(vs...))
 	})
 }
 
 // OptionalInt16NotIn applies the NotIn predicate on the "optional_int16" field.
 func OptionalInt16NotIn(vs ...int16) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalInt16, p.Without(v...))
+		t.Has(Label, FieldOptionalInt16, p.Without(vs...))
 	})
 }
 
@@ -1100,23 +1036,15 @@ func OptionalInt32NEQ(v int32) predicate.FieldType {
 
 // OptionalInt32In applies the In predicate on the "optional_int32" field.
 func OptionalInt32In(vs ...int32) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalInt32, p.Within(v...))
+		t.Has(Label, FieldOptionalInt32, p.Within(vs...))
 	})
 }
 
 // OptionalInt32NotIn applies the NotIn predicate on the "optional_int32" field.
 func OptionalInt32NotIn(vs ...int32) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalInt32, p.Without(v...))
+		t.Has(Label, FieldOptionalInt32, p.Without(vs...))
 	})
 }
 
@@ -1178,23 +1106,15 @@ func OptionalInt64NEQ(v int64) predicate.FieldType {
 
 // OptionalInt64In applies the In predicate on the "optional_int64" field.
 func OptionalInt64In(vs ...int64) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalInt64, p.Within(v...))
+		t.Has(Label, FieldOptionalInt64, p.Within(vs...))
 	})
 }
 
 // OptionalInt64NotIn applies the NotIn predicate on the "optional_int64" field.
 func OptionalInt64NotIn(vs ...int64) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalInt64, p.Without(v...))
+		t.Has(Label, FieldOptionalInt64, p.Without(vs...))
 	})
 }
 
@@ -1256,23 +1176,15 @@ func NillableIntNEQ(v int) predicate.FieldType {
 
 // NillableIntIn applies the In predicate on the "nillable_int" field.
 func NillableIntIn(vs ...int) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNillableInt, p.Within(v...))
+		t.Has(Label, FieldNillableInt, p.Within(vs...))
 	})
 }
 
 // NillableIntNotIn applies the NotIn predicate on the "nillable_int" field.
 func NillableIntNotIn(vs ...int) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNillableInt, p.Without(v...))
+		t.Has(Label, FieldNillableInt, p.Without(vs...))
 	})
 }
 
@@ -1334,23 +1246,15 @@ func NillableInt8NEQ(v int8) predicate.FieldType {
 
 // NillableInt8In applies the In predicate on the "nillable_int8" field.
 func NillableInt8In(vs ...int8) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNillableInt8, p.Within(v...))
+		t.Has(Label, FieldNillableInt8, p.Within(vs...))
 	})
 }
 
 // NillableInt8NotIn applies the NotIn predicate on the "nillable_int8" field.
 func NillableInt8NotIn(vs ...int8) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNillableInt8, p.Without(v...))
+		t.Has(Label, FieldNillableInt8, p.Without(vs...))
 	})
 }
 
@@ -1412,23 +1316,15 @@ func NillableInt16NEQ(v int16) predicate.FieldType {
 
 // NillableInt16In applies the In predicate on the "nillable_int16" field.
 func NillableInt16In(vs ...int16) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNillableInt16, p.Within(v...))
+		t.Has(Label, FieldNillableInt16, p.Within(vs...))
 	})
 }
 
 // NillableInt16NotIn applies the NotIn predicate on the "nillable_int16" field.
 func NillableInt16NotIn(vs ...int16) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNillableInt16, p.Without(v...))
+		t.Has(Label, FieldNillableInt16, p.Without(vs...))
 	})
 }
 
@@ -1490,23 +1386,15 @@ func NillableInt32NEQ(v int32) predicate.FieldType {
 
 // NillableInt32In applies the In predicate on the "nillable_int32" field.
 func NillableInt32In(vs ...int32) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNillableInt32, p.Within(v...))
+		t.Has(Label, FieldNillableInt32, p.Within(vs...))
 	})
 }
 
 // NillableInt32NotIn applies the NotIn predicate on the "nillable_int32" field.
 func NillableInt32NotIn(vs ...int32) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNillableInt32, p.Without(v...))
+		t.Has(Label, FieldNillableInt32, p.Without(vs...))
 	})
 }
 
@@ -1568,23 +1456,15 @@ func NillableInt64NEQ(v int64) predicate.FieldType {
 
 // NillableInt64In applies the In predicate on the "nillable_int64" field.
 func NillableInt64In(vs ...int64) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNillableInt64, p.Within(v...))
+		t.Has(Label, FieldNillableInt64, p.Within(vs...))
 	})
 }
 
 // NillableInt64NotIn applies the NotIn predicate on the "nillable_int64" field.
 func NillableInt64NotIn(vs ...int64) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNillableInt64, p.Without(v...))
+		t.Has(Label, FieldNillableInt64, p.Without(vs...))
 	})
 }
 
@@ -1646,23 +1526,15 @@ func ValidateOptionalInt32NEQ(v int32) predicate.FieldType {
 
 // ValidateOptionalInt32In applies the In predicate on the "validate_optional_int32" field.
 func ValidateOptionalInt32In(vs ...int32) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldValidateOptionalInt32, p.Within(v...))
+		t.Has(Label, FieldValidateOptionalInt32, p.Within(vs...))
 	})
 }
 
 // ValidateOptionalInt32NotIn applies the NotIn predicate on the "validate_optional_int32" field.
 func ValidateOptionalInt32NotIn(vs ...int32) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldValidateOptionalInt32, p.Without(v...))
+		t.Has(Label, FieldValidateOptionalInt32, p.Without(vs...))
 	})
 }
 
@@ -1724,23 +1596,15 @@ func OptionalUintNEQ(v uint) predicate.FieldType {
 
 // OptionalUintIn applies the In predicate on the "optional_uint" field.
 func OptionalUintIn(vs ...uint) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalUint, p.Within(v...))
+		t.Has(Label, FieldOptionalUint, p.Within(vs...))
 	})
 }
 
 // OptionalUintNotIn applies the NotIn predicate on the "optional_uint" field.
 func OptionalUintNotIn(vs ...uint) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalUint, p.Without(v...))
+		t.Has(Label, FieldOptionalUint, p.Without(vs...))
 	})
 }
 
@@ -1802,23 +1666,15 @@ func OptionalUint8NEQ(v uint8) predicate.FieldType {
 
 // OptionalUint8In applies the In predicate on the "optional_uint8" field.
 func OptionalUint8In(vs ...uint8) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalUint8, p.Within(v...))
+		t.Has(Label, FieldOptionalUint8, p.Within(vs...))
 	})
 }
 
 // OptionalUint8NotIn applies the NotIn predicate on the "optional_uint8" field.
 func OptionalUint8NotIn(vs ...uint8) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalUint8, p.Without(v...))
+		t.Has(Label, FieldOptionalUint8, p.Without(vs...))
 	})
 }
 
@@ -1880,23 +1736,15 @@ func OptionalUint16NEQ(v uint16) predicate.FieldType {
 
 // OptionalUint16In applies the In predicate on the "optional_uint16" field.
 func OptionalUint16In(vs ...uint16) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalUint16, p.Within(v...))
+		t.Has(Label, FieldOptionalUint16, p.Within(vs...))
 	})
 }
 
 // OptionalUint16NotIn applies the NotIn predicate on the "optional_uint16" field.
 func OptionalUint16NotIn(vs ...uint16) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalUint16, p.Without(v...))
+		t.Has(Label, FieldOptionalUint16, p.Without(vs...))
 	})
 }
 
@@ -1958,23 +1806,15 @@ func OptionalUint32NEQ(v uint32) predicate.FieldType {
 
 // OptionalUint32In applies the In predicate on the "optional_uint32" field.
 func OptionalUint32In(vs ...uint32) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalUint32, p.Within(v...))
+		t.Has(Label, FieldOptionalUint32, p.Within(vs...))
 	})
 }
 
 // OptionalUint32NotIn applies the NotIn predicate on the "optional_uint32" field.
 func OptionalUint32NotIn(vs ...uint32) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalUint32, p.Without(v...))
+		t.Has(Label, FieldOptionalUint32, p.Without(vs...))
 	})
 }
 
@@ -2036,23 +1876,15 @@ func OptionalUint64NEQ(v uint64) predicate.FieldType {
 
 // OptionalUint64In applies the In predicate on the "optional_uint64" field.
 func OptionalUint64In(vs ...uint64) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalUint64, p.Within(v...))
+		t.Has(Label, FieldOptionalUint64, p.Within(vs...))
 	})
 }
 
 // OptionalUint64NotIn applies the NotIn predicate on the "optional_uint64" field.
 func OptionalUint64NotIn(vs ...uint64) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalUint64, p.Without(v...))
+		t.Has(Label, FieldOptionalUint64, p.Without(vs...))
 	})
 }
 
@@ -2114,23 +1946,15 @@ func StateNEQ(v State) predicate.FieldType {
 
 // StateIn applies the In predicate on the "state" field.
 func StateIn(vs ...State) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldState, p.Within(v...))
+		t.Has(Label, FieldState, p.Within(vs...))
 	})
 }
 
 // StateNotIn applies the NotIn predicate on the "state" field.
 func StateNotIn(vs ...State) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldState, p.Without(v...))
+		t.Has(Label, FieldState, p.Without(vs...))
 	})
 }
 
@@ -2164,23 +1988,15 @@ func OptionalFloatNEQ(v float64) predicate.FieldType {
 
 // OptionalFloatIn applies the In predicate on the "optional_float" field.
 func OptionalFloatIn(vs ...float64) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalFloat, p.Within(v...))
+		t.Has(Label, FieldOptionalFloat, p.Within(vs...))
 	})
 }
 
 // OptionalFloatNotIn applies the NotIn predicate on the "optional_float" field.
 func OptionalFloatNotIn(vs ...float64) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalFloat, p.Without(v...))
+		t.Has(Label, FieldOptionalFloat, p.Without(vs...))
 	})
 }
 
@@ -2242,23 +2058,15 @@ func OptionalFloat32NEQ(v float32) predicate.FieldType {
 
 // OptionalFloat32In applies the In predicate on the "optional_float32" field.
 func OptionalFloat32In(vs ...float32) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalFloat32, p.Within(v...))
+		t.Has(Label, FieldOptionalFloat32, p.Within(vs...))
 	})
 }
 
 // OptionalFloat32NotIn applies the NotIn predicate on the "optional_float32" field.
 func OptionalFloat32NotIn(vs ...float32) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalFloat32, p.Without(v...))
+		t.Has(Label, FieldOptionalFloat32, p.Without(vs...))
 	})
 }
 
@@ -2320,23 +2128,15 @@ func TextNEQ(v string) predicate.FieldType {
 
 // TextIn applies the In predicate on the "text" field.
 func TextIn(vs ...string) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldText, p.Within(v...))
+		t.Has(Label, FieldText, p.Within(vs...))
 	})
 }
 
 // TextNotIn applies the NotIn predicate on the "text" field.
 func TextNotIn(vs ...string) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldText, p.Without(v...))
+		t.Has(Label, FieldText, p.Without(vs...))
 	})
 }
 
@@ -2419,23 +2219,15 @@ func DatetimeNEQ(v time.Time) predicate.FieldType {
 
 // DatetimeIn applies the In predicate on the "datetime" field.
 func DatetimeIn(vs ...time.Time) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldDatetime, p.Within(v...))
+		t.Has(Label, FieldDatetime, p.Within(vs...))
 	})
 }
 
 // DatetimeNotIn applies the NotIn predicate on the "datetime" field.
 func DatetimeNotIn(vs ...time.Time) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldDatetime, p.Without(v...))
+		t.Has(Label, FieldDatetime, p.Without(vs...))
 	})
 }
 
@@ -2497,23 +2289,15 @@ func DecimalNEQ(v float64) predicate.FieldType {
 
 // DecimalIn applies the In predicate on the "decimal" field.
 func DecimalIn(vs ...float64) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldDecimal, p.Within(v...))
+		t.Has(Label, FieldDecimal, p.Within(vs...))
 	})
 }
 
 // DecimalNotIn applies the NotIn predicate on the "decimal" field.
 func DecimalNotIn(vs ...float64) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldDecimal, p.Without(v...))
+		t.Has(Label, FieldDecimal, p.Without(vs...))
 	})
 }
 
@@ -2575,23 +2359,15 @@ func LinkOtherNEQ(v *schema.Link) predicate.FieldType {
 
 // LinkOtherIn applies the In predicate on the "link_other" field.
 func LinkOtherIn(vs ...*schema.Link) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldLinkOther, p.Within(v...))
+		t.Has(Label, FieldLinkOther, p.Within(vs...))
 	})
 }
 
 // LinkOtherNotIn applies the NotIn predicate on the "link_other" field.
 func LinkOtherNotIn(vs ...*schema.Link) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldLinkOther, p.Without(v...))
+		t.Has(Label, FieldLinkOther, p.Without(vs...))
 	})
 }
 
@@ -2653,23 +2429,15 @@ func LinkOtherFuncNEQ(v *schema.Link) predicate.FieldType {
 
 // LinkOtherFuncIn applies the In predicate on the "link_other_func" field.
 func LinkOtherFuncIn(vs ...*schema.Link) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldLinkOtherFunc, p.Within(v...))
+		t.Has(Label, FieldLinkOtherFunc, p.Within(vs...))
 	})
 }
 
 // LinkOtherFuncNotIn applies the NotIn predicate on the "link_other_func" field.
 func LinkOtherFuncNotIn(vs ...*schema.Link) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldLinkOtherFunc, p.Without(v...))
+		t.Has(Label, FieldLinkOtherFunc, p.Without(vs...))
 	})
 }
 
@@ -2731,23 +2499,15 @@ func MACNEQ(v schema.MAC) predicate.FieldType {
 
 // MACIn applies the In predicate on the "mac" field.
 func MACIn(vs ...schema.MAC) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldMAC, p.Within(v...))
+		t.Has(Label, FieldMAC, p.Within(vs...))
 	})
 }
 
 // MACNotIn applies the NotIn predicate on the "mac" field.
 func MACNotIn(vs ...schema.MAC) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldMAC, p.Without(v...))
+		t.Has(Label, FieldMAC, p.Without(vs...))
 	})
 }
 
@@ -2833,23 +2593,15 @@ func StringArrayNEQ(v schema.Strings) predicate.FieldType {
 
 // StringArrayIn applies the In predicate on the "string_array" field.
 func StringArrayIn(vs ...schema.Strings) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldStringArray, p.Within(v...))
+		t.Has(Label, FieldStringArray, p.Within(vs...))
 	})
 }
 
 // StringArrayNotIn applies the NotIn predicate on the "string_array" field.
 func StringArrayNotIn(vs ...schema.Strings) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldStringArray, p.Without(v...))
+		t.Has(Label, FieldStringArray, p.Without(vs...))
 	})
 }
 
@@ -2911,23 +2663,15 @@ func PasswordNEQ(v string) predicate.FieldType {
 
 // PasswordIn applies the In predicate on the "password" field.
 func PasswordIn(vs ...string) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldPassword, p.Within(v...))
+		t.Has(Label, FieldPassword, p.Within(vs...))
 	})
 }
 
 // PasswordNotIn applies the NotIn predicate on the "password" field.
 func PasswordNotIn(vs ...string) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldPassword, p.Without(v...))
+		t.Has(Label, FieldPassword, p.Without(vs...))
 	})
 }
 
@@ -3010,23 +2754,15 @@ func StringScannerNEQ(v schema.StringScanner) predicate.FieldType {
 
 // StringScannerIn applies the In predicate on the "string_scanner" field.
 func StringScannerIn(vs ...schema.StringScanner) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldStringScanner, p.Within(v...))
+		t.Has(Label, FieldStringScanner, p.Within(vs...))
 	})
 }
 
 // StringScannerNotIn applies the NotIn predicate on the "string_scanner" field.
 func StringScannerNotIn(vs ...schema.StringScanner) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldStringScanner, p.Without(v...))
+		t.Has(Label, FieldStringScanner, p.Without(vs...))
 	})
 }
 
@@ -3398,23 +3134,15 @@ func StrNEQ(v sql.NullString) predicate.FieldType {
 
 // StrIn applies the In predicate on the "str" field.
 func StrIn(vs ...sql.NullString) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldStr, p.Within(v...))
+		t.Has(Label, FieldStr, p.Within(vs...))
 	})
 }
 
 // StrNotIn applies the NotIn predicate on the "str" field.
 func StrNotIn(vs ...sql.NullString) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldStr, p.Without(v...))
+		t.Has(Label, FieldStr, p.Without(vs...))
 	})
 }
 
@@ -3500,23 +3228,15 @@ func NullStrNEQ(v *sql.NullString) predicate.FieldType {
 
 // NullStrIn applies the In predicate on the "null_str" field.
 func NullStrIn(vs ...*sql.NullString) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNullStr, p.Within(v...))
+		t.Has(Label, FieldNullStr, p.Within(vs...))
 	})
 }
 
 // NullStrNotIn applies the NotIn predicate on the "null_str" field.
 func NullStrNotIn(vs ...*sql.NullString) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNullStr, p.Without(v...))
+		t.Has(Label, FieldNullStr, p.Without(vs...))
 	})
 }
 
@@ -3602,23 +3322,15 @@ func LinkNEQ(v schema.Link) predicate.FieldType {
 
 // LinkIn applies the In predicate on the "link" field.
 func LinkIn(vs ...schema.Link) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldLink, p.Within(v...))
+		t.Has(Label, FieldLink, p.Within(vs...))
 	})
 }
 
 // LinkNotIn applies the NotIn predicate on the "link" field.
 func LinkNotIn(vs ...schema.Link) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldLink, p.Without(v...))
+		t.Has(Label, FieldLink, p.Without(vs...))
 	})
 }
 
@@ -3704,23 +3416,15 @@ func NullLinkNEQ(v *schema.Link) predicate.FieldType {
 
 // NullLinkIn applies the In predicate on the "null_link" field.
 func NullLinkIn(vs ...*schema.Link) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNullLink, p.Within(v...))
+		t.Has(Label, FieldNullLink, p.Within(vs...))
 	})
 }
 
 // NullLinkNotIn applies the NotIn predicate on the "null_link" field.
 func NullLinkNotIn(vs ...*schema.Link) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNullLink, p.Without(v...))
+		t.Has(Label, FieldNullLink, p.Without(vs...))
 	})
 }
 
@@ -3894,23 +3598,15 @@ func DeletedAtNEQ(v *sql.NullTime) predicate.FieldType {
 
 // DeletedAtIn applies the In predicate on the "deleted_at" field.
 func DeletedAtIn(vs ...*sql.NullTime) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldDeletedAt, p.Within(v...))
+		t.Has(Label, FieldDeletedAt, p.Within(vs...))
 	})
 }
 
 // DeletedAtNotIn applies the NotIn predicate on the "deleted_at" field.
 func DeletedAtNotIn(vs ...*sql.NullTime) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldDeletedAt, p.Without(v...))
+		t.Has(Label, FieldDeletedAt, p.Without(vs...))
 	})
 }
 
@@ -3972,23 +3668,15 @@ func RawDataNEQ(v []byte) predicate.FieldType {
 
 // RawDataIn applies the In predicate on the "raw_data" field.
 func RawDataIn(vs ...[]byte) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldRawData, p.Within(v...))
+		t.Has(Label, FieldRawData, p.Within(vs...))
 	})
 }
 
 // RawDataNotIn applies the NotIn predicate on the "raw_data" field.
 func RawDataNotIn(vs ...[]byte) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldRawData, p.Without(v...))
+		t.Has(Label, FieldRawData, p.Without(vs...))
 	})
 }
 
@@ -4050,23 +3738,15 @@ func SensitiveNEQ(v []byte) predicate.FieldType {
 
 // SensitiveIn applies the In predicate on the "sensitive" field.
 func SensitiveIn(vs ...[]byte) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldSensitive, p.Within(v...))
+		t.Has(Label, FieldSensitive, p.Within(vs...))
 	})
 }
 
 // SensitiveNotIn applies the NotIn predicate on the "sensitive" field.
 func SensitiveNotIn(vs ...[]byte) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldSensitive, p.Without(v...))
+		t.Has(Label, FieldSensitive, p.Without(vs...))
 	})
 }
 
@@ -4212,23 +3892,15 @@ func NullInt64NEQ(v *sql.NullInt64) predicate.FieldType {
 
 // NullInt64In applies the In predicate on the "null_int64" field.
 func NullInt64In(vs ...*sql.NullInt64) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNullInt64, p.Within(v...))
+		t.Has(Label, FieldNullInt64, p.Within(vs...))
 	})
 }
 
 // NullInt64NotIn applies the NotIn predicate on the "null_int64" field.
 func NullInt64NotIn(vs ...*sql.NullInt64) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNullInt64, p.Without(v...))
+		t.Has(Label, FieldNullInt64, p.Without(vs...))
 	})
 }
 
@@ -4710,23 +4382,15 @@ func NullFloatNEQ(v *sql.NullFloat64) predicate.FieldType {
 
 // NullFloatIn applies the In predicate on the "null_float" field.
 func NullFloatIn(vs ...*sql.NullFloat64) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNullFloat, p.Within(v...))
+		t.Has(Label, FieldNullFloat, p.Within(vs...))
 	})
 }
 
 // NullFloatNotIn applies the NotIn predicate on the "null_float" field.
 func NullFloatNotIn(vs ...*sql.NullFloat64) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNullFloat, p.Without(v...))
+		t.Has(Label, FieldNullFloat, p.Without(vs...))
 	})
 }
 
@@ -4826,23 +4490,15 @@ func PriorityNEQ(v role.Priority) predicate.FieldType {
 
 // PriorityIn applies the In predicate on the "priority" field.
 func PriorityIn(vs ...role.Priority) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldPriority, p.Within(v...))
+		t.Has(Label, FieldPriority, p.Within(vs...))
 	})
 }
 
 // PriorityNotIn applies the NotIn predicate on the "priority" field.
 func PriorityNotIn(vs ...role.Priority) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldPriority, p.Without(v...))
+		t.Has(Label, FieldPriority, p.Without(vs...))
 	})
 }
 
@@ -4876,23 +4532,15 @@ func OptionalUUIDNEQ(v uuid.UUID) predicate.FieldType {
 
 // OptionalUUIDIn applies the In predicate on the "optional_uuid" field.
 func OptionalUUIDIn(vs ...uuid.UUID) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalUUID, p.Within(v...))
+		t.Has(Label, FieldOptionalUUID, p.Within(vs...))
 	})
 }
 
 // OptionalUUIDNotIn applies the NotIn predicate on the "optional_uuid" field.
 func OptionalUUIDNotIn(vs ...uuid.UUID) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldOptionalUUID, p.Without(v...))
+		t.Has(Label, FieldOptionalUUID, p.Without(vs...))
 	})
 }
 
@@ -4954,23 +4602,15 @@ func NillableUUIDNEQ(v uuid.UUID) predicate.FieldType {
 
 // NillableUUIDIn applies the In predicate on the "nillable_uuid" field.
 func NillableUUIDIn(vs ...uuid.UUID) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNillableUUID, p.Within(v...))
+		t.Has(Label, FieldNillableUUID, p.Within(vs...))
 	})
 }
 
 // NillableUUIDNotIn applies the NotIn predicate on the "nillable_uuid" field.
 func NillableUUIDNotIn(vs ...uuid.UUID) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNillableUUID, p.Without(v...))
+		t.Has(Label, FieldNillableUUID, p.Without(vs...))
 	})
 }
 
@@ -5046,23 +4686,15 @@ func PairNEQ(v schema.Pair) predicate.FieldType {
 
 // PairIn applies the In predicate on the "pair" field.
 func PairIn(vs ...schema.Pair) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldPair, p.Within(v...))
+		t.Has(Label, FieldPair, p.Within(vs...))
 	})
 }
 
 // PairNotIn applies the NotIn predicate on the "pair" field.
 func PairNotIn(vs ...schema.Pair) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldPair, p.Without(v...))
+		t.Has(Label, FieldPair, p.Without(vs...))
 	})
 }
 
@@ -5110,23 +4742,15 @@ func NilPairNEQ(v *schema.Pair) predicate.FieldType {
 
 // NilPairIn applies the In predicate on the "nil_pair" field.
 func NilPairIn(vs ...*schema.Pair) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNilPair, p.Within(v...))
+		t.Has(Label, FieldNilPair, p.Within(vs...))
 	})
 }
 
 // NilPairNotIn applies the NotIn predicate on the "nil_pair" field.
 func NilPairNotIn(vs ...*schema.Pair) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNilPair, p.Without(v...))
+		t.Has(Label, FieldNilPair, p.Without(vs...))
 	})
 }
 
@@ -5188,23 +4812,15 @@ func VstringNEQ(v schema.VString) predicate.FieldType {
 
 // VstringIn applies the In predicate on the "vstring" field.
 func VstringIn(vs ...schema.VString) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldVstring, p.Within(v...))
+		t.Has(Label, FieldVstring, p.Within(vs...))
 	})
 }
 
 // VstringNotIn applies the NotIn predicate on the "vstring" field.
 func VstringNotIn(vs ...schema.VString) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldVstring, p.Without(v...))
+		t.Has(Label, FieldVstring, p.Without(vs...))
 	})
 }
 
@@ -5276,23 +4892,15 @@ func TripleNEQ(v schema.Triple) predicate.FieldType {
 
 // TripleIn applies the In predicate on the "triple" field.
 func TripleIn(vs ...schema.Triple) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldTriple, p.Within(v...))
+		t.Has(Label, FieldTriple, p.Within(vs...))
 	})
 }
 
 // TripleNotIn applies the NotIn predicate on the "triple" field.
 func TripleNotIn(vs ...schema.Triple) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldTriple, p.Without(v...))
+		t.Has(Label, FieldTriple, p.Without(vs...))
 	})
 }
 
@@ -5340,23 +4948,15 @@ func BigIntNEQ(v schema.BigInt) predicate.FieldType {
 
 // BigIntIn applies the In predicate on the "big_int" field.
 func BigIntIn(vs ...schema.BigInt) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldBigInt, p.Within(v...))
+		t.Has(Label, FieldBigInt, p.Within(vs...))
 	})
 }
 
 // BigIntNotIn applies the NotIn predicate on the "big_int" field.
 func BigIntNotIn(vs ...schema.BigInt) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldBigInt, p.Without(v...))
+		t.Has(Label, FieldBigInt, p.Without(vs...))
 	})
 }
 
@@ -5418,23 +5018,15 @@ func PasswordOtherNEQ(v schema.Password) predicate.FieldType {
 
 // PasswordOtherIn applies the In predicate on the "password_other" field.
 func PasswordOtherIn(vs ...schema.Password) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldPasswordOther, p.Within(v...))
+		t.Has(Label, FieldPasswordOther, p.Within(vs...))
 	})
 }
 
 // PasswordOtherNotIn applies the NotIn predicate on the "password_other" field.
 func PasswordOtherNotIn(vs ...schema.Password) predicate.FieldType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FieldType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldPasswordOther, p.Without(v...))
+		t.Has(Label, FieldPasswordOther, p.Without(vs...))
 	})
 }
 

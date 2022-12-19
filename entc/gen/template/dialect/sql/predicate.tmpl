@@ -7,32 +7,19 @@ in the LICENSE file in the root directory of this source tree.
 {{/* gotype: entgo.io/ent/entc/gen.typeScope */}}
 
 {{ define "dialect/sql/predicate/id" -}}
-	func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C({{ $.ID.Constant }}), id))
-	}
+	sql.FieldEQ({{ $.ID.Constant }}, id)
 {{- end }}
 
 {{ define "dialect/sql/predicate/id/ops" -}}
 	{{- $op := $.Scope.Op -}}
-	{{- $arg := $.Scope.Arg -}}
 	{{- $storage := $.Scope.Storage -}}
-	func(s *sql.Selector) {
-		{{- if $op.Variadic }}
-			v := make([]any, len({{ $arg }}))
-			for i := range v {
-				v[i] = {{ $arg }}[i]
-			}
-		{{- end }}
-		s.Where(sql.{{ call $storage.OpCode $op }}(s.C({{ $.ID.Constant }}){{ if not $op.Niladic }},{{ if $op.Variadic }}v...{{ else }}id{{ end }}{{ end }}))
-	}
+	sql.Field{{ call $storage.OpCode $op }}({{ $.ID.Constant }}{{ if not $op.Niladic }},{{ if $op.Variadic }}ids...{{ else }}id{{ end }}{{ end }})
 {{- end }}
 
 {{ define "dialect/sql/predicate/field" -}}
 	{{- $f := $.Scope.Field -}}
 	{{- $arg := $.Scope.Arg -}}
-	func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C({{ $f.Constant }}), {{ $arg }}))
-	}
+	sql.FieldEQ({{ $f.Constant }}, {{ $arg }})
 {{- end }}
 
 {{ define "dialect/sql/predicate/field/ops" -}}
@@ -40,9 +27,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{- $op := $.Scope.Op -}}
 	{{- $arg := $.Scope.Arg -}}
 	{{- $storage := $.Scope.Storage -}}
-	func(s *sql.Selector) {
-		s.Where(sql.{{ call $storage.OpCode $op }}(s.C({{ $f.Constant }}){{ if not $op.Niladic }}, {{ $arg }}{{ if $op.Variadic }}...{{ end }}{{ end }}))
-	}
+	sql.Field{{ call $storage.OpCode $op }}({{ $f.Constant }}{{ if not $op.Niladic }}, {{ $arg }}{{ if $op.Variadic }}...{{ end }}{{ end }})
 {{- end }}
 
 {{ define "dialect/sql/predicate/edge/has" -}}
