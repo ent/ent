@@ -1,5 +1,5 @@
 ---
-id: slack
+id: community
 title: Join our Community
 ---
 

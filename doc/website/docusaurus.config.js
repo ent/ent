@@ -80,7 +80,18 @@ const config = {
       }
     ]
   ],
-  "plugins": [],
+  "plugins": [
+      [
+        `@docusaurus/plugin-client-redirects`,{
+          redirects: [
+            {
+              to:'/docs/community',
+              from:'/docs/slack',
+            },
+          ],
+        },
+      ]
+  ],
   "themeConfig": {
     prism: {
       additionalLanguages: ['gotemplate', 'protobuf'],
