@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -32,40 +31,7 @@ func (mid *MixinIDDelete) Where(ps ...predicate.MixinID) *MixinIDDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (mid *MixinIDDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(mid.hooks) == 0 {
-		affected, err = mid.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*MixinIDMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			mid.mutation = mutation
-			affected, err = mid.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(mid.hooks) - 1; i >= 0; i-- {
-			if mid.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = mid.hooks[i](mut)
-		}
-		n, err := mut.Mutate(ctx, mid.mutation)
-		if err != nil {
-			return 0, err
-		}
-		nv, ok := n.(int)
-		if !ok {
-			return 0, fmt.Errorf("unexpected type %T returned from mutation. expected type: int", n)
-		}
-		affected = nv
-	}
-	return affected, err
+	return withHooks[int, MixinIDMutation](ctx, mid.sqlExec, mid.mutation, mid.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -98,6 +64,7 @@ func (mid *MixinIDDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	mid.mutation.done = true
 	return affected, err
 }
 

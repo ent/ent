@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/gremlin"
@@ -45,35 +44,8 @@ func (lu *LicenseUpdate) Mutation() *LicenseMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (lu *LicenseUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
 	lu.defaults()
-	if len(lu.hooks) == 0 {
-		affected, err = lu.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*LicenseMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			lu.mutation = mutation
-			affected, err = lu.gremlinSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(lu.hooks) - 1; i >= 0; i-- {
-			if lu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = lu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, lu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, LicenseMutation](ctx, lu.gremlinSave, lu.mutation, lu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -115,6 +87,7 @@ func (lu *LicenseUpdate) gremlinSave(ctx context.Context) (int, error) {
 	if err, ok := isConstantError(res); ok {
 		return 0, err
 	}
+	lu.mutation.done = true
 	return res.ReadInt()
 }
 
@@ -162,41 +135,8 @@ func (luo *LicenseUpdateOne) Select(field string, fields ...string) *LicenseUpda
 
 // Save executes the query and returns the updated License entity.
 func (luo *LicenseUpdateOne) Save(ctx context.Context) (*License, error) {
-	var (
-		err  error
-		node *License
-	)
 	luo.defaults()
-	if len(luo.hooks) == 0 {
-		node, err = luo.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*LicenseMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			luo.mutation = mutation
-			node, err = luo.gremlinSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(luo.hooks) - 1; i >= 0; i-- {
-			if luo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = luo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, luo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*License)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from LicenseMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*License, LicenseMutation](ctx, luo.gremlinSave, luo.mutation, luo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -242,6 +182,7 @@ func (luo *LicenseUpdateOne) gremlinSave(ctx context.Context) (*License, error) 
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
+	luo.mutation.done = true
 	l := &License{config: luo.config}
 	if err := l.FromResponse(res); err != nil {
 		return nil, err

@@ -48,50 +48,8 @@ func (oc *OtherCreate) Mutation() *OtherMutation {
 
 // Save creates the Other in the database.
 func (oc *OtherCreate) Save(ctx context.Context) (*Other, error) {
-	var (
-		err  error
-		node *Other
-	)
 	oc.defaults()
-	if len(oc.hooks) == 0 {
-		if err = oc.check(); err != nil {
-			return nil, err
-		}
-		node, err = oc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*OtherMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = oc.check(); err != nil {
-				return nil, err
-			}
-			oc.mutation = mutation
-			if node, err = oc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(oc.hooks) - 1; i >= 0; i-- {
-			if oc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = oc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, oc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Other)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from OtherMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Other, OtherMutation](ctx, oc.sqlSave, oc.mutation, oc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -130,6 +88,9 @@ func (oc *OtherCreate) check() error {
 }
 
 func (oc *OtherCreate) sqlSave(ctx context.Context) (*Other, error) {
+	if err := oc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := oc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, oc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -144,6 +105,8 @@ func (oc *OtherCreate) sqlSave(ctx context.Context) (*Other, error) {
 			return nil, err
 		}
 	}
+	oc.mutation.id = &_node.ID
+	oc.mutation.done = true
 	return _node, nil
 }
 

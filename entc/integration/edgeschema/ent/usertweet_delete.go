@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -32,40 +31,7 @@ func (utd *UserTweetDelete) Where(ps ...predicate.UserTweet) *UserTweetDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (utd *UserTweetDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(utd.hooks) == 0 {
-		affected, err = utd.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*UserTweetMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			utd.mutation = mutation
-			affected, err = utd.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(utd.hooks) - 1; i >= 0; i-- {
-			if utd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = utd.hooks[i](mut)
-		}
-		n, err := mut.Mutate(ctx, utd.mutation)
-		if err != nil {
-			return 0, err
-		}
-		nv, ok := n.(int)
-		if !ok {
-			return 0, fmt.Errorf("unexpected type %T returned from mutation. expected type: int", n)
-		}
-		affected = nv
-	}
-	return affected, err
+	return withHooks[int, UserTweetMutation](ctx, utd.sqlExec, utd.mutation, utd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -98,6 +64,7 @@ func (utd *UserTweetDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	utd.mutation.done = true
 	return affected, err
 }
 

@@ -63,49 +63,7 @@ func (ic *InfoCreate) Mutation() *InfoMutation {
 
 // Save creates the Info in the database.
 func (ic *InfoCreate) Save(ctx context.Context) (*Info, error) {
-	var (
-		err  error
-		node *Info
-	)
-	if len(ic.hooks) == 0 {
-		if err = ic.check(); err != nil {
-			return nil, err
-		}
-		node, err = ic.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*InfoMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = ic.check(); err != nil {
-				return nil, err
-			}
-			ic.mutation = mutation
-			if node, err = ic.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(ic.hooks) - 1; i >= 0; i-- {
-			if ic.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ic.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, ic.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Info)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from InfoMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Info, InfoMutation](ctx, ic.sqlSave, ic.mutation, ic.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -139,6 +97,9 @@ func (ic *InfoCreate) check() error {
 }
 
 func (ic *InfoCreate) sqlSave(ctx context.Context) (*Info, error) {
+	if err := ic.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := ic.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ic.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -150,6 +111,8 @@ func (ic *InfoCreate) sqlSave(ctx context.Context) (*Info, error) {
 		id := _spec.ID.Value.(int64)
 		_node.ID = int(id)
 	}
+	ic.mutation.id = &_node.ID
+	ic.mutation.done = true
 	return _node, nil
 }
 

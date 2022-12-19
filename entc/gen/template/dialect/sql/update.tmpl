@@ -32,6 +32,11 @@ in the LICENSE file in the root directory of this source tree.
 {{- end }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} {{ if $one }}*{{ $.Name }}{{ else }}int{{ end }}, err error) {
+	{{- if $.HasUpdateCheckers }}
+		if err := {{ $receiver }}.check(); err != nil {
+			return {{ $ret }}, err
+		}
+	{{- end }}
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table: {{ $.Package }}.Table,
@@ -171,6 +176,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 		}
 		return {{ $zero }}, err
 	}
+	{{ $mutation }}.done = true
 	return {{ $ret }}, nil
 }
 {{ end }}

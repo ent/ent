@@ -12,6 +12,9 @@ in the LICENSE file in the root directory of this source tree.
 {{ $mutation := print $receiver ".mutation"  }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name }}, error) {
+	if err := {{ $receiver }}.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := {{ $receiver }}.createSpec()
 	if err := sqlgraph.CreateNode(ctx, {{ $receiver }}.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -48,6 +51,10 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 		{{- if $.ID.UserDefined }}
 			}
 		{{- end }}
+	{{- end }}
+	{{- if $.HasOneFieldID }}
+		{{ $mutation }}.{{ $.ID.BuilderField }} = &_node.{{ $.ID.StructField }}
+		{{ $mutation }}.done = true
 	{{- end }}
 	return _node, nil
 }

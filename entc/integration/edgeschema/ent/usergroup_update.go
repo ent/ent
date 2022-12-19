@@ -89,40 +89,7 @@ func (ugu *UserGroupUpdate) ClearGroup() *UserGroupUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ugu *UserGroupUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(ugu.hooks) == 0 {
-		if err = ugu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = ugu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*UserGroupMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = ugu.check(); err != nil {
-				return 0, err
-			}
-			ugu.mutation = mutation
-			affected, err = ugu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(ugu.hooks) - 1; i >= 0; i-- {
-			if ugu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ugu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, ugu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, UserGroupMutation](ctx, ugu.sqlSave, ugu.mutation, ugu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -159,6 +126,9 @@ func (ugu *UserGroupUpdate) check() error {
 }
 
 func (ugu *UserGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := ugu.check(); err != nil {
+		return n, err
+	}
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   usergroup.Table,
@@ -257,6 +227,7 @@ func (ugu *UserGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	ugu.mutation.done = true
 	return n, nil
 }
 
@@ -330,46 +301,7 @@ func (uguo *UserGroupUpdateOne) Select(field string, fields ...string) *UserGrou
 
 // Save executes the query and returns the updated UserGroup entity.
 func (uguo *UserGroupUpdateOne) Save(ctx context.Context) (*UserGroup, error) {
-	var (
-		err  error
-		node *UserGroup
-	)
-	if len(uguo.hooks) == 0 {
-		if err = uguo.check(); err != nil {
-			return nil, err
-		}
-		node, err = uguo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*UserGroupMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = uguo.check(); err != nil {
-				return nil, err
-			}
-			uguo.mutation = mutation
-			node, err = uguo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(uguo.hooks) - 1; i >= 0; i-- {
-			if uguo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = uguo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, uguo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*UserGroup)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from UserGroupMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*UserGroup, UserGroupMutation](ctx, uguo.sqlSave, uguo.mutation, uguo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -406,6 +338,9 @@ func (uguo *UserGroupUpdateOne) check() error {
 }
 
 func (uguo *UserGroupUpdateOne) sqlSave(ctx context.Context) (_node *UserGroup, err error) {
+	if err := uguo.check(); err != nil {
+		return _node, err
+	}
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   usergroup.Table,
@@ -524,5 +459,6 @@ func (uguo *UserGroupUpdateOne) sqlSave(ctx context.Context) (_node *UserGroup, 
 		}
 		return nil, err
 	}
+	uguo.mutation.done = true
 	return _node, nil
 }

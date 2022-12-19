@@ -42,10 +42,6 @@ type {{ $builder }} struct {
 
 // Save creates the {{ $.Name }} in the database.
 func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }}, error) {
-	var (
-		err error
-		node *{{ $.Name }}
-	)
 	{{- if $.HasDefault }}
 		{{- if $runtimeRequired }}
 			if err := {{ $receiver }}.defaults(); err != nil {
@@ -55,47 +51,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }},
 			{{ $receiver }}.defaults()
 		{{- end }}
 	{{- end }}
-	if len({{ $receiver }}.hooks) == 0 {
-		if err = {{ $receiver }}.check(); err != nil {
-			return nil, err
-		}
-		node, err = {{ $receiver }}.{{ $.Storage }}Save(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*{{ $.MutationName }})
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = {{ $receiver }}.check(); err != nil {
-				return nil, err
-			}
-			{{ $mutation }} = mutation
-			if node, err = {{ $receiver }}.{{ $.Storage }}Save(ctx) ; err != nil {
-				return nil, err
-			}
-			{{- if $.HasOneFieldID }}
-				mutation.{{ $.ID.BuilderField }} = &node.{{ $.ID.StructField }}
-				mutation.done = true
-			{{- end }}
-			return node, err
-		})
-		for i := len({{ $receiver }}.hooks) - 1; i >= 0; i-- {
-			if {{ $receiver }}.hooks[i] == nil {
-				return nil, fmt.Errorf("{{ $pkg }}: uninitialized hook (forgotten import {{ $pkg }}/runtime?)")
-			}
-			mut = {{ $receiver }}.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, {{ $mutation }})
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*{{ $.Name }})
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from {{ $.MutationName }}", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*{{ $.Name }}, {{ $.MutationName }}](ctx, {{ $receiver }}.{{ $.Storage }}Save, {{ $mutation }}, {{ $receiver }}.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

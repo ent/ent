@@ -796,50 +796,8 @@ func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
-	var (
-		err  error
-		node *FieldType
-	)
 	ftc.defaults()
-	if len(ftc.hooks) == 0 {
-		if err = ftc.check(); err != nil {
-			return nil, err
-		}
-		node, err = ftc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*FieldTypeMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = ftc.check(); err != nil {
-				return nil, err
-			}
-			ftc.mutation = mutation
-			if node, err = ftc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(ftc.hooks) - 1; i >= 0; i-- {
-			if ftc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ftc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, ftc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*FieldType)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from FieldTypeMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*FieldType, FieldTypeMutation](ctx, ftc.sqlSave, ftc.mutation, ftc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -993,6 +951,9 @@ func (ftc *FieldTypeCreate) check() error {
 }
 
 func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
+	if err := ftc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := ftc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -1002,6 +963,8 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
+	ftc.mutation.id = &_node.ID
+	ftc.mutation.done = true
 	return _node, nil
 }
 

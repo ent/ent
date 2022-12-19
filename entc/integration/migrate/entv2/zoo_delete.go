@@ -8,7 +8,6 @@ package entv2
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -32,40 +31,7 @@ func (zd *ZooDelete) Where(ps ...predicate.Zoo) *ZooDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (zd *ZooDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(zd.hooks) == 0 {
-		affected, err = zd.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ZooMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			zd.mutation = mutation
-			affected, err = zd.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(zd.hooks) - 1; i >= 0; i-- {
-			if zd.hooks[i] == nil {
-				return 0, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
-			}
-			mut = zd.hooks[i](mut)
-		}
-		n, err := mut.Mutate(ctx, zd.mutation)
-		if err != nil {
-			return 0, err
-		}
-		nv, ok := n.(int)
-		if !ok {
-			return 0, fmt.Errorf("unexpected type %T returned from mutation. expected type: int", n)
-		}
-		affected = nv
-	}
-	return affected, err
+	return withHooks[int, ZooMutation](ctx, zd.sqlExec, zd.mutation, zd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -98,6 +64,7 @@ func (zd *ZooDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	zd.mutation.done = true
 	return affected, err
 }
 

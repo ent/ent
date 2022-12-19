@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/gremlin"
@@ -66,50 +65,8 @@ func (lc *LicenseCreate) Mutation() *LicenseMutation {
 
 // Save creates the License in the database.
 func (lc *LicenseCreate) Save(ctx context.Context) (*License, error) {
-	var (
-		err  error
-		node *License
-	)
 	lc.defaults()
-	if len(lc.hooks) == 0 {
-		if err = lc.check(); err != nil {
-			return nil, err
-		}
-		node, err = lc.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*LicenseMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = lc.check(); err != nil {
-				return nil, err
-			}
-			lc.mutation = mutation
-			if node, err = lc.gremlinSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(lc.hooks) - 1; i >= 0; i-- {
-			if lc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = lc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, lc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*License)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from LicenseMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*License, LicenseMutation](ctx, lc.gremlinSave, lc.mutation, lc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -158,6 +115,9 @@ func (lc *LicenseCreate) check() error {
 }
 
 func (lc *LicenseCreate) gremlinSave(ctx context.Context) (*License, error) {
+	if err := lc.check(); err != nil {
+		return nil, err
+	}
 	res := &gremlin.Response{}
 	query, bindings := lc.gremlin().Query()
 	if err := lc.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -170,6 +130,8 @@ func (lc *LicenseCreate) gremlinSave(ctx context.Context) (*License, error) {
 	if err := l.FromResponse(res); err != nil {
 		return nil, err
 	}
+	lc.mutation.id = &l.ID
+	lc.mutation.done = true
 	return l, nil
 }
 

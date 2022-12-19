@@ -38,34 +38,7 @@ func (zu *ZooUpdate) Mutation() *ZooMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (zu *ZooUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(zu.hooks) == 0 {
-		affected, err = zu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ZooMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			zu.mutation = mutation
-			affected, err = zu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(zu.hooks) - 1; i >= 0; i-- {
-			if zu.hooks[i] == nil {
-				return 0, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
-			}
-			mut = zu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, zu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, ZooMutation](ctx, zu.sqlSave, zu.mutation, zu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -116,6 +89,7 @@ func (zu *ZooUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	zu.mutation.done = true
 	return n, nil
 }
 
@@ -141,40 +115,7 @@ func (zuo *ZooUpdateOne) Select(field string, fields ...string) *ZooUpdateOne {
 
 // Save executes the query and returns the updated Zoo entity.
 func (zuo *ZooUpdateOne) Save(ctx context.Context) (*Zoo, error) {
-	var (
-		err  error
-		node *Zoo
-	)
-	if len(zuo.hooks) == 0 {
-		node, err = zuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ZooMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			zuo.mutation = mutation
-			node, err = zuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(zuo.hooks) - 1; i >= 0; i-- {
-			if zuo.hooks[i] == nil {
-				return nil, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
-			}
-			mut = zuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, zuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Zoo)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from ZooMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Zoo, ZooMutation](ctx, zuo.sqlSave, zuo.mutation, zuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -245,5 +186,6 @@ func (zuo *ZooUpdateOne) sqlSave(ctx context.Context) (_node *Zoo, err error) {
 		}
 		return nil, err
 	}
+	zuo.mutation.done = true
 	return _node, nil
 }

@@ -89,40 +89,7 @@ func (blu *BlobLinkUpdate) ClearLink() *BlobLinkUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (blu *BlobLinkUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(blu.hooks) == 0 {
-		if err = blu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = blu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*BlobLinkMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = blu.check(); err != nil {
-				return 0, err
-			}
-			blu.mutation = mutation
-			affected, err = blu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(blu.hooks) - 1; i >= 0; i-- {
-			if blu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = blu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, blu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, BlobLinkMutation](ctx, blu.sqlSave, blu.mutation, blu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -159,6 +126,9 @@ func (blu *BlobLinkUpdate) check() error {
 }
 
 func (blu *BlobLinkUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := blu.check(); err != nil {
+		return n, err
+	}
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   bloblink.Table,
@@ -263,6 +233,7 @@ func (blu *BlobLinkUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	blu.mutation.done = true
 	return n, nil
 }
 
@@ -336,46 +307,7 @@ func (bluo *BlobLinkUpdateOne) Select(field string, fields ...string) *BlobLinkU
 
 // Save executes the query and returns the updated BlobLink entity.
 func (bluo *BlobLinkUpdateOne) Save(ctx context.Context) (*BlobLink, error) {
-	var (
-		err  error
-		node *BlobLink
-	)
-	if len(bluo.hooks) == 0 {
-		if err = bluo.check(); err != nil {
-			return nil, err
-		}
-		node, err = bluo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*BlobLinkMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = bluo.check(); err != nil {
-				return nil, err
-			}
-			bluo.mutation = mutation
-			node, err = bluo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(bluo.hooks) - 1; i >= 0; i-- {
-			if bluo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = bluo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, bluo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*BlobLink)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from BlobLinkMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*BlobLink, BlobLinkMutation](ctx, bluo.sqlSave, bluo.mutation, bluo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -412,6 +344,9 @@ func (bluo *BlobLinkUpdateOne) check() error {
 }
 
 func (bluo *BlobLinkUpdateOne) sqlSave(ctx context.Context) (_node *BlobLink, err error) {
+	if err := bluo.check(); err != nil {
+		return _node, err
+	}
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   bloblink.Table,
@@ -538,5 +473,6 @@ func (bluo *BlobLinkUpdateOne) sqlSave(ctx context.Context) (_node *BlobLink, er
 		}
 		return nil, err
 	}
+	bluo.mutation.done = true
 	return _node, nil
 }

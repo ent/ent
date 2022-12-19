@@ -17,6 +17,7 @@ func ({{ $receiver}} *{{ $builder }}) gremlinExec(ctx context.Context) (int, err
 	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
+	{{ $mutation }}.done = true
 	return res.ReadInt()
 }
 

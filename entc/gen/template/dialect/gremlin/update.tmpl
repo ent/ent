@@ -15,6 +15,11 @@ in the LICENSE file in the root directory of this source tree.
 {{ $zero := 0 }}{{ if $one }}{{ $zero = "nil" }}{{ end }}
 
 func ({{ $receiver }} *{{ $builder }}) gremlinSave(ctx context.Context) ({{- if $one }}*{{ $.Name }}{{ else }}int{{ end }}, error) {
+	{{- if $.HasUpdateCheckers }}
+		if err := {{ $receiver }}.check(); err != nil {
+			return {{ $zero }}, err
+		}
+	{{- end }}
 	res := &gremlin.Response{}
 	{{- if $one }}
 		id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}()
@@ -31,6 +36,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinSave(ctx context.Context) ({{- if 
 	if err, ok := isConstantError(res); ok {
 		return {{ $zero }}, err
 	}
+	{{ $mutation }}.done = true
 	{{- if $one }}
 		{{- $r := $.Receiver }}
 		{{ $r }} := &{{ $.Name }}{config: {{ $receiver }}.config}

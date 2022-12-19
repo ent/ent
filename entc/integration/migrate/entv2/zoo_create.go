@@ -35,49 +35,7 @@ func (zc *ZooCreate) Mutation() *ZooMutation {
 
 // Save creates the Zoo in the database.
 func (zc *ZooCreate) Save(ctx context.Context) (*Zoo, error) {
-	var (
-		err  error
-		node *Zoo
-	)
-	if len(zc.hooks) == 0 {
-		if err = zc.check(); err != nil {
-			return nil, err
-		}
-		node, err = zc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ZooMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = zc.check(); err != nil {
-				return nil, err
-			}
-			zc.mutation = mutation
-			if node, err = zc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(zc.hooks) - 1; i >= 0; i-- {
-			if zc.hooks[i] == nil {
-				return nil, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
-			}
-			mut = zc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, zc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Zoo)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from ZooMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Zoo, ZooMutation](ctx, zc.sqlSave, zc.mutation, zc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -108,6 +66,9 @@ func (zc *ZooCreate) check() error {
 }
 
 func (zc *ZooCreate) sqlSave(ctx context.Context) (*Zoo, error) {
+	if err := zc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := zc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, zc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -119,6 +80,8 @@ func (zc *ZooCreate) sqlSave(ctx context.Context) (*Zoo, error) {
 		id := _spec.ID.Value.(int64)
 		_node.ID = int(id)
 	}
+	zc.mutation.id = &_node.ID
+	zc.mutation.done = true
 	return _node, nil
 }
 

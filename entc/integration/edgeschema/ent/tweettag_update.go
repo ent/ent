@@ -89,40 +89,7 @@ func (ttu *TweetTagUpdate) ClearTweet() *TweetTagUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ttu *TweetTagUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(ttu.hooks) == 0 {
-		if err = ttu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = ttu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*TweetTagMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = ttu.check(); err != nil {
-				return 0, err
-			}
-			ttu.mutation = mutation
-			affected, err = ttu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(ttu.hooks) - 1; i >= 0; i-- {
-			if ttu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ttu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, ttu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, TweetTagMutation](ctx, ttu.sqlSave, ttu.mutation, ttu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -159,6 +126,9 @@ func (ttu *TweetTagUpdate) check() error {
 }
 
 func (ttu *TweetTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := ttu.check(); err != nil {
+		return n, err
+	}
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   tweettag.Table,
@@ -257,6 +227,7 @@ func (ttu *TweetTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	ttu.mutation.done = true
 	return n, nil
 }
 
@@ -330,46 +301,7 @@ func (ttuo *TweetTagUpdateOne) Select(field string, fields ...string) *TweetTagU
 
 // Save executes the query and returns the updated TweetTag entity.
 func (ttuo *TweetTagUpdateOne) Save(ctx context.Context) (*TweetTag, error) {
-	var (
-		err  error
-		node *TweetTag
-	)
-	if len(ttuo.hooks) == 0 {
-		if err = ttuo.check(); err != nil {
-			return nil, err
-		}
-		node, err = ttuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*TweetTagMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = ttuo.check(); err != nil {
-				return nil, err
-			}
-			ttuo.mutation = mutation
-			node, err = ttuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(ttuo.hooks) - 1; i >= 0; i-- {
-			if ttuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ttuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, ttuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*TweetTag)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from TweetTagMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*TweetTag, TweetTagMutation](ctx, ttuo.sqlSave, ttuo.mutation, ttuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -406,6 +338,9 @@ func (ttuo *TweetTagUpdateOne) check() error {
 }
 
 func (ttuo *TweetTagUpdateOne) sqlSave(ctx context.Context) (_node *TweetTag, err error) {
+	if err := ttuo.check(); err != nil {
+		return _node, err
+	}
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   tweettag.Table,
@@ -524,5 +459,6 @@ func (ttuo *TweetTagUpdateOne) sqlSave(ctx context.Context) (_node *TweetTag, er
 		}
 		return nil, err
 	}
+	ttuo.mutation.done = true
 	return _node, nil
 }
