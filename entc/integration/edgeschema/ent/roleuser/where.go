@@ -16,159 +16,97 @@ import (
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.RoleUser {
-	return predicate.RoleUser(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
-	})
+	return predicate.RoleUser(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // RoleID applies equality check predicate on the "role_id" field. It's identical to RoleIDEQ.
 func RoleID(v int) predicate.RoleUser {
-	return predicate.RoleUser(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRoleID), v))
-	})
+	return predicate.RoleUser(sql.FieldEQ(FieldRoleID, v))
 }
 
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
 func UserID(v int) predicate.RoleUser {
-	return predicate.RoleUser(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUserID), v))
-	})
+	return predicate.RoleUser(sql.FieldEQ(FieldUserID, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.RoleUser {
-	return predicate.RoleUser(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
-	})
+	return predicate.RoleUser(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
 func CreatedAtNEQ(v time.Time) predicate.RoleUser {
-	return predicate.RoleUser(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCreatedAt), v))
-	})
+	return predicate.RoleUser(sql.FieldNEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
 func CreatedAtIn(vs ...time.Time) predicate.RoleUser {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.RoleUser(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldCreatedAt), v...))
-	})
+	return predicate.RoleUser(sql.FieldIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
 func CreatedAtNotIn(vs ...time.Time) predicate.RoleUser {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.RoleUser(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldCreatedAt), v...))
-	})
+	return predicate.RoleUser(sql.FieldNotIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtGT applies the GT predicate on the "created_at" field.
 func CreatedAtGT(v time.Time) predicate.RoleUser {
-	return predicate.RoleUser(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCreatedAt), v))
-	})
+	return predicate.RoleUser(sql.FieldGT(FieldCreatedAt, v))
 }
 
 // CreatedAtGTE applies the GTE predicate on the "created_at" field.
 func CreatedAtGTE(v time.Time) predicate.RoleUser {
-	return predicate.RoleUser(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCreatedAt), v))
-	})
+	return predicate.RoleUser(sql.FieldGTE(FieldCreatedAt, v))
 }
 
 // CreatedAtLT applies the LT predicate on the "created_at" field.
 func CreatedAtLT(v time.Time) predicate.RoleUser {
-	return predicate.RoleUser(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCreatedAt), v))
-	})
+	return predicate.RoleUser(sql.FieldLT(FieldCreatedAt, v))
 }
 
 // CreatedAtLTE applies the LTE predicate on the "created_at" field.
 func CreatedAtLTE(v time.Time) predicate.RoleUser {
-	return predicate.RoleUser(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCreatedAt), v))
-	})
+	return predicate.RoleUser(sql.FieldLTE(FieldCreatedAt, v))
 }
 
 // RoleIDEQ applies the EQ predicate on the "role_id" field.
 func RoleIDEQ(v int) predicate.RoleUser {
-	return predicate.RoleUser(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRoleID), v))
-	})
+	return predicate.RoleUser(sql.FieldEQ(FieldRoleID, v))
 }
 
 // RoleIDNEQ applies the NEQ predicate on the "role_id" field.
 func RoleIDNEQ(v int) predicate.RoleUser {
-	return predicate.RoleUser(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldRoleID), v))
-	})
+	return predicate.RoleUser(sql.FieldNEQ(FieldRoleID, v))
 }
 
 // RoleIDIn applies the In predicate on the "role_id" field.
 func RoleIDIn(vs ...int) predicate.RoleUser {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.RoleUser(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldRoleID), v...))
-	})
+	return predicate.RoleUser(sql.FieldIn(FieldRoleID, vs...))
 }
 
 // RoleIDNotIn applies the NotIn predicate on the "role_id" field.
 func RoleIDNotIn(vs ...int) predicate.RoleUser {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.RoleUser(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldRoleID), v...))
-	})
+	return predicate.RoleUser(sql.FieldNotIn(FieldRoleID, vs...))
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.
 func UserIDEQ(v int) predicate.RoleUser {
-	return predicate.RoleUser(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUserID), v))
-	})
+	return predicate.RoleUser(sql.FieldEQ(FieldUserID, v))
 }
 
 // UserIDNEQ applies the NEQ predicate on the "user_id" field.
 func UserIDNEQ(v int) predicate.RoleUser {
-	return predicate.RoleUser(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldUserID), v))
-	})
+	return predicate.RoleUser(sql.FieldNEQ(FieldUserID, v))
 }
 
 // UserIDIn applies the In predicate on the "user_id" field.
 func UserIDIn(vs ...int) predicate.RoleUser {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.RoleUser(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldUserID), v...))
-	})
+	return predicate.RoleUser(sql.FieldIn(FieldUserID, vs...))
 }
 
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
 func UserIDNotIn(vs ...int) predicate.RoleUser {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.RoleUser(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldUserID), v...))
-	})
+	return predicate.RoleUser(sql.FieldNotIn(FieldUserID, vs...))
 }
 
 // HasRole applies the HasEdge predicate on the "role" edge.

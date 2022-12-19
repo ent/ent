@@ -14,250 +14,162 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id int) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.GroupInfo(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id int) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.GroupInfo(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id int) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.GroupInfo(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.GroupInfo(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.GroupInfo(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id int) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.GroupInfo(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id int) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.GroupInfo(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id int) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.GroupInfo(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id int) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.GroupInfo(sql.FieldLTE(FieldID, id))
 }
 
 // Desc applies equality check predicate on the "desc" field. It's identical to DescEQ.
 func Desc(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDesc), v))
-	})
+	return predicate.GroupInfo(sql.FieldEQ(FieldDesc, v))
 }
 
 // MaxUsers applies equality check predicate on the "max_users" field. It's identical to MaxUsersEQ.
 func MaxUsers(v int) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMaxUsers), v))
-	})
+	return predicate.GroupInfo(sql.FieldEQ(FieldMaxUsers, v))
 }
 
 // DescEQ applies the EQ predicate on the "desc" field.
 func DescEQ(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDesc), v))
-	})
+	return predicate.GroupInfo(sql.FieldEQ(FieldDesc, v))
 }
 
 // DescNEQ applies the NEQ predicate on the "desc" field.
 func DescNEQ(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldDesc), v))
-	})
+	return predicate.GroupInfo(sql.FieldNEQ(FieldDesc, v))
 }
 
 // DescIn applies the In predicate on the "desc" field.
 func DescIn(vs ...string) predicate.GroupInfo {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldDesc), v...))
-	})
+	return predicate.GroupInfo(sql.FieldIn(FieldDesc, vs...))
 }
 
 // DescNotIn applies the NotIn predicate on the "desc" field.
 func DescNotIn(vs ...string) predicate.GroupInfo {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldDesc), v...))
-	})
+	return predicate.GroupInfo(sql.FieldNotIn(FieldDesc, vs...))
 }
 
 // DescGT applies the GT predicate on the "desc" field.
 func DescGT(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldDesc), v))
-	})
+	return predicate.GroupInfo(sql.FieldGT(FieldDesc, v))
 }
 
 // DescGTE applies the GTE predicate on the "desc" field.
 func DescGTE(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldDesc), v))
-	})
+	return predicate.GroupInfo(sql.FieldGTE(FieldDesc, v))
 }
 
 // DescLT applies the LT predicate on the "desc" field.
 func DescLT(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldDesc), v))
-	})
+	return predicate.GroupInfo(sql.FieldLT(FieldDesc, v))
 }
 
 // DescLTE applies the LTE predicate on the "desc" field.
 func DescLTE(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldDesc), v))
-	})
+	return predicate.GroupInfo(sql.FieldLTE(FieldDesc, v))
 }
 
 // DescContains applies the Contains predicate on the "desc" field.
 func DescContains(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldDesc), v))
-	})
+	return predicate.GroupInfo(sql.FieldContains(FieldDesc, v))
 }
 
 // DescHasPrefix applies the HasPrefix predicate on the "desc" field.
 func DescHasPrefix(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldDesc), v))
-	})
+	return predicate.GroupInfo(sql.FieldHasPrefix(FieldDesc, v))
 }
 
 // DescHasSuffix applies the HasSuffix predicate on the "desc" field.
 func DescHasSuffix(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldDesc), v))
-	})
+	return predicate.GroupInfo(sql.FieldHasSuffix(FieldDesc, v))
 }
 
 // DescEqualFold applies the EqualFold predicate on the "desc" field.
 func DescEqualFold(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldDesc), v))
-	})
+	return predicate.GroupInfo(sql.FieldEqualFold(FieldDesc, v))
 }
 
 // DescContainsFold applies the ContainsFold predicate on the "desc" field.
 func DescContainsFold(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldDesc), v))
-	})
+	return predicate.GroupInfo(sql.FieldContainsFold(FieldDesc, v))
 }
 
 // MaxUsersEQ applies the EQ predicate on the "max_users" field.
 func MaxUsersEQ(v int) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMaxUsers), v))
-	})
+	return predicate.GroupInfo(sql.FieldEQ(FieldMaxUsers, v))
 }
 
 // MaxUsersNEQ applies the NEQ predicate on the "max_users" field.
 func MaxUsersNEQ(v int) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldMaxUsers), v))
-	})
+	return predicate.GroupInfo(sql.FieldNEQ(FieldMaxUsers, v))
 }
 
 // MaxUsersIn applies the In predicate on the "max_users" field.
 func MaxUsersIn(vs ...int) predicate.GroupInfo {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldMaxUsers), v...))
-	})
+	return predicate.GroupInfo(sql.FieldIn(FieldMaxUsers, vs...))
 }
 
 // MaxUsersNotIn applies the NotIn predicate on the "max_users" field.
 func MaxUsersNotIn(vs ...int) predicate.GroupInfo {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldMaxUsers), v...))
-	})
+	return predicate.GroupInfo(sql.FieldNotIn(FieldMaxUsers, vs...))
 }
 
 // MaxUsersGT applies the GT predicate on the "max_users" field.
 func MaxUsersGT(v int) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldMaxUsers), v))
-	})
+	return predicate.GroupInfo(sql.FieldGT(FieldMaxUsers, v))
 }
 
 // MaxUsersGTE applies the GTE predicate on the "max_users" field.
 func MaxUsersGTE(v int) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldMaxUsers), v))
-	})
+	return predicate.GroupInfo(sql.FieldGTE(FieldMaxUsers, v))
 }
 
 // MaxUsersLT applies the LT predicate on the "max_users" field.
 func MaxUsersLT(v int) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldMaxUsers), v))
-	})
+	return predicate.GroupInfo(sql.FieldLT(FieldMaxUsers, v))
 }
 
 // MaxUsersLTE applies the LTE predicate on the "max_users" field.
 func MaxUsersLTE(v int) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldMaxUsers), v))
-	})
+	return predicate.GroupInfo(sql.FieldLTE(FieldMaxUsers, v))
 }
 
 // HasGroups applies the HasEdge predicate on the "groups" edge.

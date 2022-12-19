@@ -107,23 +107,15 @@ func NameNEQ(v string) predicate.FileType {
 
 // NameIn applies the In predicate on the "name" field.
 func NameIn(vs ...string) predicate.FileType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FileType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldName, p.Within(v...))
+		t.Has(Label, FieldName, p.Within(vs...))
 	})
 }
 
 // NameNotIn applies the NotIn predicate on the "name" field.
 func NameNotIn(vs ...string) predicate.FileType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FileType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldName, p.Without(v...))
+		t.Has(Label, FieldName, p.Without(vs...))
 	})
 }
 
@@ -192,23 +184,15 @@ func TypeNEQ(v Type) predicate.FileType {
 
 // TypeIn applies the In predicate on the "type" field.
 func TypeIn(vs ...Type) predicate.FileType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FileType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldType, p.Within(v...))
+		t.Has(Label, FieldType, p.Within(vs...))
 	})
 }
 
 // TypeNotIn applies the NotIn predicate on the "type" field.
 func TypeNotIn(vs ...Type) predicate.FileType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FileType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldType, p.Without(v...))
+		t.Has(Label, FieldType, p.Without(vs...))
 	})
 }
 
@@ -228,23 +212,15 @@ func StateNEQ(v State) predicate.FileType {
 
 // StateIn applies the In predicate on the "state" field.
 func StateIn(vs ...State) predicate.FileType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FileType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldState, p.Within(v...))
+		t.Has(Label, FieldState, p.Within(vs...))
 	})
 }
 
 // StateNotIn applies the NotIn predicate on the "state" field.
 func StateNotIn(vs ...State) predicate.FileType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.FileType(func(t *dsl.Traversal) {
-		t.Has(Label, FieldState, p.Without(v...))
+		t.Has(Label, FieldState, p.Without(vs...))
 	})
 }
 

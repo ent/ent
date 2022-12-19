@@ -14,216 +14,132 @@ import (
 
 // Weight applies equality check predicate on the "weight" field. It's identical to WeightEQ.
 func Weight(v int) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWeight), v))
-	})
+	return predicate.Relationship(sql.FieldEQ(FieldWeight, v))
 }
 
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
 func UserID(v int) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUserID), v))
-	})
+	return predicate.Relationship(sql.FieldEQ(FieldUserID, v))
 }
 
 // RelativeID applies equality check predicate on the "relative_id" field. It's identical to RelativeIDEQ.
 func RelativeID(v int) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRelativeID), v))
-	})
+	return predicate.Relationship(sql.FieldEQ(FieldRelativeID, v))
 }
 
 // InfoID applies equality check predicate on the "info_id" field. It's identical to InfoIDEQ.
 func InfoID(v int) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldInfoID), v))
-	})
+	return predicate.Relationship(sql.FieldEQ(FieldInfoID, v))
 }
 
 // WeightEQ applies the EQ predicate on the "weight" field.
 func WeightEQ(v int) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWeight), v))
-	})
+	return predicate.Relationship(sql.FieldEQ(FieldWeight, v))
 }
 
 // WeightNEQ applies the NEQ predicate on the "weight" field.
 func WeightNEQ(v int) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldWeight), v))
-	})
+	return predicate.Relationship(sql.FieldNEQ(FieldWeight, v))
 }
 
 // WeightIn applies the In predicate on the "weight" field.
 func WeightIn(vs ...int) predicate.Relationship {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldWeight), v...))
-	})
+	return predicate.Relationship(sql.FieldIn(FieldWeight, vs...))
 }
 
 // WeightNotIn applies the NotIn predicate on the "weight" field.
 func WeightNotIn(vs ...int) predicate.Relationship {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldWeight), v...))
-	})
+	return predicate.Relationship(sql.FieldNotIn(FieldWeight, vs...))
 }
 
 // WeightGT applies the GT predicate on the "weight" field.
 func WeightGT(v int) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldWeight), v))
-	})
+	return predicate.Relationship(sql.FieldGT(FieldWeight, v))
 }
 
 // WeightGTE applies the GTE predicate on the "weight" field.
 func WeightGTE(v int) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldWeight), v))
-	})
+	return predicate.Relationship(sql.FieldGTE(FieldWeight, v))
 }
 
 // WeightLT applies the LT predicate on the "weight" field.
 func WeightLT(v int) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldWeight), v))
-	})
+	return predicate.Relationship(sql.FieldLT(FieldWeight, v))
 }
 
 // WeightLTE applies the LTE predicate on the "weight" field.
 func WeightLTE(v int) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldWeight), v))
-	})
+	return predicate.Relationship(sql.FieldLTE(FieldWeight, v))
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.
 func UserIDEQ(v int) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUserID), v))
-	})
+	return predicate.Relationship(sql.FieldEQ(FieldUserID, v))
 }
 
 // UserIDNEQ applies the NEQ predicate on the "user_id" field.
 func UserIDNEQ(v int) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldUserID), v))
-	})
+	return predicate.Relationship(sql.FieldNEQ(FieldUserID, v))
 }
 
 // UserIDIn applies the In predicate on the "user_id" field.
 func UserIDIn(vs ...int) predicate.Relationship {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldUserID), v...))
-	})
+	return predicate.Relationship(sql.FieldIn(FieldUserID, vs...))
 }
 
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
 func UserIDNotIn(vs ...int) predicate.Relationship {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldUserID), v...))
-	})
+	return predicate.Relationship(sql.FieldNotIn(FieldUserID, vs...))
 }
 
 // RelativeIDEQ applies the EQ predicate on the "relative_id" field.
 func RelativeIDEQ(v int) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRelativeID), v))
-	})
+	return predicate.Relationship(sql.FieldEQ(FieldRelativeID, v))
 }
 
 // RelativeIDNEQ applies the NEQ predicate on the "relative_id" field.
 func RelativeIDNEQ(v int) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldRelativeID), v))
-	})
+	return predicate.Relationship(sql.FieldNEQ(FieldRelativeID, v))
 }
 
 // RelativeIDIn applies the In predicate on the "relative_id" field.
 func RelativeIDIn(vs ...int) predicate.Relationship {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldRelativeID), v...))
-	})
+	return predicate.Relationship(sql.FieldIn(FieldRelativeID, vs...))
 }
 
 // RelativeIDNotIn applies the NotIn predicate on the "relative_id" field.
 func RelativeIDNotIn(vs ...int) predicate.Relationship {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldRelativeID), v...))
-	})
+	return predicate.Relationship(sql.FieldNotIn(FieldRelativeID, vs...))
 }
 
 // InfoIDEQ applies the EQ predicate on the "info_id" field.
 func InfoIDEQ(v int) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldInfoID), v))
-	})
+	return predicate.Relationship(sql.FieldEQ(FieldInfoID, v))
 }
 
 // InfoIDNEQ applies the NEQ predicate on the "info_id" field.
 func InfoIDNEQ(v int) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldInfoID), v))
-	})
+	return predicate.Relationship(sql.FieldNEQ(FieldInfoID, v))
 }
 
 // InfoIDIn applies the In predicate on the "info_id" field.
 func InfoIDIn(vs ...int) predicate.Relationship {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldInfoID), v...))
-	})
+	return predicate.Relationship(sql.FieldIn(FieldInfoID, vs...))
 }
 
 // InfoIDNotIn applies the NotIn predicate on the "info_id" field.
 func InfoIDNotIn(vs ...int) predicate.Relationship {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldInfoID), v...))
-	})
+	return predicate.Relationship(sql.FieldNotIn(FieldInfoID, vs...))
 }
 
 // InfoIDIsNil applies the IsNil predicate on the "info_id" field.
 func InfoIDIsNil() predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldInfoID)))
-	})
+	return predicate.Relationship(sql.FieldIsNull(FieldInfoID))
 }
 
 // InfoIDNotNil applies the NotNil predicate on the "info_id" field.
 func InfoIDNotNil() predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldInfoID)))
-	})
+	return predicate.Relationship(sql.FieldNotNull(FieldInfoID))
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.

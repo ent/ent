@@ -151,23 +151,15 @@ func ExpireNEQ(v time.Time) predicate.Group {
 
 // ExpireIn applies the In predicate on the "expire" field.
 func ExpireIn(vs ...time.Time) predicate.Group {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Group(func(t *dsl.Traversal) {
-		t.Has(Label, FieldExpire, p.Within(v...))
+		t.Has(Label, FieldExpire, p.Within(vs...))
 	})
 }
 
 // ExpireNotIn applies the NotIn predicate on the "expire" field.
 func ExpireNotIn(vs ...time.Time) predicate.Group {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Group(func(t *dsl.Traversal) {
-		t.Has(Label, FieldExpire, p.Without(v...))
+		t.Has(Label, FieldExpire, p.Without(vs...))
 	})
 }
 
@@ -215,23 +207,15 @@ func TypeNEQ(v string) predicate.Group {
 
 // TypeIn applies the In predicate on the "type" field.
 func TypeIn(vs ...string) predicate.Group {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Group(func(t *dsl.Traversal) {
-		t.Has(Label, FieldType, p.Within(v...))
+		t.Has(Label, FieldType, p.Within(vs...))
 	})
 }
 
 // TypeNotIn applies the NotIn predicate on the "type" field.
 func TypeNotIn(vs ...string) predicate.Group {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Group(func(t *dsl.Traversal) {
-		t.Has(Label, FieldType, p.Without(v...))
+		t.Has(Label, FieldType, p.Without(vs...))
 	})
 }
 
@@ -314,23 +298,15 @@ func MaxUsersNEQ(v int) predicate.Group {
 
 // MaxUsersIn applies the In predicate on the "max_users" field.
 func MaxUsersIn(vs ...int) predicate.Group {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Group(func(t *dsl.Traversal) {
-		t.Has(Label, FieldMaxUsers, p.Within(v...))
+		t.Has(Label, FieldMaxUsers, p.Within(vs...))
 	})
 }
 
 // MaxUsersNotIn applies the NotIn predicate on the "max_users" field.
 func MaxUsersNotIn(vs ...int) predicate.Group {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Group(func(t *dsl.Traversal) {
-		t.Has(Label, FieldMaxUsers, p.Without(v...))
+		t.Has(Label, FieldMaxUsers, p.Without(vs...))
 	})
 }
 
@@ -392,23 +368,15 @@ func NameNEQ(v string) predicate.Group {
 
 // NameIn applies the In predicate on the "name" field.
 func NameIn(vs ...string) predicate.Group {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Group(func(t *dsl.Traversal) {
-		t.Has(Label, FieldName, p.Within(v...))
+		t.Has(Label, FieldName, p.Within(vs...))
 	})
 }
 
 // NameNotIn applies the NotIn predicate on the "name" field.
 func NameNotIn(vs ...string) predicate.Group {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Group(func(t *dsl.Traversal) {
-		t.Has(Label, FieldName, p.Without(v...))
+		t.Has(Label, FieldName, p.Without(vs...))
 	})
 }
 

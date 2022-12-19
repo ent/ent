@@ -136,23 +136,15 @@ func AgeNEQ(v float64) predicate.Pet {
 
 // AgeIn applies the In predicate on the "age" field.
 func AgeIn(vs ...float64) predicate.Pet {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Pet(func(t *dsl.Traversal) {
-		t.Has(Label, FieldAge, p.Within(v...))
+		t.Has(Label, FieldAge, p.Within(vs...))
 	})
 }
 
 // AgeNotIn applies the NotIn predicate on the "age" field.
 func AgeNotIn(vs ...float64) predicate.Pet {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Pet(func(t *dsl.Traversal) {
-		t.Has(Label, FieldAge, p.Without(v...))
+		t.Has(Label, FieldAge, p.Without(vs...))
 	})
 }
 
@@ -200,23 +192,15 @@ func NameNEQ(v string) predicate.Pet {
 
 // NameIn applies the In predicate on the "name" field.
 func NameIn(vs ...string) predicate.Pet {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Pet(func(t *dsl.Traversal) {
-		t.Has(Label, FieldName, p.Within(v...))
+		t.Has(Label, FieldName, p.Within(vs...))
 	})
 }
 
 // NameNotIn applies the NotIn predicate on the "name" field.
 func NameNotIn(vs ...string) predicate.Pet {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Pet(func(t *dsl.Traversal) {
-		t.Has(Label, FieldName, p.Without(v...))
+		t.Has(Label, FieldName, p.Without(vs...))
 	})
 }
 
@@ -285,23 +269,15 @@ func UUIDNEQ(v uuid.UUID) predicate.Pet {
 
 // UUIDIn applies the In predicate on the "uuid" field.
 func UUIDIn(vs ...uuid.UUID) predicate.Pet {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Pet(func(t *dsl.Traversal) {
-		t.Has(Label, FieldUUID, p.Within(v...))
+		t.Has(Label, FieldUUID, p.Within(vs...))
 	})
 }
 
 // UUIDNotIn applies the NotIn predicate on the "uuid" field.
 func UUIDNotIn(vs ...uuid.UUID) predicate.Pet {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Pet(func(t *dsl.Traversal) {
-		t.Has(Label, FieldUUID, p.Without(v...))
+		t.Has(Label, FieldUUID, p.Without(vs...))
 	})
 }
 
@@ -363,23 +339,15 @@ func NicknameNEQ(v string) predicate.Pet {
 
 // NicknameIn applies the In predicate on the "nickname" field.
 func NicknameIn(vs ...string) predicate.Pet {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Pet(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNickname, p.Within(v...))
+		t.Has(Label, FieldNickname, p.Within(vs...))
 	})
 }
 
 // NicknameNotIn applies the NotIn predicate on the "nickname" field.
 func NicknameNotIn(vs ...string) predicate.Pet {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Pet(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNickname, p.Without(v...))
+		t.Has(Label, FieldNickname, p.Without(vs...))
 	})
 }
 

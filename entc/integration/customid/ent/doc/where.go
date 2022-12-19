@@ -15,193 +15,127 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id schema.DocID) predicate.Doc {
-	return predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Doc(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id schema.DocID) predicate.Doc {
-	return predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Doc(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id schema.DocID) predicate.Doc {
-	return predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.Doc(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...schema.DocID) predicate.Doc {
-	return predicate.Doc(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.Doc(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...schema.DocID) predicate.Doc {
-	return predicate.Doc(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.Doc(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id schema.DocID) predicate.Doc {
-	return predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.Doc(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id schema.DocID) predicate.Doc {
-	return predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.Doc(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id schema.DocID) predicate.Doc {
-	return predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.Doc(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id schema.DocID) predicate.Doc {
-	return predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.Doc(sql.FieldLTE(FieldID, id))
 }
 
 // Text applies equality check predicate on the "text" field. It's identical to TextEQ.
 func Text(v string) predicate.Doc {
-	return predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldText), v))
-	})
+	return predicate.Doc(sql.FieldEQ(FieldText, v))
 }
 
 // TextEQ applies the EQ predicate on the "text" field.
 func TextEQ(v string) predicate.Doc {
-	return predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldText), v))
-	})
+	return predicate.Doc(sql.FieldEQ(FieldText, v))
 }
 
 // TextNEQ applies the NEQ predicate on the "text" field.
 func TextNEQ(v string) predicate.Doc {
-	return predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldText), v))
-	})
+	return predicate.Doc(sql.FieldNEQ(FieldText, v))
 }
 
 // TextIn applies the In predicate on the "text" field.
 func TextIn(vs ...string) predicate.Doc {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldText), v...))
-	})
+	return predicate.Doc(sql.FieldIn(FieldText, vs...))
 }
 
 // TextNotIn applies the NotIn predicate on the "text" field.
 func TextNotIn(vs ...string) predicate.Doc {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldText), v...))
-	})
+	return predicate.Doc(sql.FieldNotIn(FieldText, vs...))
 }
 
 // TextGT applies the GT predicate on the "text" field.
 func TextGT(v string) predicate.Doc {
-	return predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldText), v))
-	})
+	return predicate.Doc(sql.FieldGT(FieldText, v))
 }
 
 // TextGTE applies the GTE predicate on the "text" field.
 func TextGTE(v string) predicate.Doc {
-	return predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldText), v))
-	})
+	return predicate.Doc(sql.FieldGTE(FieldText, v))
 }
 
 // TextLT applies the LT predicate on the "text" field.
 func TextLT(v string) predicate.Doc {
-	return predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldText), v))
-	})
+	return predicate.Doc(sql.FieldLT(FieldText, v))
 }
 
 // TextLTE applies the LTE predicate on the "text" field.
 func TextLTE(v string) predicate.Doc {
-	return predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldText), v))
-	})
+	return predicate.Doc(sql.FieldLTE(FieldText, v))
 }
 
 // TextContains applies the Contains predicate on the "text" field.
 func TextContains(v string) predicate.Doc {
-	return predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldText), v))
-	})
+	return predicate.Doc(sql.FieldContains(FieldText, v))
 }
 
 // TextHasPrefix applies the HasPrefix predicate on the "text" field.
 func TextHasPrefix(v string) predicate.Doc {
-	return predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldText), v))
-	})
+	return predicate.Doc(sql.FieldHasPrefix(FieldText, v))
 }
 
 // TextHasSuffix applies the HasSuffix predicate on the "text" field.
 func TextHasSuffix(v string) predicate.Doc {
-	return predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldText), v))
-	})
+	return predicate.Doc(sql.FieldHasSuffix(FieldText, v))
 }
 
 // TextIsNil applies the IsNil predicate on the "text" field.
 func TextIsNil() predicate.Doc {
-	return predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldText)))
-	})
+	return predicate.Doc(sql.FieldIsNull(FieldText))
 }
 
 // TextNotNil applies the NotNil predicate on the "text" field.
 func TextNotNil() predicate.Doc {
-	return predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldText)))
-	})
+	return predicate.Doc(sql.FieldNotNull(FieldText))
 }
 
 // TextEqualFold applies the EqualFold predicate on the "text" field.
 func TextEqualFold(v string) predicate.Doc {
-	return predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldText), v))
-	})
+	return predicate.Doc(sql.FieldEqualFold(FieldText, v))
 }
 
 // TextContainsFold applies the ContainsFold predicate on the "text" field.
 func TextContainsFold(v string) predicate.Doc {
-	return predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldText), v))
-	})
+	return predicate.Doc(sql.FieldContainsFold(FieldText, v))
 }
 
 // HasParent applies the HasEdge predicate on the "parent" edge.

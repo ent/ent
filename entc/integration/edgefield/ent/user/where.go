@@ -14,187 +14,117 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.User(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.User(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.User(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.User(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.User(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.User(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.User(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.User(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.User(sql.FieldLTE(FieldID, id))
 }
 
 // ParentID applies equality check predicate on the "parent_id" field. It's identical to ParentIDEQ.
 func ParentID(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldParentID), v))
-	})
+	return predicate.User(sql.FieldEQ(FieldParentID, v))
 }
 
 // SpouseID applies equality check predicate on the "spouse_id" field. It's identical to SpouseIDEQ.
 func SpouseID(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldSpouseID), v))
-	})
+	return predicate.User(sql.FieldEQ(FieldSpouseID, v))
 }
 
 // ParentIDEQ applies the EQ predicate on the "parent_id" field.
 func ParentIDEQ(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldParentID), v))
-	})
+	return predicate.User(sql.FieldEQ(FieldParentID, v))
 }
 
 // ParentIDNEQ applies the NEQ predicate on the "parent_id" field.
 func ParentIDNEQ(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldParentID), v))
-	})
+	return predicate.User(sql.FieldNEQ(FieldParentID, v))
 }
 
 // ParentIDIn applies the In predicate on the "parent_id" field.
 func ParentIDIn(vs ...int) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldParentID), v...))
-	})
+	return predicate.User(sql.FieldIn(FieldParentID, vs...))
 }
 
 // ParentIDNotIn applies the NotIn predicate on the "parent_id" field.
 func ParentIDNotIn(vs ...int) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldParentID), v...))
-	})
+	return predicate.User(sql.FieldNotIn(FieldParentID, vs...))
 }
 
 // ParentIDIsNil applies the IsNil predicate on the "parent_id" field.
 func ParentIDIsNil() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldParentID)))
-	})
+	return predicate.User(sql.FieldIsNull(FieldParentID))
 }
 
 // ParentIDNotNil applies the NotNil predicate on the "parent_id" field.
 func ParentIDNotNil() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldParentID)))
-	})
+	return predicate.User(sql.FieldNotNull(FieldParentID))
 }
 
 // SpouseIDEQ applies the EQ predicate on the "spouse_id" field.
 func SpouseIDEQ(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldSpouseID), v))
-	})
+	return predicate.User(sql.FieldEQ(FieldSpouseID, v))
 }
 
 // SpouseIDNEQ applies the NEQ predicate on the "spouse_id" field.
 func SpouseIDNEQ(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldSpouseID), v))
-	})
+	return predicate.User(sql.FieldNEQ(FieldSpouseID, v))
 }
 
 // SpouseIDIn applies the In predicate on the "spouse_id" field.
 func SpouseIDIn(vs ...int) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldSpouseID), v...))
-	})
+	return predicate.User(sql.FieldIn(FieldSpouseID, vs...))
 }
 
 // SpouseIDNotIn applies the NotIn predicate on the "spouse_id" field.
 func SpouseIDNotIn(vs ...int) predicate.User {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldSpouseID), v...))
-	})
+	return predicate.User(sql.FieldNotIn(FieldSpouseID, vs...))
 }
 
 // SpouseIDIsNil applies the IsNil predicate on the "spouse_id" field.
 func SpouseIDIsNil() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldSpouseID)))
-	})
+	return predicate.User(sql.FieldIsNull(FieldSpouseID))
 }
 
 // SpouseIDNotNil applies the NotNil predicate on the "spouse_id" field.
 func SpouseIDNotNil() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldSpouseID)))
-	})
+	return predicate.User(sql.FieldNotNull(FieldSpouseID))
 }
 
 // HasPets applies the HasEdge predicate on the "pets" edge.

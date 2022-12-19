@@ -17,159 +17,97 @@ import (
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.BlobLink {
-	return predicate.BlobLink(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
-	})
+	return predicate.BlobLink(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // BlobID applies equality check predicate on the "blob_id" field. It's identical to BlobIDEQ.
 func BlobID(v uuid.UUID) predicate.BlobLink {
-	return predicate.BlobLink(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldBlobID), v))
-	})
+	return predicate.BlobLink(sql.FieldEQ(FieldBlobID, v))
 }
 
 // LinkID applies equality check predicate on the "link_id" field. It's identical to LinkIDEQ.
 func LinkID(v uuid.UUID) predicate.BlobLink {
-	return predicate.BlobLink(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLinkID), v))
-	})
+	return predicate.BlobLink(sql.FieldEQ(FieldLinkID, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.BlobLink {
-	return predicate.BlobLink(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
-	})
+	return predicate.BlobLink(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
 func CreatedAtNEQ(v time.Time) predicate.BlobLink {
-	return predicate.BlobLink(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCreatedAt), v))
-	})
+	return predicate.BlobLink(sql.FieldNEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
 func CreatedAtIn(vs ...time.Time) predicate.BlobLink {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.BlobLink(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldCreatedAt), v...))
-	})
+	return predicate.BlobLink(sql.FieldIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
 func CreatedAtNotIn(vs ...time.Time) predicate.BlobLink {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.BlobLink(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldCreatedAt), v...))
-	})
+	return predicate.BlobLink(sql.FieldNotIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtGT applies the GT predicate on the "created_at" field.
 func CreatedAtGT(v time.Time) predicate.BlobLink {
-	return predicate.BlobLink(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCreatedAt), v))
-	})
+	return predicate.BlobLink(sql.FieldGT(FieldCreatedAt, v))
 }
 
 // CreatedAtGTE applies the GTE predicate on the "created_at" field.
 func CreatedAtGTE(v time.Time) predicate.BlobLink {
-	return predicate.BlobLink(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCreatedAt), v))
-	})
+	return predicate.BlobLink(sql.FieldGTE(FieldCreatedAt, v))
 }
 
 // CreatedAtLT applies the LT predicate on the "created_at" field.
 func CreatedAtLT(v time.Time) predicate.BlobLink {
-	return predicate.BlobLink(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCreatedAt), v))
-	})
+	return predicate.BlobLink(sql.FieldLT(FieldCreatedAt, v))
 }
 
 // CreatedAtLTE applies the LTE predicate on the "created_at" field.
 func CreatedAtLTE(v time.Time) predicate.BlobLink {
-	return predicate.BlobLink(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCreatedAt), v))
-	})
+	return predicate.BlobLink(sql.FieldLTE(FieldCreatedAt, v))
 }
 
 // BlobIDEQ applies the EQ predicate on the "blob_id" field.
 func BlobIDEQ(v uuid.UUID) predicate.BlobLink {
-	return predicate.BlobLink(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldBlobID), v))
-	})
+	return predicate.BlobLink(sql.FieldEQ(FieldBlobID, v))
 }
 
 // BlobIDNEQ applies the NEQ predicate on the "blob_id" field.
 func BlobIDNEQ(v uuid.UUID) predicate.BlobLink {
-	return predicate.BlobLink(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldBlobID), v))
-	})
+	return predicate.BlobLink(sql.FieldNEQ(FieldBlobID, v))
 }
 
 // BlobIDIn applies the In predicate on the "blob_id" field.
 func BlobIDIn(vs ...uuid.UUID) predicate.BlobLink {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.BlobLink(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldBlobID), v...))
-	})
+	return predicate.BlobLink(sql.FieldIn(FieldBlobID, vs...))
 }
 
 // BlobIDNotIn applies the NotIn predicate on the "blob_id" field.
 func BlobIDNotIn(vs ...uuid.UUID) predicate.BlobLink {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.BlobLink(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldBlobID), v...))
-	})
+	return predicate.BlobLink(sql.FieldNotIn(FieldBlobID, vs...))
 }
 
 // LinkIDEQ applies the EQ predicate on the "link_id" field.
 func LinkIDEQ(v uuid.UUID) predicate.BlobLink {
-	return predicate.BlobLink(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLinkID), v))
-	})
+	return predicate.BlobLink(sql.FieldEQ(FieldLinkID, v))
 }
 
 // LinkIDNEQ applies the NEQ predicate on the "link_id" field.
 func LinkIDNEQ(v uuid.UUID) predicate.BlobLink {
-	return predicate.BlobLink(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLinkID), v))
-	})
+	return predicate.BlobLink(sql.FieldNEQ(FieldLinkID, v))
 }
 
 // LinkIDIn applies the In predicate on the "link_id" field.
 func LinkIDIn(vs ...uuid.UUID) predicate.BlobLink {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.BlobLink(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldLinkID), v...))
-	})
+	return predicate.BlobLink(sql.FieldIn(FieldLinkID, vs...))
 }
 
 // LinkIDNotIn applies the NotIn predicate on the "link_id" field.
 func LinkIDNotIn(vs ...uuid.UUID) predicate.BlobLink {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.BlobLink(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldLinkID), v...))
-	})
+	return predicate.BlobLink(sql.FieldNotIn(FieldLinkID, vs...))
 }
 
 // HasBlob applies the HasEdge predicate on the "blob" edge.

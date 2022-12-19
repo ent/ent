@@ -14,179 +14,117 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id int) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Tag(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id int) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Tag(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id int) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.Tag(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.Tag(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.Tag(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id int) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.Tag(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id int) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.Tag(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id int) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.Tag(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id int) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.Tag(sql.FieldLTE(FieldID, id))
 }
 
 // Value applies equality check predicate on the "value" field. It's identical to ValueEQ.
 func Value(v string) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldValue), v))
-	})
+	return predicate.Tag(sql.FieldEQ(FieldValue, v))
 }
 
 // ValueEQ applies the EQ predicate on the "value" field.
 func ValueEQ(v string) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldValue), v))
-	})
+	return predicate.Tag(sql.FieldEQ(FieldValue, v))
 }
 
 // ValueNEQ applies the NEQ predicate on the "value" field.
 func ValueNEQ(v string) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldValue), v))
-	})
+	return predicate.Tag(sql.FieldNEQ(FieldValue, v))
 }
 
 // ValueIn applies the In predicate on the "value" field.
 func ValueIn(vs ...string) predicate.Tag {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldValue), v...))
-	})
+	return predicate.Tag(sql.FieldIn(FieldValue, vs...))
 }
 
 // ValueNotIn applies the NotIn predicate on the "value" field.
 func ValueNotIn(vs ...string) predicate.Tag {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldValue), v...))
-	})
+	return predicate.Tag(sql.FieldNotIn(FieldValue, vs...))
 }
 
 // ValueGT applies the GT predicate on the "value" field.
 func ValueGT(v string) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldValue), v))
-	})
+	return predicate.Tag(sql.FieldGT(FieldValue, v))
 }
 
 // ValueGTE applies the GTE predicate on the "value" field.
 func ValueGTE(v string) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldValue), v))
-	})
+	return predicate.Tag(sql.FieldGTE(FieldValue, v))
 }
 
 // ValueLT applies the LT predicate on the "value" field.
 func ValueLT(v string) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldValue), v))
-	})
+	return predicate.Tag(sql.FieldLT(FieldValue, v))
 }
 
 // ValueLTE applies the LTE predicate on the "value" field.
 func ValueLTE(v string) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldValue), v))
-	})
+	return predicate.Tag(sql.FieldLTE(FieldValue, v))
 }
 
 // ValueContains applies the Contains predicate on the "value" field.
 func ValueContains(v string) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldValue), v))
-	})
+	return predicate.Tag(sql.FieldContains(FieldValue, v))
 }
 
 // ValueHasPrefix applies the HasPrefix predicate on the "value" field.
 func ValueHasPrefix(v string) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldValue), v))
-	})
+	return predicate.Tag(sql.FieldHasPrefix(FieldValue, v))
 }
 
 // ValueHasSuffix applies the HasSuffix predicate on the "value" field.
 func ValueHasSuffix(v string) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldValue), v))
-	})
+	return predicate.Tag(sql.FieldHasSuffix(FieldValue, v))
 }
 
 // ValueEqualFold applies the EqualFold predicate on the "value" field.
 func ValueEqualFold(v string) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldValue), v))
-	})
+	return predicate.Tag(sql.FieldEqualFold(FieldValue, v))
 }
 
 // ValueContainsFold applies the ContainsFold predicate on the "value" field.
 func ValueContainsFold(v string) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldValue), v))
-	})
+	return predicate.Tag(sql.FieldContainsFold(FieldValue, v))
 }
 
 // HasTweets applies the HasEdge predicate on the "tweets" edge.
