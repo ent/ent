@@ -8,7 +8,6 @@ package entv2
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -32,40 +31,7 @@ func (bd *BlogDelete) Where(ps ...predicate.Blog) *BlogDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (bd *BlogDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(bd.hooks) == 0 {
-		affected, err = bd.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*BlogMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			bd.mutation = mutation
-			affected, err = bd.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(bd.hooks) - 1; i >= 0; i-- {
-			if bd.hooks[i] == nil {
-				return 0, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
-			}
-			mut = bd.hooks[i](mut)
-		}
-		n, err := mut.Mutate(ctx, bd.mutation)
-		if err != nil {
-			return 0, err
-		}
-		nv, ok := n.(int)
-		if !ok {
-			return 0, fmt.Errorf("unexpected type %T returned from mutation. expected type: int", n)
-		}
-		affected = nv
-	}
-	return affected, err
+	return withHooks[int, BlogMutation](ctx, bd.sqlExec, bd.mutation, bd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -98,6 +64,7 @@ func (bd *BlogDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	bd.mutation.done = true
 	return affected, err
 }
 

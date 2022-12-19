@@ -56,49 +56,7 @@ func (gtc *GroupTagCreate) Mutation() *GroupTagMutation {
 
 // Save creates the GroupTag in the database.
 func (gtc *GroupTagCreate) Save(ctx context.Context) (*GroupTag, error) {
-	var (
-		err  error
-		node *GroupTag
-	)
-	if len(gtc.hooks) == 0 {
-		if err = gtc.check(); err != nil {
-			return nil, err
-		}
-		node, err = gtc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GroupTagMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = gtc.check(); err != nil {
-				return nil, err
-			}
-			gtc.mutation = mutation
-			if node, err = gtc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(gtc.hooks) - 1; i >= 0; i-- {
-			if gtc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = gtc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, gtc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*GroupTag)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from GroupTagMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*GroupTag, GroupTagMutation](ctx, gtc.sqlSave, gtc.mutation, gtc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -141,6 +99,9 @@ func (gtc *GroupTagCreate) check() error {
 }
 
 func (gtc *GroupTagCreate) sqlSave(ctx context.Context) (*GroupTag, error) {
+	if err := gtc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := gtc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, gtc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -150,6 +111,8 @@ func (gtc *GroupTagCreate) sqlSave(ctx context.Context) (*GroupTag, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
+	gtc.mutation.id = &_node.ID
+	gtc.mutation.done = true
 	return _node, nil
 }
 

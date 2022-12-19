@@ -75,34 +75,7 @@ func (bu *BlogUpdate) RemoveAdmins(u ...*User) *BlogUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (bu *BlogUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(bu.hooks) == 0 {
-		affected, err = bu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*BlogMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			bu.mutation = mutation
-			affected, err = bu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(bu.hooks) - 1; i >= 0; i-- {
-			if bu.hooks[i] == nil {
-				return 0, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
-			}
-			mut = bu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, bu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, BlogMutation](ctx, bu.sqlSave, bu.mutation, bu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -207,6 +180,7 @@ func (bu *BlogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	bu.mutation.done = true
 	return n, nil
 }
 
@@ -268,40 +242,7 @@ func (buo *BlogUpdateOne) Select(field string, fields ...string) *BlogUpdateOne 
 
 // Save executes the query and returns the updated Blog entity.
 func (buo *BlogUpdateOne) Save(ctx context.Context) (*Blog, error) {
-	var (
-		err  error
-		node *Blog
-	)
-	if len(buo.hooks) == 0 {
-		node, err = buo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*BlogMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			buo.mutation = mutation
-			node, err = buo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(buo.hooks) - 1; i >= 0; i-- {
-			if buo.hooks[i] == nil {
-				return nil, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
-			}
-			mut = buo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, buo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Blog)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from BlogMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Blog, BlogMutation](ctx, buo.sqlSave, buo.mutation, buo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -426,5 +367,6 @@ func (buo *BlogUpdateOne) sqlSave(ctx context.Context) (_node *Blog, err error) 
 		}
 		return nil, err
 	}
+	buo.mutation.done = true
 	return _node, nil
 }

@@ -499,6 +499,40 @@ func (s *selector) BoolX(ctx context.Context) bool {
 	return v
 }
 
+// withHooks invokes the builder operation with the given hooks, if any.
+func withHooks[V Value, M any, PM interface {
+	*M
+	Mutation
+}](ctx context.Context, exec func(context.Context) (V, error), mutation PM, hooks []Hook) (value V, err error) {
+	if len(hooks) == 0 {
+		return exec(ctx)
+	}
+	var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+		mutationT, ok := m.(PM)
+		if !ok {
+			return nil, fmt.Errorf("unexpected mutation type %T", m)
+		}
+		// Set the mutation to the builder.
+		*mutation = *mutationT
+		return exec(ctx)
+	})
+	for i := len(hooks) - 1; i >= 0; i-- {
+		if hooks[i] == nil {
+			return value, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+		}
+		mut = hooks[i](mut)
+	}
+	v, err := mut.Mutate(ctx, mutation)
+	if err != nil {
+		return value, err
+	}
+	nv, ok := v.(V)
+	if !ok {
+		return value, fmt.Errorf("unexpected node type %T returned from %T", v, mutation)
+	}
+	return nv, nil
+}
+
 // newQueryContext returns a new context with the given QueryContext attached in case it does not exist.
 func newQueryContext(ctx context.Context, typ, op string) context.Context {
 	if ent.QueryFromContext(ctx) == nil {

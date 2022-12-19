@@ -38,49 +38,7 @@ func (ric *RelationshipInfoCreate) Mutation() *RelationshipInfoMutation {
 
 // Save creates the RelationshipInfo in the database.
 func (ric *RelationshipInfoCreate) Save(ctx context.Context) (*RelationshipInfo, error) {
-	var (
-		err  error
-		node *RelationshipInfo
-	)
-	if len(ric.hooks) == 0 {
-		if err = ric.check(); err != nil {
-			return nil, err
-		}
-		node, err = ric.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*RelationshipInfoMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = ric.check(); err != nil {
-				return nil, err
-			}
-			ric.mutation = mutation
-			if node, err = ric.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(ric.hooks) - 1; i >= 0; i-- {
-			if ric.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ric.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, ric.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*RelationshipInfo)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from RelationshipInfoMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*RelationshipInfo, RelationshipInfoMutation](ctx, ric.sqlSave, ric.mutation, ric.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -114,6 +72,9 @@ func (ric *RelationshipInfoCreate) check() error {
 }
 
 func (ric *RelationshipInfoCreate) sqlSave(ctx context.Context) (*RelationshipInfo, error) {
+	if err := ric.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := ric.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ric.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -123,6 +84,8 @@ func (ric *RelationshipInfoCreate) sqlSave(ctx context.Context) (*RelationshipIn
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
+	ric.mutation.id = &_node.ID
+	ric.mutation.done = true
 	return _node, nil
 }
 

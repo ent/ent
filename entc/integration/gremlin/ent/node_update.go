@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -117,34 +116,7 @@ func (nu *NodeUpdate) ClearNext() *NodeUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (nu *NodeUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(nu.hooks) == 0 {
-		affected, err = nu.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*NodeMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			nu.mutation = mutation
-			affected, err = nu.gremlinSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(nu.hooks) - 1; i >= 0; i-- {
-			if nu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = nu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, nu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, NodeMutation](ctx, nu.gremlinSave, nu.mutation, nu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -178,6 +150,7 @@ func (nu *NodeUpdate) gremlinSave(ctx context.Context) (int, error) {
 	if err, ok := isConstantError(res); ok {
 		return 0, err
 	}
+	nu.mutation.done = true
 	return res.ReadInt()
 }
 
@@ -346,40 +319,7 @@ func (nuo *NodeUpdateOne) Select(field string, fields ...string) *NodeUpdateOne 
 
 // Save executes the query and returns the updated Node entity.
 func (nuo *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
-	var (
-		err  error
-		node *Node
-	)
-	if len(nuo.hooks) == 0 {
-		node, err = nuo.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*NodeMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			nuo.mutation = mutation
-			node, err = nuo.gremlinSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(nuo.hooks) - 1; i >= 0; i-- {
-			if nuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = nuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, nuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Node)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from NodeMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Node, NodeMutation](ctx, nuo.gremlinSave, nuo.mutation, nuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -417,6 +357,7 @@ func (nuo *NodeUpdateOne) gremlinSave(ctx context.Context) (*Node, error) {
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
+	nuo.mutation.done = true
 	n := &Node{config: nuo.config}
 	if err := n.FromResponse(res); err != nil {
 		return nil, err

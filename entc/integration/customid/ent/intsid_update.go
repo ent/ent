@@ -100,34 +100,7 @@ func (isu *IntSIDUpdate) RemoveChildren(i ...*IntSID) *IntSIDUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (isu *IntSIDUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(isu.hooks) == 0 {
-		affected, err = isu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*IntSIDMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			isu.mutation = mutation
-			affected, err = isu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(isu.hooks) - 1; i >= 0; i-- {
-			if isu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = isu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, isu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, IntSIDMutation](ctx, isu.sqlSave, isu.mutation, isu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -267,6 +240,7 @@ func (isu *IntSIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	isu.mutation.done = true
 	return n, nil
 }
 
@@ -353,40 +327,7 @@ func (isuo *IntSIDUpdateOne) Select(field string, fields ...string) *IntSIDUpdat
 
 // Save executes the query and returns the updated IntSID entity.
 func (isuo *IntSIDUpdateOne) Save(ctx context.Context) (*IntSID, error) {
-	var (
-		err  error
-		node *IntSID
-	)
-	if len(isuo.hooks) == 0 {
-		node, err = isuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*IntSIDMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			isuo.mutation = mutation
-			node, err = isuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(isuo.hooks) - 1; i >= 0; i-- {
-			if isuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = isuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, isuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*IntSID)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from IntSIDMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*IntSID, IntSIDMutation](ctx, isuo.sqlSave, isuo.mutation, isuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -546,5 +487,6 @@ func (isuo *IntSIDUpdateOne) sqlSave(ctx context.Context) (_node *IntSID, err er
 		}
 		return nil, err
 	}
+	isuo.mutation.done = true
 	return _node, nil
 }

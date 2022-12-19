@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -33,40 +32,7 @@ func (ud *UserDelete) Where(ps ...predicate.User) *UserDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ud *UserDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(ud.hooks) == 0 {
-		affected, err = ud.gremlinExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*UserMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			ud.mutation = mutation
-			affected, err = ud.gremlinExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(ud.hooks) - 1; i >= 0; i-- {
-			if ud.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ud.hooks[i](mut)
-		}
-		n, err := mut.Mutate(ctx, ud.mutation)
-		if err != nil {
-			return 0, err
-		}
-		nv, ok := n.(int)
-		if !ok {
-			return 0, fmt.Errorf("unexpected type %T returned from mutation. expected type: int", n)
-		}
-		affected = nv
-	}
-	return affected, err
+	return withHooks[int, UserMutation](ctx, ud.gremlinExec, ud.mutation, ud.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -84,6 +50,7 @@ func (ud *UserDelete) gremlinExec(ctx context.Context) (int, error) {
 	if err := ud.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
+	ud.mutation.done = true
 	return res.ReadInt()
 }
 

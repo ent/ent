@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -69,50 +68,8 @@ func (gic *GroupInfoCreate) Mutation() *GroupInfoMutation {
 
 // Save creates the GroupInfo in the database.
 func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
-	var (
-		err  error
-		node *GroupInfo
-	)
 	gic.defaults()
-	if len(gic.hooks) == 0 {
-		if err = gic.check(); err != nil {
-			return nil, err
-		}
-		node, err = gic.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GroupInfoMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = gic.check(); err != nil {
-				return nil, err
-			}
-			gic.mutation = mutation
-			if node, err = gic.gremlinSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(gic.hooks) - 1; i >= 0; i-- {
-			if gic.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = gic.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, gic.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*GroupInfo)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from GroupInfoMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*GroupInfo, GroupInfoMutation](ctx, gic.gremlinSave, gic.mutation, gic.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -157,6 +114,9 @@ func (gic *GroupInfoCreate) check() error {
 }
 
 func (gic *GroupInfoCreate) gremlinSave(ctx context.Context) (*GroupInfo, error) {
+	if err := gic.check(); err != nil {
+		return nil, err
+	}
 	res := &gremlin.Response{}
 	query, bindings := gic.gremlin().Query()
 	if err := gic.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -169,6 +129,8 @@ func (gic *GroupInfoCreate) gremlinSave(ctx context.Context) (*GroupInfo, error)
 	if err := gi.FromResponse(res); err != nil {
 		return nil, err
 	}
+	gic.mutation.id = &gi.ID
+	gic.mutation.done = true
 	return gi, nil
 }
 

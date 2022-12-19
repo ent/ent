@@ -68,50 +68,8 @@ func (tc *TaskCreate) Mutation() *TaskMutation {
 
 // Save creates the Task in the database.
 func (tc *TaskCreate) Save(ctx context.Context) (*Task, error) {
-	var (
-		err  error
-		node *Task
-	)
 	tc.defaults()
-	if len(tc.hooks) == 0 {
-		if err = tc.check(); err != nil {
-			return nil, err
-		}
-		node, err = tc.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*TaskMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = tc.check(); err != nil {
-				return nil, err
-			}
-			tc.mutation = mutation
-			if node, err = tc.gremlinSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(tc.hooks) - 1; i >= 0; i-- {
-			if tc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = tc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, tc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Task)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from TaskMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Task, TaskMutation](ctx, tc.gremlinSave, tc.mutation, tc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -165,6 +123,9 @@ func (tc *TaskCreate) check() error {
 }
 
 func (tc *TaskCreate) gremlinSave(ctx context.Context) (*Task, error) {
+	if err := tc.check(); err != nil {
+		return nil, err
+	}
 	res := &gremlin.Response{}
 	query, bindings := tc.gremlin().Query()
 	if err := tc.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -177,6 +138,8 @@ func (tc *TaskCreate) gremlinSave(ctx context.Context) (*Task, error) {
 	if err := t.FromResponse(res); err != nil {
 		return nil, err
 	}
+	tc.mutation.id = &t.ID
+	tc.mutation.done = true
 	return t, nil
 }
 

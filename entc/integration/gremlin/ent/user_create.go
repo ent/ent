@@ -352,50 +352,8 @@ func (uc *UserCreate) Mutation() *UserMutation {
 
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
-	var (
-		err  error
-		node *User
-	)
 	uc.defaults()
-	if len(uc.hooks) == 0 {
-		if err = uc.check(); err != nil {
-			return nil, err
-		}
-		node, err = uc.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*UserMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = uc.check(); err != nil {
-				return nil, err
-			}
-			uc.mutation = mutation
-			if node, err = uc.gremlinSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(uc.hooks) - 1; i >= 0; i-- {
-			if uc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = uc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, uc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*User)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from UserMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*User, UserMutation](ctx, uc.gremlinSave, uc.mutation, uc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -476,6 +434,9 @@ func (uc *UserCreate) check() error {
 }
 
 func (uc *UserCreate) gremlinSave(ctx context.Context) (*User, error) {
+	if err := uc.check(); err != nil {
+		return nil, err
+	}
 	res := &gremlin.Response{}
 	query, bindings := uc.gremlin().Query()
 	if err := uc.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -488,6 +449,8 @@ func (uc *UserCreate) gremlinSave(ctx context.Context) (*User, error) {
 	if err := u.FromResponse(res); err != nil {
 		return nil, err
 	}
+	uc.mutation.id = &u.ID
+	uc.mutation.done = true
 	return u, nil
 }
 

@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -135,50 +134,8 @@ func (pc *PetCreate) Mutation() *PetMutation {
 
 // Save creates the Pet in the database.
 func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
-	var (
-		err  error
-		node *Pet
-	)
 	pc.defaults()
-	if len(pc.hooks) == 0 {
-		if err = pc.check(); err != nil {
-			return nil, err
-		}
-		node, err = pc.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*PetMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = pc.check(); err != nil {
-				return nil, err
-			}
-			pc.mutation = mutation
-			if node, err = pc.gremlinSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(pc.hooks) - 1; i >= 0; i-- {
-			if pc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = pc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, pc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Pet)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from PetMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Pet, PetMutation](ctx, pc.gremlinSave, pc.mutation, pc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -230,6 +187,9 @@ func (pc *PetCreate) check() error {
 }
 
 func (pc *PetCreate) gremlinSave(ctx context.Context) (*Pet, error) {
+	if err := pc.check(); err != nil {
+		return nil, err
+	}
 	res := &gremlin.Response{}
 	query, bindings := pc.gremlin().Query()
 	if err := pc.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -242,6 +202,8 @@ func (pc *PetCreate) gremlinSave(ctx context.Context) (*Pet, error) {
 	if err := pe.FromResponse(res); err != nil {
 		return nil, err
 	}
+	pc.mutation.id = &pe.ID
+	pc.mutation.done = true
 	return pe, nil
 }
 

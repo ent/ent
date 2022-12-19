@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -45,49 +44,7 @@ func (sc *SpecCreate) Mutation() *SpecMutation {
 
 // Save creates the Spec in the database.
 func (sc *SpecCreate) Save(ctx context.Context) (*Spec, error) {
-	var (
-		err  error
-		node *Spec
-	)
-	if len(sc.hooks) == 0 {
-		if err = sc.check(); err != nil {
-			return nil, err
-		}
-		node, err = sc.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*SpecMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = sc.check(); err != nil {
-				return nil, err
-			}
-			sc.mutation = mutation
-			if node, err = sc.gremlinSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(sc.hooks) - 1; i >= 0; i-- {
-			if sc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = sc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, sc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Spec)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from SpecMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Spec, SpecMutation](ctx, sc.gremlinSave, sc.mutation, sc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -118,6 +75,9 @@ func (sc *SpecCreate) check() error {
 }
 
 func (sc *SpecCreate) gremlinSave(ctx context.Context) (*Spec, error) {
+	if err := sc.check(); err != nil {
+		return nil, err
+	}
 	res := &gremlin.Response{}
 	query, bindings := sc.gremlin().Query()
 	if err := sc.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -130,6 +90,8 @@ func (sc *SpecCreate) gremlinSave(ctx context.Context) (*Spec, error) {
 	if err := s.FromResponse(res); err != nil {
 		return nil, err
 	}
+	sc.mutation.id = &s.ID
+	sc.mutation.done = true
 	return s, nil
 }
 

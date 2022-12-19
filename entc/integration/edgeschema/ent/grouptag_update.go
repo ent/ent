@@ -74,40 +74,7 @@ func (gtu *GroupTagUpdate) ClearGroup() *GroupTagUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (gtu *GroupTagUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(gtu.hooks) == 0 {
-		if err = gtu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = gtu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GroupTagMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = gtu.check(); err != nil {
-				return 0, err
-			}
-			gtu.mutation = mutation
-			affected, err = gtu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(gtu.hooks) - 1; i >= 0; i-- {
-			if gtu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = gtu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, gtu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, GroupTagMutation](ctx, gtu.sqlSave, gtu.mutation, gtu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -144,6 +111,9 @@ func (gtu *GroupTagUpdate) check() error {
 }
 
 func (gtu *GroupTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := gtu.check(); err != nil {
+		return n, err
+	}
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   grouptag.Table,
@@ -239,6 +209,7 @@ func (gtu *GroupTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	gtu.mutation.done = true
 	return n, nil
 }
 
@@ -298,46 +269,7 @@ func (gtuo *GroupTagUpdateOne) Select(field string, fields ...string) *GroupTagU
 
 // Save executes the query and returns the updated GroupTag entity.
 func (gtuo *GroupTagUpdateOne) Save(ctx context.Context) (*GroupTag, error) {
-	var (
-		err  error
-		node *GroupTag
-	)
-	if len(gtuo.hooks) == 0 {
-		if err = gtuo.check(); err != nil {
-			return nil, err
-		}
-		node, err = gtuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GroupTagMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = gtuo.check(); err != nil {
-				return nil, err
-			}
-			gtuo.mutation = mutation
-			node, err = gtuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(gtuo.hooks) - 1; i >= 0; i-- {
-			if gtuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = gtuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, gtuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*GroupTag)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from GroupTagMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*GroupTag, GroupTagMutation](ctx, gtuo.sqlSave, gtuo.mutation, gtuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -374,6 +306,9 @@ func (gtuo *GroupTagUpdateOne) check() error {
 }
 
 func (gtuo *GroupTagUpdateOne) sqlSave(ctx context.Context) (_node *GroupTag, err error) {
+	if err := gtuo.check(); err != nil {
+		return _node, err
+	}
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   grouptag.Table,
@@ -489,5 +424,6 @@ func (gtuo *GroupTagUpdateOne) sqlSave(ctx context.Context) (_node *GroupTag, er
 		}
 		return nil, err
 	}
+	gtuo.mutation.done = true
 	return _node, nil
 }

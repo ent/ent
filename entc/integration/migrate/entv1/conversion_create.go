@@ -155,49 +155,7 @@ func (cc *ConversionCreate) Mutation() *ConversionMutation {
 
 // Save creates the Conversion in the database.
 func (cc *ConversionCreate) Save(ctx context.Context) (*Conversion, error) {
-	var (
-		err  error
-		node *Conversion
-	)
-	if len(cc.hooks) == 0 {
-		if err = cc.check(); err != nil {
-			return nil, err
-		}
-		node, err = cc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ConversionMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = cc.check(); err != nil {
-				return nil, err
-			}
-			cc.mutation = mutation
-			if node, err = cc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(cc.hooks) - 1; i >= 0; i-- {
-			if cc.hooks[i] == nil {
-				return nil, fmt.Errorf("entv1: uninitialized hook (forgotten import entv1/runtime?)")
-			}
-			mut = cc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, cc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Conversion)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from ConversionMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Conversion, ConversionMutation](ctx, cc.sqlSave, cc.mutation, cc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -228,6 +186,9 @@ func (cc *ConversionCreate) check() error {
 }
 
 func (cc *ConversionCreate) sqlSave(ctx context.Context) (*Conversion, error) {
+	if err := cc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := cc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -237,6 +198,8 @@ func (cc *ConversionCreate) sqlSave(ctx context.Context) (*Conversion, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
+	cc.mutation.id = &_node.ID
+	cc.mutation.done = true
 	return _node, nil
 }
 

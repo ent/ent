@@ -151,41 +151,8 @@ func (cu *CardUpdate) RemoveSpec(s ...*Spec) *CardUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (cu *CardUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
 	cu.defaults()
-	if len(cu.hooks) == 0 {
-		if err = cu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = cu.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*CardMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = cu.check(); err != nil {
-				return 0, err
-			}
-			cu.mutation = mutation
-			affected, err = cu.gremlinSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(cu.hooks) - 1; i >= 0; i-- {
-			if cu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = cu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, cu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, CardMutation](ctx, cu.gremlinSave, cu.mutation, cu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -229,6 +196,9 @@ func (cu *CardUpdate) check() error {
 }
 
 func (cu *CardUpdate) gremlinSave(ctx context.Context) (int, error) {
+	if err := cu.check(); err != nil {
+		return 0, err
+	}
 	res := &gremlin.Response{}
 	query, bindings := cu.gremlin().Query()
 	if err := cu.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -237,6 +207,7 @@ func (cu *CardUpdate) gremlinSave(ctx context.Context) (int, error) {
 	if err, ok := isConstantError(res); ok {
 		return 0, err
 	}
+	cu.mutation.done = true
 	return res.ReadInt()
 }
 
@@ -438,47 +409,8 @@ func (cuo *CardUpdateOne) Select(field string, fields ...string) *CardUpdateOne 
 
 // Save executes the query and returns the updated Card entity.
 func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
-	var (
-		err  error
-		node *Card
-	)
 	cuo.defaults()
-	if len(cuo.hooks) == 0 {
-		if err = cuo.check(); err != nil {
-			return nil, err
-		}
-		node, err = cuo.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*CardMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = cuo.check(); err != nil {
-				return nil, err
-			}
-			cuo.mutation = mutation
-			node, err = cuo.gremlinSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(cuo.hooks) - 1; i >= 0; i-- {
-			if cuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = cuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, cuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Card)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from CardMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Card, CardMutation](ctx, cuo.gremlinSave, cuo.mutation, cuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -522,6 +454,9 @@ func (cuo *CardUpdateOne) check() error {
 }
 
 func (cuo *CardUpdateOne) gremlinSave(ctx context.Context) (*Card, error) {
+	if err := cuo.check(); err != nil {
+		return nil, err
+	}
 	res := &gremlin.Response{}
 	id, ok := cuo.mutation.ID()
 	if !ok {
@@ -534,6 +469,7 @@ func (cuo *CardUpdateOne) gremlinSave(ctx context.Context) (*Card, error) {
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
+	cuo.mutation.done = true
 	c := &Card{config: cuo.config}
 	if err := c.FromResponse(res); err != nil {
 		return nil, err

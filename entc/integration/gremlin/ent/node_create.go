@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -84,49 +83,7 @@ func (nc *NodeCreate) Mutation() *NodeMutation {
 
 // Save creates the Node in the database.
 func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
-	var (
-		err  error
-		node *Node
-	)
-	if len(nc.hooks) == 0 {
-		if err = nc.check(); err != nil {
-			return nil, err
-		}
-		node, err = nc.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*NodeMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = nc.check(); err != nil {
-				return nil, err
-			}
-			nc.mutation = mutation
-			if node, err = nc.gremlinSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(nc.hooks) - 1; i >= 0; i-- {
-			if nc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = nc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, nc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Node)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from NodeMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Node, NodeMutation](ctx, nc.gremlinSave, nc.mutation, nc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -157,6 +114,9 @@ func (nc *NodeCreate) check() error {
 }
 
 func (nc *NodeCreate) gremlinSave(ctx context.Context) (*Node, error) {
+	if err := nc.check(); err != nil {
+		return nil, err
+	}
 	res := &gremlin.Response{}
 	query, bindings := nc.gremlin().Query()
 	if err := nc.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -169,6 +129,8 @@ func (nc *NodeCreate) gremlinSave(ctx context.Context) (*Node, error) {
 	if err := n.FromResponse(res); err != nil {
 		return nil, err
 	}
+	nc.mutation.id = &n.ID
+	nc.mutation.done = true
 	return n, nil
 }
 

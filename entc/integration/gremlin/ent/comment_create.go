@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -102,49 +101,7 @@ func (cc *CommentCreate) Mutation() *CommentMutation {
 
 // Save creates the Comment in the database.
 func (cc *CommentCreate) Save(ctx context.Context) (*Comment, error) {
-	var (
-		err  error
-		node *Comment
-	)
-	if len(cc.hooks) == 0 {
-		if err = cc.check(); err != nil {
-			return nil, err
-		}
-		node, err = cc.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*CommentMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = cc.check(); err != nil {
-				return nil, err
-			}
-			cc.mutation = mutation
-			if node, err = cc.gremlinSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(cc.hooks) - 1; i >= 0; i-- {
-			if cc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = cc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, cc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Comment)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from CommentMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Comment, CommentMutation](ctx, cc.gremlinSave, cc.mutation, cc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -181,6 +138,9 @@ func (cc *CommentCreate) check() error {
 }
 
 func (cc *CommentCreate) gremlinSave(ctx context.Context) (*Comment, error) {
+	if err := cc.check(); err != nil {
+		return nil, err
+	}
 	res := &gremlin.Response{}
 	query, bindings := cc.gremlin().Query()
 	if err := cc.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -193,6 +153,8 @@ func (cc *CommentCreate) gremlinSave(ctx context.Context) (*Comment, error) {
 	if err := c.FromResponse(res); err != nil {
 		return nil, err
 	}
+	cc.mutation.id = &c.ID
+	cc.mutation.done = true
 	return c, nil
 }
 

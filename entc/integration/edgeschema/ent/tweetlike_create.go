@@ -71,50 +71,10 @@ func (tlc *TweetLikeCreate) Mutation() *TweetLikeMutation {
 
 // Save creates the TweetLike in the database.
 func (tlc *TweetLikeCreate) Save(ctx context.Context) (*TweetLike, error) {
-	var (
-		err  error
-		node *TweetLike
-	)
 	if err := tlc.defaults(); err != nil {
 		return nil, err
 	}
-	if len(tlc.hooks) == 0 {
-		if err = tlc.check(); err != nil {
-			return nil, err
-		}
-		node, err = tlc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*TweetLikeMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = tlc.check(); err != nil {
-				return nil, err
-			}
-			tlc.mutation = mutation
-			if node, err = tlc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			return node, err
-		})
-		for i := len(tlc.hooks) - 1; i >= 0; i-- {
-			if tlc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = tlc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, tlc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*TweetLike)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from TweetLikeMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*TweetLike, TweetLikeMutation](ctx, tlc.sqlSave, tlc.mutation, tlc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -172,6 +132,9 @@ func (tlc *TweetLikeCreate) check() error {
 }
 
 func (tlc *TweetLikeCreate) sqlSave(ctx context.Context) (*TweetLike, error) {
+	if err := tlc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := tlc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, tlc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {

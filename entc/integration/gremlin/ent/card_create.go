@@ -132,50 +132,8 @@ func (cc *CardCreate) Mutation() *CardMutation {
 
 // Save creates the Card in the database.
 func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
-	var (
-		err  error
-		node *Card
-	)
 	cc.defaults()
-	if len(cc.hooks) == 0 {
-		if err = cc.check(); err != nil {
-			return nil, err
-		}
-		node, err = cc.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*CardMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = cc.check(); err != nil {
-				return nil, err
-			}
-			cc.mutation = mutation
-			if node, err = cc.gremlinSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(cc.hooks) - 1; i >= 0; i-- {
-			if cc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = cc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, cc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Card)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from CardMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Card, CardMutation](ctx, cc.gremlinSave, cc.mutation, cc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -244,6 +202,9 @@ func (cc *CardCreate) check() error {
 }
 
 func (cc *CardCreate) gremlinSave(ctx context.Context) (*Card, error) {
+	if err := cc.check(); err != nil {
+		return nil, err
+	}
 	res := &gremlin.Response{}
 	query, bindings := cc.gremlin().Query()
 	if err := cc.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -256,6 +217,8 @@ func (cc *CardCreate) gremlinSave(ctx context.Context) (*Card, error) {
 	if err := c.FromResponse(res); err != nil {
 		return nil, err
 	}
+	cc.mutation.id = &c.ID
+	cc.mutation.done = true
 	return c, nil
 }
 

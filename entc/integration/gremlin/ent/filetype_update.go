@@ -110,40 +110,7 @@ func (ftu *FileTypeUpdate) RemoveFiles(f ...*File) *FileTypeUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ftu *FileTypeUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(ftu.hooks) == 0 {
-		if err = ftu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = ftu.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*FileTypeMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = ftu.check(); err != nil {
-				return 0, err
-			}
-			ftu.mutation = mutation
-			affected, err = ftu.gremlinSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(ftu.hooks) - 1; i >= 0; i-- {
-			if ftu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ftu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, ftu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, FileTypeMutation](ctx, ftu.gremlinSave, ftu.mutation, ftu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -184,6 +151,9 @@ func (ftu *FileTypeUpdate) check() error {
 }
 
 func (ftu *FileTypeUpdate) gremlinSave(ctx context.Context) (int, error) {
+	if err := ftu.check(); err != nil {
+		return 0, err
+	}
 	res := &gremlin.Response{}
 	query, bindings := ftu.gremlin().Query()
 	if err := ftu.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -192,6 +162,7 @@ func (ftu *FileTypeUpdate) gremlinSave(ctx context.Context) (int, error) {
 	if err, ok := isConstantError(res); ok {
 		return 0, err
 	}
+	ftu.mutation.done = true
 	return res.ReadInt()
 }
 
@@ -342,46 +313,7 @@ func (ftuo *FileTypeUpdateOne) Select(field string, fields ...string) *FileTypeU
 
 // Save executes the query and returns the updated FileType entity.
 func (ftuo *FileTypeUpdateOne) Save(ctx context.Context) (*FileType, error) {
-	var (
-		err  error
-		node *FileType
-	)
-	if len(ftuo.hooks) == 0 {
-		if err = ftuo.check(); err != nil {
-			return nil, err
-		}
-		node, err = ftuo.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*FileTypeMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = ftuo.check(); err != nil {
-				return nil, err
-			}
-			ftuo.mutation = mutation
-			node, err = ftuo.gremlinSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(ftuo.hooks) - 1; i >= 0; i-- {
-			if ftuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ftuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, ftuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*FileType)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from FileTypeMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*FileType, FileTypeMutation](ctx, ftuo.gremlinSave, ftuo.mutation, ftuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -422,6 +354,9 @@ func (ftuo *FileTypeUpdateOne) check() error {
 }
 
 func (ftuo *FileTypeUpdateOne) gremlinSave(ctx context.Context) (*FileType, error) {
+	if err := ftuo.check(); err != nil {
+		return nil, err
+	}
 	res := &gremlin.Response{}
 	id, ok := ftuo.mutation.ID()
 	if !ok {
@@ -434,6 +369,7 @@ func (ftuo *FileTypeUpdateOne) gremlinSave(ctx context.Context) (*FileType, erro
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
+	ftuo.mutation.done = true
 	ft := &FileType{config: ftuo.config}
 	if err := ft.FromResponse(res); err != nil {
 		return nil, err

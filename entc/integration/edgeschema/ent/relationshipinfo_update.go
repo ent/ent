@@ -44,34 +44,7 @@ func (riu *RelationshipInfoUpdate) Mutation() *RelationshipInfoMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (riu *RelationshipInfoUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(riu.hooks) == 0 {
-		affected, err = riu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*RelationshipInfoMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			riu.mutation = mutation
-			affected, err = riu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(riu.hooks) - 1; i >= 0; i-- {
-			if riu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = riu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, riu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, RelationshipInfoMutation](ctx, riu.sqlSave, riu.mutation, riu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -125,6 +98,7 @@ func (riu *RelationshipInfoUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		return 0, err
 	}
+	riu.mutation.done = true
 	return n, nil
 }
 
@@ -156,40 +130,7 @@ func (riuo *RelationshipInfoUpdateOne) Select(field string, fields ...string) *R
 
 // Save executes the query and returns the updated RelationshipInfo entity.
 func (riuo *RelationshipInfoUpdateOne) Save(ctx context.Context) (*RelationshipInfo, error) {
-	var (
-		err  error
-		node *RelationshipInfo
-	)
-	if len(riuo.hooks) == 0 {
-		node, err = riuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*RelationshipInfoMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			riuo.mutation = mutation
-			node, err = riuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(riuo.hooks) - 1; i >= 0; i-- {
-			if riuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = riuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, riuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*RelationshipInfo)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from RelationshipInfoMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*RelationshipInfo, RelationshipInfoMutation](ctx, riuo.sqlSave, riuo.mutation, riuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -263,5 +204,6 @@ func (riuo *RelationshipInfoUpdateOne) sqlSave(ctx context.Context) (_node *Rela
 		}
 		return nil, err
 	}
+	riuo.mutation.done = true
 	return _node, nil
 }

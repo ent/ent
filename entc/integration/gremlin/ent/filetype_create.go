@@ -82,50 +82,8 @@ func (ftc *FileTypeCreate) Mutation() *FileTypeMutation {
 
 // Save creates the FileType in the database.
 func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
-	var (
-		err  error
-		node *FileType
-	)
 	ftc.defaults()
-	if len(ftc.hooks) == 0 {
-		if err = ftc.check(); err != nil {
-			return nil, err
-		}
-		node, err = ftc.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*FileTypeMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = ftc.check(); err != nil {
-				return nil, err
-			}
-			ftc.mutation = mutation
-			if node, err = ftc.gremlinSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(ftc.hooks) - 1; i >= 0; i-- {
-			if ftc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ftc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, ftc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*FileType)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from FileTypeMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*FileType, FileTypeMutation](ctx, ftc.gremlinSave, ftc.mutation, ftc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -187,6 +145,9 @@ func (ftc *FileTypeCreate) check() error {
 }
 
 func (ftc *FileTypeCreate) gremlinSave(ctx context.Context) (*FileType, error) {
+	if err := ftc.check(); err != nil {
+		return nil, err
+	}
 	res := &gremlin.Response{}
 	query, bindings := ftc.gremlin().Query()
 	if err := ftc.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -199,6 +160,8 @@ func (ftc *FileTypeCreate) gremlinSave(ctx context.Context) (*FileType, error) {
 	if err := ft.FromResponse(res); err != nil {
 		return nil, err
 	}
+	ftc.mutation.id = &ft.ID
+	ftc.mutation.done = true
 	return ft, nil
 }
 
