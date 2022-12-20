@@ -73,7 +73,7 @@ func (f TraverseFunc) Traverse(ctx context.Context, q {{ $pkg }}.Query) error {
 }
 
 {{- range $n := $.Nodes }}
-	{{ $name := print $n.Name "QueryFunc" }}
+	{{ $name := print $n.Name "Func" }}
 	{{ $type := printf "*%s.%s" $pkg $n.QueryName }}
 	// The {{ $name }} type is an adapter to allow the use of ordinary function as a Querier.
 	type {{ $name }} func(context.Context, {{ $type }}) ({{ $pkg }}.Value, error)
@@ -84,6 +84,23 @@ func (f TraverseFunc) Traverse(ctx context.Context, q {{ $pkg }}.Query) error {
 			return f(ctx, q)
 		}
 		return nil, fmt.Errorf("unexpected query type %T. expect {{ $type }}", q)
+	}
+
+	{{ $name = print "Traverse" $n.Name }}
+	// The {{ $name }} type is an adapter to allow the use of ordinary function as Traverser.
+	type {{ $name }} func(context.Context, {{ $type }}) error
+
+	// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+	func (f {{ $name }}) Intercept(next {{ $pkg }}.Querier) {{ $pkg }}.Querier {
+		return next
+	}
+
+	// Traverse calls f(ctx, q).
+	func (f {{ $name }}) Traverse(ctx context.Context, q {{ $pkg }}.Query) error {
+		if q, ok := q.({{ $type }}); ok {
+			return f(ctx, q)
+		}
+		return fmt.Errorf("unexpected query type %T. expect {{ $type }}", q)
 	}
 {{- end }}
 

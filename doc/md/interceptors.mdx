@@ -173,10 +173,8 @@ continuing to the nodes returned by the query. For example, in the query below, 
 users are traversed in **any** graph traversals in the system:
 
 ```go
-ent.TraverseFunc(func(ctx context.Context, query ent.Query) error {
-	if q, ok := query.(*ent.UserQuery); ok {
-		q.Where(user.Active(true))
-	}
+intercept.TraverseUser(func(ctx context.Context, q *ent.UserQuery) error {
+	q.Where(user.Active(true))
 	return nil
 })
 ```
@@ -204,10 +202,8 @@ func TestTypedTraverser(t *testing.T) {
 
 	// Add an interceptor that filters out inactive users.
 	client.User.Intercept(
-		ent.TraverseFunc(func(ctx context.Context, query ent.Query) error {
-			if q, ok := query.(*ent.UserQuery); ok {
-				q.Where(user.Active(true))
-			}
+		intercept.TraverseUser(func(ctx context.Context, q *ent.UserQuery) error {
+			q.Where(user.Active(true))
 			return nil
 		}),
 	)
