@@ -11,10 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"entgo.io/ent/dialect/sql"
-
 	"entgo.io/ent/dialect"
-
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/hooks/ent"
 	"entgo.io/ent/entc/integration/hooks/ent/card"
 	"entgo.io/ent/entc/integration/hooks/ent/enttest"
@@ -494,9 +492,7 @@ func TestInterceptor_Sanity(t *testing.T) {
 		defer client.Close()
 		client.Intercept(
 			ent.InterceptFunc(func(next ent.Querier) ent.Querier {
-				return ent.QuerierFunc(func(ctx context.Context, query ent.Query) (ent.Value, error) {
-					_, err := intercept.NewQuery(query)
-					require.NoError(t, err)
+				return intercept.UserFunc(func(ctx context.Context, query *ent.UserQuery) (ent.Value, error) {
 					calls++
 					nodes, err := next.Query(ctx, query)
 					require.NoError(t, err)
@@ -739,13 +735,12 @@ func TestTypedTraverser(t *testing.T) {
 
 	// Add an interceptor that filters out inactive users.
 	client.User.Intercept(
-		ent.TraverseFunc(func(ctx context.Context, query ent.Query) error {
-			if q, ok := query.(*ent.UserQuery); ok {
-				q.Where(user.Active(true))
-			}
+		intercept.TraverseUser(func(ctx context.Context, q *ent.UserQuery) error {
+			q.Where(user.Active(true))
 			return nil
 		}),
 	)
+
 	// Only pets of active users are returned.
 	if n := client.User.Query().QueryPets().CountX(ctx); n != 2 {
 		t.Errorf("got %d pets, want 2", n)
@@ -786,9 +781,7 @@ func TestFilterTraverseFunc(t *testing.T) {
 	// Add an interceptor that filters out inactive users.
 	client.User.Intercept(
 		intercept.TraverseFunc(func(ctx context.Context, query intercept.Query) error {
-			query.WhereP(func(s *sql.Selector) {
-				s.Where(sql.EQ("active", true))
-			})
+			query.WhereP(sql.FieldEQ("active", true))
 			return nil
 		}),
 	)

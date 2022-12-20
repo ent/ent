@@ -71,37 +71,85 @@ func (f TraverseFunc) Traverse(ctx context.Context, q ent.Query) error {
 	return f(ctx, query)
 }
 
-// The CardQueryFunc type is an adapter to allow the use of ordinary function as a Querier.
-type CardQueryFunc func(context.Context, *ent.CardQuery) (ent.Value, error)
+// The CardFunc type is an adapter to allow the use of ordinary function as a Querier.
+type CardFunc func(context.Context, *ent.CardQuery) (ent.Value, error)
 
 // Query calls f(ctx, q).
-func (f CardQueryFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+func (f CardFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
 	if q, ok := q.(*ent.CardQuery); ok {
 		return f(ctx, q)
 	}
 	return nil, fmt.Errorf("unexpected query type %T. expect *ent.CardQuery", q)
 }
 
-// The PetQueryFunc type is an adapter to allow the use of ordinary function as a Querier.
-type PetQueryFunc func(context.Context, *ent.PetQuery) (ent.Value, error)
+// The TraverseCard type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseCard func(context.Context, *ent.CardQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseCard) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseCard) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.CardQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.CardQuery", q)
+}
+
+// The PetFunc type is an adapter to allow the use of ordinary function as a Querier.
+type PetFunc func(context.Context, *ent.PetQuery) (ent.Value, error)
 
 // Query calls f(ctx, q).
-func (f PetQueryFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+func (f PetFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
 	if q, ok := q.(*ent.PetQuery); ok {
 		return f(ctx, q)
 	}
 	return nil, fmt.Errorf("unexpected query type %T. expect *ent.PetQuery", q)
 }
 
-// The UserQueryFunc type is an adapter to allow the use of ordinary function as a Querier.
-type UserQueryFunc func(context.Context, *ent.UserQuery) (ent.Value, error)
+// The TraversePet type is an adapter to allow the use of ordinary function as Traverser.
+type TraversePet func(context.Context, *ent.PetQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraversePet) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraversePet) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.PetQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.PetQuery", q)
+}
+
+// The UserFunc type is an adapter to allow the use of ordinary function as a Querier.
+type UserFunc func(context.Context, *ent.UserQuery) (ent.Value, error)
 
 // Query calls f(ctx, q).
-func (f UserQueryFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+func (f UserFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
 	if q, ok := q.(*ent.UserQuery); ok {
 		return f(ctx, q)
 	}
 	return nil, fmt.Errorf("unexpected query type %T. expect *ent.UserQuery", q)
+}
+
+// The TraverseUser type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseUser func(context.Context, *ent.UserQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseUser) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseUser) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.UserQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.UserQuery", q)
 }
 
 // NewQuery returns the generic Query interface for the given typed query.
