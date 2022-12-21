@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/examples/jsonencode/ent/migrate"
 
+	"entgo.io/ent/examples/jsonencode/ent/card"
 	"entgo.io/ent/examples/jsonencode/ent/pet"
 	"entgo.io/ent/examples/jsonencode/ent/user"
 
@@ -27,6 +28,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Card is the client for interacting with the Card builders.
+	Card *CardClient
 	// Pet is the client for interacting with the Pet builders.
 	Pet *PetClient
 	// User is the client for interacting with the User builders.
@@ -44,6 +47,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Card = NewCardClient(c.config)
 	c.Pet = NewPetClient(c.config)
 	c.User = NewUserClient(c.config)
 }
@@ -79,6 +83,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:    ctx,
 		config: cfg,
+		Card:   NewCardClient(cfg),
 		Pet:    NewPetClient(cfg),
 		User:   NewUserClient(cfg),
 	}, nil
@@ -100,6 +105,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:    ctx,
 		config: cfg,
+		Card:   NewCardClient(cfg),
 		Pet:    NewPetClient(cfg),
 		User:   NewUserClient(cfg),
 	}, nil
@@ -108,7 +114,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Pet.
+//		Card.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -130,6 +136,7 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.Card.Use(hooks...)
 	c.Pet.Use(hooks...)
 	c.User.Use(hooks...)
 }
@@ -137,6 +144,7 @@ func (c *Client) Use(hooks ...Hook) {
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.Card.Intercept(interceptors...)
 	c.Pet.Intercept(interceptors...)
 	c.User.Intercept(interceptors...)
 }
@@ -144,12 +152,131 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *CardMutation:
+		return c.Card.mutate(ctx, m)
 	case *PetMutation:
 		return c.Pet.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// CardClient is a client for the Card schema.
+type CardClient struct {
+	config
+}
+
+// NewCardClient returns a client for the Card from the given config.
+func NewCardClient(c config) *CardClient {
+	return &CardClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `card.Hooks(f(g(h())))`.
+func (c *CardClient) Use(hooks ...Hook) {
+	c.hooks.Card = append(c.hooks.Card, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `card.Intercept(f(g(h())))`.
+func (c *CardClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Card = append(c.inters.Card, interceptors...)
+}
+
+// Create returns a builder for creating a Card entity.
+func (c *CardClient) Create() *CardCreate {
+	mutation := newCardMutation(c.config, OpCreate)
+	return &CardCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Card entities.
+func (c *CardClient) CreateBulk(builders ...*CardCreate) *CardCreateBulk {
+	return &CardCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Card.
+func (c *CardClient) Update() *CardUpdate {
+	mutation := newCardMutation(c.config, OpUpdate)
+	return &CardUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CardClient) UpdateOne(ca *Card) *CardUpdateOne {
+	mutation := newCardMutation(c.config, OpUpdateOne, withCard(ca))
+	return &CardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CardClient) UpdateOneID(id int) *CardUpdateOne {
+	mutation := newCardMutation(c.config, OpUpdateOne, withCardID(id))
+	return &CardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Card.
+func (c *CardClient) Delete() *CardDelete {
+	mutation := newCardMutation(c.config, OpDelete)
+	return &CardDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CardClient) DeleteOne(ca *Card) *CardDeleteOne {
+	return c.DeleteOneID(ca.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CardClient) DeleteOneID(id int) *CardDeleteOne {
+	builder := c.Delete().Where(card.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CardDeleteOne{builder}
+}
+
+// Query returns a query builder for Card.
+func (c *CardClient) Query() *CardQuery {
+	return &CardQuery{
+		config: c.config,
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Card entity by its id.
+func (c *CardClient) Get(ctx context.Context, id int) (*Card, error) {
+	return c.Query().Where(card.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CardClient) GetX(ctx context.Context, id int) *Card {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CardClient) Hooks() []Hook {
+	return c.hooks.Card
+}
+
+// Interceptors returns the client interceptors.
+func (c *CardClient) Interceptors() []Interceptor {
+	return c.inters.Card
+}
+
+func (c *CardClient) mutate(ctx context.Context, m *CardMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CardCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CardUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CardDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Card mutation op: %q", m.Op())
 	}
 }
 

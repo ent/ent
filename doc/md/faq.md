@@ -827,17 +827,19 @@ func (e *EncodeExtension) Templates() []*gen.Template {
 	return []*gen.Template{
 		gen.MustParse(gen.NewTemplate("model/additional/jsonencode").
 			Parse(`
-// MarshalJSON implements the json.Marshaler interface.
-func ({{ $.Receiver }} *{{ $.Name }}) MarshalJSON() ([]byte, error) {
-	type Alias {{ $.Name }}
-	return json.Marshal(&struct {
-		*Alias
-		{{ $.Name }}Edges
-	}{
-		Alias: (*Alias)({{ $.Receiver }}),
-		{{ $.Name }}Edges: {{ $.Receiver }}.Edges,
-	})
-}
+{{ if $.Edges }}
+	// MarshalJSON implements the json.Marshaler interface.
+	func ({{ $.Receiver }} *{{ $.Name }}) MarshalJSON() ([]byte, error) {
+		type Alias {{ $.Name }}
+		return json.Marshal(&struct {
+			*Alias
+			{{ $.Name }}Edges
+		}{
+			Alias: (*Alias)({{ $.Receiver }}),
+			{{ $.Name }}Edges: {{ $.Receiver }}.Edges,
+		})
+	}
+{{ end }}
 `)),
 	}
 }
