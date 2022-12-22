@@ -99,7 +99,7 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 
 	// Open a connection to the server.
-	conn, err := grpc.Dial(":5000", grpc.WithInsecure())
+	conn, err := grpc.Dial(":5000", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("failed connecting to server: %s", err)
 	}
