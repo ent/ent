@@ -603,7 +603,7 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 				// the foreign-key on) and "ref" is the referenced table.
 				owner, ref := tables[e.Rel.Table], tables[n.Table()]
 				pk := ref.PrimaryKey[0]
-				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, Unique: e.Rel.Type == O2O, SchemaType: pk.SchemaType, Nullable: true}
+				column := &schema.Column{Name: e.Rel.Column(), Comment: e.Rel.fk.Field.Comment(), Size: pk.Size, Type: pk.Type, Unique: e.Rel.Type == O2O, SchemaType: pk.SchemaType, Nullable: true}
 				// If it's not a circular reference (self-referencing table),
 				// and the inverse edge is required, make it non-nullable.
 				if n != e.Type && e.Ref != nil && !e.Ref.Optional {
@@ -620,7 +620,7 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 			case M2O:
 				ref, owner := tables[e.Type.Table()], tables[e.Rel.Table]
 				pk := ref.PrimaryKey[0]
-				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, SchemaType: pk.SchemaType, Nullable: true}
+				column := &schema.Column{Name: e.Rel.Column(), Comment: e.Rel.fk.Field.Comment(), Size: pk.Size, Type: pk.Type, SchemaType: pk.SchemaType, Nullable: true}
 				// If it's not a circular reference (self-referencing table),
 				// and the edge is non-optional (required), make it non-nullable.
 				if n != e.Type && !e.Optional {
@@ -640,12 +640,12 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 					continue
 				}
 				t1, t2 := tables[n.Table()], tables[e.Type.Table()]
-				c1 := &schema.Column{Name: e.Rel.Columns[0], Type: field.TypeInt, SchemaType: n.ID.def.SchemaType}
+				c1 := &schema.Column{Name: e.Rel.Columns[0], Comment: t1.Name + "." + t1.PrimaryKey[0].Name, Type: field.TypeInt, SchemaType: n.ID.def.SchemaType}
 				if ref := n.ID; ref.UserDefined {
 					c1.Type = ref.Type.Type
 					c1.Size = ref.size()
 				}
-				c2 := &schema.Column{Name: e.Rel.Columns[1], Type: field.TypeInt, SchemaType: e.Type.ID.def.SchemaType}
+				c2 := &schema.Column{Name: e.Rel.Columns[1], Comment: t2.Name + "." + t2.PrimaryKey[0].Name, Type: field.TypeInt, SchemaType: e.Type.ID.def.SchemaType}
 				if ref := e.Type.ID; ref.UserDefined {
 					c2.Type = ref.Type.Type
 					c2.Size = ref.size()
