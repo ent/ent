@@ -580,11 +580,13 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 	for _, n := range g.Nodes {
 		table := schema.NewTable(n.Table())
 		if n.HasOneFieldID() {
+			mergeEntSQLAnnotation(n, n.ID)
 			table.AddPrimary(n.ID.PK())
 		}
 		table.SetAnnotation(n.EntSQL())
 		for _, f := range n.Fields {
 			if !f.IsEdgeField() {
+				mergeEntSQLAnnotation(n, f)
 				table.AddColumn(f.Column())
 			}
 		}
@@ -694,6 +696,20 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 		return nil, err
 	}
 	return
+}
+
+// mergeEntSQLAnnotation merge node schema EntSQL annotation into
+// field EntSQL annotation if it exists.
+func mergeEntSQLAnnotation(n *Type, f *Field) {
+	if n.EntSQL() == nil {
+		return
+	}
+	if f.EntSQL() != nil {
+		f.Annotations[n.EntSQL().Name()] = n.EntSQL().Merge(f.EntSQL())
+		return
+	}
+	f.Annotations = make(Annotations)
+	f.Annotations[n.EntSQL().Name()] = n.EntSQL()
 }
 
 // mayAddColumn adds the given column if it does not already exist in the table.
