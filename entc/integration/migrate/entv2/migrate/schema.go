@@ -90,7 +90,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "source", Type: field.TypeString, Nullable: true},
 		{Name: "source_uri", Type: field.TypeString, Nullable: true},
-		{Name: "text", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "text", Type: field.TypeString, Nullable: true, Size: 2147483647, Comment: "media text"},
 	}
 	// MediaTable holds the schema information for the "media" table.
 	MediaTable = &schema.Table{

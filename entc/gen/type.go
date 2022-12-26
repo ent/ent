@@ -65,6 +65,7 @@ type (
 	Field struct {
 		cfg *Config
 		def *load.Field
+		typ *Type
 		// Name is the name of this field in the database schema.
 		Name string
 		// Type holds the type information of the field.
@@ -226,6 +227,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 		fields:      make(map[string]*Field, len(schema.Fields)),
 		foreignKeys: make(map[string]struct{}),
 	}
+	typ.ID.typ = typ
 	if err := ValidSchemaName(typ.Name); err != nil {
 		return nil, err
 	}
@@ -233,6 +235,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 		tf := &Field{
 			cfg:           c,
 			def:           f,
+			typ:           typ,
 			Name:          f.Name,
 			Type:          f.Info,
 			Unique:        f.Unique,
@@ -298,7 +301,7 @@ func (t Type) Table() string {
 
 // EntSQL returns the EntSQL annotation if exists.
 func (t Type) EntSQL() *entsql.Annotation {
-	return entsqlAnnotate(t.Annotations)
+	return sqlAnnotate(t.Annotations)
 }
 
 // Package returns the package name of this node.
@@ -631,7 +634,7 @@ func (t *Type) AddIndex(idx *load.Index) error {
 	if len(idx.Fields) == 0 && len(idx.Edges) == 0 {
 		return errors.New("missing fields or edges")
 	}
-	switch ant := entsqlIndexAnnotate(idx.Annotations); {
+	switch ant := sqlIndexAnnotate(idx.Annotations); {
 	case ant == nil:
 	case len(ant.PrefixColumns) != 0 && ant.Prefix != 0:
 		return fmt.Errorf("index %q cannot contain both entsql.Prefix and entsql.PrefixColumn in annotation", index.Name)
@@ -698,6 +701,7 @@ func (t *Type) setupFKs() error {
 		fk := &ForeignKey{
 			Edge: e,
 			Field: &Field{
+				typ:         owner,
 				Name:        builderField(e.Rel.Column()),
 				Type:        refid.Type,
 				Nillable:    true,
@@ -1079,7 +1083,7 @@ func (f Field) Validator() string {
 
 // EntSQL returns the EntSQL annotation if exists.
 func (f Field) EntSQL() *entsql.Annotation {
-	return entsqlAnnotate(f.Annotations)
+	return sqlAnnotate(f.Annotations)
 }
 
 // mutMethods returns the method names of mutation interface.
@@ -1367,6 +1371,7 @@ func (f Field) Column() *schema.Column {
 		Nullable: f.Optional,
 		Size:     f.size(),
 		Enums:    f.EnumValues(),
+		Comment:  f.sqlComment(),
 	}
 	switch {
 	case f.Default && (f.Type.Numeric() || f.Type.Type == field.TypeBool):
@@ -1399,12 +1404,6 @@ func (f Field) Column() *schema.Column {
 	if f.def != nil {
 		c.SchemaType = f.def.SchemaType
 	}
-	// Override the Comment defined in the schema
-	// if WithComments is enabled in annotation.
-	// Field comment will be used as column comment.
-	if ant := f.EntSQL(); ant != nil && ant.WithComments != nil && *ant.WithComments {
-		c.Comment = f.Comment()
-	}
 	return c
 }
 
@@ -1434,6 +1433,7 @@ func (f Field) PK() *schema.Column {
 		Name:      f.StorageKey(),
 		Type:      f.Type.Type,
 		Key:       schema.PrimaryKey,
+		Comment:   f.sqlComment(),
 		Increment: f.incremental(f.Type.Type.Integer()),
 	}
 	// If the PK was defined by the user, and it is UUID or string.
@@ -1463,13 +1463,24 @@ func (f Field) PK() *schema.Column {
 	if f.def != nil {
 		c.SchemaType = f.def.SchemaType
 	}
-	// Override the Comment defined in the schema
-	// if WithComments is enabled in annotation.
-	// Field comment will be used as column comment.
-	if ant := f.EntSQL(); ant != nil && ant.WithComments != nil && *ant.WithComments {
-		c.Comment = f.Comment()
-	}
 	return c
+}
+
+// sqlComment returns the SQL database comment for the field, if defined and enabled.
+func (f Field) sqlComment() string {
+	fa, ta := f.EntSQL(), f.typ.EntSQL()
+	switch c := f.Comment(); {
+	// Field annotation gets precedence over type annotation.
+	case fa != nil && fa.WithComments != nil:
+		if *fa.WithComments {
+			return c
+		}
+	case ta != nil && ta.WithComments != nil:
+		if *ta.WithComments {
+			return c
+		}
+	}
+	return ""
 }
 
 // StorageKey returns the storage name of the field.
@@ -1907,7 +1918,7 @@ func (e Edge) StorageKey() (*edge.StorageKey, error) {
 
 // EntSQL returns the EntSQL annotation if exists.
 func (e Edge) EntSQL() *entsql.Annotation {
-	return entsqlAnnotate(e.Annotations)
+	return sqlAnnotate(e.Annotations)
 }
 
 // Column returns the first element from the columns slice.
@@ -1988,8 +1999,8 @@ func fieldAnnotate(annotation map[string]any) *field.Annotation {
 	return annotate
 }
 
-// entsqlAnnotate extracts the entsql annotation from a loaded annotation format.
-func entsqlAnnotate(annotation map[string]any) *entsql.Annotation {
+// sqlAnnotate extracts the entsql.Annotation from a loaded annotation format.
+func sqlAnnotate(annotation map[string]any) *entsql.Annotation {
 	annotate := &entsql.Annotation{}
 	if annotation == nil || annotation[annotate.Name()] == nil {
 		return nil
@@ -2000,8 +2011,8 @@ func entsqlAnnotate(annotation map[string]any) *entsql.Annotation {
 	return annotate
 }
 
-// entsqlIndexAnnotate extracts the entsql annotation from a loaded annotation format.
-func entsqlIndexAnnotate(annotation map[string]any) *entsql.IndexAnnotation {
+// sqlIndexAnnotate extracts the entsql annotation from a loaded annotation format.
+func sqlIndexAnnotate(annotation map[string]any) *entsql.IndexAnnotation {
 	annotate := &entsql.IndexAnnotation{}
 	if annotation == nil || annotation[annotate.Name()] == nil {
 		return nil

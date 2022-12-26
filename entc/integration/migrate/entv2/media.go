@@ -21,9 +21,9 @@ type Media struct {
 	ID int `json:"id,omitempty"`
 	// Source holds the value of the "source" field.
 	Source string `json:"source,omitempty"`
-	// SourceURI holds the value of the "source_uri" field.
+	// source_ui text
 	SourceURI string `json:"source_uri,omitempty"`
-	// Text holds the value of the "text" field.
+	// media text
 	Text string `json:"text,omitempty"`
 }
 

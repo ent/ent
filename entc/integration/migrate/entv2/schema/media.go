@@ -23,9 +23,12 @@ func (Media) Fields() []ent.Field {
 		field.String("source").
 			Optional(),
 		field.String("source_uri").
-			Optional(),
+			Optional().
+			Comment("source_ui text").
+			Annotations(entsql.WithComments(false)),
 		field.Text("text").
-			Optional(),
+			Optional().
+			Comment("media text"),
 	}
 }
 
@@ -43,11 +46,10 @@ func (Media) Indexes() []ent.Index {
 
 func (Media) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		&entsql.Annotation{
-			Check: "text <> 'boring'",
-			Checks: map[string]string{
-				"boring_check": "source_uri <> 'entgo.io'",
-			},
-		},
+		entsql.WithComments(true),
+		entsql.Check("text <> 'boring'"),
+		entsql.Checks(map[string]string{
+			"boring_check": "source_uri <> 'entgo.io'",
+		}),
 	}
 }
