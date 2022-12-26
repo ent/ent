@@ -912,6 +912,9 @@ func (a *Atlas) aColumns(et *Table, at *schema.Table) error {
 		if c1.Collation != "" {
 			c2.SetCollation(c1.Collation)
 		}
+		if c1.Comment != "" {
+			c2.SetComment(c1.Comment)
+		}
 		if err := a.sqlDialect.atTypeC(c1, c2); err != nil {
 			return err
 		}

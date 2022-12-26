@@ -89,6 +89,16 @@ type Annotation struct {
 	//
 	Size int64 `json:"size,omitempty"`
 
+	// WithComments specifies whether fields' comments should
+	// be stored in the database schema as column comments.
+	//
+	//  withCommentsEnabled := true
+	//	entsql.WithComments{
+	//		WithComments: &withCommentsEnabled,
+	//	}
+	//
+	WithComments *bool `json:"with_comments,omitempty"`
+
 	// Incremental defines the auto-incremental behavior of a column. For example:
 	//
 	//  incrementalEnabled := true
@@ -205,6 +215,20 @@ func DefaultExprs(exprs map[string]string) *Annotation {
 	}
 }
 
+// WithComments specifies whether fields' comments should
+// be stored in the database schema as column comments.
+//
+//	func (T) Annotations() []schema.Annotation {
+//		return []schema.Annotation{
+//			entsql.WithComments(true),
+//		}
+//	}
+func WithComments(b bool) *Annotation {
+	return &Annotation{
+		WithComments: &b,
+	}
+}
+
 // Merge implements the schema.Merger interface.
 func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	var ant Annotation
@@ -246,6 +270,9 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	}
 	if s := ant.Size; s != 0 {
 		a.Size = s
+	}
+	if b := ant.WithComments; b != nil {
+		a.WithComments = b
 	}
 	if i := ant.Incremental; i != nil {
 		a.Incremental = i
