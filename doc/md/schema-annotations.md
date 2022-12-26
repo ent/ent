@@ -13,7 +13,7 @@ The builtin annotations allow configuring the different storage drivers (like SQ
 
 A custom table name can be provided for types using the `entsql` annotation as follows:
 
-```go
+```go title="ent/schema/user.go"
 package schema
 
 import (
@@ -49,7 +49,7 @@ func (User) Fields() []ent.Field {
 Ent allows to customize the foreign key creation and provide a [referential action](https://dev.mysql.com/doc/refman/8.0/en/create-table-foreign-keys.html#foreign-key-referential-actions)
 for the `ON DELETE` clause:
 
-```go
+```go title="ent/schema/user.go"
 package schema
 
 import (
@@ -85,3 +85,48 @@ func (User) Edges() []ent.Edge {
 
 The example above configures the foreign key to cascade the deletion of rows in the parent table to the matching
 rows in the child table.
+
+## Database Comments
+
+By default, column comments are not stored in the database. However, this functionality can be enabled by using the
+`WithComments(true)` annotation. For example:
+
+```go title="ent/schema/user.go" {17-19,32-35}
+package schema
+
+import (
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema/field"
+)
+
+// User holds the schema definition for the User entity.
+type User struct {
+	ent.Schema
+}
+
+// Annotations of the User.
+func (User) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+	    // Adding this annotation on the
+	    // type enables it for all fields.
+		entsql.WithComments(true),
+	}
+}
+
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name").
+			Comment("The user's name"),
+		field.Int("age").
+            Comment("The user's age"),
+        field.String("skipped").
+            Comment("This comment won't be stored in the database").
+            // Explicitly disable comments for this field.
+            Annotations(
+                entsql.WithComments(false),
+            ),
+	}
+}
+```
