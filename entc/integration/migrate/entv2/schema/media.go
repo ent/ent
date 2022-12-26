@@ -44,6 +44,7 @@ func (Media) Indexes() []ent.Index {
 	}
 }
 
+// Annotations of the Media.
 func (Media) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		entsql.WithComments(true),
