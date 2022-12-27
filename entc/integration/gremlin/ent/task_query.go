@@ -255,6 +255,7 @@ func (tq *TaskQuery) Clone() *TaskQuery {
 		limit:      tq.limit,
 		offset:     tq.offset,
 		order:      append([]OrderFunc{}, tq.order...),
+		inters:     append([]Interceptor{}, tq.inters...),
 		predicates: append([]predicate.Task{}, tq.predicates...),
 		// clone intermediate query.
 		gremlin: tq.gremlin.Clone(),

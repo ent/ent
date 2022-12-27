@@ -254,6 +254,7 @@ func (lq *LicenseQuery) Clone() *LicenseQuery {
 		limit:      lq.limit,
 		offset:     lq.offset,
 		order:      append([]OrderFunc{}, lq.order...),
+		inters:     append([]Interceptor{}, lq.inters...),
 		predicates: append([]predicate.License{}, lq.predicates...),
 		// clone intermediate query.
 		gremlin: lq.gremlin.Clone(),

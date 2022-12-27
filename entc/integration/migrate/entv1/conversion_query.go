@@ -253,6 +253,7 @@ func (cq *ConversionQuery) Clone() *ConversionQuery {
 		limit:      cq.limit,
 		offset:     cq.offset,
 		order:      append([]OrderFunc{}, cq.order...),
+		inters:     append([]Interceptor{}, cq.inters...),
 		predicates: append([]predicate.Conversion{}, cq.predicates...),
 		// clone intermediate query.
 		sql:    cq.sql.Clone(),

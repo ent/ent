@@ -300,6 +300,7 @@ func (fq *FileQuery) Clone() *FileQuery {
 		limit:        fq.limit,
 		offset:       fq.offset,
 		order:        append([]OrderFunc{}, fq.order...),
+		inters:       append([]Interceptor{}, fq.inters...),
 		predicates:   append([]predicate.File{}, fq.predicates...),
 		withParent:   fq.withParent.Clone(),
 		withChildren: fq.withChildren.Clone(),

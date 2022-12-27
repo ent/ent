@@ -281,6 +281,7 @@ func (sq *SpecQuery) Clone() *SpecQuery {
 		limit:      sq.limit,
 		offset:     sq.offset,
 		order:      append([]OrderFunc{}, sq.order...),
+		inters:     append([]Interceptor{}, sq.inters...),
 		predicates: append([]predicate.Spec{}, sq.predicates...),
 		withCard:   sq.withCard.Clone(),
 		// clone intermediate query.

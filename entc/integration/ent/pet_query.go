@@ -303,6 +303,7 @@ func (pq *PetQuery) Clone() *PetQuery {
 		limit:      pq.limit,
 		offset:     pq.offset,
 		order:      append([]OrderFunc{}, pq.order...),
+		inters:     append([]Interceptor{}, pq.inters...),
 		predicates: append([]predicate.Pet{}, pq.predicates...),
 		withTeam:   pq.withTeam.Clone(),
 		withOwner:  pq.withOwner.Clone(),

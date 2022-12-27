@@ -230,6 +230,7 @@ func (blq *BlobLinkQuery) Clone() *BlobLinkQuery {
 		limit:      blq.limit,
 		offset:     blq.offset,
 		order:      append([]OrderFunc{}, blq.order...),
+		inters:     append([]Interceptor{}, blq.inters...),
 		predicates: append([]predicate.BlobLink{}, blq.predicates...),
 		withBlob:   blq.withBlob.Clone(),
 		withLink:   blq.withLink.Clone(),

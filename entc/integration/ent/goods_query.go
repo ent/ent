@@ -255,6 +255,7 @@ func (gq *GoodsQuery) Clone() *GoodsQuery {
 		limit:      gq.limit,
 		offset:     gq.offset,
 		order:      append([]OrderFunc{}, gq.order...),
+		inters:     append([]Interceptor{}, gq.inters...),
 		predicates: append([]predicate.Goods{}, gq.predicates...),
 		// clone intermediate query.
 		sql:    gq.sql.Clone(),

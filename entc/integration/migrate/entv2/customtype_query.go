@@ -253,6 +253,7 @@ func (ctq *CustomTypeQuery) Clone() *CustomTypeQuery {
 		limit:      ctq.limit,
 		offset:     ctq.offset,
 		order:      append([]OrderFunc{}, ctq.order...),
+		inters:     append([]Interceptor{}, ctq.inters...),
 		predicates: append([]predicate.CustomType{}, ctq.predicates...),
 		// clone intermediate query.
 		sql:    ctq.sql.Clone(),

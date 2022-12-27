@@ -301,6 +301,7 @@ func (utq *UserTweetQuery) Clone() *UserTweetQuery {
 		limit:      utq.limit,
 		offset:     utq.offset,
 		order:      append([]OrderFunc{}, utq.order...),
+		inters:     append([]Interceptor{}, utq.inters...),
 		predicates: append([]predicate.UserTweet{}, utq.predicates...),
 		withUser:   utq.withUser.Clone(),
 		withTweet:  utq.withTweet.Clone(),

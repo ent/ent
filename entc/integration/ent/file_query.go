@@ -330,6 +330,7 @@ func (fq *FileQuery) Clone() *FileQuery {
 		limit:      fq.limit,
 		offset:     fq.offset,
 		order:      append([]OrderFunc{}, fq.order...),
+		inters:     append([]Interceptor{}, fq.inters...),
 		predicates: append([]predicate.File{}, fq.predicates...),
 		withOwner:  fq.withOwner.Clone(),
 		withType:   fq.withType.Clone(),

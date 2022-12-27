@@ -279,6 +279,7 @@ func (aq *AccountQuery) Clone() *AccountQuery {
 		limit:      aq.limit,
 		offset:     aq.offset,
 		order:      append([]OrderFunc{}, aq.order...),
+		inters:     append([]Interceptor{}, aq.inters...),
 		predicates: append([]predicate.Account{}, aq.predicates...),
 		withToken:  aq.withToken.Clone(),
 		// clone intermediate query.

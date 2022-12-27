@@ -277,6 +277,7 @@ func (iq *InfoQuery) Clone() *InfoQuery {
 		limit:      iq.limit,
 		offset:     iq.offset,
 		order:      append([]OrderFunc{}, iq.order...),
+		inters:     append([]Interceptor{}, iq.inters...),
 		predicates: append([]predicate.Info{}, iq.predicates...),
 		withUser:   iq.withUser.Clone(),
 		// clone intermediate query.

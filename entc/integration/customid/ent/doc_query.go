@@ -325,6 +325,7 @@ func (dq *DocQuery) Clone() *DocQuery {
 		limit:        dq.limit,
 		offset:       dq.offset,
 		order:        append([]OrderFunc{}, dq.order...),
+		inters:       append([]Interceptor{}, dq.inters...),
 		predicates:   append([]predicate.Doc{}, dq.predicates...),
 		withParent:   dq.withParent.Clone(),
 		withChildren: dq.withChildren.Clone(),

@@ -301,6 +301,7 @@ func (ugq *UserGroupQuery) Clone() *UserGroupQuery {
 		limit:      ugq.limit,
 		offset:     ugq.offset,
 		order:      append([]OrderFunc{}, ugq.order...),
+		inters:     append([]Interceptor{}, ugq.inters...),
 		predicates: append([]predicate.UserGroup{}, ugq.predicates...),
 		withUser:   ugq.withUser.Clone(),
 		withGroup:  ugq.withGroup.Clone(),

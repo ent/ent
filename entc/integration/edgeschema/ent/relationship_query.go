@@ -254,6 +254,7 @@ func (rq *RelationshipQuery) Clone() *RelationshipQuery {
 		limit:        rq.limit,
 		offset:       rq.offset,
 		order:        append([]OrderFunc{}, rq.order...),
+		inters:       append([]Interceptor{}, rq.inters...),
 		predicates:   append([]predicate.Relationship{}, rq.predicates...),
 		withUser:     rq.withUser.Clone(),
 		withRelative: rq.withRelative.Clone(),

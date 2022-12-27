@@ -253,6 +253,7 @@ func (cq *CardQuery) Clone() *CardQuery {
 		limit:      cq.limit,
 		offset:     cq.offset,
 		order:      append([]OrderFunc{}, cq.order...),
+		inters:     append([]Interceptor{}, cq.inters...),
 		predicates: append([]predicate.Card{}, cq.predicates...),
 		// clone intermediate query.
 		sql:    cq.sql.Clone(),

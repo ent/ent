@@ -254,6 +254,7 @@ func (miq *MixinIDQuery) Clone() *MixinIDQuery {
 		limit:      miq.limit,
 		offset:     miq.offset,
 		order:      append([]OrderFunc{}, miq.order...),
+		inters:     append([]Interceptor{}, miq.inters...),
 		predicates: append([]predicate.MixinID{}, miq.predicates...),
 		// clone intermediate query.
 		sql:    miq.sql.Clone(),

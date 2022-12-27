@@ -277,6 +277,7 @@ func (pq *PostQuery) Clone() *PostQuery {
 		limit:      pq.limit,
 		offset:     pq.offset,
 		order:      append([]OrderFunc{}, pq.order...),
+		inters:     append([]Interceptor{}, pq.inters...),
 		predicates: append([]predicate.Post{}, pq.predicates...),
 		withAuthor: pq.withAuthor.Clone(),
 		// clone intermediate query.

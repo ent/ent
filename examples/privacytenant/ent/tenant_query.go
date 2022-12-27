@@ -254,6 +254,7 @@ func (tq *TenantQuery) Clone() *TenantQuery {
 		limit:      tq.limit,
 		offset:     tq.offset,
 		order:      append([]OrderFunc{}, tq.order...),
+		inters:     append([]Interceptor{}, tq.inters...),
 		predicates: append([]predicate.Tenant{}, tq.predicates...),
 		// clone intermediate query.
 		sql:    tq.sql.Clone(),

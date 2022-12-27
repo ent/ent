@@ -279,6 +279,7 @@ func (tq *TokenQuery) Clone() *TokenQuery {
 		limit:       tq.limit,
 		offset:      tq.offset,
 		order:       append([]OrderFunc{}, tq.order...),
+		inters:      append([]Interceptor{}, tq.inters...),
 		predicates:  append([]predicate.Token{}, tq.predicates...),
 		withAccount: tq.withAccount.Clone(),
 		// clone intermediate query.

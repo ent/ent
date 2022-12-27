@@ -255,6 +255,7 @@ func (cq *CommentQuery) Clone() *CommentQuery {
 		limit:      cq.limit,
 		offset:     cq.offset,
 		order:      append([]OrderFunc{}, cq.order...),
+		inters:     append([]Interceptor{}, cq.inters...),
 		predicates: append([]predicate.Comment{}, cq.predicates...),
 		// clone intermediate query.
 		sql:    cq.sql.Clone(),

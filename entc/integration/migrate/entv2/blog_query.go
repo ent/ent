@@ -278,6 +278,7 @@ func (bq *BlogQuery) Clone() *BlogQuery {
 		limit:      bq.limit,
 		offset:     bq.offset,
 		order:      append([]OrderFunc{}, bq.order...),
+		inters:     append([]Interceptor{}, bq.inters...),
 		predicates: append([]predicate.Blog{}, bq.predicates...),
 		withAdmins: bq.withAdmins.Clone(),
 		// clone intermediate query.

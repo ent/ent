@@ -304,6 +304,7 @@ func (tq *TaskQuery) Clone() *TaskQuery {
 		limit:      tq.limit,
 		offset:     tq.offset,
 		order:      append([]OrderFunc{}, tq.order...),
+		inters:     append([]Interceptor{}, tq.inters...),
 		predicates: append([]predicate.Task{}, tq.predicates...),
 		withTeams:  tq.withTeams.Clone(),
 		withOwner:  tq.withOwner.Clone(),
