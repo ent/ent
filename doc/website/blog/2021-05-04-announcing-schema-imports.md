@@ -97,7 +97,7 @@ with the community in planning and building out your idea? Reach out to our grea
 [Discord server](https://discord.gg/qZmPgTE6RX), [Slack channel](https://app.slack.com/client/T029RQSE6/C01FMSQDT53) or start a [discussion on GitHub](https://github.com/ent/ent/discussions)!
 
 :::note For more Ent news and updates:
-- Subscribe to our [Newsletter](https://www.getrevue.co/profile/ent)
+- Subscribe to our [Newsletter](https://entgo.substack.com/)
 - Follow us on [Twitter](https://twitter.com/entgo_io)
 - Join us on #ent on the [Gophers Slack](https://app.slack.com/client/T029RQSE6/C01FMSQDT53)
 - Join us on the [Ent Discord Server](https://discord.gg/qZmPgTE6RX)

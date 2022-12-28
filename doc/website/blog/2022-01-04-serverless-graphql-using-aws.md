@@ -601,7 +601,7 @@ Have questions? Need help with getting started? Feel free to join our [Discord s
 
 :::note For more Ent news and updates:
 
-- Subscribe to our [Newsletter](https://www.getrevue.co/profile/ent)
+- Subscribe to our [Newsletter](https://entgo.substack.com/)
 - Follow us on [Twitter](https://twitter.com/entgo_io)
 - Join us on #ent on the [Gophers Slack](https://entgo.io/docs/slack)
 - Join us on the [Ent Discord Server](https://discord.gg/qZmPgTE6RX)

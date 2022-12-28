@@ -210,6 +210,6 @@ Many thanks 🙏 to all the good people who took the time to give feedback and h
 ### For more Ent news and updates:
 
 - Follow us on [twitter.com/entgo_io](https://twitter.com/entgo_io)
-- Subscribe to our [newsletter](https://www.getrevue.co/profile/ent)
+- Subscribe to our [newsletter](https://entgo.substack.com/)
 - Join us on #ent on the [Gophers slack](https://app.slack.com/client/T029RQSE6/C01FMSQDT53)
 - Join us on the [Ent Discord Server](https://discord.gg/qZmPgTE6RX)
