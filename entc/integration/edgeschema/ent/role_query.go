@@ -302,6 +302,7 @@ func (rq *RoleQuery) Clone() *RoleQuery {
 		limit:          rq.limit,
 		offset:         rq.offset,
 		order:          append([]OrderFunc{}, rq.order...),
+		inters:         append([]Interceptor{}, rq.inters...),
 		predicates:     append([]predicate.Role{}, rq.predicates...),
 		withUser:       rq.withUser.Clone(),
 		withRolesUsers: rq.withRolesUsers.Clone(),

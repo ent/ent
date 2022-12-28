@@ -253,6 +253,7 @@ func (zq *ZooQuery) Clone() *ZooQuery {
 		limit:      zq.limit,
 		offset:     zq.offset,
 		order:      append([]OrderFunc{}, zq.order...),
+		inters:     append([]Interceptor{}, zq.inters...),
 		predicates: append([]predicate.Zoo{}, zq.predicates...),
 		// clone intermediate query.
 		sql:    zq.sql.Clone(),

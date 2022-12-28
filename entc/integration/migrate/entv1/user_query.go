@@ -348,6 +348,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		limit:        uq.limit,
 		offset:       uq.offset,
 		order:        append([]OrderFunc{}, uq.order...),
+		inters:       append([]Interceptor{}, uq.inters...),
 		predicates:   append([]predicate.User{}, uq.predicates...),
 		withParent:   uq.withParent.Clone(),
 		withChildren: uq.withChildren.Clone(),

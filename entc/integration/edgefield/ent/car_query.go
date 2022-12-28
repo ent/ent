@@ -279,6 +279,7 @@ func (cq *CarQuery) Clone() *CarQuery {
 		limit:       cq.limit,
 		offset:      cq.offset,
 		order:       append([]OrderFunc{}, cq.order...),
+		inters:      append([]Interceptor{}, cq.inters...),
 		predicates:  append([]predicate.Car{}, cq.predicates...),
 		withRentals: cq.withRentals.Clone(),
 		// clone intermediate query.

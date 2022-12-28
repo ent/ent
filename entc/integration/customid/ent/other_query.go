@@ -254,6 +254,7 @@ func (oq *OtherQuery) Clone() *OtherQuery {
 		limit:      oq.limit,
 		offset:     oq.offset,
 		order:      append([]OrderFunc{}, oq.order...),
+		inters:     append([]Interceptor{}, oq.inters...),
 		predicates: append([]predicate.Other{}, oq.predicates...),
 		// clone intermediate query.
 		sql:    oq.sql.Clone(),

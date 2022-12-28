@@ -281,6 +281,7 @@ func (giq *GroupInfoQuery) Clone() *GroupInfoQuery {
 		limit:      giq.limit,
 		offset:     giq.offset,
 		order:      append([]OrderFunc{}, giq.order...),
+		inters:     append([]Interceptor{}, giq.inters...),
 		predicates: append([]predicate.GroupInfo{}, giq.predicates...),
 		withGroups: giq.withGroups.Clone(),
 		// clone intermediate query.

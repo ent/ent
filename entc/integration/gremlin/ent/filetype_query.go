@@ -269,6 +269,7 @@ func (ftq *FileTypeQuery) Clone() *FileTypeQuery {
 		limit:      ftq.limit,
 		offset:     ftq.offset,
 		order:      append([]OrderFunc{}, ftq.order...),
+		inters:     append([]Interceptor{}, ftq.inters...),
 		predicates: append([]predicate.FileType{}, ftq.predicates...),
 		withFiles:  ftq.withFiles.Clone(),
 		// clone intermediate query.

@@ -350,6 +350,7 @@ func (tq *TagQuery) Clone() *TagQuery {
 		limit:         tq.limit,
 		offset:        tq.offset,
 		order:         append([]OrderFunc{}, tq.order...),
+		inters:        append([]Interceptor{}, tq.inters...),
 		predicates:    append([]predicate.Tag{}, tq.predicates...),
 		withTweets:    tq.withTweets.Clone(),
 		withGroups:    tq.withGroups.Clone(),

@@ -302,6 +302,7 @@ func (ttq *TweetTagQuery) Clone() *TweetTagQuery {
 		limit:      ttq.limit,
 		offset:     ttq.offset,
 		order:      append([]OrderFunc{}, ttq.order...),
+		inters:     append([]Interceptor{}, ttq.inters...),
 		predicates: append([]predicate.TweetTag{}, ttq.predicates...),
 		withTag:    ttq.withTag.Clone(),
 		withTweet:  ttq.withTweet.Clone(),

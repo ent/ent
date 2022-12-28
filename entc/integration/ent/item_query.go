@@ -255,6 +255,7 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 		limit:      iq.limit,
 		offset:     iq.offset,
 		order:      append([]OrderFunc{}, iq.order...),
+		inters:     append([]Interceptor{}, iq.inters...),
 		predicates: append([]predicate.Item{}, iq.predicates...),
 		// clone intermediate query.
 		sql:    iq.sql.Clone(),

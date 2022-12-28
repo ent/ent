@@ -300,6 +300,7 @@ func (fq *FriendshipQuery) Clone() *FriendshipQuery {
 		limit:      fq.limit,
 		offset:     fq.offset,
 		order:      append([]OrderFunc{}, fq.order...),
+		inters:     append([]Interceptor{}, fq.inters...),
 		predicates: append([]predicate.Friendship{}, fq.predicates...),
 		withUser:   fq.withUser.Clone(),
 		withFriend: fq.withFriend.Clone(),

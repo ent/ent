@@ -301,6 +301,7 @@ func (gtq *GroupTagQuery) Clone() *GroupTagQuery {
 		limit:      gtq.limit,
 		offset:     gtq.offset,
 		order:      append([]OrderFunc{}, gtq.order...),
+		inters:     append([]Interceptor{}, gtq.inters...),
 		predicates: append([]predicate.GroupTag{}, gtq.predicates...),
 		withTag:    gtq.withTag.Clone(),
 		withGroup:  gtq.withGroup.Clone(),

@@ -253,6 +253,7 @@ func (mq *MediaQuery) Clone() *MediaQuery {
 		limit:      mq.limit,
 		offset:     mq.offset,
 		order:      append([]OrderFunc{}, mq.order...),
+		inters:     append([]Interceptor{}, mq.inters...),
 		predicates: append([]predicate.Media{}, mq.predicates...),
 		// clone intermediate query.
 		sql:    mq.sql.Clone(),

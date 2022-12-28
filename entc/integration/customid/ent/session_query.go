@@ -279,6 +279,7 @@ func (sq *SessionQuery) Clone() *SessionQuery {
 		limit:      sq.limit,
 		offset:     sq.offset,
 		order:      append([]OrderFunc{}, sq.order...),
+		inters:     append([]Interceptor{}, sq.inters...),
 		predicates: append([]predicate.Session{}, sq.predicates...),
 		withDevice: sq.withDevice.Clone(),
 		// clone intermediate query.

@@ -253,6 +253,7 @@ func (rq *RevisionQuery) Clone() *RevisionQuery {
 		limit:      rq.limit,
 		offset:     rq.offset,
 		order:      append([]OrderFunc{}, rq.order...),
+		inters:     append([]Interceptor{}, rq.inters...),
 		predicates: append([]predicate.Revision{}, rq.predicates...),
 		// clone intermediate query.
 		sql:    rq.sql.Clone(),

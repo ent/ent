@@ -302,6 +302,7 @@ func (rq *RentalQuery) Clone() *RentalQuery {
 		limit:      rq.limit,
 		offset:     rq.offset,
 		order:      append([]OrderFunc{}, rq.order...),
+		inters:     append([]Interceptor{}, rq.inters...),
 		predicates: append([]predicate.Rental{}, rq.predicates...),
 		withUser:   rq.withUser.Clone(),
 		withCar:    rq.withCar.Clone(),

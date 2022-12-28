@@ -303,6 +303,7 @@ func (dq *DeviceQuery) Clone() *DeviceQuery {
 		limit:             dq.limit,
 		offset:            dq.offset,
 		order:             append([]OrderFunc{}, dq.order...),
+		inters:            append([]Interceptor{}, dq.inters...),
 		predicates:        append([]predicate.Device{}, dq.predicates...),
 		withActiveSession: dq.withActiveSession.Clone(),
 		withSessions:      dq.withSessions.Clone(),

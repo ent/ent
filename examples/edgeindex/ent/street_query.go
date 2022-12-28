@@ -278,6 +278,7 @@ func (sq *StreetQuery) Clone() *StreetQuery {
 		limit:      sq.limit,
 		offset:     sq.offset,
 		order:      append([]OrderFunc{}, sq.order...),
+		inters:     append([]Interceptor{}, sq.inters...),
 		predicates: append([]predicate.Street{}, sq.predicates...),
 		withCity:   sq.withCity.Clone(),
 		// clone intermediate query.

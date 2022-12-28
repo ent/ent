@@ -315,6 +315,7 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		limit:       gq.limit,
 		offset:      gq.offset,
 		order:       append([]OrderFunc{}, gq.order...),
+		inters:      append([]Interceptor{}, gq.inters...),
 		predicates:  append([]predicate.Group{}, gq.predicates...),
 		withFiles:   gq.withFiles.Clone(),
 		withBlocked: gq.withBlocked.Clone(),

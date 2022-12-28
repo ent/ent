@@ -600,6 +600,32 @@ func TestInterceptor_Sanity(t *testing.T) {
 		require.Equal(t, []n2c{{"nati", 1}, {"fake", 10}}, vs)
 		require.Equal(t, 2, calls)
 	})
+	t.Run("Clone", func(t *testing.T) {
+		var (
+			calls  int
+			client = enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
+		)
+		defer client.Close()
+		client.Intercept(
+			ent.InterceptFunc(func(next ent.Querier) ent.Querier {
+				return ent.QuerierFunc(func(ctx context.Context, query ent.Query) (ent.Value, error) {
+					calls++
+					count, err := next.Query(ctx, query)
+					require.NoError(t, err)
+					require.Equal(t, 0, count)
+					return count, nil
+				})
+			}),
+			intercept.TraverseFunc(func(ctx context.Context, query intercept.Query) error {
+				calls++
+				return nil
+			}),
+		)
+		client.User.Query().CountX(ctx)
+		require.Equal(t, 2, calls)
+		client.User.Query().Clone().CountX(ctx)
+		require.Equal(t, 4, calls)
+	})
 }
 
 func TestSoftDelete(t *testing.T) {

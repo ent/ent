@@ -302,6 +302,7 @@ func (isq *IntSIDQuery) Clone() *IntSIDQuery {
 		limit:        isq.limit,
 		offset:       isq.offset,
 		order:        append([]OrderFunc{}, isq.order...),
+		inters:       append([]Interceptor{}, isq.inters...),
 		predicates:   append([]predicate.IntSID{}, isq.predicates...),
 		withParent:   isq.withParent.Clone(),
 		withChildren: isq.withChildren.Clone(),

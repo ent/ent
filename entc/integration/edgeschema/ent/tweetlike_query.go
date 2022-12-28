@@ -231,6 +231,7 @@ func (tlq *TweetLikeQuery) Clone() *TweetLikeQuery {
 		limit:      tlq.limit,
 		offset:     tlq.offset,
 		order:      append([]OrderFunc{}, tlq.order...),
+		inters:     append([]Interceptor{}, tlq.inters...),
 		predicates: append([]predicate.TweetLike{}, tlq.predicates...),
 		withTweet:  tlq.withTweet.Clone(),
 		withUser:   tlq.withUser.Clone(),

@@ -256,6 +256,7 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		limit:      gq.limit,
 		offset:     gq.offset,
 		order:      append([]OrderFunc{}, gq.order...),
+		inters:     append([]Interceptor{}, gq.inters...),
 		predicates: append([]predicate.Group{}, gq.predicates...),
 		// clone intermediate query.
 		sql:    gq.sql.Clone(),

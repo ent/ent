@@ -254,6 +254,7 @@ func (lq *LinkQuery) Clone() *LinkQuery {
 		limit:      lq.limit,
 		offset:     lq.offset,
 		order:      append([]OrderFunc{}, lq.order...),
+		inters:     append([]Interceptor{}, lq.inters...),
 		predicates: append([]predicate.Link{}, lq.predicates...),
 		// clone intermediate query.
 		sql:    lq.sql.Clone(),

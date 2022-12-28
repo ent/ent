@@ -326,6 +326,7 @@ func (bq *BlobQuery) Clone() *BlobQuery {
 		limit:         bq.limit,
 		offset:        bq.offset,
 		order:         append([]OrderFunc{}, bq.order...),
+		inters:        append([]Interceptor{}, bq.inters...),
 		predicates:    append([]predicate.Blob{}, bq.predicates...),
 		withParent:    bq.withParent.Clone(),
 		withLinks:     bq.withLinks.Clone(),

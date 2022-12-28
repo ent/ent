@@ -253,6 +253,7 @@ func (riq *RelationshipInfoQuery) Clone() *RelationshipInfoQuery {
 		limit:      riq.limit,
 		offset:     riq.offset,
 		order:      append([]OrderFunc{}, riq.order...),
+		inters:     append([]Interceptor{}, riq.inters...),
 		predicates: append([]predicate.RelationshipInfo{}, riq.predicates...),
 		// clone intermediate query.
 		sql:    riq.sql.Clone(),

@@ -256,6 +256,7 @@ func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 		limit:      ftq.limit,
 		offset:     ftq.offset,
 		order:      append([]OrderFunc{}, ftq.order...),
+		inters:     append([]Interceptor{}, ftq.inters...),
 		predicates: append([]predicate.FieldType{}, ftq.predicates...),
 		// clone intermediate query.
 		sql:    ftq.sql.Clone(),

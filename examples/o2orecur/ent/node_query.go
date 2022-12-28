@@ -301,6 +301,7 @@ func (nq *NodeQuery) Clone() *NodeQuery {
 		limit:      nq.limit,
 		offset:     nq.offset,
 		order:      append([]OrderFunc{}, nq.order...),
+		inters:     append([]Interceptor{}, nq.inters...),
 		predicates: append([]predicate.Node{}, nq.predicates...),
 		withPrev:   nq.withPrev.Clone(),
 		withNext:   nq.withNext.Clone(),

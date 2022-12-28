@@ -303,6 +303,7 @@ func (tq *TeamQuery) Clone() *TeamQuery {
 		limit:      tq.limit,
 		offset:     tq.offset,
 		order:      append([]OrderFunc{}, tq.order...),
+		inters:     append([]Interceptor{}, tq.inters...),
 		predicates: append([]predicate.Team{}, tq.predicates...),
 		withTasks:  tq.withTasks.Clone(),
 		withUsers:  tq.withUsers.Clone(),

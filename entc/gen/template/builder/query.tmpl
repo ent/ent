@@ -292,6 +292,7 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 		limit: 		{{ $receiver }}.limit,
 		offset: 	{{ $receiver }}.offset,
 		order: 		append([]OrderFunc{}, {{ $receiver }}.order...),
+		inters: 	append([]Interceptor{}, {{ $receiver }}.inters...),
 		predicates: append([]predicate.{{ $.Name }}{}, {{ $receiver }}.predicates...),
 		{{- range $e := $.Edges }}
 			{{ $e.EagerLoadField }}: {{ $receiver }}.{{ $e.EagerLoadField }}.Clone(),

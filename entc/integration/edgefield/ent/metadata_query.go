@@ -324,6 +324,7 @@ func (mq *MetadataQuery) Clone() *MetadataQuery {
 		limit:        mq.limit,
 		offset:       mq.offset,
 		order:        append([]OrderFunc{}, mq.order...),
+		inters:       append([]Interceptor{}, mq.inters...),
 		predicates:   append([]predicate.Metadata{}, mq.predicates...),
 		withUser:     mq.withUser.Clone(),
 		withChildren: mq.withChildren.Clone(),

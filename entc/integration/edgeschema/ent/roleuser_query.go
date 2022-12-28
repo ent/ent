@@ -230,6 +230,7 @@ func (ruq *RoleUserQuery) Clone() *RoleUserQuery {
 		limit:      ruq.limit,
 		offset:     ruq.offset,
 		order:      append([]OrderFunc{}, ruq.order...),
+		inters:     append([]Interceptor{}, ruq.inters...),
 		predicates: append([]predicate.RoleUser{}, ruq.predicates...),
 		withRole:   ruq.withRole.Clone(),
 		withUser:   ruq.withUser.Clone(),
