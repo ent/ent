@@ -8,6 +8,7 @@ package user
 
 import (
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/migration/ent/predicate"
 )
 
@@ -179,6 +180,33 @@ func TagsIsNil() predicate.User {
 // TagsNotNil applies the NotNil predicate on the "tags" field.
 func TagsNotNil() predicate.User {
 	return predicate.User(sql.FieldNotNull(FieldTags))
+}
+
+// HasCards applies the HasEdge predicate on the "cards" edge.
+func HasCards() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CardsTable, CardsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCardsWith applies the HasEdge predicate on the "cards" edge with a given conditions (other predicates).
+func HasCardsWith(preds ...predicate.Card) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(CardsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CardsTable, CardsColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

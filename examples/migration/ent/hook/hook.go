@@ -13,6 +13,30 @@ import (
 	"entgo.io/ent/examples/migration/ent"
 )
 
+// The CardFunc type is an adapter to allow the use of ordinary
+// function as Card mutator.
+type CardFunc func(context.Context, *ent.CardMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CardFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CardMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CardMutation", m)
+}
+
+// The PetFunc type is an adapter to allow the use of ordinary
+// function as Pet mutator.
+type PetFunc func(context.Context, *ent.PetMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PetFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PetMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PetMutation", m)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary
 // function as User mutator.
 type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)

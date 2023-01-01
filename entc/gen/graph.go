@@ -602,8 +602,7 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 				// The "owner" is the table that owns the relation (we set
 				// the foreign-key on) and "ref" is the referenced table.
 				owner, ref := tables[e.Rel.Table], tables[n.Table()]
-				pk := ref.PrimaryKey[0]
-				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, Unique: e.Rel.Type == O2O, SchemaType: pk.SchemaType, Nullable: true}
+				column := fkColumn(e, owner, ref.PrimaryKey[0])
 				// If it's not a circular reference (self-referencing table),
 				// and the inverse edge is required, make it non-nullable.
 				if n != e.Type && e.Ref != nil && !e.Ref.Optional {
@@ -619,8 +618,7 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 				})
 			case M2O:
 				ref, owner := tables[e.Type.Table()], tables[e.Rel.Table]
-				pk := ref.PrimaryKey[0]
-				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, SchemaType: pk.SchemaType, Nullable: true}
+				column := fkColumn(e, owner, ref.PrimaryKey[0])
 				// If it's not a circular reference (self-referencing table),
 				// and the edge is non-optional (required), make it non-nullable.
 				if n != e.Type && !e.Optional {
@@ -701,6 +699,21 @@ func mayAddColumn(t *schema.Table, c *schema.Column) {
 	if !t.HasColumn(c.Name) {
 		t.AddColumn(c)
 	}
+}
+
+// fkColumn returns the foreign key column for the given edge.
+func fkColumn(e *Edge, owner *schema.Table, refPK *schema.Column) *schema.Column {
+	// If the foreign-key also functions as a primary key, it cannot be nullable.
+	ispk := len(owner.PrimaryKey) == 1 && owner.PrimaryKey[0].Name == e.Rel.Column()
+	column := &schema.Column{Name: e.Rel.Column(), Size: refPK.Size, Type: refPK.Type, SchemaType: refPK.SchemaType, Nullable: !ispk}
+	// O2O relations are enforced using a unique index.
+	column.Unique = e.Rel.Type == O2O
+	// Foreign key was defined as an edge field.
+	if e.Rel.fk != nil && e.Rel.fk.Field != nil {
+		fc := e.Rel.fk.Field.Column()
+		column.Comment, column.Default = fc.Comment, fc.Default
+	}
+	return column
 }
 
 func addCompositePK(t *schema.Table, n *Type) error {
