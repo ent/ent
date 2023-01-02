@@ -17,8 +17,17 @@ const (
 	FieldName = "name"
 	// FieldTags holds the string denoting the tags field in the database.
 	FieldTags = "tags"
+	// EdgeCards holds the string denoting the cards edge name in mutations.
+	EdgeCards = "cards"
 	// Table holds the table name of the user in the database.
 	Table = "users"
+	// CardsTable is the table that holds the cards relation/edge.
+	CardsTable = "cards"
+	// CardsInverseTable is the table name for the Card entity.
+	// It exists in this package in order to avoid circular dependency with the "card" package.
+	CardsInverseTable = "cards"
+	// CardsColumn is the table column denoting the cards relation/edge.
+	CardsColumn = "owner_id"
 )
 
 // Columns holds all SQL columns for user fields.

@@ -65,7 +65,7 @@ var (
 				Symbol:     "infos_users_user",
 				Columns:    []*schema.Column{InfosColumns[0]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -91,7 +91,7 @@ var (
 				Symbol:     "metadata_users_metadata",
 				Columns:    []*schema.Column{MetadataColumns[0]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}

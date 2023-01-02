@@ -1,0 +1,4 @@
+-- create "cards" table
+CREATE TABLE `cards` (`id` bigint NOT NULL AUTO_INCREMENT, `owner_id` bigint NOT NULL DEFAULT 0, PRIMARY KEY (`id`), INDEX `cards_users_cards` (`owner_id`), CONSTRAINT `cards_users_cards` FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION) CHARSET utf8mb4 COLLATE utf8mb4_bin;
+-- create "pets" table
+CREATE TABLE `pets` (`id` char(36) NOT NULL, `best_friend_id` char(36) NULL DEFAULT "00000000-0000-0000-0000-000000000000", `owner_id` bigint NOT NULL DEFAULT 0, PRIMARY KEY (`id`), UNIQUE INDEX `best_friend_id` (`best_friend_id`), INDEX `pets_users_owner` (`owner_id`), CONSTRAINT `pets_pets_best_friend` FOREIGN KEY (`best_friend_id`) REFERENCES `pets` (`id`) ON UPDATE NO ACTION ON DELETE SET NULL, CONSTRAINT `pets_users_owner` FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION) CHARSET utf8mb4 COLLATE utf8mb4_bin;

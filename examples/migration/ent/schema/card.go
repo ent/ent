@@ -5,29 +5,31 @@
 package schema
 
 import (
-	"encoding/json"
-
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
-// Info holds the schema definition for the Info entity.
-type Info struct {
+// Card holds the schema definition for the Card entity.
+type Card struct {
 	ent.Schema
 }
 
-func (Info) Fields() []ent.Field {
+// Fields of the Card.
+func (Card) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("id"),
-		field.JSON("content", json.RawMessage{}),
+		field.Int("owner_id").
+			Default(0),
 	}
 }
 
-func (Info) Edges() []ent.Edge {
+// Edges of the Card.
+func (Card) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("user", User.Type).
+		edge.From("owner", User.Type).
+			Ref("cards").
 			Unique().
-			StorageKey(edge.Column("id")),
+			Required().
+			Field("owner_id"),
 	}
 }

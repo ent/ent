@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/examples/migration/ent/card"
 	"entgo.io/ent/examples/migration/ent/user"
 	"entgo.io/ent/schema/field"
 )
@@ -39,6 +40,21 @@ func (uc *UserCreate) SetName(s string) *UserCreate {
 func (uc *UserCreate) SetTags(s []string) *UserCreate {
 	uc.mutation.SetTags(s)
 	return uc
+}
+
+// AddCardIDs adds the "cards" edge to the Card entity by IDs.
+func (uc *UserCreate) AddCardIDs(ids ...int) *UserCreate {
+	uc.mutation.AddCardIDs(ids...)
+	return uc
+}
+
+// AddCards adds the "cards" edges to the Card entity.
+func (uc *UserCreate) AddCards(c ...*Card) *UserCreate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uc.AddCardIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -124,6 +140,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.Tags(); ok {
 		_spec.SetField(user.FieldTags, field.TypeJSON, value)
 		_node.Tags = value
+	}
+	if nodes := uc.mutation.CardsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CardsTable,
+			Columns: []string{user.CardsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: card.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
