@@ -8,8 +8,10 @@ package entv2
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/blog"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
@@ -21,6 +23,12 @@ type BlogCreate struct {
 	config
 	mutation *BlogMutation
 	hooks    []Hook
+}
+
+// SetOid sets the "oid" field.
+func (bc *BlogCreate) SetOid(i int) *BlogCreate {
+	bc.mutation.SetOid(i)
+	return bc
 }
 
 // SetID sets the "id" field.
@@ -78,6 +86,12 @@ func (bc *BlogCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (bc *BlogCreate) check() error {
+	switch bc.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		if _, ok := bc.mutation.Oid(); !ok {
+			return &ValidationError{Name: "oid", err: errors.New(`entv2: missing required field "Blog.oid"`)}
+		}
+	}
 	return nil
 }
 
@@ -115,6 +129,10 @@ func (bc *BlogCreate) createSpec() (*Blog, *sqlgraph.CreateSpec) {
 	if id, ok := bc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
+	}
+	if value, ok := bc.mutation.Oid(); ok {
+		_spec.SetField(blog.FieldOid, field.TypeInt, value)
+		_node.Oid = value
 	}
 	if nodes := bc.mutation.AdminsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

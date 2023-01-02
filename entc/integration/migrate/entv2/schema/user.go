@@ -225,6 +225,10 @@ func (Blog) Fields() []ent.Field {
 			SchemaType(map[string]string{
 				dialect.Postgres: postgres.TypeSerial,
 			}),
+		field.Int("oid").
+			SchemaType(map[string]string{
+				dialect.Postgres: postgres.TypeSerial,
+			}),
 	}
 }
 

@@ -16,9 +16,11 @@ import (
 
 // Blog is the model entity for the Blog schema.
 type Blog struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// Oid holds the value of the "oid" field.
+	Oid int `json:"oid,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the BlogQuery when eager-loading is set.
 	Edges BlogEdges `json:"edges"`
@@ -47,7 +49,7 @@ func (*Blog) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case blog.FieldID:
+		case blog.FieldID, blog.FieldOid:
 			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Blog", columns[i])
@@ -70,6 +72,12 @@ func (b *Blog) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			b.ID = int(value.Int64)
+		case blog.FieldOid:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field oid", values[i])
+			} else if value.Valid {
+				b.Oid = int(value.Int64)
+			}
 		}
 	}
 	return nil
@@ -102,7 +110,9 @@ func (b *Blog) Unwrap() *Blog {
 func (b *Blog) String() string {
 	var builder strings.Builder
 	builder.WriteString("Blog(")
-	builder.WriteString(fmt.Sprintf("id=%v", b.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", b.ID))
+	builder.WriteString("oid=")
+	builder.WriteString(fmt.Sprintf("%v", b.Oid))
 	builder.WriteByte(')')
 	return builder.String()
 }

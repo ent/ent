@@ -301,6 +301,18 @@ func (bq *BlogQuery) WithAdmins(opts ...func(*UserQuery)) *BlogQuery {
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		Oid int `json:"oid,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.Blog.Query().
+//		GroupBy(blog.FieldOid).
+//		Aggregate(entv2.Count()).
+//		Scan(ctx, &v)
 func (bq *BlogQuery) GroupBy(field string, fields ...string) *BlogGroupBy {
 	bq.fields = append([]string{field}, fields...)
 	grbuild := &BlogGroupBy{build: bq}
@@ -312,6 +324,16 @@ func (bq *BlogQuery) GroupBy(field string, fields ...string) *BlogGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		Oid int `json:"oid,omitempty"`
+//	}
+//
+//	client.Blog.Query().
+//		Select(blog.FieldOid).
+//		Scan(ctx, &v)
 func (bq *BlogQuery) Select(fields ...string) *BlogSelect {
 	bq.fields = append(bq.fields, fields...)
 	sbuild := &BlogSelect{BlogQuery: bq}

@@ -145,6 +145,7 @@ func TestPostgres(t *testing.T) {
 			if version != "10" {
 				IncludeColumns(t, drv)
 			}
+			SerialType(t, clientv2)
 			vdrv, err := sql.Open(dialect.Postgres, dsn+" dbname=versioned_migrate")
 			require.NoError(t, err, "connecting to versioned migrate database")
 			defer vdrv.Close()
@@ -213,7 +214,7 @@ func TestSQLite(t *testing.T) {
 
 	SanityV2(t, drv.Dialect(), client)
 	u := client.User.Create().SetAge(1).SetName("x").SetNickname("x'").SetPhone("y").SaveX(ctx)
-	idRange(t, client.Blog.Create().SaveX(ctx).ID, 0, 1<<32)
+	idRange(t, client.Blog.Create().SetOid(1).SaveX(ctx).ID, 0, 1<<32)
 	idRange(t, client.Car.Create().SetOwner(u).SaveX(ctx).ID, 1<<32-1, 2<<32)
 	idRange(t, client.Conversion.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
 	idRange(t, client.CustomType.Create().SaveX(ctx).ID, 3<<32-1, 4<<32)
@@ -767,6 +768,12 @@ func IndexOpClass(t *testing.T, drv *sql.Driver) {
 	require.NoError(t, err)
 	require.NoError(t, rows.Close())
 	require.Equal(t, d, "CREATE INDEX user_age_phone ON public.users USING btree (age, phone bpchar_pattern_ops)")
+}
+
+func SerialType(t *testing.T, c *entv2.Client) {
+	ctx := context.Background()
+	c.Blog.Create().ExecX(ctx)
+	require.NotZero(t, c.Blog.Query().OnlyX(ctx).Oid)
 }
 
 func PartialIndexes(t *testing.T, drv *sql.Driver, query, def string) {
