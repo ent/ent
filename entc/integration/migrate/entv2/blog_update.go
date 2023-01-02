@@ -32,6 +32,19 @@ func (bu *BlogUpdate) Where(ps ...predicate.Blog) *BlogUpdate {
 	return bu
 }
 
+// SetOid sets the "oid" field.
+func (bu *BlogUpdate) SetOid(i int) *BlogUpdate {
+	bu.mutation.ResetOid()
+	bu.mutation.SetOid(i)
+	return bu
+}
+
+// AddOid adds i to the "oid" field.
+func (bu *BlogUpdate) AddOid(i int) *BlogUpdate {
+	bu.mutation.AddOid(i)
+	return bu
+}
+
 // AddAdminIDs adds the "admins" edge to the User entity by IDs.
 func (bu *BlogUpdate) AddAdminIDs(ids ...int) *BlogUpdate {
 	bu.mutation.AddAdminIDs(ids...)
@@ -118,6 +131,12 @@ func (bu *BlogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := bu.mutation.Oid(); ok {
+		_spec.SetField(blog.FieldOid, field.TypeInt, value)
+	}
+	if value, ok := bu.mutation.AddedOid(); ok {
+		_spec.AddField(blog.FieldOid, field.TypeInt, value)
+	}
 	if bu.mutation.AdminsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -190,6 +209,19 @@ type BlogUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *BlogMutation
+}
+
+// SetOid sets the "oid" field.
+func (buo *BlogUpdateOne) SetOid(i int) *BlogUpdateOne {
+	buo.mutation.ResetOid()
+	buo.mutation.SetOid(i)
+	return buo
+}
+
+// AddOid adds i to the "oid" field.
+func (buo *BlogUpdateOne) AddOid(i int) *BlogUpdateOne {
+	buo.mutation.AddOid(i)
+	return buo
 }
 
 // AddAdminIDs adds the "admins" edge to the User entity by IDs.
@@ -301,6 +333,12 @@ func (buo *BlogUpdateOne) sqlSave(ctx context.Context) (_node *Blog, err error) 
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := buo.mutation.Oid(); ok {
+		_spec.SetField(blog.FieldOid, field.TypeInt, value)
+	}
+	if value, ok := buo.mutation.AddedOid(); ok {
+		_spec.AddField(blog.FieldOid, field.TypeInt, value)
 	}
 	if buo.mutation.AdminsCleared() {
 		edge := &sqlgraph.EdgeSpec{

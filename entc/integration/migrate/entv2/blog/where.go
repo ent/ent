@@ -57,6 +57,51 @@ func IDLTE(id int) predicate.Blog {
 	return predicate.Blog(sql.FieldLTE(FieldID, id))
 }
 
+// Oid applies equality check predicate on the "oid" field. It's identical to OidEQ.
+func Oid(v int) predicate.Blog {
+	return predicate.Blog(sql.FieldEQ(FieldOid, v))
+}
+
+// OidEQ applies the EQ predicate on the "oid" field.
+func OidEQ(v int) predicate.Blog {
+	return predicate.Blog(sql.FieldEQ(FieldOid, v))
+}
+
+// OidNEQ applies the NEQ predicate on the "oid" field.
+func OidNEQ(v int) predicate.Blog {
+	return predicate.Blog(sql.FieldNEQ(FieldOid, v))
+}
+
+// OidIn applies the In predicate on the "oid" field.
+func OidIn(vs ...int) predicate.Blog {
+	return predicate.Blog(sql.FieldIn(FieldOid, vs...))
+}
+
+// OidNotIn applies the NotIn predicate on the "oid" field.
+func OidNotIn(vs ...int) predicate.Blog {
+	return predicate.Blog(sql.FieldNotIn(FieldOid, vs...))
+}
+
+// OidGT applies the GT predicate on the "oid" field.
+func OidGT(v int) predicate.Blog {
+	return predicate.Blog(sql.FieldGT(FieldOid, v))
+}
+
+// OidGTE applies the GTE predicate on the "oid" field.
+func OidGTE(v int) predicate.Blog {
+	return predicate.Blog(sql.FieldGTE(FieldOid, v))
+}
+
+// OidLT applies the LT predicate on the "oid" field.
+func OidLT(v int) predicate.Blog {
+	return predicate.Blog(sql.FieldLT(FieldOid, v))
+}
+
+// OidLTE applies the LTE predicate on the "oid" field.
+func OidLTE(v int) predicate.Blog {
+	return predicate.Blog(sql.FieldLTE(FieldOid, v))
+}
+
 // HasAdmins applies the HasEdge predicate on the "admins" edge.
 func HasAdmins() predicate.Blog {
 	return predicate.Blog(func(s *sql.Selector) {

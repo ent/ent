@@ -17,7 +17,9 @@ import (
 	"strings"
 	"unicode"
 
+	"ariga.io/atlas/sql/postgres"
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/entc/load"
@@ -1189,6 +1191,35 @@ func (f Field) MutationAppended() string {
 		name += "Field"
 	}
 	return name
+}
+
+// RequiredFor returns a list of dialects that this field is required for.
+// A field can be required in one database, but optional in the other. e.g.,
+// in case a SchemaType was defined as "serial" for PostgreSQL, but "int" for SQLite.
+func (f Field) RequiredFor() (dialects []string) {
+	seen := make(map[string]struct{})
+	switch f.def.SchemaType[dialect.Postgres] {
+	case postgres.TypeSerial, postgres.TypeBigSerial, postgres.TypeSmallSerial:
+		seen[dialect.Postgres] = struct{}{}
+	}
+	switch d := f.Column().Default.(type) {
+	// Static values (or nil) are set by
+	// the builders, unless explicitly set.
+	case nil:
+	// Database default values for all dialects.
+	case schema.Expr:
+		return nil
+	case map[string]schema.Expr:
+		for k := range d {
+			seen[k] = struct{}{}
+		}
+	}
+	for _, d := range f.cfg.Storage.Dialects {
+		if _, ok := seen[strings.ToLower(strings.TrimPrefix(d, "dialect."))]; !ok {
+			dialects = append(dialects, d)
+		}
+	}
+	return dialects
 }
 
 // IsBool returns true if the field is a bool field.

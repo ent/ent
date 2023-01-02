@@ -11,6 +11,8 @@ const (
 	Label = "blog"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldOid holds the string denoting the oid field in the database.
+	FieldOid = "oid"
 	// EdgeAdmins holds the string denoting the admins edge name in mutations.
 	EdgeAdmins = "admins"
 	// UserFieldID holds the string denoting the ID field of the User.
@@ -29,6 +31,7 @@ const (
 // Columns holds all SQL columns for blog fields.
 var Columns = []string{
 	FieldID,
+	FieldOid,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
