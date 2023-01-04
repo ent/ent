@@ -28,6 +28,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/node"
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/spec"
+
 	enttask "entgo.io/ent/entc/integration/ent/task"
 	"entgo.io/ent/entc/integration/ent/user"
 )
