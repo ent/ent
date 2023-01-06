@@ -140,9 +140,6 @@ func init() {
 			{{ print $pkg "Inters" }} := {{ $schema }}.{{ $n.Name }}{}.Interceptors()
 		{{- end }}
 		{{- range $i, $p := $inters }}
-			{{- if $n.NumPolicy }}
-				{{ $i = add $i 1 }}
-			{{- end }}
 			{{- if $p.MixedIn }}
 				{{ print $pkg ".Interceptors" }}[{{ $i }}] =  {{ print $pkg "MixinInters" $p.MixinIndex }}[{{ $p.Index }}]
 			{{- else }}
