@@ -471,6 +471,9 @@ func (nq *NodeQuery) loadParent(ctx context.Context, query *NodeQuery, nodes []*
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(node.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {

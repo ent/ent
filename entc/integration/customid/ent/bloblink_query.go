@@ -389,6 +389,9 @@ func (blq *BlobLinkQuery) loadBlob(ctx context.Context, query *BlobQuery, nodes 
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(blob.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -414,6 +417,9 @@ func (blq *BlobLinkQuery) loadLink(ctx context.Context, query *BlobQuery, nodes 
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
 	}
 	query.Where(blob.IDIn(ids...))
 	neighbors, err := query.All(ctx)

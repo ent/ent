@@ -460,6 +460,9 @@ func (gtq *GroupTagQuery) loadTag(ctx context.Context, query *TagQuery, nodes []
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(tag.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -485,6 +488,9 @@ func (gtq *GroupTagQuery) loadGroup(ctx context.Context, query *GroupQuery, node
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
 	}
 	query.Where(group.IDIn(ids...))
 	neighbors, err := query.All(ctx)

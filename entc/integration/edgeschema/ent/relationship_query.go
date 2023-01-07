@@ -438,6 +438,9 @@ func (rq *RelationshipQuery) loadUser(ctx context.Context, query *UserQuery, nod
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(user.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -464,6 +467,9 @@ func (rq *RelationshipQuery) loadRelative(ctx context.Context, query *UserQuery,
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(user.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -489,6 +495,9 @@ func (rq *RelationshipQuery) loadInfo(ctx context.Context, query *RelationshipIn
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
 	}
 	query.Where(relationshipinfo.IDIn(ids...))
 	neighbors, err := query.All(ctx)

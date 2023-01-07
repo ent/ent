@@ -515,6 +515,9 @@ func (dq *DocQuery) loadParent(ctx context.Context, query *DocQuery, nodes []*Do
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(doc.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
