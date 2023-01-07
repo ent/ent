@@ -503,6 +503,9 @@ func (mq *MetadataQuery) loadUser(ctx context.Context, query *UserQuery, nodes [
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(user.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -555,6 +558,9 @@ func (mq *MetadataQuery) loadParent(ctx context.Context, query *MetadataQuery, n
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
 	}
 	query.Where(metadata.IDIn(ids...))
 	neighbors, err := query.All(ctx)

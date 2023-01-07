@@ -1435,8 +1435,8 @@ func (g *graph) addFKEdges(ctx context.Context, ids []driver.Value, edges []*Edg
 		if err != nil {
 			return err
 		}
-		// Setting the FK value of the "other" table
-		// without clearing it before, is not allowed.
+		// Setting the FK value of the "other" table without clearing it before, is not allowed.
+		// Including no-op (same id), because we rely on "affected" to determine if the FK set.
 		if ids := edge.Target.Nodes; int(affected) < len(ids) {
 			return &ConstraintError{msg: fmt.Sprintf("one of %v is already connected to a different %s", ids, edge.Columns[0])}
 		}

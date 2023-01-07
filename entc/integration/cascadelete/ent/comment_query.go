@@ -417,6 +417,9 @@ func (cq *CommentQuery) loadPost(ctx context.Context, query *PostQuery, nodes []
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(post.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {

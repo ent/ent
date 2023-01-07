@@ -461,6 +461,9 @@ func (ttq *TweetTagQuery) loadTag(ctx context.Context, query *TagQuery, nodes []
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(tag.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -486,6 +489,9 @@ func (ttq *TweetTagQuery) loadTweet(ctx context.Context, query *TweetQuery, node
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
 	}
 	query.Where(tweet.IDIn(ids...))
 	neighbors, err := query.All(ctx)

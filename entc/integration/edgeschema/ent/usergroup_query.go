@@ -460,6 +460,9 @@ func (ugq *UserGroupQuery) loadUser(ctx context.Context, query *UserQuery, nodes
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(user.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -485,6 +488,9 @@ func (ugq *UserGroupQuery) loadGroup(ctx context.Context, query *GroupQuery, nod
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
 	}
 	query.Where(group.IDIn(ids...))
 	neighbors, err := query.All(ctx)

@@ -451,6 +451,9 @@ func (dq *DeviceQuery) loadActiveSession(ctx context.Context, query *SessionQuer
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(session.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
