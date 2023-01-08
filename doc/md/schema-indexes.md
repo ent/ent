@@ -195,7 +195,7 @@ func (User) Indexes() []ent.Index {
 		index.Fields("description").
 			Annotations(entsql.Prefix(128)),
 		index.Fields("c1", "c2", "c3").
-			Annotation(
+			Annotations(
 				entsql.PrefixColumn("c1", 100),
 				entsql.PrefixColumn("c2", 200),
 			)
@@ -222,7 +222,7 @@ func (User) Indexes() []ent.Index {
         index.Fields("c1").
             Annotations(entsql.Desc()),
         index.Fields("c1", "c2", "c3").
-            Annotation(entsql.DescColumns("c1", "c2")),
+            Annotations(entsql.DescColumns("c1", "c2")),
         index.Fields("c4").
             Annotations(entsql.IndexType("HASH")),
         // Enable FULLTEXT search on MySQL,
