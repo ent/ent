@@ -22,7 +22,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ $mutation := print $receiver ".mutation" }}
 {{ $one := hasSuffix $builder "One" }}
 {{- $zero := 0 }}{{ if $one }}{{ $zero = "nil" }}{{ end }}
-{{- $ret := "n" }}{{ if $one }}{{ $ret = "_node" }}{{ end }}
+{{- $ret := "n" }}{{ if eq $ret $receiver }}{{ $ret = "_n" }}{{ end }}{{ if $one }}{{ $ret = "_node" }}{{ end }}
 
 {{- /* Allow adding methods to the update-builder by ent extensions or user templates.*/}}
 {{- with $tmpls := matchTemplate "dialect/sql/update/additional/*" }}
