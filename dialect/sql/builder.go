@@ -2744,6 +2744,12 @@ func (s *Selector) OrderExpr(exprs ...Querier) *Selector {
 	return s
 }
 
+// ClearOrder clears the ORDER BY clause to be empty.
+func (s *Selector) ClearOrder() *Selector {
+	s.order = nil
+	return s
+}
+
 // GroupBy appends the `GROUP BY` clause to the `SELECT` statement.
 func (s *Selector) GroupBy(columns ...string) *Selector {
 	s.group = append(s.group, columns...)

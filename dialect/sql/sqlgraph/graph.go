@@ -645,6 +645,11 @@ func (q *query) count(ctx context.Context, drv dialect.Driver) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+	// Remove any ORDER BY clauses present in the COUNT query as
+	// they are not allowed in some databases, such as PostgreSQL.
+	if q.Order != nil {
+		selector.ClearOrder()
+	}
 	// If no columns were selected in count,
 	// the default selection is by node ids.
 	columns := q.Node.Columns
