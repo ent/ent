@@ -1681,6 +1681,17 @@ func TestSelector_OrderByExpr(t *testing.T) {
 	require.Equal(t, []any{28, 1, 2}, args)
 }
 
+func TestSelector_ClearOrder(t *testing.T) {
+	query, args := Select("*").
+		From(Table("users")).
+		OrderBy("name").
+		ClearOrder().
+		OrderBy("id").
+		Query()
+	require.Equal(t, "SELECT * FROM `users` ORDER BY `id`", query)
+	require.Empty(t, args)
+}
+
 func TestSelector_SelectExpr(t *testing.T) {
 	query, args := SelectExpr(
 		Expr("?", "a"),
@@ -1716,93 +1727,93 @@ func TestSelector_SelectExpr(t *testing.T) {
 }
 
 func TestSelector_Union(t *testing.T) {
-    query, args := Dialect(dialect.Postgres).
-        Select("*").
-        From(Table("users")).
-        Where(EQ("active", true)).
-        Union(
-            Select("*").
-                From(Table("old_users1")).
-                Where(
-                    And(
-                        EQ("is_active", true),
-                        GT("age", 20),
-                    ),
-                ),
-        ).
-        UnionAll(
-            Select("*").
-                From(Table("old_users2")).
-                Where(
-                    And(
-                        EQ("is_active", "true"),
-                        LT("age", 18),
-                    ),
-                ),
-        ).
-        Query()
-    require.Equal(t, `SELECT * FROM "users" WHERE "active" UNION SELECT * FROM "old_users1" WHERE "is_active" AND "age" > $1 UNION ALL SELECT * FROM "old_users2" WHERE "is_active" = $2 AND "age" < $3`, query)
-    require.Equal(t, []any{20, "true", 18}, args)
+	query, args := Dialect(dialect.Postgres).
+		Select("*").
+		From(Table("users")).
+		Where(EQ("active", true)).
+		Union(
+			Select("*").
+				From(Table("old_users1")).
+				Where(
+					And(
+						EQ("is_active", true),
+						GT("age", 20),
+					),
+				),
+		).
+		UnionAll(
+			Select("*").
+				From(Table("old_users2")).
+				Where(
+					And(
+						EQ("is_active", "true"),
+						LT("age", 18),
+					),
+				),
+		).
+		Query()
+	require.Equal(t, `SELECT * FROM "users" WHERE "active" UNION SELECT * FROM "old_users1" WHERE "is_active" AND "age" > $1 UNION ALL SELECT * FROM "old_users2" WHERE "is_active" = $2 AND "age" < $3`, query)
+	require.Equal(t, []any{20, "true", 18}, args)
 }
 
 func TestSelector_Except(t *testing.T) {
-    query, args := Dialect(dialect.Postgres).
-        Select("*").
-        From(Table("users")).
-        Where(EQ("active", true)).
-        Except(
-            Select("*").
-                From(Table("old_users1")).
-                Where(
-                    And(
-                        EQ("is_active", true),
-                        GT("age", 20),
-                    ),
-                ),
-        ).
-        ExceptAll(
-            Select("*").
-                From(Table("old_users2")).
-                Where(
-                    And(
-                        EQ("is_active", "true"),
-                        LT("age", 18),
-                    ),
-                ),
-        ).
-        Query()
-    require.Equal(t, `SELECT * FROM "users" WHERE "active" EXCEPT SELECT * FROM "old_users1" WHERE "is_active" AND "age" > $1 EXCEPT ALL SELECT * FROM "old_users2" WHERE "is_active" = $2 AND "age" < $3`, query)
-    require.Equal(t, []any{20, "true", 18}, args)
+	query, args := Dialect(dialect.Postgres).
+		Select("*").
+		From(Table("users")).
+		Where(EQ("active", true)).
+		Except(
+			Select("*").
+				From(Table("old_users1")).
+				Where(
+					And(
+						EQ("is_active", true),
+						GT("age", 20),
+					),
+				),
+		).
+		ExceptAll(
+			Select("*").
+				From(Table("old_users2")).
+				Where(
+					And(
+						EQ("is_active", "true"),
+						LT("age", 18),
+					),
+				),
+		).
+		Query()
+	require.Equal(t, `SELECT * FROM "users" WHERE "active" EXCEPT SELECT * FROM "old_users1" WHERE "is_active" AND "age" > $1 EXCEPT ALL SELECT * FROM "old_users2" WHERE "is_active" = $2 AND "age" < $3`, query)
+	require.Equal(t, []any{20, "true", 18}, args)
 }
 
 func TestSelector_Intersect(t *testing.T) {
-    query, args := Dialect(dialect.Postgres).
-        Select("*").
-        From(Table("users")).
-        Where(EQ("active", true)).
-        Intersect(
-            Select("*").
-                From(Table("old_users1")).
-                Where(
-                    And(
-                        EQ("is_active", true),
-                        GT("age", 20),
-                    ),
-                ),
-        ).
-        IntersectAll(
-            Select("*").
-                From(Table("old_users2")).
-                Where(
-                    And(
-                        EQ("is_active", "true"),
-                        LT("age", 18),
-                    ),
-                ),
-        ).
-        Query()
-    require.Equal(t, `SELECT * FROM "users" WHERE "active" INTERSECT SELECT * FROM "old_users1" WHERE "is_active" AND "age" > $1 INTERSECT ALL SELECT * FROM "old_users2" WHERE "is_active" = $2 AND "age" < $3`, query)
-    require.Equal(t, []any{20, "true", 18}, args)
+	query, args := Dialect(dialect.Postgres).
+		Select("*").
+		From(Table("users")).
+		Where(EQ("active", true)).
+		Intersect(
+			Select("*").
+				From(Table("old_users1")).
+				Where(
+					And(
+						EQ("is_active", true),
+						GT("age", 20),
+					),
+				),
+		).
+		IntersectAll(
+			Select("*").
+				From(Table("old_users2")).
+				Where(
+					And(
+						EQ("is_active", "true"),
+						LT("age", 18),
+					),
+				),
+		).
+		Query()
+	require.Equal(t, `SELECT * FROM "users" WHERE "active" INTERSECT SELECT * FROM "old_users1" WHERE "is_active" AND "age" > $1 INTERSECT ALL SELECT * FROM "old_users2" WHERE "is_active" = $2 AND "age" < $3`, query)
+	require.Equal(t, []any{20, "true", 18}, args)
 }
 
 func TestSelector_SetOperatorWithRecursive(t *testing.T) {
