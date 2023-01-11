@@ -125,19 +125,19 @@ func (ug *UserGroup) assignValues(columns []string, values []any) error {
 
 // QueryUser queries the "user" edge of the UserGroup entity.
 func (ug *UserGroup) QueryUser() *UserQuery {
-	return (&UserGroupClient{config: ug.config}).QueryUser(ug)
+	return NewUserGroupClient(ug.config).QueryUser(ug)
 }
 
 // QueryGroup queries the "group" edge of the UserGroup entity.
 func (ug *UserGroup) QueryGroup() *GroupQuery {
-	return (&UserGroupClient{config: ug.config}).QueryGroup(ug)
+	return NewUserGroupClient(ug.config).QueryGroup(ug)
 }
 
 // Update returns a builder for updating this UserGroup.
 // Note that you need to call UserGroup.Unwrap() before calling this method if this UserGroup
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (ug *UserGroup) Update() *UserGroupUpdateOne {
-	return (&UserGroupClient{config: ug.config}).UpdateOne(ug)
+	return NewUserGroupClient(ug.config).UpdateOne(ug)
 }
 
 // Unwrap unwraps the UserGroup entity that was returned from a transaction after it was closed,

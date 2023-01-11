@@ -120,29 +120,29 @@ func (gr *Group) assignValues(columns []string, values []any) error {
 
 // QueryUsers queries the "users" edge of the Group entity.
 func (gr *Group) QueryUsers() *UserQuery {
-	return (&GroupClient{config: gr.config}).QueryUsers(gr)
+	return NewGroupClient(gr.config).QueryUsers(gr)
 }
 
 // QueryTags queries the "tags" edge of the Group entity.
 func (gr *Group) QueryTags() *TagQuery {
-	return (&GroupClient{config: gr.config}).QueryTags(gr)
+	return NewGroupClient(gr.config).QueryTags(gr)
 }
 
 // QueryJoinedUsers queries the "joined_users" edge of the Group entity.
 func (gr *Group) QueryJoinedUsers() *UserGroupQuery {
-	return (&GroupClient{config: gr.config}).QueryJoinedUsers(gr)
+	return NewGroupClient(gr.config).QueryJoinedUsers(gr)
 }
 
 // QueryGroupTags queries the "group_tags" edge of the Group entity.
 func (gr *Group) QueryGroupTags() *GroupTagQuery {
-	return (&GroupClient{config: gr.config}).QueryGroupTags(gr)
+	return NewGroupClient(gr.config).QueryGroupTags(gr)
 }
 
 // Update returns a builder for updating this Group.
 // Note that you need to call Group.Unwrap() before calling this method if this Group
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (gr *Group) Update() *GroupUpdateOne {
-	return (&GroupClient{config: gr.config}).UpdateOne(gr)
+	return NewGroupClient(gr.config).UpdateOne(gr)
 }
 
 // Unwrap unwraps the Group entity that was returned from a transaction after it was closed,

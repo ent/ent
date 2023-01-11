@@ -111,19 +111,19 @@ func (po *Post) assignValues(columns []string, values []any) error {
 
 // QueryAuthor queries the "author" edge of the Post entity.
 func (po *Post) QueryAuthor() *UserQuery {
-	return (&PostClient{config: po.config}).QueryAuthor(po)
+	return NewPostClient(po.config).QueryAuthor(po)
 }
 
 // QueryComments queries the "comments" edge of the Post entity.
 func (po *Post) QueryComments() *CommentQuery {
-	return (&PostClient{config: po.config}).QueryComments(po)
+	return NewPostClient(po.config).QueryComments(po)
 }
 
 // Update returns a builder for updating this Post.
 // Note that you need to call Post.Unwrap() before calling this method if this Post
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (po *Post) Update() *PostUpdateOne {
-	return (&PostClient{config: po.config}).UpdateOne(po)
+	return NewPostClient(po.config).UpdateOne(po)
 }
 
 // Unwrap unwraps the Post entity that was returned from a transaction after it was closed,

@@ -103,19 +103,19 @@ func (is *IntSID) assignValues(columns []string, values []any) error {
 
 // QueryParent queries the "parent" edge of the IntSID entity.
 func (is *IntSID) QueryParent() *IntSIDQuery {
-	return (&IntSIDClient{config: is.config}).QueryParent(is)
+	return NewIntSIDClient(is.config).QueryParent(is)
 }
 
 // QueryChildren queries the "children" edge of the IntSID entity.
 func (is *IntSID) QueryChildren() *IntSIDQuery {
-	return (&IntSIDClient{config: is.config}).QueryChildren(is)
+	return NewIntSIDClient(is.config).QueryChildren(is)
 }
 
 // Update returns a builder for updating this IntSID.
 // Note that you need to call IntSID.Unwrap() before calling this method if this IntSID
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (is *IntSID) Update() *IntSIDUpdateOne {
-	return (&IntSIDClient{config: is.config}).UpdateOne(is)
+	return NewIntSIDClient(is.config).UpdateOne(is)
 }
 
 // Unwrap unwraps the IntSID entity that was returned from a transaction after it was closed,

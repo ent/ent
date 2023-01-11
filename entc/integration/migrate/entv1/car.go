@@ -92,14 +92,14 @@ func (c *Car) assignValues(columns []string, values []any) error {
 
 // QueryOwner queries the "owner" edge of the Car entity.
 func (c *Car) QueryOwner() *UserQuery {
-	return (&CarClient{config: c.config}).QueryOwner(c)
+	return NewCarClient(c.config).QueryOwner(c)
 }
 
 // Update returns a builder for updating this Car.
 // Note that you need to call Car.Unwrap() before calling this method if this Car
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (c *Car) Update() *CarUpdateOne {
-	return (&CarClient{config: c.config}).UpdateOne(c)
+	return NewCarClient(c.config).UpdateOne(c)
 }
 
 // Unwrap unwraps the Car entity that was returned from a transaction after it was closed,

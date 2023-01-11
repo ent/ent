@@ -128,19 +128,19 @@ func (tt *TweetTag) assignValues(columns []string, values []any) error {
 
 // QueryTag queries the "tag" edge of the TweetTag entity.
 func (tt *TweetTag) QueryTag() *TagQuery {
-	return (&TweetTagClient{config: tt.config}).QueryTag(tt)
+	return NewTweetTagClient(tt.config).QueryTag(tt)
 }
 
 // QueryTweet queries the "tweet" edge of the TweetTag entity.
 func (tt *TweetTag) QueryTweet() *TweetQuery {
-	return (&TweetTagClient{config: tt.config}).QueryTweet(tt)
+	return NewTweetTagClient(tt.config).QueryTweet(tt)
 }
 
 // Update returns a builder for updating this TweetTag.
 // Note that you need to call TweetTag.Unwrap() before calling this method if this TweetTag
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (tt *TweetTag) Update() *TweetTagUpdateOne {
-	return (&TweetTagClient{config: tt.config}).UpdateOne(tt)
+	return NewTweetTagClient(tt.config).UpdateOne(tt)
 }
 
 // Unwrap unwraps the TweetTag entity that was returned from a transaction after it was closed,

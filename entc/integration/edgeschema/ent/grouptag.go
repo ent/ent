@@ -114,19 +114,19 @@ func (gt *GroupTag) assignValues(columns []string, values []any) error {
 
 // QueryTag queries the "tag" edge of the GroupTag entity.
 func (gt *GroupTag) QueryTag() *TagQuery {
-	return (&GroupTagClient{config: gt.config}).QueryTag(gt)
+	return NewGroupTagClient(gt.config).QueryTag(gt)
 }
 
 // QueryGroup queries the "group" edge of the GroupTag entity.
 func (gt *GroupTag) QueryGroup() *GroupQuery {
-	return (&GroupTagClient{config: gt.config}).QueryGroup(gt)
+	return NewGroupTagClient(gt.config).QueryGroup(gt)
 }
 
 // Update returns a builder for updating this GroupTag.
 // Note that you need to call GroupTag.Unwrap() before calling this method if this GroupTag
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (gt *GroupTag) Update() *GroupTagUpdateOne {
-	return (&GroupTagClient{config: gt.config}).UpdateOne(gt)
+	return NewGroupTagClient(gt.config).UpdateOne(gt)
 }
 
 // Unwrap unwraps the GroupTag entity that was returned from a transaction after it was closed,

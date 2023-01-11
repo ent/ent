@@ -128,19 +128,19 @@ func (r *Rental) assignValues(columns []string, values []any) error {
 
 // QueryUser queries the "user" edge of the Rental entity.
 func (r *Rental) QueryUser() *UserQuery {
-	return (&RentalClient{config: r.config}).QueryUser(r)
+	return NewRentalClient(r.config).QueryUser(r)
 }
 
 // QueryCar queries the "car" edge of the Rental entity.
 func (r *Rental) QueryCar() *CarQuery {
-	return (&RentalClient{config: r.config}).QueryCar(r)
+	return NewRentalClient(r.config).QueryCar(r)
 }
 
 // Update returns a builder for updating this Rental.
 // Note that you need to call Rental.Unwrap() before calling this method if this Rental
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (r *Rental) Update() *RentalUpdateOne {
-	return (&RentalClient{config: r.config}).UpdateOne(r)
+	return NewRentalClient(r.config).UpdateOne(r)
 }
 
 // Unwrap unwraps the Rental entity that was returned from a transaction after it was closed,

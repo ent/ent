@@ -100,14 +100,14 @@ func (u *User) assignValues(columns []string, values []any) error {
 
 // QueryCard queries the "card" edge of the User entity.
 func (u *User) QueryCard() *CardQuery {
-	return (&UserClient{config: u.config}).QueryCard(u)
+	return NewUserClient(u.config).QueryCard(u)
 }
 
 // Update returns a builder for updating this User.
 // Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (u *User) Update() *UserUpdateOne {
-	return (&UserClient{config: u.config}).UpdateOne(u)
+	return NewUserClient(u.config).UpdateOne(u)
 }
 
 // Unwrap unwraps the User entity that was returned from a transaction after it was closed,

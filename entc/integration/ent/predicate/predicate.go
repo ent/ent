@@ -10,6 +10,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// Api is the predicate function for api builders.
+type Api func(*sql.Selector)
+
 // Card is the predicate function for card builders.
 type Card func(*sql.Selector)
 

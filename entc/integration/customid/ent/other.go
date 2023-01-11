@@ -58,7 +58,7 @@ func (o *Other) assignValues(columns []string, values []any) error {
 // Note that you need to call Other.Unwrap() before calling this method if this Other
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (o *Other) Update() *OtherUpdateOne {
-	return (&OtherClient{config: o.config}).UpdateOne(o)
+	return NewOtherClient(o.config).UpdateOne(o)
 }
 
 // Unwrap unwraps the Other entity that was returned from a transaction after it was closed,

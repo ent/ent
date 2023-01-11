@@ -13,6 +13,16 @@ import (
 )
 
 var (
+	// ApisColumns holds the columns for the "apis" table.
+	ApisColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+	}
+	// ApisTable holds the schema information for the "apis" table.
+	ApisTable = &schema.Table{
+		Name:       "apis",
+		Columns:    ApisColumns,
+		PrimaryKey: []*schema.Column{ApisColumns[0]},
+	}
 	// CardsColumns holds the columns for the "cards" table.
 	CardsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -534,6 +544,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		ApisTable,
 		CardsTable,
 		CommentsTable,
 		FieldTypesTable,

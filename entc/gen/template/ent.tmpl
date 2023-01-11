@@ -96,7 +96,7 @@ type {{ $.Name }}Edges struct {
 	{{ $func := print "Query" $e.StructField }}
 	// {{ $func }} queries the "{{ $e.Name }}" edge of the {{ $.Name }} entity.
 	func ({{ $receiver }} *{{ $.Name }}) {{ $func }}() *{{ $e.Type.QueryName }} {
-		return (&{{ $.Name }}Client{config: {{ $receiver }}.config}).{{ $func }}({{ $receiver }})
+		return New{{ $.ClientName }}({{ $receiver }}.config).{{ $func }}({{ $receiver }})
 	}
 {{ end }}
 
@@ -104,7 +104,7 @@ type {{ $.Name }}Edges struct {
 // Note that you need to call {{ $.Name }}.Unwrap() before calling this method if this {{ $.Name }}
 // was returned from a transaction, and the transaction was committed or rolled back.
 func ({{ $receiver }} *{{ $.Name }}) Update() *{{ $.UpdateOneName }} {
-	return (&{{ $.Name }}Client{config: {{ $receiver }}.config}).UpdateOne({{ $receiver }})
+	return New{{ $.ClientName }}({{ $receiver }}.config).UpdateOne({{ $receiver }})
 }
 
 // Unwrap unwraps the {{ $.Name }} entity that was returned from a transaction after it was closed,

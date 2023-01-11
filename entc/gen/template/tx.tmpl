@@ -22,7 +22,7 @@ type Tx struct {
 	config
 	{{- range $n := $.Nodes }}
 		// {{ $n.Name }} is the client for interacting with the {{ $n.Name }} builders.
-		{{ $n.Name }} *{{ $n.Name }}Client
+		{{ $n.Name }} *{{ $n.ClientName }}
 	{{- end }}
 
 	// lazily loaded.
@@ -105,7 +105,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	{{- range $n := $.Nodes }}
-		tx.{{ $n.Name }} = New{{ $n.Name }}Client(tx.config)
+		tx.{{ $n.Name }} = New{{ $n.ClientName }}(tx.config)
 	{{- end }}
 }
 

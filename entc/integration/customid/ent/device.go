@@ -104,19 +104,19 @@ func (d *Device) assignValues(columns []string, values []any) error {
 
 // QueryActiveSession queries the "active_session" edge of the Device entity.
 func (d *Device) QueryActiveSession() *SessionQuery {
-	return (&DeviceClient{config: d.config}).QueryActiveSession(d)
+	return NewDeviceClient(d.config).QueryActiveSession(d)
 }
 
 // QuerySessions queries the "sessions" edge of the Device entity.
 func (d *Device) QuerySessions() *SessionQuery {
-	return (&DeviceClient{config: d.config}).QuerySessions(d)
+	return NewDeviceClient(d.config).QuerySessions(d)
 }
 
 // Update returns a builder for updating this Device.
 // Note that you need to call Device.Unwrap() before calling this method if this Device
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (d *Device) Update() *DeviceUpdateOne {
-	return (&DeviceClient{config: d.config}).UpdateOne(d)
+	return NewDeviceClient(d.config).UpdateOne(d)
 }
 
 // Unwrap unwraps the Device entity that was returned from a transaction after it was closed,

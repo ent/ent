@@ -132,7 +132,7 @@ func (c *Conversion) assignValues(columns []string, values []any) error {
 // Note that you need to call Conversion.Unwrap() before calling this method if this Conversion
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (c *Conversion) Update() *ConversionUpdateOne {
-	return (&ConversionClient{config: c.config}).UpdateOne(c)
+	return NewConversionClient(c.config).UpdateOne(c)
 }
 
 // Unwrap unwraps the Conversion entity that was returned from a transaction after it was closed,

@@ -10,6 +10,9 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 )
 
+// Api is the predicate function for api builders.
+type Api func(*dsl.Traversal)
+
 // Card is the predicate function for card builders.
 type Card func(*dsl.Traversal)
 

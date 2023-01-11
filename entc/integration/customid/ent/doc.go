@@ -124,24 +124,24 @@ func (d *Doc) assignValues(columns []string, values []any) error {
 
 // QueryParent queries the "parent" edge of the Doc entity.
 func (d *Doc) QueryParent() *DocQuery {
-	return (&DocClient{config: d.config}).QueryParent(d)
+	return NewDocClient(d.config).QueryParent(d)
 }
 
 // QueryChildren queries the "children" edge of the Doc entity.
 func (d *Doc) QueryChildren() *DocQuery {
-	return (&DocClient{config: d.config}).QueryChildren(d)
+	return NewDocClient(d.config).QueryChildren(d)
 }
 
 // QueryRelated queries the "related" edge of the Doc entity.
 func (d *Doc) QueryRelated() *DocQuery {
-	return (&DocClient{config: d.config}).QueryRelated(d)
+	return NewDocClient(d.config).QueryRelated(d)
 }
 
 // Update returns a builder for updating this Doc.
 // Note that you need to call Doc.Unwrap() before calling this method if this Doc
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (d *Doc) Update() *DocUpdateOne {
-	return (&DocClient{config: d.config}).UpdateOne(d)
+	return NewDocClient(d.config).UpdateOne(d)
 }
 
 // Unwrap unwraps the Doc entity that was returned from a transaction after it was closed,

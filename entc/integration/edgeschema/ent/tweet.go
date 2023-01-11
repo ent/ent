@@ -142,39 +142,39 @@ func (t *Tweet) assignValues(columns []string, values []any) error {
 
 // QueryLikedUsers queries the "liked_users" edge of the Tweet entity.
 func (t *Tweet) QueryLikedUsers() *UserQuery {
-	return (&TweetClient{config: t.config}).QueryLikedUsers(t)
+	return NewTweetClient(t.config).QueryLikedUsers(t)
 }
 
 // QueryUser queries the "user" edge of the Tweet entity.
 func (t *Tweet) QueryUser() *UserQuery {
-	return (&TweetClient{config: t.config}).QueryUser(t)
+	return NewTweetClient(t.config).QueryUser(t)
 }
 
 // QueryTags queries the "tags" edge of the Tweet entity.
 func (t *Tweet) QueryTags() *TagQuery {
-	return (&TweetClient{config: t.config}).QueryTags(t)
+	return NewTweetClient(t.config).QueryTags(t)
 }
 
 // QueryLikes queries the "likes" edge of the Tweet entity.
 func (t *Tweet) QueryLikes() *TweetLikeQuery {
-	return (&TweetClient{config: t.config}).QueryLikes(t)
+	return NewTweetClient(t.config).QueryLikes(t)
 }
 
 // QueryTweetUser queries the "tweet_user" edge of the Tweet entity.
 func (t *Tweet) QueryTweetUser() *UserTweetQuery {
-	return (&TweetClient{config: t.config}).QueryTweetUser(t)
+	return NewTweetClient(t.config).QueryTweetUser(t)
 }
 
 // QueryTweetTags queries the "tweet_tags" edge of the Tweet entity.
 func (t *Tweet) QueryTweetTags() *TweetTagQuery {
-	return (&TweetClient{config: t.config}).QueryTweetTags(t)
+	return NewTweetClient(t.config).QueryTweetTags(t)
 }
 
 // Update returns a builder for updating this Tweet.
 // Note that you need to call Tweet.Unwrap() before calling this method if this Tweet
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (t *Tweet) Update() *TweetUpdateOne {
-	return (&TweetClient{config: t.config}).UpdateOne(t)
+	return NewTweetClient(t.config).UpdateOne(t)
 }
 
 // Unwrap unwraps the Tweet entity that was returned from a transaction after it was closed,

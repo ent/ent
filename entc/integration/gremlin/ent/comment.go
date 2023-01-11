@@ -65,7 +65,7 @@ func (c *Comment) FromResponse(res *gremlin.Response) error {
 // Note that you need to call Comment.Unwrap() before calling this method if this Comment
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (c *Comment) Update() *CommentUpdateOne {
-	return (&CommentClient{config: c.config}).UpdateOne(c)
+	return NewCommentClient(c.config).UpdateOne(c)
 }
 
 // Unwrap unwraps the Comment entity that was returned from a transaction after it was closed,

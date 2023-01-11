@@ -68,7 +68,7 @@ func (t *Tenant) assignValues(columns []string, values []any) error {
 // Note that you need to call Tenant.Unwrap() before calling this method if this Tenant
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (t *Tenant) Update() *TenantUpdateOne {
-	return (&TenantClient{config: t.config}).UpdateOne(t)
+	return NewTenantClient(t.config).UpdateOne(t)
 }
 
 // Unwrap unwraps the Tenant entity that was returned from a transaction after it was closed,

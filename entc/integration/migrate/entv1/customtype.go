@@ -68,7 +68,7 @@ func (ct *CustomType) assignValues(columns []string, values []any) error {
 // Note that you need to call CustomType.Unwrap() before calling this method if this CustomType
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (ct *CustomType) Update() *CustomTypeUpdateOne {
-	return (&CustomTypeClient{config: ct.config}).UpdateOne(ct)
+	return NewCustomTypeClient(ct.config).UpdateOne(ct)
 }
 
 // Unwrap unwraps the CustomType entity that was returned from a transaction after it was closed,
