@@ -24,6 +24,7 @@ values={[
 {label: 'PostgreSQL', value: 'postgres'},
 {label: 'MySQL', value: 'mysql'},
 {label: 'Gremlin (AWS Neptune)', value: 'gremlin'},
+{label: 'CloudSQL (Google Cloud)', value: 'cloudsql'},
 ]}>
 <TabItem value="sqlite">
 
@@ -128,6 +129,41 @@ func main() {
 	}
 }
 ```
+
+<TabItem value="cloudsql">
+
+```go
+package main
+
+import (
+	"database/sql"
+	"log"
+
+	"entdemo/ent"
+	"entgo.io/ent/dialect"
+	entsql "entgo.io/ent/dialect/sql"
+	_ "github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/proxy"
+)
+
+func main() {
+	db, err := sql.Open(
+		"cloudsqlpostgres",
+		"host=<project-id>:<region>:<instance-name> user=<user> dbname=<dbname> password=<password>> sslmode=disable",
+	)
+	if err != nil {
+		log.Fatalf("failed opening connection to postgres: %v", err)
+	}
+
+	driver := entsql.OpenDB(dialect.Postgres, db)
+	options := []ent.Option{ent.Driver(driver)}
+	
+	client := ent.NewClient(options...)
+	defer client.Close()
+}
+
+```
+
+</TabItem>
 
 </TabItem>
 </Tabs>
