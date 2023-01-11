@@ -117,19 +117,19 @@ func (bl *BlobLink) assignValues(columns []string, values []any) error {
 
 // QueryBlob queries the "blob" edge of the BlobLink entity.
 func (bl *BlobLink) QueryBlob() *BlobQuery {
-	return (&BlobLinkClient{config: bl.config}).QueryBlob(bl)
+	return NewBlobLinkClient(bl.config).QueryBlob(bl)
 }
 
 // QueryLink queries the "link" edge of the BlobLink entity.
 func (bl *BlobLink) QueryLink() *BlobQuery {
-	return (&BlobLinkClient{config: bl.config}).QueryLink(bl)
+	return NewBlobLinkClient(bl.config).QueryLink(bl)
 }
 
 // Update returns a builder for updating this BlobLink.
 // Note that you need to call BlobLink.Unwrap() before calling this method if this BlobLink
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (bl *BlobLink) Update() *BlobLinkUpdateOne {
-	return (&BlobLinkClient{config: bl.config}).UpdateOne(bl)
+	return NewBlobLinkClient(bl.config).UpdateOne(bl)
 }
 
 // Unwrap unwraps the BlobLink entity that was returned from a transaction after it was closed,

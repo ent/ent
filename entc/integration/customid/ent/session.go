@@ -93,14 +93,14 @@ func (s *Session) assignValues(columns []string, values []any) error {
 
 // QueryDevice queries the "device" edge of the Session entity.
 func (s *Session) QueryDevice() *DeviceQuery {
-	return (&SessionClient{config: s.config}).QueryDevice(s)
+	return NewSessionClient(s.config).QueryDevice(s)
 }
 
 // Update returns a builder for updating this Session.
 // Note that you need to call Session.Unwrap() before calling this method if this Session
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (s *Session) Update() *SessionUpdateOne {
-	return (&SessionClient{config: s.config}).UpdateOne(s)
+	return NewSessionClient(s.config).UpdateOne(s)
 }
 
 // Unwrap unwraps the Session entity that was returned from a transaction after it was closed,

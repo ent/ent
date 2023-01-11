@@ -111,19 +111,19 @@ func (n *Note) assignValues(columns []string, values []any) error {
 
 // QueryParent queries the "parent" edge of the Note entity.
 func (n *Note) QueryParent() *NoteQuery {
-	return (&NoteClient{config: n.config}).QueryParent(n)
+	return NewNoteClient(n.config).QueryParent(n)
 }
 
 // QueryChildren queries the "children" edge of the Note entity.
 func (n *Note) QueryChildren() *NoteQuery {
-	return (&NoteClient{config: n.config}).QueryChildren(n)
+	return NewNoteClient(n.config).QueryChildren(n)
 }
 
 // Update returns a builder for updating this Note.
 // Note that you need to call Note.Unwrap() before calling this method if this Note
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (n *Note) Update() *NoteUpdateOne {
-	return (&NoteClient{config: n.config}).UpdateOne(n)
+	return NewNoteClient(n.config).UpdateOne(n)
 }
 
 // Unwrap unwraps the Note entity that was returned from a transaction after it was closed,

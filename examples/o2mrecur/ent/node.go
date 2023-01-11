@@ -110,19 +110,19 @@ func (n *Node) assignValues(columns []string, values []any) error {
 
 // QueryParent queries the "parent" edge of the Node entity.
 func (n *Node) QueryParent() *NodeQuery {
-	return (&NodeClient{config: n.config}).QueryParent(n)
+	return NewNodeClient(n.config).QueryParent(n)
 }
 
 // QueryChildren queries the "children" edge of the Node entity.
 func (n *Node) QueryChildren() *NodeQuery {
-	return (&NodeClient{config: n.config}).QueryChildren(n)
+	return NewNodeClient(n.config).QueryChildren(n)
 }
 
 // Update returns a builder for updating this Node.
 // Note that you need to call Node.Unwrap() before calling this method if this Node
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (n *Node) Update() *NodeUpdateOne {
-	return (&NodeClient{config: n.config}).UpdateOne(n)
+	return NewNodeClient(n.config).UpdateOne(n)
 }
 
 // Unwrap unwraps the Node entity that was returned from a transaction after it was closed,

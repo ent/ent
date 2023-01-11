@@ -72,7 +72,7 @@ func (l *Link) assignValues(columns []string, values []any) error {
 // Note that you need to call Link.Unwrap() before calling this method if this Link
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (l *Link) Update() *LinkUpdateOne {
-	return (&LinkClient{config: l.config}).UpdateOne(l)
+	return NewLinkClient(l.config).UpdateOne(l)
 }
 
 // Unwrap unwraps the Link entity that was returned from a transaction after it was closed,

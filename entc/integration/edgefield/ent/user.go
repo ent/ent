@@ -188,49 +188,49 @@ func (u *User) assignValues(columns []string, values []any) error {
 
 // QueryPets queries the "pets" edge of the User entity.
 func (u *User) QueryPets() *PetQuery {
-	return (&UserClient{config: u.config}).QueryPets(u)
+	return NewUserClient(u.config).QueryPets(u)
 }
 
 // QueryParent queries the "parent" edge of the User entity.
 func (u *User) QueryParent() *UserQuery {
-	return (&UserClient{config: u.config}).QueryParent(u)
+	return NewUserClient(u.config).QueryParent(u)
 }
 
 // QueryChildren queries the "children" edge of the User entity.
 func (u *User) QueryChildren() *UserQuery {
-	return (&UserClient{config: u.config}).QueryChildren(u)
+	return NewUserClient(u.config).QueryChildren(u)
 }
 
 // QuerySpouse queries the "spouse" edge of the User entity.
 func (u *User) QuerySpouse() *UserQuery {
-	return (&UserClient{config: u.config}).QuerySpouse(u)
+	return NewUserClient(u.config).QuerySpouse(u)
 }
 
 // QueryCard queries the "card" edge of the User entity.
 func (u *User) QueryCard() *CardQuery {
-	return (&UserClient{config: u.config}).QueryCard(u)
+	return NewUserClient(u.config).QueryCard(u)
 }
 
 // QueryMetadata queries the "metadata" edge of the User entity.
 func (u *User) QueryMetadata() *MetadataQuery {
-	return (&UserClient{config: u.config}).QueryMetadata(u)
+	return NewUserClient(u.config).QueryMetadata(u)
 }
 
 // QueryInfo queries the "info" edge of the User entity.
 func (u *User) QueryInfo() *InfoQuery {
-	return (&UserClient{config: u.config}).QueryInfo(u)
+	return NewUserClient(u.config).QueryInfo(u)
 }
 
 // QueryRentals queries the "rentals" edge of the User entity.
 func (u *User) QueryRentals() *RentalQuery {
-	return (&UserClient{config: u.config}).QueryRentals(u)
+	return NewUserClient(u.config).QueryRentals(u)
 }
 
 // Update returns a builder for updating this User.
 // Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (u *User) Update() *UserUpdateOne {
-	return (&UserClient{config: u.config}).UpdateOne(u)
+	return NewUserClient(u.config).UpdateOne(u)
 }
 
 // Unwrap unwraps the User entity that was returned from a transaction after it was closed,

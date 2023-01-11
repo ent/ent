@@ -117,19 +117,19 @@ func (tl *TweetLike) assignValues(columns []string, values []any) error {
 
 // QueryTweet queries the "tweet" edge of the TweetLike entity.
 func (tl *TweetLike) QueryTweet() *TweetQuery {
-	return (&TweetLikeClient{config: tl.config}).QueryTweet(tl)
+	return NewTweetLikeClient(tl.config).QueryTweet(tl)
 }
 
 // QueryUser queries the "user" edge of the TweetLike entity.
 func (tl *TweetLike) QueryUser() *UserQuery {
-	return (&TweetLikeClient{config: tl.config}).QueryUser(tl)
+	return NewTweetLikeClient(tl.config).QueryUser(tl)
 }
 
 // Update returns a builder for updating this TweetLike.
 // Note that you need to call TweetLike.Unwrap() before calling this method if this TweetLike
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (tl *TweetLike) Update() *TweetLikeUpdateOne {
-	return (&TweetLikeClient{config: tl.config}).UpdateOne(tl)
+	return NewTweetLikeClient(tl.config).UpdateOne(tl)
 }
 
 // Unwrap unwraps the TweetLike entity that was returned from a transaction after it was closed,

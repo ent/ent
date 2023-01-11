@@ -137,24 +137,24 @@ func (r *Relationship) assignValues(columns []string, values []any) error {
 
 // QueryUser queries the "user" edge of the Relationship entity.
 func (r *Relationship) QueryUser() *UserQuery {
-	return (&RelationshipClient{config: r.config}).QueryUser(r)
+	return NewRelationshipClient(r.config).QueryUser(r)
 }
 
 // QueryRelative queries the "relative" edge of the Relationship entity.
 func (r *Relationship) QueryRelative() *UserQuery {
-	return (&RelationshipClient{config: r.config}).QueryRelative(r)
+	return NewRelationshipClient(r.config).QueryRelative(r)
 }
 
 // QueryInfo queries the "info" edge of the Relationship entity.
 func (r *Relationship) QueryInfo() *RelationshipInfoQuery {
-	return (&RelationshipClient{config: r.config}).QueryInfo(r)
+	return NewRelationshipClient(r.config).QueryInfo(r)
 }
 
 // Update returns a builder for updating this Relationship.
 // Note that you need to call Relationship.Unwrap() before calling this method if this Relationship
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (r *Relationship) Update() *RelationshipUpdateOne {
-	return (&RelationshipClient{config: r.config}).UpdateOne(r)
+	return NewRelationshipClient(r.config).UpdateOne(r)
 }
 
 // Unwrap unwraps the Relationship entity that was returned from a transaction after it was closed,

@@ -84,7 +84,7 @@ func (m *Media) assignValues(columns []string, values []any) error {
 // Note that you need to call Media.Unwrap() before calling this method if this Media
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (m *Media) Update() *MediaUpdateOne {
-	return (&MediaClient{config: m.config}).UpdateOne(m)
+	return NewMediaClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Media entity that was returned from a transaction after it was closed,

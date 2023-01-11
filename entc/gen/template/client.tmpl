@@ -16,7 +16,7 @@ type Client struct {
 	{{- end }}
 	{{- range $n := $.Nodes }}
 		// {{ $n.Name }} is the client for interacting with the {{ $n.Name }} builders.
-		{{ $n.Name }} *{{ $n.Name }}Client
+		{{ $n.Name }} *{{ $n.ClientName }}
 	{{- end }}
 	{{- template "client/fields/additional" $ }}
 	{{- with $tmpls := matchTemplate "client/fields/additional/*" }}
@@ -40,7 +40,7 @@ func (c *Client) init() {
 		c.Schema = migrate.NewSchema(c.driver)
 	{{- end }}
 	{{- range $n := $.Nodes }}
-    	c.{{ $n.Name }} = New{{ $n.Name }}Client(c.config)
+    	c.{{ $n.Name }} = New{{ $n.ClientName }}(c.config)
 	{{- end }}
 }
 {{ end }}
@@ -95,7 +95,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx: ctx,
 		config: cfg,
 		{{- range $n := $.Nodes }}
-			{{ $n.Name }}: New{{ $n.Name }}Client(cfg),
+			{{ $n.Name }}: New{{ $n.ClientName }}(cfg),
 		{{- end }}
 	}, nil
 }

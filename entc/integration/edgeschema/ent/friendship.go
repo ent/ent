@@ -132,19 +132,19 @@ func (f *Friendship) assignValues(columns []string, values []any) error {
 
 // QueryUser queries the "user" edge of the Friendship entity.
 func (f *Friendship) QueryUser() *UserQuery {
-	return (&FriendshipClient{config: f.config}).QueryUser(f)
+	return NewFriendshipClient(f.config).QueryUser(f)
 }
 
 // QueryFriend queries the "friend" edge of the Friendship entity.
 func (f *Friendship) QueryFriend() *UserQuery {
-	return (&FriendshipClient{config: f.config}).QueryFriend(f)
+	return NewFriendshipClient(f.config).QueryFriend(f)
 }
 
 // Update returns a builder for updating this Friendship.
 // Note that you need to call Friendship.Unwrap() before calling this method if this Friendship
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (f *Friendship) Update() *FriendshipUpdateOne {
-	return (&FriendshipClient{config: f.config}).UpdateOne(f)
+	return NewFriendshipClient(f.config).UpdateOne(f)
 }
 
 // Unwrap unwraps the Friendship entity that was returned from a transaction after it was closed,

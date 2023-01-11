@@ -132,24 +132,24 @@ func (b *Blob) assignValues(columns []string, values []any) error {
 
 // QueryParent queries the "parent" edge of the Blob entity.
 func (b *Blob) QueryParent() *BlobQuery {
-	return (&BlobClient{config: b.config}).QueryParent(b)
+	return NewBlobClient(b.config).QueryParent(b)
 }
 
 // QueryLinks queries the "links" edge of the Blob entity.
 func (b *Blob) QueryLinks() *BlobQuery {
-	return (&BlobClient{config: b.config}).QueryLinks(b)
+	return NewBlobClient(b.config).QueryLinks(b)
 }
 
 // QueryBlobLinks queries the "blob_links" edge of the Blob entity.
 func (b *Blob) QueryBlobLinks() *BlobLinkQuery {
-	return (&BlobClient{config: b.config}).QueryBlobLinks(b)
+	return NewBlobClient(b.config).QueryBlobLinks(b)
 }
 
 // Update returns a builder for updating this Blob.
 // Note that you need to call Blob.Unwrap() before calling this method if this Blob
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (b *Blob) Update() *BlobUpdateOne {
-	return (&BlobClient{config: b.config}).UpdateOne(b)
+	return NewBlobClient(b.config).UpdateOne(b)
 }
 
 // Unwrap unwraps the Blob entity that was returned from a transaction after it was closed,

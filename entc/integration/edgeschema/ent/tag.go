@@ -120,29 +120,29 @@ func (t *Tag) assignValues(columns []string, values []any) error {
 
 // QueryTweets queries the "tweets" edge of the Tag entity.
 func (t *Tag) QueryTweets() *TweetQuery {
-	return (&TagClient{config: t.config}).QueryTweets(t)
+	return NewTagClient(t.config).QueryTweets(t)
 }
 
 // QueryGroups queries the "groups" edge of the Tag entity.
 func (t *Tag) QueryGroups() *GroupQuery {
-	return (&TagClient{config: t.config}).QueryGroups(t)
+	return NewTagClient(t.config).QueryGroups(t)
 }
 
 // QueryTweetTags queries the "tweet_tags" edge of the Tag entity.
 func (t *Tag) QueryTweetTags() *TweetTagQuery {
-	return (&TagClient{config: t.config}).QueryTweetTags(t)
+	return NewTagClient(t.config).QueryTweetTags(t)
 }
 
 // QueryGroupTags queries the "group_tags" edge of the Tag entity.
 func (t *Tag) QueryGroupTags() *GroupTagQuery {
-	return (&TagClient{config: t.config}).QueryGroupTags(t)
+	return NewTagClient(t.config).QueryGroupTags(t)
 }
 
 // Update returns a builder for updating this Tag.
 // Note that you need to call Tag.Unwrap() before calling this method if this Tag
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (t *Tag) Update() *TagUpdateOne {
-	return (&TagClient{config: t.config}).UpdateOne(t)
+	return NewTagClient(t.config).UpdateOne(t)
 }
 
 // Unwrap unwraps the Tag entity that was returned from a transaction after it was closed,

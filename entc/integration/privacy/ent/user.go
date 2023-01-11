@@ -106,19 +106,19 @@ func (u *User) assignValues(columns []string, values []any) error {
 
 // QueryTeams queries the "teams" edge of the User entity.
 func (u *User) QueryTeams() *TeamQuery {
-	return (&UserClient{config: u.config}).QueryTeams(u)
+	return NewUserClient(u.config).QueryTeams(u)
 }
 
 // QueryTasks queries the "tasks" edge of the User entity.
 func (u *User) QueryTasks() *TaskQuery {
-	return (&UserClient{config: u.config}).QueryTasks(u)
+	return NewUserClient(u.config).QueryTasks(u)
 }
 
 // Update returns a builder for updating this User.
 // Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (u *User) Update() *UserUpdateOne {
-	return (&UserClient{config: u.config}).UpdateOne(u)
+	return NewUserClient(u.config).UpdateOne(u)
 }
 
 // Unwrap unwraps the User entity that was returned from a transaction after it was closed,

@@ -77,7 +77,7 @@ func (l *License) assignValues(columns []string, values []any) error {
 // Note that you need to call License.Unwrap() before calling this method if this License
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (l *License) Update() *LicenseUpdateOne {
-	return (&LicenseClient{config: l.config}).UpdateOne(l)
+	return NewLicenseClient(l.config).UpdateOne(l)
 }
 
 // Unwrap unwraps the License entity that was returned from a transaction after it was closed,

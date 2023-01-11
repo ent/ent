@@ -95,14 +95,14 @@ func (i *Info) assignValues(columns []string, values []any) error {
 
 // QueryUser queries the "user" edge of the Info entity.
 func (i *Info) QueryUser() *UserQuery {
-	return (&InfoClient{config: i.config}).QueryUser(i)
+	return NewInfoClient(i.config).QueryUser(i)
 }
 
 // Update returns a builder for updating this Info.
 // Note that you need to call Info.Unwrap() before calling this method if this Info
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (i *Info) Update() *InfoUpdateOne {
-	return (&InfoClient{config: i.config}).UpdateOne(i)
+	return NewInfoClient(i.config).UpdateOne(i)
 }
 
 // Unwrap unwraps the Info entity that was returned from a transaction after it was closed,

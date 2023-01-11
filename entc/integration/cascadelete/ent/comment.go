@@ -100,14 +100,14 @@ func (c *Comment) assignValues(columns []string, values []any) error {
 
 // QueryPost queries the "post" edge of the Comment entity.
 func (c *Comment) QueryPost() *PostQuery {
-	return (&CommentClient{config: c.config}).QueryPost(c)
+	return NewCommentClient(c.config).QueryPost(c)
 }
 
 // Update returns a builder for updating this Comment.
 // Note that you need to call Comment.Unwrap() before calling this method if this Comment
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (c *Comment) Update() *CommentUpdateOne {
-	return (&CommentClient{config: c.config}).UpdateOne(c)
+	return NewCommentClient(c.config).UpdateOne(c)
 }
 
 // Unwrap unwraps the Comment entity that was returned from a transaction after it was closed,

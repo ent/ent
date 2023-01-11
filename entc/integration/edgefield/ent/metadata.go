@@ -124,24 +124,24 @@ func (m *Metadata) assignValues(columns []string, values []any) error {
 
 // QueryUser queries the "user" edge of the Metadata entity.
 func (m *Metadata) QueryUser() *UserQuery {
-	return (&MetadataClient{config: m.config}).QueryUser(m)
+	return NewMetadataClient(m.config).QueryUser(m)
 }
 
 // QueryChildren queries the "children" edge of the Metadata entity.
 func (m *Metadata) QueryChildren() *MetadataQuery {
-	return (&MetadataClient{config: m.config}).QueryChildren(m)
+	return NewMetadataClient(m.config).QueryChildren(m)
 }
 
 // QueryParent queries the "parent" edge of the Metadata entity.
 func (m *Metadata) QueryParent() *MetadataQuery {
-	return (&MetadataClient{config: m.config}).QueryParent(m)
+	return NewMetadataClient(m.config).QueryParent(m)
 }
 
 // Update returns a builder for updating this Metadata.
 // Note that you need to call Metadata.Unwrap() before calling this method if this Metadata
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (m *Metadata) Update() *MetadataUpdateOne {
-	return (&MetadataClient{config: m.config}).UpdateOne(m)
+	return NewMetadataClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Metadata entity that was returned from a transaction after it was closed,

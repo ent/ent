@@ -85,14 +85,14 @@ func (b *Blog) assignValues(columns []string, values []any) error {
 
 // QueryAdmins queries the "admins" edge of the Blog entity.
 func (b *Blog) QueryAdmins() *UserQuery {
-	return (&BlogClient{config: b.config}).QueryAdmins(b)
+	return NewBlogClient(b.config).QueryAdmins(b)
 }
 
 // Update returns a builder for updating this Blog.
 // Note that you need to call Blog.Unwrap() before calling this method if this Blog
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (b *Blog) Update() *BlogUpdateOne {
-	return (&BlogClient{config: b.config}).UpdateOne(b)
+	return NewBlogClient(b.config).UpdateOne(b)
 }
 
 // Unwrap unwraps the Blog entity that was returned from a transaction after it was closed,

@@ -125,19 +125,19 @@ func (ut *UserTweet) assignValues(columns []string, values []any) error {
 
 // QueryUser queries the "user" edge of the UserTweet entity.
 func (ut *UserTweet) QueryUser() *UserQuery {
-	return (&UserTweetClient{config: ut.config}).QueryUser(ut)
+	return NewUserTweetClient(ut.config).QueryUser(ut)
 }
 
 // QueryTweet queries the "tweet" edge of the UserTweet entity.
 func (ut *UserTweet) QueryTweet() *TweetQuery {
-	return (&UserTweetClient{config: ut.config}).QueryTweet(ut)
+	return NewUserTweetClient(ut.config).QueryTweet(ut)
 }
 
 // Update returns a builder for updating this UserTweet.
 // Note that you need to call UserTweet.Unwrap() before calling this method if this UserTweet
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (ut *UserTweet) Update() *UserTweetUpdateOne {
-	return (&UserTweetClient{config: ut.config}).UpdateOne(ut)
+	return NewUserTweetClient(ut.config).UpdateOne(ut)
 }
 
 // Unwrap unwraps the UserTweet entity that was returned from a transaction after it was closed,
