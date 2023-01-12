@@ -7,12 +7,12 @@
 package ent
 
 import (
-	"context"
+	context "context"
 
-	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/dialect/gremlin/graph/dsl"
-	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
-	"entgo.io/ent/entc/integration/gremlin/ent/api"
+	gremlin "entgo.io/ent/dialect/gremlin"
+	dsl "entgo.io/ent/dialect/gremlin/graph/dsl"
+	g "entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	api "entgo.io/ent/entc/integration/gremlin/ent/api"
 )
 
 // APICreate is the builder for creating a Api entity.

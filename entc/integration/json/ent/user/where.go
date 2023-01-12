@@ -8,7 +8,7 @@ package user
 
 import (
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/json/ent/predicate"
+	predicate "entgo.io/ent/entc/integration/json/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
@@ -134,6 +134,36 @@ func AddrIsNil() predicate.User {
 // AddrNotNil applies the NotNil predicate on the "addr" field.
 func AddrNotNil() predicate.User {
 	return predicate.User(sql.FieldNotNull(FieldAddr))
+}
+
+// ValobjIsNil applies the IsNil predicate on the "valobj" field.
+func ValobjIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldValobj))
+}
+
+// ValobjNotNil applies the NotNil predicate on the "valobj" field.
+func ValobjNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldValobj))
+}
+
+// AnotherValobjIsNil applies the IsNil predicate on the "another_valobj" field.
+func AnotherValobjIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldAnotherValobj))
+}
+
+// AnotherValobjNotNil applies the NotNil predicate on the "another_valobj" field.
+func AnotherValobjNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldAnotherValobj))
+}
+
+// AnotherValobjsIsNil applies the IsNil predicate on the "another_valobjs" field.
+func AnotherValobjsIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldAnotherValobjs))
+}
+
+// AnotherValobjsNotNil applies the NotNil predicate on the "another_valobjs" field.
+func AnotherValobjsNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldAnotherValobjs))
 }
 
 // And groups predicates with the AND operator between them.

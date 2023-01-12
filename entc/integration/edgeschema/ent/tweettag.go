@@ -7,15 +7,15 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
-	"time"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
+	time "time"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
-	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
-	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
-	"github.com/google/uuid"
+	tag "entgo.io/ent/entc/integration/edgeschema/ent/tag"
+	tweet "entgo.io/ent/entc/integration/edgeschema/ent/tweet"
+	tweettag "entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
+	uuid "github.com/google/uuid"
 )
 
 // TweetTag is the model entity for the TweetTag schema.

@@ -7,9 +7,9 @@
 package tweetlike
 
 import (
-	"time"
+	time "time"
 
-	"entgo.io/ent"
+	ent "entgo.io/ent"
 )
 
 const (

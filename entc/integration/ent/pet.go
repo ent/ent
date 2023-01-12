@@ -7,13 +7,13 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/ent/pet"
-	"entgo.io/ent/entc/integration/ent/user"
-	"github.com/google/uuid"
+	pet "entgo.io/ent/entc/integration/ent/pet"
+	user "entgo.io/ent/entc/integration/ent/user"
+	uuid "github.com/google/uuid"
 )
 
 // Pet is the model entity for the Pet schema.

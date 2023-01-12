@@ -7,17 +7,17 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"time"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	time "time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/multischema/ent/friendship"
-	"entgo.io/ent/entc/integration/multischema/ent/internal"
-	"entgo.io/ent/entc/integration/multischema/ent/predicate"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	friendship "entgo.io/ent/entc/integration/multischema/ent/friendship"
+	internal "entgo.io/ent/entc/integration/multischema/ent/internal"
+	predicate "entgo.io/ent/entc/integration/multischema/ent/predicate"
+	field "entgo.io/ent/schema/field"
 )
 
 // FriendshipUpdate is the builder for updating Friendship entities.

@@ -7,14 +7,14 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
-	"time"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
+	time "time"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/edgeschema/ent/role"
-	"entgo.io/ent/entc/integration/edgeschema/ent/roleuser"
-	"entgo.io/ent/entc/integration/edgeschema/ent/user"
+	role "entgo.io/ent/entc/integration/edgeschema/ent/role"
+	roleuser "entgo.io/ent/entc/integration/edgeschema/ent/roleuser"
+	user "entgo.io/ent/entc/integration/edgeschema/ent/user"
 )
 
 // RoleUser is the model entity for the RoleUser schema.

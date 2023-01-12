@@ -7,15 +7,15 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/ent/api"
-	"entgo.io/ent/entc/integration/ent/predicate"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	api "entgo.io/ent/entc/integration/ent/api"
+	predicate "entgo.io/ent/entc/integration/ent/predicate"
+	field "entgo.io/ent/schema/field"
 )
 
 // APIUpdate is the builder for updating Api entities.

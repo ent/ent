@@ -7,18 +7,19 @@
 package ent
 
 import (
+	databasesql "database/sql"
 	"encoding/json"
-	"fmt"
-	"net"
-	"net/http"
-	"strings"
-	"time"
+	fmt "fmt"
+	net "net"
+	http "net/http"
+	strings "strings"
+	time "time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/ent/fieldtype"
-	"entgo.io/ent/entc/integration/ent/role"
-	"entgo.io/ent/entc/integration/ent/schema"
-	"github.com/google/uuid"
+	fieldtype "entgo.io/ent/entc/integration/ent/fieldtype"
+	role "entgo.io/ent/entc/integration/ent/role"
+	schema "entgo.io/ent/entc/integration/ent/schema"
+	uuid "github.com/google/uuid"
 )
 
 // FieldType is the model entity for the FieldType schema.
@@ -99,9 +100,9 @@ type FieldType struct {
 	// Ndir holds the value of the "ndir" field.
 	Ndir *http.Dir `json:"ndir,omitempty"`
 	// Str holds the value of the "str" field.
-	Str sql.NullString `json:"str,omitempty"`
+	Str databasesql.NullString `json:"str,omitempty"`
 	// NullStr holds the value of the "null_str" field.
-	NullStr *sql.NullString `json:"null_str,omitempty"`
+	NullStr *databasesql.NullString `json:"null_str,omitempty"`
 	// Link holds the value of the "link" field.
 	Link schema.Link `json:"link,omitempty"`
 	// NullLink holds the value of the "null_link" field.
@@ -111,9 +112,9 @@ type FieldType struct {
 	// NullActive holds the value of the "null_active" field.
 	NullActive *schema.Status `json:"null_active,omitempty"`
 	// Deleted holds the value of the "deleted" field.
-	Deleted *sql.NullBool `json:"deleted,omitempty"`
+	Deleted *databasesql.NullBool `json:"deleted,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
-	DeletedAt *sql.NullTime `json:"deleted_at,omitempty"`
+	DeletedAt *databasesql.NullTime `json:"deleted_at,omitempty"`
 	// RawData holds the value of the "raw_data" field.
 	RawData []byte `json:"raw_data,omitempty"`
 	// Sensitive holds the value of the "sensitive" field.
@@ -121,7 +122,7 @@ type FieldType struct {
 	// IP holds the value of the "ip" field.
 	IP net.IP `json:"ip,omitempty"`
 	// NullInt64 holds the value of the "null_int64" field.
-	NullInt64 *sql.NullInt64 `json:"null_int64,omitempty"`
+	NullInt64 *databasesql.NullInt64 `json:"null_int64,omitempty"`
 	// SchemaInt holds the value of the "schema_int" field.
 	SchemaInt schema.Int `json:"schema_int,omitempty"`
 	// SchemaInt8 holds the value of the "schema_int8" field.
@@ -133,7 +134,7 @@ type FieldType struct {
 	// SchemaFloat32 holds the value of the "schema_float32" field.
 	SchemaFloat32 schema.Float32 `json:"schema_float32,omitempty"`
 	// NullFloat holds the value of the "null_float" field.
-	NullFloat *sql.NullFloat64 `json:"null_float,omitempty"`
+	NullFloat *databasesql.NullFloat64 `json:"null_float,omitempty"`
 	// Role holds the value of the "role" field.
 	Role role.Role `json:"role,omitempty"`
 	// Priority holds the value of the "priority" field.

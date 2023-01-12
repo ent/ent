@@ -7,12 +7,12 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
-	"time"
+	fmt "fmt"
+	strings "strings"
+	time "time"
 
-	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/entc/integration/ent/schema/task"
+	gremlin "entgo.io/ent/dialect/gremlin"
+	task "entgo.io/ent/entc/integration/ent/schema/task"
 )
 
 // Task is the model entity for the Task schema.

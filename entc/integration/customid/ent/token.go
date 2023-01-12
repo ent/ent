@@ -7,13 +7,13 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	fmt "fmt"
+	strings "strings"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/customid/ent/account"
-	"entgo.io/ent/entc/integration/customid/ent/token"
-	"entgo.io/ent/entc/integration/customid/sid"
+	account "entgo.io/ent/entc/integration/customid/ent/account"
+	token "entgo.io/ent/entc/integration/customid/ent/token"
+	sid "entgo.io/ent/entc/integration/customid/sid"
 )
 
 // Token is the model entity for the Token schema.

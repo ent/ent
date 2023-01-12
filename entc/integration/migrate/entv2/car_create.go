@@ -7,14 +7,14 @@
 package entv2
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/migrate/entv2/car"
-	"entgo.io/ent/entc/integration/migrate/entv2/user"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	car "entgo.io/ent/entc/integration/migrate/entv2/car"
+	user "entgo.io/ent/entc/integration/migrate/entv2/user"
+	field "entgo.io/ent/schema/field"
 )
 
 // CarCreate is the builder for creating a Car entity.

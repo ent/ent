@@ -7,12 +7,12 @@
 package ent
 
 import (
-	"context"
-	"fmt"
+	context "context"
+	fmt "fmt"
 
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/config/ent/user"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	user "entgo.io/ent/entc/integration/config/ent/user"
+	field "entgo.io/ent/schema/field"
 )
 
 // UserCreate is the builder for creating a User entity.

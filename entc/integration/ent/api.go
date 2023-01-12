@@ -7,11 +7,11 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	fmt "fmt"
+	strings "strings"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/ent/api"
+	api "entgo.io/ent/entc/integration/ent/api"
 )
 
 // Api is the model entity for the Api schema.

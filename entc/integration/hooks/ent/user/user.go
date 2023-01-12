@@ -7,7 +7,7 @@
 package user
 
 import (
-	"entgo.io/ent"
+	ent "entgo.io/ent"
 )
 
 const (

@@ -7,18 +7,17 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"sync"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	sync "sync"
 
+	ent "entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/cascadelete/ent/comment"
-	"entgo.io/ent/entc/integration/cascadelete/ent/post"
-	"entgo.io/ent/entc/integration/cascadelete/ent/predicate"
-	"entgo.io/ent/entc/integration/cascadelete/ent/user"
-
-	"entgo.io/ent"
+	comment "entgo.io/ent/entc/integration/cascadelete/ent/comment"
+	post "entgo.io/ent/entc/integration/cascadelete/ent/post"
+	predicate "entgo.io/ent/entc/integration/cascadelete/ent/predicate"
+	user "entgo.io/ent/entc/integration/cascadelete/ent/user"
 )
 
 const (

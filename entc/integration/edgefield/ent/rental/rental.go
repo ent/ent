@@ -7,7 +7,7 @@
 package rental
 
 import (
-	"time"
+	time "time"
 )
 
 const (

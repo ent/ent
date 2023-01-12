@@ -7,10 +7,10 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/gremlin"
+	gremlin "entgo.io/ent/dialect/gremlin"
 )
 
 // Item is the model entity for the Item schema.

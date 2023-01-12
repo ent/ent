@@ -7,7 +7,7 @@
 package ent
 
 import (
-	"time"
+	time "time"
 
 	"entgo.io/ent/entc/integration/customid/ent/account"
 	"entgo.io/ent/entc/integration/customid/ent/blob"
@@ -20,12 +20,12 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/note"
 	"entgo.io/ent/entc/integration/customid/ent/other"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
-	"entgo.io/ent/entc/integration/customid/ent/schema"
+	schema "entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/entc/integration/customid/ent/session"
 	"entgo.io/ent/entc/integration/customid/ent/token"
-	"entgo.io/ent/entc/integration/customid/sid"
+	sid "entgo.io/ent/entc/integration/customid/sid"
 	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
-	"github.com/google/uuid"
+	uuid "github.com/google/uuid"
 )
 
 // The init function reads all schema descriptors with runtime code

@@ -7,18 +7,18 @@
 package ent
 
 import (
-	"database/sql"
-	"fmt"
-	"net"
-	"net/http"
-	"strings"
-	"time"
+	databasesql "database/sql"
+	fmt "fmt"
+	net "net"
+	http "net/http"
+	strings "strings"
+	time "time"
 
-	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/entc/integration/ent/role"
-	"entgo.io/ent/entc/integration/ent/schema"
-	"entgo.io/ent/entc/integration/gremlin/ent/fieldtype"
-	"github.com/google/uuid"
+	gremlin "entgo.io/ent/dialect/gremlin"
+	role "entgo.io/ent/entc/integration/ent/role"
+	schema "entgo.io/ent/entc/integration/ent/schema"
+	fieldtype "entgo.io/ent/entc/integration/gremlin/ent/fieldtype"
+	uuid "github.com/google/uuid"
 )
 
 // FieldType is the model entity for the FieldType schema.
@@ -99,9 +99,9 @@ type FieldType struct {
 	// Ndir holds the value of the "ndir" field.
 	Ndir *http.Dir `json:"ndir,omitempty"`
 	// Str holds the value of the "str" field.
-	Str sql.NullString `json:"str,omitempty"`
+	Str databasesql.NullString `json:"str,omitempty"`
 	// NullStr holds the value of the "null_str" field.
-	NullStr *sql.NullString `json:"null_str,omitempty"`
+	NullStr *databasesql.NullString `json:"null_str,omitempty"`
 	// Link holds the value of the "link" field.
 	Link schema.Link `json:"link,omitempty"`
 	// NullLink holds the value of the "null_link" field.
@@ -111,9 +111,9 @@ type FieldType struct {
 	// NullActive holds the value of the "null_active" field.
 	NullActive *schema.Status `json:"null_active,omitempty"`
 	// Deleted holds the value of the "deleted" field.
-	Deleted *sql.NullBool `json:"deleted,omitempty"`
+	Deleted *databasesql.NullBool `json:"deleted,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
-	DeletedAt *sql.NullTime `json:"deleted_at,omitempty"`
+	DeletedAt *databasesql.NullTime `json:"deleted_at,omitempty"`
 	// RawData holds the value of the "raw_data" field.
 	RawData []byte `json:"raw_data,omitempty"`
 	// Sensitive holds the value of the "sensitive" field.
@@ -121,7 +121,7 @@ type FieldType struct {
 	// IP holds the value of the "ip" field.
 	IP net.IP `json:"ip,omitempty"`
 	// NullInt64 holds the value of the "null_int64" field.
-	NullInt64 *sql.NullInt64 `json:"null_int64,omitempty"`
+	NullInt64 *databasesql.NullInt64 `json:"null_int64,omitempty"`
 	// SchemaInt holds the value of the "schema_int" field.
 	SchemaInt schema.Int `json:"schema_int,omitempty"`
 	// SchemaInt8 holds the value of the "schema_int8" field.
@@ -133,7 +133,7 @@ type FieldType struct {
 	// SchemaFloat32 holds the value of the "schema_float32" field.
 	SchemaFloat32 schema.Float32 `json:"schema_float32,omitempty"`
 	// NullFloat holds the value of the "null_float" field.
-	NullFloat *sql.NullFloat64 `json:"null_float,omitempty"`
+	NullFloat *databasesql.NullFloat64 `json:"null_float,omitempty"`
 	// Role holds the value of the "role" field.
 	Role role.Role `json:"role,omitempty"`
 	// Priority holds the value of the "priority" field.
@@ -165,72 +165,72 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanft struct {
-		ID                    string                `json:"id,omitempty"`
-		Int                   int                   `json:"int,omitempty"`
-		Int8                  int8                  `json:"int8,omitempty"`
-		Int16                 int16                 `json:"int16,omitempty"`
-		Int32                 int32                 `json:"int32,omitempty"`
-		Int64                 int64                 `json:"int64,omitempty"`
-		OptionalInt           int                   `json:"optional_int,omitempty"`
-		OptionalInt8          int8                  `json:"optional_int8,omitempty"`
-		OptionalInt16         int16                 `json:"optional_int16,omitempty"`
-		OptionalInt32         int32                 `json:"optional_int32,omitempty"`
-		OptionalInt64         int64                 `json:"optional_int64,omitempty"`
-		NillableInt           *int                  `json:"nillable_int,omitempty"`
-		NillableInt8          *int8                 `json:"nillable_int8,omitempty"`
-		NillableInt16         *int16                `json:"nillable_int16,omitempty"`
-		NillableInt32         *int32                `json:"nillable_int32,omitempty"`
-		NillableInt64         *int64                `json:"nillable_int64,omitempty"`
-		ValidateOptionalInt32 int32                 `json:"validate_optional_int32,omitempty"`
-		OptionalUint          uint                  `json:"optional_uint,omitempty"`
-		OptionalUint8         uint8                 `json:"optional_uint8,omitempty"`
-		OptionalUint16        uint16                `json:"optional_uint16,omitempty"`
-		OptionalUint32        uint32                `json:"optional_uint32,omitempty"`
-		OptionalUint64        uint64                `json:"optional_uint64,omitempty"`
-		State                 fieldtype.State       `json:"state,omitempty"`
-		OptionalFloat         float64               `json:"optional_float,omitempty"`
-		OptionalFloat32       float32               `json:"optional_float32,omitempty"`
-		Text                  string                `json:"text,omitempty"`
-		Datetime              int64                 `json:"datetime,omitempty"`
-		Decimal               float64               `json:"decimal,omitempty"`
-		LinkOther             *schema.Link          `json:"link_other,omitempty"`
-		LinkOtherFunc         *schema.Link          `json:"link_other_func,omitempty"`
-		MAC                   schema.MAC            `json:"mac,omitempty"`
-		StringArray           schema.Strings        `json:"string_array,omitempty"`
-		Password              string                `json:"password,omitempty"`
-		StringScanner         *schema.StringScanner `json:"string_scanner,omitempty"`
-		Duration              time.Duration         `json:"duration,omitempty"`
-		Dir                   http.Dir              `json:"dir,omitempty"`
-		Ndir                  *http.Dir             `json:"ndir,omitempty"`
-		Str                   sql.NullString        `json:"str,omitempty"`
-		NullStr               *sql.NullString       `json:"null_str,omitempty"`
-		Link                  schema.Link           `json:"link,omitempty"`
-		NullLink              *schema.Link          `json:"null_link,omitempty"`
-		Active                schema.Status         `json:"active,omitempty"`
-		NullActive            *schema.Status        `json:"null_active,omitempty"`
-		Deleted               *sql.NullBool         `json:"deleted,omitempty"`
-		DeletedAt             *sql.NullTime         `json:"deleted_at,omitempty"`
-		RawData               []byte                `json:"raw_data,omitempty"`
-		Sensitive             []byte                `json:"sensitive,omitempty"`
-		IP                    net.IP                `json:"ip,omitempty"`
-		NullInt64             *sql.NullInt64        `json:"null_int64,omitempty"`
-		SchemaInt             schema.Int            `json:"schema_int,omitempty"`
-		SchemaInt8            schema.Int8           `json:"schema_int8,omitempty"`
-		SchemaInt64           schema.Int64          `json:"schema_int64,omitempty"`
-		SchemaFloat           schema.Float64        `json:"schema_float,omitempty"`
-		SchemaFloat32         schema.Float32        `json:"schema_float32,omitempty"`
-		NullFloat             *sql.NullFloat64      `json:"null_float,omitempty"`
-		Role                  role.Role             `json:"role,omitempty"`
-		Priority              role.Priority         `json:"priority,omitempty"`
-		OptionalUUID          uuid.UUID             `json:"optional_uuid,omitempty"`
-		NillableUUID          *uuid.UUID            `json:"nillable_uuid,omitempty"`
-		Strings               []string              `json:"strings,omitempty"`
-		Pair                  schema.Pair           `json:"pair,omitempty"`
-		NilPair               *schema.Pair          `json:"nil_pair,omitempty"`
-		Vstring               schema.VString        `json:"vstring,omitempty"`
-		Triple                schema.Triple         `json:"triple,omitempty"`
-		BigInt                schema.BigInt         `json:"big_int,omitempty"`
-		PasswordOther         schema.Password       `json:"password_other,omitempty"`
+		ID                    string                   `json:"id,omitempty"`
+		Int                   int                      `json:"int,omitempty"`
+		Int8                  int8                     `json:"int8,omitempty"`
+		Int16                 int16                    `json:"int16,omitempty"`
+		Int32                 int32                    `json:"int32,omitempty"`
+		Int64                 int64                    `json:"int64,omitempty"`
+		OptionalInt           int                      `json:"optional_int,omitempty"`
+		OptionalInt8          int8                     `json:"optional_int8,omitempty"`
+		OptionalInt16         int16                    `json:"optional_int16,omitempty"`
+		OptionalInt32         int32                    `json:"optional_int32,omitempty"`
+		OptionalInt64         int64                    `json:"optional_int64,omitempty"`
+		NillableInt           *int                     `json:"nillable_int,omitempty"`
+		NillableInt8          *int8                    `json:"nillable_int8,omitempty"`
+		NillableInt16         *int16                   `json:"nillable_int16,omitempty"`
+		NillableInt32         *int32                   `json:"nillable_int32,omitempty"`
+		NillableInt64         *int64                   `json:"nillable_int64,omitempty"`
+		ValidateOptionalInt32 int32                    `json:"validate_optional_int32,omitempty"`
+		OptionalUint          uint                     `json:"optional_uint,omitempty"`
+		OptionalUint8         uint8                    `json:"optional_uint8,omitempty"`
+		OptionalUint16        uint16                   `json:"optional_uint16,omitempty"`
+		OptionalUint32        uint32                   `json:"optional_uint32,omitempty"`
+		OptionalUint64        uint64                   `json:"optional_uint64,omitempty"`
+		State                 fieldtype.State          `json:"state,omitempty"`
+		OptionalFloat         float64                  `json:"optional_float,omitempty"`
+		OptionalFloat32       float32                  `json:"optional_float32,omitempty"`
+		Text                  string                   `json:"text,omitempty"`
+		Datetime              int64                    `json:"datetime,omitempty"`
+		Decimal               float64                  `json:"decimal,omitempty"`
+		LinkOther             *schema.Link             `json:"link_other,omitempty"`
+		LinkOtherFunc         *schema.Link             `json:"link_other_func,omitempty"`
+		MAC                   schema.MAC               `json:"mac,omitempty"`
+		StringArray           schema.Strings           `json:"string_array,omitempty"`
+		Password              string                   `json:"password,omitempty"`
+		StringScanner         *schema.StringScanner    `json:"string_scanner,omitempty"`
+		Duration              time.Duration            `json:"duration,omitempty"`
+		Dir                   http.Dir                 `json:"dir,omitempty"`
+		Ndir                  *http.Dir                `json:"ndir,omitempty"`
+		Str                   databasesql.NullString   `json:"str,omitempty"`
+		NullStr               *databasesql.NullString  `json:"null_str,omitempty"`
+		Link                  schema.Link              `json:"link,omitempty"`
+		NullLink              *schema.Link             `json:"null_link,omitempty"`
+		Active                schema.Status            `json:"active,omitempty"`
+		NullActive            *schema.Status           `json:"null_active,omitempty"`
+		Deleted               *databasesql.NullBool    `json:"deleted,omitempty"`
+		DeletedAt             *databasesql.NullTime    `json:"deleted_at,omitempty"`
+		RawData               []byte                   `json:"raw_data,omitempty"`
+		Sensitive             []byte                   `json:"sensitive,omitempty"`
+		IP                    net.IP                   `json:"ip,omitempty"`
+		NullInt64             *databasesql.NullInt64   `json:"null_int64,omitempty"`
+		SchemaInt             schema.Int               `json:"schema_int,omitempty"`
+		SchemaInt8            schema.Int8              `json:"schema_int8,omitempty"`
+		SchemaInt64           schema.Int64             `json:"schema_int64,omitempty"`
+		SchemaFloat           schema.Float64           `json:"schema_float,omitempty"`
+		SchemaFloat32         schema.Float32           `json:"schema_float32,omitempty"`
+		NullFloat             *databasesql.NullFloat64 `json:"null_float,omitempty"`
+		Role                  role.Role                `json:"role,omitempty"`
+		Priority              role.Priority            `json:"priority,omitempty"`
+		OptionalUUID          uuid.UUID                `json:"optional_uuid,omitempty"`
+		NillableUUID          *uuid.UUID               `json:"nillable_uuid,omitempty"`
+		Strings               []string                 `json:"strings,omitempty"`
+		Pair                  schema.Pair              `json:"pair,omitempty"`
+		NilPair               *schema.Pair             `json:"nil_pair,omitempty"`
+		Vstring               schema.VString           `json:"vstring,omitempty"`
+		Triple                schema.Triple            `json:"triple,omitempty"`
+		BigInt                schema.BigInt            `json:"big_int,omitempty"`
+		PasswordOther         schema.Password          `json:"password_other,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -558,72 +558,72 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanft []struct {
-		ID                    string                `json:"id,omitempty"`
-		Int                   int                   `json:"int,omitempty"`
-		Int8                  int8                  `json:"int8,omitempty"`
-		Int16                 int16                 `json:"int16,omitempty"`
-		Int32                 int32                 `json:"int32,omitempty"`
-		Int64                 int64                 `json:"int64,omitempty"`
-		OptionalInt           int                   `json:"optional_int,omitempty"`
-		OptionalInt8          int8                  `json:"optional_int8,omitempty"`
-		OptionalInt16         int16                 `json:"optional_int16,omitempty"`
-		OptionalInt32         int32                 `json:"optional_int32,omitempty"`
-		OptionalInt64         int64                 `json:"optional_int64,omitempty"`
-		NillableInt           *int                  `json:"nillable_int,omitempty"`
-		NillableInt8          *int8                 `json:"nillable_int8,omitempty"`
-		NillableInt16         *int16                `json:"nillable_int16,omitempty"`
-		NillableInt32         *int32                `json:"nillable_int32,omitempty"`
-		NillableInt64         *int64                `json:"nillable_int64,omitempty"`
-		ValidateOptionalInt32 int32                 `json:"validate_optional_int32,omitempty"`
-		OptionalUint          uint                  `json:"optional_uint,omitempty"`
-		OptionalUint8         uint8                 `json:"optional_uint8,omitempty"`
-		OptionalUint16        uint16                `json:"optional_uint16,omitempty"`
-		OptionalUint32        uint32                `json:"optional_uint32,omitempty"`
-		OptionalUint64        uint64                `json:"optional_uint64,omitempty"`
-		State                 fieldtype.State       `json:"state,omitempty"`
-		OptionalFloat         float64               `json:"optional_float,omitempty"`
-		OptionalFloat32       float32               `json:"optional_float32,omitempty"`
-		Text                  string                `json:"text,omitempty"`
-		Datetime              int64                 `json:"datetime,omitempty"`
-		Decimal               float64               `json:"decimal,omitempty"`
-		LinkOther             *schema.Link          `json:"link_other,omitempty"`
-		LinkOtherFunc         *schema.Link          `json:"link_other_func,omitempty"`
-		MAC                   schema.MAC            `json:"mac,omitempty"`
-		StringArray           schema.Strings        `json:"string_array,omitempty"`
-		Password              string                `json:"password,omitempty"`
-		StringScanner         *schema.StringScanner `json:"string_scanner,omitempty"`
-		Duration              time.Duration         `json:"duration,omitempty"`
-		Dir                   http.Dir              `json:"dir,omitempty"`
-		Ndir                  *http.Dir             `json:"ndir,omitempty"`
-		Str                   sql.NullString        `json:"str,omitempty"`
-		NullStr               *sql.NullString       `json:"null_str,omitempty"`
-		Link                  schema.Link           `json:"link,omitempty"`
-		NullLink              *schema.Link          `json:"null_link,omitempty"`
-		Active                schema.Status         `json:"active,omitempty"`
-		NullActive            *schema.Status        `json:"null_active,omitempty"`
-		Deleted               *sql.NullBool         `json:"deleted,omitempty"`
-		DeletedAt             *sql.NullTime         `json:"deleted_at,omitempty"`
-		RawData               []byte                `json:"raw_data,omitempty"`
-		Sensitive             []byte                `json:"sensitive,omitempty"`
-		IP                    net.IP                `json:"ip,omitempty"`
-		NullInt64             *sql.NullInt64        `json:"null_int64,omitempty"`
-		SchemaInt             schema.Int            `json:"schema_int,omitempty"`
-		SchemaInt8            schema.Int8           `json:"schema_int8,omitempty"`
-		SchemaInt64           schema.Int64          `json:"schema_int64,omitempty"`
-		SchemaFloat           schema.Float64        `json:"schema_float,omitempty"`
-		SchemaFloat32         schema.Float32        `json:"schema_float32,omitempty"`
-		NullFloat             *sql.NullFloat64      `json:"null_float,omitempty"`
-		Role                  role.Role             `json:"role,omitempty"`
-		Priority              role.Priority         `json:"priority,omitempty"`
-		OptionalUUID          uuid.UUID             `json:"optional_uuid,omitempty"`
-		NillableUUID          *uuid.UUID            `json:"nillable_uuid,omitempty"`
-		Strings               []string              `json:"strings,omitempty"`
-		Pair                  schema.Pair           `json:"pair,omitempty"`
-		NilPair               *schema.Pair          `json:"nil_pair,omitempty"`
-		Vstring               schema.VString        `json:"vstring,omitempty"`
-		Triple                schema.Triple         `json:"triple,omitempty"`
-		BigInt                schema.BigInt         `json:"big_int,omitempty"`
-		PasswordOther         schema.Password       `json:"password_other,omitempty"`
+		ID                    string                   `json:"id,omitempty"`
+		Int                   int                      `json:"int,omitempty"`
+		Int8                  int8                     `json:"int8,omitempty"`
+		Int16                 int16                    `json:"int16,omitempty"`
+		Int32                 int32                    `json:"int32,omitempty"`
+		Int64                 int64                    `json:"int64,omitempty"`
+		OptionalInt           int                      `json:"optional_int,omitempty"`
+		OptionalInt8          int8                     `json:"optional_int8,omitempty"`
+		OptionalInt16         int16                    `json:"optional_int16,omitempty"`
+		OptionalInt32         int32                    `json:"optional_int32,omitempty"`
+		OptionalInt64         int64                    `json:"optional_int64,omitempty"`
+		NillableInt           *int                     `json:"nillable_int,omitempty"`
+		NillableInt8          *int8                    `json:"nillable_int8,omitempty"`
+		NillableInt16         *int16                   `json:"nillable_int16,omitempty"`
+		NillableInt32         *int32                   `json:"nillable_int32,omitempty"`
+		NillableInt64         *int64                   `json:"nillable_int64,omitempty"`
+		ValidateOptionalInt32 int32                    `json:"validate_optional_int32,omitempty"`
+		OptionalUint          uint                     `json:"optional_uint,omitempty"`
+		OptionalUint8         uint8                    `json:"optional_uint8,omitempty"`
+		OptionalUint16        uint16                   `json:"optional_uint16,omitempty"`
+		OptionalUint32        uint32                   `json:"optional_uint32,omitempty"`
+		OptionalUint64        uint64                   `json:"optional_uint64,omitempty"`
+		State                 fieldtype.State          `json:"state,omitempty"`
+		OptionalFloat         float64                  `json:"optional_float,omitempty"`
+		OptionalFloat32       float32                  `json:"optional_float32,omitempty"`
+		Text                  string                   `json:"text,omitempty"`
+		Datetime              int64                    `json:"datetime,omitempty"`
+		Decimal               float64                  `json:"decimal,omitempty"`
+		LinkOther             *schema.Link             `json:"link_other,omitempty"`
+		LinkOtherFunc         *schema.Link             `json:"link_other_func,omitempty"`
+		MAC                   schema.MAC               `json:"mac,omitempty"`
+		StringArray           schema.Strings           `json:"string_array,omitempty"`
+		Password              string                   `json:"password,omitempty"`
+		StringScanner         *schema.StringScanner    `json:"string_scanner,omitempty"`
+		Duration              time.Duration            `json:"duration,omitempty"`
+		Dir                   http.Dir                 `json:"dir,omitempty"`
+		Ndir                  *http.Dir                `json:"ndir,omitempty"`
+		Str                   databasesql.NullString   `json:"str,omitempty"`
+		NullStr               *databasesql.NullString  `json:"null_str,omitempty"`
+		Link                  schema.Link              `json:"link,omitempty"`
+		NullLink              *schema.Link             `json:"null_link,omitempty"`
+		Active                schema.Status            `json:"active,omitempty"`
+		NullActive            *schema.Status           `json:"null_active,omitempty"`
+		Deleted               *databasesql.NullBool    `json:"deleted,omitempty"`
+		DeletedAt             *databasesql.NullTime    `json:"deleted_at,omitempty"`
+		RawData               []byte                   `json:"raw_data,omitempty"`
+		Sensitive             []byte                   `json:"sensitive,omitempty"`
+		IP                    net.IP                   `json:"ip,omitempty"`
+		NullInt64             *databasesql.NullInt64   `json:"null_int64,omitempty"`
+		SchemaInt             schema.Int               `json:"schema_int,omitempty"`
+		SchemaInt8            schema.Int8              `json:"schema_int8,omitempty"`
+		SchemaInt64           schema.Int64             `json:"schema_int64,omitempty"`
+		SchemaFloat           schema.Float64           `json:"schema_float,omitempty"`
+		SchemaFloat32         schema.Float32           `json:"schema_float32,omitempty"`
+		NullFloat             *databasesql.NullFloat64 `json:"null_float,omitempty"`
+		Role                  role.Role                `json:"role,omitempty"`
+		Priority              role.Priority            `json:"priority,omitempty"`
+		OptionalUUID          uuid.UUID                `json:"optional_uuid,omitempty"`
+		NillableUUID          *uuid.UUID               `json:"nillable_uuid,omitempty"`
+		Strings               []string                 `json:"strings,omitempty"`
+		Pair                  schema.Pair              `json:"pair,omitempty"`
+		NilPair               *schema.Pair             `json:"nil_pair,omitempty"`
+		Vstring               schema.VString           `json:"vstring,omitempty"`
+		Triple                schema.Triple            `json:"triple,omitempty"`
+		BigInt                schema.BigInt            `json:"big_int,omitempty"`
+		PasswordOther         schema.Password          `json:"password_other,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err

@@ -7,13 +7,13 @@
 package entv2
 
 import (
-	"context"
+	context "context"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/blog"
-	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
-	"entgo.io/ent/schema/field"
+	predicate "entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	field "entgo.io/ent/schema/field"
 )
 
 // BlogDelete is the builder for deleting a Blog entity.

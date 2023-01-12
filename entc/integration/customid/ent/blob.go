@@ -7,12 +7,12 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	fmt "fmt"
+	strings "strings"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/customid/ent/blob"
-	"github.com/google/uuid"
+	blob "entgo.io/ent/entc/integration/customid/ent/blob"
+	uuid "github.com/google/uuid"
 )
 
 // Blob is the model entity for the Blob schema.

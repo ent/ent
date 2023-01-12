@@ -7,14 +7,14 @@
 package entv1
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/migrate/entv1/car"
-	"entgo.io/ent/entc/integration/migrate/entv1/user"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	car "entgo.io/ent/entc/integration/migrate/entv1/car"
+	user "entgo.io/ent/entc/integration/migrate/entv1/user"
+	field "entgo.io/ent/schema/field"
 )
 
 // UserCreate is the builder for creating a User entity.

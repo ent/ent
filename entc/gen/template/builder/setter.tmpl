@@ -23,7 +23,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{ $p := receiver $f.Type.String }}{{ if eq $p $receiver }} {{ $p = "value" }} {{ end }}
 	{{ $func := print "Set" $f.StructField }}
 	// {{ $func }} sets the "{{ $f.Name }}" field.
-	func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ $f.Type | typeIndent }}) *{{ $builder }} {
+	func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ $f.Type | typeIdent }}) *{{ $builder }} {
 		{{- /* setting numeric type override previous calls to Add. */}}
 		{{- if and $updater $f.SupportsMutationAdd }}
 			{{ $receiver }}.mutation.{{ $f.MutationReset }}()
@@ -36,7 +36,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{ if and (not $f.Type.Nillable) (or $f.Optional $f.Default) (not (and $updater $f.UpdateDefault)) }}
 		{{ $nillableFunc := print "SetNillable" $f.StructField }}
 		// {{ $nillableFunc }} sets the "{{ $f.Name }}" field if the given value is not nil.
-		func ({{ $receiver }} *{{ $builder }}) {{ $nillableFunc }}({{ $p }} *{{ $f.Type | typeIndent }}) *{{ $builder }} {
+		func ({{ $receiver }} *{{ $builder }}) {{ $nillableFunc }}({{ $p }} *{{ $f.Type | typeIdent }}) *{{ $builder }} {
 			if {{ $p }} != nil {
 				{{ $receiver }}.{{ $func }}(*{{ $p }})
 			}
@@ -54,7 +54,7 @@ in the LICENSE file in the root directory of this source tree.
 
 	{{ if and $updater $f.SupportsMutationAppend }}
 		// {{ $f.MutationAppend }} appends {{ $p }} to the "{{ $f.Name }}" field.
-		func ({{ $receiver }} *{{ $builder }}) {{ $f.MutationAppend }}({{ $p }} {{ $f.Type | typeIndent }}) *{{ $builder }} {
+		func ({{ $receiver }} *{{ $builder }}) {{ $f.MutationAppend }}({{ $p }} {{ $f.Type | typeIdent }}) *{{ $builder }} {
 			{{ $receiver }}.mutation.{{ $f.MutationAppend }}({{ $p }})
 			return {{ $receiver }}
 		}
@@ -88,7 +88,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{ if and $e.Unique $e.Optional $withSetter }}
 		{{ $nillableIDsFunc := print "SetNillable" $e.StructField "ID" }}
 		// {{ $nillableIDsFunc }} sets the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity by ID if the given value is not nil.
-		func ({{ $receiver }} *{{ $builder }}) {{ $nillableIDsFunc }}(id *{{ $e.Type.ID.Type }}) *{{ $builder }} {
+		func ({{ $receiver }} *{{ $builder }}) {{ $nillableIDsFunc }}(id *{{ $e.Type.ID.Type | typeIdent }}) *{{ $builder }} {
 			if id != nil {
 				{{ $receiver}} = {{ $receiver }}.{{ $idsFunc }}(*id)
 			}

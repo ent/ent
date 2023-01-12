@@ -7,9 +7,9 @@
 package entv2
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 	"log"
 
 	"entgo.io/ent/entc/integration/migrate/entv2/migrate"

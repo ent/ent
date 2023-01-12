@@ -7,12 +7,12 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	fmt "fmt"
+	strings "strings"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/customid/ent/doc"
-	"entgo.io/ent/entc/integration/customid/ent/schema"
+	doc "entgo.io/ent/entc/integration/customid/ent/doc"
+	schema "entgo.io/ent/entc/integration/customid/ent/schema"
 )
 
 // Doc is the model entity for the Doc schema.

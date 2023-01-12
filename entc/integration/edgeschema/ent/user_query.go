@@ -7,17 +7,17 @@
 package ent
 
 import (
-	"context"
-	"database/sql/driver"
-	"errors"
-	"fmt"
-	"math"
+	context "context"
+	driver "database/sql/driver"
+	errors "errors"
+	fmt "fmt"
+	math "math"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/friendship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
-	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	predicate "entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/role"
 	"entgo.io/ent/entc/integration/edgeschema/ent/roleuser"
@@ -26,7 +26,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
-	"entgo.io/ent/schema/field"
+	field "entgo.io/ent/schema/field"
 )
 
 // UserQuery is the builder for querying User entities.

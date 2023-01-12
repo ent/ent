@@ -7,14 +7,14 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"time"
+	context "context"
+	errors "errors"
+	time "time"
 
-	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/dialect/gremlin/graph/dsl"
-	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
-	"entgo.io/ent/entc/integration/gremlin/ent/license"
+	gremlin "entgo.io/ent/dialect/gremlin"
+	dsl "entgo.io/ent/dialect/gremlin/graph/dsl"
+	g "entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	license "entgo.io/ent/entc/integration/gremlin/ent/license"
 )
 
 // LicenseCreate is the builder for creating a License entity.

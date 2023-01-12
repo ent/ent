@@ -7,7 +7,7 @@
 package role
 
 import (
-	"time"
+	time "time"
 )
 
 const (

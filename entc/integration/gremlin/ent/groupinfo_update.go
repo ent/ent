@@ -7,17 +7,17 @@
 package ent
 
 import (
-	"context"
-	"errors"
+	context "context"
+	errors "errors"
 
-	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	gremlin "entgo.io/ent/dialect/gremlin"
+	dsl "entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
-	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
-	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
-	"entgo.io/ent/entc/integration/gremlin/ent/group"
-	"entgo.io/ent/entc/integration/gremlin/ent/groupinfo"
-	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	g "entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	p "entgo.io/ent/dialect/gremlin/graph/dsl/p"
+	group "entgo.io/ent/entc/integration/gremlin/ent/group"
+	groupinfo "entgo.io/ent/entc/integration/gremlin/ent/groupinfo"
+	predicate "entgo.io/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // GroupInfoUpdate is the builder for updating GroupInfo entities.

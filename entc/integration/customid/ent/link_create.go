@@ -7,17 +7,17 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
-	"entgo.io/ent/dialect"
+	dialect "entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/customid/ent/link"
-	"entgo.io/ent/entc/integration/customid/ent/schema"
-	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	link "entgo.io/ent/entc/integration/customid/ent/link"
+	schema "entgo.io/ent/entc/integration/customid/ent/schema"
+	uuidcompatible "entgo.io/ent/entc/integration/customid/uuidcompatible"
+	field "entgo.io/ent/schema/field"
 )
 
 // LinkCreate is the builder for creating a Link entity.
@@ -35,13 +35,13 @@ func (lc *LinkCreate) SetLinkInformation(mi map[string]schema.LinkInformation) *
 }
 
 // SetID sets the "id" field.
-func (lc *LinkCreate) SetID(u uuidc.UUIDC) *LinkCreate {
+func (lc *LinkCreate) SetID(u uuidcompatible.UUIDC) *LinkCreate {
 	lc.mutation.SetID(u)
 	return lc
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (lc *LinkCreate) SetNillableID(u *uuidc.UUIDC) *LinkCreate {
+func (lc *LinkCreate) SetNillableID(u *uuidcompatible.UUIDC) *LinkCreate {
 	if u != nil {
 		lc.SetID(*u)
 	}
@@ -113,7 +113,7 @@ func (lc *LinkCreate) sqlSave(ctx context.Context) (*Link, error) {
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(*uuidc.UUIDC); ok {
+		if id, ok := _spec.ID.Value.(*uuidcompatible.UUIDC); ok {
 			_node.ID = *id
 		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
 			return nil, err
@@ -286,7 +286,7 @@ func (u *LinkUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *LinkUpsertOne) ID(ctx context.Context) (id uuidc.UUIDC, err error) {
+func (u *LinkUpsertOne) ID(ctx context.Context) (id uuidcompatible.UUIDC, err error) {
 	if u.create.driver.Dialect() == dialect.MySQL {
 		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
 		// fields from the database since MySQL does not support the RETURNING clause.
@@ -300,7 +300,7 @@ func (u *LinkUpsertOne) ID(ctx context.Context) (id uuidc.UUIDC, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *LinkUpsertOne) IDX(ctx context.Context) uuidc.UUIDC {
+func (u *LinkUpsertOne) IDX(ctx context.Context) uuidcompatible.UUIDC {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)

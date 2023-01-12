@@ -7,7 +7,7 @@
 package user
 
 import (
-	"net/http"
+	http "net/http"
 )
 
 const (
@@ -33,6 +33,12 @@ const (
 	FieldStrings = "strings"
 	// FieldAddr holds the string denoting the addr field in the database.
 	FieldAddr = "addr"
+	// FieldValobj holds the string denoting the valobj field in the database.
+	FieldValobj = "valobj"
+	// FieldAnotherValobj holds the string denoting the another_valobj field in the database.
+	FieldAnotherValobj = "another_valobj"
+	// FieldAnotherValobjs holds the string denoting the another_valobjs field in the database.
+	FieldAnotherValobjs = "another_valobjs"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 )
@@ -49,6 +55,9 @@ var Columns = []string{
 	FieldFloats,
 	FieldStrings,
 	FieldAddr,
+	FieldValobj,
+	FieldAnotherValobj,
+	FieldAnotherValobjs,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

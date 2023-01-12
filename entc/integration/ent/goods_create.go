@@ -7,14 +7,14 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/ent/goods"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	goods "entgo.io/ent/entc/integration/ent/goods"
+	field "entgo.io/ent/schema/field"
 )
 
 // GoodsCreate is the builder for creating a Goods entity.

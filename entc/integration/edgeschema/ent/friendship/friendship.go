@@ -7,7 +7,7 @@
 package friendship
 
 import (
-	"time"
+	time "time"
 )
 
 const (

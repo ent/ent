@@ -7,15 +7,15 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/customid/ent/mixinid"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	mixinid "entgo.io/ent/entc/integration/customid/ent/mixinid"
+	predicate "entgo.io/ent/entc/integration/customid/ent/predicate"
+	field "entgo.io/ent/schema/field"
 )
 
 // MixinIDUpdate is the builder for updating MixinID entities.

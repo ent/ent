@@ -7,15 +7,15 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/privacy/ent/task"
-	"entgo.io/ent/entc/integration/privacy/ent/team"
-	"entgo.io/ent/entc/integration/privacy/ent/user"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	task "entgo.io/ent/entc/integration/privacy/ent/task"
+	team "entgo.io/ent/entc/integration/privacy/ent/team"
+	user "entgo.io/ent/entc/integration/privacy/ent/user"
+	field "entgo.io/ent/schema/field"
 )
 
 // TeamCreate is the builder for creating a Team entity.

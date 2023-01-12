@@ -8,7 +8,7 @@ package conversion
 
 import (
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
+	predicate "entgo.io/ent/entc/integration/migrate/entv1/predicate"
 )
 
 // ID filters vertices based on their ID field.

@@ -7,14 +7,14 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"math"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	math "math"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	predicate "entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"

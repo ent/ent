@@ -7,16 +7,16 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"time"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	time "time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgeschema/ent/role"
-	"entgo.io/ent/entc/integration/edgeschema/ent/user"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	role "entgo.io/ent/entc/integration/edgeschema/ent/role"
+	user "entgo.io/ent/entc/integration/edgeschema/ent/user"
+	field "entgo.io/ent/schema/field"
 )
 
 // RoleCreate is the builder for creating a Role entity.

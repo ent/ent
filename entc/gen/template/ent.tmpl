@@ -11,11 +11,14 @@ in the LICENSE file in the root directory of this source tree.
 {{ $pkg := base $.Config.Package }}
 {{ template "header" $ }}
 
+{{ renewImports }}
 {{ template "import" $ }}
 
 {{- range $import := $.SiblingImports }}
 	{{ addPath $import.Path }}
 {{- end }}
+
+{{ template "import/print" }}
 
 {{ template "model/comment" $ }}
 {{- with $tmpls := matchTemplate "model/comment/additional/*" }}
@@ -37,7 +40,7 @@ type {{ $.Name }} struct {
 	{{- range $f := $.Fields }}
 		{{- $tag := $f.StructTag }}{{ with $tags := $.Annotations.Fields.StructTag }}{{ with index $tags $f.Name }}{{ $tag = . }}{{ end }}{{ end }}
 		{{- template "model/fieldcomment" $f }}
-		{{ $f.StructField }} {{ if $f.NillableValue }}*{{ end }}{{ $f.Type | typeIndent }} {{ if not $f.Sensitive }}`{{ $tag }}`{{ else }}{{ template "model/omittags" $ }}{{ end }}
+		{{ $f.StructField }} {{ if $f.NillableValue }}*{{ end }}{{ $f.Type | typeIdent }} {{ if not $f.Sensitive }}`{{ $tag }}`{{ else }}{{ template "model/omittags" $ }}{{ end }}
 	{{- end }}
 	{{- with $.Edges }}
 		// Edges holds the relations/edges for other nodes in the graph.

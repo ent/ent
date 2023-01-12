@@ -7,17 +7,17 @@
 package ent
 
 import (
-	"context"
-	"fmt"
-	"math"
+	context "context"
+	fmt "fmt"
+	math "math"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	predicate "entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
-	"entgo.io/ent/schema/field"
+	field "entgo.io/ent/schema/field"
 )
 
 // UserTweetQuery is the builder for querying UserTweet entities.

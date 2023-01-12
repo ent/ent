@@ -7,11 +7,11 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/edgefield/ent/node"
+	node "entgo.io/ent/entc/integration/edgefield/ent/node"
 )
 
 // Node is the model entity for the Node schema.

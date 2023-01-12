@@ -7,20 +7,22 @@
 package ent
 
 import (
-	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"net/http"
-	"net/url"
+	context "context"
+	json "encoding/json"
+	errors "errors"
+	fmt "fmt"
+	http "net/http"
+	url "net/url"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/dialect/sql/sqljson"
-	"entgo.io/ent/entc/integration/json/ent/predicate"
-	"entgo.io/ent/entc/integration/json/ent/schema"
-	"entgo.io/ent/entc/integration/json/ent/user"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	sqljson "entgo.io/ent/dialect/sql/sqljson"
+	predicate "entgo.io/ent/entc/integration/json/ent/predicate"
+	schema "entgo.io/ent/entc/integration/json/ent/schema"
+	user "entgo.io/ent/entc/integration/json/ent/user"
+	valobj "entgo.io/ent/entc/integration/json/valobj"
+	valobjvalobj "entgo.io/ent/entc/integration/json/valobj/valobj"
+	field "entgo.io/ent/schema/field"
 )
 
 // UserUpdate is the builder for updating User entities.
@@ -183,6 +185,64 @@ func (uu *UserUpdate) ClearAddr() *UserUpdate {
 	return uu
 }
 
+// SetValobj sets the "valobj" field.
+func (uu *UserUpdate) SetValobj(vo valobj.ValObj) *UserUpdate {
+	uu.mutation.SetValobj(vo)
+	return uu
+}
+
+// SetNillableValobj sets the "valobj" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableValobj(vo *valobj.ValObj) *UserUpdate {
+	if vo != nil {
+		uu.SetValobj(*vo)
+	}
+	return uu
+}
+
+// ClearValobj clears the value of the "valobj" field.
+func (uu *UserUpdate) ClearValobj() *UserUpdate {
+	uu.mutation.ClearValobj()
+	return uu
+}
+
+// SetAnotherValobj sets the "another_valobj" field.
+func (uu *UserUpdate) SetAnotherValobj(vvo valobjvalobj.AnotherValObj) *UserUpdate {
+	uu.mutation.SetAnotherValobj(vvo)
+	return uu
+}
+
+// SetNillableAnotherValobj sets the "another_valobj" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableAnotherValobj(vvo *valobjvalobj.AnotherValObj) *UserUpdate {
+	if vvo != nil {
+		uu.SetAnotherValobj(*vvo)
+	}
+	return uu
+}
+
+// ClearAnotherValobj clears the value of the "another_valobj" field.
+func (uu *UserUpdate) ClearAnotherValobj() *UserUpdate {
+	uu.mutation.ClearAnotherValobj()
+	return uu
+}
+
+// SetAnotherValobjs sets the "another_valobjs" field.
+func (uu *UserUpdate) SetAnotherValobjs(vvo []valobjvalobj.AnotherValObj) *UserUpdate {
+	uu.mutation.SetAnotherValobjs(vvo)
+	return uu
+}
+
+// AppendAnotherValobjs appends vvo to the "another_valobjs" field.
+func (uu *UserUpdate) AppendAnotherValobjs(vvo []valobjvalobj.AnotherValObj) *UserUpdate {
+	uu.mutation.AppendAnotherValobjs(vvo)
+	return uu
+}
+
+// ClearAnotherValobjs clears the value of the "another_valobjs" field.
+func (uu *UserUpdate) ClearAnotherValobjs() *UserUpdate {
+	uu.mutation.ClearAnotherValobjs()
+	return uu
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -319,6 +379,29 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if uu.mutation.AddrCleared() {
 		_spec.ClearField(user.FieldAddr, field.TypeJSON)
+	}
+	if value, ok := uu.mutation.Valobj(); ok {
+		_spec.SetField(user.FieldValobj, field.TypeJSON, value)
+	}
+	if uu.mutation.ValobjCleared() {
+		_spec.ClearField(user.FieldValobj, field.TypeJSON)
+	}
+	if value, ok := uu.mutation.AnotherValobj(); ok {
+		_spec.SetField(user.FieldAnotherValobj, field.TypeJSON, value)
+	}
+	if uu.mutation.AnotherValobjCleared() {
+		_spec.ClearField(user.FieldAnotherValobj, field.TypeJSON)
+	}
+	if value, ok := uu.mutation.AnotherValobjs(); ok {
+		_spec.SetField(user.FieldAnotherValobjs, field.TypeJSON, value)
+	}
+	if value, ok := uu.mutation.AppendedAnotherValobjs(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldAnotherValobjs, value)
+		})
+	}
+	if uu.mutation.AnotherValobjsCleared() {
+		_spec.ClearField(user.FieldAnotherValobjs, field.TypeJSON)
 	}
 	_spec.AddModifiers(uu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
@@ -488,6 +571,64 @@ func (uuo *UserUpdateOne) ClearAddr() *UserUpdateOne {
 	return uuo
 }
 
+// SetValobj sets the "valobj" field.
+func (uuo *UserUpdateOne) SetValobj(vo valobj.ValObj) *UserUpdateOne {
+	uuo.mutation.SetValobj(vo)
+	return uuo
+}
+
+// SetNillableValobj sets the "valobj" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableValobj(vo *valobj.ValObj) *UserUpdateOne {
+	if vo != nil {
+		uuo.SetValobj(*vo)
+	}
+	return uuo
+}
+
+// ClearValobj clears the value of the "valobj" field.
+func (uuo *UserUpdateOne) ClearValobj() *UserUpdateOne {
+	uuo.mutation.ClearValobj()
+	return uuo
+}
+
+// SetAnotherValobj sets the "another_valobj" field.
+func (uuo *UserUpdateOne) SetAnotherValobj(vvo valobjvalobj.AnotherValObj) *UserUpdateOne {
+	uuo.mutation.SetAnotherValobj(vvo)
+	return uuo
+}
+
+// SetNillableAnotherValobj sets the "another_valobj" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableAnotherValobj(vvo *valobjvalobj.AnotherValObj) *UserUpdateOne {
+	if vvo != nil {
+		uuo.SetAnotherValobj(*vvo)
+	}
+	return uuo
+}
+
+// ClearAnotherValobj clears the value of the "another_valobj" field.
+func (uuo *UserUpdateOne) ClearAnotherValobj() *UserUpdateOne {
+	uuo.mutation.ClearAnotherValobj()
+	return uuo
+}
+
+// SetAnotherValobjs sets the "another_valobjs" field.
+func (uuo *UserUpdateOne) SetAnotherValobjs(vvo []valobjvalobj.AnotherValObj) *UserUpdateOne {
+	uuo.mutation.SetAnotherValobjs(vvo)
+	return uuo
+}
+
+// AppendAnotherValobjs appends vvo to the "another_valobjs" field.
+func (uuo *UserUpdateOne) AppendAnotherValobjs(vvo []valobjvalobj.AnotherValObj) *UserUpdateOne {
+	uuo.mutation.AppendAnotherValobjs(vvo)
+	return uuo
+}
+
+// ClearAnotherValobjs clears the value of the "another_valobjs" field.
+func (uuo *UserUpdateOne) ClearAnotherValobjs() *UserUpdateOne {
+	uuo.mutation.ClearAnotherValobjs()
+	return uuo
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -648,6 +789,29 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if uuo.mutation.AddrCleared() {
 		_spec.ClearField(user.FieldAddr, field.TypeJSON)
+	}
+	if value, ok := uuo.mutation.Valobj(); ok {
+		_spec.SetField(user.FieldValobj, field.TypeJSON, value)
+	}
+	if uuo.mutation.ValobjCleared() {
+		_spec.ClearField(user.FieldValobj, field.TypeJSON)
+	}
+	if value, ok := uuo.mutation.AnotherValobj(); ok {
+		_spec.SetField(user.FieldAnotherValobj, field.TypeJSON, value)
+	}
+	if uuo.mutation.AnotherValobjCleared() {
+		_spec.ClearField(user.FieldAnotherValobj, field.TypeJSON)
+	}
+	if value, ok := uuo.mutation.AnotherValobjs(); ok {
+		_spec.SetField(user.FieldAnotherValobjs, field.TypeJSON, value)
+	}
+	if value, ok := uuo.mutation.AppendedAnotherValobjs(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldAnotherValobjs, value)
+		})
+	}
+	if uuo.mutation.AnotherValobjsCleared() {
+		_spec.ClearField(user.FieldAnotherValobjs, field.TypeJSON)
 	}
 	_spec.AddModifiers(uuo.modifiers...)
 	_node = &User{config: uuo.config}

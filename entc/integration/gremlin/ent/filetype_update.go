@@ -7,17 +7,17 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
-	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	gremlin "entgo.io/ent/dialect/gremlin"
+	dsl "entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
-	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
-	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
-	"entgo.io/ent/entc/integration/gremlin/ent/filetype"
-	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	g "entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	p "entgo.io/ent/dialect/gremlin/graph/dsl/p"
+	filetype "entgo.io/ent/entc/integration/gremlin/ent/filetype"
+	predicate "entgo.io/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // FileTypeUpdate is the builder for updating FileType entities.

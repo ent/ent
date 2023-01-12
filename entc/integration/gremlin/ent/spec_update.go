@@ -7,15 +7,15 @@
 package ent
 
 import (
-	"context"
-	"errors"
+	context "context"
+	errors "errors"
 
-	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	gremlin "entgo.io/ent/dialect/gremlin"
+	dsl "entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
-	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
-	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
-	"entgo.io/ent/entc/integration/gremlin/ent/spec"
+	g "entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	predicate "entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	spec "entgo.io/ent/entc/integration/gremlin/ent/spec"
 )
 
 // SpecUpdate is the builder for updating Spec entities.

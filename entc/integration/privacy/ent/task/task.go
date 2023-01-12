@@ -7,9 +7,9 @@
 package task
 
 import (
-	"fmt"
+	fmt "fmt"
 
-	"entgo.io/ent"
+	ent "entgo.io/ent"
 )
 
 const (

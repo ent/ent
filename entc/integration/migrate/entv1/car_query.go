@@ -7,16 +7,16 @@
 package entv1
 
 import (
-	"context"
-	"fmt"
-	"math"
+	context "context"
+	fmt "fmt"
+	math "math"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv1/car"
-	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
+	predicate "entgo.io/ent/entc/integration/migrate/entv1/predicate"
 	"entgo.io/ent/entc/integration/migrate/entv1/user"
-	"entgo.io/ent/schema/field"
+	field "entgo.io/ent/schema/field"
 )
 
 // CarQuery is the builder for querying Car entities.

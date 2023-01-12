@@ -7,16 +7,16 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgefield/ent/post"
-	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
-	"entgo.io/ent/entc/integration/edgefield/ent/user"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	post "entgo.io/ent/entc/integration/edgefield/ent/post"
+	predicate "entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	user "entgo.io/ent/entc/integration/edgefield/ent/user"
+	field "entgo.io/ent/schema/field"
 )
 
 // PostUpdate is the builder for updating Post entities.

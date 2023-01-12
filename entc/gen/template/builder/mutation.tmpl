@@ -8,10 +8,10 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "mutation" }}
 
-{{ renewImports }}
 {{ $pkg := base $.Config.Package }}
 {{ template "header" $ }}
 
+{{- renewImports }}
 {{- addPath "context" "fmt" "sync" "entgo.io/ent" }}
 {{- range $n := $.Nodes }}
 	{{ addPath (printf "%s/%s" $.Config.Package $n.PackageDir) }}
@@ -42,15 +42,15 @@ type {{ $mutation }} struct {
 	op Op
 	typ string
 	{{- with $n.HasOneFieldID }}
-		{{ $n.ID.BuilderField }} *{{ $n.ID.Type }}
+		{{ $n.ID.BuilderField }} *{{ $n.ID.Type | typeIdent }}
 	{{- end }}
 	{{- range $f := $n.MutationFields }}
-		{{ $f.BuilderField }} *{{ $f.Type | typeIndent }}
+		{{ $f.BuilderField }} *{{ $f.Type | typeIdent }}
 		{{- if $f.SupportsMutationAdd }}
-			add{{ $f.BuilderField }} *{{ $f.SignedType }}
+			add{{ $f.BuilderField }} *{{ $f.SignedType | typeIdent }}
 		{{- end }}
 		{{- if $f.SupportsMutationAppend }}
-			append{{ $f.BuilderField }} {{ $f.Type | typeIndent }}
+			append{{ $f.BuilderField }} {{ $f.Type | typeIdent }}
 		{{- end }}
 	{{- end }}
 	clearedFields map[string]struct{}
@@ -91,7 +91,7 @@ func new{{ $mutation }}(c config, op Op, opts ...{{ $mutationOption }}) *{{ $mut
 {{ with $n.HasOneFieldID }}
 	{{ $opt := print "with" $n.Name "ID" }}
 	// {{ $opt }} sets the ID field of the mutation.
-	func {{ $opt }}(id {{ $n.ID.Type }}) {{ $mutationOption }} {
+	func {{ $opt }}(id {{ $n.ID.Type | typeIdent }}) {{ $mutationOption }} {
 		return func(m *{{ $mutation }}) {
 			var (
 				err error
@@ -147,14 +147,14 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 	{{ if $n.ID.UserDefined }}
 		// SetID sets the value of the id field. Note that this
 		// operation is only accepted on creation of {{ $n.Name }} entities.
-		func (m *{{ $mutation }}) SetID(id {{ $n.ID.Type }}) {
+		func (m *{{ $mutation }}) SetID(id {{ $n.ID.Type | typeIdent }}) {
 			m.{{ $n.ID.BuilderField }} = &id
 		}
 	{{ end }}
 
 	// ID returns the ID value in the mutation. Note that the ID is only available
 	// if it was provided to the builder or after it was returned from the database.
-	func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
+	func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type | typeIdent }}, exists bool) {
 		if m.{{ $n.ID.BuilderField }} == nil {
 			return
 		}
@@ -165,12 +165,12 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 	// That means, if the mutation is applied within a transaction with an isolation level such
 	// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 	// or updated by the mutation.
-	func (m *{{ $mutation }}) IDs(ctx context.Context) ([]{{ $n.ID.Type }}, error) {
+	func (m *{{ $mutation }}) IDs(ctx context.Context) ([]{{ $n.ID.Type | typeIdent }}, error) {
 		switch {
 		case m.op.Is(OpUpdateOne | OpDeleteOne):
 			id, exists := m.ID()
 			if exists {
-				return []{{ $n.ID.Type }}{id}, nil
+				return []{{ $n.ID.Type | typeIdent }}{id}, nil
 			}
 			fallthrough
 		case m.op.Is(OpUpdate | OpDelete):
@@ -186,7 +186,7 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 	{{ $p := receiver $f.Type.String }}{{ if eq $p "m" }} {{ $p = "value" }} {{ end }}
 	{{ $func := $f.MutationSet }}
 	// {{ $func }} sets the "{{ $f.Name }}" field.
-	func (m *{{ $mutation }}) {{ $func }}({{ $p }} {{ $f.Type | typeIndent }}) {
+	func (m *{{ $mutation }}) {{ $func }}({{ $p }} {{ $f.Type | typeIdent }}) {
 		m.{{ $f.BuilderField }} = &{{ $p }}
 		{{- /* Setting numeric type override previous calls to Add. */}}
 		{{- if $f.SupportsMutationAdd }}
@@ -199,7 +199,7 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 	}
 
 	// {{ $f.MutationGet }} returns the value of the "{{ $f.Name }}" field in the mutation.
-	func (m *{{ $mutation }}) {{ $f.MutationGet }}() (r {{ $f.Type | typeIndent }}, exists bool) {
+	func (m *{{ $mutation }}) {{ $f.MutationGet }}() (r {{ $f.Type | typeIdent }}, exists bool) {
 		v := m.{{ $f.BuilderField }}
 		if v == nil {
 			return
@@ -211,7 +211,7 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 		// {{ $f.MutationGetOld }} returns the old "{{ $f.Name }}" field's value of the {{ $n.Name }} entity.
 		// If the {{ $n.Name }} object wasn't provided to the builder, the object is fetched from the database.
 		// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-		func (m *{{ $mutation }}) {{ $f.MutationGetOld }}(ctx context.Context) (v {{ if $f.NillableValue }}*{{ end }}{{ $f.Type | typeIndent }}, err error) {
+		func (m *{{ $mutation }}) {{ $f.MutationGetOld }}(ctx context.Context) (v {{ if $f.NillableValue }}*{{ end }}{{ $f.Type | typeIdent }}, err error) {
 			if !m.op.Is(OpUpdateOne) {
 				return v, errors.New("{{ $f.MutationGetOld }} is only allowed on UpdateOne operations")
 			}
@@ -228,7 +228,7 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 
 	{{ if $f.SupportsMutationAdd }}
 		// {{ $f.MutationAdd }} adds {{ $p }} to the "{{ $f.Name }}" field.
-		func (m *{{ $mutation }}) {{ $f.MutationAdd }}({{ $p }} {{ $f.SignedType }}) {
+		func (m *{{ $mutation }}) {{ $f.MutationAdd }}({{ $p }} {{ $f.SignedType | typeIdent }}) {
 			{{- $structField := print "m.add" $f.BuilderField }}
 			if {{ $structField }} != nil {
 				{{ $f.MutationAddAssignExpr $structField $p }}
@@ -238,7 +238,7 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 		}
 
 		// {{ $f.MutationAdded }} returns the value that was added to the "{{ $f.Name }}" field in this mutation.
-		func (m *{{ $mutation }}) {{ $f.MutationAdded }}() (r {{ $f.SignedType }}, exists bool) {
+		func (m *{{ $mutation }}) {{ $f.MutationAdded }}() (r {{ $f.SignedType | typeIdent }}, exists bool) {
 			v := m.add{{ $f.BuilderField }}
 			if v == nil {
 				return
@@ -250,12 +250,12 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 	{{ if $f.SupportsMutationAppend }}
 		{{- $structField := print "m.append" $f.BuilderField }}
 		// {{ $f.MutationAppend }} adds {{ $p }} to the "{{ $f.Name }}" field.
-		func (m *{{ $mutation }}) {{ $f.MutationAppend }}({{ $p }} {{ $f.Type | typeIndent }}) {
+		func (m *{{ $mutation }}) {{ $f.MutationAppend }}({{ $p }} {{ $f.Type | typeIdent }}) {
 			{{ $structField }} = append({{ $structField }}, {{ $p }}...)
 		}
 
 		// {{ $f.MutationAppended }} returns the list of values that were appended to the "{{ $f.Name }}" field in this mutation.
-		func (m *{{ $mutation }}) {{ $f.MutationAppended }}() ({{ $f.Type | typeIndent }}, bool) {
+		func (m *{{ $mutation }}) {{ $f.MutationAppended }}() ({{ $f.Type | typeIdent }}, bool) {
 			if len({{ $structField }}) == 0 {
 				return nil, false
 			}
@@ -485,7 +485,7 @@ func (m *{{ $mutation }}) SetField(name string, value ent.Value) error {
 	{{- range $f := $n.Fields }}
 		{{- $const := print $n.Package "." $f.Constant }}
 		case {{ $const }}:
-			v, ok := value.({{ $f.Type | typeIndent }})
+			v, ok := value.({{ $f.Type | typeIdent }})
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field %s", value, name)
 			}
@@ -543,7 +543,7 @@ func (m *{{ $mutation }}) AddField(name string, value ent.Value) error {
 			{{- if $f.SupportsMutationAdd }}
 				{{- $const := print $n.Package "." $f.Constant }}
 				case {{ $const }}:
-					v, ok := value.({{ $f.SignedType }})
+					v, ok := value.({{ $f.SignedType | typeIdent }})
 					if !ok {
 						return fmt.Errorf("unexpected type %T for field %s", value, name)
 					}

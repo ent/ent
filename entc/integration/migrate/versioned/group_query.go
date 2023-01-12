@@ -7,15 +7,15 @@
 package versioned
 
 import (
-	"context"
-	"fmt"
-	"math"
+	context "context"
+	fmt "fmt"
+	math "math"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/versioned/group"
-	"entgo.io/ent/entc/integration/migrate/versioned/predicate"
-	"entgo.io/ent/schema/field"
+	predicate "entgo.io/ent/entc/integration/migrate/versioned/predicate"
+	field "entgo.io/ent/schema/field"
 )
 
 // GroupQuery is the builder for querying Group entities.

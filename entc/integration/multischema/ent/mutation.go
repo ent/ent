@@ -7,20 +7,19 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"sync"
-	"time"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	sync "sync"
+	time "time"
 
+	ent "entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/multischema/ent/friendship"
-	"entgo.io/ent/entc/integration/multischema/ent/group"
-	"entgo.io/ent/entc/integration/multischema/ent/pet"
-	"entgo.io/ent/entc/integration/multischema/ent/predicate"
-	"entgo.io/ent/entc/integration/multischema/ent/user"
-
-	"entgo.io/ent"
+	friendship "entgo.io/ent/entc/integration/multischema/ent/friendship"
+	group "entgo.io/ent/entc/integration/multischema/ent/group"
+	pet "entgo.io/ent/entc/integration/multischema/ent/pet"
+	predicate "entgo.io/ent/entc/integration/multischema/ent/predicate"
+	user "entgo.io/ent/entc/integration/multischema/ent/user"
 )
 
 const (

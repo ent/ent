@@ -7,23 +7,22 @@
 package entv2
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"sync"
-	"time"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	sync "sync"
+	time "time"
 
+	ent "entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/migrate/entv2/blog"
-	"entgo.io/ent/entc/integration/migrate/entv2/car"
-	"entgo.io/ent/entc/integration/migrate/entv2/conversion"
-	"entgo.io/ent/entc/integration/migrate/entv2/customtype"
-	"entgo.io/ent/entc/integration/migrate/entv2/media"
-	"entgo.io/ent/entc/integration/migrate/entv2/pet"
-	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
-	"entgo.io/ent/entc/integration/migrate/entv2/user"
-
-	"entgo.io/ent"
+	blog "entgo.io/ent/entc/integration/migrate/entv2/blog"
+	car "entgo.io/ent/entc/integration/migrate/entv2/car"
+	conversion "entgo.io/ent/entc/integration/migrate/entv2/conversion"
+	customtype "entgo.io/ent/entc/integration/migrate/entv2/customtype"
+	media "entgo.io/ent/entc/integration/migrate/entv2/media"
+	pet "entgo.io/ent/entc/integration/migrate/entv2/pet"
+	predicate "entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	user "entgo.io/ent/entc/integration/migrate/entv2/user"
 )
 
 const (

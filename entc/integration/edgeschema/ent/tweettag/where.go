@@ -7,12 +7,12 @@
 package tweettag
 
 import (
-	"time"
+	time "time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
-	"github.com/google/uuid"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	predicate "entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	uuid "github.com/google/uuid"
 )
 
 // ID filters vertices based on their ID field.

@@ -7,18 +7,18 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"time"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	time "time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
-	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
-	"entgo.io/ent/entc/integration/edgeschema/ent/user"
-	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	predicate "entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	tweet "entgo.io/ent/entc/integration/edgeschema/ent/tweet"
+	user "entgo.io/ent/entc/integration/edgeschema/ent/user"
+	usertweet "entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
+	field "entgo.io/ent/schema/field"
 )
 
 // UserTweetUpdate is the builder for updating UserTweet entities.

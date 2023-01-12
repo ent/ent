@@ -7,12 +7,12 @@
 package bloblink
 
 import (
-	"time"
+	time "time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
-	"github.com/google/uuid"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	predicate "entgo.io/ent/entc/integration/customid/ent/predicate"
+	uuid "github.com/google/uuid"
 )
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.

@@ -8,9 +8,9 @@ package car
 
 import (
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
-	"github.com/google/uuid"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	predicate "entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	uuid "github.com/google/uuid"
 )
 
 // ID filters vertices based on their ID field.

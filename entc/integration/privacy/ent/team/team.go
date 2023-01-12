@@ -7,7 +7,7 @@
 package team
 
 import (
-	"entgo.io/ent"
+	ent "entgo.io/ent"
 )
 
 const (

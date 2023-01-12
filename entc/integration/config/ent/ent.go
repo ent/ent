@@ -7,15 +7,15 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"reflect"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	reflect "reflect"
 
-	"entgo.io/ent"
+	ent "entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/config/ent/user"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	user "entgo.io/ent/entc/integration/config/ent/user"
 )
 
 // ent aliases to avoid import conflicts in user's code.

@@ -7,17 +7,17 @@
 package ent
 
 import (
-	"context"
-	"database/sql/driver"
-	"fmt"
-	"math"
+	context "context"
+	driver "database/sql/driver"
+	fmt "fmt"
+	math "math"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/doc"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
-	"entgo.io/ent/entc/integration/customid/ent/schema"
-	"entgo.io/ent/schema/field"
+	predicate "entgo.io/ent/entc/integration/customid/ent/predicate"
+	schema "entgo.io/ent/entc/integration/customid/ent/schema"
+	field "entgo.io/ent/schema/field"
 )
 
 // DocQuery is the builder for querying Doc entities.

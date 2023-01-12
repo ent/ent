@@ -7,14 +7,14 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/ent/api"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	api "entgo.io/ent/entc/integration/ent/api"
+	field "entgo.io/ent/schema/field"
 )
 
 // APICreate is the builder for creating a Api entity.

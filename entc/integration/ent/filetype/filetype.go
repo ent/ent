@@ -7,7 +7,7 @@
 package filetype
 
 import (
-	"fmt"
+	fmt "fmt"
 )
 
 const (

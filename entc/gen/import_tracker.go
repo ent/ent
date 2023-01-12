@@ -5,8 +5,8 @@
 package gen
 
 import (
-	"fmt"
 	"go/token"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -28,7 +28,7 @@ type ImportTracker struct {
 
 func newImportTracker() *ImportTracker {
 	registerKeyWords := map[string]struct{}{
-		"go": {},
+		"sql": {},
 	}
 
 	return &ImportTracker{
@@ -51,21 +51,20 @@ func (i *ImportTracker) TypeIdent(t *field.TypeInfo) string {
 	}
 
 	lcName := i.LocalNameOf(path)
-	fmt.Println(lcName, path)
 	if len(lcName) == 0 {
 		return t.String()
 	}
 
-	return strings.ReplaceAll(t.String(), t.PkgName, lcName)
+	pkgName := t.PkgName
+	if len(pkgName) == 0 {
+		pkgName = filepath.Base(path)
+	}
+
+	return strings.ReplaceAll(t.String(), pkgName, lcName)
 }
 
 func (i *ImportTracker) ImportLine(path string) string {
-	alias := i.pathToName[path]
-	if strings.HasSuffix(path, alias) {
-		alias = ""
-	}
-
-	return alias + " \"" + path + "\""
+	return i.pathToName[path] + " \"" + path + "\""
 }
 
 func (i *ImportTracker) ImportLines() []string {
@@ -102,20 +101,19 @@ func (i *ImportTracker) AddField(f *Field) (empty string) {
 
 // AddImport register a full import line with path and alias. rename another alias
 // if duplicate and return false
-func (i *ImportTracker) AddImport(alias, path string) bool {
-	isDuplicated := false
+func (i *ImportTracker) AddImport(alias, path string) (empty string) {
 	if existPath, exists := i.PathOf(alias); exists {
 		if path != existPath {
 			defer i.AddPath(path)
 
 			i.removePath(path)
-			isDuplicated = true
+
 		}
 	}
 
 	i.nameToPath[alias] = path
 	i.pathToName[path] = alias
-	return isDuplicated
+	return
 }
 
 func (i *ImportTracker) removePath(path string) {

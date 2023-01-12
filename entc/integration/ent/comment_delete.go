@@ -7,13 +7,13 @@
 package ent
 
 import (
-	"context"
+	context "context"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/comment"
-	"entgo.io/ent/entc/integration/ent/predicate"
-	"entgo.io/ent/schema/field"
+	predicate "entgo.io/ent/entc/integration/ent/predicate"
+	field "entgo.io/ent/schema/field"
 )
 
 // CommentDelete is the builder for deleting a Comment entity.

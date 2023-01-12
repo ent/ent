@@ -7,15 +7,15 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/ent/comment"
-	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	comment "entgo.io/ent/entc/integration/ent/comment"
+	dir "entgo.io/ent/entc/integration/ent/schema/dir"
+	field "entgo.io/ent/schema/field"
 )
 
 // CommentCreate is the builder for creating a Comment entity.
@@ -67,13 +67,13 @@ func (cc *CommentCreate) SetNillableTable(s *string) *CommentCreate {
 }
 
 // SetDir sets the "dir" field.
-func (cc *CommentCreate) SetDir(s schemadir.Dir) *CommentCreate {
+func (cc *CommentCreate) SetDir(s dir.Dir) *CommentCreate {
 	cc.mutation.SetDir(s)
 	return cc
 }
 
 // SetNillableDir sets the "dir" field if the given value is not nil.
-func (cc *CommentCreate) SetNillableDir(s *schemadir.Dir) *CommentCreate {
+func (cc *CommentCreate) SetNillableDir(s *dir.Dir) *CommentCreate {
 	if s != nil {
 		cc.SetDir(*s)
 	}
@@ -322,7 +322,7 @@ func (u *CommentUpsert) ClearTable() *CommentUpsert {
 }
 
 // SetDir sets the "dir" field.
-func (u *CommentUpsert) SetDir(v schemadir.Dir) *CommentUpsert {
+func (u *CommentUpsert) SetDir(v dir.Dir) *CommentUpsert {
 	u.Set(comment.FieldDir, v)
 	return u
 }
@@ -489,7 +489,7 @@ func (u *CommentUpsertOne) ClearTable() *CommentUpsertOne {
 }
 
 // SetDir sets the "dir" field.
-func (u *CommentUpsertOne) SetDir(v schemadir.Dir) *CommentUpsertOne {
+func (u *CommentUpsertOne) SetDir(v dir.Dir) *CommentUpsertOne {
 	return u.Update(func(s *CommentUpsert) {
 		s.SetDir(v)
 	})
@@ -821,7 +821,7 @@ func (u *CommentUpsertBulk) ClearTable() *CommentUpsertBulk {
 }
 
 // SetDir sets the "dir" field.
-func (u *CommentUpsertBulk) SetDir(v schemadir.Dir) *CommentUpsertBulk {
+func (u *CommentUpsertBulk) SetDir(v dir.Dir) *CommentUpsertBulk {
 	return u.Update(func(s *CommentUpsert) {
 		s.SetDir(v)
 	})

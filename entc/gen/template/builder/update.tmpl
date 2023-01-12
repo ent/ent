@@ -19,6 +19,8 @@ in the LICENSE file in the root directory of this source tree.
 	{{ addPath $import.Path }}
 {{- end }}
 
+{{ template "import/print"}}
+
 {{ $builder := $.UpdateName }}
 {{ $receiver := receiver $builder }}
 {{ $mutation := print $receiver ".mutation" }}

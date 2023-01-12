@@ -7,19 +7,19 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/multischema/ent/friendship"
-	"entgo.io/ent/entc/integration/multischema/ent/group"
-	"entgo.io/ent/entc/integration/multischema/ent/internal"
-	"entgo.io/ent/entc/integration/multischema/ent/pet"
-	"entgo.io/ent/entc/integration/multischema/ent/predicate"
-	"entgo.io/ent/entc/integration/multischema/ent/user"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	friendship "entgo.io/ent/entc/integration/multischema/ent/friendship"
+	group "entgo.io/ent/entc/integration/multischema/ent/group"
+	internal "entgo.io/ent/entc/integration/multischema/ent/internal"
+	pet "entgo.io/ent/entc/integration/multischema/ent/pet"
+	predicate "entgo.io/ent/entc/integration/multischema/ent/predicate"
+	user "entgo.io/ent/entc/integration/multischema/ent/user"
+	field "entgo.io/ent/schema/field"
 )
 
 // UserUpdate is the builder for updating User entities.

@@ -7,11 +7,11 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
+	tweet "entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 )
 
 // Tweet is the model entity for the Tweet schema.

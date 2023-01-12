@@ -7,18 +7,18 @@
 package entv1
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"reflect"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	reflect "reflect"
 
-	"entgo.io/ent"
+	ent "entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/migrate/entv1/car"
-	"entgo.io/ent/entc/integration/migrate/entv1/conversion"
-	"entgo.io/ent/entc/integration/migrate/entv1/customtype"
-	"entgo.io/ent/entc/integration/migrate/entv1/user"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	car "entgo.io/ent/entc/integration/migrate/entv1/car"
+	conversion "entgo.io/ent/entc/integration/migrate/entv1/conversion"
+	customtype "entgo.io/ent/entc/integration/migrate/entv1/customtype"
+	user "entgo.io/ent/entc/integration/migrate/entv1/user"
 )
 
 // ent aliases to avoid import conflicts in user's code.

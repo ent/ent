@@ -7,27 +7,26 @@
 package ent
 
 import (
-	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"sync"
-	"time"
+	context "context"
+	json "encoding/json"
+	errors "errors"
+	fmt "fmt"
+	sync "sync"
+	time "time"
 
+	ent "entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/edgefield/ent/car"
-	"entgo.io/ent/entc/integration/edgefield/ent/card"
-	"entgo.io/ent/entc/integration/edgefield/ent/info"
-	"entgo.io/ent/entc/integration/edgefield/ent/metadata"
-	"entgo.io/ent/entc/integration/edgefield/ent/node"
-	"entgo.io/ent/entc/integration/edgefield/ent/pet"
-	"entgo.io/ent/entc/integration/edgefield/ent/post"
-	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
-	"entgo.io/ent/entc/integration/edgefield/ent/rental"
-	"entgo.io/ent/entc/integration/edgefield/ent/user"
-	"github.com/google/uuid"
-
-	"entgo.io/ent"
+	car "entgo.io/ent/entc/integration/edgefield/ent/car"
+	card "entgo.io/ent/entc/integration/edgefield/ent/card"
+	info "entgo.io/ent/entc/integration/edgefield/ent/info"
+	metadata "entgo.io/ent/entc/integration/edgefield/ent/metadata"
+	node "entgo.io/ent/entc/integration/edgefield/ent/node"
+	pet "entgo.io/ent/entc/integration/edgefield/ent/pet"
+	post "entgo.io/ent/entc/integration/edgefield/ent/post"
+	predicate "entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	rental "entgo.io/ent/entc/integration/edgefield/ent/rental"
+	user "entgo.io/ent/entc/integration/edgefield/ent/user"
+	uuid "github.com/google/uuid"
 )
 
 const (

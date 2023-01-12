@@ -8,7 +8,7 @@ services:
 
   mysql:
     platform: linux/amd64
-    image: mysql:5.6.35
+    image: mysql:5.7.34
     environment:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: pass
@@ -19,7 +19,7 @@ services:
 
   mysql57:
     platform: linux/amd64
-    image: mysql:5.7.26
+    image: mysql:5.7.34
     environment:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: pass
@@ -52,7 +52,7 @@ services:
 
   mariadb102:
     platform: linux/amd64
-    image: mariadb:10.2.32
+    image: mariadb
     environment:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: pass
@@ -63,7 +63,7 @@ services:
 
   mariadb103:
     platform: linux/amd64
-    image: mariadb:10.3.13
+    image: mariadb
     environment:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: pass

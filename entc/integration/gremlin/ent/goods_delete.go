@@ -7,14 +7,14 @@
 package ent
 
 import (
-	"context"
+	context "context"
 
-	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	gremlin "entgo.io/ent/dialect/gremlin"
+	dsl "entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
-	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	g "entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/goods"
-	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	predicate "entgo.io/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // GoodsDelete is the builder for deleting a Goods entity.

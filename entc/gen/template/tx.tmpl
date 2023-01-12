@@ -10,12 +10,10 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ template "header" $ }}
 
-import (
-	"context"
-	"sync"
-
-	"entgo.io/ent/dialect"
-)
+{{- renewImports }}
+{{ template "import" $ }}
+{{ addPath "context" "sync" "entgo.io/ent/dialect" }}
+{{- template "import/print" $ }}
 
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {

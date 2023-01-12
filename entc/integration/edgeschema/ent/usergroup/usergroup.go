@@ -7,7 +7,7 @@
 package usergroup
 
 import (
-	"time"
+	time "time"
 )
 
 const (

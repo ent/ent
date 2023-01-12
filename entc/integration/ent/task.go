@@ -8,13 +8,12 @@ package ent
 
 import (
 	"encoding/json"
-	"fmt"
-	"strings"
-	"time"
+	fmt "fmt"
+	strings "strings"
+	time "time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/ent/schema/task"
-
+	task "entgo.io/ent/entc/integration/ent/schema/task"
 	enttask "entgo.io/ent/entc/integration/ent/task"
 )
 

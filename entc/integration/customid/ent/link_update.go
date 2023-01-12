@@ -7,16 +7,16 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/customid/ent/link"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
-	"entgo.io/ent/entc/integration/customid/ent/schema"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	link "entgo.io/ent/entc/integration/customid/ent/link"
+	predicate "entgo.io/ent/entc/integration/customid/ent/predicate"
+	schema "entgo.io/ent/entc/integration/customid/ent/schema"
+	field "entgo.io/ent/schema/field"
 )
 
 // LinkUpdate is the builder for updating Link entities.

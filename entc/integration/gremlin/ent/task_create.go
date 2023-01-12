@@ -7,16 +7,15 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"time"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	time "time"
 
-	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/dialect/gremlin/graph/dsl"
-	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
-	"entgo.io/ent/entc/integration/ent/schema/task"
-
+	gremlin "entgo.io/ent/dialect/gremlin"
+	dsl "entgo.io/ent/dialect/gremlin/graph/dsl"
+	g "entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	task "entgo.io/ent/entc/integration/ent/schema/task"
 	enttask "entgo.io/ent/entc/integration/gremlin/ent/task"
 )
 

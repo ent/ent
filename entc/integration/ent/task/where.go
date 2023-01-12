@@ -7,11 +7,11 @@
 package enttask
 
 import (
-	"time"
+	time "time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/ent/predicate"
-	"entgo.io/ent/entc/integration/ent/schema/task"
+	predicate "entgo.io/ent/entc/integration/ent/predicate"
+	task "entgo.io/ent/entc/integration/ent/schema/task"
 )
 
 // ID filters vertices based on their ID field.

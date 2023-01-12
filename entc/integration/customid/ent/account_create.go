@@ -7,17 +7,17 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
-	"entgo.io/ent/dialect"
+	dialect "entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/customid/ent/account"
-	"entgo.io/ent/entc/integration/customid/ent/token"
-	"entgo.io/ent/entc/integration/customid/sid"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	account "entgo.io/ent/entc/integration/customid/ent/account"
+	token "entgo.io/ent/entc/integration/customid/ent/token"
+	sid "entgo.io/ent/entc/integration/customid/sid"
+	field "entgo.io/ent/schema/field"
 )
 
 // AccountCreate is the builder for creating a Account entity.

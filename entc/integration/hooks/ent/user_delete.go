@@ -7,13 +7,13 @@
 package ent
 
 import (
-	"context"
+	context "context"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/hooks/ent/predicate"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	predicate "entgo.io/ent/entc/integration/hooks/ent/predicate"
 	"entgo.io/ent/entc/integration/hooks/ent/user"
-	"entgo.io/ent/schema/field"
+	field "entgo.io/ent/schema/field"
 )
 
 // UserDelete is the builder for deleting a User entity.

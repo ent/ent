@@ -12,7 +12,9 @@ in the LICENSE file in the root directory of this source tree.
 	{{ template "header" . }}
 {{ end }}
 
+{{- renewImports }}
 {{ template "import" $ }}
+{{- template "import/print" }}
 
 const (
 	// Label holds the string label denoting the {{ lower $.Name }} type in the database.
@@ -78,12 +80,12 @@ const (
 			{{- if and $f.Default (not $f.IsEnum) }}
 				{{- $default := $f.DefaultName }}
 				// {{ $default }} holds the default value on creation for the "{{ $f.Name }}" field.
-				{{ $default }} {{ if $f.DefaultFunc }}func() {{ end }}{{ $f.Type }}
+				{{ $default }} {{ if $f.DefaultFunc }}func() {{ end }}{{ $f.Type | typeIdent }}
 			{{- end }}
 			{{- if $f.UpdateDefault }}
 				{{- $default := $f.UpdateDefaultName }}
 				// {{ $default }} holds the default value on update for the "{{ $f.Name }}" field.
-				{{ $default }} func() {{ $f.Type }}
+				{{ $default }} func() {{ $f.Type | typeIdent }}
 			{{- end }}
 			{{- with $f.Validators }}
 				{{- $name := $f.Validator }}

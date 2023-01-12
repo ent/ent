@@ -7,16 +7,16 @@
 package entv2
 
 import (
-	"context"
-	"fmt"
-	"math"
+	context "context"
+	fmt "fmt"
+	math "math"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/pet"
-	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	predicate "entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
-	"entgo.io/ent/schema/field"
+	field "entgo.io/ent/schema/field"
 )
 
 // PetQuery is the builder for querying Pet entities.

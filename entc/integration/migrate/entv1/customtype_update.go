@@ -7,15 +7,15 @@
 package entv1
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/migrate/entv1/customtype"
-	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	customtype "entgo.io/ent/entc/integration/migrate/entv1/customtype"
+	predicate "entgo.io/ent/entc/integration/migrate/entv1/predicate"
+	field "entgo.io/ent/schema/field"
 )
 
 // CustomTypeUpdate is the builder for updating CustomType entities.

@@ -7,10 +7,8 @@
 package ent
 
 import (
-	"net/http"
-
-	"entgo.io/ent"
-	"entgo.io/ent/dialect"
+	ent "entgo.io/ent"
+	dialect "entgo.io/ent/dialect"
 )
 
 // Option function to configure the client.
@@ -27,8 +25,7 @@ type config struct {
 	// hooks to execute on mutations.
 	hooks *hooks
 	// interceptors to execute on queries.
-	inters     *inters
-	HTTPClient *http.Client
+	inters *inters
 }
 
 // hooks and interceptors per client, for fast access.
@@ -73,12 +70,5 @@ func Log(fn func(...any)) Option {
 func Driver(driver dialect.Driver) Option {
 	return func(c *config) {
 		c.driver = driver
-	}
-}
-
-// HTTPClient configures the HTTPClient.
-func HTTPClient(v *http.Client) Option {
-	return func(c *config) {
-		c.HTTPClient = v
 	}
 }

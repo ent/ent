@@ -7,12 +7,12 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	fmt "fmt"
+	strings "strings"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/customid/ent/intsid"
-	"entgo.io/ent/entc/integration/customid/sid"
+	intsid "entgo.io/ent/entc/integration/customid/ent/intsid"
+	sid "entgo.io/ent/entc/integration/customid/sid"
 )
 
 // IntSID is the model entity for the IntSID schema.

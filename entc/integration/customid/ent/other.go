@@ -7,11 +7,11 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/entc/integration/customid/ent/other"
-	"entgo.io/ent/entc/integration/customid/sid"
+	other "entgo.io/ent/entc/integration/customid/ent/other"
+	sid "entgo.io/ent/entc/integration/customid/sid"
 )
 
 // Other is the model entity for the Other schema.

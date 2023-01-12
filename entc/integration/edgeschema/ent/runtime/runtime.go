@@ -8,23 +8,22 @@ package runtime
 
 import (
 	"context"
-	"time"
+	time "time"
 
+	ent "entgo.io/ent"
 	"entgo.io/ent/entc/integration/edgeschema/ent/friendship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/role"
 	"entgo.io/ent/entc/integration/edgeschema/ent/roleuser"
-	"entgo.io/ent/entc/integration/edgeschema/ent/schema"
+	schema "entgo.io/ent/entc/integration/edgeschema/ent/schema"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
-	"github.com/google/uuid"
-
-	"entgo.io/ent"
-	"entgo.io/ent/privacy"
+	privacy "entgo.io/ent/privacy"
+	uuid "github.com/google/uuid"
 )
 
 // The init function reads all schema descriptors with runtime code

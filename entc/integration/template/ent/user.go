@@ -7,11 +7,11 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/template/ent/user"
+	user "entgo.io/ent/entc/integration/template/ent/user"
 )
 
 // User represents a user who has Pets and Friends.

@@ -7,11 +7,11 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	fmt "fmt"
+	strings "strings"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/ent/goods"
+	goods "entgo.io/ent/entc/integration/ent/goods"
 )
 
 // Goods is the model entity for the Goods schema.

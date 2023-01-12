@@ -7,19 +7,18 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"sync"
-	"time"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	sync "sync"
+	time "time"
 
+	ent "entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/hooks/ent/card"
-	"entgo.io/ent/entc/integration/hooks/ent/pet"
-	"entgo.io/ent/entc/integration/hooks/ent/predicate"
-	"entgo.io/ent/entc/integration/hooks/ent/user"
-
-	"entgo.io/ent"
+	card "entgo.io/ent/entc/integration/hooks/ent/card"
+	pet "entgo.io/ent/entc/integration/hooks/ent/pet"
+	predicate "entgo.io/ent/entc/integration/hooks/ent/predicate"
+	user "entgo.io/ent/entc/integration/hooks/ent/user"
 )
 
 const (

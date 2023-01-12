@@ -7,16 +7,16 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"time"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	time "time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/ent/license"
-	"entgo.io/ent/entc/integration/ent/predicate"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	license "entgo.io/ent/entc/integration/ent/license"
+	predicate "entgo.io/ent/entc/integration/ent/predicate"
+	field "entgo.io/ent/schema/field"
 )
 
 // LicenseUpdate is the builder for updating License entities.

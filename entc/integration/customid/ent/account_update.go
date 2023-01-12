@@ -7,17 +7,17 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/customid/ent/account"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
-	"entgo.io/ent/entc/integration/customid/ent/token"
-	"entgo.io/ent/entc/integration/customid/sid"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	account "entgo.io/ent/entc/integration/customid/ent/account"
+	predicate "entgo.io/ent/entc/integration/customid/ent/predicate"
+	token "entgo.io/ent/entc/integration/customid/ent/token"
+	sid "entgo.io/ent/entc/integration/customid/sid"
+	field "entgo.io/ent/schema/field"
 )
 
 // AccountUpdate is the builder for updating Account entities.

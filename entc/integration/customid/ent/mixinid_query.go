@@ -7,16 +7,16 @@
 package ent
 
 import (
-	"context"
-	"fmt"
-	"math"
+	context "context"
+	fmt "fmt"
+	math "math"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
-	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
+	predicate "entgo.io/ent/entc/integration/customid/ent/predicate"
+	field "entgo.io/ent/schema/field"
+	uuid "github.com/google/uuid"
 )
 
 // MixinIDQuery is the builder for querying MixinID entities.

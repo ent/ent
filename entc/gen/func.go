@@ -72,8 +72,9 @@ var (
 		"importLines":   importTracker.ImportLines,
 		"addPath":       importTracker.AddPath,
 		"renewImports":  importTracker.Empty,
-		"typeIndent":    importTracker.TypeIdent,
+		"typeIdent":     importTracker.TypeIdent,
 		"addImport":     importTracker.AddImport,
+		"importAlias":   importTracker.LocalNameOf,
 	}
 	rules    = ruleset()
 	acronyms = make(map[string]struct{})

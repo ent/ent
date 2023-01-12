@@ -7,16 +7,16 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
-	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
-	"entgo.io/ent/entc/integration/edgeschema/ent/user"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	relationship "entgo.io/ent/entc/integration/edgeschema/ent/relationship"
+	relationshipinfo "entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
+	user "entgo.io/ent/entc/integration/edgeschema/ent/user"
+	field "entgo.io/ent/schema/field"
 )
 
 // RelationshipCreate is the builder for creating a Relationship entity.

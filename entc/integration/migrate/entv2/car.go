@@ -7,12 +7,12 @@
 package entv2
 
 import (
-	"fmt"
-	"strings"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/migrate/entv2/car"
-	"entgo.io/ent/entc/integration/migrate/entv2/user"
+	car "entgo.io/ent/entc/integration/migrate/entv2/car"
+	user "entgo.io/ent/entc/integration/migrate/entv2/user"
 )
 
 // Car is the model entity for the Car schema.

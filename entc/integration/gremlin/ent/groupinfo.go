@@ -7,10 +7,10 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/gremlin"
+	gremlin "entgo.io/ent/dialect/gremlin"
 )
 
 // GroupInfo is the model entity for the GroupInfo schema.

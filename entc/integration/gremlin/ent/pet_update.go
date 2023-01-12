@@ -7,18 +7,18 @@
 package ent
 
 import (
-	"context"
-	"errors"
+	context "context"
+	errors "errors"
 
-	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	gremlin "entgo.io/ent/dialect/gremlin"
+	dsl "entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
-	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
-	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
-	"entgo.io/ent/entc/integration/gremlin/ent/pet"
-	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
-	"entgo.io/ent/entc/integration/gremlin/ent/user"
-	"github.com/google/uuid"
+	g "entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	p "entgo.io/ent/dialect/gremlin/graph/dsl/p"
+	pet "entgo.io/ent/entc/integration/gremlin/ent/pet"
+	predicate "entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	user "entgo.io/ent/entc/integration/gremlin/ent/user"
+	uuid "github.com/google/uuid"
 )
 
 // PetUpdate is the builder for updating Pet entities.

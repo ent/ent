@@ -7,15 +7,17 @@
 package ent
 
 import (
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"net/url"
-	"strings"
+	"database/sql"
+	json "encoding/json"
+	fmt "fmt"
+	http "net/http"
+	url "net/url"
+	strings "strings"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/json/ent/schema"
-	"entgo.io/ent/entc/integration/json/ent/user"
+	schema "entgo.io/ent/entc/integration/json/ent/schema"
+	user "entgo.io/ent/entc/integration/json/ent/user"
+	valobj "entgo.io/ent/entc/integration/json/valobj"
+	valobjvalobj "entgo.io/ent/entc/integration/json/valobj/valobj"
 )
 
 // User is the model entity for the User schema.
@@ -41,6 +43,12 @@ type User struct {
 	Strings []string `json:"strings,omitempty"`
 	// Addr holds the value of the "addr" field.
 	Addr schema.Addr `json:"-"`
+	// Valobj holds the value of the "valobj" field.
+	Valobj valobj.ValObj `json:"valobj,omitempty"`
+	// AnotherValobj holds the value of the "another_valobj" field.
+	AnotherValobj valobjvalobj.AnotherValObj `json:"another_valobj,omitempty"`
+	// AnotherValobjs holds the value of the "another_valobjs" field.
+	AnotherValobjs []valobjvalobj.AnotherValObj `json:"another_valobjs,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -48,7 +56,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldT, user.FieldURL, user.FieldURLs, user.FieldRaw, user.FieldDirs, user.FieldInts, user.FieldFloats, user.FieldStrings, user.FieldAddr:
+		case user.FieldT, user.FieldURL, user.FieldURLs, user.FieldRaw, user.FieldDirs, user.FieldInts, user.FieldFloats, user.FieldStrings, user.FieldAddr, user.FieldValobj, user.FieldAnotherValobj, user.FieldAnotherValobjs:
 			values[i] = new([]byte)
 		case user.FieldID:
 			values[i] = new(sql.NullInt64)
@@ -145,6 +153,30 @@ func (u *User) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field addr: %w", err)
 				}
 			}
+		case user.FieldValobj:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field valobj", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &u.Valobj); err != nil {
+					return fmt.Errorf("unmarshal field valobj: %w", err)
+				}
+			}
+		case user.FieldAnotherValobj:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field another_valobj", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &u.AnotherValobj); err != nil {
+					return fmt.Errorf("unmarshal field another_valobj: %w", err)
+				}
+			}
+		case user.FieldAnotherValobjs:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field another_valobjs", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &u.AnotherValobjs); err != nil {
+					return fmt.Errorf("unmarshal field another_valobjs: %w", err)
+				}
+			}
 		}
 	}
 	return nil
@@ -198,6 +230,15 @@ func (u *User) String() string {
 	builder.WriteString(fmt.Sprintf("%v", u.Strings))
 	builder.WriteString(", ")
 	builder.WriteString("addr=<sensitive>")
+	builder.WriteString(", ")
+	builder.WriteString("valobj=")
+	builder.WriteString(fmt.Sprintf("%v", u.Valobj))
+	builder.WriteString(", ")
+	builder.WriteString("another_valobj=")
+	builder.WriteString(fmt.Sprintf("%v", u.AnotherValobj))
+	builder.WriteString(", ")
+	builder.WriteString("another_valobjs=")
+	builder.WriteString(fmt.Sprintf("%v", u.AnotherValobjs))
 	builder.WriteByte(')')
 	return builder.String()
 }

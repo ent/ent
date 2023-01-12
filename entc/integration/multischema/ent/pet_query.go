@@ -7,17 +7,17 @@
 package ent
 
 import (
-	"context"
-	"fmt"
-	"math"
+	context "context"
+	fmt "fmt"
+	math "math"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/multischema/ent/internal"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	internal "entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/pet"
-	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	predicate "entgo.io/ent/entc/integration/multischema/ent/predicate"
 	"entgo.io/ent/entc/integration/multischema/ent/user"
-	"entgo.io/ent/schema/field"
+	field "entgo.io/ent/schema/field"
 )
 
 // PetQuery is the builder for querying Pet entities.

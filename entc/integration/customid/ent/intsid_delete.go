@@ -7,13 +7,13 @@
 package ent
 
 import (
-	"context"
+	context "context"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/intsid"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
-	"entgo.io/ent/schema/field"
+	predicate "entgo.io/ent/entc/integration/customid/ent/predicate"
+	field "entgo.io/ent/schema/field"
 )
 
 // IntSIDDelete is the builder for deleting a IntSID entity.

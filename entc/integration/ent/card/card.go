@@ -7,7 +7,7 @@
 package card
 
 import (
-	"time"
+	time "time"
 )
 
 const (

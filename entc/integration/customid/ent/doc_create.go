@@ -7,16 +7,16 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
-	"entgo.io/ent/dialect"
+	dialect "entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/customid/ent/doc"
-	"entgo.io/ent/entc/integration/customid/ent/schema"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	doc "entgo.io/ent/entc/integration/customid/ent/doc"
+	schema "entgo.io/ent/entc/integration/customid/ent/schema"
+	field "entgo.io/ent/schema/field"
 )
 
 // DocCreate is the builder for creating a Doc entity.

@@ -7,14 +7,14 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
-	"time"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
+	time "time"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/customid/ent/blob"
-	"entgo.io/ent/entc/integration/customid/ent/bloblink"
-	"github.com/google/uuid"
+	blob "entgo.io/ent/entc/integration/customid/ent/blob"
+	bloblink "entgo.io/ent/entc/integration/customid/ent/bloblink"
+	uuid "github.com/google/uuid"
 )
 
 // BlobLink is the model entity for the BlobLink schema.

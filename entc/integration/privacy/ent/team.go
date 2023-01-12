@@ -7,11 +7,11 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/privacy/ent/team"
+	team "entgo.io/ent/entc/integration/privacy/ent/team"
 )
 
 // Team is the model entity for the Team schema.

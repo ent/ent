@@ -7,11 +7,11 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/entc/integration/gremlin/ent/filetype"
+	gremlin "entgo.io/ent/dialect/gremlin"
+	filetype "entgo.io/ent/entc/integration/gremlin/ent/filetype"
 )
 
 // FileType is the model entity for the FileType schema.

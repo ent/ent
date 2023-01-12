@@ -7,23 +7,23 @@
 package ent
 
 import (
-	"context"
-	"database/sql"
-	"errors"
-	"fmt"
-	"net"
-	"net/http"
-	"time"
+	context "context"
+	databasesql "database/sql"
+	errors "errors"
+	fmt "fmt"
+	net "net"
+	http "net/http"
+	time "time"
 
-	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	gremlin "entgo.io/ent/dialect/gremlin"
+	dsl "entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
-	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
-	"entgo.io/ent/entc/integration/ent/role"
-	"entgo.io/ent/entc/integration/ent/schema"
-	"entgo.io/ent/entc/integration/gremlin/ent/fieldtype"
-	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
-	"github.com/google/uuid"
+	g "entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	role "entgo.io/ent/entc/integration/ent/role"
+	schema "entgo.io/ent/entc/integration/ent/schema"
+	fieldtype "entgo.io/ent/entc/integration/gremlin/ent/fieldtype"
+	predicate "entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	uuid "github.com/google/uuid"
 )
 
 // FieldTypeUpdate is the builder for updating FieldType entities.
@@ -827,13 +827,13 @@ func (ftu *FieldTypeUpdate) ClearNdir() *FieldTypeUpdate {
 }
 
 // SetStr sets the "str" field.
-func (ftu *FieldTypeUpdate) SetStr(ss sql.NullString) *FieldTypeUpdate {
+func (ftu *FieldTypeUpdate) SetStr(ss databasesql.NullString) *FieldTypeUpdate {
 	ftu.mutation.SetStr(ss)
 	return ftu
 }
 
 // SetNillableStr sets the "str" field if the given value is not nil.
-func (ftu *FieldTypeUpdate) SetNillableStr(ss *sql.NullString) *FieldTypeUpdate {
+func (ftu *FieldTypeUpdate) SetNillableStr(ss *databasesql.NullString) *FieldTypeUpdate {
 	if ss != nil {
 		ftu.SetStr(*ss)
 	}
@@ -847,7 +847,7 @@ func (ftu *FieldTypeUpdate) ClearStr() *FieldTypeUpdate {
 }
 
 // SetNullStr sets the "null_str" field.
-func (ftu *FieldTypeUpdate) SetNullStr(ss *sql.NullString) *FieldTypeUpdate {
+func (ftu *FieldTypeUpdate) SetNullStr(ss *databasesql.NullString) *FieldTypeUpdate {
 	ftu.mutation.SetNullStr(ss)
 	return ftu
 }
@@ -931,7 +931,7 @@ func (ftu *FieldTypeUpdate) ClearNullActive() *FieldTypeUpdate {
 }
 
 // SetDeleted sets the "deleted" field.
-func (ftu *FieldTypeUpdate) SetDeleted(sb *sql.NullBool) *FieldTypeUpdate {
+func (ftu *FieldTypeUpdate) SetDeleted(sb *databasesql.NullBool) *FieldTypeUpdate {
 	ftu.mutation.SetDeleted(sb)
 	return ftu
 }
@@ -943,7 +943,7 @@ func (ftu *FieldTypeUpdate) ClearDeleted() *FieldTypeUpdate {
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (ftu *FieldTypeUpdate) SetDeletedAt(st *sql.NullTime) *FieldTypeUpdate {
+func (ftu *FieldTypeUpdate) SetDeletedAt(st *databasesql.NullTime) *FieldTypeUpdate {
 	ftu.mutation.SetDeletedAt(st)
 	return ftu
 }
@@ -991,7 +991,7 @@ func (ftu *FieldTypeUpdate) ClearIP() *FieldTypeUpdate {
 }
 
 // SetNullInt64 sets the "null_int64" field.
-func (ftu *FieldTypeUpdate) SetNullInt64(si *sql.NullInt64) *FieldTypeUpdate {
+func (ftu *FieldTypeUpdate) SetNullInt64(si *databasesql.NullInt64) *FieldTypeUpdate {
 	ftu.mutation.SetNullInt64(si)
 	return ftu
 }
@@ -1138,7 +1138,7 @@ func (ftu *FieldTypeUpdate) ClearSchemaFloat32() *FieldTypeUpdate {
 }
 
 // SetNullFloat sets the "null_float" field.
-func (ftu *FieldTypeUpdate) SetNullFloat(sf *sql.NullFloat64) *FieldTypeUpdate {
+func (ftu *FieldTypeUpdate) SetNullFloat(sf *databasesql.NullFloat64) *FieldTypeUpdate {
 	ftu.mutation.SetNullFloat(sf)
 	return ftu
 }
@@ -2723,13 +2723,13 @@ func (ftuo *FieldTypeUpdateOne) ClearNdir() *FieldTypeUpdateOne {
 }
 
 // SetStr sets the "str" field.
-func (ftuo *FieldTypeUpdateOne) SetStr(ss sql.NullString) *FieldTypeUpdateOne {
+func (ftuo *FieldTypeUpdateOne) SetStr(ss databasesql.NullString) *FieldTypeUpdateOne {
 	ftuo.mutation.SetStr(ss)
 	return ftuo
 }
 
 // SetNillableStr sets the "str" field if the given value is not nil.
-func (ftuo *FieldTypeUpdateOne) SetNillableStr(ss *sql.NullString) *FieldTypeUpdateOne {
+func (ftuo *FieldTypeUpdateOne) SetNillableStr(ss *databasesql.NullString) *FieldTypeUpdateOne {
 	if ss != nil {
 		ftuo.SetStr(*ss)
 	}
@@ -2743,7 +2743,7 @@ func (ftuo *FieldTypeUpdateOne) ClearStr() *FieldTypeUpdateOne {
 }
 
 // SetNullStr sets the "null_str" field.
-func (ftuo *FieldTypeUpdateOne) SetNullStr(ss *sql.NullString) *FieldTypeUpdateOne {
+func (ftuo *FieldTypeUpdateOne) SetNullStr(ss *databasesql.NullString) *FieldTypeUpdateOne {
 	ftuo.mutation.SetNullStr(ss)
 	return ftuo
 }
@@ -2827,7 +2827,7 @@ func (ftuo *FieldTypeUpdateOne) ClearNullActive() *FieldTypeUpdateOne {
 }
 
 // SetDeleted sets the "deleted" field.
-func (ftuo *FieldTypeUpdateOne) SetDeleted(sb *sql.NullBool) *FieldTypeUpdateOne {
+func (ftuo *FieldTypeUpdateOne) SetDeleted(sb *databasesql.NullBool) *FieldTypeUpdateOne {
 	ftuo.mutation.SetDeleted(sb)
 	return ftuo
 }
@@ -2839,7 +2839,7 @@ func (ftuo *FieldTypeUpdateOne) ClearDeleted() *FieldTypeUpdateOne {
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (ftuo *FieldTypeUpdateOne) SetDeletedAt(st *sql.NullTime) *FieldTypeUpdateOne {
+func (ftuo *FieldTypeUpdateOne) SetDeletedAt(st *databasesql.NullTime) *FieldTypeUpdateOne {
 	ftuo.mutation.SetDeletedAt(st)
 	return ftuo
 }
@@ -2887,7 +2887,7 @@ func (ftuo *FieldTypeUpdateOne) ClearIP() *FieldTypeUpdateOne {
 }
 
 // SetNullInt64 sets the "null_int64" field.
-func (ftuo *FieldTypeUpdateOne) SetNullInt64(si *sql.NullInt64) *FieldTypeUpdateOne {
+func (ftuo *FieldTypeUpdateOne) SetNullInt64(si *databasesql.NullInt64) *FieldTypeUpdateOne {
 	ftuo.mutation.SetNullInt64(si)
 	return ftuo
 }
@@ -3034,7 +3034,7 @@ func (ftuo *FieldTypeUpdateOne) ClearSchemaFloat32() *FieldTypeUpdateOne {
 }
 
 // SetNullFloat sets the "null_float" field.
-func (ftuo *FieldTypeUpdateOne) SetNullFloat(sf *sql.NullFloat64) *FieldTypeUpdateOne {
+func (ftuo *FieldTypeUpdateOne) SetNullFloat(sf *databasesql.NullFloat64) *FieldTypeUpdateOne {
 	ftuo.mutation.SetNullFloat(sf)
 	return ftuo
 }

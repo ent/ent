@@ -7,16 +7,16 @@
 package ent
 
 import (
-	"context"
-	"errors"
+	context "context"
+	errors "errors"
 
-	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	gremlin "entgo.io/ent/dialect/gremlin"
+	dsl "entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
-	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
-	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
-	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
-	"entgo.io/ent/entc/integration/gremlin/ent/comment"
+	g "entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	p "entgo.io/ent/dialect/gremlin/graph/dsl/p"
+	dir "entgo.io/ent/entc/integration/ent/schema/dir"
+	comment "entgo.io/ent/entc/integration/gremlin/ent/comment"
 )
 
 // CommentCreate is the builder for creating a Comment entity.
@@ -67,13 +67,13 @@ func (cc *CommentCreate) SetNillableTable(s *string) *CommentCreate {
 }
 
 // SetDir sets the "dir" field.
-func (cc *CommentCreate) SetDir(s schemadir.Dir) *CommentCreate {
+func (cc *CommentCreate) SetDir(s dir.Dir) *CommentCreate {
 	cc.mutation.SetDir(s)
 	return cc
 }
 
 // SetNillableDir sets the "dir" field if the given value is not nil.
-func (cc *CommentCreate) SetNillableDir(s *schemadir.Dir) *CommentCreate {
+func (cc *CommentCreate) SetNillableDir(s *dir.Dir) *CommentCreate {
 	if s != nil {
 		cc.SetDir(*s)
 	}

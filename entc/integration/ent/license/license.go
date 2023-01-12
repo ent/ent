@@ -7,7 +7,7 @@
 package license
 
 import (
-	"time"
+	time "time"
 )
 
 const (

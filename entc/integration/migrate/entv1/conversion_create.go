@@ -7,12 +7,12 @@
 package entv1
 
 import (
-	"context"
-	"fmt"
+	context "context"
+	fmt "fmt"
 
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/migrate/entv1/conversion"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	conversion "entgo.io/ent/entc/integration/migrate/entv1/conversion"
+	field "entgo.io/ent/schema/field"
 )
 
 // ConversionCreate is the builder for creating a Conversion entity.

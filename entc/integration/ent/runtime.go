@@ -7,9 +7,9 @@
 package ent
 
 import (
-	"net"
-	"net/http"
-	"time"
+	net "net"
+	http "net/http"
+	time "time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/card"
@@ -20,8 +20,8 @@ import (
 	"entgo.io/ent/entc/integration/ent/item"
 	"entgo.io/ent/entc/integration/ent/license"
 	"entgo.io/ent/entc/integration/ent/pet"
-	"entgo.io/ent/entc/integration/ent/schema"
-	"entgo.io/ent/entc/integration/ent/schema/task"
+	schema "entgo.io/ent/entc/integration/ent/schema"
+	task "entgo.io/ent/entc/integration/ent/schema/task"
 	enttask "entgo.io/ent/entc/integration/ent/task"
 	"entgo.io/ent/entc/integration/ent/user"
 )

@@ -7,12 +7,12 @@
 package entv2
 
 import (
-	"context"
-	"fmt"
+	context "context"
+	fmt "fmt"
 
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/migrate/entv2/zoo"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	zoo "entgo.io/ent/entc/integration/migrate/entv2/zoo"
+	field "entgo.io/ent/schema/field"
 )
 
 // ZooCreate is the builder for creating a Zoo entity.

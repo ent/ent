@@ -8,8 +8,8 @@ package versioned
 
 import (
 	"context"
-	"errors"
-	"fmt"
+	errors "errors"
+	fmt "fmt"
 	"log"
 
 	"entgo.io/ent/entc/integration/migrate/versioned/migrate"

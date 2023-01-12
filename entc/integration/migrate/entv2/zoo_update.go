@@ -7,15 +7,15 @@
 package entv2
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
-	"entgo.io/ent/entc/integration/migrate/entv2/zoo"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	predicate "entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	zoo "entgo.io/ent/entc/integration/migrate/entv2/zoo"
+	field "entgo.io/ent/schema/field"
 )
 
 // ZooUpdate is the builder for updating Zoo entities.

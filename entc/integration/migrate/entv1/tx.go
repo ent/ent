@@ -7,10 +7,10 @@
 package entv1
 
 import (
-	"context"
-	"sync"
+	context "context"
+	sync "sync"
 
-	"entgo.io/ent/dialect"
+	dialect "entgo.io/ent/dialect"
 )
 
 // Tx is a transactional client that is created by calling Client.Tx().

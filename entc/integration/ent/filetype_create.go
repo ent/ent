@@ -7,15 +7,15 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/ent/file"
-	"entgo.io/ent/entc/integration/ent/filetype"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	file "entgo.io/ent/entc/integration/ent/file"
+	filetype "entgo.io/ent/entc/integration/ent/filetype"
+	field "entgo.io/ent/schema/field"
 )
 
 // FileTypeCreate is the builder for creating a FileType entity.

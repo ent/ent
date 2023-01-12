@@ -7,13 +7,13 @@
 package entv1
 
 import (
-	"context"
+	context "context"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv1/customtype"
-	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
-	"entgo.io/ent/schema/field"
+	predicate "entgo.io/ent/entc/integration/migrate/entv1/predicate"
+	field "entgo.io/ent/schema/field"
 )
 
 // CustomTypeDelete is the builder for deleting a CustomType entity.

@@ -7,11 +7,11 @@
 package entv2
 
 import (
-	"fmt"
-	"strings"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/migrate/entv2/media"
+	media "entgo.io/ent/entc/integration/migrate/entv2/media"
 )
 
 // Media is the model entity for the Media schema.

@@ -7,16 +7,16 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/cascadelete/ent/comment"
-	"entgo.io/ent/entc/integration/cascadelete/ent/post"
-	"entgo.io/ent/entc/integration/cascadelete/ent/predicate"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	comment "entgo.io/ent/entc/integration/cascadelete/ent/comment"
+	post "entgo.io/ent/entc/integration/cascadelete/ent/post"
+	predicate "entgo.io/ent/entc/integration/cascadelete/ent/predicate"
+	field "entgo.io/ent/schema/field"
 )
 
 // CommentUpdate is the builder for updating Comment entities.

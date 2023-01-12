@@ -7,7 +7,7 @@
 package usertweet
 
 import (
-	"time"
+	time "time"
 )
 
 const (

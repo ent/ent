@@ -14,15 +14,15 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ template "header" $ }}
 
+{{- renewImports }}
 {{ template "import" $ }}
 
 {{ with $deps }}
-	import (
-		{{- range $dep := $deps }}
-			{{ $dep.Type.PkgName }} "{{ $dep.Type.PkgPath }}"
-		{{- end }}
-	)
+	{{- range $dep := $deps }}
+		{{ addImport $dep.Type.PkgName $dep.Type.PkgPath }}
+	{{- end }}
 {{ end }}
+{{- template "import/print" $ }}
 
 // Option function to configure the client.
 type Option func(*config)

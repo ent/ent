@@ -8,8 +8,8 @@ package mixinid
 
 import (
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
-	"github.com/google/uuid"
+	predicate "entgo.io/ent/entc/integration/customid/ent/predicate"
+	uuid "github.com/google/uuid"
 )
 
 // ID filters vertices based on their ID field.

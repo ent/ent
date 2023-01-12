@@ -7,13 +7,13 @@
 package ent
 
 import (
-	"encoding/json"
-	"fmt"
-	"strings"
+	"database/sql"
+	json "encoding/json"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/edgefield/ent/info"
-	"entgo.io/ent/entc/integration/edgefield/ent/user"
+	info "entgo.io/ent/entc/integration/edgefield/ent/info"
+	user "entgo.io/ent/entc/integration/edgefield/ent/user"
 )
 
 // Info is the model entity for the Info schema.

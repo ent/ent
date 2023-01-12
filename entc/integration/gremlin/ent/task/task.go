@@ -7,9 +7,9 @@
 package enttask
 
 import (
-	"time"
+	time "time"
 
-	"entgo.io/ent/entc/integration/ent/schema/task"
+	task "entgo.io/ent/entc/integration/ent/schema/task"
 )
 
 const (

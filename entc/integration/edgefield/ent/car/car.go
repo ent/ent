@@ -7,7 +7,7 @@
 package car
 
 import (
-	"github.com/google/uuid"
+	uuid "github.com/google/uuid"
 )
 
 const (

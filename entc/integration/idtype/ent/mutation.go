@@ -7,16 +7,15 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"sync"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	sync "sync"
 
+	ent "entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/idtype/ent/predicate"
-	"entgo.io/ent/entc/integration/idtype/ent/user"
-
-	"entgo.io/ent"
+	predicate "entgo.io/ent/entc/integration/idtype/ent/predicate"
+	user "entgo.io/ent/entc/integration/idtype/ent/user"
 )
 
 const (

@@ -7,12 +7,12 @@
 package ent
 
 import (
-	"context"
+	context "context"
 	stdsql "database/sql"
-	"fmt"
-	"sync"
+	fmt "fmt"
+	sync "sync"
 
-	"entgo.io/ent/dialect"
+	dialect "entgo.io/ent/dialect"
 )
 
 // Tx is a transactional client that is created by calling Client.Tx().

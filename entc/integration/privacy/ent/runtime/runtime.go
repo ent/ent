@@ -9,13 +9,12 @@ package runtime
 import (
 	"context"
 
-	"entgo.io/ent/entc/integration/privacy/ent/schema"
+	ent "entgo.io/ent"
+	schema "entgo.io/ent/entc/integration/privacy/ent/schema"
 	"entgo.io/ent/entc/integration/privacy/ent/task"
 	"entgo.io/ent/entc/integration/privacy/ent/team"
 	"entgo.io/ent/entc/integration/privacy/ent/user"
-
-	"entgo.io/ent"
-	"entgo.io/ent/privacy"
+	privacy "entgo.io/ent/privacy"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -74,7 +73,3 @@ func init() {
 	// user.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	user.NameValidator = userDescName.Validators[0].(func(string) error)
 }
-
-const (
-	Version = "(devel)" // Version of ent codegen.
-)

@@ -7,14 +7,14 @@
 package ent
 
 import (
-	"context"
-	"errors"
+	context "context"
+	errors "errors"
 
-	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/dialect/gremlin/graph/dsl"
-	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
-	"entgo.io/ent/entc/integration/gremlin/ent/goods"
-	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	gremlin "entgo.io/ent/dialect/gremlin"
+	dsl "entgo.io/ent/dialect/gremlin/graph/dsl"
+	g "entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	goods "entgo.io/ent/entc/integration/gremlin/ent/goods"
+	predicate "entgo.io/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // GoodsUpdate is the builder for updating Goods entities.

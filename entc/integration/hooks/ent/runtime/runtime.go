@@ -7,11 +7,11 @@
 package runtime
 
 import (
-	"time"
+	time "time"
 
 	"entgo.io/ent/entc/integration/hooks/ent/card"
 	"entgo.io/ent/entc/integration/hooks/ent/pet"
-	"entgo.io/ent/entc/integration/hooks/ent/schema"
+	schema "entgo.io/ent/entc/integration/hooks/ent/schema"
 	"entgo.io/ent/entc/integration/hooks/ent/user"
 )
 

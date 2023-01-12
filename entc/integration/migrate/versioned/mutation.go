@@ -7,17 +7,16 @@
 package versioned
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"sync"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	sync "sync"
 
+	ent "entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/migrate/versioned/group"
-	"entgo.io/ent/entc/integration/migrate/versioned/predicate"
-	"entgo.io/ent/entc/integration/migrate/versioned/user"
-
-	"entgo.io/ent"
+	group "entgo.io/ent/entc/integration/migrate/versioned/group"
+	predicate "entgo.io/ent/entc/integration/migrate/versioned/predicate"
+	user "entgo.io/ent/entc/integration/migrate/versioned/user"
 )
 
 const (

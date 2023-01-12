@@ -7,13 +7,13 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	fmt "fmt"
+	strings "strings"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/customid/ent/device"
-	"entgo.io/ent/entc/integration/customid/ent/schema"
-	"entgo.io/ent/entc/integration/customid/ent/session"
+	device "entgo.io/ent/entc/integration/customid/ent/device"
+	schema "entgo.io/ent/entc/integration/customid/ent/schema"
+	session "entgo.io/ent/entc/integration/customid/ent/session"
 )
 
 // Session is the model entity for the Session schema.

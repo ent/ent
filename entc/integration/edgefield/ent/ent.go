@@ -7,23 +7,23 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"reflect"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	reflect "reflect"
 
-	"entgo.io/ent"
+	ent "entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgefield/ent/car"
-	"entgo.io/ent/entc/integration/edgefield/ent/card"
-	"entgo.io/ent/entc/integration/edgefield/ent/info"
-	"entgo.io/ent/entc/integration/edgefield/ent/metadata"
-	"entgo.io/ent/entc/integration/edgefield/ent/node"
-	"entgo.io/ent/entc/integration/edgefield/ent/pet"
-	"entgo.io/ent/entc/integration/edgefield/ent/post"
-	"entgo.io/ent/entc/integration/edgefield/ent/rental"
-	"entgo.io/ent/entc/integration/edgefield/ent/user"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	car "entgo.io/ent/entc/integration/edgefield/ent/car"
+	card "entgo.io/ent/entc/integration/edgefield/ent/card"
+	info "entgo.io/ent/entc/integration/edgefield/ent/info"
+	metadata "entgo.io/ent/entc/integration/edgefield/ent/metadata"
+	node "entgo.io/ent/entc/integration/edgefield/ent/node"
+	pet "entgo.io/ent/entc/integration/edgefield/ent/pet"
+	post "entgo.io/ent/entc/integration/edgefield/ent/post"
+	rental "entgo.io/ent/entc/integration/edgefield/ent/rental"
+	user "entgo.io/ent/entc/integration/edgefield/ent/user"
 )
 
 // ent aliases to avoid import conflicts in user's code.

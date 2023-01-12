@@ -7,35 +7,34 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"sync"
-	"time"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	sync "sync"
+	time "time"
 
+	ent "entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/customid/ent/account"
-	"entgo.io/ent/entc/integration/customid/ent/blob"
-	"entgo.io/ent/entc/integration/customid/ent/bloblink"
-	"entgo.io/ent/entc/integration/customid/ent/car"
-	"entgo.io/ent/entc/integration/customid/ent/device"
-	"entgo.io/ent/entc/integration/customid/ent/doc"
-	"entgo.io/ent/entc/integration/customid/ent/group"
-	"entgo.io/ent/entc/integration/customid/ent/intsid"
-	"entgo.io/ent/entc/integration/customid/ent/link"
-	"entgo.io/ent/entc/integration/customid/ent/mixinid"
-	"entgo.io/ent/entc/integration/customid/ent/note"
-	"entgo.io/ent/entc/integration/customid/ent/pet"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
-	"entgo.io/ent/entc/integration/customid/ent/schema"
-	"entgo.io/ent/entc/integration/customid/ent/session"
-	"entgo.io/ent/entc/integration/customid/ent/token"
-	"entgo.io/ent/entc/integration/customid/ent/user"
-	"entgo.io/ent/entc/integration/customid/sid"
-	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
-	"github.com/google/uuid"
-
-	"entgo.io/ent"
+	account "entgo.io/ent/entc/integration/customid/ent/account"
+	blob "entgo.io/ent/entc/integration/customid/ent/blob"
+	bloblink "entgo.io/ent/entc/integration/customid/ent/bloblink"
+	car "entgo.io/ent/entc/integration/customid/ent/car"
+	device "entgo.io/ent/entc/integration/customid/ent/device"
+	doc "entgo.io/ent/entc/integration/customid/ent/doc"
+	group "entgo.io/ent/entc/integration/customid/ent/group"
+	intsid "entgo.io/ent/entc/integration/customid/ent/intsid"
+	link "entgo.io/ent/entc/integration/customid/ent/link"
+	mixinid "entgo.io/ent/entc/integration/customid/ent/mixinid"
+	note "entgo.io/ent/entc/integration/customid/ent/note"
+	pet "entgo.io/ent/entc/integration/customid/ent/pet"
+	predicate "entgo.io/ent/entc/integration/customid/ent/predicate"
+	schema "entgo.io/ent/entc/integration/customid/ent/schema"
+	session "entgo.io/ent/entc/integration/customid/ent/session"
+	token "entgo.io/ent/entc/integration/customid/ent/token"
+	user "entgo.io/ent/entc/integration/customid/ent/user"
+	sid "entgo.io/ent/entc/integration/customid/sid"
+	uuidcompatible "entgo.io/ent/entc/integration/customid/uuidcompatible"
+	uuid "github.com/google/uuid"
 )
 
 const (
@@ -3897,7 +3896,7 @@ type LinkMutation struct {
 	config
 	op               Op
 	typ              string
-	id               *uuidc.UUIDC
+	id               *uuidcompatible.UUIDC
 	link_information *map[string]schema.LinkInformation
 	clearedFields    map[string]struct{}
 	done             bool
@@ -3925,7 +3924,7 @@ func newLinkMutation(c config, op Op, opts ...linkOption) *LinkMutation {
 }
 
 // withLinkID sets the ID field of the mutation.
-func withLinkID(id uuidc.UUIDC) linkOption {
+func withLinkID(id uuidcompatible.UUIDC) linkOption {
 	return func(m *LinkMutation) {
 		var (
 			err   error
@@ -3977,13 +3976,13 @@ func (m LinkMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of Link entities.
-func (m *LinkMutation) SetID(id uuidc.UUIDC) {
+func (m *LinkMutation) SetID(id uuidcompatible.UUIDC) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *LinkMutation) ID() (id uuidc.UUIDC, exists bool) {
+func (m *LinkMutation) ID() (id uuidcompatible.UUIDC, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -3994,12 +3993,12 @@ func (m *LinkMutation) ID() (id uuidc.UUIDC, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *LinkMutation) IDs(ctx context.Context) ([]uuidc.UUIDC, error) {
+func (m *LinkMutation) IDs(ctx context.Context) ([]uuidcompatible.UUIDC, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []uuidc.UUIDC{id}, nil
+			return []uuidcompatible.UUIDC{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):

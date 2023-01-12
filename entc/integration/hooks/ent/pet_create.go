@@ -7,14 +7,14 @@
 package ent
 
 import (
-	"context"
-	"fmt"
-	"time"
+	context "context"
+	fmt "fmt"
+	time "time"
 
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/hooks/ent/pet"
-	"entgo.io/ent/entc/integration/hooks/ent/user"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	pet "entgo.io/ent/entc/integration/hooks/ent/pet"
+	user "entgo.io/ent/entc/integration/hooks/ent/user"
+	field "entgo.io/ent/schema/field"
 )
 
 // PetCreate is the builder for creating a Pet entity.
