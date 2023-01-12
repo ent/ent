@@ -12,13 +12,15 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ template "header" $ }}
 
+{{- renewImports }}
+
 {{ template "import" $ }}
 
-import (
-	{{- range $import := $.SiblingImports }}
-		{{ $import.Alias }} "{{ $import.Path }}"
-	{{- end }}
-)
+{{- range $import := $.SiblingImports }}
+	{{ addPath $import.Path }}
+{{- end }}
+
+{{ template "import/print" }}
 
 {{ $builder := $.CreateName }}
 {{ $receiver := receiver $builder }}

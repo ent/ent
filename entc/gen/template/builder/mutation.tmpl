@@ -8,21 +8,16 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "mutation" }}
 
+{{ renewImports }}
 {{ $pkg := base $.Config.Package }}
 {{ template "header" $ }}
 
-import (
-	"context"
-	"fmt"
-	"sync"
-
-	{{- range $n := $.Nodes }}
-		{{ $n.PackageAlias }} "{{ $.Config.Package }}/{{ $n.PackageDir }}"
-		{{- template "import/types" $n }}
-	{{- end }}
-
-	"entgo.io/ent"
-)
+{{- addPath "context" "fmt" "sync" "entgo.io/ent" }}
+{{- range $n := $.Nodes }}
+	{{ addPath (printf "%s/%s" $.Config.Package $n.PackageDir) }}
+	{{- template "import/types" $n }}
+{{- end }}
+{{- template "import/print" }}
 
 const (
 	// Operation types.
@@ -50,12 +45,12 @@ type {{ $mutation }} struct {
 		{{ $n.ID.BuilderField }} *{{ $n.ID.Type }}
 	{{- end }}
 	{{- range $f := $n.MutationFields }}
-		{{ $f.BuilderField }} *{{ $f.Type }}
+		{{ $f.BuilderField }} *{{ $f.Type | typeIndent }}
 		{{- if $f.SupportsMutationAdd }}
 			add{{ $f.BuilderField }} *{{ $f.SignedType }}
 		{{- end }}
 		{{- if $f.SupportsMutationAppend }}
-			append{{ $f.BuilderField }} {{ $f.Type }}
+			append{{ $f.BuilderField }} {{ $f.Type | typeIndent }}
 		{{- end }}
 	{{- end }}
 	clearedFields map[string]struct{}
@@ -191,7 +186,7 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 	{{ $p := receiver $f.Type.String }}{{ if eq $p "m" }} {{ $p = "value" }} {{ end }}
 	{{ $func := $f.MutationSet }}
 	// {{ $func }} sets the "{{ $f.Name }}" field.
-	func (m *{{ $mutation }}) {{ $func }}({{ $p }} {{ $f.Type }}) {
+	func (m *{{ $mutation }}) {{ $func }}({{ $p }} {{ $f.Type | typeIndent }}) {
 		m.{{ $f.BuilderField }} = &{{ $p }}
 		{{- /* Setting numeric type override previous calls to Add. */}}
 		{{- if $f.SupportsMutationAdd }}
@@ -204,7 +199,7 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 	}
 
 	// {{ $f.MutationGet }} returns the value of the "{{ $f.Name }}" field in the mutation.
-	func (m *{{ $mutation }}) {{ $f.MutationGet }}() (r {{ $f.Type }}, exists bool) {
+	func (m *{{ $mutation }}) {{ $f.MutationGet }}() (r {{ $f.Type | typeIndent }}, exists bool) {
 		v := m.{{ $f.BuilderField }}
 		if v == nil {
 			return
@@ -216,7 +211,7 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 		// {{ $f.MutationGetOld }} returns the old "{{ $f.Name }}" field's value of the {{ $n.Name }} entity.
 		// If the {{ $n.Name }} object wasn't provided to the builder, the object is fetched from the database.
 		// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-		func (m *{{ $mutation }}) {{ $f.MutationGetOld }}(ctx context.Context) (v {{ if $f.NillableValue }}*{{ end }}{{ $f.Type }}, err error) {
+		func (m *{{ $mutation }}) {{ $f.MutationGetOld }}(ctx context.Context) (v {{ if $f.NillableValue }}*{{ end }}{{ $f.Type | typeIndent }}, err error) {
 			if !m.op.Is(OpUpdateOne) {
 				return v, errors.New("{{ $f.MutationGetOld }} is only allowed on UpdateOne operations")
 			}
@@ -255,12 +250,12 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 	{{ if $f.SupportsMutationAppend }}
 		{{- $structField := print "m.append" $f.BuilderField }}
 		// {{ $f.MutationAppend }} adds {{ $p }} to the "{{ $f.Name }}" field.
-		func (m *{{ $mutation }}) {{ $f.MutationAppend }}({{ $p }} {{ $f.Type }}) {
+		func (m *{{ $mutation }}) {{ $f.MutationAppend }}({{ $p }} {{ $f.Type | typeIndent }}) {
 			{{ $structField }} = append({{ $structField }}, {{ $p }}...)
 		}
 
 		// {{ $f.MutationAppended }} returns the list of values that were appended to the "{{ $f.Name }}" field in this mutation.
-		func (m *{{ $mutation }}) {{ $f.MutationAppended }}() ({{ $f.Type }}, bool) {
+		func (m *{{ $mutation }}) {{ $f.MutationAppended }}() ({{ $f.Type | typeIndent }}, bool) {
 			if len({{ $structField }}) == 0 {
 				return nil, false
 			}
@@ -490,7 +485,7 @@ func (m *{{ $mutation }}) SetField(name string, value ent.Value) error {
 	{{- range $f := $n.Fields }}
 		{{- $const := print $n.Package "." $f.Constant }}
 		case {{ $const }}:
-			v, ok := value.({{ $f.Type }})
+			v, ok := value.({{ $f.Type | typeIndent }})
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field %s", value, name)
 			}
