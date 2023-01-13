@@ -22,11 +22,8 @@ import (
 // FriendshipQuery is the builder for querying Friendship entities.
 type FriendshipQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
 	inters     []Interceptor
 	predicates []predicate.Friendship
 	withUser   *UserQuery
@@ -44,20 +41,20 @@ func (fq *FriendshipQuery) Where(ps ...predicate.Friendship) *FriendshipQuery {
 
 // Limit the number of records to be returned by this query.
 func (fq *FriendshipQuery) Limit(limit int) *FriendshipQuery {
-	fq.limit = &limit
+	fq.ctx.Limit = &limit
 	return fq
 }
 
 // Offset to start from.
 func (fq *FriendshipQuery) Offset(offset int) *FriendshipQuery {
-	fq.offset = &offset
+	fq.ctx.Offset = &offset
 	return fq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (fq *FriendshipQuery) Unique(unique bool) *FriendshipQuery {
-	fq.unique = &unique
+	fq.ctx.Unique = &unique
 	return fq
 }
 
@@ -114,7 +111,7 @@ func (fq *FriendshipQuery) QueryFriend() *UserQuery {
 // First returns the first Friendship entity from the query.
 // Returns a *NotFoundError when no Friendship was found.
 func (fq *FriendshipQuery) First(ctx context.Context) (*Friendship, error) {
-	nodes, err := fq.Limit(1).All(newQueryContext(ctx, TypeFriendship, "First"))
+	nodes, err := fq.Limit(1).All(setContextOp(ctx, fq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +134,7 @@ func (fq *FriendshipQuery) FirstX(ctx context.Context) *Friendship {
 // Returns a *NotFoundError when no Friendship ID was found.
 func (fq *FriendshipQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = fq.Limit(1).IDs(newQueryContext(ctx, TypeFriendship, "FirstID")); err != nil {
+	if ids, err = fq.Limit(1).IDs(setContextOp(ctx, fq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -160,7 +157,7 @@ func (fq *FriendshipQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Friendship entity is found.
 // Returns a *NotFoundError when no Friendship entities are found.
 func (fq *FriendshipQuery) Only(ctx context.Context) (*Friendship, error) {
-	nodes, err := fq.Limit(2).All(newQueryContext(ctx, TypeFriendship, "Only"))
+	nodes, err := fq.Limit(2).All(setContextOp(ctx, fq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -188,7 +185,7 @@ func (fq *FriendshipQuery) OnlyX(ctx context.Context) *Friendship {
 // Returns a *NotFoundError when no entities are found.
 func (fq *FriendshipQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = fq.Limit(2).IDs(newQueryContext(ctx, TypeFriendship, "OnlyID")); err != nil {
+	if ids, err = fq.Limit(2).IDs(setContextOp(ctx, fq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -213,7 +210,7 @@ func (fq *FriendshipQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Friendships.
 func (fq *FriendshipQuery) All(ctx context.Context) ([]*Friendship, error) {
-	ctx = newQueryContext(ctx, TypeFriendship, "All")
+	ctx = setContextOp(ctx, fq.ctx, "All")
 	if err := fq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -233,7 +230,7 @@ func (fq *FriendshipQuery) AllX(ctx context.Context) []*Friendship {
 // IDs executes the query and returns a list of Friendship IDs.
 func (fq *FriendshipQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
-	ctx = newQueryContext(ctx, TypeFriendship, "IDs")
+	ctx = setContextOp(ctx, fq.ctx, "IDs")
 	if err := fq.Select(friendship.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -251,7 +248,7 @@ func (fq *FriendshipQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (fq *FriendshipQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeFriendship, "Count")
+	ctx = setContextOp(ctx, fq.ctx, "Count")
 	if err := fq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -269,7 +266,7 @@ func (fq *FriendshipQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (fq *FriendshipQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeFriendship, "Exist")
+	ctx = setContextOp(ctx, fq.ctx, "Exist")
 	switch _, err := fq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -297,17 +294,15 @@ func (fq *FriendshipQuery) Clone() *FriendshipQuery {
 	}
 	return &FriendshipQuery{
 		config:     fq.config,
-		limit:      fq.limit,
-		offset:     fq.offset,
+		ctx:        fq.ctx.Clone(),
 		order:      append([]OrderFunc{}, fq.order...),
 		inters:     append([]Interceptor{}, fq.inters...),
 		predicates: append([]predicate.Friendship{}, fq.predicates...),
 		withUser:   fq.withUser.Clone(),
 		withFriend: fq.withFriend.Clone(),
 		// clone intermediate query.
-		sql:    fq.sql.Clone(),
-		path:   fq.path,
-		unique: fq.unique,
+		sql:  fq.sql.Clone(),
+		path: fq.path,
 	}
 }
 
@@ -348,9 +343,9 @@ func (fq *FriendshipQuery) WithFriend(opts ...func(*UserQuery)) *FriendshipQuery
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (fq *FriendshipQuery) GroupBy(field string, fields ...string) *FriendshipGroupBy {
-	fq.fields = append([]string{field}, fields...)
+	fq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &FriendshipGroupBy{build: fq}
-	grbuild.flds = &fq.fields
+	grbuild.flds = &fq.ctx.Fields
 	grbuild.label = friendship.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -369,10 +364,10 @@ func (fq *FriendshipQuery) GroupBy(field string, fields ...string) *FriendshipGr
 //		Select(friendship.FieldWeight).
 //		Scan(ctx, &v)
 func (fq *FriendshipQuery) Select(fields ...string) *FriendshipSelect {
-	fq.fields = append(fq.fields, fields...)
+	fq.ctx.Fields = append(fq.ctx.Fields, fields...)
 	sbuild := &FriendshipSelect{FriendshipQuery: fq}
 	sbuild.label = friendship.Label
-	sbuild.flds, sbuild.scan = &fq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &fq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -392,7 +387,7 @@ func (fq *FriendshipQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range fq.fields {
+	for _, f := range fq.ctx.Fields {
 		if !friendship.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -510,9 +505,9 @@ func (fq *FriendshipQuery) loadFriend(ctx context.Context, query *UserQuery, nod
 
 func (fq *FriendshipQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := fq.querySpec()
-	_spec.Node.Columns = fq.fields
-	if len(fq.fields) > 0 {
-		_spec.Unique = fq.unique != nil && *fq.unique
+	_spec.Node.Columns = fq.ctx.Fields
+	if len(fq.ctx.Fields) > 0 {
+		_spec.Unique = fq.ctx.Unique != nil && *fq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, fq.driver, _spec)
 }
@@ -530,10 +525,10 @@ func (fq *FriendshipQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   fq.sql,
 		Unique: true,
 	}
-	if unique := fq.unique; unique != nil {
+	if unique := fq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := fq.fields; len(fields) > 0 {
+	if fields := fq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, friendship.FieldID)
 		for i := range fields {
@@ -549,10 +544,10 @@ func (fq *FriendshipQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := fq.limit; limit != nil {
+	if limit := fq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := fq.offset; offset != nil {
+	if offset := fq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := fq.order; len(ps) > 0 {
@@ -568,7 +563,7 @@ func (fq *FriendshipQuery) querySpec() *sqlgraph.QuerySpec {
 func (fq *FriendshipQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(fq.driver.Dialect())
 	t1 := builder.Table(friendship.Table)
-	columns := fq.fields
+	columns := fq.ctx.Fields
 	if len(columns) == 0 {
 		columns = friendship.Columns
 	}
@@ -577,7 +572,7 @@ func (fq *FriendshipQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = fq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if fq.unique != nil && *fq.unique {
+	if fq.ctx.Unique != nil && *fq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range fq.predicates {
@@ -586,12 +581,12 @@ func (fq *FriendshipQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range fq.order {
 		p(selector)
 	}
-	if offset := fq.offset; offset != nil {
+	if offset := fq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := fq.limit; limit != nil {
+	if limit := fq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -611,7 +606,7 @@ func (fgb *FriendshipGroupBy) Aggregate(fns ...AggregateFunc) *FriendshipGroupBy
 
 // Scan applies the selector query and scans the result into the given value.
 func (fgb *FriendshipGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeFriendship, "GroupBy")
+	ctx = setContextOp(ctx, fgb.build.ctx, "GroupBy")
 	if err := fgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -659,7 +654,7 @@ func (fs *FriendshipSelect) Aggregate(fns ...AggregateFunc) *FriendshipSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (fs *FriendshipSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeFriendship, "Select")
+	ctx = setContextOp(ctx, fs.ctx, "Select")
 	if err := fs.prepareQuery(ctx); err != nil {
 		return err
 	}

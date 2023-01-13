@@ -21,11 +21,8 @@ import (
 // MediaQuery is the builder for querying Media entities.
 type MediaQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
 	inters     []Interceptor
 	predicates []predicate.Media
 	// intermediate query (i.e. traversal path).
@@ -41,20 +38,20 @@ func (mq *MediaQuery) Where(ps ...predicate.Media) *MediaQuery {
 
 // Limit the number of records to be returned by this query.
 func (mq *MediaQuery) Limit(limit int) *MediaQuery {
-	mq.limit = &limit
+	mq.ctx.Limit = &limit
 	return mq
 }
 
 // Offset to start from.
 func (mq *MediaQuery) Offset(offset int) *MediaQuery {
-	mq.offset = &offset
+	mq.ctx.Offset = &offset
 	return mq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (mq *MediaQuery) Unique(unique bool) *MediaQuery {
-	mq.unique = &unique
+	mq.ctx.Unique = &unique
 	return mq
 }
 
@@ -67,7 +64,7 @@ func (mq *MediaQuery) Order(o ...OrderFunc) *MediaQuery {
 // First returns the first Media entity from the query.
 // Returns a *NotFoundError when no Media was found.
 func (mq *MediaQuery) First(ctx context.Context) (*Media, error) {
-	nodes, err := mq.Limit(1).All(newQueryContext(ctx, TypeMedia, "First"))
+	nodes, err := mq.Limit(1).All(setContextOp(ctx, mq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +87,7 @@ func (mq *MediaQuery) FirstX(ctx context.Context) *Media {
 // Returns a *NotFoundError when no Media ID was found.
 func (mq *MediaQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = mq.Limit(1).IDs(newQueryContext(ctx, TypeMedia, "FirstID")); err != nil {
+	if ids, err = mq.Limit(1).IDs(setContextOp(ctx, mq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -113,7 +110,7 @@ func (mq *MediaQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Media entity is found.
 // Returns a *NotFoundError when no Media entities are found.
 func (mq *MediaQuery) Only(ctx context.Context) (*Media, error) {
-	nodes, err := mq.Limit(2).All(newQueryContext(ctx, TypeMedia, "Only"))
+	nodes, err := mq.Limit(2).All(setContextOp(ctx, mq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +138,7 @@ func (mq *MediaQuery) OnlyX(ctx context.Context) *Media {
 // Returns a *NotFoundError when no entities are found.
 func (mq *MediaQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = mq.Limit(2).IDs(newQueryContext(ctx, TypeMedia, "OnlyID")); err != nil {
+	if ids, err = mq.Limit(2).IDs(setContextOp(ctx, mq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -166,7 +163,7 @@ func (mq *MediaQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of MediaSlice.
 func (mq *MediaQuery) All(ctx context.Context) ([]*Media, error) {
-	ctx = newQueryContext(ctx, TypeMedia, "All")
+	ctx = setContextOp(ctx, mq.ctx, "All")
 	if err := mq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -186,7 +183,7 @@ func (mq *MediaQuery) AllX(ctx context.Context) []*Media {
 // IDs executes the query and returns a list of Media IDs.
 func (mq *MediaQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
-	ctx = newQueryContext(ctx, TypeMedia, "IDs")
+	ctx = setContextOp(ctx, mq.ctx, "IDs")
 	if err := mq.Select(media.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -204,7 +201,7 @@ func (mq *MediaQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (mq *MediaQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeMedia, "Count")
+	ctx = setContextOp(ctx, mq.ctx, "Count")
 	if err := mq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -222,7 +219,7 @@ func (mq *MediaQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (mq *MediaQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeMedia, "Exist")
+	ctx = setContextOp(ctx, mq.ctx, "Exist")
 	switch _, err := mq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -250,15 +247,13 @@ func (mq *MediaQuery) Clone() *MediaQuery {
 	}
 	return &MediaQuery{
 		config:     mq.config,
-		limit:      mq.limit,
-		offset:     mq.offset,
+		ctx:        mq.ctx.Clone(),
 		order:      append([]OrderFunc{}, mq.order...),
 		inters:     append([]Interceptor{}, mq.inters...),
 		predicates: append([]predicate.Media{}, mq.predicates...),
 		// clone intermediate query.
-		sql:    mq.sql.Clone(),
-		path:   mq.path,
-		unique: mq.unique,
+		sql:  mq.sql.Clone(),
+		path: mq.path,
 	}
 }
 
@@ -277,9 +272,9 @@ func (mq *MediaQuery) Clone() *MediaQuery {
 //		Aggregate(entv2.Count()).
 //		Scan(ctx, &v)
 func (mq *MediaQuery) GroupBy(field string, fields ...string) *MediaGroupBy {
-	mq.fields = append([]string{field}, fields...)
+	mq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &MediaGroupBy{build: mq}
-	grbuild.flds = &mq.fields
+	grbuild.flds = &mq.ctx.Fields
 	grbuild.label = media.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -298,10 +293,10 @@ func (mq *MediaQuery) GroupBy(field string, fields ...string) *MediaGroupBy {
 //		Select(media.FieldSource).
 //		Scan(ctx, &v)
 func (mq *MediaQuery) Select(fields ...string) *MediaSelect {
-	mq.fields = append(mq.fields, fields...)
+	mq.ctx.Fields = append(mq.ctx.Fields, fields...)
 	sbuild := &MediaSelect{MediaQuery: mq}
 	sbuild.label = media.Label
-	sbuild.flds, sbuild.scan = &mq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &mq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -321,7 +316,7 @@ func (mq *MediaQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range mq.fields {
+	for _, f := range mq.ctx.Fields {
 		if !media.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("entv2: invalid field %q for query", f)}
 		}
@@ -363,9 +358,9 @@ func (mq *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media,
 
 func (mq *MediaQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := mq.querySpec()
-	_spec.Node.Columns = mq.fields
-	if len(mq.fields) > 0 {
-		_spec.Unique = mq.unique != nil && *mq.unique
+	_spec.Node.Columns = mq.ctx.Fields
+	if len(mq.ctx.Fields) > 0 {
+		_spec.Unique = mq.ctx.Unique != nil && *mq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, mq.driver, _spec)
 }
@@ -383,10 +378,10 @@ func (mq *MediaQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   mq.sql,
 		Unique: true,
 	}
-	if unique := mq.unique; unique != nil {
+	if unique := mq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := mq.fields; len(fields) > 0 {
+	if fields := mq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, media.FieldID)
 		for i := range fields {
@@ -402,10 +397,10 @@ func (mq *MediaQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := mq.limit; limit != nil {
+	if limit := mq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := mq.offset; offset != nil {
+	if offset := mq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := mq.order; len(ps) > 0 {
@@ -421,7 +416,7 @@ func (mq *MediaQuery) querySpec() *sqlgraph.QuerySpec {
 func (mq *MediaQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(mq.driver.Dialect())
 	t1 := builder.Table(media.Table)
-	columns := mq.fields
+	columns := mq.ctx.Fields
 	if len(columns) == 0 {
 		columns = media.Columns
 	}
@@ -430,7 +425,7 @@ func (mq *MediaQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = mq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if mq.unique != nil && *mq.unique {
+	if mq.ctx.Unique != nil && *mq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range mq.predicates {
@@ -439,12 +434,12 @@ func (mq *MediaQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range mq.order {
 		p(selector)
 	}
-	if offset := mq.offset; offset != nil {
+	if offset := mq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := mq.limit; limit != nil {
+	if limit := mq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -464,7 +459,7 @@ func (mgb *MediaGroupBy) Aggregate(fns ...AggregateFunc) *MediaGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (mgb *MediaGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeMedia, "GroupBy")
+	ctx = setContextOp(ctx, mgb.build.ctx, "GroupBy")
 	if err := mgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -512,7 +507,7 @@ func (ms *MediaSelect) Aggregate(fns ...AggregateFunc) *MediaSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ms *MediaSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeMedia, "Select")
+	ctx = setContextOp(ctx, ms.ctx, "Select")
 	if err := ms.prepareQuery(ctx); err != nil {
 		return err
 	}

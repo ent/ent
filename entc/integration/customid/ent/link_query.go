@@ -22,11 +22,8 @@ import (
 // LinkQuery is the builder for querying Link entities.
 type LinkQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
 	inters     []Interceptor
 	predicates []predicate.Link
 	// intermediate query (i.e. traversal path).
@@ -42,20 +39,20 @@ func (lq *LinkQuery) Where(ps ...predicate.Link) *LinkQuery {
 
 // Limit the number of records to be returned by this query.
 func (lq *LinkQuery) Limit(limit int) *LinkQuery {
-	lq.limit = &limit
+	lq.ctx.Limit = &limit
 	return lq
 }
 
 // Offset to start from.
 func (lq *LinkQuery) Offset(offset int) *LinkQuery {
-	lq.offset = &offset
+	lq.ctx.Offset = &offset
 	return lq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (lq *LinkQuery) Unique(unique bool) *LinkQuery {
-	lq.unique = &unique
+	lq.ctx.Unique = &unique
 	return lq
 }
 
@@ -68,7 +65,7 @@ func (lq *LinkQuery) Order(o ...OrderFunc) *LinkQuery {
 // First returns the first Link entity from the query.
 // Returns a *NotFoundError when no Link was found.
 func (lq *LinkQuery) First(ctx context.Context) (*Link, error) {
-	nodes, err := lq.Limit(1).All(newQueryContext(ctx, TypeLink, "First"))
+	nodes, err := lq.Limit(1).All(setContextOp(ctx, lq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +88,7 @@ func (lq *LinkQuery) FirstX(ctx context.Context) *Link {
 // Returns a *NotFoundError when no Link ID was found.
 func (lq *LinkQuery) FirstID(ctx context.Context) (id uuidc.UUIDC, err error) {
 	var ids []uuidc.UUIDC
-	if ids, err = lq.Limit(1).IDs(newQueryContext(ctx, TypeLink, "FirstID")); err != nil {
+	if ids, err = lq.Limit(1).IDs(setContextOp(ctx, lq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -114,7 +111,7 @@ func (lq *LinkQuery) FirstIDX(ctx context.Context) uuidc.UUIDC {
 // Returns a *NotSingularError when more than one Link entity is found.
 // Returns a *NotFoundError when no Link entities are found.
 func (lq *LinkQuery) Only(ctx context.Context) (*Link, error) {
-	nodes, err := lq.Limit(2).All(newQueryContext(ctx, TypeLink, "Only"))
+	nodes, err := lq.Limit(2).All(setContextOp(ctx, lq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +139,7 @@ func (lq *LinkQuery) OnlyX(ctx context.Context) *Link {
 // Returns a *NotFoundError when no entities are found.
 func (lq *LinkQuery) OnlyID(ctx context.Context) (id uuidc.UUIDC, err error) {
 	var ids []uuidc.UUIDC
-	if ids, err = lq.Limit(2).IDs(newQueryContext(ctx, TypeLink, "OnlyID")); err != nil {
+	if ids, err = lq.Limit(2).IDs(setContextOp(ctx, lq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -167,7 +164,7 @@ func (lq *LinkQuery) OnlyIDX(ctx context.Context) uuidc.UUIDC {
 
 // All executes the query and returns a list of Links.
 func (lq *LinkQuery) All(ctx context.Context) ([]*Link, error) {
-	ctx = newQueryContext(ctx, TypeLink, "All")
+	ctx = setContextOp(ctx, lq.ctx, "All")
 	if err := lq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -187,7 +184,7 @@ func (lq *LinkQuery) AllX(ctx context.Context) []*Link {
 // IDs executes the query and returns a list of Link IDs.
 func (lq *LinkQuery) IDs(ctx context.Context) ([]uuidc.UUIDC, error) {
 	var ids []uuidc.UUIDC
-	ctx = newQueryContext(ctx, TypeLink, "IDs")
+	ctx = setContextOp(ctx, lq.ctx, "IDs")
 	if err := lq.Select(link.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -205,7 +202,7 @@ func (lq *LinkQuery) IDsX(ctx context.Context) []uuidc.UUIDC {
 
 // Count returns the count of the given query.
 func (lq *LinkQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeLink, "Count")
+	ctx = setContextOp(ctx, lq.ctx, "Count")
 	if err := lq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -223,7 +220,7 @@ func (lq *LinkQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (lq *LinkQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeLink, "Exist")
+	ctx = setContextOp(ctx, lq.ctx, "Exist")
 	switch _, err := lq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -251,15 +248,13 @@ func (lq *LinkQuery) Clone() *LinkQuery {
 	}
 	return &LinkQuery{
 		config:     lq.config,
-		limit:      lq.limit,
-		offset:     lq.offset,
+		ctx:        lq.ctx.Clone(),
 		order:      append([]OrderFunc{}, lq.order...),
 		inters:     append([]Interceptor{}, lq.inters...),
 		predicates: append([]predicate.Link{}, lq.predicates...),
 		// clone intermediate query.
-		sql:    lq.sql.Clone(),
-		path:   lq.path,
-		unique: lq.unique,
+		sql:  lq.sql.Clone(),
+		path: lq.path,
 	}
 }
 
@@ -278,9 +273,9 @@ func (lq *LinkQuery) Clone() *LinkQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (lq *LinkQuery) GroupBy(field string, fields ...string) *LinkGroupBy {
-	lq.fields = append([]string{field}, fields...)
+	lq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &LinkGroupBy{build: lq}
-	grbuild.flds = &lq.fields
+	grbuild.flds = &lq.ctx.Fields
 	grbuild.label = link.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -299,10 +294,10 @@ func (lq *LinkQuery) GroupBy(field string, fields ...string) *LinkGroupBy {
 //		Select(link.FieldLinkInformation).
 //		Scan(ctx, &v)
 func (lq *LinkQuery) Select(fields ...string) *LinkSelect {
-	lq.fields = append(lq.fields, fields...)
+	lq.ctx.Fields = append(lq.ctx.Fields, fields...)
 	sbuild := &LinkSelect{LinkQuery: lq}
 	sbuild.label = link.Label
-	sbuild.flds, sbuild.scan = &lq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &lq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -322,7 +317,7 @@ func (lq *LinkQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range lq.fields {
+	for _, f := range lq.ctx.Fields {
 		if !link.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -364,9 +359,9 @@ func (lq *LinkQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Link, e
 
 func (lq *LinkQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := lq.querySpec()
-	_spec.Node.Columns = lq.fields
-	if len(lq.fields) > 0 {
-		_spec.Unique = lq.unique != nil && *lq.unique
+	_spec.Node.Columns = lq.ctx.Fields
+	if len(lq.ctx.Fields) > 0 {
+		_spec.Unique = lq.ctx.Unique != nil && *lq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, lq.driver, _spec)
 }
@@ -384,10 +379,10 @@ func (lq *LinkQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   lq.sql,
 		Unique: true,
 	}
-	if unique := lq.unique; unique != nil {
+	if unique := lq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := lq.fields; len(fields) > 0 {
+	if fields := lq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, link.FieldID)
 		for i := range fields {
@@ -403,10 +398,10 @@ func (lq *LinkQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := lq.limit; limit != nil {
+	if limit := lq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := lq.offset; offset != nil {
+	if offset := lq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := lq.order; len(ps) > 0 {
@@ -422,7 +417,7 @@ func (lq *LinkQuery) querySpec() *sqlgraph.QuerySpec {
 func (lq *LinkQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(lq.driver.Dialect())
 	t1 := builder.Table(link.Table)
-	columns := lq.fields
+	columns := lq.ctx.Fields
 	if len(columns) == 0 {
 		columns = link.Columns
 	}
@@ -431,7 +426,7 @@ func (lq *LinkQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = lq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if lq.unique != nil && *lq.unique {
+	if lq.ctx.Unique != nil && *lq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range lq.predicates {
@@ -440,12 +435,12 @@ func (lq *LinkQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range lq.order {
 		p(selector)
 	}
-	if offset := lq.offset; offset != nil {
+	if offset := lq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := lq.limit; limit != nil {
+	if limit := lq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -465,7 +460,7 @@ func (lgb *LinkGroupBy) Aggregate(fns ...AggregateFunc) *LinkGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (lgb *LinkGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeLink, "GroupBy")
+	ctx = setContextOp(ctx, lgb.build.ctx, "GroupBy")
 	if err := lgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -513,7 +508,7 @@ func (ls *LinkSelect) Aggregate(fns ...AggregateFunc) *LinkSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ls *LinkSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeLink, "Select")
+	ctx = setContextOp(ctx, ls.ctx, "Select")
 	if err := ls.prepareQuery(ctx); err != nil {
 		return err
 	}

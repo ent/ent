@@ -22,11 +22,8 @@ import (
 // APIQuery is the builder for querying Api entities.
 type APIQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
 	inters     []Interceptor
 	predicates []predicate.Api
 	// intermediate query (i.e. traversal path).
@@ -42,20 +39,20 @@ func (aq *APIQuery) Where(ps ...predicate.Api) *APIQuery {
 
 // Limit the number of records to be returned by this query.
 func (aq *APIQuery) Limit(limit int) *APIQuery {
-	aq.limit = &limit
+	aq.ctx.Limit = &limit
 	return aq
 }
 
 // Offset to start from.
 func (aq *APIQuery) Offset(offset int) *APIQuery {
-	aq.offset = &offset
+	aq.ctx.Offset = &offset
 	return aq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (aq *APIQuery) Unique(unique bool) *APIQuery {
-	aq.unique = &unique
+	aq.ctx.Unique = &unique
 	return aq
 }
 
@@ -68,7 +65,7 @@ func (aq *APIQuery) Order(o ...OrderFunc) *APIQuery {
 // First returns the first Api entity from the query.
 // Returns a *NotFoundError when no Api was found.
 func (aq *APIQuery) First(ctx context.Context) (*Api, error) {
-	nodes, err := aq.Limit(1).All(newQueryContext(ctx, TypeAPI, "First"))
+	nodes, err := aq.Limit(1).All(setContextOp(ctx, aq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +88,7 @@ func (aq *APIQuery) FirstX(ctx context.Context) *Api {
 // Returns a *NotFoundError when no Api ID was found.
 func (aq *APIQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = aq.Limit(1).IDs(newQueryContext(ctx, TypeAPI, "FirstID")); err != nil {
+	if ids, err = aq.Limit(1).IDs(setContextOp(ctx, aq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -114,7 +111,7 @@ func (aq *APIQuery) FirstIDX(ctx context.Context) string {
 // Returns a *NotSingularError when more than one Api entity is found.
 // Returns a *NotFoundError when no Api entities are found.
 func (aq *APIQuery) Only(ctx context.Context) (*Api, error) {
-	nodes, err := aq.Limit(2).All(newQueryContext(ctx, TypeAPI, "Only"))
+	nodes, err := aq.Limit(2).All(setContextOp(ctx, aq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +139,7 @@ func (aq *APIQuery) OnlyX(ctx context.Context) *Api {
 // Returns a *NotFoundError when no entities are found.
 func (aq *APIQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = aq.Limit(2).IDs(newQueryContext(ctx, TypeAPI, "OnlyID")); err != nil {
+	if ids, err = aq.Limit(2).IDs(setContextOp(ctx, aq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -167,7 +164,7 @@ func (aq *APIQuery) OnlyIDX(ctx context.Context) string {
 
 // All executes the query and returns a list of Apis.
 func (aq *APIQuery) All(ctx context.Context) ([]*Api, error) {
-	ctx = newQueryContext(ctx, TypeAPI, "All")
+	ctx = setContextOp(ctx, aq.ctx, "All")
 	if err := aq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -187,7 +184,7 @@ func (aq *APIQuery) AllX(ctx context.Context) []*Api {
 // IDs executes the query and returns a list of Api IDs.
 func (aq *APIQuery) IDs(ctx context.Context) ([]string, error) {
 	var ids []string
-	ctx = newQueryContext(ctx, TypeAPI, "IDs")
+	ctx = setContextOp(ctx, aq.ctx, "IDs")
 	if err := aq.Select(api.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -205,7 +202,7 @@ func (aq *APIQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (aq *APIQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeAPI, "Count")
+	ctx = setContextOp(ctx, aq.ctx, "Count")
 	if err := aq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -223,7 +220,7 @@ func (aq *APIQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (aq *APIQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeAPI, "Exist")
+	ctx = setContextOp(ctx, aq.ctx, "Exist")
 	switch _, err := aq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -251,24 +248,22 @@ func (aq *APIQuery) Clone() *APIQuery {
 	}
 	return &APIQuery{
 		config:     aq.config,
-		limit:      aq.limit,
-		offset:     aq.offset,
+		ctx:        aq.ctx.Clone(),
 		order:      append([]OrderFunc{}, aq.order...),
 		inters:     append([]Interceptor{}, aq.inters...),
 		predicates: append([]predicate.Api{}, aq.predicates...),
 		// clone intermediate query.
 		gremlin: aq.gremlin.Clone(),
 		path:    aq.path,
-		unique:  aq.unique,
 	}
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (aq *APIQuery) GroupBy(field string, fields ...string) *APIGroupBy {
-	aq.fields = append([]string{field}, fields...)
+	aq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &APIGroupBy{build: aq}
-	grbuild.flds = &aq.fields
+	grbuild.flds = &aq.ctx.Fields
 	grbuild.label = api.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -277,10 +272,10 @@ func (aq *APIQuery) GroupBy(field string, fields ...string) *APIGroupBy {
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
 func (aq *APIQuery) Select(fields ...string) *APISelect {
-	aq.fields = append(aq.fields, fields...)
+	aq.ctx.Fields = append(aq.ctx.Fields, fields...)
 	sbuild := &APISelect{APIQuery: aq}
 	sbuild.label = api.Label
-	sbuild.flds, sbuild.scan = &aq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &aq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -313,9 +308,9 @@ func (aq *APIQuery) prepareQuery(ctx context.Context) error {
 func (aq *APIQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Api, error) {
 	res := &gremlin.Response{}
 	traversal := aq.gremlinQuery(ctx)
-	if len(aq.fields) > 0 {
-		fields := make([]any, len(aq.fields))
-		for i, f := range aq.fields {
+	if len(aq.ctx.Fields) > 0 {
+		fields := make([]any, len(aq.ctx.Fields))
+		for i, f := range aq.ctx.Fields {
 			fields[i] = f
 		}
 		traversal.ValueMap(fields...)
@@ -357,7 +352,7 @@ func (aq *APIQuery) gremlinQuery(context.Context) *dsl.Traversal {
 			p(v)
 		}
 	}
-	switch limit, offset := aq.limit, aq.offset; {
+	switch limit, offset := aq.ctx.Limit, aq.ctx.Offset; {
 	case limit != nil && offset != nil:
 		v.Range(*offset, *offset+*limit)
 	case offset != nil:
@@ -365,7 +360,7 @@ func (aq *APIQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := aq.unique; unique == nil || *unique {
+	if unique := aq.ctx.Unique; unique == nil || *unique {
 		v.Dedup()
 	}
 	return v
@@ -385,7 +380,7 @@ func (agb *APIGroupBy) Aggregate(fns ...AggregateFunc) *APIGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (agb *APIGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeAPI, "GroupBy")
+	ctx = setContextOp(ctx, agb.build.ctx, "GroupBy")
 	if err := agb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -440,7 +435,7 @@ func (as *APISelect) Aggregate(fns ...AggregateFunc) *APISelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (as *APISelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeAPI, "Select")
+	ctx = setContextOp(ctx, as.ctx, "Select")
 	if err := as.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -452,15 +447,15 @@ func (as *APISelect) gremlinScan(ctx context.Context, root *APIQuery, v any) err
 		res       = &gremlin.Response{}
 		traversal = root.gremlinQuery(ctx)
 	)
-	if len(as.fields) == 1 {
-		if as.fields[0] != api.FieldID {
-			traversal = traversal.Values(as.fields...)
+	if fields := as.ctx.Fields; len(fields) == 1 {
+		if fields[0] != api.FieldID {
+			traversal = traversal.Values(fields...)
 		} else {
 			traversal = traversal.ID()
 		}
 	} else {
-		fields := make([]any, len(as.fields))
-		for i, f := range as.fields {
+		fields := make([]any, len(as.ctx.Fields))
+		for i, f := range as.ctx.Fields {
 			fields[i] = f
 		}
 		traversal = traversal.ValueMap(fields...)
@@ -469,7 +464,7 @@ func (as *APISelect) gremlinScan(ctx context.Context, root *APIQuery, v any) err
 	if err := as.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
-	if len(root.fields) == 1 {
+	if len(root.ctx.Fields) == 1 {
 		return res.ReadVal(v)
 	}
 	vm, err := res.ReadValueMap()

@@ -237,6 +237,7 @@ func (c *CommentClient) DeleteOneID(id int) *CommentDeleteOne {
 func (c *CommentClient) Query() *CommentQuery {
 	return &CommentQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeComment},
 		inters: c.Interceptors(),
 	}
 }
@@ -370,6 +371,7 @@ func (c *PostClient) DeleteOneID(id int) *PostDeleteOne {
 func (c *PostClient) Query() *PostQuery {
 	return &PostQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypePost},
 		inters: c.Interceptors(),
 	}
 }
@@ -519,6 +521,7 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeUser},
 		inters: c.Interceptors(),
 	}
 }

@@ -23,11 +23,8 @@ import (
 // NoteQuery is the builder for querying Note entities.
 type NoteQuery struct {
 	config
-	limit        *int
-	offset       *int
-	unique       *bool
+	ctx          *QueryContext
 	order        []OrderFunc
-	fields       []string
 	inters       []Interceptor
 	predicates   []predicate.Note
 	withParent   *NoteQuery
@@ -46,20 +43,20 @@ func (nq *NoteQuery) Where(ps ...predicate.Note) *NoteQuery {
 
 // Limit the number of records to be returned by this query.
 func (nq *NoteQuery) Limit(limit int) *NoteQuery {
-	nq.limit = &limit
+	nq.ctx.Limit = &limit
 	return nq
 }
 
 // Offset to start from.
 func (nq *NoteQuery) Offset(offset int) *NoteQuery {
-	nq.offset = &offset
+	nq.ctx.Offset = &offset
 	return nq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (nq *NoteQuery) Unique(unique bool) *NoteQuery {
-	nq.unique = &unique
+	nq.ctx.Unique = &unique
 	return nq
 }
 
@@ -116,7 +113,7 @@ func (nq *NoteQuery) QueryChildren() *NoteQuery {
 // First returns the first Note entity from the query.
 // Returns a *NotFoundError when no Note was found.
 func (nq *NoteQuery) First(ctx context.Context) (*Note, error) {
-	nodes, err := nq.Limit(1).All(newQueryContext(ctx, TypeNote, "First"))
+	nodes, err := nq.Limit(1).All(setContextOp(ctx, nq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +136,7 @@ func (nq *NoteQuery) FirstX(ctx context.Context) *Note {
 // Returns a *NotFoundError when no Note ID was found.
 func (nq *NoteQuery) FirstID(ctx context.Context) (id schema.NoteID, err error) {
 	var ids []schema.NoteID
-	if ids, err = nq.Limit(1).IDs(newQueryContext(ctx, TypeNote, "FirstID")); err != nil {
+	if ids, err = nq.Limit(1).IDs(setContextOp(ctx, nq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -162,7 +159,7 @@ func (nq *NoteQuery) FirstIDX(ctx context.Context) schema.NoteID {
 // Returns a *NotSingularError when more than one Note entity is found.
 // Returns a *NotFoundError when no Note entities are found.
 func (nq *NoteQuery) Only(ctx context.Context) (*Note, error) {
-	nodes, err := nq.Limit(2).All(newQueryContext(ctx, TypeNote, "Only"))
+	nodes, err := nq.Limit(2).All(setContextOp(ctx, nq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -190,7 +187,7 @@ func (nq *NoteQuery) OnlyX(ctx context.Context) *Note {
 // Returns a *NotFoundError when no entities are found.
 func (nq *NoteQuery) OnlyID(ctx context.Context) (id schema.NoteID, err error) {
 	var ids []schema.NoteID
-	if ids, err = nq.Limit(2).IDs(newQueryContext(ctx, TypeNote, "OnlyID")); err != nil {
+	if ids, err = nq.Limit(2).IDs(setContextOp(ctx, nq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -215,7 +212,7 @@ func (nq *NoteQuery) OnlyIDX(ctx context.Context) schema.NoteID {
 
 // All executes the query and returns a list of Notes.
 func (nq *NoteQuery) All(ctx context.Context) ([]*Note, error) {
-	ctx = newQueryContext(ctx, TypeNote, "All")
+	ctx = setContextOp(ctx, nq.ctx, "All")
 	if err := nq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -235,7 +232,7 @@ func (nq *NoteQuery) AllX(ctx context.Context) []*Note {
 // IDs executes the query and returns a list of Note IDs.
 func (nq *NoteQuery) IDs(ctx context.Context) ([]schema.NoteID, error) {
 	var ids []schema.NoteID
-	ctx = newQueryContext(ctx, TypeNote, "IDs")
+	ctx = setContextOp(ctx, nq.ctx, "IDs")
 	if err := nq.Select(note.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -253,7 +250,7 @@ func (nq *NoteQuery) IDsX(ctx context.Context) []schema.NoteID {
 
 // Count returns the count of the given query.
 func (nq *NoteQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeNote, "Count")
+	ctx = setContextOp(ctx, nq.ctx, "Count")
 	if err := nq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -271,7 +268,7 @@ func (nq *NoteQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (nq *NoteQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeNote, "Exist")
+	ctx = setContextOp(ctx, nq.ctx, "Exist")
 	switch _, err := nq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -299,17 +296,15 @@ func (nq *NoteQuery) Clone() *NoteQuery {
 	}
 	return &NoteQuery{
 		config:       nq.config,
-		limit:        nq.limit,
-		offset:       nq.offset,
+		ctx:          nq.ctx.Clone(),
 		order:        append([]OrderFunc{}, nq.order...),
 		inters:       append([]Interceptor{}, nq.inters...),
 		predicates:   append([]predicate.Note{}, nq.predicates...),
 		withParent:   nq.withParent.Clone(),
 		withChildren: nq.withChildren.Clone(),
 		// clone intermediate query.
-		sql:    nq.sql.Clone(),
-		path:   nq.path,
-		unique: nq.unique,
+		sql:  nq.sql.Clone(),
+		path: nq.path,
 	}
 }
 
@@ -350,9 +345,9 @@ func (nq *NoteQuery) WithChildren(opts ...func(*NoteQuery)) *NoteQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (nq *NoteQuery) GroupBy(field string, fields ...string) *NoteGroupBy {
-	nq.fields = append([]string{field}, fields...)
+	nq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &NoteGroupBy{build: nq}
-	grbuild.flds = &nq.fields
+	grbuild.flds = &nq.ctx.Fields
 	grbuild.label = note.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -371,10 +366,10 @@ func (nq *NoteQuery) GroupBy(field string, fields ...string) *NoteGroupBy {
 //		Select(note.FieldText).
 //		Scan(ctx, &v)
 func (nq *NoteQuery) Select(fields ...string) *NoteSelect {
-	nq.fields = append(nq.fields, fields...)
+	nq.ctx.Fields = append(nq.ctx.Fields, fields...)
 	sbuild := &NoteSelect{NoteQuery: nq}
 	sbuild.label = note.Label
-	sbuild.flds, sbuild.scan = &nq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &nq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -394,7 +389,7 @@ func (nq *NoteQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range nq.fields {
+	for _, f := range nq.ctx.Fields {
 		if !note.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -525,9 +520,9 @@ func (nq *NoteQuery) loadChildren(ctx context.Context, query *NoteQuery, nodes [
 
 func (nq *NoteQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := nq.querySpec()
-	_spec.Node.Columns = nq.fields
-	if len(nq.fields) > 0 {
-		_spec.Unique = nq.unique != nil && *nq.unique
+	_spec.Node.Columns = nq.ctx.Fields
+	if len(nq.ctx.Fields) > 0 {
+		_spec.Unique = nq.ctx.Unique != nil && *nq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, nq.driver, _spec)
 }
@@ -545,10 +540,10 @@ func (nq *NoteQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   nq.sql,
 		Unique: true,
 	}
-	if unique := nq.unique; unique != nil {
+	if unique := nq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := nq.fields; len(fields) > 0 {
+	if fields := nq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, note.FieldID)
 		for i := range fields {
@@ -564,10 +559,10 @@ func (nq *NoteQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := nq.limit; limit != nil {
+	if limit := nq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := nq.offset; offset != nil {
+	if offset := nq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := nq.order; len(ps) > 0 {
@@ -583,7 +578,7 @@ func (nq *NoteQuery) querySpec() *sqlgraph.QuerySpec {
 func (nq *NoteQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(nq.driver.Dialect())
 	t1 := builder.Table(note.Table)
-	columns := nq.fields
+	columns := nq.ctx.Fields
 	if len(columns) == 0 {
 		columns = note.Columns
 	}
@@ -592,7 +587,7 @@ func (nq *NoteQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = nq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if nq.unique != nil && *nq.unique {
+	if nq.ctx.Unique != nil && *nq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range nq.predicates {
@@ -601,12 +596,12 @@ func (nq *NoteQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range nq.order {
 		p(selector)
 	}
-	if offset := nq.offset; offset != nil {
+	if offset := nq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := nq.limit; limit != nil {
+	if limit := nq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -626,7 +621,7 @@ func (ngb *NoteGroupBy) Aggregate(fns ...AggregateFunc) *NoteGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ngb *NoteGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeNote, "GroupBy")
+	ctx = setContextOp(ctx, ngb.build.ctx, "GroupBy")
 	if err := ngb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -674,7 +669,7 @@ func (ns *NoteSelect) Aggregate(fns ...AggregateFunc) *NoteSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ns *NoteSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeNote, "Select")
+	ctx = setContextOp(ctx, ns.ctx, "Select")
 	if err := ns.prepareQuery(ctx); err != nil {
 		return err
 	}

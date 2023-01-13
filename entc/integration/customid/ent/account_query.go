@@ -24,11 +24,8 @@ import (
 // AccountQuery is the builder for querying Account entities.
 type AccountQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
 	inters     []Interceptor
 	predicates []predicate.Account
 	withToken  *TokenQuery
@@ -45,20 +42,20 @@ func (aq *AccountQuery) Where(ps ...predicate.Account) *AccountQuery {
 
 // Limit the number of records to be returned by this query.
 func (aq *AccountQuery) Limit(limit int) *AccountQuery {
-	aq.limit = &limit
+	aq.ctx.Limit = &limit
 	return aq
 }
 
 // Offset to start from.
 func (aq *AccountQuery) Offset(offset int) *AccountQuery {
-	aq.offset = &offset
+	aq.ctx.Offset = &offset
 	return aq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (aq *AccountQuery) Unique(unique bool) *AccountQuery {
-	aq.unique = &unique
+	aq.ctx.Unique = &unique
 	return aq
 }
 
@@ -93,7 +90,7 @@ func (aq *AccountQuery) QueryToken() *TokenQuery {
 // First returns the first Account entity from the query.
 // Returns a *NotFoundError when no Account was found.
 func (aq *AccountQuery) First(ctx context.Context) (*Account, error) {
-	nodes, err := aq.Limit(1).All(newQueryContext(ctx, TypeAccount, "First"))
+	nodes, err := aq.Limit(1).All(setContextOp(ctx, aq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +113,7 @@ func (aq *AccountQuery) FirstX(ctx context.Context) *Account {
 // Returns a *NotFoundError when no Account ID was found.
 func (aq *AccountQuery) FirstID(ctx context.Context) (id sid.ID, err error) {
 	var ids []sid.ID
-	if ids, err = aq.Limit(1).IDs(newQueryContext(ctx, TypeAccount, "FirstID")); err != nil {
+	if ids, err = aq.Limit(1).IDs(setContextOp(ctx, aq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -139,7 +136,7 @@ func (aq *AccountQuery) FirstIDX(ctx context.Context) sid.ID {
 // Returns a *NotSingularError when more than one Account entity is found.
 // Returns a *NotFoundError when no Account entities are found.
 func (aq *AccountQuery) Only(ctx context.Context) (*Account, error) {
-	nodes, err := aq.Limit(2).All(newQueryContext(ctx, TypeAccount, "Only"))
+	nodes, err := aq.Limit(2).All(setContextOp(ctx, aq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -167,7 +164,7 @@ func (aq *AccountQuery) OnlyX(ctx context.Context) *Account {
 // Returns a *NotFoundError when no entities are found.
 func (aq *AccountQuery) OnlyID(ctx context.Context) (id sid.ID, err error) {
 	var ids []sid.ID
-	if ids, err = aq.Limit(2).IDs(newQueryContext(ctx, TypeAccount, "OnlyID")); err != nil {
+	if ids, err = aq.Limit(2).IDs(setContextOp(ctx, aq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -192,7 +189,7 @@ func (aq *AccountQuery) OnlyIDX(ctx context.Context) sid.ID {
 
 // All executes the query and returns a list of Accounts.
 func (aq *AccountQuery) All(ctx context.Context) ([]*Account, error) {
-	ctx = newQueryContext(ctx, TypeAccount, "All")
+	ctx = setContextOp(ctx, aq.ctx, "All")
 	if err := aq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -212,7 +209,7 @@ func (aq *AccountQuery) AllX(ctx context.Context) []*Account {
 // IDs executes the query and returns a list of Account IDs.
 func (aq *AccountQuery) IDs(ctx context.Context) ([]sid.ID, error) {
 	var ids []sid.ID
-	ctx = newQueryContext(ctx, TypeAccount, "IDs")
+	ctx = setContextOp(ctx, aq.ctx, "IDs")
 	if err := aq.Select(account.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -230,7 +227,7 @@ func (aq *AccountQuery) IDsX(ctx context.Context) []sid.ID {
 
 // Count returns the count of the given query.
 func (aq *AccountQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeAccount, "Count")
+	ctx = setContextOp(ctx, aq.ctx, "Count")
 	if err := aq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -248,7 +245,7 @@ func (aq *AccountQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (aq *AccountQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeAccount, "Exist")
+	ctx = setContextOp(ctx, aq.ctx, "Exist")
 	switch _, err := aq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -276,16 +273,14 @@ func (aq *AccountQuery) Clone() *AccountQuery {
 	}
 	return &AccountQuery{
 		config:     aq.config,
-		limit:      aq.limit,
-		offset:     aq.offset,
+		ctx:        aq.ctx.Clone(),
 		order:      append([]OrderFunc{}, aq.order...),
 		inters:     append([]Interceptor{}, aq.inters...),
 		predicates: append([]predicate.Account{}, aq.predicates...),
 		withToken:  aq.withToken.Clone(),
 		// clone intermediate query.
-		sql:    aq.sql.Clone(),
-		path:   aq.path,
-		unique: aq.unique,
+		sql:  aq.sql.Clone(),
+		path: aq.path,
 	}
 }
 
@@ -315,9 +310,9 @@ func (aq *AccountQuery) WithToken(opts ...func(*TokenQuery)) *AccountQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (aq *AccountQuery) GroupBy(field string, fields ...string) *AccountGroupBy {
-	aq.fields = append([]string{field}, fields...)
+	aq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &AccountGroupBy{build: aq}
-	grbuild.flds = &aq.fields
+	grbuild.flds = &aq.ctx.Fields
 	grbuild.label = account.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -336,10 +331,10 @@ func (aq *AccountQuery) GroupBy(field string, fields ...string) *AccountGroupBy 
 //		Select(account.FieldEmail).
 //		Scan(ctx, &v)
 func (aq *AccountQuery) Select(fields ...string) *AccountSelect {
-	aq.fields = append(aq.fields, fields...)
+	aq.ctx.Fields = append(aq.ctx.Fields, fields...)
 	sbuild := &AccountSelect{AccountQuery: aq}
 	sbuild.label = account.Label
-	sbuild.flds, sbuild.scan = &aq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &aq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -359,7 +354,7 @@ func (aq *AccountQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range aq.fields {
+	for _, f := range aq.ctx.Fields {
 		if !account.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -444,9 +439,9 @@ func (aq *AccountQuery) loadToken(ctx context.Context, query *TokenQuery, nodes 
 
 func (aq *AccountQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := aq.querySpec()
-	_spec.Node.Columns = aq.fields
-	if len(aq.fields) > 0 {
-		_spec.Unique = aq.unique != nil && *aq.unique
+	_spec.Node.Columns = aq.ctx.Fields
+	if len(aq.ctx.Fields) > 0 {
+		_spec.Unique = aq.ctx.Unique != nil && *aq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, aq.driver, _spec)
 }
@@ -464,10 +459,10 @@ func (aq *AccountQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   aq.sql,
 		Unique: true,
 	}
-	if unique := aq.unique; unique != nil {
+	if unique := aq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := aq.fields; len(fields) > 0 {
+	if fields := aq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, account.FieldID)
 		for i := range fields {
@@ -483,10 +478,10 @@ func (aq *AccountQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := aq.limit; limit != nil {
+	if limit := aq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := aq.offset; offset != nil {
+	if offset := aq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := aq.order; len(ps) > 0 {
@@ -502,7 +497,7 @@ func (aq *AccountQuery) querySpec() *sqlgraph.QuerySpec {
 func (aq *AccountQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(aq.driver.Dialect())
 	t1 := builder.Table(account.Table)
-	columns := aq.fields
+	columns := aq.ctx.Fields
 	if len(columns) == 0 {
 		columns = account.Columns
 	}
@@ -511,7 +506,7 @@ func (aq *AccountQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = aq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if aq.unique != nil && *aq.unique {
+	if aq.ctx.Unique != nil && *aq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range aq.predicates {
@@ -520,12 +515,12 @@ func (aq *AccountQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range aq.order {
 		p(selector)
 	}
-	if offset := aq.offset; offset != nil {
+	if offset := aq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := aq.limit; limit != nil {
+	if limit := aq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -545,7 +540,7 @@ func (agb *AccountGroupBy) Aggregate(fns ...AggregateFunc) *AccountGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (agb *AccountGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeAccount, "GroupBy")
+	ctx = setContextOp(ctx, agb.build.ctx, "GroupBy")
 	if err := agb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -593,7 +588,7 @@ func (as *AccountSelect) Aggregate(fns ...AggregateFunc) *AccountSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (as *AccountSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeAccount, "Select")
+	ctx = setContextOp(ctx, as.ctx, "Select")
 	if err := as.prepareQuery(ctx); err != nil {
 		return err
 	}

@@ -22,11 +22,8 @@ import (
 // ItemQuery is the builder for querying Item entities.
 type ItemQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
 	inters     []Interceptor
 	predicates []predicate.Item
 	// intermediate query (i.e. traversal path).
@@ -42,20 +39,20 @@ func (iq *ItemQuery) Where(ps ...predicate.Item) *ItemQuery {
 
 // Limit the number of records to be returned by this query.
 func (iq *ItemQuery) Limit(limit int) *ItemQuery {
-	iq.limit = &limit
+	iq.ctx.Limit = &limit
 	return iq
 }
 
 // Offset to start from.
 func (iq *ItemQuery) Offset(offset int) *ItemQuery {
-	iq.offset = &offset
+	iq.ctx.Offset = &offset
 	return iq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (iq *ItemQuery) Unique(unique bool) *ItemQuery {
-	iq.unique = &unique
+	iq.ctx.Unique = &unique
 	return iq
 }
 
@@ -68,7 +65,7 @@ func (iq *ItemQuery) Order(o ...OrderFunc) *ItemQuery {
 // First returns the first Item entity from the query.
 // Returns a *NotFoundError when no Item was found.
 func (iq *ItemQuery) First(ctx context.Context) (*Item, error) {
-	nodes, err := iq.Limit(1).All(newQueryContext(ctx, TypeItem, "First"))
+	nodes, err := iq.Limit(1).All(setContextOp(ctx, iq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +88,7 @@ func (iq *ItemQuery) FirstX(ctx context.Context) *Item {
 // Returns a *NotFoundError when no Item ID was found.
 func (iq *ItemQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = iq.Limit(1).IDs(newQueryContext(ctx, TypeItem, "FirstID")); err != nil {
+	if ids, err = iq.Limit(1).IDs(setContextOp(ctx, iq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -114,7 +111,7 @@ func (iq *ItemQuery) FirstIDX(ctx context.Context) string {
 // Returns a *NotSingularError when more than one Item entity is found.
 // Returns a *NotFoundError when no Item entities are found.
 func (iq *ItemQuery) Only(ctx context.Context) (*Item, error) {
-	nodes, err := iq.Limit(2).All(newQueryContext(ctx, TypeItem, "Only"))
+	nodes, err := iq.Limit(2).All(setContextOp(ctx, iq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +139,7 @@ func (iq *ItemQuery) OnlyX(ctx context.Context) *Item {
 // Returns a *NotFoundError when no entities are found.
 func (iq *ItemQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = iq.Limit(2).IDs(newQueryContext(ctx, TypeItem, "OnlyID")); err != nil {
+	if ids, err = iq.Limit(2).IDs(setContextOp(ctx, iq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -167,7 +164,7 @@ func (iq *ItemQuery) OnlyIDX(ctx context.Context) string {
 
 // All executes the query and returns a list of Items.
 func (iq *ItemQuery) All(ctx context.Context) ([]*Item, error) {
-	ctx = newQueryContext(ctx, TypeItem, "All")
+	ctx = setContextOp(ctx, iq.ctx, "All")
 	if err := iq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -187,7 +184,7 @@ func (iq *ItemQuery) AllX(ctx context.Context) []*Item {
 // IDs executes the query and returns a list of Item IDs.
 func (iq *ItemQuery) IDs(ctx context.Context) ([]string, error) {
 	var ids []string
-	ctx = newQueryContext(ctx, TypeItem, "IDs")
+	ctx = setContextOp(ctx, iq.ctx, "IDs")
 	if err := iq.Select(item.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -205,7 +202,7 @@ func (iq *ItemQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (iq *ItemQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeItem, "Count")
+	ctx = setContextOp(ctx, iq.ctx, "Count")
 	if err := iq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -223,7 +220,7 @@ func (iq *ItemQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (iq *ItemQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeItem, "Exist")
+	ctx = setContextOp(ctx, iq.ctx, "Exist")
 	switch _, err := iq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -251,15 +248,13 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 	}
 	return &ItemQuery{
 		config:     iq.config,
-		limit:      iq.limit,
-		offset:     iq.offset,
+		ctx:        iq.ctx.Clone(),
 		order:      append([]OrderFunc{}, iq.order...),
 		inters:     append([]Interceptor{}, iq.inters...),
 		predicates: append([]predicate.Item{}, iq.predicates...),
 		// clone intermediate query.
 		gremlin: iq.gremlin.Clone(),
 		path:    iq.path,
-		unique:  iq.unique,
 	}
 }
 
@@ -278,9 +273,9 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
-	iq.fields = append([]string{field}, fields...)
+	iq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &ItemGroupBy{build: iq}
-	grbuild.flds = &iq.fields
+	grbuild.flds = &iq.ctx.Fields
 	grbuild.label = item.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -299,10 +294,10 @@ func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 //		Select(item.FieldText).
 //		Scan(ctx, &v)
 func (iq *ItemQuery) Select(fields ...string) *ItemSelect {
-	iq.fields = append(iq.fields, fields...)
+	iq.ctx.Fields = append(iq.ctx.Fields, fields...)
 	sbuild := &ItemSelect{ItemQuery: iq}
 	sbuild.label = item.Label
-	sbuild.flds, sbuild.scan = &iq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &iq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -335,9 +330,9 @@ func (iq *ItemQuery) prepareQuery(ctx context.Context) error {
 func (iq *ItemQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Item, error) {
 	res := &gremlin.Response{}
 	traversal := iq.gremlinQuery(ctx)
-	if len(iq.fields) > 0 {
-		fields := make([]any, len(iq.fields))
-		for i, f := range iq.fields {
+	if len(iq.ctx.Fields) > 0 {
+		fields := make([]any, len(iq.ctx.Fields))
+		for i, f := range iq.ctx.Fields {
 			fields[i] = f
 		}
 		traversal.ValueMap(fields...)
@@ -379,7 +374,7 @@ func (iq *ItemQuery) gremlinQuery(context.Context) *dsl.Traversal {
 			p(v)
 		}
 	}
-	switch limit, offset := iq.limit, iq.offset; {
+	switch limit, offset := iq.ctx.Limit, iq.ctx.Offset; {
 	case limit != nil && offset != nil:
 		v.Range(*offset, *offset+*limit)
 	case offset != nil:
@@ -387,7 +382,7 @@ func (iq *ItemQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := iq.unique; unique == nil || *unique {
+	if unique := iq.ctx.Unique; unique == nil || *unique {
 		v.Dedup()
 	}
 	return v
@@ -407,7 +402,7 @@ func (igb *ItemGroupBy) Aggregate(fns ...AggregateFunc) *ItemGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (igb *ItemGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeItem, "GroupBy")
+	ctx = setContextOp(ctx, igb.build.ctx, "GroupBy")
 	if err := igb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -462,7 +457,7 @@ func (is *ItemSelect) Aggregate(fns ...AggregateFunc) *ItemSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (is *ItemSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeItem, "Select")
+	ctx = setContextOp(ctx, is.ctx, "Select")
 	if err := is.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -474,15 +469,15 @@ func (is *ItemSelect) gremlinScan(ctx context.Context, root *ItemQuery, v any) e
 		res       = &gremlin.Response{}
 		traversal = root.gremlinQuery(ctx)
 	)
-	if len(is.fields) == 1 {
-		if is.fields[0] != item.FieldID {
-			traversal = traversal.Values(is.fields...)
+	if fields := is.ctx.Fields; len(fields) == 1 {
+		if fields[0] != item.FieldID {
+			traversal = traversal.Values(fields...)
 		} else {
 			traversal = traversal.ID()
 		}
 	} else {
-		fields := make([]any, len(is.fields))
-		for i, f := range is.fields {
+		fields := make([]any, len(is.ctx.Fields))
+		for i, f := range is.ctx.Fields {
 			fields[i] = f
 		}
 		traversal = traversal.ValueMap(fields...)
@@ -491,7 +486,7 @@ func (is *ItemSelect) gremlinScan(ctx context.Context, root *ItemQuery, v any) e
 	if err := is.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
-	if len(root.fields) == 1 {
+	if len(root.ctx.Fields) == 1 {
 		return res.ReadVal(v)
 	}
 	vm, err := res.ReadValueMap()

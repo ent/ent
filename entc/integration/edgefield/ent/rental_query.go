@@ -24,11 +24,8 @@ import (
 // RentalQuery is the builder for querying Rental entities.
 type RentalQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
 	inters     []Interceptor
 	predicates []predicate.Rental
 	withUser   *UserQuery
@@ -46,20 +43,20 @@ func (rq *RentalQuery) Where(ps ...predicate.Rental) *RentalQuery {
 
 // Limit the number of records to be returned by this query.
 func (rq *RentalQuery) Limit(limit int) *RentalQuery {
-	rq.limit = &limit
+	rq.ctx.Limit = &limit
 	return rq
 }
 
 // Offset to start from.
 func (rq *RentalQuery) Offset(offset int) *RentalQuery {
-	rq.offset = &offset
+	rq.ctx.Offset = &offset
 	return rq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (rq *RentalQuery) Unique(unique bool) *RentalQuery {
-	rq.unique = &unique
+	rq.ctx.Unique = &unique
 	return rq
 }
 
@@ -116,7 +113,7 @@ func (rq *RentalQuery) QueryCar() *CarQuery {
 // First returns the first Rental entity from the query.
 // Returns a *NotFoundError when no Rental was found.
 func (rq *RentalQuery) First(ctx context.Context) (*Rental, error) {
-	nodes, err := rq.Limit(1).All(newQueryContext(ctx, TypeRental, "First"))
+	nodes, err := rq.Limit(1).All(setContextOp(ctx, rq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +136,7 @@ func (rq *RentalQuery) FirstX(ctx context.Context) *Rental {
 // Returns a *NotFoundError when no Rental ID was found.
 func (rq *RentalQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = rq.Limit(1).IDs(newQueryContext(ctx, TypeRental, "FirstID")); err != nil {
+	if ids, err = rq.Limit(1).IDs(setContextOp(ctx, rq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -162,7 +159,7 @@ func (rq *RentalQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Rental entity is found.
 // Returns a *NotFoundError when no Rental entities are found.
 func (rq *RentalQuery) Only(ctx context.Context) (*Rental, error) {
-	nodes, err := rq.Limit(2).All(newQueryContext(ctx, TypeRental, "Only"))
+	nodes, err := rq.Limit(2).All(setContextOp(ctx, rq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -190,7 +187,7 @@ func (rq *RentalQuery) OnlyX(ctx context.Context) *Rental {
 // Returns a *NotFoundError when no entities are found.
 func (rq *RentalQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = rq.Limit(2).IDs(newQueryContext(ctx, TypeRental, "OnlyID")); err != nil {
+	if ids, err = rq.Limit(2).IDs(setContextOp(ctx, rq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -215,7 +212,7 @@ func (rq *RentalQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Rentals.
 func (rq *RentalQuery) All(ctx context.Context) ([]*Rental, error) {
-	ctx = newQueryContext(ctx, TypeRental, "All")
+	ctx = setContextOp(ctx, rq.ctx, "All")
 	if err := rq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -235,7 +232,7 @@ func (rq *RentalQuery) AllX(ctx context.Context) []*Rental {
 // IDs executes the query and returns a list of Rental IDs.
 func (rq *RentalQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
-	ctx = newQueryContext(ctx, TypeRental, "IDs")
+	ctx = setContextOp(ctx, rq.ctx, "IDs")
 	if err := rq.Select(rental.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -253,7 +250,7 @@ func (rq *RentalQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (rq *RentalQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeRental, "Count")
+	ctx = setContextOp(ctx, rq.ctx, "Count")
 	if err := rq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -271,7 +268,7 @@ func (rq *RentalQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (rq *RentalQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeRental, "Exist")
+	ctx = setContextOp(ctx, rq.ctx, "Exist")
 	switch _, err := rq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -299,17 +296,15 @@ func (rq *RentalQuery) Clone() *RentalQuery {
 	}
 	return &RentalQuery{
 		config:     rq.config,
-		limit:      rq.limit,
-		offset:     rq.offset,
+		ctx:        rq.ctx.Clone(),
 		order:      append([]OrderFunc{}, rq.order...),
 		inters:     append([]Interceptor{}, rq.inters...),
 		predicates: append([]predicate.Rental{}, rq.predicates...),
 		withUser:   rq.withUser.Clone(),
 		withCar:    rq.withCar.Clone(),
 		// clone intermediate query.
-		sql:    rq.sql.Clone(),
-		path:   rq.path,
-		unique: rq.unique,
+		sql:  rq.sql.Clone(),
+		path: rq.path,
 	}
 }
 
@@ -350,9 +345,9 @@ func (rq *RentalQuery) WithCar(opts ...func(*CarQuery)) *RentalQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (rq *RentalQuery) GroupBy(field string, fields ...string) *RentalGroupBy {
-	rq.fields = append([]string{field}, fields...)
+	rq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &RentalGroupBy{build: rq}
-	grbuild.flds = &rq.fields
+	grbuild.flds = &rq.ctx.Fields
 	grbuild.label = rental.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -371,10 +366,10 @@ func (rq *RentalQuery) GroupBy(field string, fields ...string) *RentalGroupBy {
 //		Select(rental.FieldDate).
 //		Scan(ctx, &v)
 func (rq *RentalQuery) Select(fields ...string) *RentalSelect {
-	rq.fields = append(rq.fields, fields...)
+	rq.ctx.Fields = append(rq.ctx.Fields, fields...)
 	sbuild := &RentalSelect{RentalQuery: rq}
 	sbuild.label = rental.Label
-	sbuild.flds, sbuild.scan = &rq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &rq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -394,7 +389,7 @@ func (rq *RentalQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range rq.fields {
+	for _, f := range rq.ctx.Fields {
 		if !rental.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -512,9 +507,9 @@ func (rq *RentalQuery) loadCar(ctx context.Context, query *CarQuery, nodes []*Re
 
 func (rq *RentalQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := rq.querySpec()
-	_spec.Node.Columns = rq.fields
-	if len(rq.fields) > 0 {
-		_spec.Unique = rq.unique != nil && *rq.unique
+	_spec.Node.Columns = rq.ctx.Fields
+	if len(rq.ctx.Fields) > 0 {
+		_spec.Unique = rq.ctx.Unique != nil && *rq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, rq.driver, _spec)
 }
@@ -532,10 +527,10 @@ func (rq *RentalQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   rq.sql,
 		Unique: true,
 	}
-	if unique := rq.unique; unique != nil {
+	if unique := rq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := rq.fields; len(fields) > 0 {
+	if fields := rq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, rental.FieldID)
 		for i := range fields {
@@ -551,10 +546,10 @@ func (rq *RentalQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := rq.limit; limit != nil {
+	if limit := rq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := rq.offset; offset != nil {
+	if offset := rq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := rq.order; len(ps) > 0 {
@@ -570,7 +565,7 @@ func (rq *RentalQuery) querySpec() *sqlgraph.QuerySpec {
 func (rq *RentalQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(rq.driver.Dialect())
 	t1 := builder.Table(rental.Table)
-	columns := rq.fields
+	columns := rq.ctx.Fields
 	if len(columns) == 0 {
 		columns = rental.Columns
 	}
@@ -579,7 +574,7 @@ func (rq *RentalQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = rq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if rq.unique != nil && *rq.unique {
+	if rq.ctx.Unique != nil && *rq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range rq.predicates {
@@ -588,12 +583,12 @@ func (rq *RentalQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range rq.order {
 		p(selector)
 	}
-	if offset := rq.offset; offset != nil {
+	if offset := rq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := rq.limit; limit != nil {
+	if limit := rq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -613,7 +608,7 @@ func (rgb *RentalGroupBy) Aggregate(fns ...AggregateFunc) *RentalGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (rgb *RentalGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeRental, "GroupBy")
+	ctx = setContextOp(ctx, rgb.build.ctx, "GroupBy")
 	if err := rgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -661,7 +656,7 @@ func (rs *RentalSelect) Aggregate(fns ...AggregateFunc) *RentalSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (rs *RentalSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeRental, "Select")
+	ctx = setContextOp(ctx, rs.ctx, "Select")
 	if err := rs.prepareQuery(ctx); err != nil {
 		return err
 	}

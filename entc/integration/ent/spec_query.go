@@ -24,11 +24,8 @@ import (
 // SpecQuery is the builder for querying Spec entities.
 type SpecQuery struct {
 	config
-	limit         *int
-	offset        *int
-	unique        *bool
+	ctx           *QueryContext
 	order         []OrderFunc
-	fields        []string
 	inters        []Interceptor
 	predicates    []predicate.Spec
 	withCard      *CardQuery
@@ -47,20 +44,20 @@ func (sq *SpecQuery) Where(ps ...predicate.Spec) *SpecQuery {
 
 // Limit the number of records to be returned by this query.
 func (sq *SpecQuery) Limit(limit int) *SpecQuery {
-	sq.limit = &limit
+	sq.ctx.Limit = &limit
 	return sq
 }
 
 // Offset to start from.
 func (sq *SpecQuery) Offset(offset int) *SpecQuery {
-	sq.offset = &offset
+	sq.ctx.Offset = &offset
 	return sq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (sq *SpecQuery) Unique(unique bool) *SpecQuery {
-	sq.unique = &unique
+	sq.ctx.Unique = &unique
 	return sq
 }
 
@@ -95,7 +92,7 @@ func (sq *SpecQuery) QueryCard() *CardQuery {
 // First returns the first Spec entity from the query.
 // Returns a *NotFoundError when no Spec was found.
 func (sq *SpecQuery) First(ctx context.Context) (*Spec, error) {
-	nodes, err := sq.Limit(1).All(newQueryContext(ctx, TypeSpec, "First"))
+	nodes, err := sq.Limit(1).All(setContextOp(ctx, sq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +115,7 @@ func (sq *SpecQuery) FirstX(ctx context.Context) *Spec {
 // Returns a *NotFoundError when no Spec ID was found.
 func (sq *SpecQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = sq.Limit(1).IDs(newQueryContext(ctx, TypeSpec, "FirstID")); err != nil {
+	if ids, err = sq.Limit(1).IDs(setContextOp(ctx, sq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -141,7 +138,7 @@ func (sq *SpecQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Spec entity is found.
 // Returns a *NotFoundError when no Spec entities are found.
 func (sq *SpecQuery) Only(ctx context.Context) (*Spec, error) {
-	nodes, err := sq.Limit(2).All(newQueryContext(ctx, TypeSpec, "Only"))
+	nodes, err := sq.Limit(2).All(setContextOp(ctx, sq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -169,7 +166,7 @@ func (sq *SpecQuery) OnlyX(ctx context.Context) *Spec {
 // Returns a *NotFoundError when no entities are found.
 func (sq *SpecQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = sq.Limit(2).IDs(newQueryContext(ctx, TypeSpec, "OnlyID")); err != nil {
+	if ids, err = sq.Limit(2).IDs(setContextOp(ctx, sq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -194,7 +191,7 @@ func (sq *SpecQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Specs.
 func (sq *SpecQuery) All(ctx context.Context) ([]*Spec, error) {
-	ctx = newQueryContext(ctx, TypeSpec, "All")
+	ctx = setContextOp(ctx, sq.ctx, "All")
 	if err := sq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -214,7 +211,7 @@ func (sq *SpecQuery) AllX(ctx context.Context) []*Spec {
 // IDs executes the query and returns a list of Spec IDs.
 func (sq *SpecQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
-	ctx = newQueryContext(ctx, TypeSpec, "IDs")
+	ctx = setContextOp(ctx, sq.ctx, "IDs")
 	if err := sq.Select(spec.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -232,7 +229,7 @@ func (sq *SpecQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (sq *SpecQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeSpec, "Count")
+	ctx = setContextOp(ctx, sq.ctx, "Count")
 	if err := sq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -250,7 +247,7 @@ func (sq *SpecQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (sq *SpecQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeSpec, "Exist")
+	ctx = setContextOp(ctx, sq.ctx, "Exist")
 	switch _, err := sq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -278,16 +275,14 @@ func (sq *SpecQuery) Clone() *SpecQuery {
 	}
 	return &SpecQuery{
 		config:     sq.config,
-		limit:      sq.limit,
-		offset:     sq.offset,
+		ctx:        sq.ctx.Clone(),
 		order:      append([]OrderFunc{}, sq.order...),
 		inters:     append([]Interceptor{}, sq.inters...),
 		predicates: append([]predicate.Spec{}, sq.predicates...),
 		withCard:   sq.withCard.Clone(),
 		// clone intermediate query.
-		sql:    sq.sql.Clone(),
-		path:   sq.path,
-		unique: sq.unique,
+		sql:  sq.sql.Clone(),
+		path: sq.path,
 	}
 }
 
@@ -305,9 +300,9 @@ func (sq *SpecQuery) WithCard(opts ...func(*CardQuery)) *SpecQuery {
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (sq *SpecQuery) GroupBy(field string, fields ...string) *SpecGroupBy {
-	sq.fields = append([]string{field}, fields...)
+	sq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &SpecGroupBy{build: sq}
-	grbuild.flds = &sq.fields
+	grbuild.flds = &sq.ctx.Fields
 	grbuild.label = spec.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -316,10 +311,10 @@ func (sq *SpecQuery) GroupBy(field string, fields ...string) *SpecGroupBy {
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
 func (sq *SpecQuery) Select(fields ...string) *SpecSelect {
-	sq.fields = append(sq.fields, fields...)
+	sq.ctx.Fields = append(sq.ctx.Fields, fields...)
 	sbuild := &SpecSelect{SpecQuery: sq}
 	sbuild.label = spec.Label
-	sbuild.flds, sbuild.scan = &sq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &sq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -339,7 +334,7 @@ func (sq *SpecQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range sq.fields {
+	for _, f := range sq.ctx.Fields {
 		if !spec.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -464,9 +459,9 @@ func (sq *SpecQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(sq.modifiers) > 0 {
 		_spec.Modifiers = sq.modifiers
 	}
-	_spec.Node.Columns = sq.fields
-	if len(sq.fields) > 0 {
-		_spec.Unique = sq.unique != nil && *sq.unique
+	_spec.Node.Columns = sq.ctx.Fields
+	if len(sq.ctx.Fields) > 0 {
+		_spec.Unique = sq.ctx.Unique != nil && *sq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, sq.driver, _spec)
 }
@@ -484,10 +479,10 @@ func (sq *SpecQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   sq.sql,
 		Unique: true,
 	}
-	if unique := sq.unique; unique != nil {
+	if unique := sq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := sq.fields; len(fields) > 0 {
+	if fields := sq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, spec.FieldID)
 		for i := range fields {
@@ -503,10 +498,10 @@ func (sq *SpecQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := sq.limit; limit != nil {
+	if limit := sq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := sq.offset; offset != nil {
+	if offset := sq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := sq.order; len(ps) > 0 {
@@ -522,7 +517,7 @@ func (sq *SpecQuery) querySpec() *sqlgraph.QuerySpec {
 func (sq *SpecQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(sq.driver.Dialect())
 	t1 := builder.Table(spec.Table)
-	columns := sq.fields
+	columns := sq.ctx.Fields
 	if len(columns) == 0 {
 		columns = spec.Columns
 	}
@@ -531,7 +526,7 @@ func (sq *SpecQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = sq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if sq.unique != nil && *sq.unique {
+	if sq.ctx.Unique != nil && *sq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, m := range sq.modifiers {
@@ -543,12 +538,12 @@ func (sq *SpecQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range sq.order {
 		p(selector)
 	}
-	if offset := sq.offset; offset != nil {
+	if offset := sq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := sq.limit; limit != nil {
+	if limit := sq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -614,7 +609,7 @@ func (sgb *SpecGroupBy) Aggregate(fns ...AggregateFunc) *SpecGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (sgb *SpecGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeSpec, "GroupBy")
+	ctx = setContextOp(ctx, sgb.build.ctx, "GroupBy")
 	if err := sgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -662,7 +657,7 @@ func (ss *SpecSelect) Aggregate(fns ...AggregateFunc) *SpecSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ss *SpecSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeSpec, "Select")
+	ctx = setContextOp(ctx, ss.ctx, "Select")
 	if err := ss.prepareQuery(ctx); err != nil {
 		return err
 	}

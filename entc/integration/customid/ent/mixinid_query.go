@@ -22,11 +22,8 @@ import (
 // MixinIDQuery is the builder for querying MixinID entities.
 type MixinIDQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
 	inters     []Interceptor
 	predicates []predicate.MixinID
 	// intermediate query (i.e. traversal path).
@@ -42,20 +39,20 @@ func (miq *MixinIDQuery) Where(ps ...predicate.MixinID) *MixinIDQuery {
 
 // Limit the number of records to be returned by this query.
 func (miq *MixinIDQuery) Limit(limit int) *MixinIDQuery {
-	miq.limit = &limit
+	miq.ctx.Limit = &limit
 	return miq
 }
 
 // Offset to start from.
 func (miq *MixinIDQuery) Offset(offset int) *MixinIDQuery {
-	miq.offset = &offset
+	miq.ctx.Offset = &offset
 	return miq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (miq *MixinIDQuery) Unique(unique bool) *MixinIDQuery {
-	miq.unique = &unique
+	miq.ctx.Unique = &unique
 	return miq
 }
 
@@ -68,7 +65,7 @@ func (miq *MixinIDQuery) Order(o ...OrderFunc) *MixinIDQuery {
 // First returns the first MixinID entity from the query.
 // Returns a *NotFoundError when no MixinID was found.
 func (miq *MixinIDQuery) First(ctx context.Context) (*MixinID, error) {
-	nodes, err := miq.Limit(1).All(newQueryContext(ctx, TypeMixinID, "First"))
+	nodes, err := miq.Limit(1).All(setContextOp(ctx, miq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +88,7 @@ func (miq *MixinIDQuery) FirstX(ctx context.Context) *MixinID {
 // Returns a *NotFoundError when no MixinID ID was found.
 func (miq *MixinIDQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = miq.Limit(1).IDs(newQueryContext(ctx, TypeMixinID, "FirstID")); err != nil {
+	if ids, err = miq.Limit(1).IDs(setContextOp(ctx, miq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -114,7 +111,7 @@ func (miq *MixinIDQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one MixinID entity is found.
 // Returns a *NotFoundError when no MixinID entities are found.
 func (miq *MixinIDQuery) Only(ctx context.Context) (*MixinID, error) {
-	nodes, err := miq.Limit(2).All(newQueryContext(ctx, TypeMixinID, "Only"))
+	nodes, err := miq.Limit(2).All(setContextOp(ctx, miq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +139,7 @@ func (miq *MixinIDQuery) OnlyX(ctx context.Context) *MixinID {
 // Returns a *NotFoundError when no entities are found.
 func (miq *MixinIDQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = miq.Limit(2).IDs(newQueryContext(ctx, TypeMixinID, "OnlyID")); err != nil {
+	if ids, err = miq.Limit(2).IDs(setContextOp(ctx, miq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -167,7 +164,7 @@ func (miq *MixinIDQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of MixinIDs.
 func (miq *MixinIDQuery) All(ctx context.Context) ([]*MixinID, error) {
-	ctx = newQueryContext(ctx, TypeMixinID, "All")
+	ctx = setContextOp(ctx, miq.ctx, "All")
 	if err := miq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -187,7 +184,7 @@ func (miq *MixinIDQuery) AllX(ctx context.Context) []*MixinID {
 // IDs executes the query and returns a list of MixinID IDs.
 func (miq *MixinIDQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	var ids []uuid.UUID
-	ctx = newQueryContext(ctx, TypeMixinID, "IDs")
+	ctx = setContextOp(ctx, miq.ctx, "IDs")
 	if err := miq.Select(mixinid.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -205,7 +202,7 @@ func (miq *MixinIDQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (miq *MixinIDQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeMixinID, "Count")
+	ctx = setContextOp(ctx, miq.ctx, "Count")
 	if err := miq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -223,7 +220,7 @@ func (miq *MixinIDQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (miq *MixinIDQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeMixinID, "Exist")
+	ctx = setContextOp(ctx, miq.ctx, "Exist")
 	switch _, err := miq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -251,15 +248,13 @@ func (miq *MixinIDQuery) Clone() *MixinIDQuery {
 	}
 	return &MixinIDQuery{
 		config:     miq.config,
-		limit:      miq.limit,
-		offset:     miq.offset,
+		ctx:        miq.ctx.Clone(),
 		order:      append([]OrderFunc{}, miq.order...),
 		inters:     append([]Interceptor{}, miq.inters...),
 		predicates: append([]predicate.MixinID{}, miq.predicates...),
 		// clone intermediate query.
-		sql:    miq.sql.Clone(),
-		path:   miq.path,
-		unique: miq.unique,
+		sql:  miq.sql.Clone(),
+		path: miq.path,
 	}
 }
 
@@ -278,9 +273,9 @@ func (miq *MixinIDQuery) Clone() *MixinIDQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (miq *MixinIDQuery) GroupBy(field string, fields ...string) *MixinIDGroupBy {
-	miq.fields = append([]string{field}, fields...)
+	miq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &MixinIDGroupBy{build: miq}
-	grbuild.flds = &miq.fields
+	grbuild.flds = &miq.ctx.Fields
 	grbuild.label = mixinid.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -299,10 +294,10 @@ func (miq *MixinIDQuery) GroupBy(field string, fields ...string) *MixinIDGroupBy
 //		Select(mixinid.FieldSomeField).
 //		Scan(ctx, &v)
 func (miq *MixinIDQuery) Select(fields ...string) *MixinIDSelect {
-	miq.fields = append(miq.fields, fields...)
+	miq.ctx.Fields = append(miq.ctx.Fields, fields...)
 	sbuild := &MixinIDSelect{MixinIDQuery: miq}
 	sbuild.label = mixinid.Label
-	sbuild.flds, sbuild.scan = &miq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &miq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -322,7 +317,7 @@ func (miq *MixinIDQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range miq.fields {
+	for _, f := range miq.ctx.Fields {
 		if !mixinid.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -364,9 +359,9 @@ func (miq *MixinIDQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Mix
 
 func (miq *MixinIDQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := miq.querySpec()
-	_spec.Node.Columns = miq.fields
-	if len(miq.fields) > 0 {
-		_spec.Unique = miq.unique != nil && *miq.unique
+	_spec.Node.Columns = miq.ctx.Fields
+	if len(miq.ctx.Fields) > 0 {
+		_spec.Unique = miq.ctx.Unique != nil && *miq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, miq.driver, _spec)
 }
@@ -384,10 +379,10 @@ func (miq *MixinIDQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   miq.sql,
 		Unique: true,
 	}
-	if unique := miq.unique; unique != nil {
+	if unique := miq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := miq.fields; len(fields) > 0 {
+	if fields := miq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, mixinid.FieldID)
 		for i := range fields {
@@ -403,10 +398,10 @@ func (miq *MixinIDQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := miq.limit; limit != nil {
+	if limit := miq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := miq.offset; offset != nil {
+	if offset := miq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := miq.order; len(ps) > 0 {
@@ -422,7 +417,7 @@ func (miq *MixinIDQuery) querySpec() *sqlgraph.QuerySpec {
 func (miq *MixinIDQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(miq.driver.Dialect())
 	t1 := builder.Table(mixinid.Table)
-	columns := miq.fields
+	columns := miq.ctx.Fields
 	if len(columns) == 0 {
 		columns = mixinid.Columns
 	}
@@ -431,7 +426,7 @@ func (miq *MixinIDQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = miq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if miq.unique != nil && *miq.unique {
+	if miq.ctx.Unique != nil && *miq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range miq.predicates {
@@ -440,12 +435,12 @@ func (miq *MixinIDQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range miq.order {
 		p(selector)
 	}
-	if offset := miq.offset; offset != nil {
+	if offset := miq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := miq.limit; limit != nil {
+	if limit := miq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -465,7 +460,7 @@ func (migb *MixinIDGroupBy) Aggregate(fns ...AggregateFunc) *MixinIDGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (migb *MixinIDGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeMixinID, "GroupBy")
+	ctx = setContextOp(ctx, migb.build.ctx, "GroupBy")
 	if err := migb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -513,7 +508,7 @@ func (mis *MixinIDSelect) Aggregate(fns ...AggregateFunc) *MixinIDSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (mis *MixinIDSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeMixinID, "Select")
+	ctx = setContextOp(ctx, mis.ctx, "Select")
 	if err := mis.prepareQuery(ctx); err != nil {
 		return err
 	}

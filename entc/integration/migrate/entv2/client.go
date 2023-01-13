@@ -297,6 +297,7 @@ func (c *BlogClient) DeleteOneID(id int) *BlogDeleteOne {
 func (c *BlogClient) Query() *BlogQuery {
 	return &BlogQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeBlog},
 		inters: c.Interceptors(),
 	}
 }
@@ -430,6 +431,7 @@ func (c *CarClient) DeleteOneID(id int) *CarDeleteOne {
 func (c *CarClient) Query() *CarQuery {
 	return &CarQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeCar},
 		inters: c.Interceptors(),
 	}
 }
@@ -563,6 +565,7 @@ func (c *ConversionClient) DeleteOneID(id int) *ConversionDeleteOne {
 func (c *ConversionClient) Query() *ConversionQuery {
 	return &ConversionQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeConversion},
 		inters: c.Interceptors(),
 	}
 }
@@ -680,6 +683,7 @@ func (c *CustomTypeClient) DeleteOneID(id int) *CustomTypeDeleteOne {
 func (c *CustomTypeClient) Query() *CustomTypeQuery {
 	return &CustomTypeQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeCustomType},
 		inters: c.Interceptors(),
 	}
 }
@@ -797,6 +801,7 @@ func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
 func (c *GroupClient) Query() *GroupQuery {
 	return &GroupQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeGroup},
 		inters: c.Interceptors(),
 	}
 }
@@ -914,6 +919,7 @@ func (c *MediaClient) DeleteOneID(id int) *MediaDeleteOne {
 func (c *MediaClient) Query() *MediaQuery {
 	return &MediaQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeMedia},
 		inters: c.Interceptors(),
 	}
 }
@@ -1031,6 +1037,7 @@ func (c *PetClient) DeleteOneID(id int) *PetDeleteOne {
 func (c *PetClient) Query() *PetQuery {
 	return &PetQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypePet},
 		inters: c.Interceptors(),
 	}
 }
@@ -1164,6 +1171,7 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeUser},
 		inters: c.Interceptors(),
 	}
 }
@@ -1329,6 +1337,7 @@ func (c *ZooClient) DeleteOneID(id int) *ZooDeleteOne {
 func (c *ZooClient) Query() *ZooQuery {
 	return &ZooQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeZoo},
 		inters: c.Interceptors(),
 	}
 }

@@ -32,6 +32,7 @@ type (
 	Hook          = ent.Hook
 	Value         = ent.Value
 	Query         = ent.Query
+	QueryContext  = ent.QueryContext
 	Querier       = ent.Querier
 	QuerierFunc   = ent.QuerierFunc
 	Interceptor   = ent.Interceptor
@@ -523,10 +524,11 @@ func withHooks[V Value, M any, PM interface {
 	return nv, nil
 }
 
-// newQueryContext returns a new context with the given QueryContext attached in case it does not exist.
-func newQueryContext(ctx context.Context, typ, op string) context.Context {
+// setContextOp returns a new context with the given QueryContext attached (including its op) in case it does not exist.
+func setContextOp(ctx context.Context, qc *QueryContext, op string) context.Context {
 	if ent.QueryFromContext(ctx) == nil {
-		ctx = ent.NewQueryContext(ctx, &ent.QueryContext{Type: typ, Op: op})
+		qc.Op = op
+		ctx = ent.NewQueryContext(ctx, qc)
 	}
 	return ctx
 }

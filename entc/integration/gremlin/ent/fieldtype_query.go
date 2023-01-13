@@ -22,11 +22,8 @@ import (
 // FieldTypeQuery is the builder for querying FieldType entities.
 type FieldTypeQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
 	inters     []Interceptor
 	predicates []predicate.FieldType
 	// intermediate query (i.e. traversal path).
@@ -42,20 +39,20 @@ func (ftq *FieldTypeQuery) Where(ps ...predicate.FieldType) *FieldTypeQuery {
 
 // Limit the number of records to be returned by this query.
 func (ftq *FieldTypeQuery) Limit(limit int) *FieldTypeQuery {
-	ftq.limit = &limit
+	ftq.ctx.Limit = &limit
 	return ftq
 }
 
 // Offset to start from.
 func (ftq *FieldTypeQuery) Offset(offset int) *FieldTypeQuery {
-	ftq.offset = &offset
+	ftq.ctx.Offset = &offset
 	return ftq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (ftq *FieldTypeQuery) Unique(unique bool) *FieldTypeQuery {
-	ftq.unique = &unique
+	ftq.ctx.Unique = &unique
 	return ftq
 }
 
@@ -68,7 +65,7 @@ func (ftq *FieldTypeQuery) Order(o ...OrderFunc) *FieldTypeQuery {
 // First returns the first FieldType entity from the query.
 // Returns a *NotFoundError when no FieldType was found.
 func (ftq *FieldTypeQuery) First(ctx context.Context) (*FieldType, error) {
-	nodes, err := ftq.Limit(1).All(newQueryContext(ctx, TypeFieldType, "First"))
+	nodes, err := ftq.Limit(1).All(setContextOp(ctx, ftq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +88,7 @@ func (ftq *FieldTypeQuery) FirstX(ctx context.Context) *FieldType {
 // Returns a *NotFoundError when no FieldType ID was found.
 func (ftq *FieldTypeQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = ftq.Limit(1).IDs(newQueryContext(ctx, TypeFieldType, "FirstID")); err != nil {
+	if ids, err = ftq.Limit(1).IDs(setContextOp(ctx, ftq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -114,7 +111,7 @@ func (ftq *FieldTypeQuery) FirstIDX(ctx context.Context) string {
 // Returns a *NotSingularError when more than one FieldType entity is found.
 // Returns a *NotFoundError when no FieldType entities are found.
 func (ftq *FieldTypeQuery) Only(ctx context.Context) (*FieldType, error) {
-	nodes, err := ftq.Limit(2).All(newQueryContext(ctx, TypeFieldType, "Only"))
+	nodes, err := ftq.Limit(2).All(setContextOp(ctx, ftq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +139,7 @@ func (ftq *FieldTypeQuery) OnlyX(ctx context.Context) *FieldType {
 // Returns a *NotFoundError when no entities are found.
 func (ftq *FieldTypeQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = ftq.Limit(2).IDs(newQueryContext(ctx, TypeFieldType, "OnlyID")); err != nil {
+	if ids, err = ftq.Limit(2).IDs(setContextOp(ctx, ftq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -167,7 +164,7 @@ func (ftq *FieldTypeQuery) OnlyIDX(ctx context.Context) string {
 
 // All executes the query and returns a list of FieldTypes.
 func (ftq *FieldTypeQuery) All(ctx context.Context) ([]*FieldType, error) {
-	ctx = newQueryContext(ctx, TypeFieldType, "All")
+	ctx = setContextOp(ctx, ftq.ctx, "All")
 	if err := ftq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -187,7 +184,7 @@ func (ftq *FieldTypeQuery) AllX(ctx context.Context) []*FieldType {
 // IDs executes the query and returns a list of FieldType IDs.
 func (ftq *FieldTypeQuery) IDs(ctx context.Context) ([]string, error) {
 	var ids []string
-	ctx = newQueryContext(ctx, TypeFieldType, "IDs")
+	ctx = setContextOp(ctx, ftq.ctx, "IDs")
 	if err := ftq.Select(fieldtype.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -205,7 +202,7 @@ func (ftq *FieldTypeQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (ftq *FieldTypeQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeFieldType, "Count")
+	ctx = setContextOp(ctx, ftq.ctx, "Count")
 	if err := ftq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -223,7 +220,7 @@ func (ftq *FieldTypeQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (ftq *FieldTypeQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeFieldType, "Exist")
+	ctx = setContextOp(ctx, ftq.ctx, "Exist")
 	switch _, err := ftq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -251,15 +248,13 @@ func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 	}
 	return &FieldTypeQuery{
 		config:     ftq.config,
-		limit:      ftq.limit,
-		offset:     ftq.offset,
+		ctx:        ftq.ctx.Clone(),
 		order:      append([]OrderFunc{}, ftq.order...),
 		inters:     append([]Interceptor{}, ftq.inters...),
 		predicates: append([]predicate.FieldType{}, ftq.predicates...),
 		// clone intermediate query.
 		gremlin: ftq.gremlin.Clone(),
 		path:    ftq.path,
-		unique:  ftq.unique,
 	}
 }
 
@@ -278,9 +273,9 @@ func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (ftq *FieldTypeQuery) GroupBy(field string, fields ...string) *FieldTypeGroupBy {
-	ftq.fields = append([]string{field}, fields...)
+	ftq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &FieldTypeGroupBy{build: ftq}
-	grbuild.flds = &ftq.fields
+	grbuild.flds = &ftq.ctx.Fields
 	grbuild.label = fieldtype.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -299,10 +294,10 @@ func (ftq *FieldTypeQuery) GroupBy(field string, fields ...string) *FieldTypeGro
 //		Select(fieldtype.FieldInt).
 //		Scan(ctx, &v)
 func (ftq *FieldTypeQuery) Select(fields ...string) *FieldTypeSelect {
-	ftq.fields = append(ftq.fields, fields...)
+	ftq.ctx.Fields = append(ftq.ctx.Fields, fields...)
 	sbuild := &FieldTypeSelect{FieldTypeQuery: ftq}
 	sbuild.label = fieldtype.Label
-	sbuild.flds, sbuild.scan = &ftq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &ftq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -335,9 +330,9 @@ func (ftq *FieldTypeQuery) prepareQuery(ctx context.Context) error {
 func (ftq *FieldTypeQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*FieldType, error) {
 	res := &gremlin.Response{}
 	traversal := ftq.gremlinQuery(ctx)
-	if len(ftq.fields) > 0 {
-		fields := make([]any, len(ftq.fields))
-		for i, f := range ftq.fields {
+	if len(ftq.ctx.Fields) > 0 {
+		fields := make([]any, len(ftq.ctx.Fields))
+		for i, f := range ftq.ctx.Fields {
 			fields[i] = f
 		}
 		traversal.ValueMap(fields...)
@@ -379,7 +374,7 @@ func (ftq *FieldTypeQuery) gremlinQuery(context.Context) *dsl.Traversal {
 			p(v)
 		}
 	}
-	switch limit, offset := ftq.limit, ftq.offset; {
+	switch limit, offset := ftq.ctx.Limit, ftq.ctx.Offset; {
 	case limit != nil && offset != nil:
 		v.Range(*offset, *offset+*limit)
 	case offset != nil:
@@ -387,7 +382,7 @@ func (ftq *FieldTypeQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := ftq.unique; unique == nil || *unique {
+	if unique := ftq.ctx.Unique; unique == nil || *unique {
 		v.Dedup()
 	}
 	return v
@@ -407,7 +402,7 @@ func (ftgb *FieldTypeGroupBy) Aggregate(fns ...AggregateFunc) *FieldTypeGroupBy 
 
 // Scan applies the selector query and scans the result into the given value.
 func (ftgb *FieldTypeGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeFieldType, "GroupBy")
+	ctx = setContextOp(ctx, ftgb.build.ctx, "GroupBy")
 	if err := ftgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -462,7 +457,7 @@ func (fts *FieldTypeSelect) Aggregate(fns ...AggregateFunc) *FieldTypeSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (fts *FieldTypeSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeFieldType, "Select")
+	ctx = setContextOp(ctx, fts.ctx, "Select")
 	if err := fts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -474,15 +469,15 @@ func (fts *FieldTypeSelect) gremlinScan(ctx context.Context, root *FieldTypeQuer
 		res       = &gremlin.Response{}
 		traversal = root.gremlinQuery(ctx)
 	)
-	if len(fts.fields) == 1 {
-		if fts.fields[0] != fieldtype.FieldID {
-			traversal = traversal.Values(fts.fields...)
+	if fields := fts.ctx.Fields; len(fields) == 1 {
+		if fields[0] != fieldtype.FieldID {
+			traversal = traversal.Values(fields...)
 		} else {
 			traversal = traversal.ID()
 		}
 	} else {
-		fields := make([]any, len(fts.fields))
-		for i, f := range fts.fields {
+		fields := make([]any, len(fts.ctx.Fields))
+		for i, f := range fts.ctx.Fields {
 			fields[i] = f
 		}
 		traversal = traversal.ValueMap(fields...)
@@ -491,7 +486,7 @@ func (fts *FieldTypeSelect) gremlinScan(ctx context.Context, root *FieldTypeQuer
 	if err := fts.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
-	if len(root.fields) == 1 {
+	if len(root.ctx.Fields) == 1 {
 		return res.ReadVal(v)
 	}
 	vm, err := res.ReadValueMap()

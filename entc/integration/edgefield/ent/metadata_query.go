@@ -23,11 +23,8 @@ import (
 // MetadataQuery is the builder for querying Metadata entities.
 type MetadataQuery struct {
 	config
-	limit        *int
-	offset       *int
-	unique       *bool
+	ctx          *QueryContext
 	order        []OrderFunc
-	fields       []string
 	inters       []Interceptor
 	predicates   []predicate.Metadata
 	withUser     *UserQuery
@@ -46,20 +43,20 @@ func (mq *MetadataQuery) Where(ps ...predicate.Metadata) *MetadataQuery {
 
 // Limit the number of records to be returned by this query.
 func (mq *MetadataQuery) Limit(limit int) *MetadataQuery {
-	mq.limit = &limit
+	mq.ctx.Limit = &limit
 	return mq
 }
 
 // Offset to start from.
 func (mq *MetadataQuery) Offset(offset int) *MetadataQuery {
-	mq.offset = &offset
+	mq.ctx.Offset = &offset
 	return mq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (mq *MetadataQuery) Unique(unique bool) *MetadataQuery {
-	mq.unique = &unique
+	mq.ctx.Unique = &unique
 	return mq
 }
 
@@ -138,7 +135,7 @@ func (mq *MetadataQuery) QueryParent() *MetadataQuery {
 // First returns the first Metadata entity from the query.
 // Returns a *NotFoundError when no Metadata was found.
 func (mq *MetadataQuery) First(ctx context.Context) (*Metadata, error) {
-	nodes, err := mq.Limit(1).All(newQueryContext(ctx, TypeMetadata, "First"))
+	nodes, err := mq.Limit(1).All(setContextOp(ctx, mq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +158,7 @@ func (mq *MetadataQuery) FirstX(ctx context.Context) *Metadata {
 // Returns a *NotFoundError when no Metadata ID was found.
 func (mq *MetadataQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = mq.Limit(1).IDs(newQueryContext(ctx, TypeMetadata, "FirstID")); err != nil {
+	if ids, err = mq.Limit(1).IDs(setContextOp(ctx, mq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -184,7 +181,7 @@ func (mq *MetadataQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Metadata entity is found.
 // Returns a *NotFoundError when no Metadata entities are found.
 func (mq *MetadataQuery) Only(ctx context.Context) (*Metadata, error) {
-	nodes, err := mq.Limit(2).All(newQueryContext(ctx, TypeMetadata, "Only"))
+	nodes, err := mq.Limit(2).All(setContextOp(ctx, mq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -212,7 +209,7 @@ func (mq *MetadataQuery) OnlyX(ctx context.Context) *Metadata {
 // Returns a *NotFoundError when no entities are found.
 func (mq *MetadataQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = mq.Limit(2).IDs(newQueryContext(ctx, TypeMetadata, "OnlyID")); err != nil {
+	if ids, err = mq.Limit(2).IDs(setContextOp(ctx, mq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -237,7 +234,7 @@ func (mq *MetadataQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of MetadataSlice.
 func (mq *MetadataQuery) All(ctx context.Context) ([]*Metadata, error) {
-	ctx = newQueryContext(ctx, TypeMetadata, "All")
+	ctx = setContextOp(ctx, mq.ctx, "All")
 	if err := mq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -257,7 +254,7 @@ func (mq *MetadataQuery) AllX(ctx context.Context) []*Metadata {
 // IDs executes the query and returns a list of Metadata IDs.
 func (mq *MetadataQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
-	ctx = newQueryContext(ctx, TypeMetadata, "IDs")
+	ctx = setContextOp(ctx, mq.ctx, "IDs")
 	if err := mq.Select(metadata.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -275,7 +272,7 @@ func (mq *MetadataQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (mq *MetadataQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeMetadata, "Count")
+	ctx = setContextOp(ctx, mq.ctx, "Count")
 	if err := mq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -293,7 +290,7 @@ func (mq *MetadataQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (mq *MetadataQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeMetadata, "Exist")
+	ctx = setContextOp(ctx, mq.ctx, "Exist")
 	switch _, err := mq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -321,8 +318,7 @@ func (mq *MetadataQuery) Clone() *MetadataQuery {
 	}
 	return &MetadataQuery{
 		config:       mq.config,
-		limit:        mq.limit,
-		offset:       mq.offset,
+		ctx:          mq.ctx.Clone(),
 		order:        append([]OrderFunc{}, mq.order...),
 		inters:       append([]Interceptor{}, mq.inters...),
 		predicates:   append([]predicate.Metadata{}, mq.predicates...),
@@ -330,9 +326,8 @@ func (mq *MetadataQuery) Clone() *MetadataQuery {
 		withChildren: mq.withChildren.Clone(),
 		withParent:   mq.withParent.Clone(),
 		// clone intermediate query.
-		sql:    mq.sql.Clone(),
-		path:   mq.path,
-		unique: mq.unique,
+		sql:  mq.sql.Clone(),
+		path: mq.path,
 	}
 }
 
@@ -384,9 +379,9 @@ func (mq *MetadataQuery) WithParent(opts ...func(*MetadataQuery)) *MetadataQuery
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (mq *MetadataQuery) GroupBy(field string, fields ...string) *MetadataGroupBy {
-	mq.fields = append([]string{field}, fields...)
+	mq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &MetadataGroupBy{build: mq}
-	grbuild.flds = &mq.fields
+	grbuild.flds = &mq.ctx.Fields
 	grbuild.label = metadata.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -405,10 +400,10 @@ func (mq *MetadataQuery) GroupBy(field string, fields ...string) *MetadataGroupB
 //		Select(metadata.FieldAge).
 //		Scan(ctx, &v)
 func (mq *MetadataQuery) Select(fields ...string) *MetadataSelect {
-	mq.fields = append(mq.fields, fields...)
+	mq.ctx.Fields = append(mq.ctx.Fields, fields...)
 	sbuild := &MetadataSelect{MetadataQuery: mq}
 	sbuild.label = metadata.Label
-	sbuild.flds, sbuild.scan = &mq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &mq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -428,7 +423,7 @@ func (mq *MetadataQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range mq.fields {
+	for _, f := range mq.ctx.Fields {
 		if !metadata.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -581,9 +576,9 @@ func (mq *MetadataQuery) loadParent(ctx context.Context, query *MetadataQuery, n
 
 func (mq *MetadataQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := mq.querySpec()
-	_spec.Node.Columns = mq.fields
-	if len(mq.fields) > 0 {
-		_spec.Unique = mq.unique != nil && *mq.unique
+	_spec.Node.Columns = mq.ctx.Fields
+	if len(mq.ctx.Fields) > 0 {
+		_spec.Unique = mq.ctx.Unique != nil && *mq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, mq.driver, _spec)
 }
@@ -601,10 +596,10 @@ func (mq *MetadataQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   mq.sql,
 		Unique: true,
 	}
-	if unique := mq.unique; unique != nil {
+	if unique := mq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := mq.fields; len(fields) > 0 {
+	if fields := mq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, metadata.FieldID)
 		for i := range fields {
@@ -620,10 +615,10 @@ func (mq *MetadataQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := mq.limit; limit != nil {
+	if limit := mq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := mq.offset; offset != nil {
+	if offset := mq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := mq.order; len(ps) > 0 {
@@ -639,7 +634,7 @@ func (mq *MetadataQuery) querySpec() *sqlgraph.QuerySpec {
 func (mq *MetadataQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(mq.driver.Dialect())
 	t1 := builder.Table(metadata.Table)
-	columns := mq.fields
+	columns := mq.ctx.Fields
 	if len(columns) == 0 {
 		columns = metadata.Columns
 	}
@@ -648,7 +643,7 @@ func (mq *MetadataQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = mq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if mq.unique != nil && *mq.unique {
+	if mq.ctx.Unique != nil && *mq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range mq.predicates {
@@ -657,12 +652,12 @@ func (mq *MetadataQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range mq.order {
 		p(selector)
 	}
-	if offset := mq.offset; offset != nil {
+	if offset := mq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := mq.limit; limit != nil {
+	if limit := mq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -682,7 +677,7 @@ func (mgb *MetadataGroupBy) Aggregate(fns ...AggregateFunc) *MetadataGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (mgb *MetadataGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeMetadata, "GroupBy")
+	ctx = setContextOp(ctx, mgb.build.ctx, "GroupBy")
 	if err := mgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -730,7 +725,7 @@ func (ms *MetadataSelect) Aggregate(fns ...AggregateFunc) *MetadataSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ms *MetadataSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeMetadata, "Select")
+	ctx = setContextOp(ctx, ms.ctx, "Select")
 	if err := ms.prepareQuery(ctx); err != nil {
 		return err
 	}

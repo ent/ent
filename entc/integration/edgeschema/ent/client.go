@@ -348,6 +348,7 @@ func (c *FriendshipClient) DeleteOneID(id int) *FriendshipDeleteOne {
 func (c *FriendshipClient) Query() *FriendshipQuery {
 	return &FriendshipQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeFriendship},
 		inters: c.Interceptors(),
 	}
 }
@@ -497,6 +498,7 @@ func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
 func (c *GroupClient) Query() *GroupQuery {
 	return &GroupQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeGroup},
 		inters: c.Interceptors(),
 	}
 }
@@ -678,6 +680,7 @@ func (c *GroupTagClient) DeleteOneID(id int) *GroupTagDeleteOne {
 func (c *GroupTagClient) Query() *GroupTagQuery {
 	return &GroupTagQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeGroupTag},
 		inters: c.Interceptors(),
 	}
 }
@@ -810,6 +813,7 @@ func (c *RelationshipClient) Delete() *RelationshipDelete {
 func (c *RelationshipClient) Query() *RelationshipQuery {
 	return &RelationshipQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeRelationship},
 		inters: c.Interceptors(),
 	}
 }
@@ -935,6 +939,7 @@ func (c *RelationshipInfoClient) DeleteOneID(id int) *RelationshipInfoDeleteOne 
 func (c *RelationshipInfoClient) Query() *RelationshipInfoQuery {
 	return &RelationshipInfoQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeRelationshipInfo},
 		inters: c.Interceptors(),
 	}
 }
@@ -1052,6 +1057,7 @@ func (c *RoleClient) DeleteOneID(id int) *RoleDeleteOne {
 func (c *RoleClient) Query() *RoleQuery {
 	return &RoleQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeRole},
 		inters: c.Interceptors(),
 	}
 }
@@ -1184,6 +1190,7 @@ func (c *RoleUserClient) Delete() *RoleUserDelete {
 func (c *RoleUserClient) Query() *RoleUserQuery {
 	return &RoleUserQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeRoleUser},
 		inters: c.Interceptors(),
 	}
 }
@@ -1301,6 +1308,7 @@ func (c *TagClient) DeleteOneID(id int) *TagDeleteOne {
 func (c *TagClient) Query() *TagQuery {
 	return &TagQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeTag},
 		inters: c.Interceptors(),
 	}
 }
@@ -1482,6 +1490,7 @@ func (c *TweetClient) DeleteOneID(id int) *TweetDeleteOne {
 func (c *TweetClient) Query() *TweetQuery {
 	return &TweetQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeTweet},
 		inters: c.Interceptors(),
 	}
 }
@@ -1678,6 +1687,7 @@ func (c *TweetLikeClient) Delete() *TweetLikeDelete {
 func (c *TweetLikeClient) Query() *TweetLikeQuery {
 	return &TweetLikeQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeTweetLike},
 		inters: c.Interceptors(),
 	}
 }
@@ -1796,6 +1806,7 @@ func (c *TweetTagClient) DeleteOneID(id uuid.UUID) *TweetTagDeleteOne {
 func (c *TweetTagClient) Query() *TweetTagQuery {
 	return &TweetTagQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeTweetTag},
 		inters: c.Interceptors(),
 	}
 }
@@ -1945,6 +1956,7 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeUser},
 		inters: c.Interceptors(),
 	}
 }
@@ -2255,6 +2267,7 @@ func (c *UserGroupClient) DeleteOneID(id int) *UserGroupDeleteOne {
 func (c *UserGroupClient) Query() *UserGroupQuery {
 	return &UserGroupQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeUserGroup},
 		inters: c.Interceptors(),
 	}
 }
@@ -2404,6 +2417,7 @@ func (c *UserTweetClient) DeleteOneID(id int) *UserTweetDeleteOne {
 func (c *UserTweetClient) Query() *UserTweetQuery {
 	return &UserTweetQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeUserTweet},
 		inters: c.Interceptors(),
 	}
 }

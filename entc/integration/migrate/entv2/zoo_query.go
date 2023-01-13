@@ -21,11 +21,8 @@ import (
 // ZooQuery is the builder for querying Zoo entities.
 type ZooQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
 	inters     []Interceptor
 	predicates []predicate.Zoo
 	// intermediate query (i.e. traversal path).
@@ -41,20 +38,20 @@ func (zq *ZooQuery) Where(ps ...predicate.Zoo) *ZooQuery {
 
 // Limit the number of records to be returned by this query.
 func (zq *ZooQuery) Limit(limit int) *ZooQuery {
-	zq.limit = &limit
+	zq.ctx.Limit = &limit
 	return zq
 }
 
 // Offset to start from.
 func (zq *ZooQuery) Offset(offset int) *ZooQuery {
-	zq.offset = &offset
+	zq.ctx.Offset = &offset
 	return zq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (zq *ZooQuery) Unique(unique bool) *ZooQuery {
-	zq.unique = &unique
+	zq.ctx.Unique = &unique
 	return zq
 }
 
@@ -67,7 +64,7 @@ func (zq *ZooQuery) Order(o ...OrderFunc) *ZooQuery {
 // First returns the first Zoo entity from the query.
 // Returns a *NotFoundError when no Zoo was found.
 func (zq *ZooQuery) First(ctx context.Context) (*Zoo, error) {
-	nodes, err := zq.Limit(1).All(newQueryContext(ctx, TypeZoo, "First"))
+	nodes, err := zq.Limit(1).All(setContextOp(ctx, zq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +87,7 @@ func (zq *ZooQuery) FirstX(ctx context.Context) *Zoo {
 // Returns a *NotFoundError when no Zoo ID was found.
 func (zq *ZooQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = zq.Limit(1).IDs(newQueryContext(ctx, TypeZoo, "FirstID")); err != nil {
+	if ids, err = zq.Limit(1).IDs(setContextOp(ctx, zq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -113,7 +110,7 @@ func (zq *ZooQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Zoo entity is found.
 // Returns a *NotFoundError when no Zoo entities are found.
 func (zq *ZooQuery) Only(ctx context.Context) (*Zoo, error) {
-	nodes, err := zq.Limit(2).All(newQueryContext(ctx, TypeZoo, "Only"))
+	nodes, err := zq.Limit(2).All(setContextOp(ctx, zq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +138,7 @@ func (zq *ZooQuery) OnlyX(ctx context.Context) *Zoo {
 // Returns a *NotFoundError when no entities are found.
 func (zq *ZooQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = zq.Limit(2).IDs(newQueryContext(ctx, TypeZoo, "OnlyID")); err != nil {
+	if ids, err = zq.Limit(2).IDs(setContextOp(ctx, zq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -166,7 +163,7 @@ func (zq *ZooQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Zoos.
 func (zq *ZooQuery) All(ctx context.Context) ([]*Zoo, error) {
-	ctx = newQueryContext(ctx, TypeZoo, "All")
+	ctx = setContextOp(ctx, zq.ctx, "All")
 	if err := zq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -186,7 +183,7 @@ func (zq *ZooQuery) AllX(ctx context.Context) []*Zoo {
 // IDs executes the query and returns a list of Zoo IDs.
 func (zq *ZooQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
-	ctx = newQueryContext(ctx, TypeZoo, "IDs")
+	ctx = setContextOp(ctx, zq.ctx, "IDs")
 	if err := zq.Select(zoo.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -204,7 +201,7 @@ func (zq *ZooQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (zq *ZooQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeZoo, "Count")
+	ctx = setContextOp(ctx, zq.ctx, "Count")
 	if err := zq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -222,7 +219,7 @@ func (zq *ZooQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (zq *ZooQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeZoo, "Exist")
+	ctx = setContextOp(ctx, zq.ctx, "Exist")
 	switch _, err := zq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -250,24 +247,22 @@ func (zq *ZooQuery) Clone() *ZooQuery {
 	}
 	return &ZooQuery{
 		config:     zq.config,
-		limit:      zq.limit,
-		offset:     zq.offset,
+		ctx:        zq.ctx.Clone(),
 		order:      append([]OrderFunc{}, zq.order...),
 		inters:     append([]Interceptor{}, zq.inters...),
 		predicates: append([]predicate.Zoo{}, zq.predicates...),
 		// clone intermediate query.
-		sql:    zq.sql.Clone(),
-		path:   zq.path,
-		unique: zq.unique,
+		sql:  zq.sql.Clone(),
+		path: zq.path,
 	}
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (zq *ZooQuery) GroupBy(field string, fields ...string) *ZooGroupBy {
-	zq.fields = append([]string{field}, fields...)
+	zq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &ZooGroupBy{build: zq}
-	grbuild.flds = &zq.fields
+	grbuild.flds = &zq.ctx.Fields
 	grbuild.label = zoo.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -276,10 +271,10 @@ func (zq *ZooQuery) GroupBy(field string, fields ...string) *ZooGroupBy {
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
 func (zq *ZooQuery) Select(fields ...string) *ZooSelect {
-	zq.fields = append(zq.fields, fields...)
+	zq.ctx.Fields = append(zq.ctx.Fields, fields...)
 	sbuild := &ZooSelect{ZooQuery: zq}
 	sbuild.label = zoo.Label
-	sbuild.flds, sbuild.scan = &zq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &zq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -299,7 +294,7 @@ func (zq *ZooQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range zq.fields {
+	for _, f := range zq.ctx.Fields {
 		if !zoo.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("entv2: invalid field %q for query", f)}
 		}
@@ -341,9 +336,9 @@ func (zq *ZooQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Zoo, err
 
 func (zq *ZooQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := zq.querySpec()
-	_spec.Node.Columns = zq.fields
-	if len(zq.fields) > 0 {
-		_spec.Unique = zq.unique != nil && *zq.unique
+	_spec.Node.Columns = zq.ctx.Fields
+	if len(zq.ctx.Fields) > 0 {
+		_spec.Unique = zq.ctx.Unique != nil && *zq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, zq.driver, _spec)
 }
@@ -361,10 +356,10 @@ func (zq *ZooQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   zq.sql,
 		Unique: true,
 	}
-	if unique := zq.unique; unique != nil {
+	if unique := zq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := zq.fields; len(fields) > 0 {
+	if fields := zq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, zoo.FieldID)
 		for i := range fields {
@@ -380,10 +375,10 @@ func (zq *ZooQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := zq.limit; limit != nil {
+	if limit := zq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := zq.offset; offset != nil {
+	if offset := zq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := zq.order; len(ps) > 0 {
@@ -399,7 +394,7 @@ func (zq *ZooQuery) querySpec() *sqlgraph.QuerySpec {
 func (zq *ZooQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(zq.driver.Dialect())
 	t1 := builder.Table(zoo.Table)
-	columns := zq.fields
+	columns := zq.ctx.Fields
 	if len(columns) == 0 {
 		columns = zoo.Columns
 	}
@@ -408,7 +403,7 @@ func (zq *ZooQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = zq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if zq.unique != nil && *zq.unique {
+	if zq.ctx.Unique != nil && *zq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range zq.predicates {
@@ -417,12 +412,12 @@ func (zq *ZooQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range zq.order {
 		p(selector)
 	}
-	if offset := zq.offset; offset != nil {
+	if offset := zq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := zq.limit; limit != nil {
+	if limit := zq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -442,7 +437,7 @@ func (zgb *ZooGroupBy) Aggregate(fns ...AggregateFunc) *ZooGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (zgb *ZooGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeZoo, "GroupBy")
+	ctx = setContextOp(ctx, zgb.build.ctx, "GroupBy")
 	if err := zgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -490,7 +485,7 @@ func (zs *ZooSelect) Aggregate(fns ...AggregateFunc) *ZooSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (zs *ZooSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeZoo, "Select")
+	ctx = setContextOp(ctx, zs.ctx, "Select")
 	if err := zs.prepareQuery(ctx); err != nil {
 		return err
 	}

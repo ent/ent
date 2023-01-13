@@ -22,11 +22,8 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	limit         *int
-	offset        *int
-	unique        *bool
+	ctx           *QueryContext
 	order         []OrderFunc
-	fields        []string
 	inters        []Interceptor
 	predicates    []predicate.User
 	withCard      *CardQuery
@@ -53,20 +50,20 @@ func (uq *UserQuery) Where(ps ...predicate.User) *UserQuery {
 
 // Limit the number of records to be returned by this query.
 func (uq *UserQuery) Limit(limit int) *UserQuery {
-	uq.limit = &limit
+	uq.ctx.Limit = &limit
 	return uq
 }
 
 // Offset to start from.
 func (uq *UserQuery) Offset(offset int) *UserQuery {
-	uq.offset = &offset
+	uq.ctx.Offset = &offset
 	return uq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (uq *UserQuery) Unique(unique bool) *UserQuery {
-	uq.unique = &unique
+	uq.ctx.Unique = &unique
 	return uq
 }
 
@@ -233,7 +230,7 @@ func (uq *UserQuery) QueryParent() *UserQuery {
 // First returns the first User entity from the query.
 // Returns a *NotFoundError when no User was found.
 func (uq *UserQuery) First(ctx context.Context) (*User, error) {
-	nodes, err := uq.Limit(1).All(newQueryContext(ctx, TypeUser, "First"))
+	nodes, err := uq.Limit(1).All(setContextOp(ctx, uq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -256,7 +253,7 @@ func (uq *UserQuery) FirstX(ctx context.Context) *User {
 // Returns a *NotFoundError when no User ID was found.
 func (uq *UserQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = uq.Limit(1).IDs(newQueryContext(ctx, TypeUser, "FirstID")); err != nil {
+	if ids, err = uq.Limit(1).IDs(setContextOp(ctx, uq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -279,7 +276,7 @@ func (uq *UserQuery) FirstIDX(ctx context.Context) string {
 // Returns a *NotSingularError when more than one User entity is found.
 // Returns a *NotFoundError when no User entities are found.
 func (uq *UserQuery) Only(ctx context.Context) (*User, error) {
-	nodes, err := uq.Limit(2).All(newQueryContext(ctx, TypeUser, "Only"))
+	nodes, err := uq.Limit(2).All(setContextOp(ctx, uq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -307,7 +304,7 @@ func (uq *UserQuery) OnlyX(ctx context.Context) *User {
 // Returns a *NotFoundError when no entities are found.
 func (uq *UserQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = uq.Limit(2).IDs(newQueryContext(ctx, TypeUser, "OnlyID")); err != nil {
+	if ids, err = uq.Limit(2).IDs(setContextOp(ctx, uq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -332,7 +329,7 @@ func (uq *UserQuery) OnlyIDX(ctx context.Context) string {
 
 // All executes the query and returns a list of Users.
 func (uq *UserQuery) All(ctx context.Context) ([]*User, error) {
-	ctx = newQueryContext(ctx, TypeUser, "All")
+	ctx = setContextOp(ctx, uq.ctx, "All")
 	if err := uq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -352,7 +349,7 @@ func (uq *UserQuery) AllX(ctx context.Context) []*User {
 // IDs executes the query and returns a list of User IDs.
 func (uq *UserQuery) IDs(ctx context.Context) ([]string, error) {
 	var ids []string
-	ctx = newQueryContext(ctx, TypeUser, "IDs")
+	ctx = setContextOp(ctx, uq.ctx, "IDs")
 	if err := uq.Select(user.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -370,7 +367,7 @@ func (uq *UserQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (uq *UserQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeUser, "Count")
+	ctx = setContextOp(ctx, uq.ctx, "Count")
 	if err := uq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -388,7 +385,7 @@ func (uq *UserQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (uq *UserQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeUser, "Exist")
+	ctx = setContextOp(ctx, uq.ctx, "Exist")
 	switch _, err := uq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -416,8 +413,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 	}
 	return &UserQuery{
 		config:        uq.config,
-		limit:         uq.limit,
-		offset:        uq.offset,
+		ctx:           uq.ctx.Clone(),
 		order:         append([]OrderFunc{}, uq.order...),
 		inters:        append([]Interceptor{}, uq.inters...),
 		predicates:    append([]predicate.User{}, uq.predicates...),
@@ -435,7 +431,6 @@ func (uq *UserQuery) Clone() *UserQuery {
 		// clone intermediate query.
 		gremlin: uq.gremlin.Clone(),
 		path:    uq.path,
-		unique:  uq.unique,
 	}
 }
 
@@ -575,9 +570,9 @@ func (uq *UserQuery) WithParent(opts ...func(*UserQuery)) *UserQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
-	uq.fields = append([]string{field}, fields...)
+	uq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &UserGroupBy{build: uq}
-	grbuild.flds = &uq.fields
+	grbuild.flds = &uq.ctx.Fields
 	grbuild.label = user.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -596,10 +591,10 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 //		Select(user.FieldOptionalInt).
 //		Scan(ctx, &v)
 func (uq *UserQuery) Select(fields ...string) *UserSelect {
-	uq.fields = append(uq.fields, fields...)
+	uq.ctx.Fields = append(uq.ctx.Fields, fields...)
 	sbuild := &UserSelect{UserQuery: uq}
 	sbuild.label = user.Label
-	sbuild.flds, sbuild.scan = &uq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &uq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -632,9 +627,9 @@ func (uq *UserQuery) prepareQuery(ctx context.Context) error {
 func (uq *UserQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*User, error) {
 	res := &gremlin.Response{}
 	traversal := uq.gremlinQuery(ctx)
-	if len(uq.fields) > 0 {
-		fields := make([]any, len(uq.fields))
-		for i, f := range uq.fields {
+	if len(uq.ctx.Fields) > 0 {
+		fields := make([]any, len(uq.ctx.Fields))
+		for i, f := range uq.ctx.Fields {
 			fields[i] = f
 		}
 		traversal.ValueMap(fields...)
@@ -676,7 +671,7 @@ func (uq *UserQuery) gremlinQuery(context.Context) *dsl.Traversal {
 			p(v)
 		}
 	}
-	switch limit, offset := uq.limit, uq.offset; {
+	switch limit, offset := uq.ctx.Limit, uq.ctx.Offset; {
 	case limit != nil && offset != nil:
 		v.Range(*offset, *offset+*limit)
 	case offset != nil:
@@ -684,7 +679,7 @@ func (uq *UserQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := uq.unique; unique == nil || *unique {
+	if unique := uq.ctx.Unique; unique == nil || *unique {
 		v.Dedup()
 	}
 	return v
@@ -704,7 +699,7 @@ func (ugb *UserGroupBy) Aggregate(fns ...AggregateFunc) *UserGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ugb *UserGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeUser, "GroupBy")
+	ctx = setContextOp(ctx, ugb.build.ctx, "GroupBy")
 	if err := ugb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -759,7 +754,7 @@ func (us *UserSelect) Aggregate(fns ...AggregateFunc) *UserSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (us *UserSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeUser, "Select")
+	ctx = setContextOp(ctx, us.ctx, "Select")
 	if err := us.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -771,15 +766,15 @@ func (us *UserSelect) gremlinScan(ctx context.Context, root *UserQuery, v any) e
 		res       = &gremlin.Response{}
 		traversal = root.gremlinQuery(ctx)
 	)
-	if len(us.fields) == 1 {
-		if us.fields[0] != user.FieldID {
-			traversal = traversal.Values(us.fields...)
+	if fields := us.ctx.Fields; len(fields) == 1 {
+		if fields[0] != user.FieldID {
+			traversal = traversal.Values(fields...)
 		} else {
 			traversal = traversal.ID()
 		}
 	} else {
-		fields := make([]any, len(us.fields))
-		for i, f := range us.fields {
+		fields := make([]any, len(us.ctx.Fields))
+		for i, f := range us.ctx.Fields {
 			fields[i] = f
 		}
 		traversal = traversal.ValueMap(fields...)
@@ -788,7 +783,7 @@ func (us *UserSelect) gremlinScan(ctx context.Context, root *UserQuery, v any) e
 	if err := us.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
-	if len(root.fields) == 1 {
+	if len(root.ctx.Fields) == 1 {
 		return res.ReadVal(v)
 	}
 	vm, err := res.ReadValueMap()

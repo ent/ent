@@ -22,11 +22,8 @@ import (
 // OtherQuery is the builder for querying Other entities.
 type OtherQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
 	inters     []Interceptor
 	predicates []predicate.Other
 	// intermediate query (i.e. traversal path).
@@ -42,20 +39,20 @@ func (oq *OtherQuery) Where(ps ...predicate.Other) *OtherQuery {
 
 // Limit the number of records to be returned by this query.
 func (oq *OtherQuery) Limit(limit int) *OtherQuery {
-	oq.limit = &limit
+	oq.ctx.Limit = &limit
 	return oq
 }
 
 // Offset to start from.
 func (oq *OtherQuery) Offset(offset int) *OtherQuery {
-	oq.offset = &offset
+	oq.ctx.Offset = &offset
 	return oq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (oq *OtherQuery) Unique(unique bool) *OtherQuery {
-	oq.unique = &unique
+	oq.ctx.Unique = &unique
 	return oq
 }
 
@@ -68,7 +65,7 @@ func (oq *OtherQuery) Order(o ...OrderFunc) *OtherQuery {
 // First returns the first Other entity from the query.
 // Returns a *NotFoundError when no Other was found.
 func (oq *OtherQuery) First(ctx context.Context) (*Other, error) {
-	nodes, err := oq.Limit(1).All(newQueryContext(ctx, TypeOther, "First"))
+	nodes, err := oq.Limit(1).All(setContextOp(ctx, oq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +88,7 @@ func (oq *OtherQuery) FirstX(ctx context.Context) *Other {
 // Returns a *NotFoundError when no Other ID was found.
 func (oq *OtherQuery) FirstID(ctx context.Context) (id sid.ID, err error) {
 	var ids []sid.ID
-	if ids, err = oq.Limit(1).IDs(newQueryContext(ctx, TypeOther, "FirstID")); err != nil {
+	if ids, err = oq.Limit(1).IDs(setContextOp(ctx, oq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -114,7 +111,7 @@ func (oq *OtherQuery) FirstIDX(ctx context.Context) sid.ID {
 // Returns a *NotSingularError when more than one Other entity is found.
 // Returns a *NotFoundError when no Other entities are found.
 func (oq *OtherQuery) Only(ctx context.Context) (*Other, error) {
-	nodes, err := oq.Limit(2).All(newQueryContext(ctx, TypeOther, "Only"))
+	nodes, err := oq.Limit(2).All(setContextOp(ctx, oq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +139,7 @@ func (oq *OtherQuery) OnlyX(ctx context.Context) *Other {
 // Returns a *NotFoundError when no entities are found.
 func (oq *OtherQuery) OnlyID(ctx context.Context) (id sid.ID, err error) {
 	var ids []sid.ID
-	if ids, err = oq.Limit(2).IDs(newQueryContext(ctx, TypeOther, "OnlyID")); err != nil {
+	if ids, err = oq.Limit(2).IDs(setContextOp(ctx, oq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -167,7 +164,7 @@ func (oq *OtherQuery) OnlyIDX(ctx context.Context) sid.ID {
 
 // All executes the query and returns a list of Others.
 func (oq *OtherQuery) All(ctx context.Context) ([]*Other, error) {
-	ctx = newQueryContext(ctx, TypeOther, "All")
+	ctx = setContextOp(ctx, oq.ctx, "All")
 	if err := oq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -187,7 +184,7 @@ func (oq *OtherQuery) AllX(ctx context.Context) []*Other {
 // IDs executes the query and returns a list of Other IDs.
 func (oq *OtherQuery) IDs(ctx context.Context) ([]sid.ID, error) {
 	var ids []sid.ID
-	ctx = newQueryContext(ctx, TypeOther, "IDs")
+	ctx = setContextOp(ctx, oq.ctx, "IDs")
 	if err := oq.Select(other.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -205,7 +202,7 @@ func (oq *OtherQuery) IDsX(ctx context.Context) []sid.ID {
 
 // Count returns the count of the given query.
 func (oq *OtherQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeOther, "Count")
+	ctx = setContextOp(ctx, oq.ctx, "Count")
 	if err := oq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -223,7 +220,7 @@ func (oq *OtherQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (oq *OtherQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeOther, "Exist")
+	ctx = setContextOp(ctx, oq.ctx, "Exist")
 	switch _, err := oq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -251,24 +248,22 @@ func (oq *OtherQuery) Clone() *OtherQuery {
 	}
 	return &OtherQuery{
 		config:     oq.config,
-		limit:      oq.limit,
-		offset:     oq.offset,
+		ctx:        oq.ctx.Clone(),
 		order:      append([]OrderFunc{}, oq.order...),
 		inters:     append([]Interceptor{}, oq.inters...),
 		predicates: append([]predicate.Other{}, oq.predicates...),
 		// clone intermediate query.
-		sql:    oq.sql.Clone(),
-		path:   oq.path,
-		unique: oq.unique,
+		sql:  oq.sql.Clone(),
+		path: oq.path,
 	}
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (oq *OtherQuery) GroupBy(field string, fields ...string) *OtherGroupBy {
-	oq.fields = append([]string{field}, fields...)
+	oq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &OtherGroupBy{build: oq}
-	grbuild.flds = &oq.fields
+	grbuild.flds = &oq.ctx.Fields
 	grbuild.label = other.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -277,10 +272,10 @@ func (oq *OtherQuery) GroupBy(field string, fields ...string) *OtherGroupBy {
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
 func (oq *OtherQuery) Select(fields ...string) *OtherSelect {
-	oq.fields = append(oq.fields, fields...)
+	oq.ctx.Fields = append(oq.ctx.Fields, fields...)
 	sbuild := &OtherSelect{OtherQuery: oq}
 	sbuild.label = other.Label
-	sbuild.flds, sbuild.scan = &oq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &oq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -300,7 +295,7 @@ func (oq *OtherQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range oq.fields {
+	for _, f := range oq.ctx.Fields {
 		if !other.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -342,9 +337,9 @@ func (oq *OtherQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Other,
 
 func (oq *OtherQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := oq.querySpec()
-	_spec.Node.Columns = oq.fields
-	if len(oq.fields) > 0 {
-		_spec.Unique = oq.unique != nil && *oq.unique
+	_spec.Node.Columns = oq.ctx.Fields
+	if len(oq.ctx.Fields) > 0 {
+		_spec.Unique = oq.ctx.Unique != nil && *oq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, oq.driver, _spec)
 }
@@ -362,10 +357,10 @@ func (oq *OtherQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   oq.sql,
 		Unique: true,
 	}
-	if unique := oq.unique; unique != nil {
+	if unique := oq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := oq.fields; len(fields) > 0 {
+	if fields := oq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, other.FieldID)
 		for i := range fields {
@@ -381,10 +376,10 @@ func (oq *OtherQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := oq.limit; limit != nil {
+	if limit := oq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := oq.offset; offset != nil {
+	if offset := oq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := oq.order; len(ps) > 0 {
@@ -400,7 +395,7 @@ func (oq *OtherQuery) querySpec() *sqlgraph.QuerySpec {
 func (oq *OtherQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(oq.driver.Dialect())
 	t1 := builder.Table(other.Table)
-	columns := oq.fields
+	columns := oq.ctx.Fields
 	if len(columns) == 0 {
 		columns = other.Columns
 	}
@@ -409,7 +404,7 @@ func (oq *OtherQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = oq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if oq.unique != nil && *oq.unique {
+	if oq.ctx.Unique != nil && *oq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range oq.predicates {
@@ -418,12 +413,12 @@ func (oq *OtherQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range oq.order {
 		p(selector)
 	}
-	if offset := oq.offset; offset != nil {
+	if offset := oq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := oq.limit; limit != nil {
+	if limit := oq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -443,7 +438,7 @@ func (ogb *OtherGroupBy) Aggregate(fns ...AggregateFunc) *OtherGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ogb *OtherGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeOther, "GroupBy")
+	ctx = setContextOp(ctx, ogb.build.ctx, "GroupBy")
 	if err := ogb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -491,7 +486,7 @@ func (os *OtherSelect) Aggregate(fns ...AggregateFunc) *OtherSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (os *OtherSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeOther, "Select")
+	ctx = setContextOp(ctx, os.ctx, "Select")
 	if err := os.prepareQuery(ctx); err != nil {
 		return err
 	}

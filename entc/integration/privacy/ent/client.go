@@ -237,6 +237,7 @@ func (c *TaskClient) DeleteOneID(id int) *TaskDeleteOne {
 func (c *TaskClient) Query() *TaskQuery {
 	return &TaskQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeTask},
 		inters: c.Interceptors(),
 	}
 }
@@ -387,6 +388,7 @@ func (c *TeamClient) DeleteOneID(id int) *TeamDeleteOne {
 func (c *TeamClient) Query() *TeamQuery {
 	return &TeamQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeTeam},
 		inters: c.Interceptors(),
 	}
 }
@@ -537,6 +539,7 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeUser},
 		inters: c.Interceptors(),
 	}
 }

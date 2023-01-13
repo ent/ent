@@ -706,13 +706,17 @@ func TestTraverseUnique(t *testing.T) {
 
 	// Disable unique traversal using interceptors.
 	client.User.Intercept(
-		intercept.TraverseFunc(func(ctx context.Context, q intercept.Query) error {
-			q.Unique(false)
+		intercept.Func(func(ctx context.Context, q intercept.Query) error {
+			// Skip setting the Unique if the modifier was set explicitly.
+			if entgo.QueryFromContext(ctx).Unique == nil {
+				q.Unique(false)
+			}
 			return nil
 		}),
 	)
 	// The JOIN with pets will return the same owner twice, one for each pet.
 	require.Equal(t, 2, client.Pet.Query().QueryOwner().CountX(ctx))
+	require.Equal(t, 1, client.Pet.Query().QueryOwner().Unique(true).CountX(ctx))
 }
 
 // The following example demonstrates how to write interceptors that

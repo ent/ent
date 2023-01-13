@@ -24,11 +24,8 @@ import (
 // CardQuery is the builder for querying Card entities.
 type CardQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
 	inters     []Interceptor
 	predicates []predicate.Card
 	withOwner  *UserQuery
@@ -46,20 +43,20 @@ func (cq *CardQuery) Where(ps ...predicate.Card) *CardQuery {
 
 // Limit the number of records to be returned by this query.
 func (cq *CardQuery) Limit(limit int) *CardQuery {
-	cq.limit = &limit
+	cq.ctx.Limit = &limit
 	return cq
 }
 
 // Offset to start from.
 func (cq *CardQuery) Offset(offset int) *CardQuery {
-	cq.offset = &offset
+	cq.ctx.Offset = &offset
 	return cq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (cq *CardQuery) Unique(unique bool) *CardQuery {
-	cq.unique = &unique
+	cq.ctx.Unique = &unique
 	return cq
 }
 
@@ -100,7 +97,7 @@ func (cq *CardQuery) QuerySpec() *SpecQuery {
 // First returns the first Card entity from the query.
 // Returns a *NotFoundError when no Card was found.
 func (cq *CardQuery) First(ctx context.Context) (*Card, error) {
-	nodes, err := cq.Limit(1).All(newQueryContext(ctx, TypeCard, "First"))
+	nodes, err := cq.Limit(1).All(setContextOp(ctx, cq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +120,7 @@ func (cq *CardQuery) FirstX(ctx context.Context) *Card {
 // Returns a *NotFoundError when no Card ID was found.
 func (cq *CardQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = cq.Limit(1).IDs(newQueryContext(ctx, TypeCard, "FirstID")); err != nil {
+	if ids, err = cq.Limit(1).IDs(setContextOp(ctx, cq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -146,7 +143,7 @@ func (cq *CardQuery) FirstIDX(ctx context.Context) string {
 // Returns a *NotSingularError when more than one Card entity is found.
 // Returns a *NotFoundError when no Card entities are found.
 func (cq *CardQuery) Only(ctx context.Context) (*Card, error) {
-	nodes, err := cq.Limit(2).All(newQueryContext(ctx, TypeCard, "Only"))
+	nodes, err := cq.Limit(2).All(setContextOp(ctx, cq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +171,7 @@ func (cq *CardQuery) OnlyX(ctx context.Context) *Card {
 // Returns a *NotFoundError when no entities are found.
 func (cq *CardQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = cq.Limit(2).IDs(newQueryContext(ctx, TypeCard, "OnlyID")); err != nil {
+	if ids, err = cq.Limit(2).IDs(setContextOp(ctx, cq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -199,7 +196,7 @@ func (cq *CardQuery) OnlyIDX(ctx context.Context) string {
 
 // All executes the query and returns a list of Cards.
 func (cq *CardQuery) All(ctx context.Context) ([]*Card, error) {
-	ctx = newQueryContext(ctx, TypeCard, "All")
+	ctx = setContextOp(ctx, cq.ctx, "All")
 	if err := cq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -219,7 +216,7 @@ func (cq *CardQuery) AllX(ctx context.Context) []*Card {
 // IDs executes the query and returns a list of Card IDs.
 func (cq *CardQuery) IDs(ctx context.Context) ([]string, error) {
 	var ids []string
-	ctx = newQueryContext(ctx, TypeCard, "IDs")
+	ctx = setContextOp(ctx, cq.ctx, "IDs")
 	if err := cq.Select(card.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -237,7 +234,7 @@ func (cq *CardQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (cq *CardQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeCard, "Count")
+	ctx = setContextOp(ctx, cq.ctx, "Count")
 	if err := cq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -255,7 +252,7 @@ func (cq *CardQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (cq *CardQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeCard, "Exist")
+	ctx = setContextOp(ctx, cq.ctx, "Exist")
 	switch _, err := cq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -283,8 +280,7 @@ func (cq *CardQuery) Clone() *CardQuery {
 	}
 	return &CardQuery{
 		config:     cq.config,
-		limit:      cq.limit,
-		offset:     cq.offset,
+		ctx:        cq.ctx.Clone(),
 		order:      append([]OrderFunc{}, cq.order...),
 		inters:     append([]Interceptor{}, cq.inters...),
 		predicates: append([]predicate.Card{}, cq.predicates...),
@@ -293,7 +289,6 @@ func (cq *CardQuery) Clone() *CardQuery {
 		// clone intermediate query.
 		gremlin: cq.gremlin.Clone(),
 		path:    cq.path,
-		unique:  cq.unique,
 	}
 }
 
@@ -334,9 +329,9 @@ func (cq *CardQuery) WithSpec(opts ...func(*SpecQuery)) *CardQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
-	cq.fields = append([]string{field}, fields...)
+	cq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &CardGroupBy{build: cq}
-	grbuild.flds = &cq.fields
+	grbuild.flds = &cq.ctx.Fields
 	grbuild.label = card.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -355,10 +350,10 @@ func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 //		Select(card.FieldCreateTime).
 //		Scan(ctx, &v)
 func (cq *CardQuery) Select(fields ...string) *CardSelect {
-	cq.fields = append(cq.fields, fields...)
+	cq.ctx.Fields = append(cq.ctx.Fields, fields...)
 	sbuild := &CardSelect{CardQuery: cq}
 	sbuild.label = card.Label
-	sbuild.flds, sbuild.scan = &cq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &cq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -391,9 +386,9 @@ func (cq *CardQuery) prepareQuery(ctx context.Context) error {
 func (cq *CardQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Card, error) {
 	res := &gremlin.Response{}
 	traversal := cq.gremlinQuery(ctx)
-	if len(cq.fields) > 0 {
-		fields := make([]any, len(cq.fields))
-		for i, f := range cq.fields {
+	if len(cq.ctx.Fields) > 0 {
+		fields := make([]any, len(cq.ctx.Fields))
+		for i, f := range cq.ctx.Fields {
 			fields[i] = f
 		}
 		traversal.ValueMap(fields...)
@@ -435,7 +430,7 @@ func (cq *CardQuery) gremlinQuery(context.Context) *dsl.Traversal {
 			p(v)
 		}
 	}
-	switch limit, offset := cq.limit, cq.offset; {
+	switch limit, offset := cq.ctx.Limit, cq.ctx.Offset; {
 	case limit != nil && offset != nil:
 		v.Range(*offset, *offset+*limit)
 	case offset != nil:
@@ -443,7 +438,7 @@ func (cq *CardQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := cq.unique; unique == nil || *unique {
+	if unique := cq.ctx.Unique; unique == nil || *unique {
 		v.Dedup()
 	}
 	return v
@@ -463,7 +458,7 @@ func (cgb *CardGroupBy) Aggregate(fns ...AggregateFunc) *CardGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (cgb *CardGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeCard, "GroupBy")
+	ctx = setContextOp(ctx, cgb.build.ctx, "GroupBy")
 	if err := cgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -518,7 +513,7 @@ func (cs *CardSelect) Aggregate(fns ...AggregateFunc) *CardSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (cs *CardSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeCard, "Select")
+	ctx = setContextOp(ctx, cs.ctx, "Select")
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -530,15 +525,15 @@ func (cs *CardSelect) gremlinScan(ctx context.Context, root *CardQuery, v any) e
 		res       = &gremlin.Response{}
 		traversal = root.gremlinQuery(ctx)
 	)
-	if len(cs.fields) == 1 {
-		if cs.fields[0] != card.FieldID {
-			traversal = traversal.Values(cs.fields...)
+	if fields := cs.ctx.Fields; len(fields) == 1 {
+		if fields[0] != card.FieldID {
+			traversal = traversal.Values(fields...)
 		} else {
 			traversal = traversal.ID()
 		}
 	} else {
-		fields := make([]any, len(cs.fields))
-		for i, f := range cs.fields {
+		fields := make([]any, len(cs.ctx.Fields))
+		for i, f := range cs.ctx.Fields {
 			fields[i] = f
 		}
 		traversal = traversal.ValueMap(fields...)
@@ -547,7 +542,7 @@ func (cs *CardSelect) gremlinScan(ctx context.Context, root *CardQuery, v any) e
 	if err := cs.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
-	if len(root.fields) == 1 {
+	if len(root.ctx.Fields) == 1 {
 		return res.ReadVal(v)
 	}
 	vm, err := res.ReadValueMap()

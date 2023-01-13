@@ -24,11 +24,8 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	limit        *int
-	offset       *int
-	unique       *bool
+	ctx          *QueryContext
 	order        []OrderFunc
-	fields       []string
 	inters       []Interceptor
 	predicates   []predicate.User
 	withGroups   *GroupQuery
@@ -49,20 +46,20 @@ func (uq *UserQuery) Where(ps ...predicate.User) *UserQuery {
 
 // Limit the number of records to be returned by this query.
 func (uq *UserQuery) Limit(limit int) *UserQuery {
-	uq.limit = &limit
+	uq.ctx.Limit = &limit
 	return uq
 }
 
 // Offset to start from.
 func (uq *UserQuery) Offset(offset int) *UserQuery {
-	uq.offset = &offset
+	uq.ctx.Offset = &offset
 	return uq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (uq *UserQuery) Unique(unique bool) *UserQuery {
-	uq.unique = &unique
+	uq.ctx.Unique = &unique
 	return uq
 }
 
@@ -163,7 +160,7 @@ func (uq *UserQuery) QueryPets() *PetQuery {
 // First returns the first User entity from the query.
 // Returns a *NotFoundError when no User was found.
 func (uq *UserQuery) First(ctx context.Context) (*User, error) {
-	nodes, err := uq.Limit(1).All(newQueryContext(ctx, TypeUser, "First"))
+	nodes, err := uq.Limit(1).All(setContextOp(ctx, uq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +183,7 @@ func (uq *UserQuery) FirstX(ctx context.Context) *User {
 // Returns a *NotFoundError when no User ID was found.
 func (uq *UserQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = uq.Limit(1).IDs(newQueryContext(ctx, TypeUser, "FirstID")); err != nil {
+	if ids, err = uq.Limit(1).IDs(setContextOp(ctx, uq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -209,7 +206,7 @@ func (uq *UserQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one User entity is found.
 // Returns a *NotFoundError when no User entities are found.
 func (uq *UserQuery) Only(ctx context.Context) (*User, error) {
-	nodes, err := uq.Limit(2).All(newQueryContext(ctx, TypeUser, "Only"))
+	nodes, err := uq.Limit(2).All(setContextOp(ctx, uq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -237,7 +234,7 @@ func (uq *UserQuery) OnlyX(ctx context.Context) *User {
 // Returns a *NotFoundError when no entities are found.
 func (uq *UserQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = uq.Limit(2).IDs(newQueryContext(ctx, TypeUser, "OnlyID")); err != nil {
+	if ids, err = uq.Limit(2).IDs(setContextOp(ctx, uq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -262,7 +259,7 @@ func (uq *UserQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Users.
 func (uq *UserQuery) All(ctx context.Context) ([]*User, error) {
-	ctx = newQueryContext(ctx, TypeUser, "All")
+	ctx = setContextOp(ctx, uq.ctx, "All")
 	if err := uq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -282,7 +279,7 @@ func (uq *UserQuery) AllX(ctx context.Context) []*User {
 // IDs executes the query and returns a list of User IDs.
 func (uq *UserQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
-	ctx = newQueryContext(ctx, TypeUser, "IDs")
+	ctx = setContextOp(ctx, uq.ctx, "IDs")
 	if err := uq.Select(user.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -300,7 +297,7 @@ func (uq *UserQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (uq *UserQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeUser, "Count")
+	ctx = setContextOp(ctx, uq.ctx, "Count")
 	if err := uq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -318,7 +315,7 @@ func (uq *UserQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (uq *UserQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeUser, "Exist")
+	ctx = setContextOp(ctx, uq.ctx, "Exist")
 	switch _, err := uq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -346,8 +343,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 	}
 	return &UserQuery{
 		config:       uq.config,
-		limit:        uq.limit,
-		offset:       uq.offset,
+		ctx:          uq.ctx.Clone(),
 		order:        append([]OrderFunc{}, uq.order...),
 		inters:       append([]Interceptor{}, uq.inters...),
 		predicates:   append([]predicate.User{}, uq.predicates...),
@@ -356,9 +352,8 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withChildren: uq.withChildren.Clone(),
 		withPets:     uq.withPets.Clone(),
 		// clone intermediate query.
-		sql:    uq.sql.Clone(),
-		path:   uq.path,
-		unique: uq.unique,
+		sql:  uq.sql.Clone(),
+		path: uq.path,
 	}
 }
 
@@ -409,9 +404,9 @@ func (uq *UserQuery) WithPets(opts ...func(*PetQuery)) *UserQuery {
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
-	uq.fields = append([]string{field}, fields...)
+	uq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &UserGroupBy{build: uq}
-	grbuild.flds = &uq.fields
+	grbuild.flds = &uq.ctx.Fields
 	grbuild.label = user.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -420,10 +415,10 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
 func (uq *UserQuery) Select(fields ...string) *UserSelect {
-	uq.fields = append(uq.fields, fields...)
+	uq.ctx.Fields = append(uq.ctx.Fields, fields...)
 	sbuild := &UserSelect{UserQuery: uq}
 	sbuild.label = user.Label
-	sbuild.flds, sbuild.scan = &uq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &uq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -443,7 +438,7 @@ func (uq *UserQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range uq.fields {
+	for _, f := range uq.ctx.Fields {
 		if !user.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -679,9 +674,9 @@ func (uq *UserQuery) loadPets(ctx context.Context, query *PetQuery, nodes []*Use
 
 func (uq *UserQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := uq.querySpec()
-	_spec.Node.Columns = uq.fields
-	if len(uq.fields) > 0 {
-		_spec.Unique = uq.unique != nil && *uq.unique
+	_spec.Node.Columns = uq.ctx.Fields
+	if len(uq.ctx.Fields) > 0 {
+		_spec.Unique = uq.ctx.Unique != nil && *uq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, uq.driver, _spec)
 }
@@ -699,10 +694,10 @@ func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   uq.sql,
 		Unique: true,
 	}
-	if unique := uq.unique; unique != nil {
+	if unique := uq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := uq.fields; len(fields) > 0 {
+	if fields := uq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, user.FieldID)
 		for i := range fields {
@@ -718,10 +713,10 @@ func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := uq.limit; limit != nil {
+	if limit := uq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := uq.offset; offset != nil {
+	if offset := uq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := uq.order; len(ps) > 0 {
@@ -737,7 +732,7 @@ func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
 func (uq *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(uq.driver.Dialect())
 	t1 := builder.Table(user.Table)
-	columns := uq.fields
+	columns := uq.ctx.Fields
 	if len(columns) == 0 {
 		columns = user.Columns
 	}
@@ -746,7 +741,7 @@ func (uq *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = uq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if uq.unique != nil && *uq.unique {
+	if uq.ctx.Unique != nil && *uq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range uq.predicates {
@@ -755,12 +750,12 @@ func (uq *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range uq.order {
 		p(selector)
 	}
-	if offset := uq.offset; offset != nil {
+	if offset := uq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := uq.limit; limit != nil {
+	if limit := uq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -780,7 +775,7 @@ func (ugb *UserGroupBy) Aggregate(fns ...AggregateFunc) *UserGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ugb *UserGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeUser, "GroupBy")
+	ctx = setContextOp(ctx, ugb.build.ctx, "GroupBy")
 	if err := ugb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -828,7 +823,7 @@ func (us *UserSelect) Aggregate(fns ...AggregateFunc) *UserSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (us *UserSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeUser, "Select")
+	ctx = setContextOp(ctx, us.ctx, "Select")
 	if err := us.prepareQuery(ctx); err != nil {
 		return err
 	}

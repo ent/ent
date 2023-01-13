@@ -247,6 +247,7 @@ func (c *CarClient) DeleteOneID(id int) *CarDeleteOne {
 func (c *CarClient) Query() *CarQuery {
 	return &CarQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeCar},
 		inters: c.Interceptors(),
 	}
 }
@@ -380,6 +381,7 @@ func (c *ConversionClient) DeleteOneID(id int) *ConversionDeleteOne {
 func (c *ConversionClient) Query() *ConversionQuery {
 	return &ConversionQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeConversion},
 		inters: c.Interceptors(),
 	}
 }
@@ -497,6 +499,7 @@ func (c *CustomTypeClient) DeleteOneID(id int) *CustomTypeDeleteOne {
 func (c *CustomTypeClient) Query() *CustomTypeQuery {
 	return &CustomTypeQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeCustomType},
 		inters: c.Interceptors(),
 	}
 }
@@ -614,6 +617,7 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeUser},
 		inters: c.Interceptors(),
 	}
 }

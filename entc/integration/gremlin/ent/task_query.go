@@ -23,11 +23,8 @@ import (
 // TaskQuery is the builder for querying Task entities.
 type TaskQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
 	inters     []Interceptor
 	predicates []predicate.Task
 	// intermediate query (i.e. traversal path).
@@ -43,20 +40,20 @@ func (tq *TaskQuery) Where(ps ...predicate.Task) *TaskQuery {
 
 // Limit the number of records to be returned by this query.
 func (tq *TaskQuery) Limit(limit int) *TaskQuery {
-	tq.limit = &limit
+	tq.ctx.Limit = &limit
 	return tq
 }
 
 // Offset to start from.
 func (tq *TaskQuery) Offset(offset int) *TaskQuery {
-	tq.offset = &offset
+	tq.ctx.Offset = &offset
 	return tq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (tq *TaskQuery) Unique(unique bool) *TaskQuery {
-	tq.unique = &unique
+	tq.ctx.Unique = &unique
 	return tq
 }
 
@@ -69,7 +66,7 @@ func (tq *TaskQuery) Order(o ...OrderFunc) *TaskQuery {
 // First returns the first Task entity from the query.
 // Returns a *NotFoundError when no Task was found.
 func (tq *TaskQuery) First(ctx context.Context) (*Task, error) {
-	nodes, err := tq.Limit(1).All(newQueryContext(ctx, TypeTask, "First"))
+	nodes, err := tq.Limit(1).All(setContextOp(ctx, tq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +89,7 @@ func (tq *TaskQuery) FirstX(ctx context.Context) *Task {
 // Returns a *NotFoundError when no Task ID was found.
 func (tq *TaskQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = tq.Limit(1).IDs(newQueryContext(ctx, TypeTask, "FirstID")); err != nil {
+	if ids, err = tq.Limit(1).IDs(setContextOp(ctx, tq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -115,7 +112,7 @@ func (tq *TaskQuery) FirstIDX(ctx context.Context) string {
 // Returns a *NotSingularError when more than one Task entity is found.
 // Returns a *NotFoundError when no Task entities are found.
 func (tq *TaskQuery) Only(ctx context.Context) (*Task, error) {
-	nodes, err := tq.Limit(2).All(newQueryContext(ctx, TypeTask, "Only"))
+	nodes, err := tq.Limit(2).All(setContextOp(ctx, tq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +140,7 @@ func (tq *TaskQuery) OnlyX(ctx context.Context) *Task {
 // Returns a *NotFoundError when no entities are found.
 func (tq *TaskQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = tq.Limit(2).IDs(newQueryContext(ctx, TypeTask, "OnlyID")); err != nil {
+	if ids, err = tq.Limit(2).IDs(setContextOp(ctx, tq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -168,7 +165,7 @@ func (tq *TaskQuery) OnlyIDX(ctx context.Context) string {
 
 // All executes the query and returns a list of Tasks.
 func (tq *TaskQuery) All(ctx context.Context) ([]*Task, error) {
-	ctx = newQueryContext(ctx, TypeTask, "All")
+	ctx = setContextOp(ctx, tq.ctx, "All")
 	if err := tq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -188,7 +185,7 @@ func (tq *TaskQuery) AllX(ctx context.Context) []*Task {
 // IDs executes the query and returns a list of Task IDs.
 func (tq *TaskQuery) IDs(ctx context.Context) ([]string, error) {
 	var ids []string
-	ctx = newQueryContext(ctx, TypeTask, "IDs")
+	ctx = setContextOp(ctx, tq.ctx, "IDs")
 	if err := tq.Select(enttask.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -206,7 +203,7 @@ func (tq *TaskQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (tq *TaskQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeTask, "Count")
+	ctx = setContextOp(ctx, tq.ctx, "Count")
 	if err := tq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -224,7 +221,7 @@ func (tq *TaskQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (tq *TaskQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeTask, "Exist")
+	ctx = setContextOp(ctx, tq.ctx, "Exist")
 	switch _, err := tq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -252,15 +249,13 @@ func (tq *TaskQuery) Clone() *TaskQuery {
 	}
 	return &TaskQuery{
 		config:     tq.config,
-		limit:      tq.limit,
-		offset:     tq.offset,
+		ctx:        tq.ctx.Clone(),
 		order:      append([]OrderFunc{}, tq.order...),
 		inters:     append([]Interceptor{}, tq.inters...),
 		predicates: append([]predicate.Task{}, tq.predicates...),
 		// clone intermediate query.
 		gremlin: tq.gremlin.Clone(),
 		path:    tq.path,
-		unique:  tq.unique,
 	}
 }
 
@@ -279,9 +274,9 @@ func (tq *TaskQuery) Clone() *TaskQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (tq *TaskQuery) GroupBy(field string, fields ...string) *TaskGroupBy {
-	tq.fields = append([]string{field}, fields...)
+	tq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &TaskGroupBy{build: tq}
-	grbuild.flds = &tq.fields
+	grbuild.flds = &tq.ctx.Fields
 	grbuild.label = enttask.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -300,10 +295,10 @@ func (tq *TaskQuery) GroupBy(field string, fields ...string) *TaskGroupBy {
 //		Select(enttask.FieldPriority).
 //		Scan(ctx, &v)
 func (tq *TaskQuery) Select(fields ...string) *TaskSelect {
-	tq.fields = append(tq.fields, fields...)
+	tq.ctx.Fields = append(tq.ctx.Fields, fields...)
 	sbuild := &TaskSelect{TaskQuery: tq}
 	sbuild.label = enttask.Label
-	sbuild.flds, sbuild.scan = &tq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &tq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -336,9 +331,9 @@ func (tq *TaskQuery) prepareQuery(ctx context.Context) error {
 func (tq *TaskQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Task, error) {
 	res := &gremlin.Response{}
 	traversal := tq.gremlinQuery(ctx)
-	if len(tq.fields) > 0 {
-		fields := make([]any, len(tq.fields))
-		for i, f := range tq.fields {
+	if len(tq.ctx.Fields) > 0 {
+		fields := make([]any, len(tq.ctx.Fields))
+		for i, f := range tq.ctx.Fields {
 			fields[i] = f
 		}
 		traversal.ValueMap(fields...)
@@ -380,7 +375,7 @@ func (tq *TaskQuery) gremlinQuery(context.Context) *dsl.Traversal {
 			p(v)
 		}
 	}
-	switch limit, offset := tq.limit, tq.offset; {
+	switch limit, offset := tq.ctx.Limit, tq.ctx.Offset; {
 	case limit != nil && offset != nil:
 		v.Range(*offset, *offset+*limit)
 	case offset != nil:
@@ -388,7 +383,7 @@ func (tq *TaskQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := tq.unique; unique == nil || *unique {
+	if unique := tq.ctx.Unique; unique == nil || *unique {
 		v.Dedup()
 	}
 	return v
@@ -408,7 +403,7 @@ func (tgb *TaskGroupBy) Aggregate(fns ...AggregateFunc) *TaskGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (tgb *TaskGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeTask, "GroupBy")
+	ctx = setContextOp(ctx, tgb.build.ctx, "GroupBy")
 	if err := tgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -463,7 +458,7 @@ func (ts *TaskSelect) Aggregate(fns ...AggregateFunc) *TaskSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ts *TaskSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeTask, "Select")
+	ctx = setContextOp(ctx, ts.ctx, "Select")
 	if err := ts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -475,15 +470,15 @@ func (ts *TaskSelect) gremlinScan(ctx context.Context, root *TaskQuery, v any) e
 		res       = &gremlin.Response{}
 		traversal = root.gremlinQuery(ctx)
 	)
-	if len(ts.fields) == 1 {
-		if ts.fields[0] != enttask.FieldID {
-			traversal = traversal.Values(ts.fields...)
+	if fields := ts.ctx.Fields; len(fields) == 1 {
+		if fields[0] != enttask.FieldID {
+			traversal = traversal.Values(fields...)
 		} else {
 			traversal = traversal.ID()
 		}
 	} else {
-		fields := make([]any, len(ts.fields))
-		for i, f := range ts.fields {
+		fields := make([]any, len(ts.ctx.Fields))
+		for i, f := range ts.ctx.Fields {
 			fields[i] = f
 		}
 		traversal = traversal.ValueMap(fields...)
@@ -492,7 +487,7 @@ func (ts *TaskSelect) gremlinScan(ctx context.Context, root *TaskQuery, v any) e
 	if err := ts.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
-	if len(root.fields) == 1 {
+	if len(root.ctx.Fields) == 1 {
 		return res.ReadVal(v)
 	}
 	vm, err := res.ReadValueMap()
