@@ -34,6 +34,12 @@ func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $
 	return {{ $receiver }}
 }
 
+// TableName is used to dynamically modify the table name used in sql builder
+func ({{ $receiver }} *{{ $builder }}) TableName(s string) *{{ $builder }} {
+	{{ $receiver }}.mutation.tableName = s
+	return {{ $receiver }}
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func ({{ $receiver }} *{{ $builder }}) Exec(ctx context.Context) (int, error) {
 	return withHooks[int, {{ $.MutationName }}](ctx, {{ $receiver }}.{{ $.Storage }}Exec, {{ $mutation }}, {{ $receiver }}.hooks)

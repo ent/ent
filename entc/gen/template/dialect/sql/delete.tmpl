@@ -23,6 +23,9 @@ func ({{ $receiver}} *{{ $builder }}) sqlExec(ctx context.Context) (int, error) 
 			{{- end }}
 		},
 	}
+	if name := {{ $receiver }}.mutation.tableName; name != "" {
+		_spec.Node.Table = name
+	}
 	{{- /* Allow mutating the sqlgraph.DeleteSpec by ent extensions or user templates.*/}}
 	{{- with $tmpls := matchTemplate "dialect/sql/delete/spec/*" }}
 		{{- range $tmpl := $tmpls }}

@@ -118,4 +118,10 @@ func ({{ $receiver }} *{{ $builder }}) Mutation() *{{ $.MutationName }} {
 	return {{ $receiver }}.mutation
 }
 
+// TableName is used to dynamically modify the table name used in sql builder
+func ({{ $receiver }} *{{ $builder }}) TableName(s string) *{{ $builder }} {
+	{{ $receiver }}.mutation.tableName = s
+	return {{ $receiver }}
+}
+
 {{ end }}

@@ -44,6 +44,14 @@ type {{ $builder }} struct {
 	// intermediate query (i.e. traversal path).
 	{{ $.Storage }} {{ $.Storage.Builder }}
 	path func(context.Context) ({{ $.Storage.Builder }}, error)
+
+	tableName string
+}
+
+// TableName is used to dynamically modify the table name used in sql builder
+func ({{ $receiver }} *{{ $builder }}) TableName(s string) *{{ $builder }} {
+	{{ $receiver }}.tableName = s
+	return {{ $receiver }}
 }
 
 // Where adds a new predicate for the {{ $builder }} builder.

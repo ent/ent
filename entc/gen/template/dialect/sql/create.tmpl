@@ -72,6 +72,9 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 			{{- end }}
 		}
 	)
+	if name := {{ $receiver }}.mutation.tableName; name != "" {
+		_spec.Table = name
+	}
 	{{- /* Allow mutating the sqlgraph.CreateSpec by ent extensions or user templates.*/}}
 	{{- with $tmpls := matchTemplate "dialect/sql/create/spec/*" }}
 		{{- range $tmpl := $tmpls }}

@@ -273,6 +273,9 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 		From: {{ $receiver }}.sql,
 		Unique: true,
 	}
+	if name := {{ $receiver }}.tableName; name != "" {
+		_spec.Node.Table = name
+	}
 	if unique := {{ $receiver }}.unique; unique != nil {
 		_spec.Unique = *unique
 	}
@@ -332,7 +335,11 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 
 func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect({{ $receiver }}.driver.Dialect())
-	t1 := builder.Table({{ $.Package }}.Table)
+	tableName := {{ $.Package }}.Table
+	if name := {{ $receiver }}.tableName; name != "" {
+		tableName = name
+	}
+	t1 := builder.Table(tableName)
 	columns := {{ $receiver }}.fields
 	if len(columns) == 0 {
 		columns = {{ $.Package }}.Columns

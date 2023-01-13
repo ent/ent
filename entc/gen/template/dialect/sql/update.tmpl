@@ -58,6 +58,9 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			{{- end }}
 		},
 	}
+	if name := {{ $receiver }}.mutation.tableName; name != "" {
+		_spec.Node.Table = name
+	}
 	{{- if $one }}
 		{{- if $.HasOneFieldID }}
 			id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}()
