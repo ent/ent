@@ -13,9 +13,9 @@ in the LICENSE file in the root directory of this source tree.
 func ({{ $receiver }} *{{ $builder }}) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*{{ $.Name }}, error) {
 	res := &gremlin.Response{}
 	traversal := {{ $receiver }}.gremlinQuery(ctx)
-	if len({{ $receiver }}.fields) > 0 {
-		fields := make([]any, len({{ $receiver }}.fields))
-		for i, f := range {{ $receiver }}.fields {
+	if len({{ $receiver }}.ctx.Fields) > 0 {
+		fields := make([]any, len({{ $receiver }}.ctx.Fields))
+		for i, f := range {{ $receiver }}.ctx.Fields {
 			fields[i] = f
 		}
 		traversal.ValueMap(fields...)
@@ -57,7 +57,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinQuery(context.Context) *dsl.Traver
 			p(v)
 		}
 	}
-	switch limit, offset := {{ $receiver }}.limit, {{ $receiver }}.offset; {
+	switch limit, offset := {{ $receiver }}.ctx.Limit, {{ $receiver }}.ctx.Offset; {
 	case limit != nil && offset != nil:
 		v.Range(*offset, *offset + *limit)
 	case offset != nil:
@@ -65,7 +65,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinQuery(context.Context) *dsl.Traver
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := {{ $receiver }}.unique; unique == nil || *unique {
+	if unique := {{ $receiver }}.ctx.Unique; unique == nil || *unique {
 		v.Dedup()
 	}
 	return v

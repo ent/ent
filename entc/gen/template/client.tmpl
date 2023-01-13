@@ -253,6 +253,7 @@ func (c *{{ $client }}) Delete() *{{ $n.DeleteName }} {
 func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
 	return &{{ $n.QueryName }}{
 		config: c.config,
+		ctx: &QueryContext{Type: {{ $n.TypeName }} },
 		inters: c.Interceptors(),
 		{{- with $tmpls := matchTemplate (printf "dialect/%s/query/fields/init/*" $.Storage) }}
 			{{- range $tmpl := $tmpls }}

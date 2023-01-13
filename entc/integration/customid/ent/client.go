@@ -381,6 +381,7 @@ func (c *AccountClient) DeleteOneID(id sid.ID) *AccountDeleteOne {
 func (c *AccountClient) Query() *AccountQuery {
 	return &AccountQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeAccount},
 		inters: c.Interceptors(),
 	}
 }
@@ -514,6 +515,7 @@ func (c *BlobClient) DeleteOneID(id uuid.UUID) *BlobDeleteOne {
 func (c *BlobClient) Query() *BlobQuery {
 	return &BlobQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeBlob},
 		inters: c.Interceptors(),
 	}
 }
@@ -662,6 +664,7 @@ func (c *BlobLinkClient) Delete() *BlobLinkDelete {
 func (c *BlobLinkClient) Query() *BlobLinkQuery {
 	return &BlobLinkQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeBlobLink},
 		inters: c.Interceptors(),
 	}
 }
@@ -779,6 +782,7 @@ func (c *CarClient) DeleteOneID(id int) *CarDeleteOne {
 func (c *CarClient) Query() *CarQuery {
 	return &CarQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeCar},
 		inters: c.Interceptors(),
 	}
 }
@@ -912,6 +916,7 @@ func (c *DeviceClient) DeleteOneID(id schema.ID) *DeviceDeleteOne {
 func (c *DeviceClient) Query() *DeviceQuery {
 	return &DeviceQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeDevice},
 		inters: c.Interceptors(),
 	}
 }
@@ -1061,6 +1066,7 @@ func (c *DocClient) DeleteOneID(id schema.DocID) *DocDeleteOne {
 func (c *DocClient) Query() *DocQuery {
 	return &DocQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeDoc},
 		inters: c.Interceptors(),
 	}
 }
@@ -1226,6 +1232,7 @@ func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
 func (c *GroupClient) Query() *GroupQuery {
 	return &GroupQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeGroup},
 		inters: c.Interceptors(),
 	}
 }
@@ -1359,6 +1366,7 @@ func (c *IntSIDClient) DeleteOneID(id sid.ID) *IntSIDDeleteOne {
 func (c *IntSIDClient) Query() *IntSIDQuery {
 	return &IntSIDQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeIntSID},
 		inters: c.Interceptors(),
 	}
 }
@@ -1508,6 +1516,7 @@ func (c *LinkClient) DeleteOneID(id uuidc.UUIDC) *LinkDeleteOne {
 func (c *LinkClient) Query() *LinkQuery {
 	return &LinkQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeLink},
 		inters: c.Interceptors(),
 	}
 }
@@ -1625,6 +1634,7 @@ func (c *MixinIDClient) DeleteOneID(id uuid.UUID) *MixinIDDeleteOne {
 func (c *MixinIDClient) Query() *MixinIDQuery {
 	return &MixinIDQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeMixinID},
 		inters: c.Interceptors(),
 	}
 }
@@ -1742,6 +1752,7 @@ func (c *NoteClient) DeleteOneID(id schema.NoteID) *NoteDeleteOne {
 func (c *NoteClient) Query() *NoteQuery {
 	return &NoteQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeNote},
 		inters: c.Interceptors(),
 	}
 }
@@ -1891,6 +1902,7 @@ func (c *OtherClient) DeleteOneID(id sid.ID) *OtherDeleteOne {
 func (c *OtherClient) Query() *OtherQuery {
 	return &OtherQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeOther},
 		inters: c.Interceptors(),
 	}
 }
@@ -2008,6 +2020,7 @@ func (c *PetClient) DeleteOneID(id string) *PetDeleteOne {
 func (c *PetClient) Query() *PetQuery {
 	return &PetQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypePet},
 		inters: c.Interceptors(),
 	}
 }
@@ -2189,6 +2202,7 @@ func (c *RevisionClient) DeleteOneID(id string) *RevisionDeleteOne {
 func (c *RevisionClient) Query() *RevisionQuery {
 	return &RevisionQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeRevision},
 		inters: c.Interceptors(),
 	}
 }
@@ -2306,6 +2320,7 @@ func (c *SessionClient) DeleteOneID(id schema.ID) *SessionDeleteOne {
 func (c *SessionClient) Query() *SessionQuery {
 	return &SessionQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeSession},
 		inters: c.Interceptors(),
 	}
 }
@@ -2439,6 +2454,7 @@ func (c *TokenClient) DeleteOneID(id sid.ID) *TokenDeleteOne {
 func (c *TokenClient) Query() *TokenQuery {
 	return &TokenQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeToken},
 		inters: c.Interceptors(),
 	}
 }
@@ -2572,6 +2588,7 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeUser},
 		inters: c.Interceptors(),
 	}
 }

@@ -378,6 +378,7 @@ func (c *APIClient) DeleteOneID(id int) *APIDeleteOne {
 func (c *APIClient) Query() *APIQuery {
 	return &APIQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeAPI},
 		inters: c.Interceptors(),
 	}
 }
@@ -495,6 +496,7 @@ func (c *CardClient) DeleteOneID(id int) *CardDeleteOne {
 func (c *CardClient) Query() *CardQuery {
 	return &CardQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeCard},
 		inters: c.Interceptors(),
 	}
 }
@@ -644,6 +646,7 @@ func (c *CommentClient) DeleteOneID(id int) *CommentDeleteOne {
 func (c *CommentClient) Query() *CommentQuery {
 	return &CommentQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeComment},
 		inters: c.Interceptors(),
 	}
 }
@@ -761,6 +764,7 @@ func (c *FieldTypeClient) DeleteOneID(id int) *FieldTypeDeleteOne {
 func (c *FieldTypeClient) Query() *FieldTypeQuery {
 	return &FieldTypeQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeFieldType},
 		inters: c.Interceptors(),
 	}
 }
@@ -878,6 +882,7 @@ func (c *FileClient) DeleteOneID(id int) *FileDeleteOne {
 func (c *FileClient) Query() *FileQuery {
 	return &FileQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeFile},
 		inters: c.Interceptors(),
 	}
 }
@@ -1043,6 +1048,7 @@ func (c *FileTypeClient) DeleteOneID(id int) *FileTypeDeleteOne {
 func (c *FileTypeClient) Query() *FileTypeQuery {
 	return &FileTypeQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeFileType},
 		inters: c.Interceptors(),
 	}
 }
@@ -1176,6 +1182,7 @@ func (c *GoodsClient) DeleteOneID(id int) *GoodsDeleteOne {
 func (c *GoodsClient) Query() *GoodsQuery {
 	return &GoodsQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeGoods},
 		inters: c.Interceptors(),
 	}
 }
@@ -1293,6 +1300,7 @@ func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
 func (c *GroupClient) Query() *GroupQuery {
 	return &GroupQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeGroup},
 		inters: c.Interceptors(),
 	}
 }
@@ -1474,6 +1482,7 @@ func (c *GroupInfoClient) DeleteOneID(id int) *GroupInfoDeleteOne {
 func (c *GroupInfoClient) Query() *GroupInfoQuery {
 	return &GroupInfoQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeGroupInfo},
 		inters: c.Interceptors(),
 	}
 }
@@ -1607,6 +1616,7 @@ func (c *ItemClient) DeleteOneID(id string) *ItemDeleteOne {
 func (c *ItemClient) Query() *ItemQuery {
 	return &ItemQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeItem},
 		inters: c.Interceptors(),
 	}
 }
@@ -1724,6 +1734,7 @@ func (c *LicenseClient) DeleteOneID(id int) *LicenseDeleteOne {
 func (c *LicenseClient) Query() *LicenseQuery {
 	return &LicenseQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeLicense},
 		inters: c.Interceptors(),
 	}
 }
@@ -1841,6 +1852,7 @@ func (c *NodeClient) DeleteOneID(id int) *NodeDeleteOne {
 func (c *NodeClient) Query() *NodeQuery {
 	return &NodeQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeNode},
 		inters: c.Interceptors(),
 	}
 }
@@ -1990,6 +2002,7 @@ func (c *PetClient) DeleteOneID(id int) *PetDeleteOne {
 func (c *PetClient) Query() *PetQuery {
 	return &PetQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypePet},
 		inters: c.Interceptors(),
 	}
 }
@@ -2139,6 +2152,7 @@ func (c *SpecClient) DeleteOneID(id int) *SpecDeleteOne {
 func (c *SpecClient) Query() *SpecQuery {
 	return &SpecQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeSpec},
 		inters: c.Interceptors(),
 	}
 }
@@ -2272,6 +2286,7 @@ func (c *TaskClient) DeleteOneID(id int) *TaskDeleteOne {
 func (c *TaskClient) Query() *TaskQuery {
 	return &TaskQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeTask},
 		inters: c.Interceptors(),
 	}
 }
@@ -2389,6 +2404,7 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeUser},
 		inters: c.Interceptors(),
 	}
 }

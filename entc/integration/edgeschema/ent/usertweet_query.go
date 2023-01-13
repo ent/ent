@@ -23,11 +23,8 @@ import (
 // UserTweetQuery is the builder for querying UserTweet entities.
 type UserTweetQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
 	inters     []Interceptor
 	predicates []predicate.UserTweet
 	withUser   *UserQuery
@@ -45,20 +42,20 @@ func (utq *UserTweetQuery) Where(ps ...predicate.UserTweet) *UserTweetQuery {
 
 // Limit the number of records to be returned by this query.
 func (utq *UserTweetQuery) Limit(limit int) *UserTweetQuery {
-	utq.limit = &limit
+	utq.ctx.Limit = &limit
 	return utq
 }
 
 // Offset to start from.
 func (utq *UserTweetQuery) Offset(offset int) *UserTweetQuery {
-	utq.offset = &offset
+	utq.ctx.Offset = &offset
 	return utq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (utq *UserTweetQuery) Unique(unique bool) *UserTweetQuery {
-	utq.unique = &unique
+	utq.ctx.Unique = &unique
 	return utq
 }
 
@@ -115,7 +112,7 @@ func (utq *UserTweetQuery) QueryTweet() *TweetQuery {
 // First returns the first UserTweet entity from the query.
 // Returns a *NotFoundError when no UserTweet was found.
 func (utq *UserTweetQuery) First(ctx context.Context) (*UserTweet, error) {
-	nodes, err := utq.Limit(1).All(newQueryContext(ctx, TypeUserTweet, "First"))
+	nodes, err := utq.Limit(1).All(setContextOp(ctx, utq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +135,7 @@ func (utq *UserTweetQuery) FirstX(ctx context.Context) *UserTweet {
 // Returns a *NotFoundError when no UserTweet ID was found.
 func (utq *UserTweetQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = utq.Limit(1).IDs(newQueryContext(ctx, TypeUserTweet, "FirstID")); err != nil {
+	if ids, err = utq.Limit(1).IDs(setContextOp(ctx, utq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -161,7 +158,7 @@ func (utq *UserTweetQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one UserTweet entity is found.
 // Returns a *NotFoundError when no UserTweet entities are found.
 func (utq *UserTweetQuery) Only(ctx context.Context) (*UserTweet, error) {
-	nodes, err := utq.Limit(2).All(newQueryContext(ctx, TypeUserTweet, "Only"))
+	nodes, err := utq.Limit(2).All(setContextOp(ctx, utq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +186,7 @@ func (utq *UserTweetQuery) OnlyX(ctx context.Context) *UserTweet {
 // Returns a *NotFoundError when no entities are found.
 func (utq *UserTweetQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = utq.Limit(2).IDs(newQueryContext(ctx, TypeUserTweet, "OnlyID")); err != nil {
+	if ids, err = utq.Limit(2).IDs(setContextOp(ctx, utq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -214,7 +211,7 @@ func (utq *UserTweetQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of UserTweets.
 func (utq *UserTweetQuery) All(ctx context.Context) ([]*UserTweet, error) {
-	ctx = newQueryContext(ctx, TypeUserTweet, "All")
+	ctx = setContextOp(ctx, utq.ctx, "All")
 	if err := utq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -234,7 +231,7 @@ func (utq *UserTweetQuery) AllX(ctx context.Context) []*UserTweet {
 // IDs executes the query and returns a list of UserTweet IDs.
 func (utq *UserTweetQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
-	ctx = newQueryContext(ctx, TypeUserTweet, "IDs")
+	ctx = setContextOp(ctx, utq.ctx, "IDs")
 	if err := utq.Select(usertweet.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -252,7 +249,7 @@ func (utq *UserTweetQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (utq *UserTweetQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeUserTweet, "Count")
+	ctx = setContextOp(ctx, utq.ctx, "Count")
 	if err := utq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -270,7 +267,7 @@ func (utq *UserTweetQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (utq *UserTweetQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeUserTweet, "Exist")
+	ctx = setContextOp(ctx, utq.ctx, "Exist")
 	switch _, err := utq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -298,17 +295,15 @@ func (utq *UserTweetQuery) Clone() *UserTweetQuery {
 	}
 	return &UserTweetQuery{
 		config:     utq.config,
-		limit:      utq.limit,
-		offset:     utq.offset,
+		ctx:        utq.ctx.Clone(),
 		order:      append([]OrderFunc{}, utq.order...),
 		inters:     append([]Interceptor{}, utq.inters...),
 		predicates: append([]predicate.UserTweet{}, utq.predicates...),
 		withUser:   utq.withUser.Clone(),
 		withTweet:  utq.withTweet.Clone(),
 		// clone intermediate query.
-		sql:    utq.sql.Clone(),
-		path:   utq.path,
-		unique: utq.unique,
+		sql:  utq.sql.Clone(),
+		path: utq.path,
 	}
 }
 
@@ -349,9 +344,9 @@ func (utq *UserTweetQuery) WithTweet(opts ...func(*TweetQuery)) *UserTweetQuery 
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (utq *UserTweetQuery) GroupBy(field string, fields ...string) *UserTweetGroupBy {
-	utq.fields = append([]string{field}, fields...)
+	utq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &UserTweetGroupBy{build: utq}
-	grbuild.flds = &utq.fields
+	grbuild.flds = &utq.ctx.Fields
 	grbuild.label = usertweet.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -370,10 +365,10 @@ func (utq *UserTweetQuery) GroupBy(field string, fields ...string) *UserTweetGro
 //		Select(usertweet.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (utq *UserTweetQuery) Select(fields ...string) *UserTweetSelect {
-	utq.fields = append(utq.fields, fields...)
+	utq.ctx.Fields = append(utq.ctx.Fields, fields...)
 	sbuild := &UserTweetSelect{UserTweetQuery: utq}
 	sbuild.label = usertweet.Label
-	sbuild.flds, sbuild.scan = &utq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &utq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -393,7 +388,7 @@ func (utq *UserTweetQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range utq.fields {
+	for _, f := range utq.ctx.Fields {
 		if !usertweet.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -511,9 +506,9 @@ func (utq *UserTweetQuery) loadTweet(ctx context.Context, query *TweetQuery, nod
 
 func (utq *UserTweetQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := utq.querySpec()
-	_spec.Node.Columns = utq.fields
-	if len(utq.fields) > 0 {
-		_spec.Unique = utq.unique != nil && *utq.unique
+	_spec.Node.Columns = utq.ctx.Fields
+	if len(utq.ctx.Fields) > 0 {
+		_spec.Unique = utq.ctx.Unique != nil && *utq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, utq.driver, _spec)
 }
@@ -531,10 +526,10 @@ func (utq *UserTweetQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   utq.sql,
 		Unique: true,
 	}
-	if unique := utq.unique; unique != nil {
+	if unique := utq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := utq.fields; len(fields) > 0 {
+	if fields := utq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, usertweet.FieldID)
 		for i := range fields {
@@ -550,10 +545,10 @@ func (utq *UserTweetQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := utq.limit; limit != nil {
+	if limit := utq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := utq.offset; offset != nil {
+	if offset := utq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := utq.order; len(ps) > 0 {
@@ -569,7 +564,7 @@ func (utq *UserTweetQuery) querySpec() *sqlgraph.QuerySpec {
 func (utq *UserTweetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(utq.driver.Dialect())
 	t1 := builder.Table(usertweet.Table)
-	columns := utq.fields
+	columns := utq.ctx.Fields
 	if len(columns) == 0 {
 		columns = usertweet.Columns
 	}
@@ -578,7 +573,7 @@ func (utq *UserTweetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = utq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if utq.unique != nil && *utq.unique {
+	if utq.ctx.Unique != nil && *utq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range utq.predicates {
@@ -587,12 +582,12 @@ func (utq *UserTweetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range utq.order {
 		p(selector)
 	}
-	if offset := utq.offset; offset != nil {
+	if offset := utq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := utq.limit; limit != nil {
+	if limit := utq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -612,7 +607,7 @@ func (utgb *UserTweetGroupBy) Aggregate(fns ...AggregateFunc) *UserTweetGroupBy 
 
 // Scan applies the selector query and scans the result into the given value.
 func (utgb *UserTweetGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeUserTweet, "GroupBy")
+	ctx = setContextOp(ctx, utgb.build.ctx, "GroupBy")
 	if err := utgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -660,7 +655,7 @@ func (uts *UserTweetSelect) Aggregate(fns ...AggregateFunc) *UserTweetSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (uts *UserTweetSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeUserTweet, "Select")
+	ctx = setContextOp(ctx, uts.ctx, "Select")
 	if err := uts.prepareQuery(ctx); err != nil {
 		return err
 	}

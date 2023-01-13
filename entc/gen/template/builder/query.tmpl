@@ -25,11 +25,8 @@ import (
 // {{ $builder }} is the builder for querying {{ $.Name }} entities.
 type {{ $builder }} struct {
 	config
-	limit		*int
-	offset		*int
-	unique		*bool
+	ctx			*QueryContext
 	order		[]OrderFunc
-	fields		[]string
 	inters		[]Interceptor
 	predicates 	[]predicate.{{ $.Name }}
 	{{- /* Eager loading fields. */}}
@@ -54,20 +51,20 @@ func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $
 
 // Limit the number of records to be returned by this query.
 func ({{ $receiver }} *{{ $builder }}) Limit(limit int) *{{ $builder }} {
-	{{ $receiver }}.limit = &limit
+	{{ $receiver }}.ctx.Limit = &limit
 	return {{ $receiver }}
 }
 
 // Offset to start from.
 func ({{ $receiver }} *{{ $builder }}) Offset(offset int) *{{ $builder }} {
-	{{ $receiver }}.offset = &offset
+	{{ $receiver }}.ctx.Offset = &offset
 	return {{ $receiver }}
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func ({{ $receiver }} *{{ $builder }}) Unique(unique bool) *{{ $builder }} {
-	{{ $receiver }}.unique = &unique
+	{{ $receiver }}.ctx.Unique = &unique
 	return {{ $receiver }}
 }
 
@@ -100,7 +97,7 @@ func ({{ $receiver }} *{{ $builder }}) Order(o ...OrderFunc) *{{ $builder }} {
 // First returns the first {{ $.Name }} entity from the query. 
 // Returns a *NotFoundError when no {{ $.Name }} was found.
 func ({{ $receiver }} *{{ $builder }}) First(ctx context.Context) (*{{ $.Name }}, error) {
-	nodes, err := {{ $receiver }}.Limit(1).All(newQueryContext(ctx, {{ $.TypeName }}, "First"))
+	nodes, err := {{ $receiver }}.Limit(1).All(setContextOp(ctx, {{ $receiver }}.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +121,7 @@ func ({{ $receiver }} *{{ $builder }}) FirstX(ctx context.Context) *{{ $.Name }}
 	// Returns a *NotFoundError when no {{ $.Name }} ID was found.
 	func ({{ $receiver }} *{{ $builder }}) FirstID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
 		var ids []{{ $.ID.Type }}
-		if ids, err = {{ $receiver }}.Limit(1).IDs(newQueryContext(ctx, {{ $.TypeName }}, "FirstID")); err != nil {
+		if ids, err = {{ $receiver }}.Limit(1).IDs(setContextOp(ctx, {{ $receiver }}.ctx, "FirstID")); err != nil {
 			return
 		}
 		if len(ids) == 0 {
@@ -133,7 +130,7 @@ func ({{ $receiver }} *{{ $builder }}) FirstX(ctx context.Context) *{{ $.Name }}
 		}
 		return ids[0], nil
 	}
-	
+
 	// FirstIDX is like FirstID, but panics if an error occurs.
 	func ({{ $receiver }} *{{ $builder }}) FirstIDX(ctx context.Context) {{ $.ID.Type }} {
 		id, err := {{ $receiver }}.FirstID(ctx)
@@ -148,7 +145,7 @@ func ({{ $receiver }} *{{ $builder }}) FirstX(ctx context.Context) *{{ $.Name }}
 // Returns a *NotSingularError when more than one {{ $.Name }} entity is found.
 // Returns a *NotFoundError when no {{ $.Name }} entities are found.
 func ({{ $receiver }} *{{ $builder }}) Only(ctx context.Context) (*{{ $.Name }}, error) {
-	nodes, err := {{ $receiver }}.Limit(2).All(newQueryContext(ctx, {{ $.TypeName }}, "Only"))
+	nodes, err := {{ $receiver }}.Limit(2).All(setContextOp(ctx, {{ $receiver }}.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -177,7 +174,7 @@ func ({{ $receiver }} *{{ $builder }}) OnlyX(ctx context.Context) *{{ $.Name }} 
 	// Returns a *NotFoundError when no entities are found.
 	func ({{ $receiver }} *{{ $builder }}) OnlyID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
 		var ids []{{ $.ID.Type }}
-		if ids, err = {{ $receiver }}.Limit(2).IDs(newQueryContext(ctx, {{ $.TypeName }}, "OnlyID")); err != nil {
+		if ids, err = {{ $receiver }}.Limit(2).IDs(setContextOp(ctx, {{ $receiver }}.ctx, "OnlyID")); err != nil {
 			return
 		}
 		switch len(ids) {
@@ -190,7 +187,7 @@ func ({{ $receiver }} *{{ $builder }}) OnlyX(ctx context.Context) *{{ $.Name }} 
 		}
 		return
 	}
-	
+
 	// OnlyIDX is like OnlyID, but panics if an error occurs.
 	func ({{ $receiver }} *{{ $builder }}) OnlyIDX(ctx context.Context) {{ $.ID.Type }} {
 		id, err := {{ $receiver }}.OnlyID(ctx)
@@ -203,7 +200,7 @@ func ({{ $receiver }} *{{ $builder }}) OnlyX(ctx context.Context) *{{ $.Name }} 
 
 // All executes the query and returns a list of {{ plural $.Name }}.
 func ({{ $receiver }} *{{ $builder }}) All(ctx context.Context) ([]*{{ $.Name }}, error) {
-	ctx = newQueryContext(ctx, {{ $.TypeName }}, "All")
+	ctx = setContextOp(ctx, {{ $receiver }}.ctx, "All")
 	if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -224,13 +221,13 @@ func ({{ $receiver }} *{{ $builder }}) AllX(ctx context.Context) []*{{ $.Name }}
 	// IDs executes the query and returns a list of {{ $.Name }} IDs.
 	func ({{ $receiver }} *{{ $builder }}) IDs(ctx context.Context) ([]{{ $.ID.Type }}, error) {
 		var ids []{{ $.ID.Type }}
-		ctx = newQueryContext(ctx, {{ $.TypeName }}, "IDs")
+		ctx = setContextOp(ctx, {{ $receiver }}.ctx, "IDs")
 		if err := {{ $receiver }}.Select({{ $.Package }}.FieldID).Scan(ctx, &ids); err != nil {
 			return nil, err
 		}
 		return ids, nil
 	}
-	
+
 	// IDsX is like IDs, but panics if an error occurs.
 	func ({{ $receiver }} *{{ $builder }}) IDsX(ctx context.Context) []{{ $.ID.Type }} {
 		ids, err := {{ $receiver }}.IDs(ctx)
@@ -243,7 +240,7 @@ func ({{ $receiver }} *{{ $builder }}) AllX(ctx context.Context) []*{{ $.Name }}
 
 // Count returns the count of the given query.
 func ({{ $receiver }} *{{ $builder }}) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, {{ $.TypeName }}, "Count")
+	ctx = setContextOp(ctx, {{ $receiver }}.ctx, "Count")
 	if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -261,7 +258,7 @@ func ({{ $receiver }} *{{ $builder }}) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func ({{ $receiver }} *{{ $builder }}) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, {{ $.TypeName }}, "Exist")
+	ctx = setContextOp(ctx, {{ $receiver }}.ctx, "Exist")
 	switch _, err := {{ $receiver }}.First{{ if $.HasOneFieldID }}ID{{ end }}(ctx);{
 	case IsNotFound(err):
 		return false, nil
@@ -289,8 +286,7 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 	}
 	return &{{ $builder }}{
 		config: 	{{ $receiver }}.config,
-		limit: 		{{ $receiver }}.limit,
-		offset: 	{{ $receiver }}.offset,
+		ctx: 		{{ $receiver }}.ctx.Clone(),
 		order: 		append([]OrderFunc{}, {{ $receiver }}.order...),
 		inters: 	append([]Interceptor{}, {{ $receiver }}.inters...),
 		predicates: append([]predicate.{{ $.Name }}{}, {{ $receiver }}.predicates...),
@@ -300,7 +296,6 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 		// clone intermediate query.
 		{{ $.Storage }}: {{ $receiver }}.{{ $.Storage }}.Clone(),
 		path: {{ $receiver }}.path,
-		unique: {{ $receiver }}.unique,
 	}
 }
 
@@ -340,9 +335,9 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 //
 {{- end }}
 func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *{{ $groupBuilder }} {
-	{{ $receiver }}.fields = append([]string{field}, fields...)
+	{{ $receiver }}.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &{{ $groupBuilder }}{build: {{ $receiver }}}
-	grbuild.flds = &{{ $receiver }}.fields
+	grbuild.flds = &{{ $receiver }}.ctx.Fields
 	grbuild.label = {{ $.Package }}.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -367,10 +362,10 @@ func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *
 //
 {{- end }}
 func ({{ $receiver }} *{{ $builder }}) Select(fields ...string) *{{ $selectBuilder }} {
-	{{ $receiver }}.fields = append({{ $receiver }}.fields, fields...)
+	{{ $receiver }}.ctx.Fields = append({{ $receiver }}.ctx.Fields, fields...)
 	sbuild := &{{ $selectBuilder }}{ {{ $builder }}: {{ $receiver }} }
 	sbuild.label = {{ $.Package }}.Label
-	sbuild.flds, sbuild.scan = &{{ $receiver }}.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &{{ $receiver }}.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -447,7 +442,7 @@ func ({{ $groupReceiver }} *{{ $groupBuilder }}) Aggregate(fns ...AggregateFunc)
 
 // Scan applies the selector query and scans the result into the given value.
 func ({{ $groupReceiver }} *{{ $groupBuilder }}) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, {{ $.TypeName }}, "GroupBy")
+	ctx = setContextOp(ctx, {{ $groupReceiver }}.build.ctx, "GroupBy")
 	if err := {{ $groupReceiver }}.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -477,7 +472,7 @@ func ({{ $selectReceiver }} *{{ $selectBuilder }}) Aggregate(fns ...AggregateFun
 
 // Scan applies the selector query and scans the result into the given value.
 func ({{ $selectReceiver }} *{{ $selectBuilder }}) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, {{ $.TypeName }}, "Select")
+	ctx = setContextOp(ctx, {{ $selectReceiver }}.ctx, "Select")
 	if err := {{ $selectReceiver }}.prepareQuery(ctx); err != nil {
 		return err
 	}

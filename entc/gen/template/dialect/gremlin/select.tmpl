@@ -15,15 +15,15 @@ func ({{ $receiver }} *{{ $builder }}) gremlinScan(ctx context.Context, root *{{
 		res = &gremlin.Response{}
 		traversal = root.gremlinQuery(ctx)
 	)
-	if len({{ $receiver }}.fields) == 1 {
-		if {{ $receiver }}.fields[0] != {{ $.Package }}.FieldID {
-			traversal = traversal.Values({{ $receiver }}.fields...)
+	if fields := {{ $receiver }}.ctx.Fields; len(fields) == 1 {
+		if fields[0] != {{ $.Package }}.FieldID {
+			traversal = traversal.Values(fields...)
 		} else {
 			traversal = traversal.ID()
 		}
 	} else {
-		fields := make([]any, len({{ $receiver }}.fields))
-		for i, f := range {{ $receiver }}.fields {
+		fields := make([]any, len({{ $receiver }}.ctx.Fields))
+		for i, f := range {{ $receiver }}.ctx.Fields {
 			fields[i] = f
 		}
 		traversal = traversal.ValueMap(fields...)
@@ -32,7 +32,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinScan(ctx context.Context, root *{{
 	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
-	if len(root.fields) == 1 {
+	if len(root.ctx.Fields) == 1 {
 		return res.ReadVal(v)
 	}
 	vm, err := res.ReadValueMap()

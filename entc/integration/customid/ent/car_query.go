@@ -22,11 +22,8 @@ import (
 // CarQuery is the builder for querying Car entities.
 type CarQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
 	inters     []Interceptor
 	predicates []predicate.Car
 	withOwner  *PetQuery
@@ -44,20 +41,20 @@ func (cq *CarQuery) Where(ps ...predicate.Car) *CarQuery {
 
 // Limit the number of records to be returned by this query.
 func (cq *CarQuery) Limit(limit int) *CarQuery {
-	cq.limit = &limit
+	cq.ctx.Limit = &limit
 	return cq
 }
 
 // Offset to start from.
 func (cq *CarQuery) Offset(offset int) *CarQuery {
-	cq.offset = &offset
+	cq.ctx.Offset = &offset
 	return cq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (cq *CarQuery) Unique(unique bool) *CarQuery {
-	cq.unique = &unique
+	cq.ctx.Unique = &unique
 	return cq
 }
 
@@ -92,7 +89,7 @@ func (cq *CarQuery) QueryOwner() *PetQuery {
 // First returns the first Car entity from the query.
 // Returns a *NotFoundError when no Car was found.
 func (cq *CarQuery) First(ctx context.Context) (*Car, error) {
-	nodes, err := cq.Limit(1).All(newQueryContext(ctx, TypeCar, "First"))
+	nodes, err := cq.Limit(1).All(setContextOp(ctx, cq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +112,7 @@ func (cq *CarQuery) FirstX(ctx context.Context) *Car {
 // Returns a *NotFoundError when no Car ID was found.
 func (cq *CarQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = cq.Limit(1).IDs(newQueryContext(ctx, TypeCar, "FirstID")); err != nil {
+	if ids, err = cq.Limit(1).IDs(setContextOp(ctx, cq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -138,7 +135,7 @@ func (cq *CarQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Car entity is found.
 // Returns a *NotFoundError when no Car entities are found.
 func (cq *CarQuery) Only(ctx context.Context) (*Car, error) {
-	nodes, err := cq.Limit(2).All(newQueryContext(ctx, TypeCar, "Only"))
+	nodes, err := cq.Limit(2).All(setContextOp(ctx, cq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +163,7 @@ func (cq *CarQuery) OnlyX(ctx context.Context) *Car {
 // Returns a *NotFoundError when no entities are found.
 func (cq *CarQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = cq.Limit(2).IDs(newQueryContext(ctx, TypeCar, "OnlyID")); err != nil {
+	if ids, err = cq.Limit(2).IDs(setContextOp(ctx, cq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -191,7 +188,7 @@ func (cq *CarQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Cars.
 func (cq *CarQuery) All(ctx context.Context) ([]*Car, error) {
-	ctx = newQueryContext(ctx, TypeCar, "All")
+	ctx = setContextOp(ctx, cq.ctx, "All")
 	if err := cq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -211,7 +208,7 @@ func (cq *CarQuery) AllX(ctx context.Context) []*Car {
 // IDs executes the query and returns a list of Car IDs.
 func (cq *CarQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
-	ctx = newQueryContext(ctx, TypeCar, "IDs")
+	ctx = setContextOp(ctx, cq.ctx, "IDs")
 	if err := cq.Select(car.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -229,7 +226,7 @@ func (cq *CarQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (cq *CarQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeCar, "Count")
+	ctx = setContextOp(ctx, cq.ctx, "Count")
 	if err := cq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -247,7 +244,7 @@ func (cq *CarQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (cq *CarQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeCar, "Exist")
+	ctx = setContextOp(ctx, cq.ctx, "Exist")
 	switch _, err := cq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -275,16 +272,14 @@ func (cq *CarQuery) Clone() *CarQuery {
 	}
 	return &CarQuery{
 		config:     cq.config,
-		limit:      cq.limit,
-		offset:     cq.offset,
+		ctx:        cq.ctx.Clone(),
 		order:      append([]OrderFunc{}, cq.order...),
 		inters:     append([]Interceptor{}, cq.inters...),
 		predicates: append([]predicate.Car{}, cq.predicates...),
 		withOwner:  cq.withOwner.Clone(),
 		// clone intermediate query.
-		sql:    cq.sql.Clone(),
-		path:   cq.path,
-		unique: cq.unique,
+		sql:  cq.sql.Clone(),
+		path: cq.path,
 	}
 }
 
@@ -314,9 +309,9 @@ func (cq *CarQuery) WithOwner(opts ...func(*PetQuery)) *CarQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (cq *CarQuery) GroupBy(field string, fields ...string) *CarGroupBy {
-	cq.fields = append([]string{field}, fields...)
+	cq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &CarGroupBy{build: cq}
-	grbuild.flds = &cq.fields
+	grbuild.flds = &cq.ctx.Fields
 	grbuild.label = car.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -335,10 +330,10 @@ func (cq *CarQuery) GroupBy(field string, fields ...string) *CarGroupBy {
 //		Select(car.FieldBeforeID).
 //		Scan(ctx, &v)
 func (cq *CarQuery) Select(fields ...string) *CarSelect {
-	cq.fields = append(cq.fields, fields...)
+	cq.ctx.Fields = append(cq.ctx.Fields, fields...)
 	sbuild := &CarSelect{CarQuery: cq}
 	sbuild.label = car.Label
-	sbuild.flds, sbuild.scan = &cq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &cq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -358,7 +353,7 @@ func (cq *CarQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range cq.fields {
+	for _, f := range cq.ctx.Fields {
 		if !car.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -450,9 +445,9 @@ func (cq *CarQuery) loadOwner(ctx context.Context, query *PetQuery, nodes []*Car
 
 func (cq *CarQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := cq.querySpec()
-	_spec.Node.Columns = cq.fields
-	if len(cq.fields) > 0 {
-		_spec.Unique = cq.unique != nil && *cq.unique
+	_spec.Node.Columns = cq.ctx.Fields
+	if len(cq.ctx.Fields) > 0 {
+		_spec.Unique = cq.ctx.Unique != nil && *cq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, cq.driver, _spec)
 }
@@ -470,10 +465,10 @@ func (cq *CarQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   cq.sql,
 		Unique: true,
 	}
-	if unique := cq.unique; unique != nil {
+	if unique := cq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := cq.fields; len(fields) > 0 {
+	if fields := cq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, car.FieldID)
 		for i := range fields {
@@ -489,10 +484,10 @@ func (cq *CarQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := cq.limit; limit != nil {
+	if limit := cq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := cq.offset; offset != nil {
+	if offset := cq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := cq.order; len(ps) > 0 {
@@ -508,7 +503,7 @@ func (cq *CarQuery) querySpec() *sqlgraph.QuerySpec {
 func (cq *CarQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(cq.driver.Dialect())
 	t1 := builder.Table(car.Table)
-	columns := cq.fields
+	columns := cq.ctx.Fields
 	if len(columns) == 0 {
 		columns = car.Columns
 	}
@@ -517,7 +512,7 @@ func (cq *CarQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = cq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if cq.unique != nil && *cq.unique {
+	if cq.ctx.Unique != nil && *cq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range cq.predicates {
@@ -526,12 +521,12 @@ func (cq *CarQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range cq.order {
 		p(selector)
 	}
-	if offset := cq.offset; offset != nil {
+	if offset := cq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := cq.limit; limit != nil {
+	if limit := cq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -551,7 +546,7 @@ func (cgb *CarGroupBy) Aggregate(fns ...AggregateFunc) *CarGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (cgb *CarGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeCar, "GroupBy")
+	ctx = setContextOp(ctx, cgb.build.ctx, "GroupBy")
 	if err := cgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -599,7 +594,7 @@ func (cs *CarSelect) Aggregate(fns ...AggregateFunc) *CarSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (cs *CarSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeCar, "Select")
+	ctx = setContextOp(ctx, cs.ctx, "Select")
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}

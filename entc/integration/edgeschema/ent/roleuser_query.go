@@ -22,11 +22,8 @@ import (
 // RoleUserQuery is the builder for querying RoleUser entities.
 type RoleUserQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
 	inters     []Interceptor
 	predicates []predicate.RoleUser
 	withRole   *RoleQuery
@@ -44,20 +41,20 @@ func (ruq *RoleUserQuery) Where(ps ...predicate.RoleUser) *RoleUserQuery {
 
 // Limit the number of records to be returned by this query.
 func (ruq *RoleUserQuery) Limit(limit int) *RoleUserQuery {
-	ruq.limit = &limit
+	ruq.ctx.Limit = &limit
 	return ruq
 }
 
 // Offset to start from.
 func (ruq *RoleUserQuery) Offset(offset int) *RoleUserQuery {
-	ruq.offset = &offset
+	ruq.ctx.Offset = &offset
 	return ruq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (ruq *RoleUserQuery) Unique(unique bool) *RoleUserQuery {
-	ruq.unique = &unique
+	ruq.ctx.Unique = &unique
 	return ruq
 }
 
@@ -114,7 +111,7 @@ func (ruq *RoleUserQuery) QueryUser() *UserQuery {
 // First returns the first RoleUser entity from the query.
 // Returns a *NotFoundError when no RoleUser was found.
 func (ruq *RoleUserQuery) First(ctx context.Context) (*RoleUser, error) {
-	nodes, err := ruq.Limit(1).All(newQueryContext(ctx, TypeRoleUser, "First"))
+	nodes, err := ruq.Limit(1).All(setContextOp(ctx, ruq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +134,7 @@ func (ruq *RoleUserQuery) FirstX(ctx context.Context) *RoleUser {
 // Returns a *NotSingularError when more than one RoleUser entity is found.
 // Returns a *NotFoundError when no RoleUser entities are found.
 func (ruq *RoleUserQuery) Only(ctx context.Context) (*RoleUser, error) {
-	nodes, err := ruq.Limit(2).All(newQueryContext(ctx, TypeRoleUser, "Only"))
+	nodes, err := ruq.Limit(2).All(setContextOp(ctx, ruq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +159,7 @@ func (ruq *RoleUserQuery) OnlyX(ctx context.Context) *RoleUser {
 
 // All executes the query and returns a list of RoleUsers.
 func (ruq *RoleUserQuery) All(ctx context.Context) ([]*RoleUser, error) {
-	ctx = newQueryContext(ctx, TypeRoleUser, "All")
+	ctx = setContextOp(ctx, ruq.ctx, "All")
 	if err := ruq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -181,7 +178,7 @@ func (ruq *RoleUserQuery) AllX(ctx context.Context) []*RoleUser {
 
 // Count returns the count of the given query.
 func (ruq *RoleUserQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeRoleUser, "Count")
+	ctx = setContextOp(ctx, ruq.ctx, "Count")
 	if err := ruq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -199,7 +196,7 @@ func (ruq *RoleUserQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (ruq *RoleUserQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeRoleUser, "Exist")
+	ctx = setContextOp(ctx, ruq.ctx, "Exist")
 	switch _, err := ruq.First(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -227,17 +224,15 @@ func (ruq *RoleUserQuery) Clone() *RoleUserQuery {
 	}
 	return &RoleUserQuery{
 		config:     ruq.config,
-		limit:      ruq.limit,
-		offset:     ruq.offset,
+		ctx:        ruq.ctx.Clone(),
 		order:      append([]OrderFunc{}, ruq.order...),
 		inters:     append([]Interceptor{}, ruq.inters...),
 		predicates: append([]predicate.RoleUser{}, ruq.predicates...),
 		withRole:   ruq.withRole.Clone(),
 		withUser:   ruq.withUser.Clone(),
 		// clone intermediate query.
-		sql:    ruq.sql.Clone(),
-		path:   ruq.path,
-		unique: ruq.unique,
+		sql:  ruq.sql.Clone(),
+		path: ruq.path,
 	}
 }
 
@@ -278,9 +273,9 @@ func (ruq *RoleUserQuery) WithUser(opts ...func(*UserQuery)) *RoleUserQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (ruq *RoleUserQuery) GroupBy(field string, fields ...string) *RoleUserGroupBy {
-	ruq.fields = append([]string{field}, fields...)
+	ruq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &RoleUserGroupBy{build: ruq}
-	grbuild.flds = &ruq.fields
+	grbuild.flds = &ruq.ctx.Fields
 	grbuild.label = roleuser.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -299,10 +294,10 @@ func (ruq *RoleUserQuery) GroupBy(field string, fields ...string) *RoleUserGroup
 //		Select(roleuser.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (ruq *RoleUserQuery) Select(fields ...string) *RoleUserSelect {
-	ruq.fields = append(ruq.fields, fields...)
+	ruq.ctx.Fields = append(ruq.ctx.Fields, fields...)
 	sbuild := &RoleUserSelect{RoleUserQuery: ruq}
 	sbuild.label = roleuser.Label
-	sbuild.flds, sbuild.scan = &ruq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &ruq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -322,7 +317,7 @@ func (ruq *RoleUserQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range ruq.fields {
+	for _, f := range ruq.ctx.Fields {
 		if !roleuser.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -454,10 +449,10 @@ func (ruq *RoleUserQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   ruq.sql,
 		Unique: true,
 	}
-	if unique := ruq.unique; unique != nil {
+	if unique := ruq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := ruq.fields; len(fields) > 0 {
+	if fields := ruq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		for i := range fields {
 			_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
@@ -470,10 +465,10 @@ func (ruq *RoleUserQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := ruq.limit; limit != nil {
+	if limit := ruq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := ruq.offset; offset != nil {
+	if offset := ruq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := ruq.order; len(ps) > 0 {
@@ -489,7 +484,7 @@ func (ruq *RoleUserQuery) querySpec() *sqlgraph.QuerySpec {
 func (ruq *RoleUserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(ruq.driver.Dialect())
 	t1 := builder.Table(roleuser.Table)
-	columns := ruq.fields
+	columns := ruq.ctx.Fields
 	if len(columns) == 0 {
 		columns = roleuser.Columns
 	}
@@ -498,7 +493,7 @@ func (ruq *RoleUserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = ruq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if ruq.unique != nil && *ruq.unique {
+	if ruq.ctx.Unique != nil && *ruq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range ruq.predicates {
@@ -507,12 +502,12 @@ func (ruq *RoleUserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range ruq.order {
 		p(selector)
 	}
-	if offset := ruq.offset; offset != nil {
+	if offset := ruq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := ruq.limit; limit != nil {
+	if limit := ruq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -532,7 +527,7 @@ func (rugb *RoleUserGroupBy) Aggregate(fns ...AggregateFunc) *RoleUserGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (rugb *RoleUserGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeRoleUser, "GroupBy")
+	ctx = setContextOp(ctx, rugb.build.ctx, "GroupBy")
 	if err := rugb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -580,7 +575,7 @@ func (rus *RoleUserSelect) Aggregate(fns ...AggregateFunc) *RoleUserSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (rus *RoleUserSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeRoleUser, "Select")
+	ctx = setContextOp(ctx, rus.ctx, "Select")
 	if err := rus.prepareQuery(ctx); err != nil {
 		return err
 	}

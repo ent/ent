@@ -298,6 +298,7 @@ func (c *CarClient) DeleteOneID(id uuid.UUID) *CarDeleteOne {
 func (c *CarClient) Query() *CarQuery {
 	return &CarQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeCar},
 		inters: c.Interceptors(),
 	}
 }
@@ -431,6 +432,7 @@ func (c *CardClient) DeleteOneID(id int) *CardDeleteOne {
 func (c *CardClient) Query() *CardQuery {
 	return &CardQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeCard},
 		inters: c.Interceptors(),
 	}
 }
@@ -564,6 +566,7 @@ func (c *InfoClient) DeleteOneID(id int) *InfoDeleteOne {
 func (c *InfoClient) Query() *InfoQuery {
 	return &InfoQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeInfo},
 		inters: c.Interceptors(),
 	}
 }
@@ -697,6 +700,7 @@ func (c *MetadataClient) DeleteOneID(id int) *MetadataDeleteOne {
 func (c *MetadataClient) Query() *MetadataQuery {
 	return &MetadataQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeMetadata},
 		inters: c.Interceptors(),
 	}
 }
@@ -862,6 +866,7 @@ func (c *NodeClient) DeleteOneID(id int) *NodeDeleteOne {
 func (c *NodeClient) Query() *NodeQuery {
 	return &NodeQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeNode},
 		inters: c.Interceptors(),
 	}
 }
@@ -1011,6 +1016,7 @@ func (c *PetClient) DeleteOneID(id int) *PetDeleteOne {
 func (c *PetClient) Query() *PetQuery {
 	return &PetQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypePet},
 		inters: c.Interceptors(),
 	}
 }
@@ -1144,6 +1150,7 @@ func (c *PostClient) DeleteOneID(id int) *PostDeleteOne {
 func (c *PostClient) Query() *PostQuery {
 	return &PostQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypePost},
 		inters: c.Interceptors(),
 	}
 }
@@ -1277,6 +1284,7 @@ func (c *RentalClient) DeleteOneID(id int) *RentalDeleteOne {
 func (c *RentalClient) Query() *RentalQuery {
 	return &RentalQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeRental},
 		inters: c.Interceptors(),
 	}
 }
@@ -1426,6 +1434,7 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeUser},
 		inters: c.Interceptors(),
 	}
 }

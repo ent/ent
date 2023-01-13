@@ -24,11 +24,8 @@ import (
 // PostQuery is the builder for querying Post entities.
 type PostQuery struct {
 	config
-	limit        *int
-	offset       *int
-	unique       *bool
+	ctx          *QueryContext
 	order        []OrderFunc
-	fields       []string
 	inters       []Interceptor
 	predicates   []predicate.Post
 	withAuthor   *UserQuery
@@ -46,20 +43,20 @@ func (pq *PostQuery) Where(ps ...predicate.Post) *PostQuery {
 
 // Limit the number of records to be returned by this query.
 func (pq *PostQuery) Limit(limit int) *PostQuery {
-	pq.limit = &limit
+	pq.ctx.Limit = &limit
 	return pq
 }
 
 // Offset to start from.
 func (pq *PostQuery) Offset(offset int) *PostQuery {
-	pq.offset = &offset
+	pq.ctx.Offset = &offset
 	return pq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (pq *PostQuery) Unique(unique bool) *PostQuery {
-	pq.unique = &unique
+	pq.ctx.Unique = &unique
 	return pq
 }
 
@@ -116,7 +113,7 @@ func (pq *PostQuery) QueryComments() *CommentQuery {
 // First returns the first Post entity from the query.
 // Returns a *NotFoundError when no Post was found.
 func (pq *PostQuery) First(ctx context.Context) (*Post, error) {
-	nodes, err := pq.Limit(1).All(newQueryContext(ctx, TypePost, "First"))
+	nodes, err := pq.Limit(1).All(setContextOp(ctx, pq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +136,7 @@ func (pq *PostQuery) FirstX(ctx context.Context) *Post {
 // Returns a *NotFoundError when no Post ID was found.
 func (pq *PostQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = pq.Limit(1).IDs(newQueryContext(ctx, TypePost, "FirstID")); err != nil {
+	if ids, err = pq.Limit(1).IDs(setContextOp(ctx, pq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -162,7 +159,7 @@ func (pq *PostQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Post entity is found.
 // Returns a *NotFoundError when no Post entities are found.
 func (pq *PostQuery) Only(ctx context.Context) (*Post, error) {
-	nodes, err := pq.Limit(2).All(newQueryContext(ctx, TypePost, "Only"))
+	nodes, err := pq.Limit(2).All(setContextOp(ctx, pq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -190,7 +187,7 @@ func (pq *PostQuery) OnlyX(ctx context.Context) *Post {
 // Returns a *NotFoundError when no entities are found.
 func (pq *PostQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = pq.Limit(2).IDs(newQueryContext(ctx, TypePost, "OnlyID")); err != nil {
+	if ids, err = pq.Limit(2).IDs(setContextOp(ctx, pq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -215,7 +212,7 @@ func (pq *PostQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Posts.
 func (pq *PostQuery) All(ctx context.Context) ([]*Post, error) {
-	ctx = newQueryContext(ctx, TypePost, "All")
+	ctx = setContextOp(ctx, pq.ctx, "All")
 	if err := pq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -235,7 +232,7 @@ func (pq *PostQuery) AllX(ctx context.Context) []*Post {
 // IDs executes the query and returns a list of Post IDs.
 func (pq *PostQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
-	ctx = newQueryContext(ctx, TypePost, "IDs")
+	ctx = setContextOp(ctx, pq.ctx, "IDs")
 	if err := pq.Select(post.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -253,7 +250,7 @@ func (pq *PostQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (pq *PostQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypePost, "Count")
+	ctx = setContextOp(ctx, pq.ctx, "Count")
 	if err := pq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -271,7 +268,7 @@ func (pq *PostQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (pq *PostQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypePost, "Exist")
+	ctx = setContextOp(ctx, pq.ctx, "Exist")
 	switch _, err := pq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -299,17 +296,15 @@ func (pq *PostQuery) Clone() *PostQuery {
 	}
 	return &PostQuery{
 		config:       pq.config,
-		limit:        pq.limit,
-		offset:       pq.offset,
+		ctx:          pq.ctx.Clone(),
 		order:        append([]OrderFunc{}, pq.order...),
 		inters:       append([]Interceptor{}, pq.inters...),
 		predicates:   append([]predicate.Post{}, pq.predicates...),
 		withAuthor:   pq.withAuthor.Clone(),
 		withComments: pq.withComments.Clone(),
 		// clone intermediate query.
-		sql:    pq.sql.Clone(),
-		path:   pq.path,
-		unique: pq.unique,
+		sql:  pq.sql.Clone(),
+		path: pq.path,
 	}
 }
 
@@ -350,9 +345,9 @@ func (pq *PostQuery) WithComments(opts ...func(*CommentQuery)) *PostQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (pq *PostQuery) GroupBy(field string, fields ...string) *PostGroupBy {
-	pq.fields = append([]string{field}, fields...)
+	pq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &PostGroupBy{build: pq}
-	grbuild.flds = &pq.fields
+	grbuild.flds = &pq.ctx.Fields
 	grbuild.label = post.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -371,10 +366,10 @@ func (pq *PostQuery) GroupBy(field string, fields ...string) *PostGroupBy {
 //		Select(post.FieldText).
 //		Scan(ctx, &v)
 func (pq *PostQuery) Select(fields ...string) *PostSelect {
-	pq.fields = append(pq.fields, fields...)
+	pq.ctx.Fields = append(pq.ctx.Fields, fields...)
 	sbuild := &PostSelect{PostQuery: pq}
 	sbuild.label = post.Label
-	sbuild.flds, sbuild.scan = &pq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &pq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -394,7 +389,7 @@ func (pq *PostQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range pq.fields {
+	for _, f := range pq.ctx.Fields {
 		if !post.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -511,9 +506,9 @@ func (pq *PostQuery) loadComments(ctx context.Context, query *CommentQuery, node
 
 func (pq *PostQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := pq.querySpec()
-	_spec.Node.Columns = pq.fields
-	if len(pq.fields) > 0 {
-		_spec.Unique = pq.unique != nil && *pq.unique
+	_spec.Node.Columns = pq.ctx.Fields
+	if len(pq.ctx.Fields) > 0 {
+		_spec.Unique = pq.ctx.Unique != nil && *pq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, pq.driver, _spec)
 }
@@ -531,10 +526,10 @@ func (pq *PostQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   pq.sql,
 		Unique: true,
 	}
-	if unique := pq.unique; unique != nil {
+	if unique := pq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := pq.fields; len(fields) > 0 {
+	if fields := pq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, post.FieldID)
 		for i := range fields {
@@ -550,10 +545,10 @@ func (pq *PostQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := pq.limit; limit != nil {
+	if limit := pq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := pq.offset; offset != nil {
+	if offset := pq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := pq.order; len(ps) > 0 {
@@ -569,7 +564,7 @@ func (pq *PostQuery) querySpec() *sqlgraph.QuerySpec {
 func (pq *PostQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(pq.driver.Dialect())
 	t1 := builder.Table(post.Table)
-	columns := pq.fields
+	columns := pq.ctx.Fields
 	if len(columns) == 0 {
 		columns = post.Columns
 	}
@@ -578,7 +573,7 @@ func (pq *PostQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = pq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if pq.unique != nil && *pq.unique {
+	if pq.ctx.Unique != nil && *pq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range pq.predicates {
@@ -587,12 +582,12 @@ func (pq *PostQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range pq.order {
 		p(selector)
 	}
-	if offset := pq.offset; offset != nil {
+	if offset := pq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := pq.limit; limit != nil {
+	if limit := pq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -612,7 +607,7 @@ func (pgb *PostGroupBy) Aggregate(fns ...AggregateFunc) *PostGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (pgb *PostGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypePost, "GroupBy")
+	ctx = setContextOp(ctx, pgb.build.ctx, "GroupBy")
 	if err := pgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -660,7 +655,7 @@ func (ps *PostSelect) Aggregate(fns ...AggregateFunc) *PostSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ps *PostSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypePost, "Select")
+	ctx = setContextOp(ctx, ps.ctx, "Select")
 	if err := ps.prepareQuery(ctx); err != nil {
 		return err
 	}

@@ -22,11 +22,8 @@ import (
 // BlobLinkQuery is the builder for querying BlobLink entities.
 type BlobLinkQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
 	inters     []Interceptor
 	predicates []predicate.BlobLink
 	withBlob   *BlobQuery
@@ -44,20 +41,20 @@ func (blq *BlobLinkQuery) Where(ps ...predicate.BlobLink) *BlobLinkQuery {
 
 // Limit the number of records to be returned by this query.
 func (blq *BlobLinkQuery) Limit(limit int) *BlobLinkQuery {
-	blq.limit = &limit
+	blq.ctx.Limit = &limit
 	return blq
 }
 
 // Offset to start from.
 func (blq *BlobLinkQuery) Offset(offset int) *BlobLinkQuery {
-	blq.offset = &offset
+	blq.ctx.Offset = &offset
 	return blq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (blq *BlobLinkQuery) Unique(unique bool) *BlobLinkQuery {
-	blq.unique = &unique
+	blq.ctx.Unique = &unique
 	return blq
 }
 
@@ -114,7 +111,7 @@ func (blq *BlobLinkQuery) QueryLink() *BlobQuery {
 // First returns the first BlobLink entity from the query.
 // Returns a *NotFoundError when no BlobLink was found.
 func (blq *BlobLinkQuery) First(ctx context.Context) (*BlobLink, error) {
-	nodes, err := blq.Limit(1).All(newQueryContext(ctx, TypeBlobLink, "First"))
+	nodes, err := blq.Limit(1).All(setContextOp(ctx, blq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +134,7 @@ func (blq *BlobLinkQuery) FirstX(ctx context.Context) *BlobLink {
 // Returns a *NotSingularError when more than one BlobLink entity is found.
 // Returns a *NotFoundError when no BlobLink entities are found.
 func (blq *BlobLinkQuery) Only(ctx context.Context) (*BlobLink, error) {
-	nodes, err := blq.Limit(2).All(newQueryContext(ctx, TypeBlobLink, "Only"))
+	nodes, err := blq.Limit(2).All(setContextOp(ctx, blq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +159,7 @@ func (blq *BlobLinkQuery) OnlyX(ctx context.Context) *BlobLink {
 
 // All executes the query and returns a list of BlobLinks.
 func (blq *BlobLinkQuery) All(ctx context.Context) ([]*BlobLink, error) {
-	ctx = newQueryContext(ctx, TypeBlobLink, "All")
+	ctx = setContextOp(ctx, blq.ctx, "All")
 	if err := blq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -181,7 +178,7 @@ func (blq *BlobLinkQuery) AllX(ctx context.Context) []*BlobLink {
 
 // Count returns the count of the given query.
 func (blq *BlobLinkQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeBlobLink, "Count")
+	ctx = setContextOp(ctx, blq.ctx, "Count")
 	if err := blq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -199,7 +196,7 @@ func (blq *BlobLinkQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (blq *BlobLinkQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeBlobLink, "Exist")
+	ctx = setContextOp(ctx, blq.ctx, "Exist")
 	switch _, err := blq.First(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -227,17 +224,15 @@ func (blq *BlobLinkQuery) Clone() *BlobLinkQuery {
 	}
 	return &BlobLinkQuery{
 		config:     blq.config,
-		limit:      blq.limit,
-		offset:     blq.offset,
+		ctx:        blq.ctx.Clone(),
 		order:      append([]OrderFunc{}, blq.order...),
 		inters:     append([]Interceptor{}, blq.inters...),
 		predicates: append([]predicate.BlobLink{}, blq.predicates...),
 		withBlob:   blq.withBlob.Clone(),
 		withLink:   blq.withLink.Clone(),
 		// clone intermediate query.
-		sql:    blq.sql.Clone(),
-		path:   blq.path,
-		unique: blq.unique,
+		sql:  blq.sql.Clone(),
+		path: blq.path,
 	}
 }
 
@@ -278,9 +273,9 @@ func (blq *BlobLinkQuery) WithLink(opts ...func(*BlobQuery)) *BlobLinkQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (blq *BlobLinkQuery) GroupBy(field string, fields ...string) *BlobLinkGroupBy {
-	blq.fields = append([]string{field}, fields...)
+	blq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &BlobLinkGroupBy{build: blq}
-	grbuild.flds = &blq.fields
+	grbuild.flds = &blq.ctx.Fields
 	grbuild.label = bloblink.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -299,10 +294,10 @@ func (blq *BlobLinkQuery) GroupBy(field string, fields ...string) *BlobLinkGroup
 //		Select(bloblink.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (blq *BlobLinkQuery) Select(fields ...string) *BlobLinkSelect {
-	blq.fields = append(blq.fields, fields...)
+	blq.ctx.Fields = append(blq.ctx.Fields, fields...)
 	sbuild := &BlobLinkSelect{BlobLinkQuery: blq}
 	sbuild.label = bloblink.Label
-	sbuild.flds, sbuild.scan = &blq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &blq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -322,7 +317,7 @@ func (blq *BlobLinkQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range blq.fields {
+	for _, f := range blq.ctx.Fields {
 		if !bloblink.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -454,10 +449,10 @@ func (blq *BlobLinkQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   blq.sql,
 		Unique: true,
 	}
-	if unique := blq.unique; unique != nil {
+	if unique := blq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := blq.fields; len(fields) > 0 {
+	if fields := blq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		for i := range fields {
 			_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
@@ -470,10 +465,10 @@ func (blq *BlobLinkQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := blq.limit; limit != nil {
+	if limit := blq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := blq.offset; offset != nil {
+	if offset := blq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := blq.order; len(ps) > 0 {
@@ -489,7 +484,7 @@ func (blq *BlobLinkQuery) querySpec() *sqlgraph.QuerySpec {
 func (blq *BlobLinkQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(blq.driver.Dialect())
 	t1 := builder.Table(bloblink.Table)
-	columns := blq.fields
+	columns := blq.ctx.Fields
 	if len(columns) == 0 {
 		columns = bloblink.Columns
 	}
@@ -498,7 +493,7 @@ func (blq *BlobLinkQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = blq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if blq.unique != nil && *blq.unique {
+	if blq.ctx.Unique != nil && *blq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range blq.predicates {
@@ -507,12 +502,12 @@ func (blq *BlobLinkQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range blq.order {
 		p(selector)
 	}
-	if offset := blq.offset; offset != nil {
+	if offset := blq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := blq.limit; limit != nil {
+	if limit := blq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -532,7 +527,7 @@ func (blgb *BlobLinkGroupBy) Aggregate(fns ...AggregateFunc) *BlobLinkGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (blgb *BlobLinkGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeBlobLink, "GroupBy")
+	ctx = setContextOp(ctx, blgb.build.ctx, "GroupBy")
 	if err := blgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -580,7 +575,7 @@ func (bls *BlobLinkSelect) Aggregate(fns ...AggregateFunc) *BlobLinkSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (bls *BlobLinkSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeBlobLink, "Select")
+	ctx = setContextOp(ctx, bls.ctx, "Select")
 	if err := bls.prepareQuery(ctx); err != nil {
 		return err
 	}

@@ -21,11 +21,8 @@ import (
 // CustomTypeQuery is the builder for querying CustomType entities.
 type CustomTypeQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
 	inters     []Interceptor
 	predicates []predicate.CustomType
 	// intermediate query (i.e. traversal path).
@@ -41,20 +38,20 @@ func (ctq *CustomTypeQuery) Where(ps ...predicate.CustomType) *CustomTypeQuery {
 
 // Limit the number of records to be returned by this query.
 func (ctq *CustomTypeQuery) Limit(limit int) *CustomTypeQuery {
-	ctq.limit = &limit
+	ctq.ctx.Limit = &limit
 	return ctq
 }
 
 // Offset to start from.
 func (ctq *CustomTypeQuery) Offset(offset int) *CustomTypeQuery {
-	ctq.offset = &offset
+	ctq.ctx.Offset = &offset
 	return ctq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (ctq *CustomTypeQuery) Unique(unique bool) *CustomTypeQuery {
-	ctq.unique = &unique
+	ctq.ctx.Unique = &unique
 	return ctq
 }
 
@@ -67,7 +64,7 @@ func (ctq *CustomTypeQuery) Order(o ...OrderFunc) *CustomTypeQuery {
 // First returns the first CustomType entity from the query.
 // Returns a *NotFoundError when no CustomType was found.
 func (ctq *CustomTypeQuery) First(ctx context.Context) (*CustomType, error) {
-	nodes, err := ctq.Limit(1).All(newQueryContext(ctx, TypeCustomType, "First"))
+	nodes, err := ctq.Limit(1).All(setContextOp(ctx, ctq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +87,7 @@ func (ctq *CustomTypeQuery) FirstX(ctx context.Context) *CustomType {
 // Returns a *NotFoundError when no CustomType ID was found.
 func (ctq *CustomTypeQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = ctq.Limit(1).IDs(newQueryContext(ctx, TypeCustomType, "FirstID")); err != nil {
+	if ids, err = ctq.Limit(1).IDs(setContextOp(ctx, ctq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -113,7 +110,7 @@ func (ctq *CustomTypeQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one CustomType entity is found.
 // Returns a *NotFoundError when no CustomType entities are found.
 func (ctq *CustomTypeQuery) Only(ctx context.Context) (*CustomType, error) {
-	nodes, err := ctq.Limit(2).All(newQueryContext(ctx, TypeCustomType, "Only"))
+	nodes, err := ctq.Limit(2).All(setContextOp(ctx, ctq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +138,7 @@ func (ctq *CustomTypeQuery) OnlyX(ctx context.Context) *CustomType {
 // Returns a *NotFoundError when no entities are found.
 func (ctq *CustomTypeQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = ctq.Limit(2).IDs(newQueryContext(ctx, TypeCustomType, "OnlyID")); err != nil {
+	if ids, err = ctq.Limit(2).IDs(setContextOp(ctx, ctq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -166,7 +163,7 @@ func (ctq *CustomTypeQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of CustomTypes.
 func (ctq *CustomTypeQuery) All(ctx context.Context) ([]*CustomType, error) {
-	ctx = newQueryContext(ctx, TypeCustomType, "All")
+	ctx = setContextOp(ctx, ctq.ctx, "All")
 	if err := ctq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -186,7 +183,7 @@ func (ctq *CustomTypeQuery) AllX(ctx context.Context) []*CustomType {
 // IDs executes the query and returns a list of CustomType IDs.
 func (ctq *CustomTypeQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
-	ctx = newQueryContext(ctx, TypeCustomType, "IDs")
+	ctx = setContextOp(ctx, ctq.ctx, "IDs")
 	if err := ctq.Select(customtype.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -204,7 +201,7 @@ func (ctq *CustomTypeQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (ctq *CustomTypeQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeCustomType, "Count")
+	ctx = setContextOp(ctx, ctq.ctx, "Count")
 	if err := ctq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -222,7 +219,7 @@ func (ctq *CustomTypeQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (ctq *CustomTypeQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeCustomType, "Exist")
+	ctx = setContextOp(ctx, ctq.ctx, "Exist")
 	switch _, err := ctq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -250,15 +247,13 @@ func (ctq *CustomTypeQuery) Clone() *CustomTypeQuery {
 	}
 	return &CustomTypeQuery{
 		config:     ctq.config,
-		limit:      ctq.limit,
-		offset:     ctq.offset,
+		ctx:        ctq.ctx.Clone(),
 		order:      append([]OrderFunc{}, ctq.order...),
 		inters:     append([]Interceptor{}, ctq.inters...),
 		predicates: append([]predicate.CustomType{}, ctq.predicates...),
 		// clone intermediate query.
-		sql:    ctq.sql.Clone(),
-		path:   ctq.path,
-		unique: ctq.unique,
+		sql:  ctq.sql.Clone(),
+		path: ctq.path,
 	}
 }
 
@@ -277,9 +272,9 @@ func (ctq *CustomTypeQuery) Clone() *CustomTypeQuery {
 //		Aggregate(entv2.Count()).
 //		Scan(ctx, &v)
 func (ctq *CustomTypeQuery) GroupBy(field string, fields ...string) *CustomTypeGroupBy {
-	ctq.fields = append([]string{field}, fields...)
+	ctq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &CustomTypeGroupBy{build: ctq}
-	grbuild.flds = &ctq.fields
+	grbuild.flds = &ctq.ctx.Fields
 	grbuild.label = customtype.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -298,10 +293,10 @@ func (ctq *CustomTypeQuery) GroupBy(field string, fields ...string) *CustomTypeG
 //		Select(customtype.FieldCustom).
 //		Scan(ctx, &v)
 func (ctq *CustomTypeQuery) Select(fields ...string) *CustomTypeSelect {
-	ctq.fields = append(ctq.fields, fields...)
+	ctq.ctx.Fields = append(ctq.ctx.Fields, fields...)
 	sbuild := &CustomTypeSelect{CustomTypeQuery: ctq}
 	sbuild.label = customtype.Label
-	sbuild.flds, sbuild.scan = &ctq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &ctq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -321,7 +316,7 @@ func (ctq *CustomTypeQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range ctq.fields {
+	for _, f := range ctq.ctx.Fields {
 		if !customtype.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("entv2: invalid field %q for query", f)}
 		}
@@ -363,9 +358,9 @@ func (ctq *CustomTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 
 func (ctq *CustomTypeQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := ctq.querySpec()
-	_spec.Node.Columns = ctq.fields
-	if len(ctq.fields) > 0 {
-		_spec.Unique = ctq.unique != nil && *ctq.unique
+	_spec.Node.Columns = ctq.ctx.Fields
+	if len(ctq.ctx.Fields) > 0 {
+		_spec.Unique = ctq.ctx.Unique != nil && *ctq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, ctq.driver, _spec)
 }
@@ -383,10 +378,10 @@ func (ctq *CustomTypeQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   ctq.sql,
 		Unique: true,
 	}
-	if unique := ctq.unique; unique != nil {
+	if unique := ctq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := ctq.fields; len(fields) > 0 {
+	if fields := ctq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, customtype.FieldID)
 		for i := range fields {
@@ -402,10 +397,10 @@ func (ctq *CustomTypeQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := ctq.limit; limit != nil {
+	if limit := ctq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := ctq.offset; offset != nil {
+	if offset := ctq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := ctq.order; len(ps) > 0 {
@@ -421,7 +416,7 @@ func (ctq *CustomTypeQuery) querySpec() *sqlgraph.QuerySpec {
 func (ctq *CustomTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(ctq.driver.Dialect())
 	t1 := builder.Table(customtype.Table)
-	columns := ctq.fields
+	columns := ctq.ctx.Fields
 	if len(columns) == 0 {
 		columns = customtype.Columns
 	}
@@ -430,7 +425,7 @@ func (ctq *CustomTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = ctq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if ctq.unique != nil && *ctq.unique {
+	if ctq.ctx.Unique != nil && *ctq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range ctq.predicates {
@@ -439,12 +434,12 @@ func (ctq *CustomTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range ctq.order {
 		p(selector)
 	}
-	if offset := ctq.offset; offset != nil {
+	if offset := ctq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := ctq.limit; limit != nil {
+	if limit := ctq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -464,7 +459,7 @@ func (ctgb *CustomTypeGroupBy) Aggregate(fns ...AggregateFunc) *CustomTypeGroupB
 
 // Scan applies the selector query and scans the result into the given value.
 func (ctgb *CustomTypeGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeCustomType, "GroupBy")
+	ctx = setContextOp(ctx, ctgb.build.ctx, "GroupBy")
 	if err := ctgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -512,7 +507,7 @@ func (cts *CustomTypeSelect) Aggregate(fns ...AggregateFunc) *CustomTypeSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (cts *CustomTypeSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeCustomType, "Select")
+	ctx = setContextOp(ctx, cts.ctx, "Select")
 	if err := cts.prepareQuery(ctx); err != nil {
 		return err
 	}

@@ -2086,6 +2086,7 @@ var (
 	// private fields used by the different builders.
 	privateField = names(
 		"config",
+		"ctx",
 		"done",
 		"hooks",
 		"inters",
