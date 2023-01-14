@@ -68,8 +68,8 @@ backwards-compatibility with previous versions of ent.
 {{/* register schema handlers to type packages */}}
 {{ define "runtime/register" }}
 import (
-	{{- with $.Config.Schema }}
-		"{{ . }}"
+	{{- with $.Config }}
+		{{ .SchemaPackageBase }} "{{ .Schema }}"
 	{{- end }}
 	{{- range $n := $.Nodes }}
 		{{ $n.PackageAlias }} "{{ $.Config.Package }}/{{ $n.PackageDir }}"
@@ -88,7 +88,7 @@ import (
 func init() {
 {{- range $n := $.Nodes }}
 	{{- $pkg := $n.Package }}
-	{{- $schema := base $.Config.Schema }}
+	{{- $schema := $.Config.SchemaPackageBase }}
 	{{- with $n.RuntimeMixin }}
 		{{ $pkg }}Mixin := {{ $schema }}.{{ $n.Name }}{}.Mixin()
 	{{- end }}

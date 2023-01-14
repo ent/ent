@@ -891,6 +891,16 @@ func (g *Graph) templates() (*Template, []GraphTemplate) {
 	return templates, external
 }
 
+// SchemaPackageBaseName returns the base name of the schema package.
+func (c Config) SchemaPackageBase() string {
+	base := filepath.Base(c.Schema)
+	// Specifically look for a collision with the "ent" package:
+	if base == "ent" {
+		return "entschema"
+	}
+	return base
+}
+
 // ModuleInfo returns the entgo.io/ent version.
 func (Config) ModuleInfo() (m debug.Module) {
 	const pkg = "entgo.io/ent"
