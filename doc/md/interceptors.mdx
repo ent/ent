@@ -365,8 +365,11 @@ function:
 ```go
 client.Intercept(
     intercept.Func(func(ctx context.Context, q intercept.Query) error {
-		// LimitInterceptor limits the number of records returned from the database to 1000.
-		q.Limit(1000)
+		// LimitInterceptor limits the number of records returned from
+		// the database to 1000, in case Limit was not explicitly set.
+		if ent.QueryFromContext(ctx).Limit == nil {
+			q.Limit(1000)
+		}
 		return nil
 	}),
 )
@@ -383,12 +386,17 @@ The example below demonstrates how to write a generic interceptor that can be us
 // Project-level example. The usage of "entgo" package emphasizes that this interceptor does not rely on any generated code.
 func SharedLimiter[Q interface{ Limit(int) }](f func(entgo.Query) (Q, error), limit int) entgo.Interceptor {
 	return entgo.InterceptFunc(func(next entgo.Querier) entgo.Querier {
-		return entgo.QuerierFunc(func(ctx context.Context, query entgo.Query) (ent.Value, error) {
+		return entgo.QuerierFunc(func(ctx context.Context, query entgo.Query) (entgo.Value, error) {
 			l, err := f(query)
 			if err != nil {
 				return nil, err
 			}
 			l.Limit(limit)
+			// LimitInterceptor limits the number of records returned from the
+			// database to the configured one, in case Limit was not explicitly set.
+			if entgo.QueryFromContext(ctx).Limit == nil {
+				l.Limit(limit)
+			}
 			return next.Query(ctx, query)
 		})
 	})
