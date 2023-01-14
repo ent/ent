@@ -730,10 +730,11 @@ func TestSharedInterceptor(t *testing.T) {
 	require.Len(t, client.User.Query().AllX(ctx), 2)
 	client.Intercept(SharedLimiter(intercept.NewQuery, 1))
 	require.Len(t, client.User.Query().AllX(ctx), 1)
+	require.Len(t, client.User.Query().Limit(10).AllX(ctx), 2)
 }
 
 // Project-level example. The usage of "entgo" package demonstrates how to
-// write a generic interceptor that can be  used by any ent-based project.
+// write a generic interceptor that can be used by any ent-based project.
 func SharedLimiter[Q interface{ Limit(int) }](f func(entgo.Query) (Q, error), limit int) entgo.Interceptor {
 	return entgo.InterceptFunc(func(next entgo.Querier) entgo.Querier {
 		return entgo.QuerierFunc(func(ctx context.Context, query entgo.Query) (ent.Value, error) {
@@ -741,7 +742,11 @@ func SharedLimiter[Q interface{ Limit(int) }](f func(entgo.Query) (Q, error), li
 			if err != nil {
 				return nil, err
 			}
-			l.Limit(limit)
+			// LimitInterceptor limits the number of records returned from the
+			// database to the configured one, in case Limit was not explicitly set.
+			if entgo.QueryFromContext(ctx).Limit == nil {
+				l.Limit(limit)
+			}
 			return next.Query(ctx, query)
 		})
 	})
