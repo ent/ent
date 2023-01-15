@@ -15,7 +15,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/role"
 	"entgo.io/ent/entc/integration/edgeschema/ent/roleuser"
-	"entgo.io/ent/entc/integration/edgeschema/ent/schema"
+	schema "entgo.io/ent/entc/integration/edgeschema/ent/schema"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"

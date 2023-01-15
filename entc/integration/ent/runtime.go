@@ -21,6 +21,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/license"
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/schema"
+	schema "entgo.io/ent/entc/integration/ent/schema"
 	"entgo.io/ent/entc/integration/ent/schema/task"
 	enttask "entgo.io/ent/entc/integration/ent/task"
 	"entgo.io/ent/entc/integration/ent/user"

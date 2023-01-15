@@ -9,7 +9,7 @@ package runtime
 import (
 	"context"
 
-	"entgo.io/ent/entc/integration/privacy/ent/schema"
+	schema "entgo.io/ent/entc/integration/privacy/ent/schema"
 	"entgo.io/ent/entc/integration/privacy/ent/task"
 	"entgo.io/ent/entc/integration/privacy/ent/team"
 	"entgo.io/ent/entc/integration/privacy/ent/user"

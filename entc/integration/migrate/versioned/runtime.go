@@ -7,7 +7,7 @@
 package versioned
 
 import (
-	"entgo.io/ent/entc/integration/migrate/versioned/schema"
+	schema "entgo.io/ent/entc/integration/migrate/versioned/schema"
 	"entgo.io/ent/entc/integration/migrate/versioned/user"
 )
 

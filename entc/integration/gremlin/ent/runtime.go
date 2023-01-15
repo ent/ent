@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"entgo.io/ent/entc/integration/ent/schema"
+	schema "entgo.io/ent/entc/integration/ent/schema"
 	"entgo.io/ent/entc/integration/ent/schema/task"
 	"entgo.io/ent/entc/integration/gremlin/ent/card"
 	"entgo.io/ent/entc/integration/gremlin/ent/fieldtype"
