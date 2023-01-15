@@ -9,7 +9,7 @@ package entv2
 import (
 	"time"
 
-	schema "entgo.io/ent/entc/integration/migrate/entv2/schema"
+	"entgo.io/ent/entc/integration/migrate/entv2/schema"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
 )
 

@@ -7,7 +7,7 @@
 package entv1
 
 import (
-	schema "entgo.io/ent/entc/integration/migrate/entv1/schema"
+	"entgo.io/ent/entc/integration/migrate/entv1/schema"
 	"entgo.io/ent/entc/integration/migrate/entv1/user"
 )
 

@@ -10,7 +10,6 @@ import (
 	"net/http"
 
 	"entgo.io/ent/entc/integration/json/ent/schema"
-	schema "entgo.io/ent/entc/integration/json/ent/schema"
 	"entgo.io/ent/entc/integration/json/ent/user"
 )
 

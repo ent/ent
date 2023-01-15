@@ -69,7 +69,7 @@ backwards-compatibility with previous versions of ent.
 {{ define "runtime/register" }}
 import (
 	{{- with $.Config }}
-		{{ .SchemaPackageBase }} "{{ .Schema }}"
+		{{ if .SchemaPackageAlias }}{{ .SchemaPackageAlias }}{{ end }} "{{ .Schema }}"
 	{{- end }}
 	{{- range $n := $.Nodes }}
 		{{ $n.PackageAlias }} "{{ $.Config.Package }}/{{ $n.PackageDir }}"

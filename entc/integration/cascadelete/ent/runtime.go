@@ -8,7 +8,7 @@ package ent
 
 import (
 	"entgo.io/ent/entc/integration/cascadelete/ent/post"
-	schema "entgo.io/ent/entc/integration/cascadelete/ent/schema"
+	"entgo.io/ent/entc/integration/cascadelete/ent/schema"
 	"entgo.io/ent/entc/integration/cascadelete/ent/user"
 )
 

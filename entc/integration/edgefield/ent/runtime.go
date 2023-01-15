@@ -13,7 +13,7 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/metadata"
 	"entgo.io/ent/entc/integration/edgefield/ent/node"
 	"entgo.io/ent/entc/integration/edgefield/ent/rental"
-	schema "entgo.io/ent/entc/integration/edgefield/ent/schema"
+	"entgo.io/ent/entc/integration/edgefield/ent/schema"
 	"github.com/google/uuid"
 )
 
