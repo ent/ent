@@ -120,6 +120,9 @@ func (c *Config) load() (*SchemaSpec, error) {
 	if len(pkg.Errors) != 0 {
 		return nil, pkg.Errors[0]
 	}
+	if len(entPkg.Errors) != 0 {
+		return nil, entPkg.Errors[0]
+	}
 	if pkgs[0].PkgPath != entInterface.PkgPath() {
 		entPkg, pkg = pkgs[1], pkgs[0]
 	}
