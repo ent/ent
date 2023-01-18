@@ -789,7 +789,17 @@ func (a *Atlas) diff(ctx context.Context, name string, current, desired *schema.
 	if err != nil {
 		return nil, err
 	}
-	plan, err := a.atDriver.PlanChanges(ctx, name, changes, opts...)
+	filtered := make([]schema.Change, 0, len(changes))
+	for _, c := range changes {
+		// Skip any table drops explicitly. The reason we may encounter this, even though specific tables are passed
+		// to Inspect, is if the MySQL system variable 'lower_case_table_names' is set to 1. In such a case, the given
+		// tables will be returned from inspection because MySQL compares case-insensitive, but they won't match when
+		// compare them in code.
+		if _, ok := c.(*schema.DropTable); !ok {
+			filtered = append(filtered, c)
+		}
+	}
+	plan, err := a.atDriver.PlanChanges(ctx, name, filtered, opts...)
 	if err != nil {
 		return nil, err
 	}
