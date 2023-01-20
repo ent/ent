@@ -128,30 +128,30 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 				return err
 			}
 			qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-                return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-                    assign := spec.Assign
-                    values := spec.ScanValues
-                    {{- $out := "sql.NullInt64" }}{{ if $.ID.UserDefined }}{{ $out = $.ID.ScanType }}{{ end }}
-                    {{- $in := "sql.NullInt64" }}{{ if $e.Type.ID.UserDefined }}{{ $in = $e.Type.ID.ScanType }}{{ end }}
-                    spec.ScanValues = func(columns []string) ([]any, error) {
-                        values, err := values(columns[1:])
-                        if err != nil {
-                            return nil, err
-                        }
-                        return append([]any{new({{ $out }})}, values...), nil
-                    }
-                    spec.Assign = func(columns []string, values []any) error {
-                        outValue := {{ with extend $ "Arg" "values[0]" "Field" $.ID "ScanType" $out }}{{ template "dialect/sql/query/eagerloading/m2massign" . }}{{ end }}
-                        inValue := {{ with extend $ "Arg" "values[1]" "Field" $e.Type.ID "ScanType" $in }}{{ template "dialect/sql/query/eagerloading/m2massign" . }}{{ end }}
-                        if nids[inValue] == nil {
-                            nids[inValue] = map[*{{ $.Name }}]struct{}{byID[outValue]: {}}
-                            return assign(columns[1:], values[1:])
-                        }
-                        nids[inValue][byID[outValue]] = struct{}{}
-                        return nil
-                    }
-                })
-            })
+				return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+					assign := spec.Assign
+					values := spec.ScanValues
+					{{- $out := "sql.NullInt64" }}{{ if $.ID.UserDefined }}{{ $out = $.ID.ScanType }}{{ end }}
+					{{- $in := "sql.NullInt64" }}{{ if $e.Type.ID.UserDefined }}{{ $in = $e.Type.ID.ScanType }}{{ end }}
+					spec.ScanValues = func(columns []string) ([]any, error) {
+						values, err := values(columns[1:])
+						if err != nil {
+							return nil, err
+						}
+						return append([]any{new({{ $out }})}, values...), nil
+					}
+					spec.Assign = func(columns []string, values []any) error {
+						outValue := {{ with extend $ "Arg" "values[0]" "Field" $.ID "ScanType" $out }}{{ template "dialect/sql/query/eagerloading/m2massign" . }}{{ end }}
+						inValue := {{ with extend $ "Arg" "values[1]" "Field" $e.Type.ID "ScanType" $in }}{{ template "dialect/sql/query/eagerloading/m2massign" . }}{{ end }}
+						if nids[inValue] == nil {
+							nids[inValue] = map[*{{ $.Name }}]struct{}{byID[outValue]: {}}
+							return assign(columns[1:], values[1:])
+						}
+						nids[inValue][byID[outValue]] = struct{}{}
+						return nil
+					}
+				})
+			})
 			neighbors, err :=  withInterceptors[[]*{{ $e.Type.Name }}](ctx, query, qr, query.inters)
 			if err != nil {
 				return err
