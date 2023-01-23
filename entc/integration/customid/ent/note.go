@@ -156,3 +156,11 @@ func (n Notes) config(cfg config) {
 		n[_i].config = cfg
 	}
 }
+
+func (n Notes) IDs() []schema.NoteID {
+	ids := make([]schema.NoteID, len(n))
+	for _i := range n {
+		ids[_i] = n[_i].ID
+	}
+	return ids
+}

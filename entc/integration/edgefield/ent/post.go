@@ -146,3 +146,11 @@ func (po Posts) config(cfg config) {
 		po[_i].config = cfg
 	}
 }
+
+func (po Posts) IDs() []int {
+	ids := make([]int, len(po))
+	for _i := range po {
+		ids[_i] = po[_i].ID
+	}
+	return ids
+}

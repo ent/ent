@@ -113,3 +113,11 @@ func (l Licenses) config(cfg config) {
 		l[_i].config = cfg
 	}
 }
+
+func (l Licenses) IDs() []int {
+	ids := make([]int, len(l))
+	for _i := range l {
+		ids[_i] = l[_i].ID
+	}
+	return ids
+}

@@ -176,3 +176,11 @@ func (ut UserTweets) config(cfg config) {
 		ut[_i].config = cfg
 	}
 }
+
+func (ut UserTweets) IDs() []int {
+	ids := make([]int, len(ut))
+	for _i := range ut {
+		ids[_i] = ut[_i].ID
+	}
+	return ids
+}

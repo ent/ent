@@ -146,3 +146,11 @@ func (c Comments) config(cfg config) {
 		c[_i].config = cfg
 	}
 }
+
+func (c Comments) IDs() []string {
+	ids := make([]string, len(c))
+	for _i := range c {
+		ids[_i] = c[_i].ID
+	}
+	return ids
+}

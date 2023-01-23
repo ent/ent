@@ -131,3 +131,11 @@ func (s Sessions) config(cfg config) {
 		s[_i].config = cfg
 	}
 }
+
+func (s Sessions) IDs() []schema.ID {
+	ids := make([]schema.ID, len(s))
+	for _i := range s {
+		ids[_i] = s[_i].ID
+	}
+	return ids
+}

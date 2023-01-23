@@ -185,3 +185,11 @@ func (b Blobs) config(cfg config) {
 		b[_i].config = cfg
 	}
 }
+
+func (b Blobs) IDs() []uuid.UUID {
+	ids := make([]uuid.UUID, len(b))
+	for _i := range b {
+		ids[_i] = b[_i].ID
+	}
+	return ids
+}

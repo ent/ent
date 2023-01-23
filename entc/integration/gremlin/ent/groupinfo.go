@@ -133,3 +133,11 @@ func (gi GroupInfos) config(cfg config) {
 		gi[_i].config = cfg
 	}
 }
+
+func (gi GroupInfos) IDs() []string {
+	ids := make([]string, len(gi))
+	for _i := range gi {
+		ids[_i] = gi[_i].ID
+	}
+	return ids
+}

@@ -101,3 +101,11 @@ func (ri RelationshipInfos) config(cfg config) {
 		ri[_i].config = cfg
 	}
 }
+
+func (ri RelationshipInfos) IDs() []int {
+	ids := make([]int, len(ri))
+	for _i := range ri {
+		ids[_i] = ri[_i].ID
+	}
+	return ids
+}

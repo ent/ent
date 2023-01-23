@@ -2050,10 +2050,17 @@ func Mutation(t *testing.T, client *ent.Client) {
 	require.Equal(t, "boring", a8m.Name)
 	require.Equal(t, "boring", usr.Name)
 
+	firstFriendIDs := ent.Users(a8m.Edges.Friends).IDs()
 	require.Equal(t, []int{usr.ID}, a8m.Update().AddFriends(usr).Mutation().FriendsIDs())
+
 	require.Empty(t, a8m.Update().AddFriends(usr).RemoveFriends(usr).Mutation().FriendsIDs())
+
 	require.Equal(t, []int{usr.ID}, a8m.Update().AddFriends(usr).RemoveFriends(a8m).Mutation().FriendsIDs())
+
 	a8m.Update().AddFriends(usr).ExecX(ctx)
+
+	friends := client.User.Query().Where(user.IDEQ(a8m.ID)).WithFriends().OnlyX(ctx).Edges.Friends
+	require.Equal(t, append(firstFriendIDs, usr.ID), ent.Users(friends).IDs())
 
 	t.Run("IDs", func(t *testing.T) {
 		ids := client.User.Query().IDsX(ctx)

@@ -194,3 +194,11 @@ func (t Tasks) config(cfg config) {
 		t[_i].config = cfg
 	}
 }
+
+func (t Tasks) IDs() []int {
+	ids := make([]int, len(t))
+	for _i := range t {
+		ids[_i] = t[_i].ID
+	}
+	return ids
+}

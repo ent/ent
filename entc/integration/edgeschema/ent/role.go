@@ -157,3 +157,11 @@ func (r Roles) config(cfg config) {
 		r[_i].config = cfg
 	}
 }
+
+func (r Roles) IDs() []int {
+	ids := make([]int, len(r))
+	for _i := range r {
+		ids[_i] = r[_i].ID
+	}
+	return ids
+}
