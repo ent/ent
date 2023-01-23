@@ -227,6 +227,7 @@ func (c *CityClient) DeleteOneID(id int) *CityDeleteOne {
 func (c *CityClient) Query() *CityQuery {
 	return &CityQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeCity},
 		inters: c.Interceptors(),
 	}
 }
@@ -360,6 +361,7 @@ func (c *StreetClient) DeleteOneID(id int) *StreetDeleteOne {
 func (c *StreetClient) Query() *StreetQuery {
 	return &StreetQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeStreet},
 		inters: c.Interceptors(),
 	}
 }

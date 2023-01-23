@@ -217,6 +217,7 @@ func (c *FileClient) DeleteOneID(id int) *FileDeleteOne {
 func (c *FileClient) Query() *FileQuery {
 	return &FileQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeFile},
 		inters: c.Interceptors(),
 	}
 }
