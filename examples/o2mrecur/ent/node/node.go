@@ -13,6 +13,8 @@ const (
 	FieldID = "id"
 	// FieldValue holds the string denoting the value field in the database.
 	FieldValue = "value"
+	// FieldParentID holds the string denoting the parent_id field in the database.
+	FieldParentID = "parent_id"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
 	// EdgeChildren holds the string denoting the children edge name in mutations.
@@ -22,34 +24,24 @@ const (
 	// ParentTable is the table that holds the parent relation/edge.
 	ParentTable = "nodes"
 	// ParentColumn is the table column denoting the parent relation/edge.
-	ParentColumn = "node_children"
+	ParentColumn = "parent_id"
 	// ChildrenTable is the table that holds the children relation/edge.
 	ChildrenTable = "nodes"
 	// ChildrenColumn is the table column denoting the children relation/edge.
-	ChildrenColumn = "node_children"
+	ChildrenColumn = "parent_id"
 )
 
 // Columns holds all SQL columns for node fields.
 var Columns = []string{
 	FieldID,
 	FieldValue,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "nodes"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"node_children",
+	FieldParentID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}

@@ -62,6 +62,11 @@ func Value(v int) predicate.Node {
 	return predicate.Node(sql.FieldEQ(FieldValue, v))
 }
 
+// ParentID applies equality check predicate on the "parent_id" field. It's identical to ParentIDEQ.
+func ParentID(v int) predicate.Node {
+	return predicate.Node(sql.FieldEQ(FieldParentID, v))
+}
+
 // ValueEQ applies the EQ predicate on the "value" field.
 func ValueEQ(v int) predicate.Node {
 	return predicate.Node(sql.FieldEQ(FieldValue, v))
@@ -100,6 +105,36 @@ func ValueLT(v int) predicate.Node {
 // ValueLTE applies the LTE predicate on the "value" field.
 func ValueLTE(v int) predicate.Node {
 	return predicate.Node(sql.FieldLTE(FieldValue, v))
+}
+
+// ParentIDEQ applies the EQ predicate on the "parent_id" field.
+func ParentIDEQ(v int) predicate.Node {
+	return predicate.Node(sql.FieldEQ(FieldParentID, v))
+}
+
+// ParentIDNEQ applies the NEQ predicate on the "parent_id" field.
+func ParentIDNEQ(v int) predicate.Node {
+	return predicate.Node(sql.FieldNEQ(FieldParentID, v))
+}
+
+// ParentIDIn applies the In predicate on the "parent_id" field.
+func ParentIDIn(vs ...int) predicate.Node {
+	return predicate.Node(sql.FieldIn(FieldParentID, vs...))
+}
+
+// ParentIDNotIn applies the NotIn predicate on the "parent_id" field.
+func ParentIDNotIn(vs ...int) predicate.Node {
+	return predicate.Node(sql.FieldNotIn(FieldParentID, vs...))
+}
+
+// ParentIDIsNil applies the IsNil predicate on the "parent_id" field.
+func ParentIDIsNil() predicate.Node {
+	return predicate.Node(sql.FieldIsNull(FieldParentID))
+}
+
+// ParentIDNotNil applies the NotNil predicate on the "parent_id" field.
+func ParentIDNotNil() predicate.Node {
+	return predicate.Node(sql.FieldNotNull(FieldParentID))
 }
 
 // HasParent applies the HasEdge predicate on the "parent" edge.

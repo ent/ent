@@ -21,10 +21,11 @@ type Node struct {
 	ID int `json:"id,omitempty"`
 	// Value holds the value of the "value" field.
 	Value int `json:"value,omitempty"`
+	// PrevID holds the value of the "prev_id" field.
+	PrevID int `json:"prev_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the NodeQuery when eager-loading is set.
-	Edges     NodeEdges `json:"edges"`
-	node_next *int
+	Edges NodeEdges `json:"edges"`
 }
 
 // NodeEdges holds the relations/edges for other nodes in the graph.
@@ -69,9 +70,7 @@ func (*Node) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case node.FieldID, node.FieldValue:
-			values[i] = new(sql.NullInt64)
-		case node.ForeignKeys[0]: // node_next
+		case node.FieldID, node.FieldValue, node.FieldPrevID:
 			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Node", columns[i])
@@ -100,12 +99,11 @@ func (n *Node) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				n.Value = int(value.Int64)
 			}
-		case node.ForeignKeys[0]:
+		case node.FieldPrevID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field node_next", value)
+				return fmt.Errorf("unexpected type %T for field prev_id", values[i])
 			} else if value.Valid {
-				n.node_next = new(int)
-				*n.node_next = int(value.Int64)
+				n.PrevID = int(value.Int64)
 			}
 		}
 	}
@@ -147,6 +145,9 @@ func (n *Node) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", n.ID))
 	builder.WriteString("value=")
 	builder.WriteString(fmt.Sprintf("%v", n.Value))
+	builder.WriteString(", ")
+	builder.WriteString("prev_id=")
+	builder.WriteString(fmt.Sprintf("%v", n.PrevID))
 	builder.WriteByte(')')
 	return builder.String()
 }

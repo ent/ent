@@ -22,16 +22,12 @@ import (
 // NodeQuery is the builder for querying Node entities.
 type NodeQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
 	inters     []Interceptor
 	predicates []predicate.Node
 	withPrev   *NodeQuery
 	withNext   *NodeQuery
-	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -45,20 +41,20 @@ func (nq *NodeQuery) Where(ps ...predicate.Node) *NodeQuery {
 
 // Limit the number of records to be returned by this query.
 func (nq *NodeQuery) Limit(limit int) *NodeQuery {
-	nq.limit = &limit
+	nq.ctx.Limit = &limit
 	return nq
 }
 
 // Offset to start from.
 func (nq *NodeQuery) Offset(offset int) *NodeQuery {
-	nq.offset = &offset
+	nq.ctx.Offset = &offset
 	return nq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (nq *NodeQuery) Unique(unique bool) *NodeQuery {
-	nq.unique = &unique
+	nq.ctx.Unique = &unique
 	return nq
 }
 
@@ -115,7 +111,7 @@ func (nq *NodeQuery) QueryNext() *NodeQuery {
 // First returns the first Node entity from the query.
 // Returns a *NotFoundError when no Node was found.
 func (nq *NodeQuery) First(ctx context.Context) (*Node, error) {
-	nodes, err := nq.Limit(1).All(newQueryContext(ctx, TypeNode, "First"))
+	nodes, err := nq.Limit(1).All(setContextOp(ctx, nq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +134,7 @@ func (nq *NodeQuery) FirstX(ctx context.Context) *Node {
 // Returns a *NotFoundError when no Node ID was found.
 func (nq *NodeQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = nq.Limit(1).IDs(newQueryContext(ctx, TypeNode, "FirstID")); err != nil {
+	if ids, err = nq.Limit(1).IDs(setContextOp(ctx, nq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -161,7 +157,7 @@ func (nq *NodeQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Node entity is found.
 // Returns a *NotFoundError when no Node entities are found.
 func (nq *NodeQuery) Only(ctx context.Context) (*Node, error) {
-	nodes, err := nq.Limit(2).All(newQueryContext(ctx, TypeNode, "Only"))
+	nodes, err := nq.Limit(2).All(setContextOp(ctx, nq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +185,7 @@ func (nq *NodeQuery) OnlyX(ctx context.Context) *Node {
 // Returns a *NotFoundError when no entities are found.
 func (nq *NodeQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = nq.Limit(2).IDs(newQueryContext(ctx, TypeNode, "OnlyID")); err != nil {
+	if ids, err = nq.Limit(2).IDs(setContextOp(ctx, nq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -214,7 +210,7 @@ func (nq *NodeQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Nodes.
 func (nq *NodeQuery) All(ctx context.Context) ([]*Node, error) {
-	ctx = newQueryContext(ctx, TypeNode, "All")
+	ctx = setContextOp(ctx, nq.ctx, "All")
 	if err := nq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -234,7 +230,7 @@ func (nq *NodeQuery) AllX(ctx context.Context) []*Node {
 // IDs executes the query and returns a list of Node IDs.
 func (nq *NodeQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
-	ctx = newQueryContext(ctx, TypeNode, "IDs")
+	ctx = setContextOp(ctx, nq.ctx, "IDs")
 	if err := nq.Select(node.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -252,7 +248,7 @@ func (nq *NodeQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (nq *NodeQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeNode, "Count")
+	ctx = setContextOp(ctx, nq.ctx, "Count")
 	if err := nq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -270,7 +266,7 @@ func (nq *NodeQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (nq *NodeQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeNode, "Exist")
+	ctx = setContextOp(ctx, nq.ctx, "Exist")
 	switch _, err := nq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -298,17 +294,15 @@ func (nq *NodeQuery) Clone() *NodeQuery {
 	}
 	return &NodeQuery{
 		config:     nq.config,
-		limit:      nq.limit,
-		offset:     nq.offset,
+		ctx:        nq.ctx.Clone(),
 		order:      append([]OrderFunc{}, nq.order...),
 		inters:     append([]Interceptor{}, nq.inters...),
 		predicates: append([]predicate.Node{}, nq.predicates...),
 		withPrev:   nq.withPrev.Clone(),
 		withNext:   nq.withNext.Clone(),
 		// clone intermediate query.
-		sql:    nq.sql.Clone(),
-		path:   nq.path,
-		unique: nq.unique,
+		sql:  nq.sql.Clone(),
+		path: nq.path,
 	}
 }
 
@@ -349,9 +343,9 @@ func (nq *NodeQuery) WithNext(opts ...func(*NodeQuery)) *NodeQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
-	nq.fields = append([]string{field}, fields...)
+	nq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &NodeGroupBy{build: nq}
-	grbuild.flds = &nq.fields
+	grbuild.flds = &nq.ctx.Fields
 	grbuild.label = node.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -370,10 +364,10 @@ func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 //		Select(node.FieldValue).
 //		Scan(ctx, &v)
 func (nq *NodeQuery) Select(fields ...string) *NodeSelect {
-	nq.fields = append(nq.fields, fields...)
+	nq.ctx.Fields = append(nq.ctx.Fields, fields...)
 	sbuild := &NodeSelect{NodeQuery: nq}
 	sbuild.label = node.Label
-	sbuild.flds, sbuild.scan = &nq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &nq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -393,7 +387,7 @@ func (nq *NodeQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range nq.fields {
+	for _, f := range nq.ctx.Fields {
 		if !node.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -411,19 +405,12 @@ func (nq *NodeQuery) prepareQuery(ctx context.Context) error {
 func (nq *NodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Node, error) {
 	var (
 		nodes       = []*Node{}
-		withFKs     = nq.withFKs
 		_spec       = nq.querySpec()
 		loadedTypes = [2]bool{
 			nq.withPrev != nil,
 			nq.withNext != nil,
 		}
 	)
-	if nq.withPrev != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, node.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Node).scanValues(nil, columns)
 	}
@@ -461,10 +448,7 @@ func (nq *NodeQuery) loadPrev(ctx context.Context, query *NodeQuery, nodes []*No
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Node)
 	for i := range nodes {
-		if nodes[i].node_next == nil {
-			continue
-		}
-		fk := *nodes[i].node_next
+		fk := nodes[i].PrevID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -481,7 +465,7 @@ func (nq *NodeQuery) loadPrev(ctx context.Context, query *NodeQuery, nodes []*No
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "node_next" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "prev_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -496,7 +480,6 @@ func (nq *NodeQuery) loadNext(ctx context.Context, query *NodeQuery, nodes []*No
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
 	}
-	query.withFKs = true
 	query.Where(predicate.Node(func(s *sql.Selector) {
 		s.Where(sql.InValues(node.NextColumn, fks...))
 	}))
@@ -505,13 +488,10 @@ func (nq *NodeQuery) loadNext(ctx context.Context, query *NodeQuery, nodes []*No
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.node_next
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "node_next" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.PrevID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "node_next" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "prev_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -520,9 +500,9 @@ func (nq *NodeQuery) loadNext(ctx context.Context, query *NodeQuery, nodes []*No
 
 func (nq *NodeQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := nq.querySpec()
-	_spec.Node.Columns = nq.fields
-	if len(nq.fields) > 0 {
-		_spec.Unique = nq.unique != nil && *nq.unique
+	_spec.Node.Columns = nq.ctx.Fields
+	if len(nq.ctx.Fields) > 0 {
+		_spec.Unique = nq.ctx.Unique != nil && *nq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, nq.driver, _spec)
 }
@@ -540,10 +520,10 @@ func (nq *NodeQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   nq.sql,
 		Unique: true,
 	}
-	if unique := nq.unique; unique != nil {
+	if unique := nq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := nq.fields; len(fields) > 0 {
+	if fields := nq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, node.FieldID)
 		for i := range fields {
@@ -559,10 +539,10 @@ func (nq *NodeQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := nq.limit; limit != nil {
+	if limit := nq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := nq.offset; offset != nil {
+	if offset := nq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := nq.order; len(ps) > 0 {
@@ -578,7 +558,7 @@ func (nq *NodeQuery) querySpec() *sqlgraph.QuerySpec {
 func (nq *NodeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(nq.driver.Dialect())
 	t1 := builder.Table(node.Table)
-	columns := nq.fields
+	columns := nq.ctx.Fields
 	if len(columns) == 0 {
 		columns = node.Columns
 	}
@@ -587,7 +567,7 @@ func (nq *NodeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = nq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if nq.unique != nil && *nq.unique {
+	if nq.ctx.Unique != nil && *nq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range nq.predicates {
@@ -596,12 +576,12 @@ func (nq *NodeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range nq.order {
 		p(selector)
 	}
-	if offset := nq.offset; offset != nil {
+	if offset := nq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := nq.limit; limit != nil {
+	if limit := nq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -621,7 +601,7 @@ func (ngb *NodeGroupBy) Aggregate(fns ...AggregateFunc) *NodeGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ngb *NodeGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeNode, "GroupBy")
+	ctx = setContextOp(ctx, ngb.build.ctx, "GroupBy")
 	if err := ngb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -669,7 +649,7 @@ func (ns *NodeSelect) Aggregate(fns ...AggregateFunc) *NodeSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ns *NodeSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeNode, "Select")
+	ctx = setContextOp(ctx, ns.ctx, "Select")
 	if err := ns.prepareQuery(ctx); err != nil {
 		return err
 	}

@@ -44,17 +44,23 @@ func (nu *NodeUpdate) AddValue(i int) *NodeUpdate {
 	return nu
 }
 
-// SetPrevID sets the "prev" edge to the Node entity by ID.
-func (nu *NodeUpdate) SetPrevID(id int) *NodeUpdate {
-	nu.mutation.SetPrevID(id)
+// SetPrevID sets the "prev_id" field.
+func (nu *NodeUpdate) SetPrevID(i int) *NodeUpdate {
+	nu.mutation.SetPrevID(i)
 	return nu
 }
 
-// SetNillablePrevID sets the "prev" edge to the Node entity by ID if the given value is not nil.
-func (nu *NodeUpdate) SetNillablePrevID(id *int) *NodeUpdate {
-	if id != nil {
-		nu = nu.SetPrevID(*id)
+// SetNillablePrevID sets the "prev_id" field if the given value is not nil.
+func (nu *NodeUpdate) SetNillablePrevID(i *int) *NodeUpdate {
+	if i != nil {
+		nu.SetPrevID(*i)
 	}
+	return nu
+}
+
+// ClearPrevID clears the value of the "prev_id" field.
+func (nu *NodeUpdate) ClearPrevID() *NodeUpdate {
+	nu.mutation.ClearPrevID()
 	return nu
 }
 
@@ -253,17 +259,23 @@ func (nuo *NodeUpdateOne) AddValue(i int) *NodeUpdateOne {
 	return nuo
 }
 
-// SetPrevID sets the "prev" edge to the Node entity by ID.
-func (nuo *NodeUpdateOne) SetPrevID(id int) *NodeUpdateOne {
-	nuo.mutation.SetPrevID(id)
+// SetPrevID sets the "prev_id" field.
+func (nuo *NodeUpdateOne) SetPrevID(i int) *NodeUpdateOne {
+	nuo.mutation.SetPrevID(i)
 	return nuo
 }
 
-// SetNillablePrevID sets the "prev" edge to the Node entity by ID if the given value is not nil.
-func (nuo *NodeUpdateOne) SetNillablePrevID(id *int) *NodeUpdateOne {
-	if id != nil {
-		nuo = nuo.SetPrevID(*id)
+// SetNillablePrevID sets the "prev_id" field if the given value is not nil.
+func (nuo *NodeUpdateOne) SetNillablePrevID(i *int) *NodeUpdateOne {
+	if i != nil {
+		nuo.SetPrevID(*i)
 	}
+	return nuo
+}
+
+// ClearPrevID clears the value of the "prev_id" field.
+func (nuo *NodeUpdateOne) ClearPrevID() *NodeUpdateOne {
+	nuo.mutation.ClearPrevID()
 	return nuo
 }
 

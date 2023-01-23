@@ -29,16 +29,16 @@ func (nc *NodeCreate) SetValue(i int) *NodeCreate {
 	return nc
 }
 
-// SetPrevID sets the "prev" edge to the Node entity by ID.
-func (nc *NodeCreate) SetPrevID(id int) *NodeCreate {
-	nc.mutation.SetPrevID(id)
+// SetPrevID sets the "prev_id" field.
+func (nc *NodeCreate) SetPrevID(i int) *NodeCreate {
+	nc.mutation.SetPrevID(i)
 	return nc
 }
 
-// SetNillablePrevID sets the "prev" edge to the Node entity by ID if the given value is not nil.
-func (nc *NodeCreate) SetNillablePrevID(id *int) *NodeCreate {
-	if id != nil {
-		nc = nc.SetPrevID(*id)
+// SetNillablePrevID sets the "prev_id" field if the given value is not nil.
+func (nc *NodeCreate) SetNillablePrevID(i *int) *NodeCreate {
+	if i != nil {
+		nc.SetPrevID(*i)
 	}
 	return nc
 }
@@ -157,7 +157,7 @@ func (nc *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.node_next = &nodes[0]
+		_node.PrevID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := nc.mutation.NextIDs(); len(nodes) > 0 {
