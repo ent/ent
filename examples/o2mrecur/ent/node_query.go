@@ -28,7 +28,6 @@ type NodeQuery struct {
 	predicates   []predicate.Node
 	withParent   *NodeQuery
 	withChildren *NodeQuery
-	withFKs      bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -406,19 +405,12 @@ func (nq *NodeQuery) prepareQuery(ctx context.Context) error {
 func (nq *NodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Node, error) {
 	var (
 		nodes       = []*Node{}
-		withFKs     = nq.withFKs
 		_spec       = nq.querySpec()
 		loadedTypes = [2]bool{
 			nq.withParent != nil,
 			nq.withChildren != nil,
 		}
 	)
-	if nq.withParent != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, node.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Node).scanValues(nil, columns)
 	}
@@ -457,10 +449,7 @@ func (nq *NodeQuery) loadParent(ctx context.Context, query *NodeQuery, nodes []*
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Node)
 	for i := range nodes {
-		if nodes[i].node_children == nil {
-			continue
-		}
-		fk := *nodes[i].node_children
+		fk := nodes[i].ParentID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -477,7 +466,7 @@ func (nq *NodeQuery) loadParent(ctx context.Context, query *NodeQuery, nodes []*
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "node_children" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "parent_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -495,7 +484,6 @@ func (nq *NodeQuery) loadChildren(ctx context.Context, query *NodeQuery, nodes [
 			init(nodes[i])
 		}
 	}
-	query.withFKs = true
 	query.Where(predicate.Node(func(s *sql.Selector) {
 		s.Where(sql.InValues(node.ChildrenColumn, fks...))
 	}))
@@ -504,13 +492,10 @@ func (nq *NodeQuery) loadChildren(ctx context.Context, query *NodeQuery, nodes [
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.node_children
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "node_children" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.ParentID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "node_children" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

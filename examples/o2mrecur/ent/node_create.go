@@ -29,16 +29,16 @@ func (nc *NodeCreate) SetValue(i int) *NodeCreate {
 	return nc
 }
 
-// SetParentID sets the "parent" edge to the Node entity by ID.
-func (nc *NodeCreate) SetParentID(id int) *NodeCreate {
-	nc.mutation.SetParentID(id)
+// SetParentID sets the "parent_id" field.
+func (nc *NodeCreate) SetParentID(i int) *NodeCreate {
+	nc.mutation.SetParentID(i)
 	return nc
 }
 
-// SetNillableParentID sets the "parent" edge to the Node entity by ID if the given value is not nil.
-func (nc *NodeCreate) SetNillableParentID(id *int) *NodeCreate {
-	if id != nil {
-		nc = nc.SetParentID(*id)
+// SetNillableParentID sets the "parent_id" field if the given value is not nil.
+func (nc *NodeCreate) SetNillableParentID(i *int) *NodeCreate {
+	if i != nil {
+		nc.SetParentID(*i)
 	}
 	return nc
 }
@@ -153,7 +153,7 @@ func (nc *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.node_children = &nodes[0]
+		_node.ParentID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := nc.mutation.ChildrenIDs(); len(nodes) > 0 {

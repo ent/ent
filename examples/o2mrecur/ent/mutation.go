@@ -204,9 +204,53 @@ func (m *NodeMutation) ResetValue() {
 	m.addvalue = nil
 }
 
-// SetParentID sets the "parent" edge to the Node entity by id.
-func (m *NodeMutation) SetParentID(id int) {
-	m.parent = &id
+// SetParentID sets the "parent_id" field.
+func (m *NodeMutation) SetParentID(i int) {
+	m.parent = &i
+}
+
+// ParentID returns the value of the "parent_id" field in the mutation.
+func (m *NodeMutation) ParentID() (r int, exists bool) {
+	v := m.parent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldParentID returns the old "parent_id" field's value of the Node entity.
+// If the Node object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NodeMutation) OldParentID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldParentID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldParentID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldParentID: %w", err)
+	}
+	return oldValue.ParentID, nil
+}
+
+// ClearParentID clears the value of the "parent_id" field.
+func (m *NodeMutation) ClearParentID() {
+	m.parent = nil
+	m.clearedFields[node.FieldParentID] = struct{}{}
+}
+
+// ParentIDCleared returns if the "parent_id" field was cleared in this mutation.
+func (m *NodeMutation) ParentIDCleared() bool {
+	_, ok := m.clearedFields[node.FieldParentID]
+	return ok
+}
+
+// ResetParentID resets all changes to the "parent_id" field.
+func (m *NodeMutation) ResetParentID() {
+	m.parent = nil
+	delete(m.clearedFields, node.FieldParentID)
 }
 
 // ClearParent clears the "parent" edge to the Node entity.
@@ -216,15 +260,7 @@ func (m *NodeMutation) ClearParent() {
 
 // ParentCleared reports if the "parent" edge to the Node entity was cleared.
 func (m *NodeMutation) ParentCleared() bool {
-	return m.clearedparent
-}
-
-// ParentID returns the "parent" edge ID in the mutation.
-func (m *NodeMutation) ParentID() (id int, exists bool) {
-	if m.parent != nil {
-		return *m.parent, true
-	}
-	return
+	return m.ParentIDCleared() || m.clearedparent
 }
 
 // ParentIDs returns the "parent" edge IDs in the mutation.
@@ -331,9 +367,12 @@ func (m *NodeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *NodeMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 2)
 	if m.value != nil {
 		fields = append(fields, node.FieldValue)
+	}
+	if m.parent != nil {
+		fields = append(fields, node.FieldParentID)
 	}
 	return fields
 }
@@ -345,6 +384,8 @@ func (m *NodeMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case node.FieldValue:
 		return m.Value()
+	case node.FieldParentID:
+		return m.ParentID()
 	}
 	return nil, false
 }
@@ -356,6 +397,8 @@ func (m *NodeMutation) OldField(ctx context.Context, name string) (ent.Value, er
 	switch name {
 	case node.FieldValue:
 		return m.OldValue(ctx)
+	case node.FieldParentID:
+		return m.OldParentID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Node field %s", name)
 }
@@ -371,6 +414,13 @@ func (m *NodeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetValue(v)
+		return nil
+	case node.FieldParentID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetParentID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Node field %s", name)
@@ -416,7 +466,11 @@ func (m *NodeMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *NodeMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(node.FieldParentID) {
+		fields = append(fields, node.FieldParentID)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -429,6 +483,11 @@ func (m *NodeMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *NodeMutation) ClearField(name string) error {
+	switch name {
+	case node.FieldParentID:
+		m.ClearParentID()
+		return nil
+	}
 	return fmt.Errorf("unknown Node nullable field %s", name)
 }
 
@@ -438,6 +497,9 @@ func (m *NodeMutation) ResetField(name string) error {
 	switch name {
 	case node.FieldValue:
 		m.ResetValue()
+		return nil
+	case node.FieldParentID:
+		m.ResetParentID()
 		return nil
 	}
 	return fmt.Errorf("unknown Node field %s", name)

@@ -44,17 +44,23 @@ func (nu *NodeUpdate) AddValue(i int) *NodeUpdate {
 	return nu
 }
 
-// SetParentID sets the "parent" edge to the Node entity by ID.
-func (nu *NodeUpdate) SetParentID(id int) *NodeUpdate {
-	nu.mutation.SetParentID(id)
+// SetParentID sets the "parent_id" field.
+func (nu *NodeUpdate) SetParentID(i int) *NodeUpdate {
+	nu.mutation.SetParentID(i)
 	return nu
 }
 
-// SetNillableParentID sets the "parent" edge to the Node entity by ID if the given value is not nil.
-func (nu *NodeUpdate) SetNillableParentID(id *int) *NodeUpdate {
-	if id != nil {
-		nu = nu.SetParentID(*id)
+// SetNillableParentID sets the "parent_id" field if the given value is not nil.
+func (nu *NodeUpdate) SetNillableParentID(i *int) *NodeUpdate {
+	if i != nil {
+		nu.SetParentID(*i)
 	}
+	return nu
+}
+
+// ClearParentID clears the value of the "parent_id" field.
+func (nu *NodeUpdate) ClearParentID() *NodeUpdate {
+	nu.mutation.ClearParentID()
 	return nu
 }
 
@@ -283,17 +289,23 @@ func (nuo *NodeUpdateOne) AddValue(i int) *NodeUpdateOne {
 	return nuo
 }
 
-// SetParentID sets the "parent" edge to the Node entity by ID.
-func (nuo *NodeUpdateOne) SetParentID(id int) *NodeUpdateOne {
-	nuo.mutation.SetParentID(id)
+// SetParentID sets the "parent_id" field.
+func (nuo *NodeUpdateOne) SetParentID(i int) *NodeUpdateOne {
+	nuo.mutation.SetParentID(i)
 	return nuo
 }
 
-// SetNillableParentID sets the "parent" edge to the Node entity by ID if the given value is not nil.
-func (nuo *NodeUpdateOne) SetNillableParentID(id *int) *NodeUpdateOne {
-	if id != nil {
-		nuo = nuo.SetParentID(*id)
+// SetNillableParentID sets the "parent_id" field if the given value is not nil.
+func (nuo *NodeUpdateOne) SetNillableParentID(i *int) *NodeUpdateOne {
+	if i != nil {
+		nuo.SetParentID(*i)
 	}
+	return nuo
+}
+
+// ClearParentID clears the value of the "parent_id" field.
+func (nuo *NodeUpdateOne) ClearParentID() *NodeUpdateOne {
+	nuo.mutation.ClearParentID()
 	return nuo
 }
 

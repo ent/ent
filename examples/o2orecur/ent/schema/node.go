@@ -19,6 +19,8 @@ type Node struct {
 func (Node) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("value"),
+		field.Int("prev_id").
+			Optional(),
 	}
 }
 
@@ -28,6 +30,7 @@ func (Node) Edges() []ent.Edge {
 		edge.To("next", Node.Type).
 			Unique().
 			From("prev").
+			Field("prev_id").
 			Unique(),
 	}
 }

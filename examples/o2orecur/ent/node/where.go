@@ -62,6 +62,11 @@ func Value(v int) predicate.Node {
 	return predicate.Node(sql.FieldEQ(FieldValue, v))
 }
 
+// PrevID applies equality check predicate on the "prev_id" field. It's identical to PrevIDEQ.
+func PrevID(v int) predicate.Node {
+	return predicate.Node(sql.FieldEQ(FieldPrevID, v))
+}
+
 // ValueEQ applies the EQ predicate on the "value" field.
 func ValueEQ(v int) predicate.Node {
 	return predicate.Node(sql.FieldEQ(FieldValue, v))
@@ -100,6 +105,36 @@ func ValueLT(v int) predicate.Node {
 // ValueLTE applies the LTE predicate on the "value" field.
 func ValueLTE(v int) predicate.Node {
 	return predicate.Node(sql.FieldLTE(FieldValue, v))
+}
+
+// PrevIDEQ applies the EQ predicate on the "prev_id" field.
+func PrevIDEQ(v int) predicate.Node {
+	return predicate.Node(sql.FieldEQ(FieldPrevID, v))
+}
+
+// PrevIDNEQ applies the NEQ predicate on the "prev_id" field.
+func PrevIDNEQ(v int) predicate.Node {
+	return predicate.Node(sql.FieldNEQ(FieldPrevID, v))
+}
+
+// PrevIDIn applies the In predicate on the "prev_id" field.
+func PrevIDIn(vs ...int) predicate.Node {
+	return predicate.Node(sql.FieldIn(FieldPrevID, vs...))
+}
+
+// PrevIDNotIn applies the NotIn predicate on the "prev_id" field.
+func PrevIDNotIn(vs ...int) predicate.Node {
+	return predicate.Node(sql.FieldNotIn(FieldPrevID, vs...))
+}
+
+// PrevIDIsNil applies the IsNil predicate on the "prev_id" field.
+func PrevIDIsNil() predicate.Node {
+	return predicate.Node(sql.FieldIsNull(FieldPrevID))
+}
+
+// PrevIDNotNil applies the NotNil predicate on the "prev_id" field.
+func PrevIDNotNil() predicate.Node {
+	return predicate.Node(sql.FieldNotNull(FieldPrevID))
 }
 
 // HasPrev applies the HasEdge predicate on the "prev" edge.

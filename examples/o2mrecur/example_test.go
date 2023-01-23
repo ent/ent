@@ -32,7 +32,7 @@ func Example_O2MRecur() {
 	// Output:
 	// Tree leafs [1 3 5]
 	// [1 3 5]
-	// Node(id=1, value=2)
+	// Node(id=1, value=2, parent_id=0)
 }
 
 func Do(ctx context.Context, client *ent.Client) error {
@@ -96,7 +96,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 		Where(node.Not(node.HasParent())).
 		OnlyX(ctx)
 	fmt.Println(orphan)
-	// Output: Node(id=1, value=2)
+	// Output: Node(id=1, value=2, parent_id=0)
 
 	return nil
 }
