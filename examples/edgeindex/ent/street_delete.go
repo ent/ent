@@ -73,6 +73,12 @@ type StreetDeleteOne struct {
 	sd *StreetDelete
 }
 
+// Where appends a list predicates to the StreetDelete builder.
+func (sdo *StreetDeleteOne) Where(ps ...predicate.Street) *StreetDeleteOne {
+	sdo.sd.mutation.Where(ps...)
+	return sdo
+}
+
 // Exec executes the deletion query.
 func (sdo *StreetDeleteOne) Exec(ctx context.Context) error {
 	n, err := sdo.sd.Exec(ctx)
@@ -88,5 +94,7 @@ func (sdo *StreetDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (sdo *StreetDeleteOne) ExecX(ctx context.Context) {
-	sdo.sd.ExecX(ctx)
+	if err := sdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

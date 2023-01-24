@@ -76,6 +76,12 @@ type UserDeleteOne struct {
 	ud *UserDelete
 }
 
+// Where appends a list predicates to the UserDelete builder.
+func (udo *UserDeleteOne) Where(ps ...predicate.User) *UserDeleteOne {
+	udo.ud.mutation.Where(ps...)
+	return udo
+}
+
 // Exec executes the deletion query.
 func (udo *UserDeleteOne) Exec(ctx context.Context) error {
 	n, err := udo.ud.Exec(ctx)
@@ -91,5 +97,7 @@ func (udo *UserDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (udo *UserDeleteOne) ExecX(ctx context.Context) {
-	udo.ud.ExecX(ctx)
+	if err := udo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

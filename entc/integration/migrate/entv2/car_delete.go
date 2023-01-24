@@ -73,6 +73,12 @@ type CarDeleteOne struct {
 	cd *CarDelete
 }
 
+// Where appends a list predicates to the CarDelete builder.
+func (cdo *CarDeleteOne) Where(ps ...predicate.Car) *CarDeleteOne {
+	cdo.cd.mutation.Where(ps...)
+	return cdo
+}
+
 // Exec executes the deletion query.
 func (cdo *CarDeleteOne) Exec(ctx context.Context) error {
 	n, err := cdo.cd.Exec(ctx)
@@ -88,5 +94,7 @@ func (cdo *CarDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (cdo *CarDeleteOne) ExecX(ctx context.Context) {
-	cdo.cd.ExecX(ctx)
+	if err := cdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

@@ -67,6 +67,12 @@ type FieldTypeDeleteOne struct {
 	ftd *FieldTypeDelete
 }
 
+// Where appends a list predicates to the FieldTypeDelete builder.
+func (ftdo *FieldTypeDeleteOne) Where(ps ...predicate.FieldType) *FieldTypeDeleteOne {
+	ftdo.ftd.mutation.Where(ps...)
+	return ftdo
+}
+
 // Exec executes the deletion query.
 func (ftdo *FieldTypeDeleteOne) Exec(ctx context.Context) error {
 	n, err := ftdo.ftd.Exec(ctx)
@@ -82,5 +88,7 @@ func (ftdo *FieldTypeDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (ftdo *FieldTypeDeleteOne) ExecX(ctx context.Context) {
-	ftdo.ftd.ExecX(ctx)
+	if err := ftdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

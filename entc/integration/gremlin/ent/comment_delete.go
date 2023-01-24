@@ -67,6 +67,12 @@ type CommentDeleteOne struct {
 	cd *CommentDelete
 }
 
+// Where appends a list predicates to the CommentDelete builder.
+func (cdo *CommentDeleteOne) Where(ps ...predicate.Comment) *CommentDeleteOne {
+	cdo.cd.mutation.Where(ps...)
+	return cdo
+}
+
 // Exec executes the deletion query.
 func (cdo *CommentDeleteOne) Exec(ctx context.Context) error {
 	n, err := cdo.cd.Exec(ctx)
@@ -82,5 +88,7 @@ func (cdo *CommentDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (cdo *CommentDeleteOne) ExecX(ctx context.Context) {
-	cdo.cd.ExecX(ctx)
+	if err := cdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

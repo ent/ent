@@ -67,6 +67,12 @@ type LicenseDeleteOne struct {
 	ld *LicenseDelete
 }
 
+// Where appends a list predicates to the LicenseDelete builder.
+func (ldo *LicenseDeleteOne) Where(ps ...predicate.License) *LicenseDeleteOne {
+	ldo.ld.mutation.Where(ps...)
+	return ldo
+}
+
 // Exec executes the deletion query.
 func (ldo *LicenseDeleteOne) Exec(ctx context.Context) error {
 	n, err := ldo.ld.Exec(ctx)
@@ -82,5 +88,7 @@ func (ldo *LicenseDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (ldo *LicenseDeleteOne) ExecX(ctx context.Context) {
-	ldo.ld.ExecX(ctx)
+	if err := ldo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

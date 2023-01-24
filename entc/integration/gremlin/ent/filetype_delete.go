@@ -67,6 +67,12 @@ type FileTypeDeleteOne struct {
 	ftd *FileTypeDelete
 }
 
+// Where appends a list predicates to the FileTypeDelete builder.
+func (ftdo *FileTypeDeleteOne) Where(ps ...predicate.FileType) *FileTypeDeleteOne {
+	ftdo.ftd.mutation.Where(ps...)
+	return ftdo
+}
+
 // Exec executes the deletion query.
 func (ftdo *FileTypeDeleteOne) Exec(ctx context.Context) error {
 	n, err := ftdo.ftd.Exec(ctx)
@@ -82,5 +88,7 @@ func (ftdo *FileTypeDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (ftdo *FileTypeDeleteOne) ExecX(ctx context.Context) {
-	ftdo.ftd.ExecX(ctx)
+	if err := ftdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

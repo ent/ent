@@ -73,6 +73,12 @@ type LinkDeleteOne struct {
 	ld *LinkDelete
 }
 
+// Where appends a list predicates to the LinkDelete builder.
+func (ldo *LinkDeleteOne) Where(ps ...predicate.Link) *LinkDeleteOne {
+	ldo.ld.mutation.Where(ps...)
+	return ldo
+}
+
 // Exec executes the deletion query.
 func (ldo *LinkDeleteOne) Exec(ctx context.Context) error {
 	n, err := ldo.ld.Exec(ctx)
@@ -88,5 +94,7 @@ func (ldo *LinkDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (ldo *LinkDeleteOne) ExecX(ctx context.Context) {
-	ldo.ld.ExecX(ctx)
+	if err := ldo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

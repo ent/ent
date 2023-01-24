@@ -73,6 +73,12 @@ type RentalDeleteOne struct {
 	rd *RentalDelete
 }
 
+// Where appends a list predicates to the RentalDelete builder.
+func (rdo *RentalDeleteOne) Where(ps ...predicate.Rental) *RentalDeleteOne {
+	rdo.rd.mutation.Where(ps...)
+	return rdo
+}
+
 // Exec executes the deletion query.
 func (rdo *RentalDeleteOne) Exec(ctx context.Context) error {
 	n, err := rdo.rd.Exec(ctx)
@@ -88,5 +94,7 @@ func (rdo *RentalDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (rdo *RentalDeleteOne) ExecX(ctx context.Context) {
-	rdo.rd.ExecX(ctx)
+	if err := rdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

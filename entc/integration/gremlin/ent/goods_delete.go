@@ -67,6 +67,12 @@ type GoodsDeleteOne struct {
 	gd *GoodsDelete
 }
 
+// Where appends a list predicates to the GoodsDelete builder.
+func (gdo *GoodsDeleteOne) Where(ps ...predicate.Goods) *GoodsDeleteOne {
+	gdo.gd.mutation.Where(ps...)
+	return gdo
+}
+
 // Exec executes the deletion query.
 func (gdo *GoodsDeleteOne) Exec(ctx context.Context) error {
 	n, err := gdo.gd.Exec(ctx)
@@ -82,5 +88,7 @@ func (gdo *GoodsDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (gdo *GoodsDeleteOne) ExecX(ctx context.Context) {
-	gdo.gd.ExecX(ctx)
+	if err := gdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

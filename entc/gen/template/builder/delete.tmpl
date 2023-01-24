@@ -69,6 +69,12 @@ type {{ $onebuilder }} struct {
 	{{ $receiver }} *{{ $builder }}
 }
 
+// Where appends a list predicates to the {{ $builder }} builder.
+func ({{ $oneReceiver }} *{{ $onebuilder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $onebuilder }} {
+	{{ $oneReceiver }}.{{ $mutation }}.Where(ps...)
+	return {{ $oneReceiver }}
+}
+
 // Exec executes the deletion query.
 func ({{ $oneReceiver }} *{{ $onebuilder }}) Exec(ctx context.Context) error {
 	n, err := {{ $oneReceiver }}.{{ $receiver }}.Exec(ctx)
@@ -84,7 +90,9 @@ func ({{ $oneReceiver }} *{{ $onebuilder }}) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func ({{ $oneReceiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
-	{{ $oneReceiver }}.{{ $receiver }}.ExecX(ctx)
+	if err := {{ $oneReceiver }}.Exec(ctx); err != nil {
+		panic(err)
+	}
 }
 
 {{ end }}

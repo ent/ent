@@ -73,6 +73,12 @@ type ZooDeleteOne struct {
 	zd *ZooDelete
 }
 
+// Where appends a list predicates to the ZooDelete builder.
+func (zdo *ZooDeleteOne) Where(ps ...predicate.Zoo) *ZooDeleteOne {
+	zdo.zd.mutation.Where(ps...)
+	return zdo
+}
+
 // Exec executes the deletion query.
 func (zdo *ZooDeleteOne) Exec(ctx context.Context) error {
 	n, err := zdo.zd.Exec(ctx)
@@ -88,5 +94,7 @@ func (zdo *ZooDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (zdo *ZooDeleteOne) ExecX(ctx context.Context) {
-	zdo.zd.ExecX(ctx)
+	if err := zdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

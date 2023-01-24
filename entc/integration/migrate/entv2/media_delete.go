@@ -73,6 +73,12 @@ type MediaDeleteOne struct {
 	md *MediaDelete
 }
 
+// Where appends a list predicates to the MediaDelete builder.
+func (mdo *MediaDeleteOne) Where(ps ...predicate.Media) *MediaDeleteOne {
+	mdo.md.mutation.Where(ps...)
+	return mdo
+}
+
 // Exec executes the deletion query.
 func (mdo *MediaDeleteOne) Exec(ctx context.Context) error {
 	n, err := mdo.md.Exec(ctx)
@@ -88,5 +94,7 @@ func (mdo *MediaDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (mdo *MediaDeleteOne) ExecX(ctx context.Context) {
-	mdo.md.ExecX(ctx)
+	if err := mdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

@@ -73,6 +73,12 @@ type OtherDeleteOne struct {
 	od *OtherDelete
 }
 
+// Where appends a list predicates to the OtherDelete builder.
+func (odo *OtherDeleteOne) Where(ps ...predicate.Other) *OtherDeleteOne {
+	odo.od.mutation.Where(ps...)
+	return odo
+}
+
 // Exec executes the deletion query.
 func (odo *OtherDeleteOne) Exec(ctx context.Context) error {
 	n, err := odo.od.Exec(ctx)
@@ -88,5 +94,7 @@ func (odo *OtherDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (odo *OtherDeleteOne) ExecX(ctx context.Context) {
-	odo.od.ExecX(ctx)
+	if err := odo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

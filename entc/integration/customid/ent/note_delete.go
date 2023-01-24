@@ -73,6 +73,12 @@ type NoteDeleteOne struct {
 	nd *NoteDelete
 }
 
+// Where appends a list predicates to the NoteDelete builder.
+func (ndo *NoteDeleteOne) Where(ps ...predicate.Note) *NoteDeleteOne {
+	ndo.nd.mutation.Where(ps...)
+	return ndo
+}
+
 // Exec executes the deletion query.
 func (ndo *NoteDeleteOne) Exec(ctx context.Context) error {
 	n, err := ndo.nd.Exec(ctx)
@@ -88,5 +94,7 @@ func (ndo *NoteDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (ndo *NoteDeleteOne) ExecX(ctx context.Context) {
-	ndo.nd.ExecX(ctx)
+	if err := ndo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

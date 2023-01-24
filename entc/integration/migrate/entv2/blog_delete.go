@@ -73,6 +73,12 @@ type BlogDeleteOne struct {
 	bd *BlogDelete
 }
 
+// Where appends a list predicates to the BlogDelete builder.
+func (bdo *BlogDeleteOne) Where(ps ...predicate.Blog) *BlogDeleteOne {
+	bdo.bd.mutation.Where(ps...)
+	return bdo
+}
+
 // Exec executes the deletion query.
 func (bdo *BlogDeleteOne) Exec(ctx context.Context) error {
 	n, err := bdo.bd.Exec(ctx)
@@ -88,5 +94,7 @@ func (bdo *BlogDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (bdo *BlogDeleteOne) ExecX(ctx context.Context) {
-	bdo.bd.ExecX(ctx)
+	if err := bdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

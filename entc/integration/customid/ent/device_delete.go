@@ -73,6 +73,12 @@ type DeviceDeleteOne struct {
 	dd *DeviceDelete
 }
 
+// Where appends a list predicates to the DeviceDelete builder.
+func (ddo *DeviceDeleteOne) Where(ps ...predicate.Device) *DeviceDeleteOne {
+	ddo.dd.mutation.Where(ps...)
+	return ddo
+}
+
 // Exec executes the deletion query.
 func (ddo *DeviceDeleteOne) Exec(ctx context.Context) error {
 	n, err := ddo.dd.Exec(ctx)
@@ -88,5 +94,7 @@ func (ddo *DeviceDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (ddo *DeviceDeleteOne) ExecX(ctx context.Context) {
-	ddo.dd.ExecX(ctx)
+	if err := ddo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

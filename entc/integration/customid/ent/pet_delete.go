@@ -73,6 +73,12 @@ type PetDeleteOne struct {
 	pd *PetDelete
 }
 
+// Where appends a list predicates to the PetDelete builder.
+func (pdo *PetDeleteOne) Where(ps ...predicate.Pet) *PetDeleteOne {
+	pdo.pd.mutation.Where(ps...)
+	return pdo
+}
+
 // Exec executes the deletion query.
 func (pdo *PetDeleteOne) Exec(ctx context.Context) error {
 	n, err := pdo.pd.Exec(ctx)
@@ -88,5 +94,7 @@ func (pdo *PetDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (pdo *PetDeleteOne) ExecX(ctx context.Context) {
-	pdo.pd.ExecX(ctx)
+	if err := pdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

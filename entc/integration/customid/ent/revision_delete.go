@@ -73,6 +73,12 @@ type RevisionDeleteOne struct {
 	rd *RevisionDelete
 }
 
+// Where appends a list predicates to the RevisionDelete builder.
+func (rdo *RevisionDeleteOne) Where(ps ...predicate.Revision) *RevisionDeleteOne {
+	rdo.rd.mutation.Where(ps...)
+	return rdo
+}
+
 // Exec executes the deletion query.
 func (rdo *RevisionDeleteOne) Exec(ctx context.Context) error {
 	n, err := rdo.rd.Exec(ctx)
@@ -88,5 +94,7 @@ func (rdo *RevisionDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (rdo *RevisionDeleteOne) ExecX(ctx context.Context) {
-	rdo.rd.ExecX(ctx)
+	if err := rdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

@@ -73,6 +73,12 @@ type CityDeleteOne struct {
 	cd *CityDelete
 }
 
+// Where appends a list predicates to the CityDelete builder.
+func (cdo *CityDeleteOne) Where(ps ...predicate.City) *CityDeleteOne {
+	cdo.cd.mutation.Where(ps...)
+	return cdo
+}
+
 // Exec executes the deletion query.
 func (cdo *CityDeleteOne) Exec(ctx context.Context) error {
 	n, err := cdo.cd.Exec(ctx)
@@ -88,5 +94,7 @@ func (cdo *CityDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (cdo *CityDeleteOne) ExecX(ctx context.Context) {
-	cdo.cd.ExecX(ctx)
+	if err := cdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

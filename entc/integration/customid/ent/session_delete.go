@@ -73,6 +73,12 @@ type SessionDeleteOne struct {
 	sd *SessionDelete
 }
 
+// Where appends a list predicates to the SessionDelete builder.
+func (sdo *SessionDeleteOne) Where(ps ...predicate.Session) *SessionDeleteOne {
+	sdo.sd.mutation.Where(ps...)
+	return sdo
+}
+
 // Exec executes the deletion query.
 func (sdo *SessionDeleteOne) Exec(ctx context.Context) error {
 	n, err := sdo.sd.Exec(ctx)
@@ -88,5 +94,7 @@ func (sdo *SessionDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (sdo *SessionDeleteOne) ExecX(ctx context.Context) {
-	sdo.sd.ExecX(ctx)
+	if err := sdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

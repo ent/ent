@@ -67,6 +67,12 @@ type GroupDeleteOne struct {
 	gd *GroupDelete
 }
 
+// Where appends a list predicates to the GroupDelete builder.
+func (gdo *GroupDeleteOne) Where(ps ...predicate.Group) *GroupDeleteOne {
+	gdo.gd.mutation.Where(ps...)
+	return gdo
+}
+
 // Exec executes the deletion query.
 func (gdo *GroupDeleteOne) Exec(ctx context.Context) error {
 	n, err := gdo.gd.Exec(ctx)
@@ -82,5 +88,7 @@ func (gdo *GroupDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (gdo *GroupDeleteOne) ExecX(ctx context.Context) {
-	gdo.gd.ExecX(ctx)
+	if err := gdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

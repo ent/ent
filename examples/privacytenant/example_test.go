@@ -115,8 +115,11 @@ func Example_TenantView() {
 		client.User.Query().CountX(labView), // 0
 	)
 
-	// DeleteOne with wrong viewer-context is nop.
-	client.User.DeleteOne(hubUsers[0]).ExecX(labView)
+	// DeleteOne with wrong viewer-context should cause the operation to fail with NotFoundError.
+	err := client.User.DeleteOne(hubUsers[0]).Exec(labView)
+	if !ent.IsNotFound(err) {
+		log.Fatal("expect user deletion to fail, but got:", err)
+	}
 	fmt.Println(client.User.Query().CountX(hubView)) // 2
 
 	// Unlike queries, admin users are not allowed to mutate tenant specific data.

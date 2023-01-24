@@ -73,6 +73,12 @@ type GroupTagDeleteOne struct {
 	gtd *GroupTagDelete
 }
 
+// Where appends a list predicates to the GroupTagDelete builder.
+func (gtdo *GroupTagDeleteOne) Where(ps ...predicate.GroupTag) *GroupTagDeleteOne {
+	gtdo.gtd.mutation.Where(ps...)
+	return gtdo
+}
+
 // Exec executes the deletion query.
 func (gtdo *GroupTagDeleteOne) Exec(ctx context.Context) error {
 	n, err := gtdo.gtd.Exec(ctx)
@@ -88,5 +94,7 @@ func (gtdo *GroupTagDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (gtdo *GroupTagDeleteOne) ExecX(ctx context.Context) {
-	gtdo.gtd.ExecX(ctx)
+	if err := gtdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

@@ -73,6 +73,12 @@ type TokenDeleteOne struct {
 	td *TokenDelete
 }
 
+// Where appends a list predicates to the TokenDelete builder.
+func (tdo *TokenDeleteOne) Where(ps ...predicate.Token) *TokenDeleteOne {
+	tdo.td.mutation.Where(ps...)
+	return tdo
+}
+
 // Exec executes the deletion query.
 func (tdo *TokenDeleteOne) Exec(ctx context.Context) error {
 	n, err := tdo.td.Exec(ctx)
@@ -88,5 +94,7 @@ func (tdo *TokenDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (tdo *TokenDeleteOne) ExecX(ctx context.Context) {
-	tdo.td.ExecX(ctx)
+	if err := tdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }
