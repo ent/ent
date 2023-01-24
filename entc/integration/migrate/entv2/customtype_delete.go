@@ -73,6 +73,12 @@ type CustomTypeDeleteOne struct {
 	ctd *CustomTypeDelete
 }
 
+// Where appends a list predicates to the CustomTypeDelete builder.
+func (ctdo *CustomTypeDeleteOne) Where(ps ...predicate.CustomType) *CustomTypeDeleteOne {
+	ctdo.ctd.mutation.Where(ps...)
+	return ctdo
+}
+
 // Exec executes the deletion query.
 func (ctdo *CustomTypeDeleteOne) Exec(ctx context.Context) error {
 	n, err := ctdo.ctd.Exec(ctx)
@@ -88,5 +94,7 @@ func (ctdo *CustomTypeDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (ctdo *CustomTypeDeleteOne) ExecX(ctx context.Context) {
-	ctdo.ctd.ExecX(ctx)
+	if err := ctdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

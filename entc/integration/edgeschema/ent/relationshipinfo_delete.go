@@ -73,6 +73,12 @@ type RelationshipInfoDeleteOne struct {
 	rid *RelationshipInfoDelete
 }
 
+// Where appends a list predicates to the RelationshipInfoDelete builder.
+func (rido *RelationshipInfoDeleteOne) Where(ps ...predicate.RelationshipInfo) *RelationshipInfoDeleteOne {
+	rido.rid.mutation.Where(ps...)
+	return rido
+}
+
 // Exec executes the deletion query.
 func (rido *RelationshipInfoDeleteOne) Exec(ctx context.Context) error {
 	n, err := rido.rid.Exec(ctx)
@@ -88,5 +94,7 @@ func (rido *RelationshipInfoDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (rido *RelationshipInfoDeleteOne) ExecX(ctx context.Context) {
-	rido.rid.ExecX(ctx)
+	if err := rido.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

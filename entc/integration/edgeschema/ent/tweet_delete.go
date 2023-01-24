@@ -73,6 +73,12 @@ type TweetDeleteOne struct {
 	td *TweetDelete
 }
 
+// Where appends a list predicates to the TweetDelete builder.
+func (tdo *TweetDeleteOne) Where(ps ...predicate.Tweet) *TweetDeleteOne {
+	tdo.td.mutation.Where(ps...)
+	return tdo
+}
+
 // Exec executes the deletion query.
 func (tdo *TweetDeleteOne) Exec(ctx context.Context) error {
 	n, err := tdo.td.Exec(ctx)
@@ -88,5 +94,7 @@ func (tdo *TweetDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (tdo *TweetDeleteOne) ExecX(ctx context.Context) {
-	tdo.td.ExecX(ctx)
+	if err := tdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

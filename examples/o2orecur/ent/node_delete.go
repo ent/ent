@@ -73,6 +73,12 @@ type NodeDeleteOne struct {
 	nd *NodeDelete
 }
 
+// Where appends a list predicates to the NodeDelete builder.
+func (ndo *NodeDeleteOne) Where(ps ...predicate.Node) *NodeDeleteOne {
+	ndo.nd.mutation.Where(ps...)
+	return ndo
+}
+
 // Exec executes the deletion query.
 func (ndo *NodeDeleteOne) Exec(ctx context.Context) error {
 	n, err := ndo.nd.Exec(ctx)
@@ -88,5 +94,7 @@ func (ndo *NodeDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (ndo *NodeDeleteOne) ExecX(ctx context.Context) {
-	ndo.nd.ExecX(ctx)
+	if err := ndo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

@@ -68,6 +68,12 @@ type RelationshipDeleteOne struct {
 	rd *RelationshipDelete
 }
 
+// Where appends a list predicates to the RelationshipDelete builder.
+func (rdo *RelationshipDeleteOne) Where(ps ...predicate.Relationship) *RelationshipDeleteOne {
+	rdo.rd.mutation.Where(ps...)
+	return rdo
+}
+
 // Exec executes the deletion query.
 func (rdo *RelationshipDeleteOne) Exec(ctx context.Context) error {
 	n, err := rdo.rd.Exec(ctx)
@@ -83,5 +89,7 @@ func (rdo *RelationshipDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (rdo *RelationshipDeleteOne) ExecX(ctx context.Context) {
-	rdo.rd.ExecX(ctx)
+	if err := rdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

@@ -73,6 +73,12 @@ type BlobDeleteOne struct {
 	bd *BlobDelete
 }
 
+// Where appends a list predicates to the BlobDelete builder.
+func (bdo *BlobDeleteOne) Where(ps ...predicate.Blob) *BlobDeleteOne {
+	bdo.bd.mutation.Where(ps...)
+	return bdo
+}
+
 // Exec executes the deletion query.
 func (bdo *BlobDeleteOne) Exec(ctx context.Context) error {
 	n, err := bdo.bd.Exec(ctx)
@@ -88,5 +94,7 @@ func (bdo *BlobDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (bdo *BlobDeleteOne) ExecX(ctx context.Context) {
-	bdo.bd.ExecX(ctx)
+	if err := bdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

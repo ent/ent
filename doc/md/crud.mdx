@@ -109,7 +109,6 @@ func main() {
 ```
 
 </TabItem>
-
 <TabItem value="gremlin">
 
 ```go
@@ -452,7 +451,7 @@ pedro, err := client.Pet.
 
 ## Delete One 
 
-Delete an entity.
+Delete an entity:
 
 ```go
 err := client.User.
@@ -460,7 +459,7 @@ err := client.User.
 	Exec(ctx)
 ```
 
-Delete by ID.
+Delete by ID:
 
 ```go
 err := client.User.
@@ -468,12 +467,38 @@ err := client.User.
 	Exec(ctx)
 ```
 
-## Delete Many
+#### Delete One With Condition
 
-Delete using predicates.
+In some projects, the "delete many" operation is not allowed and is blocked using hooks. However, there is still a need
+to delete a single entity by its ID while ensuring it meets a specific condition. In this case, you can use the `Where`
+option as follows:
 
 ```go
-_, err := client.File.
+err := client.Todo.
+    DeleteOneID(id).
+    Where(
+        // Allow deleting only expired todos.
+        todo.ExpireLT(time.Now()),
+    ).
+    Exec(ctx)
+switch {
+// If the entity does not meet a specific condition,
+// the operation will return an "ent.NotFoundError".
+case ent.IsNotFound(err):
+    fmt.Println("todo item was not found")
+// Any other error.
+case err != nil:
+    fmt.Println("deletion error:", err)
+}
+```
+
+
+## Delete Many
+
+Delete using predicates:
+
+```go
+affected, err := client.File.
 	Delete().
 	Where(file.UpdatedAtLT(date)).
 	Exec(ctx)

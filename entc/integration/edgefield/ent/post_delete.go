@@ -73,6 +73,12 @@ type PostDeleteOne struct {
 	pd *PostDelete
 }
 
+// Where appends a list predicates to the PostDelete builder.
+func (pdo *PostDeleteOne) Where(ps ...predicate.Post) *PostDeleteOne {
+	pdo.pd.mutation.Where(ps...)
+	return pdo
+}
+
 // Exec executes the deletion query.
 func (pdo *PostDeleteOne) Exec(ctx context.Context) error {
 	n, err := pdo.pd.Exec(ctx)
@@ -88,5 +94,7 @@ func (pdo *PostDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (pdo *PostDeleteOne) ExecX(ctx context.Context) {
-	pdo.pd.ExecX(ctx)
+	if err := pdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

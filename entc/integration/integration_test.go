@@ -985,9 +985,28 @@ func Delete(t *testing.T, client *ent.Client) {
 	require.Equal(3, affected)
 
 	info := client.GroupInfo.Create().SetDesc("group info").SaveX(ctx)
-	client.Group.Create().SetInfo(info).SetName("GitHub").SetExpire(time.Now().Add(time.Hour)).ExecX(ctx)
+	hub := client.Group.Create().SetInfo(info).SetName("GitHub").SetExpire(time.Now().Add(time.Hour)).SaveX(ctx)
 	err = client.GroupInfo.DeleteOne(info).Exec(ctx)
 	require.True(ent.IsConstraintError(err))
+
+	// Group.DeleteOneID(id).Where(...), is identical to Group.Delete().Where(group.ID(id), ...),
+	// but, in case the OpDelete is not an allowed operation, the DeleteOne can be used with Where.
+	n, err := client.Group.Delete().
+		Where(
+			group.ID(hub.ID),
+			group.ExpireLT(time.Now()), // Expired.
+		).Exec(ctx)
+	require.Zero(n)
+	require.NoError(err)
+
+	err = client.Group.DeleteOne(hub).
+		Where(group.ExpireLT(time.Now())).
+		Exec(ctx)
+	require.True(ent.IsNotFound(err))
+	hub.Update().SetExpire(time.Now().Add(-time.Hour)).ExecX(ctx)
+	client.Group.DeleteOne(hub).
+		Where(group.ExpireLT(time.Now())).
+		ExecX(ctx)
 }
 
 func Relation(t *testing.T, client *ent.Client) {

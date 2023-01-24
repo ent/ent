@@ -67,6 +67,12 @@ type ItemDeleteOne struct {
 	id *ItemDelete
 }
 
+// Where appends a list predicates to the ItemDelete builder.
+func (ido *ItemDeleteOne) Where(ps ...predicate.Item) *ItemDeleteOne {
+	ido.id.mutation.Where(ps...)
+	return ido
+}
+
 // Exec executes the deletion query.
 func (ido *ItemDeleteOne) Exec(ctx context.Context) error {
 	n, err := ido.id.Exec(ctx)
@@ -82,5 +88,7 @@ func (ido *ItemDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (ido *ItemDeleteOne) ExecX(ctx context.Context) {
-	ido.id.ExecX(ctx)
+	if err := ido.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

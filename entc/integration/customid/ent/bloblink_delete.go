@@ -68,6 +68,12 @@ type BlobLinkDeleteOne struct {
 	bld *BlobLinkDelete
 }
 
+// Where appends a list predicates to the BlobLinkDelete builder.
+func (bldo *BlobLinkDeleteOne) Where(ps ...predicate.BlobLink) *BlobLinkDeleteOne {
+	bldo.bld.mutation.Where(ps...)
+	return bldo
+}
+
 // Exec executes the deletion query.
 func (bldo *BlobLinkDeleteOne) Exec(ctx context.Context) error {
 	n, err := bldo.bld.Exec(ctx)
@@ -83,5 +89,7 @@ func (bldo *BlobLinkDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (bldo *BlobLinkDeleteOne) ExecX(ctx context.Context) {
-	bldo.bld.ExecX(ctx)
+	if err := bldo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

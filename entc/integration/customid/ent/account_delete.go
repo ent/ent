@@ -73,6 +73,12 @@ type AccountDeleteOne struct {
 	ad *AccountDelete
 }
 
+// Where appends a list predicates to the AccountDelete builder.
+func (ado *AccountDeleteOne) Where(ps ...predicate.Account) *AccountDeleteOne {
+	ado.ad.mutation.Where(ps...)
+	return ado
+}
+
 // Exec executes the deletion query.
 func (ado *AccountDeleteOne) Exec(ctx context.Context) error {
 	n, err := ado.ad.Exec(ctx)
@@ -88,5 +94,7 @@ func (ado *AccountDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (ado *AccountDeleteOne) ExecX(ctx context.Context) {
-	ado.ad.ExecX(ctx)
+	if err := ado.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

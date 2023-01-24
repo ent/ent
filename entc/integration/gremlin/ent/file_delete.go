@@ -67,6 +67,12 @@ type FileDeleteOne struct {
 	fd *FileDelete
 }
 
+// Where appends a list predicates to the FileDelete builder.
+func (fdo *FileDeleteOne) Where(ps ...predicate.File) *FileDeleteOne {
+	fdo.fd.mutation.Where(ps...)
+	return fdo
+}
+
 // Exec executes the deletion query.
 func (fdo *FileDeleteOne) Exec(ctx context.Context) error {
 	n, err := fdo.fd.Exec(ctx)
@@ -82,5 +88,7 @@ func (fdo *FileDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (fdo *FileDeleteOne) ExecX(ctx context.Context) {
-	fdo.fd.ExecX(ctx)
+	if err := fdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

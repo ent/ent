@@ -73,6 +73,12 @@ type IntSIDDeleteOne struct {
 	isd *IntSIDDelete
 }
 
+// Where appends a list predicates to the IntSIDDelete builder.
+func (isdo *IntSIDDeleteOne) Where(ps ...predicate.IntSID) *IntSIDDeleteOne {
+	isdo.isd.mutation.Where(ps...)
+	return isdo
+}
+
 // Exec executes the deletion query.
 func (isdo *IntSIDDeleteOne) Exec(ctx context.Context) error {
 	n, err := isdo.isd.Exec(ctx)
@@ -88,5 +94,7 @@ func (isdo *IntSIDDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (isdo *IntSIDDeleteOne) ExecX(ctx context.Context) {
-	isdo.isd.ExecX(ctx)
+	if err := isdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

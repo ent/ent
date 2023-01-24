@@ -73,6 +73,12 @@ type DocDeleteOne struct {
 	dd *DocDelete
 }
 
+// Where appends a list predicates to the DocDelete builder.
+func (ddo *DocDeleteOne) Where(ps ...predicate.Doc) *DocDeleteOne {
+	ddo.dd.mutation.Where(ps...)
+	return ddo
+}
+
 // Exec executes the deletion query.
 func (ddo *DocDeleteOne) Exec(ctx context.Context) error {
 	n, err := ddo.dd.Exec(ctx)
@@ -88,5 +94,7 @@ func (ddo *DocDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (ddo *DocDeleteOne) ExecX(ctx context.Context) {
-	ddo.dd.ExecX(ctx)
+	if err := ddo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

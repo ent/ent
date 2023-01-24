@@ -73,6 +73,12 @@ type UserTweetDeleteOne struct {
 	utd *UserTweetDelete
 }
 
+// Where appends a list predicates to the UserTweetDelete builder.
+func (utdo *UserTweetDeleteOne) Where(ps ...predicate.UserTweet) *UserTweetDeleteOne {
+	utdo.utd.mutation.Where(ps...)
+	return utdo
+}
+
 // Exec executes the deletion query.
 func (utdo *UserTweetDeleteOne) Exec(ctx context.Context) error {
 	n, err := utdo.utd.Exec(ctx)
@@ -88,5 +94,7 @@ func (utdo *UserTweetDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (utdo *UserTweetDeleteOne) ExecX(ctx context.Context) {
-	utdo.utd.ExecX(ctx)
+	if err := utdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

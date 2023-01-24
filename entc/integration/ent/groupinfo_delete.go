@@ -73,6 +73,12 @@ type GroupInfoDeleteOne struct {
 	gid *GroupInfoDelete
 }
 
+// Where appends a list predicates to the GroupInfoDelete builder.
+func (gido *GroupInfoDeleteOne) Where(ps ...predicate.GroupInfo) *GroupInfoDeleteOne {
+	gido.gid.mutation.Where(ps...)
+	return gido
+}
+
 // Exec executes the deletion query.
 func (gido *GroupInfoDeleteOne) Exec(ctx context.Context) error {
 	n, err := gido.gid.Exec(ctx)
@@ -88,5 +94,7 @@ func (gido *GroupInfoDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (gido *GroupInfoDeleteOne) ExecX(ctx context.Context) {
-	gido.gid.ExecX(ctx)
+	if err := gido.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

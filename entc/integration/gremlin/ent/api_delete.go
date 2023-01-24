@@ -67,6 +67,12 @@ type APIDeleteOne struct {
 	ad *APIDelete
 }
 
+// Where appends a list predicates to the APIDelete builder.
+func (ado *APIDeleteOne) Where(ps ...predicate.Api) *APIDeleteOne {
+	ado.ad.mutation.Where(ps...)
+	return ado
+}
+
 // Exec executes the deletion query.
 func (ado *APIDeleteOne) Exec(ctx context.Context) error {
 	n, err := ado.ad.Exec(ctx)
@@ -82,5 +88,7 @@ func (ado *APIDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (ado *APIDeleteOne) ExecX(ctx context.Context) {
-	ado.ad.ExecX(ctx)
+	if err := ado.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

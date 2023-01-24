@@ -73,6 +73,12 @@ type MixinIDDeleteOne struct {
 	mid *MixinIDDelete
 }
 
+// Where appends a list predicates to the MixinIDDelete builder.
+func (mido *MixinIDDeleteOne) Where(ps ...predicate.MixinID) *MixinIDDeleteOne {
+	mido.mid.mutation.Where(ps...)
+	return mido
+}
+
 // Exec executes the deletion query.
 func (mido *MixinIDDeleteOne) Exec(ctx context.Context) error {
 	n, err := mido.mid.Exec(ctx)
@@ -88,5 +94,7 @@ func (mido *MixinIDDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (mido *MixinIDDeleteOne) ExecX(ctx context.Context) {
-	mido.mid.ExecX(ctx)
+	if err := mido.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

@@ -73,6 +73,12 @@ type TeamDeleteOne struct {
 	td *TeamDelete
 }
 
+// Where appends a list predicates to the TeamDelete builder.
+func (tdo *TeamDeleteOne) Where(ps ...predicate.Team) *TeamDeleteOne {
+	tdo.td.mutation.Where(ps...)
+	return tdo
+}
+
 // Exec executes the deletion query.
 func (tdo *TeamDeleteOne) Exec(ctx context.Context) error {
 	n, err := tdo.td.Exec(ctx)
@@ -88,5 +94,7 @@ func (tdo *TeamDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (tdo *TeamDeleteOne) ExecX(ctx context.Context) {
-	tdo.td.ExecX(ctx)
+	if err := tdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

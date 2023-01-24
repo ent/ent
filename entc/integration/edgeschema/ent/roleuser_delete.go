@@ -68,6 +68,12 @@ type RoleUserDeleteOne struct {
 	rud *RoleUserDelete
 }
 
+// Where appends a list predicates to the RoleUserDelete builder.
+func (rudo *RoleUserDeleteOne) Where(ps ...predicate.RoleUser) *RoleUserDeleteOne {
+	rudo.rud.mutation.Where(ps...)
+	return rudo
+}
+
 // Exec executes the deletion query.
 func (rudo *RoleUserDeleteOne) Exec(ctx context.Context) error {
 	n, err := rudo.rud.Exec(ctx)
@@ -83,5 +89,7 @@ func (rudo *RoleUserDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (rudo *RoleUserDeleteOne) ExecX(ctx context.Context) {
-	rudo.rud.ExecX(ctx)
+	if err := rudo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }
