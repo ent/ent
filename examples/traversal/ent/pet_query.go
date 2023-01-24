@@ -23,11 +23,8 @@ import (
 // PetQuery is the builder for querying Pet entities.
 type PetQuery struct {
 	config
-	limit       *int
-	offset      *int
-	unique      *bool
+	ctx         *QueryContext
 	order       []OrderFunc
-	fields      []string
 	inters      []Interceptor
 	predicates  []predicate.Pet
 	withFriends *PetQuery
@@ -46,20 +43,20 @@ func (pq *PetQuery) Where(ps ...predicate.Pet) *PetQuery {
 
 // Limit the number of records to be returned by this query.
 func (pq *PetQuery) Limit(limit int) *PetQuery {
-	pq.limit = &limit
+	pq.ctx.Limit = &limit
 	return pq
 }
 
 // Offset to start from.
 func (pq *PetQuery) Offset(offset int) *PetQuery {
-	pq.offset = &offset
+	pq.ctx.Offset = &offset
 	return pq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (pq *PetQuery) Unique(unique bool) *PetQuery {
-	pq.unique = &unique
+	pq.ctx.Unique = &unique
 	return pq
 }
 
@@ -116,7 +113,7 @@ func (pq *PetQuery) QueryOwner() *UserQuery {
 // First returns the first Pet entity from the query.
 // Returns a *NotFoundError when no Pet was found.
 func (pq *PetQuery) First(ctx context.Context) (*Pet, error) {
-	nodes, err := pq.Limit(1).All(newQueryContext(ctx, TypePet, "First"))
+	nodes, err := pq.Limit(1).All(setContextOp(ctx, pq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +136,7 @@ func (pq *PetQuery) FirstX(ctx context.Context) *Pet {
 // Returns a *NotFoundError when no Pet ID was found.
 func (pq *PetQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = pq.Limit(1).IDs(newQueryContext(ctx, TypePet, "FirstID")); err != nil {
+	if ids, err = pq.Limit(1).IDs(setContextOp(ctx, pq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -162,7 +159,7 @@ func (pq *PetQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Pet entity is found.
 // Returns a *NotFoundError when no Pet entities are found.
 func (pq *PetQuery) Only(ctx context.Context) (*Pet, error) {
-	nodes, err := pq.Limit(2).All(newQueryContext(ctx, TypePet, "Only"))
+	nodes, err := pq.Limit(2).All(setContextOp(ctx, pq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -190,7 +187,7 @@ func (pq *PetQuery) OnlyX(ctx context.Context) *Pet {
 // Returns a *NotFoundError when no entities are found.
 func (pq *PetQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = pq.Limit(2).IDs(newQueryContext(ctx, TypePet, "OnlyID")); err != nil {
+	if ids, err = pq.Limit(2).IDs(setContextOp(ctx, pq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -215,7 +212,7 @@ func (pq *PetQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Pets.
 func (pq *PetQuery) All(ctx context.Context) ([]*Pet, error) {
-	ctx = newQueryContext(ctx, TypePet, "All")
+	ctx = setContextOp(ctx, pq.ctx, "All")
 	if err := pq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -235,7 +232,7 @@ func (pq *PetQuery) AllX(ctx context.Context) []*Pet {
 // IDs executes the query and returns a list of Pet IDs.
 func (pq *PetQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
-	ctx = newQueryContext(ctx, TypePet, "IDs")
+	ctx = setContextOp(ctx, pq.ctx, "IDs")
 	if err := pq.Select(pet.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -253,7 +250,7 @@ func (pq *PetQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (pq *PetQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypePet, "Count")
+	ctx = setContextOp(ctx, pq.ctx, "Count")
 	if err := pq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -271,7 +268,7 @@ func (pq *PetQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (pq *PetQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypePet, "Exist")
+	ctx = setContextOp(ctx, pq.ctx, "Exist")
 	switch _, err := pq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -299,17 +296,15 @@ func (pq *PetQuery) Clone() *PetQuery {
 	}
 	return &PetQuery{
 		config:      pq.config,
-		limit:       pq.limit,
-		offset:      pq.offset,
+		ctx:         pq.ctx.Clone(),
 		order:       append([]OrderFunc{}, pq.order...),
 		inters:      append([]Interceptor{}, pq.inters...),
 		predicates:  append([]predicate.Pet{}, pq.predicates...),
 		withFriends: pq.withFriends.Clone(),
 		withOwner:   pq.withOwner.Clone(),
 		// clone intermediate query.
-		sql:    pq.sql.Clone(),
-		path:   pq.path,
-		unique: pq.unique,
+		sql:  pq.sql.Clone(),
+		path: pq.path,
 	}
 }
 
@@ -350,9 +345,9 @@ func (pq *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
-	pq.fields = append([]string{field}, fields...)
+	pq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &PetGroupBy{build: pq}
-	grbuild.flds = &pq.fields
+	grbuild.flds = &pq.ctx.Fields
 	grbuild.label = pet.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -371,10 +366,10 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 //		Select(pet.FieldName).
 //		Scan(ctx, &v)
 func (pq *PetQuery) Select(fields ...string) *PetSelect {
-	pq.fields = append(pq.fields, fields...)
+	pq.ctx.Fields = append(pq.ctx.Fields, fields...)
 	sbuild := &PetSelect{PetQuery: pq}
 	sbuild.label = pet.Label
-	sbuild.flds, sbuild.scan = &pq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &pq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -394,7 +389,7 @@ func (pq *PetQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range pq.fields {
+	for _, f := range pq.ctx.Fields {
 		if !pet.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -552,9 +547,9 @@ func (pq *PetQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*Pe
 
 func (pq *PetQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := pq.querySpec()
-	_spec.Node.Columns = pq.fields
-	if len(pq.fields) > 0 {
-		_spec.Unique = pq.unique != nil && *pq.unique
+	_spec.Node.Columns = pq.ctx.Fields
+	if len(pq.ctx.Fields) > 0 {
+		_spec.Unique = pq.ctx.Unique != nil && *pq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, pq.driver, _spec)
 }
@@ -572,10 +567,10 @@ func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   pq.sql,
 		Unique: true,
 	}
-	if unique := pq.unique; unique != nil {
+	if unique := pq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := pq.fields; len(fields) > 0 {
+	if fields := pq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, pet.FieldID)
 		for i := range fields {
@@ -591,10 +586,10 @@ func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := pq.limit; limit != nil {
+	if limit := pq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := pq.offset; offset != nil {
+	if offset := pq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := pq.order; len(ps) > 0 {
@@ -610,7 +605,7 @@ func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {
 func (pq *PetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(pq.driver.Dialect())
 	t1 := builder.Table(pet.Table)
-	columns := pq.fields
+	columns := pq.ctx.Fields
 	if len(columns) == 0 {
 		columns = pet.Columns
 	}
@@ -619,7 +614,7 @@ func (pq *PetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = pq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if pq.unique != nil && *pq.unique {
+	if pq.ctx.Unique != nil && *pq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range pq.predicates {
@@ -628,12 +623,12 @@ func (pq *PetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range pq.order {
 		p(selector)
 	}
-	if offset := pq.offset; offset != nil {
+	if offset := pq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := pq.limit; limit != nil {
+	if limit := pq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -653,7 +648,7 @@ func (pgb *PetGroupBy) Aggregate(fns ...AggregateFunc) *PetGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (pgb *PetGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypePet, "GroupBy")
+	ctx = setContextOp(ctx, pgb.build.ctx, "GroupBy")
 	if err := pgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -701,7 +696,7 @@ func (ps *PetSelect) Aggregate(fns ...AggregateFunc) *PetSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ps *PetSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypePet, "Select")
+	ctx = setContextOp(ctx, ps.ctx, "Select")
 	if err := ps.prepareQuery(ctx); err != nil {
 		return err
 	}

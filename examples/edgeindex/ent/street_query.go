@@ -22,11 +22,8 @@ import (
 // StreetQuery is the builder for querying Street entities.
 type StreetQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
 	inters     []Interceptor
 	predicates []predicate.Street
 	withCity   *CityQuery
@@ -44,20 +41,20 @@ func (sq *StreetQuery) Where(ps ...predicate.Street) *StreetQuery {
 
 // Limit the number of records to be returned by this query.
 func (sq *StreetQuery) Limit(limit int) *StreetQuery {
-	sq.limit = &limit
+	sq.ctx.Limit = &limit
 	return sq
 }
 
 // Offset to start from.
 func (sq *StreetQuery) Offset(offset int) *StreetQuery {
-	sq.offset = &offset
+	sq.ctx.Offset = &offset
 	return sq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (sq *StreetQuery) Unique(unique bool) *StreetQuery {
-	sq.unique = &unique
+	sq.ctx.Unique = &unique
 	return sq
 }
 
@@ -92,7 +89,7 @@ func (sq *StreetQuery) QueryCity() *CityQuery {
 // First returns the first Street entity from the query.
 // Returns a *NotFoundError when no Street was found.
 func (sq *StreetQuery) First(ctx context.Context) (*Street, error) {
-	nodes, err := sq.Limit(1).All(newQueryContext(ctx, TypeStreet, "First"))
+	nodes, err := sq.Limit(1).All(setContextOp(ctx, sq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +112,7 @@ func (sq *StreetQuery) FirstX(ctx context.Context) *Street {
 // Returns a *NotFoundError when no Street ID was found.
 func (sq *StreetQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = sq.Limit(1).IDs(newQueryContext(ctx, TypeStreet, "FirstID")); err != nil {
+	if ids, err = sq.Limit(1).IDs(setContextOp(ctx, sq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -138,7 +135,7 @@ func (sq *StreetQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Street entity is found.
 // Returns a *NotFoundError when no Street entities are found.
 func (sq *StreetQuery) Only(ctx context.Context) (*Street, error) {
-	nodes, err := sq.Limit(2).All(newQueryContext(ctx, TypeStreet, "Only"))
+	nodes, err := sq.Limit(2).All(setContextOp(ctx, sq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +163,7 @@ func (sq *StreetQuery) OnlyX(ctx context.Context) *Street {
 // Returns a *NotFoundError when no entities are found.
 func (sq *StreetQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = sq.Limit(2).IDs(newQueryContext(ctx, TypeStreet, "OnlyID")); err != nil {
+	if ids, err = sq.Limit(2).IDs(setContextOp(ctx, sq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -191,7 +188,7 @@ func (sq *StreetQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Streets.
 func (sq *StreetQuery) All(ctx context.Context) ([]*Street, error) {
-	ctx = newQueryContext(ctx, TypeStreet, "All")
+	ctx = setContextOp(ctx, sq.ctx, "All")
 	if err := sq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -211,7 +208,7 @@ func (sq *StreetQuery) AllX(ctx context.Context) []*Street {
 // IDs executes the query and returns a list of Street IDs.
 func (sq *StreetQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
-	ctx = newQueryContext(ctx, TypeStreet, "IDs")
+	ctx = setContextOp(ctx, sq.ctx, "IDs")
 	if err := sq.Select(street.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -229,7 +226,7 @@ func (sq *StreetQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (sq *StreetQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeStreet, "Count")
+	ctx = setContextOp(ctx, sq.ctx, "Count")
 	if err := sq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -247,7 +244,7 @@ func (sq *StreetQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (sq *StreetQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeStreet, "Exist")
+	ctx = setContextOp(ctx, sq.ctx, "Exist")
 	switch _, err := sq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -275,16 +272,14 @@ func (sq *StreetQuery) Clone() *StreetQuery {
 	}
 	return &StreetQuery{
 		config:     sq.config,
-		limit:      sq.limit,
-		offset:     sq.offset,
+		ctx:        sq.ctx.Clone(),
 		order:      append([]OrderFunc{}, sq.order...),
 		inters:     append([]Interceptor{}, sq.inters...),
 		predicates: append([]predicate.Street{}, sq.predicates...),
 		withCity:   sq.withCity.Clone(),
 		// clone intermediate query.
-		sql:    sq.sql.Clone(),
-		path:   sq.path,
-		unique: sq.unique,
+		sql:  sq.sql.Clone(),
+		path: sq.path,
 	}
 }
 
@@ -314,9 +309,9 @@ func (sq *StreetQuery) WithCity(opts ...func(*CityQuery)) *StreetQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (sq *StreetQuery) GroupBy(field string, fields ...string) *StreetGroupBy {
-	sq.fields = append([]string{field}, fields...)
+	sq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &StreetGroupBy{build: sq}
-	grbuild.flds = &sq.fields
+	grbuild.flds = &sq.ctx.Fields
 	grbuild.label = street.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -335,10 +330,10 @@ func (sq *StreetQuery) GroupBy(field string, fields ...string) *StreetGroupBy {
 //		Select(street.FieldName).
 //		Scan(ctx, &v)
 func (sq *StreetQuery) Select(fields ...string) *StreetSelect {
-	sq.fields = append(sq.fields, fields...)
+	sq.ctx.Fields = append(sq.ctx.Fields, fields...)
 	sbuild := &StreetSelect{StreetQuery: sq}
 	sbuild.label = street.Label
-	sbuild.flds, sbuild.scan = &sq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &sq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -358,7 +353,7 @@ func (sq *StreetQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range sq.fields {
+	for _, f := range sq.ctx.Fields {
 		if !street.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -450,9 +445,9 @@ func (sq *StreetQuery) loadCity(ctx context.Context, query *CityQuery, nodes []*
 
 func (sq *StreetQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := sq.querySpec()
-	_spec.Node.Columns = sq.fields
-	if len(sq.fields) > 0 {
-		_spec.Unique = sq.unique != nil && *sq.unique
+	_spec.Node.Columns = sq.ctx.Fields
+	if len(sq.ctx.Fields) > 0 {
+		_spec.Unique = sq.ctx.Unique != nil && *sq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, sq.driver, _spec)
 }
@@ -470,10 +465,10 @@ func (sq *StreetQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   sq.sql,
 		Unique: true,
 	}
-	if unique := sq.unique; unique != nil {
+	if unique := sq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := sq.fields; len(fields) > 0 {
+	if fields := sq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, street.FieldID)
 		for i := range fields {
@@ -489,10 +484,10 @@ func (sq *StreetQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := sq.limit; limit != nil {
+	if limit := sq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := sq.offset; offset != nil {
+	if offset := sq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := sq.order; len(ps) > 0 {
@@ -508,7 +503,7 @@ func (sq *StreetQuery) querySpec() *sqlgraph.QuerySpec {
 func (sq *StreetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(sq.driver.Dialect())
 	t1 := builder.Table(street.Table)
-	columns := sq.fields
+	columns := sq.ctx.Fields
 	if len(columns) == 0 {
 		columns = street.Columns
 	}
@@ -517,7 +512,7 @@ func (sq *StreetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = sq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if sq.unique != nil && *sq.unique {
+	if sq.ctx.Unique != nil && *sq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range sq.predicates {
@@ -526,12 +521,12 @@ func (sq *StreetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range sq.order {
 		p(selector)
 	}
-	if offset := sq.offset; offset != nil {
+	if offset := sq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := sq.limit; limit != nil {
+	if limit := sq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -551,7 +546,7 @@ func (sgb *StreetGroupBy) Aggregate(fns ...AggregateFunc) *StreetGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (sgb *StreetGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeStreet, "GroupBy")
+	ctx = setContextOp(ctx, sgb.build.ctx, "GroupBy")
 	if err := sgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -599,7 +594,7 @@ func (ss *StreetSelect) Aggregate(fns ...AggregateFunc) *StreetSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ss *StreetSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeStreet, "Select")
+	ctx = setContextOp(ctx, ss.ctx, "Select")
 	if err := ss.prepareQuery(ctx); err != nil {
 		return err
 	}

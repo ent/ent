@@ -23,11 +23,8 @@ import (
 // GroupQuery is the builder for querying Group entities.
 type GroupQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
 	inters     []Interceptor
 	predicates []predicate.Group
 	withUsers  *UserQuery
@@ -44,20 +41,20 @@ func (gq *GroupQuery) Where(ps ...predicate.Group) *GroupQuery {
 
 // Limit the number of records to be returned by this query.
 func (gq *GroupQuery) Limit(limit int) *GroupQuery {
-	gq.limit = &limit
+	gq.ctx.Limit = &limit
 	return gq
 }
 
 // Offset to start from.
 func (gq *GroupQuery) Offset(offset int) *GroupQuery {
-	gq.offset = &offset
+	gq.ctx.Offset = &offset
 	return gq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (gq *GroupQuery) Unique(unique bool) *GroupQuery {
-	gq.unique = &unique
+	gq.ctx.Unique = &unique
 	return gq
 }
 
@@ -92,7 +89,7 @@ func (gq *GroupQuery) QueryUsers() *UserQuery {
 // First returns the first Group entity from the query.
 // Returns a *NotFoundError when no Group was found.
 func (gq *GroupQuery) First(ctx context.Context) (*Group, error) {
-	nodes, err := gq.Limit(1).All(newQueryContext(ctx, TypeGroup, "First"))
+	nodes, err := gq.Limit(1).All(setContextOp(ctx, gq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +112,7 @@ func (gq *GroupQuery) FirstX(ctx context.Context) *Group {
 // Returns a *NotFoundError when no Group ID was found.
 func (gq *GroupQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = gq.Limit(1).IDs(newQueryContext(ctx, TypeGroup, "FirstID")); err != nil {
+	if ids, err = gq.Limit(1).IDs(setContextOp(ctx, gq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -138,7 +135,7 @@ func (gq *GroupQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Group entity is found.
 // Returns a *NotFoundError when no Group entities are found.
 func (gq *GroupQuery) Only(ctx context.Context) (*Group, error) {
-	nodes, err := gq.Limit(2).All(newQueryContext(ctx, TypeGroup, "Only"))
+	nodes, err := gq.Limit(2).All(setContextOp(ctx, gq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +163,7 @@ func (gq *GroupQuery) OnlyX(ctx context.Context) *Group {
 // Returns a *NotFoundError when no entities are found.
 func (gq *GroupQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = gq.Limit(2).IDs(newQueryContext(ctx, TypeGroup, "OnlyID")); err != nil {
+	if ids, err = gq.Limit(2).IDs(setContextOp(ctx, gq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -191,7 +188,7 @@ func (gq *GroupQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Groups.
 func (gq *GroupQuery) All(ctx context.Context) ([]*Group, error) {
-	ctx = newQueryContext(ctx, TypeGroup, "All")
+	ctx = setContextOp(ctx, gq.ctx, "All")
 	if err := gq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -211,7 +208,7 @@ func (gq *GroupQuery) AllX(ctx context.Context) []*Group {
 // IDs executes the query and returns a list of Group IDs.
 func (gq *GroupQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
-	ctx = newQueryContext(ctx, TypeGroup, "IDs")
+	ctx = setContextOp(ctx, gq.ctx, "IDs")
 	if err := gq.Select(group.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -229,7 +226,7 @@ func (gq *GroupQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (gq *GroupQuery) Count(ctx context.Context) (int, error) {
-	ctx = newQueryContext(ctx, TypeGroup, "Count")
+	ctx = setContextOp(ctx, gq.ctx, "Count")
 	if err := gq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -247,7 +244,7 @@ func (gq *GroupQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (gq *GroupQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = newQueryContext(ctx, TypeGroup, "Exist")
+	ctx = setContextOp(ctx, gq.ctx, "Exist")
 	switch _, err := gq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -275,16 +272,14 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 	}
 	return &GroupQuery{
 		config:     gq.config,
-		limit:      gq.limit,
-		offset:     gq.offset,
+		ctx:        gq.ctx.Clone(),
 		order:      append([]OrderFunc{}, gq.order...),
 		inters:     append([]Interceptor{}, gq.inters...),
 		predicates: append([]predicate.Group{}, gq.predicates...),
 		withUsers:  gq.withUsers.Clone(),
 		// clone intermediate query.
-		sql:    gq.sql.Clone(),
-		path:   gq.path,
-		unique: gq.unique,
+		sql:  gq.sql.Clone(),
+		path: gq.path,
 	}
 }
 
@@ -314,9 +309,9 @@ func (gq *GroupQuery) WithUsers(opts ...func(*UserQuery)) *GroupQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
-	gq.fields = append([]string{field}, fields...)
+	gq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &GroupGroupBy{build: gq}
-	grbuild.flds = &gq.fields
+	grbuild.flds = &gq.ctx.Fields
 	grbuild.label = group.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -335,10 +330,10 @@ func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 //		Select(group.FieldName).
 //		Scan(ctx, &v)
 func (gq *GroupQuery) Select(fields ...string) *GroupSelect {
-	gq.fields = append(gq.fields, fields...)
+	gq.ctx.Fields = append(gq.ctx.Fields, fields...)
 	sbuild := &GroupSelect{GroupQuery: gq}
 	sbuild.label = group.Label
-	sbuild.flds, sbuild.scan = &gq.fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &gq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -358,7 +353,7 @@ func (gq *GroupQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range gq.fields {
+	for _, f := range gq.ctx.Fields {
 		if !group.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -470,9 +465,9 @@ func (gq *GroupQuery) loadUsers(ctx context.Context, query *UserQuery, nodes []*
 
 func (gq *GroupQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := gq.querySpec()
-	_spec.Node.Columns = gq.fields
-	if len(gq.fields) > 0 {
-		_spec.Unique = gq.unique != nil && *gq.unique
+	_spec.Node.Columns = gq.ctx.Fields
+	if len(gq.ctx.Fields) > 0 {
+		_spec.Unique = gq.ctx.Unique != nil && *gq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, gq.driver, _spec)
 }
@@ -490,10 +485,10 @@ func (gq *GroupQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   gq.sql,
 		Unique: true,
 	}
-	if unique := gq.unique; unique != nil {
+	if unique := gq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
 	}
-	if fields := gq.fields; len(fields) > 0 {
+	if fields := gq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, group.FieldID)
 		for i := range fields {
@@ -509,10 +504,10 @@ func (gq *GroupQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := gq.limit; limit != nil {
+	if limit := gq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := gq.offset; offset != nil {
+	if offset := gq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := gq.order; len(ps) > 0 {
@@ -528,7 +523,7 @@ func (gq *GroupQuery) querySpec() *sqlgraph.QuerySpec {
 func (gq *GroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(gq.driver.Dialect())
 	t1 := builder.Table(group.Table)
-	columns := gq.fields
+	columns := gq.ctx.Fields
 	if len(columns) == 0 {
 		columns = group.Columns
 	}
@@ -537,7 +532,7 @@ func (gq *GroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = gq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if gq.unique != nil && *gq.unique {
+	if gq.ctx.Unique != nil && *gq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range gq.predicates {
@@ -546,12 +541,12 @@ func (gq *GroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range gq.order {
 		p(selector)
 	}
-	if offset := gq.offset; offset != nil {
+	if offset := gq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := gq.limit; limit != nil {
+	if limit := gq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -571,7 +566,7 @@ func (ggb *GroupGroupBy) Aggregate(fns ...AggregateFunc) *GroupGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ggb *GroupGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeGroup, "GroupBy")
+	ctx = setContextOp(ctx, ggb.build.ctx, "GroupBy")
 	if err := ggb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -619,7 +614,7 @@ func (gs *GroupSelect) Aggregate(fns ...AggregateFunc) *GroupSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (gs *GroupSelect) Scan(ctx context.Context, v any) error {
-	ctx = newQueryContext(ctx, TypeGroup, "Select")
+	ctx = setContextOp(ctx, gs.ctx, "Select")
 	if err := gs.prepareQuery(ctx); err != nil {
 		return err
 	}
