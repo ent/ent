@@ -908,6 +908,10 @@ func (c Config) SchemaPackageAlias() string {
 // SchemaPackageBase returns the base name of the schema package.
 func (c Config) SchemaPackageBase() string {
 	base := filepath.Base(c.Schema)
+	// We don't want to generate a dot import for the schema package.
+	if base == "." {
+		return ""
+	}
 	// Specifically look for a collision with the "ent" package:
 	if base == "ent" {
 		return "entschema"
