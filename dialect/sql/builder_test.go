@@ -2355,3 +2355,14 @@ func TestMultipleFrom(t *testing.T) {
 	require.Equal(t, []any{"neutrino|(dark & matter)", 10}, args)
 	require.Equal(t, `SELECT items.*, ts_rank_cd(search, search_query) AS "rank" FROM "items", to_tsquery($1) AS search_query WHERE "value" = $2 AND search @@ search_query`, query)
 }
+
+func TestFormattedColumnFromSubQuery(t *testing.T) {
+	q := Select("*").From(Select("*").AppendSelectExprAs(P(func(b *Builder) {
+		b.SetDialect(dialect.Postgres)
+		b.WriteString("calculate_score")
+		b.Wrap(func(bb *Builder) {
+			bb.WriteString(Table("table_name").C("field_name")).Comma().Args("test")
+		})
+	}), "score").From(Table("table_name").As("table_name_alias")))
+	require.Equal(t, "`table_name_alias`.`score`", q.C("score"))
+}
