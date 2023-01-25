@@ -68,8 +68,10 @@ backwards-compatibility with previous versions of ent.
 {{/* register schema handlers to type packages */}}
 {{ define "runtime/register" }}
 import (
+	{{- if $.Config.Schema }}
 	{{- with $.Config }}
 		{{ if .SchemaPackageAlias }}{{ .SchemaPackageAlias }}{{ end }} "{{ .Schema }}"
+	{{- end }}
 	{{- end }}
 	{{- range $n := $.Nodes }}
 		{{ $n.PackageAlias }} "{{ $.Config.Package }}/{{ $n.PackageDir }}"
