@@ -66,6 +66,26 @@ func TNotNil() predicate.User {
 	return predicate.User(sql.FieldNotNull(FieldT))
 }
 
+// MyJSONIsNil applies the IsNil predicate on the "my_json" field.
+func MyJSONIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldMyJSON))
+}
+
+// MyJSONNotNil applies the NotNil predicate on the "my_json" field.
+func MyJSONNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldMyJSON))
+}
+
+// MyJSONPtrIsNil applies the IsNil predicate on the "my_json_ptr" field.
+func MyJSONPtrIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldMyJSONPtr))
+}
+
+// MyJSONPtrNotNil applies the NotNil predicate on the "my_json_ptr" field.
+func MyJSONPtrNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldMyJSONPtr))
+}
+
 // URLIsNil applies the IsNil predicate on the "url" field.
 func URLIsNil() predicate.User {
 	return predicate.User(sql.FieldIsNull(FieldURL))

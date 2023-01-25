@@ -17,6 +17,10 @@ const (
 	FieldID = "id"
 	// FieldT holds the string denoting the t field in the database.
 	FieldT = "t"
+	// FieldMyJSON holds the string denoting the my_json field in the database.
+	FieldMyJSON = "my_json"
+	// FieldMyJSONPtr holds the string denoting the my_json_ptr field in the database.
+	FieldMyJSONPtr = "my_json_ptr"
 	// FieldURL holds the string denoting the url field in the database.
 	FieldURL = "url"
 	// FieldURLs holds the string denoting the urls field in the database.
@@ -41,6 +45,8 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldT,
+	FieldMyJSON,
+	FieldMyJSONPtr,
 	FieldURL,
 	FieldURLs,
 	FieldRaw,

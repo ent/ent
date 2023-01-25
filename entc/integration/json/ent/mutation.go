@@ -42,6 +42,8 @@ type UserMutation struct {
 	typ           string
 	id            *int
 	t             **schema.T
+	my_json       *schema.MyJSON
+	my_json_ptr   **schema.MyJSON
 	url           **url.URL
 	_URLs         *[]*url.URL
 	append_URLs   []*url.URL
@@ -207,6 +209,104 @@ func (m *UserMutation) TCleared() bool {
 func (m *UserMutation) ResetT() {
 	m.t = nil
 	delete(m.clearedFields, user.FieldT)
+}
+
+// SetMyJSON sets the "my_json" field.
+func (m *UserMutation) SetMyJSON(sj schema.MyJSON) {
+	m.my_json = &sj
+}
+
+// MyJSON returns the value of the "my_json" field in the mutation.
+func (m *UserMutation) MyJSON() (r schema.MyJSON, exists bool) {
+	v := m.my_json
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMyJSON returns the old "my_json" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldMyJSON(ctx context.Context) (v schema.MyJSON, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMyJSON is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMyJSON requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMyJSON: %w", err)
+	}
+	return oldValue.MyJSON, nil
+}
+
+// ClearMyJSON clears the value of the "my_json" field.
+func (m *UserMutation) ClearMyJSON() {
+	m.my_json = nil
+	m.clearedFields[user.FieldMyJSON] = struct{}{}
+}
+
+// MyJSONCleared returns if the "my_json" field was cleared in this mutation.
+func (m *UserMutation) MyJSONCleared() bool {
+	_, ok := m.clearedFields[user.FieldMyJSON]
+	return ok
+}
+
+// ResetMyJSON resets all changes to the "my_json" field.
+func (m *UserMutation) ResetMyJSON() {
+	m.my_json = nil
+	delete(m.clearedFields, user.FieldMyJSON)
+}
+
+// SetMyJSONPtr sets the "my_json_ptr" field.
+func (m *UserMutation) SetMyJSONPtr(sj *schema.MyJSON) {
+	m.my_json_ptr = &sj
+}
+
+// MyJSONPtr returns the value of the "my_json_ptr" field in the mutation.
+func (m *UserMutation) MyJSONPtr() (r *schema.MyJSON, exists bool) {
+	v := m.my_json_ptr
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMyJSONPtr returns the old "my_json_ptr" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldMyJSONPtr(ctx context.Context) (v *schema.MyJSON, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMyJSONPtr is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMyJSONPtr requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMyJSONPtr: %w", err)
+	}
+	return oldValue.MyJSONPtr, nil
+}
+
+// ClearMyJSONPtr clears the value of the "my_json_ptr" field.
+func (m *UserMutation) ClearMyJSONPtr() {
+	m.my_json_ptr = nil
+	m.clearedFields[user.FieldMyJSONPtr] = struct{}{}
+}
+
+// MyJSONPtrCleared returns if the "my_json_ptr" field was cleared in this mutation.
+func (m *UserMutation) MyJSONPtrCleared() bool {
+	_, ok := m.clearedFields[user.FieldMyJSONPtr]
+	return ok
+}
+
+// ResetMyJSONPtr resets all changes to the "my_json_ptr" field.
+func (m *UserMutation) ResetMyJSONPtr() {
+	m.my_json_ptr = nil
+	delete(m.clearedFields, user.FieldMyJSONPtr)
 }
 
 // SetURL sets the "url" field.
@@ -717,9 +817,15 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 11)
 	if m.t != nil {
 		fields = append(fields, user.FieldT)
+	}
+	if m.my_json != nil {
+		fields = append(fields, user.FieldMyJSON)
+	}
+	if m.my_json_ptr != nil {
+		fields = append(fields, user.FieldMyJSONPtr)
 	}
 	if m.url != nil {
 		fields = append(fields, user.FieldURL)
@@ -755,6 +861,10 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case user.FieldT:
 		return m.T()
+	case user.FieldMyJSON:
+		return m.MyJSON()
+	case user.FieldMyJSONPtr:
+		return m.MyJSONPtr()
 	case user.FieldURL:
 		return m.URL()
 	case user.FieldURLs:
@@ -782,6 +892,10 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 	switch name {
 	case user.FieldT:
 		return m.OldT(ctx)
+	case user.FieldMyJSON:
+		return m.OldMyJSON(ctx)
+	case user.FieldMyJSONPtr:
+		return m.OldMyJSONPtr(ctx)
 	case user.FieldURL:
 		return m.OldURL(ctx)
 	case user.FieldURLs:
@@ -813,6 +927,20 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetT(v)
+		return nil
+	case user.FieldMyJSON:
+		v, ok := value.(schema.MyJSON)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMyJSON(v)
+		return nil
+	case user.FieldMyJSONPtr:
+		v, ok := value.(*schema.MyJSON)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMyJSONPtr(v)
 		return nil
 	case user.FieldURL:
 		v, ok := value.(*url.URL)
@@ -903,6 +1031,12 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldT) {
 		fields = append(fields, user.FieldT)
 	}
+	if m.FieldCleared(user.FieldMyJSON) {
+		fields = append(fields, user.FieldMyJSON)
+	}
+	if m.FieldCleared(user.FieldMyJSONPtr) {
+		fields = append(fields, user.FieldMyJSONPtr)
+	}
 	if m.FieldCleared(user.FieldURL) {
 		fields = append(fields, user.FieldURL)
 	}
@@ -941,6 +1075,12 @@ func (m *UserMutation) ClearField(name string) error {
 	case user.FieldT:
 		m.ClearT()
 		return nil
+	case user.FieldMyJSON:
+		m.ClearMyJSON()
+		return nil
+	case user.FieldMyJSONPtr:
+		m.ClearMyJSONPtr()
+		return nil
 	case user.FieldURL:
 		m.ClearURL()
 		return nil
@@ -972,6 +1112,12 @@ func (m *UserMutation) ResetField(name string) error {
 	switch name {
 	case user.FieldT:
 		m.ResetT()
+		return nil
+	case user.FieldMyJSON:
+		m.ResetMyJSON()
+		return nil
+	case user.FieldMyJSONPtr:
+		m.ResetMyJSONPtr()
 		return nil
 	case user.FieldURL:
 		m.ResetURL()

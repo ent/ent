@@ -49,6 +49,38 @@ func (uu *UserUpdate) ClearT() *UserUpdate {
 	return uu
 }
 
+// SetMyJSON sets the "my_json" field.
+func (uu *UserUpdate) SetMyJSON(sj schema.MyJSON) *UserUpdate {
+	uu.mutation.SetMyJSON(sj)
+	return uu
+}
+
+// SetNillableMyJSON sets the "my_json" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableMyJSON(sj *schema.MyJSON) *UserUpdate {
+	if sj != nil {
+		uu.SetMyJSON(*sj)
+	}
+	return uu
+}
+
+// ClearMyJSON clears the value of the "my_json" field.
+func (uu *UserUpdate) ClearMyJSON() *UserUpdate {
+	uu.mutation.ClearMyJSON()
+	return uu
+}
+
+// SetMyJSONPtr sets the "my_json_ptr" field.
+func (uu *UserUpdate) SetMyJSONPtr(sj *schema.MyJSON) *UserUpdate {
+	uu.mutation.SetMyJSONPtr(sj)
+	return uu
+}
+
+// ClearMyJSONPtr clears the value of the "my_json_ptr" field.
+func (uu *UserUpdate) ClearMyJSONPtr() *UserUpdate {
+	uu.mutation.ClearMyJSONPtr()
+	return uu
+}
+
 // SetURL sets the "url" field.
 func (uu *UserUpdate) SetURL(u *url.URL) *UserUpdate {
 	uu.mutation.SetURL(u)
@@ -245,6 +277,18 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if uu.mutation.TCleared() {
 		_spec.ClearField(user.FieldT, field.TypeJSON)
 	}
+	if value, ok := uu.mutation.MyJSON(); ok {
+		_spec.SetField(user.FieldMyJSON, field.TypeJSON, value)
+	}
+	if uu.mutation.MyJSONCleared() {
+		_spec.ClearField(user.FieldMyJSON, field.TypeJSON)
+	}
+	if value, ok := uu.mutation.MyJSONPtr(); ok {
+		_spec.SetField(user.FieldMyJSONPtr, field.TypeJSON, value)
+	}
+	if uu.mutation.MyJSONPtrCleared() {
+		_spec.ClearField(user.FieldMyJSONPtr, field.TypeJSON)
+	}
 	if value, ok := uu.mutation.URL(); ok {
 		_spec.SetField(user.FieldURL, field.TypeJSON, value)
 	}
@@ -351,6 +395,38 @@ func (uuo *UserUpdateOne) SetT(s *schema.T) *UserUpdateOne {
 // ClearT clears the value of the "t" field.
 func (uuo *UserUpdateOne) ClearT() *UserUpdateOne {
 	uuo.mutation.ClearT()
+	return uuo
+}
+
+// SetMyJSON sets the "my_json" field.
+func (uuo *UserUpdateOne) SetMyJSON(sj schema.MyJSON) *UserUpdateOne {
+	uuo.mutation.SetMyJSON(sj)
+	return uuo
+}
+
+// SetNillableMyJSON sets the "my_json" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableMyJSON(sj *schema.MyJSON) *UserUpdateOne {
+	if sj != nil {
+		uuo.SetMyJSON(*sj)
+	}
+	return uuo
+}
+
+// ClearMyJSON clears the value of the "my_json" field.
+func (uuo *UserUpdateOne) ClearMyJSON() *UserUpdateOne {
+	uuo.mutation.ClearMyJSON()
+	return uuo
+}
+
+// SetMyJSONPtr sets the "my_json_ptr" field.
+func (uuo *UserUpdateOne) SetMyJSONPtr(sj *schema.MyJSON) *UserUpdateOne {
+	uuo.mutation.SetMyJSONPtr(sj)
+	return uuo
+}
+
+// ClearMyJSONPtr clears the value of the "my_json_ptr" field.
+func (uuo *UserUpdateOne) ClearMyJSONPtr() *UserUpdateOne {
+	uuo.mutation.ClearMyJSONPtr()
 	return uuo
 }
 
@@ -573,6 +649,18 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if uuo.mutation.TCleared() {
 		_spec.ClearField(user.FieldT, field.TypeJSON)
+	}
+	if value, ok := uuo.mutation.MyJSON(); ok {
+		_spec.SetField(user.FieldMyJSON, field.TypeJSON, value)
+	}
+	if uuo.mutation.MyJSONCleared() {
+		_spec.ClearField(user.FieldMyJSON, field.TypeJSON)
+	}
+	if value, ok := uuo.mutation.MyJSONPtr(); ok {
+		_spec.SetField(user.FieldMyJSONPtr, field.TypeJSON, value)
+	}
+	if uuo.mutation.MyJSONPtrCleared() {
+		_spec.ClearField(user.FieldMyJSONPtr, field.TypeJSON)
 	}
 	if value, ok := uuo.mutation.URL(); ok {
 		_spec.SetField(user.FieldURL, field.TypeJSON, value)

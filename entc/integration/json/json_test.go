@@ -56,6 +56,7 @@ func TestMySQL(t *testing.T) {
 				Predicates(t, client)
 			}
 			Scan(t, client)
+			MyJSON(t, client)
 		})
 	}
 }
@@ -88,6 +89,7 @@ func TestMaria(t *testing.T) {
 			RawMessage(t, client)
 			Predicates(t, client)
 			Scan(t, client)
+			MyJSON(t, client)
 		})
 	}
 }
@@ -120,6 +122,7 @@ func TestPostgres(t *testing.T) {
 			RawMessage(t, client)
 			Predicates(t, client)
 			Scan(t, client)
+			MyJSON(t, client)
 		})
 	}
 }
@@ -141,6 +144,7 @@ func TestSQLite(t *testing.T) {
 	RawMessage(t, client)
 	Predicates(t, client)
 	Scan(t, client)
+	MyJSON(t, client)
 }
 
 func Ints(t *testing.T, client *ent.Client) {
@@ -323,6 +327,19 @@ func URLs(t *testing.T, client *ent.Client) {
 	require.Len(t, usr.URLs, 2)
 	require.Equal(t, u1, usr.URLs[0])
 	require.Equal(t, u2, usr.URLs[1])
+}
+
+func MyJSON(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	myJSON := schema.MyJSON{Field: "test"}
+	mjs := client.User.Create().SetMyJSON(myJSON).SaveX(ctx)
+	require.Equal(t, myJSON, mjs.MyJSON)
+	require.Equal(t, myJSON, client.User.GetX(ctx, mjs.ID).MyJSON)
+
+	myJSONPtr := &schema.MyJSON{Field: "test"}
+	mjsptr := client.User.Create().SetMyJSONPtr(myJSONPtr).SaveX(ctx)
+	require.Equal(t, myJSONPtr, mjsptr.MyJSONPtr)
+	require.Equal(t, myJSONPtr, client.User.GetX(ctx, mjsptr.ID).MyJSONPtr)
 }
 
 func Predicates(t *testing.T, client *ent.Client) {

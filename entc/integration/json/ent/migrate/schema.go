@@ -16,6 +16,8 @@ var (
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "t", Type: field.TypeJSON, Nullable: true},
+		{Name: "my_json", Type: field.TypeJSON, Nullable: true},
+		{Name: "my_json_ptr", Type: field.TypeJSON, Nullable: true},
 		{Name: "url", Type: field.TypeJSON, Nullable: true},
 		{Name: "urls", Type: field.TypeJSON, Nullable: true},
 		{Name: "raw", Type: field.TypeJSON, Nullable: true},

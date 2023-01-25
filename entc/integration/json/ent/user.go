@@ -25,6 +25,10 @@ type User struct {
 	ID int `json:"id,omitempty"`
 	// T holds the value of the "t" field.
 	T *schema.T `json:"t,omitempty"`
+	// MyJSON holds the value of the "my_json" field.
+	MyJSON schema.MyJSON `json:"my_json,omitempty"`
+	// MyJSONPtr holds the value of the "my_json_ptr" field.
+	MyJSONPtr *schema.MyJSON `json:"my_json_ptr,omitempty"`
 	// URL holds the value of the "url" field.
 	URL *url.URL `json:"url,omitempty"`
 	// URLs holds the value of the "URLs" field.
@@ -50,6 +54,8 @@ func (*User) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case user.FieldT, user.FieldURL, user.FieldURLs, user.FieldRaw, user.FieldDirs, user.FieldInts, user.FieldFloats, user.FieldStrings, user.FieldAddr:
 			values[i] = new([]byte)
+		case user.FieldMyJSON, user.FieldMyJSONPtr:
+			values[i] = new(schema.MyJSON)
 		case user.FieldID:
 			values[i] = new(sql.NullInt64)
 		default:
@@ -80,6 +86,18 @@ func (u *User) assignValues(columns []string, values []any) error {
 				if err := json.Unmarshal(*value, &u.T); err != nil {
 					return fmt.Errorf("unmarshal field t: %w", err)
 				}
+			}
+		case user.FieldMyJSON:
+			if value, ok := values[i].(*schema.MyJSON); !ok {
+				return fmt.Errorf("unexpected type %T for field my_json", values[i])
+			} else if value != nil {
+				u.MyJSON = *value
+			}
+		case user.FieldMyJSONPtr:
+			if value, ok := values[i].(*schema.MyJSON); !ok {
+				return fmt.Errorf("unexpected type %T for field my_json_ptr", values[i])
+			} else if value != nil {
+				u.MyJSONPtr = value
 			}
 		case user.FieldURL:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -175,6 +193,12 @@ func (u *User) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", u.ID))
 	builder.WriteString("t=")
 	builder.WriteString(fmt.Sprintf("%v", u.T))
+	builder.WriteString(", ")
+	builder.WriteString("my_json=")
+	builder.WriteString(fmt.Sprintf("%v", u.MyJSON))
+	builder.WriteString(", ")
+	builder.WriteString("my_json_ptr=")
+	builder.WriteString(fmt.Sprintf("%v", u.MyJSONPtr))
 	builder.WriteString(", ")
 	builder.WriteString("url=")
 	builder.WriteString(fmt.Sprintf("%v", u.URL))

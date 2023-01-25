@@ -5,6 +5,7 @@
 package schema
 
 import (
+	"database/sql/driver"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -25,6 +26,10 @@ type User struct {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.JSON("t", &T{}).
+			Optional(),
+		field.JSON("my_json", MyJSON{}).
+			Optional(),
+		field.JSON("my_json_ptr", &MyJSON{}).
 			Optional(),
 		field.JSON("url", &url.URL{}).
 			Optional(),
@@ -105,4 +110,30 @@ func (a Addr) String() string {
 		return ""
 	}
 	return a.Addr.String()
+}
+
+type MyJSON struct {
+	Field string `json:"field"`
+}
+
+func (m *MyJSON) Scan(value any) error {
+	if value == nil {
+		return nil
+	}
+	data, ok := value.([]byte)
+	if !ok {
+		return fmt.Errorf("value %T is not bytes", value)
+	}
+	if err := json.Unmarshal(data, m); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m MyJSON) Value() (driver.Value, error) {
+	b, err := json.Marshal(&m)
+	if err != nil {
+		return nil, err
+	}
+	return driver.Value(b), nil
 }

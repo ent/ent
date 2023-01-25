@@ -33,6 +33,26 @@ func (uc *UserCreate) SetT(s *schema.T) *UserCreate {
 	return uc
 }
 
+// SetMyJSON sets the "my_json" field.
+func (uc *UserCreate) SetMyJSON(sj schema.MyJSON) *UserCreate {
+	uc.mutation.SetMyJSON(sj)
+	return uc
+}
+
+// SetNillableMyJSON sets the "my_json" field if the given value is not nil.
+func (uc *UserCreate) SetNillableMyJSON(sj *schema.MyJSON) *UserCreate {
+	if sj != nil {
+		uc.SetMyJSON(*sj)
+	}
+	return uc
+}
+
+// SetMyJSONPtr sets the "my_json_ptr" field.
+func (uc *UserCreate) SetMyJSONPtr(sj *schema.MyJSON) *UserCreate {
+	uc.mutation.SetMyJSONPtr(sj)
+	return uc
+}
+
 // SetURL sets the "url" field.
 func (uc *UserCreate) SetURL(u *url.URL) *UserCreate {
 	uc.mutation.SetURL(u)
@@ -174,6 +194,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.T(); ok {
 		_spec.SetField(user.FieldT, field.TypeJSON, value)
 		_node.T = value
+	}
+	if value, ok := uc.mutation.MyJSON(); ok {
+		_spec.SetField(user.FieldMyJSON, field.TypeJSON, value)
+		_node.MyJSON = value
+	}
+	if value, ok := uc.mutation.MyJSONPtr(); ok {
+		_spec.SetField(user.FieldMyJSONPtr, field.TypeJSON, value)
+		_node.MyJSONPtr = value
 	}
 	if value, ok := uc.mutation.URL(); ok {
 		_spec.SetField(user.FieldURL, field.TypeJSON, value)
