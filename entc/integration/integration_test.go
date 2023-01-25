@@ -304,6 +304,8 @@ func Sanity(t *testing.T, client *ent.Client) {
 		require.False(client.Pet.Query().Where(pet.NameEqualFold("A_\\%")).ExistX(ctx))
 		require.False(client.Pet.Query().Where(pet.NameEqualFold("A%")).ExistX(ctx))
 	})
+
+	require.NotNil(node.UpdateDefaultUpdatedAt) // issue #3217
 }
 
 func Upsert(t *testing.T, client *ent.Client) {

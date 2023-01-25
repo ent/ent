@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -35,6 +36,20 @@ func (nc *NodeCreate) SetValue(i int) *NodeCreate {
 func (nc *NodeCreate) SetNillableValue(i *int) *NodeCreate {
 	if i != nil {
 		nc.SetValue(*i)
+	}
+	return nc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (nc *NodeCreate) SetUpdatedAt(t time.Time) *NodeCreate {
+	nc.mutation.SetUpdatedAt(t)
+	return nc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (nc *NodeCreate) SetNillableUpdatedAt(t *time.Time) *NodeCreate {
+	if t != nil {
+		nc.SetUpdatedAt(*t)
 	}
 	return nc
 }
@@ -147,6 +162,10 @@ func (nc *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 	if value, ok := nc.mutation.Value(); ok {
 		_spec.SetField(node.FieldValue, field.TypeInt, value)
 		_node.Value = value
+	}
+	if value, ok := nc.mutation.UpdatedAt(); ok {
+		_spec.SetField(node.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = &value
 	}
 	if nodes := nc.mutation.PrevIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -263,6 +282,24 @@ func (u *NodeUpsert) ClearValue() *NodeUpsert {
 	return u
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (u *NodeUpsert) SetUpdatedAt(v time.Time) *NodeUpsert {
+	u.Set(node.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *NodeUpsert) UpdateUpdatedAt() *NodeUpsert {
+	u.SetExcluded(node.FieldUpdatedAt)
+	return u
+}
+
+// ClearUpdatedAt clears the value of the "updated_at" field.
+func (u *NodeUpsert) ClearUpdatedAt() *NodeUpsert {
+	u.SetNull(node.FieldUpdatedAt)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -328,6 +365,27 @@ func (u *NodeUpsertOne) UpdateValue() *NodeUpsertOne {
 func (u *NodeUpsertOne) ClearValue() *NodeUpsertOne {
 	return u.Update(func(s *NodeUpsert) {
 		s.ClearValue()
+	})
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *NodeUpsertOne) SetUpdatedAt(v time.Time) *NodeUpsertOne {
+	return u.Update(func(s *NodeUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *NodeUpsertOne) UpdateUpdatedAt() *NodeUpsertOne {
+	return u.Update(func(s *NodeUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// ClearUpdatedAt clears the value of the "updated_at" field.
+func (u *NodeUpsertOne) ClearUpdatedAt() *NodeUpsertOne {
+	return u.Update(func(s *NodeUpsert) {
+		s.ClearUpdatedAt()
 	})
 }
 
@@ -555,6 +613,27 @@ func (u *NodeUpsertBulk) UpdateValue() *NodeUpsertBulk {
 func (u *NodeUpsertBulk) ClearValue() *NodeUpsertBulk {
 	return u.Update(func(s *NodeUpsert) {
 		s.ClearValue()
+	})
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *NodeUpsertBulk) SetUpdatedAt(v time.Time) *NodeUpsertBulk {
+	return u.Update(func(s *NodeUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *NodeUpsertBulk) UpdateUpdatedAt() *NodeUpsertBulk {
+	return u.Update(func(s *NodeUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// ClearUpdatedAt clears the value of the "updated_at" field.
+func (u *NodeUpsertBulk) ClearUpdatedAt() *NodeUpsertBulk {
+	return u.Update(func(s *NodeUpsert) {
+		s.ClearUpdatedAt()
 	})
 }
 

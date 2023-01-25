@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -56,6 +57,18 @@ func (nu *NodeUpdate) AddValue(i int) *NodeUpdate {
 // ClearValue clears the value of the "value" field.
 func (nu *NodeUpdate) ClearValue() *NodeUpdate {
 	nu.mutation.ClearValue()
+	return nu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (nu *NodeUpdate) SetUpdatedAt(t time.Time) *NodeUpdate {
+	nu.mutation.SetUpdatedAt(t)
+	return nu
+}
+
+// ClearUpdatedAt clears the value of the "updated_at" field.
+func (nu *NodeUpdate) ClearUpdatedAt() *NodeUpdate {
+	nu.mutation.ClearUpdatedAt()
 	return nu
 }
 
@@ -116,6 +129,7 @@ func (nu *NodeUpdate) ClearNext() *NodeUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (nu *NodeUpdate) Save(ctx context.Context) (int, error) {
+	nu.defaults()
 	return withHooks[int, NodeMutation](ctx, nu.sqlSave, nu.mutation, nu.hooks)
 }
 
@@ -138,6 +152,14 @@ func (nu *NodeUpdate) Exec(ctx context.Context) error {
 func (nu *NodeUpdate) ExecX(ctx context.Context) {
 	if err := nu.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (nu *NodeUpdate) defaults() {
+	if _, ok := nu.mutation.UpdatedAt(); !ok && !nu.mutation.UpdatedAtCleared() {
+		v := node.UpdateDefaultUpdatedAt()
+		nu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -173,6 +195,12 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nu.mutation.ValueCleared() {
 		_spec.ClearField(node.FieldValue, field.TypeInt)
+	}
+	if value, ok := nu.mutation.UpdatedAt(); ok {
+		_spec.SetField(node.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if nu.mutation.UpdatedAtCleared() {
+		_spec.ClearField(node.FieldUpdatedAt, field.TypeTime)
 	}
 	if nu.mutation.PrevCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -293,6 +321,18 @@ func (nuo *NodeUpdateOne) ClearValue() *NodeUpdateOne {
 	return nuo
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (nuo *NodeUpdateOne) SetUpdatedAt(t time.Time) *NodeUpdateOne {
+	nuo.mutation.SetUpdatedAt(t)
+	return nuo
+}
+
+// ClearUpdatedAt clears the value of the "updated_at" field.
+func (nuo *NodeUpdateOne) ClearUpdatedAt() *NodeUpdateOne {
+	nuo.mutation.ClearUpdatedAt()
+	return nuo
+}
+
 // SetPrevID sets the "prev" edge to the Node entity by ID.
 func (nuo *NodeUpdateOne) SetPrevID(id int) *NodeUpdateOne {
 	nuo.mutation.SetPrevID(id)
@@ -357,6 +397,7 @@ func (nuo *NodeUpdateOne) Select(field string, fields ...string) *NodeUpdateOne 
 
 // Save executes the query and returns the updated Node entity.
 func (nuo *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
+	nuo.defaults()
 	return withHooks[*Node, NodeMutation](ctx, nuo.sqlSave, nuo.mutation, nuo.hooks)
 }
 
@@ -379,6 +420,14 @@ func (nuo *NodeUpdateOne) Exec(ctx context.Context) error {
 func (nuo *NodeUpdateOne) ExecX(ctx context.Context) {
 	if err := nuo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (nuo *NodeUpdateOne) defaults() {
+	if _, ok := nuo.mutation.UpdatedAt(); !ok && !nuo.mutation.UpdatedAtCleared() {
+		v := node.UpdateDefaultUpdatedAt()
+		nuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -431,6 +480,12 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (_node *Node, err error) 
 	}
 	if nuo.mutation.ValueCleared() {
 		_spec.ClearField(node.FieldValue, field.TypeInt)
+	}
+	if value, ok := nuo.mutation.UpdatedAt(); ok {
+		_spec.SetField(node.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if nuo.mutation.UpdatedAtCleared() {
+		_spec.ClearField(node.FieldUpdatedAt, field.TypeTime)
 	}
 	if nuo.mutation.PrevCleared() {
 		edge := &sqlgraph.EdgeSpec{

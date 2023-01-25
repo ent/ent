@@ -21,6 +21,7 @@ import (
 	"entgo.io/ent/entc/integration/gremlin/ent/groupinfo"
 	"entgo.io/ent/entc/integration/gremlin/ent/item"
 	"entgo.io/ent/entc/integration/gremlin/ent/license"
+	"entgo.io/ent/entc/integration/gremlin/ent/node"
 	"entgo.io/ent/entc/integration/gremlin/ent/pet"
 	enttask "entgo.io/ent/entc/integration/gremlin/ent/task"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
@@ -236,6 +237,12 @@ func init() {
 	license.DefaultUpdateTime = licenseDescUpdateTime.Default.(func() time.Time)
 	// license.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
 	license.UpdateDefaultUpdateTime = licenseDescUpdateTime.UpdateDefault.(func() time.Time)
+	nodeFields := schema.Node{}.Fields()
+	_ = nodeFields
+	// nodeDescUpdatedAt is the schema descriptor for updated_at field.
+	nodeDescUpdatedAt := nodeFields[1].Descriptor()
+	// node.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	node.UpdateDefaultUpdatedAt = nodeDescUpdatedAt.UpdateDefault.(func() time.Time)
 	petFields := schema.Pet{}.Fields()
 	_ = petFields
 	// petDescAge is the schema descriptor for age field.

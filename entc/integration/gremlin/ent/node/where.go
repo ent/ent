@@ -7,6 +7,8 @@
 package node
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
@@ -91,6 +93,13 @@ func Value(v int) predicate.Node {
 	})
 }
 
+// UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
+func UpdatedAt(v time.Time) predicate.Node {
+	return predicate.Node(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUpdatedAt, p.EQ(v))
+	})
+}
+
 // ValueEQ applies the EQ predicate on the "value" field.
 func ValueEQ(v int) predicate.Node {
 	return predicate.Node(func(t *dsl.Traversal) {
@@ -158,6 +167,76 @@ func ValueIsNil() predicate.Node {
 func ValueNotNil() predicate.Node {
 	return predicate.Node(func(t *dsl.Traversal) {
 		t.HasLabel(Label).Has(FieldValue)
+	})
+}
+
+// UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
+func UpdatedAtEQ(v time.Time) predicate.Node {
+	return predicate.Node(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUpdatedAt, p.EQ(v))
+	})
+}
+
+// UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
+func UpdatedAtNEQ(v time.Time) predicate.Node {
+	return predicate.Node(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUpdatedAt, p.NEQ(v))
+	})
+}
+
+// UpdatedAtIn applies the In predicate on the "updated_at" field.
+func UpdatedAtIn(vs ...time.Time) predicate.Node {
+	return predicate.Node(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUpdatedAt, p.Within(vs...))
+	})
+}
+
+// UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
+func UpdatedAtNotIn(vs ...time.Time) predicate.Node {
+	return predicate.Node(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUpdatedAt, p.Without(vs...))
+	})
+}
+
+// UpdatedAtGT applies the GT predicate on the "updated_at" field.
+func UpdatedAtGT(v time.Time) predicate.Node {
+	return predicate.Node(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUpdatedAt, p.GT(v))
+	})
+}
+
+// UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
+func UpdatedAtGTE(v time.Time) predicate.Node {
+	return predicate.Node(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUpdatedAt, p.GTE(v))
+	})
+}
+
+// UpdatedAtLT applies the LT predicate on the "updated_at" field.
+func UpdatedAtLT(v time.Time) predicate.Node {
+	return predicate.Node(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUpdatedAt, p.LT(v))
+	})
+}
+
+// UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
+func UpdatedAtLTE(v time.Time) predicate.Node {
+	return predicate.Node(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUpdatedAt, p.LTE(v))
+	})
+}
+
+// UpdatedAtIsNil applies the IsNil predicate on the "updated_at" field.
+func UpdatedAtIsNil() predicate.Node {
+	return predicate.Node(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldUpdatedAt)
+	})
+}
+
+// UpdatedAtNotNil applies the NotNil predicate on the "updated_at" field.
+func UpdatedAtNotNil() predicate.Node {
+	return predicate.Node(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldUpdatedAt)
 	})
 }
 

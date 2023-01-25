@@ -9,6 +9,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/entc/integration/gremlin/ent/node"
@@ -21,6 +22,8 @@ type Node struct {
 	ID string `json:"id,omitempty"`
 	// Value holds the value of the "value" field.
 	Value int `json:"value,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the NodeQuery when eager-loading is set.
 	Edges NodeEdges `json:"edges"`
@@ -70,14 +73,17 @@ func (n *Node) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scann struct {
-		ID    string `json:"id,omitempty"`
-		Value int    `json:"value,omitempty"`
+		ID        string `json:"id,omitempty"`
+		Value     int    `json:"value,omitempty"`
+		UpdatedAt int64  `json:"updated_at,omitempty"`
 	}
 	if err := vmap.Decode(&scann); err != nil {
 		return err
 	}
 	n.ID = scann.ID
 	n.Value = scann.Value
+	v1 := time.Unix(0, scann.UpdatedAt)
+	n.UpdatedAt = &v1
 	return nil
 }
 
@@ -116,6 +122,11 @@ func (n *Node) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", n.ID))
 	builder.WriteString("value=")
 	builder.WriteString(fmt.Sprintf("%v", n.Value))
+	builder.WriteString(", ")
+	if v := n.UpdatedAt; v != nil {
+		builder.WriteString("updated_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -130,8 +141,9 @@ func (n *Nodes) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scann []struct {
-		ID    string `json:"id,omitempty"`
-		Value int    `json:"value,omitempty"`
+		ID        string `json:"id,omitempty"`
+		Value     int    `json:"value,omitempty"`
+		UpdatedAt int64  `json:"updated_at,omitempty"`
 	}
 	if err := vmap.Decode(&scann); err != nil {
 		return err
@@ -139,6 +151,8 @@ func (n *Nodes) FromResponse(res *gremlin.Response) error {
 	for _, v := range scann {
 		node := &Node{ID: v.ID}
 		node.Value = v.Value
+		v1 := time.Unix(0, v.UpdatedAt)
+		node.UpdatedAt = &v1
 		*n = append(*n, node)
 	}
 	return nil

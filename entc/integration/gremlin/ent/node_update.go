@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"errors"
+	"time"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -56,6 +57,18 @@ func (nu *NodeUpdate) AddValue(i int) *NodeUpdate {
 // ClearValue clears the value of the "value" field.
 func (nu *NodeUpdate) ClearValue() *NodeUpdate {
 	nu.mutation.ClearValue()
+	return nu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (nu *NodeUpdate) SetUpdatedAt(t time.Time) *NodeUpdate {
+	nu.mutation.SetUpdatedAt(t)
+	return nu
+}
+
+// ClearUpdatedAt clears the value of the "updated_at" field.
+func (nu *NodeUpdate) ClearUpdatedAt() *NodeUpdate {
+	nu.mutation.ClearUpdatedAt()
 	return nu
 }
 
@@ -116,6 +129,7 @@ func (nu *NodeUpdate) ClearNext() *NodeUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (nu *NodeUpdate) Save(ctx context.Context) (int, error) {
+	nu.defaults()
 	return withHooks[int, NodeMutation](ctx, nu.gremlinSave, nu.mutation, nu.hooks)
 }
 
@@ -138,6 +152,14 @@ func (nu *NodeUpdate) Exec(ctx context.Context) error {
 func (nu *NodeUpdate) ExecX(ctx context.Context) {
 	if err := nu.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (nu *NodeUpdate) defaults() {
+	if _, ok := nu.mutation.UpdatedAt(); !ok && !nu.mutation.UpdatedAtCleared() {
+		v := node.UpdateDefaultUpdatedAt()
+		nu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -176,9 +198,15 @@ func (nu *NodeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := nu.mutation.AddedValue(); ok {
 		v.Property(dsl.Single, node.FieldValue, __.Union(__.Values(node.FieldValue), __.Constant(value)).Sum())
 	}
+	if value, ok := nu.mutation.UpdatedAt(); ok {
+		v.Property(dsl.Single, node.FieldUpdatedAt, value)
+	}
 	var properties []any
 	if nu.mutation.ValueCleared() {
 		properties = append(properties, node.FieldValue)
+	}
+	if nu.mutation.UpdatedAtCleared() {
+		properties = append(properties, node.FieldUpdatedAt)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -255,6 +283,18 @@ func (nuo *NodeUpdateOne) ClearValue() *NodeUpdateOne {
 	return nuo
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (nuo *NodeUpdateOne) SetUpdatedAt(t time.Time) *NodeUpdateOne {
+	nuo.mutation.SetUpdatedAt(t)
+	return nuo
+}
+
+// ClearUpdatedAt clears the value of the "updated_at" field.
+func (nuo *NodeUpdateOne) ClearUpdatedAt() *NodeUpdateOne {
+	nuo.mutation.ClearUpdatedAt()
+	return nuo
+}
+
 // SetPrevID sets the "prev" edge to the Node entity by ID.
 func (nuo *NodeUpdateOne) SetPrevID(id string) *NodeUpdateOne {
 	nuo.mutation.SetPrevID(id)
@@ -319,6 +359,7 @@ func (nuo *NodeUpdateOne) Select(field string, fields ...string) *NodeUpdateOne 
 
 // Save executes the query and returns the updated Node entity.
 func (nuo *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
+	nuo.defaults()
 	return withHooks[*Node, NodeMutation](ctx, nuo.gremlinSave, nuo.mutation, nuo.hooks)
 }
 
@@ -341,6 +382,14 @@ func (nuo *NodeUpdateOne) Exec(ctx context.Context) error {
 func (nuo *NodeUpdateOne) ExecX(ctx context.Context) {
 	if err := nuo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (nuo *NodeUpdateOne) defaults() {
+	if _, ok := nuo.mutation.UpdatedAt(); !ok && !nuo.mutation.UpdatedAtCleared() {
+		v := node.UpdateDefaultUpdatedAt()
+		nuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -384,9 +433,15 @@ func (nuo *NodeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := nuo.mutation.AddedValue(); ok {
 		v.Property(dsl.Single, node.FieldValue, __.Union(__.Values(node.FieldValue), __.Constant(value)).Sum())
 	}
+	if value, ok := nuo.mutation.UpdatedAt(); ok {
+		v.Property(dsl.Single, node.FieldUpdatedAt, value)
+	}
 	var properties []any
 	if nuo.mutation.ValueCleared() {
 		properties = append(properties, node.FieldValue)
+	}
+	if nuo.mutation.UpdatedAtCleared() {
+		properties = append(properties, node.FieldUpdatedAt)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
