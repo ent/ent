@@ -281,7 +281,8 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "Node",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			node.FieldValue: {Type: field.TypeInt, Column: node.FieldValue},
+			node.FieldValue:     {Type: field.TypeInt, Column: node.FieldValue},
+			node.FieldUpdatedAt: {Type: field.TypeTime, Column: node.FieldUpdatedAt},
 		},
 	}
 	graph.Nodes[12] = &sqlgraph.Node{
@@ -1799,6 +1800,11 @@ func (f *NodeFilter) WhereID(p entql.IntP) {
 // WhereValue applies the entql int predicate on the value field.
 func (f *NodeFilter) WhereValue(p entql.IntP) {
 	f.Where(p.Field(node.FieldValue))
+}
+
+// WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
+func (f *NodeFilter) WhereUpdatedAt(p entql.TimeP) {
+	f.Where(p.Field(node.FieldUpdatedAt))
 }
 
 // WhereHasPrev applies a predicate to check if query has an edge prev.

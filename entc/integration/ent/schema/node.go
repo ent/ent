@@ -5,6 +5,8 @@
 package schema
 
 import (
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -20,6 +22,10 @@ func (Node) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("value").
 			Optional(),
+		field.Time("updated_at").
+			Nillable().
+			Optional().
+			UpdateDefault(time.Now),
 	}
 }
 

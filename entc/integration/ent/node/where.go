@@ -7,6 +7,8 @@
 package node
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
@@ -62,6 +64,11 @@ func Value(v int) predicate.Node {
 	return predicate.Node(sql.FieldEQ(FieldValue, v))
 }
 
+// UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
+func UpdatedAt(v time.Time) predicate.Node {
+	return predicate.Node(sql.FieldEQ(FieldUpdatedAt, v))
+}
+
 // ValueEQ applies the EQ predicate on the "value" field.
 func ValueEQ(v int) predicate.Node {
 	return predicate.Node(sql.FieldEQ(FieldValue, v))
@@ -110,6 +117,56 @@ func ValueIsNil() predicate.Node {
 // ValueNotNil applies the NotNil predicate on the "value" field.
 func ValueNotNil() predicate.Node {
 	return predicate.Node(sql.FieldNotNull(FieldValue))
+}
+
+// UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
+func UpdatedAtEQ(v time.Time) predicate.Node {
+	return predicate.Node(sql.FieldEQ(FieldUpdatedAt, v))
+}
+
+// UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
+func UpdatedAtNEQ(v time.Time) predicate.Node {
+	return predicate.Node(sql.FieldNEQ(FieldUpdatedAt, v))
+}
+
+// UpdatedAtIn applies the In predicate on the "updated_at" field.
+func UpdatedAtIn(vs ...time.Time) predicate.Node {
+	return predicate.Node(sql.FieldIn(FieldUpdatedAt, vs...))
+}
+
+// UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
+func UpdatedAtNotIn(vs ...time.Time) predicate.Node {
+	return predicate.Node(sql.FieldNotIn(FieldUpdatedAt, vs...))
+}
+
+// UpdatedAtGT applies the GT predicate on the "updated_at" field.
+func UpdatedAtGT(v time.Time) predicate.Node {
+	return predicate.Node(sql.FieldGT(FieldUpdatedAt, v))
+}
+
+// UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
+func UpdatedAtGTE(v time.Time) predicate.Node {
+	return predicate.Node(sql.FieldGTE(FieldUpdatedAt, v))
+}
+
+// UpdatedAtLT applies the LT predicate on the "updated_at" field.
+func UpdatedAtLT(v time.Time) predicate.Node {
+	return predicate.Node(sql.FieldLT(FieldUpdatedAt, v))
+}
+
+// UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
+func UpdatedAtLTE(v time.Time) predicate.Node {
+	return predicate.Node(sql.FieldLTE(FieldUpdatedAt, v))
+}
+
+// UpdatedAtIsNil applies the IsNil predicate on the "updated_at" field.
+func UpdatedAtIsNil() predicate.Node {
+	return predicate.Node(sql.FieldIsNull(FieldUpdatedAt))
+}
+
+// UpdatedAtNotNil applies the NotNil predicate on the "updated_at" field.
+func UpdatedAtNotNil() predicate.Node {
+	return predicate.Node(sql.FieldNotNull(FieldUpdatedAt))
 }
 
 // HasPrev applies the HasEdge predicate on the "prev" edge.

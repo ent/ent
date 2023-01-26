@@ -147,7 +147,7 @@ func init() {
 			{{- end }}
 		{{- end }}
 	{{- end }}
-	{{- if or $n.HasDefault $n.HasValidators }}
+	{{- if or $n.HasDefault $n.HasUpdateDefault $n.HasValidators }}
 		{{- with $idx := $n.MixedInFields }}
 			{{- range $i := $idx }}
 				{{ print $pkg "MixinFields" $i }} := {{ $pkg }}Mixin[{{ $i }}].Fields()

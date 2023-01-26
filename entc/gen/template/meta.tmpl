@@ -50,7 +50,7 @@ const (
 {{ $hasDefault := false }}{{ range $f := $fields }}{{ if and $f.Default (not $f.IsEnum) }}{{ $hasDefault = true }}{{ end }}{{ end }}
 
 {{/* Generate global variables for hooks, validators and policy checkers */}}
-{{ if or $hasDefault $.HasValidators $.NumHooks $.NumPolicy $.NumInterceptors }}
+{{ if or $hasDefault $.HasUpdateDefault $.HasValidators $.NumHooks $.NumPolicy $.NumInterceptors }}
 	{{- $numHooks := $.NumHooks }}
 	{{- if $.NumPolicy }}
 		{{- $numHooks = add $numHooks 1 }}

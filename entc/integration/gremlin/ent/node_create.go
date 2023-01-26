@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"time"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -34,6 +35,20 @@ func (nc *NodeCreate) SetValue(i int) *NodeCreate {
 func (nc *NodeCreate) SetNillableValue(i *int) *NodeCreate {
 	if i != nil {
 		nc.SetValue(*i)
+	}
+	return nc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (nc *NodeCreate) SetUpdatedAt(t time.Time) *NodeCreate {
+	nc.mutation.SetUpdatedAt(t)
+	return nc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (nc *NodeCreate) SetNillableUpdatedAt(t *time.Time) *NodeCreate {
+	if t != nil {
+		nc.SetUpdatedAt(*t)
 	}
 	return nc
 }
@@ -143,6 +158,9 @@ func (nc *NodeCreate) gremlin() *dsl.Traversal {
 	v := g.AddV(node.Label)
 	if value, ok := nc.mutation.Value(); ok {
 		v.Property(dsl.Single, node.FieldValue, value)
+	}
+	if value, ok := nc.mutation.UpdatedAt(); ok {
+		v.Property(dsl.Single, node.FieldUpdatedAt, value)
 	}
 	for _, id := range nc.mutation.PrevIDs() {
 		v.AddE(node.NextLabel).From(g.V(id)).InV()
