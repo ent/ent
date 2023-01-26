@@ -52,7 +52,7 @@ func (User) Edges() []ent.Edge {
 }
 ```
 
-Defining data models this way has many benefits such as being able to
+Modeling data this way has many benefits such as being able to
 easily [traverse](https://entgo.io/docs/traversals) an application's data graph in an intuitive API, automatically
 generating [GraphQL](https://entgo.io/docs/tutorial-todo-gql) servers and more.
 
@@ -94,7 +94,7 @@ or [Atlas HCL](https://atlasgo.io/atlas-schema/sql-resources) document.
 
 In this blog post we discussed some scenarios where you might find it useful to quickly get a visualization of your Ent
 application's schema, we then showed how creating such visualizations can be achieved
-using [entviz](https://github.com/ariga/entviz). If you like the idea, we will be super happy if you tried it today and
+using [entviz](https://github.com/ariga/entviz). If you like the idea, we'd be super happy if you tried it today and
 gave us feedback!
 
 :::note For more Ent news and updates:
