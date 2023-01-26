@@ -7,13 +7,13 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/edgeschema/ent/group"
-	"entgo.io/ent/entc/integration/edgeschema/ent/grouptag"
-	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
+	group "entgo.io/ent/entc/integration/edgeschema/ent/group"
+	grouptag "entgo.io/ent/entc/integration/edgeschema/ent/grouptag"
+	tag "entgo.io/ent/entc/integration/edgeschema/ent/tag"
 )
 
 // GroupTag is the model entity for the GroupTag schema.

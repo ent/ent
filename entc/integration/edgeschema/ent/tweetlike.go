@@ -7,14 +7,14 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
-	"time"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
+	time "time"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
-	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
-	"entgo.io/ent/entc/integration/edgeschema/ent/user"
+	tweet "entgo.io/ent/entc/integration/edgeschema/ent/tweet"
+	tweetlike "entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
+	user "entgo.io/ent/entc/integration/edgeschema/ent/user"
 )
 
 // TweetLike is the model entity for the TweetLike schema.

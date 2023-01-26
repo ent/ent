@@ -7,18 +7,18 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"time"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	time "time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/customid/ent/blob"
-	"entgo.io/ent/entc/integration/customid/ent/bloblink"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
-	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	blob "entgo.io/ent/entc/integration/customid/ent/blob"
+	bloblink "entgo.io/ent/entc/integration/customid/ent/bloblink"
+	predicate "entgo.io/ent/entc/integration/customid/ent/predicate"
+	field "entgo.io/ent/schema/field"
+	uuid "github.com/google/uuid"
 )
 
 // BlobLinkUpdate is the builder for updating BlobLink entities.

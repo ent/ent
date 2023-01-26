@@ -7,12 +7,12 @@
 package entv2
 
 import (
-	"fmt"
-	"strings"
-	"time"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
+	time "time"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/migrate/entv2/customtype"
+	customtype "entgo.io/ent/entc/integration/migrate/entv2/customtype"
 )
 
 // CustomType is the model entity for the CustomType schema.

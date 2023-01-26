@@ -7,12 +7,12 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/edgefield/ent/car"
-	"github.com/google/uuid"
+	car "entgo.io/ent/entc/integration/edgefield/ent/car"
+	uuid "github.com/google/uuid"
 )
 
 // Car is the model entity for the Car schema.

@@ -7,7 +7,7 @@
 package pet
 
 import (
-	"entgo.io/ent"
+	ent "entgo.io/ent"
 )
 
 const (

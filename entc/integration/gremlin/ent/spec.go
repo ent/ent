@@ -7,10 +7,10 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/gremlin"
+	gremlin "entgo.io/ent/dialect/gremlin"
 )
 
 // Spec is the model entity for the Spec schema.

@@ -7,17 +7,17 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"reflect"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	reflect "reflect"
 	"strconv"
-	"strings"
+	strings "strings"
 
-	"entgo.io/ent"
-	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/dialect/gremlin/encoding/graphson"
-	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	ent "entgo.io/ent"
+	gremlin "entgo.io/ent/dialect/gremlin"
+	graphson "entgo.io/ent/dialect/gremlin/encoding/graphson"
+	dsl "entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 )
 

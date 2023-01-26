@@ -111,7 +111,7 @@ type (
 {{ range $f := $.MutableFields }}
 	{{ $func := print "Set" $f.StructField }}
 	// {{ $func }} sets the "{{ $f.Name }}" field.
-	func (u *{{ $upsertSet }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsertSet }} {
+	func (u *{{ $upsertSet }}) {{ $func }}(v {{ $f.Type | typeIdent }}) *{{ $upsertSet }} {
 		u.Set({{ $.Package }}.{{ $f.Constant }}, v)
 		return u
 	}
@@ -226,7 +226,7 @@ func (u *{{ $upsertOne }}) ExecX(ctx context.Context) {
 
 {{ if $.HasOneFieldID }}
 	// Exec executes the UPSERT query and returns the inserted/updated ID.
-	func (u *{{ $upsertOne }}) ID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
+	func (u *{{ $upsertOne }}) ID(ctx context.Context) (id {{ $.ID.Type | typeIdent }}, err error) {
 		{{- if and $udfID (not $.ID.Type.Numeric) }}
 			if u.create.driver.Dialect() == dialect.MySQL {
 				// In case of "ON CONFLICT", there is no way to get back non-numeric ID
@@ -242,7 +242,7 @@ func (u *{{ $upsertOne }}) ExecX(ctx context.Context) {
 	}
 
 	// IDX is like ID, but panics if an error occurs.
-	func (u *{{ $upsertOne }}) IDX(ctx context.Context) {{ $.ID.Type }} {
+	func (u *{{ $upsertOne }}) IDX(ctx context.Context) {{ $.ID.Type | typeIdent }} {
 		id, err := u.ID(ctx)
 		if err != nil {
 			panic(err)
@@ -411,7 +411,7 @@ func (u *{{ $upsertBulk }}) ExecX(ctx context.Context) {
 {{ range $f := $.MutableFields }}
     {{ $func := print "Set" $f.StructField }}
     // {{ $func }} sets the "{{ $f.Name }}" field.
-	func (u *{{ $upsert }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsert }} {
+	func (u *{{ $upsert }}) {{ $func }}(v {{ $f.Type | typeIdent }}) *{{ $upsert }} {
 		return u.Update(func(s *{{ $upsertSet }}) {
 			s.{{ $func }}(v)
 		})

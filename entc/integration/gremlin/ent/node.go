@@ -7,11 +7,11 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/entc/integration/gremlin/ent/node"
+	gremlin "entgo.io/ent/dialect/gremlin"
+	node "entgo.io/ent/entc/integration/gremlin/ent/node"
 )
 
 // Node is the model entity for the Node schema.

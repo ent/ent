@@ -7,18 +7,18 @@
 package ent
 
 import (
-	"context"
-	"database/sql/driver"
-	"fmt"
-	"math"
+	context "context"
+	driver "database/sql/driver"
+	fmt "fmt"
+	math "math"
 
-	"entgo.io/ent/dialect"
+	dialect "entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/card"
-	"entgo.io/ent/entc/integration/ent/predicate"
+	predicate "entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/spec"
-	"entgo.io/ent/schema/field"
+	field "entgo.io/ent/schema/field"
 )
 
 // SpecQuery is the builder for querying Spec entities.

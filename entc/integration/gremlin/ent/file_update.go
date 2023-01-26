@@ -7,19 +7,19 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
-	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	gremlin "entgo.io/ent/dialect/gremlin"
+	dsl "entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
-	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
-	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
-	"entgo.io/ent/entc/integration/gremlin/ent/file"
-	"entgo.io/ent/entc/integration/gremlin/ent/filetype"
-	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
-	"entgo.io/ent/entc/integration/gremlin/ent/user"
+	g "entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	p "entgo.io/ent/dialect/gremlin/graph/dsl/p"
+	file "entgo.io/ent/entc/integration/gremlin/ent/file"
+	filetype "entgo.io/ent/entc/integration/gremlin/ent/filetype"
+	predicate "entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	user "entgo.io/ent/entc/integration/gremlin/ent/user"
 )
 
 // FileUpdate is the builder for updating File entities.

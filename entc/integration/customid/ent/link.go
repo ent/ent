@@ -8,11 +8,11 @@ package ent
 
 import (
 	"encoding/json"
-	"fmt"
-	"strings"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/entc/integration/customid/ent/link"
-	"entgo.io/ent/entc/integration/customid/ent/schema"
+	link "entgo.io/ent/entc/integration/customid/ent/link"
+	schema "entgo.io/ent/entc/integration/customid/ent/schema"
 	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
 )
 

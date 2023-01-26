@@ -7,16 +7,16 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/ent/card"
-	"entgo.io/ent/entc/integration/ent/predicate"
-	"entgo.io/ent/entc/integration/ent/spec"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	card "entgo.io/ent/entc/integration/ent/card"
+	predicate "entgo.io/ent/entc/integration/ent/predicate"
+	spec "entgo.io/ent/entc/integration/ent/spec"
+	field "entgo.io/ent/schema/field"
 )
 
 // SpecUpdate is the builder for updating Spec entities.

@@ -7,11 +7,11 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
+	tag "entgo.io/ent/entc/integration/edgeschema/ent/tag"
 )
 
 // Tag is the model entity for the Tag schema.

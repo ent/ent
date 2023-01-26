@@ -7,7 +7,7 @@
 package blob
 
 import (
-	"github.com/google/uuid"
+	uuid "github.com/google/uuid"
 )
 
 const (

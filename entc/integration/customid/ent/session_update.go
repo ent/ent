@@ -7,17 +7,17 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/customid/ent/device"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
-	"entgo.io/ent/entc/integration/customid/ent/schema"
-	"entgo.io/ent/entc/integration/customid/ent/session"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	device "entgo.io/ent/entc/integration/customid/ent/device"
+	predicate "entgo.io/ent/entc/integration/customid/ent/predicate"
+	schema "entgo.io/ent/entc/integration/customid/ent/schema"
+	session "entgo.io/ent/entc/integration/customid/ent/session"
+	field "entgo.io/ent/schema/field"
 )
 
 // SessionUpdate is the builder for updating Session entities.

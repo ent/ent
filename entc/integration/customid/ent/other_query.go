@@ -7,16 +7,16 @@
 package ent
 
 import (
-	"context"
-	"fmt"
-	"math"
+	context "context"
+	fmt "fmt"
+	math "math"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/other"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
-	"entgo.io/ent/entc/integration/customid/sid"
-	"entgo.io/ent/schema/field"
+	predicate "entgo.io/ent/entc/integration/customid/ent/predicate"
+	sid "entgo.io/ent/entc/integration/customid/sid"
+	field "entgo.io/ent/schema/field"
 )
 
 // OtherQuery is the builder for querying Other entities.

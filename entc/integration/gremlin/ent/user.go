@@ -7,13 +7,13 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/entc/integration/gremlin/ent/card"
-	"entgo.io/ent/entc/integration/gremlin/ent/pet"
-	"entgo.io/ent/entc/integration/gremlin/ent/user"
+	gremlin "entgo.io/ent/dialect/gremlin"
+	card "entgo.io/ent/entc/integration/gremlin/ent/card"
+	pet "entgo.io/ent/entc/integration/gremlin/ent/pet"
+	user "entgo.io/ent/entc/integration/gremlin/ent/user"
 )
 
 // User is the model entity for the User schema.

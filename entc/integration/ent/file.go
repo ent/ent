@@ -7,13 +7,13 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/ent/file"
-	"entgo.io/ent/entc/integration/ent/filetype"
-	"entgo.io/ent/entc/integration/ent/user"
+	file "entgo.io/ent/entc/integration/ent/file"
+	filetype "entgo.io/ent/entc/integration/ent/filetype"
+	user "entgo.io/ent/entc/integration/ent/user"
 )
 
 // File is the model entity for the File schema.

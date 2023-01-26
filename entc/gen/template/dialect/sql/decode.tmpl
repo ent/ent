@@ -114,11 +114,16 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []any
 			return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[{{ $i }}])
 		{{- if hasPrefix $scantype "sql.Null" }}
 			} else if value.Valid {
-				{{- if $f.NillableValue }}
-					{{ $ret }}.{{ $field }} = new({{ $f.Type }})
-					*{{ $ret }}.{{ $field }} = {{ $f.ScanTypeField "value" }}
+			{{- $scantypeField := $f.ScanTypeField "value" }}
+			{{- if lt (len $f.Type.PkgPath) 0 }}
+				{{- $pkgName := $f.Type.PkgName }} {{ if and (eq (len $pkgName) 0) }} {{ $pkgName = $f.Type.PkgPath | base }} {{ end }}
+				{{- $scantypeField = replace $pkgName ($f.Type.PkgPath | importAlias) }}
+			{{- end }}
+			{{- if $f.NillableValue }}
+					{{ $ret }}.{{ $field }} = new({{ $f.Type | typeIdent }})
+					*{{ $ret }}.{{ $field }} = {{ $scantypeField }}
 				{{- else }}
-					{{ $ret }}.{{ $field }} = {{ $f.ScanTypeField "value" }}
+					{{ $ret }}.{{ $field }} = {{ $scantypeField }}
 				{{- end }}
 		{{- else }}
 			} else if value != nil {

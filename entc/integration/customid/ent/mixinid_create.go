@@ -7,16 +7,16 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
-	"entgo.io/ent/dialect"
+	dialect "entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/customid/ent/mixinid"
-	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	mixinid "entgo.io/ent/entc/integration/customid/ent/mixinid"
+	field "entgo.io/ent/schema/field"
+	uuid "github.com/google/uuid"
 )
 
 // MixinIDCreate is the builder for creating a MixinID entity.

@@ -7,14 +7,14 @@
 package fieldtype
 
 import (
-	"database/sql"
-	"fmt"
-	"net"
-	"net/http"
-	"time"
+	databasesql "database/sql"
+	fmt "fmt"
+	net "net"
+	http "net/http"
+	time "time"
 
-	"entgo.io/ent/entc/integration/ent/role"
-	"entgo.io/ent/entc/integration/ent/schema"
+	role "entgo.io/ent/entc/integration/ent/role"
+	schema "entgo.io/ent/entc/integration/ent/schema"
 )
 
 const (
@@ -172,15 +172,15 @@ var (
 	// NdirValidator is a validator for the "ndir" field. It is called by the builders before save.
 	NdirValidator func(string) error
 	// DefaultStr holds the default value on creation for the "str" field.
-	DefaultStr func() sql.NullString
+	DefaultStr func() databasesql.NullString
 	// DefaultNullStr holds the default value on creation for the "null_str" field.
-	DefaultNullStr func() *sql.NullString
+	DefaultNullStr func() *databasesql.NullString
 	// LinkValidator is a validator for the "link" field. It is called by the builders before save.
 	LinkValidator func(string) error
 	// DefaultDeletedAt holds the default value on creation for the "deleted_at" field.
-	DefaultDeletedAt func() *sql.NullTime
+	DefaultDeletedAt func() *databasesql.NullTime
 	// UpdateDefaultDeletedAt holds the default value on update for the "deleted_at" field.
-	UpdateDefaultDeletedAt func() *sql.NullTime
+	UpdateDefaultDeletedAt func() *databasesql.NullTime
 	// RawDataValidator is a validator for the "raw_data" field. It is called by the builders before save.
 	RawDataValidator func([]byte) error
 	// DefaultIP holds the default value on creation for the "ip" field.

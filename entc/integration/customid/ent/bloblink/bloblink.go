@@ -7,7 +7,7 @@
 package bloblink
 
 import (
-	"time"
+	time "time"
 )
 
 const (

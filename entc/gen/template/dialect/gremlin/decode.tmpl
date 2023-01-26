@@ -17,9 +17,9 @@ func ({{ $receiver }} *{{ $.Name }}) FromResponse(res *gremlin.Response) error {
 	}
 	{{- $scan := print "scan" $receiver }}
 	var {{ $scan }} struct {
-		ID   {{ $.ID.Type }}  `json:"id,omitempty"`
+		ID   {{ $.ID.Type | typeIdent }}  `json:"id,omitempty"`
 		{{ range $f := $.Fields }}
-			{{- $f.StructField }} {{ if and $f.IsTime (not $f.HasGoType) }}int64{{ else }}{{ if $f.NillableValue }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.StorageKey }},omitempty"`
+			{{- $f.StructField }} {{ if and $f.IsTime (not $f.HasGoType) }}int64{{ else }}{{ if $f.NillableValue }}*{{ end }}{{ $f.Type | typeIdent }}{{ end }} `json:"{{ $f.StorageKey }},omitempty"`
 		{{ end }}
 	}
 	if err := vmap.Decode(&{{ $scan }}); err != nil {
@@ -54,9 +54,9 @@ func ({{ $receiver }} *{{ $slice }}) FromResponse(res *gremlin.Response) error {
 	}
 	{{- $scan := print "scan" $receiver }}
 	var {{ $scan }} []struct {
-		ID   {{ $.ID.Type }}  `json:"id,omitempty"`
+		ID   {{ $.ID.Type | typeIdent }}  `json:"id,omitempty"`
 		{{ range $f := $.Fields }}
-			{{- $f.StructField }} {{ if and $f.IsTime (not $f.HasGoType) }}int64{{ else }}{{ if $f.NillableValue }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.StorageKey }},omitempty"`
+			{{- $f.StructField }} {{ if and $f.IsTime (not $f.HasGoType) }}int64{{ else }}{{ if $f.NillableValue }}*{{ end }}{{ $f.Type | typeIdent }}{{ end }} `json:"{{ $f.StorageKey }},omitempty"`
 		{{ end }}
 	}
 	if err := vmap.Decode(&{{ $scan }}); err != nil {

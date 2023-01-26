@@ -7,48 +7,37 @@ in the LICENSE file in the root directory of this source tree.
 {{/* gotype: entgo.io/ent/entc/gen.Graph */}}
 
 {{ define "import" }}
-import (
-	"context"
-	"errors"
-	"fmt"
-	"math"
-	"strings"
-	"time"
+	{{ addPath "context" "errors" "fmt" "math" "strings" "time" "entgo.io/ent" "entgo.io/ent/dialect" }}
+	{{- with $.Storage }}
+		{{- range $import := .Imports }}
+			{{ addPath $import }}
+		{{- end }}
+	{{- end }}
+
 	{{- /* Ignore generting on graph templates (e.g. config.tmpl, client.tmpl, etc). */}}
 	{{- if ne $.Config.Package $.Package }}
-		"{{ $.Config.Package }}/predicate"
-		{{- if $.HasOneFieldID }}
-			{{- with $.ID.Type.PkgPath }}
-				{{- $name := $.ID.Type.PkgName }}
-				{{ if ne $name (base $.ID.Type.PkgPath) }}{{ $name }} {{ end }}"{{ . }}"
-			{{- end }}
-		{{- end }}
+		{{ addPath (printf "%s/predicate" $.Config.Package) }}
 		{{- /* Import external packages */}}
         {{- template "import/types" $ }}
 	{{- end }}
-	"entgo.io/ent"
-	"entgo.io/ent/dialect"
-	{{- with $.Storage }}
-		{{- range $import := .Imports }}
-			"{{ $import }}"
-		{{- end }}
-	{{- end }}
-	{{- template "import/additional" $ }}
-)
 {{ end }}
 
 {{/* A template for importing fields with custom types */}}
 {{ define "import/types" -}}
-	{{- $seen := dict }}
 	{{- $fields := $.Fields }}{{ if $.HasOneFieldID }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}{{ end }}
 	{{- range $f := $fields }}
 		{{- $pkg := $f.Type.PkgPath }}
-		{{- if and $pkg (not (hasImport (base $pkg))) (not (hasKey $seen $pkg)) }}
-			{{- $name := $f.Type.PkgName }}
-			{{ if ne $name (base $pkg) }}{{ $name }} {{ end}}"{{ $pkg }}"
-			{{- $seen = set $seen $pkg true }}
-		{{- end }}
+		{{- addPath $pkg }}
 	{{- end }}
+{{- end }}
+
+{{ define "import/print" }}
+import (
+	{{- template "import/additional" $ }}
+	{{- range $import := importLines }}
+		{{- $import }}
+	{{ end }}
+)
 {{- end }}
 
 {{/* A template for allowing additional imports by ent extensions or user templates.*/}}

@@ -7,9 +7,9 @@
 package tweettag
 
 import (
-	"time"
+	time "time"
 
-	"github.com/google/uuid"
+	uuid "github.com/google/uuid"
 )
 
 const (

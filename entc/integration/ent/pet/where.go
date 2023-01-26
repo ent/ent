@@ -8,9 +8,9 @@ package pet
 
 import (
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/ent/predicate"
-	"github.com/google/uuid"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	predicate "entgo.io/ent/entc/integration/ent/predicate"
+	uuid "github.com/google/uuid"
 )
 
 // ID filters vertices based on their ID field.

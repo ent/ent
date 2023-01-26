@@ -7,11 +7,11 @@
 package entv1
 
 import (
-	"fmt"
-	"strings"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/migrate/entv1/conversion"
+	conversion "entgo.io/ent/entc/integration/migrate/entv1/conversion"
 )
 
 // Conversion is the model entity for the Conversion schema.

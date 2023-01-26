@@ -7,19 +7,18 @@
 package entv1
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"sync"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	sync "sync"
 
+	ent "entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/migrate/entv1/car"
-	"entgo.io/ent/entc/integration/migrate/entv1/conversion"
-	"entgo.io/ent/entc/integration/migrate/entv1/customtype"
-	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
-	"entgo.io/ent/entc/integration/migrate/entv1/user"
-
-	"entgo.io/ent"
+	car "entgo.io/ent/entc/integration/migrate/entv1/car"
+	conversion "entgo.io/ent/entc/integration/migrate/entv1/conversion"
+	customtype "entgo.io/ent/entc/integration/migrate/entv1/customtype"
+	predicate "entgo.io/ent/entc/integration/migrate/entv1/predicate"
+	user "entgo.io/ent/entc/integration/migrate/entv1/user"
 )
 
 const (

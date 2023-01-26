@@ -7,12 +7,12 @@
 package entv1
 
 import (
-	"context"
-	"fmt"
+	context "context"
+	fmt "fmt"
 
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/migrate/entv1/customtype"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	customtype "entgo.io/ent/entc/integration/migrate/entv1/customtype"
+	field "entgo.io/ent/schema/field"
 )
 
 // CustomTypeCreate is the builder for creating a CustomType entity.

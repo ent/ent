@@ -7,18 +7,18 @@
 package ent
 
 import (
-	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
+	context "context"
+	json "encoding/json"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/dialect/sql/sqljson"
-	"entgo.io/ent/entc/integration/edgefield/ent/info"
-	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
-	"entgo.io/ent/entc/integration/edgefield/ent/user"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	sqljson "entgo.io/ent/dialect/sql/sqljson"
+	info "entgo.io/ent/entc/integration/edgefield/ent/info"
+	predicate "entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	user "entgo.io/ent/entc/integration/edgefield/ent/user"
+	field "entgo.io/ent/schema/field"
 )
 
 // InfoUpdate is the builder for updating Info entities.

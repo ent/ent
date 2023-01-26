@@ -7,12 +7,12 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
-	"time"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
+	time "time"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/ent/license"
+	license "entgo.io/ent/entc/integration/ent/license"
 )
 
 // License is the model entity for the License schema.

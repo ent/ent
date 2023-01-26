@@ -7,15 +7,15 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/customid/ent/group"
-	"entgo.io/ent/entc/integration/customid/ent/user"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	group "entgo.io/ent/entc/integration/customid/ent/group"
+	user "entgo.io/ent/entc/integration/customid/ent/user"
+	field "entgo.io/ent/schema/field"
 )
 
 // GroupCreate is the builder for creating a Group entity.

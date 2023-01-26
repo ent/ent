@@ -7,20 +7,21 @@
 package ent
 
 import (
-	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"net/http"
-	"net/url"
-	"sync"
+	context "context"
+	json "encoding/json"
+	errors "errors"
+	fmt "fmt"
+	http "net/http"
+	url "net/url"
+	sync "sync"
 
+	ent "entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/json/ent/predicate"
-	"entgo.io/ent/entc/integration/json/ent/schema"
-	"entgo.io/ent/entc/integration/json/ent/user"
-
-	"entgo.io/ent"
+	predicate "entgo.io/ent/entc/integration/json/ent/predicate"
+	schema "entgo.io/ent/entc/integration/json/ent/schema"
+	user "entgo.io/ent/entc/integration/json/ent/user"
+	valobj "entgo.io/ent/entc/integration/json/valobj"
+	valobjvalobj "entgo.io/ent/entc/integration/json/valobj/valobj"
 )
 
 const (
@@ -38,28 +39,32 @@ const (
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	t             **schema.T
-	url           **url.URL
-	_URLs         *[]*url.URL
-	append_URLs   []*url.URL
-	raw           *json.RawMessage
-	appendraw     json.RawMessage
-	dirs          *[]http.Dir
-	appenddirs    []http.Dir
-	ints          *[]int
-	appendints    []int
-	floats        *[]float64
-	appendfloats  []float64
-	strings       *[]string
-	appendstrings []string
-	addr          *schema.Addr
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*User, error)
-	predicates    []predicate.User
+	op                    Op
+	typ                   string
+	id                    *int
+	t                     **schema.T
+	url                   **url.URL
+	_URLs                 *[]*url.URL
+	append_URLs           []*url.URL
+	raw                   *json.RawMessage
+	appendraw             json.RawMessage
+	dirs                  *[]http.Dir
+	appenddirs            []http.Dir
+	ints                  *[]int
+	appendints            []int
+	floats                *[]float64
+	appendfloats          []float64
+	strings               *[]string
+	appendstrings         []string
+	addr                  *schema.Addr
+	valobj                *valobj.ValObj
+	another_valobj        *valobjvalobj.AnotherValObj
+	another_valobjs       *[]valobjvalobj.AnotherValObj
+	appendanother_valobjs []valobjvalobj.AnotherValObj
+	clearedFields         map[string]struct{}
+	done                  bool
+	oldValue              func(context.Context) (*User, error)
+	predicates            []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -683,6 +688,169 @@ func (m *UserMutation) ResetAddr() {
 	delete(m.clearedFields, user.FieldAddr)
 }
 
+// SetValobj sets the "valobj" field.
+func (m *UserMutation) SetValobj(vo valobj.ValObj) {
+	m.valobj = &vo
+}
+
+// Valobj returns the value of the "valobj" field in the mutation.
+func (m *UserMutation) Valobj() (r valobj.ValObj, exists bool) {
+	v := m.valobj
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldValobj returns the old "valobj" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldValobj(ctx context.Context) (v valobj.ValObj, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldValobj is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldValobj requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValobj: %w", err)
+	}
+	return oldValue.Valobj, nil
+}
+
+// ClearValobj clears the value of the "valobj" field.
+func (m *UserMutation) ClearValobj() {
+	m.valobj = nil
+	m.clearedFields[user.FieldValobj] = struct{}{}
+}
+
+// ValobjCleared returns if the "valobj" field was cleared in this mutation.
+func (m *UserMutation) ValobjCleared() bool {
+	_, ok := m.clearedFields[user.FieldValobj]
+	return ok
+}
+
+// ResetValobj resets all changes to the "valobj" field.
+func (m *UserMutation) ResetValobj() {
+	m.valobj = nil
+	delete(m.clearedFields, user.FieldValobj)
+}
+
+// SetAnotherValobj sets the "another_valobj" field.
+func (m *UserMutation) SetAnotherValobj(vvo valobjvalobj.AnotherValObj) {
+	m.another_valobj = &vvo
+}
+
+// AnotherValobj returns the value of the "another_valobj" field in the mutation.
+func (m *UserMutation) AnotherValobj() (r valobjvalobj.AnotherValObj, exists bool) {
+	v := m.another_valobj
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAnotherValobj returns the old "another_valobj" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldAnotherValobj(ctx context.Context) (v valobjvalobj.AnotherValObj, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAnotherValobj is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAnotherValobj requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAnotherValobj: %w", err)
+	}
+	return oldValue.AnotherValobj, nil
+}
+
+// ClearAnotherValobj clears the value of the "another_valobj" field.
+func (m *UserMutation) ClearAnotherValobj() {
+	m.another_valobj = nil
+	m.clearedFields[user.FieldAnotherValobj] = struct{}{}
+}
+
+// AnotherValobjCleared returns if the "another_valobj" field was cleared in this mutation.
+func (m *UserMutation) AnotherValobjCleared() bool {
+	_, ok := m.clearedFields[user.FieldAnotherValobj]
+	return ok
+}
+
+// ResetAnotherValobj resets all changes to the "another_valobj" field.
+func (m *UserMutation) ResetAnotherValobj() {
+	m.another_valobj = nil
+	delete(m.clearedFields, user.FieldAnotherValobj)
+}
+
+// SetAnotherValobjs sets the "another_valobjs" field.
+func (m *UserMutation) SetAnotherValobjs(vvo []valobjvalobj.AnotherValObj) {
+	m.another_valobjs = &vvo
+	m.appendanother_valobjs = nil
+}
+
+// AnotherValobjs returns the value of the "another_valobjs" field in the mutation.
+func (m *UserMutation) AnotherValobjs() (r []valobjvalobj.AnotherValObj, exists bool) {
+	v := m.another_valobjs
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAnotherValobjs returns the old "another_valobjs" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldAnotherValobjs(ctx context.Context) (v []valobjvalobj.AnotherValObj, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAnotherValobjs is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAnotherValobjs requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAnotherValobjs: %w", err)
+	}
+	return oldValue.AnotherValobjs, nil
+}
+
+// AppendAnotherValobjs adds vvo to the "another_valobjs" field.
+func (m *UserMutation) AppendAnotherValobjs(vvo []valobjvalobj.AnotherValObj) {
+	m.appendanother_valobjs = append(m.appendanother_valobjs, vvo...)
+}
+
+// AppendedAnotherValobjs returns the list of values that were appended to the "another_valobjs" field in this mutation.
+func (m *UserMutation) AppendedAnotherValobjs() ([]valobjvalobj.AnotherValObj, bool) {
+	if len(m.appendanother_valobjs) == 0 {
+		return nil, false
+	}
+	return m.appendanother_valobjs, true
+}
+
+// ClearAnotherValobjs clears the value of the "another_valobjs" field.
+func (m *UserMutation) ClearAnotherValobjs() {
+	m.another_valobjs = nil
+	m.appendanother_valobjs = nil
+	m.clearedFields[user.FieldAnotherValobjs] = struct{}{}
+}
+
+// AnotherValobjsCleared returns if the "another_valobjs" field was cleared in this mutation.
+func (m *UserMutation) AnotherValobjsCleared() bool {
+	_, ok := m.clearedFields[user.FieldAnotherValobjs]
+	return ok
+}
+
+// ResetAnotherValobjs resets all changes to the "another_valobjs" field.
+func (m *UserMutation) ResetAnotherValobjs() {
+	m.another_valobjs = nil
+	m.appendanother_valobjs = nil
+	delete(m.clearedFields, user.FieldAnotherValobjs)
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -717,7 +885,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 12)
 	if m.t != nil {
 		fields = append(fields, user.FieldT)
 	}
@@ -745,6 +913,15 @@ func (m *UserMutation) Fields() []string {
 	if m.addr != nil {
 		fields = append(fields, user.FieldAddr)
 	}
+	if m.valobj != nil {
+		fields = append(fields, user.FieldValobj)
+	}
+	if m.another_valobj != nil {
+		fields = append(fields, user.FieldAnotherValobj)
+	}
+	if m.another_valobjs != nil {
+		fields = append(fields, user.FieldAnotherValobjs)
+	}
 	return fields
 }
 
@@ -771,6 +948,12 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Strings()
 	case user.FieldAddr:
 		return m.Addr()
+	case user.FieldValobj:
+		return m.Valobj()
+	case user.FieldAnotherValobj:
+		return m.AnotherValobj()
+	case user.FieldAnotherValobjs:
+		return m.AnotherValobjs()
 	}
 	return nil, false
 }
@@ -798,6 +981,12 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldStrings(ctx)
 	case user.FieldAddr:
 		return m.OldAddr(ctx)
+	case user.FieldValobj:
+		return m.OldValobj(ctx)
+	case user.FieldAnotherValobj:
+		return m.OldAnotherValobj(ctx)
+	case user.FieldAnotherValobjs:
+		return m.OldAnotherValobjs(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -870,6 +1059,27 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAddr(v)
 		return nil
+	case user.FieldValobj:
+		v, ok := value.(valobj.ValObj)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetValobj(v)
+		return nil
+	case user.FieldAnotherValobj:
+		v, ok := value.(valobjvalobj.AnotherValObj)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAnotherValobj(v)
+		return nil
+	case user.FieldAnotherValobjs:
+		v, ok := value.([]valobjvalobj.AnotherValObj)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAnotherValobjs(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
 }
@@ -924,6 +1134,15 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldAddr) {
 		fields = append(fields, user.FieldAddr)
 	}
+	if m.FieldCleared(user.FieldValobj) {
+		fields = append(fields, user.FieldValobj)
+	}
+	if m.FieldCleared(user.FieldAnotherValobj) {
+		fields = append(fields, user.FieldAnotherValobj)
+	}
+	if m.FieldCleared(user.FieldAnotherValobjs) {
+		fields = append(fields, user.FieldAnotherValobjs)
+	}
 	return fields
 }
 
@@ -962,6 +1181,15 @@ func (m *UserMutation) ClearField(name string) error {
 	case user.FieldAddr:
 		m.ClearAddr()
 		return nil
+	case user.FieldValobj:
+		m.ClearValobj()
+		return nil
+	case user.FieldAnotherValobj:
+		m.ClearAnotherValobj()
+		return nil
+	case user.FieldAnotherValobjs:
+		m.ClearAnotherValobjs()
+		return nil
 	}
 	return fmt.Errorf("unknown User nullable field %s", name)
 }
@@ -996,6 +1224,15 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldAddr:
 		m.ResetAddr()
+		return nil
+	case user.FieldValobj:
+		m.ResetValobj()
+		return nil
+	case user.FieldAnotherValobj:
+		m.ResetAnotherValobj()
+		return nil
+	case user.FieldAnotherValobjs:
+		m.ResetAnotherValobjs()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)

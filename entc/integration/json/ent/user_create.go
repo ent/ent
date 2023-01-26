@@ -7,17 +7,19 @@
 package ent
 
 import (
-	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"net/http"
-	"net/url"
+	context "context"
+	json "encoding/json"
+	errors "errors"
+	fmt "fmt"
+	http "net/http"
+	url "net/url"
 
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/json/ent/schema"
-	"entgo.io/ent/entc/integration/json/ent/user"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	schema "entgo.io/ent/entc/integration/json/ent/schema"
+	user "entgo.io/ent/entc/integration/json/ent/user"
+	valobj "entgo.io/ent/entc/integration/json/valobj"
+	valobjvalobj "entgo.io/ent/entc/integration/json/valobj/valobj"
+	field "entgo.io/ent/schema/field"
 )
 
 // UserCreate is the builder for creating a User entity.
@@ -86,6 +88,40 @@ func (uc *UserCreate) SetNillableAddr(s *schema.Addr) *UserCreate {
 	if s != nil {
 		uc.SetAddr(*s)
 	}
+	return uc
+}
+
+// SetValobj sets the "valobj" field.
+func (uc *UserCreate) SetValobj(vo valobj.ValObj) *UserCreate {
+	uc.mutation.SetValobj(vo)
+	return uc
+}
+
+// SetNillableValobj sets the "valobj" field if the given value is not nil.
+func (uc *UserCreate) SetNillableValobj(vo *valobj.ValObj) *UserCreate {
+	if vo != nil {
+		uc.SetValobj(*vo)
+	}
+	return uc
+}
+
+// SetAnotherValobj sets the "another_valobj" field.
+func (uc *UserCreate) SetAnotherValobj(vvo valobjvalobj.AnotherValObj) *UserCreate {
+	uc.mutation.SetAnotherValobj(vvo)
+	return uc
+}
+
+// SetNillableAnotherValobj sets the "another_valobj" field if the given value is not nil.
+func (uc *UserCreate) SetNillableAnotherValobj(vvo *valobjvalobj.AnotherValObj) *UserCreate {
+	if vvo != nil {
+		uc.SetAnotherValobj(*vvo)
+	}
+	return uc
+}
+
+// SetAnotherValobjs sets the "another_valobjs" field.
+func (uc *UserCreate) SetAnotherValobjs(vvo []valobjvalobj.AnotherValObj) *UserCreate {
+	uc.mutation.SetAnotherValobjs(vvo)
 	return uc
 }
 
@@ -206,6 +242,18 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.Addr(); ok {
 		_spec.SetField(user.FieldAddr, field.TypeJSON, value)
 		_node.Addr = value
+	}
+	if value, ok := uc.mutation.Valobj(); ok {
+		_spec.SetField(user.FieldValobj, field.TypeJSON, value)
+		_node.Valobj = value
+	}
+	if value, ok := uc.mutation.AnotherValobj(); ok {
+		_spec.SetField(user.FieldAnotherValobj, field.TypeJSON, value)
+		_node.AnotherValobj = value
+	}
+	if value, ok := uc.mutation.AnotherValobjs(); ok {
+		_spec.SetField(user.FieldAnotherValobjs, field.TypeJSON, value)
+		_node.AnotherValobjs = value
 	}
 	return _node, _spec
 }

@@ -7,13 +7,13 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
-	"time"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
+	time "time"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/edgeschema/ent/friendship"
-	"entgo.io/ent/entc/integration/edgeschema/ent/user"
+	friendship "entgo.io/ent/entc/integration/edgeschema/ent/friendship"
+	user "entgo.io/ent/entc/integration/edgeschema/ent/user"
 )
 
 // Friendship is the model entity for the Friendship schema.

@@ -7,20 +7,21 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"net"
-	"net/http"
-	"time"
+	context "context"
+	databasesql "database/sql"
+	errors "errors"
+	fmt "fmt"
+	net "net"
+	http "net/http"
+	time "time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/ent/fieldtype"
-	"entgo.io/ent/entc/integration/ent/role"
-	"entgo.io/ent/entc/integration/ent/schema"
-	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	fieldtype "entgo.io/ent/entc/integration/ent/fieldtype"
+	role "entgo.io/ent/entc/integration/ent/role"
+	schema "entgo.io/ent/entc/integration/ent/schema"
+	field "entgo.io/ent/schema/field"
+	uuid "github.com/google/uuid"
 )
 
 // FieldTypeCreate is the builder for creating a FieldType entity.
@@ -472,13 +473,13 @@ func (ftc *FieldTypeCreate) SetNillableNdir(h *http.Dir) *FieldTypeCreate {
 }
 
 // SetStr sets the "str" field.
-func (ftc *FieldTypeCreate) SetStr(ss sql.NullString) *FieldTypeCreate {
+func (ftc *FieldTypeCreate) SetStr(ss databasesql.NullString) *FieldTypeCreate {
 	ftc.mutation.SetStr(ss)
 	return ftc
 }
 
 // SetNillableStr sets the "str" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableStr(ss *sql.NullString) *FieldTypeCreate {
+func (ftc *FieldTypeCreate) SetNillableStr(ss *databasesql.NullString) *FieldTypeCreate {
 	if ss != nil {
 		ftc.SetStr(*ss)
 	}
@@ -486,7 +487,7 @@ func (ftc *FieldTypeCreate) SetNillableStr(ss *sql.NullString) *FieldTypeCreate 
 }
 
 // SetNullStr sets the "null_str" field.
-func (ftc *FieldTypeCreate) SetNullStr(ss *sql.NullString) *FieldTypeCreate {
+func (ftc *FieldTypeCreate) SetNullStr(ss *databasesql.NullString) *FieldTypeCreate {
 	ftc.mutation.SetNullStr(ss)
 	return ftc
 }
@@ -540,13 +541,13 @@ func (ftc *FieldTypeCreate) SetNillableNullActive(s *schema.Status) *FieldTypeCr
 }
 
 // SetDeleted sets the "deleted" field.
-func (ftc *FieldTypeCreate) SetDeleted(sb *sql.NullBool) *FieldTypeCreate {
+func (ftc *FieldTypeCreate) SetDeleted(sb *databasesql.NullBool) *FieldTypeCreate {
 	ftc.mutation.SetDeleted(sb)
 	return ftc
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (ftc *FieldTypeCreate) SetDeletedAt(st *sql.NullTime) *FieldTypeCreate {
+func (ftc *FieldTypeCreate) SetDeletedAt(st *databasesql.NullTime) *FieldTypeCreate {
 	ftc.mutation.SetDeletedAt(st)
 	return ftc
 }
@@ -570,7 +571,7 @@ func (ftc *FieldTypeCreate) SetIP(n net.IP) *FieldTypeCreate {
 }
 
 // SetNullInt64 sets the "null_int64" field.
-func (ftc *FieldTypeCreate) SetNullInt64(si *sql.NullInt64) *FieldTypeCreate {
+func (ftc *FieldTypeCreate) SetNullInt64(si *databasesql.NullInt64) *FieldTypeCreate {
 	ftc.mutation.SetNullInt64(si)
 	return ftc
 }
@@ -646,7 +647,7 @@ func (ftc *FieldTypeCreate) SetNillableSchemaFloat32(s *schema.Float32) *FieldTy
 }
 
 // SetNullFloat sets the "null_float" field.
-func (ftc *FieldTypeCreate) SetNullFloat(sf *sql.NullFloat64) *FieldTypeCreate {
+func (ftc *FieldTypeCreate) SetNullFloat(sf *databasesql.NullFloat64) *FieldTypeCreate {
 	ftc.mutation.SetNullFloat(sf)
 	return ftc
 }
@@ -2055,7 +2056,7 @@ func (u *FieldTypeUpsert) ClearNdir() *FieldTypeUpsert {
 }
 
 // SetStr sets the "str" field.
-func (u *FieldTypeUpsert) SetStr(v sql.NullString) *FieldTypeUpsert {
+func (u *FieldTypeUpsert) SetStr(v databasesql.NullString) *FieldTypeUpsert {
 	u.Set(fieldtype.FieldStr, v)
 	return u
 }
@@ -2073,7 +2074,7 @@ func (u *FieldTypeUpsert) ClearStr() *FieldTypeUpsert {
 }
 
 // SetNullStr sets the "null_str" field.
-func (u *FieldTypeUpsert) SetNullStr(v *sql.NullString) *FieldTypeUpsert {
+func (u *FieldTypeUpsert) SetNullStr(v *databasesql.NullString) *FieldTypeUpsert {
 	u.Set(fieldtype.FieldNullStr, v)
 	return u
 }
@@ -2163,7 +2164,7 @@ func (u *FieldTypeUpsert) ClearNullActive() *FieldTypeUpsert {
 }
 
 // SetDeleted sets the "deleted" field.
-func (u *FieldTypeUpsert) SetDeleted(v *sql.NullBool) *FieldTypeUpsert {
+func (u *FieldTypeUpsert) SetDeleted(v *databasesql.NullBool) *FieldTypeUpsert {
 	u.Set(fieldtype.FieldDeleted, v)
 	return u
 }
@@ -2181,7 +2182,7 @@ func (u *FieldTypeUpsert) ClearDeleted() *FieldTypeUpsert {
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (u *FieldTypeUpsert) SetDeletedAt(v *sql.NullTime) *FieldTypeUpsert {
+func (u *FieldTypeUpsert) SetDeletedAt(v *databasesql.NullTime) *FieldTypeUpsert {
 	u.Set(fieldtype.FieldDeletedAt, v)
 	return u
 }
@@ -2253,7 +2254,7 @@ func (u *FieldTypeUpsert) ClearIP() *FieldTypeUpsert {
 }
 
 // SetNullInt64 sets the "null_int64" field.
-func (u *FieldTypeUpsert) SetNullInt64(v *sql.NullInt64) *FieldTypeUpsert {
+func (u *FieldTypeUpsert) SetNullInt64(v *databasesql.NullInt64) *FieldTypeUpsert {
 	u.Set(fieldtype.FieldNullInt64, v)
 	return u
 }
@@ -2391,7 +2392,7 @@ func (u *FieldTypeUpsert) ClearSchemaFloat32() *FieldTypeUpsert {
 }
 
 // SetNullFloat sets the "null_float" field.
-func (u *FieldTypeUpsert) SetNullFloat(v *sql.NullFloat64) *FieldTypeUpsert {
+func (u *FieldTypeUpsert) SetNullFloat(v *databasesql.NullFloat64) *FieldTypeUpsert {
 	u.Set(fieldtype.FieldNullFloat, v)
 	return u
 }
@@ -3518,7 +3519,7 @@ func (u *FieldTypeUpsertOne) ClearNdir() *FieldTypeUpsertOne {
 }
 
 // SetStr sets the "str" field.
-func (u *FieldTypeUpsertOne) SetStr(v sql.NullString) *FieldTypeUpsertOne {
+func (u *FieldTypeUpsertOne) SetStr(v databasesql.NullString) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetStr(v)
 	})
@@ -3539,7 +3540,7 @@ func (u *FieldTypeUpsertOne) ClearStr() *FieldTypeUpsertOne {
 }
 
 // SetNullStr sets the "null_str" field.
-func (u *FieldTypeUpsertOne) SetNullStr(v *sql.NullString) *FieldTypeUpsertOne {
+func (u *FieldTypeUpsertOne) SetNullStr(v *databasesql.NullString) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetNullStr(v)
 	})
@@ -3644,7 +3645,7 @@ func (u *FieldTypeUpsertOne) ClearNullActive() *FieldTypeUpsertOne {
 }
 
 // SetDeleted sets the "deleted" field.
-func (u *FieldTypeUpsertOne) SetDeleted(v *sql.NullBool) *FieldTypeUpsertOne {
+func (u *FieldTypeUpsertOne) SetDeleted(v *databasesql.NullBool) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetDeleted(v)
 	})
@@ -3665,7 +3666,7 @@ func (u *FieldTypeUpsertOne) ClearDeleted() *FieldTypeUpsertOne {
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (u *FieldTypeUpsertOne) SetDeletedAt(v *sql.NullTime) *FieldTypeUpsertOne {
+func (u *FieldTypeUpsertOne) SetDeletedAt(v *databasesql.NullTime) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetDeletedAt(v)
 	})
@@ -3749,7 +3750,7 @@ func (u *FieldTypeUpsertOne) ClearIP() *FieldTypeUpsertOne {
 }
 
 // SetNullInt64 sets the "null_int64" field.
-func (u *FieldTypeUpsertOne) SetNullInt64(v *sql.NullInt64) *FieldTypeUpsertOne {
+func (u *FieldTypeUpsertOne) SetNullInt64(v *databasesql.NullInt64) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetNullInt64(v)
 	})
@@ -3910,7 +3911,7 @@ func (u *FieldTypeUpsertOne) ClearSchemaFloat32() *FieldTypeUpsertOne {
 }
 
 // SetNullFloat sets the "null_float" field.
-func (u *FieldTypeUpsertOne) SetNullFloat(v *sql.NullFloat64) *FieldTypeUpsertOne {
+func (u *FieldTypeUpsertOne) SetNullFloat(v *databasesql.NullFloat64) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetNullFloat(v)
 	})
@@ -5230,7 +5231,7 @@ func (u *FieldTypeUpsertBulk) ClearNdir() *FieldTypeUpsertBulk {
 }
 
 // SetStr sets the "str" field.
-func (u *FieldTypeUpsertBulk) SetStr(v sql.NullString) *FieldTypeUpsertBulk {
+func (u *FieldTypeUpsertBulk) SetStr(v databasesql.NullString) *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetStr(v)
 	})
@@ -5251,7 +5252,7 @@ func (u *FieldTypeUpsertBulk) ClearStr() *FieldTypeUpsertBulk {
 }
 
 // SetNullStr sets the "null_str" field.
-func (u *FieldTypeUpsertBulk) SetNullStr(v *sql.NullString) *FieldTypeUpsertBulk {
+func (u *FieldTypeUpsertBulk) SetNullStr(v *databasesql.NullString) *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetNullStr(v)
 	})
@@ -5356,7 +5357,7 @@ func (u *FieldTypeUpsertBulk) ClearNullActive() *FieldTypeUpsertBulk {
 }
 
 // SetDeleted sets the "deleted" field.
-func (u *FieldTypeUpsertBulk) SetDeleted(v *sql.NullBool) *FieldTypeUpsertBulk {
+func (u *FieldTypeUpsertBulk) SetDeleted(v *databasesql.NullBool) *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetDeleted(v)
 	})
@@ -5377,7 +5378,7 @@ func (u *FieldTypeUpsertBulk) ClearDeleted() *FieldTypeUpsertBulk {
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (u *FieldTypeUpsertBulk) SetDeletedAt(v *sql.NullTime) *FieldTypeUpsertBulk {
+func (u *FieldTypeUpsertBulk) SetDeletedAt(v *databasesql.NullTime) *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetDeletedAt(v)
 	})
@@ -5461,7 +5462,7 @@ func (u *FieldTypeUpsertBulk) ClearIP() *FieldTypeUpsertBulk {
 }
 
 // SetNullInt64 sets the "null_int64" field.
-func (u *FieldTypeUpsertBulk) SetNullInt64(v *sql.NullInt64) *FieldTypeUpsertBulk {
+func (u *FieldTypeUpsertBulk) SetNullInt64(v *databasesql.NullInt64) *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetNullInt64(v)
 	})
@@ -5622,7 +5623,7 @@ func (u *FieldTypeUpsertBulk) ClearSchemaFloat32() *FieldTypeUpsertBulk {
 }
 
 // SetNullFloat sets the "null_float" field.
-func (u *FieldTypeUpsertBulk) SetNullFloat(v *sql.NullFloat64) *FieldTypeUpsertBulk {
+func (u *FieldTypeUpsertBulk) SetNullFloat(v *databasesql.NullFloat64) *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetNullFloat(v)
 	})

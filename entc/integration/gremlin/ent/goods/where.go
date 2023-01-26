@@ -7,10 +7,10 @@
 package goods
 
 import (
-	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	dsl "entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
-	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
-	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	p "entgo.io/ent/dialect/gremlin/graph/dsl/p"
+	predicate "entgo.io/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.

@@ -7,12 +7,12 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/edgefield/ent/metadata"
-	"entgo.io/ent/entc/integration/edgefield/ent/user"
+	metadata "entgo.io/ent/entc/integration/edgefield/ent/metadata"
+	user "entgo.io/ent/entc/integration/edgefield/ent/user"
 )
 
 // Metadata is the model entity for the Metadata schema.

@@ -7,7 +7,7 @@
 package user
 
 import (
-	"fmt"
+	fmt "fmt"
 )
 
 const (

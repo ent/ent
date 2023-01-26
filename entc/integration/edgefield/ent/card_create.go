@@ -7,13 +7,13 @@
 package ent
 
 import (
-	"context"
-	"fmt"
+	context "context"
+	fmt "fmt"
 
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgefield/ent/card"
-	"entgo.io/ent/entc/integration/edgefield/ent/user"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	card "entgo.io/ent/entc/integration/edgefield/ent/card"
+	user "entgo.io/ent/entc/integration/edgefield/ent/user"
+	field "entgo.io/ent/schema/field"
 )
 
 // CardCreate is the builder for creating a Card entity.

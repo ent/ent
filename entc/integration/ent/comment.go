@@ -8,12 +8,12 @@ package ent
 
 import (
 	"encoding/json"
-	"fmt"
-	"strings"
+	fmt "fmt"
+	strings "strings"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/ent/comment"
-	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
+	comment "entgo.io/ent/entc/integration/ent/comment"
+	dir "entgo.io/ent/entc/integration/ent/schema/dir"
 )
 
 // Comment is the model entity for the Comment schema.
@@ -30,7 +30,7 @@ type Comment struct {
 	// Table holds the value of the "table" field.
 	Table string `json:"table,omitempty"`
 	// Dir holds the value of the "dir" field.
-	Dir schemadir.Dir `json:"dir,omitempty"`
+	Dir dir.Dir `json:"dir,omitempty"`
 	// Client holds the value of the "client" field.
 	Client string `json:"client,omitempty"`
 }

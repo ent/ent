@@ -44,7 +44,7 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 {{/* Addtional imports by the schemaconfig feature. */}}
 {{- define "dialect/sql/import/additional/schemaconfig" -}}
 	{{- if $.FeatureEnabled "sql/schemaconfig" }}
-		"{{ $.Config.Package }}/internal"
+		{{ addImport "internal" (printf "%s/internal" $.Config.Package) }}
 	{{- end }}
 {{- end }}
 

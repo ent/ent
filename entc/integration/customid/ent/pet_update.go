@@ -7,17 +7,17 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/customid/ent/car"
-	"entgo.io/ent/entc/integration/customid/ent/pet"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
-	"entgo.io/ent/entc/integration/customid/ent/user"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	car "entgo.io/ent/entc/integration/customid/ent/car"
+	pet "entgo.io/ent/entc/integration/customid/ent/pet"
+	predicate "entgo.io/ent/entc/integration/customid/ent/predicate"
+	user "entgo.io/ent/entc/integration/customid/ent/user"
+	field "entgo.io/ent/schema/field"
 )
 
 // PetUpdate is the builder for updating Pet entities.

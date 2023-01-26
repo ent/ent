@@ -7,15 +7,15 @@
 package entv2
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
-	"entgo.io/ent/dialect"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/migrate/entv2/blog"
-	"entgo.io/ent/entc/integration/migrate/entv2/user"
-	"entgo.io/ent/schema/field"
+	dialect "entgo.io/ent/dialect"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	blog "entgo.io/ent/entc/integration/migrate/entv2/blog"
+	user "entgo.io/ent/entc/integration/migrate/entv2/user"
+	field "entgo.io/ent/schema/field"
 )
 
 // BlogCreate is the builder for creating a Blog entity.

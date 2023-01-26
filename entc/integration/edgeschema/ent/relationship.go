@@ -7,13 +7,13 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	fmt "fmt"
+	strings "strings"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
-	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
-	"entgo.io/ent/entc/integration/edgeschema/ent/user"
+	relationship "entgo.io/ent/entc/integration/edgeschema/ent/relationship"
+	relationshipinfo "entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
+	user "entgo.io/ent/entc/integration/edgeschema/ent/user"
 )
 
 // Relationship is the model entity for the Relationship schema.

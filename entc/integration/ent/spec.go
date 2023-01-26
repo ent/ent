@@ -7,11 +7,11 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	fmt "fmt"
+	strings "strings"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/ent/spec"
+	spec "entgo.io/ent/entc/integration/ent/spec"
 )
 
 // Spec is the model entity for the Spec schema.

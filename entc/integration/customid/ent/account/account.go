@@ -7,7 +7,7 @@
 package account
 
 import (
-	"entgo.io/ent/entc/integration/customid/sid"
+	sid "entgo.io/ent/entc/integration/customid/sid"
 )
 
 const (

@@ -24,6 +24,8 @@ require (
 	golang.org/x/tools v0.3.1-0.20221202221704-aa9f4b2f3d57
 )
 
+require github.com/gofrs/uuid v4.3.1+incompatible
+
 require (
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect

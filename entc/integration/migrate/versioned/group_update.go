@@ -7,15 +7,15 @@
 package versioned
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/migrate/versioned/group"
-	"entgo.io/ent/entc/integration/migrate/versioned/predicate"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	group "entgo.io/ent/entc/integration/migrate/versioned/group"
+	predicate "entgo.io/ent/entc/integration/migrate/versioned/predicate"
+	field "entgo.io/ent/schema/field"
 )
 
 // GroupUpdate is the builder for updating Group entities.

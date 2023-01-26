@@ -7,12 +7,12 @@
 package ent
 
 import (
-	"time"
+	time "time"
 
 	"entgo.io/ent/entc/integration/multischema/ent/friendship"
 	"entgo.io/ent/entc/integration/multischema/ent/group"
 	"entgo.io/ent/entc/integration/multischema/ent/pet"
-	"entgo.io/ent/entc/integration/multischema/ent/schema"
+	schema "entgo.io/ent/entc/integration/multischema/ent/schema"
 	"entgo.io/ent/entc/integration/multischema/ent/user"
 )
 

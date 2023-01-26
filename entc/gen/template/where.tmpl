@@ -12,11 +12,13 @@ in the LICENSE file in the root directory of this source tree.
 	{{ template "header" . }}
 {{ end }}
 
+{{ renewImports }}
 {{ template "import" $ }}
+{{ template "import/print" }}
 
 {{ if .HasOneFieldID }}
 	// ID filters vertices based on their ID field.
-	func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
+	func ID(id {{ $.ID.Type | typeIdent }}) predicate.{{ $.Name }} {
 		return predicate.{{ $.Name }}(
 			{{- $tmpl := printf "dialect/%s/predicate/id" $.Storage }}
 			{{- xtemplate $tmpl $ -}}
@@ -27,7 +29,7 @@ in the LICENSE file in the root directory of this source tree.
 		{{ $arg := "id" }}{{ if $op.Variadic }}{{ $arg = "ids" }}{{ end }}
 		{{ $func := printf "ID%s" $op.Name }}
 		// {{ $func }} applies the {{ $op.Name }} predicate on the ID field.
-		func {{ $func }}({{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $.ID.Type }}) predicate.{{ $.Name }} {
+		func {{ $func }}({{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $.ID.Type | typeIdent }}) predicate.{{ $.Name }} {
 			return predicate.{{ $.Name }}(
 				{{- with extend $ "Arg" $arg "Op" $op "Storage" $.Storage -}}
 					{{ $tmpl := printf "dialect/%s/predicate/id/ops" $.Storage }}
@@ -47,7 +49,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{- if and $hasP $comparable $undeclared }}
 		{{ $arg := "v" }}
 		// {{ $func }} applies equality check predicate on the {{ quote $f.Name }} field. It's identical to {{ $func }}EQ.
-		func {{ $func }}({{ $arg }} {{ $f.Type }}) predicate.{{ $.Name }} {
+		func {{ $func }}({{ $arg }} {{ $f.Type | typeIdent }}) predicate.{{ $.Name }} {
 			{{- if and $f.HasGoType (not $f.Type.Valuer) }}
 				vc := {{ $f.BasicType "v" }}
 				{{- $arg = "vc" }}
@@ -67,7 +69,7 @@ in the LICENSE file in the root directory of this source tree.
 		{{ $arg := "v" }}{{ if $op.Variadic }}{{ $arg = "vs" }}{{ end }}
 		{{ $stringOp := eq $op.Name "EqualFold" "Contains" "ContainsFold" "HasPrefix" "HasSuffix" }}
 		{{ $func := print $f.StructField $op.Name }}
-		{{ $type := $f.Type.String }}{{ if $f.IsEnum }}{{ $type = trimPackage $type $.Package }}{{ end }}
+		{{ $type := $f.Type | typeIdent }}{{ if $f.IsEnum }}{{ $type = trimPackage $type $.Package }}{{ end }}
 		// {{ $func }} applies the {{ $op.Name }} predicate on the {{ quote $f.Name }} field.
 		func {{ $func }}({{ if not $op.Niladic }}{{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $type }}{{ end }}) predicate.{{ $.Name }} {
 			{{- if and $f.HasGoType (or $stringOp (not $f.Type.Valuer)) }}

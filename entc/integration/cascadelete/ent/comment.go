@@ -7,12 +7,12 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/cascadelete/ent/comment"
-	"entgo.io/ent/entc/integration/cascadelete/ent/post"
+	comment "entgo.io/ent/entc/integration/cascadelete/ent/comment"
+	post "entgo.io/ent/entc/integration/cascadelete/ent/post"
 )
 
 // Comment is the model entity for the Comment schema.

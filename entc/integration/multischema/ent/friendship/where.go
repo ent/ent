@@ -7,12 +7,12 @@
 package friendship
 
 import (
-	"time"
+	time "time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
-	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	predicate "entgo.io/ent/entc/integration/multischema/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.

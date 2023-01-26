@@ -8,12 +8,12 @@ package ent
 
 import (
 	"context"
-	"errors"
-	"fmt"
+	errors "errors"
+	fmt "fmt"
 	"log"
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/migrate"
-	"github.com/google/uuid"
+	uuid "github.com/google/uuid"
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/friendship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"

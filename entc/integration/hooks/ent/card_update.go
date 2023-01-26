@@ -7,17 +7,17 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"time"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	time "time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/hooks/ent/card"
-	"entgo.io/ent/entc/integration/hooks/ent/predicate"
-	"entgo.io/ent/entc/integration/hooks/ent/user"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	card "entgo.io/ent/entc/integration/hooks/ent/card"
+	predicate "entgo.io/ent/entc/integration/hooks/ent/predicate"
+	user "entgo.io/ent/entc/integration/hooks/ent/user"
+	field "entgo.io/ent/schema/field"
 )
 
 // CardUpdate is the builder for updating Card entities.

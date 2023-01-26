@@ -7,23 +7,23 @@
 package entv2
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"reflect"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	reflect "reflect"
 
-	"entgo.io/ent"
+	ent "entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/migrate/entv2/blog"
-	"entgo.io/ent/entc/integration/migrate/entv2/car"
-	"entgo.io/ent/entc/integration/migrate/entv2/conversion"
-	"entgo.io/ent/entc/integration/migrate/entv2/customtype"
-	"entgo.io/ent/entc/integration/migrate/entv2/group"
-	"entgo.io/ent/entc/integration/migrate/entv2/media"
-	"entgo.io/ent/entc/integration/migrate/entv2/pet"
-	"entgo.io/ent/entc/integration/migrate/entv2/user"
-	"entgo.io/ent/entc/integration/migrate/entv2/zoo"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	blog "entgo.io/ent/entc/integration/migrate/entv2/blog"
+	car "entgo.io/ent/entc/integration/migrate/entv2/car"
+	conversion "entgo.io/ent/entc/integration/migrate/entv2/conversion"
+	customtype "entgo.io/ent/entc/integration/migrate/entv2/customtype"
+	group "entgo.io/ent/entc/integration/migrate/entv2/group"
+	media "entgo.io/ent/entc/integration/migrate/entv2/media"
+	pet "entgo.io/ent/entc/integration/migrate/entv2/pet"
+	user "entgo.io/ent/entc/integration/migrate/entv2/user"
+	zoo "entgo.io/ent/entc/integration/migrate/entv2/zoo"
 )
 
 // ent aliases to avoid import conflicts in user's code.

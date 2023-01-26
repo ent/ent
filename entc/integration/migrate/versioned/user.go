@@ -7,11 +7,11 @@
 package versioned
 
 import (
-	"fmt"
-	"strings"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/migrate/versioned/user"
+	user "entgo.io/ent/entc/integration/migrate/versioned/user"
 )
 
 // User is the model entity for the User schema.

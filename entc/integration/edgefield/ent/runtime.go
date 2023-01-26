@@ -7,14 +7,14 @@
 package ent
 
 import (
-	"time"
+	time "time"
 
 	"entgo.io/ent/entc/integration/edgefield/ent/car"
 	"entgo.io/ent/entc/integration/edgefield/ent/metadata"
 	"entgo.io/ent/entc/integration/edgefield/ent/node"
 	"entgo.io/ent/entc/integration/edgefield/ent/rental"
-	"entgo.io/ent/entc/integration/edgefield/ent/schema"
-	"github.com/google/uuid"
+	schema "entgo.io/ent/entc/integration/edgefield/ent/schema"
+	uuid "github.com/google/uuid"
 )
 
 // The init function reads all schema descriptors with runtime code

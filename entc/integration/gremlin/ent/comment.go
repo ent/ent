@@ -7,11 +7,11 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/gremlin"
-	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
+	gremlin "entgo.io/ent/dialect/gremlin"
+	dir "entgo.io/ent/entc/integration/ent/schema/dir"
 )
 
 // Comment is the model entity for the Comment schema.
@@ -28,7 +28,7 @@ type Comment struct {
 	// Table holds the value of the "table" field.
 	Table string `json:"table,omitempty"`
 	// Dir holds the value of the "dir" field.
-	Dir schemadir.Dir `json:"dir,omitempty"`
+	Dir dir.Dir `json:"dir,omitempty"`
 	// Client holds the value of the "client" field.
 	Client string `json:"client,omitempty"`
 }
@@ -40,13 +40,13 @@ func (c *Comment) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanc struct {
-		ID          string        `json:"id,omitempty"`
-		UniqueInt   int           `json:"unique_int,omitempty"`
-		UniqueFloat float64       `json:"unique_float,omitempty"`
-		NillableInt *int          `json:"nillable_int,omitempty"`
-		Table       string        `json:"table,omitempty"`
-		Dir         schemadir.Dir `json:"dir,omitempty"`
-		Client      string        `json:"client,omitempty"`
+		ID          string  `json:"id,omitempty"`
+		UniqueInt   int     `json:"unique_int,omitempty"`
+		UniqueFloat float64 `json:"unique_float,omitempty"`
+		NillableInt *int    `json:"nillable_int,omitempty"`
+		Table       string  `json:"table,omitempty"`
+		Dir         dir.Dir `json:"dir,omitempty"`
+		Client      string  `json:"client,omitempty"`
 	}
 	if err := vmap.Decode(&scanc); err != nil {
 		return err
@@ -117,13 +117,13 @@ func (c *Comments) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanc []struct {
-		ID          string        `json:"id,omitempty"`
-		UniqueInt   int           `json:"unique_int,omitempty"`
-		UniqueFloat float64       `json:"unique_float,omitempty"`
-		NillableInt *int          `json:"nillable_int,omitempty"`
-		Table       string        `json:"table,omitempty"`
-		Dir         schemadir.Dir `json:"dir,omitempty"`
-		Client      string        `json:"client,omitempty"`
+		ID          string  `json:"id,omitempty"`
+		UniqueInt   int     `json:"unique_int,omitempty"`
+		UniqueFloat float64 `json:"unique_float,omitempty"`
+		NillableInt *int    `json:"nillable_int,omitempty"`
+		Table       string  `json:"table,omitempty"`
+		Dir         dir.Dir `json:"dir,omitempty"`
+		Client      string  `json:"client,omitempty"`
 	}
 	if err := vmap.Decode(&scanc); err != nil {
 		return err

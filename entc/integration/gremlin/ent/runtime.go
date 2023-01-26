@@ -8,12 +8,12 @@ package ent
 
 import (
 	"database/sql"
-	"net"
-	"net/http"
-	"time"
+	net "net"
+	http "net/http"
+	time "time"
 
-	"entgo.io/ent/entc/integration/ent/schema"
-	"entgo.io/ent/entc/integration/ent/schema/task"
+	schema "entgo.io/ent/entc/integration/ent/schema"
+	task "entgo.io/ent/entc/integration/ent/schema/task"
 	"entgo.io/ent/entc/integration/gremlin/ent/card"
 	"entgo.io/ent/entc/integration/gremlin/ent/fieldtype"
 	"entgo.io/ent/entc/integration/gremlin/ent/file"

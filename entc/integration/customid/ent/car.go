@@ -7,12 +7,12 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/customid/ent/car"
-	"entgo.io/ent/entc/integration/customid/ent/pet"
+	car "entgo.io/ent/entc/integration/customid/ent/car"
+	pet "entgo.io/ent/entc/integration/customid/ent/pet"
 )
 
 // Car is the model entity for the Car schema.

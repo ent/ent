@@ -7,8 +7,8 @@
 package link
 
 import (
-	"entgo.io/ent/entc/integration/customid/ent/schema"
-	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
+	schema "entgo.io/ent/entc/integration/customid/ent/schema"
+	uuidcompatible "entgo.io/ent/entc/integration/customid/uuidcompatible"
 )
 
 const (
@@ -42,5 +42,5 @@ var (
 	// DefaultLinkInformation holds the default value on creation for the "link_information" field.
 	DefaultLinkInformation map[string]schema.LinkInformation
 	// DefaultID holds the default value on creation for the "id" field.
-	DefaultID func() uuidc.UUIDC
+	DefaultID func() uuidcompatible.UUIDC
 )

@@ -7,18 +7,18 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"reflect"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	reflect "reflect"
 
-	"entgo.io/ent"
+	ent "entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/multischema/ent/friendship"
-	"entgo.io/ent/entc/integration/multischema/ent/group"
-	"entgo.io/ent/entc/integration/multischema/ent/pet"
-	"entgo.io/ent/entc/integration/multischema/ent/user"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	friendship "entgo.io/ent/entc/integration/multischema/ent/friendship"
+	group "entgo.io/ent/entc/integration/multischema/ent/group"
+	pet "entgo.io/ent/entc/integration/multischema/ent/pet"
+	user "entgo.io/ent/entc/integration/multischema/ent/user"
 )
 
 // ent aliases to avoid import conflicts in user's code.

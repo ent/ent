@@ -7,15 +7,15 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"time"
+	context "context"
+	errors "errors"
+	time "time"
 
-	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/dialect/gremlin/graph/dsl"
-	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
-	"entgo.io/ent/entc/integration/gremlin/ent/license"
-	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	gremlin "entgo.io/ent/dialect/gremlin"
+	dsl "entgo.io/ent/dialect/gremlin/graph/dsl"
+	g "entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	license "entgo.io/ent/entc/integration/gremlin/ent/license"
+	predicate "entgo.io/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // LicenseUpdate is the builder for updating License entities.

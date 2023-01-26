@@ -7,19 +7,19 @@
 package ent
 
 import (
-	"context"
-	"database/sql/driver"
-	"errors"
-	"fmt"
-	"math"
+	context "context"
+	driver "database/sql/driver"
+	errors "errors"
+	fmt "fmt"
+	math "math"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/privacy/ent/predicate"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	predicate "entgo.io/ent/entc/integration/privacy/ent/predicate"
 	"entgo.io/ent/entc/integration/privacy/ent/task"
 	"entgo.io/ent/entc/integration/privacy/ent/team"
 	"entgo.io/ent/entc/integration/privacy/ent/user"
-	"entgo.io/ent/schema/field"
+	field "entgo.io/ent/schema/field"
 )
 
 // TeamQuery is the builder for querying Team entities.

@@ -7,12 +7,12 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/cascadelete/ent/post"
-	"entgo.io/ent/entc/integration/cascadelete/ent/user"
+	post "entgo.io/ent/entc/integration/cascadelete/ent/post"
+	user "entgo.io/ent/entc/integration/cascadelete/ent/user"
 )
 
 // Post is the model entity for the Post schema.

@@ -7,12 +7,12 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/entc/integration/gremlin/ent/filetype"
-	"entgo.io/ent/entc/integration/gremlin/ent/user"
+	gremlin "entgo.io/ent/dialect/gremlin"
+	filetype "entgo.io/ent/entc/integration/gremlin/ent/filetype"
+	user "entgo.io/ent/entc/integration/gremlin/ent/user"
 )
 
 // File is the model entity for the File schema.

@@ -7,16 +7,16 @@
 package entv2
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/migrate/entv2/blog"
-	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
-	"entgo.io/ent/entc/integration/migrate/entv2/user"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	blog "entgo.io/ent/entc/integration/migrate/entv2/blog"
+	predicate "entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	user "entgo.io/ent/entc/integration/migrate/entv2/user"
+	field "entgo.io/ent/schema/field"
 )
 
 // BlogUpdate is the builder for updating Blog entities.

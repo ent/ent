@@ -7,10 +7,10 @@
 package ent
 
 import (
-	"context"
+	context "context"
 	"encoding/json"
-	"fmt"
-	"sync"
+	fmt "fmt"
+	sync "sync"
 	"sync/atomic"
 
 	"entgo.io/ent/dialect/sql"

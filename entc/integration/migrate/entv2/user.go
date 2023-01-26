@@ -7,14 +7,14 @@
 package entv2
 
 import (
+	"database/sql"
 	"encoding/json"
-	"fmt"
-	"strings"
-	"time"
+	fmt "fmt"
+	strings "strings"
+	time "time"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/migrate/entv2/pet"
-	"entgo.io/ent/entc/integration/migrate/entv2/user"
+	pet "entgo.io/ent/entc/integration/migrate/entv2/pet"
+	user "entgo.io/ent/entc/integration/migrate/entv2/user"
 )
 
 // User is the model entity for the User schema.

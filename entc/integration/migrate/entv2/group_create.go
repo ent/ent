@@ -7,12 +7,12 @@
 package entv2
 
 import (
-	"context"
-	"fmt"
+	context "context"
+	fmt "fmt"
 
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/migrate/entv2/group"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	group "entgo.io/ent/entc/integration/migrate/entv2/group"
+	field "entgo.io/ent/schema/field"
 )
 
 // GroupCreate is the builder for creating a Group entity.

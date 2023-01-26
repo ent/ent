@@ -7,11 +7,11 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	fmt "fmt"
+	strings "strings"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/template/ent/group"
+	group "entgo.io/ent/entc/integration/template/ent/group"
 )
 
 // Group is the model entity for the Group schema.

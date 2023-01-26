@@ -7,20 +7,20 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"time"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	time "time"
 
-	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	gremlin "entgo.io/ent/dialect/gremlin"
+	dsl "entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
-	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
-	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
-	"entgo.io/ent/entc/integration/gremlin/ent/card"
-	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
-	"entgo.io/ent/entc/integration/gremlin/ent/spec"
-	"entgo.io/ent/entc/integration/gremlin/ent/user"
+	g "entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	p "entgo.io/ent/dialect/gremlin/graph/dsl/p"
+	card "entgo.io/ent/entc/integration/gremlin/ent/card"
+	predicate "entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	spec "entgo.io/ent/entc/integration/gremlin/ent/spec"
+	user "entgo.io/ent/entc/integration/gremlin/ent/user"
 )
 
 // CardUpdate is the builder for updating Card entities.

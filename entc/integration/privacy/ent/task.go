@@ -7,13 +7,13 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/privacy/ent/task"
-	"entgo.io/ent/entc/integration/privacy/ent/user"
-	"github.com/google/uuid"
+	task "entgo.io/ent/entc/integration/privacy/ent/task"
+	user "entgo.io/ent/entc/integration/privacy/ent/user"
+	uuid "github.com/google/uuid"
 )
 
 // Task is the model entity for the Task schema.

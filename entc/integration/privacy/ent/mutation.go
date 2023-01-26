@@ -7,19 +7,18 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"sync"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	sync "sync"
 
+	ent "entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/privacy/ent/predicate"
-	"entgo.io/ent/entc/integration/privacy/ent/task"
-	"entgo.io/ent/entc/integration/privacy/ent/team"
-	"entgo.io/ent/entc/integration/privacy/ent/user"
-	"github.com/google/uuid"
-
-	"entgo.io/ent"
+	task "entgo.io/ent/entc/integration/privacy/ent/task"
+	team "entgo.io/ent/entc/integration/privacy/ent/team"
+	user "entgo.io/ent/entc/integration/privacy/ent/user"
+	uuid "github.com/google/uuid"
 )
 
 const (

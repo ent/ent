@@ -7,19 +7,19 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
-	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
-	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
-	"entgo.io/ent/entc/integration/edgeschema/ent/user"
-	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
-	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	tag "entgo.io/ent/entc/integration/edgeschema/ent/tag"
+	tweet "entgo.io/ent/entc/integration/edgeschema/ent/tweet"
+	tweettag "entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
+	user "entgo.io/ent/entc/integration/edgeschema/ent/user"
+	usertweet "entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
+	field "entgo.io/ent/schema/field"
+	uuid "github.com/google/uuid"
 )
 
 // TweetCreate is the builder for creating a Tweet entity.

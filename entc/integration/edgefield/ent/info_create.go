@@ -7,15 +7,15 @@
 package ent
 
 import (
-	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
+	context "context"
+	json "encoding/json"
+	errors "errors"
+	fmt "fmt"
 
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgefield/ent/info"
-	"entgo.io/ent/entc/integration/edgefield/ent/user"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	info "entgo.io/ent/entc/integration/edgefield/ent/info"
+	user "entgo.io/ent/entc/integration/edgefield/ent/user"
+	field "entgo.io/ent/schema/field"
 )
 
 // InfoCreate is the builder for creating a Info entity.

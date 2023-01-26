@@ -7,14 +7,14 @@
 package ent
 
 import (
-	"context"
+	context "context"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/group"
-	"entgo.io/ent/entc/integration/multischema/ent/internal"
-	"entgo.io/ent/entc/integration/multischema/ent/predicate"
-	"entgo.io/ent/schema/field"
+	internal "entgo.io/ent/entc/integration/multischema/ent/internal"
+	predicate "entgo.io/ent/entc/integration/multischema/ent/predicate"
+	field "entgo.io/ent/schema/field"
 )
 
 // GroupDelete is the builder for deleting a Group entity.

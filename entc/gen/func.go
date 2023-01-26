@@ -69,6 +69,12 @@ var (
 		"list":          list,
 		"fail":          fail,
 		"replace":       strings.ReplaceAll,
+		"importLines":   importTracker.ImportLines,
+		"addPath":       importTracker.AddPath,
+		"renewImports":  importTracker.Empty,
+		"typeIdent":     importTracker.TypeIdent,
+		"addImport":     importTracker.AddImport,
+		"importAlias":   importTracker.LocalNameOf,
 	}
 	rules    = ruleset()
 	acronyms = make(map[string]struct{})

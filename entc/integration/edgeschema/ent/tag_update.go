@@ -7,20 +7,20 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgeschema/ent/group"
-	"entgo.io/ent/entc/integration/edgeschema/ent/grouptag"
-	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
-	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
-	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
-	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
-	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	group "entgo.io/ent/entc/integration/edgeschema/ent/group"
+	grouptag "entgo.io/ent/entc/integration/edgeschema/ent/grouptag"
+	predicate "entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	tag "entgo.io/ent/entc/integration/edgeschema/ent/tag"
+	tweet "entgo.io/ent/entc/integration/edgeschema/ent/tweet"
+	tweettag "entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
+	field "entgo.io/ent/schema/field"
+	uuid "github.com/google/uuid"
 )
 
 // TagUpdate is the builder for updating Tag entities.

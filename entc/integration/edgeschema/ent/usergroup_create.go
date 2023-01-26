@@ -7,17 +7,17 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"time"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	time "time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgeschema/ent/group"
-	"entgo.io/ent/entc/integration/edgeschema/ent/user"
-	"entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	group "entgo.io/ent/entc/integration/edgeschema/ent/group"
+	user "entgo.io/ent/entc/integration/edgeschema/ent/user"
+	usergroup "entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
+	field "entgo.io/ent/schema/field"
 )
 
 // UserGroupCreate is the builder for creating a UserGroup entity.

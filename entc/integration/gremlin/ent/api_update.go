@@ -7,14 +7,14 @@
 package ent
 
 import (
-	"context"
-	"errors"
+	context "context"
+	errors "errors"
 
-	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/dialect/gremlin/graph/dsl"
-	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
-	"entgo.io/ent/entc/integration/gremlin/ent/api"
-	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	gremlin "entgo.io/ent/dialect/gremlin"
+	dsl "entgo.io/ent/dialect/gremlin/graph/dsl"
+	g "entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	api "entgo.io/ent/entc/integration/gremlin/ent/api"
+	predicate "entgo.io/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // APIUpdate is the builder for updating Api entities.

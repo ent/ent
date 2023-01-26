@@ -7,7 +7,7 @@
 package roleuser
 
 import (
-	"time"
+	time "time"
 )
 
 const (

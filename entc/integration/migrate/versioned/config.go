@@ -7,8 +7,8 @@
 package versioned
 
 import (
-	"entgo.io/ent"
-	"entgo.io/ent/dialect"
+	ent "entgo.io/ent"
+	dialect "entgo.io/ent/dialect"
 )
 
 // Option function to configure the client.

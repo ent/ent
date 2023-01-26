@@ -7,37 +7,37 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"net"
-	"net/http"
-	"sync"
-	"time"
+	context "context"
+	databasesql "database/sql"
+	errors "errors"
+	fmt "fmt"
+	net "net"
+	http "net/http"
+	sync "sync"
+	time "time"
 
+	ent "entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/ent/card"
-	"entgo.io/ent/entc/integration/ent/comment"
-	"entgo.io/ent/entc/integration/ent/fieldtype"
-	"entgo.io/ent/entc/integration/ent/file"
-	"entgo.io/ent/entc/integration/ent/filetype"
-	"entgo.io/ent/entc/integration/ent/group"
-	"entgo.io/ent/entc/integration/ent/groupinfo"
-	"entgo.io/ent/entc/integration/ent/item"
-	"entgo.io/ent/entc/integration/ent/license"
-	"entgo.io/ent/entc/integration/ent/node"
-	"entgo.io/ent/entc/integration/ent/pet"
-	"entgo.io/ent/entc/integration/ent/predicate"
-	"entgo.io/ent/entc/integration/ent/role"
-	"entgo.io/ent/entc/integration/ent/schema"
-	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
-	"entgo.io/ent/entc/integration/ent/schema/task"
-	"entgo.io/ent/entc/integration/ent/spec"
+	card "entgo.io/ent/entc/integration/ent/card"
+	comment "entgo.io/ent/entc/integration/ent/comment"
+	fieldtype "entgo.io/ent/entc/integration/ent/fieldtype"
+	file "entgo.io/ent/entc/integration/ent/file"
+	filetype "entgo.io/ent/entc/integration/ent/filetype"
+	group "entgo.io/ent/entc/integration/ent/group"
+	groupinfo "entgo.io/ent/entc/integration/ent/groupinfo"
+	item "entgo.io/ent/entc/integration/ent/item"
+	license "entgo.io/ent/entc/integration/ent/license"
+	node "entgo.io/ent/entc/integration/ent/node"
+	pet "entgo.io/ent/entc/integration/ent/pet"
+	predicate "entgo.io/ent/entc/integration/ent/predicate"
+	role "entgo.io/ent/entc/integration/ent/role"
+	schema "entgo.io/ent/entc/integration/ent/schema"
+	dir "entgo.io/ent/entc/integration/ent/schema/dir"
+	schematask "entgo.io/ent/entc/integration/ent/schema/task"
+	spec "entgo.io/ent/entc/integration/ent/spec"
 	enttask "entgo.io/ent/entc/integration/ent/task"
-	"entgo.io/ent/entc/integration/ent/user"
-	"github.com/google/uuid"
-
-	"entgo.io/ent"
+	user "entgo.io/ent/entc/integration/ent/user"
+	uuid "github.com/google/uuid"
 )
 
 const (
@@ -1096,7 +1096,7 @@ type CommentMutation struct {
 	nillable_int    *int
 	addnillable_int *int
 	table           *string
-	dir             *schemadir.Dir
+	dir             *dir.Dir
 	client          *string
 	clearedFields   map[string]struct{}
 	done            bool
@@ -1434,12 +1434,12 @@ func (m *CommentMutation) ResetTable() {
 }
 
 // SetDir sets the "dir" field.
-func (m *CommentMutation) SetDir(s schemadir.Dir) {
+func (m *CommentMutation) SetDir(s dir.Dir) {
 	m.dir = &s
 }
 
 // Dir returns the value of the "dir" field in the mutation.
-func (m *CommentMutation) Dir() (r schemadir.Dir, exists bool) {
+func (m *CommentMutation) Dir() (r dir.Dir, exists bool) {
 	v := m.dir
 	if v == nil {
 		return
@@ -1450,7 +1450,7 @@ func (m *CommentMutation) Dir() (r schemadir.Dir, exists bool) {
 // OldDir returns the old "dir" field's value of the Comment entity.
 // If the Comment object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CommentMutation) OldDir(ctx context.Context) (v schemadir.Dir, err error) {
+func (m *CommentMutation) OldDir(ctx context.Context) (v dir.Dir, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldDir is only allowed on UpdateOne operations")
 	}
@@ -1663,7 +1663,7 @@ func (m *CommentMutation) SetField(name string, value ent.Value) error {
 		m.SetTable(v)
 		return nil
 	case comment.FieldDir:
-		v, ok := value.(schemadir.Dir)
+		v, ok := value.(dir.Dir)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1928,18 +1928,18 @@ type FieldTypeMutation struct {
 	addduration                *time.Duration
 	dir                        *http.Dir
 	ndir                       *http.Dir
-	str                        *sql.NullString
-	null_str                   **sql.NullString
+	str                        *databasesql.NullString
+	null_str                   **databasesql.NullString
 	link                       *schema.Link
 	null_link                  **schema.Link
 	active                     *schema.Status
 	null_active                *schema.Status
-	deleted                    **sql.NullBool
-	deleted_at                 **sql.NullTime
+	deleted                    **databasesql.NullBool
+	deleted_at                 **databasesql.NullTime
 	raw_data                   *[]byte
 	sensitive                  *[]byte
 	ip                         *net.IP
-	null_int64                 **sql.NullInt64
+	null_int64                 **databasesql.NullInt64
 	schema_int                 *schema.Int
 	addschema_int              *schema.Int
 	schema_int8                *schema.Int8
@@ -1950,7 +1950,7 @@ type FieldTypeMutation struct {
 	addschema_float            *schema.Float64
 	schema_float32             *schema.Float32
 	addschema_float32          *schema.Float32
-	null_float                 **sql.NullFloat64
+	null_float                 **databasesql.NullFloat64
 	role                       *role.Role
 	priority                   *role.Priority
 	optional_uuid              *uuid.UUID
@@ -4275,12 +4275,12 @@ func (m *FieldTypeMutation) ResetNdir() {
 }
 
 // SetStr sets the "str" field.
-func (m *FieldTypeMutation) SetStr(ss sql.NullString) {
+func (m *FieldTypeMutation) SetStr(ss databasesql.NullString) {
 	m.str = &ss
 }
 
 // Str returns the value of the "str" field in the mutation.
-func (m *FieldTypeMutation) Str() (r sql.NullString, exists bool) {
+func (m *FieldTypeMutation) Str() (r databasesql.NullString, exists bool) {
 	v := m.str
 	if v == nil {
 		return
@@ -4291,7 +4291,7 @@ func (m *FieldTypeMutation) Str() (r sql.NullString, exists bool) {
 // OldStr returns the old "str" field's value of the FieldType entity.
 // If the FieldType object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FieldTypeMutation) OldStr(ctx context.Context) (v sql.NullString, err error) {
+func (m *FieldTypeMutation) OldStr(ctx context.Context) (v databasesql.NullString, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldStr is only allowed on UpdateOne operations")
 	}
@@ -4324,12 +4324,12 @@ func (m *FieldTypeMutation) ResetStr() {
 }
 
 // SetNullStr sets the "null_str" field.
-func (m *FieldTypeMutation) SetNullStr(ss *sql.NullString) {
+func (m *FieldTypeMutation) SetNullStr(ss *databasesql.NullString) {
 	m.null_str = &ss
 }
 
 // NullStr returns the value of the "null_str" field in the mutation.
-func (m *FieldTypeMutation) NullStr() (r *sql.NullString, exists bool) {
+func (m *FieldTypeMutation) NullStr() (r *databasesql.NullString, exists bool) {
 	v := m.null_str
 	if v == nil {
 		return
@@ -4340,7 +4340,7 @@ func (m *FieldTypeMutation) NullStr() (r *sql.NullString, exists bool) {
 // OldNullStr returns the old "null_str" field's value of the FieldType entity.
 // If the FieldType object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FieldTypeMutation) OldNullStr(ctx context.Context) (v *sql.NullString, err error) {
+func (m *FieldTypeMutation) OldNullStr(ctx context.Context) (v *databasesql.NullString, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldNullStr is only allowed on UpdateOne operations")
 	}
@@ -4569,12 +4569,12 @@ func (m *FieldTypeMutation) ResetNullActive() {
 }
 
 // SetDeleted sets the "deleted" field.
-func (m *FieldTypeMutation) SetDeleted(sb *sql.NullBool) {
+func (m *FieldTypeMutation) SetDeleted(sb *databasesql.NullBool) {
 	m.deleted = &sb
 }
 
 // Deleted returns the value of the "deleted" field in the mutation.
-func (m *FieldTypeMutation) Deleted() (r *sql.NullBool, exists bool) {
+func (m *FieldTypeMutation) Deleted() (r *databasesql.NullBool, exists bool) {
 	v := m.deleted
 	if v == nil {
 		return
@@ -4585,7 +4585,7 @@ func (m *FieldTypeMutation) Deleted() (r *sql.NullBool, exists bool) {
 // OldDeleted returns the old "deleted" field's value of the FieldType entity.
 // If the FieldType object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FieldTypeMutation) OldDeleted(ctx context.Context) (v *sql.NullBool, err error) {
+func (m *FieldTypeMutation) OldDeleted(ctx context.Context) (v *databasesql.NullBool, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldDeleted is only allowed on UpdateOne operations")
 	}
@@ -4618,12 +4618,12 @@ func (m *FieldTypeMutation) ResetDeleted() {
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (m *FieldTypeMutation) SetDeletedAt(st *sql.NullTime) {
+func (m *FieldTypeMutation) SetDeletedAt(st *databasesql.NullTime) {
 	m.deleted_at = &st
 }
 
 // DeletedAt returns the value of the "deleted_at" field in the mutation.
-func (m *FieldTypeMutation) DeletedAt() (r *sql.NullTime, exists bool) {
+func (m *FieldTypeMutation) DeletedAt() (r *databasesql.NullTime, exists bool) {
 	v := m.deleted_at
 	if v == nil {
 		return
@@ -4634,7 +4634,7 @@ func (m *FieldTypeMutation) DeletedAt() (r *sql.NullTime, exists bool) {
 // OldDeletedAt returns the old "deleted_at" field's value of the FieldType entity.
 // If the FieldType object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FieldTypeMutation) OldDeletedAt(ctx context.Context) (v *sql.NullTime, err error) {
+func (m *FieldTypeMutation) OldDeletedAt(ctx context.Context) (v *databasesql.NullTime, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
 	}
@@ -4814,12 +4814,12 @@ func (m *FieldTypeMutation) ResetIP() {
 }
 
 // SetNullInt64 sets the "null_int64" field.
-func (m *FieldTypeMutation) SetNullInt64(si *sql.NullInt64) {
+func (m *FieldTypeMutation) SetNullInt64(si *databasesql.NullInt64) {
 	m.null_int64 = &si
 }
 
 // NullInt64 returns the value of the "null_int64" field in the mutation.
-func (m *FieldTypeMutation) NullInt64() (r *sql.NullInt64, exists bool) {
+func (m *FieldTypeMutation) NullInt64() (r *databasesql.NullInt64, exists bool) {
 	v := m.null_int64
 	if v == nil {
 		return
@@ -4830,7 +4830,7 @@ func (m *FieldTypeMutation) NullInt64() (r *sql.NullInt64, exists bool) {
 // OldNullInt64 returns the old "null_int64" field's value of the FieldType entity.
 // If the FieldType object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FieldTypeMutation) OldNullInt64(ctx context.Context) (v *sql.NullInt64, err error) {
+func (m *FieldTypeMutation) OldNullInt64(ctx context.Context) (v *databasesql.NullInt64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldNullInt64 is only allowed on UpdateOne operations")
 	}
@@ -5213,12 +5213,12 @@ func (m *FieldTypeMutation) ResetSchemaFloat32() {
 }
 
 // SetNullFloat sets the "null_float" field.
-func (m *FieldTypeMutation) SetNullFloat(sf *sql.NullFloat64) {
+func (m *FieldTypeMutation) SetNullFloat(sf *databasesql.NullFloat64) {
 	m.null_float = &sf
 }
 
 // NullFloat returns the value of the "null_float" field in the mutation.
-func (m *FieldTypeMutation) NullFloat() (r *sql.NullFloat64, exists bool) {
+func (m *FieldTypeMutation) NullFloat() (r *databasesql.NullFloat64, exists bool) {
 	v := m.null_float
 	if v == nil {
 		return
@@ -5229,7 +5229,7 @@ func (m *FieldTypeMutation) NullFloat() (r *sql.NullFloat64, exists bool) {
 // OldNullFloat returns the old "null_float" field's value of the FieldType entity.
 // If the FieldType object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FieldTypeMutation) OldNullFloat(ctx context.Context) (v *sql.NullFloat64, err error) {
+func (m *FieldTypeMutation) OldNullFloat(ctx context.Context) (v *databasesql.NullFloat64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldNullFloat is only allowed on UpdateOne operations")
 	}
@@ -6554,14 +6554,14 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 		m.SetNdir(v)
 		return nil
 	case fieldtype.FieldStr:
-		v, ok := value.(sql.NullString)
+		v, ok := value.(databasesql.NullString)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetStr(v)
 		return nil
 	case fieldtype.FieldNullStr:
-		v, ok := value.(*sql.NullString)
+		v, ok := value.(*databasesql.NullString)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -6596,14 +6596,14 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 		m.SetNullActive(v)
 		return nil
 	case fieldtype.FieldDeleted:
-		v, ok := value.(*sql.NullBool)
+		v, ok := value.(*databasesql.NullBool)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDeleted(v)
 		return nil
 	case fieldtype.FieldDeletedAt:
-		v, ok := value.(*sql.NullTime)
+		v, ok := value.(*databasesql.NullTime)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -6631,7 +6631,7 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 		m.SetIP(v)
 		return nil
 	case fieldtype.FieldNullInt64:
-		v, ok := value.(*sql.NullInt64)
+		v, ok := value.(*databasesql.NullInt64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -6673,7 +6673,7 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 		m.SetSchemaFloat32(v)
 		return nil
 	case fieldtype.FieldNullFloat:
-		v, ok := value.(*sql.NullFloat64)
+		v, ok := value.(*databasesql.NullFloat64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -13313,9 +13313,9 @@ type TaskMutation struct {
 	op            Op
 	typ           string
 	id            *int
-	priority      *task.Priority
-	addpriority   *task.Priority
-	priorities    *map[string]task.Priority
+	priority      *schematask.Priority
+	addpriority   *schematask.Priority
+	priorities    *map[string]schematask.Priority
 	created_at    *time.Time
 	clearedFields map[string]struct{}
 	done          bool
@@ -13422,13 +13422,13 @@ func (m *TaskMutation) IDs(ctx context.Context) ([]int, error) {
 }
 
 // SetPriority sets the "priority" field.
-func (m *TaskMutation) SetPriority(t task.Priority) {
+func (m *TaskMutation) SetPriority(t schematask.Priority) {
 	m.priority = &t
 	m.addpriority = nil
 }
 
 // Priority returns the value of the "priority" field in the mutation.
-func (m *TaskMutation) Priority() (r task.Priority, exists bool) {
+func (m *TaskMutation) Priority() (r schematask.Priority, exists bool) {
 	v := m.priority
 	if v == nil {
 		return
@@ -13439,7 +13439,7 @@ func (m *TaskMutation) Priority() (r task.Priority, exists bool) {
 // OldPriority returns the old "priority" field's value of the Task entity.
 // If the Task object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TaskMutation) OldPriority(ctx context.Context) (v task.Priority, err error) {
+func (m *TaskMutation) OldPriority(ctx context.Context) (v schematask.Priority, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPriority is only allowed on UpdateOne operations")
 	}
@@ -13454,7 +13454,7 @@ func (m *TaskMutation) OldPriority(ctx context.Context) (v task.Priority, err er
 }
 
 // AddPriority adds t to the "priority" field.
-func (m *TaskMutation) AddPriority(t task.Priority) {
+func (m *TaskMutation) AddPriority(t schematask.Priority) {
 	if m.addpriority != nil {
 		*m.addpriority += t
 	} else {
@@ -13463,7 +13463,7 @@ func (m *TaskMutation) AddPriority(t task.Priority) {
 }
 
 // AddedPriority returns the value that was added to the "priority" field in this mutation.
-func (m *TaskMutation) AddedPriority() (r task.Priority, exists bool) {
+func (m *TaskMutation) AddedPriority() (r schematask.Priority, exists bool) {
 	v := m.addpriority
 	if v == nil {
 		return
@@ -13478,12 +13478,12 @@ func (m *TaskMutation) ResetPriority() {
 }
 
 // SetPriorities sets the "priorities" field.
-func (m *TaskMutation) SetPriorities(value map[string]task.Priority) {
+func (m *TaskMutation) SetPriorities(value map[string]schematask.Priority) {
 	m.priorities = &value
 }
 
 // Priorities returns the value of the "priorities" field in the mutation.
-func (m *TaskMutation) Priorities() (r map[string]task.Priority, exists bool) {
+func (m *TaskMutation) Priorities() (r map[string]schematask.Priority, exists bool) {
 	v := m.priorities
 	if v == nil {
 		return
@@ -13494,7 +13494,7 @@ func (m *TaskMutation) Priorities() (r map[string]task.Priority, exists bool) {
 // OldPriorities returns the old "priorities" field's value of the Task entity.
 // If the Task object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TaskMutation) OldPriorities(ctx context.Context) (v map[string]task.Priority, err error) {
+func (m *TaskMutation) OldPriorities(ctx context.Context) (v map[string]schematask.Priority, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPriorities is only allowed on UpdateOne operations")
 	}
@@ -13645,14 +13645,14 @@ func (m *TaskMutation) OldField(ctx context.Context, name string) (ent.Value, er
 func (m *TaskMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case enttask.FieldPriority:
-		v, ok := value.(task.Priority)
+		v, ok := value.(schematask.Priority)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPriority(v)
 		return nil
 	case enttask.FieldPriorities:
-		v, ok := value.(map[string]task.Priority)
+		v, ok := value.(map[string]schematask.Priority)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -13696,7 +13696,7 @@ func (m *TaskMutation) AddedField(name string) (ent.Value, bool) {
 func (m *TaskMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	case enttask.FieldPriority:
-		v, ok := value.(task.Priority)
+		v, ok := value.(schematask.Priority)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

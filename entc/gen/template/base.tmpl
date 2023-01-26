@@ -11,14 +11,15 @@ in the LICENSE file in the root directory of this source tree.
 {{ $pkg := base $.Config.Package }}
 {{ template "header" $ }}
 
+{{- renewImports }}
+{{ addPath "reflect" }}
 {{ template "import" $ }}
 
-import (
-	"reflect"
-	{{- range $n := $.Nodes }}
-		{{ $n.PackageAlias }} "{{ $n.Config.Package }}/{{ $n.PackageDir }}"
-	{{- end }}
-)
+{{- range $n := $.Nodes }}
+	{{ addPath (printf "%s/%s" $n.Config.Package $n.PackageDir) }}
+{{- end }}
+
+{{ template "import/print" }}
 
 // ent aliases to avoid import conflicts in user's code.
 type (

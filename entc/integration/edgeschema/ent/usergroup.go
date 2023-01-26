@@ -7,14 +7,14 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
-	"time"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
+	time "time"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/edgeschema/ent/group"
-	"entgo.io/ent/entc/integration/edgeschema/ent/user"
-	"entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
+	group "entgo.io/ent/entc/integration/edgeschema/ent/group"
+	user "entgo.io/ent/entc/integration/edgeschema/ent/user"
+	usergroup "entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
 )
 
 // UserGroup is the model entity for the UserGroup schema.

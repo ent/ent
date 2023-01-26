@@ -7,12 +7,12 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
-	"time"
+	fmt "fmt"
+	strings "strings"
+	time "time"
 
-	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/entc/integration/gremlin/ent/groupinfo"
+	gremlin "entgo.io/ent/dialect/gremlin"
+	groupinfo "entgo.io/ent/entc/integration/gremlin/ent/groupinfo"
 )
 
 // Group is the model entity for the Group schema.

@@ -8,8 +8,8 @@ package other
 
 import (
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
-	"entgo.io/ent/entc/integration/customid/sid"
+	predicate "entgo.io/ent/entc/integration/customid/ent/predicate"
+	sid "entgo.io/ent/entc/integration/customid/sid"
 )
 
 // ID filters vertices based on their ID field.

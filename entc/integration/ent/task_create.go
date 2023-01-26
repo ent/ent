@@ -7,17 +7,16 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"time"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	time "time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/ent/schema/task"
-	"entgo.io/ent/schema/field"
-
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	task "entgo.io/ent/entc/integration/ent/schema/task"
 	enttask "entgo.io/ent/entc/integration/ent/task"
+	field "entgo.io/ent/schema/field"
 )
 
 // TaskCreate is the builder for creating a Task entity.

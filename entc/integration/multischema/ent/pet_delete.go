@@ -7,14 +7,14 @@
 package ent
 
 import (
-	"context"
+	context "context"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/multischema/ent/internal"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	internal "entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/pet"
-	"entgo.io/ent/entc/integration/multischema/ent/predicate"
-	"entgo.io/ent/schema/field"
+	predicate "entgo.io/ent/entc/integration/multischema/ent/predicate"
+	field "entgo.io/ent/schema/field"
 )
 
 // PetDelete is the builder for deleting a Pet entity.

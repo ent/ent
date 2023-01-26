@@ -7,11 +7,11 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
-	"time"
+	fmt "fmt"
+	strings "strings"
+	time "time"
 
-	"entgo.io/ent/dialect/gremlin"
+	gremlin "entgo.io/ent/dialect/gremlin"
 )
 
 // License is the model entity for the License schema.

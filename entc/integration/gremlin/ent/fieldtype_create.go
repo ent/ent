@@ -7,21 +7,21 @@
 package ent
 
 import (
-	"context"
-	"database/sql"
-	"errors"
-	"fmt"
-	"net"
-	"net/http"
-	"time"
+	context "context"
+	databasesql "database/sql"
+	errors "errors"
+	fmt "fmt"
+	net "net"
+	http "net/http"
+	time "time"
 
-	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/dialect/gremlin/graph/dsl"
-	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
-	"entgo.io/ent/entc/integration/ent/role"
-	"entgo.io/ent/entc/integration/ent/schema"
-	"entgo.io/ent/entc/integration/gremlin/ent/fieldtype"
-	"github.com/google/uuid"
+	gremlin "entgo.io/ent/dialect/gremlin"
+	dsl "entgo.io/ent/dialect/gremlin/graph/dsl"
+	g "entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	role "entgo.io/ent/entc/integration/ent/role"
+	schema "entgo.io/ent/entc/integration/ent/schema"
+	fieldtype "entgo.io/ent/entc/integration/gremlin/ent/fieldtype"
+	uuid "github.com/google/uuid"
 )
 
 // FieldTypeCreate is the builder for creating a FieldType entity.
@@ -472,13 +472,13 @@ func (ftc *FieldTypeCreate) SetNillableNdir(h *http.Dir) *FieldTypeCreate {
 }
 
 // SetStr sets the "str" field.
-func (ftc *FieldTypeCreate) SetStr(ss sql.NullString) *FieldTypeCreate {
+func (ftc *FieldTypeCreate) SetStr(ss databasesql.NullString) *FieldTypeCreate {
 	ftc.mutation.SetStr(ss)
 	return ftc
 }
 
 // SetNillableStr sets the "str" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableStr(ss *sql.NullString) *FieldTypeCreate {
+func (ftc *FieldTypeCreate) SetNillableStr(ss *databasesql.NullString) *FieldTypeCreate {
 	if ss != nil {
 		ftc.SetStr(*ss)
 	}
@@ -486,7 +486,7 @@ func (ftc *FieldTypeCreate) SetNillableStr(ss *sql.NullString) *FieldTypeCreate 
 }
 
 // SetNullStr sets the "null_str" field.
-func (ftc *FieldTypeCreate) SetNullStr(ss *sql.NullString) *FieldTypeCreate {
+func (ftc *FieldTypeCreate) SetNullStr(ss *databasesql.NullString) *FieldTypeCreate {
 	ftc.mutation.SetNullStr(ss)
 	return ftc
 }
@@ -540,13 +540,13 @@ func (ftc *FieldTypeCreate) SetNillableNullActive(s *schema.Status) *FieldTypeCr
 }
 
 // SetDeleted sets the "deleted" field.
-func (ftc *FieldTypeCreate) SetDeleted(sb *sql.NullBool) *FieldTypeCreate {
+func (ftc *FieldTypeCreate) SetDeleted(sb *databasesql.NullBool) *FieldTypeCreate {
 	ftc.mutation.SetDeleted(sb)
 	return ftc
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (ftc *FieldTypeCreate) SetDeletedAt(st *sql.NullTime) *FieldTypeCreate {
+func (ftc *FieldTypeCreate) SetDeletedAt(st *databasesql.NullTime) *FieldTypeCreate {
 	ftc.mutation.SetDeletedAt(st)
 	return ftc
 }
@@ -570,7 +570,7 @@ func (ftc *FieldTypeCreate) SetIP(n net.IP) *FieldTypeCreate {
 }
 
 // SetNullInt64 sets the "null_int64" field.
-func (ftc *FieldTypeCreate) SetNullInt64(si *sql.NullInt64) *FieldTypeCreate {
+func (ftc *FieldTypeCreate) SetNullInt64(si *databasesql.NullInt64) *FieldTypeCreate {
 	ftc.mutation.SetNullInt64(si)
 	return ftc
 }
@@ -646,7 +646,7 @@ func (ftc *FieldTypeCreate) SetNillableSchemaFloat32(s *schema.Float32) *FieldTy
 }
 
 // SetNullFloat sets the "null_float" field.
-func (ftc *FieldTypeCreate) SetNullFloat(sf *sql.NullFloat64) *FieldTypeCreate {
+func (ftc *FieldTypeCreate) SetNullFloat(sf *databasesql.NullFloat64) *FieldTypeCreate {
 	ftc.mutation.SetNullFloat(sf)
 	return ftc
 }

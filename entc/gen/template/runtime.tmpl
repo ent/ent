@@ -67,19 +67,17 @@ backwards-compatibility with previous versions of ent.
 
 {{/* register schema handlers to type packages */}}
 {{ define "runtime/register" }}
-import (
-	{{- with $.Config.Schema }}
-		"{{ . }}"
-	{{- end }}
-	{{- range $n := $.Nodes }}
-		{{ $n.PackageAlias }} "{{ $.Config.Package }}/{{ $n.PackageDir }}"
-		{{- /* Import external packages */}}
-		{{- template "import/types" $n }}
-	{{- end }}
-
-	"entgo.io/ent"
-	"entgo.io/ent/privacy"
-)
+{{- renewImports }}
+{{- with $.Config.Schema }}
+	{{ addPath . }}
+{{- end }}
+{{- range $n := $.Nodes }}
+	{{ addImport $n.PackageAlias (printf "%s/%s" $.Config.Package $n.PackageDir) }}
+	{{- /* Import external packages */}}
+	{{- template "import/types" $n }}
+{{- end }}
+{{- addPath "entgo.io/ent" "entgo.io/ent/privacy" }}
+{{- template "import/print"}}
 
 
 // The init function reads all schema descriptors with runtime code

@@ -7,21 +7,21 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgeschema/ent/friendship"
-	"entgo.io/ent/entc/integration/edgeschema/ent/group"
-	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
-	"entgo.io/ent/entc/integration/edgeschema/ent/role"
-	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
-	"entgo.io/ent/entc/integration/edgeschema/ent/user"
-	"entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
-	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	friendship "entgo.io/ent/entc/integration/edgeschema/ent/friendship"
+	group "entgo.io/ent/entc/integration/edgeschema/ent/group"
+	predicate "entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	role "entgo.io/ent/entc/integration/edgeschema/ent/role"
+	tweet "entgo.io/ent/entc/integration/edgeschema/ent/tweet"
+	user "entgo.io/ent/entc/integration/edgeschema/ent/user"
+	usergroup "entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
+	usertweet "entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
+	field "entgo.io/ent/schema/field"
 )
 
 // UserUpdate is the builder for updating User entities.

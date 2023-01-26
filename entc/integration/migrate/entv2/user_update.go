@@ -7,19 +7,19 @@
 package entv2
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"time"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	time "time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/dialect/sql/sqljson"
-	"entgo.io/ent/entc/integration/migrate/entv2/car"
-	"entgo.io/ent/entc/integration/migrate/entv2/pet"
-	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
-	"entgo.io/ent/entc/integration/migrate/entv2/user"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	sqljson "entgo.io/ent/dialect/sql/sqljson"
+	car "entgo.io/ent/entc/integration/migrate/entv2/car"
+	pet "entgo.io/ent/entc/integration/migrate/entv2/pet"
+	predicate "entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	user "entgo.io/ent/entc/integration/migrate/entv2/user"
+	field "entgo.io/ent/schema/field"
 )
 
 // UserUpdate is the builder for updating User entities.

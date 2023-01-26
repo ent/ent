@@ -7,18 +7,18 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"time"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	time "time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
-	"entgo.io/ent/entc/integration/edgeschema/ent/role"
-	"entgo.io/ent/entc/integration/edgeschema/ent/roleuser"
-	"entgo.io/ent/entc/integration/edgeschema/ent/user"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	predicate "entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	role "entgo.io/ent/entc/integration/edgeschema/ent/role"
+	roleuser "entgo.io/ent/entc/integration/edgeschema/ent/roleuser"
+	user "entgo.io/ent/entc/integration/edgeschema/ent/user"
+	field "entgo.io/ent/schema/field"
 )
 
 // RoleUserUpdate is the builder for updating RoleUser entities.

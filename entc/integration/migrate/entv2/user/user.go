@@ -7,8 +7,8 @@
 package user
 
 import (
-	"fmt"
-	"time"
+	fmt "fmt"
+	time "time"
 )
 
 const (

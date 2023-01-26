@@ -7,15 +7,15 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/customid/ent/intsid"
-	"entgo.io/ent/entc/integration/customid/sid"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	intsid "entgo.io/ent/entc/integration/customid/ent/intsid"
+	sid "entgo.io/ent/entc/integration/customid/sid"
+	field "entgo.io/ent/schema/field"
 )
 
 // IntSIDCreate is the builder for creating a IntSID entity.

@@ -13,6 +13,8 @@ import (
 	"net/url"
 
 	"entgo.io/ent"
+	"entgo.io/ent/entc/integration/json/valobj"
+	anothervalobj "entgo.io/ent/entc/integration/json/valobj/valobj"
 	"entgo.io/ent/schema/field"
 )
 
@@ -47,6 +49,12 @@ func (User) Fields() []ent.Field {
 			Optional(),
 		field.JSON("addr", Addr{}).
 			Sensitive().
+			Optional(),
+		field.JSON("valobj", valobj.ValObj("")).
+			Optional(),
+		field.JSON("another_valobj", anothervalobj.AnotherValObj("")).
+			Optional(),
+		field.JSON("another_valobjs", []anothervalobj.AnotherValObj{}).
 			Optional(),
 	}
 }

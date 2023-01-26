@@ -7,19 +7,19 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"time"
+	context "context"
+	errors "errors"
+	fmt "fmt"
+	time "time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/ent/file"
-	"entgo.io/ent/entc/integration/ent/group"
-	"entgo.io/ent/entc/integration/ent/groupinfo"
-	"entgo.io/ent/entc/integration/ent/predicate"
-	"entgo.io/ent/entc/integration/ent/user"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	file "entgo.io/ent/entc/integration/ent/file"
+	group "entgo.io/ent/entc/integration/ent/group"
+	groupinfo "entgo.io/ent/entc/integration/ent/groupinfo"
+	predicate "entgo.io/ent/entc/integration/ent/predicate"
+	user "entgo.io/ent/entc/integration/ent/user"
+	field "entgo.io/ent/schema/field"
 )
 
 // GroupUpdate is the builder for updating Group entities.

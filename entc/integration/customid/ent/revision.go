@@ -7,11 +7,11 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/customid/ent/revision"
+	revision "entgo.io/ent/entc/integration/customid/ent/revision"
 )
 
 // Revision is the model entity for the Revision schema.

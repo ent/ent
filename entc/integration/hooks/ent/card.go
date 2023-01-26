@@ -7,13 +7,13 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
-	"time"
+	"database/sql"
+	fmt "fmt"
+	strings "strings"
+	time "time"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/hooks/ent/card"
-	"entgo.io/ent/entc/integration/hooks/ent/user"
+	card "entgo.io/ent/entc/integration/hooks/ent/card"
+	user "entgo.io/ent/entc/integration/hooks/ent/user"
 )
 
 // Card is the model entity for the Card schema.

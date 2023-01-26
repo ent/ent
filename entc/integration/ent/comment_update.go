@@ -7,16 +7,16 @@
 package ent
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	context "context"
+	errors "errors"
+	fmt "fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/ent/comment"
-	"entgo.io/ent/entc/integration/ent/predicate"
-	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
-	"entgo.io/ent/schema/field"
+	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
+	comment "entgo.io/ent/entc/integration/ent/comment"
+	predicate "entgo.io/ent/entc/integration/ent/predicate"
+	dir "entgo.io/ent/entc/integration/ent/schema/dir"
+	field "entgo.io/ent/schema/field"
 )
 
 // CommentUpdate is the builder for updating Comment entities.
@@ -107,13 +107,13 @@ func (cu *CommentUpdate) ClearTable() *CommentUpdate {
 }
 
 // SetDir sets the "dir" field.
-func (cu *CommentUpdate) SetDir(s schemadir.Dir) *CommentUpdate {
+func (cu *CommentUpdate) SetDir(s dir.Dir) *CommentUpdate {
 	cu.mutation.SetDir(s)
 	return cu
 }
 
 // SetNillableDir sets the "dir" field if the given value is not nil.
-func (cu *CommentUpdate) SetNillableDir(s *schemadir.Dir) *CommentUpdate {
+func (cu *CommentUpdate) SetNillableDir(s *dir.Dir) *CommentUpdate {
 	if s != nil {
 		cu.SetDir(*s)
 	}
@@ -337,13 +337,13 @@ func (cuo *CommentUpdateOne) ClearTable() *CommentUpdateOne {
 }
 
 // SetDir sets the "dir" field.
-func (cuo *CommentUpdateOne) SetDir(s schemadir.Dir) *CommentUpdateOne {
+func (cuo *CommentUpdateOne) SetDir(s dir.Dir) *CommentUpdateOne {
 	cuo.mutation.SetDir(s)
 	return cuo
 }
 
 // SetNillableDir sets the "dir" field if the given value is not nil.
-func (cuo *CommentUpdateOne) SetNillableDir(s *schemadir.Dir) *CommentUpdateOne {
+func (cuo *CommentUpdateOne) SetNillableDir(s *dir.Dir) *CommentUpdateOne {
 	if s != nil {
 		cuo.SetDir(*s)
 	}
