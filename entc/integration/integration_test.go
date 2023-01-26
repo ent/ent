@@ -1653,7 +1653,7 @@ func DefaultValue(t *testing.T, client *ent.Client) {
 		SaveX(ctx)
 	require.Equal(t, usr.Role, user.Role("user"))
 
-	b := time.Now().Add(-1 * time.Hour)
+	b := time.Now().Add(-time.Hour)
 	n1 := client.Node.Create().SetValue(1).SetUpdatedAt(b).SaveX(ctx)
 	require.NotNil(t, n1.UpdatedAt)
 	require.WithinDuration(t, b, *n1.UpdatedAt, time.Second)
