@@ -54,6 +54,7 @@ func TestMySQL(t *testing.T) {
 				Ints(t, client)
 				Strings(t, client)
 				Predicates(t, client)
+				Order(t, client)
 			}
 			Scan(t, client)
 		})
@@ -88,6 +89,7 @@ func TestMaria(t *testing.T) {
 			RawMessage(t, client)
 			Predicates(t, client)
 			Scan(t, client)
+			Order(t, client)
 		})
 	}
 }
@@ -120,6 +122,7 @@ func TestPostgres(t *testing.T) {
 			RawMessage(t, client)
 			Predicates(t, client)
 			Scan(t, client)
+			Order(t, client)
 		})
 	}
 }
@@ -141,6 +144,7 @@ func TestSQLite(t *testing.T) {
 	RawMessage(t, client)
 	Predicates(t, client)
 	Scan(t, client)
+	Order(t, client)
 }
 
 func Ints(t *testing.T, client *ent.Client) {
@@ -599,6 +603,49 @@ func Predicates(t *testing.T, client *ent.Client) {
 		}).CountX(ctx)
 		require.Equal(t, 4, n)
 	})
+}
+
+func Order(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	client.User.Delete().ExecX(ctx)
+	client.User.CreateBulk(
+		client.User.Create().SetT(&schema.T{I: 1, Li: []int{1, 1, 1}}),
+		client.User.Create().SetT(&schema.T{I: 2, Li: []int{2, 2}}),
+		client.User.Create().SetT(&schema.T{I: 3, Li: []int{3}}),
+	).ExecX(ctx)
+
+	users := client.User.Query().
+		Order(
+			sqljson.OrderValue(user.FieldT, sqljson.Path("i")),
+		).
+		// PostgreSQL doesn't support ORDER BY
+		// expressions with SELECT DISTINCT.
+		Unique(false).
+		AllX(ctx)
+	require.Equal(t, 1, users[0].T.I)
+	require.Equal(t, 2, users[1].T.I)
+	require.Equal(t, 3, users[2].T.I)
+
+	users = client.User.Query().
+		Order(
+			sqljson.OrderValueDesc(user.FieldT, sqljson.Path("i")),
+		).
+		Unique(false).
+		AllX(ctx)
+	require.Equal(t, 3, users[0].T.I)
+	require.Equal(t, 2, users[1].T.I)
+	require.Equal(t, 1, users[2].T.I)
+
+	// Order by array length.
+	users = client.User.Query().
+		Order(
+			sqljson.OrderLenDesc(user.FieldT, sqljson.Path("li")),
+		).
+		Unique(false).
+		AllX(ctx)
+	require.Len(t, users[0].T.Li, 3)
+	require.Len(t, users[1].T.Li, 2)
+	require.Len(t, users[2].T.Li, 1)
 }
 
 func Scan(t *testing.T, client *ent.Client) {

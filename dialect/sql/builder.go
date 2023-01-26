@@ -2733,6 +2733,14 @@ func Desc(column string) string {
 	return b.String()
 }
 
+// DescExpr returns a new expression where the DESC suffix is added.
+func DescExpr(x Querier) Querier {
+	return ExprFunc(func(b *Builder) {
+		b.Join(x)
+		b.WriteString(" DESC")
+	})
+}
+
 // OrderBy appends the `ORDER BY` clause to the `SELECT` statement.
 func (s *Selector) OrderBy(columns ...string) *Selector {
 	for i := range columns {

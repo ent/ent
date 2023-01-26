@@ -383,6 +383,15 @@ func TestWritePath(t *testing.T) {
 			wantQuery: "SELECT * FROM `users` WHERE JSON_EXTRACT(`a`, '$.\"foo-bar\".\"3000\"') IN (?, ?)",
 			wantArgs:  []any{1, 2},
 		},
+		{
+			input: sql.Dialect(dialect.MySQL).
+				Select("*").
+				From(sql.Table("users")).
+				OrderExpr(
+					sqljson.LenPath("a", sqljson.Path("b")),
+				),
+			wantQuery: "SELECT * FROM `users` ORDER BY JSON_LENGTH(`a`, '$.b')",
+		},
 	}
 	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
