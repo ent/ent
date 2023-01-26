@@ -304,8 +304,6 @@ func Sanity(t *testing.T, client *ent.Client) {
 		require.False(client.Pet.Query().Where(pet.NameEqualFold("A_\\%")).ExistX(ctx))
 		require.False(client.Pet.Query().Where(pet.NameEqualFold("A%")).ExistX(ctx))
 	})
-
-	require.NotNil(node.UpdateDefaultUpdatedAt) // issue #3217
 }
 
 func Upsert(t *testing.T, client *ent.Client) {
@@ -1654,6 +1652,14 @@ func DefaultValue(t *testing.T, client *ent.Client) {
 		SetName("dario").
 		SaveX(ctx)
 	require.Equal(t, usr.Role, user.Role("user"))
+
+	b := time.Now().Add(-1 * time.Hour)
+	n1 := client.Node.Create().SetValue(1).SetUpdatedAt(b).SaveX(ctx)
+	require.NotNil(t, n1.UpdatedAt)
+	require.WithinDuration(t, b, *n1.UpdatedAt, time.Second)
+	n1 = n1.Update().SetValue(2).SaveX(ctx)
+	require.NotNil(t, n1.UpdatedAt)
+	require.False(t, b.Equal(*n1.UpdatedAt))
 }
 
 func ImmutableValue(t *testing.T, client *ent.Client) {
