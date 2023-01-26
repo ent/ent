@@ -2367,7 +2367,25 @@ func (s *Selector) Table() *SelectTable {
 	if len(s.from) == 0 {
 		return nil
 	}
-	return s.from[0].(*SelectTable)
+	return selectTable(s.from[0])
+}
+
+// selectTable returns a *SelectTable from the given TableView.
+func selectTable(tb TableView) *SelectTable {
+	if tb == nil {
+		return nil
+	}
+	switch view := tb.(type) {
+	case *SelectTable:
+		return view
+	case *Selector:
+		if len(view.from) == 0 {
+			return nil
+		}
+		return selectTable(view.from[0])
+	default:
+		panic(fmt.Sprintf("unhandled TableView type %T", tb))
+	}
 }
 
 // TableName returns the name of the selected table or alias of selector.
