@@ -100,16 +100,22 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []any
 	{{- $f := $.Scope.Field -}}
 	{{- $ret := $.Scope.Rec -}}
 	{{- $field := $f.StructField }}{{ with $.Scope.StructField }}{{ $field = . }}{{ end -}}
+	{{- $scantype := $f.ScanType -}}
 	{{- if $f.IsJSON -}}
-		if value, ok := values[{{ $i }}].(*{{ $f.ScanType }}); !ok {
+		if value, ok := values[{{ $i }}].(*{{ $scantype }}); !ok {
 			return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[{{ $i }}])
+		{{- if hasPrefix $scantype "[]" }}
 		} else if value != nil && len(*value) > 0 {
 			if err := json.Unmarshal(*value, &{{ $ret }}.{{ $field }}); err != nil {
 				return fmt.Errorf("unmarshal field {{ $f.Name }}: %w", err)
 			}
 		}
-	{{- else }}
-		{{- $scantype := $f.ScanType -}}
+		{{- else }}
+		} else if value != nil {
+			{{ $ret }}.{{ $field }} = {{ if (not $f.Type.RType.IsPtr) }}*{{end}}value
+		}
+		{{- end }}
+	{{- else -}}
 		if value, ok := values[{{ $i }}].(*{{ $scantype }}); !ok {
 			return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[{{ $i }}])
 		{{- if hasPrefix $scantype "sql.Null" }}
