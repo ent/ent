@@ -198,7 +198,7 @@ pedro, err := client.Pet.	// PetClient.
 Filter using predicates.
 
 ```go
-n, err := client.User.			// UserClient.
+n, err := client.Pet.			// PetClient.
 	Update().					// Pet update builder.
 	Where(						//
 		user.Or(				// (age >= 30 OR name = "bar") 
@@ -214,7 +214,7 @@ n, err := client.User.			// UserClient.
 Query edge-predicates.
 
 ```go
-n, err := client.User.			// UserClient.
+n, err := client.Pet.			// PetClient.
 	Update().					// Pet update builder.
 	Where(						// 
 		user.HasFriendsWith(	// UserHasFriendsWith (
