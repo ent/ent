@@ -411,6 +411,12 @@ func (ruo *RelationshipUpdateOne) ClearInfo() *RelationshipUpdateOne {
 	return ruo
 }
 
+// Where appends a list predicates to the RelationshipUpdate builder.
+func (ruo *RelationshipUpdateOne) Where(ps ...predicate.Relationship) *RelationshipUpdateOne {
+	ruo.mutation.Where(ps...)
+	return ruo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (ruo *RelationshipUpdateOne) Select(field string, fields ...string) *RelationshipUpdateOne {

@@ -318,6 +318,12 @@ func (isuo *IntSIDUpdateOne) RemoveChildren(i ...*IntSID) *IntSIDUpdateOne {
 	return isuo.RemoveChildIDs(ids...)
 }
 
+// Where appends a list predicates to the IntSIDUpdate builder.
+func (isuo *IntSIDUpdateOne) Where(ps ...predicate.IntSID) *IntSIDUpdateOne {
+	isuo.mutation.Where(ps...)
+	return isuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (isuo *IntSIDUpdateOne) Select(field string, fields ...string) *IntSIDUpdateOne {

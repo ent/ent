@@ -109,6 +109,12 @@ type {{ $onebuilder }} struct {
 	{{ template "update/edges" . }}
 {{ end }}
 
+// Where appends a list predicates to the {{ $builder }} builder.
+func ({{ $receiver }} *{{ $onebuilder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $onebuilder }} {
+	{{ $mutation }}.Where(ps...)
+	return {{ $receiver }}
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func ({{ $receiver }} *{{ $onebuilder }}) Select(field string, fields ...string) *{{ $onebuilder }} {

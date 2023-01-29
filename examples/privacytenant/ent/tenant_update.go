@@ -134,6 +134,12 @@ func (tuo *TenantUpdateOne) Mutation() *TenantMutation {
 	return tuo.mutation
 }
 
+// Where appends a list predicates to the TenantUpdate builder.
+func (tuo *TenantUpdateOne) Where(ps ...predicate.Tenant) *TenantUpdateOne {
+	tuo.mutation.Where(ps...)
+	return tuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (tuo *TenantUpdateOne) Select(field string, fields ...string) *TenantUpdateOne {

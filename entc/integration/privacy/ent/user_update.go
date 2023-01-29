@@ -423,6 +423,12 @@ func (uuo *UserUpdateOne) RemoveTasks(t ...*Task) *UserUpdateOne {
 	return uuo.RemoveTaskIDs(ids...)
 }
 
+// Where appends a list predicates to the UserUpdate builder.
+func (uuo *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
+	uuo.mutation.Where(ps...)
+	return uuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (uuo *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {

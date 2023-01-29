@@ -262,6 +262,12 @@ func (auo *AccountUpdateOne) RemoveToken(t ...*Token) *AccountUpdateOne {
 	return auo.RemoveTokenIDs(ids...)
 }
 
+// Where appends a list predicates to the AccountUpdate builder.
+func (auo *AccountUpdateOne) Where(ps ...predicate.Account) *AccountUpdateOne {
+	auo.mutation.Where(ps...)
+	return auo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (auo *AccountUpdateOne) Select(field string, fields ...string) *AccountUpdateOne {

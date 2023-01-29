@@ -106,6 +106,12 @@ func (ouo *OtherUpdateOne) Mutation() *OtherMutation {
 	return ouo.mutation
 }
 
+// Where appends a list predicates to the OtherUpdate builder.
+func (ouo *OtherUpdateOne) Where(ps ...predicate.Other) *OtherUpdateOne {
+	ouo.mutation.Where(ps...)
+	return ouo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (ouo *OtherUpdateOne) Select(field string, fields ...string) *OtherUpdateOne {

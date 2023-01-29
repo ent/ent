@@ -223,6 +223,12 @@ func (cuo *CarUpdateOne) ClearOwner() *CarUpdateOne {
 	return cuo
 }
 
+// Where appends a list predicates to the CarUpdate builder.
+func (cuo *CarUpdateOne) Where(ps ...predicate.Car) *CarUpdateOne {
+	cuo.mutation.Where(ps...)
+	return cuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (cuo *CarUpdateOne) Select(field string, fields ...string) *CarUpdateOne {

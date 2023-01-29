@@ -1007,6 +1007,15 @@ func Delete(t *testing.T, client *ent.Client) {
 	client.Group.DeleteOne(hub).
 		Where(group.ExpireLT(time.Now())).
 		ExecX(ctx)
+
+	// The behavior described above it also applied to UpdateOne.
+	hub = client.Group.Create().SetInfo(info).SetName("GitHub").SetExpire(time.Now().Add(time.Hour)).SaveX(ctx)
+	err = hub.Update().
+		SetActive(false).
+		SetExpire(time.Time{}).
+		Where(group.ExpireLT(time.Now())). // Expired.
+		Exec(ctx)
+	require.True(ent.IsNotFound(err))
 }
 
 func Relation(t *testing.T, client *ent.Client) {

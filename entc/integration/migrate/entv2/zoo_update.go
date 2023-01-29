@@ -106,6 +106,12 @@ func (zuo *ZooUpdateOne) Mutation() *ZooMutation {
 	return zuo.mutation
 }
 
+// Where appends a list predicates to the ZooUpdate builder.
+func (zuo *ZooUpdateOne) Where(ps ...predicate.Zoo) *ZooUpdateOne {
+	zuo.mutation.Where(ps...)
+	return zuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (zuo *ZooUpdateOne) Select(field string, fields ...string) *ZooUpdateOne {

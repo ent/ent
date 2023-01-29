@@ -292,6 +292,12 @@ func (ttuo *TweetTagUpdateOne) ClearTweet() *TweetTagUpdateOne {
 	return ttuo
 }
 
+// Where appends a list predicates to the TweetTagUpdate builder.
+func (ttuo *TweetTagUpdateOne) Where(ps ...predicate.TweetTag) *TweetTagUpdateOne {
+	ttuo.mutation.Where(ps...)
+	return ttuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (ttuo *TweetTagUpdateOne) Select(field string, fields ...string) *TweetTagUpdateOne {

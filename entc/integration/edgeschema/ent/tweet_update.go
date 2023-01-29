@@ -801,6 +801,12 @@ func (tuo *TweetUpdateOne) RemoveTweetTags(t ...*TweetTag) *TweetUpdateOne {
 	return tuo.RemoveTweetTagIDs(ids...)
 }
 
+// Where appends a list predicates to the TweetUpdate builder.
+func (tuo *TweetUpdateOne) Where(ps ...predicate.Tweet) *TweetUpdateOne {
+	tuo.mutation.Where(ps...)
+	return tuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (tuo *TweetUpdateOne) Select(field string, fields ...string) *TweetUpdateOne {

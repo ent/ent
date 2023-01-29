@@ -319,6 +319,12 @@ func (duo *DeviceUpdateOne) RemoveSessions(s ...*Session) *DeviceUpdateOne {
 	return duo.RemoveSessionIDs(ids...)
 }
 
+// Where appends a list predicates to the DeviceUpdate builder.
+func (duo *DeviceUpdateOne) Where(ps ...predicate.Device) *DeviceUpdateOne {
+	duo.mutation.Where(ps...)
+	return duo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (duo *DeviceUpdateOne) Select(field string, fields ...string) *DeviceUpdateOne {

@@ -193,6 +193,83 @@ pedro, err := client.Pet.	// PetClient.
 	Save(ctx)				// Save and return.
 ```
 
+
+#### Update One With Condition
+
+In some projects, the "update many" operation is not allowed and is blocked using hooks. However, there is still a need
+to update a single entity by its ID while ensuring it meets a specific condition. In this case, you can use the `Where`
+option as follows:
+
+<Tabs>
+<TabItem label="By ID" value="by-id" default>
+
+```go
+err := client.Todo.
+    UpdateOneID(id).
+    SetStatus(todo.StatusDone).
+    AddVersion(1).
+    Where(
+        todo.Version(currentVersion),
+    ).
+    Exec(ctx)
+switch {
+// If the entity does not meet a specific condition,
+// the operation will return an "ent.NotFoundError".
+case ent.IsNotFound(err):
+    fmt.Println("todo item was not found")
+// Any other error.
+case err != nil:
+    fmt.Println("update error:", err)
+}
+```
+</TabItem>
+<TabItem label="By Entity" value="by-entity" default>
+
+```go
+err := client.Todo.
+    UpdateOne(node).
+    SetStatus(todo.StatusDone).
+    AddVersion(1).
+    Where(
+        todo.Version(currentVersion),
+    ).
+    Exec(ctx)
+switch {
+// If the entity does not meet a specific condition,
+// the operation will return an "ent.NotFoundError".
+case ent.IsNotFound(err):
+    fmt.Println("todo item was not found")
+// Any other error.
+case err != nil:
+    fmt.Println("update error:", err)
+}
+```
+</TabItem>
+<TabItem label="Update Directly" value="update-directly" default>
+
+```go
+firstTodo, err = firstTodo.
+    Update().
+    SetStatus(todo.StatusDone).
+    AddVersion(1).
+    Where(
+        // Ensure the current version matches the one in the database.
+        todo.Version(firstTodo.Version),
+    ).
+    Save(ctx)
+switch {
+// If the entity does not meet a specific condition,
+// the operation will return an "ent.NotFoundError".
+case ent.IsNotFound(err):
+    fmt.Println("todo item was not found")
+// Any other error.
+case err != nil:
+    fmt.Println("update error:", err)
+}
+```
+</TabItem>
+</Tabs>
+
 ## Update Many
 
 Filter using predicates.

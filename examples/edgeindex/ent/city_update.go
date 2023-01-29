@@ -248,6 +248,12 @@ func (cuo *CityUpdateOne) RemoveStreets(s ...*Street) *CityUpdateOne {
 	return cuo.RemoveStreetIDs(ids...)
 }
 
+// Where appends a list predicates to the CityUpdate builder.
+func (cuo *CityUpdateOne) Where(ps ...predicate.City) *CityUpdateOne {
+	cuo.mutation.Where(ps...)
+	return cuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (cuo *CityUpdateOne) Select(field string, fields ...string) *CityUpdateOne {

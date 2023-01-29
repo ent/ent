@@ -245,6 +245,12 @@ func (ctuo *CustomTypeUpdateOne) Mutation() *CustomTypeMutation {
 	return ctuo.mutation
 }
 
+// Where appends a list predicates to the CustomTypeUpdate builder.
+func (ctuo *CustomTypeUpdateOne) Where(ps ...predicate.CustomType) *CustomTypeUpdateOne {
+	ctuo.mutation.Where(ps...)
+	return ctuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (ctuo *CustomTypeUpdateOne) Select(field string, fields ...string) *CustomTypeUpdateOne {

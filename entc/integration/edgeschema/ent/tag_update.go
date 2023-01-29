@@ -651,6 +651,12 @@ func (tuo *TagUpdateOne) RemoveGroupTags(g ...*GroupTag) *TagUpdateOne {
 	return tuo.RemoveGroupTagIDs(ids...)
 }
 
+// Where appends a list predicates to the TagUpdate builder.
+func (tuo *TagUpdateOne) Where(ps ...predicate.Tag) *TagUpdateOne {
+	tuo.mutation.Where(ps...)
+	return tuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (tuo *TagUpdateOne) Select(field string, fields ...string) *TagUpdateOne {

@@ -265,6 +265,12 @@ func (buo *BlogUpdateOne) RemoveAdmins(u ...*User) *BlogUpdateOne {
 	return buo.RemoveAdminIDs(ids...)
 }
 
+// Where appends a list predicates to the BlogUpdate builder.
+func (buo *BlogUpdateOne) Where(ps ...predicate.Blog) *BlogUpdateOne {
+	buo.mutation.Where(ps...)
+	return buo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (buo *BlogUpdateOne) Select(field string, fields ...string) *BlogUpdateOne {

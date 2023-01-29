@@ -298,6 +298,12 @@ func (ruuo *RoleUserUpdateOne) ClearUser() *RoleUserUpdateOne {
 	return ruuo
 }
 
+// Where appends a list predicates to the RoleUserUpdate builder.
+func (ruuo *RoleUserUpdateOne) Where(ps ...predicate.RoleUser) *RoleUserUpdateOne {
+	ruuo.mutation.Where(ps...)
+	return ruuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (ruuo *RoleUserUpdateOne) Select(field string, fields ...string) *RoleUserUpdateOne {

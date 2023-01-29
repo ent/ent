@@ -244,6 +244,12 @@ func (muo *MediaUpdateOne) Mutation() *MediaMutation {
 	return muo.mutation
 }
 
+// Where appends a list predicates to the MediaUpdate builder.
+func (muo *MediaUpdateOne) Where(ps ...predicate.Media) *MediaUpdateOne {
+	muo.mutation.Where(ps...)
+	return muo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (muo *MediaUpdateOne) Select(field string, fields ...string) *MediaUpdateOne {

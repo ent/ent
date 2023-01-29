@@ -115,6 +115,12 @@ func (auo *APIUpdateOne) Mutation() *APIMutation {
 	return auo.mutation
 }
 
+// Where appends a list predicates to the APIUpdate builder.
+func (auo *APIUpdateOne) Where(ps ...predicate.Api) *APIUpdateOne {
+	auo.mutation.Where(ps...)
+	return auo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (auo *APIUpdateOne) Select(field string, fields ...string) *APIUpdateOne {

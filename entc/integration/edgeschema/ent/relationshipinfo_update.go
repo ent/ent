@@ -121,6 +121,12 @@ func (riuo *RelationshipInfoUpdateOne) Mutation() *RelationshipInfoMutation {
 	return riuo.mutation
 }
 
+// Where appends a list predicates to the RelationshipInfoUpdate builder.
+func (riuo *RelationshipInfoUpdateOne) Where(ps ...predicate.RelationshipInfo) *RelationshipInfoUpdateOne {
+	riuo.mutation.Where(ps...)
+	return riuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (riuo *RelationshipInfoUpdateOne) Select(field string, fields ...string) *RelationshipInfoUpdateOne {

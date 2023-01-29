@@ -189,6 +189,12 @@ func (iuo *ItemUpdateOne) Mutation() *ItemMutation {
 	return iuo.mutation
 }
 
+// Where appends a list predicates to the ItemUpdate builder.
+func (iuo *ItemUpdateOne) Where(ps ...predicate.Item) *ItemUpdateOne {
+	iuo.mutation.Where(ps...)
+	return iuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (iuo *ItemUpdateOne) Select(field string, fields ...string) *ItemUpdateOne {
