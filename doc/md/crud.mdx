@@ -199,7 +199,7 @@ Filter using predicates.
 
 ```go
 n, err := client.User.			// UserClient.
-	Update().					// Pet update builder.
+	Update().					// User update builder.
 	Where(						//
 		user.Or(				// (age >= 30 OR name = "bar") 
 			user.AgeGT(30), 	//
@@ -215,7 +215,7 @@ Query edge-predicates.
 
 ```go
 n, err := client.User.			// UserClient.
-	Update().					// Pet update builder.
+	Update().					// User update builder.
 	Where(						// 
 		user.HasFriendsWith(	// UserHasFriendsWith (
 			user.Or(			//   age = 20
