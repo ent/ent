@@ -207,6 +207,12 @@ func (suo *StreetUpdateOne) ClearCity() *StreetUpdateOne {
 	return suo
 }
 
+// Where appends a list predicates to the StreetUpdate builder.
+func (suo *StreetUpdateOne) Where(ps ...predicate.Street) *StreetUpdateOne {
+	suo.mutation.Where(ps...)
+	return suo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (suo *StreetUpdateOne) Select(field string, fields ...string) *StreetUpdateOne {

@@ -193,6 +193,12 @@ func (suo *SessionUpdateOne) ClearDevice() *SessionUpdateOne {
 	return suo
 }
 
+// Where appends a list predicates to the SessionUpdate builder.
+func (suo *SessionUpdateOne) Where(ps ...predicate.Session) *SessionUpdateOne {
+	suo.mutation.Where(ps...)
+	return suo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (suo *SessionUpdateOne) Select(field string, fields ...string) *SessionUpdateOne {

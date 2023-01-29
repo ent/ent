@@ -140,6 +140,12 @@ func (luo *LicenseUpdateOne) Mutation() *LicenseMutation {
 	return luo.mutation
 }
 
+// Where appends a list predicates to the LicenseUpdate builder.
+func (luo *LicenseUpdateOne) Where(ps ...predicate.License) *LicenseUpdateOne {
+	luo.mutation.Where(ps...)
+	return luo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (luo *LicenseUpdateOne) Select(field string, fields ...string) *LicenseUpdateOne {

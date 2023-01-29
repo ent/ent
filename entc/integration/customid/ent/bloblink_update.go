@@ -298,6 +298,12 @@ func (bluo *BlobLinkUpdateOne) ClearLink() *BlobLinkUpdateOne {
 	return bluo
 }
 
+// Where appends a list predicates to the BlobLinkUpdate builder.
+func (bluo *BlobLinkUpdateOne) Where(ps ...predicate.BlobLink) *BlobLinkUpdateOne {
+	bluo.mutation.Where(ps...)
+	return bluo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (bluo *BlobLinkUpdateOne) Select(field string, fields ...string) *BlobLinkUpdateOne {

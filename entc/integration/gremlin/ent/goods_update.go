@@ -101,6 +101,12 @@ func (guo *GoodsUpdateOne) Mutation() *GoodsMutation {
 	return guo.mutation
 }
 
+// Where appends a list predicates to the GoodsUpdate builder.
+func (guo *GoodsUpdateOne) Where(ps ...predicate.Goods) *GoodsUpdateOne {
+	guo.mutation.Where(ps...)
+	return guo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (guo *GoodsUpdateOne) Select(field string, fields ...string) *GoodsUpdateOne {

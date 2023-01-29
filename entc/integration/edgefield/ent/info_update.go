@@ -226,6 +226,12 @@ func (iuo *InfoUpdateOne) ClearUser() *InfoUpdateOne {
 	return iuo
 }
 
+// Where appends a list predicates to the InfoUpdate builder.
+func (iuo *InfoUpdateOne) Where(ps ...predicate.Info) *InfoUpdateOne {
+	iuo.mutation.Where(ps...)
+	return iuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (iuo *InfoUpdateOne) Select(field string, fields ...string) *InfoUpdateOne {

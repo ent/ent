@@ -460,6 +460,12 @@ func (cuo *CardUpdateOne) RemoveSpec(s ...*Spec) *CardUpdateOne {
 	return cuo.RemoveSpecIDs(ids...)
 }
 
+// Where appends a list predicates to the CardUpdate builder.
+func (cuo *CardUpdateOne) Where(ps ...predicate.Card) *CardUpdateOne {
+	cuo.mutation.Where(ps...)
+	return cuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (cuo *CardUpdateOne) Select(field string, fields ...string) *CardUpdateOne {

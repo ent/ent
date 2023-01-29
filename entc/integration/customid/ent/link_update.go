@@ -122,6 +122,12 @@ func (luo *LinkUpdateOne) Mutation() *LinkMutation {
 	return luo.mutation
 }
 
+// Where appends a list predicates to the LinkUpdate builder.
+func (luo *LinkUpdateOne) Where(ps ...predicate.Link) *LinkUpdateOne {
+	luo.mutation.Where(ps...)
+	return luo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (luo *LinkUpdateOne) Select(field string, fields ...string) *LinkUpdateOne {

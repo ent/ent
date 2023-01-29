@@ -292,6 +292,12 @@ func (ruo *RoleUpdateOne) RemoveUser(u ...*User) *RoleUpdateOne {
 	return ruo.RemoveUserIDs(ids...)
 }
 
+// Where appends a list predicates to the RoleUpdate builder.
+func (ruo *RoleUpdateOne) Where(ps ...predicate.Role) *RoleUpdateOne {
+	ruo.mutation.Where(ps...)
+	return ruo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (ruo *RoleUpdateOne) Select(field string, fields ...string) *RoleUpdateOne {

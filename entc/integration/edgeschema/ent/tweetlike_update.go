@@ -298,6 +298,12 @@ func (tluo *TweetLikeUpdateOne) ClearUser() *TweetLikeUpdateOne {
 	return tluo
 }
 
+// Where appends a list predicates to the TweetLikeUpdate builder.
+func (tluo *TweetLikeUpdateOne) Where(ps ...predicate.TweetLike) *TweetLikeUpdateOne {
+	tluo.mutation.Where(ps...)
+	return tluo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (tluo *TweetLikeUpdateOne) Select(field string, fields ...string) *TweetLikeUpdateOne {

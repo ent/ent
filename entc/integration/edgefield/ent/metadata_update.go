@@ -463,6 +463,12 @@ func (muo *MetadataUpdateOne) ClearParent() *MetadataUpdateOne {
 	return muo
 }
 
+// Where appends a list predicates to the MetadataUpdate builder.
+func (muo *MetadataUpdateOne) Where(ps ...predicate.Metadata) *MetadataUpdateOne {
+	muo.mutation.Where(ps...)
+	return muo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (muo *MetadataUpdateOne) Select(field string, fields ...string) *MetadataUpdateOne {

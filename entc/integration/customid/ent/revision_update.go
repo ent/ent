@@ -106,6 +106,12 @@ func (ruo *RevisionUpdateOne) Mutation() *RevisionMutation {
 	return ruo.mutation
 }
 
+// Where appends a list predicates to the RevisionUpdate builder.
+func (ruo *RevisionUpdateOne) Where(ps ...predicate.Revision) *RevisionUpdateOne {
+	ruo.mutation.Where(ps...)
+	return ruo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (ruo *RevisionUpdateOne) Select(field string, fields ...string) *RevisionUpdateOne {

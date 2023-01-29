@@ -212,6 +212,12 @@ func (fuo *FriendshipUpdateOne) Mutation() *FriendshipMutation {
 	return fuo.mutation
 }
 
+// Where appends a list predicates to the FriendshipUpdate builder.
+func (fuo *FriendshipUpdateOne) Where(ps ...predicate.Friendship) *FriendshipUpdateOne {
+	fuo.mutation.Where(ps...)
+	return fuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (fuo *FriendshipUpdateOne) Select(field string, fields ...string) *FriendshipUpdateOne {

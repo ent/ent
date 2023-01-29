@@ -136,6 +136,12 @@ func (miuo *MixinIDUpdateOne) Mutation() *MixinIDMutation {
 	return miuo.mutation
 }
 
+// Where appends a list predicates to the MixinIDUpdate builder.
+func (miuo *MixinIDUpdateOne) Where(ps ...predicate.MixinID) *MixinIDUpdateOne {
+	miuo.mutation.Where(ps...)
+	return miuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (miuo *MixinIDUpdateOne) Select(field string, fields ...string) *MixinIDUpdateOne {

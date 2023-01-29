@@ -152,6 +152,12 @@ func (ruo *RentalUpdateOne) Mutation() *RentalMutation {
 	return ruo.mutation
 }
 
+// Where appends a list predicates to the RentalUpdate builder.
+func (ruo *RentalUpdateOne) Where(ps ...predicate.Rental) *RentalUpdateOne {
+	ruo.mutation.Where(ps...)
+	return ruo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (ruo *RentalUpdateOne) Select(field string, fields ...string) *RentalUpdateOne {

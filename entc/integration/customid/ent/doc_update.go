@@ -490,6 +490,12 @@ func (duo *DocUpdateOne) RemoveRelated(d ...*Doc) *DocUpdateOne {
 	return duo.RemoveRelatedIDs(ids...)
 }
 
+// Where appends a list predicates to the DocUpdate builder.
+func (duo *DocUpdateOne) Where(ps ...predicate.Doc) *DocUpdateOne {
+	duo.mutation.Where(ps...)
+	return duo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (duo *DocUpdateOne) Select(field string, fields ...string) *DocUpdateOne {

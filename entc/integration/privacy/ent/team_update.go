@@ -388,6 +388,12 @@ func (tuo *TeamUpdateOne) RemoveUsers(u ...*User) *TeamUpdateOne {
 	return tuo.RemoveUserIDs(ids...)
 }
 
+// Where appends a list predicates to the TeamUpdate builder.
+func (tuo *TeamUpdateOne) Where(ps ...predicate.Team) *TeamUpdateOne {
+	tuo.mutation.Where(ps...)
+	return tuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (tuo *TeamUpdateOne) Select(field string, fields ...string) *TeamUpdateOne {

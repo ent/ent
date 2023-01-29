@@ -292,6 +292,12 @@ func (uguo *UserGroupUpdateOne) ClearGroup() *UserGroupUpdateOne {
 	return uguo
 }
 
+// Where appends a list predicates to the UserGroupUpdate builder.
+func (uguo *UserGroupUpdateOne) Where(ps ...predicate.UserGroup) *UserGroupUpdateOne {
+	uguo.mutation.Where(ps...)
+	return uguo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (uguo *UserGroupUpdateOne) Select(field string, fields ...string) *UserGroupUpdateOne {

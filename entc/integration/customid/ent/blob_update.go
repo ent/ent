@@ -409,6 +409,12 @@ func (buo *BlobUpdateOne) RemoveLinks(b ...*Blob) *BlobUpdateOne {
 	return buo.RemoveLinkIDs(ids...)
 }
 
+// Where appends a list predicates to the BlobUpdate builder.
+func (buo *BlobUpdateOne) Where(ps ...predicate.Blob) *BlobUpdateOne {
+	buo.mutation.Where(ps...)
+	return buo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (buo *BlobUpdateOne) Select(field string, fields ...string) *BlobUpdateOne {

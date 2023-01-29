@@ -292,6 +292,12 @@ func (utuo *UserTweetUpdateOne) ClearTweet() *UserTweetUpdateOne {
 	return utuo
 }
 
+// Where appends a list predicates to the UserTweetUpdate builder.
+func (utuo *UserTweetUpdateOne) Where(ps ...predicate.UserTweet) *UserTweetUpdateOne {
+	utuo.mutation.Where(ps...)
+	return utuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (utuo *UserTweetUpdateOne) Select(field string, fields ...string) *UserTweetUpdateOne {

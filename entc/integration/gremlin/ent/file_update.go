@@ -602,6 +602,12 @@ func (fuo *FileUpdateOne) RemoveField(f ...*FieldType) *FileUpdateOne {
 	return fuo.RemoveFieldIDs(ids...)
 }
 
+// Where appends a list predicates to the FileUpdate builder.
+func (fuo *FileUpdateOne) Where(ps ...predicate.File) *FileUpdateOne {
+	fuo.mutation.Where(ps...)
+	return fuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (fuo *FileUpdateOne) Select(field string, fields ...string) *FileUpdateOne {

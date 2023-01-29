@@ -336,6 +336,12 @@ func (nuo *NodeUpdateOne) ClearNext() *NodeUpdateOne {
 	return nuo
 }
 
+// Where appends a list predicates to the NodeUpdate builder.
+func (nuo *NodeUpdateOne) Where(ps ...predicate.Node) *NodeUpdateOne {
+	nuo.mutation.Where(ps...)
+	return nuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (nuo *NodeUpdateOne) Select(field string, fields ...string) *NodeUpdateOne {

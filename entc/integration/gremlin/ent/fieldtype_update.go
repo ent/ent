@@ -3243,6 +3243,12 @@ func (ftuo *FieldTypeUpdateOne) Mutation() *FieldTypeMutation {
 	return ftuo.mutation
 }
 
+// Where appends a list predicates to the FieldTypeUpdate builder.
+func (ftuo *FieldTypeUpdateOne) Where(ps ...predicate.FieldType) *FieldTypeUpdateOne {
+	ftuo.mutation.Where(ps...)
+	return ftuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (ftuo *FieldTypeUpdateOne) Select(field string, fields ...string) *FieldTypeUpdateOne {

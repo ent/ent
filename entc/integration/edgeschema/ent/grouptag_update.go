@@ -260,6 +260,12 @@ func (gtuo *GroupTagUpdateOne) ClearGroup() *GroupTagUpdateOne {
 	return gtuo
 }
 
+// Where appends a list predicates to the GroupTagUpdate builder.
+func (gtuo *GroupTagUpdateOne) Where(ps ...predicate.GroupTag) *GroupTagUpdateOne {
+	gtuo.mutation.Where(ps...)
+	return gtuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (gtuo *GroupTagUpdateOne) Select(field string, fields ...string) *GroupTagUpdateOne {

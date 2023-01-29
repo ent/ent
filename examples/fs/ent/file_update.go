@@ -375,6 +375,12 @@ func (fuo *FileUpdateOne) RemoveChildren(f ...*File) *FileUpdateOne {
 	return fuo.RemoveChildIDs(ids...)
 }
 
+// Where appends a list predicates to the FileUpdate builder.
+func (fuo *FileUpdateOne) Where(ps ...predicate.File) *FileUpdateOne {
+	fuo.mutation.Where(ps...)
+	return fuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (fuo *FileUpdateOne) Select(field string, fields ...string) *FileUpdateOne {

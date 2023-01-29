@@ -202,6 +202,12 @@ func (cuo *CommentUpdateOne) ClearPost() *CommentUpdateOne {
 	return cuo
 }
 
+// Where appends a list predicates to the CommentUpdate builder.
+func (cuo *CommentUpdateOne) Where(ps ...predicate.Comment) *CommentUpdateOne {
+	cuo.mutation.Where(ps...)
+	return cuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (cuo *CommentUpdateOne) Select(field string, fields ...string) *CommentUpdateOne {

@@ -362,6 +362,12 @@ func (puo *PostUpdateOne) RemoveComments(c ...*Comment) *PostUpdateOne {
 	return puo.RemoveCommentIDs(ids...)
 }
 
+// Where appends a list predicates to the PostUpdate builder.
+func (puo *PostUpdateOne) Where(ps ...predicate.Post) *PostUpdateOne {
+	puo.mutation.Where(ps...)
+	return puo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (puo *PostUpdateOne) Select(field string, fields ...string) *PostUpdateOne {

@@ -656,6 +656,12 @@ func (cuo *ConversionUpdateOne) Mutation() *ConversionMutation {
 	return cuo.mutation
 }
 
+// Where appends a list predicates to the ConversionUpdate builder.
+func (cuo *ConversionUpdateOne) Where(ps ...predicate.Conversion) *ConversionUpdateOne {
+	cuo.mutation.Where(ps...)
+	return cuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (cuo *ConversionUpdateOne) Select(field string, fields ...string) *ConversionUpdateOne {

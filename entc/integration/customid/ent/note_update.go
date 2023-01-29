@@ -364,6 +364,12 @@ func (nuo *NoteUpdateOne) RemoveChildren(n ...*Note) *NoteUpdateOne {
 	return nuo.RemoveChildIDs(ids...)
 }
 
+// Where appends a list predicates to the NoteUpdate builder.
+func (nuo *NoteUpdateOne) Where(ps ...predicate.Note) *NoteUpdateOne {
+	nuo.mutation.Where(ps...)
+	return nuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (nuo *NoteUpdateOne) Select(field string, fields ...string) *NoteUpdateOne {

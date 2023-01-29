@@ -304,6 +304,12 @@ func (ftuo *FileTypeUpdateOne) RemoveFiles(f ...*File) *FileTypeUpdateOne {
 	return ftuo.RemoveFileIDs(ids...)
 }
 
+// Where appends a list predicates to the FileTypeUpdate builder.
+func (ftuo *FileTypeUpdateOne) Where(ps ...predicate.FileType) *FileTypeUpdateOne {
+	ftuo.mutation.Where(ps...)
+	return ftuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (ftuo *FileTypeUpdateOne) Select(field string, fields ...string) *FileTypeUpdateOne {

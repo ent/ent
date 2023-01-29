@@ -208,6 +208,12 @@ func (tuo *TokenUpdateOne) ClearAccount() *TokenUpdateOne {
 	return tuo
 }
 
+// Where appends a list predicates to the TokenUpdate builder.
+func (tuo *TokenUpdateOne) Where(ps ...predicate.Token) *TokenUpdateOne {
+	tuo.mutation.Where(ps...)
+	return tuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (tuo *TokenUpdateOne) Select(field string, fields ...string) *TokenUpdateOne {
