@@ -83,9 +83,3 @@ func (z *Zoo) String() string {
 
 // Zoos is a parsable slice of Zoo.
 type Zoos []*Zoo
-
-func (z Zoos) config(cfg config) {
-	for _i := range z {
-		z[_i].config = cfg
-	}
-}

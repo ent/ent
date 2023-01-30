@@ -160,9 +160,3 @@ func (c *Car) String() string {
 
 // Cars is a parsable slice of Car.
 type Cars []*Car
-
-func (c Cars) config(cfg config) {
-	for _i := range c {
-		c[_i].config = cfg
-	}
-}

@@ -140,9 +140,3 @@ func (c *Comments) FromResponse(res *gremlin.Response) error {
 	}
 	return nil
 }
-
-func (c Comments) config(cfg config) {
-	for _i := range c {
-		c[_i].config = cfg
-	}
-}

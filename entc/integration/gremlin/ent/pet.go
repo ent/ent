@@ -180,9 +180,3 @@ func (pe *Pets) FromResponse(res *gremlin.Response) error {
 	}
 	return nil
 }
-
-func (pe Pets) config(cfg config) {
-	for _i := range pe {
-		pe[_i].config = cfg
-	}
-}

@@ -83,9 +83,3 @@ func (o *Other) String() string {
 
 // Others is a parsable slice of Other.
 type Others []*Other
-
-func (o Others) config(cfg config) {
-	for _i := range o {
-		o[_i].config = cfg
-	}
-}

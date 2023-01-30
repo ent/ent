@@ -83,9 +83,3 @@ func (_go *Goods) String() string {
 
 // GoodsSlice is a parsable slice of Goods.
 type GoodsSlice []*Goods
-
-func (_go GoodsSlice) config(cfg config) {
-	for _i := range _go {
-		_go[_i].config = cfg
-	}
-}

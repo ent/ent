@@ -173,9 +173,3 @@ func (r *Rental) String() string {
 
 // Rentals is a parsable slice of Rental.
 type Rentals []*Rental
-
-func (r Rentals) config(cfg config) {
-	for _i := range r {
-		r[_i].config = cfg
-	}
-}

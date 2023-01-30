@@ -347,7 +347,9 @@ func (iq *ItemQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Ite
 	if err := is.FromResponse(res); err != nil {
 		return nil, err
 	}
-	is.config(iq.config)
+	for i := range is {
+		is[i].config = iq.config
+	}
 	return is, nil
 }
 

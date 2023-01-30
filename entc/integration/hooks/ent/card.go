@@ -183,9 +183,3 @@ func (c *Card) String() string {
 
 // Cards is a parsable slice of Card.
 type Cards []*Card
-
-func (c Cards) config(cfg config) {
-	for _i := range c {
-		c[_i].config = cfg
-	}
-}

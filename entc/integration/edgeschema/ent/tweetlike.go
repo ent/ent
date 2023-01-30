@@ -161,9 +161,3 @@ func (tl *TweetLike) String() string {
 
 // TweetLikes is a parsable slice of TweetLike.
 type TweetLikes []*TweetLike
-
-func (tl TweetLikes) config(cfg config) {
-	for _i := range tl {
-		tl[_i].config = cfg
-	}
-}

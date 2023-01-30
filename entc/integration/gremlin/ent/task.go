@@ -116,9 +116,3 @@ func (t *Tasks) FromResponse(res *gremlin.Response) error {
 	}
 	return nil
 }
-
-func (t Tasks) config(cfg config) {
-	for _i := range t {
-		t[_i].config = cfg
-	}
-}

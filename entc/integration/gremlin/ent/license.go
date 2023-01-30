@@ -102,9 +102,3 @@ func (l *Licenses) FromResponse(res *gremlin.Response) error {
 	}
 	return nil
 }
-
-func (l Licenses) config(cfg config) {
-	for _i := range l {
-		l[_i].config = cfg
-	}
-}

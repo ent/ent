@@ -170,9 +170,3 @@ func (ut *UserTweet) String() string {
 
 // UserTweets is a parsable slice of UserTweet.
 type UserTweets []*UserTweet
-
-func (ut UserTweets) config(cfg config) {
-	for _i := range ut {
-		ut[_i].config = cfg
-	}
-}

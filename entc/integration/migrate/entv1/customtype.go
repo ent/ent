@@ -95,9 +95,3 @@ func (ct *CustomType) String() string {
 
 // CustomTypes is a parsable slice of CustomType.
 type CustomTypes []*CustomType
-
-func (ct CustomTypes) config(cfg config) {
-	for _i := range ct {
-		ct[_i].config = cfg
-	}
-}

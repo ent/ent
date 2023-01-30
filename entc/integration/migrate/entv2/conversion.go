@@ -183,9 +183,3 @@ func (c *Conversion) String() string {
 
 // Conversions is a parsable slice of Conversion.
 type Conversions []*Conversion
-
-func (c Conversions) config(cfg config) {
-	for _i := range c {
-		c[_i].config = cfg
-	}
-}

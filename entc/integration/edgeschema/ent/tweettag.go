@@ -173,9 +173,3 @@ func (tt *TweetTag) String() string {
 
 // TweetTags is a parsable slice of TweetTag.
 type TweetTags []*TweetTag
-
-func (tt TweetTags) config(cfg config) {
-	for _i := range tt {
-		tt[_i].config = cfg
-	}
-}

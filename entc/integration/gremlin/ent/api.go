@@ -84,9 +84,3 @@ func (a *Apis) FromResponse(res *gremlin.Response) error {
 	}
 	return nil
 }
-
-func (a Apis) config(cfg config) {
-	for _i := range a {
-		a[_i].config = cfg
-	}
-}

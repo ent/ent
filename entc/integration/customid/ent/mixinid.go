@@ -107,9 +107,3 @@ func (mi *MixinID) String() string {
 
 // MixinIDs is a parsable slice of MixinID.
 type MixinIDs []*MixinID
-
-func (mi MixinIDs) config(cfg config) {
-	for _i := range mi {
-		mi[_i].config = cfg
-	}
-}

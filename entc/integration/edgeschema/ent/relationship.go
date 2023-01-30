@@ -189,9 +189,3 @@ func (r *Relationship) String() string {
 
 // Relationships is a parsable slice of Relationship.
 type Relationships []*Relationship
-
-func (r Relationships) config(cfg config) {
-	for _i := range r {
-		r[_i].config = cfg
-	}
-}

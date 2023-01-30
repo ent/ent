@@ -161,9 +161,3 @@ func (pe *Pet) MarshalJSON() ([]byte, error) {
 
 // Pets is a parsable slice of Pet.
 type Pets []*Pet
-
-func (pe Pets) config(cfg config) {
-	for _i := range pe {
-		pe[_i].config = cfg
-	}
-}

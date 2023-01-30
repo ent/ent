@@ -134,9 +134,3 @@ func (s *Spec) appendNamedCard(name string, edges ...*Card) {
 
 // Specs is a parsable slice of Spec.
 type Specs []*Spec
-
-func (s Specs) config(cfg config) {
-	for _i := range s {
-		s[_i].config = cfg
-	}
-}

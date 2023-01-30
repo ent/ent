@@ -84,9 +84,3 @@ func (_go *GoodsSlice) FromResponse(res *gremlin.Response) error {
 	}
 	return nil
 }
-
-func (_go GoodsSlice) config(cfg config) {
-	for _i := range _go {
-		_go[_i].config = cfg
-	}
-}

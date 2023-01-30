@@ -386,9 +386,3 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 	}
 	return nil
 }
-
-func (u Users) config(cfg config) {
-	for _i := range u {
-		u[_i].config = cfg
-	}
-}

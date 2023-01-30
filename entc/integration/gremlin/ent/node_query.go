@@ -401,7 +401,9 @@ func (nq *NodeQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Nod
 	if err := ns.FromResponse(res); err != nil {
 		return nil, err
 	}
-	ns.config(nq.config)
+	for i := range ns {
+		ns[i].config = nq.config
+	}
 	return ns, nil
 }
 

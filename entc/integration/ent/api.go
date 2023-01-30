@@ -83,9 +83,3 @@ func (a *Api) String() string {
 
 // Apis is a parsable slice of Api.
 type Apis []*Api
-
-func (a Apis) config(cfg config) {
-	for _i := range a {
-		a[_i].config = cfg
-	}
-}

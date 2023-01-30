@@ -161,9 +161,3 @@ func (bl *BlobLink) String() string {
 
 // BlobLinks is a parsable slice of BlobLink.
 type BlobLinks []*BlobLink
-
-func (bl BlobLinks) config(cfg config) {
-	for _i := range bl {
-		bl[_i].config = cfg
-	}
-}

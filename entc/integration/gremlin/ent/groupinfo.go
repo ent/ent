@@ -127,9 +127,3 @@ func (gi *GroupInfos) FromResponse(res *gremlin.Response) error {
 	}
 	return nil
 }
-
-func (gi GroupInfos) config(cfg config) {
-	for _i := range gi {
-		gi[_i].config = cfg
-	}
-}

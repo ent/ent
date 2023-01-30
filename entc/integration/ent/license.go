@@ -107,9 +107,3 @@ func (l *License) String() string {
 
 // Licenses is a parsable slice of License.
 type Licenses []*License
-
-func (l Licenses) config(cfg config) {
-	for _i := range l {
-		l[_i].config = cfg
-	}
-}

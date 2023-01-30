@@ -699,9 +699,3 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 	}
 	return nil
 }
-
-func (ft FieldTypes) config(cfg config) {
-	for _i := range ft {
-		ft[_i].config = cfg
-	}
-}

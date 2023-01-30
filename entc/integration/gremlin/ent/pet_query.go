@@ -402,7 +402,9 @@ func (pq *PetQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Pet,
 	if err := pes.FromResponse(res); err != nil {
 		return nil, err
 	}
-	pes.config(pq.config)
+	for i := range pes {
+		pes[i].config = pq.config
+	}
 	return pes, nil
 }
 

@@ -122,9 +122,3 @@ func (a *Account) String() string {
 
 // Accounts is a parsable slice of Account.
 type Accounts []*Account
-
-func (a Accounts) config(cfg config) {
-	for _i := range a {
-		a[_i].config = cfg
-	}
-}

@@ -201,9 +201,3 @@ func (t *Tweet) String() string {
 
 // Tweets is a parsable slice of Tweet.
 type Tweets []*Tweet
-
-func (t Tweets) config(cfg config) {
-	for _i := range t {
-		t[_i].config = cfg
-	}
-}

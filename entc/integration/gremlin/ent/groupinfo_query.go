@@ -375,7 +375,9 @@ func (giq *GroupInfoQuery) gremlinAll(ctx context.Context, hooks ...queryHook) (
 	if err := gis.FromResponse(res); err != nil {
 		return nil, err
 	}
-	gis.config(giq.config)
+	for i := range gis {
+		gis[i].config = giq.config
+	}
 	return gis, nil
 }
 
