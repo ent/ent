@@ -325,7 +325,9 @@ func (gq *GoodsQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Go
 	if err := _gos.FromResponse(res); err != nil {
 		return nil, err
 	}
-	_gos.config(gq.config)
+	for i := range _gos {
+		_gos[i].config = gq.config
+	}
 	return _gos, nil
 }
 

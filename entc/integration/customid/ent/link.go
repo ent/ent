@@ -99,9 +99,3 @@ func (l *Link) String() string {
 
 // Links is a parsable slice of Link.
 type Links []*Link
-
-func (l Links) config(cfg config) {
-	for _i := range l {
-		l[_i].config = cfg
-	}
-}

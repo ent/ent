@@ -180,9 +180,3 @@ func (f *Friendship) String() string {
 
 // Friendships is a parsable slice of Friendship.
 type Friendships []*Friendship
-
-func (f Friendships) config(cfg config) {
-	for _i := range f {
-		f[_i].config = cfg
-	}
-}

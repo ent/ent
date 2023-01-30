@@ -30,7 +30,9 @@ func ({{ $receiver }} *{{ $builder }}) gremlinAll(ctx context.Context, hooks ...
 	if err := {{ plural $.Receiver }}.FromResponse(res); err != nil {
 		return nil, err
 	}
-	{{ plural $.Receiver }}.config({{ $receiver }}.config)
+	for i := range {{ plural $.Receiver }} {
+		{{ plural $.Receiver }}[i].config = {{ $receiver }}.config
+	}
 	return {{ plural $.Receiver }}, nil
 }
 

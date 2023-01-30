@@ -347,7 +347,9 @@ func (cq *CommentQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*
 	if err := cs.FromResponse(res); err != nil {
 		return nil, err
 	}
-	cs.config(cq.config)
+	for i := range cs {
+		cs[i].config = cq.config
+	}
 	return cs, nil
 }
 

@@ -140,9 +140,3 @@ func (is *IntSID) String() string {
 
 // IntSIDs is a parsable slice of IntSID.
 type IntSIDs []*IntSID
-
-func (is IntSIDs) config(cfg config) {
-	for _i := range is {
-		is[_i].config = cfg
-	}
-}

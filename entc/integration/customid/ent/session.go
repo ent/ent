@@ -125,9 +125,3 @@ func (s *Session) String() string {
 
 // Sessions is a parsable slice of Session.
 type Sessions []*Session
-
-func (s Sessions) config(cfg config) {
-	for _i := range s {
-		s[_i].config = cfg
-	}
-}

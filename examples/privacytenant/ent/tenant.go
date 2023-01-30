@@ -95,9 +95,3 @@ func (t *Tenant) String() string {
 
 // Tenants is a parsable slice of Tenant.
 type Tenants []*Tenant
-
-func (t Tenants) config(cfg config) {
-	for _i := range t {
-		t[_i].config = cfg
-	}
-}

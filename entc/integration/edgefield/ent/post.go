@@ -140,9 +140,3 @@ func (po *Post) String() string {
 
 // Posts is a parsable slice of Post.
 type Posts []*Post
-
-func (po Posts) config(cfg config) {
-	for _i := range po {
-		po[_i].config = cfg
-	}
-}

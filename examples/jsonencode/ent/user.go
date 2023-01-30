@@ -145,9 +145,3 @@ func (u *User) MarshalJSON() ([]byte, error) {
 
 // Users is a parsable slice of User.
 type Users []*User
-
-func (u Users) config(cfg config) {
-	for _i := range u {
-		u[_i].config = cfg
-	}
-}

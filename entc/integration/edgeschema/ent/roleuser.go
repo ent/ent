@@ -161,9 +161,3 @@ func (ru *RoleUser) String() string {
 
 // RoleUsers is a parsable slice of RoleUser.
 type RoleUsers []*RoleUser
-
-func (ru RoleUsers) config(cfg config) {
-	for _i := range ru {
-		ru[_i].config = cfg
-	}
-}

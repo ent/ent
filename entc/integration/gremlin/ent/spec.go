@@ -110,9 +110,3 @@ func (s *Specs) FromResponse(res *gremlin.Response) error {
 	}
 	return nil
 }
-
-func (s Specs) config(cfg config) {
-	for _i := range s {
-		s[_i].config = cfg
-	}
-}

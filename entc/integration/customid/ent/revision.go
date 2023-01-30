@@ -83,9 +83,3 @@ func (r *Revision) String() string {
 
 // Revisions is a parsable slice of Revision.
 type Revisions []*Revision
-
-func (r Revisions) config(cfg config) {
-	for _i := range r {
-		r[_i].config = cfg
-	}
-}

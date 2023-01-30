@@ -117,9 +117,3 @@ func (m *Media) String() string {
 
 // MediaSlice is a parsable slice of Media.
 type MediaSlice []*Media
-
-func (m MediaSlice) config(cfg config) {
-	for _i := range m {
-		m[_i].config = cfg
-	}
-}

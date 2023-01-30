@@ -430,7 +430,9 @@ func (fq *FileQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Fil
 	if err := fs.FromResponse(res); err != nil {
 		return nil, err
 	}
-	fs.config(fq.config)
+	for i := range fs {
+		fs[i].config = fq.config
+	}
 	return fs, nil
 }
 

@@ -157,9 +157,3 @@ func (n *Nodes) FromResponse(res *gremlin.Response) error {
 	}
 	return nil
 }
-
-func (n Nodes) config(cfg config) {
-	for _i := range n {
-		n[_i].config = cfg
-	}
-}

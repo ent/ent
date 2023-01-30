@@ -210,9 +210,3 @@ func (gr *Groups) FromResponse(res *gremlin.Response) error {
 	}
 	return nil
 }
-
-func (gr Groups) config(cfg config) {
-	for _i := range gr {
-		gr[_i].config = cfg
-	}
-}

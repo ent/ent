@@ -207,9 +207,3 @@ func (f *Files) FromResponse(res *gremlin.Response) error {
 	}
 	return nil
 }
-
-func (f Files) config(cfg config) {
-	for _i := range f {
-		f[_i].config = cfg
-	}
-}

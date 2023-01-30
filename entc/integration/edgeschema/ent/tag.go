@@ -169,9 +169,3 @@ func (t *Tag) String() string {
 
 // Tags is a parsable slice of Tag.
 type Tags []*Tag
-
-func (t Tags) config(cfg config) {
-	for _i := range t {
-		t[_i].config = cfg
-	}
-}

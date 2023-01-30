@@ -168,9 +168,3 @@ func (ft *FileType) appendNamedFiles(name string, edges ...*File) {
 
 // FileTypes is a parsable slice of FileType.
 type FileTypes []*FileType
-
-func (ft FileTypes) config(cfg config) {
-	for _i := range ft {
-		ft[_i].config = cfg
-	}
-}

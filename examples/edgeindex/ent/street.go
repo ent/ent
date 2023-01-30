@@ -136,9 +136,3 @@ func (s *Street) String() string {
 
 // Streets is a parsable slice of Street.
 type Streets []*Street
-
-func (s Streets) config(cfg config) {
-	for _i := range s {
-		s[_i].config = cfg
-	}
-}

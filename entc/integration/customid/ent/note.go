@@ -150,9 +150,3 @@ func (n *Note) String() string {
 
 // Notes is a parsable slice of Note.
 type Notes []*Note
-
-func (n Notes) config(cfg config) {
-	for _i := range n {
-		n[_i].config = cfg
-	}
-}

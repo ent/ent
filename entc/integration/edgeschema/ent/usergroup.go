@@ -170,9 +170,3 @@ func (ug *UserGroup) String() string {
 
 // UserGroups is a parsable slice of UserGroup.
 type UserGroups []*UserGroup
-
-func (ug UserGroups) config(cfg config) {
-	for _i := range ug {
-		ug[_i].config = cfg
-	}
-}

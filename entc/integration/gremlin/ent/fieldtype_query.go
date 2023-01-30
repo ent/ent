@@ -347,7 +347,9 @@ func (ftq *FieldTypeQuery) gremlinAll(ctx context.Context, hooks ...queryHook) (
 	if err := fts.FromResponse(res); err != nil {
 		return nil, err
 	}
-	fts.config(ftq.config)
+	for i := range fts {
+		fts[i].config = ftq.config
+	}
 	return fts, nil
 }
 

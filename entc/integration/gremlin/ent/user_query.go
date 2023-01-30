@@ -644,7 +644,9 @@ func (uq *UserQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Use
 	if err := us.FromResponse(res); err != nil {
 		return nil, err
 	}
-	us.config(uq.config)
+	for i := range us {
+		us[i].config = uq.config
+	}
 	return us, nil
 }
 

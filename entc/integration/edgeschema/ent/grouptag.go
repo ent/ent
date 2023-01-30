@@ -156,9 +156,3 @@ func (gt *GroupTag) String() string {
 
 // GroupTags is a parsable slice of GroupTag.
 type GroupTags []*GroupTag
-
-func (gt GroupTags) config(cfg config) {
-	for _i := range gt {
-		gt[_i].config = cfg
-	}
-}

@@ -141,9 +141,3 @@ func (d *Device) String() string {
 
 // Devices is a parsable slice of Device.
 type Devices []*Device
-
-func (d Devices) config(cfg config) {
-	for _i := range d {
-		d[_i].config = cfg
-	}
-}

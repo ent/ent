@@ -325,7 +325,9 @@ func (aq *APIQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Api,
 	if err := as.FromResponse(res); err != nil {
 		return nil, err
 	}
-	as.config(aq.config)
+	for i := range as {
+		as[i].config = aq.config
+	}
 	return as, nil
 }
 

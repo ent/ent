@@ -168,9 +168,3 @@ func (d *Doc) String() string {
 
 // Docs is a parsable slice of Doc.
 type Docs []*Doc
-
-func (d Docs) config(cfg config) {
-	for _i := range d {
-		d[_i].config = cfg
-	}
-}

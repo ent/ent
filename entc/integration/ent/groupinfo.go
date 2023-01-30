@@ -157,9 +157,3 @@ func (gi *GroupInfo) appendNamedGroups(name string, edges ...*Group) {
 
 // GroupInfos is a parsable slice of GroupInfo.
 type GroupInfos []*GroupInfo
-
-func (gi GroupInfos) config(cfg config) {
-	for _i := range gi {
-		gi[_i].config = cfg
-	}
-}

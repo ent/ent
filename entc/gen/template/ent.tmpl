@@ -130,12 +130,6 @@ type {{ $slice }} []*{{ $.Name }}
 	{{ $tmpl := printf "dialect/%s/decode/many" $.Storage }}
 	{{ xtemplate $tmpl . }}
 {{ end }}
-
-func ({{ $receiver }} {{ $slice }}) config(cfg config) {
-	for _i := range {{ $receiver }} {
-		{{ $receiver }}[_i].config = cfg
-	}
-}
 {{ end }}
 
 {{/* A template to generate a fmt.Stringer implementation. */}}

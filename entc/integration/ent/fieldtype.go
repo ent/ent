@@ -886,9 +886,3 @@ func (ft *FieldType) String() string {
 
 // FieldTypes is a parsable slice of FieldType.
 type FieldTypes []*FieldType
-
-func (ft FieldTypes) config(cfg config) {
-	for _i := range ft {
-		ft[_i].config = cfg
-	}
-}

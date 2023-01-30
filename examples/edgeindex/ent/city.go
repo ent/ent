@@ -121,9 +121,3 @@ func (c *City) String() string {
 
 // Cities is a parsable slice of City.
 type Cities []*City
-
-func (c Cities) config(cfg config) {
-	for _i := range c {
-		c[_i].config = cfg
-	}
-}

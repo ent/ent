@@ -347,7 +347,9 @@ func (lq *LicenseQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*
 	if err := ls.FromResponse(res); err != nil {
 		return nil, err
 	}
-	ls.config(lq.config)
+	for i := range ls {
+		ls[i].config = lq.config
+	}
 	return ls, nil
 }
 

@@ -456,7 +456,9 @@ func (gq *GroupQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Gr
 	if err := grs.FromResponse(res); err != nil {
 		return nil, err
 	}
-	grs.config(gq.config)
+	for i := range grs {
+		grs[i].config = gq.config
+	}
 	return grs, nil
 }
 

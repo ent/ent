@@ -348,7 +348,9 @@ func (tq *TaskQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Tas
 	if err := ts.FromResponse(res); err != nil {
 		return nil, err
 	}
-	ts.config(tq.config)
+	for i := range ts {
+		ts[i].config = tq.config
+	}
 	return ts, nil
 }
 

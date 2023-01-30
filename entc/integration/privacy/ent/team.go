@@ -137,9 +137,3 @@ func (t *Team) String() string {
 
 // Teams is a parsable slice of Team.
 type Teams []*Team
-
-func (t Teams) config(cfg config) {
-	for _i := range t {
-		t[_i].config = cfg
-	}
-}

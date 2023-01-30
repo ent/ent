@@ -179,9 +179,3 @@ func (b *Blob) String() string {
 
 // Blobs is a parsable slice of Blob.
 type Blobs []*Blob
-
-func (b Blobs) config(cfg config) {
-	for _i := range b {
-		b[_i].config = cfg
-	}
-}

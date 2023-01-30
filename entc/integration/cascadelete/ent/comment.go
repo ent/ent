@@ -137,9 +137,3 @@ func (c *Comment) String() string {
 
 // Comments is a parsable slice of Comment.
 type Comments []*Comment
-
-func (c Comments) config(cfg config) {
-	for _i := range c {
-		c[_i].config = cfg
-	}
-}

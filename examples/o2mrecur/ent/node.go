@@ -150,9 +150,3 @@ func (n *Node) String() string {
 
 // Nodes is a parsable slice of Node.
 type Nodes []*Node
-
-func (n Nodes) config(cfg config) {
-	for _i := range n {
-		n[_i].config = cfg
-	}
-}

@@ -352,7 +352,9 @@ func (sq *SpecQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Spe
 	if err := sSlice.FromResponse(res); err != nil {
 		return nil, err
 	}
-	sSlice.config(sq.config)
+	for i := range sSlice {
+		sSlice[i].config = sq.config
+	}
 	return sSlice, nil
 }
 

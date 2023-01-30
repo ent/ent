@@ -178,9 +178,3 @@ func (c *Cards) FromResponse(res *gremlin.Response) error {
 	}
 	return nil
 }
-
-func (c Cards) config(cfg config) {
-	for _i := range c {
-		c[_i].config = cfg
-	}
-}

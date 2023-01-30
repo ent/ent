@@ -93,9 +93,3 @@ func (i *Item) String() string {
 
 // Items is a parsable slice of Item.
 type Items []*Item
-
-func (i Items) config(cfg config) {
-	for _i := range i {
-		i[_i].config = cfg
-	}
-}

@@ -92,9 +92,3 @@ func (i *Items) FromResponse(res *gremlin.Response) error {
 	}
 	return nil
 }
-
-func (i Items) config(cfg config) {
-	for _i := range i {
-		i[_i].config = cfg
-	}
-}

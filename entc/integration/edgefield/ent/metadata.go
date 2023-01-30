@@ -171,9 +171,3 @@ func (m *Metadata) String() string {
 
 // MetadataSlice is a parsable slice of Metadata.
 type MetadataSlice []*Metadata
-
-func (m MetadataSlice) config(cfg config) {
-	for _i := range m {
-		m[_i].config = cfg
-	}
-}

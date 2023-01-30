@@ -95,9 +95,3 @@ func (ri *RelationshipInfo) String() string {
 
 // RelationshipInfos is a parsable slice of RelationshipInfo.
 type RelationshipInfos []*RelationshipInfo
-
-func (ri RelationshipInfos) config(cfg config) {
-	for _i := range ri {
-		ri[_i].config = cfg
-	}
-}
