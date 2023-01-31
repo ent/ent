@@ -281,10 +281,10 @@ func ruleset() *inflect.Ruleset {
 	// Add common initialism from golint and more.
 	for _, w := range []string{
 		"ACL", "API", "ASCII", "AWS", "CPU", "CSS", "DNS", "EOF", "GB", "GUID",
-		"HTML", "HTTP", "HTTPS", "ID", "IP", "JSON", "KB", "LHS", "MAC", "MB",
-		"QPS", "RAM", "RHS", "RPC", "SLA", "SMTP", "SQL", "SSH", "SSO", "TCP",
-		"TLS", "TTL", "UDP", "UI", "UID", "URI", "URL", "UTF8", "UUID", "VM",
-		"XML", "XMPP", "XSRF", "XSS",
+		"HCL", "HTML", "HTTP", "HTTPS", "ID", "IP", "JSON", "KB", "LHS", "MAC",
+		"MB", "QPS", "RAM", "RHS", "RPC", "SLA", "SMTP", "SQL", "SSH", "SSO",
+		"TCP", "TLS", "TTL", "UDP", "UI", "UID", "URI", "URL", "UTF8", "UUID",
+		"VM", "XML", "XMPP", "XSRF", "XSS",
 	} {
 		acronyms[w] = struct{}{}
 		rules.AddAcronym(w)
