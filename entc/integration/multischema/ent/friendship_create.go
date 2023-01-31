@@ -164,13 +164,7 @@ func (fc *FriendshipCreate) sqlSave(ctx context.Context) (*Friendship, error) {
 func (fc *FriendshipCreate) createSpec() (*Friendship, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Friendship{config: fc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: friendship.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: friendship.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(friendship.Table, sqlgraph.NewFieldSpec(friendship.FieldID, field.TypeInt))
 	)
 	_spec.Schema = fc.schemaConfig.Friendship
 	if value, ok := fc.mutation.Weight(); ok {

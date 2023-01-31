@@ -131,13 +131,7 @@ func (mic *MixinIDCreate) sqlSave(ctx context.Context) (*MixinID, error) {
 func (mic *MixinIDCreate) createSpec() (*MixinID, *sqlgraph.CreateSpec) {
 	var (
 		_node = &MixinID{config: mic.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: mixinid.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: mixinid.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(mixinid.Table, sqlgraph.NewFieldSpec(mixinid.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = mic.conflict
 	if id, ok := mic.mutation.ID(); ok {

@@ -106,13 +106,7 @@ func (cc *CityCreate) sqlSave(ctx context.Context) (*City, error) {
 func (cc *CityCreate) createSpec() (*City, *sqlgraph.CreateSpec) {
 	var (
 		_node = &City{config: cc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: city.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: city.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(city.Table, sqlgraph.NewFieldSpec(city.FieldID, field.TypeInt))
 	)
 	if value, ok := cc.mutation.Name(); ok {
 		_spec.SetField(city.FieldName, field.TypeString, value)

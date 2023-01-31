@@ -139,13 +139,7 @@ func (lc *LicenseCreate) sqlSave(ctx context.Context) (*License, error) {
 func (lc *LicenseCreate) createSpec() (*License, *sqlgraph.CreateSpec) {
 	var (
 		_node = &License{config: lc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: license.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: license.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(license.Table, sqlgraph.NewFieldSpec(license.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = lc.conflict
 	if id, ok := lc.mutation.ID(); ok {

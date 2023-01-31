@@ -95,13 +95,7 @@ func (tc *TenantCreate) sqlSave(ctx context.Context) (*Tenant, error) {
 func (tc *TenantCreate) createSpec() (*Tenant, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Tenant{config: tc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: tenant.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: tenant.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(tenant.Table, sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt))
 	)
 	if value, ok := tc.mutation.Name(); ok {
 		_spec.SetField(tenant.FieldName, field.TypeString, value)

@@ -148,9 +148,7 @@ func (tlc *TweetLikeCreate) sqlSave(ctx context.Context) (*TweetLike, error) {
 func (tlc *TweetLikeCreate) createSpec() (*TweetLike, *sqlgraph.CreateSpec) {
 	var (
 		_node = &TweetLike{config: tlc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: tweetlike.Table,
-		}
+		_spec = sqlgraph.NewCreateSpec(tweetlike.Table, nil)
 	)
 	_spec.OnConflict = tlc.conflict
 	if value, ok := tlc.mutation.LikedAt(); ok {

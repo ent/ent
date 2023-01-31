@@ -110,13 +110,7 @@ func (pc *PostCreate) sqlSave(ctx context.Context) (*Post, error) {
 func (pc *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Post{config: pc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: post.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: post.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(post.Table, sqlgraph.NewFieldSpec(post.FieldID, field.TypeInt))
 	)
 	if value, ok := pc.mutation.Text(); ok {
 		_spec.SetField(post.FieldText, field.TypeString, value)

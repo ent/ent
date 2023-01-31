@@ -139,13 +139,7 @@ func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 func (cc *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Car{config: cc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: car.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: car.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(car.Table, sqlgraph.NewFieldSpec(car.FieldID, field.TypeUUID))
 	)
 	if id, ok := cc.mutation.ID(); ok {
 		_node.ID = id

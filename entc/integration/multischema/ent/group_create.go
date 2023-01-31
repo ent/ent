@@ -123,13 +123,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Group{config: gc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: group.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: group.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(group.Table, sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt))
 	)
 	_spec.Schema = gc.schemaConfig.Group
 	if value, ok := gc.mutation.Name(); ok {

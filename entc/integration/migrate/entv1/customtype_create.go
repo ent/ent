@@ -94,13 +94,7 @@ func (ctc *CustomTypeCreate) sqlSave(ctx context.Context) (*CustomType, error) {
 func (ctc *CustomTypeCreate) createSpec() (*CustomType, *sqlgraph.CreateSpec) {
 	var (
 		_node = &CustomType{config: ctc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: customtype.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: customtype.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(customtype.Table, sqlgraph.NewFieldSpec(customtype.FieldID, field.TypeInt))
 	)
 	if value, ok := ctc.mutation.Custom(); ok {
 		_spec.SetField(customtype.FieldCustom, field.TypeString, value)

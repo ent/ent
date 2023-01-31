@@ -83,13 +83,7 @@ func (gc *GoodsCreate) sqlSave(ctx context.Context) (*Goods, error) {
 func (gc *GoodsCreate) createSpec() (*Goods, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Goods{config: gc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: goods.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: goods.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(goods.Table, sqlgraph.NewFieldSpec(goods.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = gc.conflict
 	return _node, _spec

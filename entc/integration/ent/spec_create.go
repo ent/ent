@@ -99,13 +99,7 @@ func (sc *SpecCreate) sqlSave(ctx context.Context) (*Spec, error) {
 func (sc *SpecCreate) createSpec() (*Spec, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Spec{config: sc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: spec.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: spec.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(spec.Table, sqlgraph.NewFieldSpec(spec.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = sc.conflict
 	if nodes := sc.mutation.CardIDs(); len(nodes) > 0 {

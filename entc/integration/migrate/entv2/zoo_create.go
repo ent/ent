@@ -88,13 +88,7 @@ func (zc *ZooCreate) sqlSave(ctx context.Context) (*Zoo, error) {
 func (zc *ZooCreate) createSpec() (*Zoo, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Zoo{config: zc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: zoo.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: zoo.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(zoo.Table, sqlgraph.NewFieldSpec(zoo.FieldID, field.TypeInt))
 	)
 	if id, ok := zc.mutation.ID(); ok {
 		_node.ID = id

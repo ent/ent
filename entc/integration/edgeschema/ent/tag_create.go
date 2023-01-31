@@ -157,13 +157,7 @@ func (tc *TagCreate) sqlSave(ctx context.Context) (*Tag, error) {
 func (tc *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Tag{config: tc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: tag.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: tag.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(tag.Table, sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = tc.conflict
 	if value, ok := tc.mutation.Value(); ok {

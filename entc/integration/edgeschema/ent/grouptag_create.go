@@ -119,13 +119,7 @@ func (gtc *GroupTagCreate) sqlSave(ctx context.Context) (*GroupTag, error) {
 func (gtc *GroupTagCreate) createSpec() (*GroupTag, *sqlgraph.CreateSpec) {
 	var (
 		_node = &GroupTag{config: gtc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: grouptag.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: grouptag.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(grouptag.Table, sqlgraph.NewFieldSpec(grouptag.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = gtc.conflict
 	if nodes := gtc.mutation.TagIDs(); len(nodes) > 0 {

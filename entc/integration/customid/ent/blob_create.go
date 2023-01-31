@@ -189,13 +189,7 @@ func (bc *BlobCreate) sqlSave(ctx context.Context) (*Blob, error) {
 func (bc *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Blob{config: bc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: blob.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: blob.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(blob.Table, sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = bc.conflict
 	if id, ok := bc.mutation.ID(); ok {

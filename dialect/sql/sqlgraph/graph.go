@@ -332,6 +332,11 @@ type (
 	}
 )
 
+// NewFieldSpec creates a new FieldSpec with its required fields.
+func NewFieldSpec(column string, typ field.Type) *FieldSpec {
+	return &FieldSpec{Column: column, Type: typ}
+}
+
 // FieldValues returns the values of additional fields that were set on the join-table.
 func (e *EdgeTarget) FieldValues() []any {
 	vs := make([]any, len(e.Fields))
@@ -380,6 +385,11 @@ type (
 		OnConflict []sql.ConflictOption
 	}
 )
+
+// NewCreateSpec creates a new node creation spec.
+func NewCreateSpec(table string, id *FieldSpec) *CreateSpec {
+	return &CreateSpec{Table: table, ID: id}
+}
 
 // SetField appends a new field setter to the creation spec.
 func (u *CreateSpec) SetField(column string, t field.Type, value driver.Value) {

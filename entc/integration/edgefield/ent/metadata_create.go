@@ -169,13 +169,7 @@ func (mc *MetadataCreate) sqlSave(ctx context.Context) (*Metadata, error) {
 func (mc *MetadataCreate) createSpec() (*Metadata, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Metadata{config: mc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: metadata.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: metadata.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(metadata.Table, sqlgraph.NewFieldSpec(metadata.FieldID, field.TypeInt))
 	)
 	if id, ok := mc.mutation.ID(); ok {
 		_node.ID = id

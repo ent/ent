@@ -113,13 +113,7 @@ func (oc *OtherCreate) sqlSave(ctx context.Context) (*Other, error) {
 func (oc *OtherCreate) createSpec() (*Other, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Other{config: oc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: other.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeOther,
-				Column: other.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(other.Table, sqlgraph.NewFieldSpec(other.FieldID, field.TypeOther))
 	)
 	_spec.OnConflict = oc.conflict
 	if id, ok := oc.mutation.ID(); ok {

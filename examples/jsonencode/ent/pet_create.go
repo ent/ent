@@ -117,13 +117,7 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Pet{config: pc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: pet.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: pet.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(pet.Table, sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt))
 	)
 	if value, ok := pc.mutation.Age(); ok {
 		_spec.SetField(pet.FieldAge, field.TypeInt, value)

@@ -127,13 +127,7 @@ func (tc *TeamCreate) sqlSave(ctx context.Context) (*Team, error) {
 func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Team{config: tc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: team.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: team.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(team.Table, sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt))
 	)
 	if value, ok := tc.mutation.Name(); ok {
 		_spec.SetField(team.FieldName, field.TypeString, value)
