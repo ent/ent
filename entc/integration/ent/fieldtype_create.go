@@ -971,13 +971,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 	var (
 		_node = &FieldType{config: ftc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: fieldtype.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: fieldtype.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(fieldtype.Table, sqlgraph.NewFieldSpec(fieldtype.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = ftc.conflict
 	if value, ok := ftc.mutation.Int(); ok {

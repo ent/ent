@@ -146,13 +146,7 @@ func (ugc *UserGroupCreate) sqlSave(ctx context.Context) (*UserGroup, error) {
 func (ugc *UserGroupCreate) createSpec() (*UserGroup, *sqlgraph.CreateSpec) {
 	var (
 		_node = &UserGroup{config: ugc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: usergroup.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: usergroup.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(usergroup.Table, sqlgraph.NewFieldSpec(usergroup.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = ugc.conflict
 	if value, ok := ugc.mutation.JoinedAt(); ok {

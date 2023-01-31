@@ -163,9 +163,7 @@ func (rc *RelationshipCreate) sqlSave(ctx context.Context) (*Relationship, error
 func (rc *RelationshipCreate) createSpec() (*Relationship, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Relationship{config: rc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: relationship.Table,
-		}
+		_spec = sqlgraph.NewCreateSpec(relationship.Table, nil)
 	)
 	_spec.OnConflict = rc.conflict
 	if value, ok := rc.mutation.Weight(); ok {

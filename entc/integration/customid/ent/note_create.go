@@ -166,13 +166,7 @@ func (nc *NoteCreate) sqlSave(ctx context.Context) (*Note, error) {
 func (nc *NoteCreate) createSpec() (*Note, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Note{config: nc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: note.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
-				Column: note.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(note.Table, sqlgraph.NewFieldSpec(note.FieldID, field.TypeString))
 	)
 	_spec.OnConflict = nc.conflict
 	if id, ok := nc.mutation.ID(); ok {

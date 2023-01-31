@@ -128,13 +128,7 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 func (nc *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Node{config: nc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: node.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: node.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(node.Table, sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt))
 	)
 	if value, ok := nc.mutation.Value(); ok {
 		_spec.SetField(node.FieldValue, field.TypeInt, value)

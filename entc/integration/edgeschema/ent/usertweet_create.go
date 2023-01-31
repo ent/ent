@@ -146,13 +146,7 @@ func (utc *UserTweetCreate) sqlSave(ctx context.Context) (*UserTweet, error) {
 func (utc *UserTweetCreate) createSpec() (*UserTweet, *sqlgraph.CreateSpec) {
 	var (
 		_node = &UserTweet{config: utc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: usertweet.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: usertweet.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(usertweet.Table, sqlgraph.NewFieldSpec(usertweet.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = utc.conflict
 	if value, ok := utc.mutation.CreatedAt(); ok {

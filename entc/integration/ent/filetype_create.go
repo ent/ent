@@ -165,13 +165,7 @@ func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
 func (ftc *FileTypeCreate) createSpec() (*FileType, *sqlgraph.CreateSpec) {
 	var (
 		_node = &FileType{config: ftc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: filetype.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: filetype.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(filetype.Table, sqlgraph.NewFieldSpec(filetype.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = ftc.conflict
 	if value, ok := ftc.mutation.Name(); ok {

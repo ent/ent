@@ -138,13 +138,7 @@ func (sc *SessionCreate) sqlSave(ctx context.Context) (*Session, error) {
 func (sc *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Session{config: sc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: session.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeBytes,
-				Column: session.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(session.Table, sqlgraph.NewFieldSpec(session.FieldID, field.TypeBytes))
 	)
 	_spec.OnConflict = sc.conflict
 	if id, ok := sc.mutation.ID(); ok {

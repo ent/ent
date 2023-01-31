@@ -119,13 +119,7 @@ func (ic *InfoCreate) sqlSave(ctx context.Context) (*Info, error) {
 func (ic *InfoCreate) createSpec() (*Info, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Info{config: ic.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: info.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: info.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(info.Table, sqlgraph.NewFieldSpec(info.FieldID, field.TypeInt))
 	)
 	if id, ok := ic.mutation.ID(); ok {
 		_node.ID = id

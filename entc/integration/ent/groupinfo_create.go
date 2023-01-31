@@ -134,13 +134,7 @@ func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 func (gic *GroupInfoCreate) createSpec() (*GroupInfo, *sqlgraph.CreateSpec) {
 	var (
 		_node = &GroupInfo{config: gic.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: groupinfo.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: groupinfo.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(groupinfo.Table, sqlgraph.NewFieldSpec(groupinfo.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = gic.conflict
 	if value, ok := gic.mutation.Desc(); ok {

@@ -83,13 +83,7 @@ func (ac *APICreate) sqlSave(ctx context.Context) (*Api, error) {
 func (ac *APICreate) createSpec() (*Api, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Api{config: ac.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: api.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: api.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(api.Table, sqlgraph.NewFieldSpec(api.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = ac.conflict
 	return _node, _spec

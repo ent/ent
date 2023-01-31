@@ -122,13 +122,7 @@ func (mc *MediaCreate) sqlSave(ctx context.Context) (*Media, error) {
 func (mc *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Media{config: mc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: media.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: media.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(media.Table, sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt))
 	)
 	if value, ok := mc.mutation.Source(); ok {
 		_spec.SetField(media.FieldSource, field.TypeString, value)

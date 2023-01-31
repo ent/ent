@@ -92,13 +92,7 @@ func (ric *RelationshipInfoCreate) sqlSave(ctx context.Context) (*RelationshipIn
 func (ric *RelationshipInfoCreate) createSpec() (*RelationshipInfo, *sqlgraph.CreateSpec) {
 	var (
 		_node = &RelationshipInfo{config: ric.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: relationshipinfo.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: relationshipinfo.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(relationshipinfo.Table, sqlgraph.NewFieldSpec(relationshipinfo.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = ric.conflict
 	if value, ok := ric.mutation.Text(); ok {

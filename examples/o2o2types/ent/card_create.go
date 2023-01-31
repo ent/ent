@@ -115,13 +115,7 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Card{config: cc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: card.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: card.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(card.Table, sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt))
 	)
 	if value, ok := cc.mutation.Expired(); ok {
 		_spec.SetField(card.FieldExpired, field.TypeTime, value)

@@ -127,13 +127,7 @@ func (lc *LinkCreate) sqlSave(ctx context.Context) (*Link, error) {
 func (lc *LinkCreate) createSpec() (*Link, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Link{config: lc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: link.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: link.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(link.Table, sqlgraph.NewFieldSpec(link.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = lc.conflict
 	if id, ok := lc.mutation.ID(); ok {

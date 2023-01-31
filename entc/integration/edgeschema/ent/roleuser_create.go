@@ -142,9 +142,7 @@ func (ruc *RoleUserCreate) sqlSave(ctx context.Context) (*RoleUser, error) {
 func (ruc *RoleUserCreate) createSpec() (*RoleUser, *sqlgraph.CreateSpec) {
 	var (
 		_node = &RoleUser{config: ruc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: roleuser.Table,
-		}
+		_spec = sqlgraph.NewCreateSpec(roleuser.Table, nil)
 	)
 	_spec.OnConflict = ruc.conflict
 	if value, ok := ruc.mutation.CreatedAt(); ok {

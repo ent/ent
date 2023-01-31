@@ -142,9 +142,7 @@ func (blc *BlobLinkCreate) sqlSave(ctx context.Context) (*BlobLink, error) {
 func (blc *BlobLinkCreate) createSpec() (*BlobLink, *sqlgraph.CreateSpec) {
 	var (
 		_node = &BlobLink{config: blc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: bloblink.Table,
-		}
+		_spec = sqlgraph.NewCreateSpec(bloblink.Table, nil)
 	)
 	_spec.OnConflict = blc.conflict
 	if value, ok := blc.mutation.CreatedAt(); ok {

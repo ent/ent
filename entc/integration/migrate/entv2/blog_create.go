@@ -118,13 +118,7 @@ func (bc *BlogCreate) sqlSave(ctx context.Context) (*Blog, error) {
 func (bc *BlogCreate) createSpec() (*Blog, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Blog{config: bc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: blog.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: blog.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(blog.Table, sqlgraph.NewFieldSpec(blog.FieldID, field.TypeInt))
 	)
 	if id, ok := bc.mutation.ID(); ok {
 		_node.ID = id

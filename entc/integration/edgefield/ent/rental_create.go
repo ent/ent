@@ -145,13 +145,7 @@ func (rc *RentalCreate) sqlSave(ctx context.Context) (*Rental, error) {
 func (rc *RentalCreate) createSpec() (*Rental, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Rental{config: rc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: rental.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: rental.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(rental.Table, sqlgraph.NewFieldSpec(rental.FieldID, field.TypeInt))
 	)
 	if value, ok := rc.mutation.Date(); ok {
 		_spec.SetField(rental.FieldDate, field.TypeTime, value)

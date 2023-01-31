@@ -206,13 +206,7 @@ func (cc *ConversionCreate) sqlSave(ctx context.Context) (*Conversion, error) {
 func (cc *ConversionCreate) createSpec() (*Conversion, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Conversion{config: cc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: conversion.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: conversion.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(conversion.Table, sqlgraph.NewFieldSpec(conversion.FieldID, field.TypeInt))
 	)
 	if value, ok := cc.mutation.Name(); ok {
 		_spec.SetField(conversion.FieldName, field.TypeString, value)

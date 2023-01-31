@@ -144,13 +144,7 @@ func (tc *TaskCreate) sqlSave(ctx context.Context) (*Task, error) {
 func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Task{config: tc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: enttask.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: enttask.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(enttask.Table, sqlgraph.NewFieldSpec(enttask.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = tc.conflict
 	if value, ok := tc.mutation.Priority(); ok {

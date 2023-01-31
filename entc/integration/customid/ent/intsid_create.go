@@ -129,13 +129,7 @@ func (isc *IntSIDCreate) sqlSave(ctx context.Context) (*IntSID, error) {
 func (isc *IntSIDCreate) createSpec() (*IntSID, *sqlgraph.CreateSpec) {
 	var (
 		_node = &IntSID{config: isc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: intsid.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: intsid.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(intsid.Table, sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64))
 	)
 	_spec.OnConflict = isc.conflict
 	if id, ok := isc.mutation.ID(); ok {
