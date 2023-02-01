@@ -43,11 +43,7 @@ func (bld *BlobLinkDelete) ExecX(ctx context.Context) int {
 }
 
 func (bld *BlobLinkDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: bloblink.Table,
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(bloblink.Table, nil)
 	if ps := bld.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

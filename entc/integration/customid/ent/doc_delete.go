@@ -44,15 +44,7 @@ func (dd *DocDelete) ExecX(ctx context.Context) int {
 }
 
 func (dd *DocDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: doc.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
-				Column: doc.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(doc.Table, sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString))
 	if ps := dd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

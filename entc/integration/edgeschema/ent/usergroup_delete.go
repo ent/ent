@@ -44,15 +44,7 @@ func (ugd *UserGroupDelete) ExecX(ctx context.Context) int {
 }
 
 func (ugd *UserGroupDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: usergroup.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: usergroup.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(usergroup.Table, sqlgraph.NewFieldSpec(usergroup.FieldID, field.TypeInt))
 	if ps := ugd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

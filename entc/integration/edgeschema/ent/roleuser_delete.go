@@ -43,11 +43,7 @@ func (rud *RoleUserDelete) ExecX(ctx context.Context) int {
 }
 
 func (rud *RoleUserDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: roleuser.Table,
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(roleuser.Table, nil)
 	if ps := rud.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

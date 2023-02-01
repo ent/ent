@@ -43,11 +43,7 @@ func (tld *TweetLikeDelete) ExecX(ctx context.Context) int {
 }
 
 func (tld *TweetLikeDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: tweetlike.Table,
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(tweetlike.Table, nil)
 	if ps := tld.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

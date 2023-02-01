@@ -44,15 +44,7 @@ func (cd *CommentDelete) ExecX(ctx context.Context) int {
 }
 
 func (cd *CommentDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: comment.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: comment.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(comment.Table, sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt))
 	if ps := cd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

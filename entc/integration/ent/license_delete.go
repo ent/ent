@@ -44,15 +44,7 @@ func (ld *LicenseDelete) ExecX(ctx context.Context) int {
 }
 
 func (ld *LicenseDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: license.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: license.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(license.Table, sqlgraph.NewFieldSpec(license.FieldID, field.TypeInt))
 	if ps := ld.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

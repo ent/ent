@@ -45,15 +45,7 @@ func (ud *UserDelete) ExecX(ctx context.Context) int {
 }
 
 func (ud *UserDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: user.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: user.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(user.Table, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	_spec.Node.Schema = ud.schemaConfig.User
 	ctx = internal.NewSchemaConfigContext(ctx, ud.schemaConfig)
 	if ps := ud.mutation.predicates; len(ps) > 0 {

@@ -12,17 +12,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ $mutation := print $receiver ".mutation" }}
 
 func ({{ $receiver}} *{{ $builder }}) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: {{ $.Package }}.Table,
-			{{- if $.HasOneFieldID }}
-				ID: &sqlgraph.FieldSpec{
-					Type: field.{{ $.ID.Type.ConstName }},
-					Column: {{ $.Package }}.{{ $.ID.Constant }},
-				},
-			{{- end }}
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec({{ $.Package }}.Table, {{ if $.HasOneFieldID }}sqlgraph.NewFieldSpec({{ $.Package }}.{{ $.ID.Constant }}, field.{{ $.ID.Type.ConstName }}){{ else }}nil{{ end }})
 	{{- /* Allow mutating the sqlgraph.DeleteSpec by ent extensions or user templates.*/}}
 	{{- with $tmpls := matchTemplate "dialect/sql/delete/spec/*" }}
 		{{- range $tmpl := $tmpls }}

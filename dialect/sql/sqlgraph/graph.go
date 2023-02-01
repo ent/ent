@@ -518,6 +518,11 @@ type DeleteSpec struct {
 	Predicate func(*sql.Selector)
 }
 
+// NewDeleteSpec creates a new node deletion spec.
+func NewDeleteSpec(table string, id *FieldSpec) *DeleteSpec {
+	return &DeleteSpec{Node: &NodeSpec{Table: table, ID: id}}
+}
+
 // DeleteNodes applies the DeleteSpec on the graph.
 func DeleteNodes(ctx context.Context, drv dialect.Driver, spec *DeleteSpec) (int, error) {
 	var (

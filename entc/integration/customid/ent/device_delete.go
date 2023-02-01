@@ -44,15 +44,7 @@ func (dd *DeviceDelete) ExecX(ctx context.Context) int {
 }
 
 func (dd *DeviceDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: device.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeBytes,
-				Column: device.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(device.Table, sqlgraph.NewFieldSpec(device.FieldID, field.TypeBytes))
 	if ps := dd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

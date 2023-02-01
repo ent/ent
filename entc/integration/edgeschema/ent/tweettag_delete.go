@@ -44,15 +44,7 @@ func (ttd *TweetTagDelete) ExecX(ctx context.Context) int {
 }
 
 func (ttd *TweetTagDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: tweettag.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: tweettag.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(tweettag.Table, sqlgraph.NewFieldSpec(tweettag.FieldID, field.TypeUUID))
 	if ps := ttd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
