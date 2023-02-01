@@ -43,11 +43,7 @@ func (rd *RelationshipDelete) ExecX(ctx context.Context) int {
 }
 
 func (rd *RelationshipDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: relationship.Table,
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(relationship.Table, nil)
 	if ps := rd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

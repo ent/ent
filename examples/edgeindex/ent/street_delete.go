@@ -44,15 +44,7 @@ func (sd *StreetDelete) ExecX(ctx context.Context) int {
 }
 
 func (sd *StreetDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: street.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: street.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(street.Table, sqlgraph.NewFieldSpec(street.FieldID, field.TypeInt))
 	if ps := sd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
