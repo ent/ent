@@ -184,7 +184,7 @@ func (c *{{ $client }}) Use(hooks ...Hook) {
 	c.hooks.{{ $n.Name }} = append(c.hooks.{{ $n.Name }}, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `{{ $n.Package }}.Intercept(f(g(h())))`.
 func (c *{{ $client }}) Intercept(interceptors ...Interceptor) {
 	c.inters.{{ $n.Name }} = append(c.inters.{{ $n.Name }}, interceptors...)

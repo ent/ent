@@ -169,7 +169,7 @@ func (c *CityClient) Use(hooks ...Hook) {
 	c.hooks.City = append(c.hooks.City, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `city.Intercept(f(g(h())))`.
 func (c *CityClient) Intercept(interceptors ...Interceptor) {
 	c.inters.City = append(c.inters.City, interceptors...)
@@ -303,7 +303,7 @@ func (c *StreetClient) Use(hooks ...Hook) {
 	c.hooks.Street = append(c.hooks.Street, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `street.Intercept(f(g(h())))`.
 func (c *StreetClient) Intercept(interceptors ...Interceptor) {
 	c.inters.Street = append(c.inters.Street, interceptors...)

@@ -240,7 +240,7 @@ func (c *CarClient) Use(hooks ...Hook) {
 	c.hooks.Car = append(c.hooks.Car, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `car.Intercept(f(g(h())))`.
 func (c *CarClient) Intercept(interceptors ...Interceptor) {
 	c.inters.Car = append(c.inters.Car, interceptors...)
@@ -374,7 +374,7 @@ func (c *CardClient) Use(hooks ...Hook) {
 	c.hooks.Card = append(c.hooks.Card, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `card.Intercept(f(g(h())))`.
 func (c *CardClient) Intercept(interceptors ...Interceptor) {
 	c.inters.Card = append(c.inters.Card, interceptors...)
@@ -508,7 +508,7 @@ func (c *InfoClient) Use(hooks ...Hook) {
 	c.hooks.Info = append(c.hooks.Info, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `info.Intercept(f(g(h())))`.
 func (c *InfoClient) Intercept(interceptors ...Interceptor) {
 	c.inters.Info = append(c.inters.Info, interceptors...)
@@ -642,7 +642,7 @@ func (c *MetadataClient) Use(hooks ...Hook) {
 	c.hooks.Metadata = append(c.hooks.Metadata, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `metadata.Intercept(f(g(h())))`.
 func (c *MetadataClient) Intercept(interceptors ...Interceptor) {
 	c.inters.Metadata = append(c.inters.Metadata, interceptors...)
@@ -808,7 +808,7 @@ func (c *NodeClient) Use(hooks ...Hook) {
 	c.hooks.Node = append(c.hooks.Node, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `node.Intercept(f(g(h())))`.
 func (c *NodeClient) Intercept(interceptors ...Interceptor) {
 	c.inters.Node = append(c.inters.Node, interceptors...)
@@ -958,7 +958,7 @@ func (c *PetClient) Use(hooks ...Hook) {
 	c.hooks.Pet = append(c.hooks.Pet, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `pet.Intercept(f(g(h())))`.
 func (c *PetClient) Intercept(interceptors ...Interceptor) {
 	c.inters.Pet = append(c.inters.Pet, interceptors...)
@@ -1092,7 +1092,7 @@ func (c *PostClient) Use(hooks ...Hook) {
 	c.hooks.Post = append(c.hooks.Post, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `post.Intercept(f(g(h())))`.
 func (c *PostClient) Intercept(interceptors ...Interceptor) {
 	c.inters.Post = append(c.inters.Post, interceptors...)
@@ -1226,7 +1226,7 @@ func (c *RentalClient) Use(hooks ...Hook) {
 	c.hooks.Rental = append(c.hooks.Rental, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `rental.Intercept(f(g(h())))`.
 func (c *RentalClient) Intercept(interceptors ...Interceptor) {
 	c.inters.Rental = append(c.inters.Rental, interceptors...)
@@ -1376,7 +1376,7 @@ func (c *UserClient) Use(hooks ...Hook) {
 	c.hooks.User = append(c.hooks.User, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `user.Intercept(f(g(h())))`.
 func (c *UserClient) Intercept(interceptors ...Interceptor) {
 	c.inters.User = append(c.inters.User, interceptors...)
