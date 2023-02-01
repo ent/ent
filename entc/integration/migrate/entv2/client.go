@@ -239,7 +239,7 @@ func (c *BlogClient) Use(hooks ...Hook) {
 	c.hooks.Blog = append(c.hooks.Blog, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `blog.Intercept(f(g(h())))`.
 func (c *BlogClient) Intercept(interceptors ...Interceptor) {
 	c.inters.Blog = append(c.inters.Blog, interceptors...)
@@ -373,7 +373,7 @@ func (c *CarClient) Use(hooks ...Hook) {
 	c.hooks.Car = append(c.hooks.Car, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `car.Intercept(f(g(h())))`.
 func (c *CarClient) Intercept(interceptors ...Interceptor) {
 	c.inters.Car = append(c.inters.Car, interceptors...)
@@ -507,7 +507,7 @@ func (c *ConversionClient) Use(hooks ...Hook) {
 	c.hooks.Conversion = append(c.hooks.Conversion, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `conversion.Intercept(f(g(h())))`.
 func (c *ConversionClient) Intercept(interceptors ...Interceptor) {
 	c.inters.Conversion = append(c.inters.Conversion, interceptors...)
@@ -625,7 +625,7 @@ func (c *CustomTypeClient) Use(hooks ...Hook) {
 	c.hooks.CustomType = append(c.hooks.CustomType, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `customtype.Intercept(f(g(h())))`.
 func (c *CustomTypeClient) Intercept(interceptors ...Interceptor) {
 	c.inters.CustomType = append(c.inters.CustomType, interceptors...)
@@ -743,7 +743,7 @@ func (c *GroupClient) Use(hooks ...Hook) {
 	c.hooks.Group = append(c.hooks.Group, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `group.Intercept(f(g(h())))`.
 func (c *GroupClient) Intercept(interceptors ...Interceptor) {
 	c.inters.Group = append(c.inters.Group, interceptors...)
@@ -861,7 +861,7 @@ func (c *MediaClient) Use(hooks ...Hook) {
 	c.hooks.Media = append(c.hooks.Media, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `media.Intercept(f(g(h())))`.
 func (c *MediaClient) Intercept(interceptors ...Interceptor) {
 	c.inters.Media = append(c.inters.Media, interceptors...)
@@ -979,7 +979,7 @@ func (c *PetClient) Use(hooks ...Hook) {
 	c.hooks.Pet = append(c.hooks.Pet, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `pet.Intercept(f(g(h())))`.
 func (c *PetClient) Intercept(interceptors ...Interceptor) {
 	c.inters.Pet = append(c.inters.Pet, interceptors...)
@@ -1113,7 +1113,7 @@ func (c *UserClient) Use(hooks ...Hook) {
 	c.hooks.User = append(c.hooks.User, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `user.Intercept(f(g(h())))`.
 func (c *UserClient) Intercept(interceptors ...Interceptor) {
 	c.inters.User = append(c.inters.User, interceptors...)
@@ -1279,7 +1279,7 @@ func (c *ZooClient) Use(hooks ...Hook) {
 	c.hooks.Zoo = append(c.hooks.Zoo, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `zoo.Intercept(f(g(h())))`.
 func (c *ZooClient) Intercept(interceptors ...Interceptor) {
 	c.inters.Zoo = append(c.inters.Zoo, interceptors...)

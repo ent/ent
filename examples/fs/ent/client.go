@@ -159,7 +159,7 @@ func (c *FileClient) Use(hooks ...Hook) {
 	c.hooks.File = append(c.hooks.File, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `file.Intercept(f(g(h())))`.
 func (c *FileClient) Intercept(interceptors ...Interceptor) {
 	c.inters.File = append(c.inters.File, interceptors...)

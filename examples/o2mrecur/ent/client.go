@@ -159,7 +159,7 @@ func (c *NodeClient) Use(hooks ...Hook) {
 	c.hooks.Node = append(c.hooks.Node, hooks...)
 }
 
-// Use adds a list of query interceptors to the interceptors stack.
+// Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `node.Intercept(f(g(h())))`.
 func (c *NodeClient) Intercept(interceptors ...Interceptor) {
 	c.inters.Node = append(c.inters.Node, interceptors...)
