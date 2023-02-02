@@ -80,7 +80,7 @@ func TestMySQL_Create(t *testing.T) {
 			before: func(mock mysqlMock) {
 				mock.start("5.7.8")
 				mock.tableExists("users", false)
-				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) NULL, `age` bigint NOT NULL, `doc` json NULL, `enums` enum('a', 'b') NOT NULL, `uuid` char(36) binary NULL, `ts` timestamp NULL, `ts_default` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, `datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, `decimal` decimal(6,2) NOT NULL, `unsigned decimal` decimal(6,2) unsigned NOT NULL, `float` float NOT NULL DEFAULT '0', PRIMARY KEY(`id`), CHECK (price > 0), CONSTRAINT `valid_age` CHECK (age > 0), CONSTRAINT `valid_name` CHECK (name <> '')) CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE = INNODB")).
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) NULL, `age` bigint NOT NULL, `doc` json NULL, `enums` enum('a', 'b') NOT NULL, `uuid` char(36) binary NULL, `ts` datetime NULL, `ts_default` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, `datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, `decimal` decimal(6,2) NOT NULL, `unsigned decimal` decimal(6,2) unsigned NOT NULL, `float` float NOT NULL DEFAULT '0', PRIMARY KEY(`id`), CHECK (price > 0), CONSTRAINT `valid_age` CHECK (age > 0), CONSTRAINT `valid_name` CHECK (name <> '')) CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE = INNODB")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
@@ -182,7 +182,7 @@ func TestMySQL_Create(t *testing.T) {
 			before: func(mock mysqlMock) {
 				mock.start("5.7.23")
 				mock.tableExists("users", false)
-				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) NULL, `created_at` timestamp NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) NULL, `created_at` datetime NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.tableExists("pets", false)
 				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `pets`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) NOT NULL, `owner_id` bigint NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
@@ -235,7 +235,7 @@ func TestMySQL_Create(t *testing.T) {
 			before: func(mock mysqlMock) {
 				mock.start("5.7.23")
 				mock.tableExists("users", false)
-				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) NULL, `created_at` timestamp NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) NULL, `created_at` datetime NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.tableExists("pets", false)
 				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `pets`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) NOT NULL, `owner_id` bigint NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
@@ -301,7 +301,7 @@ func TestMySQL_Create(t *testing.T) {
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "sub_part", "non_unique", "seq_in_index"}).
 						AddRow("PRIMARY", "id", nil, "0", "1"))
-				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `age` bigint NOT NULL, ADD COLUMN `ts` timestamp NOT NULL, MODIFY COLUMN `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP")).
+				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `age` bigint NOT NULL, ADD COLUMN `ts` datetime NOT NULL, MODIFY COLUMN `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
@@ -368,12 +368,12 @@ func TestMySQL_Create(t *testing.T) {
 						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", "", nil, nil).
 						AddRow("created_at", "datetime", "NO", "YES", "NULL", "", "", "", nil, nil).
 						AddRow("updated_at", "timestamp", "NO", "YES", "NULL", "", "", "", nil, nil).
-						AddRow("deleted_at", "datetime", "NO", "YES", "NULL", "", "", "", nil, nil))
+						AddRow("deleted_at", "timestamp", "NO", "YES", "NULL", "", "", "", nil, nil))
 				mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `sub_part`,  `non_unique`, `seq_in_index` FROM `INFORMATION_SCHEMA`.`STATISTICS` WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ? ORDER BY `index_name`, `seq_in_index`")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "sub_part", "non_unique", "seq_in_index"}).
 						AddRow("PRIMARY", "id", nil, "0", "1"))
-				mock.ExpectExec(escape("ALTER TABLE `users` MODIFY COLUMN `updated_at` datetime NULL, MODIFY COLUMN `deleted_at` timestamp NULL")).
+				mock.ExpectExec(escape("ALTER TABLE `users` MODIFY COLUMN `updated_at` datetime NULL, MODIFY COLUMN `deleted_at` datetime NULL")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},

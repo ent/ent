@@ -2008,8 +2008,8 @@ func TestUpdateNodes(t *testing.T) {
 				mock.ExpectQuery(escape("SELECT `id` FROM `users`")).
 					WillReturnRows(sqlmock.NewRows([]string{"id"}).
 						AddRow(10))
-				mock.ExpectExec(escape("UPDATE `users` SET `version` = COALESCE(`users`.`version`, 0) + ? WHERE `id` = ?")).
-					WithArgs(1, 10).
+				mock.ExpectExec(escape("UPDATE `users` SET `version` = COALESCE(`users`.`version`, 0) + ?")).
+					WithArgs(1).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				// Clear "owner_id" column in the "cards" table.
 				mock.ExpectExec(escape("UPDATE `cards` SET `owner_id` = NULL WHERE `id` IN (?, ?) AND `owner_id` = ?")).
@@ -2198,7 +2198,7 @@ func TestQueryNodes(t *testing.T) {
 			AddRow(1, 10, nil, nil, nil).
 			AddRow(2, 20, "", 0, 0).
 			AddRow(3, 30, "a8m", 1, 1))
-	mock.ExpectQuery(escape("SELECT COUNT(DISTINCT `users`.`id`) FROM `users` WHERE `age` < ? LIMIT 3 OFFSET 4 FOR UPDATE NOWAIT")).
+	mock.ExpectQuery(escape("SELECT COUNT(*) FROM `users` WHERE `age` < ? LIMIT 3 OFFSET 4 FOR UPDATE NOWAIT")).
 		WithArgs(40).
 		WillReturnRows(sqlmock.NewRows([]string{"COUNT"}).
 			AddRow(3))

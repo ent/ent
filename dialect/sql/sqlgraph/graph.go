@@ -653,15 +653,19 @@ func (q *query) count(ctx context.Context, drv dialect.Driver) (int, error) {
 	// If no columns were selected in count,
 	// the default selection is by node ids.
 	columns := q.Node.Columns
-	if len(columns) == 0 && q.Node.ID != nil {
-		columns = append(columns, q.Node.ID.Column)
-	}
+	// if len(columns) == 0 && q.Node.ID != nil {
+	// 	columns = append(columns, q.Node.ID.Column)
+	// }
 	for i, c := range columns {
 		columns[i] = selector.C(c)
 	}
 	if q.Unique {
 		selector.SetDistinct(false)
-		selector.Count(sql.Distinct(columns...))
+		if len(columns) > 0 {
+			selector.Count(sql.Distinct(columns...))
+		} else {
+			selector.Count()
+		}
 	} else {
 		selector.Count(columns...)
 	}
@@ -856,7 +860,14 @@ func (u *updater) nodes(ctx context.Context, drv dialect.Driver) (int, error) {
 		if len(ids) == 0 {
 			return 0, nil
 		}
-		update.Where(matchID(u.Node.ID.Column, ids))
+		// remake predicate by creating a new selector
+		selector2 := u.builder.Select(u.Node.ID.Column).
+			From(u.builder.Table(u.Node.Table))
+		if pred := u.Predicate; pred != nil {
+			pred(selector2)
+		}
+		// update.Where(matchID(u.Node.ID.Column, ids))
+		update.Where(selector2.P())
 		// In case of multi statement update, that change can
 		// affect more than 1 table, and therefore, we return
 		// the list of ids as number of affected records.

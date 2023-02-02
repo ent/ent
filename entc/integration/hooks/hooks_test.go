@@ -702,7 +702,8 @@ func TestTraverseUnique(t *testing.T) {
 		client.Pet.Create().SetName("a").SetOwner(a8m),
 		client.Pet.Create().SetName("b").SetOwner(a8m),
 	).ExecX(ctx)
-	require.Equal(t, 1, client.Pet.Query().QueryOwner().CountX(ctx))
+	require.Equal(t, 2, client.Pet.Query().QueryOwner().CountX(ctx))
+	require.Equal(t, 1, client.Pet.Query().QueryOwner().Select(user.FieldName).Unique(true).CountX(ctx))
 
 	// Disable unique traversal using interceptors.
 	client.User.Intercept(
@@ -716,7 +717,7 @@ func TestTraverseUnique(t *testing.T) {
 	)
 	// The JOIN with pets will return the same owner twice, one for each pet.
 	require.Equal(t, 2, client.Pet.Query().QueryOwner().CountX(ctx))
-	require.Equal(t, 1, client.Pet.Query().QueryOwner().Unique(true).CountX(ctx))
+	require.Equal(t, 1, client.Pet.Query().QueryOwner().Select(user.FieldName).Unique(true).CountX(ctx))
 }
 
 // The following example demonstrates how to write interceptors that

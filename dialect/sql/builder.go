@@ -1295,10 +1295,11 @@ func False() *Predicate {
 	return P().False()
 }
 
-// False appends FALSE to the predicate.
+// False appends 0 = 1 to the predicate.
+// Kingshard reports an error for FALSE, so convert to the equivalent boolean expression.
 func (p *Predicate) False() *Predicate {
 	return p.Append(func(b *Builder) {
-		b.WriteString("FALSE")
+		b.WriteString("0 = 1")
 	})
 }
 

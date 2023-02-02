@@ -653,23 +653,23 @@ func TestBuilder(t *testing.T) {
 		{
 			input: Delete("users").
 				Where(And(IsNull("parent_id"), In("name"))),
-			wantQuery: "DELETE FROM `users` WHERE `parent_id` IS NULL AND FALSE",
+			wantQuery: "DELETE FROM `users` WHERE `parent_id` IS NULL AND 0 = 1",
 		},
 		{
 			input: Delete("users").
 				Where(And(IsNull("parent_id"), NotIn("name"))),
-			wantQuery: "DELETE FROM `users` WHERE `parent_id` IS NULL AND (NOT (FALSE))",
+			wantQuery: "DELETE FROM `users` WHERE `parent_id` IS NULL AND (NOT (0 = 1))",
 		},
 		{
 			input: Delete("users").
 				Where(And(False(), False())),
-			wantQuery: "DELETE FROM `users` WHERE FALSE AND FALSE",
+			wantQuery: "DELETE FROM `users` WHERE 0 = 1 AND 0 = 1",
 		},
 		{
 			input: Dialect(dialect.Postgres).
 				Delete("users").
 				Where(And(False(), False())),
-			wantQuery: `DELETE FROM "users" WHERE FALSE AND FALSE`,
+			wantQuery: `DELETE FROM "users" WHERE 0 = 1 AND 0 = 1`,
 		},
 		{
 			input: Delete("users").
@@ -2170,7 +2170,7 @@ func TestReusePredicates(t *testing.T) {
 				EQ("a", "a"),
 				In("b"),
 			),
-			wantQuery: `SELECT * FROM "users" WHERE "a" = $1 OR FALSE`,
+			wantQuery: `SELECT * FROM "users" WHERE "a" = $1 OR 0 = 1`,
 			wantArgs:  []any{"a"},
 		},
 		{
