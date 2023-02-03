@@ -64,14 +64,14 @@ This option can be added to a project using the `--feature schema/snapshot` flag
 The privacy layer allows configuring privacy policy for queries and mutations of entities in the database.
 
 This option can be added to a project using the `--feature privacy` flag, and you can learn more about in the
-[privacy](privacy.md) documentation.
+[privacy](privacy.mdx) documentation.
 
 ### EntQL Filtering
 
 The `entql` option provides a generic and dynamic filtering capability at runtime for the different query builders.
 
 This option can be added to a project using the `--feature entql` flag, and you can learn more about in the
-[privacy](privacy.md#multi-tenancy) documentation.
+[privacy](privacy.mdx#multi-tenancy) documentation.
 
 ### Named Edges
 
