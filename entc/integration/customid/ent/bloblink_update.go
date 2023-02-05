@@ -129,22 +129,7 @@ func (blu *BlobLinkUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := blu.check(); err != nil {
 		return n, err
 	}
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   bloblink.Table,
-			Columns: bloblink.Columns,
-			CompositeID: []*sqlgraph.FieldSpec{
-				{
-					Type:   field.TypeUUID,
-					Column: bloblink.FieldBlobID,
-				},
-				{
-					Type:   field.TypeUUID,
-					Column: bloblink.FieldLinkID,
-				},
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(bloblink.Table, bloblink.Columns, sqlgraph.NewFieldSpec(bloblink.FieldBlobID, field.TypeUUID), sqlgraph.NewFieldSpec(bloblink.FieldLinkID, field.TypeUUID))
 	if ps := blu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -353,22 +338,7 @@ func (bluo *BlobLinkUpdateOne) sqlSave(ctx context.Context) (_node *BlobLink, er
 	if err := bluo.check(); err != nil {
 		return _node, err
 	}
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   bloblink.Table,
-			Columns: bloblink.Columns,
-			CompositeID: []*sqlgraph.FieldSpec{
-				{
-					Type:   field.TypeUUID,
-					Column: bloblink.FieldBlobID,
-				},
-				{
-					Type:   field.TypeUUID,
-					Column: bloblink.FieldLinkID,
-				},
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(bloblink.Table, bloblink.Columns, sqlgraph.NewFieldSpec(bloblink.FieldBlobID, field.TypeUUID), sqlgraph.NewFieldSpec(bloblink.FieldLinkID, field.TypeUUID))
 	if id, ok := bluo.mutation.BlobID(); !ok {
 		return nil, &ValidationError{Name: "blob_id", err: errors.New(`ent: missing "BlobLink.blob_id" for update`)}
 	} else {

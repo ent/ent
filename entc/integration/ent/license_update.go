@@ -87,16 +87,7 @@ func (lu *LicenseUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Licens
 }
 
 func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   license.Table,
-			Columns: license.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: license.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(license.Table, license.Columns, sqlgraph.NewFieldSpec(license.FieldID, field.TypeInt))
 	if ps := lu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -196,16 +187,7 @@ func (luo *LicenseUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Li
 }
 
 func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   license.Table,
-			Columns: license.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: license.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(license.Table, license.Columns, sqlgraph.NewFieldSpec(license.FieldID, field.TypeInt))
 	id, ok := luo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "License.id" for update`)}

@@ -71,16 +71,7 @@ func (gu *GoodsUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *GoodsUpd
 }
 
 func (gu *GoodsUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   goods.Table,
-			Columns: goods.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: goods.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(goods.Table, goods.Columns, sqlgraph.NewFieldSpec(goods.FieldID, field.TypeInt))
 	if ps := gu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -162,16 +153,7 @@ func (guo *GoodsUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Good
 }
 
 func (guo *GoodsUpdateOne) sqlSave(ctx context.Context) (_node *Goods, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   goods.Table,
-			Columns: goods.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: goods.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(goods.Table, goods.Columns, sqlgraph.NewFieldSpec(goods.FieldID, field.TypeInt))
 	id, ok := guo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Goods.id" for update`)}

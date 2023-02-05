@@ -104,16 +104,7 @@ func (iu *InfoUpdate) ExecX(ctx context.Context) {
 }
 
 func (iu *InfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   info.Table,
-			Columns: info.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: info.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(info.Table, info.Columns, sqlgraph.NewFieldSpec(info.FieldID, field.TypeInt))
 	if ps := iu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -267,16 +258,7 @@ func (iuo *InfoUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (iuo *InfoUpdateOne) sqlSave(ctx context.Context) (_node *Info, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   info.Table,
-			Columns: info.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: info.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(info.Table, info.Columns, sqlgraph.NewFieldSpec(info.FieldID, field.TypeInt))
 	id, ok := iuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Info.id" for update`)}

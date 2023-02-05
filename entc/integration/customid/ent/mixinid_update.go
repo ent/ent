@@ -76,16 +76,7 @@ func (miu *MixinIDUpdate) ExecX(ctx context.Context) {
 }
 
 func (miu *MixinIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   mixinid.Table,
-			Columns: mixinid.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: mixinid.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(mixinid.Table, mixinid.Columns, sqlgraph.NewFieldSpec(mixinid.FieldID, field.TypeUUID))
 	if ps := miu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -177,16 +168,7 @@ func (miuo *MixinIDUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (miuo *MixinIDUpdateOne) sqlSave(ctx context.Context) (_node *MixinID, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   mixinid.Table,
-			Columns: mixinid.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: mixinid.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(mixinid.Table, mixinid.Columns, sqlgraph.NewFieldSpec(mixinid.FieldID, field.TypeUUID))
 	id, ok := miuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "MixinID.id" for update`)}

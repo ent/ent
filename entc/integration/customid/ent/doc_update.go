@@ -182,16 +182,7 @@ func (du *DocUpdate) ExecX(ctx context.Context) {
 }
 
 func (du *DocUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   doc.Table,
-			Columns: doc.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
-				Column: doc.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(doc.Table, doc.Columns, sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString))
 	if ps := du.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -531,16 +522,7 @@ func (duo *DocUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (duo *DocUpdateOne) sqlSave(ctx context.Context) (_node *Doc, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   doc.Table,
-			Columns: doc.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
-				Column: doc.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(doc.Table, doc.Columns, sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString))
 	id, ok := duo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Doc.id" for update`)}

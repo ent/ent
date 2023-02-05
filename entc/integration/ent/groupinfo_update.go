@@ -135,16 +135,7 @@ func (giu *GroupInfoUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Gro
 }
 
 func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   groupinfo.Table,
-			Columns: groupinfo.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: groupinfo.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(groupinfo.Table, groupinfo.Columns, sqlgraph.NewFieldSpec(groupinfo.FieldID, field.TypeInt))
 	if ps := giu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -352,16 +343,7 @@ func (giuo *GroupInfoUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) 
 }
 
 func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (_node *GroupInfo, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   groupinfo.Table,
-			Columns: groupinfo.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: groupinfo.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(groupinfo.Table, groupinfo.Columns, sqlgraph.NewFieldSpec(groupinfo.FieldID, field.TypeInt))
 	id, ok := giuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "GroupInfo.id" for update`)}

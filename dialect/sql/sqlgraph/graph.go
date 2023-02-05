@@ -443,6 +443,20 @@ type (
 	}
 )
 
+// NewUpdateSpec creates a new node update spec.
+func NewUpdateSpec(table string, columns []string, id ...*FieldSpec) *UpdateSpec {
+	spec := &UpdateSpec{
+		Node: &NodeSpec{Table: table, Columns: columns},
+	}
+	switch {
+	case len(id) == 1:
+		spec.Node.ID = id[0]
+	case len(id) > 1:
+		spec.Node.CompositeID = id
+	}
+	return spec
+}
+
 // AddModifier adds a new statement modifier to the spec.
 func (u *UpdateSpec) AddModifier(m func(*sql.UpdateBuilder)) {
 	u.Modifiers = append(u.Modifiers, m)

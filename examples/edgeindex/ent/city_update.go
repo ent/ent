@@ -107,16 +107,7 @@ func (cu *CityUpdate) ExecX(ctx context.Context) {
 }
 
 func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   city.Table,
-			Columns: city.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: city.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(city.Table, city.Columns, sqlgraph.NewFieldSpec(city.FieldID, field.TypeInt))
 	if ps := cu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -289,16 +280,7 @@ func (cuo *CityUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (_node *City, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   city.Table,
-			Columns: city.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: city.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(city.Table, city.Columns, sqlgraph.NewFieldSpec(city.FieldID, field.TypeInt))
 	id, ok := cuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "City.id" for update`)}

@@ -129,22 +129,7 @@ func (ruu *RoleUserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := ruu.check(); err != nil {
 		return n, err
 	}
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   roleuser.Table,
-			Columns: roleuser.Columns,
-			CompositeID: []*sqlgraph.FieldSpec{
-				{
-					Type:   field.TypeInt,
-					Column: roleuser.FieldUserID,
-				},
-				{
-					Type:   field.TypeInt,
-					Column: roleuser.FieldRoleID,
-				},
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(roleuser.Table, roleuser.Columns, sqlgraph.NewFieldSpec(roleuser.FieldUserID, field.TypeInt), sqlgraph.NewFieldSpec(roleuser.FieldRoleID, field.TypeInt))
 	if ps := ruu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -353,22 +338,7 @@ func (ruuo *RoleUserUpdateOne) sqlSave(ctx context.Context) (_node *RoleUser, er
 	if err := ruuo.check(); err != nil {
 		return _node, err
 	}
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   roleuser.Table,
-			Columns: roleuser.Columns,
-			CompositeID: []*sqlgraph.FieldSpec{
-				{
-					Type:   field.TypeInt,
-					Column: roleuser.FieldUserID,
-				},
-				{
-					Type:   field.TypeInt,
-					Column: roleuser.FieldRoleID,
-				},
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(roleuser.Table, roleuser.Columns, sqlgraph.NewFieldSpec(roleuser.FieldUserID, field.TypeInt), sqlgraph.NewFieldSpec(roleuser.FieldRoleID, field.TypeInt))
 	if id, ok := ruuo.mutation.UserID(); !ok {
 		return nil, &ValidationError{Name: "user_id", err: errors.New(`ent: missing "RoleUser.user_id" for update`)}
 	} else {

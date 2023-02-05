@@ -71,16 +71,7 @@ func (au *APIUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *APIUpdate 
 }
 
 func (au *APIUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   api.Table,
-			Columns: api.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: api.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(api.Table, api.Columns, sqlgraph.NewFieldSpec(api.FieldID, field.TypeInt))
 	if ps := au.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -162,16 +153,7 @@ func (auo *APIUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *APIUpd
 }
 
 func (auo *APIUpdateOne) sqlSave(ctx context.Context) (_node *Api, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   api.Table,
-			Columns: api.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: api.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(api.Table, api.Columns, sqlgraph.NewFieldSpec(api.FieldID, field.TypeInt))
 	id, ok := auo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Api.id" for update`)}

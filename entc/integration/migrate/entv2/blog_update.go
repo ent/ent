@@ -114,16 +114,7 @@ func (bu *BlogUpdate) ExecX(ctx context.Context) {
 }
 
 func (bu *BlogUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   blog.Table,
-			Columns: blog.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: blog.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(blog.Table, blog.Columns, sqlgraph.NewFieldSpec(blog.FieldID, field.TypeInt))
 	if ps := bu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -306,16 +297,7 @@ func (buo *BlogUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (buo *BlogUpdateOne) sqlSave(ctx context.Context) (_node *Blog, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   blog.Table,
-			Columns: blog.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: blog.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(blog.Table, blog.Columns, sqlgraph.NewFieldSpec(blog.FieldID, field.TypeInt))
 	id, ok := buo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`entv2: missing "Blog.id" for update`)}

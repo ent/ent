@@ -91,16 +91,7 @@ func (su *SessionUpdate) ExecX(ctx context.Context) {
 }
 
 func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   session.Table,
-			Columns: session.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeBytes,
-				Column: session.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(session.Table, session.Columns, sqlgraph.NewFieldSpec(session.FieldID, field.TypeBytes))
 	if ps := su.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -234,16 +225,7 @@ func (suo *SessionUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   session.Table,
-			Columns: session.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeBytes,
-				Column: session.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(session.Table, session.Columns, sqlgraph.NewFieldSpec(session.FieldID, field.TypeBytes))
 	id, ok := suo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Session.id" for update`)}

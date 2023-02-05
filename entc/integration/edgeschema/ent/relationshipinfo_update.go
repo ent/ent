@@ -70,16 +70,7 @@ func (riu *RelationshipInfoUpdate) ExecX(ctx context.Context) {
 }
 
 func (riu *RelationshipInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   relationshipinfo.Table,
-			Columns: relationshipinfo.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: relationshipinfo.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(relationshipinfo.Table, relationshipinfo.Columns, sqlgraph.NewFieldSpec(relationshipinfo.FieldID, field.TypeInt))
 	if ps := riu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -162,16 +153,7 @@ func (riuo *RelationshipInfoUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (riuo *RelationshipInfoUpdateOne) sqlSave(ctx context.Context) (_node *RelationshipInfo, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   relationshipinfo.Table,
-			Columns: relationshipinfo.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: relationshipinfo.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(relationshipinfo.Table, relationshipinfo.Columns, sqlgraph.NewFieldSpec(relationshipinfo.FieldID, field.TypeInt))
 	id, ok := riuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "RelationshipInfo.id" for update`)}

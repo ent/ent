@@ -1451,16 +1451,7 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := ftu.check(); err != nil {
 		return n, err
 	}
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   fieldtype.Table,
-			Columns: fieldtype.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: fieldtype.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(fieldtype.Table, fieldtype.Columns, sqlgraph.NewFieldSpec(fieldtype.FieldID, field.TypeInt))
 	if ps := ftu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -3373,16 +3364,7 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 	if err := ftuo.check(); err != nil {
 		return _node, err
 	}
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   fieldtype.Table,
-			Columns: fieldtype.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: fieldtype.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(fieldtype.Table, fieldtype.Columns, sqlgraph.NewFieldSpec(fieldtype.FieldID, field.TypeInt))
 	id, ok := ftuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "FieldType.id" for update`)}
