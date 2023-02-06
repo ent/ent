@@ -29,6 +29,10 @@ type Task struct {
 	Priorities map[string]task.Priority `json:"priorities,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt *time.Time `json:"created_at,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty"`
+	// Owner holds the value of the "owner" field.
+	Owner string `json:"owner,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -40,6 +44,8 @@ func (*Task) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case enttask.FieldID, enttask.FieldPriority:
 			values[i] = new(sql.NullInt64)
+		case enttask.FieldName, enttask.FieldOwner:
+			values[i] = new(sql.NullString)
 		case enttask.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
 		default:
@@ -84,6 +90,18 @@ func (t *Task) assignValues(columns []string, values []any) error {
 				t.CreatedAt = new(time.Time)
 				*t.CreatedAt = value.Time
 			}
+		case enttask.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				t.Name = value.String
+			}
+		case enttask.FieldOwner:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field owner", values[i])
+			} else if value.Valid {
+				t.Owner = value.String
+			}
 		}
 	}
 	return nil
@@ -122,6 +140,12 @@ func (t *Task) String() string {
 		builder.WriteString("created_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("name=")
+	builder.WriteString(t.Name)
+	builder.WriteString(", ")
+	builder.WriteString("owner=")
+	builder.WriteString(t.Owner)
 	builder.WriteByte(')')
 	return builder.String()
 }

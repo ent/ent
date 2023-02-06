@@ -102,6 +102,20 @@ func CreatedAt(v time.Time) predicate.Task {
 	})
 }
 
+// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
+func Name(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.EQ(v))
+	})
+}
+
+// Owner applies equality check predicate on the "owner" field. It's identical to OwnerEQ.
+func Owner(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOwner, p.EQ(v))
+	})
+}
+
 // PriorityEQ applies the EQ predicate on the "priority" field.
 func PriorityEQ(v task.Priority) predicate.Task {
 	vc := int(v)
@@ -239,6 +253,188 @@ func CreatedAtLT(v time.Time) predicate.Task {
 func CreatedAtLTE(v time.Time) predicate.Task {
 	return predicate.Task(func(t *dsl.Traversal) {
 		t.Has(Label, FieldCreatedAt, p.LTE(v))
+	})
+}
+
+// NameEQ applies the EQ predicate on the "name" field.
+func NameEQ(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.EQ(v))
+	})
+}
+
+// NameNEQ applies the NEQ predicate on the "name" field.
+func NameNEQ(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.NEQ(v))
+	})
+}
+
+// NameIn applies the In predicate on the "name" field.
+func NameIn(vs ...string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.Within(vs...))
+	})
+}
+
+// NameNotIn applies the NotIn predicate on the "name" field.
+func NameNotIn(vs ...string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.Without(vs...))
+	})
+}
+
+// NameGT applies the GT predicate on the "name" field.
+func NameGT(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.GT(v))
+	})
+}
+
+// NameGTE applies the GTE predicate on the "name" field.
+func NameGTE(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.GTE(v))
+	})
+}
+
+// NameLT applies the LT predicate on the "name" field.
+func NameLT(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.LT(v))
+	})
+}
+
+// NameLTE applies the LTE predicate on the "name" field.
+func NameLTE(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.LTE(v))
+	})
+}
+
+// NameContains applies the Contains predicate on the "name" field.
+func NameContains(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.Containing(v))
+	})
+}
+
+// NameHasPrefix applies the HasPrefix predicate on the "name" field.
+func NameHasPrefix(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.StartingWith(v))
+	})
+}
+
+// NameHasSuffix applies the HasSuffix predicate on the "name" field.
+func NameHasSuffix(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.EndingWith(v))
+	})
+}
+
+// NameIsNil applies the IsNil predicate on the "name" field.
+func NameIsNil() predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldName)
+	})
+}
+
+// NameNotNil applies the NotNil predicate on the "name" field.
+func NameNotNil() predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldName)
+	})
+}
+
+// OwnerEQ applies the EQ predicate on the "owner" field.
+func OwnerEQ(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOwner, p.EQ(v))
+	})
+}
+
+// OwnerNEQ applies the NEQ predicate on the "owner" field.
+func OwnerNEQ(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOwner, p.NEQ(v))
+	})
+}
+
+// OwnerIn applies the In predicate on the "owner" field.
+func OwnerIn(vs ...string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOwner, p.Within(vs...))
+	})
+}
+
+// OwnerNotIn applies the NotIn predicate on the "owner" field.
+func OwnerNotIn(vs ...string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOwner, p.Without(vs...))
+	})
+}
+
+// OwnerGT applies the GT predicate on the "owner" field.
+func OwnerGT(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOwner, p.GT(v))
+	})
+}
+
+// OwnerGTE applies the GTE predicate on the "owner" field.
+func OwnerGTE(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOwner, p.GTE(v))
+	})
+}
+
+// OwnerLT applies the LT predicate on the "owner" field.
+func OwnerLT(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOwner, p.LT(v))
+	})
+}
+
+// OwnerLTE applies the LTE predicate on the "owner" field.
+func OwnerLTE(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOwner, p.LTE(v))
+	})
+}
+
+// OwnerContains applies the Contains predicate on the "owner" field.
+func OwnerContains(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOwner, p.Containing(v))
+	})
+}
+
+// OwnerHasPrefix applies the HasPrefix predicate on the "owner" field.
+func OwnerHasPrefix(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOwner, p.StartingWith(v))
+	})
+}
+
+// OwnerHasSuffix applies the HasSuffix predicate on the "owner" field.
+func OwnerHasSuffix(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOwner, p.EndingWith(v))
+	})
+}
+
+// OwnerIsNil applies the IsNil predicate on the "owner" field.
+func OwnerIsNil() predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldOwner)
+	})
+}
+
+// OwnerNotNil applies the NotNil predicate on the "owner" field.
+func OwnerNotNil() predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldOwner)
 	})
 }
 

@@ -13391,6 +13391,8 @@ type TaskMutation struct {
 	addpriority   *task.Priority
 	priorities    *map[string]task.Priority
 	created_at    *time.Time
+	name          *string
+	owner         *string
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Task, error)
@@ -13636,6 +13638,104 @@ func (m *TaskMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
+// SetName sets the "name" field.
+func (m *TaskMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *TaskMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Task entity.
+// If the Task object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TaskMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ClearName clears the value of the "name" field.
+func (m *TaskMutation) ClearName() {
+	m.name = nil
+	m.clearedFields[enttask.FieldName] = struct{}{}
+}
+
+// NameCleared returns if the "name" field was cleared in this mutation.
+func (m *TaskMutation) NameCleared() bool {
+	_, ok := m.clearedFields[enttask.FieldName]
+	return ok
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *TaskMutation) ResetName() {
+	m.name = nil
+	delete(m.clearedFields, enttask.FieldName)
+}
+
+// SetOwner sets the "owner" field.
+func (m *TaskMutation) SetOwner(s string) {
+	m.owner = &s
+}
+
+// Owner returns the value of the "owner" field in the mutation.
+func (m *TaskMutation) Owner() (r string, exists bool) {
+	v := m.owner
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOwner returns the old "owner" field's value of the Task entity.
+// If the Task object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TaskMutation) OldOwner(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOwner is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOwner requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOwner: %w", err)
+	}
+	return oldValue.Owner, nil
+}
+
+// ClearOwner clears the value of the "owner" field.
+func (m *TaskMutation) ClearOwner() {
+	m.owner = nil
+	m.clearedFields[enttask.FieldOwner] = struct{}{}
+}
+
+// OwnerCleared returns if the "owner" field was cleared in this mutation.
+func (m *TaskMutation) OwnerCleared() bool {
+	_, ok := m.clearedFields[enttask.FieldOwner]
+	return ok
+}
+
+// ResetOwner resets all changes to the "owner" field.
+func (m *TaskMutation) ResetOwner() {
+	m.owner = nil
+	delete(m.clearedFields, enttask.FieldOwner)
+}
+
 // Where appends a list predicates to the TaskMutation builder.
 func (m *TaskMutation) Where(ps ...predicate.Task) {
 	m.predicates = append(m.predicates, ps...)
@@ -13670,7 +13770,7 @@ func (m *TaskMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TaskMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 5)
 	if m.priority != nil {
 		fields = append(fields, enttask.FieldPriority)
 	}
@@ -13679,6 +13779,12 @@ func (m *TaskMutation) Fields() []string {
 	}
 	if m.created_at != nil {
 		fields = append(fields, enttask.FieldCreatedAt)
+	}
+	if m.name != nil {
+		fields = append(fields, enttask.FieldName)
+	}
+	if m.owner != nil {
+		fields = append(fields, enttask.FieldOwner)
 	}
 	return fields
 }
@@ -13694,6 +13800,10 @@ func (m *TaskMutation) Field(name string) (ent.Value, bool) {
 		return m.Priorities()
 	case enttask.FieldCreatedAt:
 		return m.CreatedAt()
+	case enttask.FieldName:
+		return m.Name()
+	case enttask.FieldOwner:
+		return m.Owner()
 	}
 	return nil, false
 }
@@ -13709,6 +13819,10 @@ func (m *TaskMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldPriorities(ctx)
 	case enttask.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
+	case enttask.FieldName:
+		return m.OldName(ctx)
+	case enttask.FieldOwner:
+		return m.OldOwner(ctx)
 	}
 	return nil, fmt.Errorf("unknown Task field %s", name)
 }
@@ -13738,6 +13852,20 @@ func (m *TaskMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedAt(v)
+		return nil
+	case enttask.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case enttask.FieldOwner:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOwner(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Task field %s", name)
@@ -13787,6 +13915,12 @@ func (m *TaskMutation) ClearedFields() []string {
 	if m.FieldCleared(enttask.FieldPriorities) {
 		fields = append(fields, enttask.FieldPriorities)
 	}
+	if m.FieldCleared(enttask.FieldName) {
+		fields = append(fields, enttask.FieldName)
+	}
+	if m.FieldCleared(enttask.FieldOwner) {
+		fields = append(fields, enttask.FieldOwner)
+	}
 	return fields
 }
 
@@ -13804,6 +13938,12 @@ func (m *TaskMutation) ClearField(name string) error {
 	case enttask.FieldPriorities:
 		m.ClearPriorities()
 		return nil
+	case enttask.FieldName:
+		m.ClearName()
+		return nil
+	case enttask.FieldOwner:
+		m.ClearOwner()
+		return nil
 	}
 	return fmt.Errorf("unknown Task nullable field %s", name)
 }
@@ -13820,6 +13960,12 @@ func (m *TaskMutation) ResetField(name string) error {
 		return nil
 	case enttask.FieldCreatedAt:
 		m.ResetCreatedAt()
+		return nil
+	case enttask.FieldName:
+		m.ResetName()
+		return nil
+	case enttask.FieldOwner:
+		m.ResetOwner()
 		return nil
 	}
 	return fmt.Errorf("unknown Task field %s", name)

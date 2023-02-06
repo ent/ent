@@ -392,12 +392,21 @@ var (
 		{Name: "priority", Type: field.TypeInt, Default: 1},
 		{Name: "priorities", Type: field.TypeJSON, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString, Nullable: true},
+		{Name: "owner", Type: field.TypeString, Nullable: true},
 	}
 	// TasksTable holds the schema information for the "tasks" table.
 	TasksTable = &schema.Table{
 		Name:       "tasks",
 		Columns:    TasksColumns,
 		PrimaryKey: []*schema.Column{TasksColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "task_name_owner",
+				Unique:  true,
+				Columns: []*schema.Column{TasksColumns[4], TasksColumns[5]},
+			},
+		},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{

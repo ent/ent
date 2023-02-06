@@ -38,6 +38,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/node"
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/schema"
+	"entgo.io/ent/entc/integration/ent/schema/task"
 	enttask "entgo.io/ent/entc/integration/ent/task"
 	"entgo.io/ent/entc/integration/ent/user"
 
@@ -477,6 +478,18 @@ func Upsert(t *testing.T, client *ent.Client) {
 		ExecX(ctx)
 	require.Empty(t, client.Card.GetX(ctx, c3.ID).Name, "existing name fields should be cleared when not set (= set to nil)")
 	require.NotEmpty(t, client.Card.Query().Where(card.Number("708090")).OnlyX(ctx).Name, "new record should set their name")
+
+	// Conflict on a composite unique index.
+	t1 := client.Task.Create().SetName("todo1").SetOwner("a8m").SetPriority(task.PriorityLow).SaveX(ctx)
+	tid := client.Task.Create().
+		SetName("todo1").
+		SetOwner("a8m").
+		SetPriority(task.PriorityHigh).
+		OnConflictColumns(enttask.FieldName, enttask.FieldOwner).
+		UpdatePriority().
+		IDX(ctx)
+	require.Equal(t, t1.ID, tid)
+	require.Equal(t, task.PriorityHigh, client.Task.GetX(ctx, tid).Priority)
 }
 
 func Clone(t *testing.T, client *ent.Client) {

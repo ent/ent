@@ -329,6 +329,8 @@ var schemaGraph = func() *sqlgraph.Schema {
 			enttask.FieldPriority:   {Type: field.TypeInt, Column: enttask.FieldPriority},
 			enttask.FieldPriorities: {Type: field.TypeJSON, Column: enttask.FieldPriorities},
 			enttask.FieldCreatedAt:  {Type: field.TypeTime, Column: enttask.FieldCreatedAt},
+			enttask.FieldName:       {Type: field.TypeString, Column: enttask.FieldName},
+			enttask.FieldOwner:      {Type: field.TypeString, Column: enttask.FieldOwner},
 		},
 	}
 	graph.Nodes[15] = &sqlgraph.Node{
@@ -2035,6 +2037,16 @@ func (f *TaskFilter) WherePriorities(p entql.BytesP) {
 // WhereCreatedAt applies the entql time.Time predicate on the created_at field.
 func (f *TaskFilter) WhereCreatedAt(p entql.TimeP) {
 	f.Where(p.Field(enttask.FieldCreatedAt))
+}
+
+// WhereName applies the entql string predicate on the name field.
+func (f *TaskFilter) WhereName(p entql.StringP) {
+	f.Where(p.Field(enttask.FieldName))
+}
+
+// WhereOwner applies the entql string predicate on the owner field.
+func (f *TaskFilter) WhereOwner(p entql.StringP) {
+	f.Where(p.Field(enttask.FieldOwner))
 }
 
 // addPredicate implements the predicateAdder interface.
