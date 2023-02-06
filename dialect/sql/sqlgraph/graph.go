@@ -577,6 +577,17 @@ type QuerySpec struct {
 	Assign     func(columns []string, values []any) error
 }
 
+// NewQuerySpec creates a new node query spec.
+func NewQuerySpec(table string, columns []string, id *FieldSpec) *QuerySpec {
+	return &QuerySpec{
+		Node: &NodeSpec{
+			ID:      id,
+			Table:   table,
+			Columns: columns,
+		},
+	}
+}
+
 // QueryNodes queries the nodes in the graph query and scans them to the given values.
 func QueryNodes(ctx context.Context, drv dialect.Driver, spec *QuerySpec) error {
 	builder := sql.Dialect(drv.Dialect())

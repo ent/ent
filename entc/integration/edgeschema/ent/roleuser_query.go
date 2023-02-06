@@ -441,16 +441,12 @@ func (ruq *RoleUserQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (ruq *RoleUserQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   roleuser.Table,
-			Columns: roleuser.Columns,
-		},
-		From:   ruq.sql,
-		Unique: true,
-	}
+	_spec := sqlgraph.NewQuerySpec(roleuser.Table, roleuser.Columns, nil)
+	_spec.From = ruq.sql
 	if unique := ruq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if ruq.path != nil {
+		_spec.Unique = true
 	}
 	if fields := ruq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

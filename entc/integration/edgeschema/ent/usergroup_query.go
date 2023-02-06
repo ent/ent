@@ -516,20 +516,12 @@ func (ugq *UserGroupQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (ugq *UserGroupQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   usergroup.Table,
-			Columns: usergroup.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: usergroup.FieldID,
-			},
-		},
-		From:   ugq.sql,
-		Unique: true,
-	}
+	_spec := sqlgraph.NewQuerySpec(usergroup.Table, usergroup.Columns, sqlgraph.NewFieldSpec(usergroup.FieldID, field.TypeInt))
+	_spec.From = ugq.sql
 	if unique := ugq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if ugq.path != nil {
+		_spec.Unique = true
 	}
 	if fields := ugq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

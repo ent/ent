@@ -516,20 +516,12 @@ func (utq *UserTweetQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (utq *UserTweetQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   usertweet.Table,
-			Columns: usertweet.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: usertweet.FieldID,
-			},
-		},
-		From:   utq.sql,
-		Unique: true,
-	}
+	_spec := sqlgraph.NewQuerySpec(usertweet.Table, usertweet.Columns, sqlgraph.NewFieldSpec(usertweet.FieldID, field.TypeInt))
+	_spec.From = utq.sql
 	if unique := utq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if utq.path != nil {
+		_spec.Unique = true
 	}
 	if fields := utq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

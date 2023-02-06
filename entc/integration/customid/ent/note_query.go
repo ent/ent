@@ -530,20 +530,12 @@ func (nq *NoteQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (nq *NoteQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   note.Table,
-			Columns: note.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
-				Column: note.FieldID,
-			},
-		},
-		From:   nq.sql,
-		Unique: true,
-	}
+	_spec := sqlgraph.NewQuerySpec(note.Table, note.Columns, sqlgraph.NewFieldSpec(note.FieldID, field.TypeString))
+	_spec.From = nq.sql
 	if unique := nq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if nq.path != nil {
+		_spec.Unique = true
 	}
 	if fields := nq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
