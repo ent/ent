@@ -205,10 +205,12 @@ func (iq *InfoQuery) AllX(ctx context.Context) []*Info {
 }
 
 // IDs executes the query and returns a list of Info IDs.
-func (iq *InfoQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (iq *InfoQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if iq.ctx.Unique == nil && iq.path != nil {
+		iq.Unique(true)
+	}
 	ctx = setContextOp(ctx, iq.ctx, "IDs")
-	if err := iq.Select(info.FieldID).Scan(ctx, &ids); err != nil {
+	if err = iq.Select(info.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

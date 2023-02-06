@@ -181,10 +181,12 @@ func (cq *ConversionQuery) AllX(ctx context.Context) []*Conversion {
 }
 
 // IDs executes the query and returns a list of Conversion IDs.
-func (cq *ConversionQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (cq *ConversionQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if cq.ctx.Unique == nil && cq.path != nil {
+		cq.Unique(true)
+	}
 	ctx = setContextOp(ctx, cq.ctx, "IDs")
-	if err := cq.Select(conversion.FieldID).Scan(ctx, &ids); err != nil {
+	if err = cq.Select(conversion.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

@@ -181,10 +181,12 @@ func (mq *MediaQuery) AllX(ctx context.Context) []*Media {
 }
 
 // IDs executes the query and returns a list of Media IDs.
-func (mq *MediaQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (mq *MediaQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if mq.ctx.Unique == nil && mq.path != nil {
+		mq.Unique(true)
+	}
 	ctx = setContextOp(ctx, mq.ctx, "IDs")
-	if err := mq.Select(media.FieldID).Scan(ctx, &ids); err != nil {
+	if err = mq.Select(media.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

@@ -182,10 +182,12 @@ func (miq *MixinIDQuery) AllX(ctx context.Context) []*MixinID {
 }
 
 // IDs executes the query and returns a list of MixinID IDs.
-func (miq *MixinIDQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
+func (miq *MixinIDQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if miq.ctx.Unique == nil && miq.path != nil {
+		miq.Unique(true)
+	}
 	ctx = setContextOp(ctx, miq.ctx, "IDs")
-	if err := miq.Select(mixinid.FieldID).Scan(ctx, &ids); err != nil {
+	if err = miq.Select(mixinid.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

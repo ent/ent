@@ -183,10 +183,12 @@ func (tq *TaskQuery) AllX(ctx context.Context) []*Task {
 }
 
 // IDs executes the query and returns a list of Task IDs.
-func (tq *TaskQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (tq *TaskQuery) IDs(ctx context.Context) (ids []string, err error) {
+	if tq.ctx.Unique == nil && tq.path != nil {
+		tq.Unique(true)
+	}
 	ctx = setContextOp(ctx, tq.ctx, "IDs")
-	if err := tq.Select(enttask.FieldID).Scan(ctx, &ids); err != nil {
+	if err = tq.Select(enttask.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

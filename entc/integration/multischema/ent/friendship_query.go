@@ -236,10 +236,12 @@ func (fq *FriendshipQuery) AllX(ctx context.Context) []*Friendship {
 }
 
 // IDs executes the query and returns a list of Friendship IDs.
-func (fq *FriendshipQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (fq *FriendshipQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if fq.ctx.Unique == nil && fq.path != nil {
+		fq.Unique(true)
+	}
 	ctx = setContextOp(ctx, fq.ctx, "IDs")
-	if err := fq.Select(friendship.FieldID).Scan(ctx, &ids); err != nil {
+	if err = fq.Select(friendship.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

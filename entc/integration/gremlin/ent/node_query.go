@@ -212,10 +212,12 @@ func (nq *NodeQuery) AllX(ctx context.Context) []*Node {
 }
 
 // IDs executes the query and returns a list of Node IDs.
-func (nq *NodeQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (nq *NodeQuery) IDs(ctx context.Context) (ids []string, err error) {
+	if nq.ctx.Unique == nil && nq.path != nil {
+		nq.Unique(true)
+	}
 	ctx = setContextOp(ctx, nq.ctx, "IDs")
-	if err := nq.Select(node.FieldID).Scan(ctx, &ids); err != nil {
+	if err = nq.Select(node.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

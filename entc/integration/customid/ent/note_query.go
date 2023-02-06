@@ -230,10 +230,12 @@ func (nq *NoteQuery) AllX(ctx context.Context) []*Note {
 }
 
 // IDs executes the query and returns a list of Note IDs.
-func (nq *NoteQuery) IDs(ctx context.Context) ([]schema.NoteID, error) {
-	var ids []schema.NoteID
+func (nq *NoteQuery) IDs(ctx context.Context) (ids []schema.NoteID, err error) {
+	if nq.ctx.Unique == nil && nq.path != nil {
+		nq.Unique(true)
+	}
 	ctx = setContextOp(ctx, nq.ctx, "IDs")
-	if err := nq.Select(note.FieldID).Scan(ctx, &ids); err != nil {
+	if err = nq.Select(note.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

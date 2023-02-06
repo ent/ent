@@ -181,10 +181,12 @@ func (zq *ZooQuery) AllX(ctx context.Context) []*Zoo {
 }
 
 // IDs executes the query and returns a list of Zoo IDs.
-func (zq *ZooQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (zq *ZooQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if zq.ctx.Unique == nil && zq.path != nil {
+		zq.Unique(true)
+	}
 	ctx = setContextOp(ctx, zq.ctx, "IDs")
-	if err := zq.Select(zoo.FieldID).Scan(ctx, &ids); err != nil {
+	if err = zq.Select(zoo.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

@@ -231,10 +231,12 @@ func (dq *DeviceQuery) AllX(ctx context.Context) []*Device {
 }
 
 // IDs executes the query and returns a list of Device IDs.
-func (dq *DeviceQuery) IDs(ctx context.Context) ([]schema.ID, error) {
-	var ids []schema.ID
+func (dq *DeviceQuery) IDs(ctx context.Context) (ids []schema.ID, err error) {
+	if dq.ctx.Unique == nil && dq.path != nil {
+		dq.Unique(true)
+	}
 	ctx = setContextOp(ctx, dq.ctx, "IDs")
-	if err := dq.Select(device.FieldID).Scan(ctx, &ids); err != nil {
+	if err = dq.Select(device.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

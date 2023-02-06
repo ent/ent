@@ -229,10 +229,12 @@ func (fq *FileQuery) AllX(ctx context.Context) []*File {
 }
 
 // IDs executes the query and returns a list of File IDs.
-func (fq *FileQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (fq *FileQuery) IDs(ctx context.Context) (ids []string, err error) {
+	if fq.ctx.Unique == nil && fq.path != nil {
+		fq.Unique(true)
+	}
 	ctx = setContextOp(ctx, fq.ctx, "IDs")
-	if err := fq.Select(file.FieldID).Scan(ctx, &ids); err != nil {
+	if err = fq.Select(file.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

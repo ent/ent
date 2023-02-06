@@ -229,10 +229,12 @@ func (utq *UserTweetQuery) AllX(ctx context.Context) []*UserTweet {
 }
 
 // IDs executes the query and returns a list of UserTweet IDs.
-func (utq *UserTweetQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (utq *UserTweetQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if utq.ctx.Unique == nil && utq.path != nil {
+		utq.Unique(true)
+	}
 	ctx = setContextOp(ctx, utq.ctx, "IDs")
-	if err := utq.Select(usertweet.FieldID).Scan(ctx, &ids); err != nil {
+	if err = utq.Select(usertweet.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

@@ -181,10 +181,12 @@ func (riq *RelationshipInfoQuery) AllX(ctx context.Context) []*RelationshipInfo 
 }
 
 // IDs executes the query and returns a list of RelationshipInfo IDs.
-func (riq *RelationshipInfoQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (riq *RelationshipInfoQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if riq.ctx.Unique == nil && riq.path != nil {
+		riq.Unique(true)
+	}
 	ctx = setContextOp(ctx, riq.ctx, "IDs")
-	if err := riq.Select(relationshipinfo.FieldID).Scan(ctx, &ids); err != nil {
+	if err = riq.Select(relationshipinfo.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

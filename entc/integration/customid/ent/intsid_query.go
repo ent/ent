@@ -230,10 +230,12 @@ func (isq *IntSIDQuery) AllX(ctx context.Context) []*IntSID {
 }
 
 // IDs executes the query and returns a list of IntSID IDs.
-func (isq *IntSIDQuery) IDs(ctx context.Context) ([]sid.ID, error) {
-	var ids []sid.ID
+func (isq *IntSIDQuery) IDs(ctx context.Context) (ids []sid.ID, err error) {
+	if isq.ctx.Unique == nil && isq.path != nil {
+		isq.Unique(true)
+	}
 	ctx = setContextOp(ctx, isq.ctx, "IDs")
-	if err := isq.Select(intsid.FieldID).Scan(ctx, &ids); err != nil {
+	if err = isq.Select(intsid.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

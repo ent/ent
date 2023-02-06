@@ -182,10 +182,12 @@ func (iq *ItemQuery) AllX(ctx context.Context) []*Item {
 }
 
 // IDs executes the query and returns a list of Item IDs.
-func (iq *ItemQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (iq *ItemQuery) IDs(ctx context.Context) (ids []string, err error) {
+	if iq.ctx.Unique == nil && iq.path != nil {
+		iq.Unique(true)
+	}
 	ctx = setContextOp(ctx, iq.ctx, "IDs")
-	if err := iq.Select(item.FieldID).Scan(ctx, &ids); err != nil {
+	if err = iq.Select(item.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

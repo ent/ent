@@ -230,10 +230,12 @@ func (uq *UserQuery) AllX(ctx context.Context) []*User {
 }
 
 // IDs executes the query and returns a list of User IDs.
-func (uq *UserQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (uq *UserQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if uq.ctx.Unique == nil && uq.path != nil {
+		uq.Unique(true)
+	}
 	ctx = setContextOp(ctx, uq.ctx, "IDs")
-	if err := uq.Select(user.FieldID).Scan(ctx, &ids); err != nil {
+	if err = uq.Select(user.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

@@ -206,10 +206,12 @@ func (sq *StreetQuery) AllX(ctx context.Context) []*Street {
 }
 
 // IDs executes the query and returns a list of Street IDs.
-func (sq *StreetQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (sq *StreetQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if sq.ctx.Unique == nil && sq.path != nil {
+		sq.Unique(true)
+	}
 	ctx = setContextOp(ctx, sq.ctx, "IDs")
-	if err := sq.Select(street.FieldID).Scan(ctx, &ids); err != nil {
+	if err = sq.Select(street.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

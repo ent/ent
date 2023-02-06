@@ -182,10 +182,12 @@ func (gq *GoodsQuery) AllX(ctx context.Context) []*Goods {
 }
 
 // IDs executes the query and returns a list of Goods IDs.
-func (gq *GoodsQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (gq *GoodsQuery) IDs(ctx context.Context) (ids []string, err error) {
+	if gq.ctx.Unique == nil && gq.path != nil {
+		gq.Unique(true)
+	}
 	ctx = setContextOp(ctx, gq.ctx, "IDs")
-	if err := gq.Select(goods.FieldID).Scan(ctx, &ids); err != nil {
+	if err = gq.Select(goods.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
