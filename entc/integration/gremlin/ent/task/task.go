@@ -23,6 +23,10 @@ const (
 	FieldPriorities = "priorities"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
+	// FieldOwner holds the string denoting the owner field in the database.
+	FieldOwner = "owner"
 )
 
 var (

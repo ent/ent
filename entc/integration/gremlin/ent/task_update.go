@@ -67,6 +67,46 @@ func (tu *TaskUpdate) ClearPriorities() *TaskUpdate {
 	return tu
 }
 
+// SetName sets the "name" field.
+func (tu *TaskUpdate) SetName(s string) *TaskUpdate {
+	tu.mutation.SetName(s)
+	return tu
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (tu *TaskUpdate) SetNillableName(s *string) *TaskUpdate {
+	if s != nil {
+		tu.SetName(*s)
+	}
+	return tu
+}
+
+// ClearName clears the value of the "name" field.
+func (tu *TaskUpdate) ClearName() *TaskUpdate {
+	tu.mutation.ClearName()
+	return tu
+}
+
+// SetOwner sets the "owner" field.
+func (tu *TaskUpdate) SetOwner(s string) *TaskUpdate {
+	tu.mutation.SetOwner(s)
+	return tu
+}
+
+// SetNillableOwner sets the "owner" field if the given value is not nil.
+func (tu *TaskUpdate) SetNillableOwner(s *string) *TaskUpdate {
+	if s != nil {
+		tu.SetOwner(*s)
+	}
+	return tu
+}
+
+// ClearOwner clears the value of the "owner" field.
+func (tu *TaskUpdate) ClearOwner() *TaskUpdate {
+	tu.mutation.ClearOwner()
+	return tu
+}
+
 // Mutation returns the TaskMutation object of the builder.
 func (tu *TaskUpdate) Mutation() *TaskMutation {
 	return tu.mutation
@@ -142,9 +182,21 @@ func (tu *TaskUpdate) gremlin() *dsl.Traversal {
 	if value, ok := tu.mutation.Priorities(); ok {
 		v.Property(dsl.Single, enttask.FieldPriorities, value)
 	}
+	if value, ok := tu.mutation.Name(); ok {
+		v.Property(dsl.Single, enttask.FieldName, value)
+	}
+	if value, ok := tu.mutation.Owner(); ok {
+		v.Property(dsl.Single, enttask.FieldOwner, value)
+	}
 	var properties []any
 	if tu.mutation.PrioritiesCleared() {
 		properties = append(properties, enttask.FieldPriorities)
+	}
+	if tu.mutation.NameCleared() {
+		properties = append(properties, enttask.FieldName)
+	}
+	if tu.mutation.OwnerCleared() {
+		properties = append(properties, enttask.FieldOwner)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -192,6 +244,46 @@ func (tuo *TaskUpdateOne) SetPriorities(m map[string]task.Priority) *TaskUpdateO
 // ClearPriorities clears the value of the "priorities" field.
 func (tuo *TaskUpdateOne) ClearPriorities() *TaskUpdateOne {
 	tuo.mutation.ClearPriorities()
+	return tuo
+}
+
+// SetName sets the "name" field.
+func (tuo *TaskUpdateOne) SetName(s string) *TaskUpdateOne {
+	tuo.mutation.SetName(s)
+	return tuo
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (tuo *TaskUpdateOne) SetNillableName(s *string) *TaskUpdateOne {
+	if s != nil {
+		tuo.SetName(*s)
+	}
+	return tuo
+}
+
+// ClearName clears the value of the "name" field.
+func (tuo *TaskUpdateOne) ClearName() *TaskUpdateOne {
+	tuo.mutation.ClearName()
+	return tuo
+}
+
+// SetOwner sets the "owner" field.
+func (tuo *TaskUpdateOne) SetOwner(s string) *TaskUpdateOne {
+	tuo.mutation.SetOwner(s)
+	return tuo
+}
+
+// SetNillableOwner sets the "owner" field if the given value is not nil.
+func (tuo *TaskUpdateOne) SetNillableOwner(s *string) *TaskUpdateOne {
+	if s != nil {
+		tuo.SetOwner(*s)
+	}
+	return tuo
+}
+
+// ClearOwner clears the value of the "owner" field.
+func (tuo *TaskUpdateOne) ClearOwner() *TaskUpdateOne {
+	tuo.mutation.ClearOwner()
 	return tuo
 }
 
@@ -288,9 +380,21 @@ func (tuo *TaskUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := tuo.mutation.Priorities(); ok {
 		v.Property(dsl.Single, enttask.FieldPriorities, value)
 	}
+	if value, ok := tuo.mutation.Name(); ok {
+		v.Property(dsl.Single, enttask.FieldName, value)
+	}
+	if value, ok := tuo.mutation.Owner(); ok {
+		v.Property(dsl.Single, enttask.FieldOwner, value)
+	}
 	var properties []any
 	if tuo.mutation.PrioritiesCleared() {
 		properties = append(properties, enttask.FieldPriorities)
+	}
+	if tuo.mutation.NameCleared() {
+		properties = append(properties, enttask.FieldName)
+	}
+	if tuo.mutation.OwnerCleared() {
+		properties = append(properties, enttask.FieldOwner)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())

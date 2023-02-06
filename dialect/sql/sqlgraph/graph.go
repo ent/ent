@@ -1050,7 +1050,10 @@ func (c *creator) node(ctx context.Context, drv dialect.Driver) error {
 		// we interact with an edge-schema with composite primary key.
 		if c.ID == nil {
 			c.ensureConflict(insert)
-			query, args := insert.Query()
+			query, args, err := insert.QueryErr()
+			if err != nil {
+				return err
+			}
 			return c.tx.Exec(ctx, query, args, nil)
 		}
 		if err := c.insert(ctx, insert); err != nil {
@@ -1096,7 +1099,10 @@ func (c *creator) insert(ctx context.Context, insert *sql.InsertBuilder) error {
 		// In case of "ON CONFLICT", the record may exist in the
 		// database, and we need to get back the database id field.
 		if len(c.CreateSpec.OnConflict) == 0 {
-			query, args := insert.Query()
+			query, args, err := insert.QueryErr()
+			if err != nil {
+				return err
+			}
 			return c.tx.Exec(ctx, query, args, nil)
 		}
 	}
@@ -1529,8 +1535,8 @@ func setTableColumns(fields []*FieldSpec, edges map[Rel][]*EdgeSpec, set func(st
 
 // insertLastID invokes the insert query on the transaction and returns the LastInsertID.
 func (c *creator) insertLastID(ctx context.Context, insert *sql.InsertBuilder) error {
-	query, args := insert.Query()
-	if err := insert.Err(); err != nil {
+	query, args, err := insert.QueryErr()
+	if err != nil {
 		return err
 	}
 	// MySQL does not support the "RETURNING" clause.
@@ -1577,8 +1583,8 @@ func (c *creator) insertLastID(ctx context.Context, insert *sql.InsertBuilder) e
 
 // insertLastIDs invokes the batch insert query on the transaction and returns the LastInsertID of all entities.
 func (c *batchCreator) insertLastIDs(ctx context.Context, tx dialect.ExecQuerier, insert *sql.InsertBuilder) error {
-	query, args := insert.Query()
-	if err := insert.Err(); err != nil {
+	query, args, err := insert.QueryErr()
+	if err != nil {
 		return err
 	}
 	// MySQL does not support the "RETURNING" clause.

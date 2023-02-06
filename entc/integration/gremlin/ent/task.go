@@ -26,6 +26,10 @@ type Task struct {
 	Priorities map[string]task.Priority `json:"priorities,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt *time.Time `json:"created_at,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty"`
+	// Owner holds the value of the "owner" field.
+	Owner string `json:"owner,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into Task.
@@ -39,6 +43,8 @@ func (t *Task) FromResponse(res *gremlin.Response) error {
 		Priority   task.Priority            `json:"priority,omitempty"`
 		Priorities map[string]task.Priority `json:"priorities,omitempty"`
 		CreatedAt  int64                    `json:"created_at,omitempty"`
+		Name       string                   `json:"name,omitempty"`
+		Owner      string                   `json:"owner,omitempty"`
 	}
 	if err := vmap.Decode(&scant); err != nil {
 		return err
@@ -48,6 +54,8 @@ func (t *Task) FromResponse(res *gremlin.Response) error {
 	t.Priorities = scant.Priorities
 	v2 := time.Unix(0, scant.CreatedAt)
 	t.CreatedAt = &v2
+	t.Name = scant.Name
+	t.Owner = scant.Owner
 	return nil
 }
 
@@ -84,6 +92,12 @@ func (t *Task) String() string {
 		builder.WriteString("created_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("name=")
+	builder.WriteString(t.Name)
+	builder.WriteString(", ")
+	builder.WriteString("owner=")
+	builder.WriteString(t.Owner)
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -102,6 +116,8 @@ func (t *Tasks) FromResponse(res *gremlin.Response) error {
 		Priority   task.Priority            `json:"priority,omitempty"`
 		Priorities map[string]task.Priority `json:"priorities,omitempty"`
 		CreatedAt  int64                    `json:"created_at,omitempty"`
+		Name       string                   `json:"name,omitempty"`
+		Owner      string                   `json:"owner,omitempty"`
 	}
 	if err := vmap.Decode(&scant); err != nil {
 		return err
@@ -112,6 +128,8 @@ func (t *Tasks) FromResponse(res *gremlin.Response) error {
 		node.Priorities = v.Priorities
 		v2 := time.Unix(0, v.CreatedAt)
 		node.CreatedAt = &v2
+		node.Name = v.Name
+		node.Owner = v.Owner
 		*t = append(*t, node)
 	}
 	return nil

@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 
 	"entgo.io/ent/entc/integration/ent/schema/task"
 )
@@ -33,5 +34,17 @@ func (Task) Fields() []ent.Field {
 			Default(time.Now).
 			Immutable().
 			Nillable(),
+		field.String("name").
+			Optional(),
+		field.String("owner").
+			Optional(),
+	}
+}
+
+// Indexes of the Task.
+func (Task) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("name", "owner").
+			Unique(),
 	}
 }

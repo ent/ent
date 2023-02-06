@@ -949,6 +949,13 @@ func (u *UpdateSet) SetExcluded(name string) *UpdateSet {
 
 // Query returns query representation of an `INSERT INTO` statement.
 func (i *InsertBuilder) Query() (string, []any) {
+	query, args, _ := i.QueryErr()
+	return query, args
+}
+
+// QueryErr returns query representation of an `INSERT INTO`
+// statement and any error occurred in building the statement.
+func (i *InsertBuilder) QueryErr() (string, []any, error) {
 	b := i.Builder.clone()
 	b.WriteString("INSERT INTO ")
 	b.writeSchema(i.schema)
@@ -969,7 +976,7 @@ func (i *InsertBuilder) Query() (string, []any) {
 		i.writeConflict(&b)
 	}
 	joinReturning(i.returning, &b)
-	return b.String(), b.args
+	return b.String(), b.args, b.Err()
 }
 
 func (i *InsertBuilder) writeDefault(b *Builder) {

@@ -70,6 +70,16 @@ func CreatedAt(v time.Time) predicate.Task {
 	return predicate.Task(sql.FieldEQ(FieldCreatedAt, v))
 }
 
+// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
+func Name(v string) predicate.Task {
+	return predicate.Task(sql.FieldEQ(FieldName, v))
+}
+
+// Owner applies equality check predicate on the "owner" field. It's identical to OwnerEQ.
+func Owner(v string) predicate.Task {
+	return predicate.Task(sql.FieldEQ(FieldOwner, v))
+}
+
 // PriorityEQ applies the EQ predicate on the "priority" field.
 func PriorityEQ(v task.Priority) predicate.Task {
 	vc := int(v)
@@ -172,6 +182,156 @@ func CreatedAtLT(v time.Time) predicate.Task {
 // CreatedAtLTE applies the LTE predicate on the "created_at" field.
 func CreatedAtLTE(v time.Time) predicate.Task {
 	return predicate.Task(sql.FieldLTE(FieldCreatedAt, v))
+}
+
+// NameEQ applies the EQ predicate on the "name" field.
+func NameEQ(v string) predicate.Task {
+	return predicate.Task(sql.FieldEQ(FieldName, v))
+}
+
+// NameNEQ applies the NEQ predicate on the "name" field.
+func NameNEQ(v string) predicate.Task {
+	return predicate.Task(sql.FieldNEQ(FieldName, v))
+}
+
+// NameIn applies the In predicate on the "name" field.
+func NameIn(vs ...string) predicate.Task {
+	return predicate.Task(sql.FieldIn(FieldName, vs...))
+}
+
+// NameNotIn applies the NotIn predicate on the "name" field.
+func NameNotIn(vs ...string) predicate.Task {
+	return predicate.Task(sql.FieldNotIn(FieldName, vs...))
+}
+
+// NameGT applies the GT predicate on the "name" field.
+func NameGT(v string) predicate.Task {
+	return predicate.Task(sql.FieldGT(FieldName, v))
+}
+
+// NameGTE applies the GTE predicate on the "name" field.
+func NameGTE(v string) predicate.Task {
+	return predicate.Task(sql.FieldGTE(FieldName, v))
+}
+
+// NameLT applies the LT predicate on the "name" field.
+func NameLT(v string) predicate.Task {
+	return predicate.Task(sql.FieldLT(FieldName, v))
+}
+
+// NameLTE applies the LTE predicate on the "name" field.
+func NameLTE(v string) predicate.Task {
+	return predicate.Task(sql.FieldLTE(FieldName, v))
+}
+
+// NameContains applies the Contains predicate on the "name" field.
+func NameContains(v string) predicate.Task {
+	return predicate.Task(sql.FieldContains(FieldName, v))
+}
+
+// NameHasPrefix applies the HasPrefix predicate on the "name" field.
+func NameHasPrefix(v string) predicate.Task {
+	return predicate.Task(sql.FieldHasPrefix(FieldName, v))
+}
+
+// NameHasSuffix applies the HasSuffix predicate on the "name" field.
+func NameHasSuffix(v string) predicate.Task {
+	return predicate.Task(sql.FieldHasSuffix(FieldName, v))
+}
+
+// NameIsNil applies the IsNil predicate on the "name" field.
+func NameIsNil() predicate.Task {
+	return predicate.Task(sql.FieldIsNull(FieldName))
+}
+
+// NameNotNil applies the NotNil predicate on the "name" field.
+func NameNotNil() predicate.Task {
+	return predicate.Task(sql.FieldNotNull(FieldName))
+}
+
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.Task {
+	return predicate.Task(sql.FieldEqualFold(FieldName, v))
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.Task {
+	return predicate.Task(sql.FieldContainsFold(FieldName, v))
+}
+
+// OwnerEQ applies the EQ predicate on the "owner" field.
+func OwnerEQ(v string) predicate.Task {
+	return predicate.Task(sql.FieldEQ(FieldOwner, v))
+}
+
+// OwnerNEQ applies the NEQ predicate on the "owner" field.
+func OwnerNEQ(v string) predicate.Task {
+	return predicate.Task(sql.FieldNEQ(FieldOwner, v))
+}
+
+// OwnerIn applies the In predicate on the "owner" field.
+func OwnerIn(vs ...string) predicate.Task {
+	return predicate.Task(sql.FieldIn(FieldOwner, vs...))
+}
+
+// OwnerNotIn applies the NotIn predicate on the "owner" field.
+func OwnerNotIn(vs ...string) predicate.Task {
+	return predicate.Task(sql.FieldNotIn(FieldOwner, vs...))
+}
+
+// OwnerGT applies the GT predicate on the "owner" field.
+func OwnerGT(v string) predicate.Task {
+	return predicate.Task(sql.FieldGT(FieldOwner, v))
+}
+
+// OwnerGTE applies the GTE predicate on the "owner" field.
+func OwnerGTE(v string) predicate.Task {
+	return predicate.Task(sql.FieldGTE(FieldOwner, v))
+}
+
+// OwnerLT applies the LT predicate on the "owner" field.
+func OwnerLT(v string) predicate.Task {
+	return predicate.Task(sql.FieldLT(FieldOwner, v))
+}
+
+// OwnerLTE applies the LTE predicate on the "owner" field.
+func OwnerLTE(v string) predicate.Task {
+	return predicate.Task(sql.FieldLTE(FieldOwner, v))
+}
+
+// OwnerContains applies the Contains predicate on the "owner" field.
+func OwnerContains(v string) predicate.Task {
+	return predicate.Task(sql.FieldContains(FieldOwner, v))
+}
+
+// OwnerHasPrefix applies the HasPrefix predicate on the "owner" field.
+func OwnerHasPrefix(v string) predicate.Task {
+	return predicate.Task(sql.FieldHasPrefix(FieldOwner, v))
+}
+
+// OwnerHasSuffix applies the HasSuffix predicate on the "owner" field.
+func OwnerHasSuffix(v string) predicate.Task {
+	return predicate.Task(sql.FieldHasSuffix(FieldOwner, v))
+}
+
+// OwnerIsNil applies the IsNil predicate on the "owner" field.
+func OwnerIsNil() predicate.Task {
+	return predicate.Task(sql.FieldIsNull(FieldOwner))
+}
+
+// OwnerNotNil applies the NotNil predicate on the "owner" field.
+func OwnerNotNil() predicate.Task {
+	return predicate.Task(sql.FieldNotNull(FieldOwner))
+}
+
+// OwnerEqualFold applies the EqualFold predicate on the "owner" field.
+func OwnerEqualFold(v string) predicate.Task {
+	return predicate.Task(sql.FieldEqualFold(FieldOwner, v))
+}
+
+// OwnerContainsFold applies the ContainsFold predicate on the "owner" field.
+func OwnerContainsFold(v string) predicate.Task {
+	return predicate.Task(sql.FieldContainsFold(FieldOwner, v))
 }
 
 // And groups predicates with the AND operator between them.

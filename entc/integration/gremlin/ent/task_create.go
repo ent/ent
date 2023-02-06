@@ -61,6 +61,34 @@ func (tc *TaskCreate) SetNillableCreatedAt(t *time.Time) *TaskCreate {
 	return tc
 }
 
+// SetName sets the "name" field.
+func (tc *TaskCreate) SetName(s string) *TaskCreate {
+	tc.mutation.SetName(s)
+	return tc
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (tc *TaskCreate) SetNillableName(s *string) *TaskCreate {
+	if s != nil {
+		tc.SetName(*s)
+	}
+	return tc
+}
+
+// SetOwner sets the "owner" field.
+func (tc *TaskCreate) SetOwner(s string) *TaskCreate {
+	tc.mutation.SetOwner(s)
+	return tc
+}
+
+// SetNillableOwner sets the "owner" field if the given value is not nil.
+func (tc *TaskCreate) SetNillableOwner(s *string) *TaskCreate {
+	if s != nil {
+		tc.SetOwner(*s)
+	}
+	return tc
+}
+
 // Mutation returns the TaskMutation object of the builder.
 func (tc *TaskCreate) Mutation() *TaskMutation {
 	return tc.mutation
@@ -153,6 +181,12 @@ func (tc *TaskCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := tc.mutation.CreatedAt(); ok {
 		v.Property(dsl.Single, enttask.FieldCreatedAt, value)
+	}
+	if value, ok := tc.mutation.Name(); ok {
+		v.Property(dsl.Single, enttask.FieldName, value)
+	}
+	if value, ok := tc.mutation.Owner(); ok {
+		v.Property(dsl.Single, enttask.FieldOwner, value)
 	}
 	return v.ValueMap(true)
 }
