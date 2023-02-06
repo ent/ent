@@ -37,27 +37,14 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			return {{ $ret }}, err
 		}
 	{{- end }}
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: {{ $.Package }}.Table,
-			Columns: {{ $.Package }}.Columns,
-			{{- if $.HasOneFieldID }}
-				ID: &sqlgraph.FieldSpec{
-					Type: field.{{ $.ID.Type.ConstName }},
-					Column: {{ $.Package }}.{{ $.ID.Constant }},
-				},
-			{{- else }}
-				CompositeID: []*sqlgraph.FieldSpec{
-					{{- range $id := $.EdgeSchema.ID }}
-						{
-							Type: field.{{ $id.Type.ConstName }},
-							Column: {{ $.Package }}.{{ $id.Constant }},
-						},
-					{{- end }}
-				},
-			{{- end }}
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec({{ $.Package }}.Table, {{ $.Package }}.Columns,
+		{{- if $.HasOneFieldID -}}
+			sqlgraph.NewFieldSpec({{ $.Package }}.{{ $.ID.Constant }}, field.{{ $.ID.Type.ConstName }})
+		{{- else -}}
+			{{- range $id := $.EdgeSchema.ID -}}
+				sqlgraph.NewFieldSpec({{ $.Package }}.{{ $id.Constant }}, field.{{ $id.Type.ConstName }}),
+			{{- end -}}
+		{{- end }})
 	{{- if $one }}
 		{{- if $.HasOneFieldID }}
 			id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}()
