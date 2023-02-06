@@ -15,9 +15,12 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/edgeschema/ent/attachedfile"
+	"entgo.io/ent/entc/integration/edgeschema/ent/file"
 	"entgo.io/ent/entc/integration/edgeschema/ent/friendship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
 	"entgo.io/ent/entc/integration/edgeschema/ent/grouptag"
+	"entgo.io/ent/entc/integration/edgeschema/ent/process"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
 	"entgo.io/ent/entc/integration/edgeschema/ent/role"
@@ -56,9 +59,12 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
+		attachedfile.Table:     attachedfile.ValidColumn,
+		file.Table:             file.ValidColumn,
 		friendship.Table:       friendship.ValidColumn,
 		group.Table:            group.ValidColumn,
 		grouptag.Table:         grouptag.ValidColumn,
+		process.Table:          process.ValidColumn,
 		relationship.Table:     relationship.ValidColumn,
 		relationshipinfo.Table: relationshipinfo.ValidColumn,
 		role.Table:             role.ValidColumn,

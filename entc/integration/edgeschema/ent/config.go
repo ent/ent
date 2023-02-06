@@ -31,9 +31,12 @@ type config struct {
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
+		AttachedFile     []ent.Hook
+		File             []ent.Hook
 		Friendship       []ent.Hook
 		Group            []ent.Hook
 		GroupTag         []ent.Hook
+		Process          []ent.Hook
 		Relationship     []ent.Hook
 		RelationshipInfo []ent.Hook
 		Role             []ent.Hook
@@ -47,9 +50,12 @@ type (
 		UserTweet        []ent.Hook
 	}
 	inters struct {
+		AttachedFile     []ent.Interceptor
+		File             []ent.Interceptor
 		Friendship       []ent.Interceptor
 		Group            []ent.Interceptor
 		GroupTag         []ent.Interceptor
+		Process          []ent.Interceptor
 		Relationship     []ent.Interceptor
 		RelationshipInfo []ent.Interceptor
 		Role             []ent.Interceptor

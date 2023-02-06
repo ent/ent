@@ -750,11 +750,11 @@ func (t *Type) setupFKs() error {
 func (t *Type) setupFieldEdge(fk *ForeignKey, fkOwner *Edge, fkName string) error {
 	tf, ok := t.fields[fkName]
 	if !ok {
-		return fmt.Errorf("field %q was not found in the schema for edge %q", fkName, fkOwner.Name)
+		return fmt.Errorf("field %q was not found in %s.Fields() for edge %q", fkName, t.Name, fkOwner.Name)
 	}
 	switch tf, ok := t.fields[fkName]; {
 	case !ok:
-		return fmt.Errorf("field %q was not found in the schema for edge %q", fkName, fkOwner.Name)
+		return fmt.Errorf("field %q was not found in %s.Fields() for edge %q", fkName, t.Name, fkOwner.Name)
 	case tf.Optional && !fkOwner.Optional:
 		return fmt.Errorf("edge-field %q was set as Optional, but edge %q is not", fkName, fkOwner.Name)
 	case !tf.Optional && fkOwner.Optional:
