@@ -197,10 +197,12 @@ func (sq *SpecQuery) AllX(ctx context.Context) []*Spec {
 }
 
 // IDs executes the query and returns a list of Spec IDs.
-func (sq *SpecQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (sq *SpecQuery) IDs(ctx context.Context) (ids []string, err error) {
+	if sq.ctx.Unique == nil && sq.path != nil {
+		sq.Unique(true)
+	}
 	ctx = setContextOp(ctx, sq.ctx, "IDs")
-	if err := sq.Select(spec.FieldID).Scan(ctx, &ids); err != nil {
+	if err = sq.Select(spec.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

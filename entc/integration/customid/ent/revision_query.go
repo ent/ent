@@ -181,10 +181,12 @@ func (rq *RevisionQuery) AllX(ctx context.Context) []*Revision {
 }
 
 // IDs executes the query and returns a list of Revision IDs.
-func (rq *RevisionQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (rq *RevisionQuery) IDs(ctx context.Context) (ids []string, err error) {
+	if rq.ctx.Unique == nil && rq.path != nil {
+		rq.Unique(true)
+	}
 	ctx = setContextOp(ctx, rq.ctx, "IDs")
-	if err := rq.Select(revision.FieldID).Scan(ctx, &ids); err != nil {
+	if err = rq.Select(revision.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

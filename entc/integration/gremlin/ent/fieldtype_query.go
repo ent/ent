@@ -182,10 +182,12 @@ func (ftq *FieldTypeQuery) AllX(ctx context.Context) []*FieldType {
 }
 
 // IDs executes the query and returns a list of FieldType IDs.
-func (ftq *FieldTypeQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (ftq *FieldTypeQuery) IDs(ctx context.Context) (ids []string, err error) {
+	if ftq.ctx.Unique == nil && ftq.path != nil {
+		ftq.Unique(true)
+	}
 	ctx = setContextOp(ctx, ftq.ctx, "IDs")
-	if err := ftq.Select(fieldtype.FieldID).Scan(ctx, &ids); err != nil {
+	if err = ftq.Select(fieldtype.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

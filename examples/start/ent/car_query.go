@@ -206,10 +206,12 @@ func (cq *CarQuery) AllX(ctx context.Context) []*Car {
 }
 
 // IDs executes the query and returns a list of Car IDs.
-func (cq *CarQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (cq *CarQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if cq.ctx.Unique == nil && cq.path != nil {
+		cq.Unique(true)
+	}
 	ctx = setContextOp(ctx, cq.ctx, "IDs")
-	if err := cq.Select(car.FieldID).Scan(ctx, &ids); err != nil {
+	if err = cq.Select(car.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

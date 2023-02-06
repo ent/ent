@@ -1223,6 +1223,8 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.Equal(neta.Name, usr.QueryGroups().Where(group.Name("Github")).QueryUsers().QuerySpouse().OnlyX(ctx).Name)
 	require.Empty(client.GroupInfo.Query().Where(groupinfo.Desc("group info")).QueryGroups().Where(group.Name("boring")).AllX(ctx))
 	require.Equal(child.Name, client.GroupInfo.Query().Where(groupinfo.Desc("group info")).QueryGroups().Where(group.Name("Github")).QueryUsers().QueryChildren().FirstX(ctx).Name)
+	neta.Update().AddGroups(grp).ExecX(ctx)
+	require.Equal(grp.ID, client.User.Query().QueryGroups().OnlyIDX(ctx))
 
 	t.Log("query using string predicate")
 	require.Len(client.User.Query().Where(user.NameIn("a8m", "neta", "pedro")).AllX(ctx), 3)

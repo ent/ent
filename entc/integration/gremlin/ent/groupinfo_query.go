@@ -198,10 +198,12 @@ func (giq *GroupInfoQuery) AllX(ctx context.Context) []*GroupInfo {
 }
 
 // IDs executes the query and returns a list of GroupInfo IDs.
-func (giq *GroupInfoQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (giq *GroupInfoQuery) IDs(ctx context.Context) (ids []string, err error) {
+	if giq.ctx.Unique == nil && giq.path != nil {
+		giq.Unique(true)
+	}
 	ctx = setContextOp(ctx, giq.ctx, "IDs")
-	if err := giq.Select(groupinfo.FieldID).Scan(ctx, &ids); err != nil {
+	if err = giq.Select(groupinfo.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

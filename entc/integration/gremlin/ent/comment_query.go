@@ -182,10 +182,12 @@ func (cq *CommentQuery) AllX(ctx context.Context) []*Comment {
 }
 
 // IDs executes the query and returns a list of Comment IDs.
-func (cq *CommentQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (cq *CommentQuery) IDs(ctx context.Context) (ids []string, err error) {
+	if cq.ctx.Unique == nil && cq.path != nil {
+		cq.Unique(true)
+	}
 	ctx = setContextOp(ctx, cq.ctx, "IDs")
-	if err := cq.Select(comment.FieldID).Scan(ctx, &ids); err != nil {
+	if err = cq.Select(comment.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

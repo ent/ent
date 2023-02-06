@@ -230,10 +230,12 @@ func (gq *GroupQuery) AllX(ctx context.Context) []*Group {
 }
 
 // IDs executes the query and returns a list of Group IDs.
-func (gq *GroupQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (gq *GroupQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if gq.ctx.Unique == nil && gq.path != nil {
+		gq.Unique(true)
+	}
 	ctx = setContextOp(ctx, gq.ctx, "IDs")
-	if err := gq.Select(group.FieldID).Scan(ctx, &ids); err != nil {
+	if err = gq.Select(group.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

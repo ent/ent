@@ -252,10 +252,12 @@ func (mq *MetadataQuery) AllX(ctx context.Context) []*Metadata {
 }
 
 // IDs executes the query and returns a list of Metadata IDs.
-func (mq *MetadataQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (mq *MetadataQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if mq.ctx.Unique == nil && mq.path != nil {
+		mq.Unique(true)
+	}
 	ctx = setContextOp(ctx, mq.ctx, "IDs")
-	if err := mq.Select(metadata.FieldID).Scan(ctx, &ids); err != nil {
+	if err = mq.Select(metadata.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

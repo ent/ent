@@ -182,10 +182,12 @@ func (lq *LinkQuery) AllX(ctx context.Context) []*Link {
 }
 
 // IDs executes the query and returns a list of Link IDs.
-func (lq *LinkQuery) IDs(ctx context.Context) ([]uuidc.UUIDC, error) {
-	var ids []uuidc.UUIDC
+func (lq *LinkQuery) IDs(ctx context.Context) (ids []uuidc.UUIDC, err error) {
+	if lq.ctx.Unique == nil && lq.path != nil {
+		lq.Unique(true)
+	}
 	ctx = setContextOp(ctx, lq.ctx, "IDs")
-	if err := lq.Select(link.FieldID).Scan(ctx, &ids); err != nil {
+	if err = lq.Select(link.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

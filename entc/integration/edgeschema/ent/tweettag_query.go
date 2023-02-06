@@ -230,10 +230,12 @@ func (ttq *TweetTagQuery) AllX(ctx context.Context) []*TweetTag {
 }
 
 // IDs executes the query and returns a list of TweetTag IDs.
-func (ttq *TweetTagQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
+func (ttq *TweetTagQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if ttq.ctx.Unique == nil && ttq.path != nil {
+		ttq.Unique(true)
+	}
 	ctx = setContextOp(ctx, ttq.ctx, "IDs")
-	if err := ttq.Select(tweettag.FieldID).Scan(ctx, &ids); err != nil {
+	if err = ttq.Select(tweettag.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

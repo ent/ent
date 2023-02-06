@@ -229,10 +229,12 @@ func (ugq *UserGroupQuery) AllX(ctx context.Context) []*UserGroup {
 }
 
 // IDs executes the query and returns a list of UserGroup IDs.
-func (ugq *UserGroupQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (ugq *UserGroupQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if ugq.ctx.Unique == nil && ugq.path != nil {
+		ugq.Unique(true)
+	}
 	ctx = setContextOp(ctx, ugq.ctx, "IDs")
-	if err := ugq.Select(usergroup.FieldID).Scan(ctx, &ids); err != nil {
+	if err = ugq.Select(usergroup.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

@@ -207,10 +207,12 @@ func (sq *SessionQuery) AllX(ctx context.Context) []*Session {
 }
 
 // IDs executes the query and returns a list of Session IDs.
-func (sq *SessionQuery) IDs(ctx context.Context) ([]schema.ID, error) {
-	var ids []schema.ID
+func (sq *SessionQuery) IDs(ctx context.Context) (ids []schema.ID, err error) {
+	if sq.ctx.Unique == nil && sq.path != nil {
+		sq.Unique(true)
+	}
 	ctx = setContextOp(ctx, sq.ctx, "IDs")
-	if err := sq.Select(session.FieldID).Scan(ctx, &ids); err != nil {
+	if err = sq.Select(session.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

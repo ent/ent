@@ -253,10 +253,12 @@ func (dq *DocQuery) AllX(ctx context.Context) []*Doc {
 }
 
 // IDs executes the query and returns a list of Doc IDs.
-func (dq *DocQuery) IDs(ctx context.Context) ([]schema.DocID, error) {
-	var ids []schema.DocID
+func (dq *DocQuery) IDs(ctx context.Context) (ids []schema.DocID, err error) {
+	if dq.ctx.Unique == nil && dq.path != nil {
+		dq.Unique(true)
+	}
 	ctx = setContextOp(ctx, dq.ctx, "IDs")
-	if err := dq.Select(doc.FieldID).Scan(ctx, &ids); err != nil {
+	if err = dq.Select(doc.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

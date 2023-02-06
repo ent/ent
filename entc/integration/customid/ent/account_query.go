@@ -207,10 +207,12 @@ func (aq *AccountQuery) AllX(ctx context.Context) []*Account {
 }
 
 // IDs executes the query and returns a list of Account IDs.
-func (aq *AccountQuery) IDs(ctx context.Context) ([]sid.ID, error) {
-	var ids []sid.ID
+func (aq *AccountQuery) IDs(ctx context.Context) (ids []sid.ID, err error) {
+	if aq.ctx.Unique == nil && aq.path != nil {
+		aq.Unique(true)
+	}
 	ctx = setContextOp(ctx, aq.ctx, "IDs")
-	if err := aq.Select(account.FieldID).Scan(ctx, &ids); err != nil {
+	if err = aq.Select(account.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

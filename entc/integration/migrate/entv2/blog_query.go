@@ -206,10 +206,12 @@ func (bq *BlogQuery) AllX(ctx context.Context) []*Blog {
 }
 
 // IDs executes the query and returns a list of Blog IDs.
-func (bq *BlogQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (bq *BlogQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if bq.ctx.Unique == nil && bq.path != nil {
+		bq.Unique(true)
+	}
 	ctx = setContextOp(ctx, bq.ctx, "IDs")
-	if err := bq.Select(blog.FieldID).Scan(ctx, &ids); err != nil {
+	if err = bq.Select(blog.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

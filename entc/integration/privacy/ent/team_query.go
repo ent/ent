@@ -231,10 +231,12 @@ func (tq *TeamQuery) AllX(ctx context.Context) []*Team {
 }
 
 // IDs executes the query and returns a list of Team IDs.
-func (tq *TeamQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (tq *TeamQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if tq.ctx.Unique == nil && tq.path != nil {
+		tq.Unique(true)
+	}
 	ctx = setContextOp(ctx, tq.ctx, "IDs")
-	if err := tq.Select(team.FieldID).Scan(ctx, &ids); err != nil {
+	if err = tq.Select(team.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

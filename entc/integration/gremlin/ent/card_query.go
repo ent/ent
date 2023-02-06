@@ -214,10 +214,12 @@ func (cq *CardQuery) AllX(ctx context.Context) []*Card {
 }
 
 // IDs executes the query and returns a list of Card IDs.
-func (cq *CardQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (cq *CardQuery) IDs(ctx context.Context) (ids []string, err error) {
+	if cq.ctx.Unique == nil && cq.path != nil {
+		cq.Unique(true)
+	}
 	ctx = setContextOp(ctx, cq.ctx, "IDs")
-	if err := cq.Select(card.FieldID).Scan(ctx, &ids); err != nil {
+	if err = cq.Select(card.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

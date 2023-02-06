@@ -230,10 +230,12 @@ func (pq *PostQuery) AllX(ctx context.Context) []*Post {
 }
 
 // IDs executes the query and returns a list of Post IDs.
-func (pq *PostQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (pq *PostQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if pq.ctx.Unique == nil && pq.path != nil {
+		pq.Unique(true)
+	}
 	ctx = setContextOp(ctx, pq.ctx, "IDs")
-	if err := pq.Select(post.FieldID).Scan(ctx, &ids); err != nil {
+	if err = pq.Select(post.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

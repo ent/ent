@@ -183,10 +183,12 @@ func (aq *APIQuery) AllX(ctx context.Context) []*Api {
 }
 
 // IDs executes the query and returns a list of Api IDs.
-func (aq *APIQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (aq *APIQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if aq.ctx.Unique == nil && aq.path != nil {
+		aq.Unique(true)
+	}
 	ctx = setContextOp(ctx, aq.ctx, "IDs")
-	if err := aq.Select(api.FieldID).Scan(ctx, &ids); err != nil {
+	if err = aq.Select(api.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

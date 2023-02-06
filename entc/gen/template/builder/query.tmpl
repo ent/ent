@@ -219,10 +219,13 @@ func ({{ $receiver }} *{{ $builder }}) AllX(ctx context.Context) []*{{ $.Name }}
 
 {{ if $.HasOneFieldID }}
 	// IDs executes the query and returns a list of {{ $.Name }} IDs.
-	func ({{ $receiver }} *{{ $builder }}) IDs(ctx context.Context) ([]{{ $.ID.Type }}, error) {
-		var ids []{{ $.ID.Type }}
+	func ({{ $receiver }} *{{ $builder }}) IDs(ctx context.Context) (ids []{{ $.ID.Type }}, err error) {
+		{{- /* Since a graph traversal such as JOINs can return duplicate IDs, set the Unique modifier unless specified otherwise. */}}
+		if {{ $receiver }}.ctx.Unique == nil && {{ $receiver }}.path != nil {
+			{{ $receiver }}.Unique(true)
+		}
 		ctx = setContextOp(ctx, {{ $receiver }}.ctx, "IDs")
-		if err := {{ $receiver }}.Select({{ $.Package }}.FieldID).Scan(ctx, &ids); err != nil {
+		if err = {{ $receiver }}.Select({{ $.Package }}.FieldID).Scan(ctx, &ids); err != nil {
 			return nil, err
 		}
 		return ids, nil

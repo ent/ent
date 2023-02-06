@@ -207,10 +207,12 @@ func (tq *TokenQuery) AllX(ctx context.Context) []*Token {
 }
 
 // IDs executes the query and returns a list of Token IDs.
-func (tq *TokenQuery) IDs(ctx context.Context) ([]sid.ID, error) {
-	var ids []sid.ID
+func (tq *TokenQuery) IDs(ctx context.Context) (ids []sid.ID, err error) {
+	if tq.ctx.Unique == nil && tq.path != nil {
+		tq.Unique(true)
+	}
 	ctx = setContextOp(ctx, tq.ctx, "IDs")
-	if err := tq.Select(token.FieldID).Scan(ctx, &ids); err != nil {
+	if err = tq.Select(token.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

@@ -182,10 +182,12 @@ func (oq *OtherQuery) AllX(ctx context.Context) []*Other {
 }
 
 // IDs executes the query and returns a list of Other IDs.
-func (oq *OtherQuery) IDs(ctx context.Context) ([]sid.ID, error) {
-	var ids []sid.ID
+func (oq *OtherQuery) IDs(ctx context.Context) (ids []sid.ID, err error) {
+	if oq.ctx.Unique == nil && oq.path != nil {
+		oq.Unique(true)
+	}
 	ctx = setContextOp(ctx, oq.ctx, "IDs")
-	if err := oq.Select(other.FieldID).Scan(ctx, &ids); err != nil {
+	if err = oq.Select(other.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

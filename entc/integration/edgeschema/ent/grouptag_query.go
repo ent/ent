@@ -229,10 +229,12 @@ func (gtq *GroupTagQuery) AllX(ctx context.Context) []*GroupTag {
 }
 
 // IDs executes the query and returns a list of GroupTag IDs.
-func (gtq *GroupTagQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (gtq *GroupTagQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if gtq.ctx.Unique == nil && gtq.path != nil {
+		gtq.Unique(true)
+	}
 	ctx = setContextOp(ctx, gtq.ctx, "IDs")
-	if err := gtq.Select(grouptag.FieldID).Scan(ctx, &ids); err != nil {
+	if err = gtq.Select(grouptag.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

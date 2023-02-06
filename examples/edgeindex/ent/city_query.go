@@ -206,10 +206,12 @@ func (cq *CityQuery) AllX(ctx context.Context) []*City {
 }
 
 // IDs executes the query and returns a list of City IDs.
-func (cq *CityQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (cq *CityQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if cq.ctx.Unique == nil && cq.path != nil {
+		cq.Unique(true)
+	}
 	ctx = setContextOp(ctx, cq.ctx, "IDs")
-	if err := cq.Select(city.FieldID).Scan(ctx, &ids); err != nil {
+	if err = cq.Select(city.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

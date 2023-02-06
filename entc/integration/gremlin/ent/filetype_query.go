@@ -197,10 +197,12 @@ func (ftq *FileTypeQuery) AllX(ctx context.Context) []*FileType {
 }
 
 // IDs executes the query and returns a list of FileType IDs.
-func (ftq *FileTypeQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (ftq *FileTypeQuery) IDs(ctx context.Context) (ids []string, err error) {
+	if ftq.ctx.Unique == nil && ftq.path != nil {
+		ftq.Unique(true)
+	}
 	ctx = setContextOp(ctx, ftq.ctx, "IDs")
-	if err := ftq.Select(filetype.FieldID).Scan(ctx, &ids); err != nil {
+	if err = ftq.Select(filetype.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil

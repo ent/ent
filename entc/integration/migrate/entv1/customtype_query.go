@@ -181,10 +181,12 @@ func (ctq *CustomTypeQuery) AllX(ctx context.Context) []*CustomType {
 }
 
 // IDs executes the query and returns a list of CustomType IDs.
-func (ctq *CustomTypeQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (ctq *CustomTypeQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if ctq.ctx.Unique == nil && ctq.path != nil {
+		ctq.Unique(true)
+	}
 	ctx = setContextOp(ctx, ctq.ctx, "IDs")
-	if err := ctq.Select(customtype.FieldID).Scan(ctx, &ids); err != nil {
+	if err = ctq.Select(customtype.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
