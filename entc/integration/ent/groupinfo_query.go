@@ -464,20 +464,12 @@ func (giq *GroupInfoQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (giq *GroupInfoQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   groupinfo.Table,
-			Columns: groupinfo.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: groupinfo.FieldID,
-			},
-		},
-		From:   giq.sql,
-		Unique: true,
-	}
+	_spec := sqlgraph.NewQuerySpec(groupinfo.Table, groupinfo.Columns, sqlgraph.NewFieldSpec(groupinfo.FieldID, field.TypeInt))
+	_spec.From = giq.sql
 	if unique := giq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if giq.path != nil {
+		_spec.Unique = true
 	}
 	if fields := giq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

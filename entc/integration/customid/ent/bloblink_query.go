@@ -441,16 +441,12 @@ func (blq *BlobLinkQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (blq *BlobLinkQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   bloblink.Table,
-			Columns: bloblink.Columns,
-		},
-		From:   blq.sql,
-		Unique: true,
-	}
+	_spec := sqlgraph.NewQuerySpec(bloblink.Table, bloblink.Columns, nil)
+	_spec.From = blq.sql
 	if unique := blq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if blq.path != nil {
+		_spec.Unique = true
 	}
 	if fields := blq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

@@ -517,20 +517,12 @@ func (rq *RentalQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (rq *RentalQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   rental.Table,
-			Columns: rental.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: rental.FieldID,
-			},
-		},
-		From:   rq.sql,
-		Unique: true,
-	}
+	_spec := sqlgraph.NewQuerySpec(rental.Table, rental.Columns, sqlgraph.NewFieldSpec(rental.FieldID, field.TypeInt))
+	_spec.From = rq.sql
 	if unique := rq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if rq.path != nil {
+		_spec.Unique = true
 	}
 	if fields := rq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

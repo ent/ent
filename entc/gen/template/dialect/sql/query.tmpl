@@ -262,22 +262,13 @@ func ({{ $receiver }} *{{ $builder }}) sqlCount(ctx context.Context) (int, error
 }
 
 func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: {{ $.Package }}.Table,
-			Columns: {{ $.Package }}.Columns,
-			{{- if $.HasOneFieldID }}
-				ID: &sqlgraph.FieldSpec{
-					Type: field.{{ $.ID.Type.ConstName }},
-					Column: {{ $.Package }}.{{ $.ID.Constant }},
-				},
-			{{- end }}
-		},
-		From: {{ $receiver }}.sql,
-		Unique: true,
-	}
+	_spec := sqlgraph.NewQuerySpec({{ $.Package }}.Table, {{ $.Package }}.Columns, {{ if $.HasOneFieldID }}sqlgraph.NewFieldSpec({{ $.Package }}.{{ $.ID.Constant }}, field.{{ $.ID.Type.ConstName }}){{ else }}nil{{ end }})
+	{{- /* Setup any intermediate queries if exist (traversal path). */}}
+	_spec.From = {{ $receiver }}.sql
 	if unique := {{ $receiver }}.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if {{ $receiver }}.path != nil {
+		_spec.Unique = true
 	}
 	if fields := {{ $receiver }}.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

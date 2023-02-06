@@ -354,20 +354,12 @@ func (gq *GoodsQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (gq *GoodsQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   goods.Table,
-			Columns: goods.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: goods.FieldID,
-			},
-		},
-		From:   gq.sql,
-		Unique: true,
-	}
+	_spec := sqlgraph.NewQuerySpec(goods.Table, goods.Columns, sqlgraph.NewFieldSpec(goods.FieldID, field.TypeInt))
+	_spec.From = gq.sql
 	if unique := gq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if gq.path != nil {
+		_spec.Unique = true
 	}
 	if fields := gq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

@@ -515,20 +515,12 @@ func (fq *FriendshipQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (fq *FriendshipQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   friendship.Table,
-			Columns: friendship.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: friendship.FieldID,
-			},
-		},
-		From:   fq.sql,
-		Unique: true,
-	}
+	_spec := sqlgraph.NewQuerySpec(friendship.Table, friendship.Columns, sqlgraph.NewFieldSpec(friendship.FieldID, field.TypeInt))
+	_spec.From = fq.sql
 	if unique := fq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if fq.path != nil {
+		_spec.Unique = true
 	}
 	if fields := fq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

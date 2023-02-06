@@ -346,20 +346,12 @@ func (zq *ZooQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (zq *ZooQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   zoo.Table,
-			Columns: zoo.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: zoo.FieldID,
-			},
-		},
-		From:   zq.sql,
-		Unique: true,
-	}
+	_spec := sqlgraph.NewQuerySpec(zoo.Table, zoo.Columns, sqlgraph.NewFieldSpec(zoo.FieldID, field.TypeInt))
+	_spec.From = zq.sql
 	if unique := zq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if zq.path != nil {
+		_spec.Unique = true
 	}
 	if fields := zq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

@@ -448,16 +448,12 @@ func (tlq *TweetLikeQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (tlq *TweetLikeQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   tweetlike.Table,
-			Columns: tweetlike.Columns,
-		},
-		From:   tlq.sql,
-		Unique: true,
-	}
+	_spec := sqlgraph.NewQuerySpec(tweetlike.Table, tweetlike.Columns, nil)
+	_spec.From = tlq.sql
 	if unique := tlq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if tlq.path != nil {
+		_spec.Unique = true
 	}
 	if fields := tlq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

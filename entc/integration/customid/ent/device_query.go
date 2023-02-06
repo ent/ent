@@ -509,20 +509,12 @@ func (dq *DeviceQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (dq *DeviceQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   device.Table,
-			Columns: device.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeBytes,
-				Column: device.FieldID,
-			},
-		},
-		From:   dq.sql,
-		Unique: true,
-	}
+	_spec := sqlgraph.NewQuerySpec(device.Table, device.Columns, sqlgraph.NewFieldSpec(device.FieldID, field.TypeBytes))
+	_spec.From = dq.sql
 	if unique := dq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if dq.path != nil {
+		_spec.Unique = true
 	}
 	if fields := dq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

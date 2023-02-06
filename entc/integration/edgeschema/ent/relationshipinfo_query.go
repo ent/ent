@@ -368,20 +368,12 @@ func (riq *RelationshipInfoQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (riq *RelationshipInfoQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   relationshipinfo.Table,
-			Columns: relationshipinfo.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: relationshipinfo.FieldID,
-			},
-		},
-		From:   riq.sql,
-		Unique: true,
-	}
+	_spec := sqlgraph.NewQuerySpec(relationshipinfo.Table, relationshipinfo.Columns, sqlgraph.NewFieldSpec(relationshipinfo.FieldID, field.TypeInt))
+	_spec.From = riq.sql
 	if unique := riq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if riq.path != nil {
+		_spec.Unique = true
 	}
 	if fields := riq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

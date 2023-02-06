@@ -375,20 +375,12 @@ func (tq *TenantQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (tq *TenantQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   tenant.Table,
-			Columns: tenant.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: tenant.FieldID,
-			},
-		},
-		From:   tq.sql,
-		Unique: true,
-	}
+	_spec := sqlgraph.NewQuerySpec(tenant.Table, tenant.Columns, sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt))
+	_spec.From = tq.sql
 	if unique := tq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if tq.path != nil {
+		_spec.Unique = true
 	}
 	if fields := tq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

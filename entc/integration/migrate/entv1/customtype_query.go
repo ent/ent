@@ -368,20 +368,12 @@ func (ctq *CustomTypeQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (ctq *CustomTypeQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   customtype.Table,
-			Columns: customtype.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: customtype.FieldID,
-			},
-		},
-		From:   ctq.sql,
-		Unique: true,
-	}
+	_spec := sqlgraph.NewQuerySpec(customtype.Table, customtype.Columns, sqlgraph.NewFieldSpec(customtype.FieldID, field.TypeInt))
+	_spec.From = ctq.sql
 	if unique := ctq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if ctq.path != nil {
+		_spec.Unique = true
 	}
 	if fields := ctq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

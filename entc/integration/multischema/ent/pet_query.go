@@ -459,20 +459,12 @@ func (pq *PetQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   pet.Table,
-			Columns: pet.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: pet.FieldID,
-			},
-		},
-		From:   pq.sql,
-		Unique: true,
-	}
+	_spec := sqlgraph.NewQuerySpec(pet.Table, pet.Columns, sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt))
+	_spec.From = pq.sql
 	if unique := pq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if pq.path != nil {
+		_spec.Unique = true
 	}
 	if fields := pq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

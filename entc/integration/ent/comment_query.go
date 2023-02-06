@@ -376,20 +376,12 @@ func (cq *CommentQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (cq *CommentQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   comment.Table,
-			Columns: comment.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: comment.FieldID,
-			},
-		},
-		From:   cq.sql,
-		Unique: true,
-	}
+	_spec := sqlgraph.NewQuerySpec(comment.Table, comment.Columns, sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt))
+	_spec.From = cq.sql
 	if unique := cq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if cq.path != nil {
+		_spec.Unique = true
 	}
 	if fields := cq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

@@ -519,16 +519,12 @@ func (rq *RelationshipQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (rq *RelationshipQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   relationship.Table,
-			Columns: relationship.Columns,
-		},
-		From:   rq.sql,
-		Unique: true,
-	}
+	_spec := sqlgraph.NewQuerySpec(relationship.Table, relationship.Columns, nil)
+	_spec.From = rq.sql
 	if unique := rq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if rq.path != nil {
+		_spec.Unique = true
 	}
 	if fields := rq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
