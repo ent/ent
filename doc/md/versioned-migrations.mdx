@@ -118,7 +118,7 @@ docker run --name migration --rm -p 5432:5432 -e POSTGRES_PASSWORD=pass -e POSTG
 </TabItem>
 </Tabs>
 
-2\. Create a `main.go` file under the `ent/migrate` package and customize the migration generation for your project.
+2\. Create a file named `main.go` and a directory named `migrations` under the `ent/migrate` package and customize the migration generation for your project.
 
 <Tabs
 defaultValue="atlas"
@@ -152,12 +152,6 @@ import (
 
 func main() {
 	ctx := context.Background()
-	
-	// Check if the migration directory exists and create it otherwise
-	if _, err := os.Stat(migrationDirPath); os.IsNotExist(err) {
-		os.Mkdir(migrationDirPath, 0755)
-	}
-
 	// Create a local migration directory able to understand Atlas migration file format for replay.
 	dir, err := atlas.NewLocalDir("ent/migrate/migrations")
 	if err != nil {
@@ -204,12 +198,6 @@ import (
 
 func main() {
 	ctx := context.Background()
-	
-	// Check if the migration directory exists and create it otherwise
-	if _, err := os.Stat(migrationDirPath); os.IsNotExist(err) {
-		os.Mkdir(migrationDirPath, 0755)
-	}
-
 	// Create a local migration directory able to understand golang-migrate migration file format for replay.
 	dir, err := sqltool.NewGolangMigrateDir("ent/migrate/migrations")
 	if err != nil {
@@ -255,12 +243,6 @@ import (
 
 func main() {
 	ctx := context.Background()
-	
-	// Check if the migration directory exists and create it otherwise
-	if _, err := os.Stat(migrationDirPath); os.IsNotExist(err) {
-		os.Mkdir(migrationDirPath, 0755)
-	}
-
 	// Create a local migration directory able to understand goose migration file format for replay.
 	dir, err := sqltool.NewGooseDir("ent/migrate/migrations")
 	if err != nil {
@@ -306,12 +288,6 @@ import (
 
 func main() {
 	ctx := context.Background()
-	
-	// Check if the migration directory exists and create it otherwise
-	if _, err := os.Stat(migrationDirPath); os.IsNotExist(err) {
-		os.Mkdir(migrationDirPath, 0755)
-	}
-
 	// Create a local migration directory able to understand dbmate migration file format for replay.
 	dir, err := sqltool.NewDBMateDir("ent/migrate/migrations")
 	if err != nil {
@@ -357,12 +333,6 @@ import (
 
 func main() {
 	ctx := context.Background()
-	
-	// Check if the migration directory exists and create it otherwise
-	if _, err := os.Stat(migrationDirPath); os.IsNotExist(err) {
-		os.Mkdir(migrationDirPath, 0755)
-	}
-
 	// Create a local migration directory able to understand Flyway migration file format for replay.
 	dir, err := sqltool.NewFlywayDir("ent/migrate/migrations")
 	if err != nil {
@@ -408,12 +378,6 @@ import (
 
 func main() {
 	ctx := context.Background()
-
-	// Check if the migration directory exists and create it otherwise
-	if _, err := os.Stat(migrationDirPath); os.IsNotExist(err) {
-		os.Mkdir(migrationDirPath, 0755)
-	}
-
 	// Create a local migration directory able to understand Liquibase migration file format for replay.
 	dir, err := sqltool.NewLiquibaseDir("ent/migrate/migrations")
 	if err != nil {
