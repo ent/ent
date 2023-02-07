@@ -13,6 +13,30 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent"
 )
 
+// The AttachedFileFunc type is an adapter to allow the use of ordinary
+// function as AttachedFile mutator.
+type AttachedFileFunc func(context.Context, *ent.AttachedFileMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AttachedFileFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AttachedFileMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AttachedFileMutation", m)
+}
+
+// The FileFunc type is an adapter to allow the use of ordinary
+// function as File mutator.
+type FileFunc func(context.Context, *ent.FileMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f FileFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.FileMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FileMutation", m)
+}
+
 // The FriendshipFunc type is an adapter to allow the use of ordinary
 // function as Friendship mutator.
 type FriendshipFunc func(context.Context, *ent.FriendshipMutation) (ent.Value, error)
@@ -47,6 +71,18 @@ func (f GroupTagFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GroupTagMutation", m)
+}
+
+// The ProcessFunc type is an adapter to allow the use of ordinary
+// function as Process mutator.
+type ProcessFunc func(context.Context, *ent.ProcessMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ProcessFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ProcessMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProcessMutation", m)
 }
 
 // The RelationshipFunc type is an adapter to allow the use of ordinary

@@ -15,9 +15,12 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/migrate"
 	"github.com/google/uuid"
 
+	"entgo.io/ent/entc/integration/edgeschema/ent/attachedfile"
+	"entgo.io/ent/entc/integration/edgeschema/ent/file"
 	"entgo.io/ent/entc/integration/edgeschema/ent/friendship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
 	"entgo.io/ent/entc/integration/edgeschema/ent/grouptag"
+	"entgo.io/ent/entc/integration/edgeschema/ent/process"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
 	"entgo.io/ent/entc/integration/edgeschema/ent/role"
@@ -40,12 +43,18 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// AttachedFile is the client for interacting with the AttachedFile builders.
+	AttachedFile *AttachedFileClient
+	// File is the client for interacting with the File builders.
+	File *FileClient
 	// Friendship is the client for interacting with the Friendship builders.
 	Friendship *FriendshipClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
 	// GroupTag is the client for interacting with the GroupTag builders.
 	GroupTag *GroupTagClient
+	// Process is the client for interacting with the Process builders.
+	Process *ProcessClient
 	// Relationship is the client for interacting with the Relationship builders.
 	Relationship *RelationshipClient
 	// RelationshipInfo is the client for interacting with the RelationshipInfo builders.
@@ -81,9 +90,12 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.AttachedFile = NewAttachedFileClient(c.config)
+	c.File = NewFileClient(c.config)
 	c.Friendship = NewFriendshipClient(c.config)
 	c.Group = NewGroupClient(c.config)
 	c.GroupTag = NewGroupTagClient(c.config)
+	c.Process = NewProcessClient(c.config)
 	c.Relationship = NewRelationshipClient(c.config)
 	c.RelationshipInfo = NewRelationshipInfoClient(c.config)
 	c.Role = NewRoleClient(c.config)
@@ -128,9 +140,12 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:              ctx,
 		config:           cfg,
+		AttachedFile:     NewAttachedFileClient(cfg),
+		File:             NewFileClient(cfg),
 		Friendship:       NewFriendshipClient(cfg),
 		Group:            NewGroupClient(cfg),
 		GroupTag:         NewGroupTagClient(cfg),
+		Process:          NewProcessClient(cfg),
 		Relationship:     NewRelationshipClient(cfg),
 		RelationshipInfo: NewRelationshipInfoClient(cfg),
 		Role:             NewRoleClient(cfg),
@@ -161,9 +176,12 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:              ctx,
 		config:           cfg,
+		AttachedFile:     NewAttachedFileClient(cfg),
+		File:             NewFileClient(cfg),
 		Friendship:       NewFriendshipClient(cfg),
 		Group:            NewGroupClient(cfg),
 		GroupTag:         NewGroupTagClient(cfg),
+		Process:          NewProcessClient(cfg),
 		Relationship:     NewRelationshipClient(cfg),
 		RelationshipInfo: NewRelationshipInfoClient(cfg),
 		Role:             NewRoleClient(cfg),
@@ -181,7 +199,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Friendship.
+//		AttachedFile.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -203,9 +221,12 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.AttachedFile.Use(hooks...)
+	c.File.Use(hooks...)
 	c.Friendship.Use(hooks...)
 	c.Group.Use(hooks...)
 	c.GroupTag.Use(hooks...)
+	c.Process.Use(hooks...)
 	c.Relationship.Use(hooks...)
 	c.RelationshipInfo.Use(hooks...)
 	c.Role.Use(hooks...)
@@ -222,9 +243,12 @@ func (c *Client) Use(hooks ...Hook) {
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.AttachedFile.Intercept(interceptors...)
+	c.File.Intercept(interceptors...)
 	c.Friendship.Intercept(interceptors...)
 	c.Group.Intercept(interceptors...)
 	c.GroupTag.Intercept(interceptors...)
+	c.Process.Intercept(interceptors...)
 	c.Relationship.Intercept(interceptors...)
 	c.RelationshipInfo.Intercept(interceptors...)
 	c.Role.Intercept(interceptors...)
@@ -241,12 +265,18 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *AttachedFileMutation:
+		return c.AttachedFile.mutate(ctx, m)
+	case *FileMutation:
+		return c.File.mutate(ctx, m)
 	case *FriendshipMutation:
 		return c.Friendship.mutate(ctx, m)
 	case *GroupMutation:
 		return c.Group.mutate(ctx, m)
 	case *GroupTagMutation:
 		return c.GroupTag.mutate(ctx, m)
+	case *ProcessMutation:
+		return c.Process.mutate(ctx, m)
 	case *RelationshipMutation:
 		return c.Relationship.mutate(ctx, m)
 	case *RelationshipInfoMutation:
@@ -271,6 +301,290 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.UserTweet.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// AttachedFileClient is a client for the AttachedFile schema.
+type AttachedFileClient struct {
+	config
+}
+
+// NewAttachedFileClient returns a client for the AttachedFile from the given config.
+func NewAttachedFileClient(c config) *AttachedFileClient {
+	return &AttachedFileClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `attachedfile.Hooks(f(g(h())))`.
+func (c *AttachedFileClient) Use(hooks ...Hook) {
+	c.hooks.AttachedFile = append(c.hooks.AttachedFile, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `attachedfile.Intercept(f(g(h())))`.
+func (c *AttachedFileClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AttachedFile = append(c.inters.AttachedFile, interceptors...)
+}
+
+// Create returns a builder for creating a AttachedFile entity.
+func (c *AttachedFileClient) Create() *AttachedFileCreate {
+	mutation := newAttachedFileMutation(c.config, OpCreate)
+	return &AttachedFileCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AttachedFile entities.
+func (c *AttachedFileClient) CreateBulk(builders ...*AttachedFileCreate) *AttachedFileCreateBulk {
+	return &AttachedFileCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AttachedFile.
+func (c *AttachedFileClient) Update() *AttachedFileUpdate {
+	mutation := newAttachedFileMutation(c.config, OpUpdate)
+	return &AttachedFileUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AttachedFileClient) UpdateOne(af *AttachedFile) *AttachedFileUpdateOne {
+	mutation := newAttachedFileMutation(c.config, OpUpdateOne, withAttachedFile(af))
+	return &AttachedFileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AttachedFileClient) UpdateOneID(id int) *AttachedFileUpdateOne {
+	mutation := newAttachedFileMutation(c.config, OpUpdateOne, withAttachedFileID(id))
+	return &AttachedFileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AttachedFile.
+func (c *AttachedFileClient) Delete() *AttachedFileDelete {
+	mutation := newAttachedFileMutation(c.config, OpDelete)
+	return &AttachedFileDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AttachedFileClient) DeleteOne(af *AttachedFile) *AttachedFileDeleteOne {
+	return c.DeleteOneID(af.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AttachedFileClient) DeleteOneID(id int) *AttachedFileDeleteOne {
+	builder := c.Delete().Where(attachedfile.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AttachedFileDeleteOne{builder}
+}
+
+// Query returns a query builder for AttachedFile.
+func (c *AttachedFileClient) Query() *AttachedFileQuery {
+	return &AttachedFileQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAttachedFile},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AttachedFile entity by its id.
+func (c *AttachedFileClient) Get(ctx context.Context, id int) (*AttachedFile, error) {
+	return c.Query().Where(attachedfile.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AttachedFileClient) GetX(ctx context.Context, id int) *AttachedFile {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryFi queries the fi edge of a AttachedFile.
+func (c *AttachedFileClient) QueryFi(af *AttachedFile) *FileQuery {
+	query := (&FileClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := af.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(attachedfile.Table, attachedfile.FieldID, id),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, attachedfile.FiTable, attachedfile.FiColumn),
+		)
+		fromV = sqlgraph.Neighbors(af.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryProc queries the proc edge of a AttachedFile.
+func (c *AttachedFileClient) QueryProc(af *AttachedFile) *ProcessQuery {
+	query := (&ProcessClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := af.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(attachedfile.Table, attachedfile.FieldID, id),
+			sqlgraph.To(process.Table, process.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, attachedfile.ProcTable, attachedfile.ProcColumn),
+		)
+		fromV = sqlgraph.Neighbors(af.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AttachedFileClient) Hooks() []Hook {
+	return c.hooks.AttachedFile
+}
+
+// Interceptors returns the client interceptors.
+func (c *AttachedFileClient) Interceptors() []Interceptor {
+	return c.inters.AttachedFile
+}
+
+func (c *AttachedFileClient) mutate(ctx context.Context, m *AttachedFileMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AttachedFileCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AttachedFileUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AttachedFileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AttachedFileDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AttachedFile mutation op: %q", m.Op())
+	}
+}
+
+// FileClient is a client for the File schema.
+type FileClient struct {
+	config
+}
+
+// NewFileClient returns a client for the File from the given config.
+func NewFileClient(c config) *FileClient {
+	return &FileClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `file.Hooks(f(g(h())))`.
+func (c *FileClient) Use(hooks ...Hook) {
+	c.hooks.File = append(c.hooks.File, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `file.Intercept(f(g(h())))`.
+func (c *FileClient) Intercept(interceptors ...Interceptor) {
+	c.inters.File = append(c.inters.File, interceptors...)
+}
+
+// Create returns a builder for creating a File entity.
+func (c *FileClient) Create() *FileCreate {
+	mutation := newFileMutation(c.config, OpCreate)
+	return &FileCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of File entities.
+func (c *FileClient) CreateBulk(builders ...*FileCreate) *FileCreateBulk {
+	return &FileCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for File.
+func (c *FileClient) Update() *FileUpdate {
+	mutation := newFileMutation(c.config, OpUpdate)
+	return &FileUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *FileClient) UpdateOne(f *File) *FileUpdateOne {
+	mutation := newFileMutation(c.config, OpUpdateOne, withFile(f))
+	return &FileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *FileClient) UpdateOneID(id int) *FileUpdateOne {
+	mutation := newFileMutation(c.config, OpUpdateOne, withFileID(id))
+	return &FileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for File.
+func (c *FileClient) Delete() *FileDelete {
+	mutation := newFileMutation(c.config, OpDelete)
+	return &FileDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *FileClient) DeleteOne(f *File) *FileDeleteOne {
+	return c.DeleteOneID(f.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *FileClient) DeleteOneID(id int) *FileDeleteOne {
+	builder := c.Delete().Where(file.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &FileDeleteOne{builder}
+}
+
+// Query returns a query builder for File.
+func (c *FileClient) Query() *FileQuery {
+	return &FileQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeFile},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a File entity by its id.
+func (c *FileClient) Get(ctx context.Context, id int) (*File, error) {
+	return c.Query().Where(file.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FileClient) GetX(ctx context.Context, id int) *File {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryProcesses queries the processes edge of a File.
+func (c *FileClient) QueryProcesses(f *File) *ProcessQuery {
+	query := (&ProcessClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := f.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(file.Table, file.FieldID, id),
+			sqlgraph.To(process.Table, process.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, file.ProcessesTable, file.ProcessesPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *FileClient) Hooks() []Hook {
+	return c.hooks.File
+}
+
+// Interceptors returns the client interceptors.
+func (c *FileClient) Interceptors() []Interceptor {
+	return c.inters.File
+}
+
+func (c *FileClient) mutate(ctx context.Context, m *FileMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&FileCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&FileUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&FileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&FileDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown File mutation op: %q", m.Op())
 	}
 }
 
@@ -753,6 +1067,156 @@ func (c *GroupTagClient) mutate(ctx context.Context, m *GroupTagMutation) (Value
 		return (&GroupTagDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown GroupTag mutation op: %q", m.Op())
+	}
+}
+
+// ProcessClient is a client for the Process schema.
+type ProcessClient struct {
+	config
+}
+
+// NewProcessClient returns a client for the Process from the given config.
+func NewProcessClient(c config) *ProcessClient {
+	return &ProcessClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `process.Hooks(f(g(h())))`.
+func (c *ProcessClient) Use(hooks ...Hook) {
+	c.hooks.Process = append(c.hooks.Process, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `process.Intercept(f(g(h())))`.
+func (c *ProcessClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Process = append(c.inters.Process, interceptors...)
+}
+
+// Create returns a builder for creating a Process entity.
+func (c *ProcessClient) Create() *ProcessCreate {
+	mutation := newProcessMutation(c.config, OpCreate)
+	return &ProcessCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Process entities.
+func (c *ProcessClient) CreateBulk(builders ...*ProcessCreate) *ProcessCreateBulk {
+	return &ProcessCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Process.
+func (c *ProcessClient) Update() *ProcessUpdate {
+	mutation := newProcessMutation(c.config, OpUpdate)
+	return &ProcessUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ProcessClient) UpdateOne(pr *Process) *ProcessUpdateOne {
+	mutation := newProcessMutation(c.config, OpUpdateOne, withProcess(pr))
+	return &ProcessUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ProcessClient) UpdateOneID(id int) *ProcessUpdateOne {
+	mutation := newProcessMutation(c.config, OpUpdateOne, withProcessID(id))
+	return &ProcessUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Process.
+func (c *ProcessClient) Delete() *ProcessDelete {
+	mutation := newProcessMutation(c.config, OpDelete)
+	return &ProcessDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ProcessClient) DeleteOne(pr *Process) *ProcessDeleteOne {
+	return c.DeleteOneID(pr.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ProcessClient) DeleteOneID(id int) *ProcessDeleteOne {
+	builder := c.Delete().Where(process.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ProcessDeleteOne{builder}
+}
+
+// Query returns a query builder for Process.
+func (c *ProcessClient) Query() *ProcessQuery {
+	return &ProcessQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeProcess},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Process entity by its id.
+func (c *ProcessClient) Get(ctx context.Context, id int) (*Process, error) {
+	return c.Query().Where(process.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ProcessClient) GetX(ctx context.Context, id int) *Process {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryFiles queries the files edge of a Process.
+func (c *ProcessClient) QueryFiles(pr *Process) *FileQuery {
+	query := (&FileClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(process.Table, process.FieldID, id),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, process.FilesTable, process.FilesPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAttachedFiles queries the attached_files edge of a Process.
+func (c *ProcessClient) QueryAttachedFiles(pr *Process) *AttachedFileQuery {
+	query := (&AttachedFileClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(process.Table, process.FieldID, id),
+			sqlgraph.To(attachedfile.Table, attachedfile.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, process.AttachedFilesTable, process.AttachedFilesColumn),
+		)
+		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ProcessClient) Hooks() []Hook {
+	return c.hooks.Process
+}
+
+// Interceptors returns the client interceptors.
+func (c *ProcessClient) Interceptors() []Interceptor {
+	return c.inters.Process
+}
+
+func (c *ProcessClient) mutate(ctx context.Context, m *ProcessMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ProcessCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ProcessUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ProcessUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ProcessDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Process mutation op: %q", m.Op())
 	}
 }
 
