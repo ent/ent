@@ -1376,19 +1376,19 @@ func EQ(col string, value any) *Predicate {
 func (p *Predicate) EQ(col string, arg any) *Predicate {
 	// A small optimization to avoid passing
 	// arguments when it can be avoided.
-	switch arg := arg.(type) {
-	case bool:
-		if arg {
-			return IsTrue(col)
-		}
-		return IsFalse(col)
-	default:
-		return p.Append(func(b *Builder) {
-			b.Ident(col)
-			b.WriteOp(OpEQ)
-			p.arg(b, arg)
-		})
-	}
+	// switch arg := arg.(type) {
+	// case bool:
+	// 	if arg {
+	// 		return IsTrue(col)
+	// 	}
+	// 	return IsFalse(col)
+	// default:
+	return p.Append(func(b *Builder) {
+		b.Ident(col)
+		b.WriteOp(OpEQ)
+		p.arg(b, arg)
+	})
+	// }
 }
 
 // ColumnsEQ appends a "=" predicate between 2 columns.
@@ -1410,19 +1410,19 @@ func NEQ(col string, value any) *Predicate {
 func (p *Predicate) NEQ(col string, arg any) *Predicate {
 	// A small optimization to avoid passing
 	// arguments when it can be avoided.
-	switch arg := arg.(type) {
-	case bool:
-		if arg {
-			return IsFalse(col)
-		}
-		return IsTrue(col)
-	default:
-		return p.Append(func(b *Builder) {
-			b.Ident(col)
-			b.WriteOp(OpNEQ)
-			p.arg(b, arg)
-		})
-	}
+	// switch arg := arg.(type) {
+	// case bool:
+	// 	if arg {
+	// 		return IsFalse(col)
+	// 	}
+	// 	return IsTrue(col)
+	// default:
+	return p.Append(func(b *Builder) {
+		b.Ident(col)
+		b.WriteOp(OpNEQ)
+		p.arg(b, arg)
+	})
+	// }
 }
 
 // ColumnsNEQ appends a "<>" predicate between 2 columns.

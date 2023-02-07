@@ -655,7 +655,8 @@ func TestHasNeighborsWith(t *testing.T) {
 			predicate: func(s *sql.Selector) {
 				s.Where(sql.EQ("expired", false))
 			},
-			wantQuery: `SELECT * FROM "users" WHERE "users"."id" IN (SELECT "cards"."owner_id" FROM "cards" WHERE NOT "expired")`,
+			wantQuery: `SELECT * FROM "users" WHERE "users"."id" IN (SELECT "cards"."owner_id" FROM "cards" WHERE "expired" = $1)`,
+			wantArgs:  []any{false},
 		},
 		{
 			name: "O2O/inverse",
@@ -778,7 +779,8 @@ WHERE "groups"."id" IN
 			predicate: func(s *sql.Selector) {
 				s.Where(sql.EQ("expired", false))
 			},
-			wantQuery: `SELECT * FROM "s1"."users" WHERE "s1"."users"."id" IN (SELECT "s2"."cards"."owner_id" FROM "s2"."cards" WHERE NOT "expired")`,
+			wantQuery: `SELECT * FROM "s1"."users" WHERE "s1"."users"."id" IN (SELECT "s2"."cards"."owner_id" FROM "s2"."cards" WHERE "expired" = $1)`,
+			wantArgs:  []any{false},
 		},
 		{
 			name: "schema/O2M",
@@ -1623,8 +1625,8 @@ func TestUpdateNode(t *testing.T) {
 			},
 			prepare: func(mock sqlmock.Sqlmock) {
 				mock.ExpectBegin()
-				mock.ExpectExec(escape("UPDATE `users` SET `name` = NULL, `deleted` = ?, `age` = COALESCE(`users`.`age`, 0) + ? WHERE `id` = ? AND NOT `deleted`")).
-					WithArgs(true, 1, 1).
+				mock.ExpectExec(escape("UPDATE `users` SET `name` = NULL, `deleted` = ?, `age` = COALESCE(`users`.`age`, 0) + ? WHERE `id` = ? AND `deleted` = ?")).
+					WithArgs(true, 1, 1, false).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectQuery(escape("SELECT `id`, `name`, `age` FROM `users` WHERE `id` = ?")).
 					WithArgs(1).
@@ -1659,11 +1661,11 @@ func TestUpdateNode(t *testing.T) {
 			},
 			prepare: func(mock sqlmock.Sqlmock) {
 				mock.ExpectBegin()
-				mock.ExpectExec(escape("UPDATE `users` SET `name` = NULL, `deleted` = ?, `age` = COALESCE(`users`.`age`, 0) + ? WHERE `id` = ? AND NOT `deleted`")).
-					WithArgs(true, 1, 1).
+				mock.ExpectExec(escape("UPDATE `users` SET `name` = NULL, `deleted` = ?, `age` = COALESCE(`users`.`age`, 0) + ? WHERE `id` = ? AND `deleted` = ?")).
+					WithArgs(true, 1, 1, false).
 					WillReturnResult(sqlmock.NewResult(0, 0))
-				mock.ExpectQuery(escape("SELECT EXISTS (SELECT * FROM `users` WHERE `id` = ? AND NOT `deleted`)")).
-					WithArgs(1).
+				mock.ExpectQuery(escape("SELECT EXISTS (SELECT * FROM `users` WHERE `id` = ? AND `deleted` = ?)")).
+					WithArgs(1, true).
 					WillReturnRows(sqlmock.NewRows([]string{"exists"}).
 						AddRow(false))
 				mock.ExpectRollback()

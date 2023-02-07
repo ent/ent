@@ -862,7 +862,8 @@ func (u *updater) nodes(ctx context.Context, drv dialect.Driver) (int, error) {
 		}
 		// remake predicate by creating a new selector
 		selector2 := u.builder.Select(u.Node.ID.Column).
-			From(u.builder.Table(u.Node.Table))
+			From(u.builder.Table(u.Node.Table).Schema(u.Node.Schema)).
+			WithContext(ctx)
 		if pred := u.Predicate; pred != nil {
 			pred(selector2)
 		}

@@ -1609,8 +1609,8 @@ func TestBuilder(t *testing.T) {
 						EQ("active", true),
 					),
 				),
-			wantQuery: `SELECT * FROM "users" WHERE ((name = $1 AND name = $2) AND "name" = $3) AND ("id" IN (SELECT "owner_id" FROM "pets" WHERE "name" = $4) AND "active")`,
-			wantArgs:  []any{"pedro", "pedro", "pedro", "luna"},
+			wantQuery: `SELECT * FROM "users" WHERE ((name = $1 AND name = $2) AND "name" = $3) AND ("id" IN (SELECT "owner_id" FROM "pets" WHERE "name" = $4) AND "active" = $5)`,
+			wantArgs:  []any{"pedro", "pedro", "pedro", "luna", true},
 		},
 		{
 			input: func() Querier {
@@ -1752,8 +1752,8 @@ func TestSelector_Union(t *testing.T) {
 				),
 		).
 		Query()
-	require.Equal(t, `SELECT * FROM "users" WHERE "active" UNION SELECT * FROM "old_users1" WHERE "is_active" AND "age" > $1 UNION ALL SELECT * FROM "old_users2" WHERE "is_active" = $2 AND "age" < $3`, query)
-	require.Equal(t, []any{20, "true", 18}, args)
+	require.Equal(t, `SELECT * FROM "users" WHERE "active" = $1 UNION SELECT * FROM "old_users1" WHERE "is_active" = $2 AND "age" > $3 UNION ALL SELECT * FROM "old_users2" WHERE "is_active" = $4 AND "age" < $5`, query)
+	require.Equal(t, []any{true, true, 20, "true", 18}, args)
 }
 
 func TestSelector_Except(t *testing.T) {
@@ -1782,8 +1782,8 @@ func TestSelector_Except(t *testing.T) {
 				),
 		).
 		Query()
-	require.Equal(t, `SELECT * FROM "users" WHERE "active" EXCEPT SELECT * FROM "old_users1" WHERE "is_active" AND "age" > $1 EXCEPT ALL SELECT * FROM "old_users2" WHERE "is_active" = $2 AND "age" < $3`, query)
-	require.Equal(t, []any{20, "true", 18}, args)
+	require.Equal(t, `SELECT * FROM "users" WHERE "active" = $1 EXCEPT SELECT * FROM "old_users1" WHERE "is_active" = $2 AND "age" > $3 EXCEPT ALL SELECT * FROM "old_users2" WHERE "is_active" = $4 AND "age" < $5`, query)
+	require.Equal(t, []any{true, true, 20, "true", 18}, args)
 }
 
 func TestSelector_Intersect(t *testing.T) {
@@ -1812,8 +1812,8 @@ func TestSelector_Intersect(t *testing.T) {
 				),
 		).
 		Query()
-	require.Equal(t, `SELECT * FROM "users" WHERE "active" INTERSECT SELECT * FROM "old_users1" WHERE "is_active" AND "age" > $1 INTERSECT ALL SELECT * FROM "old_users2" WHERE "is_active" = $2 AND "age" < $3`, query)
-	require.Equal(t, []any{20, "true", 18}, args)
+	require.Equal(t, `SELECT * FROM "users" WHERE "active" = $1 INTERSECT SELECT * FROM "old_users1" WHERE "is_active" = $2 AND "age" > $3 INTERSECT ALL SELECT * FROM "old_users2" WHERE "is_active" = $4 AND "age" < $5`, query)
+	require.Equal(t, []any{true, true, 20, "true", 18}, args)
 }
 
 func TestSelector_SetOperatorWithRecursive(t *testing.T) {
@@ -1842,8 +1842,8 @@ func TestSelector_SetOperatorWithRecursive(t *testing.T) {
 			From(t3),
 	}
 	query, args := n.Query()
-	require.Equal(t, "WITH RECURSIVE `path`(`id`, `name`, `parent_id`) AS (SELECT `files`.`id`, `files`.`name`, `files`.`parent_id` FROM `files` WHERE `files`.`parent_id` IS NULL AND NOT `files`.`deleted` UNION ALL SELECT `files`.`id`, `files`.`name`, `files`.`parent_id` FROM `files` JOIN `path` AS `t1` ON `files`.`parent_id` = `t1`.`id` WHERE NOT `files`.`deleted`) SELECT `t1`.`id`, `t1`.`name`, `t1`.`parent_id` FROM `path` AS `t1`", query)
-	require.Nil(t, args)
+	require.Equal(t, "WITH RECURSIVE `path`(`id`, `name`, `parent_id`) AS (SELECT `files`.`id`, `files`.`name`, `files`.`parent_id` FROM `files` WHERE `files`.`parent_id` IS NULL AND `files`.`deleted` = ? UNION ALL SELECT `files`.`id`, `files`.`name`, `files`.`parent_id` FROM `files` JOIN `path` AS `t1` ON `files`.`parent_id` = `t1`.`id` WHERE `files`.`deleted` = ?) SELECT `t1`.`id`, `t1`.`name`, `t1`.`parent_id` FROM `path` AS `t1`", query)
+	require.Equal(t, []any{false, false}, args)
 }
 
 func TestBuilderContext(t *testing.T) {
@@ -1947,7 +1947,7 @@ func TestSelector_UnionOrderBy(t *testing.T) {
 		Union(Select("*").From(Table("old_users1"))).
 		OrderBy(table.C("whatever")).
 		Query()
-	require.Equal(t, `SELECT * FROM "users" WHERE "active" UNION SELECT * FROM "old_users1" ORDER BY "users"."whatever"`, query)
+	require.Equal(t, `SELECT * FROM "users" WHERE "active" = $1 UNION SELECT * FROM "old_users1" ORDER BY "users"."whatever"`, query)
 }
 
 func TestUpdateBuilder_SetExpr(t *testing.T) {
@@ -2155,7 +2155,8 @@ func TestReusePredicates(t *testing.T) {
 	}{
 		{
 			p:         EQ("active", false),
-			wantQuery: `SELECT * FROM "users" WHERE NOT "active"`,
+			wantQuery: `SELECT * FROM "users" WHERE "active" = $1`,
+			wantArgs:  []any{false},
 		},
 		{
 			p: Or(
@@ -2183,8 +2184,8 @@ func TestReusePredicates(t *testing.T) {
 					In("id", Select("oid").From(Table("history"))),
 				),
 			),
-			wantQuery: `SELECT * FROM "users" WHERE "active" AND "name" LIKE $1 AND "name" LIKE $2 AND ("id" IN (SELECT "oid" FROM "audit") OR "id" IN (SELECT "oid" FROM "history"))`,
-			wantArgs:  []any{"foo%", "%bar"},
+			wantQuery: `SELECT * FROM "users" WHERE "active" = $1 AND "name" LIKE $2 AND "name" LIKE $3 AND ("id" IN (SELECT "oid" FROM "audit") OR "id" IN (SELECT "oid" FROM "history"))`,
+			wantArgs:  []any{true, "foo%", "%bar"},
 		},
 		{
 			p: func() *Predicate {
@@ -2228,8 +2229,8 @@ func TestBoolPredicates(t *testing.T) {
 			),
 		).
 		Query()
-	require.Nil(t, args)
-	require.Equal(t, "SELECT * FROM `users` JOIN `posts` AS `t1` ON `users`.`id` = `t1`.`author_id` WHERE `users`.`active` AND NOT `t1`.`deleted`", query)
+	require.Equal(t, []any{true, true}, args)
+	require.Equal(t, "SELECT * FROM `users` JOIN `posts` AS `t1` ON `users`.`id` = `t1`.`author_id` WHERE `users`.`active` = ? AND `t1`.`deleted` <> ?", query)
 }
 
 func TestWindowFunction(t *testing.T) {
@@ -2250,8 +2251,8 @@ func TestWindowFunction(t *testing.T) {
 				From(Table("active_posts")),
 		)
 	query, args := Select("*").From(Table("selected_posts")).Where(LTE("row_number", 2)).Prefix(with).Query()
-	require.Equal(t, "WITH `active_posts` AS (SELECT `posts`.`id`, `posts`.`content`, `posts`.`author_id` FROM `posts` WHERE `active`), `selected_posts` AS (SELECT *, (ROW_NUMBER() OVER (PARTITION BY `author_id` ORDER BY `id`, f(`s`))) AS `row_number` FROM `active_posts`) SELECT * FROM `selected_posts` WHERE `row_number` <= ?", query)
-	require.Equal(t, []any{2}, args)
+	require.Equal(t, "WITH `active_posts` AS (SELECT `posts`.`id`, `posts`.`content`, `posts`.`author_id` FROM `posts` WHERE `active` = ?), `selected_posts` AS (SELECT *, (ROW_NUMBER() OVER (PARTITION BY `author_id` ORDER BY `id`, f(`s`))) AS `row_number` FROM `active_posts`) SELECT * FROM `selected_posts` WHERE `row_number` <= ?", query)
+	require.Equal(t, []any{true, 2}, args)
 }
 
 func TestWindowFunction_Select(t *testing.T) {
