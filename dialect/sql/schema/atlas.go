@@ -726,7 +726,7 @@ func (a *Atlas) planReplay(ctx context.Context, name string, tables []*Table) (*
 		return nil, err
 	}
 	if len(s.Tables) > 0 {
-		return nil, migrate.NotCleanError{Reason: fmt.Sprintf("found table %q", s.Tables[0].Name)}
+		return nil, &migrate.NotCleanError{Reason: fmt.Sprintf("found table %q", s.Tables[0].Name)}
 	}
 	// Replay the migration directory on the database.
 	ex, err := migrate.NewExecutor(a.atDriver, a.dir, &migrate.NopRevisionReadWriter{})
