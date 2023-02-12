@@ -84,7 +84,7 @@ Open the html file with your favorite browser to see the visualization
 
 Next, let's add another entity named Post, and see how our visualization changes:
 ```bash
-ent init Post
+ent new Post
 ```
 ```go title="ent/schema/post.go"
 // Fields of the Post.

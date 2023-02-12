@@ -64,14 +64,28 @@ func (IDType) String() string {
 
 // InitCmd returns the init command for ent/c packages.
 func InitCmd() *cobra.Command {
+	c := NewCmd()
+	c.Use = "init [flags] [schemas]"
+	c.Short = "initialize an environment with zero or more schemas"
+	c.Example = examples(
+		"ent init Example",
+		"ent init --target entv1/schema User Group",
+		"ent init --template ./path/to/file.tmpl User",
+	)
+	c.Deprecated = "use `ent new` instead"
+	return c
+}
+
+// NewCmd returns the new command for ent/c packages.
+func NewCmd() *cobra.Command {
 	var target, tmplPath string
 	cmd := &cobra.Command{
-		Use:   "init [flags] [schemas]",
-		Short: "initialize an environment with zero or more schemas",
+		Use:   "new [flags] [schemas]",
+		Short: "new an environment with zero or more schemas",
 		Example: examples(
-			"ent init Example",
-			"ent init --target entv1/schema User Group",
-			"ent init --template ./path/to/file.tmpl User",
+			"ent new Example",
+			"ent new --target entv1/schema User Group",
+			"ent new --template ./path/to/file.tmpl User",
 		),
 		Args: func(_ *cobra.Command, names []string) error {
 			for _, name := range names {
@@ -92,10 +106,10 @@ func InitCmd() *cobra.Command {
 				tmpl, err = template.New("schema").Parse(defaultTemplate)
 			}
 			if err != nil {
-				log.Fatalln(fmt.Errorf("ent/init: could not parse template %w", err))
+				log.Fatalln(fmt.Errorf("ent/new: could not parse template %w", err))
 			}
-			if err := initEnv(target, names, tmpl); err != nil {
-				log.Fatalln(fmt.Errorf("ent/init: %w", err))
+			if err := newEnv(target, names, tmpl); err != nil {
+				log.Fatalln(fmt.Errorf("ent/new: %w", err))
 			}
 		},
 	}
@@ -189,17 +203,17 @@ func GenerateCmd(postRun ...func(*gen.Config)) *cobra.Command {
 	return cmd
 }
 
-// initEnv initialize an environment for ent codegen.
-func initEnv(target string, names []string, tmpl *template.Template) error {
+// newEnv create an new environment for ent codegen.
+func newEnv(target string, names []string, tmpl *template.Template) error {
 	if err := createDir(target); err != nil {
 		return fmt.Errorf("create dir %s: %w", target, err)
 	}
 	for _, name := range names {
 		if err := gen.ValidSchemaName(name); err != nil {
-			return fmt.Errorf("init schema %s: %w", name, err)
+			return fmt.Errorf("new schema %s: %w", name, err)
 		}
 		if fileExists(target, name) {
-			return fmt.Errorf("init schema %s: already exists", name)
+			return fmt.Errorf("new schema %s: already exists", name)
 		}
 		b := bytes.NewBuffer(nil)
 		if err := tmpl.Execute(b, name); err != nil {

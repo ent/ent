@@ -75,7 +75,7 @@ over to the [Setup Tutorial](https://entgo.io/docs/tutorial-setup/).
 The first step on our way to the OAS file is to create an Ent schema graph:
 
 ```shell
-go run -mod=mod entgo.io/ent/cmd/ent init Fridge Compartment Item
+go run -mod=mod entgo.io/ent/cmd/ent new Fridge Compartment Item
 ```
 
 To demonstrate `elk`'s OAS generation capabilities, we will build together an example application. Suppose I have

@@ -94,7 +94,7 @@ mkdir ent-sum-file
 cd ent-sum-file
 go mod init ent-sum-file
 go install entgo.io/ent/cmd/ent@master
-go run entgo.io/ent/cmd/ent init User
+go run entgo.io/ent/cmd/ent new User
 sed -i -E 's|^//go(.*)$|//go\1 --feature sql/versioned-migration|' ent/generate.go
 go generate ./...
 docker run --rm --name atlas-sum --detach --env MYSQL_ROOT_PASSWORD=pass --env MYSQL_DATABASE=ent -p 3306:3306 mysql

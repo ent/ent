@@ -11,7 +11,7 @@ For the purpose of the example, we'll generate the following graph:
 The first step is to generate the 3 schemas: `Pet`, `User`, `Group`.
 
 ```console
-go run -mod=mod entgo.io/ent/cmd/ent init Pet User Group
+go run -mod=mod entgo.io/ent/cmd/ent new Pet User Group
 ```
 
 Add the necessary fields and edges for the schemas:

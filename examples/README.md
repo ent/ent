@@ -22,7 +22,7 @@ For the purpose of the example, we'll generate the following graph:
 The first step is to generate the 3 schemas: `Pet`, `User`, `Group`.
 
 ```console
-ent init Pet User Group
+ent new Pet User Group
 ```
 
 Add the necessary fields and edges for the schemas:

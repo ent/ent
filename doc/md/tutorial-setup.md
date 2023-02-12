@@ -29,7 +29,7 @@ go get -d entgo.io/ent/cmd/ent
 ```
 
 ```console
-go run -mod=mod entgo.io/ent/cmd/ent init Todo
+go run -mod=mod entgo.io/ent/cmd/ent new Todo
 ```
 
 After installing Ent and running `ent init`, your project directory should look like this:
@@ -49,7 +49,7 @@ entity schemas.
 
 ## Code Generation
 
-When we ran `ent init Todo` above, a schema named `Todo`  was created in the `todo.go` file under the`todo/ent/schema/` directory:
+When we ran `ent new Todo` above, a schema named `Todo`  was created in the `todo.go` file under the`todo/ent/schema/` directory:
 
 ```go
 package schema

@@ -34,7 +34,7 @@ In our example, we are going to create a simple `User` schema with 2 immutable s
 `"avatar_url"`. Let's run the `ent init` command for creating a skeleton schema for our `User`:
 
 ```shell
-go run entgo.io/ent/cmd/ent init User
+go run entgo.io/ent/cmd/ent new User
 ```
 
 Then, add the `name` and the `avatar_url` fields and run `go generate` to generate the assets.
