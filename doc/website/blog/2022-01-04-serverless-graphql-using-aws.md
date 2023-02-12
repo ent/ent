@@ -166,7 +166,7 @@ go mod init entgo-aws-appsync
 Third, we create the `Todo` schema while pulling in the ent dependencies:
 
 ```console
-go run -mod=mod entgo.io/ent/cmd/ent init Todo
+go run -mod=mod entgo.io/ent/cmd/ent new Todo
 ```
 
 and add the `title` field:

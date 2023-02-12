@@ -125,7 +125,7 @@ go mod init entimport-example
 Run Ent Init:
 
 ```shell
-go run -mod=mod entgo.io/ent/cmd/ent init 
+go run -mod=mod entgo.io/ent/cmd/ent new 
 ```
 
 The project should look like this:

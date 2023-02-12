@@ -17,7 +17,7 @@ go get -d entgo.io/ent/cmd/ent
 In order to generate one or more schema templates, run `ent init` as follows:
 
 ```bash
-go run -mod=mod entgo.io/ent/cmd/ent init User Pet
+go run -mod=mod entgo.io/ent/cmd/ent new User Pet
 ```
 
 `init` will create the 2 schemas (`user.go` and `pet.go`) under the `ent/schema` directory.
