@@ -551,6 +551,13 @@ const (
 // StateReader returns an atlas migrate.StateReader returning the state as described by the Ent table slice.
 func (a *Atlas) StateReader(tables ...*Table) migrate.StateReaderFunc {
 	return func(context.Context) (*schema.Realm, error) {
+		if a.sqlDialect == nil {
+			drv, err := a.entDialect(a.driver)
+			if err != nil {
+				return nil, err
+			}
+			a.sqlDialect = drv
+		}
 		ts, err := a.tables(tables)
 		if err != nil {
 			return nil, err

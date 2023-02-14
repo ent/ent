@@ -20,10 +20,10 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
-	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/stretchr/testify/require"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMigrateHookOmitTable(t *testing.T) {
@@ -390,4 +390,30 @@ func TestMigrateWithoutForeignKeys(t *testing.T) {
 		require.True(t, ok)
 		require.EqualValues(t, "name", addColumn.C.Name)
 	})
+}
+
+func TestAtlas_StateReader(t *testing.T) {
+	db, err := sql.Open(dialect.SQLite, "file:test?mode=memory&_fk=1")
+	require.NoError(t, err)
+	m, err := NewMigrate(db)
+	require.NoError(t, err)
+	realm, err := m.StateReader(&Table{
+		Name: "users",
+		Columns: []*Column{
+			{Name: "name", Type: field.TypeString},
+			{Name: "active", Type: field.TypeBool},
+		},
+	}).ReadState(context.Background())
+	require.NoError(t, err)
+	require.NotNil(t, realm)
+	require.Len(t, realm.Schemas, 1)
+	require.Len(t, realm.Schemas[0].Tables, 1)
+	require.Equal(t, realm.Schemas[0].Tables[0].Name, "users")
+	require.Equal(t,
+		realm.Schemas[0].Tables[0].Columns,
+		[]*schema.Column{
+			schema.NewStringColumn("name", "text"),
+			schema.NewBoolColumn("active", "bool"),
+		},
+	)
 }
