@@ -24,7 +24,7 @@ with large data-models.
 go install entgo.io/ent/cmd/ent@latest
 ```
 
-For proper installation using [Go modules], visit [entgo.io website][entgo instal].
+For proper installation using [Go modules], visit [entgo.io website][entgo install].
 
 ## Docs and Support
 The documentation for developing and using ent is available at: https://entgo.io
@@ -53,6 +53,6 @@ Read more about the motivation of the project [here](https://entgo.io/blog/2019/
 ent is licensed under Apache 2.0 as found in the [LICENSE file](LICENSE).
 
 
-[entgo instal]: https://entgo.io/docs/code-gen/#version-compatibility-between-entc-and-ent
+[entgo install]: https://entgo.io/docs/code-gen/#version-compatibility-between-entc-and-ent
 [Go modules]: https://github.com/golang/go/wiki/Modules#quick-start
 [fbc]: https://connectivity.fb.com
