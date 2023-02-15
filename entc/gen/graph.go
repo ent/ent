@@ -259,8 +259,14 @@ func generate(g *Graph) error {
 	if err := assets.write(); err != nil {
 		return err
 	}
-	// cleanup assets that are not needed anymore.
+	// Cleanup nodes' assets and old template
+	// files that are not needed anymore.
 	cleanOldNodes(assets, g.Config.Target)
+	for _, n := range deletedTemplates {
+		if err := os.Remove(filepath.Join(g.Target, n)); err != nil && !os.IsNotExist(err) {
+			log.Printf("remove old file %s: %s\n", filepath.Join(g.Target, n), err)
+		}
+	}
 	// We can't run "imports" on files when the state is not completed.
 	// Because, "goimports" will drop undefined package. Therefore, it
 	// is suspended to the end of the writing.
