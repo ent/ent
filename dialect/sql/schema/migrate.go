@@ -41,6 +41,14 @@ func WithGlobalUniqueID(b bool) MigrateOption {
 	}
 }
 
+// WithErrNoPlan sets Atlas to returns a migrate.ErrNoPlan in case
+// the migration plan is empty. Defaults to false.
+func WithErrNoPlan(b bool) MigrateOption {
+	return func(a *Atlas) {
+		a.errNoPlan = b
+	}
+}
+
 // WithDropColumn sets the columns dropping option to the migration.
 // Defaults to false.
 func WithDropColumn(b bool) MigrateOption {

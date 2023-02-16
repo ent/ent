@@ -305,6 +305,13 @@ func TestMigrate_Diff(t *testing.T) {
 
 	// Checksum will be updated as well.
 	require.NoError(t, migrate.Validate(d))
+
+	require.NoError(t, m.NamedDiff(ctx, "no_changes"), "should not error if WithErrNoPlan is not set")
+	// Enable WithErrNoPlan.
+	m, err = NewMigrate(db, WithFormatter(f), WithDir(d), WithGlobalUniqueID(true), WithErrNoPlan(true))
+	require.NoError(t, err)
+	err = m.NamedDiff(ctx, "no_changes")
+	require.ErrorIs(t, err, migrate.ErrNoPlan)
 }
 
 func requireFileEqual(t *testing.T, name, contents string) {
