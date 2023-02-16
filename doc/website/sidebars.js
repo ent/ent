@@ -109,6 +109,7 @@ module.exports = {
           'grpc-edges',
           'grpc-optional-fields',
           'grpc-service-generation-options',
+          'grpc-external-service',
       ]
     },
     {
