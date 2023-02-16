@@ -270,45 +270,25 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.AttachedFile.Use(hooks...)
-	c.File.Use(hooks...)
-	c.Friendship.Use(hooks...)
-	c.Group.Use(hooks...)
-	c.GroupTag.Use(hooks...)
-	c.Process.Use(hooks...)
-	c.Relationship.Use(hooks...)
-	c.RelationshipInfo.Use(hooks...)
-	c.Role.Use(hooks...)
-	c.RoleUser.Use(hooks...)
-	c.Tag.Use(hooks...)
-	c.Tweet.Use(hooks...)
-	c.TweetLike.Use(hooks...)
-	c.TweetTag.Use(hooks...)
-	c.User.Use(hooks...)
-	c.UserGroup.Use(hooks...)
-	c.UserTweet.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.AttachedFile, c.File, c.Friendship, c.Group, c.GroupTag, c.Process,
+		c.Relationship, c.RelationshipInfo, c.Role, c.RoleUser, c.Tag, c.Tweet,
+		c.TweetLike, c.TweetTag, c.User, c.UserGroup, c.UserTweet,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.AttachedFile.Intercept(interceptors...)
-	c.File.Intercept(interceptors...)
-	c.Friendship.Intercept(interceptors...)
-	c.Group.Intercept(interceptors...)
-	c.GroupTag.Intercept(interceptors...)
-	c.Process.Intercept(interceptors...)
-	c.Relationship.Intercept(interceptors...)
-	c.RelationshipInfo.Intercept(interceptors...)
-	c.Role.Intercept(interceptors...)
-	c.RoleUser.Intercept(interceptors...)
-	c.Tag.Intercept(interceptors...)
-	c.Tweet.Intercept(interceptors...)
-	c.TweetLike.Intercept(interceptors...)
-	c.TweetTag.Intercept(interceptors...)
-	c.User.Intercept(interceptors...)
-	c.UserGroup.Intercept(interceptors...)
-	c.UserTweet.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.AttachedFile, c.File, c.Friendship, c.Group, c.GroupTag, c.Process,
+		c.Relationship, c.RelationshipInfo, c.Role, c.RoleUser, c.Tag, c.Tweet,
+		c.TweetLike, c.TweetTag, c.User, c.UserGroup, c.UserTweet,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -3009,41 +2989,13 @@ func (c *UserTweetClient) mutate(ctx context.Context, m *UserTweetMutation) (Val
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		AttachedFile     []ent.Hook
-		File             []ent.Hook
-		Friendship       []ent.Hook
-		Group            []ent.Hook
-		GroupTag         []ent.Hook
-		Process          []ent.Hook
-		Relationship     []ent.Hook
-		RelationshipInfo []ent.Hook
-		Role             []ent.Hook
-		RoleUser         []ent.Hook
-		Tag              []ent.Hook
-		Tweet            []ent.Hook
-		TweetLike        []ent.Hook
-		TweetTag         []ent.Hook
-		User             []ent.Hook
-		UserGroup        []ent.Hook
-		UserTweet        []ent.Hook
+		AttachedFile, File, Friendship, Group, GroupTag, Process, Relationship,
+		RelationshipInfo, Role, RoleUser, Tag, Tweet, TweetLike, TweetTag, User,
+		UserGroup, UserTweet []ent.Hook
 	}
 	inters struct {
-		AttachedFile     []ent.Interceptor
-		File             []ent.Interceptor
-		Friendship       []ent.Interceptor
-		Group            []ent.Interceptor
-		GroupTag         []ent.Interceptor
-		Process          []ent.Interceptor
-		Relationship     []ent.Interceptor
-		RelationshipInfo []ent.Interceptor
-		Role             []ent.Interceptor
-		RoleUser         []ent.Interceptor
-		Tag              []ent.Interceptor
-		Tweet            []ent.Interceptor
-		TweetLike        []ent.Interceptor
-		TweetTag         []ent.Interceptor
-		User             []ent.Interceptor
-		UserGroup        []ent.Interceptor
-		UserTweet        []ent.Interceptor
+		AttachedFile, File, Friendship, Group, GroupTag, Process, Relationship,
+		RelationshipInfo, Role, RoleUser, Tag, Tweet, TweetLike, TweetTag, User,
+		UserGroup, UserTweet []ent.Interceptor
 	}
 )

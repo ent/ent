@@ -222,29 +222,21 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Car.Use(hooks...)
-	c.Card.Use(hooks...)
-	c.Info.Use(hooks...)
-	c.Metadata.Use(hooks...)
-	c.Node.Use(hooks...)
-	c.Pet.Use(hooks...)
-	c.Post.Use(hooks...)
-	c.Rental.Use(hooks...)
-	c.User.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.Car, c.Card, c.Info, c.Metadata, c.Node, c.Pet, c.Post, c.Rental, c.User,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.Car.Intercept(interceptors...)
-	c.Card.Intercept(interceptors...)
-	c.Info.Intercept(interceptors...)
-	c.Metadata.Intercept(interceptors...)
-	c.Node.Intercept(interceptors...)
-	c.Pet.Intercept(interceptors...)
-	c.Post.Intercept(interceptors...)
-	c.Rental.Intercept(interceptors...)
-	c.User.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.Car, c.Card, c.Info, c.Metadata, c.Node, c.Pet, c.Post, c.Rental, c.User,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -1658,25 +1650,9 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Car      []ent.Hook
-		Card     []ent.Hook
-		Info     []ent.Hook
-		Metadata []ent.Hook
-		Node     []ent.Hook
-		Pet      []ent.Hook
-		Post     []ent.Hook
-		Rental   []ent.Hook
-		User     []ent.Hook
+		Car, Card, Info, Metadata, Node, Pet, Post, Rental, User []ent.Hook
 	}
 	inters struct {
-		Car      []ent.Interceptor
-		Card     []ent.Interceptor
-		Info     []ent.Interceptor
-		Metadata []ent.Interceptor
-		Node     []ent.Interceptor
-		Pet      []ent.Interceptor
-		Post     []ent.Interceptor
-		Rental   []ent.Interceptor
-		User     []ent.Interceptor
+		Car, Card, Info, Metadata, Node, Pet, Post, Rental, User []ent.Interceptor
 	}
 )

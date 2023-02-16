@@ -473,11 +473,9 @@ func (c *StreetClient) mutate(ctx context.Context, m *StreetMutation) (Value, er
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		City   []ent.Hook
-		Street []ent.Hook
+		City, Street []ent.Hook
 	}
 	inters struct {
-		City   []ent.Interceptor
-		Street []ent.Interceptor
+		City, Street []ent.Interceptor
 	}
 )

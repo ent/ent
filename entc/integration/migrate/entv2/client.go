@@ -221,29 +221,23 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Blog.Use(hooks...)
-	c.Car.Use(hooks...)
-	c.Conversion.Use(hooks...)
-	c.CustomType.Use(hooks...)
-	c.Group.Use(hooks...)
-	c.Media.Use(hooks...)
-	c.Pet.Use(hooks...)
-	c.User.Use(hooks...)
-	c.Zoo.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.Blog, c.Car, c.Conversion, c.CustomType, c.Group, c.Media, c.Pet, c.User,
+		c.Zoo,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.Blog.Intercept(interceptors...)
-	c.Car.Intercept(interceptors...)
-	c.Conversion.Intercept(interceptors...)
-	c.CustomType.Intercept(interceptors...)
-	c.Group.Intercept(interceptors...)
-	c.Media.Intercept(interceptors...)
-	c.Pet.Intercept(interceptors...)
-	c.User.Intercept(interceptors...)
-	c.Zoo.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.Blog, c.Car, c.Conversion, c.CustomType, c.Group, c.Media, c.Pet, c.User,
+		c.Zoo,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -1433,25 +1427,10 @@ func (c *ZooClient) mutate(ctx context.Context, m *ZooMutation) (Value, error) {
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Blog       []ent.Hook
-		Car        []ent.Hook
-		Conversion []ent.Hook
-		CustomType []ent.Hook
-		Group      []ent.Hook
-		Media      []ent.Hook
-		Pet        []ent.Hook
-		User       []ent.Hook
-		Zoo        []ent.Hook
+		Blog, Car, Conversion, CustomType, Group, Media, Pet, User, Zoo []ent.Hook
 	}
 	inters struct {
-		Blog       []ent.Interceptor
-		Car        []ent.Interceptor
-		Conversion []ent.Interceptor
-		CustomType []ent.Interceptor
-		Group      []ent.Interceptor
-		Media      []ent.Interceptor
-		Pet        []ent.Interceptor
-		User       []ent.Interceptor
-		Zoo        []ent.Interceptor
+		Blog, Car, Conversion, CustomType, Group, Media, Pet, User,
+		Zoo []ent.Interceptor
 	}
 )
