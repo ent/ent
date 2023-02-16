@@ -112,13 +112,6 @@ var (
 			Format: "tx.go",
 		},
 		{
-			Name:   "config",
-			Format: "config.go",
-			ExtendPatterns: []string{
-				"dialect/*/config/*/*",
-			},
-		},
-		{
 			Name:   "mutation",
 			Format: "mutation.go",
 		},
@@ -174,6 +167,8 @@ var (
 			Format: "runtime/runtime.go",
 		},
 	}
+	// template files that were deleted and should be removed by the codegen.
+	deletedTemplates = []string{"config.go"}
 	// patterns for extending partial-templates (included by other templates).
 	partialPatterns = [...]string{
 		"client/additional/*",

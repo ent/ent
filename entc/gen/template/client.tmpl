@@ -50,6 +50,9 @@ func (c *Client) init() {
 {{ $pkg := base $.Config.Package }}
 {{ template "header" $ }}
 
+{{/* Additional dependencies injected to config. */}}
+{{ $deps := list }}{{ with $.Config.Annotations }}{{ $deps = $.Config.Annotations.Dependencies }}{{ end }}
+
 import (
 	"log"
 
@@ -57,14 +60,88 @@ import (
 	{{ range $n := $.Nodes }}
 		{{ $n.PackageAlias }} "{{ $n.Config.Package }}/{{ $n.PackageDir }}"
 	{{- end }}
-
+	{{- range $dep := $deps }}
+		{{ $dep.Type.PkgName }} "{{ $dep.Type.PkgPath }}"
+	{{- end }}
 	"entgo.io/ent/dialect"
 	{{ range $import := $.Storage.Imports -}}
 		"{{ $import }}"
 	{{ end -}}
+	{{- template "import/additional" $ }}
 )
 
 {{ template "client/init" $ }}
+
+type (
+	// config is the configuration for the client and its builder.
+	config struct {
+		// driver used for executing database requests.
+		driver dialect.Driver
+		// debug enable a debug logging.
+		debug bool
+		// log used for logging on debug mode.
+		log func(...any)
+		// hooks to execute on mutations.
+		hooks *hooks
+		// interceptors to execute on queries.
+		inters *inters
+		{{- /* Additional dependency fields. */}}
+		{{- range $dep := $deps }}
+			{{ $dep.Field }} {{ $dep.Type }}
+		{{- end }}
+		{{- /* Support adding config fields from both global or dialect-specific templates. */}}
+		{{- range $prefix := list "" (printf "dialect/%s/" $.Storage) }}
+			{{- with $tmpls := matchTemplate (print $prefix "config/fields/*") }}
+				{{- range $tmpl := $tmpls }}
+					{{ xtemplate $tmpl $ }}
+				{{- end }}
+			{{- end }}
+		{{- end }}
+	}
+	// Option function to configure the client.
+	Option func(*config)
+)
+
+// options applies the options on the config object.
+func (c *config) options(opts ...Option) {
+	for _, opt := range opts {
+		opt(c)
+	}
+	if c.debug {
+		c.driver = dialect.Debug(c.driver, c.log)
+	}
+}
+
+// Debug enables debug logging on the ent.Driver.
+func Debug() Option {
+	return func(c *config) {
+		c.debug = true
+	}
+}
+
+// Log sets the logging function for debug mode.
+func Log(fn func(...any)) Option {
+	return func(c *config) {
+		c.log = fn
+	}
+}
+
+// Driver configures the client driver.
+func Driver(driver dialect.Driver) Option {
+	return func(c *config) {
+		c.driver = driver
+	}
+}
+
+{{- /* Additional dependency options reside on the config object. */}}
+{{- range $dep := $deps }}
+	// {{ $dep.Option }} configures the {{ $dep.Field }}.
+	func {{ $dep.Option }}(v {{ $dep.Type }}) Option {
+		return func(c *config) {
+			c.{{ $dep.Field }} = v
+		}
+	}
+{{- end }}
 
 // Open opens a database/sql.DB specified by the driver name and
 // the data source name, and returns a new client attached to it.
@@ -339,6 +416,34 @@ func (c *{{ $client }}) mutate(ctx context.Context, m *{{ $n.MutationName }}) (V
 	}
 }
 {{ end }}
+// hooks and interceptors per client, for fast access.
+type (
+	hooks struct {
+		{{- range $n := $.Nodes }}
+			{{ $n.Name }} []ent.Hook
+		{{- end }}
+	}
+	inters struct {
+		{{- range $n := $.Nodes }}
+			{{ $n.Name }} []ent.Interceptor
+		{{- end }}
+	}
+)
+
+{{- /* Support adding config options from both global or dialect-specific templates. */}}
+{{- range $prefix := list "" (printf "dialect/%s/" $.Storage) }}
+	{{- with $tmpls := matchTemplate (print $prefix "config/options/*") }}
+		{{- range $tmpl := $tmpls }}
+			{{ xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
+{{- end }}
+
+{{- with $tmpls := matchTemplate "config/additional/*" "config/additional/*/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{- xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
 {{ end }}
 
 {{/* A template that can be overridden in order to add additional fields to the client.*/}}

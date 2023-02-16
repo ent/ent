@@ -12,12 +12,16 @@ import (
 	"fmt"
 	"log"
 
+	"entgo.io/ent"
 	"entgo.io/ent/entc/integration/customid/ent/migrate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/entc/integration/customid/sid"
 	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
 	"github.com/google/uuid"
 
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/account"
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/bloblink"
@@ -35,10 +39,6 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/session"
 	"entgo.io/ent/entc/integration/customid/ent/token"
 	"entgo.io/ent/entc/integration/customid/ent/user"
-
-	"entgo.io/ent/dialect"
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -110,6 +110,55 @@ func (c *Client) init() {
 	c.Session = NewSessionClient(c.config)
 	c.Token = NewTokenClient(c.config)
 	c.User = NewUserClient(c.config)
+}
+
+type (
+	// config is the configuration for the client and its builder.
+	config struct {
+		// driver used for executing database requests.
+		driver dialect.Driver
+		// debug enable a debug logging.
+		debug bool
+		// log used for logging on debug mode.
+		log func(...any)
+		// hooks to execute on mutations.
+		hooks *hooks
+		// interceptors to execute on queries.
+		inters *inters
+	}
+	// Option function to configure the client.
+	Option func(*config)
+)
+
+// options applies the options on the config object.
+func (c *config) options(opts ...Option) {
+	for _, opt := range opts {
+		opt(c)
+	}
+	if c.debug {
+		c.driver = dialect.Debug(c.driver, c.log)
+	}
+}
+
+// Debug enables debug logging on the ent.Driver.
+func Debug() Option {
+	return func(c *config) {
+		c.debug = true
+	}
+}
+
+// Log sets the logging function for debug mode.
+func Log(fn func(...any)) Option {
+	return func(c *config) {
+		c.log = fn
+	}
+}
+
+// Driver configures the client driver.
+func Driver(driver dialect.Driver) Option {
+	return func(c *config) {
+		c.driver = driver
+	}
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -2695,3 +2744,45 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 		return nil, fmt.Errorf("ent: unknown User mutation op: %q", m.Op())
 	}
 }
+
+// hooks and interceptors per client, for fast access.
+type (
+	hooks struct {
+		Account  []ent.Hook
+		Blob     []ent.Hook
+		BlobLink []ent.Hook
+		Car      []ent.Hook
+		Device   []ent.Hook
+		Doc      []ent.Hook
+		Group    []ent.Hook
+		IntSID   []ent.Hook
+		Link     []ent.Hook
+		MixinID  []ent.Hook
+		Note     []ent.Hook
+		Other    []ent.Hook
+		Pet      []ent.Hook
+		Revision []ent.Hook
+		Session  []ent.Hook
+		Token    []ent.Hook
+		User     []ent.Hook
+	}
+	inters struct {
+		Account  []ent.Interceptor
+		Blob     []ent.Interceptor
+		BlobLink []ent.Interceptor
+		Car      []ent.Interceptor
+		Device   []ent.Interceptor
+		Doc      []ent.Interceptor
+		Group    []ent.Interceptor
+		IntSID   []ent.Interceptor
+		Link     []ent.Interceptor
+		MixinID  []ent.Interceptor
+		Note     []ent.Interceptor
+		Other    []ent.Interceptor
+		Pet      []ent.Interceptor
+		Revision []ent.Interceptor
+		Session  []ent.Interceptor
+		Token    []ent.Interceptor
+		User     []ent.Interceptor
+	}
+)
