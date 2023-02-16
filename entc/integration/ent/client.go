@@ -266,43 +266,23 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Api.Use(hooks...)
-	c.Card.Use(hooks...)
-	c.Comment.Use(hooks...)
-	c.FieldType.Use(hooks...)
-	c.File.Use(hooks...)
-	c.FileType.Use(hooks...)
-	c.Goods.Use(hooks...)
-	c.Group.Use(hooks...)
-	c.GroupInfo.Use(hooks...)
-	c.Item.Use(hooks...)
-	c.License.Use(hooks...)
-	c.Node.Use(hooks...)
-	c.Pet.Use(hooks...)
-	c.Spec.Use(hooks...)
-	c.Task.Use(hooks...)
-	c.User.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.Api, c.Card, c.Comment, c.FieldType, c.File, c.FileType, c.Goods, c.Group,
+		c.GroupInfo, c.Item, c.License, c.Node, c.Pet, c.Spec, c.Task, c.User,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.Api.Intercept(interceptors...)
-	c.Card.Intercept(interceptors...)
-	c.Comment.Intercept(interceptors...)
-	c.FieldType.Intercept(interceptors...)
-	c.File.Intercept(interceptors...)
-	c.FileType.Intercept(interceptors...)
-	c.Goods.Intercept(interceptors...)
-	c.Group.Intercept(interceptors...)
-	c.GroupInfo.Intercept(interceptors...)
-	c.Item.Intercept(interceptors...)
-	c.License.Intercept(interceptors...)
-	c.Node.Intercept(interceptors...)
-	c.Pet.Intercept(interceptors...)
-	c.Spec.Intercept(interceptors...)
-	c.Task.Intercept(interceptors...)
-	c.User.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.Api, c.Card, c.Comment, c.FieldType, c.File, c.FileType, c.Goods, c.Group,
+		c.GroupInfo, c.Item, c.License, c.Node, c.Pet, c.Spec, c.Task, c.User,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Dialect returns the driver dialect.
@@ -2678,40 +2658,12 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Api       []ent.Hook
-		Card      []ent.Hook
-		Comment   []ent.Hook
-		FieldType []ent.Hook
-		File      []ent.Hook
-		FileType  []ent.Hook
-		Goods     []ent.Hook
-		Group     []ent.Hook
-		GroupInfo []ent.Hook
-		Item      []ent.Hook
-		License   []ent.Hook
-		Node      []ent.Hook
-		Pet       []ent.Hook
-		Spec      []ent.Hook
-		Task      []ent.Hook
-		User      []ent.Hook
+		Api, Card, Comment, FieldType, File, FileType, Goods, Group, GroupInfo, Item,
+		License, Node, Pet, Spec, Task, User []ent.Hook
 	}
 	inters struct {
-		Api       []ent.Interceptor
-		Card      []ent.Interceptor
-		Comment   []ent.Interceptor
-		FieldType []ent.Interceptor
-		File      []ent.Interceptor
-		FileType  []ent.Interceptor
-		Goods     []ent.Interceptor
-		Group     []ent.Interceptor
-		GroupInfo []ent.Interceptor
-		Item      []ent.Interceptor
-		License   []ent.Interceptor
-		Node      []ent.Interceptor
-		Pet       []ent.Interceptor
-		Spec      []ent.Interceptor
-		Task      []ent.Interceptor
-		User      []ent.Interceptor
+		Api, Card, Comment, FieldType, File, FileType, Goods, Group, GroupInfo, Item,
+		License, Node, Pet, Spec, Task, User []ent.Interceptor
 	}
 )
 

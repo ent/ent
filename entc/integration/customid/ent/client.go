@@ -273,45 +273,25 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Account.Use(hooks...)
-	c.Blob.Use(hooks...)
-	c.BlobLink.Use(hooks...)
-	c.Car.Use(hooks...)
-	c.Device.Use(hooks...)
-	c.Doc.Use(hooks...)
-	c.Group.Use(hooks...)
-	c.IntSID.Use(hooks...)
-	c.Link.Use(hooks...)
-	c.MixinID.Use(hooks...)
-	c.Note.Use(hooks...)
-	c.Other.Use(hooks...)
-	c.Pet.Use(hooks...)
-	c.Revision.Use(hooks...)
-	c.Session.Use(hooks...)
-	c.Token.Use(hooks...)
-	c.User.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.Account, c.Blob, c.BlobLink, c.Car, c.Device, c.Doc, c.Group, c.IntSID,
+		c.Link, c.MixinID, c.Note, c.Other, c.Pet, c.Revision, c.Session, c.Token,
+		c.User,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.Account.Intercept(interceptors...)
-	c.Blob.Intercept(interceptors...)
-	c.BlobLink.Intercept(interceptors...)
-	c.Car.Intercept(interceptors...)
-	c.Device.Intercept(interceptors...)
-	c.Doc.Intercept(interceptors...)
-	c.Group.Intercept(interceptors...)
-	c.IntSID.Intercept(interceptors...)
-	c.Link.Intercept(interceptors...)
-	c.MixinID.Intercept(interceptors...)
-	c.Note.Intercept(interceptors...)
-	c.Other.Intercept(interceptors...)
-	c.Pet.Intercept(interceptors...)
-	c.Revision.Intercept(interceptors...)
-	c.Session.Intercept(interceptors...)
-	c.Token.Intercept(interceptors...)
-	c.User.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.Account, c.Blob, c.BlobLink, c.Car, c.Device, c.Doc, c.Group, c.IntSID,
+		c.Link, c.MixinID, c.Note, c.Other, c.Pet, c.Revision, c.Session, c.Token,
+		c.User,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -2748,41 +2728,11 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Account  []ent.Hook
-		Blob     []ent.Hook
-		BlobLink []ent.Hook
-		Car      []ent.Hook
-		Device   []ent.Hook
-		Doc      []ent.Hook
-		Group    []ent.Hook
-		IntSID   []ent.Hook
-		Link     []ent.Hook
-		MixinID  []ent.Hook
-		Note     []ent.Hook
-		Other    []ent.Hook
-		Pet      []ent.Hook
-		Revision []ent.Hook
-		Session  []ent.Hook
-		Token    []ent.Hook
-		User     []ent.Hook
+		Account, Blob, BlobLink, Car, Device, Doc, Group, IntSID, Link, MixinID, Note,
+		Other, Pet, Revision, Session, Token, User []ent.Hook
 	}
 	inters struct {
-		Account  []ent.Interceptor
-		Blob     []ent.Interceptor
-		BlobLink []ent.Interceptor
-		Car      []ent.Interceptor
-		Device   []ent.Interceptor
-		Doc      []ent.Interceptor
-		Group    []ent.Interceptor
-		IntSID   []ent.Interceptor
-		Link     []ent.Interceptor
-		MixinID  []ent.Interceptor
-		Note     []ent.Interceptor
-		Other    []ent.Interceptor
-		Pet      []ent.Interceptor
-		Revision []ent.Interceptor
-		Session  []ent.Interceptor
-		Token    []ent.Interceptor
-		User     []ent.Interceptor
+		Account, Blob, BlobLink, Car, Device, Doc, Group, IntSID, Link, MixinID, Note,
+		Other, Pet, Revision, Session, Token, User []ent.Interceptor
 	}
 )

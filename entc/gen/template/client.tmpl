@@ -209,16 +209,38 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	{{- range $n := $.Nodes }}
-		c.{{ $n.Name }}.Use(hooks...)
+	{{- if lt (len $.Nodes) 6 }}
+		{{- range $n := $.Nodes }}
+			c.{{ $n.Name }}.Use(hooks...)
+		{{- end }}
+	{{- /* Use a for-loop for setting hooks in case there are too many nodes. */}}
+	{{- else }}
+		{{- $hooks := slist }}
+		{{- range $n := $.Nodes }}{{ $hooks = append $hooks (printf "c.%s," $n.Name) }}{{ end }}
+		for _, n := range []interface{ Use(...Hook) }{
+			{{ joinWords $hooks 80 }}
+		}{
+			n.Use(hooks...)
+		}
 	{{- end }}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	{{- range $n := $.Nodes }}
-		c.{{ $n.Name }}.Intercept(interceptors...)
+	{{- if lt (len $.Nodes) 6 }}
+		{{- range $n := $.Nodes }}
+			c.{{ $n.Name }}.Intercept(interceptors...)
+		{{- end }}
+	{{- /* Use a for-loop for setting interceptors in case there are too many nodes. */}}
+	{{- else }}
+		{{- $inters := slist }}
+		{{- range $n := $.Nodes }}{{ $inters = append $inters (printf "c.%s," $n.Name) }}{{ end }}
+		for _, n := range []interface{ Intercept(...Interceptor) }{
+			{{ joinWords $inters 80 }}
+		}{
+			n.Intercept(interceptors...)
+		}
 	{{- end }}
 }
 
@@ -416,17 +438,26 @@ func (c *{{ $client }}) mutate(ctx context.Context, m *{{ $n.MutationName }}) (V
 	}
 }
 {{ end }}
+
 // hooks and interceptors per client, for fast access.
 type (
-	hooks struct {
-		{{- range $n := $.Nodes }}
-			{{ $n.Name }} []ent.Hook
+	{{- $leni := len $.Nodes | add -1 }}
+	{{- $hooks := slist }}
+	{{- $inters := slist }}
+	{{- range $i, $n := $.Nodes }}
+		{{- if eq $i $leni }}
+			{{- $hooks = append $hooks (printf "%s []ent.Hook" $n.Name) }}
+			{{- $inters = append $inters (printf "%s []ent.Interceptor" $n.Name) }}
+		{{- else }}
+			{{- $hooks = append $hooks (print $n.Name ",") }}
+			{{- $inters = append $inters (print $n.Name ",") }}
 		{{- end }}
+	{{- end }}
+	hooks struct {
+		{{ joinWords $hooks 80 }}
 	}
 	inters struct {
-		{{- range $n := $.Nodes }}
-			{{ $n.Name }} []ent.Interceptor
-		{{- end }}
+		{{ joinWords $inters 80 }}
 	}
 )
 

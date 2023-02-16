@@ -440,11 +440,9 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Group []ent.Hook
-		User  []ent.Hook
+		Group, User []ent.Hook
 	}
 	inters struct {
-		Group []ent.Interceptor
-		User  []ent.Interceptor
+		Group, User []ent.Interceptor
 	}
 )

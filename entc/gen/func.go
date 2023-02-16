@@ -45,6 +45,7 @@ var (
 		"base":          filepath.Base,
 		"keys":          keys,
 		"join":          join,
+		"joinWords":     joinWords,
 		"isNil":         isNil,
 		"lower":         strings.ToLower,
 		"upper":         strings.ToUpper,
@@ -66,13 +67,34 @@ var (
 		"set":           set,
 		"unset":         unset,
 		"hasKey":        hasKey,
-		"list":          list,
+		"list":          list[any],
+		"slist":         list[string],
 		"fail":          fail,
 		"replace":       strings.ReplaceAll,
 	}
 	rules    = ruleset()
 	acronyms = make(map[string]struct{})
 )
+
+// joinWords with spaces and add linebreaks to ensure lines do not exceed the given maxSize.
+func joinWords(words []string, maxSize int) string {
+	if len(words) == 0 {
+		return ""
+	}
+	b := &strings.Builder{}
+	b.WriteString(words[0])
+	n := len(words[0])
+	for _, w := range words[1:] {
+		if n+len(w)+1 > maxSize {
+			b.WriteByte('\n')
+			n = 0
+		}
+		b.WriteString(" ")
+		b.WriteString(w)
+		n += len(w) + 1
+	}
+	return b.String()
+}
 
 // quote only strings.
 func quote(v any) any {
@@ -488,7 +510,7 @@ func hasKey(d map[string]any, key string) bool {
 }
 
 // list creates a list from values.
-func list(v ...any) []any {
+func list[T any](v ...T) []T {
 	return v
 }
 
