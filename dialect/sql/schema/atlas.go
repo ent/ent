@@ -33,6 +33,7 @@ type Atlas struct {
 	withFixture bool // deprecated: with fks rename fixture
 	sum         bool // deprecated: sum file generation will be required
 
+	errNoPlan       bool // no plan error enabled
 	universalID     bool // global unique ids
 	dropColumns     bool // drop deleted columns
 	dropIndexes     bool // drop deleted indexes
@@ -183,14 +184,17 @@ func (a *Atlas) NamedDiff(ctx context.Context, name string, tables ...*Table) er
 	default:
 		return fmt.Errorf("unknown migration mode: %q", a.mode)
 	}
-	if err != nil {
+	switch {
+	case err != nil:
 		return err
-	}
-	// Skip if the plan has no changes.
-	if len(plan.Changes) == 0 {
+	case len(plan.Changes) == 0:
+		if a.errNoPlan {
+			return migrate.ErrNoPlan
+		}
 		return nil
+	default:
+		return migrate.NewPlanner(nil, a.dir, opts...).WritePlan(plan)
 	}
-	return migrate.NewPlanner(nil, a.dir, opts...).WritePlan(plan)
 }
 
 func (a *Atlas) cleanSchema(ctx context.Context, name string, err0 error) (err error) {
