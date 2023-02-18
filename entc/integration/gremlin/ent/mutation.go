@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"database/sql"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"net"
@@ -3837,6 +3838,13 @@ func (m *FieldTypeMutation) LinkOther() (r *schema.Link, exists bool) {
 	if v == nil {
 		return
 	}
+	var i interface{} = &r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := (*v).Value(); val == nil {
+			return
+		}
+	}
 	return *v, true
 }
 
@@ -3885,6 +3893,13 @@ func (m *FieldTypeMutation) LinkOtherFunc() (r *schema.Link, exists bool) {
 	v := m.link_other_func
 	if v == nil {
 		return
+	}
+	var i interface{} = &r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := (*v).Value(); val == nil {
+			return
+		}
 	}
 	return *v, true
 }
@@ -3935,6 +3950,13 @@ func (m *FieldTypeMutation) MAC() (r schema.MAC, exists bool) {
 	if v == nil {
 		return
 	}
+	var i interface{} = r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := v.Value(); val == nil {
+			return
+		}
+	}
 	return *v, true
 }
 
@@ -3983,6 +4005,13 @@ func (m *FieldTypeMutation) StringArray() (r schema.Strings, exists bool) {
 	v := m.string_array
 	if v == nil {
 		return
+	}
+	var i interface{} = r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := v.Value(); val == nil {
+			return
+		}
 	}
 	return *v, true
 }
@@ -4081,6 +4110,13 @@ func (m *FieldTypeMutation) StringScanner() (r schema.StringScanner, exists bool
 	v := m.string_scanner
 	if v == nil {
 		return
+	}
+	var i interface{} = r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := v.Value(); val == nil {
+			return
+		}
 	}
 	return *v, true
 }
@@ -4286,6 +4322,13 @@ func (m *FieldTypeMutation) Str() (r sql.NullString, exists bool) {
 	if v == nil {
 		return
 	}
+	var i interface{} = r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := v.Value(); val == nil {
+			return
+		}
+	}
 	return *v, true
 }
 
@@ -4334,6 +4377,13 @@ func (m *FieldTypeMutation) NullStr() (r *sql.NullString, exists bool) {
 	v := m.null_str
 	if v == nil {
 		return
+	}
+	var i interface{} = &r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := (*v).Value(); val == nil {
+			return
+		}
 	}
 	return *v, true
 }
@@ -4384,6 +4434,13 @@ func (m *FieldTypeMutation) Link() (r schema.Link, exists bool) {
 	if v == nil {
 		return
 	}
+	var i interface{} = r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := v.Value(); val == nil {
+			return
+		}
+	}
 	return *v, true
 }
 
@@ -4432,6 +4489,13 @@ func (m *FieldTypeMutation) NullLink() (r *schema.Link, exists bool) {
 	v := m.null_link
 	if v == nil {
 		return
+	}
+	var i interface{} = &r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := (*v).Value(); val == nil {
+			return
+		}
 	}
 	return *v, true
 }
@@ -4580,6 +4644,13 @@ func (m *FieldTypeMutation) Deleted() (r *sql.NullBool, exists bool) {
 	if v == nil {
 		return
 	}
+	var i interface{} = &r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := (*v).Value(); val == nil {
+			return
+		}
+	}
 	return *v, true
 }
 
@@ -4628,6 +4699,13 @@ func (m *FieldTypeMutation) DeletedAt() (r *sql.NullTime, exists bool) {
 	v := m.deleted_at
 	if v == nil {
 		return
+	}
+	var i interface{} = &r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := (*v).Value(); val == nil {
+			return
+		}
 	}
 	return *v, true
 }
@@ -4824,6 +4902,13 @@ func (m *FieldTypeMutation) NullInt64() (r *sql.NullInt64, exists bool) {
 	v := m.null_int64
 	if v == nil {
 		return
+	}
+	var i interface{} = &r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := (*v).Value(); val == nil {
+			return
+		}
 	}
 	return *v, true
 }
@@ -5224,6 +5309,13 @@ func (m *FieldTypeMutation) NullFloat() (r *sql.NullFloat64, exists bool) {
 	if v == nil {
 		return
 	}
+	var i interface{} = &r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := (*v).Value(); val == nil {
+			return
+		}
+	}
 	return *v, true
 }
 
@@ -5309,6 +5401,13 @@ func (m *FieldTypeMutation) Priority() (r role.Priority, exists bool) {
 	if v == nil {
 		return
 	}
+	var i interface{} = r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := v.Value(); val == nil {
+			return
+		}
+	}
 	return *v, true
 }
 
@@ -5358,6 +5457,13 @@ func (m *FieldTypeMutation) OptionalUUID() (r uuid.UUID, exists bool) {
 	if v == nil {
 		return
 	}
+	var i interface{} = r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := v.Value(); val == nil {
+			return
+		}
+	}
 	return *v, true
 }
 
@@ -5406,6 +5512,13 @@ func (m *FieldTypeMutation) NillableUUID() (r uuid.UUID, exists bool) {
 	v := m.nillable_uuid
 	if v == nil {
 		return
+	}
+	var i interface{} = r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := v.Value(); val == nil {
+			return
+		}
 	}
 	return *v, true
 }
@@ -5521,6 +5634,13 @@ func (m *FieldTypeMutation) Pair() (r schema.Pair, exists bool) {
 	if v == nil {
 		return
 	}
+	var i interface{} = r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := v.Value(); val == nil {
+			return
+		}
+	}
 	return *v, true
 }
 
@@ -5556,6 +5676,13 @@ func (m *FieldTypeMutation) NilPair() (r *schema.Pair, exists bool) {
 	v := m.nil_pair
 	if v == nil {
 		return
+	}
+	var i interface{} = &r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := (*v).Value(); val == nil {
+			return
+		}
 	}
 	return *v, true
 }
@@ -5606,6 +5733,13 @@ func (m *FieldTypeMutation) Vstring() (r schema.VString, exists bool) {
 	if v == nil {
 		return
 	}
+	var i interface{} = r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := v.Value(); val == nil {
+			return
+		}
+	}
 	return *v, true
 }
 
@@ -5641,6 +5775,13 @@ func (m *FieldTypeMutation) Triple() (r schema.Triple, exists bool) {
 	v := m.triple
 	if v == nil {
 		return
+	}
+	var i interface{} = r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := v.Value(); val == nil {
+			return
+		}
 	}
 	return *v, true
 }
@@ -5678,6 +5819,13 @@ func (m *FieldTypeMutation) BigInt() (r schema.BigInt, exists bool) {
 	v := m.big_int
 	if v == nil {
 		return
+	}
+	var i interface{} = r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := v.Value(); val == nil {
+			return
+		}
 	}
 	return *v, true
 }
@@ -5747,6 +5895,13 @@ func (m *FieldTypeMutation) PasswordOther() (r schema.Password, exists bool) {
 	v := m.password_other
 	if v == nil {
 		return
+	}
+	var i interface{} = r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := v.Value(); val == nil {
+			return
+		}
 	}
 	return *v, true
 }
@@ -12501,6 +12656,13 @@ func (m *PetMutation) UUID() (r uuid.UUID, exists bool) {
 	v := m.uuid
 	if v == nil {
 		return
+	}
+	var i interface{} = r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := v.Value(); val == nil {
+			return
+		}
 	}
 	return *v, true
 }

@@ -13,6 +13,12 @@ in the LICENSE file in the root directory of this source tree.
 
 import (
 	"context"
+	{{- range $n := $.Nodes }}
+		{{- if $n.HasGoTypes }}
+			"database/sql/driver"
+			{{- break }}
+		{{- end }}
+	{{- end }}
 	"fmt"
 	"sync"
 
@@ -209,6 +215,25 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 		if v == nil {
 			return
 		}
+	{{- if $f.HasGoTypeImplementValuer }}
+		{{- if $f.HasGoTypeIsPointer }}
+			var i interface{} = &r
+		{{- else }}
+			var i interface{} = r
+		{{- end }}
+			_, ok := i.(driver.Valuer)
+			if ok {
+			{{- if $f.HasGoTypeIsPointer }}
+				if val, _ := (*v).Value(); val == nil {
+					return
+				}
+			{{- else }}
+				if val, _ := v.Value(); val == nil {
+					return
+				}
+			{{- end }}
+			}
+	{{- end }}
 		return *v, true
 	}
 

@@ -6,8 +6,20 @@
 
 package ent
 
+import (
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/examples/o2m2types/ent/schema"
+	"entgo.io/ent/examples/o2m2types/ent/user"
+)
+
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	userFields := schema.User{}.Fields()
+	_ = userFields
+	// userDescGender is the schema descriptor for gender field.
+	userDescGender := userFields[2].Descriptor()
+	// user.DefaultGender holds the default value on creation for the gender field.
+	user.DefaultGender = userDescGender.Default.(func() sql.NullString)
 }

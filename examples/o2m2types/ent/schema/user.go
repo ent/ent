@@ -6,6 +6,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
@@ -20,6 +21,15 @@ func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("age"),
 		field.String("name"),
+		field.String("gender").
+			Optional().
+			GoType(sql.NullString{}).
+			DefaultFunc(func() sql.NullString {
+				return sql.NullString{
+					String: "Unknown",
+					Valid:  true,
+				}
+			}),
 	}
 }
 

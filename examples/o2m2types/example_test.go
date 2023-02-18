@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/examples/o2m2types/ent"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -29,7 +30,7 @@ func Example_O2M2Types() {
 		log.Fatal(err)
 	}
 	// Output:
-	// User created: User(id=1, age=30, name=a8m)
+	// User created: User(id=1, age=30, name=a8m, gender={Unknown true})
 	// a8m
 	// 2
 }
@@ -55,13 +56,14 @@ func Do(ctx context.Context, client *ent.Client) error {
 		Create().
 		SetAge(30).
 		SetName("a8m").
+		SetGender(sql.NullString{}).
 		AddPets(pedro, lola).
 		Save(ctx)
 	if err != nil {
 		return fmt.Errorf("creating user: %w", err)
 	}
 	fmt.Println("User created:", a8m)
-	// Output: User(id=1, age=30, name=a8m)
+	// Output: User(id=1, age=30, name=a8m, gender={Unknown true})
 
 	// Query the owner. Unlike `Only`, `OnlyX` panics if an error occurs.
 	owner := pedro.QueryOwner().OnlyX(ctx)

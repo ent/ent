@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -3639,6 +3640,13 @@ func (m *RentalMutation) CarID() (r uuid.UUID, exists bool) {
 	v := m.car
 	if v == nil {
 		return
+	}
+	var i interface{} = r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := v.Value(); val == nil {
+			return
+		}
 	}
 	return *v, true
 }

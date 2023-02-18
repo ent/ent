@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"sync"
@@ -626,6 +627,13 @@ func (m *BlobMutation) UUID() (r uuid.UUID, exists bool) {
 	if v == nil {
 		return
 	}
+	var i interface{} = r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := v.Value(); val == nil {
+			return
+		}
+	}
 	return *v, true
 }
 
@@ -1149,6 +1157,13 @@ func (m *BlobLinkMutation) BlobID() (r uuid.UUID, exists bool) {
 	if v == nil {
 		return
 	}
+	var i interface{} = r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := v.Value(); val == nil {
+			return
+		}
+	}
 	return *v, true
 }
 
@@ -1167,6 +1182,13 @@ func (m *BlobLinkMutation) LinkID() (r uuid.UUID, exists bool) {
 	v := m.link
 	if v == nil {
 		return
+	}
+	var i interface{} = r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := v.Value(); val == nil {
+			return
+		}
 	}
 	return *v, true
 }

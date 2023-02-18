@@ -6,6 +6,7 @@ package gen
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -417,6 +418,20 @@ func (t Type) HasUpdateCheckers() bool {
 	}
 	for _, e := range t.Edges {
 		if e.Unique && !e.Optional {
+			return true
+		}
+	}
+	return false
+}
+
+// HasGoTypes reports if any of the type's field has a custom GoType.
+func (t Type) HasGoTypes() bool {
+	fields := t.Fields
+	if t.HasOneFieldID() && t.ID.UserDefined {
+		fields = append(fields, t.ID)
+	}
+	for _, f := range fields {
+		if f.HasGoType() {
 			return true
 		}
 	}
@@ -1527,6 +1542,26 @@ func (f Field) StorageKey() string {
 // has a custom GoType.
 func (f Field) HasGoType() bool {
 	return f.Type != nil && f.Type.RType != nil
+}
+
+// HasGoTypeImplementValuer indicate if a basic field (like string or bool)
+// has a custom GoType, and it implements driver.Valuer.
+func (f Field) HasGoTypeImplementValuer() bool {
+	if !f.HasGoType() {
+		return false
+	}
+	valuer := reflect.TypeOf((*driver.Valuer)(nil)).Elem()
+	return f.Type.RType.Implements(valuer)
+}
+
+// HasGoTypeIsPointer indicate if a basic field (like string or bool)
+// has a custom GoType, and it is a pointer.
+func (f Field) HasGoTypeIsPointer() bool {
+	if !f.HasGoType() {
+		return false
+	}
+
+	return f.Type.RType.IsPtr()
 }
 
 // ConvertedToBasic indicates if the Go type of the field

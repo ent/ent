@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"sync"
@@ -286,6 +287,13 @@ func (m *TaskMutation) UUID() (r uuid.UUID, exists bool) {
 	v := m.uuid
 	if v == nil {
 		return
+	}
+	var i interface{} = r
+	_, ok := i.(driver.Valuer)
+	if ok {
+		if val, _ := v.Value(); val == nil {
+			return
+		}
 	}
 	return *v, true
 }
