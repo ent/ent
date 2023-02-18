@@ -9,6 +9,11 @@ services:
   mysql:
     platform: linux/amd64
     image: mysql:5.6.35
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 26677
+        hard: 46677
     environment:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: pass
@@ -20,6 +25,11 @@ services:
   mysql57:
     platform: linux/amd64
     image: mysql:5.7.26
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 26677
+        hard: 46677
     environment:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: pass
@@ -31,6 +41,11 @@ services:
   mysql8:
     platform: linux/amd64
     image: mysql:8.0.19
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 26677
+        hard: 46677
     environment:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: pass
@@ -42,6 +57,11 @@ services:
   mariadb:
     platform: linux/amd64
     image: mariadb
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 26677
+        hard: 46677
     environment:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: pass
@@ -53,6 +73,11 @@ services:
   mariadb102:
     platform: linux/amd64
     image: mariadb:10.2.32
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 26677
+        hard: 46677
     environment:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: pass
@@ -64,6 +89,11 @@ services:
   mariadb103:
     platform: linux/amd64
     image: mariadb:10.3.13
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 26677
+        hard: 46677
     environment:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: pass
