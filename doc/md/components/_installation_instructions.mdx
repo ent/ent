@@ -1,0 +1,61 @@
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+To install the latest release of Atlas, simply run one of the following commands in your terminal, or check out the
+[Atlas website](https://atlasgo.io/getting-started#installation):
+
+<Tabs
+defaultValue="apple-intel-plain+linux"
+values={[
+{label: 'macOS + Linux', value: 'apple-intel-plain+linux'},
+{label: 'Homebrew', value: 'apple-intel-brew'},
+{label: 'Go', value: 'go'},
+{label: 'Docker', value: 'docker'},
+{label: 'Windows', value: 'windows'},
+]}>
+<TabItem value="apple-intel-plain+linux">
+
+```shell
+curl -sSf https://atlasgo.sh | sh
+```
+
+</TabItem>
+<TabItem value="apple-intel-brew">
+
+```shell
+brew install ariga/tap/atlas
+```
+
+</TabItem>
+<TabItem value="go">
+
+```shell
+go install ariga.io/atlas/cmd/atlas@master
+```
+
+</TabItem>
+<TabItem value="docker">
+
+```shell
+docker pull arigaio/atlas
+docker run --rm arigaio/atlas --help
+```
+
+If the container needs access to the host network or a local directory, use the `--net=host` flag and mount the desired
+directory:
+
+```shell
+docker run --rm --net=host \
+  -v $(pwd)/migrations:/migrations \
+  arigaio/atlas migrate apply
+  --url "mysql://root:pass@:3306/test"
+```
+
+</TabItem>
+<TabItem value="windows">
+
+Download the [latest release](https://release.ariga.io/atlas/atlas-windows-amd64-latest.exe) and
+move the atlas binary to a file location on your system PATH.
+
+</TabItem>
+</Tabs>

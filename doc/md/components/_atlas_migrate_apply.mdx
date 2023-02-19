@@ -1,0 +1,48 @@
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs
+defaultValue="mysql"
+values={[
+{label: 'MySQL', value: 'mysql'},
+{label: 'MariaDB', value: 'maria'},
+{label: 'PostgreSQL', value: 'postgres'},
+{label: 'SQLite', value: 'sqlite'},
+]}>
+<TabItem value="mysql">
+
+```shell
+atlas migrate apply \
+  --dir "file://ent/migrate/migrations" \
+  --url "mysql://root:pass@localhost:3306/example"
+```
+
+</TabItem>
+<TabItem value="maria">
+
+```shell
+atlas migrate apply \
+  --dir "file://ent/migrate/migrations" \
+  --url "maria://root:pass@localhost:3306/example"
+```
+
+</TabItem>
+<TabItem value="postgres">
+
+```shell
+atlas migrate apply \
+  --dir "file://ent/migrate/migrations" \
+  --url "postgres://postgres:pass@localhost:5432/database?search_path=public&sslmode=disable"
+```
+
+</TabItem>
+<TabItem value="sqlite">
+
+```shell
+atlas migrate apply \
+  --dir "file://ent/migrate/migrations" \
+  --url "sqlite://file.db?_fk=1"
+```
+
+</TabItem>
+</Tabs>

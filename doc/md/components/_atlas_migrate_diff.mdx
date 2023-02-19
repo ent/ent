@@ -1,0 +1,52 @@
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs
+defaultValue="mysql"
+values={[
+{label: 'MySQL', value: 'mysql'},
+{label: 'MariaDB', value: 'maria'},
+{label: 'PostgreSQL', value: 'postgres'},
+{label: 'SQLite', value: 'sqlite'},
+]}>
+<TabItem value="mysql">
+
+```shell
+atlas migrate diff migration_name \
+  --dir "file://ent/migrate/migrations" \
+  --to "ent://ent/schema" \
+  --dev-url "docker://mysql/8/ent"
+```
+
+</TabItem>
+<TabItem value="maria">
+
+```shell
+atlas migrate diff migration_name \
+  --dir "file://ent/migrate/migrations" \
+  --to "ent://ent/schema" \
+  --dev-url "docker://mariadb/latest/test"
+```
+
+</TabItem>
+<TabItem value="postgres">
+
+```shell
+atlas migrate diff migration_name \
+  --dir "file://ent/migrate/migrations" \
+  --to "ent://ent/schema" \
+  --dev-url "docker://postgres/15/test?search_path=public"
+```
+
+</TabItem>
+<TabItem value="sqlite">
+
+```shell
+atlas migrate diff migration_name \
+  --dir "file://ent/migrate/migrations" \
+  --to "ent://ent/schema" \
+  --dev-url "sqlite://file?mode=memory&_fk=1"
+```
+
+</TabItem>
+</Tabs>
