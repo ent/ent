@@ -6,6 +6,8 @@ sidebar_label: Quick Introduction
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import AtlasMigrateDiff from './components/_atlas_migrate_diff.mdx';
+import AtlasMigrateApply from './components/_atlas_migrate_apply.mdx';
 
 **ent** is a simple, yet powerful entity framework for Go, that makes it easy to build
 and maintain applications with large data-models and sticks with the following principles:
@@ -648,6 +650,44 @@ Now when we have a graph with data, we can run a few queries on it:
     	return nil
     }
     ```
+
+## Schema Migration
+
+Ent provides two approaches for running schema migrations: [Automatic Migration](/docs/migrate) and
+[Versioned migration](/docs/versioned-migrations). Here is a brief overview of each approach:
+
+### Automatic Migration
+
+With Automatic Migration, users can use the following API to keep the database schema aligned with the schema objects
+defined in the generated SQL schema `ent/migrate/schema.go`:
+```go
+if err := client.Schema.Create(ctx); err != nil {
+    log.Fatalf("failed creating schema resources: %v", err)
+}
+```
+
+This approach is mostly useful for prototyping, development, or testing. However, it is recommended to use the
+_Versioned Migration_ approach for mission-critical production environments. Using versioned migrations users know
+beforehand what changes are being applied to their database, and can easily tune them for their needs.
+
+Read more about this approach in the [Automatic Migration](/docs/migrate) documentation.
+
+### Versioned Migration
+
+Unlike _Automatic Migration_, the _Version Migrations_ approach uses Atlas to automatically generate a set of migration
+files containing the necessary SQL statements to migrate the database. These files can be edited to meet specific needs
+and applied using existing migration tools like Atlas, golang-migrate, Flyway, and Liquibase. The API for this approach
+involves two primary steps.
+
+#### Generating migrations
+
+<AtlasMigrateDiff/>
+
+#### Applying migrations
+
+<AtlasMigrateApply/>
+
+Read more about this approach in the [Versioned Migrations](/docs/versioned-migrations) documentation.
 
 ## Full Example
 
