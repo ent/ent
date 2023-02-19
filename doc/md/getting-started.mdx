@@ -658,7 +658,7 @@ Ent provides two approaches for running schema migrations: [Automatic Migrations
 
 ### Automatic Migrations
 
-With Automatic Migration, users can use the following API to keep the database schema aligned with the schema objects
+With Automatic Migrations, users can use the following API to keep the database schema aligned with the schema objects
 defined in the generated SQL schema `ent/migrate/schema.go`:
 ```go
 if err := client.Schema.Create(ctx); err != nil {
