@@ -6,7 +6,7 @@ title: "Appendix: programmatic planning"
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-In the previous sections, we saw how to use the `atlas` CLI to generate migration files. However, we can also
+In the previous sections, we saw how to use the Atlas CLI to generate migration files. However, we can also
 generate these files programmatically. In this section we will review how to write Go code that can be used for
 automatically planning migration files.
 
@@ -83,7 +83,7 @@ to `ent/migrate/migrate.go`:
 * `Diff`
 * `NamedDiff`
 
-These methods are used to compare the state read from a database connection or migration directory with the state defined
+These methods are used to compare the state read from a database connection or a migration directory with the state defined
 by the Ent schema.
 
 ## 2. Automatic Migration planning script
