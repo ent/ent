@@ -2,11 +2,18 @@
 title: Planning a Migration
 id: new-migration
 ---
-## Supporting repository
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+:::info Supporting repository
 
 The change described in this section can be found in
 [PR #6](https://github.com/rotemtam/ent-versioned-migrations-demo/pull/6/files)
 in the supporting repository.
+
+:::
+
 
 ## Planning a migration
 
@@ -35,15 +42,61 @@ After adding the new field, we need to rerun code-gen for our project:
 go generate ./...
 ```
 
-Next, we need to create a new migration file for our change using the automatic
-planning script we created earlier:
+Next, we need to create a new migration file for our change using the Atlas CLI:
+
+
+<Tabs
+defaultValue="mysql"
+values={[
+{label: 'MySQL', value: 'mysql'},
+{label: 'MariaDB', value: 'maria'},
+{label: 'PostgreSQL', value: 'postgres'},
+{label: 'SQLite', value: 'sqlite'},
+]}>
+<TabItem value="mysql">
 
 ```shell
-go run ent/migrate/main.go add_user_title
+atlas migrate diff add_user_title \
+  --dir "file://ent/migrate/migrations" \
+  --to "ent://ent/schema" \
+  --dev-url "docker://mysql/8/ent"
 ```
 
+</TabItem>
+<TabItem value="maria">
+
+```shell
+atlas migrate diff add_user_title \
+  --dir "file://ent/migrate/migrations" \
+  --to "ent://ent/schema" \
+  --dev-url "docker://mariadb/latest/test"
+```
+
+</TabItem>
+<TabItem value="postgres">
+
+```shell
+atlas migrate diff add_user_title \
+  --dir "file://ent/migrate/migrations" \
+  --to "ent://ent/schema" \
+  --dev-url "docker://postgres/15/test?search_path=public"
+```
+
+</TabItem>
+<TabItem value="sqlite">
+
+```shell
+atlas migrate diff add_user_title \
+  --dir "file://ent/migrate/migrations" \
+  --to "ent://ent/schema" \
+  --dev-url "sqlite://file?mode=memory&_fk=1"
+```
+
+</TabItem>
+</Tabs>
+
 Observe a new file named `20221115101649_add_user_title.sql` was created under
-the `ent/migrate/migrations/ directory.` This file contains the SQL statements
+the `ent/migrate/migrations/` directory. This file contains the SQL statements
 to create the newly added `title` field in the `users` table:
 
 ```sql title=ent/migrate/migrations/20221115101649_add_user_title.sql
@@ -51,7 +104,7 @@ to create the newly added `title` field in the `users` table:
 ALTER TABLE `users` ADD COLUMN `title` varchar(255) NULL;
 ```
 
-Great! We've succesfully used our migration planning script to automatically
+Great! We've successfully used the Atlas CLI to automatically
 generate a new migration file for our change.
 
 To apply the migration, we can run the following command:

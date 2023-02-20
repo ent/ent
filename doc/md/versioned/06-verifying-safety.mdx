@@ -2,11 +2,17 @@
 title: Verifying migration safety
 id: verifying-safety
 ---
-## Supporting repository
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+:::info Supporting repository
 
 The change described in this section can be found in
 [PR #8](https://github.com/rotemtam/ent-versioned-migrations-demo/pull/8/files)
 in the supporting repository.
+
+:::
 
 ## Verifying migration safety
 
@@ -45,9 +51,56 @@ go generate ./...
 
 Next, let's automatically generate a new migration:
 
+
+<Tabs
+defaultValue="mysql"
+values={[
+{label: 'MySQL', value: 'mysql'},
+{label: 'MariaDB', value: 'maria'},
+{label: 'PostgreSQL', value: 'postgres'},
+{label: 'SQLite', value: 'sqlite'},
+]}>
+<TabItem value="mysql">
+
 ```shell
-go run -mod=mod ent/migrate/main.go user_title_required```
+atlas migrate diff user_title_required \
+  --dir "file://ent/migrate/migrations" \
+  --to "ent://ent/schema" \
+  --dev-url "docker://mysql/8/ent"
 ```
+
+</TabItem>
+<TabItem value="maria">
+
+```shell
+atlas migrate diff user_title_required \
+  --dir "file://ent/migrate/migrations" \
+  --to "ent://ent/schema" \
+  --dev-url "docker://mariadb/latest/test"
+```
+
+</TabItem>
+<TabItem value="postgres">
+
+```shell
+atlas migrate diff user_title_required \
+  --dir "file://ent/migrate/migrations" \
+  --to "ent://ent/schema" \
+  --dev-url "docker://postgres/15/test?search_path=public"
+```
+
+</TabItem>
+<TabItem value="sqlite">
+
+```shell
+atlas migrate diff user_title_required \
+  --dir "file://ent/migrate/migrations" \
+  --to "ent://ent/schema" \
+  --dev-url "sqlite://file?mode=memory&_fk=1"
+```
+
+</TabItem>
+</Tabs>
 
 A new migration file was created in the `ent/migrate/migrations` directory:
 
@@ -197,6 +250,8 @@ automatic migration to versioned migrations. To recap, we learned how to:
 * Upgrade our production database to use versioned migrations with Atlas
 * Plan custom migrations for our project
 * Verify migrations safely using `atlas migrate lint`
+
+In the next steps
 
 :::note For more Ent news and updates:
 
