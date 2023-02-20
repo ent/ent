@@ -101,9 +101,11 @@ func NewCmd() *cobra.Command {
 				tmpl *template.Template
 			)
 			if tmplPath != "" {
-				tmpl, err = template.ParseFiles(tmplPath)
+				tmpl = template.New(filepath.Base(tmplPath)).Funcs(gen.Funcs)
+				tmpl, err = tmpl.ParseFiles(tmplPath)
 			} else {
-				tmpl, err = template.New("schema").Parse(defaultTemplate)
+				tmpl = template.New("schema").Funcs(gen.Funcs)
+				tmpl, err = tmpl.Parse(defaultTemplate)
 			}
 			if err != nil {
 				log.Fatalln(fmt.Errorf("ent/new: could not parse template %w", err))
