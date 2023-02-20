@@ -122,7 +122,7 @@ func NewCmd() *cobra.Command {
 func DescribeCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "describe [flags] path",
-		Short: "printer a description of the graph schema",
+		Short: "print a description of the graph schema",
 		Example: examples(
 			"ent describe ./ent/schema",
 			"ent describe github.com/a8m/x",
