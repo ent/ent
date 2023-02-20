@@ -123,10 +123,6 @@ module.exports = {
         },
         {
           type: 'doc',
-          id: 'versioned/enable-ff',
-        },
-        {
-          type: 'doc',
           id: 'versioned/auto-plan',
         },
         {
@@ -144,7 +140,11 @@ module.exports = {
         {
           type: 'doc',
           id: 'versioned/verifying-safety',
-        }
+        },
+        {
+          type: 'doc',
+          id: 'versioned/programmatically',
+        },
       ]
     }
   ]

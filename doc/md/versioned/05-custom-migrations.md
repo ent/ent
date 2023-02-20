@@ -2,11 +2,13 @@
 title: Custom migrations
 id: custom-migrations
 ---
-## Supporting repository
+:::info Supporting repository
 
 The change described in this section can be found in
 [PR #7](https://github.com/rotemtam/ent-versioned-migrations-demo/pull/7/files)
 in the supporting repository.
+
+:::
 
 ## Custom migrations
 In some cases, you may want to write custom migrations that are not automatically

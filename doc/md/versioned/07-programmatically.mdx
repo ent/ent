@@ -1,42 +1,114 @@
 ---
-title: Automatic migration planning
-id: auto-plan
+id: programmatically
+title: "Appendix: programmatic planning"
 ---
-## Supporting repository
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+In the previous sections, we saw how to use the Atlas CLI to generate migration files. However, we can also
+generate these files programmatically. In this section we will review how to write Go code that can be used for
+automatically planning migration files.
+
+## 1. Enable the versioned migration feature flag
+
+:::info Supporting repository
+
+The change described in this section can be found in PR [#2](https://github.com/rotemtam/ent-versioned-migrations-demo/pull/2/files)
+in the supporting repository.
+
+:::
+
+The first step is to enable the versioned migration feature by passing in the `sql/versioned-migration` feature flag.
+Depending on how you execute the Ent code generator, you have to use one of the two options:
+
+<Tabs
+defaultValue="ent"
+values={[
+{label: 'Using Ent CLI', value: 'ent'},
+{label: 'Using the entc package', value: 'entc'},
+]}>
+<TabItem value="ent">
+
+If you are using the default go generate configuration, simply add the `--feature sql/versioned-migration` to
+the `ent/generate.go` file as follows:
+
+```go
+package ent
+
+//go:generate go run -mod=mod entgo.io/ent/cmd/ent generate --feature sql/versioned-migration ./schema
+```
+
+</TabItem>
+<TabItem value="entc">
+
+If you are using the code generation package (e.g. if you are using an Ent extension like `entgql`),
+add the feature flag as follows:
+
+```go
+//go:build ignore
+
+package main
+
+import (
+	"log"
+
+	"entgo.io/ent/entc"
+	"entgo.io/ent/entc/gen"
+)
+
+func main() {
+	err := entc.Generate("./schema", &gen.Config{
+		//highlight-next-line
+		Features: []gen.Feature{gen.FeatureVersionedMigration},
+	})
+	if err != nil {
+		log.Fatalf("running ent codegen: %v", err)
+	}
+}
+```
+
+</TabItem>
+</Tabs>
+
+Next, re-run code-generation:
+
+```shell
+go generate ./...
+```
+
+After running the code-generation, you should see the following
+[methods added](https://github.com/rotemtam/ent-versioned-migrations-demo/commit/e724fa32330d920fd405b9785fcfece2a46ea56c#diff-370235e5107bbdd35861063f3beff1507723ebdda6e29a39cdde1f1a944594d8)
+to `ent/migrate/migrate.go`:
+* `Diff`
+* `NamedDiff`
+
+These methods are used to compare the state read from a database connection or a migration directory with the state defined
+by the Ent schema.
+
+## 2. Automatic Migration planning script
+
+:::info Supporting repository
 
 The change described in this section can be found in PR [#4](https://github.com/rotemtam/ent-versioned-migrations-demo/pull/4/files)
 in the supporting repository.
 
-## Automatic migration planning
+:::
 
-One of the convenient features of Automatic Migrations is that developers do not
-need to write the SQL statements to create or modify the database schema. To 
-achieve similar benefits, we will now add a script to our project that will 
-automatically plan migration files for us based on the changes to our schema. 
-
-To do this, Ent uses [Atlas](https://atlasgo.io), an open-source tool for managing database
-schemas, created by the same people behind Ent. 
-
-If you have been following our example repo, we have been using SQLite as our database
-until this point. To demonstrate a more realistic use case, we will now switch to MySQL.
-See this change in [PR #3](https://github.com/rotemtam/ent-versioned-migrations-demo/pull/3/files).
-
-## Dev database
+### Dev database
 
 To be able to plan accurate and consistent migration files, Atlas introduces the
 concept of a [Dev database](https://atlasgo.io/concepts/dev-database), a temporary
 database which is used to simulate the state of the database after different changes.
 Therefore, to use Atlas to automatically plan migrations, we need to supply a connection
-string to such a database to our migration planning script. Such a database is most commonly 
+string to such a database to our migration planning script. Such a database is most commonly
 spun up using a local Docker container. Let's do this now by running the following command:
 
 ```shell
 docker run --rm --name atlas-db-dev -d -p 3306:3306 -e MYSQL_DATABASE=dev -e MYSQL_ROOT_PASSWORD=pass mysql:8
 ```
 
-## Migration planning script
-
-Now that we have a Dev database, we can write a script that will use Atlas to plan
+Using the Dev database we have just configured, we can write a script that will use Atlas to plan
 migration files for us. Let's create a new file called `main.go` in the `ent/migrate` directory
 of our project:
 
@@ -49,7 +121,7 @@ import (
     "context"
     "log"
     "os"
-    
+
     // highlight-next-line
     "<project>/ent/migrate"
 
@@ -95,7 +167,7 @@ func main() {
 :::info
 
 Notice that you need to make some modifications to the script above in the highlighted lines.
-Edit the import path of the `migrate` package to match your project and to supply the connection 
+Edit the import path of the `migrate` package to match your project and to supply the connection
 string to your Dev database.
 
 :::
@@ -138,6 +210,7 @@ CREATE TABLE `blogs` (`id` bigint NOT NULL AUTO_INCREMENT, `title` varchar(255) 
 Atlas integrates very well with Ent, but it is not the only migration tool that can be used
 to manage database schemas in Ent projects. The following is a list of other migration tools
 that are supported:
+
 * [Goose](https://github.com/pressly/goose)
 * [Golang Migrate](https://github.com/golang-migrate/migrate)
 * [Flyway](https://flywaydb.org)
@@ -145,5 +218,3 @@ that are supported:
 * [dbmate](https://github.com/amacneil/dbmate)
 
 To learn more about how to use these tools with Ent, see the [docs](https://entgo.io/docs/versioned-migrations#create-a-migration-files-generator) on this subject.
-
-Next, let's see how to upgrade an existing production database to be managed with versioned migrations. 
