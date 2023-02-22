@@ -12,13 +12,12 @@ import (
 	"fmt"
 	"sync"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/cascadelete/ent/comment"
 	"entgo.io/ent/entc/integration/cascadelete/ent/post"
 	"entgo.io/ent/entc/integration/cascadelete/ent/predicate"
 	"entgo.io/ent/entc/integration/cascadelete/ent/user"
-
-	"entgo.io/ent"
 )
 
 const (

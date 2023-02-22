@@ -13,14 +13,13 @@ import (
 	"sync"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/multischema/ent/friendship"
 	"entgo.io/ent/entc/integration/multischema/ent/group"
 	"entgo.io/ent/entc/integration/multischema/ent/pet"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
 	"entgo.io/ent/entc/integration/multischema/ent/user"
-
-	"entgo.io/ent"
 )
 
 const (

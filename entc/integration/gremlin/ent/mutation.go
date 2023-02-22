@@ -16,6 +16,7 @@ import (
 	"sync"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/entc/integration/ent/role"
 	"entgo.io/ent/entc/integration/ent/schema"
@@ -37,8 +38,6 @@ import (
 	enttask "entgo.io/ent/entc/integration/gremlin/ent/task"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
 	"github.com/google/uuid"
-
-	"entgo.io/ent"
 )
 
 const (
