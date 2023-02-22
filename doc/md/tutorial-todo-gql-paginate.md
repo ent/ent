@@ -85,6 +85,22 @@ func (Todo) Fields() []ent.Field {
 }
 ```
 
+## Order By Multiple Fields
+
+By default, the `orderBy` argument only accepts a single `<T>Order` value. To enable sorting by multiple fields, simply
+add the `entgql.MultiOrder()` annotation to desired schema.
+
+```go title="ent/schema/todo.go"
+func (Todo) Annotations() []schema.Annotation {
+    return []schema.Annotation{
+        //highlight-next-line
+        entgql.MultiOrder(),
+    }
+}
+```
+
+By adding this annotation to the `Todo` schema, the `orderBy` argument will be changed from `TodoOrder` to `[TodoOrder!]`.
+
 ## Add Pagination Support For Query
 
 1\. The next step for enabling pagination is to tell Ent that the `Todo` type is a Relay Connection.
