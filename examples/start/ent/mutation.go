@@ -13,13 +13,12 @@ import (
 	"sync"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/examples/start/ent/car"
 	"entgo.io/ent/examples/start/ent/group"
 	"entgo.io/ent/examples/start/ent/predicate"
 	"entgo.io/ent/examples/start/ent/user"
-
-	"entgo.io/ent"
 )
 
 const (

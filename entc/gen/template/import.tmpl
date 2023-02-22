@@ -33,6 +33,11 @@ import (
 			"{{ $import }}"
 		{{- end }}
 	{{- end }}
+	{{- if and (hasField $ "Scope") ($.Scope.Imports) }}
+		{{- range $import := $.Scope.Imports }}
+			{{ $import.Alias }} "{{ $import.Path }}"
+		{{- end }}
+	{{- end }}
 	{{- template "import/additional" $ }}
 )
 {{ end }}

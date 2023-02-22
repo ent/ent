@@ -12,13 +12,12 @@ import (
 	"fmt"
 	"sync"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/examples/traversal/ent/group"
 	"entgo.io/ent/examples/traversal/ent/pet"
 	"entgo.io/ent/examples/traversal/ent/predicate"
 	"entgo.io/ent/examples/traversal/ent/user"
-
-	"entgo.io/ent"
 )
 
 const (

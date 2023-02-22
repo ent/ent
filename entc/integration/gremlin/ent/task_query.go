@@ -16,7 +16,6 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
-
 	enttask "entgo.io/ent/entc/integration/gremlin/ent/task"
 )
 

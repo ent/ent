@@ -15,12 +15,10 @@ import (
 	"context"
 	"fmt"
 	"sync"
-
 	{{- range $n := $.Nodes }}
 		{{ $n.PackageAlias }} "{{ $.Config.Package }}/{{ $n.PackageDir }}"
 		{{- template "import/types" $n }}
 	{{- end }}
-
 	"entgo.io/ent"
 )
 

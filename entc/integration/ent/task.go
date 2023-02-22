@@ -14,7 +14,6 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/schema/task"
-
 	enttask "entgo.io/ent/entc/integration/ent/task"
 )
 

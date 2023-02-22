@@ -15,9 +15,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/schema/task"
-	"entgo.io/ent/schema/field"
-
 	enttask "entgo.io/ent/entc/integration/ent/task"
+	"entgo.io/ent/schema/field"
 )
 
 // TaskUpdate is the builder for updating Task entities.
