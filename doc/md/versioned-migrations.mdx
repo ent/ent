@@ -117,6 +117,11 @@ In order to automatically generate migration files, you can use one of the two a
 
 <AtlasMigrateDiff/>
 
+:::note
+To enable the [`GlobalUniqueID`](migrate.md#universal-ids) option in versioned migration, append the query parameter
+`globalid=1` to the desired state. For example: `--to "ent://ent/schema?globalid=1"`.
+:::
+
 Run `ls ent/migrate/migrations` after the command above was passed successfully, and you will notice Atlas created 2
 files:
 
