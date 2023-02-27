@@ -13,7 +13,7 @@ import InstallationInstructions from '../../md/components/_installation_instruct
 few distinct features that have made it very popular in the Go community. Ent was first open-sourced by
 [Ariel](https://github.com/a8m) in 2019, when he was working at Facebook. Ent grew from the pains of managing the 
 development of applications with very large and complex data models and ran successfully inside Facebook for a year 
-before open-sourcing it.  After graduating from Facebook Open-source, Ent joined the Linux Foundation in September 2021.
+before open-sourcing it. After graduating from Facebook Open Source, Ent joined the Linux Foundation in September 2021.
 
 Over the last few years, Ent has become one of the fastest growing ORMs in Go:
 
@@ -54,7 +54,7 @@ Some of Ent's most cited features are:
   both the third-party schemas (GraphQL types, Protobuf messages, etc.) and optimized code for the repetitive
   tasks for reading and writing from the database.
 * **Bundled with Atlas** - Ent is built with a rich integration with [Atlas](https://atlasgo.io), a robust schema 
-  management tool with many advanced capabilities.  Atlas can automatically plan schema migrations for you as
+  management tool with many advanced capabilities. Atlas can automatically plan schema migrations for you as
   well as verify them in CI or deploy them to production for you. (Full disclosure: Ariel and I are the creators and maintainers)
 
 This tutorial is intended for Ent and Go novices who want to start by building a simple project: a very minimal content management system.
@@ -65,7 +65,7 @@ This tutorial is intended for Ent and Go novices who want to start by building a
 
 :::info Supporting repo
 
-You can find of the code shown in this tutorial in [this repo](https://github.com/rotemtam/ent-blog-example)
+You can find of the code shown in this tutorial in [this repo](https://github.com/rotemtam/ent-blog-example).
 
 :::
 
@@ -89,7 +89,7 @@ The first thing we will handle in our demo project will be to setup our database
 go get -u entgo.io/ent@master
 ```
 
-Once installed, we can use the Ent CLI to Initialize the models for the two types entities we will be dealing with in this tutorial, the `User` and the `Post`.
+Once installed, we can use the Ent CLI to initialize the models for the two types of entities we will be dealing with in this tutorial: the `User` and the `Post`.
 ```
 go run -mod=mod entgo.io/ent/cmd/ent new User Post
 ```
@@ -117,8 +117,10 @@ Let's continue by defining the schema for our entities. This is the schema defin
 func (User) Fields() []ent.Field {  
    return []ent.Field{  
       field.String("name"),  
-      field.String("email").Unique(),  
-      field.Time("created_at").Default(time.Now()),  
+      field.String("email").
+            Unique(),  
+      field.Time("created_at").
+            Default(time.Now),  
    }  
 }  
   
@@ -143,7 +145,8 @@ func (Post) Fields() []ent.Field {
    return []ent.Field{  
       field.String("title"),  
       field.Text("body"),  
-      field.Time("created_at").Default(time.Now),  
+      field.Time("created_at").
+            Default(time.Now),  
    }  
 }  
   
@@ -156,7 +159,7 @@ func (Post) Fields() []ent.Field {
 }
 ```
 
-On the `Post` schema, we defined 3 fields as well: `title`, `body` and `created_at`. In addition, we  defined an edge named `author` from `Post` to the `User` entity. We marked this edge as `Unique` because in our budding system, each post can have only one author. We used `Ref` to tell Ent that this edge's back reference is the `posts` edge on the `User`.
+On the `Post` schema, we defined three fields as well: `title`, `body` and `created_at`. In addition, we  defined an edge named `author` from `Post` to the `User` entity. We marked this edge as `Unique` because in our budding system, each post can have only one author. We used `Ref` to tell Ent that this edge's back reference is the `posts` edge on the `User`.
 
 Ent's power stems from it's code-generation engine. When developing with Ent, whenever we make any change to our application schema, we must invoke Ent's code-gen engine to regenerate our database access code. This is what allows Ent to maintain a type-safe and efficient Go API for us.
 
@@ -183,7 +186,7 @@ Observe that a whole *lot* of new Go files were created for us:
 ```
 
 :::info
-If you're interested to see what the actual database schema for our application looks like, you can use a useful tool called `entviz`, to generate it:
+If you're interested to see what the actual database schema for our application looks like, you can use a useful tool called `entviz`:
 ```
 go run -mod=mod ariga.io/entviz ./ent/schema
 ```
@@ -218,13 +221,13 @@ CREATE TABLE `posts` (`id` bigint NOT NULL AUTO_INCREMENT, `title` varchar(255) 
 
 To setup our development environment, let's use Docker to run a local `mysql` container:
 ```
-docker run --rm --name entdb -d -p 3306:3306 -e MYSQL_DATABASE=test -e MYSQL_ROOT_PASSWORD=pass mysql:8
+docker run --rm --name entdb -d -p 3306:3306 -e MYSQL_DATABASE=ent -e MYSQL_ROOT_PASSWORD=pass mysql:8
 ```
 
 Finally, let's run the migration script on our local database:
 ```
 atlas migrate apply --dir file://ent/migrate/migrations \
-  --url mysql://root:pass@localhost:3306/test
+  --url mysql://root:pass@localhost:3306/ent
 ```
 Atlas reports that it successfully created the tables:
 ```
@@ -330,7 +333,7 @@ As you can see, this program first checks if any `Post` entity exists in the dat
 
 Run it:
 ```
- go run main.go -dsn "root:pass@tcp(localhost:3306)/test?parseTime=true"
+ go run main.go -dsn "root:pass@tcp(localhost:3306)/ent?parseTime=true"
 ```
 
 ### Step 3: Creating the home page
@@ -458,7 +461,6 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := tmpl.Execute(w, posts); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
 	}
 }
 ```
