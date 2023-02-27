@@ -690,7 +690,7 @@ Next, we can add an HTML `<form>` component that will be used by our user to wri
 </div>
 ```
 
-Also, let's add a nice touch, where we display the blog posts from new to old. To do this, modify the `index` handler to order the posts in a descending order using the `created_at` column:
+Also, let's add a nice touch, where we display the blog posts from newest to oldest. To do this, modify the `index` handler to order the posts in a descending order using the `created_at` column:
 ```go
 posts, err := s.client.Post.
 	Query().
