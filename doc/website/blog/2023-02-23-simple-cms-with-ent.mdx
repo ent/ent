@@ -132,7 +132,10 @@ func (User) Edges() []ent.Edge {
 }
 ```
 
-Observe that we defined 3 fields, `name`, `email` and `created_at` (which takes the default value of `time.Now()`).  Since we expect emails to be unique in our system we added that constraint on the `email` field.  In addition, we defined an edge named `posts` to the `Post` type.
+Observe that we defined three fields, `name`, `email` and `created_at` (which takes the default value of `time.Now()`).
+Since we expect emails to be unique in our system we added that constraint on the `email` field.  In addition, we
+defined an edge named `posts` to the `Post` type.  Edges are used in Ent to define relationships between entities.
+When working with a relational database, edges are translated into foreign keys and association tables.
 
 ```go
 // Post holds the schema definition for the Post entity.
