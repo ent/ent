@@ -57,7 +57,7 @@ Some of Ent's most cited features are:
   management tool with many advanced capabilities.  Atlas can automatically plan schema migrations for you as
   well as verify them in CI or deploy them to production for you. (Full disclosure: Ariel and I are the creators and maintainers)
 
-This tutorial is intended for Ent and Go novices who want to start by building a simple project: a very simple content management system.
+This tutorial is intended for Ent and Go novices who want to start by building a simple project: a very minimal content management system.
 
 #### Prerequisities
 * [Install Go](https://go.dev/doc/install)
@@ -83,7 +83,7 @@ Go confirms our new module was created:
 go: creating new go.mod: module github.com/rotemtam/ent-blog-example
 ```
 
-The first thing we will handle in our demo project will be to setup our database. We create our application data modelu using Ent. Let's fetch it using `go get`:
+The first thing we will handle in our demo project will be to setup our database. We create our application data model using Ent. Let's fetch it using `go get`:
 
 ```
 go get -u entgo.io/ent@master
@@ -158,7 +158,7 @@ func (Post) Fields() []ent.Field {
 
 On the `Post` schema, we defined 3 fields as well: `title`, `body` and `created_at`. In addition, we  defined an edge named `author` from `Post` to the `User` entity. We marked this edge as `Unique` because in our budding system, each post can have only one author. We used `Ref` to tell Ent that this edge's back reference is the `posts` edge on the `User`.
 
-Ent's power stems from it's code-generation engine. The way developing with Ent works is that whenever we make any change to our application schema, we must invoke Ent's code-gen engine to regenerate our database access code. This is what allows Ent to maintain a type-safe and efficient Go API for us.
+Ent's power stems from it's code-generation engine. When developing with Ent, whenever we make any change to our application schema, we must invoke Ent's code-gen engine to regenerate our database access code. This is what allows Ent to maintain a type-safe and efficient Go API for us.
 
 Let's see this in action, run:
 ```
@@ -190,7 +190,7 @@ go run -mod=mod ariga.io/entviz ./ent/schema
 To view the result, [click here](https://gh.atlasgo.cloud/explore/a0e79415).
 :::
 
-Once we have our data model defined. Let's create the database schema for it.
+Once we have our data model defined, let's create the database schema for it.
 
 <InstallationInstructions/>
 
@@ -250,7 +250,7 @@ The code for this step can be found in [this commit](https://github.com/rotemtam
 
 :::
 
-While we are developing our content management system, it would be sad to load a web page for our system and not see content for it. Let's start by seeding some data into our database and learn some Ent concepts.
+While we are developing our content management system, it would be sad to load a web page for our system and not see content for it. Let's start by seeding data into our database and learn some Ent concepts.
 
 To access our local MySQL database, we need a driver for it, use `go get` to fetch it:
 ```
@@ -340,8 +340,8 @@ The code described in this step can be found in [this commit](https://github.com
 :::
 
 Let's now create the home page of the blog. This will consist of a few parts:
-1. The view - this is a go html/template that renders the actual HTML the user will see.
-2. The server code - this contains the HTTP request handlers that our users' browsers will communicate with and that will render our templates with data they retrieve from the database.
+1. The view - this is a Go html/template that renders the actual HTML the user will see.
+2. The server code - this contains the HTTP request handlers that our users' browsers will communicate with and will render our templates with data they retrieve from the database.
 3. The router - registers different paths to handlers.
 4. A unit test - to verify our server behaves correctly.
 
@@ -398,7 +398,7 @@ Let's create our first template that will be used to display a list of blog post
 </html>
 ```
 
-Here we are using modified version of the [Bootstrap Starter Template](https://getbootstrap.com/docs/5.3/examples/starter-template/) as the basis of our UI. Let's highlight the important parts. As you will see below, in our `index` handler, we pass to will pass this template a slice of `Post` objects.
+Here we are using a modified version of the [Bootstrap Starter Template](https://getbootstrap.com/docs/5.3/examples/starter-template/) as the basis of our UI. Let's highlight the important parts. As you will see below, in our `index` handler, we will pass this template a slice of `Post` objects.
 
 Inside the Go-template, whatever we pass to it as data is available as "`.`", this explains this line, where we use `range` to iterate over each post:
 ```
@@ -411,7 +411,7 @@ Next, we print the title, creation time and the author name, via the `Author` ed
 	{{ .CreatedAt.Format "2006-01-02" }} by {{ .Edges.Author.Name }}
 </p>
 ```
-Finally, we print the post body, and close the loop.
+Finally, we print the post body and close the loop.
 ```
 	<p>
 		{{ .Body }}
@@ -419,7 +419,7 @@ Finally, we print the post body, and close the loop.
 {{- end }}
 ```
 
-After defining the template, we need to make it available to our program, we embed this template into our binary using the `embed` package ([docs](https://pkg.go.dev/embed)):
+After defining the template, we need to make it available to our program. We embed this template into our binary using the `embed` package ([docs](https://pkg.go.dev/embed)):
 
 ```go
 var (  
@@ -477,7 +477,7 @@ s.client.Post.
 
 #### The router
 
-To manage the routes for our application, let's use `go-chi` a popular routing library for Go.
+To manage the routes for our application, let's use `go-chi`, a popular routing library for Go.
 
 ```
 go get -u github.com/go-chi/chi/v5
@@ -497,8 +497,8 @@ func newRouter(srv *server) chi.Router {
 ```
 
 In this function, we first instantiate a new `chi.Router`, then register two middlewares:
-* `middleware.Logger` - is a basic access logger that prints out some information on every request our server handles.
-* `middleware.Recoverer` recovers from if our handlers panic, preventing a cause where our entire server will crash because of an application error.
+* `middleware.Logger` is a basic access logger that prints out some information on every request our server handles.
+* `middleware.Recoverer` recovers from when our handlers panic, preventing a case where our entire server will crash because of an application error.
 
 Finally, we register the `index` function of the `server` struct to handle `GET` requests to the `/` path of our server.
 
@@ -506,7 +506,7 @@ Finally, we register the `index` function of the `server` struct to handle `GET`
 
 Before wiring everything together, let's write a simple unit test to check that our code works as expected.
 
-To simplify our tests we will install the SQLite driver for Go which allows us to use an in memory database:
+To simplify our tests we will install the SQLite driver for Go which allows us to use an in-memory database:
 ```
 go get -u github.com/mattn/go-sqlite3
 ```
@@ -617,7 +617,7 @@ func main() {
 }
 ```
 
-We can now run our application and stand amazed at our achievement, a working blog front page!
+We can now run our application and stand amazed at our achievement: a working blog front page!
 
 ```
  go run main.go -dsn "root:pass@tcp(localhost:3306)/test?parseTime=true"
@@ -627,9 +627,11 @@ We can now run our application and stand amazed at our achievement, a working bl
 
 ### Step 4: Adding content
 
+:::info 
 You can follow the changes in this step in [this commit](https://github.com/rotemtam/ent-blog-example/commit/2e412ab2cda0fd251ccb512099b802174d917511).
+:::
 
-No content mangement system would be complete without the ability, well, to manage content. Let's now demonstrate how we can add support for publishing new posts on our blog.
+No content mangement system would be complete without the ability, well, to manage content. Let's demonstrate how we can add support for publishing new posts on our blog.
 
 Let's start by creating the backend handler:
 ```go
@@ -652,7 +654,7 @@ func (s *server) add(w http.ResponseWriter, r *http.Request) {
 ```
 As you can see, the handler currently loads the *only* user from the `users` table (since we have yet to create a user management system or login capabilities). `Only` will fail unless exactly one result is retrieved from the database.
 
-Next, our handler creates a new post, using setting the title and body fields to values retrieved from `r.FormValue`, this is where Go stores all of the form input passed to an HTTP request.
+Next, our handler creates a new post, by setting the title and body fields to values retrieved from `r.FormValue`. This is where Go stores all of the form input passed to an HTTP request.
 
 After creating the handler, we should wire it to our router:
 ```go
@@ -754,7 +756,7 @@ A passing unit test is great, but let's verify our changes visually:
 
 ![](https://entgo.io/images/assets/cms-blog/cms-02.png)
 
-Our form appears, great. After submitting it:
+Our form appears - great! After submitting it:
 
 ![](https://entgo.io/images/assets/cms-blog/cms-03.png)
 
