@@ -189,6 +189,9 @@ func (b *{{ $builder }}) SchemaType(types map[string]string) *{{ $builder }} {
 
 {{ $tt := title $t.String }}
 // GoType overrides the default Go type with a custom one.
+// If the provided type implements the Validator interface
+// and no validators have been set, the type validator will
+// be used.
 //
 //	field.{{ $tt }}("{{ $t }}").
 //		GoType(pkg.{{ $tt }}(0))
@@ -358,6 +361,9 @@ func (b *{{ $builder }}) SchemaType(types map[string]string) *{{ $builder }} {
 
 {{ $tt := title $t.String }}
 // GoType overrides the default Go type with a custom one.
+// If the provided type implements the Validator interface
+// and no validators have been set, the type validator will
+// be used.
 //
 //	field.{{ $tt }}("{{ $t }}").
 //		GoType(pkg.{{ $tt }}(0))

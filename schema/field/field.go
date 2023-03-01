@@ -297,6 +297,9 @@ func (b *stringBuilder) SchemaType(types map[string]string) *stringBuilder {
 }
 
 // GoType overrides the default Go type with a custom one.
+// If the provided type implements the Validator interface
+// and no validators have been set, the type validator will
+// be used.
 //
 //	field.String("dir").
 //		GoType(http.Dir("dir"))
@@ -397,6 +400,9 @@ func (b *timeBuilder) StorageKey(key string) *timeBuilder {
 }
 
 // GoType overrides the default Go type with a custom one.
+// If the provided type implements the Validator interface
+// and no validators have been set, the type validator will
+// be used.
 //
 //	field.Time("deleted_at").
 //		GoType(&sql.NullTime{})
@@ -489,6 +495,9 @@ func (b *boolBuilder) StorageKey(key string) *boolBuilder {
 }
 
 // GoType overrides the default Go type with a custom one.
+// If the provided type implements the Validator interface
+// and no validators have been set, the type validator will
+// be used.
 //
 //	field.Bool("deleted").
 //		GoType(&sql.NullBool{})
@@ -637,6 +646,9 @@ func (b *bytesBuilder) StorageKey(key string) *bytesBuilder {
 }
 
 // GoType overrides the default Go type with a custom one.
+// If the provided type implements the Validator interface
+// and no validators have been set, the type validator will
+// be used.
 //
 //	field.Bytes("ip").
 //		GoType(net.IP("127.0.0.1"))
@@ -876,6 +888,9 @@ type EnumValues interface {
 }
 
 // GoType overrides the default Go type with a custom one.
+// If the provided type implements the Validator interface
+// and no validators have been set, the type validator will
+// be used.
 //
 //	field.Enum("enum").
 //		GoType(role.Enum("role"))
@@ -1228,12 +1243,19 @@ var (
 	stringType       = reflect.TypeOf("")
 	valuerType       = reflect.TypeOf((*driver.Valuer)(nil)).Elem()
 	valueScannerType = reflect.TypeOf((*ValueScanner)(nil)).Elem()
+	validatorType    = reflect.TypeOf((*Validator)(nil)).Elem()
 )
 
 // ValueScanner is the interface that groups the Value and the Scan methods.
 type ValueScanner interface {
 	driver.Valuer
 	sql.Scanner
+}
+
+// Validator interface wraps the Validate method. Custom GoTypes with
+// this method will be validated when the entity is created or updated.
+type Validator interface {
+	Validate() error
 }
 
 // indirect returns the type at the end of indirection.

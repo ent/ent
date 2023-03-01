@@ -252,6 +252,9 @@ func (b *intBuilder) SchemaType(types map[string]string) *intBuilder {
 }
 
 // GoType overrides the default Go type with a custom one.
+// If the provided type implements the Validator interface
+// and no validators have been set, the type validator will
+// be used.
 //
 //	field.Int("int").
 //		GoType(pkg.Int(0))
@@ -417,6 +420,9 @@ func (b *uintBuilder) SchemaType(types map[string]string) *uintBuilder {
 }
 
 // GoType overrides the default Go type with a custom one.
+// If the provided type implements the Validator interface
+// and no validators have been set, the type validator will
+// be used.
 //
 //	field.Uint("uint").
 //		GoType(pkg.Uint(0))
@@ -592,6 +598,9 @@ func (b *int8Builder) SchemaType(types map[string]string) *int8Builder {
 }
 
 // GoType overrides the default Go type with a custom one.
+// If the provided type implements the Validator interface
+// and no validators have been set, the type validator will
+// be used.
 //
 //	field.Int8("int8").
 //		GoType(pkg.Int8(0))
@@ -767,6 +776,9 @@ func (b *int16Builder) SchemaType(types map[string]string) *int16Builder {
 }
 
 // GoType overrides the default Go type with a custom one.
+// If the provided type implements the Validator interface
+// and no validators have been set, the type validator will
+// be used.
 //
 //	field.Int16("int16").
 //		GoType(pkg.Int16(0))
@@ -942,6 +954,9 @@ func (b *int32Builder) SchemaType(types map[string]string) *int32Builder {
 }
 
 // GoType overrides the default Go type with a custom one.
+// If the provided type implements the Validator interface
+// and no validators have been set, the type validator will
+// be used.
 //
 //	field.Int32("int32").
 //		GoType(pkg.Int32(0))
@@ -1117,6 +1132,9 @@ func (b *int64Builder) SchemaType(types map[string]string) *int64Builder {
 }
 
 // GoType overrides the default Go type with a custom one.
+// If the provided type implements the Validator interface
+// and no validators have been set, the type validator will
+// be used.
 //
 //	field.Int64("int64").
 //		GoType(pkg.Int64(0))
@@ -1282,6 +1300,9 @@ func (b *uint8Builder) SchemaType(types map[string]string) *uint8Builder {
 }
 
 // GoType overrides the default Go type with a custom one.
+// If the provided type implements the Validator interface
+// and no validators have been set, the type validator will
+// be used.
 //
 //	field.Uint8("uint8").
 //		GoType(pkg.Uint8(0))
@@ -1447,6 +1468,9 @@ func (b *uint16Builder) SchemaType(types map[string]string) *uint16Builder {
 }
 
 // GoType overrides the default Go type with a custom one.
+// If the provided type implements the Validator interface
+// and no validators have been set, the type validator will
+// be used.
 //
 //	field.Uint16("uint16").
 //		GoType(pkg.Uint16(0))
@@ -1612,6 +1636,9 @@ func (b *uint32Builder) SchemaType(types map[string]string) *uint32Builder {
 }
 
 // GoType overrides the default Go type with a custom one.
+// If the provided type implements the Validator interface
+// and no validators have been set, the type validator will
+// be used.
 //
 //	field.Uint32("uint32").
 //		GoType(pkg.Uint32(0))
@@ -1777,6 +1804,9 @@ func (b *uint64Builder) SchemaType(types map[string]string) *uint64Builder {
 }
 
 // GoType overrides the default Go type with a custom one.
+// If the provided type implements the Validator interface
+// and no validators have been set, the type validator will
+// be used.
 //
 //	field.Uint64("uint64").
 //		GoType(pkg.Uint64(0))
@@ -1943,6 +1973,9 @@ func (b *float64Builder) SchemaType(types map[string]string) *float64Builder {
 }
 
 // GoType overrides the default Go type with a custom one.
+// If the provided type implements the Validator interface
+// and no validators have been set, the type validator will
+// be used.
 //
 //	field.Float64("float64").
 //		GoType(pkg.Float64(0))
@@ -2093,6 +2126,9 @@ func (b *float32Builder) SchemaType(types map[string]string) *float32Builder {
 }
 
 // GoType overrides the default Go type with a custom one.
+// If the provided type implements the Validator interface
+// and no validators have been set, the type validator will
+// be used.
 //
 //	field.Float32("float32").
 //		GoType(pkg.Float32(0))

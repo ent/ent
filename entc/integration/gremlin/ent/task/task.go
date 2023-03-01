@@ -32,8 +32,6 @@ const (
 var (
 	// DefaultPriority holds the default value on creation for the "priority" field.
 	DefaultPriority task.Priority
-	// PriorityValidator is a validator for the "priority" field. It is called by the builders before save.
-	PriorityValidator func(int) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 )

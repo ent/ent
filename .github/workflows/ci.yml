@@ -68,10 +68,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
       - name: Run go generate
-        run: go generate ./...
+        run: go generate ./... && go mod tidy
       - name: Run go generate on examples directory
         working-directory: examples
-        run: go generate ./...
+        run: go generate ./... && go mod tidy
       - name: Check generated files
         run: |
           status=$(git status --porcelain)

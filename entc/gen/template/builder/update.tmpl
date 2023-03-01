@@ -258,10 +258,10 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 	// check runs all checks and user-defined validators on the builder.
 	func ({{ $receiver }} *{{ $builder }}) check() error {
 		{{- range $f := $.Fields }}
-			{{- with and (or $f.Validators $f.IsEnum) (not $f.Immutable) }}
+			{{- $isValidator := and ($f.HasGoType) ($f.Type.Validator) }}
+			{{- with and (not $f.Immutable) (or $f.Validators $f.IsEnum $isValidator) }}
 				if v, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
-					{{- $basic := $f.BasicType "v" }}
-					if err := {{ $.Package }}.{{ $f.Validator }}({{ $basic }}); err != nil {
+					if err := {{ if or $f.Validators $f.IsEnum }}{{ $.Package }}.{{ $f.Validator }}({{ $f.BasicType "v" }}){{ else }}v.Validate(){{ end }}; err != nil {
 						return &ValidationError{Name: "{{ $f.Name }}", err: fmt.Errorf(`{{ $pkg }}: validator failed for field "{{ $.Name }}.{{ $f.Name }}": %w`, err)}
 					}
 				}
