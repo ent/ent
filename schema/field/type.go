@@ -123,6 +123,11 @@ func (t TypeInfo) ValueScanner() bool {
 	return t.RType.Implements(valueScannerType)
 }
 
+// Validator indicates if this type implements the Validator interface.
+func (t TypeInfo) Validator() bool {
+	return t.RType.Implements(validatorType)
+}
+
 // Valuer indicates if this type implements the driver.Valuer interface.
 func (t TypeInfo) Valuer() bool {
 	return t.RType.Implements(valuerType)

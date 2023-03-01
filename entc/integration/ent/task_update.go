@@ -138,16 +138,6 @@ func (tu *TaskUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (tu *TaskUpdate) check() error {
-	if v, ok := tu.mutation.Priority(); ok {
-		if err := enttask.PriorityValidator(int(v)); err != nil {
-			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
-		}
-	}
-	return nil
-}
-
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (tu *TaskUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *TaskUpdate {
 	tu.modifiers = append(tu.modifiers, modifiers...)
@@ -155,9 +145,6 @@ func (tu *TaskUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *TaskUpdat
 }
 
 func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := tu.check(); err != nil {
-		return n, err
-	}
 	_spec := sqlgraph.NewUpdateSpec(enttask.Table, enttask.Columns, sqlgraph.NewFieldSpec(enttask.FieldID, field.TypeInt))
 	if ps := tu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -330,16 +317,6 @@ func (tuo *TaskUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (tuo *TaskUpdateOne) check() error {
-	if v, ok := tuo.mutation.Priority(); ok {
-		if err := enttask.PriorityValidator(int(v)); err != nil {
-			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
-		}
-	}
-	return nil
-}
-
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (tuo *TaskUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *TaskUpdateOne {
 	tuo.modifiers = append(tuo.modifiers, modifiers...)
@@ -347,9 +324,6 @@ func (tuo *TaskUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *TaskU
 }
 
 func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) {
-	if err := tuo.check(); err != nil {
-		return _node, err
-	}
 	_spec := sqlgraph.NewUpdateSpec(enttask.Table, enttask.Columns, sqlgraph.NewFieldSpec(enttask.FieldID, field.TypeInt))
 	id, ok := tuo.mutation.ID()
 	if !ok {

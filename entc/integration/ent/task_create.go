@@ -140,7 +140,7 @@ func (tc *TaskCreate) check() error {
 		return &ValidationError{Name: "priority", err: errors.New(`ent: missing required field "Task.priority"`)}
 	}
 	if v, ok := tc.mutation.Priority(); ok {
-		if err := enttask.PriorityValidator(int(v)); err != nil {
+		if err := v.Validate(); err != nil {
 			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
 	}

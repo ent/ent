@@ -24,10 +24,7 @@ func (Task) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("priority").
 			GoType(task.Priority(0)).
-			Default(int(task.PriorityMid)).
-			Validate(func(i int) error {
-				return task.Priority(i).Validate()
-			}),
+			Default(int(task.PriorityMid)),
 		field.JSON("priorities", map[string]task.Priority{}).
 			Optional(),
 		field.Time("created_at").

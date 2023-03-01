@@ -116,10 +116,10 @@ func ({{ $receiver }} *{{ $builder }}) check() error {
 				{{- end }}
 			{{- end }}
 		{{- end }}
-		{{- with or $f.Validators $f.IsEnum }}
+		{{- $isValidator := and ($f.HasGoType) ($f.Type.Validator) }}
+		{{- with or $f.Validators $f.IsEnum $isValidator }}
 			if v, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
-				{{- $basic := $f.BasicType "v" }}
-				if err := {{ $.Package }}.{{ $f.Validator }}({{ $basic }}); err != nil {
+				if err := {{ if or $f.Validators $f.IsEnum }}{{ $.Package }}.{{ $f.Validator }}({{ $f.BasicType "v" }}){{ else }}v.Validate(){{ end }}; err != nil {
 					return &ValidationError{Name: "{{ $f.Name }}", err: fmt.Errorf(`{{ $pkg }}: validator failed for field "{{ $.Name }}.{{ $f.Name }}": %w`, err)}
 				}
 			}
