@@ -41,6 +41,14 @@ func WithGlobalUniqueID(b bool) MigrateOption {
 	}
 }
 
+// WithIndent sets Atlas to generate SQL statements with indentation.
+// An empty string indicates no indentation.
+func WithIndent(indent string) MigrateOption {
+	return func(a *Atlas) {
+		a.indent = indent
+	}
+}
+
 // WithErrNoPlan sets Atlas to returns a migrate.ErrNoPlan in case
 // the migration plan is empty. Defaults to false.
 func WithErrNoPlan(b bool) MigrateOption {

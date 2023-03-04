@@ -292,13 +292,16 @@ func TestMigrate_Diff(t *testing.T) {
 	}, "\n")
 	requireFileEqual(t, filepath.Join(p, "changes.sql"), changesSQL)
 
+	// Enable indentations.
+	m, err = NewMigrate(db, WithFormatter(f), WithDir(d), WithGlobalUniqueID(true), WithIndent("  "))
+	require.NoError(t, err)
 	// Adding another node will result in a new entry to the TypeTable (without actually creating it).
 	_, err = db.ExecContext(ctx, changesSQL, nil, nil)
 	require.NoError(t, err)
 	require.NoError(t, m.NamedDiff(ctx, "changes_2", petsTable))
 	requireFileEqual(t,
 		filepath.Join(p, "changes_2.sql"), strings.Join([]string{
-			"CREATE TABLE `pets` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT);",
+			"CREATE TABLE `pets` (\n  `id` integer NOT NULL PRIMARY KEY AUTOINCREMENT\n);",
 			fmt.Sprintf("INSERT INTO sqlite_sequence (name, seq) VALUES (\"pets\", %d);", 2<<32),
 			"INSERT INTO `ent_types` (`type`) VALUES ('pets');", "",
 		}, "\n"))

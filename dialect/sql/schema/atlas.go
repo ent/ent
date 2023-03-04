@@ -33,11 +33,12 @@ type Atlas struct {
 	withFixture bool // deprecated: with fks rename fixture
 	sum         bool // deprecated: sum file generation will be required
 
-	errNoPlan       bool // no plan error enabled
-	universalID     bool // global unique ids
-	dropColumns     bool // drop deleted columns
-	dropIndexes     bool // drop deleted indexes
-	withForeignKeys bool // with foreign keys
+	indent          string // plan indentation
+	errNoPlan       bool   // no plan error enabled
+	universalID     bool   // global unique ids
+	dropColumns     bool   // drop deleted columns
+	dropIndexes     bool   // drop deleted indexes
+	withForeignKeys bool   // with foreign keys
 	mode            Mode
 	hooks           []Hook            // hooks to apply before creation
 	diffHooks       []DiffHook        // diff hooks to run when diffing current and desired
@@ -803,6 +804,11 @@ func (a *Atlas) diff(ctx context.Context, name string, current, desired *schema.
 		if _, ok := c.(*schema.DropTable); !ok {
 			filtered = append(filtered, c)
 		}
+	}
+	if a.indent != "" {
+		opts = append(opts, func(opts *migrate.PlanOptions) {
+			opts.Indent = a.indent
+		})
 	}
 	plan, err := a.atDriver.PlanChanges(ctx, name, filtered, opts...)
 	if err != nil {
