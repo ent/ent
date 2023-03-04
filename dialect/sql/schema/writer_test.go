@@ -13,12 +13,12 @@ import (
 	"testing"
 	"time"
 
-	"ariga.io/atlas/sql/migrate"
-
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqljson"
 
+	"ariga.io/atlas/sql/migrate"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -55,10 +55,10 @@ func TestWriteDriver(t *testing.T) {
 
 	b.Reset()
 	w = NewWriteDriver(dialect.Postgres, b)
-	query, args = sql.Dialect(dialect.Postgres).Update("users").Set("a", 1).Set("b", time.Now()).Query()
+	query, args = sql.Dialect(dialect.Postgres).Update("users").Set("id", uuid.Nil).Set("a", 1).Set("b", time.Now()).Query()
 	err = w.Exec(ctx, query, args, nil)
 	require.NoError(t, err)
-	require.Equal(t, `UPDATE "users" SET "a" = 1, "b" = {{ TIME_VALUE }};`+"\n", b.String())
+	require.Equal(t, `UPDATE "users" SET "id" = '00000000-0000-0000-0000-000000000000', "a" = 1, "b" = {{ TIME_VALUE }};`+"\n", b.String())
 
 	b.Reset()
 	err = w.Exec(ctx, `INSERT INTO "users" (name) VALUES("a8m") RETURNING id`, nil, nil)
