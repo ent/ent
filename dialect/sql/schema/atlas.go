@@ -872,6 +872,9 @@ func (a *Atlas) tables(tables []*Table) ([]*schema.Table, error) {
 	ts := make([]*schema.Table, len(tables))
 	for i, et := range tables {
 		at := schema.NewTable(et.Name)
+		if et.Comment != "" {
+			at.SetComment(et.Comment)
+		}
 		a.sqlDialect.atTable(et, at)
 		if a.universalID && et.Name != TypeTable && len(et.PrimaryKey) == 1 {
 			r, err := a.pkRange(et)

@@ -47,6 +47,7 @@ func (Media) Indexes() []ent.Index {
 // Annotations of the Media.
 func (Media) Annotations() []schema.Annotation {
 	return []schema.Annotation{
+		schema.Comment("Comment that appears in both the schema and the generated code"),
 		entsql.WithComments(true),
 		entsql.Check("text <> 'boring'"),
 		entsql.Checks(map[string]string{

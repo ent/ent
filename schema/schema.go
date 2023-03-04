@@ -30,7 +30,7 @@ type CommentAnnotation struct {
 }
 
 // Name implements the Annotation interface.
-func (c *CommentAnnotation) Name() string {
+func (*CommentAnnotation) Name() string {
 	return "Comment"
 }
 
