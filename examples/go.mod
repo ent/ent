@@ -5,7 +5,7 @@ go 1.19
 replace entgo.io/ent => ../
 
 require (
-	ariga.io/atlas v0.9.1
+	ariga.io/atlas v0.9.2-0.20230303073438-03a4779a6338
 	entgo.io/ent v0.0.0-00010101000000-000000000000
 	github.com/google/uuid v1.3.0
 	github.com/mattn/go-sqlite3 v1.14.16
