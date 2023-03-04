@@ -222,6 +222,8 @@ func (w *WriteDriver) formatArg(v any) (string, error) {
 		return "{{ BINARY_VALUE }}", nil
 	case time.Time:
 		return "{{ TIME_VALUE }}", nil
+	case fmt.Stringer:
+		return "'" + strings.ReplaceAll(v.String(), "'", "''") + "'", nil
 	default:
 		return "{{ VALUE }}", nil
 	}
