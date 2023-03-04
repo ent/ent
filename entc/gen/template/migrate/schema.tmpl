@@ -57,6 +57,9 @@ var (
 		// {{ $table }} holds the schema information for the "{{ $t.Name }}" table.
 		{{ $table }} = &schema.Table{
 			Name: "{{ $t.Name }}",
+			{{- with $t.Comment }}
+				Comment: "{{ . }}",
+			{{- end }}
 			Columns: {{ $columns }},
 			PrimaryKey: []*schema.Column{
 				{{- range $pk := $t.PrimaryKey }}

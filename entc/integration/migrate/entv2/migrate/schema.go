@@ -96,6 +96,7 @@ var (
 	// MediaTable holds the schema information for the "media" table.
 	MediaTable = &schema.Table{
 		Name:       "media",
+		Comment:    "Comment that appears in both the schema and the generated code",
 		Columns:    MediaColumns,
 		PrimaryKey: []*schema.Column{MediaColumns[0]},
 		Indexes: []*schema.Index{

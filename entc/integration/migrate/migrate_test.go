@@ -74,6 +74,7 @@ func TestMySQL(t *testing.T) {
 			NicknameSearch(t, clientv2)
 			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_schema = 'migrate' AND table_name = ? AND column_name = ?")
 			ColumnComments(t, drv, "SELECT column_name as name, column_comment as comment FROM information_schema.columns WHERE table_schema = 'migrate' AND table_name = 'media' ORDER BY ordinal_position")
+			TableComment(t, drv, "SELECT table_comment FROM information_schema.tables WHERE table_schema = 'migrate' AND table_name = 'media'")
 
 			require.NoError(t, err, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []any{}, new(sql.Result)))
 			require.NoError(t, root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS versioned_migrate", []any{}, new(sql.Result)))
@@ -142,6 +143,7 @@ func TestPostgres(t *testing.T) {
 			PKDefault(t, drv, `SELECT column_default FROM information_schema.columns WHERE table_name = 'zoos' AND column_name = $1`, "floor((random() * ((~ (1 << 31)))::double precision))")
 			IndexOpClass(t, drv)
 			ColumnComments(t, drv, `SELECT column_name as name, col_description(table_name::regclass::oid, ordinal_position) as comment FROM information_schema.columns WHERE table_name = 'media' ORDER BY ordinal_position`)
+			TableComment(t, drv, "SELECT obj_description('media'::regclass::oid)")
 			if version != "10" {
 				IncludeColumns(t, drv)
 			}
@@ -710,6 +712,16 @@ func JSONDefault(t *testing.T, drv *sql.Driver, query string) {
 	require.NoError(t, err)
 	require.NoError(t, rows.Close())
 	require.NotEmpty(t, s)
+}
+
+func TableComment(t *testing.T, drv *sql.Driver, query string) {
+	ctx := context.Background()
+	rows, err := drv.QueryContext(ctx, query)
+	require.NoError(t, err)
+	comment, err := sql.ScanString(rows)
+	require.NoError(t, err)
+	require.NoError(t, rows.Close())
+	require.Equal(t, "Comment that appears in both the schema and the generated code", comment)
 }
 
 func ColumnComments(t *testing.T, drv *sql.Driver, query string) {

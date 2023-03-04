@@ -88,15 +88,16 @@ rows in the child table.
 
 ## Database Comments
 
-By default, column comments are not stored in the database. However, this functionality can be enabled by using the
-`WithComments(true)` annotation. For example:
+By default, table and column comments are not stored in the database. However, this functionality can be enabled by
+using the `WithComments(true)` annotation. For example:
 
-```go title="ent/schema/user.go" {17-19,32-35}
+```go title="ent/schema/user.go" {18-21,34-37}
 package schema
 
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
 )
 
@@ -108,9 +109,10 @@ type User struct {
 // Annotations of the User.
 func (User) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-	    // Adding this annotation on the
-	    // type enables it for all fields.
+		// Adding this annotation to the schema enables
+		// comments for the table and all its fields.
 		entsql.WithComments(true),
+		schema.Comment("Comment that appears in both the schema and the generated code"),
 	}
 }
 

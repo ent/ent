@@ -14,7 +14,7 @@ import (
 	"entgo.io/ent/entc/integration/migrate/entv2/media"
 )
 
-// Media is the model entity for the Media schema.
+// Comment that appears in both the schema and the generated code
 type Media struct {
 	config `json:"-"`
 	// ID of the ent.

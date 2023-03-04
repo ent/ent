@@ -612,7 +612,8 @@ func (g *Graph) edgeSchemas() error {
 func (g *Graph) Tables() (all []*schema.Table, err error) {
 	tables := make(map[string]*schema.Table)
 	for _, n := range g.Nodes {
-		table := schema.NewTable(n.Table())
+		table := schema.NewTable(n.Table()).
+			SetComment(n.sqlComment())
 		if n.HasOneFieldID() {
 			table.AddPrimary(n.ID.PK())
 		}

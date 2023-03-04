@@ -23,6 +23,7 @@ import (
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/entc/load"
+	entschema "entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
@@ -1016,6 +1017,21 @@ func aliases(g *Graph) {
 			}
 		}
 	}
+}
+
+// sqlComment returns the SQL database comment for the node (table), if defined and enabled.
+func (t Type) sqlComment() string {
+	if ant := t.EntSQL(); ant == nil || ant.WithComments == nil || !*ant.WithComments {
+		return ""
+	}
+	ant := &entschema.CommentAnnotation{}
+	if t.Annotations == nil || t.Annotations[ant.Name()] == nil {
+		return ""
+	}
+	if b, err := json.Marshal(t.Annotations[ant.Name()]); err == nil {
+		_ = json.Unmarshal(b, &ant)
+	}
+	return ant.Text
 }
 
 // Constant returns the constant name of the field.
