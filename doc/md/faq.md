@@ -723,7 +723,6 @@ func main() {
 	// Use the client here.
 }
 
-
 type multiDriver struct {
 	r, w dialect.Driver
 }
@@ -731,7 +730,12 @@ type multiDriver struct {
 var _ dialect.Driver = (*multiDriver)(nil)
 
 func (d *multiDriver) Query(ctx context.Context, query string, args, v any) error {
-	return d.r.Query(ctx, query, args, v)
+	e := d.r
+	// Mutation statements that use the RETURNING clause.
+	if ent.QueryFromContext(ctx) == nil {
+		e = d.w
+	}
+	return e.Query(ctx, query, args, v)
 }
 
 func (d *multiDriver) Exec(ctx context.Context, query string, args, v any) error {
