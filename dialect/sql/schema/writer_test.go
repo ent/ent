@@ -70,6 +70,24 @@ func TestWriteDriver(t *testing.T) {
 	err = w.Query(ctx, `INSERT INTO "users" (name) VALUES("a8m") RETURNING id`, nil, nil)
 	require.NoError(t, err)
 	require.Equal(t, `INSERT INTO "users" (name) VALUES("a8m") RETURNING id;`+"\n", b.String())
+
+	// correct columns are extracted from a returning clause and returned by sql.ColumnScanner.
+	for q, cols := range map[string][]string{
+		`INSERT INTO "users" (name) VALUES("a8m") RETURNING id`:                          {"id"},
+		`INSERT INTO "users" (name) VALUES("a8m") RETURNING id, "name"`:                  {"id", `"name"`},
+		`INSERT INTO "users" (name) VALUES("a8m") RETURNING "id", "name"`:                {`"id"`, `"name"`},
+		`INSERT INTO "users" (name) VALUES("a8m") RETURNING "id", "name"; DROP "groups"`: {`"id"`, `"name"`},
+	} {
+		var rows sql.Rows
+		err = w.Query(ctx, q, nil, &rows)
+		require.NoError(t, err)
+		require.True(t, rows.Next())
+		c, err := rows.Columns()
+		require.NoError(t, err)
+		require.Equal(t, cols, c)
+		require.NoError(t, rows.Scan())
+	}
+	b.Reset()
 }
 
 func TestDirWriter(t *testing.T) {
@@ -133,6 +151,13 @@ func TestDirWriter(t *testing.T) {
 				"-- Seed users table\nINSERT INTO `users` (`name`, `email`) VALUES ('masseelch', 'j@ariga.io');\n",
 				"-- Seed groups table\nINSERT INTO `groups` (`name`) VALUES ('admins');\n",
 			}, ""),
+		},
+		{
+			dialect.SQLite + " no space",
+			[]string{"INSERT INTO `users` (`name`) VALUES (?)RETURNING `id`"},
+			[]string{"Seed users table"},
+			[][]any{{"masseelch"}},
+			"-- Seed users table\nINSERT INTO `users` (`name`) VALUES ('masseelch');\n",
 		},
 	} {
 		t.Run(tt.dialect, func(t *testing.T) {
