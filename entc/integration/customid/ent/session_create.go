@@ -153,10 +153,7 @@ func (sc *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 			Columns: []string{session.DeviceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeBytes,
-					Column: device.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(device.FieldID, field.TypeBytes),
 			},
 		}
 		for _, k := range nodes {

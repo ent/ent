@@ -154,10 +154,7 @@ func (afu *AttachedFileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{attachedfile.FiColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: file.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -170,10 +167,7 @@ func (afu *AttachedFileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{attachedfile.FiColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: file.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -189,10 +183,7 @@ func (afu *AttachedFileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{attachedfile.ProcColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: process.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(process.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -205,10 +196,7 @@ func (afu *AttachedFileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{attachedfile.ProcColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: process.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(process.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -386,10 +374,7 @@ func (afuo *AttachedFileUpdateOne) sqlSave(ctx context.Context) (_node *Attached
 			Columns: []string{attachedfile.FiColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: file.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -402,10 +387,7 @@ func (afuo *AttachedFileUpdateOne) sqlSave(ctx context.Context) (_node *Attached
 			Columns: []string{attachedfile.FiColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: file.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -421,10 +403,7 @@ func (afuo *AttachedFileUpdateOne) sqlSave(ctx context.Context) (_node *Attached
 			Columns: []string{attachedfile.ProcColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: process.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(process.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -437,10 +416,7 @@ func (afuo *AttachedFileUpdateOne) sqlSave(ctx context.Context) (_node *Attached
 			Columns: []string{attachedfile.ProcColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: process.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(process.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -126,10 +126,7 @@ func (pc *ProcessCreate) createSpec() (*Process, *sqlgraph.CreateSpec) {
 			Columns: process.FilesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: file.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -149,10 +146,7 @@ func (pc *ProcessCreate) createSpec() (*Process, *sqlgraph.CreateSpec) {
 			Columns: []string{process.AttachedFilesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: attachedfile.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(attachedfile.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
