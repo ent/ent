@@ -204,10 +204,7 @@ func (du *DocUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{doc.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -220,10 +217,7 @@ func (du *DocUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{doc.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -239,10 +233,7 @@ func (du *DocUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{doc.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -255,10 +246,7 @@ func (du *DocUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{doc.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -274,10 +262,7 @@ func (du *DocUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{doc.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -293,10 +278,7 @@ func (du *DocUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: doc.RelatedPrimaryKey,
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -309,10 +291,7 @@ func (du *DocUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: doc.RelatedPrimaryKey,
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -328,10 +307,7 @@ func (du *DocUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: doc.RelatedPrimaryKey,
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -561,10 +537,7 @@ func (duo *DocUpdateOne) sqlSave(ctx context.Context) (_node *Doc, err error) {
 			Columns: []string{doc.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -577,10 +550,7 @@ func (duo *DocUpdateOne) sqlSave(ctx context.Context) (_node *Doc, err error) {
 			Columns: []string{doc.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -596,10 +566,7 @@ func (duo *DocUpdateOne) sqlSave(ctx context.Context) (_node *Doc, err error) {
 			Columns: []string{doc.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -612,10 +579,7 @@ func (duo *DocUpdateOne) sqlSave(ctx context.Context) (_node *Doc, err error) {
 			Columns: []string{doc.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -631,10 +595,7 @@ func (duo *DocUpdateOne) sqlSave(ctx context.Context) (_node *Doc, err error) {
 			Columns: []string{doc.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -650,10 +611,7 @@ func (duo *DocUpdateOne) sqlSave(ctx context.Context) (_node *Doc, err error) {
 			Columns: doc.RelatedPrimaryKey,
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -666,10 +624,7 @@ func (duo *DocUpdateOne) sqlSave(ctx context.Context) (_node *Doc, err error) {
 			Columns: doc.RelatedPrimaryKey,
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -685,10 +640,7 @@ func (duo *DocUpdateOne) sqlSave(ctx context.Context) (_node *Doc, err error) {
 			Columns: doc.RelatedPrimaryKey,
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

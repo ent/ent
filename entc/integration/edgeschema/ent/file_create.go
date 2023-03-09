@@ -123,10 +123,7 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 			Columns: file.ProcessesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: process.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(process.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

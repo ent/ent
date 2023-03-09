@@ -145,10 +145,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{user.PetsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: pet.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -161,10 +158,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{user.PetsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: pet.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -180,10 +174,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{user.PetsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: pet.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -354,10 +345,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Columns: []string{user.PetsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: pet.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -370,10 +358,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Columns: []string{user.PetsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: pet.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -389,10 +374,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Columns: []string{user.PetsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: pet.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

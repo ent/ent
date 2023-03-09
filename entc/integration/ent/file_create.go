@@ -270,10 +270,7 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 			Columns: []string{file.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -290,10 +287,7 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 			Columns: []string{file.TypeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: filetype.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(filetype.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -310,10 +304,7 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 			Columns: []string{file.FieldColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: fieldtype.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(fieldtype.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

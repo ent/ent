@@ -188,10 +188,7 @@ func (ru *RelationshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{relationship.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -204,10 +201,7 @@ func (ru *RelationshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{relationship.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -223,10 +217,7 @@ func (ru *RelationshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{relationship.RelativeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -239,10 +230,7 @@ func (ru *RelationshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{relationship.RelativeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -258,10 +246,7 @@ func (ru *RelationshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{relationship.InfoColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: relationshipinfo.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(relationshipinfo.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -274,10 +259,7 @@ func (ru *RelationshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{relationship.InfoColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: relationshipinfo.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(relationshipinfo.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -492,10 +474,7 @@ func (ruo *RelationshipUpdateOne) sqlSave(ctx context.Context) (_node *Relations
 			Columns: []string{relationship.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -508,10 +487,7 @@ func (ruo *RelationshipUpdateOne) sqlSave(ctx context.Context) (_node *Relations
 			Columns: []string{relationship.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -527,10 +503,7 @@ func (ruo *RelationshipUpdateOne) sqlSave(ctx context.Context) (_node *Relations
 			Columns: []string{relationship.RelativeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -543,10 +516,7 @@ func (ruo *RelationshipUpdateOne) sqlSave(ctx context.Context) (_node *Relations
 			Columns: []string{relationship.RelativeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -562,10 +532,7 @@ func (ruo *RelationshipUpdateOne) sqlSave(ctx context.Context) (_node *Relations
 			Columns: []string{relationship.InfoColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: relationshipinfo.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(relationshipinfo.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -578,10 +545,7 @@ func (ruo *RelationshipUpdateOne) sqlSave(ctx context.Context) (_node *Relations
 			Columns: []string{relationship.InfoColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: relationshipinfo.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(relationshipinfo.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

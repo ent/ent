@@ -185,10 +185,7 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{filetype.FilesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: file.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -201,10 +198,7 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{filetype.FilesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: file.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -220,10 +214,7 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{filetype.FilesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: file.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -435,10 +426,7 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (_node *FileType, er
 			Columns: []string{filetype.FilesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: file.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -451,10 +439,7 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (_node *FileType, er
 			Columns: []string{filetype.FilesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: file.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -470,10 +455,7 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (_node *FileType, er
 			Columns: []string{filetype.FilesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: file.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

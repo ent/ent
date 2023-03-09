@@ -161,10 +161,7 @@ func (utc *UserTweetCreate) createSpec() (*UserTweet, *sqlgraph.CreateSpec) {
 			Columns: []string{usertweet.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -181,10 +178,7 @@ func (utc *UserTweetCreate) createSpec() (*UserTweet, *sqlgraph.CreateSpec) {
 			Columns: []string{usertweet.TweetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tweet.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

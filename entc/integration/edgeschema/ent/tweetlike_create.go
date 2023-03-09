@@ -163,10 +163,7 @@ func (tlc *TweetLikeCreate) createSpec() (*TweetLike, *sqlgraph.CreateSpec) {
 			Columns: []string{tweetlike.TweetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tweet.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -183,10 +180,7 @@ func (tlc *TweetLikeCreate) createSpec() (*TweetLike, *sqlgraph.CreateSpec) {
 			Columns: []string{tweetlike.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

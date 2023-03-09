@@ -118,10 +118,7 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{comment.PostColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: post.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(post.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -134,10 +131,7 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{comment.PostColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: post.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(post.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -281,10 +275,7 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 			Columns: []string{comment.PostColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: post.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(post.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -297,10 +288,7 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 			Columns: []string{comment.PostColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: post.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(post.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

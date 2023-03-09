@@ -274,10 +274,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: tweet.LikedUsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		createE := &TweetLikeCreate{config: tu.config, mutation: newTweetLikeMutation(tu.config, OpCreate)}
@@ -294,10 +291,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: tweet.LikedUsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -317,10 +311,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: tweet.LikedUsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -340,10 +331,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: tweet.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		createE := &UserTweetCreate{config: tu.config, mutation: newUserTweetMutation(tu.config, OpCreate)}
@@ -360,10 +348,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: tweet.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -383,10 +368,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: tweet.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -406,10 +388,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: tweet.TagsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tag.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
 			},
 		}
 		createE := &TweetTagCreate{config: tu.config, mutation: newTweetTagMutation(tu.config, OpCreate)}
@@ -429,10 +408,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: tweet.TagsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tag.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -455,10 +431,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: tweet.TagsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tag.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -481,10 +454,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{tweet.TweetUserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: usertweet.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(usertweet.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -497,10 +467,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{tweet.TweetUserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: usertweet.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(usertweet.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -516,10 +483,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{tweet.TweetUserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: usertweet.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(usertweet.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -535,10 +499,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{tweet.TweetTagsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: tweettag.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tweettag.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -551,10 +512,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{tweet.TweetTagsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: tweettag.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tweettag.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -570,10 +528,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{tweet.TweetTagsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: tweettag.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tweettag.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -869,10 +824,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 			Columns: tweet.LikedUsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		createE := &TweetLikeCreate{config: tuo.config, mutation: newTweetLikeMutation(tuo.config, OpCreate)}
@@ -889,10 +841,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 			Columns: tweet.LikedUsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -912,10 +861,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 			Columns: tweet.LikedUsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -935,10 +881,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 			Columns: tweet.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		createE := &UserTweetCreate{config: tuo.config, mutation: newUserTweetMutation(tuo.config, OpCreate)}
@@ -955,10 +898,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 			Columns: tweet.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -978,10 +918,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 			Columns: tweet.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1001,10 +938,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 			Columns: tweet.TagsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tag.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
 			},
 		}
 		createE := &TweetTagCreate{config: tuo.config, mutation: newTweetTagMutation(tuo.config, OpCreate)}
@@ -1024,10 +958,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 			Columns: tweet.TagsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tag.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1050,10 +981,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 			Columns: tweet.TagsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tag.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1076,10 +1004,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 			Columns: []string{tweet.TweetUserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: usertweet.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(usertweet.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1092,10 +1017,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 			Columns: []string{tweet.TweetUserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: usertweet.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(usertweet.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1111,10 +1033,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 			Columns: []string{tweet.TweetUserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: usertweet.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(usertweet.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1130,10 +1049,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 			Columns: []string{tweet.TweetTagsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: tweettag.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tweettag.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1146,10 +1062,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 			Columns: []string{tweet.TweetTagsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: tweettag.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tweettag.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1165,10 +1078,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 			Columns: []string{tweet.TweetTagsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: tweettag.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tweettag.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

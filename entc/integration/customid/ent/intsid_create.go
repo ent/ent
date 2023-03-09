@@ -144,10 +144,7 @@ func (isc *IntSIDCreate) createSpec() (*IntSID, *sqlgraph.CreateSpec) {
 			Columns: []string{intsid.ParentColumn},
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: intsid.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -164,10 +161,7 @@ func (isc *IntSIDCreate) createSpec() (*IntSID, *sqlgraph.CreateSpec) {
 			Columns: []string{intsid.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: intsid.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

@@ -160,10 +160,7 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{groupinfo.GroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: group.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -176,10 +173,7 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{groupinfo.GroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: group.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -195,10 +189,7 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{groupinfo.GroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: group.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -385,10 +376,7 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (_node *GroupInfo, 
 			Columns: []string{groupinfo.GroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: group.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -401,10 +389,7 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (_node *GroupInfo, 
 			Columns: []string{groupinfo.GroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: group.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -420,10 +405,7 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (_node *GroupInfo, 
 			Columns: []string{groupinfo.GroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: group.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

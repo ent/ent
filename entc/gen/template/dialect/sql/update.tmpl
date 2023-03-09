@@ -178,10 +178,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 		Columns: {{ if $e.M2M }}{{ $.Package }}.{{ $e.PKConstant }}{{ else }}[]string{ {{ $.Package }}.{{ $e.ColumnConstant }} }{{ end }},
 		Bidi: {{ $e.Bidi }},
 		Target: &sqlgraph.EdgeTarget{
-			IDSpec: &sqlgraph.FieldSpec{
-				Type: field.{{ $e.Type.ID.Type.ConstName }},
-				Column: {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }},
-			},
+			IDSpec: sqlgraph.NewFieldSpec({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}, field.{{ $e.Type.ID.Type.ConstName }}),
 		},
 	}
 	{{- /* Allow mutating the sqlgraph.EdgeSpec by ent extensions or user templates.*/}}

@@ -140,10 +140,7 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{account.TokenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeOther,
-					Column: token.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(token.FieldID, field.TypeOther),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -156,10 +153,7 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{account.TokenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeOther,
-					Column: token.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(token.FieldID, field.TypeOther),
 			},
 		}
 		for _, k := range nodes {
@@ -175,10 +169,7 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{account.TokenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeOther,
-					Column: token.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(token.FieldID, field.TypeOther),
 			},
 		}
 		for _, k := range nodes {
@@ -343,10 +334,7 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 			Columns: []string{account.TokenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeOther,
-					Column: token.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(token.FieldID, field.TypeOther),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -359,10 +347,7 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 			Columns: []string{account.TokenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeOther,
-					Column: token.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(token.FieldID, field.TypeOther),
 			},
 		}
 		for _, k := range nodes {
@@ -378,10 +363,7 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 			Columns: []string{account.TokenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeOther,
-					Column: token.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(token.FieldID, field.TypeOther),
 			},
 		}
 		for _, k := range nodes {

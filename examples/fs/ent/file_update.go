@@ -173,10 +173,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{file.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: file.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -189,10 +186,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{file.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: file.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -208,10 +202,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{file.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: file.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -224,10 +215,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{file.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: file.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -243,10 +231,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{file.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: file.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -446,10 +431,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 			Columns: []string{file.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: file.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -462,10 +444,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 			Columns: []string{file.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: file.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -481,10 +460,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 			Columns: []string{file.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: file.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -497,10 +473,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 			Columns: []string{file.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: file.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -516,10 +489,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 			Columns: []string{file.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: file.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

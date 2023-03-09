@@ -188,10 +188,7 @@ func (ftc *FileTypeCreate) createSpec() (*FileType, *sqlgraph.CreateSpec) {
 			Columns: []string{filetype.FilesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: file.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

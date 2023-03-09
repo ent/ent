@@ -155,10 +155,7 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{node.PrevColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: node.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -171,10 +168,7 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{node.PrevColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: node.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -190,10 +184,7 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{node.NextColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: node.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -206,10 +197,7 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{node.NextColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: node.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -391,10 +379,7 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (_node *Node, err error) 
 			Columns: []string{node.PrevColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: node.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -407,10 +392,7 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (_node *Node, err error) 
 			Columns: []string{node.PrevColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: node.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -426,10 +408,7 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (_node *Node, err error) 
 			Columns: []string{node.NextColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: node.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -442,10 +421,7 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (_node *Node, err error) 
 			Columns: []string{node.NextColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: node.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

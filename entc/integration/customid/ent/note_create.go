@@ -185,10 +185,7 @@ func (nc *NoteCreate) createSpec() (*Note, *sqlgraph.CreateSpec) {
 			Columns: []string{note.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: note.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(note.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -205,10 +202,7 @@ func (nc *NoteCreate) createSpec() (*Note, *sqlgraph.CreateSpec) {
 			Columns: []string{note.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: note.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(note.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

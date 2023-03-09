@@ -120,10 +120,7 @@ func (cc *CityCreate) createSpec() (*City, *sqlgraph.CreateSpec) {
 			Columns: []string{city.StreetsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: street.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(street.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

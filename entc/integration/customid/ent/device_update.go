@@ -143,10 +143,7 @@ func (du *DeviceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{device.ActiveSessionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeBytes,
-					Column: session.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeBytes),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -159,10 +156,7 @@ func (du *DeviceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{device.ActiveSessionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeBytes,
-					Column: session.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeBytes),
 			},
 		}
 		for _, k := range nodes {
@@ -178,10 +172,7 @@ func (du *DeviceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{device.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeBytes,
-					Column: session.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeBytes),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -194,10 +185,7 @@ func (du *DeviceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{device.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeBytes,
-					Column: session.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeBytes),
 			},
 		}
 		for _, k := range nodes {
@@ -213,10 +201,7 @@ func (du *DeviceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{device.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeBytes,
-					Column: session.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeBytes),
 			},
 		}
 		for _, k := range nodes {
@@ -384,10 +369,7 @@ func (duo *DeviceUpdateOne) sqlSave(ctx context.Context) (_node *Device, err err
 			Columns: []string{device.ActiveSessionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeBytes,
-					Column: session.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeBytes),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -400,10 +382,7 @@ func (duo *DeviceUpdateOne) sqlSave(ctx context.Context) (_node *Device, err err
 			Columns: []string{device.ActiveSessionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeBytes,
-					Column: session.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeBytes),
 			},
 		}
 		for _, k := range nodes {
@@ -419,10 +398,7 @@ func (duo *DeviceUpdateOne) sqlSave(ctx context.Context) (_node *Device, err err
 			Columns: []string{device.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeBytes,
-					Column: session.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeBytes),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -435,10 +411,7 @@ func (duo *DeviceUpdateOne) sqlSave(ctx context.Context) (_node *Device, err err
 			Columns: []string{device.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeBytes,
-					Column: session.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeBytes),
 			},
 		}
 		for _, k := range nodes {
@@ -454,10 +427,7 @@ func (duo *DeviceUpdateOne) sqlSave(ctx context.Context) (_node *Device, err err
 			Columns: []string{device.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeBytes,
-					Column: session.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeBytes),
 			},
 		}
 		for _, k := range nodes {

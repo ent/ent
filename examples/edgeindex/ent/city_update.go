@@ -126,10 +126,7 @@ func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{city.StreetsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: street.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(street.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -142,10 +139,7 @@ func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{city.StreetsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: street.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(street.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -161,10 +155,7 @@ func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{city.StreetsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: street.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(street.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -316,10 +307,7 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (_node *City, err error) 
 			Columns: []string{city.StreetsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: street.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(street.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -332,10 +320,7 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (_node *City, err error) 
 			Columns: []string{city.StreetsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: street.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(street.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -351,10 +336,7 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (_node *City, err error) 
 			Columns: []string{city.StreetsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: street.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(street.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -200,10 +200,7 @@ func (dc *DocCreate) createSpec() (*Doc, *sqlgraph.CreateSpec) {
 			Columns: []string{doc.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -220,10 +217,7 @@ func (dc *DocCreate) createSpec() (*Doc, *sqlgraph.CreateSpec) {
 			Columns: []string{doc.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -239,10 +233,7 @@ func (dc *DocCreate) createSpec() (*Doc, *sqlgraph.CreateSpec) {
 			Columns: doc.RelatedPrimaryKey,
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

@@ -130,10 +130,7 @@ func (gtc *GroupTagCreate) createSpec() (*GroupTag, *sqlgraph.CreateSpec) {
 			Columns: []string{grouptag.TagColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tag.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -150,10 +147,7 @@ func (gtc *GroupTagCreate) createSpec() (*GroupTag, *sqlgraph.CreateSpec) {
 			Columns: []string{grouptag.GroupColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: group.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

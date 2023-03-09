@@ -157,10 +157,7 @@ func (ruc *RoleUserCreate) createSpec() (*RoleUser, *sqlgraph.CreateSpec) {
 			Columns: []string{roleuser.RoleColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: role.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -177,10 +174,7 @@ func (ruc *RoleUserCreate) createSpec() (*RoleUser, *sqlgraph.CreateSpec) {
 			Columns: []string{roleuser.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

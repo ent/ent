@@ -212,10 +212,7 @@ func (bc *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 			Columns: []string{blob.ParentColumn},
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: blob.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -232,10 +229,7 @@ func (bc *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 			Columns: blob.LinksPrimaryKey,
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: blob.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
