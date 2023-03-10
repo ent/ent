@@ -89,6 +89,12 @@ func (uc *UserCreate) SetNillableAddr(s *schema.Addr) *UserCreate {
 	return uc
 }
 
+// SetUnknown sets the "unknown" field.
+func (uc *UserCreate) SetUnknown(a any) *UserCreate {
+	uc.mutation.SetUnknown(a)
+	return uc
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uc *UserCreate) Mutation() *UserMutation {
 	return uc.mutation
@@ -200,6 +206,10 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.Addr(); ok {
 		_spec.SetField(user.FieldAddr, field.TypeJSON, value)
 		_node.Addr = value
+	}
+	if value, ok := uc.mutation.Unknown(); ok {
+		_spec.SetField(user.FieldUnknown, field.TypeJSON, value)
+		_node.Unknown = value
 	}
 	return _node, _spec
 }

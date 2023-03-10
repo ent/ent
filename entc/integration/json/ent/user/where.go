@@ -136,6 +136,16 @@ func AddrNotNil() predicate.User {
 	return predicate.User(sql.FieldNotNull(FieldAddr))
 }
 
+// UnknownIsNil applies the IsNil predicate on the "unknown" field.
+func UnknownIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldUnknown))
+}
+
+// UnknownNotNil applies the NotNil predicate on the "unknown" field.
+func UnknownNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldUnknown))
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
