@@ -108,6 +108,26 @@ func Floats(name string) *jsonBuilder {
 	return JSON(name, []float64{})
 }
 
+// Any returns a new JSON Field with type any. Although this field type can be
+// useful for fields with dynamic data layout, it is strongly recommended to use
+// JSON with json.RawMessage instead and implement custom marshaling.
+func Any(name string) *jsonBuilder {
+	const t = "any"
+	return &jsonBuilder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{
+			Type:     TypeJSON,
+			Ident:    t,
+			Nillable: true,
+			RType: &RType{
+				Name:  t,
+				Ident: t,
+				Kind:  reflect.Interface,
+			},
+		},
+	}}
+}
+
 // Enum returns a new Field with type enum. An example for defining enum is as follows:
 //
 //	field.Enum("state").

@@ -48,6 +48,7 @@ func TestMySQL(t *testing.T) {
 			Floats(t, client)
 			NetAddr(t, client)
 			RawMessage(t, client)
+			Any(t, client)
 			// Skip tests with JSON functions for old MySQL versions.
 			if version != "56" {
 				URLs(t, client)
@@ -87,6 +88,7 @@ func TestMaria(t *testing.T) {
 			Strings(t, client)
 			NetAddr(t, client)
 			RawMessage(t, client)
+			Any(t, client)
 			Predicates(t, client)
 			Scan(t, client)
 			Order(t, client)
@@ -120,6 +122,7 @@ func TestPostgres(t *testing.T) {
 			Strings(t, client)
 			NetAddr(t, client)
 			RawMessage(t, client)
+			Any(t, client)
 			Predicates(t, client)
 			Scan(t, client)
 			Order(t, client)
@@ -142,6 +145,7 @@ func TestSQLite(t *testing.T) {
 	Strings(t, client)
 	NetAddr(t, client)
 	RawMessage(t, client)
+	Any(t, client)
 	Predicates(t, client)
 	Scan(t, client)
 	Order(t, client)
@@ -263,6 +267,15 @@ func Strings(t *testing.T, client *ent.Client) {
 		require.Empty(t, usr.Strings)
 		require.Equal(t, []http.Dir{"/etc", "/dev"}, usr.Dirs)
 	})
+}
+
+func Any(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	u := client.User.Create().SetUnknown("string").SaveX(ctx)
+	require.Equal(t, "string", u.Unknown)
+	u = u.Update().SetUnknown([]any{1, 2, 3}).SaveX(ctx)
+	require.Equal(t, []any{1.0, 2.0, 3.0}, u.Unknown)
+	require.Equal(t, []any{1.0, 2.0, 3.0}, client.User.GetX(ctx, u.ID).Unknown)
 }
 
 func RawMessage(t *testing.T, client *ent.Client) {

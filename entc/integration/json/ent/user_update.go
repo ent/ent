@@ -183,6 +183,18 @@ func (uu *UserUpdate) ClearAddr() *UserUpdate {
 	return uu
 }
 
+// SetUnknown sets the "unknown" field.
+func (uu *UserUpdate) SetUnknown(a any) *UserUpdate {
+	uu.mutation.SetUnknown(a)
+	return uu
+}
+
+// ClearUnknown clears the value of the "unknown" field.
+func (uu *UserUpdate) ClearUnknown() *UserUpdate {
+	uu.mutation.ClearUnknown()
+	return uu
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -310,6 +322,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if uu.mutation.AddrCleared() {
 		_spec.ClearField(user.FieldAddr, field.TypeJSON)
+	}
+	if value, ok := uu.mutation.Unknown(); ok {
+		_spec.SetField(user.FieldUnknown, field.TypeJSON, value)
+	}
+	if uu.mutation.UnknownCleared() {
+		_spec.ClearField(user.FieldUnknown, field.TypeJSON)
 	}
 	_spec.AddModifiers(uu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
@@ -479,6 +497,18 @@ func (uuo *UserUpdateOne) ClearAddr() *UserUpdateOne {
 	return uuo
 }
 
+// SetUnknown sets the "unknown" field.
+func (uuo *UserUpdateOne) SetUnknown(a any) *UserUpdateOne {
+	uuo.mutation.SetUnknown(a)
+	return uuo
+}
+
+// ClearUnknown clears the value of the "unknown" field.
+func (uuo *UserUpdateOne) ClearUnknown() *UserUpdateOne {
+	uuo.mutation.ClearUnknown()
+	return uuo
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -636,6 +666,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if uuo.mutation.AddrCleared() {
 		_spec.ClearField(user.FieldAddr, field.TypeJSON)
+	}
+	if value, ok := uuo.mutation.Unknown(); ok {
+		_spec.SetField(user.FieldUnknown, field.TypeJSON, value)
+	}
+	if uuo.mutation.UnknownCleared() {
+		_spec.ClearField(user.FieldUnknown, field.TypeJSON)
 	}
 	_spec.AddModifiers(uuo.modifiers...)
 	_node = &User{config: uuo.config}

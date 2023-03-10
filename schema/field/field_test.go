@@ -512,6 +512,13 @@ func TestJSON(t *testing.T) {
 		Descriptor()
 	assert.Error(t, fd.Err)
 
+	fd = field.Any("unknown").
+		Descriptor()
+	assert.NoError(t, fd.Err)
+	assert.Equal(t, field.TypeJSON, fd.Info.Type)
+	assert.Equal(t, "unknown", fd.Name)
+	assert.Equal(t, "any", fd.Info.String())
+
 	fd = field.JSON("values", &url.Values{}).Descriptor()
 	assert.Equal(t, "net/url", fd.Info.PkgPath)
 	assert.Equal(t, "url", fd.Info.PkgName)

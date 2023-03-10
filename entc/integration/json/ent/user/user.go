@@ -33,6 +33,8 @@ const (
 	FieldStrings = "strings"
 	// FieldAddr holds the string denoting the addr field in the database.
 	FieldAddr = "addr"
+	// FieldUnknown holds the string denoting the unknown field in the database.
+	FieldUnknown = "unknown"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 )
@@ -49,6 +51,7 @@ var Columns = []string{
 	FieldFloats,
 	FieldStrings,
 	FieldAddr,
+	FieldUnknown,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
