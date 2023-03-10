@@ -336,7 +336,7 @@ func (Tenant) Mixin() []ent.Mixin {
 As explained in the first example, the `DenyIfNoViewer` privacy rule, denies the operation if the `context.Context` does not
 contain the `viewer.Viewer` information.
 
-Similar to the previous example, we want add a constraint that only admin users can create tenants (and deny otherwise).
+Similar to the previous example, we want to add a constraint that only admin users can create tenants (and deny otherwise).
 We do it by copying the `AllowIfAdmin` rule from above, and adding it to the `Policy` of the `Tenant` schema:
 
 ```go title="examples/privacytenant/ent/schema/tenant.go"
