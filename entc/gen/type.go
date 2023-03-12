@@ -1723,7 +1723,7 @@ func (f Field) enums(lf *load.Field) ([]Enum, error) {
 // Ops returns all predicate operations of the field.
 func (f *Field) Ops() []Op {
 	ops := fieldOps(f)
-	if f.Name != "id" && f.cfg != nil && f.cfg.Storage.Ops != nil {
+	if (f.Name != "id" || !f.HasGoType()) && f.cfg != nil && f.cfg.Storage.Ops != nil {
 		ops = append(ops, f.cfg.Storage.Ops(f)...)
 	}
 	return ops
