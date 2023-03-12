@@ -56,6 +56,16 @@ func IDLTE(id string) predicate.Revision {
 	return predicate.Revision(sql.FieldLTE(FieldID, id))
 }
 
+// IDEqualFold applies the EqualFold predicate on the ID field.
+func IDEqualFold(id string) predicate.Revision {
+	return predicate.Revision(sql.FieldEqualFold(FieldID, id))
+}
+
+// IDContainsFold applies the ContainsFold predicate on the ID field.
+func IDContainsFold(id string) predicate.Revision {
+	return predicate.Revision(sql.FieldContainsFold(FieldID, id))
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Revision) predicate.Revision {
 	return predicate.Revision(func(s *sql.Selector) {

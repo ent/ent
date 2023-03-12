@@ -57,6 +57,16 @@ func IDLTE(id string) predicate.Pet {
 	return predicate.Pet(sql.FieldLTE(FieldID, id))
 }
 
+// IDEqualFold applies the EqualFold predicate on the ID field.
+func IDEqualFold(id string) predicate.Pet {
+	return predicate.Pet(sql.FieldEqualFold(FieldID, id))
+}
+
+// IDContainsFold applies the ContainsFold predicate on the ID field.
+func IDContainsFold(id string) predicate.Pet {
+	return predicate.Pet(sql.FieldContainsFold(FieldID, id))
+}
+
 // HasOwner applies the HasEdge predicate on the "owner" edge.
 func HasOwner() predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {
