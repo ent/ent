@@ -5,6 +5,9 @@
 package field_test
 
 import (
+	"crypto/md5"
+	"crypto/sha1"
+	"crypto/sha256"
 	"database/sql"
 	"database/sql/driver"
 	"errors"
@@ -343,6 +346,15 @@ func TestString(t *testing.T) {
 	assert.True(t, fd.Unique)
 	assert.Len(t, fd.Validators, 2)
 	assert.True(t, fd.Sensitive)
+
+	m := md5.New()
+	s := sha1.New()
+	s5 := sha256.New()
+	f = field.String("name").Encrypt(m, s, s5)
+	fd = f.Descriptor()
+	assert.NoError(t, fd.Err)
+	assert.Equal(t, "3fcbfb80572bb61d582ab37fd7028d898b20dcd1ebe7c8857227fb8e8375e93d", fd.Name)
+	assert.Len(t, fd.Name, 64)
 
 	fd = field.String("name").GoType(http.Dir("dir")).Descriptor()
 	assert.NoError(t, fd.Err)

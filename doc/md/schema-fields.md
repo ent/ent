@@ -160,7 +160,37 @@ func (User) Fields() []ent.Field {
 	}
 }
 ```
+## Encrypt
 
+It encrypts the value using the encryption algorithms provided by the crypto package.
+You can pass the data through different algorithms as many times as you want.
+
+```go
+package schema
+
+import (
+	"crypto/md5"
+	"crypto/sha1"
+	"crypto/sha256"
+
+	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
+)
+
+// User holds the schema definition for the User entity.
+type User struct {
+	ent.Schema
+}
+
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("email"),
+		field.String("name"),
+		field.String("password").Encrypt(md5.New(), sha1.New(), sh256.New()),
+	}
+}
+```
 ## Database Type
 
 Each database dialect has its own mapping from Go type to database type. For example,
