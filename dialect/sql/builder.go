@@ -2427,6 +2427,11 @@ func (s *Selector) FullJoin(t TableView) *Selector {
 	return s.join("FULL JOIN", t)
 }
 
+// InnerJoin appends a `INNER JOIN` clause to the statement.
+func (s *Selector) InnerJoin(t TableView) *Selector {
+	return s.join("INNER JOIN", t)
+}
+
 // join adds a join table to the selector with the given kind.
 func (s *Selector) join(kind string, t TableView) *Selector {
 	s.joins = append(s.joins, join{

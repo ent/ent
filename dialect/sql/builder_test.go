@@ -882,6 +882,18 @@ func TestBuilder(t *testing.T) {
 		},
 		{
 			input: func() Querier {
+				t1 := Table("groups").As("g")
+				t2 := Table("user_groups").As("ug")
+				return Select(t1.C("id"), As(Count("`*`"), "user_count")).
+					From(t1).
+					InnerJoin(t2).
+					On(t1.C("id"), t2.C("group_id")).
+					GroupBy(t1.C("id"))
+			}(),
+			wantQuery: "SELECT `g`.`id`, COUNT(`*`) AS `user_count` FROM `groups` AS `g` INNER JOIN `user_groups` AS `ug` ON `g`.`id` = `ug`.`group_id` GROUP BY `g`.`id`",
+		},
+		{
+			input: func() Querier {
 				t1 := Table("users").As("u")
 				return Select(t1.Columns("name", "age")...).From(t1)
 			}(),
