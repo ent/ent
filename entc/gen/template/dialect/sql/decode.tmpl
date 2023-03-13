@@ -15,6 +15,9 @@ in the LICENSE file in the root directory of this source tree.
 	{{ $ctypes = set $ctypes $idscantype (list $.ID.Constant) }}
 {{ end }}
 {{ range $f := $.Fields }}
+	{{- if $f.HasValueScanner }}
+		{{- continue }}
+	{{- end }}
 	{{ $names := list }}
 	{{ if hasKey $ctypes $f.NewScanType }}
 		{{ $names = get $ctypes $f.NewScanType }}
@@ -31,6 +34,12 @@ func (*{{ $.Name }}) scanValues(columns []string) ([]any, error) {
 			{{- range $type, $columns := $ctypes }}
 				case {{ range $i, $c := $columns }}{{ if ne $i 0 }},{{ end }}{{ $.Package }}.{{ $c }}{{ end }}:
 					values[i] = {{ $type }}
+			{{- end }}
+			{{- range $f := $.Fields }}
+				{{- if $f.HasValueScanner }}
+					case {{ $.Package }}.{{ $f.Constant }}:
+						values[i] = {{ $f.ScanValueFunc }}()
+				{{- end }}
 			{{- end }}
 			{{- range $i, $fk := $.UnexportedForeignKeys }}
 				{{- $f := $fk.Field }}
@@ -100,7 +109,13 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []any
 	{{- $f := $.Scope.Field -}}
 	{{- $ret := $.Scope.Rec -}}
 	{{- $field := $f.StructField }}{{ with $.Scope.StructField }}{{ $field = . }}{{ end -}}
-	{{- if $f.IsJSON -}}
+	{{- if $f.HasValueScanner -}}
+		if value, err := {{ $f.FromValueFunc }}(values[{{ $i }}]); err != nil {
+			return err
+		} else {
+			{{ $ret }}.{{ $field }} = value
+		}
+	{{- else if $f.IsJSON -}}
 		if value, ok := values[{{ $i }}].(*{{ $f.ScanType }}); !ok {
 			return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[{{ $i }}])
 		} else if value != nil && len(*value) > 0 {

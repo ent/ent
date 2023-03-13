@@ -93,11 +93,27 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 	{{- range $f := $.MutationFields }}
 			{{- if or (not $f.Immutable) $f.UpdateDefault }}
 				if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
-					_spec.SetField({{ $.Package }}.{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, value)
+					{{- if $f.HasValueScanner }}
+						vv, err := {{ $f.ValueFunc }}(value)
+						if err != nil {
+							return {{ $zero }}, err
+						}
+						_spec.SetField({{ $.Package }}.{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, vv)
+					{{- else }}
+						_spec.SetField({{ $.Package }}.{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, value)
+					{{- end }}
 				}
 				{{- if $f.SupportsMutationAdd }}
 					if value, ok := {{ $mutation }}.{{ $f.MutationAdded }}(); ok {
-						_spec.AddField({{ $.Package }}.{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, value)
+						{{- if $f.HasValueScanner }}
+							vv, err := {{ $f.ValueFunc }}(value)
+							if err != nil {
+								return {{ $zero }}, err
+							}
+							_spec.AddField({{ $.Package }}.{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, vv)
+						{{- else }}
+							_spec.AddField({{ $.Package }}.{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, value)
+						{{- end }}
 					}
 				{{- end }}
 				{{- if $f.SupportsMutationAppend }}
@@ -117,7 +133,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 	{{- range $e := $.EdgesWithID }}
 		{{- if $e.Immutable }}
 			{{- /* Skip to the next one as immutable edges cannot be updated. */}}
-			{{- continue}}
+			{{- continue }}
 		{{- end }}
 		if {{ $mutation }}.{{ $e.MutationCleared }}() {
 			{{- with extend $ "Edge" $e }}

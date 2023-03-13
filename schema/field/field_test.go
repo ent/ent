@@ -7,6 +7,7 @@ package field_test
 import (
 	"database/sql"
 	"database/sql/driver"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -25,6 +26,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestInt(t *testing.T) {
@@ -89,7 +91,7 @@ func TestInt(t *testing.T) {
 	assert.True(t, fd.Info.ValueScanner())
 
 	fd = field.Int("count").GoType(false).Descriptor()
-	assert.EqualError(t, fd.Err, `GoType must be a "int" type or ValueScanner`)
+	assert.EqualError(t, fd.Err, `GoType must be a "int" type, ValueScanner or provide an external ValueScanner`)
 	fd = field.Int("count").GoType(struct{}{}).Descriptor()
 	assert.Error(t, fd.Err)
 	fd = field.Int("count").GoType(new(Count)).Descriptor()
@@ -310,6 +312,38 @@ func TestString_DefaultFunc(t *testing.T) {
 
 	fd = field.String("str").GoType(http.Dir("/tmp")).DefaultFunc("/tmp").Descriptor()
 	assert.EqualError(t, fd.Err, `field.String("str").DefaultFunc expects func but got string`)
+}
+
+func TestString_ValueScanner(t *testing.T) {
+	fd := field.String("dir").
+		ValueScanner(field.ValueScannerFunc[string, *sql.NullString]{
+			V: func(s string) (driver.Value, error) {
+				return base64.StdEncoding.EncodeToString([]byte(s)), nil
+			},
+			S: func(ns *sql.NullString) (string, error) {
+				if !ns.Valid {
+					return "", nil
+				}
+				b, err := base64.StdEncoding.DecodeString(ns.String)
+				if err != nil {
+					return "", err
+				}
+				return string(b), nil
+			},
+		}).Descriptor()
+	require.NoError(t, fd.Err)
+	require.NotNil(t, fd.ValueScanner)
+	_, ok := fd.ValueScanner.(field.TypeValueScanner[string])
+	require.True(t, ok)
+
+	fd = field.String("url").
+		GoType(&url.URL{}).
+		ValueScanner(field.BinaryValueScanner[*url.URL]{}).
+		Descriptor()
+	require.NoError(t, fd.Err)
+	require.NotNil(t, fd.ValueScanner)
+	_, ok = fd.ValueScanner.(field.TypeValueScanner[*url.URL])
+	require.True(t, ok)
 }
 
 type VString string

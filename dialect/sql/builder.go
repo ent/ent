@@ -3454,15 +3454,15 @@ type (
 
 // Arg appends an input argument to the builder.
 func (b *Builder) Arg(a any) *Builder {
-	switch a := a.(type) {
+	switch v := a.(type) {
 	case nil:
 		b.WriteString("NULL")
 		return b
 	case *raw:
-		b.WriteString(a.s)
+		b.WriteString(v.s)
 		return b
 	case Querier:
-		b.Join(a)
+		b.Join(v)
 		return b
 	}
 	// Default placeholder param (MySQL and SQLite).

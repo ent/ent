@@ -7,11 +7,15 @@ package integration
 import (
 	"context"
 	stdsql "database/sql"
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
+	"math/big"
 	"net"
+	"net/url"
 	"reflect"
 	"runtime"
 	"sort"
@@ -19,6 +23,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"entgo.io/ent/entc/integration/ent/exvaluescan"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -159,6 +165,7 @@ var (
 		CreateBulk,
 		ConstraintChecks,
 		NillableRequired,
+		ExtValueScan,
 	}
 )
 
@@ -2293,6 +2300,62 @@ func Lock(t *testing.T, client *ent.Client) {
 	})
 }
 
+func ExtValueScan(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	u, err := url.Parse("https://entgo.io")
+	require.NoError(t, err)
+	check := func(ex *ent.ExValueScan, i *big.Int, u, b64, custom string) {
+		for _, e := range []*ent.ExValueScan{ex, client.ExValueScan.GetX(ctx, ex.ID)} {
+			require.Equal(t, i, e.Text)
+			require.Equal(t, u, e.Binary.String())
+			require.Equal(t, b64, e.Base64)
+			require.Equal(t, custom, e.Custom)
+		}
+	}
+	ex := client.ExValueScan.Create().
+		SetText(big.NewInt(10)).
+		SetBinary(u).
+		SetBase64("a8m").
+		SetCustom("atlasgo.io").
+		SaveX(ctx)
+	check(ex, big.NewInt(10), u.String(), "a8m", "atlasgo.io")
+
+	// Ensure the database values store as expected.
+	var raw []struct {
+		Text   string
+		Binary string
+		Base64 string
+		Custom string
+	}
+	client.ExValueScan.Query().
+		Select(exvaluescan.FieldText, exvaluescan.FieldBinary, exvaluescan.FieldBase64, exvaluescan.FieldCustom).
+		ScanX(ctx, &raw)
+	require.Len(t, raw, 1)
+	require.Equal(t, "10", raw[0].Text)
+	require.Equal(t, u.String(), raw[0].Binary)
+	require.Equal(t, base64.StdEncoding.EncodeToString([]byte(ex.Base64)), raw[0].Base64)
+	require.Equal(t, "0x:"+hex.EncodeToString([]byte(ex.Custom)), raw[0].Custom)
+
+	// Update the values and ensure they are updated as expected.
+	u.Path = "/docs"
+	ex = ex.Update().SetBinary(u).SetText(big.NewInt(20)).SetBase64("m8a").SetCustom("entgo.io").SaveX(ctx)
+	check(ex, big.NewInt(20), u.String(), "m8a", "entgo.io")
+
+	// Check predicates.
+	require.True(t, client.ExValueScan.Query().Where(exvaluescan.Text(big.NewInt(20))).ExistX(ctx))
+	require.False(t, client.ExValueScan.Query().Where(exvaluescan.Text(big.NewInt(10))).ExistX(ctx))
+	require.True(t, client.ExValueScan.Query().Where(exvaluescan.TextLTE(big.NewInt(20))).ExistX(ctx))
+	require.False(t, client.ExValueScan.Query().Where(exvaluescan.TextLTE(big.NewInt(10))).ExistX(ctx))
+	require.True(t, client.ExValueScan.Query().Where(exvaluescan.BinaryEQ(u)).ExistX(ctx))
+	require.False(t, client.ExValueScan.Query().Where(exvaluescan.BinaryEQ(&url.URL{})).ExistX(ctx))
+	require.True(t, client.ExValueScan.Query().Where(exvaluescan.Base64In("m8a")).ExistX(ctx))
+	require.False(t, client.ExValueScan.Query().Where(exvaluescan.Base64In("a8m")).ExistX(ctx))
+	require.True(t, client.ExValueScan.Query().Where(exvaluescan.CustomHasPrefix("ent")).ExistX(ctx))
+	require.False(t, client.ExValueScan.Query().Where(exvaluescan.CustomHasPrefix("atlas")).ExistX(ctx))
+	// HasSuffix cannot work with this field as the value is stored as hex (with additional prefix).
+	require.False(t, client.ExValueScan.Query().Where(exvaluescan.CustomHasSuffix("io")).ExistX(ctx))
+}
+
 func skip(t *testing.T, names ...string) {
 	for _, n := range names {
 		if strings.Contains(t.Name(), n) {
@@ -2316,4 +2379,5 @@ func drop(t *testing.T, client *ent.Client) {
 	client.GroupInfo.Delete().ExecX(ctx)
 	client.FieldType.Delete().ExecX(ctx)
 	client.FileType.Delete().ExecX(ctx)
+	client.ExValueScan.Delete().ExecX(ctx)
 }

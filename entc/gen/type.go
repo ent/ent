@@ -258,8 +258,11 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 		}
 		// User defined id field.
 		if tf.Name == typ.ID.Name {
-			if tf.Optional {
+			switch {
+			case tf.Optional:
 				return nil, errors.New("id field cannot be optional")
+			case f.ValueScanner:
+				return nil, errors.New("id field cannot have an external ValueScanner")
 			}
 			typ.ID = tf
 		} else {
@@ -764,6 +767,8 @@ func (t *Type) setupFieldEdge(fk *ForeignKey, fkOwner *Edge, fkName string) erro
 		return fmt.Errorf("edge-field %q was set as Immutable, but edge %q is not", fkName, fkOwner.Name)
 	case !tf.Immutable && fkOwner.Immutable:
 		return fmt.Errorf("edge %q was set as Immutable, but edge-field %q is not", fkOwner.Name, fkName)
+	case tf.HasValueScanner():
+		return fmt.Errorf("edge-field %q cannot have an external ValueScanner", fkName)
 	}
 	if t1, t2 := tf.Type.Type, fkOwner.Type.ID.Type.Type; t1 != t2 {
 		return fmt.Errorf("mismatch field type between edge field %q and id of type %q (%s != %s)", fkName, fkOwner.Type.Name, t1, t2)
@@ -972,6 +977,8 @@ func (t *Type) checkField(tf *Field, f *load.Field) (err error) {
 		err = fmt.Errorf("GoType %q for field %q must be converted to the basic %q type for validators", tf.Type, f.Name, tf.Type.Type)
 	case ant != nil && ant.Default != "" && (ant.DefaultExpr != "" || ant.DefaultExprs != nil):
 		err = fmt.Errorf("field %q cannot have both default value and default expression annotations", f.Name)
+	case tf.HasValueScanner() && tf.IsJSON():
+		err = fmt.Errorf("json field %q cannot have an external ValueScanner", f.Name)
 	}
 	return err
 }
@@ -1326,8 +1333,47 @@ func (f Field) ScanType() string {
 	return f.Type.String()
 }
 
-// NewScanType returns an expression for creating an new object
-// to be used by the `rows.Scan` method. An sql.Scanner or a
+// HasValueScanner reports if any of the fields has (an external) ValueScanner.
+func (t Type) HasValueScanner() bool {
+	for _, f := range t.Fields {
+		if f.HasValueScanner() {
+			return true
+		}
+	}
+	return false
+}
+
+// HasValueScanner indicates if the field has (an external) ValueScanner.
+func (f Field) HasValueScanner() bool {
+	return f.def != nil && f.def.ValueScanner
+}
+
+// ValueFunc returns a path to the Value field (func) of the external ValueScanner.
+func (f Field) ValueFunc() (string, error) {
+	if !f.HasValueScanner() {
+		return "", fmt.Errorf("%q does not have an external ValueScanner", f.Name)
+	}
+	return fmt.Sprintf("%s.ValueScanner.%s.Value", f.typ.Package(), f.StructField()), nil
+}
+
+// ScanValueFunc returns a path to the ScanValue field (func) of the external ValueScanner.
+func (f Field) ScanValueFunc() (string, error) {
+	if !f.HasValueScanner() {
+		return "", fmt.Errorf("%q does not have an external ValueScanner", f.Name)
+	}
+	return fmt.Sprintf("%s.ValueScanner.%s.ScanValue", f.typ.Package(), f.StructField()), nil
+}
+
+// FromValueFunc returns a path to the FromValue field (func) of the external ValueScanner.
+func (f Field) FromValueFunc() (string, error) {
+	if !f.HasValueScanner() {
+		return "", fmt.Errorf("%q does not have an external ValueScanner", f.Name)
+	}
+	return fmt.Sprintf("%s.ValueScanner.%s.FromValue", f.typ.Package(), f.StructField()), nil
+}
+
+// NewScanType returns an expression for creating a new object
+// to be used by the `rows.Scan` method. A sql.Scanner or a
 // nillable-type supported by the SQL driver (e.g. []byte).
 func (f Field) NewScanType() string {
 	if f.Type.ValueScanner() {

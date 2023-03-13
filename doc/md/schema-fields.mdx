@@ -3,6 +3,9 @@ id: schema-fields
 title: Fields
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 ## Quick Summary
 
 Fields (or properties) in the schema are the attributes of the node. For example, a `User`
@@ -199,9 +202,10 @@ The default type for fields are the basic Go types. For example, for string fiel
 and for time fields, the type is `time.Time`. The `GoType` method provides an option to override the
 default ent type with a custom one.
 
-The custom type must be either a type that is convertible to the Go basic type, or a type that implements the
-[ValueScanner](https://pkg.go.dev/entgo.io/ent/schema/field?tab=doc#ValueScanner) interface. Also, if the provided
-type implements the Validator interface and no validators have been set, the type validator will be used.
+The custom type must be either a type that is convertible to the Go basic type, a type that implements the
+[ValueScanner](https://pkg.go.dev/entgo.io/ent/schema/field?tab=doc#ValueScanner) interface, or has an
+[External ValueScanner](#external-valuescanner). Also, if the provided type implements the Validator interface and no validators have been set,
+the type validator will be used.
 
 
 ```go
@@ -246,6 +250,116 @@ func (Card) Fields() []ent.Field {
 	}
 }
 ```
+
+#### External `ValueScanner`
+
+Ent allows attaching custom `ValueScanner` for basic or custom Go types. This enables the use of standard
+schema fields while maintaining control over how they are stored in the database without implementing a `ValueScanner`
+interface. Additionally, this option enables users to use `GoType` that does not implement the `ValueScanner`, such
+as `*url.URL`.
+
+:::note
+At this stage, this option is only available for text and numeric fields, but it will be extended to other types in
+the future.
+:::
+
+<Tabs>
+<TabItem value="TextMarshaller">
+
+Fields with a custom Go type that implements the `encoding.TextMarshaller` and `encoding.TextUnmarshaller` interfaces can
+use the `field.TextValueScanner` as a `ValueScanner`. This `ValueScanner` calls `MarshalText` and `UnmarshalText` for
+writing and reading field values from the database:
+
+```go
+field.String("big_int").
+    GoType(&big.Int{}).
+    ValueScanner(field.TextValueScanner[*big.Int]{})
+```
+
+</TabItem>
+<TabItem value="BinaryMarshaller">
+
+Fields with a custom Go type that implements the `encoding.BinaryMarshaller` and `encoding.BinaryUnmarshaller` interfaces can
+use the `field.BinaryValueScanner` as a `ValueScanner`. This `ValueScanner` calls `MarshalBinary` and `UnmarshalBinary` for
+writing and reading field values from the database:
+
+```go
+field.String("url").
+    GoType(&url.URL{}).
+    ValueScanner(field.BinaryValueScanner[*url.URL]{})
+```
+
+</TabItem>
+<TabItem value="Functions based">
+
+The `field.ValueScannerFunc` allows setting two functions to be used for writing and reading database values: `V`
+for `driver.Value` and `S` for `sql.Scanner`:
+
+```go
+field.String("encoded").
+	ValueScanner(field.ValueScannerFunc[string, *sql.NullString]{
+		V: func(s string) (driver.Value, error) {
+			return base64.StdEncoding.EncodeToString([]byte(s)), nil
+		},
+		S: func(ns *sql.NullString) (string, error) {
+			if !ns.Valid {
+				return "", nil
+			}
+			b, err := base64.StdEncoding.DecodeString(ns.String)
+			if err != nil {
+				return "", err
+			}
+			return string(b), nil
+		},
+	})
+```
+
+</TabItem>
+<TabItem value="Custom">
+
+```go title="usage"
+field.String("prefixed").
+	ValueScanner(PrefixedHex{
+		prefix: "0x",
+	})
+```
+
+```go title="implementation"
+
+// PrefixedHex is a custom type that implements the TypeValueScanner interface.
+type PrefixedHex struct {
+	prefix string
+}
+
+// Value implements the TypeValueScanner.Value method.
+func (p PrefixedHex) Value(s string) (driver.Value, error) {
+	return p.prefix + ":" + hex.EncodeToString([]byte(s)), nil
+}
+
+// ScanValue implements the TypeValueScanner.ScanValue method.
+func (PrefixedHex) ScanValue() field.ValueScanner {
+	return &sql.NullString{}
+}
+
+// FromValue implements the TypeValueScanner.FromValue method.
+func (p PrefixedHex) FromValue(v driver.Value) (string, error) {
+	s, ok := v.(*sql.NullString)
+	if !ok {
+		return "", fmt.Errorf("unexpected input for FromValue: %T", v)
+	}
+	if !s.Valid {
+		return "", nil
+	}
+	d, err := hex.DecodeString(strings.TrimPrefix(s.String, p.prefix+":"))
+	if err != nil {
+		return "", err
+	}
+	return string(d), nil
+}
+```
+
+</TabItem>
+</Tabs>
 
 ## Other Field
 

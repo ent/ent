@@ -93,7 +93,7 @@ func init() {
 		{{ $pkg }}Mixin := {{ $schema }}.{{ $n.Name }}{}.Mixin()
 	{{- end }}
 	{{- with $policies := $n.PolicyPositions }}
-		{{- /* policies defined in schema and mixins. */}}
+		{{- /* Policies defined in schema and mixins. */}}
 		{{ $pkg }}.Policy = privacy.NewPolicies({{ range $idx := $n.MixedInPolicies }}{{ $pkg }}Mixin[{{ $idx }}],{{ end }}{{ $schema }}.{{ $n.Name }}{})
 		{{ $pkg }}.Hooks[0] = func(next ent.Mutator) ent.Mutator {
 			return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
@@ -147,7 +147,7 @@ func init() {
 			{{- end }}
 		{{- end }}
 	{{- end }}
-	{{- if or $n.HasDefault $n.HasUpdateDefault $n.HasValidators }}
+	{{- if or $n.HasDefault $n.HasUpdateDefault $n.HasValidators $n.HasValueScanner }}
 		{{- with $idx := $n.MixedInFields }}
 			{{- range $i := $idx }}
 				{{ print $pkg "MixinFields" $i }} := {{ $pkg }}Mixin[{{ $i }}].Fields()
@@ -162,7 +162,7 @@ func init() {
 		{{- range $i, $f := $fields }}
 			{{- $desc := print $pkg "Desc" $f.StructField }}
 			{{- /* enum default values handled near their declarations (in type package). */}}
-			{{- if or (and $f.Default (not $f.IsEnum)) $f.UpdateDefault $f.Validators }}
+			{{- if or (and $f.Default (not $f.IsEnum)) $f.UpdateDefault $f.Validators $f.HasValueScanner }}
 				// {{ $desc }} is the schema descriptor for {{ $f.Name }} field.
 				{{- if $f.Position.MixedIn }}
 					{{ $desc }} := {{ print $pkg "MixinFields" $f.Position.MixinIndex }}[{{ $f.Position.Index }}].Descriptor()
@@ -188,6 +188,10 @@ func init() {
 				{{- $default := print $pkg "." $f.UpdateDefaultName }}
 				// {{ $default }} holds the default value on update for the {{ $f.Name }} field.
 				{{ $default }} = {{ $desc }}.UpdateDefault.(func() {{ $f.Type }})
+			{{- end }}
+			{{- with $f.HasValueScanner }}
+				{{- $valuescan := print $pkg ".ValueScanner." $f.StructField }}
+				{{ $valuescan }} = {{ $desc }}.ValueScanner.(field.TypeValueScanner[{{ $f.Type }}])
 			{{- end }}
 			{{- with $f.Validators }}
 				{{- $name := print $pkg "." $f.Validator }}

@@ -22,5 +22,18 @@ import (
 {{ range $n := $.Nodes -}}
 	// {{ $n.Name }} is the predicate function for {{ $n.Package }} builders.
 	type {{ $n.Name }} func({{ $.Storage.Builder }})
+
+	{{- with $n.HasValueScanner }}
+		// {{ $n.Name }}OrErr calls the predicate only if the error is not nit.
+		func {{ $n.Name }}OrErr(p {{ $n.Name }}, err error) {{ $n.Name }} {
+			return func(s {{ $.Storage.Builder }}) {
+				if err != nil {
+					s.AddError(err)
+					return
+				}
+				p(s)
+			}
+		}
+	{{- end }}
 {{ end }}
 {{ end }}

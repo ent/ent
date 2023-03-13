@@ -19,6 +19,20 @@ type Card func(*sql.Selector)
 // Comment is the predicate function for comment builders.
 type Comment func(*sql.Selector)
 
+// ExValueScan is the predicate function for exvaluescan builders.
+type ExValueScan func(*sql.Selector)
+
+// ExValueScanOrErr calls the predicate only if the error is not nit.
+func ExValueScanOrErr(p ExValueScan, err error) ExValueScan {
+	return func(s *sql.Selector) {
+		if err != nil {
+			s.AddError(err)
+			return
+		}
+		p(s)
+	}
+}
+
 // FieldType is the predicate function for fieldtype builders.
 type FieldType func(*sql.Selector)
 
