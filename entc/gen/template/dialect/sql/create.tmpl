@@ -70,9 +70,7 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 			{{- xtemplate $tmpl $ }}
 		{{- end }}
 	{{- end }}
-	{{- if $.HasCompositeID }}
-	{{- /* TODO(a8m): Remove redudent if-s when Go 1.19 released as short-circuit was added in 1.18. */}}
-	{{- else if $.ID.UserDefined }}
+	{{- if and (not $.HasCompositeID) $.ID.UserDefined }}
 		if id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}(); ok {
 			_node.ID = id
 			_spec.ID.Value = {{ if and $.ID.Type.ValueScanner (not $.ID.Type.RType.IsPtr) }}&{{ end }}id
