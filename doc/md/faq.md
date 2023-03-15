@@ -763,6 +763,10 @@ func (d *multiDriver) Close() error {
 	}
 	return nil
 }
+
+func (d *multiDriver) Dialect() string {
+	return d.r.Dialect()
+}
 ```
 
 #### How to change the character set and/or collation of a MySQL table?
