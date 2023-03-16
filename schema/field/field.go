@@ -7,6 +7,7 @@ package field
 import (
 	"database/sql"
 	"database/sql/driver"
+	"encoding"
 	"errors"
 	"fmt"
 	"math"
@@ -84,7 +85,8 @@ func JSON(name string, typ any) *jsonBuilder {
 	}
 	b.desc.Info.Ident = t.String()
 	b.desc.Info.PkgPath = t.PkgPath()
-	b.desc.goType(typ, t)
+	b.desc.goType(typ)
+	b.desc.checkGoType(t)
 	switch t.Kind() {
 	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
 		b.desc.Info.Nillable = true
@@ -156,7 +158,7 @@ func UUID(name string, typ driver.Valuer) *uuidBuilder {
 			PkgPath: indirect(rt).PkgPath(),
 		},
 	}}
-	b.desc.goType(typ, valueScannerType)
+	b.desc.goType(typ)
 	return b
 }
 
@@ -176,7 +178,7 @@ func Other(name string, typ driver.Valuer) *otherBuilder {
 		Name: name,
 		Info: &TypeInfo{Type: TypeOther},
 	}}
-	ob.desc.goType(typ, valueScannerType)
+	ob.desc.goType(typ)
 	return ob
 }
 
@@ -324,7 +326,16 @@ func (b *stringBuilder) SchemaType(types map[string]string) *stringBuilder {
 //	field.String("dir").
 //		GoType(http.Dir("dir"))
 func (b *stringBuilder) GoType(typ any) *stringBuilder {
-	b.desc.goType(typ, stringType)
+	b.desc.goType(typ)
+	return b
+}
+
+// ValueScanner provides an external value scanner for the given GoType.
+// Using this option allow users to use field types that do not implement
+// the sql.Scanner and driver.Valuer interfaces, such as slices and maps
+// or types exist in external packages (e.g., url.URL).
+func (b *stringBuilder) ValueScanner(vs any) *stringBuilder {
+	b.desc.ValueScanner = vs
 	return b
 }
 
@@ -345,6 +356,7 @@ func (b *stringBuilder) Descriptor() *Descriptor {
 	if b.desc.Default != nil {
 		b.desc.checkDefaultFunc(stringType)
 	}
+	b.desc.checkGoType(stringType)
 	return b.desc
 }
 
@@ -427,7 +439,7 @@ func (b *timeBuilder) StorageKey(key string) *timeBuilder {
 //	field.Time("deleted_at").
 //		GoType(&sql.NullTime{})
 func (b *timeBuilder) GoType(typ any) *timeBuilder {
-	b.desc.goType(typ, timeType)
+	b.desc.goType(typ)
 	return b
 }
 
@@ -448,6 +460,7 @@ func (b *timeBuilder) Descriptor() *Descriptor {
 	if b.desc.Default != nil {
 		b.desc.checkDefaultFunc(timeType)
 	}
+	b.desc.checkGoType(timeType)
 	return b.desc
 }
 
@@ -522,7 +535,7 @@ func (b *boolBuilder) StorageKey(key string) *boolBuilder {
 //	field.Bool("deleted").
 //		GoType(&sql.NullBool{})
 func (b *boolBuilder) GoType(typ any) *boolBuilder {
-	b.desc.goType(typ, boolType)
+	b.desc.goType(typ)
 	return b
 }
 
@@ -540,6 +553,7 @@ func (b *boolBuilder) Annotations(annotations ...schema.Annotation) *boolBuilder
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *boolBuilder) Descriptor() *Descriptor {
+	b.desc.checkGoType(boolType)
 	return b.desc
 }
 
@@ -673,7 +687,7 @@ func (b *bytesBuilder) StorageKey(key string) *bytesBuilder {
 //	field.Bytes("ip").
 //		GoType(net.IP("127.0.0.1"))
 func (b *bytesBuilder) GoType(typ any) *bytesBuilder {
-	b.desc.goType(typ, bytesType)
+	b.desc.goType(typ)
 	return b
 }
 
@@ -702,6 +716,7 @@ func (b *bytesBuilder) Descriptor() *Descriptor {
 	if b.desc.Default != nil {
 		b.desc.checkDefaultFunc(bytesType)
 	}
+	b.desc.checkGoType(bytesType)
 	return b.desc
 }
 
@@ -916,18 +931,20 @@ type EnumValues interface {
 //		GoType(role.Enum("role"))
 func (b *enumBuilder) GoType(ev EnumValues) *enumBuilder {
 	b.Values(ev.Values()...)
-	b.desc.goType(ev, stringType)
-	// If an error already exists, let that be returned instead.
-	// Otherwise, check that the underlying type is either a string
-	// or implements Stringer.
-	if b.desc.Err == nil && b.desc.Info.RType.rtype.Kind() != reflect.String && !b.desc.Info.Stringer() {
-		b.desc.Err = errors.New("enum values which implement ValueScanner must also implement Stringer")
-	}
+	b.desc.goType(ev)
 	return b
 }
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *enumBuilder) Descriptor() *Descriptor {
+	if b.desc.Info.RType != nil {
+		// If an error already exists, let that be returned instead.
+		// Otherwise, check that the underlying type is either a string or implements Stringer.
+		if b.desc.Err == nil && b.desc.Info.RType.rtype.Kind() != reflect.String && !b.desc.Info.Stringer() {
+			b.desc.Err = errors.New("enum values which implement ValueScanner must also implement Stringer")
+		}
+		b.desc.checkGoType(stringType)
+	}
 	return b.desc
 }
 
@@ -1022,6 +1039,7 @@ func (b *uuidBuilder) Annotations(annotations ...schema.Annotation) *uuidBuilder
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uuidBuilder) Descriptor() *Descriptor {
+	b.desc.checkGoType(valueScannerType)
 	return b.desc
 }
 
@@ -1141,6 +1159,7 @@ func (b *otherBuilder) Annotations(annotations ...schema.Annotation) *otherBuild
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *otherBuilder) Descriptor() *Descriptor {
+	b.desc.checkGoType(valueScannerType)
 	if len(b.desc.SchemaType) == 0 {
 		b.desc.Err = fmt.Errorf("expect SchemaType to be set for other field")
 	}
@@ -1153,6 +1172,7 @@ type Descriptor struct {
 	Size          int                     // varchar size.
 	Name          string                  // field name.
 	Info          *TypeInfo               // field type info.
+	ValueScanner  any                     // custom field codec.
 	Unique        bool                    // unique index of field.
 	Nillable      bool                    // nillable struct field.
 	Optional      bool                    // nullable field in database.
@@ -1169,7 +1189,7 @@ type Descriptor struct {
 	Err           error
 }
 
-func (d *Descriptor) goType(typ any, expectType reflect.Type) {
+func (d *Descriptor) goType(typ any) {
 	t := reflect.TypeOf(typ)
 	tv := indirect(t)
 	info := &TypeInfo{
@@ -1191,13 +1211,38 @@ func (d *Descriptor) goType(typ any, expectType reflect.Type) {
 	case reflect.Slice, reflect.Ptr, reflect.Map:
 		info.Nillable = true
 	}
-	switch pt := reflect.PtrTo(t); {
-	case pt.Implements(valueScannerType), t.Implements(valueScannerType),
-		t.Kind() == expectType.Kind() && t.ConvertibleTo(expectType):
-	default:
-		d.Err = fmt.Errorf("GoType must be a %q type or ValueScanner", expectType)
-	}
 	d.Info = info
+}
+
+func (d *Descriptor) checkGoType(expectType reflect.Type) {
+	t := expectType
+	if d.Info.RType != nil && d.Info.RType.rtype != nil {
+		t = d.Info.RType.rtype
+	}
+	switch pt := reflect.PtrTo(t); {
+	// An external ValueScanner.
+	case d.ValueScanner != nil:
+		vs := reflect.Indirect(reflect.ValueOf(d.ValueScanner)).Type()
+		m1, ok1 := vs.MethodByName("Value")
+		m2, ok2 := vs.MethodByName("ScanValue")
+		m3, ok3 := vs.MethodByName("FromValue")
+		switch {
+		case !ok1, m1.Type.NumIn() != 2, m1.Type.In(1) != t,
+			m1.Type.NumOut() != 2, m1.Type.Out(0) != valueType, m1.Type.Out(1) != errorType:
+			d.Err = fmt.Errorf("ValueScanner must implement the Value method: func Value(%s) (driver.Valuer, error)", t)
+		case !ok2, m2.Type.NumIn() != 1, m2.Type.NumOut() != 1, m2.Type.Out(0) != valueScannerType:
+			d.Err = errors.New("ValueScanner must implement the ScanValue method: func ScanValue() field.ValueScanner")
+		case !ok3, m3.Type.NumIn() != 2, m3.Type.In(1) != valueType, m3.Type.NumOut() != 2, m3.Type.Out(0) != t, m3.Type.Out(1) != errorType:
+			d.Err = fmt.Errorf("ValueScanner must implement the FromValue method: func FromValue(driver.Valuer) (%s, error)", t)
+		}
+	// No GoType was provided.
+	case d.Info.RType == nil:
+	// A GoType without an external ValueScanner.
+	case pt.Implements(valueScannerType), t.Implements(valueScannerType), t.Kind() == expectType.Kind() && t.ConvertibleTo(expectType):
+	// There is a GoType, but it's not a ValueScanner.
+	default:
+		d.Err = fmt.Errorf("GoType must be a %q type, ValueScanner or provide an external ValueScanner", expectType)
+	}
 }
 
 // pkgName returns the package name from a Go
@@ -1261,15 +1306,128 @@ var (
 	bytesType        = reflect.TypeOf([]byte(nil))
 	timeType         = reflect.TypeOf(time.Time{})
 	stringType       = reflect.TypeOf("")
+	valueType        = reflect.TypeOf((*driver.Value)(nil)).Elem()
 	valuerType       = reflect.TypeOf((*driver.Valuer)(nil)).Elem()
+	errorType        = reflect.TypeOf((*error)(nil)).Elem()
 	valueScannerType = reflect.TypeOf((*ValueScanner)(nil)).Elem()
 	validatorType    = reflect.TypeOf((*Validator)(nil)).Elem()
 )
 
-// ValueScanner is the interface that groups the Value and the Scan methods.
+// ValueScanner is the interface that groups the Value
+// and the Scan methods implemented by custom Go types.
 type ValueScanner interface {
 	driver.Valuer
 	sql.Scanner
+}
+
+// TypeValueScanner is the interface that groups all methods for
+// attaching an external ValueScanner to a custom GoType.
+type TypeValueScanner[T any] interface {
+	// Value returns the driver.Valuer for the GoType.
+	Value(T) (driver.Value, error)
+	// ScanValue returns a new ValueScanner that functions as an
+	// intermediate result between database value and GoType value.
+	// For example, sql.NullString or sql.NullInt.
+	ScanValue() ValueScanner
+	// FromValue returns the field instance from the ScanValue
+	// above after the database value was scanned.
+	FromValue(driver.Value) (T, error)
+}
+
+// TextValueScanner returns a new TypeValueScanner that calls MarshalText
+// for storing values in the database, and calls UnmarshalText for scanning
+// database values into struct fields.
+type TextValueScanner[T interface {
+	encoding.TextMarshaler
+	encoding.TextUnmarshaler
+}] struct{}
+
+// Value implements the TypeValueScanner.Value method.
+func (TextValueScanner[T]) Value(v T) (driver.Value, error) {
+	return v.MarshalText()
+}
+
+// ScanValue implements the TypeValueScanner.ScanValue method.
+func (TextValueScanner[T]) ScanValue() ValueScanner {
+	return &sql.NullString{}
+}
+
+// FromValue implements the TypeValueScanner.FromValue method.
+func (TextValueScanner[T]) FromValue(v driver.Value) (tv T, err error) {
+	s, ok := v.(*sql.NullString)
+	if !ok {
+		return tv, fmt.Errorf("unexpected input for FromValue: %T", v)
+	}
+	tv = newT(tv).(T)
+	if s.Valid {
+		err = tv.UnmarshalText([]byte(s.String))
+	}
+	return tv, err
+}
+
+// BinaryValueScanner returns a new TypeValueScanner that calls MarshalBinary
+// for storing values in the database, and calls UnmarshalBinary for scanning
+// database values into struct fields.
+type BinaryValueScanner[T interface {
+	encoding.BinaryMarshaler
+	encoding.BinaryUnmarshaler
+}] struct{}
+
+// Value implements the TypeValueScanner.Value method.
+func (BinaryValueScanner[T]) Value(v T) (driver.Value, error) {
+	return v.MarshalBinary()
+}
+
+// ScanValue implements the TypeValueScanner.ScanValue method.
+func (BinaryValueScanner[T]) ScanValue() ValueScanner {
+	return &sql.NullString{}
+}
+
+// FromValue implements the TypeValueScanner.FromValue method.
+func (BinaryValueScanner[T]) FromValue(v driver.Value) (tv T, err error) {
+	s, ok := v.(*sql.NullString)
+	if !ok {
+		return tv, fmt.Errorf("unexpected input for FromValue: %T", v)
+	}
+	tv = newT(tv).(T)
+	if s.Valid {
+		err = tv.UnmarshalBinary([]byte(s.String))
+	}
+	return tv, err
+}
+
+// ValueScannerFunc is a wrapper for a function that implements the ValueScanner.
+type ValueScannerFunc[T any, S ValueScanner] struct {
+	V func(T) (driver.Value, error)
+	S func(S) (T, error)
+}
+
+// Value implements the TypeValueScanner.Value method.
+func (f ValueScannerFunc[T, S]) Value(t T) (driver.Value, error) {
+	return f.V(t)
+}
+
+// ScanValue implements the TypeValueScanner.ScanValue method.
+func (f ValueScannerFunc[T, S]) ScanValue() ValueScanner {
+	var s S
+	return newT(s).(S)
+}
+
+// FromValue implements the TypeValueScanner.FromValue method.
+func (f ValueScannerFunc[T, S]) FromValue(v driver.Value) (tv T, err error) {
+	s, ok := v.(S)
+	if !ok {
+		return tv, fmt.Errorf("unexpected input for FromValue: %T", v)
+	}
+	return f.S(s)
+}
+
+// newT ensures the type is initialized.
+func newT(t any) any {
+	if rt := reflect.TypeOf(t); rt.Kind() == reflect.Ptr {
+		return reflect.New(rt.Elem()).Interface()
+	}
+	return t
 }
 
 // Validator interface wraps the Validate method. Custom GoTypes with

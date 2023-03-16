@@ -19,6 +19,20 @@ type Card func(*dsl.Traversal)
 // Comment is the predicate function for comment builders.
 type Comment func(*dsl.Traversal)
 
+// ExValueScan is the predicate function for exvaluescan builders.
+type ExValueScan func(*dsl.Traversal)
+
+// ExValueScanOrErr calls the predicate only if the error is not nit.
+func ExValueScanOrErr(p ExValueScan, err error) ExValueScan {
+	return func(s *dsl.Traversal) {
+		if err != nil {
+			s.AddError(err)
+			return
+		}
+		p(s)
+	}
+}
+
 // FieldType is the predicate function for fieldtype builders.
 type FieldType func(*dsl.Traversal)
 

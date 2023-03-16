@@ -21,6 +21,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/api"
 	"entgo.io/ent/entc/integration/ent/card"
 	"entgo.io/ent/entc/integration/ent/comment"
+	"entgo.io/ent/entc/integration/ent/exvaluescan"
 	"entgo.io/ent/entc/integration/ent/fieldtype"
 	"entgo.io/ent/entc/integration/ent/file"
 	"entgo.io/ent/entc/integration/ent/filetype"
@@ -49,6 +50,8 @@ type Client struct {
 	Card *CardClient
 	// Comment is the client for interacting with the Comment builders.
 	Comment *CommentClient
+	// ExValueScan is the client for interacting with the ExValueScan builders.
+	ExValueScan *ExValueScanClient
 	// FieldType is the client for interacting with the FieldType builders.
 	FieldType *FieldTypeClient
 	// File is the client for interacting with the File builders.
@@ -92,6 +95,7 @@ func (c *Client) init() {
 	c.Api = NewAPIClient(c.config)
 	c.Card = NewCardClient(c.config)
 	c.Comment = NewCommentClient(c.config)
+	c.ExValueScan = NewExValueScanClient(c.config)
 	c.FieldType = NewFieldTypeClient(c.config)
 	c.File = NewFileClient(c.config)
 	c.FileType = NewFileTypeClient(c.config)
@@ -185,24 +189,25 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:       ctx,
-		config:    cfg,
-		Api:       NewAPIClient(cfg),
-		Card:      NewCardClient(cfg),
-		Comment:   NewCommentClient(cfg),
-		FieldType: NewFieldTypeClient(cfg),
-		File:      NewFileClient(cfg),
-		FileType:  NewFileTypeClient(cfg),
-		Goods:     NewGoodsClient(cfg),
-		Group:     NewGroupClient(cfg),
-		GroupInfo: NewGroupInfoClient(cfg),
-		Item:      NewItemClient(cfg),
-		License:   NewLicenseClient(cfg),
-		Node:      NewNodeClient(cfg),
-		Pet:       NewPetClient(cfg),
-		Spec:      NewSpecClient(cfg),
-		Task:      NewTaskClient(cfg),
-		User:      NewUserClient(cfg),
+		ctx:         ctx,
+		config:      cfg,
+		Api:         NewAPIClient(cfg),
+		Card:        NewCardClient(cfg),
+		Comment:     NewCommentClient(cfg),
+		ExValueScan: NewExValueScanClient(cfg),
+		FieldType:   NewFieldTypeClient(cfg),
+		File:        NewFileClient(cfg),
+		FileType:    NewFileTypeClient(cfg),
+		Goods:       NewGoodsClient(cfg),
+		Group:       NewGroupClient(cfg),
+		GroupInfo:   NewGroupInfoClient(cfg),
+		Item:        NewItemClient(cfg),
+		License:     NewLicenseClient(cfg),
+		Node:        NewNodeClient(cfg),
+		Pet:         NewPetClient(cfg),
+		Spec:        NewSpecClient(cfg),
+		Task:        NewTaskClient(cfg),
+		User:        NewUserClient(cfg),
 	}, nil
 }
 
@@ -220,24 +225,25 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:       ctx,
-		config:    cfg,
-		Api:       NewAPIClient(cfg),
-		Card:      NewCardClient(cfg),
-		Comment:   NewCommentClient(cfg),
-		FieldType: NewFieldTypeClient(cfg),
-		File:      NewFileClient(cfg),
-		FileType:  NewFileTypeClient(cfg),
-		Goods:     NewGoodsClient(cfg),
-		Group:     NewGroupClient(cfg),
-		GroupInfo: NewGroupInfoClient(cfg),
-		Item:      NewItemClient(cfg),
-		License:   NewLicenseClient(cfg),
-		Node:      NewNodeClient(cfg),
-		Pet:       NewPetClient(cfg),
-		Spec:      NewSpecClient(cfg),
-		Task:      NewTaskClient(cfg),
-		User:      NewUserClient(cfg),
+		ctx:         ctx,
+		config:      cfg,
+		Api:         NewAPIClient(cfg),
+		Card:        NewCardClient(cfg),
+		Comment:     NewCommentClient(cfg),
+		ExValueScan: NewExValueScanClient(cfg),
+		FieldType:   NewFieldTypeClient(cfg),
+		File:        NewFileClient(cfg),
+		FileType:    NewFileTypeClient(cfg),
+		Goods:       NewGoodsClient(cfg),
+		Group:       NewGroupClient(cfg),
+		GroupInfo:   NewGroupInfoClient(cfg),
+		Item:        NewItemClient(cfg),
+		License:     NewLicenseClient(cfg),
+		Node:        NewNodeClient(cfg),
+		Pet:         NewPetClient(cfg),
+		Spec:        NewSpecClient(cfg),
+		Task:        NewTaskClient(cfg),
+		User:        NewUserClient(cfg),
 	}, nil
 }
 
@@ -267,8 +273,9 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Api, c.Card, c.Comment, c.FieldType, c.File, c.FileType, c.Goods, c.Group,
-		c.GroupInfo, c.Item, c.License, c.Node, c.Pet, c.Spec, c.Task, c.User,
+		c.Api, c.Card, c.Comment, c.ExValueScan, c.FieldType, c.File, c.FileType,
+		c.Goods, c.Group, c.GroupInfo, c.Item, c.License, c.Node, c.Pet, c.Spec,
+		c.Task, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -278,8 +285,9 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Api, c.Card, c.Comment, c.FieldType, c.File, c.FileType, c.Goods, c.Group,
-		c.GroupInfo, c.Item, c.License, c.Node, c.Pet, c.Spec, c.Task, c.User,
+		c.Api, c.Card, c.Comment, c.ExValueScan, c.FieldType, c.File, c.FileType,
+		c.Goods, c.Group, c.GroupInfo, c.Item, c.License, c.Node, c.Pet, c.Spec,
+		c.Task, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -304,6 +312,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Card.mutate(ctx, m)
 	case *CommentMutation:
 		return c.Comment.mutate(ctx, m)
+	case *ExValueScanMutation:
+		return c.ExValueScan.mutate(ctx, m)
 	case *FieldTypeMutation:
 		return c.FieldType.mutate(ctx, m)
 	case *FileMutation:
@@ -718,6 +728,124 @@ func (c *CommentClient) mutate(ctx context.Context, m *CommentMutation) (Value, 
 		return (&CommentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Comment mutation op: %q", m.Op())
+	}
+}
+
+// ExValueScanClient is a client for the ExValueScan schema.
+type ExValueScanClient struct {
+	config
+}
+
+// NewExValueScanClient returns a client for the ExValueScan from the given config.
+func NewExValueScanClient(c config) *ExValueScanClient {
+	return &ExValueScanClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `exvaluescan.Hooks(f(g(h())))`.
+func (c *ExValueScanClient) Use(hooks ...Hook) {
+	c.hooks.ExValueScan = append(c.hooks.ExValueScan, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `exvaluescan.Intercept(f(g(h())))`.
+func (c *ExValueScanClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ExValueScan = append(c.inters.ExValueScan, interceptors...)
+}
+
+// Create returns a builder for creating a ExValueScan entity.
+func (c *ExValueScanClient) Create() *ExValueScanCreate {
+	mutation := newExValueScanMutation(c.config, OpCreate)
+	return &ExValueScanCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ExValueScan entities.
+func (c *ExValueScanClient) CreateBulk(builders ...*ExValueScanCreate) *ExValueScanCreateBulk {
+	return &ExValueScanCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ExValueScan.
+func (c *ExValueScanClient) Update() *ExValueScanUpdate {
+	mutation := newExValueScanMutation(c.config, OpUpdate)
+	return &ExValueScanUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ExValueScanClient) UpdateOne(evs *ExValueScan) *ExValueScanUpdateOne {
+	mutation := newExValueScanMutation(c.config, OpUpdateOne, withExValueScan(evs))
+	return &ExValueScanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ExValueScanClient) UpdateOneID(id int) *ExValueScanUpdateOne {
+	mutation := newExValueScanMutation(c.config, OpUpdateOne, withExValueScanID(id))
+	return &ExValueScanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ExValueScan.
+func (c *ExValueScanClient) Delete() *ExValueScanDelete {
+	mutation := newExValueScanMutation(c.config, OpDelete)
+	return &ExValueScanDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ExValueScanClient) DeleteOne(evs *ExValueScan) *ExValueScanDeleteOne {
+	return c.DeleteOneID(evs.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ExValueScanClient) DeleteOneID(id int) *ExValueScanDeleteOne {
+	builder := c.Delete().Where(exvaluescan.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ExValueScanDeleteOne{builder}
+}
+
+// Query returns a query builder for ExValueScan.
+func (c *ExValueScanClient) Query() *ExValueScanQuery {
+	return &ExValueScanQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeExValueScan},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ExValueScan entity by its id.
+func (c *ExValueScanClient) Get(ctx context.Context, id int) (*ExValueScan, error) {
+	return c.Query().Where(exvaluescan.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ExValueScanClient) GetX(ctx context.Context, id int) *ExValueScan {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ExValueScanClient) Hooks() []Hook {
+	return c.hooks.ExValueScan
+}
+
+// Interceptors returns the client interceptors.
+func (c *ExValueScanClient) Interceptors() []Interceptor {
+	return c.inters.ExValueScan
+}
+
+func (c *ExValueScanClient) mutate(ctx context.Context, m *ExValueScanMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ExValueScanCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ExValueScanUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ExValueScanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ExValueScanDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ExValueScan mutation op: %q", m.Op())
 	}
 }
 
@@ -2658,12 +2786,12 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Api, Card, Comment, FieldType, File, FileType, Goods, Group, GroupInfo, Item,
-		License, Node, Pet, Spec, Task, User []ent.Hook
+		Api, Card, Comment, ExValueScan, FieldType, File, FileType, Goods, Group,
+		GroupInfo, Item, License, Node, Pet, Spec, Task, User []ent.Hook
 	}
 	inters struct {
-		Api, Card, Comment, FieldType, File, FileType, Goods, Group, GroupInfo, Item,
-		License, Node, Pet, Spec, Task, User []ent.Interceptor
+		Api, Card, Comment, ExValueScan, FieldType, File, FileType, Goods, Group,
+		GroupInfo, Item, License, Node, Pet, Spec, Task, User []ent.Interceptor
 	}
 )
 

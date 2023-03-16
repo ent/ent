@@ -80,6 +80,23 @@ var (
 		Columns:    CommentsColumns,
 		PrimaryKey: []*schema.Column{CommentsColumns[0]},
 	}
+	// ExValueScansColumns holds the columns for the "ex_value_scans" table.
+	ExValueScansColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "binary", Type: field.TypeString},
+		{Name: "binary_optional", Type: field.TypeString, Nullable: true},
+		{Name: "text", Type: field.TypeString},
+		{Name: "text_optional", Type: field.TypeString, Nullable: true},
+		{Name: "base64", Type: field.TypeString},
+		{Name: "custom", Type: field.TypeString},
+		{Name: "custom_optional", Type: field.TypeString, Nullable: true},
+	}
+	// ExValueScansTable holds the schema information for the "ex_value_scans" table.
+	ExValueScansTable = &schema.Table{
+		Name:       "ex_value_scans",
+		Columns:    ExValueScansColumns,
+		PrimaryKey: []*schema.Column{ExValueScansColumns[0]},
+	}
 	// FieldTypesColumns holds the columns for the "field_types" table.
 	FieldTypesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -557,6 +574,7 @@ var (
 		ApisTable,
 		CardsTable,
 		CommentsTable,
+		ExValueScansTable,
 		FieldTypesTable,
 		FilesTable,
 		FileTypesTable,

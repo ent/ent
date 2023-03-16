@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/api"
 	"entgo.io/ent/entc/integration/ent/card"
 	"entgo.io/ent/entc/integration/ent/comment"
+	"entgo.io/ent/entc/integration/ent/exvaluescan"
 	"entgo.io/ent/entc/integration/ent/fieldtype"
 	"entgo.io/ent/entc/integration/ent/file"
 	"entgo.io/ent/entc/integration/ent/filetype"
@@ -85,22 +86,23 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		api.Table:       api.ValidColumn,
-		card.Table:      card.ValidColumn,
-		comment.Table:   comment.ValidColumn,
-		fieldtype.Table: fieldtype.ValidColumn,
-		file.Table:      file.ValidColumn,
-		filetype.Table:  filetype.ValidColumn,
-		goods.Table:     goods.ValidColumn,
-		group.Table:     group.ValidColumn,
-		groupinfo.Table: groupinfo.ValidColumn,
-		item.Table:      item.ValidColumn,
-		license.Table:   license.ValidColumn,
-		node.Table:      node.ValidColumn,
-		pet.Table:       pet.ValidColumn,
-		spec.Table:      spec.ValidColumn,
-		enttask.Table:   enttask.ValidColumn,
-		user.Table:      user.ValidColumn,
+		api.Table:         api.ValidColumn,
+		card.Table:        card.ValidColumn,
+		comment.Table:     comment.ValidColumn,
+		exvaluescan.Table: exvaluescan.ValidColumn,
+		fieldtype.Table:   fieldtype.ValidColumn,
+		file.Table:        file.ValidColumn,
+		filetype.Table:    filetype.ValidColumn,
+		goods.Table:       goods.ValidColumn,
+		group.Table:       group.ValidColumn,
+		groupinfo.Table:   groupinfo.ValidColumn,
+		item.Table:        item.ValidColumn,
+		license.Table:     license.ValidColumn,
+		node.Table:        node.ValidColumn,
+		pet.Table:         pet.ValidColumn,
+		spec.Table:        spec.ValidColumn,
+		enttask.Table:     enttask.ValidColumn,
+		user.Table:        user.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

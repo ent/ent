@@ -72,7 +72,7 @@ func InitCmd() *cobra.Command {
 		"ent init --target entv1/schema User Group",
 		"ent init --template ./path/to/file.tmpl User",
 	)
-	c.Deprecated = "use `ent new` instead"
+	c.Deprecated = `use "ent new" instead`
 	return c
 }
 
