@@ -1497,6 +1497,13 @@ func (f Field) Column() *schema.Column {
 	if f.def != nil {
 		c.SchemaType = f.def.SchemaType
 	}
+
+	// if schema has annotation of incremental true and have a uniq constraint of the field,
+	// field does not have to be PK and can have auto-increment
+	if ant := f.EntSQL(); ant != nil && ant.Incremental != nil && *ant.Incremental && f.Unique {
+		c.Increment = true
+	}
+
 	return c
 }
 
