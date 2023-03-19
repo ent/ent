@@ -2824,8 +2824,10 @@ func (s *Selector) Query() (string, []any) {
 			b.Wrap(func(b *Builder) {
 				b.Join(t)
 			})
-			b.WriteString(" AS ")
-			b.Ident(t.as)
+			if t.as != "" {
+				b.WriteString(" AS ")
+				b.Ident(t.as)
+			}
 		case *WithBuilder:
 			t.SetDialect(s.dialect)
 			b.Ident(t.Name())

@@ -1631,6 +1631,11 @@ WHERE (((("users"."id1" = "users"."id2" AND "users"."id1" <> "users"."id2")
 AND "users"."id1" > "users"."id2") AND "users"."id1" >= "users"."id2") 
 AND "users"."id1" < "users"."id2") AND "users"."id1" <= "users"."id2"`, "\n", ""),
 		},
+		{
+			input: Select("name").
+				From(Select("name", "age").From(Table("users"))),
+			wantQuery: "SELECT `name` FROM (SELECT `name`, `age` FROM `users`)",
+		},
 	}
 	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
