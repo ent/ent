@@ -61,8 +61,8 @@ func (User) Edges() []ent.Edge {
 Notice a few things:
 
 * Our edges also receive an `entproto.Field` annotation. We will see why in a minute.
-* We created a one-to-many relation ship where a `Group` has a single `admin`, and a `User` can administer multiple
-  groups.
+* We created a one-to-many relationship where a `Category` has a single `admin`, and a `User` can administer multiple
+  categories.
 
 Re-generating the project with `go generate ./...`, notice the changes to the `.proto` file:
 
