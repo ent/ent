@@ -529,6 +529,9 @@ func (fq *FileQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
+		if fq.withParent != nil {
+			_spec.Node.AddColumnOnce(file.FieldParentID)
+		}
 	}
 	if ps := fq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {

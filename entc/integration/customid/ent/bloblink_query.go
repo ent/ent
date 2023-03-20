@@ -453,6 +453,12 @@ func (blq *BlobLinkQuery) querySpec() *sqlgraph.QuerySpec {
 		for i := range fields {
 			_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 		}
+		if blq.withBlob != nil {
+			_spec.Node.AddColumnOnce(bloblink.FieldBlobID)
+		}
+		if blq.withLink != nil {
+			_spec.Node.AddColumnOnce(bloblink.FieldLinkID)
+		}
 	}
 	if ps := blq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {

@@ -459,6 +459,9 @@ func (cq *CardQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
+		if cq.withOwner != nil {
+			_spec.Node.AddColumnOnce(card.FieldOwnerID)
+		}
 	}
 	if ps := cq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {

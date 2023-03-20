@@ -525,6 +525,9 @@ func (nq *NodeQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
+		if nq.withPrev != nil {
+			_spec.Node.AddColumnOnce(node.FieldPrevID)
+		}
 	}
 	if ps := nq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {

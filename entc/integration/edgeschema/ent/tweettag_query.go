@@ -532,6 +532,12 @@ func (ttq *TweetTagQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
+		if ttq.withTag != nil {
+			_spec.Node.AddColumnOnce(tweettag.FieldTagID)
+		}
+		if ttq.withTweet != nil {
+			_spec.Node.AddColumnOnce(tweettag.FieldTweetID)
+		}
 	}
 	if ps := ttq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {

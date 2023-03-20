@@ -531,6 +531,12 @@ func (gtq *GroupTagQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
+		if gtq.withTag != nil {
+			_spec.Node.AddColumnOnce(grouptag.FieldTagID)
+		}
+		if gtq.withGroup != nil {
+			_spec.Node.AddColumnOnce(grouptag.FieldGroupID)
+		}
 	}
 	if ps := gtq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {

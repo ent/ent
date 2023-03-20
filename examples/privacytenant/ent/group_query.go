@@ -572,6 +572,9 @@ func (gq *GroupQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
+		if gq.withTenant != nil {
+			_spec.Node.AddColumnOnce(group.FieldTenantID)
+		}
 	}
 	if ps := gq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {

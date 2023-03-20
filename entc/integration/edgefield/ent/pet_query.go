@@ -459,6 +459,9 @@ func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
+		if pq.withOwner != nil {
+			_spec.Node.AddColumnOnce(pet.FieldOwnerID)
+		}
 	}
 	if ps := pq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {

@@ -531,6 +531,15 @@ func (rq *RelationshipQuery) querySpec() *sqlgraph.QuerySpec {
 		for i := range fields {
 			_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 		}
+		if rq.withUser != nil {
+			_spec.Node.AddColumnOnce(relationship.FieldUserID)
+		}
+		if rq.withRelative != nil {
+			_spec.Node.AddColumnOnce(relationship.FieldRelativeID)
+		}
+		if rq.withInfo != nil {
+			_spec.Node.AddColumnOnce(relationship.FieldInfoID)
+		}
 	}
 	if ps := rq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {

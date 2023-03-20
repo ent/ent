@@ -460,6 +460,12 @@ func (tlq *TweetLikeQuery) querySpec() *sqlgraph.QuerySpec {
 		for i := range fields {
 			_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 		}
+		if tlq.withTweet != nil {
+			_spec.Node.AddColumnOnce(tweetlike.FieldTweetID)
+		}
+		if tlq.withUser != nil {
+			_spec.Node.AddColumnOnce(tweetlike.FieldUserID)
+		}
 	}
 	if ps := tlq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {

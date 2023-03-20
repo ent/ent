@@ -453,6 +453,12 @@ func (ruq *RoleUserQuery) querySpec() *sqlgraph.QuerySpec {
 		for i := range fields {
 			_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 		}
+		if ruq.withRole != nil {
+			_spec.Node.AddColumnOnce(roleuser.FieldRoleID)
+		}
+		if ruq.withUser != nil {
+			_spec.Node.AddColumnOnce(roleuser.FieldUserID)
+		}
 	}
 	if ps := ruq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {

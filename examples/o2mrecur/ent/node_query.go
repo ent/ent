@@ -529,6 +529,9 @@ func (nq *NodeQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
+		if nq.withParent != nil {
+			_spec.Node.AddColumnOnce(node.FieldParentID)
+		}
 	}
 	if ps := nq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
