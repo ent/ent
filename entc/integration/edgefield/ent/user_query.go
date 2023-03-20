@@ -947,6 +947,12 @@ func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
+		if uq.withParent != nil {
+			_spec.Node.AddColumnOnce(user.FieldParentID)
+		}
+		if uq.withSpouse != nil {
+			_spec.Node.AddColumnOnce(user.FieldSpouseID)
+		}
 	}
 	if ps := uq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {

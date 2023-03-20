@@ -531,6 +531,9 @@ func (pq *PostQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
+		if pq.withAuthor != nil {
+			_spec.Node.AddColumnOnce(post.FieldAuthorID)
+		}
 	}
 	if ps := pq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {

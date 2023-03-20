@@ -530,6 +530,12 @@ func (fq *FriendshipQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
+		if fq.withUser != nil {
+			_spec.Node.AddColumnOnce(friendship.FieldUserID)
+		}
+		if fq.withFriend != nil {
+			_spec.Node.AddColumnOnce(friendship.FieldFriendID)
+		}
 	}
 	if ps := fq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {

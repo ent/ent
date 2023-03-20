@@ -531,6 +531,12 @@ func (utq *UserTweetQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
+		if utq.withUser != nil {
+			_spec.Node.AddColumnOnce(usertweet.FieldUserID)
+		}
+		if utq.withTweet != nil {
+			_spec.Node.AddColumnOnce(usertweet.FieldTweetID)
+		}
 	}
 	if ps := utq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {

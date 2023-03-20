@@ -531,6 +531,12 @@ func (afq *AttachedFileQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
+		if afq.withFi != nil {
+			_spec.Node.AddColumnOnce(attachedfile.FieldFID)
+		}
+		if afq.withProc != nil {
+			_spec.Node.AddColumnOnce(attachedfile.FieldProcID)
+		}
 	}
 	if ps := afq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {

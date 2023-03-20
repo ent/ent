@@ -601,6 +601,9 @@ func (mq *MetadataQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
+		if mq.withParent != nil {
+			_spec.Node.AddColumnOnce(metadata.FieldParentID)
+		}
 	}
 	if ps := mq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {

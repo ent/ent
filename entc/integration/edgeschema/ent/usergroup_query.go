@@ -531,6 +531,12 @@ func (ugq *UserGroupQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
+		if ugq.withUser != nil {
+			_spec.Node.AddColumnOnce(usergroup.FieldUserID)
+		}
+		if ugq.withGroup != nil {
+			_spec.Node.AddColumnOnce(usergroup.FieldGroupID)
+		}
 	}
 	if ps := ugq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {

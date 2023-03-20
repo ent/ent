@@ -459,6 +459,9 @@ func (cq *CommentQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
+		if cq.withPost != nil {
+			_spec.Node.AddColumnOnce(comment.FieldPostID)
+		}
 	}
 	if ps := cq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {

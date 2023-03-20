@@ -337,6 +337,17 @@ func NewFieldSpec(column string, typ field.Type) *FieldSpec {
 	return &FieldSpec{Column: column, Type: typ}
 }
 
+// AddColumnOnce adds the given column to the spec if it is not already present.
+func (n *NodeSpec) AddColumnOnce(column string) *NodeSpec {
+	for _, c := range n.Columns {
+		if c == column {
+			return n
+		}
+	}
+	n.Columns = append(n.Columns, column)
+	return n
+}
+
 // FieldValues returns the values of additional fields that were set on the join-table.
 func (e *EdgeTarget) FieldValues() []any {
 	vs := make([]any, len(e.Fields))

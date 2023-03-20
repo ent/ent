@@ -532,6 +532,12 @@ func (rq *RentalQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
+		if rq.withUser != nil {
+			_spec.Node.AddColumnOnce(rental.FieldUserID)
+		}
+		if rq.withCar != nil {
+			_spec.Node.AddColumnOnce(rental.FieldCarID)
+		}
 	}
 	if ps := rq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {

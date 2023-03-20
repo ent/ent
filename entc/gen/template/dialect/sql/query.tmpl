@@ -39,14 +39,16 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 		{{- end }}
 	)
 	{{- with $.UnexportedForeignKeys }}
-			{{- with $.FKEdges }}
-				if {{ range $i, $e := . }}{{ if gt $i 0 }} || {{ end }}{{ $receiver }}.{{ $e.EagerLoadField }} != nil{{ end }} {
-					withFKs = true
-				}
-			{{- end }}
-			if withFKs {
-				_spec.Node.Columns = append(_spec.Node.Columns, {{ $.Package }}.ForeignKeys...)
+		{{- $edgesWithoutField := list }}
+		{{- range $.FKEdges }}{{ if not .Field }}{{ $edgesWithoutField = append $edgesWithoutField . }}{{ end }}{{ end }}
+		{{- if $edgesWithoutField }}
+			if {{ range $i, $e := $edgesWithoutField }}{{ if $i }} || {{ end }}{{ $receiver }}.{{ $e.EagerLoadField }} != nil{{ end }} {
+				withFKs = true
 			}
+		{{- end }}
+		if withFKs {
+			_spec.Node.Columns = append(_spec.Node.Columns, {{ $.Package }}.ForeignKeys...)
+		}
 	{{- end }}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*{{ $.Name }}).scanValues(nil, columns)
@@ -282,6 +284,16 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 		{{- else }}
 			for i := range fields {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
+			}
+		{{- end }}
+		{{- /* In case of custom field selection, ensure edge-fields are loaded in case their edges were loaded. */}}
+		{{- range $.FKEdges }}
+			{{- $f := .Field }}
+			{{- if not $f }}
+				{{- continue }}
+			{{- end }}
+			if {{ $receiver }}.{{ .EagerLoadField }} != nil {
+				_spec.Node.AddColumnOnce({{ $.Package }}.{{ $f.Constant }})
 			}
 		{{- end }}
 	}
