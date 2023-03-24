@@ -16,10 +16,11 @@ import (
 	"strings"
 	"text/template"
 	"unicode"
+	"unicode/utf8"
 
 	"entgo.io/ent/schema/field"
 
-	"github.com/go-openapi/inflect"
+	"github.com/gertd/go-pluralize"
 )
 
 var (
@@ -40,7 +41,7 @@ var (
 		"plural":        plural,
 		"aggregate":     aggregate,
 		"primitives":    primitives,
-		"singular":      rules.Singularize,
+		"singular":      pluralizer.Singular,
 		"quote":         quote,
 		"base":          filepath.Base,
 		"keys":          keys,
@@ -72,8 +73,8 @@ var (
 		"fail":          fail,
 		"replace":       strings.ReplaceAll,
 	}
-	rules    = ruleset()
-	acronyms = make(map[string]struct{})
+	pluralizer = newPluralizer()
+	acronyms   = defineAcronyms()
 )
 
 // joinWords with spaces and add linebreaks to ensure lines do not exceed the given maxSize.
@@ -137,7 +138,7 @@ func xrange(n int) (a []int) {
 
 // plural a name.
 func plural(name string) string {
-	p := rules.Pluralize(name)
+	p := pluralizer.Plural(name)
 	if p == name {
 		p += "Slice"
 	}
@@ -150,14 +151,21 @@ func isSeparator(r rune) bool {
 
 func pascalWords(words []string) string {
 	for i, w := range words {
-		upper := strings.ToUpper(w)
-		if _, ok := acronyms[upper]; ok {
-			words[i] = upper
-		} else {
-			words[i] = rules.Capitalize(w)
-		}
+		words[i] = capitalizeWord(w)
 	}
 	return strings.Join(words, "")
+}
+
+// capitalizeWord converts the given string to its capitalized form by
+// converting the first letter to upper case (has no effect on the rest of the
+// word).
+func capitalizeWord(word string) string {
+	upper := strings.ToUpper(word)
+	if _, ok := acronyms[upper]; ok {
+		return upper
+	}
+	_, i := utf8.DecodeLastRuneInString(word)
+	return strings.ToUpper(word[:i]) + word[i:]
 }
 
 // pascal converts the given name into a PascalCase.
@@ -298,8 +306,26 @@ func add(xs ...int) (n int) {
 	return
 }
 
-func ruleset() *inflect.Ruleset {
-	rules := inflect.NewDefaultRuleset()
+type pluralizeClient struct {
+	*pluralize.Client
+}
+
+func newPluralizer() *pluralizeClient {
+	return &pluralizeClient{pluralize.NewClient()}
+}
+
+func (pc *pluralizeClient) Plural(s string) string {
+	fmt.Printf("plural: %s ", s)
+	if _, ok := acronyms[s]; ok {
+		fmt.Printf("-> %s\n", s+"s")
+		return s + "s"
+	}
+	fmt.Printf("-> %s\n", pc.Client.Plural(s))
+	return pc.Client.Plural(s)
+}
+
+func defineAcronyms() map[string]struct{} {
+	acronyms := map[string]struct{}{}
 	// Add common initialism from golint and more.
 	for _, w := range []string{
 		"ACL", "API", "ASCII", "AWS", "CPU", "CSS", "DNS", "EOF", "GB", "GUID",
@@ -309,15 +335,13 @@ func ruleset() *inflect.Ruleset {
 		"VM", "XML", "XMPP", "XSRF", "XSS",
 	} {
 		acronyms[w] = struct{}{}
-		rules.AddAcronym(w)
 	}
-	return rules
+	return acronyms
 }
 
 // AddAcronym adds initialism to the global ruleset.
 func AddAcronym(word string) {
 	acronyms[word] = struct{}{}
-	rules.AddAcronym(word)
 }
 
 // order returns a map of sort orders.

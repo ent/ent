@@ -302,7 +302,7 @@ func (t Type) Table() string {
 	if t.schema != nil && t.schema.Config.Table != "" {
 		return t.schema.Config.Table
 	}
-	return snake(rules.Pluralize(t.Name))
+	return snake(pluralizer.Plural(t.Name))
 }
 
 // EntSQL returns the EntSQL annotation if exists.
@@ -1924,7 +1924,7 @@ func (e Edge) MutationSet() string {
 
 // MutationAdd returns the method name for adding edge ids.
 func (e Edge) MutationAdd() string {
-	return "Add" + pascal(rules.Singularize(e.Name)) + "IDs"
+	return "Add" + pascal(pluralizer.Singular(e.Name)) + "IDs"
 }
 
 // MutationReset returns the method name for resetting the edge value.
@@ -1951,7 +1951,7 @@ func (e Edge) MutationClear() string {
 
 // MutationRemove returns the method name for removing edge ids.
 func (e Edge) MutationRemove() string {
-	return "Remove" + pascal(rules.Singularize(e.Name)) + "IDs"
+	return "Remove" + pascal(pluralizer.Singular(e.Name)) + "IDs"
 }
 
 // MutationCleared returns the method name for indicating if the edge
