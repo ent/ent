@@ -1498,6 +1498,11 @@ func UniqueConstraint(t *testing.T, client *ent.Client) {
 	require.True(ent.IsConstraintError(err))
 	err = client.User.UpdateOne(foo).SetNickname("bar").SetPhone("2").Exec(ctx)
 	require.True(ent.IsConstraintError(err))
+	err = client.User.CreateBulk(
+		client.User.Create().SetAge(1).SetName("foo").SetNickname("baz"),
+		client.User.Create().SetAge(1).SetName("foo").SetNickname("baz"),
+	).Exec(ctx)
+	require.True(ent.IsConstraintError(err))
 
 	t.Log("o2o unique constraint on creation")
 	dan := client.User.Create().SetAge(1).SetName("dan").SetNickname("dan").SetSpouse(foo).SaveX(ctx)
