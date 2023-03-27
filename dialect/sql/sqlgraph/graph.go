@@ -1630,7 +1630,7 @@ func (c *batchCreator) insertLastIDs(ctx context.Context, tx dialect.ExecQuerier
 				return err
 			}
 		}
-		return nil
+		return rows.Err()
 	}
 	// MySQL.
 	var res sql.Result
