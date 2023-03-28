@@ -2371,3 +2371,10 @@ func TestFormattedColumnFromSubQuery(t *testing.T) {
 	}), "score").From(Table("table_name").As("table_name_alias")))
 	require.Equal(t, "`table_name_alias`.`score`", q.C("score"))
 }
+
+func TestSelector_HasJoins(t *testing.T) {
+	s := Select("*").From(Table("t1"))
+	require.False(t, s.HasJoins())
+	s.Join(Table("t2"))
+	require.True(t, s.HasJoins())
+}

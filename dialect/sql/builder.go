@@ -2025,12 +2025,22 @@ func Distinct(idents ...string) string {
 // TableView is a view that returns a table view. Can be a Table, Selector or a View (WITH statement).
 type TableView interface {
 	view()
+	// C returns a formatted string prefixed
+	// with the table view qualifier.
+	C(string) string
 }
 
 // queryView allows using Querier (expressions) in the FROM clause.
 type queryView struct{ Querier }
 
 func (*queryView) view() {}
+
+func (q *queryView) C(column string) string {
+	if tv, ok := q.Querier.(TableView); ok {
+		return tv.C(column)
+	}
+	return column
+}
 
 // SelectTable is a table selector.
 type SelectTable struct {
@@ -2405,6 +2415,11 @@ func (s *Selector) TableName() string {
 	default:
 		panic(fmt.Sprintf("unhandled TableView type %T", s.from))
 	}
+}
+
+// HasJoins reports if the selector has any JOINs.
+func (s *Selector) HasJoins() bool {
+	return len(s.joins) > 0
 }
 
 // Join appends a `JOIN` clause to the statement.
@@ -3090,7 +3105,7 @@ func RowNumber() *WindowBuilder {
 }
 
 // Window returns a new window clause with a custom selector allowing
-// for custom windown functions.
+// for custom window functions.
 //
 //	Window(func(b *Builder) {
 //		b.WriteString(Sum(posts.C("duration")))
