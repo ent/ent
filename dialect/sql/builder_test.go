@@ -2378,3 +2378,36 @@ func TestSelector_HasJoins(t *testing.T) {
 	s.Join(Table("t2"))
 	require.True(t, s.HasJoins())
 }
+
+func TestSelector_JoinedTable(t *testing.T) {
+	s := Select("*").From(Table("t1"))
+	t2, ok := s.JoinedTable("t2")
+	require.False(t, ok)
+	require.Nil(t, t2)
+	s.Join(Table("t2").As("t2"))
+	t2, ok = s.JoinedTable("t2")
+	require.True(t, ok)
+	require.Equal(t, "`t2`.`c`", t2.C("c"))
+	s.LeftJoin(Select().From(Table("t3").As("t3")).Where(EQ("id", 1)))
+	t3, ok := s.JoinedTable("t3")
+	require.True(t, ok)
+	require.Equal(t, "`t3`.`c`", t3.C("c"))
+}
+
+func TestSelector_JoinedTableView(t *testing.T) {
+	s := Select("*").From(Table("t1"))
+	t2, ok := s.JoinedTableView("t2")
+	require.False(t, ok)
+	require.Nil(t, t2)
+	s.Join(Table("users").As("t2"))
+	t2, ok = s.JoinedTableView("t2")
+	require.True(t, ok)
+	require.Equal(t, "`t2`.`c`", t2.C("c"))
+	s.LeftJoin(Select().From(Table("pets").As("t3")).Where(EQ("id", 1)).As("t4"))
+	t3, ok := s.JoinedTableView("t3")
+	require.True(t, ok)
+	require.Equal(t, "`t3`.`c`", t3.C("c"))
+	t4, ok := s.JoinedTableView("t4")
+	require.True(t, ok)
+	require.Equal(t, "`t4`.`c`", t4.C("c"))
+}
