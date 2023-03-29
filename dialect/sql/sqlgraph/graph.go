@@ -82,6 +82,8 @@ type Step struct {
 		Columns []string
 		// Inverse indicates if the edge is an inverse edge.
 		Inverse bool
+		// Name allows giving this edge a name for making queries more readable.
+		Name string
 	}
 	// To is the dest of the path (the neighbors).
 	To struct {
@@ -284,6 +286,126 @@ func HasNeighborsWith(q *sql.Selector, s *Step, pred func(*sql.Selector)) {
 		matches.WithContext(q.Context())
 		pred(matches)
 		q.Where(sql.In(q.C(s.From.Column), matches))
+	}
+}
+
+type (
+	// OrderByOptions holds the information needed to order a query by an edge.
+	OrderByOptions struct {
+		// Step to get the edge to order by.
+		Step *Step
+		// Desc indicates if the ordering should be descending.
+		// When false, nulls are ordered first. When true, nulls
+		// are ordered last.
+		Desc bool
+	}
+	// OrderByInfo holds the information done by the OrderBy functions.
+	OrderByInfo struct {
+		Terms []OrderByTerm
+	}
+	// OrderByTerm holds the terms of an order by clause.
+	OrderByTerm struct {
+		Column string      // Column name. If empty, an expression is used.
+		Expr   sql.Querier // Expression. If nil, the column is used.
+		Type   field.Type  // Term type.
+	}
+)
+
+// countAlias returns the alias to use for the count column.
+func countAlias(q *sql.Selector, s *Step) string {
+	eName := s.Edge.Name
+	if eName == "" {
+		eName = s.To.Table
+	}
+	selected := make(map[string]struct{})
+	for _, c := range q.SelectedColumns() {
+		selected[c] = struct{}{}
+	}
+	column := fmt.Sprintf("count_%s", eName)
+	// If the column was already selected,
+	// try to find a free alias.
+	if _, ok := selected[column]; ok {
+		for i := 1; i <= 5; i++ {
+			ci := fmt.Sprintf("%s_%d", column, i)
+			if _, ok := selected[ci]; !ok {
+				return ci
+			}
+		}
+	}
+	return column
+}
+
+// OrderByCountNeighbors appends ordering based on the number of neighbors.
+// For example, order users by their number of posts.
+// HasNeighbors applies on the given Selector a neighbors check.
+func OrderByCountNeighbors(q *sql.Selector, opts *OrderByOptions) *OrderByInfo {
+	var (
+		countC string
+		build  = sql.Dialect(q.Dialect())
+	)
+	switch s, r := opts.Step, opts.Step.Edge.Rel; {
+	case r == M2O || (r == O2O && s.Edge.Inverse):
+		// For M2O and O2O inverse, the FK resides in the same table.
+		// Hence, the order by is on the nullability of the column.
+		x := func(b *sql.Builder) {
+			b.Ident(s.From.Column)
+			if opts.Desc {
+				b.WriteOp(sql.OpNotNull)
+			} else {
+				b.WriteOp(sql.OpIsNull)
+			}
+		}
+		q.OrderExpr(build.Expr(x))
+		return &OrderByInfo{
+			Terms: []OrderByTerm{
+				{Expr: build.Expr(x), Type: field.TypeBool},
+			},
+		}
+	case r == M2M:
+		countC = countAlias(q, s)
+		pk1 := s.Edge.Columns[0]
+		if s.Edge.Inverse {
+			pk1 = s.Edge.Columns[1]
+		}
+		joinT := build.Table(s.Edge.Table).Schema(s.Edge.Schema)
+		to := build.Select(
+			joinT.C(pk1),
+			build.String(func(b *sql.Builder) {
+				b.WriteString("COUNT(*) AS ").Ident(countC)
+			}),
+		).From(joinT).GroupBy(joinT.C(pk1))
+		q.LeftJoin(to).
+			On(
+				q.C(s.From.Column),
+				to.C(pk1),
+			)
+	case r == O2M || (r == O2O && !s.Edge.Inverse):
+		countC = countAlias(q, s)
+		edgeT := build.Table(s.Edge.Table).Schema(s.Edge.Schema)
+		to := build.Select(
+			edgeT.C(s.Edge.Columns[0]),
+			build.String(func(b *sql.Builder) {
+				b.WriteString("COUNT(*) AS ").Ident(countC)
+			}),
+		).From(edgeT).GroupBy(edgeT.C(s.Edge.Columns[0]))
+		q.LeftJoin(to).
+			On(
+				q.C(s.From.Column),
+				to.C(s.Edge.Columns[0]),
+			)
+	}
+	q.OrderExpr(
+		build.Expr(func(b *sql.Builder) {
+			b.WriteString("COALESCE(").Ident(countC).WriteString(", 0)")
+			if opts.Desc {
+				b.WriteString(" DESC")
+			}
+		}),
+	)
+	return &OrderByInfo{
+		Terms: []OrderByTerm{
+			{Column: countC, Type: field.TypeInt},
+		},
 	}
 }
 
