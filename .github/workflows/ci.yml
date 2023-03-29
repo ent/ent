@@ -19,7 +19,7 @@ jobs:
       - name: Check spelling with custom config file
         uses: crate-ci/typos@v1.13.10
         with:
-          config: ./typos.toml
+          config: .github/workflows/typos.toml
 
 
   lint:
