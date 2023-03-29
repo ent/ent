@@ -817,7 +817,7 @@ func (d *Postgres) atIndex(idx1 *Index, t2 *schema.Table, idx2 *schema.Index) er
 		if v, ok := opc[c1.Name]; ok {
 			var op postgres.IndexOpClass
 			if err := op.UnmarshalText([]byte(v)); err != nil {
-				return fmt.Errorf("unmarshaling operator-class %q for column %q: %v", v, c1.Name, err)
+				return fmt.Errorf("unmarshalling operator-class %q for column %q: %v", v, c1.Name, err)
 			}
 			part.Attrs = append(part.Attrs, &op)
 		}

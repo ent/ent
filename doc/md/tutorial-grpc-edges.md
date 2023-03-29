@@ -93,13 +93,13 @@ Observe the following changes:
 * A new message, `Category` was created. This message has a field named `admin` corresponding to the `admin` edge on
   the `Category` schema. It is a non-repeated field because we set the edge to be `.Unique()`. It's field number is `3`,
   corresponding to the `entproto.Field` annotation on the edge definition.
-* A new field `administered` was added to the `User` message definition. It is a `repeated` field, correspending to the
+* A new field `administered` was added to the `User` message definition. It is a `repeated` field, corresponding to the
   fact that we did not mark the edge as `Unique` in this direction. It's field number is `5`, corresponding to the
   `entproto.Field` annotation on the edge.
 
 ### Creating Entities with their Edges
 
-Let's demonstrate how to create an entity with it's edges by writing a test:
+Let's demonstrate how to create an entity with its edges by writing a test:
 
 ```go
 package main

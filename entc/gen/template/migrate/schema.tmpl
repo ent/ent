@@ -80,7 +80,7 @@ var (
 									{{- end }}
 								{{- end }}
 							},
-							{{- /* postpone refrencing to avoid typechecking loops */}}
+							{{- /* postpone referencing to avoid typechecking loops */}}
 							RefColumns: []*schema.Column{
 								{{- range $c1 := $fk.RefColumns }}
 									{{- range $i, $c2 := $fk.RefTable.Columns }}

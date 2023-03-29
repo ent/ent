@@ -1191,7 +1191,7 @@ func (c *batchCreator) nodes(ctx context.Context, drv dialect.Driver) error {
 					// If the ID value was provided to one of the nodes, it should be
 					// provided to all others because this affects the way we calculate
 					// their values in MySQL and SQLite dialects.
-					return fmt.Errorf("incosistent id values for batch insert")
+					return fmt.Errorf("inconsistent id values for batch insert")
 				}
 				// Assign NULL values for empty placeholders.
 				values[i][column] = nil

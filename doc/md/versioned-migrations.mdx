@@ -678,7 +678,7 @@ Counter Initialization** header) and re-calculated on startup by looking at the 
 you happen to have a table with no rows yet, the autoincrement starting value is set to 0 for every table without any
 entries. With the online migration feature this wasn't an issue, because the migration engine looked at the `ent_types`
 tables and made sure to update the counter, if it wasn't set correctly. However, with versioned migration, this is no
-longer the case. In oder to ensure, that everything is set up correctly after a server restart, make sure to call
+longer the case. In order to ensure, that everything is set up correctly after a server restart, make sure to call
 the `VerifyTableRange` method on the Atlas struct:
 
 ```go
@@ -862,7 +862,7 @@ generation, use the `schema.DisableChecksum()` option.
 
 In addition to the usual `.sql` migration files the migration directory will contain the `atlas.sum` file. Every time
 you let Ent generate a new migration file, this file is updated for you. However, every manual change made to the
-mitration directory will render the migration directory and the `atlas.sum` file out-of-sync. With the Atlas CLI you can
+migration directory will render the migration directory and the `atlas.sum` file out-of-sync. With the Atlas CLI you can
 both check if the file and migration directory are in-sync, and fix it if not:
 
 ```shell
