@@ -3330,12 +3330,12 @@ func (b *Builder) Quote(ident string) string {
 func (b *Builder) Ident(s string) *Builder {
 	switch {
 	case len(s) == 0:
-	case !strings.HasSuffix(s, "*") && !b.isIdent(s) && !isFunc(s) && !isModifier(s):
+	case !strings.HasSuffix(s, "*") && !b.isIdent(s) && !isFunc(s) && !isModifier(s) && !isAlias(s):
 		if b.qualifier != "" {
 			b.WriteString(b.Quote(b.qualifier)).WriteByte('.')
 		}
 		b.WriteString(b.Quote(s))
-	case (isFunc(s) || isModifier(s)) && b.postgres():
+	case (isFunc(s) || isModifier(s) || isAlias(s)) && b.postgres():
 		// Modifiers and aggregation functions that
 		// were called without dialect information.
 		b.WriteString(strings.ReplaceAll(s, "`", `"`))
@@ -3432,8 +3432,8 @@ func (b *Builder) Err() error {
 // An Op represents an operator.
 type Op int
 
+// Predicate and arithmetic operators.
 const (
-	// Predicate operators.
 	OpEQ      Op = iota // =
 	OpNEQ               // <>
 	OpGT                // >
@@ -3445,13 +3445,11 @@ const (
 	OpLike              // LIKE
 	OpIsNull            // IS NULL
 	OpNotNull           // IS NOT NULL
-
-	// Arithmetic operators.
-	OpAdd // +
-	OpSub // -
-	OpMul // *
-	OpDiv // / (Quotient)
-	OpMod // % (Reminder)
+	OpAdd               // +
+	OpSub               // -
+	OpMul               // *
+	OpDiv               // / (Quotient)
+	OpMod               // % (Reminder)
 )
 
 var ops = [...]string{
@@ -3713,6 +3711,19 @@ func Dialect(name string) *DialectBuilder {
 	return &DialectBuilder{name}
 }
 
+// String builds a dialect-aware expression string from the given callback.
+func (d *DialectBuilder) String(f func(*Builder)) string {
+	b := &Builder{}
+	b.SetDialect(d.dialect)
+	f(b)
+	return b.String()
+}
+
+// Expr builds a dialect-aware expression from the given callback.
+func (d *DialectBuilder) Expr(f func(*Builder)) Querier {
+	return Expr(d.String(f))
+}
+
 // Describe creates a DescribeBuilder for the configured dialect.
 //
 //	Dialect(dialect.Postgres).
@@ -3868,6 +3879,10 @@ func (d *DialectBuilder) DropIndex(name string) *DropIndexBuilder {
 	b := DropIndex(name)
 	b.SetDialect(d.dialect)
 	return b
+}
+
+func isAlias(s string) bool {
+	return strings.Contains(s, " AS ") || strings.Contains(s, " as ")
 }
 
 func isFunc(s string) bool {

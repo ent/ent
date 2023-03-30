@@ -911,6 +911,66 @@ func TestHasNeighborsWithContext(t *testing.T) {
 	}
 }
 
+func TestOrderByCountNeighbors(t *testing.T) {
+	build := sql.Dialect(dialect.Postgres)
+	t1 := build.Table("users")
+	s := build.Select(t1.C("name")).
+		From(t1)
+	t.Run("O2M", func(t *testing.T) {
+		s := s.Clone()
+		OrderByCountNeighbors(s, &OrderByOptions{
+			Step: NewStep(
+				From("users", "id"),
+				To("pets", "owner_id"),
+				Edge(O2M, false, "pets", "owner_id"),
+			),
+			Desc: true,
+		})
+		query, args := s.Query()
+		require.Empty(t, args)
+		require.Equal(t, `SELECT "users"."name" FROM "users" LEFT JOIN (SELECT "pets"."owner_id", COUNT(*) AS "count_pets" FROM "pets" GROUP BY "pets"."owner_id") AS "t1" ON "users"."id" = "t1"."owner_id" ORDER BY COALESCE("count_pets", 0) DESC`, query)
+	})
+	t.Run("M2M", func(t *testing.T) {
+		s := s.Clone()
+		OrderByCountNeighbors(s, &OrderByOptions{
+			Step: NewStep(
+				From("users", "id"),
+				To("groups", "id"),
+				Edge(M2M, false, "user_groups", "user_id", "group_id"),
+			),
+		})
+		query, args := s.Query()
+		require.Empty(t, args)
+		require.Equal(t, `SELECT "users"."name" FROM "users" LEFT JOIN (SELECT "user_groups"."user_id", COUNT(*) AS "count_groups" FROM "user_groups" GROUP BY "user_groups"."user_id") AS "t1" ON "users"."id" = "t1"."user_id" ORDER BY COALESCE("count_groups", 0)`, query)
+	})
+	// Zero or one.
+	t.Run("M2O", func(t *testing.T) {
+		s1, s2 := s.Clone(), s.Clone()
+		OrderByCountNeighbors(s1, &OrderByOptions{
+			Step: NewStep(
+				From("pets", "owner_id"),
+				To("users", "id"),
+				Edge(M2O, true, "pets", "owner_id"),
+			),
+		})
+		query, args := s1.Query()
+		require.Empty(t, args)
+		require.Equal(t, `SELECT "users"."name" FROM "users" ORDER BY "owner_id" IS NULL`, query)
+
+		OrderByCountNeighbors(s2, &OrderByOptions{
+			Step: NewStep(
+				From("pets", "owner_id"),
+				To("users", "id"),
+				Edge(M2O, true, "pets", "owner_id"),
+			),
+			Desc: true,
+		})
+		query, args = s2.Query()
+		require.Empty(t, args)
+		require.Equal(t, `SELECT "users"."name" FROM "users" ORDER BY "owner_id" IS NOT NULL`, query)
+	})
+}
+
 func TestCreateNode(t *testing.T) {
 	tests := []struct {
 		name    string

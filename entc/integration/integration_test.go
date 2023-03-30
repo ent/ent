@@ -166,6 +166,7 @@ var (
 		ConstraintChecks,
 		NillableRequired,
 		ExtValueScan,
+		OrderByEdgeCount,
 	}
 )
 
@@ -2359,6 +2360,127 @@ func ExtValueScan(t *testing.T, client *ent.Client) {
 	require.False(t, client.ExValueScan.Query().Where(exvaluescan.CustomHasPrefix("atlas")).ExistX(ctx))
 	// HasSuffix cannot work with this field as the value is stored as hex (with additional prefix).
 	require.False(t, client.ExValueScan.Query().Where(exvaluescan.CustomHasSuffix("io")).ExistX(ctx))
+}
+
+// Testing the "low-level" behavior of the sqlgraph package.
+// This functionality may be extended to the generated fluent API.
+func OrderByEdgeCount(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	users := client.User.CreateBulk(
+		client.User.Create().SetName("a").SetAge(1),
+		client.User.Create().SetName("b").SetAge(2),
+		client.User.Create().SetName("c").SetAge(3),
+		client.User.Create().SetName("d").SetAge(4),
+	).SaveX(ctx)
+	pets := client.Pet.CreateBulk(
+		client.Pet.Create().SetName("aa").SetOwner(users[0]),
+		client.Pet.Create().SetName("ab").SetOwner(users[0]),
+		client.Pet.Create().SetName("ac").SetOwner(users[0]),
+		client.Pet.Create().SetName("ba").SetOwner(users[1]),
+		client.Pet.Create().SetName("bb").SetOwner(users[1]),
+		client.Pet.Create().SetName("ca").SetOwner(users[2]),
+		client.Pet.Create().SetName("d"),
+		client.Pet.Create().SetName("e"),
+	).SaveX(ctx)
+	// O2M edge.
+	for _, tt := range []struct {
+		desc bool
+		ids  []int
+	}{
+		{desc: true, ids: []int{users[0].ID, users[1].ID, users[2].ID, users[3].ID}},
+		{desc: false, ids: []int{users[3].ID, users[2].ID, users[1].ID, users[0].ID}},
+	} {
+		ids := client.User.Query().
+			Order(func(s *sql.Selector) {
+				sqlgraph.OrderByCountNeighbors(s, &sqlgraph.OrderByOptions{
+					Desc: tt.desc,
+					Step: sqlgraph.NewStep(
+						sqlgraph.From(user.Table, user.FieldID),
+						sqlgraph.To(pet.Table, pet.OwnerColumn),
+						sqlgraph.Edge(sqlgraph.O2M, false, pet.Table, pet.OwnerColumn),
+					),
+				})
+			}).
+			IDsX(ctx)
+		require.Equal(t, tt.ids, ids)
+	}
+	// M2O edge (true or false).
+	for _, tt := range []struct {
+		desc bool
+		ids  []int
+	}{
+		{desc: true, ids: []int{pets[6].ID, pets[7].ID, pets[0].ID, pets[1].ID, pets[2].ID, pets[3].ID, pets[4].ID, pets[5].ID}},
+		{desc: false, ids: []int{pets[0].ID, pets[1].ID, pets[2].ID, pets[3].ID, pets[4].ID, pets[5].ID, pets[6].ID, pets[7].ID}},
+	} {
+		ids := client.Pet.Query().
+			Order(
+				func(s *sql.Selector) {
+					sqlgraph.OrderByCountNeighbors(s, &sqlgraph.OrderByOptions{
+						Desc: tt.desc,
+						Step: sqlgraph.NewStep(
+							sqlgraph.From(pet.Table, pet.OwnerColumn),
+							sqlgraph.To(user.Table, user.FieldID),
+							sqlgraph.Edge(sqlgraph.M2O, true, pet.Table, pet.OwnerColumn),
+						),
+					})
+				},
+				ent.Asc(pet.FieldID),
+			).
+			IDsX(ctx)
+		require.Equal(t, tt.ids, ids)
+	}
+	inf, exp := client.GroupInfo.Create().SetDesc("desc").SaveX(ctx), time.Now()
+	groups := client.Group.CreateBulk(
+		client.Group.Create().SetName("Group: 4 users").SetExpire(exp).SetInfo(inf).AddUsers(users...),
+		client.Group.Create().SetName("Group: 3 users").SetExpire(exp).SetInfo(inf).AddUsers(users[:3]...),
+		client.Group.Create().SetName("Group: 2 users").SetExpire(exp).SetInfo(inf).AddUsers(users[:2]...),
+		client.Group.Create().SetName("Group: 1 users").SetExpire(exp).SetInfo(inf).AddUsers(users[:1]...),
+		client.Group.Create().SetName("Group: 0 users").SetExpire(exp).SetInfo(inf),
+	).SaveX(ctx)
+	// M2M edge (inverse).
+	for _, tt := range []struct {
+		desc bool
+		ids  []int
+	}{
+		{desc: true, ids: []int{groups[0].ID, groups[1].ID, groups[2].ID, groups[3].ID, groups[4].ID}},
+		{desc: false, ids: []int{groups[4].ID, groups[3].ID, groups[2].ID, groups[1].ID, groups[0].ID}},
+	} {
+		ids := client.Group.Query().
+			Order(func(s *sql.Selector) {
+				sqlgraph.OrderByCountNeighbors(s, &sqlgraph.OrderByOptions{
+					Desc: tt.desc,
+					Step: sqlgraph.NewStep(
+						sqlgraph.From(group.Table, group.FieldID),
+						sqlgraph.To(user.Table, user.FieldID),
+						sqlgraph.Edge(sqlgraph.M2M, true, group.UsersTable, group.UsersPrimaryKey...),
+					),
+				})
+			}).
+			IDsX(ctx)
+		require.Equal(t, tt.ids, ids)
+	}
+	// M2M edge (assoc).
+	for _, tt := range []struct {
+		desc bool
+		ids  []int
+	}{
+		{desc: true, ids: []int{users[0].ID, users[1].ID, users[2].ID, users[3].ID}},
+		{desc: false, ids: []int{users[3].ID, users[2].ID, users[1].ID, users[0].ID}},
+	} {
+		ids := client.User.Query().
+			Order(func(s *sql.Selector) {
+				sqlgraph.OrderByCountNeighbors(s, &sqlgraph.OrderByOptions{
+					Desc: tt.desc,
+					Step: sqlgraph.NewStep(
+						sqlgraph.From(user.Table, user.FieldID),
+						sqlgraph.To(group.Table, group.FieldID),
+						sqlgraph.Edge(sqlgraph.M2M, false, user.GroupsTable, user.GroupsPrimaryKey...),
+					),
+				})
+			}).
+			IDsX(ctx)
+		require.Equal(t, tt.ids, ids)
+	}
 }
 
 func skip(t *testing.T, names ...string) {
