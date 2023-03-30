@@ -41,14 +41,14 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 
 {{- end }}
 
-{{/* Addtional imports by the schemaconfig feature. */}}
+{{/* Additional imports by the schemaconfig feature. */}}
 {{- define "dialect/sql/import/additional/schemaconfig" -}}
 	{{- if $.FeatureEnabled "sql/schemaconfig" }}
 		"{{ $.Config.Package }}/internal"
 	{{- end }}
 {{- end }}
 
-{{/* Addtional fields to the config struct. */}}
+{{/* Additional fields to the config struct. */}}
 {{- define "dialect/sql/config/fields/schemaconfig" -}}
 	{{- if $.FeatureEnabled "sql/schemaconfig" -}}
 		// schemaConfig contains alternative names for all tables.
@@ -56,7 +56,7 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 	{{- end }}
 {{- end -}}
 
-{{/* Addtional top-level code for the generated config.go file. */}}
+{{/* Additional top-level code for the generated config.go file. */}}
 {{- define "dialect/sql/config/options/schemaconfig" }}
 	{{- if $.FeatureEnabled "sql/schemaconfig" }}
 		// SchemaConfig represents alternative schema names for all tables

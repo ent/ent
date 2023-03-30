@@ -140,7 +140,7 @@ func (t *TableBuilder) Column(c *ColumnBuilder) *TableBuilder {
 	return t
 }
 
-// Columns appends the a list of columns to the builder.
+// Columns appends a list of columns to the builder.
 func (t *TableBuilder) Columns(columns ...*ColumnBuilder) *TableBuilder {
 	t.columns = make([]Querier, 0, len(columns))
 	for i := range columns {
@@ -195,7 +195,7 @@ func (t *TableBuilder) Collate(s string) *TableBuilder {
 	return t
 }
 
-// Options appends additional options to to the statement (MySQL only).
+// Options appends additional options to the statement (MySQL only).
 func (t *TableBuilder) Options(s string) *TableBuilder {
 	t.options = s
 	return t
@@ -484,7 +484,7 @@ type ReferenceBuilder struct {
 	columns []string // referenced columns.
 }
 
-// Reference create a reference builder for the reference_option clause.
+// Reference creates a reference builder for the reference_option clause.
 //
 //	Reference().Table("groups").Columns("id")
 func Reference() *ReferenceBuilder { return &ReferenceBuilder{} }
@@ -2095,7 +2095,7 @@ func (s *SelectTable) Columns(columns ...string) []string {
 }
 
 // Unquote makes the table name to be formatted as raw string (unquoted).
-// It is useful whe you don't want to query tables under the current database.
+// It is useful when you don't want to query tables under the current database.
 // For example: "INFORMATION_SCHEMA.TABLE_CONSTRAINTS" in MySQL.
 func (s *SelectTable) Unquote() *SelectTable {
 	s.quote = false
@@ -2254,7 +2254,7 @@ func (s *Selector) SelectedColumns() []string {
 	return columns
 }
 
-// UnqualifiedColumns returns the an unqualified version of the
+// UnqualifiedColumns returns an unqualified version of the
 // selected columns in the Selector. e.g. "t1"."c" => "c".
 func (s *Selector) UnqualifiedColumns() []string {
 	columns := make([]string, 0, len(s.selection))
@@ -3130,7 +3130,7 @@ type WindowBuilder struct {
 }
 
 // RowNumber returns a new window clause with the ROW_NUMBER() as a function.
-// Using this function will assign a each row a number, from 1 to N, in the
+// Using this function will assign each row a number, from 1 to N, in the
 // order defined by the ORDER BY clause in the window spec.
 func RowNumber() *WindowBuilder {
 	return Window(func(b *Builder) {
@@ -3493,7 +3493,7 @@ type (
 	}
 	// ParamFormatter wraps the FormatPram function.
 	ParamFormatter interface {
-		// The FormatParam function lets users to define
+		// The FormatParam function lets users define
 		// custom placeholder formatting for their types.
 		// For example, formatting the default placeholder
 		// from '?' to 'ST_GeomFromWKB(?)' for MySQL dialect.

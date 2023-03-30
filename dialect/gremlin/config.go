@@ -25,7 +25,7 @@ type (
 		httpClient   *http.Client
 	}
 
-	// Endpoint wraps a url to add flag unmarshaling.
+	// Endpoint wraps a url to add flag unmarshalling.
 	Endpoint struct {
 		*url.URL
 	}

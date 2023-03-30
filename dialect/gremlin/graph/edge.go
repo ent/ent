@@ -56,7 +56,7 @@ func (e Edge) MarshalGraphson() ([]byte, error) {
 func (e *Edge) UnmarshalGraphson(data []byte) error {
 	var edge edge
 	if err := graphson.Unmarshal(data, &edge); err != nil {
-		return fmt.Errorf("unmarshaling edge: %w", err)
+		return fmt.Errorf("unmarshalling edge: %w", err)
 	}
 
 	*e = NewEdge(

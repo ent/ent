@@ -14,7 +14,7 @@ import (
 	"math"
 	"strings"
 	"time"
-	{{- /* Ignore generting on graph templates (e.g. config.tmpl, client.tmpl, etc). */}}
+	{{- /* Ignore generating on graph templates (e.g. config.tmpl, client.tmpl, etc). */}}
 	{{- if ne $.Config.Package $.Package }}
 		"{{ $.Config.Package }}/predicate"
 		{{- if $.HasOneFieldID }}

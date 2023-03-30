@@ -116,7 +116,7 @@ func (Pet) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name").
 			NotEmpty(),
-		field.Int("owner_id"), // <-- explictly add the field we want to contain the FK
+		field.Int("owner_id"), // <-- explicitly add the field we want to contain the FK
 	}
 }
 

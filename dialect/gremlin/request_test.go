@@ -119,7 +119,7 @@ func TestCredentialsBadEncodingMarshaling(t *testing.T) {
 			text: []byte("Kg=="),
 		},
 		{
-			name: "NoSeperator",
+			name: "NoSeparator",
 			text: []byte("AHVzZXI="),
 		},
 	}
