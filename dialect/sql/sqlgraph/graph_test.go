@@ -911,14 +911,14 @@ func TestHasNeighborsWithContext(t *testing.T) {
 	}
 }
 
-func TestOrderByCountNeighbors(t *testing.T) {
+func TestOrderByNeighborsCount(t *testing.T) {
 	build := sql.Dialect(dialect.Postgres)
 	t1 := build.Table("users")
 	s := build.Select(t1.C("name")).
 		From(t1)
 	t.Run("O2M", func(t *testing.T) {
 		s := s.Clone()
-		OrderByCountNeighbors(s, &OrderByOptions{
+		OrderByNeighborsCount(s, &OrderByOptions{
 			Step: NewStep(
 				From("users", "id"),
 				To("pets", "owner_id"),
@@ -928,11 +928,11 @@ func TestOrderByCountNeighbors(t *testing.T) {
 		})
 		query, args := s.Query()
 		require.Empty(t, args)
-		require.Equal(t, `SELECT "users"."name" FROM "users" LEFT JOIN (SELECT "pets"."owner_id", COUNT(*) AS "count_pets" FROM "pets" GROUP BY "pets"."owner_id") AS "t1" ON "users"."id" = "t1"."owner_id" ORDER BY COALESCE("count_pets", 0) DESC`, query)
+		require.Equal(t, `SELECT "users"."name" FROM "users" LEFT JOIN (SELECT "pets"."owner_id", COUNT(*) AS "count_pets" FROM "pets" GROUP BY "pets"."owner_id") AS "t1" ON "users"."id" = "t1"."owner_id" ORDER BY "t1"."count_pets" DESC NULLS LAST`, query)
 	})
 	t.Run("M2M", func(t *testing.T) {
 		s := s.Clone()
-		OrderByCountNeighbors(s, &OrderByOptions{
+		OrderByNeighborsCount(s, &OrderByOptions{
 			Step: NewStep(
 				From("users", "id"),
 				To("groups", "id"),
@@ -941,12 +941,12 @@ func TestOrderByCountNeighbors(t *testing.T) {
 		})
 		query, args := s.Query()
 		require.Empty(t, args)
-		require.Equal(t, `SELECT "users"."name" FROM "users" LEFT JOIN (SELECT "user_groups"."user_id", COUNT(*) AS "count_groups" FROM "user_groups" GROUP BY "user_groups"."user_id") AS "t1" ON "users"."id" = "t1"."user_id" ORDER BY COALESCE("count_groups", 0)`, query)
+		require.Equal(t, `SELECT "users"."name" FROM "users" LEFT JOIN (SELECT "user_groups"."user_id", COUNT(*) AS "count_groups" FROM "user_groups" GROUP BY "user_groups"."user_id") AS "t1" ON "users"."id" = "t1"."user_id" ORDER BY "t1"."count_groups" NULLS FIRST`, query)
 	})
 	// Zero or one.
 	t.Run("M2O", func(t *testing.T) {
 		s1, s2 := s.Clone(), s.Clone()
-		OrderByCountNeighbors(s1, &OrderByOptions{
+		OrderByNeighborsCount(s1, &OrderByOptions{
 			Step: NewStep(
 				From("pets", "owner_id"),
 				To("users", "id"),
@@ -957,7 +957,7 @@ func TestOrderByCountNeighbors(t *testing.T) {
 		require.Empty(t, args)
 		require.Equal(t, `SELECT "users"."name" FROM "users" ORDER BY "owner_id" IS NULL`, query)
 
-		OrderByCountNeighbors(s2, &OrderByOptions{
+		OrderByNeighborsCount(s2, &OrderByOptions{
 			Step: NewStep(
 				From("pets", "owner_id"),
 				To("users", "id"),
@@ -968,6 +968,65 @@ func TestOrderByCountNeighbors(t *testing.T) {
 		query, args = s2.Query()
 		require.Empty(t, args)
 		require.Equal(t, `SELECT "users"."name" FROM "users" ORDER BY "owner_id" IS NOT NULL`, query)
+	})
+}
+
+func TestOrderByNeighborTerms(t *testing.T) {
+	build := sql.Dialect(dialect.Postgres)
+	t1 := build.Table("users")
+	s := build.Select(t1.C("name")).
+		From(t1)
+	t.Run("M2O", func(t *testing.T) {
+		s := s.Clone()
+		OrderByNeighborTerms(s, NewOrderBy(
+			NewStep(
+				From("users", "id"),
+				To("workplace", "id"),
+				Edge(M2O, true, "users", "workplace_id"),
+			),
+			OrderByColumn("name"),
+		))
+		query, args := s.Query()
+		require.Empty(t, args)
+		require.Equal(t, `SELECT "users"."name" FROM "users" LEFT JOIN (SELECT "workplace"."id", "workplace"."name" FROM "workplace") AS "t1" ON "users"."workplace_id" = "t1"."id" ORDER BY "t1"."name" NULLS FIRST`, query)
+	})
+	t.Run("O2M", func(t *testing.T) {
+		s := s.Clone()
+		OrderByNeighborTerms(s, NewOrderBy(
+			NewStep(
+				From("users", "id"),
+				To("repos", "id"),
+				Edge(O2M, false, "repo", "owner_id"),
+			),
+			OrderByExpr(
+				sql.ExprFunc(func(b *sql.Builder) {
+					b.S("SUM(").Ident("num_stars").S(")")
+				}),
+				"total_stars",
+			),
+		))
+		query, args := s.Query()
+		require.Empty(t, args)
+		require.Equal(t, `SELECT "users"."name" FROM "users" LEFT JOIN (SELECT "repo"."owner_id", (SUM("num_stars")) AS "total_stars" FROM "repo" GROUP BY "repo"."owner_id") AS "t1" ON "users"."id" = "t1"."owner_id" ORDER BY "t1"."total_stars" NULLS FIRST`, query)
+	})
+	t.Run("M2M", func(t *testing.T) {
+		s := s.Clone()
+		OrderByNeighborTerms(s, NewOrderBy(
+			NewStep(
+				From("users", "id"),
+				To("group", "id"),
+				Edge(M2M, false, "user_groups", "user_id", "group_id"),
+			),
+			OrderByExpr(
+				sql.ExprFunc(func(b *sql.Builder) {
+					b.S("SUM(").Ident("num_users").S(")")
+				}),
+				"total_users",
+			),
+		))
+		query, args := s.Query()
+		require.Empty(t, args)
+		require.Equal(t, `SELECT "users"."name" FROM "users" LEFT JOIN (SELECT "user_id", (SUM("num_users")) AS "total_users" FROM "group" JOIN "user_groups" AS "t1" ON "group"."id" = "t1"."group_id" GROUP BY "user_id") AS "t1" ON "users"."id" = "t1"."user_id" ORDER BY "t1"."total_users" NULLS FIRST`, query)
 	})
 }
 

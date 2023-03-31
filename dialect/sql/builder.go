@@ -2214,6 +2214,20 @@ func (s *Selector) AppendSelect(columns ...string) *Selector {
 	return s
 }
 
+// AppendSelectAs appends additional column to the SELECT statement with the given alias.
+func (s *Selector) AppendSelectAs(column, as string) *Selector {
+	s.selection = append(s.selection, ExprFunc(func(b *Builder) {
+		if b.isIdent(column) {
+			b.WriteString(column)
+		} else {
+			b.WriteString(s.C(column))
+		}
+		b.WriteString(" AS ")
+		b.Ident(as)
+	}))
+	return s
+}
+
 // SelectExpr changes the columns selection of the SELECT statement
 // with custom list of expressions.
 func (s *Selector) SelectExpr(exprs ...Querier) *Selector {
@@ -2826,6 +2840,14 @@ func (s *Selector) OrderExpr(exprs ...Querier) *Selector {
 	return s
 }
 
+// OrderExprFunc appends the `ORDER BY` expression that evaluates
+// the given function.
+func (s *Selector) OrderExprFunc(f func(*Builder)) *Selector {
+	return s.OrderExpr(
+		Dialect(s.Dialect()).Expr(f),
+	)
+}
+
 // ClearOrder clears the ORDER BY clause to be empty.
 func (s *Selector) ClearOrder() *Selector {
 	s.order = nil
@@ -3380,6 +3402,11 @@ func (b *Builder) WriteString(s string) *Builder {
 	}
 	b.sb.WriteString(s)
 	return b
+}
+
+// S is a short version of WriteString.
+func (b *Builder) S(s string) *Builder {
+	return b.WriteString(s)
 }
 
 // Len returns the number of accumulated bytes.
