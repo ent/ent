@@ -167,6 +167,7 @@ var (
 		NillableRequired,
 		ExtValueScan,
 		OrderByEdgeCount,
+		OrderByEdgeTerms,
 	}
 )
 
@@ -2392,7 +2393,7 @@ func OrderByEdgeCount(t *testing.T, client *ent.Client) {
 	} {
 		ids := client.User.Query().
 			Order(func(s *sql.Selector) {
-				sqlgraph.OrderByCountNeighbors(s, &sqlgraph.OrderByOptions{
+				sqlgraph.OrderByNeighborsCount(s, &sqlgraph.OrderByOptions{
 					Desc: tt.desc,
 					Step: sqlgraph.NewStep(
 						sqlgraph.From(user.Table, user.FieldID),
@@ -2415,7 +2416,7 @@ func OrderByEdgeCount(t *testing.T, client *ent.Client) {
 		ids := client.Pet.Query().
 			Order(
 				func(s *sql.Selector) {
-					sqlgraph.OrderByCountNeighbors(s, &sqlgraph.OrderByOptions{
+					sqlgraph.OrderByNeighborsCount(s, &sqlgraph.OrderByOptions{
 						Desc: tt.desc,
 						Step: sqlgraph.NewStep(
 							sqlgraph.From(pet.Table, pet.OwnerColumn),
@@ -2447,7 +2448,7 @@ func OrderByEdgeCount(t *testing.T, client *ent.Client) {
 	} {
 		ids := client.Group.Query().
 			Order(func(s *sql.Selector) {
-				sqlgraph.OrderByCountNeighbors(s, &sqlgraph.OrderByOptions{
+				sqlgraph.OrderByNeighborsCount(s, &sqlgraph.OrderByOptions{
 					Desc: tt.desc,
 					Step: sqlgraph.NewStep(
 						sqlgraph.From(group.Table, group.FieldID),
@@ -2469,7 +2470,7 @@ func OrderByEdgeCount(t *testing.T, client *ent.Client) {
 	} {
 		ids := client.User.Query().
 			Order(func(s *sql.Selector) {
-				sqlgraph.OrderByCountNeighbors(s, &sqlgraph.OrderByOptions{
+				sqlgraph.OrderByNeighborsCount(s, &sqlgraph.OrderByOptions{
 					Desc: tt.desc,
 					Step: sqlgraph.NewStep(
 						sqlgraph.From(user.Table, user.FieldID),
@@ -2477,6 +2478,135 @@ func OrderByEdgeCount(t *testing.T, client *ent.Client) {
 						sqlgraph.Edge(sqlgraph.M2M, false, user.GroupsTable, user.GroupsPrimaryKey...),
 					),
 				})
+			}).
+			IDsX(ctx)
+		require.Equal(t, tt.ids, ids)
+	}
+}
+
+// Testing the "low-level" behavior of the sqlgraph package.
+// This functionality may be extended to the generated fluent API.
+func OrderByEdgeTerms(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	users := client.User.CreateBulk(
+		client.User.Create().SetName("a").SetAge(1),
+		client.User.Create().SetName("b").SetAge(2),
+		client.User.Create().SetName("c").SetAge(3),
+		client.User.Create().SetName("d").SetAge(4),
+	).SaveX(ctx)
+	pets := client.Pet.CreateBulk(
+		client.Pet.Create().SetName("aa").SetAge(2).SetOwner(users[1]),
+		client.Pet.Create().SetName("ab").SetAge(2).SetOwner(users[1]),
+		client.Pet.Create().SetName("ac").SetAge(1).SetOwner(users[0]),
+		client.Pet.Create().SetName("ba").SetAge(1).SetOwner(users[0]),
+		client.Pet.Create().SetName("bb").SetAge(1).SetOwner(users[0]),
+		client.Pet.Create().SetName("ca").SetAge(3).SetOwner(users[2]),
+		client.Pet.Create().SetName("d"),
+		client.Pet.Create().SetName("e"),
+	).SaveX(ctx)
+	// M2O edge (inverse).
+	// Order pets by their owner's name.
+	for _, tt := range []struct {
+		opt sqlgraph.OrderByOption
+		ids []int
+	}{
+		{
+			opt: sqlgraph.OrderByColumn(user.FieldName),
+			ids: []int{pets[6].ID, pets[7].ID, pets[2].ID, pets[3].ID, pets[4].ID, pets[0].ID, pets[1].ID, pets[5].ID},
+		},
+		{
+			opt: sqlgraph.OrderByColumnDesc(user.FieldName),
+			ids: []int{pets[5].ID, pets[0].ID, pets[1].ID, pets[2].ID, pets[3].ID, pets[4].ID, pets[6].ID, pets[7].ID},
+		},
+	} {
+		ids := client.Pet.Query().
+			Order(func(s *sql.Selector) {
+				sqlgraph.OrderByNeighborTerms(s, sqlgraph.NewOrderBy(
+					sqlgraph.NewStep(
+						sqlgraph.From(pet.Table, pet.FieldID),
+						sqlgraph.To(user.Table, user.FieldID),
+						sqlgraph.Edge(sqlgraph.M2O, true, pet.Table, pet.OwnerColumn),
+					),
+					tt.opt,
+				))
+			}).
+			Order(ent.Asc(pet.FieldID)).
+			IDsX(ctx)
+		require.Equal(t, tt.ids, ids)
+	}
+	// O2M edge (aggregation).
+	for _, tt := range []struct {
+		opt sqlgraph.OrderByOption
+		ids []int
+	}{
+		{
+			opt: sqlgraph.OrderByExpr(sql.Expr("SUM(age)"), "sum_age"),
+			ids: []int{users[3].ID, users[0].ID, users[2].ID, users[1].ID},
+		},
+		{
+			opt: sqlgraph.OrderByExprDesc(sql.Expr("SUM(age)"), "sum_age"),
+			ids: []int{users[1].ID, users[0].ID, users[2].ID, users[3].ID},
+		},
+	} {
+		ids := client.User.Query().
+			Order(func(s *sql.Selector) {
+				sqlgraph.OrderByNeighborTerms(s, sqlgraph.NewOrderBy(
+					sqlgraph.NewStep(
+						sqlgraph.From(user.Table, user.FieldID),
+						sqlgraph.To(pet.Table, pet.FieldID),
+						sqlgraph.Edge(sqlgraph.O2M, false, pet.Table, pet.OwnerColumn),
+					),
+					tt.opt,
+				))
+			}).
+			Order(ent.Asc(user.FieldID)).
+			IDsX(ctx)
+		require.Equal(t, tt.ids, ids)
+	}
+
+	inf, exp := client.GroupInfo.Create().SetDesc("desc").SaveX(ctx), time.Now()
+	client.Group.CreateBulk(
+		client.Group.Create().SetName("Group: 4 users").SetExpire(exp).SetMaxUsers(40).SetInfo(inf).AddUsers(users...),
+		client.Group.Create().SetName("Group: 3 users").SetExpire(exp).SetMaxUsers(20).SetInfo(inf).AddUsers(users[:3]...),
+		client.Group.Create().SetName("Group: 2 users").SetExpire(exp).SetMaxUsers(20).SetInfo(inf).AddUsers(users[:2]...),
+		client.Group.Create().SetName("Group: 1 users").SetExpire(exp).SetMaxUsers(100).SetInfo(inf).AddUsers(users[:1]...),
+		client.Group.Create().SetName("Group: 0 users").SetExpire(exp).SetInfo(inf),
+	).ExecX(ctx)
+	// M2M edge.
+	// O2M edge (aggregation).
+	for _, tt := range []struct {
+		opt sqlgraph.OrderByOption
+		ids []int
+	}{
+		{
+			opt: sqlgraph.OrderByExpr(
+				sql.ExprFunc(func(b *sql.Builder) {
+					b.S("SUM(").Ident(group.FieldMaxUsers).S(")")
+				}),
+				"sum_max_users",
+			),
+			ids: []int{users[3].ID, users[2].ID, users[1].ID, users[0].ID},
+		},
+		{
+			opt: sqlgraph.OrderByExprDesc(
+				sql.ExprFunc(func(b *sql.Builder) {
+					b.S("SUM(").Ident(group.FieldMaxUsers).S(")")
+				}),
+				"sum_max_users",
+			),
+			ids: []int{users[0].ID, users[1].ID, users[2].ID, users[3].ID},
+		},
+	} {
+		ids := client.User.Query().
+			Order(func(s *sql.Selector) {
+				sqlgraph.OrderByNeighborTerms(s, sqlgraph.NewOrderBy(
+					sqlgraph.NewStep(
+						sqlgraph.From(user.Table, user.FieldID),
+						sqlgraph.To(group.Table, group.FieldID),
+						sqlgraph.Edge(sqlgraph.M2M, false, user.GroupsTable, user.GroupsPrimaryKey...),
+					),
+					tt.opt,
+				))
 			}).
 			IDsX(ctx)
 		require.Equal(t, tt.ids, ids)
