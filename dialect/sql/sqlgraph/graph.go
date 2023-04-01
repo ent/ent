@@ -142,12 +142,29 @@ func NewStep(opts ...StepOption) *Step {
 	return s
 }
 
+// FromEdgeOwner returns true if the step is from an edge owner.
+// i.e., from the table that holds the foreign-key.
+func (s *Step) FromEdgeOwner() bool {
+	return s.Edge.Rel == M2O || (s.Edge.Rel == O2O && s.Edge.Inverse)
+}
+
+// ToEdgeOwner returns true if the step is to an edge owner.
+// i.e., to the table that holds the foreign-key.
+func (s *Step) ToEdgeOwner() bool {
+	return s.Edge.Rel == O2M || (s.Edge.Rel == O2O && !s.Edge.Inverse)
+}
+
+// ThroughEdgeTable returns true if the step is through a join-table.
+func (s *Step) ThroughEdgeTable() bool {
+	return s.Edge.Rel == M2M
+}
+
 // Neighbors returns a Selector for evaluating the path-step
 // and getting the neighbors of one vertex.
 func Neighbors(dialect string, s *Step) (q *sql.Selector) {
 	builder := sql.Dialect(dialect)
-	switch r := s.Edge.Rel; {
-	case r == M2M:
+	switch {
+	case s.ThroughEdgeTable():
 		pk1, pk2 := s.Edge.Columns[1], s.Edge.Columns[0]
 		if s.Edge.Inverse {
 			pk1, pk2 = pk2, pk1
@@ -161,7 +178,7 @@ func Neighbors(dialect string, s *Step) (q *sql.Selector) {
 			From(to).
 			Join(match).
 			On(to.C(s.To.Column), match.C(pk1))
-	case r == M2O || (r == O2O && s.Edge.Inverse):
+	case s.FromEdgeOwner():
 		t1 := builder.Table(s.To.Table).Schema(s.To.Schema)
 		t2 := builder.Select(s.Edge.Columns[0]).
 			From(builder.Table(s.Edge.Table).Schema(s.Edge.Schema)).
@@ -170,7 +187,7 @@ func Neighbors(dialect string, s *Step) (q *sql.Selector) {
 			From(t1).
 			Join(t2).
 			On(t1.C(s.To.Column), t2.C(s.Edge.Columns[0]))
-	case r == O2M || (r == O2O && !s.Edge.Inverse):
+	case s.ToEdgeOwner():
 		q = builder.Select().
 			From(builder.Table(s.To.Table).Schema(s.To.Schema)).
 			Where(sql.EQ(s.Edge.Columns[0], s.From.V))
@@ -183,8 +200,8 @@ func Neighbors(dialect string, s *Step) (q *sql.Selector) {
 func SetNeighbors(dialect string, s *Step) (q *sql.Selector) {
 	set := s.From.V.(*sql.Selector)
 	builder := sql.Dialect(dialect)
-	switch r := s.Edge.Rel; {
-	case r == M2M:
+	switch {
+	case s.ThroughEdgeTable():
 		pk1, pk2 := s.Edge.Columns[1], s.Edge.Columns[0]
 		if s.Edge.Inverse {
 			pk1, pk2 = pk2, pk1
@@ -200,14 +217,14 @@ func SetNeighbors(dialect string, s *Step) (q *sql.Selector) {
 			From(to).
 			Join(match).
 			On(to.C(s.To.Column), match.C(pk1))
-	case r == M2O || (r == O2O && s.Edge.Inverse):
+	case s.FromEdgeOwner():
 		t1 := builder.Table(s.To.Table).Schema(s.To.Schema)
 		set.Select(set.C(s.Edge.Columns[0]))
 		q = builder.Select().
 			From(t1).
 			Join(set).
 			On(t1.C(s.To.Column), set.C(s.Edge.Columns[0]))
-	case r == O2M || (r == O2O && !s.Edge.Inverse):
+	case s.ToEdgeOwner():
 		t1 := builder.Table(s.To.Table).Schema(s.To.Schema)
 		set.Select(set.C(s.From.Column))
 		q = builder.Select().
@@ -221,8 +238,8 @@ func SetNeighbors(dialect string, s *Step) (q *sql.Selector) {
 // HasNeighbors applies on the given Selector a neighbors check.
 func HasNeighbors(q *sql.Selector, s *Step) {
 	builder := sql.Dialect(q.Dialect())
-	switch r := s.Edge.Rel; {
-	case r == M2M:
+	switch {
+	case s.ThroughEdgeTable():
 		pk1 := s.Edge.Columns[0]
 		if s.Edge.Inverse {
 			pk1 = s.Edge.Columns[1]
@@ -234,9 +251,9 @@ func HasNeighbors(q *sql.Selector, s *Step) {
 				builder.Select(join.C(pk1)).From(join),
 			),
 		)
-	case r == M2O || (r == O2O && s.Edge.Inverse):
+	case s.FromEdgeOwner():
 		q.Where(sql.NotNull(q.C(s.Edge.Columns[0])))
-	case r == O2M || (r == O2O && !s.Edge.Inverse):
+	case s.ToEdgeOwner():
 		to := builder.Table(s.Edge.Table).Schema(s.Edge.Schema)
 		q.Where(
 			sql.In(
@@ -253,8 +270,8 @@ func HasNeighbors(q *sql.Selector, s *Step) {
 // The given predicate applies its filtering on the selector.
 func HasNeighborsWith(q *sql.Selector, s *Step, pred func(*sql.Selector)) {
 	builder := sql.Dialect(q.Dialect())
-	switch r := s.Edge.Rel; {
-	case r == M2M:
+	switch {
+	case s.ThroughEdgeTable():
 		pk1, pk2 := s.Edge.Columns[1], s.Edge.Columns[0]
 		if s.Edge.Inverse {
 			pk1, pk2 = pk2, pk1
@@ -270,14 +287,14 @@ func HasNeighborsWith(q *sql.Selector, s *Step, pred func(*sql.Selector)) {
 		pred(matches)
 		join.FromSelect(matches)
 		q.Where(sql.In(q.C(s.From.Column), join))
-	case r == M2O || (r == O2O && s.Edge.Inverse):
+	case s.FromEdgeOwner():
 		to := builder.Table(s.To.Table).Schema(s.To.Schema)
 		matches := builder.Select(to.C(s.To.Column)).
 			From(to)
 		matches.WithContext(q.Context())
 		pred(matches)
 		q.Where(sql.In(q.C(s.Edge.Columns[0]), matches))
-	case r == O2M || (r == O2O && !s.Edge.Inverse):
+	case s.ToEdgeOwner():
 		to := builder.Table(s.Edge.Table).Schema(s.Edge.Schema)
 		matches := builder.Select(to.C(s.Edge.Columns[0])).
 			From(to)
@@ -412,8 +429,8 @@ func OrderByNeighborsCount(q *sql.Selector, opts *OrderByOptions) *OrderByInfo {
 		join   *sql.Selector
 		build  = sql.Dialect(q.Dialect())
 	)
-	switch s, r := opts.Step, opts.Step.Edge.Rel; {
-	case r == M2O || (r == O2O && s.Edge.Inverse):
+	switch s := opts.Step; {
+	case s.FromEdgeOwner():
 		// For M2O and O2O inverse, the FK resides in the same table.
 		// Hence, the order by is on the nullability of the column.
 		x := func(b *sql.Builder) {
@@ -430,7 +447,7 @@ func OrderByNeighborsCount(q *sql.Selector, opts *OrderByOptions) *OrderByInfo {
 				{Expr: build.Expr(x), Type: field.TypeBool},
 			},
 		}
-	case r == M2M:
+	case s.ThroughEdgeTable():
 		countC = countAlias(q, s)
 		pk1 := s.Edge.Columns[0]
 		if s.Edge.Inverse {
@@ -448,7 +465,7 @@ func OrderByNeighborsCount(q *sql.Selector, opts *OrderByOptions) *OrderByInfo {
 				q.C(s.From.Column),
 				join.C(pk1),
 			)
-	case r == O2M || (r == O2O && !s.Edge.Inverse):
+	case s.ToEdgeOwner():
 		countC = countAlias(q, s)
 		edgeT := build.Table(s.Edge.Table).Schema(s.Edge.Schema)
 		join = build.Select(
@@ -516,15 +533,15 @@ func OrderByNeighborTerms(q *sql.Selector, opts *OrderByOptions) {
 		join  *sql.Selector
 		build = sql.Dialect(q.Dialect())
 	)
-	switch s, r := opts.Step, opts.Step.Edge.Rel; {
-	case r == M2O || (r == O2O && s.Edge.Inverse):
+	switch s := opts.Step; {
+	case s.FromEdgeOwner():
 		toT := build.Table(s.To.Table).Schema(s.To.Schema)
 		join = build.Select(toT.C(s.To.Column)).
 			From(toT)
 		selectTerms(join, opts.Terms)
 		q.LeftJoin(join).
 			On(q.C(s.Edge.Columns[0]), join.C(s.To.Column))
-	case r == M2M:
+	case s.ThroughEdgeTable():
 		pk1, pk2 := s.Edge.Columns[1], s.Edge.Columns[0]
 		if s.Edge.Inverse {
 			pk1, pk2 = pk2, pk1
@@ -539,7 +556,7 @@ func OrderByNeighborTerms(q *sql.Selector, opts *OrderByOptions) {
 		selectTerms(join, opts.Terms)
 		q.LeftJoin(join).
 			On(q.C(s.From.Column), join.C(pk2))
-	case r == O2M || (r == O2O && !s.Edge.Inverse):
+	case s.ToEdgeOwner():
 		toT := build.Table(s.Edge.Table).Schema(s.Edge.Schema)
 		join = build.Select(toT.C(s.Edge.Columns[0])).
 			From(toT).
