@@ -4,9 +4,9 @@
 
 package sql
 
-// This file provides extra helpers to simplify the way raw predicates
-// are defined and used in both ent/schema and generated code. For full
-// predicates, check out the sql.P in builder.go.
+// The following helpers exist to simplify the way raw predicates
+// are defined and used in both ent/schema and generated code. For
+// full predicates API, check out the sql.P in builder.go.
 
 // FieldIsNull returns a raw predicate to check if the given field is NULL.
 func FieldIsNull(name string) func(*Selector) {
@@ -57,10 +57,24 @@ func FieldGT(name string, v any) func(*Selector) {
 	}
 }
 
+// FieldsGT returns a raw predicate to check if field1 is greater than field2.
+func FieldsGT(field1, field2 string) func(*Selector) {
+	return func(s *Selector) {
+		s.Where(ColumnsGT(s.C(field1), s.C(field2)))
+	}
+}
+
 // FieldGTE returns a raw predicate to check if the given field is greater than or equal the given value.
 func FieldGTE(name string, v any) func(*Selector) {
 	return func(s *Selector) {
 		s.Where(GTE(s.C(name), v))
+	}
+}
+
+// FieldsGTE returns a raw predicate to check if field1 is greater than or equal field2.
+func FieldsGTE(field1, field2 string) func(*Selector) {
+	return func(s *Selector) {
+		s.Where(ColumnsGTE(s.C(field1), s.C(field2)))
 	}
 }
 
@@ -71,10 +85,24 @@ func FieldLT(name string, v any) func(*Selector) {
 	}
 }
 
+// FieldsLT returns a raw predicate to check if field1 is lower than field2.
+func FieldsLT(field1, field2 string) func(*Selector) {
+	return func(s *Selector) {
+		s.Where(ColumnsLT(s.C(field1), s.C(field2)))
+	}
+}
+
 // FieldLTE returns a raw predicate to check if the value of the field is less than the given value.
 func FieldLTE(name string, v any) func(*Selector) {
 	return func(s *Selector) {
 		s.Where(LTE(s.C(name), v))
+	}
+}
+
+// FieldsLTE returns a raw predicate to check if field1 is lower than or equal field2.
+func FieldsLTE(field1, field2 string) func(*Selector) {
+	return func(s *Selector) {
+		s.Where(ColumnsLTE(s.C(field1), s.C(field2)))
 	}
 }
 

@@ -138,6 +138,24 @@ func TestFieldGT(t *testing.T) {
 	})
 }
 
+func TestFieldsGT(t *testing.T) {
+	p := FieldsGT("a", "b")
+	t.Run("MySQL", func(t *testing.T) {
+		s := Dialect(dialect.MySQL).Select("*").From(Table("users"))
+		p(s)
+		query, args := s.Query()
+		require.Equal(t, "SELECT * FROM `users` WHERE `users`.`a` > `users`.`b`", query)
+		require.Empty(t, args)
+	})
+	t.Run("PostgreSQL", func(t *testing.T) {
+		s := Dialect(dialect.Postgres).Select("*").From(Table("users"))
+		p(s)
+		query, args := s.Query()
+		require.Equal(t, `SELECT * FROM "users" WHERE "users"."a" > "users"."b"`, query)
+		require.Empty(t, args)
+	})
+}
+
 func TestFieldGTE(t *testing.T) {
 	p := FieldGTE("stars", 1000)
 	t.Run("MySQL", func(t *testing.T) {
@@ -153,6 +171,24 @@ func TestFieldGTE(t *testing.T) {
 		query, args := s.Query()
 		require.Equal(t, `SELECT * FROM "users" WHERE "users"."stars" >= $1`, query)
 		require.Equal(t, []any{1000}, args)
+	})
+}
+
+func TestFieldsGTE(t *testing.T) {
+	p := FieldsGTE("a", "b")
+	t.Run("MySQL", func(t *testing.T) {
+		s := Dialect(dialect.MySQL).Select("*").From(Table("users"))
+		p(s)
+		query, args := s.Query()
+		require.Equal(t, "SELECT * FROM `users` WHERE `users`.`a` >= `users`.`b`", query)
+		require.Empty(t, args)
+	})
+	t.Run("PostgreSQL", func(t *testing.T) {
+		s := Dialect(dialect.Postgres).Select("*").From(Table("users"))
+		p(s)
+		query, args := s.Query()
+		require.Equal(t, `SELECT * FROM "users" WHERE "users"."a" >= "users"."b"`, query)
+		require.Empty(t, args)
 	})
 }
 
@@ -174,6 +210,24 @@ func TestFieldLT(t *testing.T) {
 	})
 }
 
+func TestFieldsLT(t *testing.T) {
+	p := FieldsLT("a", "b")
+	t.Run("MySQL", func(t *testing.T) {
+		s := Dialect(dialect.MySQL).Select("*").From(Table("users"))
+		p(s)
+		query, args := s.Query()
+		require.Equal(t, "SELECT * FROM `users` WHERE `users`.`a` < `users`.`b`", query)
+		require.Empty(t, args)
+	})
+	t.Run("PostgreSQL", func(t *testing.T) {
+		s := Dialect(dialect.Postgres).Select("*").From(Table("users"))
+		p(s)
+		query, args := s.Query()
+		require.Equal(t, `SELECT * FROM "users" WHERE "users"."a" < "users"."b"`, query)
+		require.Empty(t, args)
+	})
+}
+
 func TestFieldLTE(t *testing.T) {
 	p := FieldLTE("stars", 1000)
 	t.Run("MySQL", func(t *testing.T) {
@@ -189,6 +243,24 @@ func TestFieldLTE(t *testing.T) {
 		query, args := s.Query()
 		require.Equal(t, `SELECT * FROM "users" WHERE "users"."stars" <= $1`, query)
 		require.Equal(t, []any{1000}, args)
+	})
+}
+
+func TestFieldsLTE(t *testing.T) {
+	p := FieldsLTE("a", "b")
+	t.Run("MySQL", func(t *testing.T) {
+		s := Dialect(dialect.MySQL).Select("*").From(Table("users"))
+		p(s)
+		query, args := s.Query()
+		require.Equal(t, "SELECT * FROM `users` WHERE `users`.`a` <= `users`.`b`", query)
+		require.Empty(t, args)
+	})
+	t.Run("PostgreSQL", func(t *testing.T) {
+		s := Dialect(dialect.Postgres).Select("*").From(Table("users"))
+		p(s)
+		query, args := s.Query()
+		require.Equal(t, `SELECT * FROM "users" WHERE "users"."a" <= "users"."b"`, query)
+		require.Empty(t, args)
 	})
 }
 
