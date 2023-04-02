@@ -4,6 +4,10 @@
 
 package sql
 
+import (
+	"fmt"
+)
+
 // The following helpers exist to simplify the way raw predicates
 // are defined and used in both ent/schema and generated code. For
 // full predicates API, check out the sql.P in builder.go.
@@ -160,5 +164,25 @@ func FieldContains(name string, substr string) func(*Selector) {
 func FieldContainsFold(name string, substr string) func(*Selector) {
 	return func(s *Selector) {
 		s.Where(ContainsFold(s.C(name), substr))
+	}
+}
+
+// ColumnCheck is a function that verifies whether the
+// specified column exists within the given table.
+type ColumnCheck func(table, column string) error
+
+// NewColumnCheck returns a function that verifies whether the specified column exists
+// within the given table. This function is utilized by the generated code to validate
+// column names in ordering functions.
+func NewColumnCheck(checks map[string]func(string) bool) ColumnCheck {
+	return func(table, column string) error {
+		check, ok := checks[table]
+		if !ok {
+			return fmt.Errorf("unknown table %q", table)
+		}
+		if !check(column) {
+			return fmt.Errorf("unknown column %q for table %q", column, table)
+		}
+		return nil
 	}
 }
