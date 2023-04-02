@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/migrate/entv2/media"
 )
@@ -24,7 +25,8 @@ type Media struct {
 	// source_ui text
 	SourceURI string `json:"source_uri,omitempty"`
 	// media text
-	Text string `json:"text,omitempty"`
+	Text         string `json:"text,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -37,7 +39,7 @@ func (*Media) scanValues(columns []string) ([]any, error) {
 		case media.FieldSource, media.FieldSourceURI, media.FieldText:
 			values[i] = new(sql.NullString)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Media", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -75,9 +77,17 @@ func (m *Media) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				m.Text = value.String
 			}
+		default:
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Media.
+// This includes values selected through modifiers, order, etc.
+func (m *Media) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Media.

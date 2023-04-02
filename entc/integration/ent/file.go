@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/file"
 	"entgo.io/ent/entc/integration/ent/filetype"
@@ -39,6 +40,7 @@ type File struct {
 	file_type_files *int
 	group_files     *int
 	user_files      *int
+	selectValues    sql.SelectValues
 }
 
 // FileEdges holds the relations/edges for other nodes in the graph.
@@ -108,7 +110,7 @@ func (*File) scanValues(columns []string) ([]any, error) {
 		case file.ForeignKeys[2]: // user_files
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type File", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -186,9 +188,17 @@ func (f *File) assignValues(columns []string, values []any) error {
 				f.user_files = new(int)
 				*f.user_files = int(value.Int64)
 			}
+		default:
+			f.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the File.
+// This includes values selected through modifiers, order, etc.
+func (f *File) Value(name string) (ent.Value, error) {
+	return f.selectValues.Get(name)
 }
 
 // QueryOwner queries the "owner" edge of the File entity.

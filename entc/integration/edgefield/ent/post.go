@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgefield/ent/post"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
@@ -26,7 +27,8 @@ type Post struct {
 	AuthorID *int `json:"author_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PostQuery when eager-loading is set.
-	Edges PostEdges `json:"edges"`
+	Edges        PostEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // PostEdges holds the relations/edges for other nodes in the graph.
@@ -61,7 +63,7 @@ func (*Post) scanValues(columns []string) ([]any, error) {
 		case post.FieldText:
 			values[i] = new(sql.NullString)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Post", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -94,9 +96,17 @@ func (po *Post) assignValues(columns []string, values []any) error {
 				po.AuthorID = new(int)
 				*po.AuthorID = int(value.Int64)
 			}
+		default:
+			po.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Post.
+// This includes values selected through modifiers, order, etc.
+func (po *Post) Value(name string) (ent.Value, error) {
+	return po.selectValues.Get(name)
 }
 
 // QueryAuthor queries the "author" edge of the Post entity.

@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgefield/ent/car"
 	"entgo.io/ent/entc/integration/edgefield/ent/rental"
@@ -31,7 +32,8 @@ type Rental struct {
 	CarID uuid.UUID `json:"car_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RentalQuery when eager-loading is set.
-	Edges RentalEdges `json:"edges"`
+	Edges        RentalEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // RentalEdges holds the relations/edges for other nodes in the graph.
@@ -83,7 +85,7 @@ func (*Rental) scanValues(columns []string) ([]any, error) {
 		case rental.FieldCarID:
 			values[i] = new(uuid.UUID)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Rental", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -121,9 +123,17 @@ func (r *Rental) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				r.CarID = *value
 			}
+		default:
+			r.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Rental.
+// This includes values selected through modifiers, order, etc.
+func (r *Rental) Value(name string) (ent.Value, error) {
+	return r.selectValues.Get(name)
 }
 
 // QueryUser queries the "user" edge of the Rental entity.

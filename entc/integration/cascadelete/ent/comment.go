@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/cascadelete/ent/comment"
 	"entgo.io/ent/entc/integration/cascadelete/ent/post"
@@ -26,7 +27,8 @@ type Comment struct {
 	PostID int `json:"post_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CommentQuery when eager-loading is set.
-	Edges CommentEdges `json:"edges"`
+	Edges        CommentEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // CommentEdges holds the relations/edges for other nodes in the graph.
@@ -61,7 +63,7 @@ func (*Comment) scanValues(columns []string) ([]any, error) {
 		case comment.FieldText:
 			values[i] = new(sql.NullString)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Comment", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -93,9 +95,17 @@ func (c *Comment) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				c.PostID = int(value.Int64)
 			}
+		default:
+			c.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Comment.
+// This includes values selected through modifiers, order, etc.
+func (c *Comment) Value(name string) (ent.Value, error) {
+	return c.selectValues.Get(name)
 }
 
 // QueryPost queries the "post" edge of the Comment entity.

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/privacy/ent/team"
 )
@@ -23,7 +24,8 @@ type Team struct {
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TeamQuery when eager-loading is set.
-	Edges TeamEdges `json:"edges"`
+	Edges        TeamEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // TeamEdges holds the relations/edges for other nodes in the graph.
@@ -65,7 +67,7 @@ func (*Team) scanValues(columns []string) ([]any, error) {
 		case team.FieldName:
 			values[i] = new(sql.NullString)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Team", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -91,9 +93,17 @@ func (t *Team) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				t.Name = value.String
 			}
+		default:
+			t.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Team.
+// This includes values selected through modifiers, order, etc.
+func (t *Team) Value(name string) (ent.Value, error) {
+	return t.selectValues.Get(name)
 }
 
 // QueryTasks queries the "tasks" edge of the Team entity.

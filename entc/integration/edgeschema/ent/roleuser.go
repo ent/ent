@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgeschema/ent/role"
 	"entgo.io/ent/entc/integration/edgeschema/ent/roleuser"
@@ -28,7 +29,8 @@ type RoleUser struct {
 	UserID int `json:"user_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RoleUserQuery when eager-loading is set.
-	Edges RoleUserEdges `json:"edges"`
+	Edges        RoleUserEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // RoleUserEdges holds the relations/edges for other nodes in the graph.
@@ -78,7 +80,7 @@ func (*RoleUser) scanValues(columns []string) ([]any, error) {
 		case roleuser.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type RoleUser", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -110,9 +112,17 @@ func (ru *RoleUser) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ru.UserID = int(value.Int64)
 			}
+		default:
+			ru.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the RoleUser.
+// This includes values selected through modifiers, order, etc.
+func (ru *RoleUser) Value(name string) (ent.Value, error) {
+	return ru.selectValues.Get(name)
 }
 
 // QueryRole queries the "role" edge of the RoleUser entity.

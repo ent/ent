@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgeschema/ent/file"
 )
@@ -23,7 +24,8 @@ type File struct {
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FileQuery when eager-loading is set.
-	Edges FileEdges `json:"edges"`
+	Edges        FileEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // FileEdges holds the relations/edges for other nodes in the graph.
@@ -54,7 +56,7 @@ func (*File) scanValues(columns []string) ([]any, error) {
 		case file.FieldName:
 			values[i] = new(sql.NullString)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type File", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -80,9 +82,17 @@ func (f *File) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				f.Name = value.String
 			}
+		default:
+			f.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the File.
+// This includes values selected through modifiers, order, etc.
+func (f *File) Value(name string) (ent.Value, error) {
+	return f.selectValues.Get(name)
 }
 
 // QueryProcesses queries the "processes" edge of the File entity.

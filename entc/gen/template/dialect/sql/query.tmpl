@@ -322,7 +322,6 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 
 {{ template "dialect/sql/query/selector" $ }}
 
-
 {{- /* Allow adding methods to the query-builder by ent extensions or user templates.*/}}
 {{- with $tmpls := matchTemplate "dialect/sql/query/additional/*" }}
 	{{- range $tmpl := $tmpls }}

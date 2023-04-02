@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/migrate/entv2/customtype"
 )
@@ -25,7 +26,8 @@ type CustomType struct {
 	// Tz0 holds the value of the "tz0" field.
 	Tz0 time.Time `json:"tz0,omitempty"`
 	// Tz3 holds the value of the "tz3" field.
-	Tz3 time.Time `json:"tz3,omitempty"`
+	Tz3          time.Time `json:"tz3,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -40,7 +42,7 @@ func (*CustomType) scanValues(columns []string) ([]any, error) {
 		case customtype.FieldTz0, customtype.FieldTz3:
 			values[i] = new(sql.NullTime)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type CustomType", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -78,9 +80,17 @@ func (ct *CustomType) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ct.Tz3 = value.Time
 			}
+		default:
+			ct.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the CustomType.
+// This includes values selected through modifiers, order, etc.
+func (ct *CustomType) Value(name string) (ent.Value, error) {
+	return ct.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this CustomType.

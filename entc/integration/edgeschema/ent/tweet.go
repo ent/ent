@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 )
@@ -23,7 +24,8 @@ type Tweet struct {
 	Text string `json:"text,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TweetQuery when eager-loading is set.
-	Edges TweetEdges `json:"edges"`
+	Edges        TweetEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // TweetEdges holds the relations/edges for other nodes in the graph.
@@ -109,7 +111,7 @@ func (*Tweet) scanValues(columns []string) ([]any, error) {
 		case tweet.FieldText:
 			values[i] = new(sql.NullString)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Tweet", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -135,9 +137,17 @@ func (t *Tweet) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				t.Text = value.String
 			}
+		default:
+			t.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Tweet.
+// This includes values selected through modifiers, order, etc.
+func (t *Tweet) Value(name string) (ent.Value, error) {
+	return t.selectValues.Get(name)
 }
 
 // QueryLikedUsers queries the "liked_users" edge of the Tweet entity.

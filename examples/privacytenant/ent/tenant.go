@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/examples/privacytenant/ent/tenant"
 )
@@ -20,7 +21,8 @@ type Tenant struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
-	Name string `json:"name,omitempty"`
+	Name         string `json:"name,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -33,7 +35,7 @@ func (*Tenant) scanValues(columns []string) ([]any, error) {
 		case tenant.FieldName:
 			values[i] = new(sql.NullString)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Tenant", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -59,9 +61,17 @@ func (t *Tenant) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				t.Name = value.String
 			}
+		default:
+			t.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Tenant.
+// This includes values selected through modifiers, order, etc.
+func (t *Tenant) Value(name string) (ent.Value, error) {
+	return t.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Tenant.

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
 )
@@ -23,7 +24,8 @@ type Tag struct {
 	Value string `json:"value,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TagQuery when eager-loading is set.
-	Edges TagEdges `json:"edges"`
+	Edges        TagEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // TagEdges holds the relations/edges for other nodes in the graph.
@@ -87,7 +89,7 @@ func (*Tag) scanValues(columns []string) ([]any, error) {
 		case tag.FieldValue:
 			values[i] = new(sql.NullString)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Tag", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -113,9 +115,17 @@ func (t *Tag) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				t.Value = value.String
 			}
+		default:
+			t.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// GetValue returns the ent.Value that was dynamically selected and assigned to the Tag.
+// This includes values selected through modifiers, order, etc.
+func (t *Tag) GetValue(name string) (ent.Value, error) {
+	return t.selectValues.Get(name)
 }
 
 // QueryTweets queries the "tweets" edge of the Tag entity.

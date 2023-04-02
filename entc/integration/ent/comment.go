@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/comment"
 	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
@@ -32,7 +33,8 @@ type Comment struct {
 	// Dir holds the value of the "dir" field.
 	Dir schemadir.Dir `json:"dir,omitempty"`
 	// Client holds the value of the "client" field.
-	Client string `json:"client,omitempty"`
+	Client       string `json:"client,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -49,7 +51,7 @@ func (*Comment) scanValues(columns []string) ([]any, error) {
 		case comment.FieldTable, comment.FieldClient:
 			values[i] = new(sql.NullString)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Comment", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -108,9 +110,17 @@ func (c *Comment) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				c.Client = value.String
 			}
+		default:
+			c.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Comment.
+// This includes values selected through modifiers, order, etc.
+func (c *Comment) Value(name string) (ent.Value, error) {
+	return c.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Comment.

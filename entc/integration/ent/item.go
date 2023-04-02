@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/item"
 )
@@ -20,7 +21,8 @@ type Item struct {
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// Text holds the value of the "text" field.
-	Text string `json:"text,omitempty"`
+	Text         string `json:"text,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -31,7 +33,7 @@ func (*Item) scanValues(columns []string) ([]any, error) {
 		case item.FieldID, item.FieldText:
 			values[i] = new(sql.NullString)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Item", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -57,9 +59,17 @@ func (i *Item) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				i.Text = value.String
 			}
+		default:
+			i.selectValues.Set(columns[j], values[j])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Item.
+// This includes values selected through modifiers, order, etc.
+func (i *Item) Value(name string) (ent.Value, error) {
+	return i.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Item.

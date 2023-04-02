@@ -918,14 +918,14 @@ func TestOrderByNeighborsCount(t *testing.T) {
 		From(t1)
 	t.Run("O2M", func(t *testing.T) {
 		s := s.Clone()
-		OrderByNeighborsCount(s, &OrderByOptions{
-			Step: NewStep(
+		OrderByNeighborsCount(s, NewOrderBy(
+			NewStep(
 				From("users", "id"),
 				To("pets", "owner_id"),
 				Edge(O2M, false, "pets", "owner_id"),
 			),
-			Desc: true,
-		})
+			OrderByExprDesc(nil, "count_pets"),
+		))
 		query, args := s.Query()
 		require.Empty(t, args)
 		require.Equal(t, `SELECT "users"."name" FROM "users" LEFT JOIN (SELECT "pets"."owner_id", COUNT(*) AS "count_pets" FROM "pets" GROUP BY "pets"."owner_id") AS "t1" ON "users"."id" = "t1"."owner_id" ORDER BY "t1"."count_pets" DESC NULLS LAST`, query)
@@ -946,25 +946,25 @@ func TestOrderByNeighborsCount(t *testing.T) {
 	// Zero or one.
 	t.Run("M2O", func(t *testing.T) {
 		s1, s2 := s.Clone(), s.Clone()
-		OrderByNeighborsCount(s1, &OrderByOptions{
-			Step: NewStep(
+		OrderByNeighborsCount(s1, NewOrderBy(
+			NewStep(
 				From("pets", "owner_id"),
 				To("users", "id"),
 				Edge(M2O, true, "pets", "owner_id"),
 			),
-		})
+		))
 		query, args := s1.Query()
 		require.Empty(t, args)
 		require.Equal(t, `SELECT "users"."name" FROM "users" ORDER BY "owner_id" IS NULL`, query)
 
-		OrderByNeighborsCount(s2, &OrderByOptions{
-			Step: NewStep(
+		OrderByNeighborsCount(s2, NewOrderBy(
+			NewStep(
 				From("pets", "owner_id"),
 				To("users", "id"),
 				Edge(M2O, true, "pets", "owner_id"),
 			),
-			Desc: true,
-		})
+			OrderDesc(),
+		))
 		query, args = s2.Query()
 		require.Empty(t, args)
 		require.Equal(t, `SELECT "users"."name" FROM "users" ORDER BY "owner_id" IS NOT NULL`, query)

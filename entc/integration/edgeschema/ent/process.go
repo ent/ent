@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgeschema/ent/process"
 )
@@ -21,7 +22,8 @@ type Process struct {
 	ID int `json:"id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ProcessQuery when eager-loading is set.
-	Edges ProcessEdges `json:"edges"`
+	Edges        ProcessEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // ProcessEdges holds the relations/edges for other nodes in the graph.
@@ -61,7 +63,7 @@ func (*Process) scanValues(columns []string) ([]any, error) {
 		case process.FieldID:
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Process", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -81,9 +83,17 @@ func (pr *Process) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			pr.ID = int(value.Int64)
+		default:
+			pr.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Process.
+// This includes values selected through modifiers, order, etc.
+func (pr *Process) Value(name string) (ent.Value, error) {
+	return pr.selectValues.Get(name)
 }
 
 // QueryFiles queries the "files" edge of the Process entity.

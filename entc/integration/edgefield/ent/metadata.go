@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgefield/ent/metadata"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
@@ -26,7 +27,8 @@ type Metadata struct {
 	ParentID int `json:"parent_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MetadataQuery when eager-loading is set.
-	Edges MetadataEdges `json:"edges"`
+	Edges        MetadataEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // MetadataEdges holds the relations/edges for other nodes in the graph.
@@ -85,7 +87,7 @@ func (*Metadata) scanValues(columns []string) ([]any, error) {
 		case metadata.FieldID, metadata.FieldAge, metadata.FieldParentID:
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Metadata", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -117,9 +119,17 @@ func (m *Metadata) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				m.ParentID = int(value.Int64)
 			}
+		default:
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Metadata.
+// This includes values selected through modifiers, order, etc.
+func (m *Metadata) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryUser queries the "user" edge of the Metadata entity.

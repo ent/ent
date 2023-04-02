@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/ent/car"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
@@ -28,8 +29,9 @@ type Car struct {
 	Model string `json:"model,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CarQuery when eager-loading is set.
-	Edges    CarEdges `json:"edges"`
-	pet_cars *string
+	Edges        CarEdges `json:"edges"`
+	pet_cars     *string
+	selectValues sql.SelectValues
 }
 
 // CarEdges holds the relations/edges for other nodes in the graph.
@@ -68,7 +70,7 @@ func (*Car) scanValues(columns []string) ([]any, error) {
 		case car.ForeignKeys[0]: // pet_cars
 			values[i] = new(sql.NullString)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Car", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -113,9 +115,17 @@ func (c *Car) assignValues(columns []string, values []any) error {
 				c.pet_cars = new(string)
 				*c.pet_cars = value.String
 			}
+		default:
+			c.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Car.
+// This includes values selected through modifiers, order, etc.
+func (c *Car) Value(name string) (ent.Value, error) {
+	return c.selectValues.Get(name)
 }
 
 // QueryOwner queries the "owner" edge of the Car entity.

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
 	"github.com/google/uuid"
@@ -23,7 +24,8 @@ type MixinID struct {
 	// SomeField holds the value of the "some_field" field.
 	SomeField string `json:"some_field,omitempty"`
 	// MixinField holds the value of the "mixin_field" field.
-	MixinField string `json:"mixin_field,omitempty"`
+	MixinField   string `json:"mixin_field,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -36,7 +38,7 @@ func (*MixinID) scanValues(columns []string) ([]any, error) {
 		case mixinid.FieldID:
 			values[i] = new(uuid.UUID)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type MixinID", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -68,9 +70,17 @@ func (mi *MixinID) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				mi.MixinField = value.String
 			}
+		default:
+			mi.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the MixinID.
+// This includes values selected through modifiers, order, etc.
+func (mi *MixinID) Value(name string) (ent.Value, error) {
+	return mi.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this MixinID.

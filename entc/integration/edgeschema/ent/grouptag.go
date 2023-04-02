@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
 	"entgo.io/ent/entc/integration/edgeschema/ent/grouptag"
@@ -27,7 +28,8 @@ type GroupTag struct {
 	GroupID int `json:"group_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GroupTagQuery when eager-loading is set.
-	Edges GroupTagEdges `json:"edges"`
+	Edges        GroupTagEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // GroupTagEdges holds the relations/edges for other nodes in the graph.
@@ -75,7 +77,7 @@ func (*GroupTag) scanValues(columns []string) ([]any, error) {
 		case grouptag.FieldID, grouptag.FieldTagID, grouptag.FieldGroupID:
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type GroupTag", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -107,9 +109,17 @@ func (gt *GroupTag) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				gt.GroupID = int(value.Int64)
 			}
+		default:
+			gt.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the GroupTag.
+// This includes values selected through modifiers, order, etc.
+func (gt *GroupTag) Value(name string) (ent.Value, error) {
+	return gt.selectValues.Get(name)
 }
 
 // QueryTag queries the "tag" edge of the GroupTag entity.

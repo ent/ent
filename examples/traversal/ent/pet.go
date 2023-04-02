@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/examples/traversal/ent/pet"
 	"entgo.io/ent/examples/traversal/ent/user"
@@ -24,8 +25,9 @@ type Pet struct {
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PetQuery when eager-loading is set.
-	Edges     PetEdges `json:"edges"`
-	user_pets *int
+	Edges        PetEdges `json:"edges"`
+	user_pets    *int
+	selectValues sql.SelectValues
 }
 
 // PetEdges holds the relations/edges for other nodes in the graph.
@@ -73,7 +75,7 @@ func (*Pet) scanValues(columns []string) ([]any, error) {
 		case pet.ForeignKeys[0]: // user_pets
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Pet", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -106,9 +108,17 @@ func (pe *Pet) assignValues(columns []string, values []any) error {
 				pe.user_pets = new(int)
 				*pe.user_pets = int(value.Int64)
 			}
+		default:
+			pe.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Pet.
+// This includes values selected through modifiers, order, etc.
+func (pe *Pet) Value(name string) (ent.Value, error) {
+	return pe.selectValues.Get(name)
 }
 
 // QueryFriends queries the "friends" edge of the Pet entity.

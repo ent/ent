@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/template/ent/group"
 )
@@ -20,7 +21,8 @@ type Group struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// MaxUsers holds the value of the "max_users" field.
-	MaxUsers int `json:"max_users,omitempty"`
+	MaxUsers     int `json:"max_users,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -31,7 +33,7 @@ func (*Group) scanValues(columns []string) ([]any, error) {
 		case group.FieldID, group.FieldMaxUsers:
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Group", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -57,9 +59,17 @@ func (gr *Group) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				gr.MaxUsers = int(value.Int64)
 			}
+		default:
+			gr.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Group.
+// This includes values selected through modifiers, order, etc.
+func (gr *Group) Value(name string) (ent.Value, error) {
+	return gr.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Group.
