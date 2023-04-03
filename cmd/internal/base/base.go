@@ -81,7 +81,7 @@ func NewCmd() *cobra.Command {
 	var target, tmplPath string
 	cmd := &cobra.Command{
 		Use:   "new [flags] [schemas]",
-		Short: "new an environment with zero or more schemas",
+		Short: "initialize a new environment with zero or more schemas",
 		Example: examples(
 			"ent new Example",
 			"ent new --target entv1/schema User Group",
