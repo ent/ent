@@ -1,4 +1,3 @@
-
 ---
 title: Quickly visualize your Ent schemas with entviz
 author: Rotem Tamir
