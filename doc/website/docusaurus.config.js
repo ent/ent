@@ -45,7 +45,7 @@ const config = {
         "pinned": true
       }
     ],
-    "slackChannel": "/docs/slack",
+    "slackChannel": "/docs/community#slack",
     "newsletter": "https://entgo.substack.com/",
     "githubRepo": "https://github.com/ent/ent"
   },
@@ -144,7 +144,7 @@ const config = {
         },
         {to: 'blog', label: 'Blog', position: 'left'},
         {
-          href: '/docs/slack',
+          href: '/docs/community#slack',
           position: 'right',
           className: 'header-slack-link',
           'aria-label': 'Slack channel',
@@ -204,7 +204,7 @@ const config = {
           "title": "Community",
           "items": [
             {"label": "GitHub", "to": "https://github.com/ent/ent"},
-            {"label": "Slack", "to": "/docs/slack"},
+            {"label": "Slack", "to": "/docs/community#slack"},
             {"label": "Discord", "to": "https://discord.gg/qZmPgTE6RX"},
             {"label": "Newsletter", "to": "https://entgo.substack.com/"},
             {"label": "Discussions", "to": "https://github.com/ent/ent/discussions"},

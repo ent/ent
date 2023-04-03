@@ -5,7 +5,11 @@ title: Join our Community
 
 Ent maintainers, contributors and users hang out in our Discord server and the #ent channel in the Gophers Slack workspace.
 
+### Discord
+
 To Join our Discord server, click [here](https://discord.gg/qZmPgTE6RX).
+
+### Slack
 
 To join the discussion in slack:
 
