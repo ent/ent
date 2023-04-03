@@ -24,8 +24,6 @@ import (
 	"testing"
 	"time"
 
-	"entgo.io/ent/entc/integration/ent/exvaluescan"
-
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	sqlschema "entgo.io/ent/dialect/sql/schema"
@@ -33,6 +31,7 @@ import (
 	"entgo.io/ent/entc/integration/ent"
 	"entgo.io/ent/entc/integration/ent/card"
 	"entgo.io/ent/entc/integration/ent/enttest"
+	"entgo.io/ent/entc/integration/ent/exvaluescan"
 	"entgo.io/ent/entc/integration/ent/file"
 	"entgo.io/ent/entc/integration/ent/filetype"
 	"entgo.io/ent/entc/integration/ent/group"
@@ -779,6 +778,19 @@ func Select(t *testing.T, client *ent.Client) {
 		}).
 		ExecX(ctx)
 	require.True(allUpper(), "at names must be upper-cased")
+
+	// Select and scan dynamic values.
+	const as = "name_length"
+	pets = client.Pet.Query().
+		Modify(func(s *sql.Selector) {
+			s.AppendSelectAs("LENGTH(name)", as)
+		}).
+		AllX(ctx)
+	for _, p := range pets {
+		n, err := p.Value(as)
+		require.NoError(err)
+		require.EqualValues(len(p.Name), n)
+	}
 }
 
 func Aggregate(t *testing.T, client *ent.Client) {

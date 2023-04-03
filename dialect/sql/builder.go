@@ -2217,7 +2217,7 @@ func (s *Selector) AppendSelect(columns ...string) *Selector {
 // AppendSelectAs appends additional column to the SELECT statement with the given alias.
 func (s *Selector) AppendSelectAs(column, as string) *Selector {
 	s.selection = append(s.selection, ExprFunc(func(b *Builder) {
-		if b.isIdent(column) {
+		if b.isIdent(column) || isFunc(column) || isModifier(column) {
 			b.WriteString(column)
 		} else {
 			b.WriteString(s.C(column))
