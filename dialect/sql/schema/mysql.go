@@ -265,7 +265,7 @@ func (d *MySQL) cType(c *Column) (t string) {
 	case field.TypeFloat32, field.TypeFloat64:
 		t = c.scanTypeOr("double")
 	case field.TypeTime:
-		t = c.scanTypeOr("timestamp")
+		t = c.scanTypeOr("datetime")
 		// In MariaDB or in MySQL < v8.0.2, the TIMESTAMP column has both `DEFAULT CURRENT_TIMESTAMP`
 		// and `ON UPDATE CURRENT_TIMESTAMP` if neither is specified explicitly. this behavior is
 		// suppressed if the column is defined with a `DEFAULT` clause or with the `NULL` attribute.
