@@ -857,6 +857,14 @@ func (t Type) TypeName() string {
 	return "Type" + pascal(t.Name)
 }
 
+// ValueName returns the name of the value method for this type.
+func (t Type) ValueName() string {
+	if t.fields["Value"] == nil && t.fields["value"] == nil {
+		return "Value"
+	}
+	return "GetValue"
+}
+
 // SiblingImports returns all sibling packages that are needed for the different builders.
 func (t Type) SiblingImports() []struct{ Alias, Path string } {
 	var (

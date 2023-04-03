@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgeschema/ent/attachedfile"
 	"entgo.io/ent/entc/integration/edgeschema/ent/file"
@@ -30,7 +31,8 @@ type AttachedFile struct {
 	ProcID int `json:"proc_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AttachedFileQuery when eager-loading is set.
-	Edges AttachedFileEdges `json:"edges"`
+	Edges        AttachedFileEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // AttachedFileEdges holds the relations/edges for other nodes in the graph.
@@ -80,7 +82,7 @@ func (*AttachedFile) scanValues(columns []string) ([]any, error) {
 		case attachedfile.FieldAttachTime:
 			values[i] = new(sql.NullTime)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type AttachedFile", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -118,9 +120,17 @@ func (af *AttachedFile) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				af.ProcID = int(value.Int64)
 			}
+		default:
+			af.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the AttachedFile.
+// This includes values selected through modifiers, order, etc.
+func (af *AttachedFile) Value(name string) (ent.Value, error) {
+	return af.selectValues.Get(name)
 }
 
 // QueryFi queries the "fi" edge of the AttachedFile entity.

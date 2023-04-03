@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/exvaluescan"
 )
@@ -35,6 +36,7 @@ type ExValueScan struct {
 	Custom string `json:"custom,omitempty"`
 	// CustomOptional holds the value of the "custom_optional" field.
 	CustomOptional string `json:"custom_optional,omitempty"`
+	selectValues   sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -59,7 +61,7 @@ func (*ExValueScan) scanValues(columns []string) ([]any, error) {
 		case exvaluescan.FieldCustomOptional:
 			values[i] = exvaluescan.ValueScanner.CustomOptional.ScanValue()
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type ExValueScan", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -121,9 +123,17 @@ func (evs *ExValueScan) assignValues(columns []string, values []any) error {
 			} else {
 				evs.CustomOptional = value
 			}
+		default:
+			evs.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the ExValueScan.
+// This includes values selected through modifiers, order, etc.
+func (evs *ExValueScan) Value(name string) (ent.Value, error) {
+	return evs.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this ExValueScan.

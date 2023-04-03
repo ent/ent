@@ -12,6 +12,7 @@ in the LICENSE file in the root directory of this source tree.
 		{{- $f := $fk.Field }}
 		{{ $fk.StructField }} {{ if $f.Nillable }}*{{ end }}{{ $f.Type }}
 	{{- end }}
+	selectValues sql.SelectValues
 	{{- /* Allow adding struct fields by ent extensions or user templates.*/}}
 	{{- with $tmpls := matchTemplate "dialect/sql/model/fields/*"  }}
 		{{- range $tmpl := $tmpls }}

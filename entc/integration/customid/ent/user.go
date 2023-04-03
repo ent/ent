@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/ent/user"
 )
@@ -23,6 +24,7 @@ type User struct {
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges         UserEdges `json:"edges"`
 	user_children *int
+	selectValues  sql.SelectValues
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
@@ -90,7 +92,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 		case user.ForeignKeys[0]: // user_children
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -117,9 +119,17 @@ func (u *User) assignValues(columns []string, values []any) error {
 				u.user_children = new(int)
 				*u.user_children = int(value.Int64)
 			}
+		default:
+			u.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the User.
+// This includes values selected through modifiers, order, etc.
+func (u *User) Value(name string) (ent.Value, error) {
+	return u.selectValues.Get(name)
 }
 
 // QueryGroups queries the "groups" edge of the User entity.

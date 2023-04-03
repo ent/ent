@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/goods"
 )
@@ -18,7 +19,8 @@ import (
 type Goods struct {
 	config
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID           int `json:"id,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -29,7 +31,7 @@ func (*Goods) scanValues(columns []string) ([]any, error) {
 		case goods.FieldID:
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Goods", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -49,9 +51,17 @@ func (_go *Goods) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_go.ID = int(value.Int64)
+		default:
+			_go.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Goods.
+// This includes values selected through modifiers, order, etc.
+func (_go *Goods) Value(name string) (ent.Value, error) {
+	return _go.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Goods.

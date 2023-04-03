@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/examples/entcpkg/ent/user"
 )
@@ -23,7 +24,8 @@ type User struct {
 	// Name holds the value of the "name" field.
 	Name string `json:"name"`
 	// Age holds the value of the "age" field.
-	Age int `json:"age"`
+	Age          int `json:"age"`
+	selectValues sql.SelectValues
 	// StaticField defined by templates (titled STATICFIELD).
 	StaticField string `json:"static_field,omitempty" rql:"static_field"`
 }
@@ -38,7 +40,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 		case user.FieldName:
 			values[i] = new(sql.NullString)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -70,9 +72,17 @@ func (u *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				u.Age = int(value.Int64)
 			}
+		default:
+			u.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the User.
+// This includes values selected through modifiers, order, etc.
+func (u *User) Value(name string) (ent.Value, error) {
+	return u.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this User.

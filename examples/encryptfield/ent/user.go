@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/examples/encryptfield/ent/user"
 )
@@ -22,7 +23,8 @@ type User struct {
 	// This PII field is encrypted before store in the database
 	Name string `json:"name,omitempty"`
 	// This field is stored as-is in the database
-	Nickname string `json:"nickname,omitempty"`
+	Nickname     string `json:"nickname,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -35,7 +37,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 		case user.FieldName, user.FieldNickname:
 			values[i] = new(sql.NullString)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -67,9 +69,17 @@ func (u *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				u.Nickname = value.String
 			}
+		default:
+			u.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the User.
+// This includes values selected through modifiers, order, etc.
+func (u *User) Value(name string) (ent.Value, error) {
+	return u.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this User.

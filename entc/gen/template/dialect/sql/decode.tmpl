@@ -47,7 +47,8 @@ func (*{{ $.Name }}) scanValues(columns []string) ([]any, error) {
 					values[i] = {{ if not $f.UserDefined }}new(sql.NullInt64){{ else }}{{ $f.NewScanType }}{{ end }}
 			{{- end }}
 			default:
-				return nil, fmt.Errorf("unexpected column %q for type {{ $.Name }}", columns[i])
+				{{- /* In case of unknown column that was added by a modifier, predicate, etc., fallback to any. */}}
+				values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -98,9 +99,18 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []any
 					}
 				{{- end }}
 		{{- end }}
+		default:
+			{{- /* In case of no match, allow getting this value by its name. */}}
+			{{ $receiver }}.selectValues.Set(columns[{{ $idx }}], values[{{ $idx }}])
 		}
 	}
 	return nil
+}
+
+// {{ $.ValueName }} returns the ent.Value that was dynamically selected and assigned to the {{ $.Name }}.
+// This includes values selected through modifiers, order, etc.
+func ({{ $receiver }} *{{ $.Name }}) {{ $.ValueName }}(name string) (ent.Value, error) {
+	return {{ $receiver }}.selectValues.Get(name)
 }
 {{ end }}
 

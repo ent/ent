@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/ent/device"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
@@ -25,6 +26,7 @@ type Session struct {
 	// The values are being populated by the SessionQuery when eager-loading is set.
 	Edges           SessionEdges `json:"edges"`
 	device_sessions *schema.ID
+	selectValues    sql.SelectValues
 }
 
 // SessionEdges holds the relations/edges for other nodes in the graph.
@@ -59,7 +61,7 @@ func (*Session) scanValues(columns []string) ([]any, error) {
 		case session.ForeignKeys[0]: // device_sessions
 			values[i] = &sql.NullScanner{S: new(schema.ID)}
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Session", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -86,9 +88,17 @@ func (s *Session) assignValues(columns []string, values []any) error {
 				s.device_sessions = new(schema.ID)
 				*s.device_sessions = *value.S.(*schema.ID)
 			}
+		default:
+			s.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Session.
+// This includes values selected through modifiers, order, etc.
+func (s *Session) Value(name string) (ent.Value, error) {
+	return s.selectValues.Get(name)
 }
 
 // QueryDevice queries the "device" edge of the Session entity.

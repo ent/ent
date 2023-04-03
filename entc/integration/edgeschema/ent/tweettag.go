@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
@@ -31,7 +32,8 @@ type TweetTag struct {
 	TweetID int `json:"tweet_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TweetTagQuery when eager-loading is set.
-	Edges TweetTagEdges `json:"edges"`
+	Edges        TweetTagEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // TweetTagEdges holds the relations/edges for other nodes in the graph.
@@ -83,7 +85,7 @@ func (*TweetTag) scanValues(columns []string) ([]any, error) {
 		case tweettag.FieldID:
 			values[i] = new(uuid.UUID)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type TweetTag", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -121,9 +123,17 @@ func (tt *TweetTag) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				tt.TweetID = int(value.Int64)
 			}
+		default:
+			tt.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the TweetTag.
+// This includes values selected through modifiers, order, etc.
+func (tt *TweetTag) Value(name string) (ent.Value, error) {
+	return tt.selectValues.Get(name)
 }
 
 // QueryTag queries the "tag" edge of the TweetTag entity.
