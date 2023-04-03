@@ -1,3 +1,4 @@
+
 ---
 title: Quickly visualize your Ent schemas with entviz
 author: Rotem Tamir
@@ -80,11 +81,11 @@ go run -mod=mod ariga.io/entviz ./path/to/ent/schema
 ```
 
 The tool will analyze your Ent schema and create a visualization on the [Atlas Playground](https://gh.atlasgo.cloud) and
-create a shareable, public [link](https://gh.atlasgo.cloud/explore/c3aa3f24) for you:
+create a shareable, public [link](https://gh.atlasgo.cloud/explore/saved/60129542154) for you:
 
 ```
 Here is a public link to your schema visualization:
-	    https://gh.atlasgo.cloud/explore/c3aa3f24
+	    https://gh.atlasgo.cloud/explore/saved/60129542154
 ```
 
 In this link you will be able to see your schema visually as an ERD or textually as either a SQL
