@@ -2506,9 +2506,8 @@ func OrderByEdgeCount(t *testing.T, client *ent.Client) {
 						sqlgraph.Edge(sqlgraph.O2M, false, pet.Table, pet.OwnerColumn),
 					),
 					sqlgraph.OrderByExprDesc(nil, as),
+					sqlgraph.OrderBySelected(),
 				))
-				// Append the value to be scanned.
-				s.AppendSelect(as)
 			}).
 			AllX(ctx)
 		require.Equal(t, 4, len(nodes))
