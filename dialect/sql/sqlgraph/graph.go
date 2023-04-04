@@ -312,6 +312,9 @@ type (
 		// Terms used for non-aggregation ordering.
 		// See, OrderByNeighborTerms for more info.
 		Terms []OrderByTerm
+		// Selected indicates that the order terms
+		// should be appended to the query selection.
+		Selected bool
 	}
 	// OrderByInfo holds the information done by the OrderBy functions.
 	OrderByInfo struct {
@@ -380,6 +383,13 @@ func OrderByColumnDesc(c string) OrderByOption {
 			Column: c,
 			Desc:   true,
 		})
+	}
+}
+
+// OrderBySelected appends the ordered columns or terms with aliases to the query selection.
+func OrderBySelected() OrderByOption {
+	return func(opts *OrderByOptions) {
+		opts.Selected = true
 	}
 }
 
@@ -469,9 +479,9 @@ func OrderByNeighborsCount(q *sql.Selector, opts *OrderByOptions) {
 				q.C(s.From.Column),
 				join.C(pk1),
 			)
-		orderTerms(q, join, []OrderByTerm{
-			{Column: countC, Type: field.TypeInt, Desc: desc},
-		})
+		opts.Terms = []OrderByTerm{{As: countC, Type: field.TypeInt, Desc: desc}}
+		orderTerms(q, join, opts.Terms)
+		appendTerms(q, opts)
 	case s.ToEdgeOwner():
 		countC := countAlias(q, opts)
 		edgeT := build.Table(s.Edge.Table).Schema(s.Edge.Schema)
@@ -486,9 +496,9 @@ func OrderByNeighborsCount(q *sql.Selector, opts *OrderByOptions) {
 				q.C(s.From.Column),
 				join.C(s.Edge.Columns[0]),
 			)
-		orderTerms(q, join, []OrderByTerm{
-			{Column: countC, Type: field.TypeInt, Desc: desc},
-		})
+		opts.Terms = []OrderByTerm{{As: countC, Type: field.TypeInt, Desc: desc}}
+		orderTerms(q, join, opts.Terms)
+		appendTerms(q, opts)
 	}
 }
 
@@ -527,6 +537,20 @@ func selectTerms(q *sql.Selector, ts []OrderByTerm) {
 			q.AppendSelect(q.C(t.Column))
 		case t.Expr != nil:
 			q.AppendSelectExprAs(t.Expr, t.As)
+		}
+	}
+}
+
+func appendTerms(q *sql.Selector, opts *OrderByOptions) {
+	if !opts.Selected {
+		return
+	}
+	for _, t := range opts.Terms {
+		switch {
+		case t.As != "":
+			q.AppendSelect(t.As)
+		case t.Column != "":
+			q.AppendSelect(q.C(t.Column))
 		}
 	}
 }
@@ -571,6 +595,7 @@ func OrderByNeighborTerms(q *sql.Selector, opts *OrderByOptions) {
 			On(q.C(s.From.Column), join.C(s.Edge.Columns[0]))
 	}
 	orderTerms(q, join, opts.Terms)
+	appendTerms(q, opts)
 }
 
 type (
