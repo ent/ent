@@ -29,12 +29,12 @@ func ExampleClient_Query() {
 
 	rsp, err := client.Query(ctx, "g.E()")
 	if err != nil {
-		log.Panicf("executing query: %v", err)
+		log.Fatalf("executing query: %v", err)
 	}
 
 	edges, err := rsp.ReadEdges()
 	if err != nil {
-		log.Panicf("unmashal edges")
+		log.Fatalf("unmashal edges")
 	}
 
 	defer cancel()
