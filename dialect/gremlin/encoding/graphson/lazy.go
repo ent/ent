@@ -5,12 +5,12 @@
 package graphson
 
 import (
+	"fmt"
 	"sync"
 	"unsafe"
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/modern-go/reflect2"
-	"github.com/pkg/errors"
 )
 
 // LazyEncoderOf returns a lazy encoder for type.
@@ -68,7 +68,7 @@ type uniqueType struct {
 func (u *uniqueType) CheckType(other Type) error {
 	u.once.Do(func() { u.typ = other })
 	if u.typ != other {
-		return errors.Errorf("expect type %s, but found %s", u.typ, other)
+		return fmt.Errorf("expect type %s, but found %s", u.typ, other)
 	}
 	return u.elemChecker.CheckType(u.typ)
 }

@@ -4,6 +4,8 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
 {{ define "hook" }}
 
 {{ with extend $ "Package" "hook" }}
@@ -24,11 +26,10 @@ import "{{ $.Config.Package }}"
 
 	// Mutate calls f(ctx, m).
 	func (f {{ $name }}) Mutate(ctx context.Context, m {{ $pkg }}.Mutation) ({{ $pkg }}.Value, error) {
-		mv, ok := m.({{ $type }})
-		if !ok {
-			return nil, fmt.Errorf("unexpected mutation type %T. expect {{ $type }}", m)
+		if mv, ok := m.({{ $type }}); ok {
+			return f(ctx, mv)
 		}
-		return f(ctx, mv)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect {{ $type }}", m)
 	}
 {{ end }}
 
@@ -100,7 +101,7 @@ func HasOp(op {{ $pkg }}.Op) Condition {
 
 // If executes the given hook under condition.
 //
-//	Hook.If(ComputeAverage, And(HasFields(...), HasAddedFields(...)))
+//	hook.If(ComputeAverage, And(HasFields(...), HasAddedFields(...)))
 //
 func If(hk {{ $pkg }}.Hook, cond Condition) {{ $pkg }}.Hook {
 	return func(next {{ $pkg }}.Mutator) {{ $pkg }}.Mutator {
@@ -129,6 +130,16 @@ func Unless(hk {{ $pkg }}.Hook, op {{ $pkg }}.Op) {{ $pkg }}.Hook {
 	return If(hk, Not(HasOp(op)))
 }
 
+// FixedError is a hook returning a fixed error.
+func FixedError(err error) {{ $pkg }}.Hook {
+	return func({{ $pkg }}.Mutator) {{ $pkg }}.Mutator {
+		return {{ $pkg }}.MutateFunc(func(context.Context, {{ $pkg }}.Mutation) ({{ $pkg }}.Value, error) {
+			return nil, err
+		})
+	}
+}
+
+
 // Reject returns a hook that rejects all operations that match op.
 //
 //	func (T) Hooks() []{{ $pkg }}.Hook {
@@ -138,11 +149,7 @@ func Unless(hk {{ $pkg }}.Hook, op {{ $pkg }}.Op) {{ $pkg }}.Hook {
 //	}
 //
 func Reject(op {{ $pkg }}.Op) {{ $pkg }}.Hook {
-	hk := func({{ $pkg }}.Mutator) {{ $pkg }}.Mutator {
-		return {{ $pkg }}.MutateFunc(func(_ context.Context, m {{ $pkg }}.Mutation) ({{ $pkg }}.Value, error) {
-			return nil, fmt.Errorf("%s operation is not allowed", m.Op())
-		})
-	}
+	hk := FixedError(fmt.Errorf("%s operation is not allowed", op))
 	return On(hk, op)
 }
 

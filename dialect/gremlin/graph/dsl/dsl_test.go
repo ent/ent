@@ -8,10 +8,10 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 
 	"github.com/stretchr/testify/require"
 )
@@ -43,14 +43,14 @@ func TestTraverse(t *testing.T) {
 			wantBinds: dsl.Bindings{"$0": "person", "$1": "name", "$2": "a8m"},
 		},
 		{
-			input: dsl.Each([]interface{}{1, 2, 3}, func(it *dsl.Traversal) *dsl.Traversal {
+			input: dsl.Each([]any{1, 2, 3}, func(it *dsl.Traversal) *dsl.Traversal {
 				return g.V(it)
 			}),
 			wantQuery: "[$0, $1, $2].each { g.V(it) }",
 			wantBinds: dsl.Bindings{"$0": 1, "$1": 2, "$2": 3},
 		},
 		{
-			input: dsl.Each([]interface{}{g.V(1).Next()}, func(it *dsl.Traversal) *dsl.Traversal {
+			input: dsl.Each([]any{g.V(1).Next()}, func(it *dsl.Traversal) *dsl.Traversal {
 				return it.ID()
 			}),
 			wantQuery: "[g.V($0).next()].each { it.id() }",
@@ -74,7 +74,7 @@ func TestTraverse(t *testing.T) {
 		{
 			input: func() *dsl.Traversal {
 				v1 := g.AddV("person")
-				each := dsl.Each([]interface{}{1, 2, 3}, func(it *dsl.Traversal) *dsl.Traversal {
+				each := dsl.Each([]any{1, 2, 3}, func(it *dsl.Traversal) *dsl.Traversal {
 					return g.V(v1).AddE("knows").To(g.V(it)).Next()
 				})
 				return dsl.Group(v1, each)

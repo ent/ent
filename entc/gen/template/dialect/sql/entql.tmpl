@@ -1,0 +1,169 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
+{{ define "dialect/sql/entql" }}
+
+{{ $pkg := base $.Config.Package }}
+{{ template "header" $ }}
+
+import (
+	"{{ $.Config.Package }}/predicate"
+	{{- range $n := $.Nodes }}
+		{{ $n.PackageAlias }} "{{ $.Config.Package }}/{{ $n.PackageDir }}"
+	{{- end }}
+
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entql"
+	"entgo.io/ent/schema/field"
+)
+
+// schemaGraph holds a representation of ent/schema at runtime.
+var schemaGraph = func() *sqlgraph.Schema {
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, {{ len $.Nodes }})}
+	{{- range $i, $n := $.Nodes }}
+		graph.Nodes[{{ $i }}] = &sqlgraph.Node{
+			NodeSpec: sqlgraph.NodeSpec{
+				Table: {{ $n.Package }}.Table,
+				Columns: {{ $n.Package }}.Columns,
+				{{- if $n.HasOneFieldID }}
+					ID: &sqlgraph.FieldSpec{
+						Type: field.{{ $n.ID.Type.ConstName }},
+						Column: {{ $n.Package }}.{{ $n.ID.Constant }},
+					},
+				{{- else }}
+					CompositeID: []*sqlgraph.FieldSpec{
+						{{- range $id := $n.EdgeSchema.ID }}
+							{
+								Type: field.{{ $id.Type.ConstName }},
+								Column: {{ $n.Package }}.{{ $id.Constant }},
+							},
+						{{- end }}
+					},
+				{{- end }}
+			},
+			Type: "{{ $n.Name }}",
+			Fields: map[string]*sqlgraph.FieldSpec{
+				{{- range $f := $n.Fields }}
+					{{ $n.Package }}.{{ $f.Constant }}: {Type: field.{{ $f.Type.ConstName }}, Column: {{ $n.Package }}.{{ $f.Constant }}},
+				{{- end }}
+			},
+		}
+	{{- end }}
+	{{- range $n := $.Nodes }}
+		{{- range $e := $n.Edges }}
+			graph.MustAddE(
+				"{{ $e.Name }}",
+				&sqlgraph.EdgeSpec{
+					Rel: sqlgraph.{{ $e.Rel.Type }},
+					Inverse: {{ $e.IsInverse }},
+					Table: {{ $n.Package }}.{{ $e.TableConstant }},
+					Columns: {{ if $e.M2M }}{{ $n.Package }}.{{ $e.PKConstant }}{{ else }}[]string{ {{ $n.Package }}.{{ $e.ColumnConstant }} }{{ end }},
+					Bidi: {{ $e.Bidi }},
+				},
+				"{{ $n.Name }}",
+				"{{ $e.Type.Name }}",
+			)
+		{{- end }}
+	{{- end }}
+	return graph
+}()
+
+// predicateAdder wraps the addPredicate method.
+// All update, update-one and query builders implement this interface.
+type predicateAdder interface {
+	addPredicate(func(s *sql.Selector))
+}
+
+{{ range $i, $n := $.Nodes }}
+	{{ $builder := $n.QueryName }}
+	{{ $receiver := receiver $builder }}
+	{{ $mutation := $n.MutationName }}
+	{{ $filter := print $n.FilterName }}
+
+	// addPredicate implements the predicateAdder interface.
+	func ({{ $receiver }} *{{ $builder }}) addPredicate(pred func(s *sql.Selector)) {
+		{{ $receiver }}.predicates = append({{ $receiver }}.predicates, pred)
+	}
+
+	// Filter returns a Filter implementation to apply filters on the {{ $builder }} builder.
+	func ({{ $receiver }} *{{ $builder }}) Filter() *{{ $filter }} {
+		return &{{ $filter }}{config: {{ $receiver }}.config, predicateAdder: {{ $receiver}} }
+	}
+
+	// addPredicate implements the predicateAdder interface.
+	func (m *{{ $mutation }}) addPredicate(pred func(s *sql.Selector)) {
+		m.predicates = append(m.predicates, pred)
+	}
+
+	// Filter returns an entql.Where implementation to apply filters on the {{ $mutation }} builder.
+	func (m *{{ $mutation }}) Filter() *{{ $filter }} {
+		return &{{ $filter }}{config: m.config, predicateAdder: m}
+	}
+
+	// {{ $filter }} provides a generic filtering capability at runtime for {{ $builder }}.
+	type {{ $filter }} struct {
+		predicateAdder
+		config
+	}
+
+	// Where applies the entql predicate on the query filter.
+	func (f *{{ $filter }}) Where(p entql.P) {
+		f.addPredicate(func(s *sql.Selector) {
+			if err := schemaGraph.EvalP(schemaGraph.Nodes[{{ $i }}].Type, p, s); err != nil {
+				s.AddError(err)
+			}
+		})
+	}
+
+	{{- if $n.HasOneFieldID }}
+		{{ $type := $n.ID.Type.Type.String }}
+		{{ $iface := print (pascal $type) "P" }}
+		{{- if $n.ID.IsTime }}{{ $iface = "TimeP" }}
+		{{- else if or $n.ID.IsBytes $n.ID.IsJSON }}{{ $iface = "BytesP" }}
+		{{- else if $n.ID.IsUUID }}{{ $iface = "ValueP" }}
+		{{- end }}
+		// WhereID applies the entql {{ $type }} predicate on the id field.
+		func (f *{{ $filter }}) WhereID(p entql.{{ $iface }}) {
+			f.Where(p.Field({{ $n.Package }}.{{ $n.ID.Constant }}))
+		}
+	{{- end }}
+
+	{{ range $f := $n.Fields }}
+		{{ $type := $f.Type.Type.String }}
+		{{ $iface := print (pascal $type) "P" }}
+		{{- if $f.IsTime }}{{ $iface = "TimeP" }}
+		{{- else if or $f.IsBytes $f.IsJSON }}{{ $iface = "BytesP" }}
+		{{- else if $f.IsUUID }}{{ $iface = "ValueP" }}
+		{{- end }}
+		// Where{{ $f.StructField }} applies the entql {{ $type }} predicate on the {{ $f.Name }} field.
+		func (f *{{ $filter }}) Where{{ $f.StructField }}(p entql.{{ $iface }}) {
+			f.Where(p.Field({{ $n.Package }}.{{ $f.Constant }}))
+		}
+	{{ end }}
+
+	{{ range $e := $n.Edges }}
+		{{ $func := print "WhereHas" $e.StructField }}
+		// {{ $func }} applies a predicate to check if query has an edge {{ $e.Name }}.
+		func (f *{{ $filter }}) {{ $func }}() {
+			f.Where(entql.HasEdge("{{ $e.Name }}"))
+		}
+
+		{{ $func = print "WhereHas" $e.StructField "With" }}
+		// {{ $func }} applies a predicate to check if query has an edge {{ $e.Name }} with a given conditions (other predicates).
+		func (f *{{ $filter }}) {{ $func }}(preds ...predicate.{{ $e.Type.Name }}) {
+			f.Where(entql.HasEdgeWith("{{ $e.Name }}", sqlgraph.WrapFunc(func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})))
+		}
+	{{ end }}
+{{ end }}
+
+{{ end }}

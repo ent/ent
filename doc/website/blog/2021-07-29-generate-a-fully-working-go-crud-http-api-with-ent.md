@@ -1,0 +1,533 @@
+---
+title: Generate a fully-working Go CRUD HTTP API with Ent
+author: MasseElch
+authorURL: "https://github.com/masseelch"
+authorImageURL: "https://avatars.githubusercontent.com/u/12862103?v=4"
+---
+
+When we say that one of the core principles of Ent is "Schema as Code", we mean by that more than "Ent's DSL for
+defining entities and their edges is done using regular Go code". Ent's unique approach, compared to many other ORMs, is
+to express all of the logic related to an entity, as code, directly in the schema definition.
+
+With Ent, developers can write all authorization logic (called "[Privacy](https://entgo.io/docs/privacy)" within Ent),
+and all of the mutation side-effects (called "[Hooks](https://entgo.io/docs/hooks)" within Ent) directly on the schema.
+Having everything in the same place can be very convenient, but its true power is revealed when paired with code
+generation.
+
+If schemas are defined this way, it becomes possible to generate code for fully-working production-grade servers
+automatically. If we move the responsibility for authorization decisions and custom side effects from the RPC layer to
+the data layer, the implementation of the basic CRUD (Create, Read, Update and Delete) endpoints becomes generic to the
+extent that it can be machine-generated. This is exactly the idea behind the popular GraphQL and gRPC Ent extensions.
+
+Today, we would like to present a new Ent extension named `elk` that can automatically generate fully-working, RESTful
+API endpoints from your Ent schemas. `elk` strives to automate all of the tedious work of setting up the basic CRUD
+endpoints for every entity you add to your graph, including logging, validation of the request body, eager loading
+relations and serializing, all while leaving reflection out of sight and maintaining type-safety.
+
+Let’s get started!
+
+### Getting Started
+
+The final version of the code below can be found on [GitHub](https://github.com/masseelch/elk-example).
+
+Start by creating a new Go project:
+
+```shell
+mkdir elk-example
+cd elk-example
+go mod init elk-example
+```
+
+Invoke the ent code generator and create two schemas: User, Pet:
+
+```shell
+go run -mod=mod entgo.io/ent/cmd/ent init Pet User
+```
+
+Your project should now look like this:
+
+```
+.
+├── ent
+│   ├── generate.go
+│   └── schema
+│       ├── pet.go
+│       └── user.go
+├── go.mod
+└── go.sum
+```
+
+Next, add the `elk` package to our project:
+
+```shell
+go get -u github.com/masseelch/elk
+```
+
+`elk` uses the
+Ent [extension API](https://github.com/ent/ent/blob/a19a89a141cf1a5e1b38c93d7898f218a1f86c94/entc/entc.go#L197) to
+integrate with Ent’s code-generation. This requires that we use the `entc` (ent codegen) package as
+described [here](https://entgo.io/docs/code-gen#use-entc-as-a-package). Follow the next three steps to enable it and to
+configure Ent to work with the `elk` extension:
+
+1\. Create a new Go file named `ent/entc.go` and paste the following content:
+
+```go
+// +build ignore
+
+package main
+
+import (
+	"log"
+
+	"entgo.io/ent/entc"
+	"entgo.io/ent/entc/gen"
+	"github.com/masseelch/elk"
+)
+
+func main() {
+	ex, err := elk.NewExtension(
+		elk.GenerateSpec("openapi.json"),
+		elk.GenerateHandlers(),
+	)
+	if err != nil {
+		log.Fatalf("creating elk extension: %v", err)
+	}
+	err = entc.Generate("./schema", &gen.Config{}, entc.Extensions(ex))
+	if err != nil {
+		log.Fatalf("running ent codegen: %v", err)
+	}
+}
+
+```
+
+2\. Edit the `ent/generate.go` file to execute the `ent/entc.go` file:
+
+```go
+package ent
+
+//go:generate go run -mod=mod entc.go
+
+```
+
+3/. `elk` uses some external packages in its generated code. Currently, you have to get those packages manually once
+when setting up `elk`:
+
+```shell
+go get github.com/mailru/easyjson github.com/masseelch/render github.com/go-chi/chi/v5 go.uber.org/zap
+```
+
+With these steps complete, all is set up for using our `elk`-powered ent! To learn more about Ent, how to connect to
+different types of databases, run migrations or work with entities head over to
+the [Setup Tutorial](https://entgo.io/docs/tutorial-setup/).
+
+### Generating HTTP CRUD Handlers with `elk`
+
+To generate the fully-working HTTP handlers we need first create an Ent schema definition. Open and
+edit `ent/schema/pet.go`:
+
+```go
+package schema
+
+import (
+	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
+)
+
+// Pet holds the schema definition for the Pet entity.
+type Pet struct {
+	ent.Schema
+}
+
+// Fields of the Pet.
+func (Pet) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name"),
+		field.Int("age"),
+	}
+}
+
+```
+
+We added two fields to our `Pet` entity: `name` and `age`. The `ent.Schema` just defines the fields of our entity. To
+generate runnable code from our schema, run:
+
+```shell
+go generate ./...
+```
+
+Observe that in addition to the files Ent would normally generate, another directory named `ent/http` was created. These
+files were generated by the `elk` extension and contain the code for the generated HTTP handlers. For example, here
+is some of the generated code for a read-operation on the Pet entity:
+
+```go
+const (
+	PetCreate Routes = 1 << iota
+	PetRead
+	PetUpdate
+	PetDelete
+	PetList
+	PetRoutes = 1<<iota - 1
+)
+
+// PetHandler handles http crud operations on ent.Pet.
+type PetHandler struct {
+	handler
+
+	client *ent.Client
+	log    *zap.Logger
+}
+
+func NewPetHandler(c *ent.Client, l *zap.Logger) *PetHandler {
+	return &PetHandler{
+		client: c,
+		log:    l.With(zap.String("handler", "PetHandler")),
+	}
+}
+
+// Read fetches the ent.Pet identified by a given url-parameter from the
+// database and renders it to the client.
+func (h *PetHandler) Read(w http.ResponseWriter, r *http.Request) {
+	l := h.log.With(zap.String("method", "Read"))
+	// ID is URL parameter.
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		l.Error("error getting id from url parameter", zap.String("id", chi.URLParam(r, "id")), zap.Error(err))
+		render.BadRequest(w, r, "id must be an integer greater zero")
+		return
+	}
+	// Create the query to fetch the Pet
+	q := h.client.Pet.Query().Where(pet.ID(id))
+	e, err := q.Only(r.Context())
+	if err != nil {
+		switch {
+		case ent.IsNotFound(err):
+			msg := stripEntError(err)
+			l.Info(msg, zap.Error(err), zap.Int("id", id))
+			render.NotFound(w, r, msg)
+		case ent.IsNotSingular(err):
+			msg := stripEntError(err)
+			l.Error(msg, zap.Error(err), zap.Int("id", id))
+			render.BadRequest(w, r, msg)
+		default:
+			l.Error("could not read pet", zap.Error(err), zap.Int("id", id))
+			render.InternalServerError(w, r, nil)
+		}
+		return
+	}
+	l.Info("pet rendered", zap.Int("id", id))
+	easyjson.MarshalToHTTPResponseWriter(NewPet2657988899View(e), w)
+}
+
+```
+
+Next, let’s see how to create an actual RESTful HTTP server that can manage your Pet entities. Create a file
+named `main.go` and add the following content:
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"net/http"
+
+	"elk-example/ent"
+	elk "elk-example/ent/http"
+
+	"github.com/go-chi/chi/v5"
+	_ "github.com/mattn/go-sqlite3"
+	"go.uber.org/zap"
+)
+
+func main() {
+	// Create the ent client.
+	c, err := ent.Open("sqlite3", "./ent.db?_fk=1")
+	if err != nil {
+		log.Fatalf("failed opening connection to sqlite: %v", err)
+	}
+	defer c.Close()
+	// Run the auto migration tool.
+	if err := c.Schema.Create(context.Background()); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
+	// Router and Logger.
+	r, l := chi.NewRouter(), zap.NewExample()
+	// Create the pet handler.
+	r.Route("/pets", func(r chi.Router) {
+		elk.NewPetHandler(c, l).Mount(r, elk.PetRoutes)
+	})
+	// Start listen to incoming requests.
+	fmt.Println("Server running")
+	defer fmt.Println("Server stopped")
+	if err := http.ListenAndServe(":8080", r); err != nil {
+		log.Fatal(err)
+	}
+}
+
+```
+
+Next, start the server:
+
+```shell
+go run -mod=mod main.go
+```
+
+Congratulations! We now have a running server serving the Pets API. We could ask the server for a list of all pets in
+the database, but there are none yet. Let’s create one first:
+
+```shell
+curl -X 'POST' -H 'Content-Type: application/json' -d '{"name":"Kuro","age":3}' 'localhost:8080/pets'
+```
+
+You should get this response:
+
+```json
+{
+  "age": 3,
+  "id": 1,
+  "name": "Kuro"
+}
+```
+
+If you head over to the terminal where the server is running you can also see `elk`s built in logging:
+
+```json
+{
+  "level": "info",
+  "msg": "pet rendered",
+  "handler": "PetHandler",
+  "method": "Create",
+  "id": 1
+}
+```
+
+`elk` uses [zap](https://github.com/uber-go/zap) for logging. To learn more about it, have a look at its documentation.
+
+### Relations
+
+To illustrate more of `elk`s features, let’s extend our graph. Edit `ent/schema/user.go` and `ent/schema/pet.go`:
+
+```go title="ent/schema/pet.go"
+// Edges of the Pet.
+func (Pet) Edges() []ent.Edge {
+    return []ent.Edge{
+        edge.From("owner", User.Type).
+            Ref("pets").
+            Unique(),
+    }
+}
+
+```
+
+```go title="ent/schema/user.go"
+package schema
+
+import (
+	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
+	"entgo.io/ent/schema/field"
+)
+
+// User holds the schema definition for the User entity.
+type User struct {
+	ent.Schema
+}
+
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name"),
+		field.Int("age"),
+	}
+}
+
+// Edges of the User.
+func (User) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("pets", Pet.Type),
+	}
+}
+
+```
+
+We have now created a One-To-Many relation between the Pet and User schemas: A pet belongs to a user, and a user can
+have multiple pets.
+
+Rerun the code generator:
+
+```shell
+go generate ./...
+```
+
+Do not forget to register the `UserHandler` on our router. Just add the following lines to `main.go`:
+
+```diff
+[...]
+    r.Route("/pets", func(r chi.Router) {
+        elk.NewPetHandler(c, l, v).Mount(r, elk.PetRoutes)
+    })
++    // Create the user handler.
++    r.Route("/users", func(r chi.Router) {
++        elk.NewUserHandler(c, l, v).Mount(r, elk.UserRoutes)
++    })
+    // Start listen to incoming requests.
+    fmt.Println("Server running")
+[...]
+```
+
+After restarting the server we can create a `User` that owns the previously created Pet named Kuro:
+
+```shell
+curl -X 'POST' -H 'Content-Type: application/json' -d '{"name":"Elk","age":30,"owner":1}' 'localhost:8080/users'
+```
+
+The server returns the following response:
+
+```json
+{
+  "age": 30,
+  "edges": {},
+  "id": 1,
+  "name": "Elk"
+}
+```
+
+From the output we can see that the user has been created, but the edges are empty. `elk` does not include edges in its
+output by default. You can configure `elk` to render edges using a feature called "serialization groups". Annotate your
+schemas with the `elk.SchemaAnnotation`
+and `elk.Annotation` structs. Edit `ent/schema/user.go` and add those:
+
+```go
+// Edges of the User.
+func (User) Edges() []ent.Edge {
+    return []ent.Edge{
+        edge.To("pets", Pet.Type).
+            Annotations(elk.Groups("user")),
+    }
+}
+
+// Annotations of the User.
+func (User) Annotations() []schema.Annotation {
+    return []schema.Annotation{elk.ReadGroups("user")}
+}
+
+```
+
+The `elk.Annotation`s added to the fields and edges tell elk to eager-load them and add them to the payload if the "
+user" group is requested. The `elk.SchemaAnnotation` is used to make the read-operation of the `UserHandler` request "
+user". Note, that any fields that do not have a serialization group attached are included by default. Edges, however,
+are excluded, unless configured otherwise.
+
+Next, let’s regenerate the code once again, and restart the server. You should now see the pets of a user rendered if
+you read a resource:
+
+```shell
+curl 'localhost:8080/users/1'
+```
+
+```json
+{
+  "age": 30,
+  "edges": {
+    "pets": [
+      {
+        "id": 1,
+        "name": "Kuro",
+        "age": 3,
+        "edges": {}
+      }
+    ]
+  },
+  "id": 1,
+  "name": "Elk"
+}
+```
+
+### Request validation
+
+Our current schemas allow to set a negative age for pets or users and we can create pets without an owner (as we did
+with Kuro). Ent has built-in support for basic [validation](https://entgo.io/docs/schema-fields#validators). In some
+cases you may want to validate requests made against your API before passing their payload to Ent. `elk`
+uses [this](https://github.com/go-playground/validator) package to define validation rules and validate data. We can
+create separate validation rules for Create and Update operations using `elk.Annotation`. In our example, let’s assume
+that we want our Pet schema to only allow ages greater than zero and to disallow creating a pet without an owner.
+Edit `ent/schema/pet.go`:
+
+```go
+// Fields of the Pet.
+func (Pet) Fields() []ent.Field {
+    return []ent.Field{
+        field.String("name"),
+        field.Int("age").
+            Positive().
+            Annotations(
+                elk.CreateValidation("required,gt=0"),
+                elk.UpdateValidation("gt=0"),
+            ),
+    }
+}
+
+// Edges of the Pet.
+func (Pet) Edges() []ent.Edge {
+    return []ent.Edge{
+        edge.From("owner", User.Type).
+            Ref("pets").
+            Unique().
+            Required().
+            Annotations(elk.Validation("required")),
+    }
+}
+```
+
+Next, regenerate the code and restart the server. To test our new validation rules, let’s try to create a pet with
+invalid age and without an owner:
+
+```shell
+curl -X 'POST' -H 'Content-Type: application/json' -d '{"name":"Bob","age":-2}' 'localhost:8080/pets'
+```
+
+`elk` returns a detailed response that includes information about which validations failed:
+
+```json
+{
+  "code": 400,
+  "status": "Bad Request",
+  "errors": {
+    "Age": "This value failed validation on 'gt:0'.",
+    "Owner": "This value is required."
+  }
+}
+```
+
+Note the uppercase field names. The validator package uses the structs field name to generate its validation errors, but
+you can simply override this, as stated in
+the [example](https://github.com/go-playground/validator/blob/9a5bce32538f319bf69aebb3aca90d394bc6d0cb/_examples/struct-level/main.go#L37)
+.
+
+If you do not define any validation rules, `elk` will not include the validation-code in its generated output. `elk`s`
+request validation is especially useful if you'd wanted to do cross-field-validation.
+
+### Upcoming Features
+
+We hope you agree that `elk` has some useful features already, but there are still many exciting things to come. The
+next version of `elk` will include::
+
+- Fully working flutter frontend to administrate your nodes
+- Integration of Ent’s validation in the current request validator
+- More transport formats (currently only JSON)
+
+### Conclusion
+
+This post has shown just a small part of what `elk` can do. To see some more examples of what you can do with it, head
+over to the project’s README on GitHub. I hope that with `elk`-powered Ent, you and your fellow developers can automate
+some repetitive tasks that go into building RESTful APIs and focus on more meaningful work.
+
+`elk` is in an early stage of development, we welcome any suggestion or feedback and if you are willing to help we'd be
+very glad. The [GitHub Issues](https://github.com/masseelch/elk/issues) is a wonderful place for you to reach out for
+help, feedback, suggestions and contribution.
+
+#### About the Author
+
+_MasseElch is a software engineer from the windy, flat, north of Germany. When not hiking with his dog Kuro (who has his 
+own Instagram channel :scream:) or playing hide-and-seek with his son, he drinks coffee and enjoys coding._

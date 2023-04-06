@@ -1,0 +1,448 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{/* gotype: entgo.io/ent/entc/gen.Type */}}
+
+{{/* Templates used by the "sql/upsert" feature-flag to allows configuring the
+ `ON CONFLICT` / `ON DUPLICATE KEY` clause for `INSERT` statements */}}
+
+{{/* Template for adding the "conflict" field to the create builder. */}}
+{{ define "dialect/sql/create/fields/additional/upsert" -}}
+	{{- if $.FeatureEnabled "sql/upsert" }}
+		conflict []sql.ConflictOption
+	{{- end }}
+{{- end -}}
+
+{{/* Template for adding the "conflict" field to the create-bulk builder. */}}
+{{ define "dialect/sql/create_bulk/fields/additional/upsert" -}}
+	{{- if $.FeatureEnabled "sql/upsert" }}
+		conflict []sql.ConflictOption
+	{{- end }}
+{{- end -}}
+
+{{/* Template for passing the "OnConflict" options to the sqlgraph.CreateSpec. */}}
+{{- define "dialect/sql/create/spec/upsert" }}
+	{{- if $.FeatureEnabled "sql/upsert" }}
+		_spec.OnConflict = {{ pascal $.Scope.Builder | receiver }}.conflict
+	{{- end }}
+{{- end }}
+
+{{/* Template for passing the "OnConflict" options to the sqlgraph.BatchCreateSpec. */}}
+{{- define "dialect/sql/create_bulk/spec/upsert" }}
+	{{- if $.FeatureEnabled "sql/upsert" }}
+		spec.OnConflict = {{ pascal $.Scope.Builder | receiver }}.conflict
+	{{- end }}
+{{- end }}
+
+{{/* Template for adding the "OnConflict" methods to the create builder. */}}
+{{ define "dialect/sql/create/additional/upsert" }}
+	{{ if $.FeatureEnabled "sql/upsert" }}
+		{{ template "helper/upsertone" $ }}
+	{{ end }}
+{{ end }}
+
+{{ define "helper/upsertone" }}
+{{ $pkg := base $.Config.Package }}
+{{ $builder := pascal $.Scope.Builder }}
+{{ $receiver := receiver $builder }}
+{{ $upsertOne := print $.Name "UpsertOne" }}
+{{ $upsertSet := print $.Name "Upsert" }}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.{{ $.Name }}.Create().
+{{- with $.Fields }}
+    {{- $f := index $.Fields 0 }}
+//		Set{{ index $f.StructField }}(v).
+{{- end }}
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+{{- with $.Fields }}
+    {{- $f := index $.Fields 0 }}
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.{{ $.Name }}Upsert) {
+//			Set{{ index $f.StructField }}(v+v).
+//		}).
+{{- end }}
+//		Exec(ctx)
+//
+func ({{ $receiver }} *{{ $builder }}) OnConflict(opts ...sql.ConflictOption) *{{ $upsertOne }} {
+	{{ $receiver }}.conflict = opts
+	return &{{ $upsertOne }}{
+		create: {{ $receiver }},
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.{{ $.Name }}.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+//
+func ({{ $receiver }} *{{ $builder }}) OnConflictColumns(columns ...string) *{{ $upsertOne }} {
+	{{ $receiver }}.conflict = append({{ $receiver }}.conflict, sql.ConflictColumns(columns...))
+	return &{{ $upsertOne }}{
+		create: {{ $receiver }},
+	}
+}
+
+type (
+	// {{ $upsertOne }} is the builder for "upsert"-ing
+	//  one {{ $.Name }} node.
+	{{ $upsertOne }} struct {
+		create *{{ $builder }}
+	}
+
+	// {{ $upsertSet }} is the "OnConflict" setter.
+	{{ $upsertSet }} struct {
+		*sql.UpdateSet
+	}
+)
+
+{{ range $f := $.MutableFields }}
+	{{ $func := print "Set" $f.StructField }}
+	// {{ $func }} sets the "{{ $f.Name }}" field.
+	func (u *{{ $upsertSet }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsertSet }} {
+		u.Set({{ $.Package }}.{{ $f.Constant }}, v)
+		return u
+	}
+
+	{{ $func = print "Update" $f.StructField }}
+	// {{ $func }} sets the "{{ $f.Name }}" field to the value that was provided on create.
+	func (u *{{ $upsertSet }}) {{ $func }}() *{{ $upsertSet }} {
+		u.SetExcluded({{ $.Package }}.{{ $f.Constant }})
+		return u
+	}
+
+	{{ if $f.SupportsMutationAdd }}
+		{{ $func := print "Add" $f.StructField }}
+		// {{ $func }} adds v to the "{{ $f.Name }}" field.
+		func (u *{{ $upsertSet }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsertSet }} {
+			u.Add({{ $.Package }}.{{ $f.Constant }}, v)
+			return u
+		}
+	{{ end }}
+
+	{{ if $f.Optional }}
+		{{ $func := print "Clear" $f.StructField }}
+		// {{ $func }} clears the value of the "{{ $f.Name }}" field.
+		func (u *{{ $upsertSet }}) {{ $func }}() *{{ $upsertSet }} {
+			u.SetNull({{ $.Package }}.{{ $f.Constant }})
+			return u
+		}
+	{{ end }}
+{{ end }}
+
+{{ $udfID := false }}{{ if $.HasOneFieldID }}{{ $udfID = $.ID.UserDefined }}{{ end }}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create{{ if $udfID }} except the ID field{{ end }}.
+// Using this option is equivalent to using:
+//
+//	client.{{ $.Name }}.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+{{- if $udfID }}
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore({{ $.Package }}.{{ $.ID.Constant }})
+//			}),
+{{- end }}
+//		).
+//		Exec(ctx)
+//
+func (u *{{ $upsertOne }}) UpdateNewValues() *{{ $upsertOne }} {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	{{- if or $udfID $.ImmutableFields }}
+		u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+			{{- if $udfID }}
+				if _, exists := u.create.mutation.ID(); exists {
+					s.SetIgnore({{ $.Package }}.{{ $.ID.Constant }})
+				}
+			{{- end }}
+			{{- range $f := $.ImmutableFields }}
+				if _, exists := u.create.mutation.{{ $f.MutationGet }}(); exists {
+					s.SetIgnore({{ $.Package }}.{{ $f.Constant }})
+				}
+			{{- end }}
+		}))
+	{{- end }}
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//  client.{{ $.Name }}.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
+func (u *{{ $upsertOne }}) Ignore() *{{ $upsertOne }} {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *{{ $upsertOne }}) DoNothing() *{{ $upsertOne }} {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the {{ $builder }}.OnConflict
+// documentation for more info.
+func (u *{{ $upsertOne }}) Update(set func(*{{ $upsertSet }})) *{{ $upsertOne }} {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&{{ $upsertSet }}{UpdateSet: update})
+	}))
+	return u
+}
+
+{{ with extend $ "Upsert" $upsertOne "UpsertSet" $upsertSet }}
+	{{ template "helper/upsert/fields" . }}
+{{ end }}
+
+// Exec executes the query.
+func (u *{{ $upsertOne }}) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("{{ $pkg }}: missing options for {{ $builder }}.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *{{ $upsertOne }}) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+{{ if $.HasOneFieldID }}
+	// Exec executes the UPSERT query and returns the inserted/updated ID.
+	func (u *{{ $upsertOne }}) ID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
+		{{- if and $udfID (not $.ID.Type.Numeric) }}
+			if u.create.driver.Dialect() == dialect.MySQL {
+				// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+				// fields from the database since MySQL does not support the RETURNING clause.
+				return id, errors.New("{{ $pkg }}: {{ $upsertOne }}.ID is not supported by MySQL driver. Use {{ $upsertOne }}.Exec instead")
+			}
+		{{- end }}
+		node, err := u.create.Save(ctx)
+		if err != nil {
+			return id, err
+		}
+		return node.ID, nil
+	}
+
+	// IDX is like ID, but panics if an error occurs.
+	func (u *{{ $upsertOne }}) IDX(ctx context.Context) {{ $.ID.Type }} {
+		id, err := u.ID(ctx)
+		if err != nil {
+			panic(err)
+		}
+		return id
+	}
+{{ end }}
+
+{{ end }}
+
+
+{{ define "dialect/sql/create_bulk/additional/upsert" }}
+	{{ if $.FeatureEnabled "sql/upsert" }}
+		{{ template "helper/upsertbulk" $ }}
+	{{ end }}
+{{ end }}
+
+{{/* Template for adding the "OnConflict" methods to the create-bulk builder. */}}
+{{ define "helper/upsertbulk" }}
+{{ $pkg := base $.Config.Package }}
+{{ $builder := pascal $.Scope.Builder }}
+{{ $receiver := receiver $builder }}
+{{ $upsertBulk := print $.Name "UpsertBulk" }}
+{{ $upsertSet := print $.Name "Upsert" }}
+{{ $udfID := false }}{{ if $.HasOneFieldID }}{{ $udfID = $.ID.UserDefined }}{{ end }}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.{{ $.Name }}.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+{{- with $.Fields }}
+		{{- $f := index $.Fields 0 }}
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.{{ $.Name }}Upsert) {
+//			Set{{ index $f.StructField }}(v+v).
+//		}).
+{{- end }}
+//		Exec(ctx)
+//
+func ({{ $receiver }} *{{ $builder }}) OnConflict(opts ...sql.ConflictOption) *{{ $upsertBulk }} {
+	{{ $receiver }}.conflict = opts
+	return &{{ $upsertBulk }}{
+		create: {{ $receiver }},
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.{{ $.Name }}.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+//
+func ({{ $receiver }} *{{ $builder }}) OnConflictColumns(columns ...string) *{{ $upsertBulk }} {
+	{{ $receiver }}.conflict = append({{ $receiver }}.conflict, sql.ConflictColumns(columns...))
+	return &{{ $upsertBulk }}{
+		create: {{ $receiver }},
+	}
+}
+
+// {{ $upsertBulk }} is the builder for "upsert"-ing
+// a bulk of {{ $.Name }} nodes.
+type {{ $upsertBulk }} struct {
+	create *{{ $builder }}
+}
+
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.{{ $.Name }}.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+{{- if $udfID }}
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore({{ $.Package }}.{{ $.ID.Constant }})
+//			}),
+{{- end }}
+//		).
+//		Exec(ctx)
+//
+func (u *{{ $upsertBulk }}) UpdateNewValues() *{{ $upsertBulk }} {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	{{- if or $udfID $.ImmutableFields }}
+		u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+			for _, b := range u.create.builders {
+				{{- if $udfID }}
+					if _, exists := b.mutation.ID(); exists {
+						s.SetIgnore({{ $.Package }}.{{ $.ID.Constant }})
+					}
+				{{- end }}
+				{{- range $f := $.ImmutableFields }}
+					if _, exists := b.mutation.{{ $f.MutationGet }}(); exists {
+						s.SetIgnore({{ $.Package }}.{{ $f.Constant }})
+					}
+				{{- end }}
+			}
+		}))
+	{{- end }}
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.{{ $.Name }}.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+//
+func (u *{{ $upsertBulk }}) Ignore() *{{ $upsertBulk }} {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *{{ $upsertBulk }}) DoNothing() *{{ $upsertBulk }} {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the {{ $builder }}.OnConflict
+// documentation for more info.
+func (u *{{ $upsertBulk }}) Update(set func(*{{ $upsertSet }})) *{{ $upsertBulk }} {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&{{ $upsertSet }}{UpdateSet: update})
+	}))
+	return u
+}
+
+{{ with extend $ "Upsert" $upsertBulk "UpsertSet" $upsertSet }}
+	{{ template "helper/upsert/fields" . }}
+{{ end }}
+
+// Exec executes the query.
+func (u *{{ $upsertBulk }}) Exec(ctx context.Context) error {
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("{{ $pkg }}: OnConflict was set for builder %d. Set it on the {{ $builder }} instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("{{ $pkg }}: missing options for {{ $builder }}.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *{{ $upsertBulk }}) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+{{- end }}
+
+{{ define "helper/upsert/fields" }}
+{{ $upsert := $.Scope.Upsert }}
+{{ $upsertSet := $.Scope.UpsertSet }}
+
+{{ range $f := $.MutableFields }}
+    {{ $func := print "Set" $f.StructField }}
+    // {{ $func }} sets the "{{ $f.Name }}" field.
+	func (u *{{ $upsert }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsert }} {
+		return u.Update(func(s *{{ $upsertSet }}) {
+			s.{{ $func }}(v)
+		})
+	}
+
+	{{ if $f.SupportsMutationAdd }}
+		{{ $func := print "Add" $f.StructField }}
+		// {{ $func }} adds v to the "{{ $f.Name }}" field.
+		func (u *{{ $upsert }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsert }} {
+			return u.Update(func(s *{{ $upsertSet }}) {
+				s.{{ $func }}(v)
+			})
+		}
+	{{ end }}
+
+    {{ $func = print "Update" $f.StructField }}
+    // {{ $func }} sets the "{{ $f.Name }}" field to the value that was provided on create.
+    func (u *{{ $upsert }}) {{ $func }}() *{{ $upsert }} {
+        return u.Update(func(s *{{ $upsertSet }}) {
+            s.{{ $func }}()
+        })
+    }
+
+    {{ if $f.Optional }}
+        {{ $func := print "Clear" $f.StructField }}
+        // {{ $func }} clears the value of the "{{ $f.Name }}" field.
+        func (u *{{ $upsert }}) {{ $func }}() *{{ $upsert }} {
+            return u.Update(func(s *{{ $upsertSet }}) {
+                s.{{ $func }}()
+            })
+        }
+    {{ end }}
+{{ end }}
+{{ end }}

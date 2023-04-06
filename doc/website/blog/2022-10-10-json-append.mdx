@@ -1,0 +1,297 @@
+---
+title: Appending values to JSON fields with Ent
+author: Rotem Tamir
+authorURL: "https://github.com/rotemtam"
+authorImageURL: "https://s.gravatar.com/avatar/36b3739951a27d2e37251867b7d44b1a?s=80"
+authorTwitter: _rtam
+image: "https://entgo.io/images/assets/ent-json-append.png"
+---
+
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+### TL;DR
+
+* Most relational databases support columns with unstructured JSON values.
+* Ent has great support for working with JSON values in relational databases.
+* How to append values to a JSON array in an atomic way.
+* Ent recently added support for atomically appending values to fields in JSON values.
+
+### JSON values in SQL databases
+
+Despite being known mostly for storing structured tabular data, virtually all
+modern relational databases support JSON columns for storing unstructured data
+in table columns. For example, in MySQL you can create a table such as:
+
+```sql
+CREATE TABLE t1 (jdoc JSON);
+```
+
+In this column, users may store JSON objects of an arbitrary schema:
+
+```sql
+INSERT INTO t1 VALUES('{"key1": "value1", "key2": "value2"}');
+```
+
+Because JSON documents can always be expressed as strings, they can
+be stored in regular VARCHAR or TEXT columns. However, when a column is declared
+with the JSON type, the database enforces the correctness of the JSON
+syntax. For example, if we try to write an incorrect JSON document to
+this MySQL table: 
+```sql
+INSERT INTO t1 VALUES('[1, 2,');
+```
+We will receive this error:
+```console
+ERROR 3140 (22032) at line 2: Invalid JSON text:
+"Invalid value." at position 6 in value (or column) '[1, 2,'.
+```
+In addition, values stored inside JSON documents may be accessed 
+in SELECT statements using [JSON Path](https://dev.mysql.com/doc/refman/8.0/en/json.html#json-path-syntax)
+expressions, as well as used in predicates (WHERE clauses) to filter data:
+```sql
+select c->'$.hello' as greeting from t where c->'$.hello' = 'world';;
+```
+To get:
+```text
++--------------+
+| greeting     |
++--------------+
+| "world"      |
++--------------+
+1 row in set (0.00 sec)
+```
+
+### JSON values in Ent
+
+With Ent, users may define JSON fields in schemas using `field.JSON` by passing
+the desired field name as well as the backing Go type. For example:
+
+```go
+type Tag struct {
+	Name    string    `json:"name"`
+	Created time.Time `json:"created"`
+}
+
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.JSON("tags", []Tag{}),
+	}
+}
+```
+
+Ent provides a convenient API for reading and writing values to JSON columns, as well
+as applying predicates (using [`sqljson`](https://entgo.io/docs/predicates/#json-predicates)):
+```go
+func TestEntJSON(t *testing.T) {
+	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	ctx := context.Background()
+	// Insert a user with two comments.
+	client.User.Create().
+		SetTags([]schema.Tag{
+			{Name: "hello", Created: time.Now()},
+			{Name: "goodbye", Created: time.Now()},
+		}).
+		SaveX(ctx)
+
+	// Count how many users have more than zero tags.
+	count := client.User.Query().
+		Where(func(s *sql.Selector) {
+			s.Where(
+				sqljson.LenGT(user.FieldTags, 0),
+			)
+		}).
+		CountX(ctx)
+	fmt.Printf("count: %d", count)
+	// Prints: count: 1
+}
+```
+
+### Appending values to fields in JSON columns
+
+In many cases, it is useful to append a value to a list in a JSON column.
+Preferably, appends are implemented in a way that is _atomic_, meaning, without
+needing to read the current value and writing the entire new value. The reason
+for this is that if two calls try to append the value concurrently, both will
+read the same _current_ value from the database, and write their own updated version
+roughly at the same time. Unless [optimistic locking](2021-07-22-database-locking-techniques-with-ent.md)
+is used, both writes will succeed, but the final result will only include one of
+the new values. 
+
+To overcome this race condition, we can let the database take care of the synchronization
+between both calls by using a clever UPDATE query. The intuition for this solution
+is similar to how counters are incremented in many applications. Instead of running:
+```sql
+SELECT points from leaderboard where user='rotemtam' 
+```
+Reading the result (lets say its 1000), incrementing the value in process (1000+1=1001) and writing the new sum
+verbatim:
+```sql
+UPDATE leaderboard SET points=1001 where user='rotemtam'
+```
+Developers can use a query such as:
+```sql
+UPDATE leaderboard SET points=points+1 where user='rotemtam'
+```
+
+To avoid the need to synchronize writes using optimistic locking
+or some other mechanism, let's see how we can similarly leverage the database's capability to
+perform them concurrently in a safe manner.
+
+There are two things to note as we are constructing this query. First, the syntax for working
+with JSON values varies a bit between different database vendors, as you will see in
+the examples below. Second, a query for appending a value to a list in a JSON document
+needs to handle at least two edge cases:
+1. The field we want to append to doesn't exist yet in the JSON document.
+2. The field exists but is set to JSON `null`.
+
+Here is what such a query might look like for appending a value `new_val` to a field named `a`
+in a column `c` for table `t` in different dialects:
+<Tabs
+    defaultValue="mysql"
+    values={[
+        {label: 'MySQL', value: 'mysql'},
+        {label: 'PostgeSQL', value: 'pgsql'},
+        {label: 'SQLite', value: 'sqlite'},
+    ]}>
+<TabItem value="mysql">
+
+```sql
+UPDATE `t` SET `c` = CASE
+WHEN
+    (JSON_TYPE(JSON_EXTRACT(`c`, '$.a')) IS NULL
+    OR JSON_TYPE(JSON_EXTRACT(`c`, '$.a')) = 'NULL')
+THEN
+    JSON_SET(`c`, '$.a', JSON_ARRAY('new_val'))
+ELSE
+    JSON_ARRAY_APPEND(`c`, '$.a', 'new_val')
+END
+```
+
+</TabItem>
+<TabItem value="pgsql">
+
+```sql
+UPDATE "t" SET "c" = CASE
+WHEN
+    (("c"->'a')::jsonb IS NULL
+    OR ("c"->'a')::jsonb = 'null'::jsonb)
+THEN
+    jsonb_set("c", '{a}', 'new_val', true)
+ELSE
+    jsonb_set("c", '{a}', "c"->'a' || 'new_val', true)
+END
+```
+
+</TabItem>
+<TabItem value="sqlite">
+
+```sql
+UPDATE `t` SET `c` = CASE
+WHEN
+    (JSON_TYPE(`c`, '$') IS NULL
+    OR JSON_TYPE(`c`, '$') = 'null')
+THEN
+    JSON_ARRAY(?)
+ELSE
+    JSON_INSERT(`c`, '$[#]', ?)
+END
+```
+
+</TabItem>
+</Tabs>
+
+### Appending values to JSON fields with Ent
+
+Ent recently added support for atomically appending values to fields in JSON
+columns. Let's see how it can be used.
+
+If the backing type of the JSON field is a slice, such as:
+```go
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		// highlight-start
+		field.JSON("tags", []string{}),
+		// highlight-end
+	}
+}
+```
+
+Ent will generate a method `AppendTags` on the update mutation builders.
+You can use them like so:
+```go
+func TestAppend(t *testing.T) {
+	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	ctx := context.Background()
+	// Insert a user with two tags.
+	u := client.User.Create().
+		SetTags([]string{"hello", "world"}).
+		SaveX(ctx)
+
+	// highlight-start
+	u.Update().AppendTags([]string{"goodbye"}).ExecX(ctx)
+	// highlight-end
+
+	again := client.User.GetX(ctx, u.ID)
+	fmt.Println(again.Tags)
+	// Prints: [hello world goodbye]
+}
+```
+If the backing type of the JSON field is a struct containing a list, such as:
+
+```go
+type Meta struct {
+	Tags []string `json:"tags"'`
+}
+
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.JSON("meta", &Meta{}),
+	}
+}
+```
+You can use the custom [sql/modifier](https://entgo.io/docs/feature-flags/#custom-sql-modifiers)
+option to have Ent generate the `Modify` method which you can use this way:
+```go
+func TestAppendSubfield(t *testing.T) {
+	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	ctx := context.Background()
+	// Insert a user with two tags.
+	u := client.User.Create().
+		SetMeta(&schema.Meta{
+			Tags: []string{"hello", "world"},
+		}).
+		SaveX(ctx)
+
+	// highlight-start
+	u.Update().
+		Modify(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldMeta, []string{"goodbye"}, sqljson.Path("tags"))
+		}).
+		ExecX(ctx)
+	// highlight-end
+
+	again := client.User.GetX(ctx, u.ID)
+	fmt.Println(again.Meta.Tags)
+	// Prints: [hello world goodbye]
+}
+```
+
+### Wrapping up
+
+In this post we discussed JSON fields in SQL and Ent in general. Next,
+we discussed how appending values to a JSON field can be done atomically
+in popular SQL databases. Finally, we showed how to do this using Ent.
+Do you think Remove/Slice operations are necessary? Let us know what you think!
+
+:::note For more Ent news and updates:
+
+- Subscribe to our [Newsletter](https://entgo.substack.com/)
+- Follow us on [Twitter](https://twitter.com/entgo_io)
+- Join us on #ent on the [Gophers Slack](https://entgo.io/docs/slack)
+- Join us on the [Ent Discord Server](https://discord.gg/qZmPgTE6RX)
+:::
+

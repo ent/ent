@@ -8,8 +8,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
 )
 
 // Driver is a dialect.Driver implementation for TinkerPop gremlin.
@@ -27,14 +27,14 @@ func NewDriver(c *Client) *Driver {
 func (Driver) Dialect() string { return dialect.Gremlin }
 
 // Exec implements the dialect.Exec method.
-func (c *Driver) Exec(ctx context.Context, query string, args, v interface{}) error {
+func (c *Driver) Exec(ctx context.Context, query string, args, v any) error {
 	vr, ok := v.(*Response)
 	if !ok {
 		return fmt.Errorf("dialect/gremlin: invalid type %T. expect *gremlin.Response", v)
 	}
 	bindings, ok := args.(dsl.Bindings)
 	if !ok {
-		return fmt.Errorf("dialect/gremlin: invalid type %T. expect map[string]interface{} for bindings", args)
+		return fmt.Errorf("dialect/gremlin: invalid type %T. expect map[string]any for bindings", args)
 	}
 	res, err := c.Do(ctx, NewEvalRequest(query, WithBindings(bindings)))
 	if err != nil {
@@ -45,7 +45,7 @@ func (c *Driver) Exec(ctx context.Context, query string, args, v interface{}) er
 }
 
 // Query implements the dialect.Query method.
-func (c *Driver) Query(ctx context.Context, query string, args, v interface{}) error {
+func (c *Driver) Query(ctx context.Context, query string, args, v any) error {
 	return c.Exec(ctx, query, args, v)
 }
 

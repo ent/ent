@@ -4,6 +4,8 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
 {{ define "tx" }}
 
 {{ template "header" $ }}
@@ -12,26 +14,20 @@ import (
 	"context"
 	"sync"
 
-	"github.com/facebook/ent/dialect"
+	"entgo.io/ent/dialect"
 )
 
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	{{ range $_, $n := $.Nodes -}}
+	{{- range $n := $.Nodes }}
 		// {{ $n.Name }} is the client for interacting with the {{ $n.Name }} builders.
-		{{ $n.Name }} *{{ $n.Name }}Client
-	{{ end }}
+		{{ $n.Name }} *{{ $n.ClientName }}
+	{{- end }}
 
 	// lazily loaded.
 	client     *Client
 	clientOnce sync.Once
-
-	// completion callbacks.
-	mu         sync.Mutex
-	onCommit   []CommitHook
-	onRollback []RollbackHook
-
 	// ctx lives for the life of the transaction. It is
 	// the same context used by the underlying connection.
 	ctx context.Context
@@ -41,7 +37,7 @@ type Tx struct {
 {{ range $func := keys $funcs }}
 	{{ $iface := get $funcs $func }}
 	type (
-		// {{ $iface }} is the interface that wraps the {{ $iface }} method.
+		// {{ $iface }} is the interface that wraps the {{ $func }} method.
 		{{ $iface }} interface {
 			{{ $func }}(context.Context, *Tx) error
 		}
@@ -55,7 +51,7 @@ type Tx struct {
 		// and returns a {{ $iface }}. For example:
 		//
 		//	hook := func(next ent.{{ $iface }}) ent.{{ $iface }} {
-		//		return ent.{{ $func }}Func(func(context.Context, tx *ent.Tx) error {
+		//		return ent.{{ $func }}Func(func(ctx context.Context, tx *ent.Tx) error {
 		//			// Do some stuff before.
 		//			if err := next.{{ $func }}(ctx, tx); err != nil {
 		//				return err
@@ -80,9 +76,9 @@ type Tx struct {
 		var fn {{ $iface }} = {{ $func }}Func(func(context.Context, *Tx) error {
 			return txDriver.tx.{{ $func }}()
 		})
-		tx.mu.Lock()
-		hooks := append([]{{ $func }}Hook(nil), tx.{{ $onFuncs }}...)
-		tx.mu.Unlock()
+		txDriver.mu.Lock()
+		hooks := append([]{{ $func }}Hook(nil), txDriver.{{ $onFuncs }}...)
+		txDriver.mu.Unlock()
 		for i := len(hooks) - 1; i >= 0; i-- {
 			fn = hooks[i](fn)
 		}
@@ -91,9 +87,10 @@ type Tx struct {
 
 	// On{{ $func }} adds a hook to call on {{ lower $func }}.
 	func (tx *Tx) On{{ $func }}(f {{ $func }}Hook) {
-		tx.mu.Lock()
-		defer tx.mu.Unlock()
-		tx.{{ $onFuncs }} = append(tx.{{ $onFuncs }}, f)
+		txDriver := tx.config.driver.(*txDriver)
+		txDriver.mu.Lock()
+		txDriver.{{ $onFuncs }} = append(txDriver.{{ $onFuncs }}, f)
+		txDriver.mu.Unlock()
 	}
 {{- end }}
 
@@ -107,9 +104,9 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
-	{{ range $_, $n := $.Nodes -}}
-    	tx.{{ $n.Name }} = New{{ $n.Name }}Client(tx.config)
-	{{ end -}}
+	{{- range $n := $.Nodes }}
+		tx.{{ $n.Name }} = New{{ $n.ClientName }}(tx.config)
+	{{- end }}
 }
 
 {{/* first node for doc example */}}
@@ -131,6 +128,10 @@ type txDriver struct {
 	drv dialect.Driver
 	// tx is the underlying transaction.
 	tx dialect.Tx
+	// completion hooks.
+	mu         sync.Mutex
+	onCommit   []CommitHook
+	onRollback []RollbackHook
 }
 
 // newTx creates a new transactional driver.
@@ -161,15 +162,21 @@ func (*txDriver) Commit() error { return nil }
 func (*txDriver) Rollback() error { return nil }
 
 // Exec calls tx.Exec.
-func (tx *txDriver) Exec(ctx context.Context, query string, args, v interface{}) error {
+func (tx *txDriver) Exec(ctx context.Context, query string, args, v any) error {
 	return tx.tx.Exec(ctx, query, args, v)
 }
 
 // Query calls tx.Query.
-func (tx *txDriver) Query(ctx context.Context, query string, args, v interface{}) error {
+func (tx *txDriver) Query(ctx context.Context, query string, args, v any) error {
 	return tx.tx.Query(ctx, query, args, v)
 }
 
 var _ dialect.Driver = (*txDriver)(nil)
+
+{{- with $tmpls := matchTemplate "tx/additional/*" "tx/additional/*/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{- xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
 
 {{ end }}

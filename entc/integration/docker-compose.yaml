@@ -1,0 +1,147 @@
+# Copyright 2019-present Facebook Inc. All rights reserved.
+# This source code is licensed under the Apache 2.0 license found
+# in the LICENSE file in the root directory of this source tree.
+
+version: "3.7"
+
+services:
+
+  mysql:
+    platform: linux/amd64
+    image: mysql:5.6.35
+    environment:
+      MYSQL_DATABASE: test
+      MYSQL_ROOT_PASSWORD: pass
+    healthcheck:
+      test: mysqladmin ping -ppass
+    ports:
+      - 3306:3306
+
+  mysql57:
+    platform: linux/amd64
+    image: mysql:5.7.26
+    environment:
+      MYSQL_DATABASE: test
+      MYSQL_ROOT_PASSWORD: pass
+    healthcheck:
+      test: mysqladmin ping -ppass
+    ports:
+      - 3307:3306
+
+  mysql8:
+    platform: linux/amd64
+    image: mysql:8.0.19
+    environment:
+      MYSQL_DATABASE: test
+      MYSQL_ROOT_PASSWORD: pass
+    healthcheck:
+      test: mysqladmin ping -ppass
+    ports:
+      - 3308:3306
+
+  mariadb:
+    platform: linux/amd64
+    image: mariadb
+    environment:
+      MYSQL_DATABASE: test
+      MYSQL_ROOT_PASSWORD: pass
+    healthcheck:
+      test: mysqladmin ping -ppass
+    ports:
+      - 4306:3306
+
+  mariadb102:
+    platform: linux/amd64
+    image: mariadb:10.2.32
+    environment:
+      MYSQL_DATABASE: test
+      MYSQL_ROOT_PASSWORD: pass
+    healthcheck:
+      test: mysqladmin ping -ppass
+    ports:
+      - 4307:3306
+
+  mariadb103:
+    platform: linux/amd64
+    image: mariadb:10.3.13
+    environment:
+      MYSQL_DATABASE: test
+      MYSQL_ROOT_PASSWORD: pass
+    healthcheck:
+      test: mysqladmin ping -ppass
+    ports:
+      - 4308:3306
+
+  postgres10:
+    platform: linux/amd64
+    image: postgres:10
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_PASSWORD: pass
+    healthcheck:
+      test: pg_isready -U postgres
+    ports:
+      - 5430:5432
+
+  postgres11:
+    platform: linux/amd64
+    image: postgres:11
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_PASSWORD: pass
+    healthcheck:
+      test: pg_isready -U postgres
+    ports:
+      - 5431:5432
+
+  postgres12:
+    platform: linux/amd64
+    image: postgres:12
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_PASSWORD: pass
+    healthcheck:
+      test: pg_isready -U postgres
+    ports:
+      - 5432:5432
+
+  postgres13:
+    platform: linux/amd64
+    image: postgres:13
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_PASSWORD: pass
+    healthcheck:
+      test: pg_isready -U postgres
+    ports:
+      - 5433:5432
+
+  postgres14:
+    platform: linux/amd64
+    image: postgres:14
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_PASSWORD: pass
+    healthcheck:
+      test: pg_isready -U postgres
+    ports:
+      - 5434:5432
+
+  postgres15:
+    platform: linux/amd64
+    image: postgres:15
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_PASSWORD: pass
+    healthcheck:
+      test: pg_isready -U postgres
+    ports:
+      - 5435:5432
+
+  gremlin:
+    platform: linux/amd64
+    image: entgo/gremlin-server
+    build: compose/gremlin-server
+    restart: on-failure
+    ports:
+      - 8182:8182

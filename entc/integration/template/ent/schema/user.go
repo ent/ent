@@ -5,14 +5,22 @@
 package schema
 
 import (
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/edge"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent"
+	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
+	"entgo.io/ent/schema/field"
 )
 
 // User holds the schema definition for the User entity.
 type User struct {
 	ent.Schema
+}
+
+// Annotations of the User.
+func (User) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		schema.Comment("User represents a user who has Pets and Friends."),
+	}
 }
 
 // Fields of the User.

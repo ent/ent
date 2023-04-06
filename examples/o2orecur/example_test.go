@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebook/ent/examples/o2orecur/ent"
-	"github.com/facebook/ent/examples/o2orecur/ent/node"
+	"entgo.io/ent/examples/o2orecur/ent"
+	"entgo.io/ent/examples/o2orecur/ent/node"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -40,7 +40,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 		SetValue(1).
 		Save(ctx)
 	if err != nil {
-		return fmt.Errorf("creating the head: %v", err)
+		return fmt.Errorf("creating the head: %w", err)
 	}
 	curr := head
 	// Generate the following linked-list: 1<->2<->3<->4<->5.
@@ -77,7 +77,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 	// Check that the change actually applied:
 	prev, err := head.QueryPrev().Only(ctx)
 	if err != nil {
-		return fmt.Errorf("getting head's prev: %v", err)
+		return fmt.Errorf("getting head's prev: %w", err)
 	}
 	fmt.Printf("\n%v", prev.Value == tail.Value)
 	// Output: true

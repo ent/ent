@@ -26,17 +26,18 @@ func ExampleClient_Query() {
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
 
 	rsp, err := client.Query(ctx, "g.E()")
 	if err != nil {
-		log.Panicf("executing query: %v", err)
+		log.Fatalf("executing query: %v", err)
 	}
 
 	edges, err := rsp.ReadEdges()
 	if err != nil {
-		log.Panicf("unmashal edges")
+		log.Fatalf("unmashal edges")
 	}
+
+	defer cancel()
 
 	for _, e := range edges {
 		log.Println(e.String())

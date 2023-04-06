@@ -16,15 +16,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facebook/ent/entc/integration/gremlin/ent"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/card"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/file"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/group"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/groupinfo"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/node"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/pet"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/entc/integration/gremlin/ent"
+	"entgo.io/ent/entc/integration/gremlin/ent/card"
+	"entgo.io/ent/entc/integration/gremlin/ent/file"
+	"entgo.io/ent/entc/integration/gremlin/ent/group"
+	"entgo.io/ent/entc/integration/gremlin/ent/groupinfo"
+	"entgo.io/ent/entc/integration/gremlin/ent/node"
+	"entgo.io/ent/entc/integration/gremlin/ent/pet"
+	"entgo.io/ent/entc/integration/gremlin/ent/user"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -139,6 +140,9 @@ func Sanity(t *testing.T, client *ent.Client) {
 	usr = client.User.UpdateOne(usr).SetName("baz").AddGroups(grp).SaveX(ctx)
 	require.Equal("baz", usr.Name)
 	require.NotEmpty(usr.QueryGroups().AllX(ctx))
+	id := uuid.NewString()
+	it := client.Item.Create().SetID(id).SaveX(ctx)
+	require.Equal(id, it.ID)
 
 	// grouping.
 	var v []struct {
@@ -246,6 +250,17 @@ func Select(t *testing.T, client *ent.Client) {
 		ScanX(ctx, &v)
 	require.Equal([]int{30, 30, 30}, []int{v[0].Age, v[1].Age, v[2].Age})
 	require.Equal([]string{"bar", "baz", "foo"}, []string{v[0].Name, v[1].Name, v[2].Name})
+
+	a8m := client.User.Create().SetName("Ariel").SetNickname("a8m").SetAge(30).SaveX(ctx)
+	require.NotEmpty(a8m.ID)
+	require.NotEmpty(a8m.Age)
+	require.NotEmpty(a8m.Name)
+	require.NotEmpty(a8m.Nickname)
+	a8m = a8m.Update().SetAge(32).Select(user.FieldAge).SaveX(ctx)
+	require.NotEmpty(a8m.ID)
+	require.NotEmpty(a8m.Age)
+	require.Empty(a8m.Name)
+	require.Empty(a8m.Nickname)
 }
 
 func Predicate(t *testing.T, client *ent.Client) {
@@ -544,14 +559,14 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.Len(client.GroupInfo.Query().Where(groupinfo.Or(groupinfo.Desc("group info"), groupinfo.HasGroupsWith(group.HasUsersWith(user.Name("alex"))))).AllX(ctx), 1)
 
 	t.Log("query with ordering")
-	u1 := client.User.Query().Order(ent.Asc(user.FieldName)).FirstXID(ctx)
-	u2 := client.User.Query().Order(ent.Desc(user.FieldName)).FirstXID(ctx)
+	u1 := client.User.Query().Order(ent.Asc(user.FieldName)).FirstIDX(ctx)
+	u2 := client.User.Query().Order(ent.Desc(user.FieldName)).FirstIDX(ctx)
 	require.NotEqual(u1, u2)
-	u1 = client.User.Query().Order(ent.Asc(user.FieldLast), ent.Asc(user.FieldAge)).FirstXID(ctx)
-	u2 = client.User.Query().Order(ent.Asc(user.FieldLast), ent.Desc(user.FieldAge)).FirstXID(ctx)
+	u1 = client.User.Query().Order(ent.Asc(user.FieldLast), ent.Asc(user.FieldAge)).FirstIDX(ctx)
+	u2 = client.User.Query().Order(ent.Asc(user.FieldLast), ent.Desc(user.FieldAge)).FirstIDX(ctx)
 	require.NotEqual(u1, u2)
-	u1 = client.User.Query().Order(ent.Asc(user.FieldName, user.FieldAge)).FirstXID(ctx)
-	u2 = client.User.Query().Order(ent.Asc(user.FieldName, user.FieldAge)).FirstXID(ctx)
+	u1 = client.User.Query().Order(ent.Asc(user.FieldName, user.FieldAge)).FirstIDX(ctx)
+	u2 = client.User.Query().Order(ent.Asc(user.FieldName, user.FieldAge)).FirstIDX(ctx)
 	require.Equal(u1, u2)
 
 	t.Log("query path")
@@ -784,17 +799,17 @@ func DefaultValue(t *testing.T, client *ent.Client) {
 func ImmutableValue(t *testing.T, client *ent.Client) {
 	tests := []struct {
 		name    string
-		updater func() interface{}
+		updater func() any
 	}{
 		{
 			name: "Update",
-			updater: func() interface{} {
+			updater: func() any {
 				return client.Card.Update()
 			},
 		},
 		{
 			name: "UpdateOne",
-			updater: func() interface{} {
+			updater: func() any {
 				return client.Card.Create().SetNumber("42").SaveX(context.Background()).Update()
 			},
 		},

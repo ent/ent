@@ -4,6 +4,8 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
 {{ define "enttest" }}
 
 {{ $pkg := base $.Config.Package }}
@@ -20,7 +22,8 @@ import (
 	_ "{{ $.Config.Package }}/runtime"
 
 	{{ if $.SupportMigrate }}
-		"github.com/facebook/ent/dialect/sql/schema"
+		"{{ $.Config.Package }}/migrate"
+		"entgo.io/ent/dialect/sql/schema"
 	{{ end }}
 )
 
@@ -29,7 +32,7 @@ type (
 	// testing.T and testing.B and used by enttest.
 	TestingT interface {
 		FailNow()
-		Error(...interface{})
+		Error(...any)
 	}
 
 	// Option configures client creation.
@@ -76,10 +79,7 @@ func Open(t TestingT, driverName, dataSourceName string, opts ...Option) *{{ $pk
 		t.FailNow()
 	}
 	{{- if $.SupportMigrate }}
-		if err := c.Schema.Create(context.Background(), o.migrateOpts...); err != nil {
-			t.Error(err)
-			t.FailNow()
-		}
+		migrateSchema(t, c, o)
 	{{- end }}
 	return c
 }
@@ -89,12 +89,22 @@ func NewClient(t TestingT, opts ...Option) *{{ $pkg }}.Client {
 	o := newOptions(opts)
 	c := {{ $pkg }}.NewClient(o.opts...)
 	{{- if $.SupportMigrate }}
-		if err := c.Schema.Create(context.Background(), o.migrateOpts...); err != nil {
-			t.Error(err)
-			t.FailNow()
-		}
+		migrateSchema(t, c, o)
 	{{- end }}
 	return c
 }
 
+{{- if $.SupportMigrate }}
+	func migrateSchema(t TestingT, c *{{ $pkg }}.Client, o *options) {
+		tables, err := schema.CopyTables(migrate.Tables)
+		if err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+		if err := migrate.Create(context.Background(), c.Schema, tables, o.migrateOpts...); err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+	}
+{{- end }}
 {{ end }}

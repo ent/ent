@@ -7,17 +7,18 @@ package ws
 import (
 	"bytes"
 	"context"
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"sync"
 	"time"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/dialect/gremlin/encoding"
-	"github.com/facebook/ent/dialect/gremlin/encoding/graphson"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin/encoding"
+	"entgo.io/ent/dialect/gremlin/encoding/graphson"
 
 	"github.com/gorilla/websocket"
-	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -88,7 +89,7 @@ var (
 		},
 	}
 
-	// ErrConnClosed is returned by the Conns Execute method when
+	// ErrConnClosed is returned by the Conn's Execute method when
 	// the underlying gremlin server connection is closed.
 	ErrConnClosed = errors.New("gremlin: server connection closed")
 
@@ -106,7 +107,7 @@ func (d *Dialer) Dial(uri string) (*Conn, error) {
 func (d *Dialer) DialContext(ctx context.Context, uri string) (*Conn, error) {
 	c, rsp, err := d.Dialer.DialContext(ctx, uri, nil)
 	if err != nil {
-		return nil, errors.Wrapf(err, "gremlin: dialing uri %s", uri)
+		return nil, fmt.Errorf("gremlin: dialing uri %s: %w", uri, err)
 	}
 	defer rsp.Body.Close()
 
@@ -141,7 +142,7 @@ func (c *Conn) Execute(ctx context.Context, req *gremlin.Request) (*gremlin.Resp
 	c.grp.Go(func() error {
 		err := graphson.NewEncoder(pw).Encode(req)
 		if err != nil {
-			err = errors.Wrap(err, "encoding request")
+			err = fmt.Errorf("encoding request: %w", err)
 		}
 		pw.CloseWithError(err)
 		return err
@@ -189,22 +190,22 @@ func (c *Conn) sender() error {
 			// fetch next message writer
 			w, err := c.conn.NextWriter(websocket.BinaryMessage)
 			if err != nil {
-				return errors.Wrap(err, "getting message writer")
+				return fmt.Errorf("getting message writer: %w", err)
 			}
 
 			// write mime header
 			if _, err := w.Write(encoding.GraphSON3Mime); err != nil {
-				return errors.Wrap(err, "writing mime header")
+				return fmt.Errorf("writing mime header: %w", err)
 			}
 
 			// write request body
 			if _, err := io.Copy(w, r); err != nil {
-				return errors.Wrap(err, "writing request")
+				return fmt.Errorf("writing request: %w", err)
 			}
 
 			// finish message write
 			if err := w.Close(); err != nil {
-				return errors.Wrap(err, "closing message writer")
+				return fmt.Errorf("closing message writer: %w", err)
 			}
 		case <-c.ctx.Done():
 			// connection closing
@@ -216,7 +217,7 @@ func (c *Conn) sender() error {
 		case <-pinger.C:
 			// periodic connection keepalive
 			if err := c.conn.WriteControl(websocket.PingMessage, nil, time.Now().Add(writeWait)); err != nil {
-				return errors.Wrap(err, "writing ping message")
+				return fmt.Errorf("writing ping message: %w", err)
 			}
 		}
 	}
@@ -230,7 +231,7 @@ func (c *Conn) receiver() error {
 	})
 
 	// complete all in flight requests on termination
-	defer c.inflight.Range(func(id, ifr interface{}) bool {
+	defer c.inflight.Range(func(id, ifr any) bool {
 		ifr.(*inflight).result <- result{err: ErrConnClosed}
 		c.inflight.Delete(id)
 		return true
@@ -240,13 +241,13 @@ func (c *Conn) receiver() error {
 		// rely on sender connection close during termination
 		_, r, err := c.conn.NextReader()
 		if err != nil {
-			return errors.Wrap(err, "getting next reader")
+			return fmt.Errorf("writing ping message: %w", err)
 		}
 
 		// decode received response
 		var rsp gremlin.Response
 		if err := graphson.NewDecoder(r).Decode(&rsp); err != nil {
-			return errors.Wrap(err, "reading response")
+			return fmt.Errorf("reading response: %w", err)
 		}
 
 		ifr, ok := c.inflight.Load(rsp.RequestID)
@@ -277,7 +278,7 @@ func (c *Conn) receive(ifr *inflight, rsp *gremlin.Response) bool {
 		// append received fragment
 		var frag []graphson.RawMessage
 		if err := graphson.Unmarshal(rsp.Result.Data, &frag); err != nil {
-			result.err = errors.Wrap(err, "decoding response fragment")
+			result.err = fmt.Errorf("decoding response fragment: %w", err)
 			break
 		}
 		ifr.frags = append(ifr.frags, frag...)
@@ -289,7 +290,7 @@ func (c *Conn) receive(ifr *inflight, rsp *gremlin.Response) bool {
 
 		// reassemble fragmented response
 		if rsp.Result.Data, result.err = graphson.Marshal(ifr.frags); result.err != nil {
-			result.err = errors.Wrap(result.err, "assembling fragmented response")
+			result.err = fmt.Errorf("assembling fragmented response: %w", result.err)
 		}
 	case gremlin.StatusAuthenticate:
 		// receiver should never block
@@ -298,7 +299,7 @@ func (c *Conn) receive(ifr *inflight, rsp *gremlin.Response) bool {
 			if err := graphson.NewEncoder(&buf).Encode(
 				gremlin.NewAuthRequest(rsp.RequestID, c.user, c.pass),
 			); err != nil {
-				return errors.Wrap(err, "encoding auth request")
+				return fmt.Errorf("encoding auth request: %w", err)
 			}
 			select {
 			case c.send <- &buf:

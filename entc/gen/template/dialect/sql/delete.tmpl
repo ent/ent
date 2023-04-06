@@ -4,28 +4,44 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.typeScope */}}
+
 {{ define "dialect/sql/delete" }}
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
+{{ $mutation := print $receiver ".mutation" }}
 
 func ({{ $receiver}} *{{ $builder }}) sqlExec(ctx context.Context) (int, error) {
 	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table: {{ $.Package }}.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type: field.{{ $.ID.Type.ConstName }},
-				Column: {{ $.Package }}.{{ $.ID.Constant }},
-			},
+			{{- if $.HasOneFieldID }}
+				ID: &sqlgraph.FieldSpec{
+					Type: field.{{ $.ID.Type.ConstName }},
+					Column: {{ $.Package }}.{{ $.ID.Constant }},
+				},
+			{{- end }}
 		},
 	}
-	if ps := {{ $receiver }}.predicates; len(ps) > 0 {
+	{{- /* Allow mutating the sqlgraph.DeleteSpec by ent extensions or user templates.*/}}
+	{{- with $tmpls := matchTemplate "dialect/sql/delete/spec/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
+	if ps := {{ $mutation }}.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, {{ $receiver}}.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, {{ $receiver}}.driver, _spec)
+	if err != nil && sqlgraph.IsConstraintError(err) {
+		err = &ConstraintError{msg: err.Error(), wrap: err}
+	}
+	{{ $mutation }}.done = true
+	return affected, err
 }
 
 {{ end }}

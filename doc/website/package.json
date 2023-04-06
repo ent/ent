@@ -1,14 +1,34 @@
 {
   "scripts": {
     "examples": "docusaurus-examples",
-    "start": "docusaurus-start",
-    "build": "docusaurus-build",
+    "start": "docusaurus start",
+    "build": "docusaurus build",
     "publish-gh-pages": "docusaurus-publish",
-    "write-translations": "docusaurus-write-translations",
+    "write-translations": "docusaurus write-translations",
     "version": "docusaurus-version",
-    "rename-version": "docusaurus-rename-version"
+    "rename-version": "docusaurus-rename-version",
+    "swizzle": "docusaurus swizzle",
+    "deploy": "docusaurus deploy",
+    "docusaurus": "docusaurus",
+    "crowdin": "crowdin",
+    "crowdin:sync": "docusaurus write-translations && crowdin upload && crowdin download"
   },
-  "devDependencies": {
-    "docusaurus": "^1.14.0"
+  "dependencies": {
+    "@crowdin/cli": "3",
+    "@docusaurus/core": "^2.0.1",
+    "@docusaurus/plugin-client-redirects": "^2.0.1",
+    "@docusaurus/preset-classic": "^2.0.1",
+    "clsx": "^1.1.1",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-github-btn": "^1.2.0"
+  },
+  "resolutions": {
+    "glob-parent": "^5.1.2",
+    "trim": "^0.0.3",
+    "browserslist": "^4.16.5",
+    "axios": "0.21.3",
+    "set-value": "^4.0.1",
+    "immer": "^9.0.6"
   }
 }

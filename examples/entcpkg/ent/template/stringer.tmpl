@@ -1,0 +1,16 @@
+{{/* The line below tells Intellij/GoLand to enable the autocompletion based *gen.Type type. */}}
+{{/* gotype: entgo.io/ent/entc/gen.Type */}}
+
+{{ define "model/additional/stringer" }}
+
+{{/* A template that adds the "GoString" method to all generated models on the same file they are defined. */}}
+
+// GoString implements the fmt.GoStringer interface.
+func ({{ $.Receiver  }} *{{ $.Name }}) GoString() string {
+	b, err := json.MarshalIndent({{ $.Receiver  }}, "", "\t")
+	if err != nil {
+		return err.Error()
+	}
+	return string(b)
+}
+{{ end }}

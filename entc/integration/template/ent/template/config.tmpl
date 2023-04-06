@@ -1,0 +1,17 @@
+{{/* The line below tells Intellij/GoLand to enable the autocompletion based *gen.Graph type. */}}
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
+{{/* A template for adding additional config fields/options. */}}
+{{ define "config/fields/httpclient" -}}
+	// HTTPClient field added by a test template.
+	HTTPClient *http.Client
+{{ end }}
+
+{{ define "config/options/httpclient" }}
+	// HTTPClient option added by a test template.
+	func HTTPClient(hc *http.Client) Option {
+		return func(c *config) {
+			c.HTTPClient = hc
+		}
+	}
+{{ end }}

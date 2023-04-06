@@ -31,6 +31,7 @@ func generateObject() *book {
 func BenchmarkMarshalObject(b *testing.B) {
 	obj := generateObject()
 
+	b.ReportAllocs()
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		_, err := Marshal(obj)
@@ -41,6 +42,7 @@ func BenchmarkMarshalObject(b *testing.B) {
 }
 
 func BenchmarkUnmarshalObject(b *testing.B) {
+	b.ReportAllocs()
 	out, err := Marshal(generateObject())
 	if err != nil {
 		b.Fatal(err)
@@ -58,12 +60,13 @@ func BenchmarkUnmarshalObject(b *testing.B) {
 }
 
 func BenchmarkMarshalInterface(b *testing.B) {
+	b.ReportAllocs()
 	data, err := jsoniter.Marshal(generateObject())
 	if err != nil {
 		b.Fatal(err)
 	}
 
-	var obj interface{}
+	var obj any
 	if err = jsoniter.Unmarshal(data, &obj); err != nil {
 		b.Fatal(err)
 	}
@@ -78,12 +81,13 @@ func BenchmarkMarshalInterface(b *testing.B) {
 }
 
 func BenchmarkUnmarshalInterface(b *testing.B) {
+	b.ReportAllocs()
 	data, err := Marshal(generateObject())
 	if err != nil {
 		b.Fatal(err)
 	}
 
-	var obj interface{}
+	var obj any
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {

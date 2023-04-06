@@ -4,6 +4,8 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
 {{ define "predicate" }}
 
 {{- with extend $ "Package" "predicate" -}}
@@ -13,11 +15,11 @@ in the LICENSE file in the root directory of this source tree.
 import (
 	"fmt"
 
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/sql"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/sql"
 )
 
-{{ range $_, $n := $.Nodes -}}
+{{ range $n := $.Nodes -}}
 	// {{ $n.Name }} is the predicate function for {{ $n.Package }} builders.
 	type {{ $n.Name }} func({{ $.Storage.Builder }})
 {{ end }}

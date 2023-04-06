@@ -1,0 +1,5 @@
+blank_issues_enabled: false # force the usage of a template
+contact_links:
+  - name: Something Else ❔
+    url: https://gophers.slack.com/archives/C01FMSQDT53
+    about: Come chat to us in the gophers slack

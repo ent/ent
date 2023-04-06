@@ -5,23 +5,24 @@
 package gremlin
 
 import (
-	"github.com/facebook/ent/dialect/gremlin/encoding/graphson"
-	"github.com/facebook/ent/dialect/gremlin/graph"
+	"errors"
+	"fmt"
 
-	"github.com/pkg/errors"
+	"entgo.io/ent/dialect/gremlin/encoding/graphson"
+	"entgo.io/ent/dialect/gremlin/graph"
 )
 
 // A Response models a response message received from the server.
 type Response struct {
 	RequestID string `json:"requestId" graphson:"g:UUID"`
 	Status    struct {
-		Code       int                    `json:"code"`
-		Attributes map[string]interface{} `json:"attributes"`
-		Message    string                 `json:"message"`
+		Code       int            `json:"code"`
+		Attributes map[string]any `json:"attributes"`
+		Message    string         `json:"message"`
 	} `json:"status"`
 	Result struct {
-		Data graphson.RawMessage    `json:"data"`
-		Meta map[string]interface{} `json:"meta"`
+		Data graphson.RawMessage `json:"data"`
+		Meta map[string]any      `json:"meta"`
 	} `json:"result"`
 }
 
@@ -38,18 +39,18 @@ func (rsp *Response) IsErr() bool {
 // Err returns an error representing response status.
 func (rsp *Response) Err() error {
 	if rsp.IsErr() {
-		return errors.Errorf("gremlin: code=%d, message=%q", rsp.Status.Code, rsp.Status.Message)
+		return fmt.Errorf("gremlin: code=%d, message=%q", rsp.Status.Code, rsp.Status.Message)
 	}
 	return nil
 }
 
 // ReadVal reads gremlin response data into v.
-func (rsp *Response) ReadVal(v interface{}) error {
+func (rsp *Response) ReadVal(v any) error {
 	if err := rsp.Err(); err != nil {
 		return err
 	}
 	if err := graphson.Unmarshal(rsp.Result.Data, v); err != nil {
-		return errors.Wrapf(err, "gremlin: unmarshal response data: type=%T", v)
+		return fmt.Errorf("gremlin: unmarshal response data: type=%T: %w", v, err)
 	}
 	return nil
 }

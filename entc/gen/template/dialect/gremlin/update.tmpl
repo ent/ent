@@ -4,7 +4,10 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.typeScope */}}
+
 {{ define "dialect/gremlin/update" }}
+{{ $pkg := $.Scope.Package }}
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
 {{ $mutation := print $receiver ".mutation" }}
@@ -12,11 +15,16 @@ in the LICENSE file in the root directory of this source tree.
 {{ $zero := 0 }}{{ if $one }}{{ $zero = "nil" }}{{ end }}
 
 func ({{ $receiver }} *{{ $builder }}) gremlinSave(ctx context.Context) ({{- if $one }}*{{ $.Name }}{{ else }}int{{ end }}, error) {
+	{{- if $.HasUpdateCheckers }}
+		if err := {{ $receiver }}.check(); err != nil {
+			return {{ $zero }}, err
+		}
+	{{- end }}
 	res := &gremlin.Response{}
 	{{- if $one }}
 		id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}()
 		if !ok {
-			return {{ $zero }}, &ValidationError{Name: "ID", err: fmt.Errorf("missing {{ $.Name }}.ID for update")}
+			return {{ $zero }}, &ValidationError{Name: "{{ $.ID.Name }}", err: errors.New(`{{ $pkg }}: missing "{{ $.Name }}.{{ $.ID.Name }}" for update`)}
 		}
 		query, bindings := {{ $receiver }}.gremlin(id).Query()
 	{{- else }}
@@ -28,6 +36,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinSave(ctx context.Context) ({{- if 
 	if err, ok := isConstantError(res); ok {
 		return {{ $zero }}, err
 	}
+	{{ $mutation }}.done = true
 	{{- if $one }}
 		{{- $r := $.Receiver }}
 		{{ $r }} := &{{ $.Name }}{config: {{ $receiver }}.config}
@@ -54,7 +63,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 	{{- /* general update for N vertices */}}
 	{{- else }}
 		v := g.V().HasLabel({{ $.Package }}.Label)
-		for _, p := range {{ $receiver }}.predicates {
+		for _, p := range {{ $mutation }}.predicates {
 			p(v)
 		}
 	{{- end }}
@@ -65,7 +74,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 		{{ end }}
 		trs []*dsl.Traversal
 	)
-	{{- range $_, $f := $.Fields }}
+	{{- range $f := $.MutationFields }}
 		{{- if or (not $f.Immutable) $f.UpdateDefault }}
 			if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 				{{- if $f.Unique }}
@@ -76,7 +85,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 				{{- end }}
 				v.Property(dsl.Single, {{ $.Package }}.{{ $f.Constant }}, value)
 			}
-			{{- if and $f.Type.Numeric $f.ConvertedToBasic }}
+			{{- if $f.SupportsMutationAdd }}
 				if value, ok := {{ $mutation }}.Added{{ $f.StructField }}(); ok {
 					{{- if $f.Unique }}
 						addValue := rv.Clone().Union(__.Values({{ $.Package }}.{{ $f.Constant }}), __.Constant(value)).Sum().Next()
@@ -92,8 +101,8 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 	{{- end }}
 	{{- /* clear optional fields. */}}
 	{{- with $.HasOptional }}
-		var properties []interface{}
-		{{- range $_, $f := $.Fields }}
+		var properties []any
+		{{- range $f := $.MutationFields }}
 			{{- if $f.Optional }}
 				if {{ $mutation }}.{{ $f.StructField }}Cleared() {
 					properties = append(properties, {{ $.Package }}.{{ $f.Constant }})
@@ -104,7 +113,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 			v.SideEffect(__.Properties(properties...).Drop())
 		}
 	{{- end }}
-	{{- range $_, $e := $.Edges }}
+	{{- range $e := $.Edges }}
 		{{- $direction := "In" }}
 		{{- $name := printf "%s.%s" $.Package $e.LabelConstant }}
 		{{- if $e.IsInverse }}
@@ -152,7 +161,20 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 		{{- end }}
 		}
 	{{- end }}
-	{{ if $one }}v.ValueMap(true){{ else }}v.Count(){{ end }}
+	{{- if $one }}
+		if len({{ $receiver }}.fields) > 0 {
+			fields := make([]any, 0, len({{ $receiver }}.fields)+1)
+			fields = append(fields, true)
+			for _, f := range {{ $receiver }}.fields {
+				fields = append(fields, f)
+			}
+			v.ValueMap(fields...)
+		} else {
+			v.ValueMap(true)
+		}
+	{{- else }}
+		v.Count()
+	{{- end }}
 	{{- with .NumConstraint }}
 		if len(constraints) > 0 {
 			{{- /* make sure the traversal does not contain more than one vertex if we have constraint */}}

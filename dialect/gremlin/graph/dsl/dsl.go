@@ -18,7 +18,7 @@ import (
 // Node represents a DSL step in the traversal.
 type Node interface {
 	// Code returns the code representation of the element and its bindings (if any).
-	Code() (string, []interface{})
+	Code() (string, []any)
 }
 
 type (
@@ -26,46 +26,46 @@ type (
 	Token string
 	// List represents a list of elements.
 	List struct {
-		Elements []interface{}
+		Elements []any
 	}
 	// Func represents a function call.
 	Func struct {
 		Name string
-		Args []interface{}
+		Args []any
 	}
 	// Block represents a block/group of nodes.
 	Block struct {
-		Nodes []interface{}
+		Nodes []any
 	}
 	// Var represents a variable assignment and usage.
 	Var struct {
 		Name string
-		Elem interface{}
+		Elem any
 	}
 )
 
 // Code stringified the token.
-func (t Token) Code() (string, []interface{}) { return string(t), nil }
+func (t Token) Code() (string, []any) { return string(t), nil }
 
 // Code returns the code representation of a list.
-func (l List) Code() (string, []interface{}) {
+func (l List) Code() (string, []any) {
 	c, args := codeList(", ", l.Elements...)
 	return fmt.Sprintf("[%s]", c), args
 }
 
 // Code returns the code representation of a function call.
-func (f Func) Code() (string, []interface{}) {
+func (f Func) Code() (string, []any) {
 	c, args := codeList(", ", f.Args...)
 	return fmt.Sprintf("%s(%s)", f.Name, c), args
 }
 
 // Code returns the code representation of group/block of nodes.
-func (b Block) Code() (string, []interface{}) {
+func (b Block) Code() (string, []any) {
 	return codeList("; ", b.Nodes...)
 }
 
 // Code returns the code representation of variable declaration or its identifier.
-func (v Var) Code() (string, []interface{}) {
+func (v Var) Code() (string, []any) {
 	c, args := code(v.Elem)
 	if v.Name == "" {
 		return c, args
@@ -80,12 +80,12 @@ var (
 )
 
 // NewFunc returns a new function node.
-func NewFunc(name string, args ...interface{}) *Func {
+func NewFunc(name string, args ...any) *Func {
 	return &Func{Name: name, Args: args}
 }
 
 // NewList returns a new list node.
-func NewList(args ...interface{}) *List {
+func NewList(args ...any) *List {
 	return &List{Elements: args}
 }
 
@@ -96,10 +96,10 @@ type Querier interface {
 }
 
 // Bindings are used to associate a variable with a value.
-type Bindings map[string]interface{}
+type Bindings map[string]any
 
 // Add adds new value to the bindings map, formats it if needed, and returns its generated name.
-func (b Bindings) Add(v interface{}) string {
+func (b Bindings) Add(v any) string {
 	k := fmt.Sprintf("$%x", len(b))
 	switch v := v.(type) {
 	case time.Time:
@@ -120,7 +120,18 @@ const (
 )
 
 // Code implements the Node interface.
-func (c Cardinality) Code() (string, []interface{}) { return string(c), nil }
+func (c Cardinality) Code() (string, []any) { return string(c), nil }
+
+// Keyword defines a Gremlin keyword.
+type Keyword string
+
+// Keyword options.
+const (
+	ID Keyword = "id"
+)
+
+// Code implements the Node interface.
+func (k Keyword) Code() (string, []any) { return string(k), nil }
 
 // Order of vertex properties.
 type Order string
@@ -133,7 +144,7 @@ const (
 )
 
 // Code implements the Node interface.
-func (o Order) Code() (string, []interface{}) { return string(o), nil }
+func (o Order) Code() (string, []any) { return string(o), nil }
 
 // Column references a particular type of column in a complex data structure such as a Map, a Map.Entry, or a Path.
 type Column string
@@ -145,7 +156,7 @@ const (
 )
 
 // Code implements the Node interface.
-func (o Column) Code() (string, []interface{}) { return string(o), nil }
+func (o Column) Code() (string, []any) { return string(o), nil }
 
 // Scope used for steps that have a variable scope which alter the manner in which the step will behave in relation to how the traverses are processed.
 type Scope string
@@ -157,12 +168,12 @@ const (
 )
 
 // Code implements the Node interface.
-func (s Scope) Code() (string, []interface{}) { return string(s), nil }
+func (s Scope) Code() (string, []any) { return string(s), nil }
 
-func codeList(sep string, vs ...interface{}) (string, []interface{}) {
+func codeList(sep string, vs ...any) (string, []any) {
 	var (
 		br   strings.Builder
-		args []interface{}
+		args []any
 	)
 	for i, node := range vs {
 		if i > 0 {
@@ -175,14 +186,14 @@ func codeList(sep string, vs ...interface{}) (string, []interface{}) {
 	return br.String(), args
 }
 
-func code(v interface{}) (string, []interface{}) {
+func code(v any) (string, []any) {
 	switch n := v.(type) {
 	case Node:
 		return n.Code()
 	case *Traversal:
 		var (
 			b    strings.Builder
-			args []interface{}
+			args []any
 		)
 		for i := range n.nodes {
 			code, nargs := n.nodes[i].Code()
@@ -191,11 +202,11 @@ func code(v interface{}) (string, []interface{}) {
 		}
 		return b.String(), args
 	default:
-		return "%s", []interface{}{v}
+		return "%s", []any{v}
 	}
 }
 
-func sface(args []string) (v []interface{}) {
+func sface(args []string) (v []any) {
 	for _, s := range args {
 		v = append(v, s)
 	}

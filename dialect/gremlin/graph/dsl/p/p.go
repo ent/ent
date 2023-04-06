@@ -5,41 +5,41 @@
 package p
 
 import (
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
 )
 
 // EQ is the equal predicate.
-func EQ(v interface{}) *dsl.Traversal {
+func EQ(v any) *dsl.Traversal {
 	return op("eq", v)
 }
 
 // NEQ is the not-equal predicate.
-func NEQ(v interface{}) *dsl.Traversal {
+func NEQ(v any) *dsl.Traversal {
 	return op("neq", v)
 }
 
 // GT is the greater than predicate.
-func GT(v interface{}) *dsl.Traversal {
+func GT(v any) *dsl.Traversal {
 	return op("gt", v)
 }
 
 // GTE is the greater than or equal predicate.
-func GTE(v interface{}) *dsl.Traversal {
+func GTE(v any) *dsl.Traversal {
 	return op("gte", v)
 }
 
 // LT is the less than predicate.
-func LT(v interface{}) *dsl.Traversal {
+func LT(v any) *dsl.Traversal {
 	return op("lt", v)
 }
 
 // LTE is the less than or equal predicate.
-func LTE(v interface{}) *dsl.Traversal {
+func LTE(v any) *dsl.Traversal {
 	return op("lte", v)
 }
 
 // Between is the between/contains predicate.
-func Between(v, u interface{}) *dsl.Traversal {
+func Between(v, u any) *dsl.Traversal {
 	return op("between", v, u)
 }
 
@@ -74,16 +74,20 @@ func NotContaining(substr string) *dsl.Traversal {
 }
 
 // Within Determines if a value is within the specified list of values.
-func Within(args ...interface{}) *dsl.Traversal {
+func Within[T any](args ...T) *dsl.Traversal {
 	return op("within", args...)
 }
 
 // Without determines if a value is not within the specified list of values.
-func Without(args ...interface{}) *dsl.Traversal {
+func Without[T any](args ...T) *dsl.Traversal {
 	return op("without", args...)
 }
 
-func op(name string, args ...interface{}) *dsl.Traversal {
+func op[T any](name string, args ...T) *dsl.Traversal {
 	t := &dsl.Traversal{}
-	return t.Add(dsl.NewFunc(name, args...))
+	vs := make([]any, len(args))
+	for i, arg := range args {
+		vs[i] = arg
+	}
+	return t.Add(dsl.NewFunc(name, vs...))
 }

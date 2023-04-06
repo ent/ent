@@ -7,10 +7,10 @@ package mixin_test
 import (
 	"testing"
 
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/edge"
-	"github.com/facebook/ent/schema/field"
-	"github.com/facebook/ent/schema/mixin"
+	"entgo.io/ent"
+	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
+	"entgo.io/ent/schema/mixin"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -33,7 +33,6 @@ func TestTimeMixin(t *testing.T) {
 		require.Len(t, fields, 1)
 		desc := fields[0].Descriptor()
 		assert.Equal(t, "update_time", desc.Name)
-		assert.True(t, desc.Immutable)
 		assert.NotNil(t, desc.Default)
 		assert.NotNil(t, desc.UpdateDefault)
 	})
@@ -51,7 +50,7 @@ type annotation string
 func (annotation) Name() string { return "" }
 
 func TestAnnotateFields(t *testing.T) {
-	annotations := []field.Annotation{
+	annotations := []schema.Annotation{
 		annotation("foo"),
 		annotation("bar"),
 		annotation("baz"),
@@ -82,7 +81,7 @@ func (TestSchema) Edges() []ent.Edge {
 }
 
 func TestAnnotateEdges(t *testing.T) {
-	annotations := []edge.Annotation{
+	annotations := []schema.Annotation{
 		annotation("foo"),
 		annotation("bar"),
 		annotation("baz"),

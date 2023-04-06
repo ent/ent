@@ -5,10 +5,14 @@
 package schema
 
 import (
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/edge"
-	"github.com/facebook/ent/schema/field"
-	"github.com/facebook/ent/schema/index"
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
+	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
+
+	"github.com/google/uuid"
 )
 
 // Pet holds the schema definition for the Pet entity.
@@ -16,10 +20,25 @@ type Pet struct {
 	ent.Schema
 }
 
+// Annotations of the Pet.
+func (Pet) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "pet"},
+	}
+}
+
 // Fields of the Pet.
 func (Pet) Fields() []ent.Field {
 	return []ent.Field{
+		field.Float("age").
+			Default(0),
 		field.String("name"),
+		field.UUID("uuid", uuid.UUID{}).
+			Optional(),
+		field.String("nickname").
+			Optional(),
+		field.Bool("trained").
+			Default(false),
 	}
 }
 
@@ -39,5 +58,7 @@ func (Pet) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("name").
 			Edges("owner"),
+		index.Fields("nickname").
+			Unique(),
 	}
 }

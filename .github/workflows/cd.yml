@@ -5,31 +5,40 @@ on:
       - master
     paths:
       - 'doc/**'
+  schedule:
+    - cron: "0 9 * * 0-5"
 
 jobs:
   docs:
     name: docs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2.1.1
+      - uses: actions/checkout@v3
         with:
-          node-version: 14
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.14
       - name: Install Dependencies
         working-directory: doc/website
         run: yarn
+      - name: Sync Translation
+        working-directory: doc/website
+        run: yarn crowdin:sync
+        env:
+          CROWDIN_TOKEN: ${{ secrets.CROWDIN_TOKEN }}
       - name: Build Docs
         working-directory: doc/website
         run: yarn build
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v1.7.0
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-central-1
       - name: Deploy Docs
-        working-directory: doc/website/build/ent
-        run: aws s3 sync . s3://entgo.io --delete --exclude "assets/*"
+        working-directory: doc/website/build
+        run: aws s3 sync . s3://entgoio --delete --exclude "images/*"
       - name: Invalidate Cache
         env:
           CDN_DISTRIBUTION_ID: ${{ secrets.CDN_DISTRIBUTION_ID }}

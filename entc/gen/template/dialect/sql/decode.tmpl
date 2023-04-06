@@ -4,77 +4,94 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.typeScope */}}
+
 {{ define "dialect/sql/decode/one" }}
 {{ $receiver := $.Receiver }}
 
-// scanValues returns the types for scanning values from sql.Rows.
-func (*{{ $.Name }}) scanValues() []interface{} {
-	return []interface{} {
-		&{{ if not $.ID.UserDefined }}sql.NullInt64{{ else }}{{ $.ID.NullType }}{{ end }}{}, // {{ $.ID.Name }}
-		{{- range $_, $f := $.Fields }}
-			&{{ $f.NullType }}{}, // {{ $f.Name }}
-		{{- end }}
-	}
-}
+{{ $ctypes := dict }}
+{{ if $.HasOneFieldID }}
+	{{ $idscantype := $.ID.NewScanType }}
+	{{ $ctypes = set $ctypes $idscantype (list $.ID.Constant) }}
+{{ end }}
+{{ range $f := $.Fields }}
+	{{ $names := list }}
+	{{ if hasKey $ctypes $f.NewScanType }}
+		{{ $names = get $ctypes $f.NewScanType }}
+	{{ end }}
+	{{ $names = append $names $f.Constant }}
+	{{ $ctypes = set $ctypes $f.NewScanType $names }}
+{{ end }}
 
-{{- with $.ForeignKeys }}
-	// fkValues returns the types for scanning foreign-keys values from sql.Rows.
-	func (*{{ $.Name }}) fkValues() []interface{} {
-		return []interface{} {
-			{{- range $fk := . }}
-				{{- $f := $fk.Field }}
-				&{{ if not $f.UserDefined }}sql.NullInt64{{ else }}{{ $f.NullType }}{{ end }}{}, // {{ $f.Name }}
+// scanValues returns the types for scanning values from sql.Rows.
+func (*{{ $.Name }}) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
+	for i := range columns {
+		switch columns[i] {
+			{{- range $type, $columns := $ctypes }}
+				case {{ range $i, $c := $columns }}{{ if ne $i 0 }},{{ end }}{{ $.Package }}.{{ $c }}{{ end }}:
+					values[i] = {{ $type }}
 			{{- end }}
+			{{- range $i, $fk := $.UnexportedForeignKeys }}
+				{{- $f := $fk.Field }}
+				case {{ $.Package }}.ForeignKeys[{{ $i }}]: // {{ $f.Name }}
+					values[i] = {{ if not $f.UserDefined }}new(sql.NullInt64){{ else }}{{ $f.NewScanType }}{{ end }}
+			{{- end }}
+			default:
+				return nil, fmt.Errorf("unexpected column %q for type {{ $.Name }}", columns[i])
 		}
 	}
-{{- end }}
+	return values, nil
+}
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the {{ $.Name }} fields.
-func ({{ $receiver }} *{{ $.Name }}) assignValues(values ...interface{}) error {
-		if m, n := len(values), len({{ $.Package }}.Columns); m < n {
-			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-		}
-		{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID) }}
-			{{- with extend $ "Idx" 0 "Field" $.ID "Rec" $receiver }}
-				{{ template "dialect/sql/decode/field" . }}
-			{{- end }}
-		{{- else }}
-			value, ok := values[0].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
-			}
-			{{ $receiver }}.ID = {{ $.ID.Type }}(value.Int64)
-		{{- end }}
-		values = values[1:]
-		{{- range $i, $f := $.Fields }}
-			{{- with extend $ "Idx" $i "Field" $f "Rec" $receiver }}
-				{{ template "dialect/sql/decode/field" . }}
-			{{- end }}
-		{{- end }}
-		{{- with $.ForeignKeys }}
-			{{- with $.Fields }}
-				values = values[{{ len . }}:]
-			{{- end }}
-			if len(values) == len({{ $.Package }}.ForeignKeys) {
-				{{- range $i, $fk := . }}
-					{{- $f := $fk.Field }}
-					{{- if and $f.UserDefined (or $f.IsString $f.IsUUID) }}
-						{{- with extend $ "Idx" $i "Field" $f "Rec" $receiver "StructField" $f.Name }}
-							{{ template "dialect/sql/decode/field" . }}
-						{{- end }}
-					{{- else }}
-						if value, ok := values[{{ $i }}].(*sql.NullInt64); !ok {
-							return fmt.Errorf("unexpected type %T for edge-field {{ $f.Name}}", value)
-						} else if value.Valid {
-							{{ $receiver }}.{{ $f.Name }} = new({{ $f.Type }})
-							*{{ $receiver }}.{{ $f.Name }} = {{ $f.Type }}(value.Int64)
-						}
+func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []any) error {
+	if m, n := len(values), len(columns); m < n {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+	}
+	{{- $idx := "i" }}{{ if eq $idx $receiver }}{{ $idx = "j" }}{{ end }}
+	for {{ $idx }} := range columns {
+		switch columns[{{ $idx }}] {
+		{{- if $.HasOneFieldID }}
+			case {{ $.Package }}.{{ $.ID.Constant }}:
+				{{- if or $.ID.IsString $.ID.IsBytes $.ID.HasGoType }}
+					{{- with extend $ "Idx" $idx "Field" $.ID "Rec" $receiver }}
+						{{ template "dialect/sql/decode/field" . }}
 					{{- end }}
+				{{- else }}
+					value, ok := values[{{ $idx }}].(*sql.NullInt64)
+					if !ok {
+						return fmt.Errorf("unexpected type %T for field id", value)
+					}
+					{{ $receiver }}.ID = {{ $.ID.Type }}(value.Int64)
 				{{- end }}
-			}
 		{{- end }}
-		return nil
+		{{- range  $f := $.Fields }}
+			case {{ $.Package }}.{{ $f.Constant }}:
+				{{- with extend $ "Idx" $idx "Field" $f "Rec" $receiver }}
+					{{ template "dialect/sql/decode/field" . }}
+				{{- end }}
+		{{- end }}
+		{{- range $i, $fk := $.UnexportedForeignKeys }}
+			{{- $f := $fk.Field }}
+			case {{ if $fk.UserDefined }}{{ $.Package }}.{{ $.ID.Constant }}{{ else }}{{ $.Package }}.ForeignKeys[{{ $i }}]{{ end }}:
+				{{- if or $fk.UserDefined (and $f.UserDefined (or $f.IsString $f.IsBytes $f.HasGoType)) }}
+					{{- with extend $ "Idx" $idx "Field" $f "Rec" $receiver "StructField" $fk.StructField }}
+						{{ template "dialect/sql/decode/field" . }}
+					{{- end }}
+				{{- else }}
+					if value, ok := values[{{ $idx }}].(*sql.NullInt64); !ok {
+						return fmt.Errorf("unexpected type %T for edge-field {{ $f.Name}}", value)
+					} else if value.Valid {
+						{{ $receiver }}.{{ $fk.StructField }} = new({{ $f.Type }})
+						{{ if and $f.Nillable (not $f.Type.Nillable) }}*{{ end }}{{ $receiver }}.{{ $fk.StructField }} = {{ $f.Type }}(value.Int64)
+					}
+				{{- end }}
+		{{- end }}
+		}
+	}
+	return nil
 }
 {{ end }}
 
@@ -82,42 +99,34 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(values ...interface{}) error {
 	{{- $i := $.Scope.Idx -}}
 	{{- $f := $.Scope.Field -}}
 	{{- $ret := $.Scope.Rec -}}
-	{{- $field := $f.StructField }}{{ with $.Scope.StructField }}{{ $field = . }}{{ end }}
-	{{- if $f.IsJSON }}
-		if value, ok := values[{{ $i }}].(*{{ $f.NullType }}); !ok {
+	{{- $field := $f.StructField }}{{ with $.Scope.StructField }}{{ $field = . }}{{ end -}}
+	{{- if $f.IsJSON -}}
+		if value, ok := values[{{ $i }}].(*{{ $f.ScanType }}); !ok {
 			return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[{{ $i }}])
 		} else if value != nil && len(*value) > 0 {
 			if err := json.Unmarshal(*value, &{{ $ret }}.{{ $field }}); err != nil {
-				return fmt.Errorf("unmarshal field {{ $f.Name }}: %v", err)
+				return fmt.Errorf("unmarshal field {{ $f.Name }}: %w", err)
 			}
 		}
 	{{- else }}
-		{{- $nulltype := $f.NullType -}}
-		if value, ok := values[{{ $i }}].(*{{ $nulltype }}); !ok {
+		{{- $scantype := $f.ScanType -}}
+		if value, ok := values[{{ $i }}].(*{{ $scantype }}); !ok {
 			return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[{{ $i }}])
-		{{- if and (not $f.Type.ValueScanner) (hasPrefix $nulltype "sql") }}
+		{{- if hasPrefix $scantype "sql.Null" }}
 			} else if value.Valid {
-				{{- if $f.Nillable }}
+				{{- if $f.NillableValue }}
 					{{ $ret }}.{{ $field }} = new({{ $f.Type }})
-					*{{ $ret }}.{{ $field }} = {{ $f.NullTypeField "value" }}
+					*{{ $ret }}.{{ $field }} = {{ $f.ScanTypeField "value" }}
 				{{- else }}
-					{{ $ret }}.{{ $field }} = {{ $f.NullTypeField "value" }}
+					{{ $ret }}.{{ $field }} = {{ $f.ScanTypeField "value" }}
 				{{- end }}
 		{{- else }}
 			} else if value != nil {
-				{{ $ret }}.{{ $field }} = {{ if not $f.Nillable }}*{{ end }}value
+				{{ $ret }}.{{ $field }} = {{ if and (not $f.Nillable) (not $f.Type.RType.IsPtr) }}*{{ end }}value
 		{{- end }}
 		}
 	{{- end }}
 {{- end }}
 
 {{ define "dialect/sql/decode/many" }}
-{{ end }}
-
-{{/* Additional fields for the generated model for holding the foreign-keys */}}
-{{ define "dialect/sql/model/fields" }}
-	{{- range $fk := $.ForeignKeys }}
-		{{- $f := $fk.Field }}
-		{{ $f.Name }} {{ if $f.Nillable }}*{{ end }}{{ $f.Type }}
-	{{- end }}
 {{ end }}

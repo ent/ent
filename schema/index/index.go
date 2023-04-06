@@ -4,12 +4,15 @@
 
 package index
 
+import "entgo.io/ent/schema"
+
 // A Descriptor for index configuration.
 type Descriptor struct {
-	Unique     bool     // unique index.
-	Edges      []string // edge columns.
-	Fields     []string // field columns.
-	StorageKey string   // custom index name.
+	Unique      bool                // unique index.
+	Edges       []string            // edge columns.
+	Fields      []string            // field columns.
+	StorageKey  string              // custom index name.
+	Annotations []schema.Annotation // index annotations.
 }
 
 // Builder for indexes on vertex columns and edges in the graph.
@@ -28,7 +31,7 @@ type Builder struct {
 //
 //		// Unique index of field under specific edge.
 //		index.Fields("name").
-//			FromEdges("parent").
+//			Edges("parent").
 //			Unique(),
 //
 //	}
@@ -43,7 +46,7 @@ func Fields(fields ...string) *Builder {
 //	func (T) Indexes() []ent.Index {
 //
 //		// Unique index of field under 2 edges.
-//		index.Field("name").
+//		index.Fields("name").
 //			Edges("parent", "type").
 //			Unique(),
 //
@@ -68,7 +71,7 @@ func (b *Builder) Fields(fields ...string) *Builder {
 	return b
 }
 
-// FromEdges sets the fields index to be unique under the set of edges (sub-graph). For example:
+// Edges sets the fields index to be unique under the set of edges (sub-graph). For example:
 //
 //	func (T) Indexes() []ent.Index {
 //
@@ -94,6 +97,21 @@ func (b *Builder) Unique() *Builder {
 // StorageKey sets the storage key of the index. In SQL dialects, it's the index name.
 func (b *Builder) StorageKey(key string) *Builder {
 	b.desc.StorageKey = key
+	return b
+}
+
+// Annotations adds a list of annotations to the index object to be used by codegen extensions.
+//
+//	func (T) Indexes() []ent.Index {
+//
+//		// Partial index on name where the entity is not deleted.
+//		index.Fields("name").
+//			Annotations(entsql.Prefix(100))
+//
+//	}
+//
+func (b *Builder) Annotations(annotations ...schema.Annotation) *Builder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
 

@@ -4,9 +4,12 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.typeScope */}}
+
 {{ define "dialect/gremlin/delete" }}
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
+{{ $mutation := print $receiver ".mutation" }}
 
 func ({{ $receiver}} *{{ $builder }}) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
@@ -14,13 +17,14 @@ func ({{ $receiver}} *{{ $builder }}) gremlinExec(ctx context.Context) (int, err
 	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
+	{{ $mutation }}.done = true
 	return res.ReadInt()
 }
 
 
 func ({{ $receiver }} *{{ $builder }}) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel({{ $.Package }}.Label)
-	for _, p := range {{ $receiver }}.predicates {
+	for _, p := range {{ $mutation }}.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

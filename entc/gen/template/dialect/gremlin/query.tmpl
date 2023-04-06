@@ -4,13 +4,25 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.typeScope */}}
+
 {{ define "dialect/gremlin/query" }}
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
 
-func ({{ $receiver }} *{{ $builder }}) gremlinAll(ctx context.Context) ([]*{{ $.Name }}, error) {
+func ({{ $receiver }} *{{ $builder }}) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*{{ $.Name }}, error) {
 	res := &gremlin.Response{}
-	query, bindings := {{ $receiver }}.gremlinQuery().ValueMap(true).Query()
+	traversal := {{ $receiver }}.gremlinQuery(ctx)
+	if len({{ $receiver }}.ctx.Fields) > 0 {
+		fields := make([]any, len({{ $receiver }}.ctx.Fields))
+		for i, f := range {{ $receiver }}.ctx.Fields {
+			fields[i] = f
+		}
+		traversal.ValueMap(fields...)
+	} else {
+		traversal.ValueMap(true)
+	}
+	query, bindings := traversal.Query()
 	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
@@ -24,23 +36,14 @@ func ({{ $receiver }} *{{ $builder }}) gremlinAll(ctx context.Context) ([]*{{ $.
 
 func ({{ $receiver }} *{{ $builder }}) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := {{ $receiver }}.gremlinQuery().Count().Query()
+	query, bindings := {{ $receiver }}.gremlinQuery(ctx).Count().Query()
 	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
 }
 
-func ({{ $receiver }} *{{ $builder }}) gremlinExist(ctx context.Context) (bool, error) {
-	res := &gremlin.Response{}
-	query, bindings := {{ $receiver }}.gremlinQuery().HasNext().Query()
-	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
-		return false, err
-	}
-	return res.ReadBool()
-}
-
-func ({{ $receiver }} *{{ $builder }}) gremlinQuery() *dsl.Traversal {
+func ({{ $receiver }} *{{ $builder }}) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel({{ $.Package }}.Label)
 	if {{ $receiver }}.gremlin != nil {
 		v = {{ $receiver }}.gremlin.Clone()
@@ -54,7 +57,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinQuery() *dsl.Traversal {
 			p(v)
 		}
 	}
-	switch limit, offset := {{ $receiver }}.limit, {{ $receiver }}.offset; {
+	switch limit, offset := {{ $receiver }}.ctx.Limit, {{ $receiver }}.ctx.Offset; {
 	case limit != nil && offset != nil:
 		v.Range(*offset, *offset + *limit)
 	case offset != nil:
@@ -62,7 +65,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinQuery() *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := {{ $receiver }}.unique; len(unique) == 0 {
+	if unique := {{ $receiver }}.ctx.Unique; unique == nil || *unique {
 		v.Dedup()
 	}
 	return v
@@ -74,7 +77,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinQuery() *dsl.Traversal {
 	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
 	{{- $receiver := $.Scope.Receiver }}
 	{{- $ident := $.Scope.Ident }}
-	gremlin := {{ $receiver }}.gremlinQuery()
+	gremlin := {{ $receiver }}.gremlinQuery(ctx)
 	{{- if $e.Bidi }}
 		{{ $ident }} = gremlin.Both({{ $.Package }}.{{ $e.LabelConstant }})
 	{{- else if $e.IsInverse }}

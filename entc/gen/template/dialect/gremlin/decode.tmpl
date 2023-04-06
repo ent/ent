@@ -4,6 +4,8 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.Type */}}
+
 {{ define "dialect/gremlin/decode/one" }}
 {{ $receiver := $.Receiver }}
 
@@ -16,17 +18,26 @@ func ({{ $receiver }} *{{ $.Name }}) FromResponse(res *gremlin.Response) error {
 	{{- $scan := print "scan" $receiver }}
 	var {{ $scan }} struct {
 		ID   {{ $.ID.Type }}  `json:"id,omitempty"`
-		{{ range $_, $f := $.Fields }}
-			{{- $f.StructField }} {{ if and $f.IsTime (not $f.HasGoType) }}int64{{ else }}{{ if $f.Nillable }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.StorageKey }},omitempty"`
+		{{ range $f := $.Fields }}
+			{{- $f.StructField }} {{ if and $f.IsTime (not $f.HasGoType) }}int64{{ else }}{{ if $f.NillableValue }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.StorageKey }},omitempty"`
 		{{ end }}
 	}
 	if err := vmap.Decode(&{{ $scan }}); err != nil {
 		return err
 	}
 	{{ $receiver }}.ID = {{ $scan }}.ID
-	{{ range $_, $f := $.Fields }}
-		{{- $receiver }}.{{ $f.StructField }} = {{ if and $f.IsTime (not $f.HasGoType) }}time.Unix(0, {{ $scan }}.{{ $f.StructField }}) {{ else }}{{- $scan }}.{{ $f.StructField }}{{ end }}
-	{{ end -}}
+	{{- range $i, $f := $.Fields }}
+		{{- if and $f.IsTime (not $f.HasGoType) }}
+			{{- if $f.Nillable }}
+				v{{ $i }} := time.Unix(0, {{ $scan }}.{{ $f.StructField }})
+				{{ $receiver }}.{{ $f.StructField }} = &v{{ $i }}
+			{{- else }}
+				{{ $receiver }}.{{ $f.StructField }} = time.Unix(0, {{ $scan }}.{{ $f.StructField }})
+			{{- end }}
+		{{- else }}
+			{{ $receiver }}.{{ $f.StructField }} = {{ $scan }}.{{ $f.StructField }}
+		{{- end }}
+	{{- end }}
 	return nil
 }
 {{ end }}
@@ -44,20 +55,28 @@ func ({{ $receiver }} *{{ $slice }}) FromResponse(res *gremlin.Response) error {
 	{{- $scan := print "scan" $receiver }}
 	var {{ $scan }} []struct {
 		ID   {{ $.ID.Type }}  `json:"id,omitempty"`
-		{{ range $_, $f := $.Fields }}
-			{{- $f.StructField }} {{ if and $f.IsTime (not $f.HasGoType) }}int64{{ else }}{{ if $f.Nillable }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.StorageKey }},omitempty"`
+		{{ range $f := $.Fields }}
+			{{- $f.StructField }} {{ if and $f.IsTime (not $f.HasGoType) }}int64{{ else }}{{ if $f.NillableValue }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.StorageKey }},omitempty"`
 		{{ end }}
 	}
 	if err := vmap.Decode(&{{ $scan }}); err != nil {
 		return err
 	}
 	for _, v := range {{ $scan }} {
-		*{{ $receiver }} = append(*{{ $receiver }}, &{{ $.Name }}{
-			ID: v.ID,
-			{{ range $_, $f := $.Fields }}
-				{{- $f.StructField }}: {{- if and $f.IsTime (not $f.HasGoType) }}time.Unix(0, v.{{ $f.StructField }}) {{ else }}v.{{ $f.StructField }}{{ end }},
-			{{ end -}}
-		})
+		node := &{{ $.Name }}{ID: v.ID}
+		{{- range $i, $f := $.Fields }}
+			{{- if and $f.IsTime (not $f.HasGoType) }}
+				{{- if $f.Nillable }}
+					v{{ $i }} := time.Unix(0, v.{{ $f.StructField }})
+					node.{{ $f.StructField }} = &v{{ $i }}
+				{{- else }}
+					node.{{ $f.StructField }} = time.Unix(0, v.{{ $f.StructField }})
+				{{- end }}
+			{{- else }}
+				node.{{ $f.StructField }} = v.{{ $f.StructField }}
+			{{- end }}
+		{{- end }}
+		*{{ $receiver }} = append(*{{ $receiver }}, node)
 	}
 	return nil
 }

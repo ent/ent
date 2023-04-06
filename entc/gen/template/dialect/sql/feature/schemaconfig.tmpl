@@ -1,0 +1,194 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
+{{- define "dialect/sql/internal/schemaconfig" -}}
+{{ with extend $ "Package" "internal" -}}
+	{{ template "header" . }}
+{{ end }}
+import "context"
+
+// SchemaConfig represents alternative schema names for all tables
+// that can be passed at runtime.
+type SchemaConfig struct {
+	{{- range $n := $.Nodes }}
+		{{ $n.Name }} string // {{ $n.Name }} table.
+		{{- range $e := $n.Edges }}
+			{{- /* Skip adding join-table in case the edge is inverse or already defined as an edge-schema. */}}
+			{{- if and $e.M2M (not $e.Inverse) (not $e.Through) }}
+				{{ $n.Name }}{{ $e.StructField }} string // {{ $n.Name }}-{{ $e.Name }}->{{ $e.Type.Name }} table.
+			{{- end }}
+		{{- end }}
+	{{- end }}
+}
+
+type schemaCtxKey struct{}
+
+// SchemaConfigFromContext returns a SchemaConfig stored inside a context, or empty if there isn't one.
+func SchemaConfigFromContext(ctx context.Context) SchemaConfig {
+	config, _ := ctx.Value(schemaCtxKey{}).(SchemaConfig)
+	return config
+}
+
+// NewSchemaConfigContext returns a new context with the given SchemaConfig attached.
+func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context.Context {
+	return context.WithValue(parent, schemaCtxKey{}, config)
+}
+
+{{- end }}
+
+{{/* Addtional imports by the schemaconfig feature. */}}
+{{- define "dialect/sql/import/additional/schemaconfig" -}}
+	{{- if $.FeatureEnabled "sql/schemaconfig" }}
+		"{{ $.Config.Package }}/internal"
+	{{- end }}
+{{- end }}
+
+{{/* Addtional fields to the config struct. */}}
+{{- define "dialect/sql/config/fields/schemaconfig" -}}
+	{{- if $.FeatureEnabled "sql/schemaconfig" -}}
+		// schemaConfig contains alternative names for all tables.
+		schemaConfig SchemaConfig
+	{{- end }}
+{{- end -}}
+
+{{/* Addtional top-level code for the generated config.go file. */}}
+{{- define "dialect/sql/config/options/schemaconfig" }}
+	{{- if $.FeatureEnabled "sql/schemaconfig" }}
+		// SchemaConfig represents alternative schema names for all tables
+		// that can be passed at runtime.
+		type SchemaConfig = internal.SchemaConfig
+
+		// AlternateSchemas allows alternate schema names to be
+		// passed into ent operations.
+		func AlternateSchema(schemaConfig SchemaConfig) Option {
+			return func(c *config) {
+				c.schemaConfig = schemaConfig
+			}
+		}
+	{{- end }}
+{{- end }}
+
+{{- define "dialect/sql/delete/spec/ctxschemaconfig" }}
+	{{- template "dialect/sql/spec/ctxschemaconfig" $ }}
+{{- end }}
+
+{{- define "dialect/sql/update/spec/ctxschemaconfig" }}
+	{{- template "dialect/sql/spec/ctxschemaconfig" $ }}
+{{- end }}
+
+{{- define "dialect/sql/create/spec/ctxschemaconfig" }}
+	{{- with extend $ "Ident" "_spec" "SkipContext" true }}
+		{{- template "dialect/sql/spec/ctxschemaconfig" . }}
+	{{- end }}
+{{- end }}
+
+{{- define "dialect/sql/query/spec/ctxschemaconfig" }}
+	{{- template "dialect/sql/spec/ctxschemaconfig" . }}
+{{- end }}
+
+{{- define "dialect/sql/query/eagerloading/join/schemaconfig" }}
+	{{- with extend $ "Ident" "joinT" "CallSet" true }}
+		{{- template "dialect/sql/defedge/spec/schemaconfig" . }}
+	{{- end }}
+{{- end }}
+
+{{- define "dialect/sql/defedge/spec/schemaconfig" }}
+	{{- $e := $.Scope.Edge }}
+	{{- $builder := pascal $.Scope.Builder }}
+	{{- $receiver := receiver $builder }}
+	{{- $ident := "edge" }}{{ with $.Scope.Ident }}{{ $ident = . }}{{ end }}
+	{{- if $.FeatureEnabled "sql/schemaconfig" }}
+		{{- $schema := $e.Type.Name }}
+		{{- if $e.OwnFK }}
+			{{- $schema = $.Name }}
+		{{- else if $e.M2M }}
+			{{- if $e.Through }}
+				{{- $schema = $e.Through.Name }}
+			{{- else if $e.Inverse }}
+				{{- $schema = print $e.Type.Name (pascal $e.Inverse) }}
+			{{- else }}
+				{{- $schema = print $.Name $e.StructField }}
+			{{- end }}
+		{{- end }}
+		{{- if $.Scope.CallSet }}
+			{{ $ident }}.Schema({{ $receiver }}.schemaConfig.{{ $schema }})
+		{{- else }}
+			{{ $ident }}.Schema = {{ $receiver }}.schemaConfig.{{ $schema }}
+		{{- end }}
+	{{- end }}
+{{- end }}
+
+{{/* A template for injecting the SchemaConfig to the context. Should be executed before other templates. */}}
+{{- define "dialect/sql/spec/ctxschemaconfig" -}}
+	{{- $builder := pascal $.Scope.Builder }}
+	{{- $receiver := receiver $builder }}
+	{{- $ident := "_spec.Node" }}{{ with $.Scope.Ident }}{{ $ident = . }}{{ end }}
+	{{- if $.FeatureEnabled "sql/schemaconfig" }}
+		{{ $ident }}.Schema = {{ $receiver }}.schemaConfig.{{ $.Name }}
+		{{- if not $.Scope.SkipContext }}
+			ctx = internal.NewSchemaConfigContext(ctx, {{ $receiver }}.schemaConfig)
+		{{- end }}
+	{{- end }}
+{{- end -}}
+
+{{- define "dialect/sql/query/selector/ctxschemaconfig" -}}
+	{{- $builder := pascal $.Scope.Builder }}
+	{{- $receiver := receiver $builder }}
+	{{- if $.FeatureEnabled "sql/schemaconfig" }}
+		t1.Schema({{ $receiver }}.schemaConfig.{{ $.Name }})
+		ctx = internal.NewSchemaConfigContext(ctx, {{ $receiver }}.schemaConfig)
+		selector.WithContext(ctx)
+	{{- end }}
+{{- end -}}
+
+{{- define "dialect/sql/query/path/ctxschemaconfig" }}
+	{{- if $.FeatureEnabled "sql/schemaconfig" }}
+		schemaConfig := {{ $.Scope.Receiver }}.schemaConfig
+		{{- template "dialect/sql/query/step/ctxschemaconfig" . }}
+	{{- end -}}
+{{- end -}}
+
+{{- define "dialect/sql/query/from/ctxschemaconfig" }}
+	{{- if $.FeatureEnabled "sql/schemaconfig" }}
+		schemaConfig := {{ $.Scope.Receiver }}.schemaConfig
+		{{- template "dialect/sql/query/step/ctxschemaconfig" . }}
+	{{- end -}}
+{{- end -}}
+
+{{- define "dialect/sql/predicate/edge/has/ctxschemaconfig" -}}
+	{{- template "dialect/sql/predicate/edge/ctxschemaconfig" . }}
+{{- end -}}
+
+{{- define "dialect/sql/predicate/edge/haswith/ctxschemaconfig" -}}
+	{{- template "dialect/sql/predicate/edge/ctxschemaconfig" . }}
+{{- end -}}
+
+{{- define "dialect/sql/predicate/edge/ctxschemaconfig" -}}
+	{{- if $.FeatureEnabled "sql/schemaconfig" }}
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		{{- template "dialect/sql/query/step/ctxschemaconfig" . }}
+	{{- end -}}
+{{- end -}}
+
+{{- define "dialect/sql/query/step/ctxschemaconfig" -}}
+	{{- $e := $.Scope.Edge }}
+	step.To.Schema = schemaConfig.{{ $e.Type.Name }}
+	{{- $schema := $e.Type.Name }}
+	{{- if $e.OwnFK }}
+		{{- $schema = $.Name }}
+	{{- else if $e.M2M }}
+		{{- if $e.Through }}
+			{{- $schema = $e.Through.Name }}
+		{{- else if $e.Inverse }}
+			{{- $schema = print $e.Type.Name (pascal $e.Inverse) }}
+		{{- else }}
+			{{- $schema = print $.Name $e.StructField }}
+		{{- end }}
+	{{- end }}
+	step.Edge.Schema = schemaConfig.{{ $schema }}
+{{- end -}}

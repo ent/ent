@@ -1,0 +1,12 @@
+{{/* The line below tells Intellij/GoLand to enable the autocompletion based *gen.Type type. */}}
+{{/* gotype: entgo.io/ent/entc/gen.Type */}}
+
+{{/* A template for adding additional static fields to specific types. */}}
+{{ define "model/fields/additional" }}
+	{{- /* Add static fields to the "Card" entity. */}}
+	{{- if eq $.Name "User" }}
+		{{- /* A usage of an external function. */ -}}
+		// StaticField defined by templates (titled {{ title "staticField" }}).
+		StaticField string `json:"static_field,omitempty"{{ with $.Config.Annotations.RQL }} {{ .StructTag }}:"static_field"{{ end }}`
+	{{- end }}
+{{ end }}

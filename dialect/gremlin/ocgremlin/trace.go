@@ -8,7 +8,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin"
 
 	"go.opencensus.io/trace"
 )
@@ -58,14 +58,14 @@ func requestAttrs(req *gremlin.Request, withQuery bool) []trace.Attribute {
 	if withQuery {
 		query, _ := req.Arguments[gremlin.ArgsGremlin].(string)
 		attrs = append(attrs, trace.StringAttribute(QueryAttribute, query))
-		if bindings, ok := req.Arguments[gremlin.ArgsBindings].(map[string]interface{}); ok {
+		if bindings, ok := req.Arguments[gremlin.ArgsBindings].(map[string]any); ok {
 			attrs = append(attrs, bindingsAttrs(bindings)...)
 		}
 	}
 	return attrs
 }
 
-func bindingsAttrs(bindings map[string]interface{}) []trace.Attribute {
+func bindingsAttrs(bindings map[string]any) []trace.Attribute {
 	attrs := make([]trace.Attribute, 0, len(bindings))
 	for key, val := range bindings {
 		key = BindingAttribute + "." + key
@@ -74,7 +74,7 @@ func bindingsAttrs(bindings map[string]interface{}) []trace.Attribute {
 	return attrs
 }
 
-func bindingToAttr(key string, val interface{}) trace.Attribute {
+func bindingToAttr(key string, val any) trace.Attribute {
 	switch v := val.(type) {
 	case nil:
 		return trace.StringAttribute(key, "")

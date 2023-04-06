@@ -4,7 +4,7 @@
 
 package gen
 
-// Op is a predicate for the where clause.
+// Op represents a predicate operation for schema fields.
 type Op int
 
 // List of all builtin predicates.
@@ -26,7 +26,7 @@ const (
 	HasSuffix              // endingWith
 )
 
-// Name returns the string representation of an predicate.
+// Name returns the string representation of an operator.
 func (o Op) Name() string {
 	if int(o) < len(opText) {
 		return opText[o]
@@ -34,12 +34,12 @@ func (o Op) Name() string {
 	return "Unknown"
 }
 
-// Variadic reports if the predicate is a variadic function.
+// Variadic reports if the operator is a variadic function (takes a varying number of arguments).
 func (o Op) Variadic() bool {
 	return o == In || o == NotIn
 }
 
-// Niladic reports if the predicate is a niladic predicate.
+// Niladic reports if the operator is niladic (takes no arguments).
 func (o Op) Niladic() bool {
 	return o == IsNil || o == NotNil
 }

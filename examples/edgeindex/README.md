@@ -8,3 +8,9 @@ street name to be unique under each city.
 ```console
 go generate ./...
 ```
+
+### Run Example
+
+```console
+go test
+```

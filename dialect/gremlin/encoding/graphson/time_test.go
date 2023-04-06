@@ -16,7 +16,7 @@ func TestTimeEncoding(t *testing.T) {
 	const ms = 1481750076295
 	ts := time.Unix(0, ms*time.Millisecond.Nanoseconds())
 
-	for _, v := range []interface{}{ts, &ts} {
+	for _, v := range []any{ts, &ts} {
 		got, err := MarshalToString(v)
 		require.NoError(t, err)
 		assert.JSONEq(t, `{ "@type": "g:Timestamp", "@value": 1481750076295 }`, got)

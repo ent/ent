@@ -4,6 +4,8 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
 {{ define "import" }}
 import (
 	"context"
@@ -12,29 +14,55 @@ import (
 	"math"
 	"strings"
 	"time"
-	{{- /* ignore generting on graph specififc templates */}}
-	{{- if not (eq $.Config.Package $.Package) }}
+	{{- /* Ignore generting on graph templates (e.g. config.tmpl, client.tmpl, etc). */}}
+	{{- if ne $.Config.Package $.Package }}
 		"{{ $.Config.Package }}/predicate"
-		{{- with $.ID.Type.PkgPath }}
-			"{{ . }}"
-		{{- end }}
-		{{- range $f := $.Fields }}
-			{{- $pkg := $f.Type.PkgPath }}
-			{{- if and $pkg (not (hasImport (base $pkg ))) }}
-				"{{ $pkg }}"
+		{{- if $.HasOneFieldID }}
+			{{- with $.ID.Type.PkgPath }}
+				{{- $name := $.ID.Type.PkgName }}
+				{{ if ne $name (base $.ID.Type.PkgPath) }}{{ $name }} {{ end }}"{{ . }}"
 			{{- end }}
 		{{- end }}
+		{{- /* Import external packages */}}
+        {{- template "import/types" $ }}
 	{{- end }}
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/dialect"
+	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	{{- with $.Storage }}
 		{{- range $import := .Imports }}
 			"{{ $import }}"
 		{{- end }}
 	{{- end }}
-	{{ template "imports/additional" $ }}
+	{{- template "import/additional" $ }}
 )
 {{ end }}
 
-{{/* A template that can be overrided in order to add additional imports to packages.*/}}
-{{ define "imports/additional" }}{{end}}
+{{/* A template for importing fields with custom types */}}
+{{ define "import/types" -}}
+	{{- $seen := dict }}
+	{{- $fields := $.Fields }}{{ if $.HasOneFieldID }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}{{ end }}
+	{{- range $f := $fields }}
+		{{- $pkg := $f.Type.PkgPath }}
+		{{- if and $pkg (not (hasImport (base $pkg))) (not (hasKey $seen $pkg)) }}
+			{{- $name := $f.Type.PkgName }}
+			{{ if ne $name (base $pkg) }}{{ $name }} {{ end}}"{{ $pkg }}"
+			{{- $seen = set $seen $pkg true }}
+		{{- end }}
+	{{- end }}
+{{- end }}
+
+{{/* A template for allowing additional imports by ent extensions or user templates.*/}}
+{{ define "import/additional" }}
+	{{- with $tmpls := matchTemplate "import/additional/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
+	{{- if $.Storage }}
+		{{- with $tmpls := matchTemplate (printf "dialect/%s/import/additional/*" $.Storage) }}
+			{{- range $tmpl := $tmpls }}
+				{{- xtemplate $tmpl $ }}
+			{{- end }}
+		{{- end }}
+	{{- end }}
+{{ end }}
