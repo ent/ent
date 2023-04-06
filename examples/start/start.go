@@ -200,7 +200,7 @@ func CreateGraph(ctx context.Context, client *ent.Client) error {
 		Create().
 		SetModel("Ford").
 		SetRegisteredAt(time.Now()).
-		// Attach this cat to Neta.
+		// Attach this car to Neta.
 		SetOwner(neta).
 		Exec(ctx)
 	if err != nil {
