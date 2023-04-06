@@ -304,126 +304,16 @@ func HasNeighborsWith(q *sql.Selector, s *Step, pred func(*sql.Selector)) {
 	}
 }
 
-type (
-	// OrderByOptions holds the information needed to order a query by an edge.
-	OrderByOptions struct {
-		// Step to get the edge to order by its count.
-		Step *Step
-		// Terms used for non-aggregation ordering.
-		// See, OrderByNeighborTerms for more info.
-		Terms []OrderByTerm
-		// Selected indicates that the order terms
-		// should be appended to the query selection.
-		Selected bool
-	}
-	// OrderByInfo holds the information done by the OrderBy functions.
-	OrderByInfo struct {
-		Terms []OrderByTerm
-	}
-	// OrderByTerm holds the terms of an order by clause.
-	OrderByTerm struct {
-		Column string      // Column name. If empty, an expression is used.
-		Expr   sql.Querier // Expression. If nil, the column is used.
-		As     string      // Optional alias.
-		Type   field.Type  // Term type.
-		Desc   bool        // Descending order.
-	}
-	// OrderByOption allows configuring OrderByOptions using functional options.
-	OrderByOption func(*OrderByOptions)
-)
-
-// OrderDesc sets the latest order by term as descending order,
-// or add a new descending order term if no terms are present.
-func OrderDesc() OrderByOption {
-	return func(opts *OrderByOptions) {
-		if len(opts.Terms) > 0 {
-			opts.Terms[len(opts.Terms)-1].Desc = true
-		} else {
-			opts.Terms = append(opts.Terms, OrderByTerm{
-				Desc: true,
-			})
-		}
-	}
-}
-
-// OrderByExpr appends an expression to the order by clause.
-func OrderByExpr(x sql.Querier, as string) OrderByOption {
-	return func(opts *OrderByOptions) {
-		opts.Terms = append(opts.Terms, OrderByTerm{
-			Expr: x,
-			As:   as,
-		})
-	}
-}
-
-// OrderByExprDesc appends an expression to the order by clause in descending order.
-func OrderByExprDesc(x sql.Querier, as string) OrderByOption {
-	return func(opts *OrderByOptions) {
-		opts.Terms = append(opts.Terms, OrderByTerm{
-			Expr: x,
-			As:   as,
-			Desc: true,
-		})
-	}
-}
-
-// OrderByColumn appends a column to the order by clause.
-func OrderByColumn(c string) OrderByOption {
-	return func(opts *OrderByOptions) {
-		opts.Terms = append(opts.Terms, OrderByTerm{
-			Column: c,
-		})
-	}
-}
-
-// OrderByColumnDesc appends a column to the order by clause in descending order.
-func OrderByColumnDesc(c string) OrderByOption {
-	return func(opts *OrderByOptions) {
-		opts.Terms = append(opts.Terms, OrderByTerm{
-			Column: c,
-			Desc:   true,
-		})
-	}
-}
-
-// OrderBySelected appends the ordered columns or terms with aliases to the query selection.
-func OrderBySelected() OrderByOption {
-	return func(opts *OrderByOptions) {
-		opts.Selected = true
-	}
-}
-
-// NewOrderBy gets list of options and returns a configured order-by.
-//
-//	NewOrderBy(
-//		sqlgraph.NewStep(
-//			sqlgraph.From(user.Table, user.FieldID),
-//			sqlgraph.To(group.Table, group.FieldID),
-//			sqlgraph.Edge(sqlgraph.M2M, false, user.GroupsTable, user.GroupsPrimaryKey...),
-//		),
-//		OrderByExpr(
-//			sql.Expr("SUM(age)"),
-//			"sum_age",
-//		),
-//	)
-func NewOrderBy(s *Step, opts ...OrderByOption) *OrderByOptions {
-	r := &OrderByOptions{Step: s}
-	for _, opt := range opts {
-		opt(r)
-	}
-	return r
-}
-
 // countAlias returns the alias to use for the count column.
-func countAlias(q *sql.Selector, opts *OrderByOptions) string {
-	if len(opts.Terms) == 1 && opts.Terms[0].As != "" {
-		return opts.Terms[0].As
+func countAlias(q *sql.Selector, s *Step, opt *sql.OrderTermOptions) string {
+	if opt.As != "" {
+		return opt.As
 	}
 	selected := make(map[string]struct{})
 	for _, c := range q.SelectedColumns() {
 		selected[c] = struct{}{}
 	}
-	column := fmt.Sprintf("count_%s", opts.Step.To.Table)
+	column := fmt.Sprintf("count_%s", s.To.Table)
 	// If the column was already selected,
 	// try to find a free alias.
 	if _, ok := selected[column]; ok {
@@ -439,22 +329,19 @@ func countAlias(q *sql.Selector, opts *OrderByOptions) string {
 
 // OrderByNeighborsCount appends ordering based on the number of neighbors.
 // For example, order users by their number of posts.
-func OrderByNeighborsCount(q *sql.Selector, opts *OrderByOptions) {
+func OrderByNeighborsCount(q *sql.Selector, s *Step, opts ...sql.OrderTermOption) {
 	var (
-		desc  bool
 		join  *sql.Selector
+		opt   = sql.NewOrderTermOptions(opts...)
 		build = sql.Dialect(q.Dialect())
 	)
-	if len(opts.Terms) == 1 {
-		desc = opts.Terms[0].Desc
-	}
-	switch s := opts.Step; {
+	switch {
 	case s.FromEdgeOwner():
 		// For M2O and O2O inverse, the FK resides in the same table.
 		// Hence, the order by is on the nullability of the column.
 		x := func(b *sql.Builder) {
 			b.Ident(s.From.Column)
-			if desc {
+			if opt.Desc {
 				b.WriteOp(sql.OpNotNull)
 			} else {
 				b.WriteOp(sql.OpIsNull)
@@ -462,7 +349,7 @@ func OrderByNeighborsCount(q *sql.Selector, opts *OrderByOptions) {
 		}
 		q.OrderExpr(build.Expr(x))
 	case s.ThroughEdgeTable():
-		countC := countAlias(q, opts)
+		countC := countAlias(q, s, opt)
 		pk1 := s.Edge.Columns[0]
 		if s.Edge.Inverse {
 			pk1 = s.Edge.Columns[1]
@@ -479,11 +366,11 @@ func OrderByNeighborsCount(q *sql.Selector, opts *OrderByOptions) {
 				q.C(s.From.Column),
 				join.C(pk1),
 			)
-		opts.Terms = []OrderByTerm{{As: countC, Type: field.TypeInt, Desc: desc}}
-		orderTerms(q, join, opts.Terms)
-		appendTerms(q, opts)
+		orderTerms(q, join, []sql.OrderTerm{
+			sql.OrderByExpr(nil, append(opts, sql.OrderAs(countC))...),
+		})
 	case s.ToEdgeOwner():
-		countC := countAlias(q, opts)
+		countC := countAlias(q, s, opt)
 		edgeT := build.Table(s.Edge.Table).Schema(s.Edge.Schema)
 		join = build.Select(
 			edgeT.C(s.Edge.Columns[0]),
@@ -496,78 +383,80 @@ func OrderByNeighborsCount(q *sql.Selector, opts *OrderByOptions) {
 				q.C(s.From.Column),
 				join.C(s.Edge.Columns[0]),
 			)
-		opts.Terms = []OrderByTerm{{As: countC, Type: field.TypeInt, Desc: desc}}
-		orderTerms(q, join, opts.Terms)
-		appendTerms(q, opts)
+		orderTerms(q, join, []sql.OrderTerm{
+			sql.OrderByExpr(nil, append(opts, sql.OrderAs(countC))...),
+		})
 	}
 }
 
-func orderTerms(q, join *sql.Selector, ts []OrderByTerm) {
+func orderTerms(q, join *sql.Selector, ts []sql.OrderTerm) {
 	for _, t := range ts {
-		t := t
 		q.OrderExprFunc(func(b *sql.Builder) {
-			switch {
-			case t.As != "":
-				b.WriteString(join.C(t.As))
-			case t.Column != "":
-				b.WriteString(join.C(t.Column))
-			case t.Expr != nil:
-				b.Join(t.Expr)
+			var desc bool
+			switch t := t.(type) {
+			case *sql.OrderFieldTerm:
+				f := t.Field
+				if t.As != "" {
+					f = t.As
+				}
+				c := join.C(f)
+				b.WriteString(c)
+				if t.Selected {
+					q.AppendSelect(c)
+				}
+				desc = t.Desc
+			case *sql.OrderExprTerm:
+				if t.As != "" {
+					c := join.C(t.As)
+					b.WriteString(c)
+					if t.Selected {
+						q.AppendSelect(c)
+					}
+				} else {
+					b.Join(t.Expr)
+				}
+				desc = t.Desc
+			default:
+				return
 			}
 			// Unlike MySQL and SQLite, NULL values sort as if larger than any other value.
 			// Therefore, we need to explicitly order NULLs first on ASC and last on DESC.
 			switch pg := b.Dialect() == dialect.Postgres; {
-			case pg && t.Desc:
+			case pg && desc:
 				b.WriteString(" DESC NULLS LAST")
 			case pg:
 				b.WriteString(" NULLS FIRST")
-			case t.Desc:
+			case desc:
 				b.WriteString(" DESC")
 			}
 		})
 	}
 }
 
-func selectTerms(q *sql.Selector, ts []OrderByTerm) {
+func selectTerms(q *sql.Selector, ts []sql.OrderTerm) {
 	for _, t := range ts {
-		switch {
-		case t.Column != "" && t.As != "":
-			q.AppendSelect(q.C(t.Column), t.As)
-		case t.Column != "":
-			q.AppendSelect(q.C(t.Column))
-		case t.Expr != nil:
+		switch t := t.(type) {
+		case *sql.OrderFieldTerm:
+			q.AppendSelect(q.C(t.Field))
+		case *sql.OrderExprTerm:
 			q.AppendSelectExprAs(t.Expr, t.As)
-		}
-	}
-}
-
-func appendTerms(q *sql.Selector, opts *OrderByOptions) {
-	if !opts.Selected {
-		return
-	}
-	for _, t := range opts.Terms {
-		switch {
-		case t.As != "":
-			q.AppendSelect(t.As)
-		case t.Column != "":
-			q.AppendSelect(q.C(t.Column))
 		}
 	}
 }
 
 // OrderByNeighborTerms appends ordering based on the number of neighbors.
 // For example, order users by their number of posts.
-func OrderByNeighborTerms(q *sql.Selector, opts *OrderByOptions) {
+func OrderByNeighborTerms(q *sql.Selector, s *Step, opts ...sql.OrderTerm) {
 	var (
 		join  *sql.Selector
 		build = sql.Dialect(q.Dialect())
 	)
-	switch s := opts.Step; {
+	switch {
 	case s.FromEdgeOwner():
 		toT := build.Table(s.To.Table).Schema(s.To.Schema)
 		join = build.Select(toT.C(s.To.Column)).
 			From(toT)
-		selectTerms(join, opts.Terms)
+		selectTerms(join, opts)
 		q.LeftJoin(join).
 			On(q.C(s.Edge.Columns[0]), join.C(s.To.Column))
 	case s.ThroughEdgeTable():
@@ -582,7 +471,7 @@ func OrderByNeighborTerms(q *sql.Selector, opts *OrderByOptions) {
 			Join(joinT).
 			On(toT.C(s.To.Column), joinT.C(pk1)).
 			GroupBy(pk2)
-		selectTerms(join, opts.Terms)
+		selectTerms(join, opts)
 		q.LeftJoin(join).
 			On(q.C(s.From.Column), join.C(pk2))
 	case s.ToEdgeOwner():
@@ -590,12 +479,11 @@ func OrderByNeighborTerms(q *sql.Selector, opts *OrderByOptions) {
 		join = build.Select(toT.C(s.Edge.Columns[0])).
 			From(toT).
 			GroupBy(toT.C(s.Edge.Columns[0]))
-		selectTerms(join, opts.Terms)
+		selectTerms(join, opts)
 		q.LeftJoin(join).
 			On(q.C(s.From.Column), join.C(s.Edge.Columns[0]))
 	}
-	orderTerms(q, join, opts.Terms)
-	appendTerms(q, opts)
+	orderTerms(q, join, opts)
 }
 
 type (

@@ -186,3 +186,79 @@ func NewColumnCheck(checks map[string]func(string) bool) ColumnCheck {
 		return nil
 	}
 }
+
+type (
+	// OrderFieldTerm represents an ordering by a field.
+	OrderFieldTerm struct {
+		OrderTermOptions
+		Field string // Field name.
+	}
+	// OrderExprTerm represents an ordering by an expression.
+	OrderExprTerm struct {
+		OrderTermOptions
+		Expr Querier // Expression.
+	}
+	// OrderTerm represents an ordering by a term.
+	OrderTerm interface {
+		term()
+	}
+	// OrderTermOptions represents options for ordering by a term.
+	OrderTermOptions struct {
+		Desc     bool   // Whether to sort in descending order.
+		As       string // Optional alias.
+		Selected bool   // Whether the term should be selected.
+	}
+	// OrderTermOption is an option for ordering by a term.
+	OrderTermOption func(*OrderTermOptions)
+)
+
+// OrderDesc returns an option to sort in descending order.
+func OrderDesc() OrderTermOption {
+	return func(o *OrderTermOptions) {
+		o.Desc = true
+	}
+}
+
+// OrderAs returns an option to set the alias for the ordering.
+func OrderAs(as string) OrderTermOption {
+	return func(o *OrderTermOptions) {
+		o.As = as
+	}
+}
+
+// OrderSelected returns an option to select the ordering term.
+func OrderSelected() OrderTermOption {
+	return func(o *OrderTermOptions) {
+		o.Selected = true
+	}
+}
+
+// OrderSelectAs returns an option to set and select the alias for the ordering.
+func OrderSelectAs(as string) OrderTermOption {
+	return func(o *OrderTermOptions) {
+		o.As = as
+		o.Selected = true
+	}
+}
+
+// NewOrderTermOptions returns a new OrderTermOptions from the given options.
+func NewOrderTermOptions(opts ...OrderTermOption) *OrderTermOptions {
+	o := &OrderTermOptions{}
+	for _, opt := range opts {
+		opt(o)
+	}
+	return o
+}
+
+// OrderByField returns an ordering by the given field.
+func OrderByField(name string, opts ...OrderTermOption) *OrderFieldTerm {
+	return &OrderFieldTerm{Field: name, OrderTermOptions: *NewOrderTermOptions(opts...)}
+}
+
+// OrderByExpr returns an ordering by the given expression.
+func OrderByExpr(x Querier, opts ...OrderTermOption) *OrderExprTerm {
+	return &OrderExprTerm{Expr: x, OrderTermOptions: *NewOrderTermOptions(opts...)}
+}
+
+func (OrderFieldTerm) term() {}
+func (OrderExprTerm) term()  {}
