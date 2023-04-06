@@ -72,6 +72,6 @@ func (c Client) Query(ctx context.Context, query string) (*Response, error) {
 }
 
 // Queryf formats a query string and invokes Query.
-func (c Client) Queryf(ctx context.Context, format string, args ...interface{}) (*Response, error) {
+func (c Client) Queryf(ctx context.Context, format string, args ...any) (*Response, error) {
 	return c.Query(ctx, fmt.Sprintf(format, args...))
 }

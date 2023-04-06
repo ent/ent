@@ -7,9 +7,9 @@ package mixin
 import (
 	"time"
 
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/edge"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent"
+	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/field"
 )
 
 // Schema is the default implementation for the ent.Mixin interface.
@@ -18,7 +18,6 @@ import (
 //	type M struct {
 //		mixin.Schema
 //	}
-//
 type Schema struct{}
 
 // Fields of the mixin.
@@ -33,7 +32,16 @@ func (Schema) Indexes() []ent.Index { return nil }
 // Hooks of the mixin.
 func (Schema) Hooks() []ent.Hook { return nil }
 
-// time mixin must implement `Mixin` interface.
+// Interceptors of the schema.
+func (Schema) Interceptors() []ent.Interceptor { return nil }
+
+// Policy of the mixin.
+func (Schema) Policy() ent.Policy { return nil }
+
+// Annotations of the mixin.
+func (Schema) Annotations() []schema.Annotation { return nil }
+
+// schema mixin must implement `Mixin` interface.
 var _ ent.Mixin = (*Schema)(nil)
 
 // CreateTime adds created at time field.
@@ -59,12 +67,11 @@ func (UpdateTime) Fields() []ent.Field {
 	return []ent.Field{
 		field.Time("update_time").
 			Default(time.Now).
-			UpdateDefault(time.Now).
-			Immutable(),
+			UpdateDefault(time.Now),
 	}
 }
 
-// create time mixin must implement `Mixin` interface.
+// update time mixin must implement `Mixin` interface.
 var _ ent.Mixin = (*UpdateTime)(nil)
 
 // Time composes create/update time mixin.
@@ -82,18 +89,18 @@ func (Time) Fields() []ent.Field {
 var _ ent.Mixin = (*Time)(nil)
 
 // AnnotateFields adds field annotations to underlying mixin fields.
-func AnnotateFields(m ent.Mixin, annotations ...field.Annotation) ent.Mixin {
+func AnnotateFields(m ent.Mixin, annotations ...schema.Annotation) ent.Mixin {
 	return fieldAnnotator{Mixin: m, annotations: annotations}
 }
 
 // AnnotateEdges adds edge annotations to underlying mixin edges.
-func AnnotateEdges(m ent.Mixin, annotations ...edge.Annotation) ent.Mixin {
+func AnnotateEdges(m ent.Mixin, annotations ...schema.Annotation) ent.Mixin {
 	return edgeAnnotator{Mixin: m, annotations: annotations}
 }
 
 type fieldAnnotator struct {
 	ent.Mixin
-	annotations []field.Annotation
+	annotations []schema.Annotation
 }
 
 func (a fieldAnnotator) Fields() []ent.Field {
@@ -107,7 +114,7 @@ func (a fieldAnnotator) Fields() []ent.Field {
 
 type edgeAnnotator struct {
 	ent.Mixin
-	annotations []edge.Annotation
+	annotations []schema.Annotation
 }
 
 func (a edgeAnnotator) Edges() []ent.Edge {

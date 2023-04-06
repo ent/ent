@@ -23,6 +23,7 @@ const (
 	TypeBytes
 	TypeEnum
 	TypeString
+	TypeOther
 	TypeInt8
 	TypeInt16
 	TypeInt32
@@ -51,12 +52,22 @@ func (t Type) Numeric() bool {
 	return t >= TypeInt8 && t < endTypes
 }
 
+// Float reports if the given type is a float type.
+func (t Type) Float() bool {
+	return t == TypeFloat32 || t == TypeFloat64
+}
+
+// Integer reports if the given type is an integral type.
+func (t Type) Integer() bool {
+	return t.Numeric() && !t.Float()
+}
+
 // Valid reports if the given type if known type.
 func (t Type) Valid() bool {
 	return t > TypeInvalid && t < endTypes
 }
 
-// ConstName returns the constant name of a info type.
+// ConstName returns the constant name of an info type.
 // It's used by entc for printing the constant name in templates.
 func (t Type) ConstName() string {
 	switch {
@@ -74,8 +85,9 @@ func (t Type) ConstName() string {
 type TypeInfo struct {
 	Type     Type
 	Ident    string
-	PkgPath  string
-	Nillable bool // slices or pointers.
+	PkgPath  string // import path.
+	PkgName  string // local package name.
+	Nillable bool   // slices or pointers.
 	RType    *RType
 }
 
@@ -108,13 +120,23 @@ func (t TypeInfo) ConstName() string {
 
 // ValueScanner indicates if this type implements the ValueScanner interface.
 func (t TypeInfo) ValueScanner() bool {
-	return t.RType.implements(valueScannerType)
+	return t.RType.Implements(valueScannerType)
+}
+
+// Valuer indicates if this type implements the driver.Valuer interface.
+func (t TypeInfo) Valuer() bool {
+	return t.RType.Implements(valuerType)
 }
 
 // Comparable reports whether values of this type are comparable.
 func (t TypeInfo) Comparable() bool {
 	switch t.Type {
 	case TypeBool, TypeTime, TypeUUID, TypeEnum, TypeString:
+		return true
+	case TypeOther:
+		// Always accept custom types as comparable on the database side.
+		// In the future, we should consider adding an interface to let
+		// custom types tell if they are comparable or not (see #1304).
 		return true
 	default:
 		return t.Numeric()
@@ -125,7 +147,7 @@ var stringerType = reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
 
 // Stringer indicates if this type implements the Stringer interface.
 func (t TypeInfo) Stringer() bool {
-	return t.RType.implements(stringerType)
+	return t.RType.Implements(stringerType)
 }
 
 var (
@@ -138,6 +160,7 @@ var (
 		TypeBytes:   "[]byte",
 		TypeEnum:    "string",
 		TypeString:  "string",
+		TypeOther:   "other",
 		TypeInt:     "int",
 		TypeInt8:    "int8",
 		TypeInt16:   "int16",
@@ -157,25 +180,43 @@ var (
 		TypeTime:  "TypeTime",
 		TypeEnum:  "TypeEnum",
 		TypeBytes: "TypeBytes",
+		TypeOther: "TypeOther",
 	}
 )
 
 // RType holds a serializable reflect.Type information of
 // Go object. Used by the entc package.
 type RType struct {
-	Name    string
+	Name    string // reflect.Type.Name
+	Ident   string // reflect.Type.String
 	Kind    reflect.Kind
 	PkgPath string
 	Methods map[string]struct{ In, Out []*RType }
+	// Used only for in-package checks.
+	rtype reflect.Type
 }
 
-// TypeEqual tests if the RType is equal to given reflect.Type.
+// TypeEqual reports if the underlying type is equal to the RType (after pointer indirections).
 func (r *RType) TypeEqual(t reflect.Type) bool {
-	t = indirect(t)
-	return r.Name == t.Name() && r.Kind == t.Kind() && r.PkgPath == t.PkgPath()
+	tv := indirect(t)
+	return r.Name == tv.Name() && r.Kind == t.Kind() && r.PkgPath == tv.PkgPath()
 }
 
-func (r *RType) implements(typ reflect.Type) bool {
+// RType returns the string value of the indirect reflect.Type.
+func (r *RType) String() string {
+	if r.rtype != nil {
+		return r.rtype.String()
+	}
+	return r.Ident
+}
+
+// IsPtr reports if the reflect-type is a pointer type.
+func (r *RType) IsPtr() bool {
+	return r != nil && r.Kind == reflect.Ptr
+}
+
+// Implements reports whether the RType ~implements the given interface type.
+func (r *RType) Implements(typ reflect.Type) bool {
 	if r == nil {
 		return false
 	}

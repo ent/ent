@@ -7,7 +7,7 @@ package graph
 import (
 	"fmt"
 
-	"github.com/facebook/ent/dialect/gremlin/encoding/graphson"
+	"entgo.io/ent/dialect/gremlin/encoding/graphson"
 )
 
 // Vertex represents a graph vertex.
@@ -16,7 +16,7 @@ type Vertex struct {
 }
 
 // NewVertex create a new graph vertex.
-func NewVertex(id interface{}, label string) Vertex {
+func NewVertex(id any, label string) Vertex {
 	if label == "" {
 		label = "vertex"
 	}
@@ -37,13 +37,13 @@ func (v Vertex) String() string {
 
 // VertexProperty denotes a key/value pair associated with a vertex.
 type VertexProperty struct {
-	ID    interface{} `json:"id"`
-	Key   string      `json:"label"`
-	Value interface{} `json:"value"`
+	ID    any    `json:"id"`
+	Key   string `json:"label"`
+	Value any    `json:"value"`
 }
 
 // NewVertexProperty create a new graph vertex property.
-func NewVertexProperty(id interface{}, key string, value interface{}) VertexProperty {
+func NewVertexProperty(id any, key string, value any) VertexProperty {
 	return VertexProperty{
 		ID:    id,
 		Key:   key,

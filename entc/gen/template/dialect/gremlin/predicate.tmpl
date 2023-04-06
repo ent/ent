@@ -4,6 +4,8 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.typeScope */}}
+
 {{ define "dialect/gremlin/predicate/id" -}}
 	func(t *dsl.Traversal) {
 		t.HasID(id)
@@ -16,7 +18,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{- $storage := $.Scope.Storage -}}
 	func(t *dsl.Traversal) {
 		{{- if $op.Variadic }}
-			v := make([]interface{}, len({{ $arg }}))
+			v := make([]any, len({{ $arg }}))
 			for i := range v {
 				v[i] = {{ $arg }}[i]
 			}
@@ -102,7 +104,7 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/gremlin/predicate/and" -}}
 	func(tr *dsl.Traversal) {
-		trs := make([]interface{}, 0, len(predicates))
+		trs := make([]any, 0, len(predicates))
 		for _, p := range predicates {
 			t := __.New()
 			p(t)
@@ -114,7 +116,7 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/gremlin/predicate/or" -}}
 	func(tr *dsl.Traversal) {
-		trs := make([]interface{}, 0, len(predicates))
+		trs := make([]any, 0, len(predicates))
 		for _, p := range predicates {
 			t := __.New()
 			p(t)

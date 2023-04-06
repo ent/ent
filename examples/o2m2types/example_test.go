@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebook/ent/examples/o2m2types/ent"
+	"entgo.io/ent/examples/o2m2types/ent"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -41,14 +41,14 @@ func Do(ctx context.Context, client *ent.Client) error {
 		SetName("pedro").
 		Save(ctx)
 	if err != nil {
-		return fmt.Errorf("creating pet: %v", err)
+		return fmt.Errorf("creating pet: %w", err)
 	}
 	lola, err := client.Pet.
 		Create().
 		SetName("lola").
 		Save(ctx)
 	if err != nil {
-		return fmt.Errorf("creating pet: %v", err)
+		return fmt.Errorf("creating pet: %w", err)
 	}
 	// Create the user, and add its pets on the creation.
 	a8m, err := client.User.
@@ -58,7 +58,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 		AddPets(pedro, lola).
 		Save(ctx)
 	if err != nil {
-		return fmt.Errorf("creating user: %v", err)
+		return fmt.Errorf("creating user: %w", err)
 	}
 	fmt.Println("User created:", a8m)
 	// Output: User(id=1, age=30, name=a8m)

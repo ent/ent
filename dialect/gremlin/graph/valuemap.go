@@ -5,17 +5,18 @@
 package graph
 
 import (
+	"errors"
+	"fmt"
 	"reflect"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/pkg/errors"
 )
 
 // ValueMap models a .valueMap() gremlin response.
-type ValueMap []map[string]interface{}
+type ValueMap []map[string]any
 
 // Decode decodes a value map into v.
-func (m ValueMap) Decode(v interface{}) error {
+func (m ValueMap) Decode(v any) error {
 	rv := reflect.ValueOf(v)
 	if rv.Kind() != reflect.Ptr {
 		return errors.New("cannot unmarshal into a non pointer")
@@ -25,14 +26,14 @@ func (m ValueMap) Decode(v interface{}) error {
 	}
 
 	if rv.Elem().Kind() != reflect.Slice {
-		v = &[]interface{}{v}
+		v = &[]any{v}
 	}
 	return m.decode(v)
 }
 
-func (m ValueMap) decode(v interface{}) error {
+func (m ValueMap) decode(v any) error {
 	cfg := mapstructure.DecoderConfig{
-		DecodeHook: func(f, t reflect.Kind, data interface{}) (interface{}, error) {
+		DecodeHook: func(f, t reflect.Kind, data any) (any, error) {
 			if f == reflect.Slice && t != reflect.Slice {
 				rv := reflect.ValueOf(data)
 				if rv.Len() == 1 {
@@ -47,10 +48,10 @@ func (m ValueMap) decode(v interface{}) error {
 
 	dec, err := mapstructure.NewDecoder(&cfg)
 	if err != nil {
-		return errors.Wrap(err, "creating structure decoder")
+		return fmt.Errorf("creating structure decoder: %w", err)
 	}
 	if err := dec.Decode(m); err != nil {
-		return errors.Wrap(err, "decoding value map")
+		return fmt.Errorf("decoding value map: %w", err)
 	}
 	return nil
 }

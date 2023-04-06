@@ -4,6 +4,55 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* The line below tells Intellij/GoLand to enable the autocompletion based *gen.Graph type. */}}
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
+{{ define "client/init" }}
+// Client is the client that holds all ent builders.
+type Client struct {
+	config
+	extraHiddenField int
+	{{- if $.SupportMigrate }}
+		// Schema is the client for creating, migrating and dropping schema.
+		Schema *migrate.Schema
+	{{- end }}
+	{{- range $n := $.Nodes }}
+		// {{ $n.Name }} is the client for interacting with the {{ $n.Name }} builders.
+		{{ $n.Name }} *{{ $n.Name }}Client
+	{{- end }}
+	{{- template "client/fields/additional" $ }}
+	{{- with $tmpls := matchTemplate "client/fields/additional/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
+}
+
+// NewClient creates a new client configured with the given options.
+func NewClient(opts ...Option) *Client {
+	cfg := config{log: log.Println, hooks: &hooks{}, inters: &inters{}}
+	cfg.options(opts...)
+	client := &Client{config: cfg}
+	client.init()
+	return client
+}
+
+func (c *Client) init() {
+	c.extraHiddenField = 20
+	{{- if $.SupportMigrate }}
+		c.Schema = migrate.NewSchema(c.driver)
+	{{- end }}
+	{{- range $n := $.Nodes }}
+    	c.{{ $n.Name }} =  New{{ $n.Name }}Client(c.config)
+	{{- end }}
+}
+
+// HiddenData returns the extraHiddenField value.
+func (c *Client) HiddenData() int {
+	return c.extraHiddenField
+}
+{{ end }}
+
 {{ define "client/fields/additional" }}
 	// additional fields.
 	sync.Mutex

@@ -16,7 +16,7 @@ import (
     "time"
 
     "<your_project>/ent"
-    "github.com/facebook/ent/dialect/sql"
+    "entgo.io/ent/dialect/sql"
 )
 
 func Open() (*ent.Client, error) {
@@ -43,7 +43,7 @@ import (
     "time"
 
     "<your_project>/ent"
-    entsql "github.com/facebook/ent/dialect/sql"
+    entsql "entgo.io/ent/dialect/sql"
 )
 
 func Open() (*ent.Client, error) {
@@ -71,10 +71,11 @@ import (
 	"database/sql/driver"
 
 	"<project>/ent"
-	
+
 	"contrib.go.opencensus.io/integrations/ocsql"
+	"entgo.io/ent/dialect"
+	entsql "entgo.io/ent/dialect/sql"
 	"github.com/go-sql-driver/mysql"
-	entsql "github.com/facebook/ent/dialect/sql"
 )
 
 type connector struct {
@@ -99,8 +100,8 @@ func (connector) Driver() driver.Driver {
 func Open(dsn string) *ent.Client {
 	db := sql.OpenDB(connector{dsn})
 	// Create an ent.Driver from `db`.
-    drv := entsql.OpenDB("mysql", db)
-    return ent.NewClient(ent.Driver(drv))
+	drv := entsql.OpenDB(dialect.MySQL, db)
+	return ent.NewClient(ent.Driver(drv))
 }
 ```
 
@@ -117,8 +118,8 @@ import (
 
 	"<project>/ent"
 
-	"github.com/facebook/ent/dialect"
-	entsql "github.com/facebook/ent/dialect/sql"
+	"entgo.io/ent/dialect"
+	entsql "entgo.io/ent/dialect/sql"
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
@@ -128,7 +129,6 @@ func Open(databaseUrl string) *ent.Client {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
 
 	// Create an ent.Driver from `db`.
 	drv := entsql.OpenDB(dialect.Postgres, db)

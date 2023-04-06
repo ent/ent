@@ -5,9 +5,9 @@
 package schema
 
 import (
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/edge"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
+	"entgo.io/ent/schema/field"
 )
 
 // FileType holds the schema definition for the FileType entity.
@@ -21,17 +21,17 @@ func (FileType) Fields() []ent.Field {
 		field.String("name").
 			Unique(),
 		field.Enum("type").
-			ValueMap(map[string]string{
-				"PNG": "png",
-				"SVG": "svg",
-				"JPG": "jpg",
-			}).
+			NamedValues(
+				"PNG", "png",
+				"SVG", "svg",
+				"JPG", "jpg",
+			).
 			Default("png"),
 		field.Enum("state").
-			ValueMap(map[string]string{
-				"On":  "ON",
-				"Off": "OFF",
-			}).
+			NamedValues(
+				"On", "ON",
+				"Off", "OFF",
+			).
 			Default("ON"),
 	}
 }

@@ -25,7 +25,7 @@ func TestEncodeArray(t *testing.T) {
 
 func TestEncodeSlice(t *testing.T) {
 	tests := []struct {
-		in   interface{}
+		in   any
 		want string
 	}{
 		{
@@ -95,7 +95,7 @@ func TestEncodeSlice(t *testing.T) {
 func TestDecodeSlice(t *testing.T) {
 	tests := []struct {
 		in   string
-		want interface{}
+		want any
 	}{
 		{
 			in: `{
@@ -151,13 +151,6 @@ func TestDecodeSlice(t *testing.T) {
 			}`,
 			want: [...]byte{42, 55},
 		},
-		{
-			in: `{
-				"@type": "g:List",
-				"@value": null
-			}`,
-			want: []int(nil),
-		},
 	}
 
 	for _, tc := range tests {
@@ -177,7 +170,7 @@ func TestDecodeBadSlice(t *testing.T) {
 	tests := []struct {
 		name string
 		in   string
-		new  func() interface{}
+		new  func() any
 	}{
 		{
 			name: "TypeMismatch",
@@ -194,7 +187,7 @@ func TestDecodeBadSlice(t *testing.T) {
 					}
 				]
 			}`,
-			new: func() interface{} { return &[]int{} },
+			new: func() any { return &[]int{} },
 		},
 		{
 			name: "BadValue",
@@ -211,7 +204,7 @@ func TestDecodeBadSlice(t *testing.T) {
 					}
 				]
 			}`,
-			new: func() interface{} { return &[2]int{} },
+			new: func() any { return &[2]int{} },
 		},
 	}
 

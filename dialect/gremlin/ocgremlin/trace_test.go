@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/facebook/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -134,7 +134,7 @@ func TestRequestAttributes(t *testing.T) {
 		{
 			name: "Query with bindings",
 			makeReq: func() *gremlin.Request {
-				bindings := map[string]interface{}{
+				bindings := map[string]any{
 					"$1": "user", "$2": int64(42),
 					"$3": 3.14, "$4": bytes.Repeat([]byte{0xff}, 257),
 					"$5": true, "$6": nil,

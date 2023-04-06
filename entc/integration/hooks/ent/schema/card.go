@@ -9,16 +9,16 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/facebook/ent"
-	gen "github.com/facebook/ent/entc/integration/hooks/ent"
-	"github.com/facebook/ent/entc/integration/hooks/ent/card"
-	"github.com/facebook/ent/entc/integration/hooks/ent/hook"
-	"github.com/facebook/ent/schema/edge"
-	"github.com/facebook/ent/schema/field"
-	"github.com/facebook/ent/schema/mixin"
+	"entgo.io/ent"
+	gen "entgo.io/ent/entc/integration/hooks/ent"
+	"entgo.io/ent/entc/integration/hooks/ent/card"
+	"entgo.io/ent/entc/integration/hooks/ent/hook"
+	"entgo.io/ent/schema/edge"
+	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/mixin"
 )
 
-// RejectMany rejects all update operations
+// RejectUpdate rejects ~all update operations
 // that are not on a specific entity.
 type RejectUpdate struct {
 	mixin.Schema
@@ -26,7 +26,11 @@ type RejectUpdate struct {
 
 func (RejectUpdate) Hooks() []ent.Hook {
 	return []ent.Hook{
-		hook.Reject(ent.OpUpdate),
+		hook.If(
+			hook.Reject(ent.OpUpdate),
+			// Accept only updates that contains the "expired_at" field.
+			hook.Not(hook.HasFields(card.FieldExpiredAt)),
+		),
 	}
 }
 
@@ -61,6 +65,7 @@ func (Card) Hooks() []ent.Hook {
 		),
 		func(next ent.Mutator) ent.Mutator {
 			return hook.CardFunc(func(ctx context.Context, m *gen.CardMutation) (ent.Value, error) {
+				m.SetInHook("value was set in hook")
 				if _, ok := m.Name(); !ok {
 					m.SetName("unknown")
 				}
@@ -81,6 +86,10 @@ func (Card) Fields() []ent.Field {
 			Comment("Exact name written on card"),
 		field.Time("created_at").
 			Default(time.Now),
+		field.String("in_hook").
+			Comment("InHook is a mandatory field that is set by the hook."),
+		field.Time("expired_at").
+			Optional(),
 	}
 }
 
@@ -89,5 +98,15 @@ func (Card) Edges() []ent.Edge {
 		edge.From("owner", User.Type).
 			Ref("cards").
 			Unique(),
+	}
+}
+
+func (Card) Interceptors() []ent.Interceptor {
+	return []ent.Interceptor{
+		ent.InterceptFunc(func(next ent.Querier) ent.Querier {
+			return ent.QuerierFunc(func(ctx context.Context, q ent.Query) (ent.Value, error) {
+				return next.Query(ctx, q)
+			})
+		}),
 	}
 }

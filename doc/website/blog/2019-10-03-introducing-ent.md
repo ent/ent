@@ -1,8 +1,8 @@
 ---
 title: Introducing ent
 author: Ariel Mashraki
-authorURL: https://github.com/a8m
-authorImageURL: https://avatars0.githubusercontent.com/u/7413593
+authorURL: "https://github.com/a8m"
+authorImageURL: "https://avatars0.githubusercontent.com/u/7413593"
 authorTwitter: arielmashraki
 ---
 ## The state of Go in Facebook Connectivity Tel Aviv
@@ -45,6 +45,6 @@ The lack of a proper Graph-based ORM for Go, led us to write one here with the f
 **ent** makes it possible to define any data model or graph-structure in Go code easily; The
 schema configuration is verified by **entc** (the ent codegen) that generates an idiomatic and
 statically-typed API that keeps Go developers productive and happy.
-It supports MySQL, SQLite (mainly for testing) and Gremlin. PostgreSQL will be added soon.
+It supports MySQL, MariaDB, PostgreSQL, SQLite, and Gremlin-based graph databases.
 
 We’re open-sourcing **ent** today, and invite you to get started → [entgo.io/docs/getting-started](/docs/getting-started).

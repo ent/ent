@@ -4,13 +4,16 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* The line below tells Intellij/GoLand to enable the autocompletion based *gen.Graph type. */}}
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
 {{ define "node" }}
 {{ $pkg := base $.Config.Package }}
 {{ template "header" $ }}
 
 import (
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/schema"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/schema"
 
 	"golang.org/x/sync/semaphore"
 )
@@ -138,7 +141,7 @@ type (
 	}
 
 	querier interface {
-		Query(ctx context.Context, query string, args, v interface{}) error
+		Query(ctx context.Context, query string, args, v any) error
 	}
 )
 
@@ -161,7 +164,18 @@ func (t *tables) Load(ctx context.Context, querier querier) ([]string, error) {
 	return tables, err
 }
 
-func (tables) load(ctx context.Context, querier querier) ([]string, error) {
+{{ template "node/helper/loadtable" $ }}
+
+{{ end }}
+
+{{ define "client/fields/additional" }}
+	// additional fields for node api
+	tables tables
+{{ end }}
+
+{{/* An example of a local helper template. */}}
+{{ define "node/helper/loadtable" }}
+func (*tables) load(ctx context.Context, querier querier) ([]string, error) {
 	rows := &sql.Rows{}
 	query, args := sql.Select("type").
 		From(sql.Table(schema.TypeTable)).
@@ -174,9 +188,4 @@ func (tables) load(ctx context.Context, querier querier) ([]string, error) {
 	var tables []string
 	return tables, sql.ScanSlice(rows, &tables)
 }
-{{ end }}
-
-{{ define "client/fields/additional" }}
-	// additional fields for node api
-	tables tables
 {{ end }}

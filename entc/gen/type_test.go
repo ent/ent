@@ -7,8 +7,8 @@ package gen
 import (
 	"testing"
 
-	"github.com/facebook/ent/entc/load"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/entc/load"
+	"entgo.io/ent/schema/field"
 
 	"github.com/stretchr/testify/require"
 )
@@ -25,17 +25,17 @@ func TestType(t *testing.T) {
 
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Fields: []*load.Field{
-			{Unique: true, Default: true, Info: &field.TypeInfo{Type: field.TypeInt}},
+			{Name: "foo", Unique: true, Default: true, Info: &field.TypeInfo{Type: field.TypeInt}},
 		},
 	})
-	require.Error(err, "unique field can not have default")
+	require.EqualError(err, "unique field \"foo\" cannot have default value", "unique field can not have default")
 
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Fields: []*load.Field{
-			{Sensitive: true, Tag: `yaml:"pwd"`, Info: &field.TypeInfo{Type: field.TypeString}},
+			{Name: "foo", Sensitive: true, Tag: `yaml:"pwd"`, Info: &field.TypeInfo{Type: field.TypeString}},
 		},
 	})
-	require.Error(err, "sensitive field cannot have tags")
+	require.EqualError(err, "sensitive field \"foo\" cannot have struct tags", "sensitive field cannot have tags")
 
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
@@ -44,23 +44,23 @@ func TestType(t *testing.T) {
 			{Name: "foo", Unique: true, Info: &field.TypeInfo{Type: field.TypeInt}},
 		},
 	})
-	require.Error(err, "field foo redeclared")
+	require.EqualError(err, "field \"foo\" redeclared for type \"T\"", "field foo redeclared")
 
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
 		Fields: []*load.Field{
-			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: map[string]string{"": ""}},
+			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: []struct{ N, V string }{{V: "v"}, {V: "v"}}},
 		},
 	})
-	require.Error(err, "duplicate enums")
+	require.EqualError(err, "duplicate values \"v\" for enum field \"enums\"", "duplicate enums")
 
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
 		Fields: []*load.Field{
-			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: map[string]string{"": ""}},
+			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: []struct{ N, V string }{{}}},
 		},
 	})
-	require.Error(err, "empty value for enums")
+	require.EqualError(err, "\"enums\" field value cannot be empty", "empty value for enums")
 
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
@@ -68,7 +68,15 @@ func TestType(t *testing.T) {
 			{Name: "", Info: &field.TypeInfo{Type: field.TypeInt}},
 		},
 	})
-	require.Error(err, "empty field name")
+	require.EqualError(err, "field name cannot be empty", "empty field name")
+
+	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
+		Name: "T",
+		Fields: []*load.Field{
+			{Name: "id", Info: &field.TypeInfo{Type: field.TypeInt}, Optional: true},
+		},
+	})
+	require.EqualError(err, "id field cannot be optional", "id field cannot be optional")
 
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{Name: "Type"})
 	require.EqualError(err, "schema lowercase name conflicts with Go keyword \"type\"")
@@ -147,6 +155,7 @@ func TestField_EnumName(t *testing.T) {
 		{"MP4", "TypeMP4"},
 		{"unknown", "TypeUnknown"},
 		{"user_data", "TypeUserData"},
+		{"test user", "TypeTestUser"},
 	}
 	for _, tt := range tests {
 		require.Equal(t, tt.enum, Field{Name: "Type"}.EnumName(tt.name))
@@ -221,8 +230,8 @@ func TestType_AddIndex(t *testing.T) {
 	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"unknown"}})
 	require.Error(t, err, "unknown field for index")
 
-	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"text"}})
-	require.Error(t, err, "index size exceeded")
+	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"id"}})
+	require.NoError(t, err, "valid index for ID field")
 
 	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"name"}, Edges: []string{"parent"}})
 	require.Error(t, err, "missing edge")
@@ -270,6 +279,23 @@ func TestField_DefaultName(t *testing.T) {
 	}
 }
 
+func TestField_incremental(t *testing.T) {
+	tests := []struct {
+		annotations map[string]any
+		def         bool
+		expected    bool
+	}{
+		{dict("EntSQL", nil), false, false},
+		{dict("EntSQL", nil), true, true},
+		{dict("EntSQL", dict("incremental", true)), false, true},
+		{dict("EntSQL", dict("incremental", false)), true, false},
+	}
+	for _, tt := range tests {
+		typ := &Field{Annotations: tt.annotations}
+		require.Equal(t, tt.expected, typ.incremental(tt.def))
+	}
+}
+
 func TestBuilderField(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -279,6 +305,7 @@ func TestBuilderField(t *testing.T) {
 		{"type", "_type"},
 		{"config", "_config"},
 		{"SSOCert", "_SSOCert"},
+		{"driver", "_driver"},
 	}
 	for _, tt := range tests {
 		require.Equal(t, tt.field, Edge{Name: tt.name}.BuilderField())
@@ -300,4 +327,15 @@ func TestEdge(t *testing.T) {
 	require.Equal(t, "UsersInverseLabel", users.InverseLabelConstant())
 	require.Equal(t, "user_groups", users.Label())
 	require.Equal(t, "user_groups", groups.Label())
+}
+
+func TestValidSchemaName(t *testing.T) {
+	err := ValidSchemaName("Config")
+	require.Error(t, err)
+	err = ValidSchemaName("Mutation")
+	require.Error(t, err)
+	err = ValidSchemaName("Boring")
+	require.NoError(t, err)
+	err = ValidSchemaName("Order")
+	require.NoError(t, err)
 }

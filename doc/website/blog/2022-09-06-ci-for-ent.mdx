@@ -1,0 +1,307 @@
+---
+title: Continuous Integration for Ent Projects
+author: Rotem Tamir
+authorURL: "https://github.com/rotemtam"
+authorImageURL: "https://s.gravatar.com/avatar/36b3739951a27d2e37251867b7d44b1a?s=80"
+authorTwitter: _rtam
+image: "https://entgo.io/images/assets/ent-ci-post.png"
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+To ensure the quality of their software, teams often apply _Continuous
+Integration_ workflows, commonly known as CI. With CI, teams continuously run a suite
+of automated verifications against every change to the code-base. During CI,
+teams may run many kinds of verifications:
+
+* Compilation or build of the most recent version to make sure it
+  isn't broken.
+* Linting to enforce any accepted code-style standards.
+* Unit tests that verify individual components work as expected
+  and that changes to the codebase do not cause regressions in
+  other areas.
+* Security scans to make sure no known vulnerabilities are introduced
+  to the codebase.
+* And much more!
+
+From our discussions with the Ent community, we have learned
+that many teams using Ent already use CI and would like to enforce some
+Ent-specific verifications into their workflows.
+
+To support the community with this effort, we added a new [guide](/docs/ci) to the docs which
+documents common best practices to verify in CI and introduces
+[ent/contrib/ci](https://github.com/ent/contrib/tree/master/ci): a GitHub Action
+we maintain that codifies them.
+
+In this post, I want to share some of our initial suggestions on how you
+might incorporate CI to you Ent project.  Towards the end of this post
+I will share insights into projects we are working on and would like to
+get the community's feedback for.
+
+## Verify all generated files are checked in
+
+Ent heavily relies on code generation. In our experience, generated code
+should always be checked into source control. This is done for two reasons:
+* If generated code is checked into source control, it can be read
+  along with the main application code. Having generated code present when
+  the code is reviewed or when a repository is browsed is essential to get
+  a complete picture of how things work.
+* Differences in development environments between team members can easily be
+  spotted and remedied. This further reduces the chance of "it works on my
+  machine" type issues since everyone is running the same code.
+
+If you're using GitHub for source control, it's easy to verify that all generated
+files are checked in with the `ent/contrib/ci` GitHub Action.
+Otherwise, we supply a simple bash script that you can integrate in your existing
+CI flow.
+
+<Tabs
+    defaultValue="gh"
+    values={[
+        {label: 'GitHub Action', value: 'gh'},
+        {label: 'Bash', value: 'bash'},
+    ]}>
+<TabItem value="gh">
+
+Simply add a file named `.github/workflows/ent-ci.yaml` in your repository:
+
+```yaml
+name: EntCI
+on:
+  push:
+  # Run whenever code is changed in the master.
+    branches:
+      - master
+  # Run on PRs where something changed under the `ent/` directory.
+  pull_request:
+    paths:
+      - 'ent/*'
+jobs:
+  ent:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3.0.1
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+      - uses: ent/contrib/ci@master
+```
+
+</TabItem>
+<TabItem value="bash">
+
+```bash
+go generate ./...
+status=$(git status --porcelain)
+if [ -n "$status" ]; then
+    echo "you need to run 'go generate ./...' and commit the changes"
+    echo "$status"
+    exit 1
+fi
+```
+
+</TabItem>
+</Tabs>
+
+## Lint migration files
+
+Changes to your project's Ent schema almost always result in a modification
+of your database. If you are using [Versioned Migrations](/docs/versioned-migrations)
+to manage changes to your database schema, you can run [migration linting](https://atlasgo.io/versioned/lint)
+as part of your continuous integration flow. This is done for multiple reasons:
+
+* Linting replays your migration directory on a [database container](https://atlasgo.io/concepts/dev-database) to
+  make sure all SQL statements are valid and in the correct order.
+* [Migration directory integrity](/docs/versioned-migrations#atlas-migration-directory-integrity-file)
+  is enforced - ensuring that history wasn't accidentally changed and that migrations that are
+  planned in parallel are unified to a clean linear history.
+* Destructive changes are detected, notifying you of any potential data loss that may be
+  caused by your migrations way before they reach your production database.
+* Linting detects data-dependent changes that _may_ fail upon deployment and require
+  more careful review from your side.
+
+If you're using GitHub, you can use the [Official Atlas Action](https://github.com/ariga/atlas-action)
+to run migration linting during CI.
+
+Add `.github/workflows/atlas-ci.yaml` to your repo with the following contents:
+
+<Tabs
+defaultValue="mysql"
+values={[
+    {label: 'MySQL', value: 'mysql'},
+    {label: 'MariaDB', value: 'maria'},
+    {label: 'PostgreSQL', value: 'postgres'},
+]}>
+<TabItem value="mysql">
+
+```yaml
+name: Atlas CI
+on:
+  # Run whenever code is changed in the master branch,
+  # change this to your root branch.
+  push:
+    branches:
+      - master
+  # Run on PRs where something changed under the `ent/migrate/migrations/` directory.
+  pull_request:
+    paths:
+      - 'ent/migrate/migrations/*'
+jobs:
+  lint:
+    services:
+      # Spin up a mysql:8.0.29 container to be used as the dev-database for analysis.
+      mysql:
+        image: mysql:8.0.29
+        env:
+          MYSQL_ROOT_PASSWORD: pass
+          MYSQL_DATABASE: test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -ppass"
+          --health-interval 10s
+          --health-start-period 10s
+          --health-timeout 5s
+          --health-retries 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3.0.1
+        with:
+          fetch-depth: 0 # Mandatory unless "latest" is set below.
+      - uses: ariga/atlas-action@v0
+        with:
+          dir: ent/migrate/migrations
+          dir-format: golang-migrate # Or: atlas, goose, dbmate
+          dev-url: mysql://root:pass@localhost:3306/test
+```
+
+</TabItem>
+<TabItem value="maria">
+
+```yaml
+name: Atlas CI
+on:
+  # Run whenever code is changed in the master branch,
+  # change this to your root branch.
+  push:
+    branches:
+      - master
+  # Run on PRs where something changed under the `ent/migrate/migrations/` directory.
+  pull_request:
+    paths:
+      - 'ent/migrate/migrations/*'
+jobs:
+  lint:
+    services:
+      # Spin up a maria:10.7 container to be used as the dev-database for analysis.
+      maria:
+        image: mariadb:10.7
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: pass
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -ppass"
+          --health-interval 10s
+          --health-start-period 10s
+          --health-timeout 5s
+          --health-retries 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3.0.1
+        with:
+          fetch-depth: 0 # Mandatory unless "latest" is set below.
+      - uses: ariga/atlas-action@v0
+        with:
+          dir: ent/migrate/migrations
+          dir-format: golang-migrate # Or: atlas, goose, dbmate
+          dev-url: maria://root:pass@localhost:3306/test
+```
+
+</TabItem>
+<TabItem value="postgres">
+
+```yaml
+name: Atlas CI
+on:
+  # Run whenever code is changed in the master branch,
+  # change this to your root branch.
+  push:
+    branches:
+      - master
+  # Run on PRs where something changed under the `ent/migrate/migrations/` directory.
+  pull_request:
+    paths:
+      - 'ent/migrate/migrations/*'
+jobs:
+  lint:
+    services:
+      # Spin up a postgres:10 container to be used as the dev-database for analysis.
+      postgres:
+        image: postgres:10
+        env:
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: pass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3.0.1
+        with:
+          fetch-depth: 0 # Mandatory unless "latest" is set below.
+      - uses: ariga/atlas-action@v0
+        with:
+          dir: ent/migrate/migrations
+          dir-format: golang-migrate # Or: atlas, goose, dbmate
+          dev-url: postgres://postgres:pass@localhost:5432/test?sslmode=disable
+```
+
+</TabItem>
+</Tabs>
+
+Notice that running `atlas migrate lint` requires a clean [dev-database](https://atlasgo.io/concepts/dev-database)
+which is provided by the `services` block in the example code above.
+
+## What's next for Ent CI
+
+To add to this modest beginning, I want to share some features that we are experimenting
+with at [Ariga](https://ariga.io) with hope to get the community's feedback on them.
+
+* *Linting for Online Migrations* - many Ent projects use the automatic schema migration
+  mechanism that is available in Ent (using `ent.Schema.Create` when applications start).
+  Assuming a project's source code is managed in a version control system (such as Git),
+  we compare the schema in the mainline branch (`master`/`main`/etc.) with the one in the
+  current feature branch and use [Atlas's schema diff capability](https://atlasgo.io/declarative/diff)
+  to calculate the SQL statements that are going to be run against the database. We can then
+  use [Atlas's linting capability](https://atlasgo.io/versioned/lint) to provide insights
+  about possible dangers the arise from the proposed change.
+* *Change visualization* - to assist reviewers in understanding the impact of changes
+  proposed in a specific pull request we generate a visual diff
+  (using an ERD similar to [entviz](/blog/2021/08/26/visualizing-your-data-graph-using-entviz/)) reflect
+  the changes to a project's schema.
+* *Schema Linting* - using the official [go/analysis](https://pkg.go.dev/golang.org/x/tools/go/analysis)
+  package to create linters that analyze an Ent schema's Go code and enforce policies (such as naming
+  or indexing conventions) on the schema definition level.
+
+### Wrapping up
+
+In this post, we presented the concept of CI and discussed ways in which it
+can be practiced for Ent projects. Next, we presented CI checks we are experimenting
+with internally. If you would like to see these checks become a part of Ent or have other ideas
+for providing CI tools for Ent, ping us on the [Ent Discord Server](https://discord.gg/qZmPgTE6RX).
+
+:::note For more Ent news and updates:
+
+- Subscribe to our [Newsletter](https://entgo.substack.com/)
+- Follow us on [Twitter](https://twitter.com/entgo_io)
+- Join us on #ent on the [Gophers Slack](https://entgo.io/docs/slack)
+- Join us on the [Ent Discord Server](https://discord.gg/qZmPgTE6RX)
+:::
+

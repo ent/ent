@@ -4,12 +4,25 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
 {{ define "config" }}
 
 {{ $pkg := base $.Config.Package }}
+{{/* Additional dependencies. */}}
+{{ $deps := list }}{{ with $.Config.Annotations }}{{ $deps = $.Config.Annotations.Dependencies }}{{ end }}
+
 {{ template "header" $ }}
 
 {{ template "import" $ }}
+
+{{ with $deps }}
+	import (
+		{{- range $dep := $deps }}
+			{{ $dep.Type.PkgName }} "{{ $dep.Type.PkgPath }}"
+		{{- end }}
+	)
+{{ end }}
 
 // Option function to configure the client.
 type Option func(*config)
@@ -21,17 +34,38 @@ type config struct {
 	// debug enable a debug logging.
 	debug bool
 	// log used for logging on debug mode.
-	log func(...interface{})
+	log func(...any)
 	// hooks to execute on mutations.
 	hooks *hooks
-}
-
-// hooks per client, for fast access.
-type hooks struct {
-	{{- range $n := $.Nodes }}
-    	{{ $n.Name }} []ent.Hook
+	// interceptors to execute on queries.
+	inters *inters
+	{{- /* Additional dependency fields. */}}
+	{{- range $dep := $deps }}
+		{{ $dep.Field }} {{ $dep.Type }}
+	{{- end }}
+	{{- /* Support adding config fields from both global or dialect-specific templates. */}}
+	{{- range $prefix := list "" (printf "dialect/%s/" $.Storage) }}
+		{{- with $tmpls := matchTemplate (print $prefix "config/fields/*") }}
+			{{- range $tmpl := $tmpls }}
+				{{ xtemplate $tmpl $ }}
+			{{- end }}
+		{{- end }}
 	{{- end }}
 }
+
+// hooks and interceptors per client, for fast access.
+type (
+	hooks struct {
+		{{- range $n := $.Nodes }}
+    		{{ $n.Name }} []ent.Hook
+		{{- end }}
+	}
+	inters struct {
+		{{- range $n := $.Nodes }}
+			{{ $n.Name }} []ent.Interceptor
+		{{- end }}
+	}
+)
 
 // Options applies the options on the config object.
 func (c *config) options(opts ...Option) {
@@ -51,7 +85,7 @@ func Debug() Option {
 }
 
 // Log sets the logging function for debug mode.
-func Log(fn func(...interface{})) Option {
+func Log(fn func(...any)) Option {
 	return func(c *config) {
 		c.log = fn
 	}
@@ -63,5 +97,30 @@ func Driver(driver dialect.Driver) Option {
 		c.driver = driver
 	}
 }
+
+{{- /* Additional dependency options. */}}
+{{- range $dep := $deps }}
+	// {{ $dep.Option }} configures the {{ $dep.Field }}.
+	func {{ $dep.Option }}(v {{ $dep.Type }}) Option {
+		return func(c *config) {
+			c.{{ $dep.Field }} = v
+		}
+	}
+{{- end }}
+
+{{- /* Support adding config options from both global or dialect-specific templates. */}}
+{{- range $prefix := list "" (printf "dialect/%s/" $.Storage) }}
+	{{- with $tmpls := matchTemplate (print $prefix "config/options/*") }}
+		{{- range $tmpl := $tmpls }}
+			{{ xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
+{{- end }}
+
+{{- with $tmpls := matchTemplate "config/additional/*" "config/additional/*/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{- xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
 
 {{ end }}

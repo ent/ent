@@ -4,61 +4,61 @@
 
 package __
 
-import "github.com/facebook/ent/dialect/gremlin/graph/dsl"
+import "entgo.io/ent/dialect/gremlin/graph/dsl"
 
 // As is the api for calling __.As().
-func As(args ...interface{}) *dsl.Traversal { return New().As(args...) }
+func As(args ...any) *dsl.Traversal { return New().As(args...) }
 
 // Is is the api for calling __.Is().
-func Is(args ...interface{}) *dsl.Traversal { return New().Is(args...) }
+func Is(args ...any) *dsl.Traversal { return New().Is(args...) }
 
 // Not is the api for calling __.Not().
-func Not(args ...interface{}) *dsl.Traversal { return New().Not(args...) }
+func Not(args ...any) *dsl.Traversal { return New().Not(args...) }
 
 // Has is the api for calling __.Has().
-func Has(args ...interface{}) *dsl.Traversal { return New().Has(args...) }
+func Has(args ...any) *dsl.Traversal { return New().Has(args...) }
 
 // HasNot is the api for calling __.HasNot().
-func HasNot(args ...interface{}) *dsl.Traversal { return New().HasNot(args...) }
+func HasNot(args ...any) *dsl.Traversal { return New().HasNot(args...) }
 
 // Or is the api for calling __.Or().
-func Or(args ...interface{}) *dsl.Traversal { return New().Or(args...) }
+func Or(args ...any) *dsl.Traversal { return New().Or(args...) }
 
 // And is the api for calling __.And().
-func And(args ...interface{}) *dsl.Traversal { return New().And(args...) }
+func And(args ...any) *dsl.Traversal { return New().And(args...) }
 
 // In is the api for calling __.In().
-func In(args ...interface{}) *dsl.Traversal { return New().In(args...) }
+func In(args ...any) *dsl.Traversal { return New().In(args...) }
 
 // Out is the api for calling __.Out().
-func Out(args ...interface{}) *dsl.Traversal { return New().Out(args...) }
+func Out(args ...any) *dsl.Traversal { return New().Out(args...) }
 
 // OutE is the api for calling __.OutE().
-func OutE(args ...interface{}) *dsl.Traversal { return New().OutE(args...) }
+func OutE(args ...any) *dsl.Traversal { return New().OutE(args...) }
 
 // InE is the api for calling __.InE().
-func InE(args ...interface{}) *dsl.Traversal { return New().InE(args...) }
+func InE(args ...any) *dsl.Traversal { return New().InE(args...) }
 
 // InV is the api for calling __.InV().
-func InV(args ...interface{}) *dsl.Traversal { return New().InV(args...) }
+func InV(args ...any) *dsl.Traversal { return New().InV(args...) }
 
 // V is the api for calling __.V().
-func V(args ...interface{}) *dsl.Traversal { return New().V(args...) }
+func V(args ...any) *dsl.Traversal { return New().V(args...) }
 
 // OutV is the api for calling __.OutV().
-func OutV(args ...interface{}) *dsl.Traversal { return New().OutV(args...) }
+func OutV(args ...any) *dsl.Traversal { return New().OutV(args...) }
 
 // Values is the api for calling __.Values().
 func Values(args ...string) *dsl.Traversal { return New().Values(args...) }
 
 // Union is the api for calling __.Union().
-func Union(args ...interface{}) *dsl.Traversal { return New().Union(args...) }
+func Union(args ...any) *dsl.Traversal { return New().Union(args...) }
 
 // Constant is the api for calling __.Constant().
-func Constant(args ...interface{}) *dsl.Traversal { return New().Constant(args...) }
+func Constant(args ...any) *dsl.Traversal { return New().Constant(args...) }
 
 // Properties is the api for calling __.Properties().
-func Properties(args ...interface{}) *dsl.Traversal { return New().Properties(args...) }
+func Properties(args ...any) *dsl.Traversal { return New().Properties(args...) }
 
 // OtherV is the api for calling __.OtherV().
 func OtherV() *dsl.Traversal { return New().OtherV() }

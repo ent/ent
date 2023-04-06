@@ -6,12 +6,12 @@ title: Graph Traversal
 For the purpose of the example, we'll generate the following graph:
 
 
-![er-traversal-graph](https://entgo.io/assets/er_traversal_graph.png)
+![er-traversal-graph](https://entgo.io/images/assets/er_traversal_graph.png)
 
 The first step is to generate the 3 schemas: `Pet`, `User`, `Group`.
 
 ```console
-entc init Pet User Group
+go run -mod=mod entgo.io/ent/cmd/ent init Pet User Group
 ```
 
 Add the necessary fields and edges for the schemas:
@@ -105,7 +105,7 @@ func Gen(ctx context.Context, client *ent.Client) error {
 		SetName("Github").
 		Save(ctx)
 	if err != nil {
-		return fmt.Errorf("failed creating the group: %v", err)
+		return fmt.Errorf("failed creating the group: %w", err)
 	}
 	// Create the admin of the group.
 	// Unlike `Save`, `SaveX` panics if an error occurs.
@@ -157,7 +157,7 @@ func Gen(ctx context.Context, client *ent.Client) error {
 
 Let's go over a few traversals, and show the code for them:
 
-![er-traversal-graph-gopher](https://entgo.io/assets/er_traversal_graph_gopher.png)
+![er-traversal-graph-gopher](https://entgo.io/images/assets/er_traversal_graph_gopher.png)
 
 The traversal above starts from a `Group` entity, continues to its `admin` (edge),
 continues to its `friends` (edge), gets their `pets` (edge), gets each pet's `friends` (edge),
@@ -175,7 +175,7 @@ func Traverse(ctx context.Context, client *ent.Client) error {
 		QueryOwner().                	// Coco's owner: Alex.
 		Only(ctx)                    	// Expect only one entity to return in the query.
 	if err != nil {
-		return fmt.Errorf("failed querying the owner: %v", err)
+		return fmt.Errorf("failed querying the owner: %w", err)
 	}
 	fmt.Println(owner)
 	// Output:
@@ -186,7 +186,7 @@ func Traverse(ctx context.Context, client *ent.Client) error {
 
 What about the following traversal?
 
-![er-traversal-graph-gopher-query](https://entgo.io/assets/er_traversal_graph_gopher_query.png)
+![er-traversal-graph-gopher-query](https://entgo.io/images/assets/er_traversal_graph_gopher_query.png)
 
 We want to get all pets (entities) that have an `owner` (`edge`) that is a `friend`
 (edge) of some group `admin` (edge).
@@ -204,7 +204,7 @@ func Traverse(ctx context.Context, client *ent.Client) error {
 		).
 		All(ctx)
 	if err != nil {
-		return fmt.Errorf("failed querying the pets: %v", err)
+		return fmt.Errorf("failed querying the pets: %w", err)
 	}
 	fmt.Println(pets)
 	// Output:
@@ -213,4 +213,4 @@ func Traverse(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/traversal).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/traversal).

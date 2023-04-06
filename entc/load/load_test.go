@@ -7,7 +7,7 @@ package load
 import (
 	"testing"
 
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/schema/field"
 
 	"github.com/stretchr/testify/require"
 )
@@ -17,7 +17,7 @@ func TestLoad(t *testing.T) {
 	spec, err := cfg.Load()
 	require.NoError(t, err)
 	require.Len(t, spec.Schemas, 3)
-	require.Equal(t, "github.com/facebook/ent/entc/load/testdata/valid", spec.PkgPath)
+	require.Equal(t, "entgo.io/ent/entc/load/testdata/valid", spec.PkgPath)
 
 	require.Equal(t, "Group", spec.Schemas[0].Name, "ordered alphabetically")
 	require.Equal(t, "Tag", spec.Schemas[1].Name)
@@ -37,7 +37,7 @@ func TestLoadSpecific(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, spec.Schemas, 1)
 	require.Equal(t, "User", spec.Schemas[0].Name)
-	require.Equal(t, "github.com/facebook/ent/entc/load/testdata/valid", spec.PkgPath)
+	require.Equal(t, "entgo.io/ent/entc/load/testdata/valid", spec.PkgPath)
 }
 
 func TestLoadNoSchema(t *testing.T) {
@@ -66,4 +66,34 @@ func TestLoadBaseSchema(t *testing.T) {
 	f2 := spec.Schemas[0].Fields[1]
 	require.Equal(t, "user_field", f2.Name)
 	require.Equal(t, field.TypeString, f2.Info.Type)
+}
+
+func TestLoadTags(t *testing.T) {
+	all, err := (&Config{
+		Path: "./testdata/buildflags",
+	}).Load()
+	require.NoError(t, err)
+
+	require.Len(t, all.Schemas, 2)
+	require.Equal(t, "Group", all.Schemas[0].Name, "ordered alphabetically")
+	require.Equal(t, "User", all.Schemas[1].Name)
+
+	notags, err := (&Config{
+		Path:       "./testdata/buildflags",
+		BuildFlags: []string{"-tags", "hidegroups"},
+	}).Load()
+	require.NoError(t, err)
+
+	require.Len(t, notags.Schemas, 1)
+	require.Equal(t, "User", notags.Schemas[0].Name)
+
+	require.Equal(t, all.Schemas[1], notags.Schemas[0])
+}
+
+func TestLoadCycleError(t *testing.T) {
+	cfg := &Config{Path: "./testdata/cycle"}
+	spec, err := cfg.Load()
+	require.Nil(t, spec)
+	require.EqualError(t, err, `entc/load: parse schema dir: import cycle not allowed: import stack: [entgo.io/ent/entc/load/testdata/cycle entgo.io/ent/entc/load/testdata/cycle/fakent entgo.io/ent/entc/load/testdata/cycle]
+To resolve this issue, move the custom types used by the generated code to a separate package: "Enum", "Used"`)
 }

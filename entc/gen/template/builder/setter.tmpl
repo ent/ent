@@ -4,6 +4,8 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.Type */}}
+
 {{ define "setter" }}
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
@@ -12,6 +14,7 @@ in the LICENSE file in the root directory of this source tree.
 {{- if or (hasSuffix $builder "Update") (hasSuffix $builder "UpdateOne") }}
 	{{ $updater = true }}
 	{{ $fields = $.MutableFields }}
+{{- else if $.HasCompositeID }}
 {{- else if $.ID.UserDefined }}
 	{{ $fields = append $fields $.ID }}
 {{- end }}
@@ -19,20 +22,20 @@ in the LICENSE file in the root directory of this source tree.
 {{ range $f := $fields }}
 	{{ $p := receiver $f.Type.String }}{{ if eq $p $receiver }} {{ $p = "value" }} {{ end }}
 	{{ $func := print "Set" $f.StructField }}
-	// {{ $func }} sets the {{ $f.Name }} field.
+	// {{ $func }} sets the "{{ $f.Name }}" field.
 	func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ $f.Type }}) *{{ $builder }} {
 		{{- /* setting numeric type override previous calls to Add. */}}
-		{{- if and $f.Type.Numeric $updater }}
-			{{ $receiver }}.mutation.{{ print "Reset" $f.StructField }}()
+		{{- if and $updater $f.SupportsMutationAdd }}
+			{{ $receiver }}.mutation.{{ $f.MutationReset }}()
 		{{- end }}
-		{{ $receiver }}.mutation.{{ $func }}({{ $p }})
+		{{ $receiver }}.mutation.{{ $f.MutationSet }}({{ $p }})
 		return {{ $receiver }}
 	}
 
-	{{/* avoid generting nillable setters for nillable types. */}}
+	{{/* Avoid generating nillable setters for nillable types. */}}
 	{{ if and (not $f.Type.Nillable) (or $f.Optional $f.Default) (not (and $updater $f.UpdateDefault)) }}
 		{{ $nillableFunc := print "SetNillable" $f.StructField }}
-		// {{ $nillableFunc }} sets the {{ $f.Name }} field if the given value is not nil.
+		// {{ $nillableFunc }} sets the "{{ $f.Name }}" field if the given value is not nil.
 		func ({{ $receiver }} *{{ $builder }}) {{ $nillableFunc }}({{ $p }} *{{ $f.Type }}) *{{ $builder }} {
 			if {{ $p }} != nil {
 				{{ $receiver }}.{{ $func }}(*{{ $p }})
@@ -41,18 +44,25 @@ in the LICENSE file in the root directory of this source tree.
 		}
 	{{ end }}
 
-	{{ if and $f.Type.Numeric $f.ConvertedToBasic $updater }}
-		{{ $func := print "Add" $f.StructField }}
-		// {{ $func }} adds {{ $p }} to {{ $f.Name }}.
-		func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ $f.Type }}) *{{ $builder }} {
-			{{ $receiver }}.mutation.{{ $func }}({{ $p }})
+	{{ if and $updater $f.SupportsMutationAdd }}
+		// {{ $f.MutationAdd }} adds {{ $p }} to the "{{ $f.Name }}" field.
+		func ({{ $receiver }} *{{ $builder }}) {{ $f.MutationAdd }}({{ $p }} {{ $f.SignedType }}) *{{ $builder }} {
+			{{ $receiver }}.mutation.{{ $f.MutationAdd }}({{ $p }})
+			return {{ $receiver }}
+		}
+	{{ end }}
+
+	{{ if and $updater $f.SupportsMutationAppend }}
+		// {{ $f.MutationAppend }} appends {{ $p }} to the "{{ $f.Name }}" field.
+		func ({{ $receiver }} *{{ $builder }}) {{ $f.MutationAppend }}({{ $p }} {{ $f.Type }}) *{{ $builder }} {
+			{{ $receiver }}.mutation.{{ $f.MutationAppend }}({{ $p }})
 			return {{ $receiver }}
 		}
 	{{ end }}
 
 	{{ if and $f.Optional $updater }}
 		{{ $func := print "Clear" $f.StructField }}
-		// {{ $func }} clears the value of {{ $f.Name }}.
+		// {{ $func }} clears the value of the "{{ $f.Name }}" field.
 		func ({{ $receiver }} *{{ $builder }}) {{ $func }}() *{{ $builder }} {
 			{{ $receiver }}.mutation.{{ $func }}()
 			return {{ $receiver }}
@@ -60,17 +70,24 @@ in the LICENSE file in the root directory of this source tree.
 	{{ end }}
 {{ end }}
 
-{{ range $e := $.Edges }}
-	{{ $op := "add" }}{{ if $e.Unique }}{{ $op = "set" }}{{ end }}
-	{{ $idsFunc := print (pascal $op) (singular $e.Name | pascal) "IDs" }}{{ if $e.Unique }}{{ $idsFunc = print (pascal $op) (pascal $e.Name) "ID" }}{{ end }}
-	// {{ $idsFunc }} {{ $op }}s the {{ $e.Name }} edge to {{ $e.Type.Name }} by id{{ if not $e.Unique }}s{{ end }}.
-	func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }} {{ $e.Type.ID.Type }}) *{{ $builder }} {
-		{{ $receiver }}.mutation.{{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }})
-		return {{ $receiver }}
-	}
-	{{ if and $e.Unique $e.Optional }}
+{{ range $e := $.EdgesWithID }}
+	{{ if and $updater $e.Immutable }}
+		{{/* Skip to the next one as immutable edges cannot be updated. */}}
+		{{continue}}
+	{{ end }}
+	{{ $op := "add" }}{{ $idsFunc := $e.MutationAdd }}{{ if $e.Unique }}{{ $op = "set" }}{{ $idsFunc = $e.MutationSet }}{{ end }}
+	{{/* Check if this setter was already defined by the field-setters (e.g. edge-field with the same name). */}}
+	{{ $withSetter := not $e.HasFieldSetter }}
+	{{ if $withSetter }}
+		// {{ $idsFunc }} {{ $op }}s the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity by ID{{ if not $e.Unique }}s{{ end }}.
+		func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }} {{ $e.Type.ID.Type }}) *{{ $builder }} {
+			{{ $receiver }}.mutation.{{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }})
+			return {{ $receiver }}
+		}
+	{{ end }}
+	{{ if and $e.Unique $e.Optional $withSetter }}
 		{{ $nillableIDsFunc := print "SetNillable" $e.StructField "ID" }}
-		// {{ $nillableIDsFunc }} sets the {{ $e.Name }} edge to {{ $e.Type.Name }} by id if the given value is not nil.
+		// {{ $nillableIDsFunc }} sets the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity by ID if the given value is not nil.
 		func ({{ $receiver }} *{{ $builder }}) {{ $nillableIDsFunc }}(id *{{ $e.Type.ID.Type }}) *{{ $builder }} {
 			if id != nil {
 				{{ $receiver}} = {{ $receiver }}.{{ $idsFunc }}(*id)
@@ -81,7 +98,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{ $p := lower (printf "%.1s" $e.Type.Name) }}
 	{{ if eq $p $receiver }} {{ $p = "v" }} {{ end }}
 	{{ $func := print (pascal $op) $e.StructField }}
-	// {{ $func }} {{ $op }}s the {{ $e.Name }} edge{{if not $e.Unique}}s{{ end }} to {{ $e.Type.Name }}.
+	// {{ $func }} {{ $op }}s the "{{ $e.Name }}" edge{{if not $e.Unique}}s{{ end }} to the {{ $e.Type.Name }} entity.
 	func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ if not $e.Unique }}...{{ end }}*{{ $e.Type.Name}}) *{{ $builder }} {
 		{{ if $e.Unique -}}
 			return {{ $receiver }}.{{ $idsFunc }}({{ $p }}.ID)

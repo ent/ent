@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facebook/ent/dialect/gremlin/encoding/graphson"
+	"entgo.io/ent/dialect/gremlin/encoding/graphson"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -17,36 +17,36 @@ import (
 
 func TestEvaluateRequestEncode(t *testing.T) {
 	req := NewEvalRequest("g.V(x)",
-		WithBindings(map[string]interface{}{"x": 1}),
+		WithBindings(map[string]any{"x": 1}),
 		WithEvalTimeout(time.Second),
 	)
 	data, err := graphson.Marshal(req)
 	require.NoError(t, err)
 
-	var got map[string]interface{}
+	var got map[string]any
 	err = json.Unmarshal(data, &got)
 	require.NoError(t, err)
 
-	assert.Equal(t, map[string]interface{}{
+	assert.Equal(t, map[string]any{
 		"@type":  "g:UUID",
 		"@value": req.RequestID,
 	}, got["requestId"])
 	assert.Equal(t, req.Operation, got["op"])
 	assert.Equal(t, req.Processor, got["processor"])
 
-	args := got["args"].(map[string]interface{})
+	args := got["args"].(map[string]any)
 	assert.Equal(t, "g:Map", args["@type"])
-	assert.ElementsMatch(t, args["@value"], []interface{}{
+	assert.ElementsMatch(t, args["@value"], []any{
 		"gremlin", "g.V(x)", "language", "gremlin-groovy",
-		"scriptEvaluationTimeout", map[string]interface{}{
+		"scriptEvaluationTimeout", map[string]any{
 			"@type":  "g:Int64",
 			"@value": float64(1000),
 		},
-		"bindings", map[string]interface{}{
+		"bindings", map[string]any{
 			"@type": "g:Map",
-			"@value": []interface{}{
+			"@value": []any{
 				"x",
-				map[string]interface{}{
+				map[string]any{
 					"@type":  "g:Int64",
 					"@value": float64(1),
 				},
@@ -67,20 +67,20 @@ func TestAuthenticateRequestEncode(t *testing.T) {
 	data, err := graphson.Marshal(req)
 	require.NoError(t, err)
 
-	var got map[string]interface{}
+	var got map[string]any
 	err = json.Unmarshal(data, &got)
 	require.NoError(t, err)
 
-	assert.Equal(t, map[string]interface{}{
+	assert.Equal(t, map[string]any{
 		"@type":  "g:UUID",
 		"@value": req.RequestID,
 	}, got["requestId"])
 	assert.Equal(t, req.Operation, got["op"])
 	assert.Equal(t, req.Processor, got["processor"])
 
-	args := got["args"].(map[string]interface{})
+	args := got["args"].(map[string]any)
 	assert.Equal(t, "g:Map", args["@type"])
-	assert.ElementsMatch(t, args["@value"], []interface{}{
+	assert.ElementsMatch(t, args["@value"], []any{
 		"sasl", "AHVzZXIAcGFzcw==", "saslMechanism", "PLAIN",
 	})
 }

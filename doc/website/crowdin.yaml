@@ -1,0 +1,34 @@
+#
+# Crowdin credentials
+#
+"project_id" : "446988"
+"api_token_env" : "CROWDIN_TOKEN"
+"base_path" : ".."
+"base_url" : "https://api.crowdin.com"
+
+#
+# Choose file structure in Crowdin
+# e.g. true or false
+#
+"preserve_hierarchy": true
+
+#
+# Files configuration
+#
+files: [
+  # JSON translation files
+  {
+    source: '/website/i18n/en/**/*',
+    translation: '/website/i18n/%two_letters_code%/**/%original_file_name%',
+  },
+  # Docs Markdown files
+  {
+    source: '/md/**/*',
+    translation: '/website/i18n/%two_letters_code%/docusaurus-plugin-content-docs/current/**/%original_file_name%',
+  },
+  # Blog Markdown files
+  {
+    source: '/website/blog/**/*',
+    translation: '/website/i18n/%two_letters_code%/docusaurus-plugin-content-blog/**/%original_file_name%',
+  },
+]

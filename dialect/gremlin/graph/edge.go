@@ -7,9 +7,7 @@ package graph
 import (
 	"fmt"
 
-	"github.com/facebook/ent/dialect/gremlin/encoding/graphson"
-
-	"github.com/pkg/errors"
+	"entgo.io/ent/dialect/gremlin/encoding/graphson"
 )
 
 type (
@@ -22,15 +20,15 @@ type (
 	// graphson edge repr.
 	edge struct {
 		Element
-		OutV      interface{} `json:"outV"`
-		OutVLabel string      `json:"outVLabel"`
-		InV       interface{} `json:"inV"`
-		InVLabel  string      `json:"inVLabel"`
+		OutV      any    `json:"outV"`
+		OutVLabel string `json:"outVLabel"`
+		InV       any    `json:"inV"`
+		InVLabel  string `json:"inVLabel"`
 	}
 )
 
 // NewEdge create a new graph edge.
-func NewEdge(id interface{}, label string, outV, inV Vertex) Edge {
+func NewEdge(id any, label string, outV, inV Vertex) Edge {
 	return Edge{
 		Element: NewElement(id, label),
 		OutV:    outV,
@@ -58,7 +56,7 @@ func (e Edge) MarshalGraphson() ([]byte, error) {
 func (e *Edge) UnmarshalGraphson(data []byte) error {
 	var edge edge
 	if err := graphson.Unmarshal(data, &edge); err != nil {
-		return errors.Wrap(err, "unmarshaling edge")
+		return fmt.Errorf("unmarshaling edge: %w", err)
 	}
 
 	*e = NewEdge(
@@ -76,12 +74,12 @@ func (edge) GraphsonType() graphson.Type {
 
 // Property denotes a key/value pair associated with an edge.
 type Property struct {
-	Key   string      `json:"key"`
-	Value interface{} `json:"value"`
+	Key   string `json:"key"`
+	Value any    `json:"value"`
 }
 
 // NewProperty create a new graph edge property.
-func NewProperty(key string, value interface{}) Property {
+func NewProperty(key string, value any) Property {
 	return Property{key, value}
 }
 

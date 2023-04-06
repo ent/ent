@@ -17,7 +17,7 @@ import (
 func TestEncodeMap(t *testing.T) {
 	tests := []struct {
 		name string
-		in   interface{}
+		in   any
 		want string
 	}{
 		{
@@ -47,7 +47,7 @@ func TestEncodeMap(t *testing.T) {
 		},
 		{
 			name: "mixed",
-			in: map[string]interface{}{
+			in: map[string]any{
 				"byte":   byte('a'),
 				"string": "str",
 				"slice":  []int{1, 2, 3},
@@ -119,11 +119,11 @@ func TestEncodeMap(t *testing.T) {
 			require.NoError(t, err)
 
 			assert.Equal(t, "g:Map", jsoniter.Get(data, "@type").ToString())
-			var want []interface{}
+			var want []any
 			err = jsoniter.UnmarshalFromString(tc.want, &want)
 			require.NoError(t, err)
 
-			got, ok := jsoniter.Get(data, "@value").GetInterface().([]interface{})
+			got, ok := jsoniter.Get(data, "@value").GetInterface().([]any)
 			require.True(t, ok)
 			assert.ElementsMatch(t, want, got)
 		})
@@ -134,7 +134,7 @@ func TestDecodeMap(t *testing.T) {
 	tests := []struct {
 		name string
 		in   string
-		want interface{}
+		want any
 	}{
 		{
 			name: "empty",

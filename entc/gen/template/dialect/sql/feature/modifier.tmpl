@@ -1,0 +1,92 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{/* gotype: entgo.io/ent/entc/gen.Type */}}
+
+{{/* Templates used by the "sql/modifier" feature-flag to add custom modifiers to the builders. */}}
+
+{{/* Template for adding the "modifiers" field to the query builder. */}}
+{{ define "dialect/sql/query/fields/additional/modify" -}}
+    {{- if or ($.FeatureEnabled "sql/lock") ($.FeatureEnabled "sql/modifier") }}
+        modifiers []func(*sql.Selector)
+    {{- end }}
+{{- end -}}
+
+{{/* Template for adding the "executing" the list of modifiers on the sql.Selector. */}}
+{{ define "dialect/sql/query/selector/modify" }}
+    {{- if or ($.FeatureEnabled "sql/lock") ($.FeatureEnabled "sql/modifier") }}
+        {{- $receiver := pascal $.Scope.Builder | receiver }}
+        for _, m := range {{ $receiver }}.modifiers {
+            m(selector)
+        }
+    {{- end }}
+{{- end -}}
+
+{{/* Template for passing the modifiers to the sqlgraph.QuerySpec. */}}
+{{ define "dialect/sql/query/spec/modify" }}
+    {{- if or ($.FeatureEnabled "sql/lock") ($.FeatureEnabled "sql/modifier") }}
+        {{- $receiver := pascal $.Scope.Builder | receiver }}
+        if len({{ $receiver }}.modifiers) > 0 {
+            _spec.Modifiers = {{ $receiver }}.modifiers
+        }
+    {{- end }}
+{{- end -}}
+
+{{/* A template for adding the Modify method to the query-builder. */}}
+{{ define "dialect/sql/query/additional/modify" }}
+    {{ if $.FeatureEnabled "sql/modifier" }}
+        {{ $builder := pascal $.Scope.Builder }}
+        {{ $receiver := receiver $builder }}
+        {{ $selectBuilder := pascal $.Name | printf "%sSelect" }}
+        // Modify adds a query modifier for attaching custom logic to queries.
+        func ({{ $receiver }} *{{ $builder }}) Modify(modifiers ...func(s *sql.Selector)) *{{ $selectBuilder }} {
+            {{ $receiver }}.modifiers = append({{ $receiver }}.modifiers, modifiers...)
+            return {{ $receiver }}.Select()
+        }
+    {{ end }}
+{{ end }}
+
+{{/* A template for adding the Modify method to the select-builder. */}}
+{{ define "dialect/sql/select/additional/modify" }}
+    {{ if $.FeatureEnabled "sql/modifier" }}
+        {{ $builder := pascal $.Scope.Builder }}
+        {{ $receiver := receiver $builder }}
+        // Modify adds a query modifier for attaching custom logic to queries.
+        func ({{ $receiver }} *{{ $builder }}) Modify(modifiers ...func(s *sql.Selector)) *{{ $builder }} {
+            {{ $receiver }}.modifiers = append({{ $receiver }}.modifiers, modifiers...)
+            return {{ $receiver }}
+        }
+    {{ end }}
+{{ end }}
+
+{{/* Template for adding the "modifiers" field to the update builder. */}}
+{{ define "dialect/sql/update/fields/additional/modify" -}}
+    {{- if $.FeatureEnabled "sql/modifier" }}
+        modifiers []func(*sql.UpdateBuilder)
+    {{- end }}
+{{- end -}}
+
+{{/* A template for adding the Modify method to the update and updateone builders. */}}
+{{ define "dialect/sql/update/additional/modify" }}
+    {{ if $.FeatureEnabled "sql/modifier" }}
+        {{ $pkg := $.Scope.Package }}
+        {{ $builder := pascal $.Scope.Builder }}
+        {{ $receiver := receiver $builder }}
+        // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+        func ({{ $receiver }} *{{ $builder }}) Modify(modifiers ...func(u *sql.UpdateBuilder)) *{{ $builder }} {
+            {{ $receiver }}.modifiers = append({{ $receiver }}.modifiers, modifiers...)
+            return {{ $receiver }}
+        }
+    {{ end }}
+{{ end }}
+
+{{/* Template for passing the modifiers to the sqlgraph.UpdateSpec. */}}
+{{ define "dialect/sql/update/spec/modify" }}
+    {{- if $.FeatureEnabled "sql/modifier" }}
+        {{- $receiver := pascal $.Scope.Builder | receiver }}
+        _spec.AddModifiers({{ $receiver }}.modifiers...)
+    {{- end }}
+{{- end -}}

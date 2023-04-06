@@ -7,15 +7,24 @@ package schema
 import (
 	"math"
 
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/edge"
-	"github.com/facebook/ent/schema/field"
-	"github.com/facebook/ent/schema/index"
+	"entgo.io/ent"
+	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
+	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // File holds the schema definition for the File entity.
 type File struct {
 	ent.Schema
+}
+
+func (File) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		edge.Annotation{
+			StructTag: `json:"file_edges"`,
+		},
+	}
 }
 
 // Fields of the File.
@@ -30,6 +39,12 @@ func (File) Fields() []ent.Field {
 			Optional().
 			Nillable(),
 		field.String("group").
+			Optional(),
+		field.Bool("op").
+			Optional(),
+		// Skip generating the "FieldID" predicate
+		// as it conflicts with the "FieldID" constant.
+		field.Int("field_id").
 			Optional(),
 	}
 }

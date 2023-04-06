@@ -4,6 +4,8 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
 {{/*
 The runtime template generates the schema-stitching logic and holds the
 module version that was used to generate the assets.
@@ -16,13 +18,13 @@ backwards-compatibility with previous versions of ent.
 */}}
 
 {{ define "runtime/ent" }}
-    {{ template "runtime" $ }}
+	{{ template "runtime" $ }}
 {{ end }}
 
 {{ define "runtime/pkg" }}
-    {{ with extend $ "Package" "runtime" }}
-        {{ template "runtime" . }}
-    {{ end }}
+	{{ with extend $ "Package" "runtime" }}
+		{{ template "runtime" . }}
+	{{ end }}
 	{{ $module := $.ModuleInfo }}
 	{{ if or $module.Version $module.Sum }}
 	const (
@@ -42,20 +44,20 @@ backwards-compatibility with previous versions of ent.
 
 {{ $hooks := 0 }}
 {{ range $n := $.Nodes }}
-	{{ $numHooks := $n.NumHooks }}{{ if $n.HasPolicy }}{{ $numHooks = add $numHooks 1 }}{{ end }}
+	{{ $numHooks := add $n.NumHooks $n.NumInterceptors }}{{ if $n.NumPolicy }}{{ $numHooks = add $numHooks 1 }}{{ end }}
 	{{ $hooks = add $hooks $numHooks }}
 {{ end }}
 {{ $rtpkg := false }}{{ if hasField $ "Scope" }}{{ $rtpkg = eq $.Scope.Package "runtime" }}{{ end }}
 
 {{ if $rtpkg }} {{/* 1st format - runtime/runtime.go */}}
 	{{ if $hooks  }}
-    	{{ template "runtime/register" $ }}
+		{{ template "runtime/register" $ }}
 	{{ else }}
 		// The schema-stitching logic is generated in {{ $.Config.Package }}/runtime.go
 	{{ end }}
 {{ else }}{{/* 2nd format - ent/runtime.go */}}
 	{{ if not $hooks  }}
-    	{{ template "runtime/register" $ }}
+		{{ template "runtime/register" $ }}
 	{{ else }}
 		// The schema-stitching logic is generated in {{ $.Config.Package }}/runtime/runtime.go
 	{{ end }}
@@ -70,15 +72,18 @@ import (
 		"{{ . }}"
 	{{- end }}
 	{{- range $n := $.Nodes }}
-		"{{ $.Config.Package }}/{{ $n.Package }}"
+		{{ $n.PackageAlias }} "{{ $.Config.Package }}/{{ $n.PackageDir }}"
+		{{- /* Import external packages */}}
+		{{- template "import/types" $n }}
 	{{- end }}
 
-	"github.com/facebook/ent"
+	"entgo.io/ent"
+	"entgo.io/ent/privacy"
 )
 
 
-// The init function reads all schema descriptors with runtime
-// code (default values, validators or hooks) and stitches it
+// The init function reads all schema descriptors with runtime code
+// (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
 {{- range $n := $.Nodes }}
@@ -87,11 +92,12 @@ func init() {
 	{{- with $n.RuntimeMixin }}
 		{{ $pkg }}Mixin := {{ $schema }}.{{ $n.Name }}{}.Mixin()
 	{{- end }}
-	{{- if $n.HasPolicy }}
-		{{ print $pkg ".Policy" }} = {{ $schema }}.{{ $n.Name }}{}.Policy()
-		{{ print $pkg ".Hooks" }}[0] = func(next ent.Mutator) ent.Mutator {
+	{{- with $policies := $n.PolicyPositions }}
+		{{- /* policies defined in schema and mixins. */}}
+		{{ $pkg }}.Policy = privacy.NewPolicies({{ range $idx := $n.MixedInPolicies }}{{ $pkg }}Mixin[{{ $idx }}],{{ end }}{{ $schema }}.{{ $n.Name }}{})
+		{{ $pkg }}.Hooks[0] = func(next ent.Mutator) ent.Mutator {
 			return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-				if err := {{ print $pkg ".Policy" }}.EvalMutation(ctx, m); err != nil {
+				if err := {{ $pkg }}.Policy.EvalMutation(ctx, m); err != nil {
 					return nil, err
 				}
 				return next.Mutate(ctx, m)
@@ -99,35 +105,56 @@ func init() {
 		}
 	{{- end }}
 	{{- with $hooks := $n.HookPositions }}
-        {{- /* Hooks defined in schema mixins. */}}
+		{{- /* Hooks defined in schema mixins. */}}
 		{{- with $idx := $n.MixedInHooks }}
 			{{- range $i := $idx }}
-                {{ print $pkg "MixinHooks" $i }} := {{ $pkg }}Mixin[{{ $i }}].(interface{ Hooks() []ent.Hook }).Hooks()
+				{{ print $pkg "MixinHooks" $i }} := {{ $pkg }}Mixin[{{ $i }}].Hooks()
 			{{- end }}
 		{{- end }}
-        {{- /* If there are hooks defined in the schema. */}}
-        {{- $schemaHooks := false }}{{ range $p := $hooks }}{{ if not $p.MixedIn }}{{ $schemaHooks = true }}{{ end }}{{ end }}
+		{{- /* If there are hooks defined in the schema. */}}
+		{{- $schemaHooks := false }}{{ range $p := $hooks }}{{ if not $p.MixedIn }}{{ $schemaHooks = true }}{{ end }}{{ end }}
 		{{- if $schemaHooks }}
 			{{ print $pkg "Hooks" }} := {{ $schema }}.{{ $n.Name }}{}.Hooks()
 		{{- end }}
 		{{- range $i, $p := $hooks }}
-            {{- if $n.HasPolicy }}
+			{{- if $n.NumPolicy }}
 				{{ $i = add $i 1 }}
 			{{- end }}
 			{{- if $p.MixedIn }}
-                {{ print $pkg ".Hooks" }}[{{ $i }}] =  {{ print $pkg "MixinHooks" $p.MixinIndex }}[{{ $p.Index }}]
+				{{ print $pkg ".Hooks" }}[{{ $i }}] =  {{ print $pkg "MixinHooks" $p.MixinIndex }}[{{ $p.Index }}]
 			{{- else }}
-                {{ print $pkg ".Hooks" }}[{{ $i }}] = {{ print $pkg "Hooks" }}[{{ $p.Index }}]
+				{{ print $pkg ".Hooks" }}[{{ $i }}] = {{ print $pkg "Hooks" }}[{{ $p.Index }}]
 			{{- end }}
 		{{- end }}
 	{{- end }}
-	{{- if or $n.HasDefault $n.HasValidators }}
-        {{- with $idx := $n.MixedInFields }}
-            {{- range $i := $idx }}
-                {{ print $pkg "MixinFields" $i }} := {{ $pkg }}Mixin[{{ $i }}].Fields()
-            {{- end }}
+	{{- with $inters := $n.InterceptorPositions }}
+		{{- /* Interceptors defined in schema mixins. */}}
+		{{- with $idx := $n.MixedInInterceptors }}
+			{{- range $i := $idx }}
+				{{ print $pkg "MixinInters" $i }} := {{ $pkg }}Mixin[{{ $i }}].Interceptors()
+			{{- end }}
 		{{- end }}
-		{{- $fields := $n.Fields }}{{ if $n.ID.UserDefined }}{{ $fields = append $fields $n.ID }}{{ end }}
+		{{- /* If there are interceptors defined in the schema. */}}
+		{{- $schemaInters := false }}{{ range $p := $inters }}{{ if not $p.MixedIn }}{{ $schemaInters = true }}{{ end }}{{ end }}
+		{{- if $schemaInters }}
+			{{ print $pkg "Inters" }} := {{ $schema }}.{{ $n.Name }}{}.Interceptors()
+		{{- end }}
+		{{- range $i, $p := $inters }}
+			{{- if $p.MixedIn }}
+				{{ print $pkg ".Interceptors" }}[{{ $i }}] =  {{ print $pkg "MixinInters" $p.MixinIndex }}[{{ $p.Index }}]
+			{{- else }}
+				{{ print $pkg ".Interceptors" }}[{{ $i }}] = {{ print $pkg "Inters" }}[{{ $p.Index }}]
+			{{- end }}
+		{{- end }}
+	{{- end }}
+	{{- if or $n.HasDefault $n.HasUpdateDefault $n.HasValidators }}
+		{{- with $idx := $n.MixedInFields }}
+			{{- range $i := $idx }}
+				{{ print $pkg "MixinFields" $i }} := {{ $pkg }}Mixin[{{ $i }}].Fields()
+				_ = {{ $pkg }}MixinFields{{ $i }}
+			{{- end }}
+		{{- end }}
+		{{- $fields := $n.Fields }}{{ if $n.HasOneFieldID }}{{ if $n.ID.UserDefined }}{{ $fields = append $fields $n.ID }}{{ end }}{{ end }}
 		{{- with $fields }}
 			{{ $pkg }}Fields := {{ $schema }}.{{ $n.Name }}{}.Fields()
 			_ = {{ $pkg }}Fields
@@ -143,44 +170,52 @@ func init() {
 					{{ $desc }} := {{ $pkg }}Fields[{{ $f.Position.Index }}].Descriptor()
 				{{- end }}
 			{{- end }}
-		{{- if and $f.Default (not $f.IsEnum) }}
-			{{- $default := print $pkg "." $f.DefaultName }}
-			// {{ $default }} holds the default value on creation for the {{ $f.Name }} field.
-			{{ $default }} = {{ $desc }}.Default.({{ if or $f.IsTime $f.IsUUID }}func() {{ end }}{{ $f.Type }})
-		{{- end }}
-		{{- if $f.UpdateDefault }}
-			{{- $default := print $pkg "." $f.UpdateDefaultName }}
-			// {{ $default }} holds the default value on update for the {{ $f.Name }} field.
-			{{ $default }} = {{ $desc }}.UpdateDefault.({{ if $f.IsTime }}func() {{ end }}{{ $f.Type }})
-		{{- end }}
-		{{- with $f.Validators }}
-			{{- $name := print $pkg "." $f.Validator }}
-			{{- $type :=  printf "func (%s) error" $f.Type.Type }}
-			// {{ $name }} is a validator for the "{{ $f.Name }}" field. It is called by the builders before save.
-			{{- if eq $f.Validators 1 }}
-				{{ $name }} = {{ $desc }}.Validators[0].({{ $type }})
-			{{- else }}
-				{{ $name }} = func() {{ $type }} {
-					validators := {{ $desc }}.Validators
-					fns := [...]func({{ $f.Type }}) error {
-						{{- range $j, $n := xrange $f.Validators }}
-							validators[{{ $j }}].(func({{ $f.Type.Type }}) error),
-						{{- end }}
-					}
-					return func({{ $f.BuilderField }} {{ $f.Type }}) error {
-						for _, fn := range fns {
-							if err := fn({{ $f.BuilderField }}); err != nil {
-								return err
-							}
-						}
-						return nil
-					}
-				}()
+			{{- if and $f.Default (not $f.IsEnum) }}
+				{{- $default := print $pkg "." $f.DefaultName }}
+				// {{ $default }} holds the default value on creation for the {{ $f.Name }} field.
+				{{- $defaultType := print $f.Type.Type }}{{ if $f.DefaultFunc }}{{ $defaultType = print "func() " $f.Type }}{{ end }}
+				{{- if and $f.HasGoType (not (hasPrefix $defaultType "func")) }}
+					{{- if or $f.IsJSON $f.IsOther }}
+						{{ $default }} = {{ $desc }}.Default.({{ $f.Type }})
+					{{- else }}
+						{{ $default }} = {{ $f.Type }}({{ $desc }}.Default.({{ $defaultType }}))
+					{{- end }}
+				{{- else }}
+					{{ $default }} = {{ $desc }}.Default.({{ $defaultType }})
+				{{- end }}
 			{{- end }}
+			{{- if $f.UpdateDefault }}
+				{{- $default := print $pkg "." $f.UpdateDefaultName }}
+				// {{ $default }} holds the default value on update for the {{ $f.Name }} field.
+				{{ $default }} = {{ $desc }}.UpdateDefault.(func() {{ $f.Type }})
+			{{- end }}
+			{{- with $f.Validators }}
+				{{- $name := print $pkg "." $f.Validator }}
+				{{- $type :=  printf "func (%s) error" $f.Type.Type }}
+				// {{ $name }} is a validator for the "{{ $f.Name }}" field. It is called by the builders before save.
+				{{- if eq $f.Validators 1 }}
+					{{ $name }} = {{ $desc }}.Validators[0].({{ $type }})
+				{{- else }}
+					{{ $name }} = func() {{ $type }} {
+						validators := {{ $desc }}.Validators
+						fns := [...]func({{ $f.Type.Type }}) error {
+							{{- range $j, $n := xrange $f.Validators }}
+								validators[{{ $j }}].(func({{ $f.Type.Type }}) error),
+							{{- end }}
+						}
+						return func({{ $f.BuilderField }} {{ $f.Type.Type }}) error {
+							for _, fn := range fns {
+								if err := fn({{ $f.BuilderField }}); err != nil {
+									return err
+								}
+							}
+							return nil
+						}
+					}()
+				{{- end }}
 		{{- end }}
 	{{- end }}
 {{- end }}
 {{- end }}
 }
-
 {{ end }}

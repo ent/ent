@@ -4,6 +4,8 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
 {{ define "schema" }}
 
 {{- with extend $ "Package" "migrate" -}}
@@ -11,19 +13,20 @@ in the LICENSE file in the root directory of this source tree.
 {{ end }}
 
 import (
-	{{ range $_, $n := $.Nodes }}
-		"{{ $.Config.Package }}/{{ $n.Package }}"
+	{{ range $n := $.Nodes }}
+		{{ $n.PackageAlias }} "{{ $.Config.Package }}/{{ $n.PackageDir }}"
 	{{- end }}
 
-	"github.com/facebook/ent/schema/field"
-	"github.com/facebook/ent/dialect/sql/schema"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/dialect/sql/schema"
+	"entgo.io/ent/schema/field"
 )
 
 var (
-	{{- range $_, $t := $.Tables }}
+	{{- range $t := $.Tables }}
 		{{- /* find type node in the graph of this table, if exists */}}
 		{{- $node := index $.Nodes 0 }}
-		{{- range $_, $n := $.Nodes }}{{ if eq $t.Name $n.Table }}{{ $node = $n }}{{ end }}{{ end }}
+		{{- range $n := $.Nodes }}{{ if eq $t.Name $n.Table }}{{ $node = $n }}{{ end }}{{ end }}
 		{{- $columns := pascal $t.Name | printf "%sColumns" }}
 		// {{ $columns }} holds the columns for the "{{ $t.Name }}" table.
 		{{ $columns }} = []*schema.Column{
@@ -33,10 +36,21 @@ var (
 				{{- if $c.Increment }} Increment: true,{{ end }}
 				{{- if $c.Nullable }} Nullable: {{ $c.Nullable }},{{ end }}
 				{{- with $c.Size }} Size: {{ . }},{{ end }}
+				{{- with $c.Comment }} Comment: "{{ $c.Comment }}",{{ end }}
 				{{- with $c.Attr }} Attr: "{{ . }}",{{ end }}
 				{{- with $c.Enums }} Enums: []string{ {{ range $e := . }}"{{ $e }}",{{ end }} },{{ end }}
-				{{- with $c.Default }} Default: {{ . }},{{ end }}
-				{{- with $c.SchemaType }} SchemaType: map[string]string{ {{ range $k, $v := . }}"{{ $k }}": "{{ $v }}",{{ end }}}{{ end }}},
+				{{- if not (isNil $c.Default) -}}
+					{{- $t := printf "%T" $c.Default -}}
+					{{- if eq $t "schema.Expr" -}}
+						Default: schema.Expr("{{ $c.Default }}"),
+					{{- else if eq $t "map[string]schema.Expr" -}}
+						Default: map[string]schema.Expr{ {{ range $k := keys $c.Default }} "{{ $k }}": "{{ index $c.Default $k }}",{{ end }} },
+					{{- else -}}
+						Default: {{ quote $c.Default }},
+					{{- end -}}
+				{{- end }}
+				{{- if $c.Collation }} Collation: "{{ $c.Collation }}",{{ end }}
+				{{- with $c.SchemaType }} SchemaType: map[string]string{ {{ range $k := keys . }}"{{ $k }}": "{{ index $c.SchemaType $k }}",{{ end }}}{{ end }}},
 			{{- end }}
 		}
 		{{- $table := pascal $t.Name | printf "%sTable" }}
@@ -45,53 +59,128 @@ var (
 			Name: "{{ $t.Name }}",
 			Columns: {{ $columns }},
 			PrimaryKey: []*schema.Column{
-				{{- range $_, $pk := $t.PrimaryKey }}
+				{{- range $pk := $t.PrimaryKey }}
 					{{- range $i, $c := $t.Columns }}
 						{{- if eq $pk.Name $c.Name }}{{ $columns }}[{{ $i }}],{{ end }}
 					{{- end }}
 				{{- end }}
 			},
-			ForeignKeys: []*schema.ForeignKey{
-				{{- range $_, $fk := $t.ForeignKeys }}
-					{
-						Symbol: "{{ $fk.Symbol }}",
-						Columns: []*schema.Column{
-					  		{{- range $_, $c1 := $fk.Columns }}
-								{{- range $i, $c2 := $t.Columns }}
-									{{- if eq $c1.Name $c2.Name }}{{ $columns }}[{{ $i }}],{{ end }}
-								{{- end }}
-							{{- end }}
-						},
-						{{/* postpone refrencing to avoid typechecking loops */}}
-						RefColumns: []*schema.Column{
-					  		{{- range $_, $c1 := $fk.RefColumns }}
-								{{- range $i, $c2 := $fk.RefTable.Columns }}
-									{{- if eq $c1.Name $c2.Name }}{{ pascal $fk.RefTable.Name | printf "%sColumns" }}[{{ $i }}],{{ end }}
-								{{- end }}
-							{{- end }}
-						},
-						{{- with $fk.OnUpdate.ConstName }}
-							OnUpdate: schema.{{ . }},
-						{{- end }}
-						{{- with $fk.OnDelete.ConstName }}
-							OnDelete: schema.{{ . }},
-						{{- end }}
-					},
-				{{- end }}
-			},
-			{{- if $t.Indexes }}
-				Indexes: []*schema.Index{
-					{{- range $_, $idx := $t.Indexes }}
+			{{- with $fks := $t.ForeignKeys }}
+				ForeignKeys: []*schema.ForeignKey{
+					{{- range $fk := $fks }}
 						{
-							Name: "{{ $idx.Name }}",
-							Unique: {{ $idx.Unique }},
+							Symbol: "{{ $fk.Symbol }}",
 							Columns: []*schema.Column{
-								{{- range $_, $c1 := $idx.Columns }}
+								{{- range $c1 := $fk.Columns }}
 									{{- range $i, $c2 := $t.Columns }}
 										{{- if eq $c1.Name $c2.Name }}{{ $columns }}[{{ $i }}],{{ end }}
 									{{- end }}
 								{{- end }}
 							},
+							{{- /* postpone refrencing to avoid typechecking loops */}}
+							RefColumns: []*schema.Column{
+								{{- range $c1 := $fk.RefColumns }}
+									{{- range $i, $c2 := $fk.RefTable.Columns }}
+										{{- if eq $c1.Name $c2.Name }}{{ pascal $fk.RefTable.Name | printf "%sColumns" }}[{{ $i }}],{{ end }}
+									{{- end }}
+								{{- end }}
+							},
+							{{- with $fk.OnUpdate.ConstName }}
+								OnUpdate: schema.{{ . }},
+							{{- end }}
+							{{- with $fk.OnDelete.ConstName }}
+								OnDelete: schema.{{ . }},
+							{{- end }}
+						},
+					{{- end }}
+				},
+			{{- end }}
+			{{- if $t.Indexes }}
+				Indexes: []*schema.Index{
+					{{- range $idx := $t.Indexes }}
+						{
+							Name: "{{ $idx.Name }}",
+							Unique: {{ $idx.Unique }},
+							Columns: []*schema.Column{
+								{{- range $c1 := $idx.Columns }}
+									{{- range $i, $c2 := $t.Columns }}
+										{{- if eq $c1.Name $c2.Name }}{{ $columns }}[{{ $i }}],{{ end }}
+									{{- end }}
+								{{- end }}
+							},
+							{{- with $ant := $idx.Annotation }}
+								Annotation: &entsql.IndexAnnotation{
+									{{- with $ant.Prefix }}
+										Prefix: {{ . }},
+									{{- end }}
+									{{- with $keys := keys $ant.PrefixColumns }}
+										PrefixColumns: map[string]uint{
+											{{- range $k := $keys }}
+												{{- /* Use the column reference instead of using raw string. */}}
+												{{- range $i, $c := $t.Columns }}
+													{{- if eq $k $c.Name }}
+														{{ $columns }}[{{ $i }}].Name: {{ index $ant.PrefixColumns $k }},
+													{{ end }}
+												{{- end }}
+											{{- end }}
+										},
+									{{- end }}
+									{{- with $ant.OpClass }}
+										OpClass: "{{ . }}",
+									{{- end }}
+									{{- with $keys := keys $ant.OpClassColumns }}
+										OpClassColumns: map[string]string{
+											{{- range $k := $keys }}
+												{{- /* Use the column reference instead of using raw string. */}}
+												{{- range $i, $c := $t.Columns }}
+													{{- if eq $k $c.Name }}
+														{{ $columns }}[{{ $i }}].Name: "{{ index $ant.OpClassColumns $k }}",
+													{{ end }}
+												{{- end }}
+											{{- end }}
+										},
+									{{- end }}
+									{{- with $ant.Desc }}
+										Desc: {{ . }},
+									{{- end }}
+									{{- with $keys := keys $ant.DescColumns }}
+										DescColumns: map[string]bool{
+										{{- range $k := $keys }}
+											{{- /* Use the column reference instead of using raw string. */}}
+											{{- range $i, $c := $t.Columns }}
+												{{- if eq $k $c.Name }}
+													{{ $columns }}[{{ $i }}].Name: {{ index $ant.DescColumns $k }},
+												{{ end }}
+											{{- end }}
+										{{- end }}
+										},
+									{{- end }}
+									{{- with $ant.IncludeColumns }}
+										IncludeColumns: []string{
+										{{- range $ic := . }}
+											{{- range $i, $c := $t.Columns }}
+												{{- if eq $ic $c.Name }}
+													{{ $columns }}[{{ $i }}].Name,
+												{{ end }}
+											{{- end }}
+										{{- end }}
+										},
+									{{- end }}
+									{{- with $ant.Type }}
+										Type: "{{ . }}",
+									{{- end }}
+									{{- with $keys := keys $ant.Types }}
+										Types: map[string]string{
+											{{- range $k := $keys }}
+												"{{ $k }}": "{{ index $ant.Types $k }}",
+											{{- end }}
+										},
+									{{- end }}
+									{{- with $ant.Where }}
+										Where: "{{ . }}",
+									{{- end }}
+								},
+							{{- end }}
 						},
 					{{- end }}
 				},
@@ -100,17 +189,47 @@ var (
 	{{- end }}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		{{- range $_, $t := $.Tables }}
+		{{- range $t := $.Tables }}
 			{{ pascal $t.Name | printf "%sTable" }},
 		{{- end }}
 	}
 )
 
 func init() {
-	{{- range $_, $t := $.Tables }}
+	{{- range $t := $.Tables }}
 		{{- $table := pascal $t.Name | printf "%sTable" }}
 		{{- range $i, $fk := $t.ForeignKeys }}
 			{{ $table }}.ForeignKeys[{{ $i }}].RefTable = {{ pascal $fk.RefTable.Name | printf "%sTable" }}
+		{{- end }}
+		{{- with $ant := $t.Annotation }}
+			{{ $table }}.Annotation = &entsql.Annotation{
+				{{- with $ant.Table }}
+					Table: "{{ . }}",
+				{{- end }}
+				{{- with $ant.Charset }}
+					Charset: "{{ . }}",
+				{{- end }}
+				{{- with $ant.Collation }}
+					Collation: "{{ . }}",
+				{{- end }}
+				{{- with $ant.Options }}
+					Options: "{{ . }}",
+				{{- end }}
+				{{- with $ant.Check }}
+					Check: "{{ . }}",
+				{{- end }}
+			}
+			{{- with $ant.Incremental }}
+				{{ $table }}.Annotation.Incremental = new(bool)
+				*{{ $table }}.Annotation.Incremental = {{ with indirect . }}true{{ else }}false{{ end }}
+			{{- end }}
+			{{- with $keys := keys $ant.Checks }}
+				{{ $table }}.Annotation.Checks = map[string]string{
+					{{- range $k := $keys }}
+						"{{ $k }}": "{{ index $ant.Checks $k }}",
+					{{- end }}
+				}
+			{{- end }}
 		{{- end }}
 	{{- end }}
 }

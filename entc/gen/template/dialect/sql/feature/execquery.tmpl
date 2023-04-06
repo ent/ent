@@ -1,0 +1,71 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{/* gotype: entgo.io/ent/entc/gen.Graph*/}}
+
+{{- define "import/additional/stdsql" -}}
+	{{- if $.FeatureEnabled "sql/execquery" }}
+		stdsql "database/sql"
+	{{- end }}
+{{- end -}}
+
+{{/* Template for adding "ExecContext"/"QueryContext" methods to the config. */}}
+{{ define "config/additional/sql/execquery" }}
+    {{- if $.FeatureEnabled "sql/execquery" }}
+        // ExecContext allows calling the underlying ExecContext method of the driver if it is supported by it.
+        // See, database/sql#DB.ExecContext for more information.
+        func (c *config) ExecContext(ctx context.Context, query string, args ...any) (stdsql.Result, error) {
+        	ex, ok := c.driver.(interface {
+        		ExecContext(context.Context, string, ...any) (stdsql.Result, error)
+        	})
+        	if !ok {
+        		return nil, fmt.Errorf("Driver.ExecContext is not supported")
+        	}
+        	return ex.ExecContext(ctx, query, args...)
+        }
+
+        // QueryContext allows calling the underlying QueryContext method of the driver if it is supported by it.
+        // See, database/sql#DB.QueryContext for more information.
+        func (c *config) QueryContext(ctx context.Context, query string, args ...any) (*stdsql.Rows, error) {
+        	q, ok := c.driver.(interface {
+        		QueryContext(context.Context, string, ...any) (*stdsql.Rows, error)
+        	})
+        	if !ok {
+        		return nil, fmt.Errorf("Driver.QueryContext is not supported")
+        	}
+        	return q.QueryContext(ctx, query, args...)
+        }
+    {{- end }}
+{{ end }}
+
+{{/* Template for adding "ExecContext"/"QueryContext" methods to the client. */}}
+{{ define "tx/additional/sql/execquery" }}
+    {{- if $.FeatureEnabled "sql/execquery" }}
+        // ExecContext allows calling the underlying ExecContext method of the transaction if it is supported by it.
+        // See, database/sql#Tx.ExecContext for more information.
+        func (tx *txDriver) ExecContext(ctx context.Context, query string, args ...any) (stdsql.Result, error) {
+        	ex, ok := tx.tx.(interface {
+        		ExecContext(context.Context, string, ...any) (stdsql.Result, error)
+        	})
+        	if !ok {
+        		return nil, fmt.Errorf("Tx.ExecContext is not supported")
+        	}
+        	return ex.ExecContext(ctx, query, args...)
+        }
+
+        // QueryContext allows calling the underlying QueryContext method of the transaction if it is supported by it.
+        // See, database/sql#Tx.QueryContext for more information.
+        func (tx *txDriver)  QueryContext(ctx context.Context, query string, args ...any) (*stdsql.Rows, error) {
+        	q, ok := tx.tx.(interface {
+        		QueryContext(context.Context, string, ...any) (*stdsql.Rows, error)
+        	})
+        	if !ok {
+        		return nil, fmt.Errorf("Tx.QueryContext is not supported")
+        	}
+        	return q.QueryContext(ctx, query, args...)
+        }
+    {{- end }}
+{{ end }}

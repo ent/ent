@@ -4,6 +4,8 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
 {{ define "base" }}
 
 {{ $pkg := base $.Config.Package }}
@@ -11,33 +13,47 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ template "import" $ }}
 
-// ent aliases to avoid import conflict in user's code.
-type (
-	Op         = ent.Op
-	Hook       = ent.Hook
-	Value      = ent.Value
-	Query      = ent.Query
-	Policy     = ent.Policy
-	Mutator    = ent.Mutator
-	Mutation   = ent.Mutation
-	MutateFunc = ent.MutateFunc
+import (
+	"reflect"
+	{{- range $n := $.Nodes }}
+		{{ $n.PackageAlias }} "{{ $n.Config.Package }}/{{ $n.PackageDir }}"
+	{{- end }}
 )
 
-// OrderFunc applies an ordering on either graph traversal or sql selector.
-type OrderFunc func({{ $.Storage.Builder }})
+// ent aliases to avoid import conflicts in user's code.
+type (
+	Op            = ent.Op
+	Hook          = ent.Hook
+	Value         = ent.Value
+	Query         = ent.Query
+	QueryContext  = ent.QueryContext
+	Querier       = ent.Querier
+	QuerierFunc   = ent.QuerierFunc
+	Interceptor   = ent.Interceptor
+	InterceptFunc = ent.InterceptFunc
+	Traverser     = ent.Traverser
+	TraverseFunc  = ent.TraverseFunc
+	Policy        = ent.Policy
+	Mutator       = ent.Mutator
+	Mutation      = ent.Mutation
+	MutateFunc    = ent.MutateFunc
+)
+
+{{ $tmpl := printf "dialect/%s/order/signature" $.Storage }}
+{{ xtemplate $tmpl . }}
 
 {{ range $f, $order := order }}
 	{{ $f = pascal $f }}
 	// {{ $f }} applies the given fields in {{ upper $f }} order.
 	func {{ $f }}(fields ...string) OrderFunc {
 		{{- with extend (index $.Nodes 0) "Func" $f "Order" $order -}}
-			{{ $tmpl := printf "dialect/%s/order" $.Storage }}
+			{{ $tmpl := printf "dialect/%s/order/func" $.Storage }}
 			return {{ xtemplate $tmpl . }}
 		{{ end -}}
 	}
 {{ end }}
 
-{{ $tmpl := printf "dialect/%s/group/signature" $.Storage }}
+{{ $tmpl = printf "dialect/%s/group/signature" $.Storage }}
 // AggregateFunc applies an aggregation step on the group-by traversal/selector.
 {{ xtemplate $tmpl . }}
 
@@ -71,23 +87,23 @@ func As(fn AggregateFunc, end string) AggregateFunc {
 	}
 {{ end }}
 
-// ValidationError returns when validating a field fails.
+// ValidationError returns when validating a field or edge fails.
 type ValidationError struct {
-    Name string // Field or edge name.
-    err error
+	Name string // Field or edge name.
+	err error
 }
 
 // Error implements the error interface.
 func (e *ValidationError) Error() string {
-    return e.err.Error()
+	return e.err.Error()
 }
 
 // Unwrap implements the errors.Wrapper interface.
 func (e *ValidationError) Unwrap() error {
-    return errors.Unwrap(e.err)
+	return e.err
 }
 
-// IsValidationError returns a boolean indicating whether the error is a validaton error.
+// IsValidationError returns a boolean indicating whether the error is a validation error.
 func IsValidationError(err error) bool {
 	if err == nil {
 		return false
@@ -115,7 +131,7 @@ func IsNotFound(err error) bool {
 	return errors.As(err, &e)
 }
 
-// MaskNotFound masks nor found error.
+// MaskNotFound masks not found error.
 func MaskNotFound(err error) error {
 	if IsNotFound(err) {
 		return nil
@@ -188,6 +204,190 @@ func IsConstraintError(err error) bool {
 	return errors.As(err, &e)
 }
 
+
+// selector embedded by the different Select/GroupBy builders.
+type selector struct {
+    label string
+    flds *[]string
+	fns  []AggregateFunc
+	scan func (context.Context, any) error
+}
+
+// ScanX is like Scan, but panics if an error occurs.
+func (s *selector) ScanX(ctx context.Context, v any) {
+	if err := s.scan(ctx, v); err != nil {
+		panic(err)
+	}
+}
+
+{{ range $t := primitives }}
+	{{ $plural := pascal $t | plural }}
+	// {{ $plural }} returns list of {{ plural $t }} from a selector. It is only allowed when selecting one field.
+	func (s *selector) {{ $plural }}(ctx context.Context) ([]{{ $t }}, error) {
+		if len(*s.flds) > 1 {
+			return nil, errors.New("{{ $pkg }}: {{ $plural }} is not achievable when selecting more than 1 field")
+		}
+		var v []{{ $t }}
+		if err := s.scan(ctx, &v); err != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+
+	// {{ $plural }}X is like {{ $plural }}, but panics if an error occurs.
+	func (s *selector) {{ $plural }}X(ctx context.Context) []{{ $t }} {
+		v, err := s.{{ $plural }}(ctx)
+		if err != nil {
+			panic(err)
+		}
+		return v
+	}
+
+	{{ $singular := pascal $t -}}
+	// {{ $singular }} returns a single {{ $t }} from a selector. It is only allowed when selecting one field.
+	func (s *selector) {{ $singular }}(ctx context.Context) (_ {{ $t }}, err error) {
+		var v []{{ $t }}
+		if v, err = s.{{ $plural }}(ctx); err != nil {
+			return
+		}
+		switch len(v) {
+		case 1:
+			return v[0], nil
+		case 0:
+			err = &NotFoundError{s.label}
+		default:
+			err = fmt.Errorf("{{ $pkg }}: {{ $plural }} returned %d results when one was expected", len(v))
+		}
+		return
+	}
+
+	// {{ $singular }}X is like {{ $singular }}, but panics if an error occurs.
+	func (s *selector) {{ $singular }}X(ctx context.Context) {{ $t }} {
+		v, err := s.{{ $singular }}(ctx)
+		if err != nil {
+			panic(err)
+		}
+		return v
+	}
+{{ end }}
+
+
+// withHooks invokes the builder operation with the given hooks, if any.
+func withHooks[V Value, M any, PM interface {
+	*M
+	Mutation
+}](ctx context.Context, exec func(context.Context) (V, error), mutation PM, hooks []Hook) (value V, err error) {
+	if len(hooks) == 0 {
+		return exec(ctx)
+	}
+	var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+		mutationT, ok := m.(PM)
+		if !ok {
+			return nil, fmt.Errorf("unexpected mutation type %T", m)
+		}
+		// Set the mutation to the builder.
+		*mutation = *mutationT
+		return exec(ctx)
+	})
+	for i := len(hooks) - 1; i >= 0; i-- {
+		if hooks[i] == nil {
+			return value, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+		}
+		mut = hooks[i](mut)
+	}
+	v, err := mut.Mutate(ctx, mutation)
+	if err != nil {
+		return value, err
+	}
+	nv, ok := v.(V)
+	if !ok {
+		return value, fmt.Errorf("unexpected node type %T returned from %T", v, mutation)
+	}
+	return nv, nil
+}
+
+// setContextOp returns a new context with the given QueryContext attached (including its op) in case it does not exist.
+func setContextOp(ctx context.Context, qc *QueryContext, op string) context.Context {
+	if ent.QueryFromContext(ctx) == nil {
+		qc.Op = op
+		ctx = ent.NewQueryContext(ctx, qc)
+	}
+	return ctx
+}
+
+func querierAll[V Value, Q interface {
+	{{ $.Storage }}All(context.Context, ...queryHook) (V, error)
+}]() Querier {
+	return QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		query, ok := q.(Q)
+		if !ok {
+			return nil, fmt.Errorf("unexpected query type %T", q)
+		}
+		return query.{{ $.Storage }}All(ctx)
+	})
+}
+
+func querierCount[Q interface {
+	{{ $.Storage }}Count(context.Context) (int, error)
+}]() Querier {
+	return QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		query, ok := q.(Q)
+		if !ok {
+			return nil, fmt.Errorf("unexpected query type %T", q)
+		}
+		return query.{{ $.Storage }}Count(ctx)
+	})
+}
+
+func withInterceptors[V Value](ctx context.Context, q Query, qr Querier, inters []Interceptor) (v V, err error) {
+	for i := len(inters) - 1; i >= 0; i-- {
+		qr = inters[i].Intercept(qr)
+	}
+	rv, err := qr.Query(ctx, q)
+	if err != nil {
+		return v, err
+	}
+	vt, ok := rv.(V)
+	if !ok {
+		return v, fmt.Errorf("unexpected type %T returned from %T. expected type: %T", vt, q, v)
+	}
+	return vt, nil
+}
+
+
+func scanWithInterceptors[Q1 ent.Query, Q2 interface {
+	{{ $.Storage }}Scan(context.Context, Q1, any) error
+}](ctx context.Context, rootQuery Q1, selectOrGroup Q2, inters []Interceptor, v any) error {
+	rv := reflect.ValueOf(v)
+	var qr Querier = QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		query, ok := q.(Q1)
+		if !ok {
+			return nil, fmt.Errorf("unexpected query type %T", q)
+		}
+		if err := selectOrGroup.{{ $.Storage }}Scan(ctx, query, v); err != nil {
+			return nil, err
+		}
+		if k := rv.Kind(); k == reflect.Pointer && rv.Elem().CanInterface() {
+			return rv.Elem().Interface(), nil
+		}
+		return v, nil
+	})
+	for i := len(inters) - 1; i >= 0; i-- {
+		qr = inters[i].Intercept(qr)
+	}
+	vv, err := qr.Query(ctx, rootQuery)
+	if err != nil {
+		return err
+	}
+	switch rv2 := reflect.ValueOf(vv); {
+	case rv.IsNil(), rv2.IsNil(), rv.Kind() != reflect.Pointer:
+	case rv.Type() == rv2.Type():
+		rv.Elem().Set(rv2.Elem())
+	case rv.Elem().Type() == rv2.Type():
+		rv.Elem().Set(rv2)
+	}
+	return nil
+}
 {{/* expand error types and global helpers. */}}
 {{ $tmpl = printf "dialect/%s/errors" $.Storage }}
 {{ if hasTemplate $tmpl }}

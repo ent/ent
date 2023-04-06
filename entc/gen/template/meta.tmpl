@@ -4,6 +4,8 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.Type*/}}
+
 {{ define "meta" }}
 
 {{- with extend $ "Package" $.Package -}}
@@ -15,22 +17,22 @@ in the LICENSE file in the root directory of this source tree.
 const (
 	// Label holds the string label denoting the {{ lower $.Name }} type in the database.
 	Label = "{{ $.Label }}"
-	// {{ $.ID.Constant }} holds the string denoting the id field in the database.
-	{{ $.ID.Constant }} = "{{ $.ID.StorageKey }}"
+	{{- if $.HasOneFieldID }}
+		// {{ $.ID.Constant }} holds the string denoting the id field in the database.
+		{{ $.ID.Constant }} = "{{ $.ID.StorageKey }}"
+	{{- end }}
 	{{- range $f := $.Fields }}
 		{{- $field := $f.Constant }}
 		// {{ $field }} holds the string denoting the {{ lower $f.Name }} field in the database.
 		{{ $field }} = "{{ $f.StorageKey }}"
 	{{- end }}
-
-	{{ range $e := $.Edges }}
+	{{- range $e := $.Edges }}
 		{{- $edge := $e.Constant }}
 		// {{ $edge }} holds the string denoting the {{ lower $e.Name }} edge name in mutations.
 		{{ $edge }} = "{{ $e.Name }}"
 	{{- end }}
-
-	{{ $tmpl := printf "dialect/%s/meta/constants" $.Storage }}
-	{{ xtemplate $tmpl $ }}
+	{{- $tmpl := printf "dialect/%s/meta/constants" $.Storage }}
+	{{- xtemplate $tmpl $ }}
 )
 
 {{ $tmpl = printf "dialect/%s/meta/variables" $.Storage }}
@@ -38,17 +40,22 @@ const (
 	{{ xtemplate $tmpl $ }}
 {{ end }}
 
+{{ $tmpl = printf "dialect/%s/meta/functions" $.Storage }}
+{{ if hasTemplate $tmpl }}
+	{{ xtemplate $tmpl $ }}
+{{ end }}
+
 {{/* Has at least one field (not enum) with default value */}}
-{{ $fields := $.Fields }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}
+{{ $fields := $.Fields }}{{ if $.HasOneFieldID }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}{{ end }}
 {{ $hasDefault := false }}{{ range $f := $fields }}{{ if and $f.Default (not $f.IsEnum) }}{{ $hasDefault = true }}{{ end }}{{ end }}
 
 {{/* Generate global variables for hooks, validators and policy checkers */}}
-{{ if or $hasDefault $.HasValidators $.NumHooks $.HasPolicy }}
-    {{- $numHooks := $.NumHooks }}
-    {{- if $.HasPolicy }}
-        {{- $numHooks = add $numHooks 1 }}
-    {{- end }}
-	{{- if $numHooks }}
+{{ if or $hasDefault $.HasUpdateDefault $.HasValidators $.NumHooks $.NumPolicy $.NumInterceptors }}
+	{{- $numHooks := $.NumHooks }}
+	{{- if $.NumPolicy }}
+		{{- $numHooks = add $numHooks 1 }}
+	{{- end }}
+	{{- if or $numHooks $.NumInterceptors }}
 		// Note that the variables below are initialized by the runtime
 		// package on the initialization of the application. Therefore,
 		// it should be imported in the main as follows:
@@ -57,23 +64,26 @@ const (
 		//
 	{{- end }}
 	var (
-		{{- if $numHooks }}
-			Hooks [{{ $numHooks }}]ent.Hook
+		{{- if $n := $numHooks }}
+			Hooks [{{ $n }}]ent.Hook
 		{{- end }}
-		{{- if $.HasPolicy }}
+		{{- if $n := $.NumInterceptors }}
+			Interceptors [{{ $n }}]ent.Interceptor
+		{{- end }}
+		{{- if $.NumPolicy }}
 			Policy ent.Policy
 		{{- end }}
-		{{- $fields := $.Fields }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}
+		{{- $fields := $.Fields }}{{ if $.HasOneFieldID }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}{{ end }}
 		{{- range $f := $fields }}
 			{{- if and $f.Default (not $f.IsEnum) }}
 				{{- $default := $f.DefaultName }}
-				// {{ $default }} holds the default value on creation for the {{ $f.Name }} field.
-				{{ $default }} {{ if or $f.IsTime $f.IsUUID }}func() {{ end }}{{ $f.Type }}
+				// {{ $default }} holds the default value on creation for the "{{ $f.Name }}" field.
+				{{ $default }} {{ if $f.DefaultFunc }}func() {{ end }}{{ $f.Type }}
 			{{- end }}
 			{{- if $f.UpdateDefault }}
 				{{- $default := $f.UpdateDefaultName }}
-				// {{ $default }} holds the default value on update for the {{ $f.Name }} field.
-				{{ $default }} {{ if $f.IsTime }}func() {{ end }}{{ $f.Type }}
+				// {{ $default }} holds the default value on update for the "{{ $f.Name }}" field.
+				{{ $default }} func() {{ $f.Type }}
 			{{- end }}
 			{{- with $f.Validators }}
 				{{- $name := $f.Validator }}
@@ -96,14 +106,14 @@ const (
 	{{ else }}
 		{{/* omit the package name from the type. */}}
 		{{ $enum = trimPackage $f.Type.String $.Package }}
-		// {{ $enum }} defines the type for the {{ $f.Name }} enum field.
+		// {{ $enum }} defines the type for the "{{ $f.Name }}" enum field.
 		type {{ $enum }} string
 
 		{{- if $f.Default }}
 			{{- /*  find the enum that holds the default value. */ -}}
 			{{- range $e := $f.Enums }}
 				{{- if eq $e.Value $f.DefaultValue }}
-					// {{ $e.Name }} is the default {{ $enum }}.
+					// {{ $e.Name }} is the default value of the {{ $enum }} enum.
 					const {{ $f.DefaultName }} = {{ $e.Name }}
 				{{- end }}
 			{{- end }}
@@ -125,7 +135,7 @@ const (
 	{{ $name := $f.Validator }}
 	// {{ $name }} is a validator for the "{{ $f.Name }}" field enum values. It is called by the builders before save.
 	func {{ $name }}({{ $receiver }} {{ $enum }}) error {
-		switch {{ $receiver }} {
+		switch {{ $receiver }}{{ if $f.Type.Stringer }}.String(){{ end }} {
 			case {{ range $i, $e := $f.Enums }}{{ if ne $i 0 }},{{ end }}{{ if $f.HasGoType }}"{{ $e.Value }}"{{ else }}{{ $e.Name }}{{ end }}{{ end }}:
 				return nil
 			default:
@@ -138,7 +148,7 @@ const (
 
 {{ with $tmpls := matchTemplate "meta/additional/*" }}
 	{{ range $tmpl := $tmpls }}
-        {{ xtemplate $tmpl $ }}
+		{{ xtemplate $tmpl $ }}
 	{{ end }}
 {{ end }}
 

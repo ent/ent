@@ -8,8 +8,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/facebook/ent/dialect/gremlin/encoding/graphson"
-	"github.com/facebook/ent/dialect/gremlin/graph"
+	"entgo.io/ent/dialect/gremlin/encoding/graphson"
+	"entgo.io/ent/dialect/gremlin/graph"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -194,7 +194,7 @@ func TestResponseReadGraphElements(t *testing.T) {
 	tests := []struct {
 		method string
 		data   string
-		want   interface{}
+		want   any
 	}{
 		{
 			method: "ReadVertices",

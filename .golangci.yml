@@ -1,5 +1,6 @@
 run:
-  timeout: 2m
+  go: '1.19'
+  timeout: 5m
 
 linters-settings:
   errcheck:
@@ -7,14 +8,13 @@ linters-settings:
   dupl:
     threshold: 100
   funlen:
-    lines: 110
-    statements: 80
+    lines: 120
+    statements: 120
   goheader:
     template: |-
       Copyright 2019-present Facebook Inc. All rights reserved.
       This source code is licensed under the Apache 2.0 license found
       in the LICENSE file in the root directory of this source tree.
-
 linters:
   disable-all: true
   enable:
@@ -26,13 +26,12 @@ linters:
     - errcheck
     - funlen
     - gocritic
-    - gofmt
+    # - gofmt; Enable back when upgrading CI to Go 1.20.
     - goheader
     - gosec
     - gosimple
     - govet
     - ineffassign
-    - interfacer
     - misspell
     - staticcheck
     - structcheck
@@ -50,27 +49,27 @@ issues:
         - dupl
         - funlen
         - gosec
+        - gocritic
     - linters:
         - unused
       source: ent.Schema
-    - path: entc/integration/ent/schema/card.go
-      text: "`internal` is unused"
-    - path: dialect/sql/builder.go
-      text: "can be `Querier`"
-      linters:
-        - interfacer
-    - path: dialect/sql/builder.go
-      text: "SQL string concatenation"
-      linters:
-        - gosec
     - path: dialect/sql/schema
       linters:
         - dupl
         - gosec
-    - path: entc/load/load.go
-      text: "packages.LoadSyntax is deprecated"
-      linters:
-        - staticcheck
     - text: "Expect WriteFile permissions to be 0600 or less"
       linters:
         - gosec
+    - path: privacy/privacy.go
+      linters:
+        - stylecheck
+    - path: entc/load/schema.go
+      linters:
+        - staticcheck
+    - path: entc/gen/graph.go
+      linters:
+        - gocritic
+    - path: \.go
+      linters:
+        - staticcheck
+      text: SA1019

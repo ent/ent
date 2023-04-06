@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebook/ent/examples/o2mrecur/ent"
-	"github.com/facebook/ent/examples/o2mrecur/ent/node"
+	"entgo.io/ent/examples/o2mrecur/ent"
+	"entgo.io/ent/examples/o2mrecur/ent/node"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -32,7 +32,7 @@ func Example_O2MRecur() {
 	// Output:
 	// Tree leafs [1 3 5]
 	// [1 3 5]
-	// Node(id=1, value=2)
+	// Node(id=1, value=2, parent_id=0)
 }
 
 func Do(ctx context.Context, client *ent.Client) error {
@@ -41,7 +41,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 		SetValue(2).
 		Save(ctx)
 	if err != nil {
-		return fmt.Errorf("creating the root: %v", err)
+		return fmt.Errorf("creating the root: %w", err)
 	}
 
 	// Add additional nodes to the tree:
@@ -53,7 +53,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 	//       3     5
 	//
 
-	// Unlike `Create`, `CreateX` panics if an error occurs.
+	// Unlike `Save`, `SaveX` panics if an error occurs.
 	n1 := client.Node.
 		Create().
 		SetValue(1).
@@ -96,7 +96,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 		Where(node.Not(node.HasParent())).
 		OnlyX(ctx)
 	fmt.Println(orphan)
-	// Output: Node(id=1, value=2)
+	// Output: Node(id=1, value=2, parent_id=0)
 
 	return nil
 }
