@@ -48,7 +48,7 @@ type {{ $mutation }} struct {
 		{{ $n.ID.BuilderField }} *{{ $n.ID.Type }}
 	{{- end }}
 	{{- range $f := $n.MutationFields }}
-		{{ $f.BuilderField }} *{{ $f.Type }}
+		{{ $f.BuilderField }} *{{ $f.TypeName }}
 		{{- if $f.SupportsMutationAdd }}
 			add{{ $f.BuilderField }} *{{ $f.SignedType }}
 		{{- end }}
@@ -187,9 +187,10 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 {{ range $f := $n.Fields }}
 	{{ $const := print $n.Package "." $f.Constant }}
 	{{ $p := receiver $f.Type.String }}{{ if eq $p "m" }} {{ $p = "value" }} {{ end }}
+	{{ $type := $f.TypeName }}
 	{{ $func := $f.MutationSet }}
 	// {{ $func }} sets the "{{ $f.Name }}" field.
-	func (m *{{ $mutation }}) {{ $func }}({{ $p }} {{ $f.Type }}) {
+	func (m *{{ $mutation }}) {{ $func }}({{ $p }} {{ $type }}) {
 		m.{{ $f.BuilderField }} = &{{ $p }}
 		{{- /* Setting numeric type override previous calls to Add. */}}
 		{{- if $f.SupportsMutationAdd }}
@@ -202,7 +203,7 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 	}
 
 	// {{ $f.MutationGet }} returns the value of the "{{ $f.Name }}" field in the mutation.
-	func (m *{{ $mutation }}) {{ $f.MutationGet }}() (r {{ $f.Type }}, exists bool) {
+	func (m *{{ $mutation }}) {{ $f.MutationGet }}() (r {{ $type }}, exists bool) {
 		v := m.{{ $f.BuilderField }}
 		if v == nil {
 			return
@@ -214,7 +215,7 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 		// {{ $f.MutationGetOld }} returns the old "{{ $f.Name }}" field's value of the {{ $n.Name }} entity.
 		// If the {{ $n.Name }} object wasn't provided to the builder, the object is fetched from the database.
 		// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-		func (m *{{ $mutation }}) {{ $f.MutationGetOld }}(ctx context.Context) (v {{ if $f.NillableValue }}*{{ end }}{{ $f.Type }}, err error) {
+		func (m *{{ $mutation }}) {{ $f.MutationGetOld }}(ctx context.Context) (v {{ if $f.NillableValue }}*{{ end }}{{ $type }}, err error) {
 			if !m.op.Is(OpUpdateOne) {
 				return v, errors.New("{{ $f.MutationGetOld }} is only allowed on UpdateOne operations")
 			}
@@ -253,12 +254,12 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 	{{ if $f.SupportsMutationAppend }}
 		{{- $structField := print "m.append" $f.BuilderField }}
 		// {{ $f.MutationAppend }} adds {{ $p }} to the "{{ $f.Name }}" field.
-		func (m *{{ $mutation }}) {{ $f.MutationAppend }}({{ $p }} {{ $f.Type }}) {
+		func (m *{{ $mutation }}) {{ $f.MutationAppend }}({{ $p }} {{ $type }}) {
 			{{ $structField }} = append({{ $structField }}, {{ $p }}...)
 		}
 
 		// {{ $f.MutationAppended }} returns the list of values that were appended to the "{{ $f.Name }}" field in this mutation.
-		func (m *{{ $mutation }}) {{ $f.MutationAppended }}() ({{ $f.Type }}, bool) {
+		func (m *{{ $mutation }}) {{ $f.MutationAppended }}() ({{ $type }}, bool) {
 			if len({{ $structField }}) == 0 {
 				return nil, false
 			}
@@ -488,7 +489,7 @@ func (m *{{ $mutation }}) SetField(name string, value ent.Value) error {
 	{{- range $f := $n.Fields }}
 		{{- $const := print $n.Package "." $f.Constant }}
 		case {{ $const }}:
-			v, ok := value.({{ $f.Type }})
+			v, ok := value.({{ $f.TypeName }})
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field %s", value, name)
 			}
