@@ -22,7 +22,7 @@ import (
 type MediaQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []media.Order
 	inters     []Interceptor
 	predicates []predicate.Media
 	// intermediate query (i.e. traversal path).
@@ -56,7 +56,7 @@ func (mq *MediaQuery) Unique(unique bool) *MediaQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (mq *MediaQuery) Order(o ...OrderFunc) *MediaQuery {
+func (mq *MediaQuery) Order(o ...media.Order) *MediaQuery {
 	mq.order = append(mq.order, o...)
 	return mq
 }
@@ -250,7 +250,7 @@ func (mq *MediaQuery) Clone() *MediaQuery {
 	return &MediaQuery{
 		config:     mq.config,
 		ctx:        mq.ctx.Clone(),
-		order:      append([]OrderFunc{}, mq.order...),
+		order:      append([]media.Order{}, mq.order...),
 		inters:     append([]Interceptor{}, mq.inters...),
 		predicates: append([]predicate.Media{}, mq.predicates...),
 		// clone intermediate query.

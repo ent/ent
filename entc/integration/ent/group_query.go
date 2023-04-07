@@ -27,7 +27,7 @@ import (
 type GroupQuery struct {
 	config
 	ctx              *QueryContext
-	order            []OrderFunc
+	order            []group.Order
 	inters           []Interceptor
 	predicates       []predicate.Group
 	withFiles        *FileQuery
@@ -70,7 +70,7 @@ func (gq *GroupQuery) Unique(unique bool) *GroupQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (gq *GroupQuery) Order(o ...OrderFunc) *GroupQuery {
+func (gq *GroupQuery) Order(o ...group.Order) *GroupQuery {
 	gq.order = append(gq.order, o...)
 	return gq
 }
@@ -352,7 +352,7 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 	return &GroupQuery{
 		config:      gq.config,
 		ctx:         gq.ctx.Clone(),
-		order:       append([]OrderFunc{}, gq.order...),
+		order:       append([]group.Order{}, gq.order...),
 		inters:      append([]Interceptor{}, gq.inters...),
 		predicates:  append([]predicate.Group{}, gq.predicates...),
 		withFiles:   gq.withFiles.Clone(),

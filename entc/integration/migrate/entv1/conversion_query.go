@@ -22,7 +22,7 @@ import (
 type ConversionQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []conversion.Order
 	inters     []Interceptor
 	predicates []predicate.Conversion
 	// intermediate query (i.e. traversal path).
@@ -56,7 +56,7 @@ func (cq *ConversionQuery) Unique(unique bool) *ConversionQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (cq *ConversionQuery) Order(o ...OrderFunc) *ConversionQuery {
+func (cq *ConversionQuery) Order(o ...conversion.Order) *ConversionQuery {
 	cq.order = append(cq.order, o...)
 	return cq
 }
@@ -250,7 +250,7 @@ func (cq *ConversionQuery) Clone() *ConversionQuery {
 	return &ConversionQuery{
 		config:     cq.config,
 		ctx:        cq.ctx.Clone(),
-		order:      append([]OrderFunc{}, cq.order...),
+		order:      append([]conversion.Order{}, cq.order...),
 		inters:     append([]Interceptor{}, cq.inters...),
 		predicates: append([]predicate.Conversion{}, cq.predicates...),
 		// clone intermediate query.

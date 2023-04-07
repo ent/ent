@@ -25,7 +25,7 @@ import (
 type DeviceQuery struct {
 	config
 	ctx               *QueryContext
-	order             []OrderFunc
+	order             []device.Order
 	inters            []Interceptor
 	predicates        []predicate.Device
 	withActiveSession *SessionQuery
@@ -62,7 +62,7 @@ func (dq *DeviceQuery) Unique(unique bool) *DeviceQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (dq *DeviceQuery) Order(o ...OrderFunc) *DeviceQuery {
+func (dq *DeviceQuery) Order(o ...device.Order) *DeviceQuery {
 	dq.order = append(dq.order, o...)
 	return dq
 }
@@ -300,7 +300,7 @@ func (dq *DeviceQuery) Clone() *DeviceQuery {
 	return &DeviceQuery{
 		config:            dq.config,
 		ctx:               dq.ctx.Clone(),
-		order:             append([]OrderFunc{}, dq.order...),
+		order:             append([]device.Order{}, dq.order...),
 		inters:            append([]Interceptor{}, dq.inters...),
 		predicates:        append([]predicate.Device{}, dq.predicates...),
 		withActiveSession: dq.withActiveSession.Clone(),

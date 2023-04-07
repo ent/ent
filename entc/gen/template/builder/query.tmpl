@@ -22,7 +22,7 @@ in the LICENSE file in the root directory of this source tree.
 type {{ $builder }} struct {
 	config
 	ctx			*QueryContext
-	order		[]OrderFunc
+	order		[]{{ $.Package }}.Order
 	inters		[]Interceptor
 	predicates 	[]predicate.{{ $.Name }}
 	{{- /* Eager loading fields. */}}
@@ -65,7 +65,7 @@ func ({{ $receiver }} *{{ $builder }}) Unique(unique bool) *{{ $builder }} {
 }
 
 // Order specifies how the records should be ordered.
-func ({{ $receiver }} *{{ $builder }}) Order(o ...OrderFunc) *{{ $builder }} {
+func ({{ $receiver }} *{{ $builder }}) Order(o ...{{ $.Package }}.Order) *{{ $builder }} {
 	{{ $receiver }}.order = append({{ $receiver }}.order, o...)
 	return {{ $receiver }}
 }
@@ -286,7 +286,7 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 	return &{{ $builder }}{
 		config: 	{{ $receiver }}.config,
 		ctx: 		{{ $receiver }}.ctx.Clone(),
-		order: 		append([]OrderFunc{}, {{ $receiver }}.order...),
+		order: 		append([]{{ $.Package }}.Order{}, {{ $receiver }}.order...),
 		inters: 	append([]Interceptor{}, {{ $receiver }}.inters...),
 		predicates: append([]predicate.{{ $.Name }}{}, {{ $receiver }}.predicates...),
 		{{- range $e := $.Edges }}

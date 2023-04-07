@@ -26,7 +26,7 @@ import (
 type TeamQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []team.Order
 	inters     []Interceptor
 	predicates []predicate.Team
 	withTasks  *TaskQuery
@@ -62,7 +62,7 @@ func (tq *TeamQuery) Unique(unique bool) *TeamQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (tq *TeamQuery) Order(o ...OrderFunc) *TeamQuery {
+func (tq *TeamQuery) Order(o ...team.Order) *TeamQuery {
 	tq.order = append(tq.order, o...)
 	return tq
 }
@@ -300,7 +300,7 @@ func (tq *TeamQuery) Clone() *TeamQuery {
 	return &TeamQuery{
 		config:     tq.config,
 		ctx:        tq.ctx.Clone(),
-		order:      append([]OrderFunc{}, tq.order...),
+		order:      append([]team.Order{}, tq.order...),
 		inters:     append([]Interceptor{}, tq.inters...),
 		predicates: append([]predicate.Team{}, tq.predicates...),
 		withTasks:  tq.withTasks.Clone(),

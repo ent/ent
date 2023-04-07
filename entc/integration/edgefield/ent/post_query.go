@@ -23,7 +23,7 @@ import (
 type PostQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []post.Order
 	inters     []Interceptor
 	predicates []predicate.Post
 	withAuthor *UserQuery
@@ -58,7 +58,7 @@ func (pq *PostQuery) Unique(unique bool) *PostQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (pq *PostQuery) Order(o ...OrderFunc) *PostQuery {
+func (pq *PostQuery) Order(o ...post.Order) *PostQuery {
 	pq.order = append(pq.order, o...)
 	return pq
 }
@@ -274,7 +274,7 @@ func (pq *PostQuery) Clone() *PostQuery {
 	return &PostQuery{
 		config:     pq.config,
 		ctx:        pq.ctx.Clone(),
-		order:      append([]OrderFunc{}, pq.order...),
+		order:      append([]post.Order{}, pq.order...),
 		inters:     append([]Interceptor{}, pq.inters...),
 		predicates: append([]predicate.Post{}, pq.predicates...),
 		withAuthor: pq.withAuthor.Clone(),

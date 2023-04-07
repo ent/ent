@@ -6,6 +6,10 @@
 
 package relationshipinfo
 
+import (
+	"entgo.io/ent/dialect/sql"
+)
+
 const (
 	// Label holds the string label denoting the relationshipinfo type in the database.
 	Label = "relationship_info"
@@ -31,4 +35,17 @@ func ValidColumn(column string) bool {
 		}
 	}
 	return false
+}
+
+// Order defines the ordering method for the RelationshipInfo queries.
+type Order func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByText orders the results by the text field.
+func ByText(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldText, opts...).ToFunc()
 }

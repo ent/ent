@@ -6,11 +6,18 @@
 
 package goods
 
+import (
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+)
+
 const (
 	// Label holds the string label denoting the goods type in the database.
 	Label = "goods"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
 )
+
+// Order defines the ordering method for the Goods queries.
+type Order func(*dsl.Traversal)
 
 // comment from another template.

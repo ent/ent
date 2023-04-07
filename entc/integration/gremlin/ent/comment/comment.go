@@ -6,6 +6,10 @@
 
 package comment
 
+import (
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+)
+
 const (
 	// Label holds the string label denoting the comment type in the database.
 	Label = "comment"
@@ -24,5 +28,8 @@ const (
 	// FieldClient holds the string denoting the client field in the database.
 	FieldClient = "client"
 )
+
+// Order defines the ordering method for the Comment queries.
+type Order func(*dsl.Traversal)
 
 // comment from another template.

@@ -71,11 +71,7 @@ func HasFiles() predicate.Process {
 // HasFilesWith applies the HasEdge predicate on the "files" edge with a given conditions (other predicates).
 func HasFilesWith(preds ...predicate.File) predicate.Process {
 	return predicate.Process(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(FilesInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, FilesTable, FilesPrimaryKey...),
-		)
+		step := newFilesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -98,11 +94,7 @@ func HasAttachedFiles() predicate.Process {
 // HasAttachedFilesWith applies the HasEdge predicate on the "attached_files" edge with a given conditions (other predicates).
 func HasAttachedFilesWith(preds ...predicate.AttachedFile) predicate.Process {
 	return predicate.Process(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(AttachedFilesInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, AttachedFilesTable, AttachedFilesColumn),
-		)
+		step := newAttachedFilesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

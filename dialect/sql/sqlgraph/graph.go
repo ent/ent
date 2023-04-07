@@ -349,7 +349,10 @@ func OrderByNeighborsCount(q *sql.Selector, s *Step, opts ...sql.OrderTermOption
 		}
 		q.OrderExpr(build.Expr(x))
 	case s.ThroughEdgeTable():
-		countC := countAlias(q, s, opt)
+		countAs := countAlias(q, s, opt)
+		terms := []sql.OrderTerm{
+			sql.OrderByCount("*", append([]sql.OrderTermOption{sql.OrderAs(countAs)}, opts...)...),
+		}
 		pk1 := s.Edge.Columns[0]
 		if s.Edge.Inverse {
 			pk1 = s.Edge.Columns[1]
@@ -357,42 +360,38 @@ func OrderByNeighborsCount(q *sql.Selector, s *Step, opts ...sql.OrderTermOption
 		joinT := build.Table(s.Edge.Table).Schema(s.Edge.Schema)
 		join = build.Select(
 			joinT.C(pk1),
-			build.String(func(b *sql.Builder) {
-				b.WriteString("COUNT(*) AS ").Ident(countC)
-			}),
 		).From(joinT).GroupBy(joinT.C(pk1))
+		selectTerms(join, terms)
 		q.LeftJoin(join).
 			On(
 				q.C(s.From.Column),
 				join.C(pk1),
 			)
-		orderTerms(q, join, []sql.OrderTerm{
-			sql.OrderByExpr(nil, append(opts, sql.OrderAs(countC))...),
-		})
+		orderTerms(q, join, terms)
 	case s.ToEdgeOwner():
-		countC := countAlias(q, s, opt)
+		countAs := countAlias(q, s, opt)
+		terms := []sql.OrderTerm{
+			sql.OrderByCount("*", append([]sql.OrderTermOption{sql.OrderAs(countAs)}, opts...)...),
+		}
 		edgeT := build.Table(s.Edge.Table).Schema(s.Edge.Schema)
 		join = build.Select(
 			edgeT.C(s.Edge.Columns[0]),
-			build.String(func(b *sql.Builder) {
-				b.WriteString("COUNT(*) AS ").Ident(countC)
-			}),
 		).From(edgeT).GroupBy(edgeT.C(s.Edge.Columns[0]))
+		selectTerms(join, terms)
 		q.LeftJoin(join).
 			On(
 				q.C(s.From.Column),
 				join.C(s.Edge.Columns[0]),
 			)
-		orderTerms(q, join, []sql.OrderTerm{
-			sql.OrderByExpr(nil, append(opts, sql.OrderAs(countC))...),
-		})
+		orderTerms(q, join, terms)
 	}
 }
 
 func orderTerms(q, join *sql.Selector, ts []sql.OrderTerm) {
 	for _, t := range ts {
+		t := t
 		q.OrderExprFunc(func(b *sql.Builder) {
-			var desc bool
+			var desc, nullsfirst, nullslast bool
 			switch t := t.(type) {
 			case *sql.OrderFieldTerm:
 				f := t.Field
@@ -405,6 +404,8 @@ func orderTerms(q, join *sql.Selector, ts []sql.OrderTerm) {
 					q.AppendSelect(c)
 				}
 				desc = t.Desc
+				nullsfirst = t.NullsFirst
+				nullslast = t.NullsLast
 			case *sql.OrderExprTerm:
 				if t.As != "" {
 					c := join.C(t.As)
@@ -413,33 +414,42 @@ func orderTerms(q, join *sql.Selector, ts []sql.OrderTerm) {
 						q.AppendSelect(c)
 					}
 				} else {
-					b.Join(t.Expr)
+					b.Join(t.Expr(join))
 				}
 				desc = t.Desc
+				nullsfirst = t.NullsFirst
+				nullslast = t.NullsLast
 			default:
 				return
 			}
-			// Unlike MySQL and SQLite, NULL values sort as if larger than any other value.
-			// Therefore, we need to explicitly order NULLs first on ASC and last on DESC.
-			switch pg := b.Dialect() == dialect.Postgres; {
-			case pg && desc:
+			// Unlike MySQL and SQLite, NULL values sort as if larger than any other value. Therefore,
+			// we need to explicitly order NULLs first on ASC and last on DESC unless specified otherwise.
+			switch normalizePG := b.Dialect() == dialect.Postgres && !nullsfirst && !nullslast; {
+			case normalizePG && desc:
 				b.WriteString(" DESC NULLS LAST")
-			case pg:
+			case normalizePG:
 				b.WriteString(" NULLS FIRST")
 			case desc:
 				b.WriteString(" DESC")
+			}
+			if nullsfirst {
+				b.WriteString(" NULLS FIRST")
+			} else if nullslast {
+				b.WriteString(" NULLS LAST")
 			}
 		})
 	}
 }
 
+// selectTerms appends the select terms to the joined query.
+// Afterward, the term aliases are utilized to order the root query.
 func selectTerms(q *sql.Selector, ts []sql.OrderTerm) {
 	for _, t := range ts {
 		switch t := t.(type) {
 		case *sql.OrderFieldTerm:
 			q.AppendSelect(q.C(t.Field))
 		case *sql.OrderExprTerm:
-			q.AppendSelectExprAs(t.Expr, t.As)
+			q.AppendSelectExprAs(t.Expr(q), t.As)
 		}
 	}
 }

@@ -169,11 +169,7 @@ func HasTag() predicate.TweetTag {
 // HasTagWith applies the HasEdge predicate on the "tag" edge with a given conditions (other predicates).
 func HasTagWith(preds ...predicate.Tag) predicate.TweetTag {
 	return predicate.TweetTag(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TagInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, TagTable, TagColumn),
-		)
+		step := newTagStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -196,11 +192,7 @@ func HasTweet() predicate.TweetTag {
 // HasTweetWith applies the HasEdge predicate on the "tweet" edge with a given conditions (other predicates).
 func HasTweetWith(preds ...predicate.Tweet) predicate.TweetTag {
 	return predicate.TweetTag(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TweetInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, TweetTable, TweetColumn),
-		)
+		step := newTweetStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

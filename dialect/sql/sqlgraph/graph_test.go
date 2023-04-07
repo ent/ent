@@ -1006,6 +1006,23 @@ func TestOrderByNeighborTerms(t *testing.T) {
 		require.Empty(t, args)
 		require.Equal(t, `SELECT "users"."name" FROM "users" LEFT JOIN (SELECT "workplace"."id", "workplace"."name" FROM "workplace") AS "t1" ON "users"."workplace_id" = "t1"."id" ORDER BY "t1"."name" NULLS FIRST`, query)
 	})
+	t.Run("M2O/NullsLast", func(t *testing.T) {
+		s := s.Clone()
+		OrderByNeighborTerms(s,
+			NewStep(
+				From("users", "id"),
+				To("workplace", "id"),
+				Edge(M2O, true, "users", "workplace_id"),
+			),
+			sql.OrderByField(
+				"name",
+				sql.OrderNullsLast(),
+			),
+		)
+		query, args := s.Query()
+		require.Empty(t, args)
+		require.Equal(t, `SELECT "users"."name" FROM "users" LEFT JOIN (SELECT "workplace"."id", "workplace"."name" FROM "workplace") AS "t1" ON "users"."workplace_id" = "t1"."id" ORDER BY "t1"."name" NULLS LAST`, query)
+	})
 	t.Run("O2M", func(t *testing.T) {
 		s := s.Clone()
 		OrderByNeighborTerms(s,
@@ -1014,16 +1031,14 @@ func TestOrderByNeighborTerms(t *testing.T) {
 				To("repos", "id"),
 				Edge(O2M, false, "repo", "owner_id"),
 			),
-			sql.OrderByExpr(
-				sql.ExprFunc(func(b *sql.Builder) {
-					b.S("SUM(").Ident("num_stars").S(")")
-				}),
+			sql.OrderBySum(
+				"num_stars",
 				sql.OrderSelectAs("total_stars"),
 			),
 		)
 		query, args := s.Query()
 		require.Empty(t, args)
-		require.Equal(t, `SELECT "users"."name", "t1"."total_stars" FROM "users" LEFT JOIN (SELECT "repo"."owner_id", (SUM("num_stars")) AS "total_stars" FROM "repo" GROUP BY "repo"."owner_id") AS "t1" ON "users"."id" = "t1"."owner_id" ORDER BY "t1"."total_stars" NULLS FIRST`, query)
+		require.Equal(t, `SELECT "users"."name", "t1"."total_stars" FROM "users" LEFT JOIN (SELECT "repo"."owner_id", SUM("repo"."num_stars") AS "total_stars" FROM "repo" GROUP BY "repo"."owner_id") AS "t1" ON "users"."id" = "t1"."owner_id" ORDER BY "t1"."total_stars" NULLS FIRST`, query)
 	})
 	t.Run("M2M", func(t *testing.T) {
 		s := s.Clone()
@@ -1033,16 +1048,32 @@ func TestOrderByNeighborTerms(t *testing.T) {
 				To("group", "id"),
 				Edge(M2M, false, "user_groups", "user_id", "group_id"),
 			),
-			sql.OrderByExpr(
-				sql.ExprFunc(func(b *sql.Builder) {
-					b.S("SUM(").Ident("num_users").S(")")
-				}),
+			sql.OrderBySum(
+				"num_users",
 				sql.OrderSelectAs("total_users"),
 			),
 		)
 		query, args := s.Query()
 		require.Empty(t, args)
-		require.Equal(t, `SELECT "users"."name", "t1"."total_users" FROM "users" LEFT JOIN (SELECT "user_id", (SUM("num_users")) AS "total_users" FROM "group" JOIN "user_groups" AS "t1" ON "group"."id" = "t1"."group_id" GROUP BY "user_id") AS "t1" ON "users"."id" = "t1"."user_id" ORDER BY "t1"."total_users" NULLS FIRST`, query)
+		require.Equal(t, `SELECT "users"."name", "t1"."total_users" FROM "users" LEFT JOIN (SELECT "user_id", SUM("group"."num_users") AS "total_users" FROM "group" JOIN "user_groups" AS "t1" ON "group"."id" = "t1"."group_id" GROUP BY "user_id") AS "t1" ON "users"."id" = "t1"."user_id" ORDER BY "t1"."total_users" NULLS FIRST`, query)
+	})
+	t.Run("M2M/NullsLast", func(t *testing.T) {
+		s := s.Clone()
+		OrderByNeighborTerms(s,
+			NewStep(
+				From("users", "id"),
+				To("group", "id"),
+				Edge(M2M, false, "user_groups", "user_id", "group_id"),
+			),
+			sql.OrderBySum(
+				"num_users",
+				sql.OrderAs("total_users"),
+				sql.OrderNullsLast(),
+			),
+		)
+		query, args := s.Query()
+		require.Empty(t, args)
+		require.Equal(t, `SELECT "users"."name" FROM "users" LEFT JOIN (SELECT "user_id", SUM("group"."num_users") AS "total_users" FROM "group" JOIN "user_groups" AS "t1" ON "group"."id" = "t1"."group_id" GROUP BY "user_id") AS "t1" ON "users"."id" = "t1"."user_id" ORDER BY "t1"."total_users" NULLS LAST`, query)
 	})
 }
 

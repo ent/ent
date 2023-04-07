@@ -23,7 +23,7 @@ import (
 type ItemQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []item.Order
 	inters     []Interceptor
 	predicates []predicate.Item
 	// intermediate query (i.e. traversal path).
@@ -57,7 +57,7 @@ func (iq *ItemQuery) Unique(unique bool) *ItemQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (iq *ItemQuery) Order(o ...OrderFunc) *ItemQuery {
+func (iq *ItemQuery) Order(o ...item.Order) *ItemQuery {
 	iq.order = append(iq.order, o...)
 	return iq
 }
@@ -251,7 +251,7 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 	return &ItemQuery{
 		config:     iq.config,
 		ctx:        iq.ctx.Clone(),
-		order:      append([]OrderFunc{}, iq.order...),
+		order:      append([]item.Order{}, iq.order...),
 		inters:     append([]Interceptor{}, iq.inters...),
 		predicates: append([]predicate.Item{}, iq.predicates...),
 		// clone intermediate query.

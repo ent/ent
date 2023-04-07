@@ -23,7 +23,7 @@ import (
 type CardQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []card.Order
 	inters     []Interceptor
 	predicates []predicate.Card
 	withOwner  *UserQuery
@@ -58,7 +58,7 @@ func (cq *CardQuery) Unique(unique bool) *CardQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (cq *CardQuery) Order(o ...OrderFunc) *CardQuery {
+func (cq *CardQuery) Order(o ...card.Order) *CardQuery {
 	cq.order = append(cq.order, o...)
 	return cq
 }
@@ -274,7 +274,7 @@ func (cq *CardQuery) Clone() *CardQuery {
 	return &CardQuery{
 		config:     cq.config,
 		ctx:        cq.ctx.Clone(),
-		order:      append([]OrderFunc{}, cq.order...),
+		order:      append([]card.Order{}, cq.order...),
 		inters:     append([]Interceptor{}, cq.inters...),
 		predicates: append([]predicate.Card{}, cq.predicates...),
 		withOwner:  cq.withOwner.Clone(),

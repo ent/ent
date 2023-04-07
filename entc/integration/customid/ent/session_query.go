@@ -24,7 +24,7 @@ import (
 type SessionQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []session.Order
 	inters     []Interceptor
 	predicates []predicate.Session
 	withDevice *DeviceQuery
@@ -60,7 +60,7 @@ func (sq *SessionQuery) Unique(unique bool) *SessionQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (sq *SessionQuery) Order(o ...OrderFunc) *SessionQuery {
+func (sq *SessionQuery) Order(o ...session.Order) *SessionQuery {
 	sq.order = append(sq.order, o...)
 	return sq
 }
@@ -276,7 +276,7 @@ func (sq *SessionQuery) Clone() *SessionQuery {
 	return &SessionQuery{
 		config:     sq.config,
 		ctx:        sq.ctx.Clone(),
-		order:      append([]OrderFunc{}, sq.order...),
+		order:      append([]session.Order{}, sq.order...),
 		inters:     append([]Interceptor{}, sq.inters...),
 		predicates: append([]predicate.Session{}, sq.predicates...),
 		withDevice: sq.withDevice.Clone(),

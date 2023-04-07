@@ -23,7 +23,7 @@ import (
 type MixinIDQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []mixinid.Order
 	inters     []Interceptor
 	predicates []predicate.MixinID
 	// intermediate query (i.e. traversal path).
@@ -57,7 +57,7 @@ func (miq *MixinIDQuery) Unique(unique bool) *MixinIDQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (miq *MixinIDQuery) Order(o ...OrderFunc) *MixinIDQuery {
+func (miq *MixinIDQuery) Order(o ...mixinid.Order) *MixinIDQuery {
 	miq.order = append(miq.order, o...)
 	return miq
 }
@@ -251,7 +251,7 @@ func (miq *MixinIDQuery) Clone() *MixinIDQuery {
 	return &MixinIDQuery{
 		config:     miq.config,
 		ctx:        miq.ctx.Clone(),
-		order:      append([]OrderFunc{}, miq.order...),
+		order:      append([]mixinid.Order{}, miq.order...),
 		inters:     append([]Interceptor{}, miq.inters...),
 		predicates: append([]predicate.MixinID{}, miq.predicates...),
 		// clone intermediate query.

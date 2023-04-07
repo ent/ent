@@ -1066,6 +1066,9 @@ func (f Field) DefaultValue() any { return f.def.DefaultValue }
 // DefaultFunc returns a bool stating if the default value is a func. Invoked by the template.
 func (f Field) DefaultFunc() bool { return f.def.DefaultKind == reflect.Func }
 
+// OrderName returns the function/option name for ordering by this field.
+func (f Field) OrderName() string { return "By" + pascal(f.Name) }
+
 // BuilderField returns the struct member of the field in the builder.
 func (f Field) BuilderField() string {
 	if f.IsEdgeField() {
@@ -1972,6 +1975,30 @@ func (e Edge) MutationCleared() string {
 		return pascal(e.Name) + "EdgeCleared"
 	}
 	return name
+}
+
+// OrderCountName returns the function/option name for ordering by the edge count.
+func (e Edge) OrderCountName() (string, error) {
+	if e.Unique {
+		return "", fmt.Errorf("edge %q is unique", e.Name)
+	}
+	return fmt.Sprintf("By%sCount", pascal(e.Name)), nil
+}
+
+// OrderTermsName returns the function/option name for ordering by any term.
+func (e Edge) OrderTermsName() (string, error) {
+	if e.Unique {
+		return "", fmt.Errorf("edge %q is unique", e.Name)
+	}
+	return fmt.Sprintf("By%s", pascal(e.Name)), nil
+}
+
+// OrderFieldName returns the function/option name for ordering by edge field.
+func (e Edge) OrderFieldName() (string, error) {
+	if !e.Unique {
+		return "", fmt.Errorf("edge %q is not-unique", e.Name)
+	}
+	return fmt.Sprintf("By%sField", pascal(e.Name)), nil
 }
 
 // setStorageKey sets the storage-key option in the schema or fail.

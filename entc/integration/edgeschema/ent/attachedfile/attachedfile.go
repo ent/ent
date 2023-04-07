@@ -8,6 +8,9 @@ package attachedfile
 
 import (
 	"time"
+
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -65,3 +68,54 @@ var (
 	// DefaultAttachTime holds the default value on creation for the "attach_time" field.
 	DefaultAttachTime func() time.Time
 )
+
+// Order defines the ordering method for the AttachedFile queries.
+type Order func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByAttachTime orders the results by the attach_time field.
+func ByAttachTime(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldAttachTime, opts...).ToFunc()
+}
+
+// ByFID orders the results by the f_id field.
+func ByFID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldFID, opts...).ToFunc()
+}
+
+// ByProcID orders the results by the proc_id field.
+func ByProcID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldProcID, opts...).ToFunc()
+}
+
+// ByFiField orders the results by fi field.
+func ByFiField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newFiStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByProcField orders the results by proc field.
+func ByProcField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newProcStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newFiStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(FiInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, FiTable, FiColumn),
+	)
+}
+func newProcStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ProcInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, ProcTable, ProcColumn),
+	)
+}

@@ -167,6 +167,7 @@ var (
 		ExtValueScan,
 		OrderByEdgeCount,
 		OrderByEdgeTerms,
+		OrderByFluent,
 	}
 )
 
@@ -2375,6 +2376,109 @@ func ExtValueScan(t *testing.T, client *ent.Client) {
 	require.False(t, client.ExValueScan.Query().Where(exvaluescan.CustomHasSuffix("io")).ExistX(ctx))
 }
 
+func OrderByFluent(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	users := client.User.CreateBulk(
+		client.User.Create().SetName("a").SetAge(1),
+		client.User.Create().SetName("b").SetAge(2),
+		client.User.Create().SetName("c").SetAge(3),
+		client.User.Create().SetName("d").SetAge(4),
+		client.User.Create().SetName("e").SetAge(5),
+	).SaveX(ctx)
+	pets := client.Pet.CreateBulk(
+		client.Pet.Create().SetName("aa").SetOwner(users[1]).SetAge(2),
+		client.Pet.Create().SetName("ab").SetOwner(users[1]).SetAge(2),
+		client.Pet.Create().SetName("ac").SetOwner(users[0]).SetAge(1),
+		client.Pet.Create().SetName("ba").SetOwner(users[0]).SetAge(1),
+		client.Pet.Create().SetName("bb").SetOwner(users[0]).SetAge(1),
+		client.Pet.Create().SetName("ca").SetOwner(users[2]).SetAge(10),
+		client.Pet.Create().SetName("d"),
+		client.Pet.Create().SetName("e"),
+	).SaveX(ctx)
+
+	t.Run("M2O", func(t *testing.T) {
+		ids := client.Pet.Query().
+			Order(
+				pet.ByOwnerField(user.FieldName),
+				pet.ByID(),
+			).
+			IDsX(ctx)
+		require.Equal(t, []int{pets[6].ID, pets[7].ID, pets[2].ID, pets[3].ID, pets[4].ID, pets[0].ID, pets[1].ID, pets[5].ID}, ids)
+
+		ids = client.Pet.Query().
+			Order(
+				pet.ByOwnerField(user.FieldName, sql.OrderDesc()),
+				pet.ByID(sql.OrderDesc()),
+			).
+			IDsX(ctx)
+		require.Equal(t, []int{pets[5].ID, pets[1].ID, pets[0].ID, pets[4].ID, pets[3].ID, pets[2].ID, pets[7].ID, pets[6].ID}, ids)
+	})
+
+	t.Run("O2M/Count", func(t *testing.T) {
+		ids := client.User.Query().
+			Order(
+				user.ByPetsCount(),
+				user.ByID(sql.OrderDesc()),
+			).
+			IDsX(ctx)
+		require.Equal(t, []int{users[4].ID, users[3].ID, users[2].ID, users[1].ID, users[0].ID}, ids)
+
+		ids = client.User.Query().
+			Order(
+				user.ByPetsCount(sql.OrderDesc()),
+				user.ByID(sql.OrderDesc()),
+			).
+			IDsX(ctx)
+		require.Equal(t, []int{users[0].ID, users[1].ID, users[2].ID, users[4].ID, users[3].ID}, ids)
+	})
+
+	t.Run("O2M/Sum", func(t *testing.T) {
+		ordered := client.User.Query().
+			Order(
+				user.ByPets(
+					sql.OrderBySum(
+						pet.FieldAge,
+						sql.OrderDesc(),
+					),
+				),
+				user.ByID(),
+			).
+			AllX(ctx)
+		require.Equal(t,
+			[]int{users[2].ID, users[1].ID, users[0].ID, users[3].ID, users[4].ID},
+			[]int{ordered[0].ID, ordered[1].ID, ordered[2].ID, ordered[3].ID, ordered[4].ID},
+		)
+
+		ordered = client.User.Query().
+			Order(
+				user.ByPets(
+					sql.OrderBySum(
+						pet.FieldAge,
+						sql.OrderDesc(),
+						sql.OrderSelected(),
+					),
+				),
+				user.ByID(
+					sql.OrderDesc(),
+				),
+			).
+			AllX(ctx)
+		require.Equal(t,
+			[]int{users[2].ID, users[1].ID, users[0].ID, users[3].ID, users[4].ID},
+			[]int{ordered[0].ID, ordered[1].ID, ordered[2].ID, ordered[4].ID, ordered[3].ID},
+		)
+		s, err := ordered[0].Value("sum_age")
+		require.NoError(t, err)
+		require.EqualValues(t, 10, s)
+		s, err = ordered[1].Value("sum_age")
+		require.NoError(t, err)
+		require.EqualValues(t, 4, s)
+		s, err = ordered[2].Value("sum_age")
+		require.NoError(t, err)
+		require.EqualValues(t, 3, s)
+	})
+}
+
 // Testing the "low-level" behavior of the sqlgraph package.
 // This functionality may be extended to the generated fluent API.
 func OrderByEdgeCount(t *testing.T, client *ent.Client) {
@@ -2579,11 +2683,11 @@ func OrderByEdgeTerms(t *testing.T, client *ent.Client) {
 		ids []int
 	}{
 		{
-			opt: sql.OrderByExpr(sql.Expr("SUM(age)"), sql.OrderAs("sum_age")),
+			opt: sql.OrderBySum(user.FieldAge),
 			ids: []int{users[3].ID, users[0].ID, users[2].ID, users[1].ID},
 		},
 		{
-			opt: sql.OrderByExpr(sql.Expr("SUM(age)"), sql.OrderDesc(), sql.OrderAs("sum_age")),
+			opt: sql.OrderBySum(user.FieldAge, sql.OrderDesc()),
 			ids: []int{users[1].ID, users[0].ID, users[2].ID, users[3].ID},
 		},
 	} {
@@ -2617,21 +2721,15 @@ func OrderByEdgeTerms(t *testing.T, client *ent.Client) {
 		ids []int
 	}{
 		{
-			opt: sql.OrderByExpr(
-				sql.ExprFunc(func(b *sql.Builder) {
-					b.S("SUM(").Ident(group.FieldMaxUsers).S(")")
-				}),
-				sql.OrderAs("sum_max_users"),
+			opt: sql.OrderBySum(
+				group.FieldMaxUsers,
 			),
 			ids: []int{users[3].ID, users[2].ID, users[1].ID, users[0].ID},
 		},
 		{
-			opt: sql.OrderByExpr(
-				sql.ExprFunc(func(b *sql.Builder) {
-					b.S("SUM(").Ident(group.FieldMaxUsers).S(")")
-				}),
+			opt: sql.OrderBySum(
+				group.FieldMaxUsers,
 				sql.OrderDesc(),
-				sql.OrderAs("sum_max_users"),
 			),
 			ids: []int{users[0].ID, users[1].ID, users[2].ID, users[3].ID},
 		},

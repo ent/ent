@@ -10,6 +10,7 @@ import (
 	"math/big"
 	"net/url"
 
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/schema/field"
 )
 
@@ -46,5 +47,8 @@ var (
 		CustomOptional field.TypeValueScanner[string]
 	}
 )
+
+// Order defines the ordering method for the ExValueScan queries.
+type Order func(*dsl.Traversal)
 
 // comment from another template.

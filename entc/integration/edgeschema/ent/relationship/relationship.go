@@ -8,6 +8,8 @@ package relationship
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -85,3 +87,68 @@ var (
 	// DefaultWeight holds the default value on creation for the "weight" field.
 	DefaultWeight int
 )
+
+// Order defines the ordering method for the Relationship queries.
+type Order func(*sql.Selector)
+
+// ByWeight orders the results by the weight field.
+func ByWeight(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldWeight, opts...).ToFunc()
+}
+
+// ByUserID orders the results by the user_id field.
+func ByUserID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldUserID, opts...).ToFunc()
+}
+
+// ByRelativeID orders the results by the relative_id field.
+func ByRelativeID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldRelativeID, opts...).ToFunc()
+}
+
+// ByInfoID orders the results by the info_id field.
+func ByInfoID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldInfoID, opts...).ToFunc()
+}
+
+// ByUserField orders the results by user field.
+func ByUserField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByRelativeField orders the results by relative field.
+func ByRelativeField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newRelativeStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByInfoField orders the results by info field.
+func ByInfoField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newInfoStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newUserStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, UserColumn),
+		sqlgraph.To(UserInverseTable, UserFieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, UserTable, UserColumn),
+	)
+}
+func newRelativeStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, RelativeColumn),
+		sqlgraph.To(RelativeInverseTable, UserFieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, RelativeTable, RelativeColumn),
+	)
+}
+func newInfoStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, InfoColumn),
+		sqlgraph.To(InfoInverseTable, RelationshipInfoFieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, InfoTable, InfoColumn),
+	)
+}

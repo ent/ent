@@ -6,6 +6,7 @@ package sql
 
 import (
 	"fmt"
+	"strings"
 )
 
 // The following helpers exist to simplify the way raw predicates
@@ -196,7 +197,7 @@ type (
 	// OrderExprTerm represents an ordering by an expression.
 	OrderExprTerm struct {
 		OrderTermOptions
-		Expr Querier // Expression.
+		Expr func(*Selector) Querier // Expression.
 	}
 	// OrderTerm represents an ordering by a term.
 	OrderTerm interface {
@@ -204,9 +205,11 @@ type (
 	}
 	// OrderTermOptions represents options for ordering by a term.
 	OrderTermOptions struct {
-		Desc     bool   // Whether to sort in descending order.
-		As       string // Optional alias.
-		Selected bool   // Whether the term should be selected.
+		Desc       bool   // Whether to sort in descending order.
+		As         string // Optional alias.
+		Selected   bool   // Whether the term should be selected.
+		NullsFirst bool   // Whether to sort nulls first.
+		NullsLast  bool   // Whether to sort nulls last.
 	}
 	// OrderTermOption is an option for ordering by a term.
 	OrderTermOption func(*OrderTermOptions)
@@ -241,6 +244,20 @@ func OrderSelectAs(as string) OrderTermOption {
 	}
 }
 
+// OrderNullsFirst returns an option to sort nulls first.
+func OrderNullsFirst() OrderTermOption {
+	return func(o *OrderTermOptions) {
+		o.NullsFirst = true
+	}
+}
+
+// OrderNullsLast returns an option to sort nulls last.
+func OrderNullsLast() OrderTermOption {
+	return func(o *OrderTermOptions) {
+		o.NullsLast = true
+	}
+}
+
 // NewOrderTermOptions returns a new OrderTermOptions from the given options.
 func NewOrderTermOptions(opts ...OrderTermOption) *OrderTermOptions {
 	o := &OrderTermOptions{}
@@ -251,13 +268,59 @@ func NewOrderTermOptions(opts ...OrderTermOption) *OrderTermOptions {
 }
 
 // OrderByField returns an ordering by the given field.
-func OrderByField(name string, opts ...OrderTermOption) *OrderFieldTerm {
-	return &OrderFieldTerm{Field: name, OrderTermOptions: *NewOrderTermOptions(opts...)}
+func OrderByField(field string, opts ...OrderTermOption) *OrderFieldTerm {
+	return &OrderFieldTerm{Field: field, OrderTermOptions: *NewOrderTermOptions(opts...)}
 }
 
-// OrderByExpr returns an ordering by the given expression.
-func OrderByExpr(x Querier, opts ...OrderTermOption) *OrderExprTerm {
-	return &OrderExprTerm{Expr: x, OrderTermOptions: *NewOrderTermOptions(opts...)}
+// OrderBySum returns an ordering by the sum of the given field.
+func OrderBySum(field string, opts ...OrderTermOption) *OrderExprTerm {
+	return orderByAgg("SUM", field, opts...)
+}
+
+// OrderByCount returns an ordering by the count of the given field.
+func OrderByCount(field string, opts ...OrderTermOption) *OrderExprTerm {
+	return orderByAgg("COUNT", field, opts...)
+}
+
+// orderByAgg returns an ordering by the aggregation of the given field.
+func orderByAgg(fn, field string, opts ...OrderTermOption) *OrderExprTerm {
+	return &OrderExprTerm{
+		OrderTermOptions: *NewOrderTermOptions(
+			append(
+				// Default alias is "<func>_<field>".
+				[]OrderTermOption{OrderAs(fmt.Sprintf("%s_%s", strings.ToLower(fn), field))},
+				opts...,
+			)...,
+		),
+		Expr: func(s *Selector) Querier {
+			var c string
+			switch {
+			case field == "*", isFunc(field):
+				c = field
+			default:
+				c = s.C(field)
+			}
+			return Raw(fmt.Sprintf("%s(%s)", fn, c))
+		},
+	}
+}
+
+// ToFunc returns a function that sets the ordering on the given selector.
+// This is used by the generated code.
+func (f *OrderFieldTerm) ToFunc() func(*Selector) {
+	return func(s *Selector) {
+		s.OrderExprFunc(func(b *Builder) {
+			b.WriteString(s.C(f.Field))
+			if f.Desc {
+				b.WriteString(" DESC")
+			}
+			if f.NullsFirst {
+				b.WriteString(" NULLS FIRST")
+			} else if f.NullsLast {
+				b.WriteString(" NULLS LAST")
+			}
+		})
+	}
 }
 
 func (OrderFieldTerm) term() {}

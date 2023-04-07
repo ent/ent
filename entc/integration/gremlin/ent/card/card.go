@@ -8,6 +8,8 @@ package card
 
 import (
 	"time"
+
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
 )
 
 const (
@@ -49,5 +51,8 @@ var (
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
 )
+
+// Order defines the ordering method for the Card queries.
+type Order func(*dsl.Traversal)
 
 // comment from another template.

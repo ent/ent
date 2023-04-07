@@ -23,7 +23,7 @@ import (
 type ExValueScanQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []exvaluescan.Order
 	inters     []Interceptor
 	predicates []predicate.ExValueScan
 	modifiers  []func(*sql.Selector)
@@ -58,7 +58,7 @@ func (evsq *ExValueScanQuery) Unique(unique bool) *ExValueScanQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (evsq *ExValueScanQuery) Order(o ...OrderFunc) *ExValueScanQuery {
+func (evsq *ExValueScanQuery) Order(o ...exvaluescan.Order) *ExValueScanQuery {
 	evsq.order = append(evsq.order, o...)
 	return evsq
 }
@@ -252,7 +252,7 @@ func (evsq *ExValueScanQuery) Clone() *ExValueScanQuery {
 	return &ExValueScanQuery{
 		config:     evsq.config,
 		ctx:        evsq.ctx.Clone(),
-		order:      append([]OrderFunc{}, evsq.order...),
+		order:      append([]exvaluescan.Order{}, evsq.order...),
 		inters:     append([]Interceptor{}, evsq.inters...),
 		predicates: append([]predicate.ExValueScan{}, evsq.predicates...),
 		// clone intermediate query.

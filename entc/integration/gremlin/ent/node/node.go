@@ -8,6 +8,8 @@ package node
 
 import (
 	"time"
+
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
 )
 
 const (
@@ -33,5 +35,8 @@ var (
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
 )
+
+// Order defines the ordering method for the Node queries.
+type Order func(*dsl.Traversal)
 
 // comment from another template.

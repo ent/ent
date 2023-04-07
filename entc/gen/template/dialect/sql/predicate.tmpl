@@ -62,29 +62,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/sql/predicate/edge/haswith" -}}
 	{{- $e := $.Scope.Edge -}}
 	func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			{{- if $.HasCompositeID }}
-				{{- /* Query that goes from the edge schema. */}}
-				sqlgraph.From(Table, {{ $e.ColumnConstant }}),
-				sqlgraph.To({{ $e.InverseTableConstant }}, {{ print $e.Type.Name "FieldID" }}),
-			{{- else }}
-				sqlgraph.From(Table, {{ $.ID.Constant }}),
-				{{- if $e.Type.HasOneFieldID }}
-					{{- $refid := $.ID.Constant }}{{ if ne $e.Type.ID.StorageKey $.ID.StorageKey }}{{ $refid = print $e.Type.Name "FieldID" }}{{ end }}
-					sqlgraph.To({{ if ne $.Table $e.Type.Table }}{{ $e.InverseTableConstant }}{{ else }}Table{{ end }}, {{ $refid }}),
-				{{- else }}
-					{{- /* Query that goes to the edge schema. */}}
-					sqlgraph.To({{ if ne $.Table $e.Type.Table }}{{ $e.InverseTableConstant }}{{ else }}Table{{ end }}, {{ $e.ColumnConstant }}),
-				{{- end }}
-			{{- end }}
-			sqlgraph.Edge(sqlgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $e.TableConstant }},
-				{{- if $e.M2M -}}
-					{{ $e.PKConstant }}...
-				{{- else -}}
-					{{ $e.ColumnConstant }}
-				{{- end -}}
-			),
-		)
+		step := new{{ pascal $e.Name }}Step()
 		{{- /* Allow mutating the sqlgraph.Step by ent extensions or user templates.*/}}
 		{{- with $tmpls := matchTemplate "dialect/sql/predicate/edge/haswith/*" }}
 			{{- range $tmpl := $tmpls }}

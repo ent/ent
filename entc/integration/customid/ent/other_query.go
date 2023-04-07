@@ -23,7 +23,7 @@ import (
 type OtherQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []other.Order
 	inters     []Interceptor
 	predicates []predicate.Other
 	// intermediate query (i.e. traversal path).
@@ -57,7 +57,7 @@ func (oq *OtherQuery) Unique(unique bool) *OtherQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (oq *OtherQuery) Order(o ...OrderFunc) *OtherQuery {
+func (oq *OtherQuery) Order(o ...other.Order) *OtherQuery {
 	oq.order = append(oq.order, o...)
 	return oq
 }
@@ -251,7 +251,7 @@ func (oq *OtherQuery) Clone() *OtherQuery {
 	return &OtherQuery{
 		config:     oq.config,
 		ctx:        oq.ctx.Clone(),
-		order:      append([]OrderFunc{}, oq.order...),
+		order:      append([]other.Order{}, oq.order...),
 		inters:     append([]Interceptor{}, oq.inters...),
 		predicates: append([]predicate.Other{}, oq.predicates...),
 		// clone intermediate query.

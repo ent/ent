@@ -141,11 +141,7 @@ func HasStreets() predicate.City {
 // HasStreetsWith applies the HasEdge predicate on the "streets" edge with a given conditions (other predicates).
 func HasStreetsWith(preds ...predicate.Street) predicate.City {
 	return predicate.City(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(StreetsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, StreetsTable, StreetsColumn),
-		)
+		step := newStreetsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -6,6 +6,11 @@
 
 package groupinfo
 
+import (
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+)
+
 const (
 	// Label holds the string label denoting the groupinfo type in the database.
 	Label = "group_info"
@@ -49,5 +54,44 @@ var (
 	// DefaultMaxUsers holds the default value on creation for the "max_users" field.
 	DefaultMaxUsers int
 )
+
+// Order defines the ordering method for the GroupInfo queries.
+type Order func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByDesc orders the results by the desc field.
+func ByDesc(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldDesc, opts...).ToFunc()
+}
+
+// ByMaxUsers orders the results by the max_users field.
+func ByMaxUsers(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldMaxUsers, opts...).ToFunc()
+}
+
+// ByGroupsCount orders the results by groups count.
+func ByGroupsCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newGroupsStep(), opts...)
+	}
+}
+
+// ByGroups orders the results by groups terms.
+func ByGroups(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newGroupsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newGroupsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(GroupsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, GroupsTable, GroupsColumn),
+	)
+}
 
 // comment from another template.

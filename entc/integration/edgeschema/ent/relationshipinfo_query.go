@@ -22,7 +22,7 @@ import (
 type RelationshipInfoQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []relationshipinfo.Order
 	inters     []Interceptor
 	predicates []predicate.RelationshipInfo
 	// intermediate query (i.e. traversal path).
@@ -56,7 +56,7 @@ func (riq *RelationshipInfoQuery) Unique(unique bool) *RelationshipInfoQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (riq *RelationshipInfoQuery) Order(o ...OrderFunc) *RelationshipInfoQuery {
+func (riq *RelationshipInfoQuery) Order(o ...relationshipinfo.Order) *RelationshipInfoQuery {
 	riq.order = append(riq.order, o...)
 	return riq
 }
@@ -250,7 +250,7 @@ func (riq *RelationshipInfoQuery) Clone() *RelationshipInfoQuery {
 	return &RelationshipInfoQuery{
 		config:     riq.config,
 		ctx:        riq.ctx.Clone(),
-		order:      append([]OrderFunc{}, riq.order...),
+		order:      append([]relationshipinfo.Order{}, riq.order...),
 		inters:     append([]Interceptor{}, riq.inters...),
 		predicates: append([]predicate.RelationshipInfo{}, riq.predicates...),
 		// clone intermediate query.

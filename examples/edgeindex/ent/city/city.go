@@ -6,6 +6,11 @@
 
 package city
 
+import (
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+)
+
 const (
 	// Label holds the string label denoting the city type in the database.
 	Label = "city"
@@ -40,4 +45,38 @@ func ValidColumn(column string) bool {
 		}
 	}
 	return false
+}
+
+// Order defines the ordering method for the City queries.
+type Order func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByName orders the results by the name field.
+func ByName(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByStreetsCount orders the results by streets count.
+func ByStreetsCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newStreetsStep(), opts...)
+	}
+}
+
+// ByStreets orders the results by streets terms.
+func ByStreets(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newStreetsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newStreetsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(StreetsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, StreetsTable, StreetsColumn),
+	)
 }

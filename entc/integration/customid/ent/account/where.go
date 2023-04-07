@@ -142,11 +142,7 @@ func HasToken() predicate.Account {
 // HasTokenWith applies the HasEdge predicate on the "token" edge with a given conditions (other predicates).
 func HasTokenWith(preds ...predicate.Token) predicate.Account {
 	return predicate.Account(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TokenInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, TokenTable, TokenColumn),
-		)
+		step := newTokenStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

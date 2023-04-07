@@ -154,6 +154,13 @@ const (
 	}
 {{ end }}
 
+{{ $tmpl = printf "dialect/%s/meta/order" $.Storage }}
+// Order defines the ordering method for the {{ $.Name }} queries.
+type Order func({{ $.Config.Storage.Builder }})
+{{ if hasTemplate $tmpl }}
+	{{ xtemplate $tmpl $ }}
+{{ end }}
+
 {{ template "meta/additional" $ }}
 
 {{ with $tmpls := matchTemplate "meta/additional/*" }}

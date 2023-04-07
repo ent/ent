@@ -23,7 +23,7 @@ import (
 type LicenseQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []license.Order
 	inters     []Interceptor
 	predicates []predicate.License
 	modifiers  []func(*sql.Selector)
@@ -58,7 +58,7 @@ func (lq *LicenseQuery) Unique(unique bool) *LicenseQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (lq *LicenseQuery) Order(o ...OrderFunc) *LicenseQuery {
+func (lq *LicenseQuery) Order(o ...license.Order) *LicenseQuery {
 	lq.order = append(lq.order, o...)
 	return lq
 }
@@ -252,7 +252,7 @@ func (lq *LicenseQuery) Clone() *LicenseQuery {
 	return &LicenseQuery{
 		config:     lq.config,
 		ctx:        lq.ctx.Clone(),
-		order:      append([]OrderFunc{}, lq.order...),
+		order:      append([]license.Order{}, lq.order...),
 		inters:     append([]Interceptor{}, lq.inters...),
 		predicates: append([]predicate.License{}, lq.predicates...),
 		// clone intermediate query.

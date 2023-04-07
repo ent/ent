@@ -72,11 +72,7 @@ func HasActiveSession() predicate.Device {
 // HasActiveSessionWith applies the HasEdge predicate on the "active_session" edge with a given conditions (other predicates).
 func HasActiveSessionWith(preds ...predicate.Session) predicate.Device {
 	return predicate.Device(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ActiveSessionInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, ActiveSessionTable, ActiveSessionColumn),
-		)
+		step := newActiveSessionStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -99,11 +95,7 @@ func HasSessions() predicate.Device {
 // HasSessionsWith applies the HasEdge predicate on the "sessions" edge with a given conditions (other predicates).
 func HasSessionsWith(preds ...predicate.Session) predicate.Device {
 	return predicate.Device(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(SessionsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, SessionsTable, SessionsColumn),
-		)
+		step := newSessionsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

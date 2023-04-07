@@ -71,11 +71,7 @@ func HasCard() predicate.Spec {
 // HasCardWith applies the HasEdge predicate on the "card" edge with a given conditions (other predicates).
 func HasCardWith(preds ...predicate.Card) predicate.Spec {
 	return predicate.Spec(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(CardInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, CardTable, CardPrimaryKey...),
-		)
+		step := newCardStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

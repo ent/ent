@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"time"
 
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/entc/integration/ent/role"
 	"entgo.io/ent/entc/integration/ent/schema"
 )
@@ -239,6 +240,9 @@ func PriorityValidator(pr role.Priority) error {
 		return fmt.Errorf("fieldtype: invalid enum value for priority field: %q", pr)
 	}
 }
+
+// Order defines the ordering method for the FieldType queries.
+type Order func(*dsl.Traversal)
 
 // Ptr returns a new pointer to the enum value.
 func (s State) Ptr() *State {

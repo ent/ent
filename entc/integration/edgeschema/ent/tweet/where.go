@@ -141,11 +141,7 @@ func HasLikedUsers() predicate.Tweet {
 // HasLikedUsersWith applies the HasEdge predicate on the "liked_users" edge with a given conditions (other predicates).
 func HasLikedUsersWith(preds ...predicate.User) predicate.Tweet {
 	return predicate.Tweet(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(LikedUsersInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, LikedUsersTable, LikedUsersPrimaryKey...),
-		)
+		step := newLikedUsersStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -168,11 +164,7 @@ func HasUser() predicate.Tweet {
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
 func HasUserWith(preds ...predicate.User) predicate.Tweet {
 	return predicate.Tweet(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UserInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, UserTable, UserPrimaryKey...),
-		)
+		step := newUserStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -195,11 +187,7 @@ func HasTags() predicate.Tweet {
 // HasTagsWith applies the HasEdge predicate on the "tags" edge with a given conditions (other predicates).
 func HasTagsWith(preds ...predicate.Tag) predicate.Tweet {
 	return predicate.Tweet(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TagsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, TagsTable, TagsPrimaryKey...),
-		)
+		step := newTagsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -222,11 +210,7 @@ func HasLikes() predicate.Tweet {
 // HasLikesWith applies the HasEdge predicate on the "likes" edge with a given conditions (other predicates).
 func HasLikesWith(preds ...predicate.TweetLike) predicate.Tweet {
 	return predicate.Tweet(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(LikesInverseTable, LikesColumn),
-			sqlgraph.Edge(sqlgraph.O2M, true, LikesTable, LikesColumn),
-		)
+		step := newLikesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -249,11 +233,7 @@ func HasTweetUser() predicate.Tweet {
 // HasTweetUserWith applies the HasEdge predicate on the "tweet_user" edge with a given conditions (other predicates).
 func HasTweetUserWith(preds ...predicate.UserTweet) predicate.Tweet {
 	return predicate.Tweet(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TweetUserInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, TweetUserTable, TweetUserColumn),
-		)
+		step := newTweetUserStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -276,11 +256,7 @@ func HasTweetTags() predicate.Tweet {
 // HasTweetTagsWith applies the HasEdge predicate on the "tweet_tags" edge with a given conditions (other predicates).
 func HasTweetTagsWith(preds ...predicate.TweetTag) predicate.Tweet {
 	return predicate.Tweet(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TweetTagsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, TweetTagsTable, TweetTagsColumn),
-		)
+		step := newTweetTagsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

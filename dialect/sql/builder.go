@@ -2249,10 +2249,13 @@ func (s *Selector) AppendSelectExpr(exprs ...Querier) *Selector {
 // AppendSelectExprAs appends additional expressions to the SELECT statement with the given name.
 func (s *Selector) AppendSelectExprAs(expr Querier, as string) *Selector {
 	s.selection = append(s.selection, ExprFunc(func(b *Builder) {
-		b.WriteByte('(')
-		b.Join(expr)
-		b.WriteString(") AS ")
-		b.Ident(as)
+		switch expr.(type) {
+		case *raw:
+			// Raw expressions are not wrapped in parentheses.
+			b.Join(expr).S(" AS ").Ident(as)
+		default:
+			b.S("(").Join(expr).S(") AS ").Ident(as)
+		}
 	}))
 	return s
 }
@@ -3298,8 +3301,9 @@ type exprFunc struct {
 }
 
 func (e *exprFunc) Query() (string, []any) {
-	e.fn(&e.Builder)
-	return e.Builder.Query()
+	b := e.Builder.clone()
+	e.fn(&b)
+	return b.Query()
 }
 
 // Queries are list of queries join with space between them.
