@@ -213,7 +213,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			createE := &{{ .CreateName }}{config: {{ $receiver }}.config, mutation: new{{ .MutationName }}({{ $receiver }}.config, OpCreate)}
 			{{- /* Skip error handling here as this check was already handled. */}}
 			{{ if or .NumHooks .NumPolicy }}_ = {{ end }}createE.defaults()
-			_, specE := createE.createSpec()
+			_, specE := createE.createSpec(ctx)
 			edge.Target.Fields = specE.Fields
 			{{- if and .HasOneFieldID .ID.Default }}
 				if specE.ID.Value != nil {

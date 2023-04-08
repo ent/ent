@@ -28,6 +28,10 @@ type SchemaConfig struct {
 
 type schemaCtxKey struct{}
 
+type schemaNameCtxKeyType struct{}
+
+var SchemaNameCtxKey = schemaNameCtxKeyType{}
+
 // SchemaConfigFromContext returns a SchemaConfig stored inside a context, or empty if there isn't one.
 func SchemaConfigFromContext(ctx context.Context) SchemaConfig {
 	config, _ := ctx.Value(schemaCtxKey{}).(SchemaConfig)
@@ -37,6 +41,16 @@ func SchemaConfigFromContext(ctx context.Context) SchemaConfig {
 // NewSchemaConfigContext returns a new context with the given SchemaConfig attached.
 func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context.Context {
 	return context.WithValue(parent, schemaCtxKey{}, config)
+}
+
+// SchemaNameFromContext returns the schema name stored inside a context, or empty if there isn't one.
+func SchemaNameFromContext(ctx context.Context, defaultSchemaName string) string {
+	if defaultSchemaName == "" {
+		if schemaNameFromCtx, ok := ctx.Value(SchemaNameCtxKey).(string); ok {
+			return schemaNameFromCtx
+		}
+	}
+	return defaultSchemaName
 }
 
 {{- end }}
@@ -62,6 +76,10 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 		// SchemaConfig represents alternative schema names for all tables
 		// that can be passed at runtime.
 		type SchemaConfig = internal.SchemaConfig
+
+		type SchemaCtxKey struct{};
+
+		var SchemaNameCtxKey = internal.SchemaNameCtxKey
 
 		// AlternateSchemas allows alternate schema names to be
 		// passed into ent operations.
@@ -93,6 +111,9 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 
 {{- define "dialect/sql/query/eagerloading/join/schemaconfig" }}
 	{{- with extend $ "Ident" "joinT" "CallSet" true }}
+		{{- if $.FeatureEnabled "sql/schemaconfig" }}
+		ctx := s.Context()
+		{{- end -}}
 		{{- template "dialect/sql/defedge/spec/schemaconfig" . }}
 	{{- end }}
 {{- end }}
@@ -116,9 +137,9 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 			{{- end }}
 		{{- end }}
 		{{- if $.Scope.CallSet }}
-			{{ $ident }}.Schema({{ $receiver }}.schemaConfig.{{ $schema }})
+			{{ $ident }}.Schema(internal.SchemaNameFromContext(ctx, {{ $receiver }}.schemaConfig.{{ $schema }}))
 		{{- else }}
-			{{ $ident }}.Schema = {{ $receiver }}.schemaConfig.{{ $schema }}
+			{{ $ident }}.Schema = internal.SchemaNameFromContext(ctx, {{ $receiver }}.schemaConfig.{{ $schema }})
 		{{- end }}
 	{{- end }}
 {{- end }}
@@ -129,7 +150,7 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 	{{- $receiver := receiver $builder }}
 	{{- $ident := "_spec.Node" }}{{ with $.Scope.Ident }}{{ $ident = . }}{{ end }}
 	{{- if $.FeatureEnabled "sql/schemaconfig" }}
-		{{ $ident }}.Schema = {{ $receiver }}.schemaConfig.{{ $.Name }}
+		{{ $ident }}.Schema = internal.SchemaNameFromContext(ctx, {{ $receiver }}.schemaConfig.{{ $.Name }})
 		{{- if not $.Scope.SkipContext }}
 			ctx = internal.NewSchemaConfigContext(ctx, {{ $receiver }}.schemaConfig)
 		{{- end }}
@@ -140,7 +161,7 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 	{{- $builder := pascal $.Scope.Builder }}
 	{{- $receiver := receiver $builder }}
 	{{- if $.FeatureEnabled "sql/schemaconfig" }}
-		t1.Schema({{ $receiver }}.schemaConfig.{{ $.Name }})
+		t1.Schema(internal.SchemaNameFromContext(ctx, {{ $receiver }}.schemaConfig.{{ $.Name }}))
 		ctx = internal.NewSchemaConfigContext(ctx, {{ $receiver }}.schemaConfig)
 		selector.WithContext(ctx)
 	{{- end }}
@@ -170,14 +191,15 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 
 {{- define "dialect/sql/predicate/edge/ctxschemaconfig" -}}
 	{{- if $.FeatureEnabled "sql/schemaconfig" }}
-		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		ctx := s.Context()
+		schemaConfig := internal.SchemaConfigFromContext(ctx)
 		{{- template "dialect/sql/query/step/ctxschemaconfig" . }}
 	{{- end -}}
 {{- end -}}
 
 {{- define "dialect/sql/query/step/ctxschemaconfig" -}}
 	{{- $e := $.Scope.Edge }}
-	step.To.Schema = schemaConfig.{{ $e.Type.Name }}
+	step.To.Schema = internal.SchemaNameFromContext(ctx, schemaConfig.{{ $e.Type.Name }})
 	{{- $schema := $e.Type.Name }}
 	{{- if $e.OwnFK }}
 		{{- $schema = $.Name }}
@@ -190,5 +212,5 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 			{{- $schema = print $.Name $e.StructField }}
 		{{- end }}
 	{{- end }}
-	step.Edge.Schema = schemaConfig.{{ $schema }}
+	step.Edge.Schema = internal.SchemaNameFromContext(ctx, schemaConfig.{{ $schema }})
 {{- end -}}

@@ -406,7 +406,7 @@ func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
 func (c *{{ $client }}) {{ $func }}({{ $arg }} *{{ $n.Name }}) *{{ $builder }} {
 	{{- if $n.HasOneFieldID }}
 		query := (&{{ $e.Type.ClientName }}{config: c.config}).Query()
-		query.path = func(context.Context) (fromV {{ $.Storage.Builder }}, _ error) {
+		query.path = func(ctx context.Context) (fromV {{ $.Storage.Builder }}, _ error) {
 			{{- with extend $n "Receiver" $arg "Edge" $e "Ident" "fromV" }}
 				{{ $tmpl := printf "dialect/%s/query/from" $.Storage }}
 				{{- xtemplate $tmpl . -}}
