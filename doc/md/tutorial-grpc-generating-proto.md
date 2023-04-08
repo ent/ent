@@ -92,7 +92,7 @@ A new `generate.go` file was created with an invocation to `protoc`, the protobu
 - To install `protoc-gen-entgrpc`, run:
 
   ```
-  go install entgo.io/contrib/entproto/cmd/protoc-gen-entgrpc@latest
+  go install entgo.io/contrib/entproto/cmd/protoc-gen-entgrpc@master
   ```
 
 After installing these dependencies, we can re-run code-generation:
