@@ -146,8 +146,8 @@ func (gcb *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
 				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for j := len(builder.hooks) - 1; j >= 0; j-- {
+				mut = builder.hooks[j](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)
