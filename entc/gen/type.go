@@ -1277,6 +1277,9 @@ func (f Field) IsUUID() bool { return f.Type != nil && f.Type.Type == field.Type
 // IsInt returns true if the field is an int field.
 func (f Field) IsInt() bool { return f.Type != nil && f.Type.Type == field.TypeInt }
 
+// IsInt32 returns true if the field is an int32 field.
+func (f Field) IsInt32() bool { return f.Type != nil && f.Type.Type == field.TypeInt32 }
+
 // IsInt64 returns true if the field is an int64 field.
 func (f Field) IsInt64() bool { return f.Type != nil && f.Type.Type == field.TypeInt64 }
 
