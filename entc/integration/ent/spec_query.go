@@ -25,7 +25,7 @@ import (
 type SpecQuery struct {
 	config
 	ctx           *QueryContext
-	order         []OrderFunc
+	order         []spec.Order
 	inters        []Interceptor
 	predicates    []predicate.Spec
 	withCard      *CardQuery
@@ -62,7 +62,7 @@ func (sq *SpecQuery) Unique(unique bool) *SpecQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (sq *SpecQuery) Order(o ...OrderFunc) *SpecQuery {
+func (sq *SpecQuery) Order(o ...spec.Order) *SpecQuery {
 	sq.order = append(sq.order, o...)
 	return sq
 }
@@ -278,7 +278,7 @@ func (sq *SpecQuery) Clone() *SpecQuery {
 	return &SpecQuery{
 		config:     sq.config,
 		ctx:        sq.ctx.Clone(),
-		order:      append([]OrderFunc{}, sq.order...),
+		order:      append([]spec.Order{}, sq.order...),
 		inters:     append([]Interceptor{}, sq.inters...),
 		predicates: append([]predicate.Spec{}, sq.predicates...),
 		withCard:   sq.withCard.Clone(),

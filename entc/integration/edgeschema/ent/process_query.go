@@ -25,7 +25,7 @@ import (
 type ProcessQuery struct {
 	config
 	ctx               *QueryContext
-	order             []OrderFunc
+	order             []process.Order
 	inters            []Interceptor
 	predicates        []predicate.Process
 	withFiles         *FileQuery
@@ -61,7 +61,7 @@ func (pq *ProcessQuery) Unique(unique bool) *ProcessQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (pq *ProcessQuery) Order(o ...OrderFunc) *ProcessQuery {
+func (pq *ProcessQuery) Order(o ...process.Order) *ProcessQuery {
 	pq.order = append(pq.order, o...)
 	return pq
 }
@@ -299,7 +299,7 @@ func (pq *ProcessQuery) Clone() *ProcessQuery {
 	return &ProcessQuery{
 		config:            pq.config,
 		ctx:               pq.ctx.Clone(),
-		order:             append([]OrderFunc{}, pq.order...),
+		order:             append([]process.Order{}, pq.order...),
 		inters:            append([]Interceptor{}, pq.inters...),
 		predicates:        append([]predicate.Process{}, pq.predicates...),
 		withFiles:         pq.withFiles.Clone(),

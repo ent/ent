@@ -8,6 +8,8 @@ package user
 
 import (
 	"net/http"
+
+	"entgo.io/ent/dialect/sql"
 )
 
 const (
@@ -70,3 +72,11 @@ var (
 	// DefaultInts holds the default value on creation for the "ints" field.
 	DefaultInts []int
 )
+
+// Order defines the ordering method for the User queries.
+type Order func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}

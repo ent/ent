@@ -9,6 +9,7 @@ package enttask
 import (
 	"time"
 
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/entc/integration/ent/schema/task"
 )
 
@@ -35,5 +36,8 @@ var (
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 )
+
+// Order defines the ordering method for the Task queries.
+type Order func(*dsl.Traversal)
 
 // comment from another template.

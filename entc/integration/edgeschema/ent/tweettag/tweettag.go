@@ -9,6 +9,8 @@ package tweettag
 import (
 	"time"
 
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
 )
 
@@ -69,3 +71,54 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
+
+// Order defines the ordering method for the TweetTag queries.
+type Order func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByAddedAt orders the results by the added_at field.
+func ByAddedAt(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldAddedAt, opts...).ToFunc()
+}
+
+// ByTagID orders the results by the tag_id field.
+func ByTagID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldTagID, opts...).ToFunc()
+}
+
+// ByTweetID orders the results by the tweet_id field.
+func ByTweetID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldTweetID, opts...).ToFunc()
+}
+
+// ByTagField orders the results by tag field.
+func ByTagField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTagStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByTweetField orders the results by tweet field.
+func ByTweetField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTweetStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newTagStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TagInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, TagTable, TagColumn),
+	)
+}
+func newTweetStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TweetInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, TweetTable, TweetColumn),
+	)
+}

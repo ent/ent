@@ -141,11 +141,7 @@ func HasProcesses() predicate.File {
 // HasProcessesWith applies the HasEdge predicate on the "processes" edge with a given conditions (other predicates).
 func HasProcessesWith(preds ...predicate.Process) predicate.File {
 	return predicate.File(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ProcessesInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, ProcessesTable, ProcessesPrimaryKey...),
-		)
+		step := newProcessesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

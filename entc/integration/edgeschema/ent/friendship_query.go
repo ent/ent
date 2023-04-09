@@ -23,7 +23,7 @@ import (
 type FriendshipQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []friendship.Order
 	inters     []Interceptor
 	predicates []predicate.Friendship
 	withUser   *UserQuery
@@ -59,7 +59,7 @@ func (fq *FriendshipQuery) Unique(unique bool) *FriendshipQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (fq *FriendshipQuery) Order(o ...OrderFunc) *FriendshipQuery {
+func (fq *FriendshipQuery) Order(o ...friendship.Order) *FriendshipQuery {
 	fq.order = append(fq.order, o...)
 	return fq
 }
@@ -297,7 +297,7 @@ func (fq *FriendshipQuery) Clone() *FriendshipQuery {
 	return &FriendshipQuery{
 		config:     fq.config,
 		ctx:        fq.ctx.Clone(),
-		order:      append([]OrderFunc{}, fq.order...),
+		order:      append([]friendship.Order{}, fq.order...),
 		inters:     append([]Interceptor{}, fq.inters...),
 		predicates: append([]predicate.Friendship{}, fq.predicates...),
 		withUser:   fq.withUser.Clone(),

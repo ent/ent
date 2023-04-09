@@ -7,6 +7,7 @@
 package mixinid
 
 import (
+	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 )
 
@@ -44,3 +45,21 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
+
+// Order defines the ordering method for the MixinID queries.
+type Order func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// BySomeField orders the results by the some_field field.
+func BySomeField(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldSomeField, opts...).ToFunc()
+}
+
+// ByMixinField orders the results by the mixin_field field.
+func ByMixinField(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldMixinField, opts...).ToFunc()
+}

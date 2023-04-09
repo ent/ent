@@ -24,7 +24,7 @@ import (
 type BlogQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []blog.Order
 	inters     []Interceptor
 	predicates []predicate.Blog
 	withAdmins *UserQuery
@@ -59,7 +59,7 @@ func (bq *BlogQuery) Unique(unique bool) *BlogQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (bq *BlogQuery) Order(o ...OrderFunc) *BlogQuery {
+func (bq *BlogQuery) Order(o ...blog.Order) *BlogQuery {
 	bq.order = append(bq.order, o...)
 	return bq
 }
@@ -275,7 +275,7 @@ func (bq *BlogQuery) Clone() *BlogQuery {
 	return &BlogQuery{
 		config:     bq.config,
 		ctx:        bq.ctx.Clone(),
-		order:      append([]OrderFunc{}, bq.order...),
+		order:      append([]blog.Order{}, bq.order...),
 		inters:     append([]Interceptor{}, bq.inters...),
 		predicates: append([]predicate.Blog{}, bq.predicates...),
 		withAdmins: bq.withAdmins.Clone(),

@@ -6,6 +6,10 @@
 
 package spec
 
+import (
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+)
+
 const (
 	// Label holds the string label denoting the spec type in the database.
 	Label = "spec"
@@ -16,5 +20,8 @@ const (
 	// CardLabel holds the string label denoting the card edge type in the database.
 	CardLabel = "spec_card"
 )
+
+// Order defines the ordering method for the Spec queries.
+type Order func(*dsl.Traversal)
 
 // comment from another template.

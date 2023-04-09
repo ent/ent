@@ -124,11 +124,7 @@ func HasBlob() predicate.BlobLink {
 // HasBlobWith applies the HasEdge predicate on the "blob" edge with a given conditions (other predicates).
 func HasBlobWith(preds ...predicate.Blob) predicate.BlobLink {
 	return predicate.BlobLink(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, BlobColumn),
-			sqlgraph.To(BlobInverseTable, BlobFieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, BlobTable, BlobColumn),
-		)
+		step := newBlobStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -151,11 +147,7 @@ func HasLink() predicate.BlobLink {
 // HasLinkWith applies the HasEdge predicate on the "link" edge with a given conditions (other predicates).
 func HasLinkWith(preds ...predicate.Blob) predicate.BlobLink {
 	return predicate.BlobLink(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, LinkColumn),
-			sqlgraph.To(LinkInverseTable, BlobFieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, LinkTable, LinkColumn),
-		)
+		step := newLinkStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -6,6 +6,10 @@
 
 package group
 
+import (
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+)
+
 const (
 	// Label holds the string label denoting the group type in the database.
 	Label = "group"
@@ -51,5 +55,8 @@ var (
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
 )
+
+// Order defines the ordering method for the Group queries.
+type Order func(*dsl.Traversal)
 
 // comment from another template.

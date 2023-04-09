@@ -6,6 +6,10 @@
 
 package pet
 
+import (
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+)
+
 const (
 	// Label holds the string label denoting the pet type in the database.
 	Label = "pet"
@@ -37,5 +41,8 @@ var (
 	// DefaultTrained holds the default value on creation for the "trained" field.
 	DefaultTrained bool
 )
+
+// Order defines the ordering method for the Pet queries.
+type Order func(*dsl.Traversal)
 
 // comment from another template.

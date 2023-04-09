@@ -29,7 +29,7 @@ type Query interface {
 	// Unique configures the query builder to filter duplicate records.
 	Unique(bool)
 	// Order specifies how the records should be ordered.
-	Order(...{{ $pkg }}.OrderFunc)
+	Order(...func({{ $.Storage.Builder }}))
 	// WhereP appends storage-level predicates to the query builder. Using this method, users
 	// can use type-assertion to append predicates that do not depend on any generated package.
 	WhereP(...func({{ $.Storage.Builder }}))
@@ -109,45 +109,49 @@ func NewQuery(q {{ $pkg }}.Query) (Query, error) {
 	switch q := q.(type) {
 	{{- range $n := $.Nodes }}
 		case *{{ $pkg }}.{{ $n.QueryName }}:
-		return &query[*{{ $pkg }}.{{ $n.QueryName }}, predicate.{{ $n.Name }}]{typ: {{ $pkg }}.{{ $n.TypeName }}, tq: q}, nil
+		return &query[*{{ $pkg }}.{{ $n.QueryName }}, predicate.{{ $n.Name }}, {{ $n.Package }}.Order]{typ: {{ $pkg }}.{{ $n.TypeName }}, tq: q}, nil
 	{{- end }}
 	default:
 		return nil, fmt.Errorf("unknown query type %T", q)
 	}
 }
 
-type query[T any, P ~func({{ $.Storage.Builder }})] struct {
+type query[T any, P ~func({{ $.Storage.Builder }}), R ~func({{ $.Storage.Builder }})] struct {
 	typ string
 	tq  interface {
 		Limit(int) T
 		Offset(int) T
 		Unique(bool) T
-		Order(...{{ $pkg }}.OrderFunc) T
+		Order(...R) T
 		Where(...P) T
 	}
 }
 
-func (q query[T, P]) Type() string {
+func (q query[T, P, R]) Type() string {
 	return q.typ
 }
 
-func (q query[T, P]) Limit(limit int) {
+func (q query[T, P, R]) Limit(limit int) {
 	q.tq.Limit(limit)
 }
 
-func (q query[T, P]) Offset(offset int) {
+func (q query[T, P, R]) Offset(offset int) {
 	q.tq.Offset(offset)
 }
 
-func (q query[T, P]) Unique(unique bool) {
+func (q query[T, P, R]) Unique(unique bool) {
 	q.tq.Unique(unique)
 }
 
-func (q query[T, P]) Order(orders ...{{ $pkg }}.OrderFunc) {
-	q.tq.Order(orders...)
+func (q query[T, P, R]) Order(orders ...func({{ $.Storage.Builder }})) {
+	rs := make([]R, len(orders))
+	for i := range orders {
+		rs[i] = orders[i]
+	}
+	q.tq.Order(rs...)
 }
 
-func (q query[T, P]) WhereP(ps ...func({{ $.Storage.Builder }})) {
+func (q query[T, P, R]) WhereP(ps ...func({{ $.Storage.Builder }})) {
 	p := make([]P, len(ps))
 	for i := range ps {
 		p[i] = ps[i]

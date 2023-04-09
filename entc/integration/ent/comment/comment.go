@@ -6,6 +6,10 @@
 
 package comment
 
+import (
+	"entgo.io/ent/dialect/sql"
+)
+
 const (
 	// Label holds the string label denoting the comment type in the database.
 	Label = "comment"
@@ -46,6 +50,39 @@ func ValidColumn(column string) bool {
 		}
 	}
 	return false
+}
+
+// Order defines the ordering method for the Comment queries.
+type Order func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByUniqueInt orders the results by the unique_int field.
+func ByUniqueInt(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldUniqueInt, opts...).ToFunc()
+}
+
+// ByUniqueFloat orders the results by the unique_float field.
+func ByUniqueFloat(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldUniqueFloat, opts...).ToFunc()
+}
+
+// ByNillableInt orders the results by the nillable_int field.
+func ByNillableInt(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldNillableInt, opts...).ToFunc()
+}
+
+// ByTable orders the results by the table field.
+func ByTable(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldTable, opts...).ToFunc()
+}
+
+// ByClient orders the results by the client field.
+func ByClient(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldClient, opts...).ToFunc()
 }
 
 // comment from another template.

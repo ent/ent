@@ -24,7 +24,7 @@ import (
 type TokenQuery struct {
 	config
 	ctx         *QueryContext
-	order       []OrderFunc
+	order       []token.Order
 	inters      []Interceptor
 	predicates  []predicate.Token
 	withAccount *AccountQuery
@@ -60,7 +60,7 @@ func (tq *TokenQuery) Unique(unique bool) *TokenQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (tq *TokenQuery) Order(o ...OrderFunc) *TokenQuery {
+func (tq *TokenQuery) Order(o ...token.Order) *TokenQuery {
 	tq.order = append(tq.order, o...)
 	return tq
 }
@@ -276,7 +276,7 @@ func (tq *TokenQuery) Clone() *TokenQuery {
 	return &TokenQuery{
 		config:      tq.config,
 		ctx:         tq.ctx.Clone(),
-		order:       append([]OrderFunc{}, tq.order...),
+		order:       append([]token.Order{}, tq.order...),
 		inters:      append([]Interceptor{}, tq.inters...),
 		predicates:  append([]predicate.Token{}, tq.predicates...),
 		withAccount: tq.withAccount.Clone(),

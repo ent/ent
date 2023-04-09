@@ -71,7 +71,7 @@ func NewTxContext(parent context.Context, tx *Tx) context.Context {
 {{ range $f, $order := order }}
 	{{ $f = pascal $f }}
 	// {{ $f }} applies the given fields in {{ upper $f }} order.
-	func {{ $f }}(fields ...string) OrderFunc {
+	func {{ $f }}(fields ...string) func({{ $.Storage.Builder }}) {
 		{{- with extend (index $.Nodes 0) "Func" $f "Order" $order -}}
 			{{ $tmpl := printf "dialect/%s/order/func" $.Storage }}
 			return {{ xtemplate $tmpl . }}

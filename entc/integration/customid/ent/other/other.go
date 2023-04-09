@@ -7,6 +7,7 @@
 package other
 
 import (
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/sid"
 )
 
@@ -38,3 +39,11 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() sid.ID
 )
+
+// Order defines the ordering method for the Other queries.
+type Order func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}

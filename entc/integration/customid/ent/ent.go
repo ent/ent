@@ -81,6 +81,7 @@ func NewTxContext(parent context.Context, tx *Tx) context.Context {
 }
 
 // OrderFunc applies an ordering on the sql selector.
+// Deprecated: Use Asc/Desc functions or the package builders instead.
 type OrderFunc func(*sql.Selector)
 
 var (
@@ -115,7 +116,7 @@ func checkColumn(table, column string) error {
 }
 
 // Asc applies the given fields in ASC order.
-func Asc(fields ...string) OrderFunc {
+func Asc(fields ...string) func(*sql.Selector) {
 	return func(s *sql.Selector) {
 		for _, f := range fields {
 			if err := checkColumn(s.TableName(), f); err != nil {
@@ -127,7 +128,7 @@ func Asc(fields ...string) OrderFunc {
 }
 
 // Desc applies the given fields in DESC order.
-func Desc(fields ...string) OrderFunc {
+func Desc(fields ...string) func(*sql.Selector) {
 	return func(s *sql.Selector) {
 		for _, f := range fields {
 			if err := checkColumn(s.TableName(), f); err != nil {

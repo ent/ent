@@ -70,7 +70,7 @@ func NewTxContext(parent context.Context, tx *Tx) context.Context {
 type OrderFunc func(*dsl.Traversal)
 
 // Asc applies the given fields in ASC order.
-func Asc(fields ...string) OrderFunc {
+func Asc(fields ...string) func(*dsl.Traversal) {
 	return func(tr *dsl.Traversal) {
 		for _, f := range fields {
 			tr.By(f, dsl.Incr)
@@ -79,7 +79,7 @@ func Asc(fields ...string) OrderFunc {
 }
 
 // Desc applies the given fields in DESC order.
-func Desc(fields ...string) OrderFunc {
+func Desc(fields ...string) func(*dsl.Traversal) {
 	return func(tr *dsl.Traversal) {
 		for _, f := range fields {
 			tr.By(f, dsl.Decr)

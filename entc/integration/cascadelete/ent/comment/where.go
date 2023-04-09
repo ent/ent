@@ -166,11 +166,7 @@ func HasPost() predicate.Comment {
 // HasPostWith applies the HasEdge predicate on the "post" edge with a given conditions (other predicates).
 func HasPostWith(preds ...predicate.Post) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PostInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, PostTable, PostColumn),
-		)
+		step := newPostStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

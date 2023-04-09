@@ -23,7 +23,7 @@ import (
 type RoleUserQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []roleuser.Order
 	inters     []Interceptor
 	predicates []predicate.RoleUser
 	withRole   *RoleQuery
@@ -59,7 +59,7 @@ func (ruq *RoleUserQuery) Unique(unique bool) *RoleUserQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (ruq *RoleUserQuery) Order(o ...OrderFunc) *RoleUserQuery {
+func (ruq *RoleUserQuery) Order(o ...roleuser.Order) *RoleUserQuery {
 	ruq.order = append(ruq.order, o...)
 	return ruq
 }
@@ -225,7 +225,7 @@ func (ruq *RoleUserQuery) Clone() *RoleUserQuery {
 	return &RoleUserQuery{
 		config:     ruq.config,
 		ctx:        ruq.ctx.Clone(),
-		order:      append([]OrderFunc{}, ruq.order...),
+		order:      append([]roleuser.Order{}, ruq.order...),
 		inters:     append([]Interceptor{}, ruq.inters...),
 		predicates: append([]predicate.RoleUser{}, ruq.predicates...),
 		withRole:   ruq.withRole.Clone(),

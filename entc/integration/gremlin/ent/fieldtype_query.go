@@ -23,7 +23,7 @@ import (
 type FieldTypeQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []fieldtype.Order
 	inters     []Interceptor
 	predicates []predicate.FieldType
 	// intermediate query (i.e. traversal path).
@@ -57,7 +57,7 @@ func (ftq *FieldTypeQuery) Unique(unique bool) *FieldTypeQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (ftq *FieldTypeQuery) Order(o ...OrderFunc) *FieldTypeQuery {
+func (ftq *FieldTypeQuery) Order(o ...fieldtype.Order) *FieldTypeQuery {
 	ftq.order = append(ftq.order, o...)
 	return ftq
 }
@@ -251,7 +251,7 @@ func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 	return &FieldTypeQuery{
 		config:     ftq.config,
 		ctx:        ftq.ctx.Clone(),
-		order:      append([]OrderFunc{}, ftq.order...),
+		order:      append([]fieldtype.Order{}, ftq.order...),
 		inters:     append([]Interceptor{}, ftq.inters...),
 		predicates: append([]predicate.FieldType{}, ftq.predicates...),
 		// clone intermediate query.

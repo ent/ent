@@ -6,6 +6,10 @@
 
 package file
 
+import (
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+)
+
 const (
 	// Label holds the string label denoting the file type in the database.
 	Label = "file"
@@ -43,5 +47,8 @@ var (
 	// SizeValidator is a validator for the "size" field. It is called by the builders before save.
 	SizeValidator func(int) error
 )
+
+// Order defines the ordering method for the File queries.
+type Order func(*dsl.Traversal)
 
 // comment from another template.

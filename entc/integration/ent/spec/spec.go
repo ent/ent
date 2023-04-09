@@ -6,6 +6,11 @@
 
 package spec
 
+import (
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+)
+
 const (
 	// Label holds the string label denoting the spec type in the database.
 	Label = "spec"
@@ -41,6 +46,35 @@ func ValidColumn(column string) bool {
 		}
 	}
 	return false
+}
+
+// Order defines the ordering method for the Spec queries.
+type Order func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByCardCount orders the results by card count.
+func ByCardCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newCardStep(), opts...)
+	}
+}
+
+// ByCard orders the results by card terms.
+func ByCard(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCardStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newCardStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CardInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, CardTable, CardPrimaryKey...),
+	)
 }
 
 // comment from another template.

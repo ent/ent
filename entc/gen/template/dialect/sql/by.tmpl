@@ -8,6 +8,7 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/sql/order/signature" -}}
 // OrderFunc applies an ordering on the sql selector.
+// Deprecated: Use Asc/Desc functions or the package builders instead.
 type OrderFunc func(*sql.Selector)
 
 var (
