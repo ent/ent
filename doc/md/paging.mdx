@@ -103,6 +103,7 @@ their author's name:
 // order with NULLs first unless otherwise specified.
 posts, err := client.Post.Query().
 	Order(
+		// highlight-next-line
 		post.ByAuthorField(user.FieldName),
 	).
 	All(ctx)
@@ -113,7 +114,7 @@ posts, err := client.Post.Query().
 		post.ByAuthorField(
 			user.FieldName,
 			sql.OrderDesc(),
-			sql.NullsNullFirst(),
+			sql.OrderNullsFirst(),
 		),
 		// highlight-end
 	).
