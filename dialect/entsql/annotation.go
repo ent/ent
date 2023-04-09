@@ -229,6 +229,23 @@ func WithComments(b bool) *Annotation {
 	}
 }
 
+// OnDelete specifies a custom referential action for DELETE operations on parent
+// table that has matching rows in the child table.
+//
+// For example, in order to delete rows from the parent table and automatically delete
+// their matching rows in the child table, pass the following annotation:
+//
+//	func (T) Annotations() []schema.Annotation {
+//		return []schema.Annotation{
+//			entsql.OnDelete(entsql.Cascade),
+//		}
+//	}
+func OnDelete(opt ReferenceOption) *Annotation {
+	return &Annotation{
+		OnDelete: opt,
+	}
+}
+
 // Merge implements the schema.Merger interface.
 func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	var ant Annotation
