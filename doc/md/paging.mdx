@@ -40,32 +40,162 @@ users, err := client.User.Query().
 	All(ctx)
 ```
 
-## Edge Ordering
+Starting with version `v0.11.10`, Ent generates type-safe ordering functions for fields and edges. The following
+example demonstrates how to use these generated functions:
 
-In order to sort by fields of an edge (relation), start the traversal from the edge (you want to order by),
-apply the ordering, and then jump to the neighbours (target type).
-
-The following shows how to order the users by the `"name"` of their `"pets"` in ascending order.
 ```go
-users, err := client.Pet.Query().
-	Order(ent.Asc(pet.FieldName)).
-	QueryOwner().
+// Get all users sorted by their name (and nickname) in ascending order.
+users, err := client.User.Query().
+	Order(
+		// highlight-start
+		user.ByName(),
+		user.ByNickname(),
+		// highlight-end
+	).
 	All(ctx)
+
+// Get all users sorted by their nickname in descending order.
+users, err := client.User.Query().
+	Order(
+		// highlight-start
+		user.ByNickname(
+			sql.OrderDesc(),
+		),
+		// highlight-end
+	).
+	All(ctx)
+```
+
+## Order By Edge Count
+
+`Order` can also be used to sort entities based on the number of edges they have. For example, the following query
+returns all users sorted by the number of posts they have:
+
+```go
+users, err := client.User.Query().
+	Order(
+		// highlight-start
+		// Users without posts are sorted first.
+		user.ByPostsCount(),
+		// highlight-end
+	).
+	All(ctx)
+
+users, err := client.User.Query().
+	Order(
+		// highlight-start
+		// Users without posts are sorted last.
+		user.ByPostsCount(
+			sql.OrderDesc(),
+		),
+		// highlight-end
+	).
+	All(ctx)
+```
+
+## Order By Edge Field
+
+Entities can also be sorted by the value of an edge field. For example, the following query returns all posts sorted by
+their author's name:
+
+```go
+// Posts are sorted by their author's name in ascending
+// order with NULLs first unless otherwise specified.
+posts, err := client.Post.Query().
+	Order(
+		post.ByAuthorField(user.FieldName),
+	).
+	All(ctx)
+
+posts, err := client.Post.Query().
+	Order(
+		// highlight-start
+		post.ByAuthorField(
+			user.FieldName,
+			sql.OrderDesc(),
+			sql.NullsNullFirst(),
+		),
+		// highlight-end
+	).
+	All(ctx)
+```
+
+## Custom Edge Terms
+
+The generated edge ordering functions support custom terms. For example, the following query returns all users sorted
+by the sum of their posts' likes and views:
+
+```go
+// Ascending order.
+posts, err := client.User.Query().
+	Order(
+		// highlight-start
+		user.ByPosts(
+			sql.OrderBySum(post.FieldNumLikes),
+			sql.OrderBySum(post.FieldNumViews),
+		),
+		// highlight-end
+	).
+	All(ctx)
+
+// Descending order.
+posts, err := client.User.Query().
+	Order(
+		// highlight-start
+		user.ByPosts(
+			sql.OrderBySum(
+				post.FieldNumLikes,
+				sql.OrderDesc(),
+			),
+			sql.OrderBySum(
+				post.FieldNumViews,
+				sql.OrderDesc(),
+			),
+		),
+		// highlight-end
+	).
+	All(ctx)
+```
+
+## Select Order Terms
+
+Ordered terms like `SUM()` and `COUNT()` are not defined in the schema and thus do not exist on the generated entities.
+However, sometimes there is a need to retrieve their information in order to either display it to the user or implement
+cursor-based pagination. The `Value` method, defined on each entity, allows you to obtain the order value if it was
+selected in the query:
+
+```go
+// Define the alias for the order term.
+const as = "pets_count"
+
+// Query users sorted by the number of pets
+// they have and select the order term.
+users := client.User.Query().
+	Order(
+		user.ByPetsCount(
+			sql.OrderDesc(),
+			// highlight-next-line
+			sql.OrderSelectAs(as),
+		),
+		user.ByID(),
+	).
+	AllX(ctx)
+
+// Retrieve the order term value.
+for _, u := range users {
+	// highlight-next-line
+	fmt.Println(u.Value(as))
+}
 ```
 
 ## Custom Ordering
 
 Custom ordering functions can be useful if you want to write your own storage-specific logic.
 
-The following shows how to order pets by their name, and their owners' name in ascending order.
-
 ```go
 names, err := client.Pet.Query().
 	Order(func(s *sql.Selector) {
-		// Join with user table for ordering by owner-name and pet-name.
-		t := sql.Table(user.Table)
-		s.Join(t).On(s.C(pet.OwnerColumn), t.C(user.FieldID))
-		s.OrderBy(t.C(user.FieldName), s.C(pet.FieldName))
+		// Logic goes here.
 	}).
 	Select(pet.FieldName).
 	Strings(ctx)

@@ -375,7 +375,7 @@ func main() {
 
 In case a field was renamed in the `ent/schema`, Ent won't detect this change as renaming and will propose `DropColumn`
 and `AddColumn` changes in the diff stage. One way to get over this is to use the
-[StorageKey](schema-fields.md#storage-key) option on the field and keep the old column name in the database table.
+[StorageKey](schema-fields.mdx#storage-key) option on the field and keep the old column name in the database table.
 However, using Atlas `Diff` hooks allow replacing the `DropColumn` and `AddColumn` changes with a `RenameColumn` change.
 
 ```go

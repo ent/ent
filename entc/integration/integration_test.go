@@ -2432,6 +2432,50 @@ func OrderByFluent(t *testing.T, client *ent.Client) {
 		require.Equal(t, []int{users[0].ID, users[1].ID, users[2].ID, users[4].ID, users[3].ID}, ids)
 	})
 
+	t.Run("O2M/SelectedCount", func(t *testing.T) {
+		const as = "pets_count"
+		ordered := client.User.Query().
+			Order(
+				user.ByPetsCount(
+					sql.OrderSelectAs(as),
+				),
+				user.ByID(sql.OrderDesc()),
+			).
+			AllX(ctx)
+		for i, v := range []struct {
+			id    int
+			count ent.Value
+		}{
+			{users[4].ID, nil}, {users[3].ID, nil}, {users[2].ID, 1}, {users[1].ID, 2}, {users[0].ID, 3},
+		} {
+			require.Equal(t, v.id, ordered[i].ID)
+			c, err := ordered[i].Value(as)
+			require.NoError(t, err)
+			require.EqualValues(t, v.count, c)
+		}
+
+		ordered = client.User.Query().
+			Order(
+				user.ByPetsCount(
+					sql.OrderDesc(),
+					sql.OrderSelectAs(as),
+				),
+				user.ByID(),
+			).
+			AllX(ctx)
+		for i, v := range []struct {
+			id    int
+			count ent.Value
+		}{
+			{users[0].ID, 3}, {users[1].ID, 2}, {users[2].ID, 1}, {users[3].ID, nil}, {users[4].ID, nil},
+		} {
+			require.Equal(t, v.id, ordered[i].ID)
+			c, err := ordered[i].Value(as)
+			require.NoError(t, err)
+			require.EqualValues(t, v.count, c)
+		}
+	})
+
 	t.Run("O2M/Sum", func(t *testing.T) {
 		ordered := client.User.Query().
 			Order(
