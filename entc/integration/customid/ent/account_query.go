@@ -419,7 +419,7 @@ func (aq *AccountQuery) loadToken(ctx context.Context, query *TokenQuery, nodes 
 	}
 	query.withFKs = true
 	query.Where(predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.InValues(account.TokenColumn, fks...))
+		s.Where(sql.InValues(s.C(account.TokenColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

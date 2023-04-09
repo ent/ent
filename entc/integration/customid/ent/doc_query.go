@@ -543,7 +543,7 @@ func (dq *DocQuery) loadChildren(ctx context.Context, query *DocQuery, nodes []*
 	}
 	query.withFKs = true
 	query.Where(predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.InValues(doc.ChildrenColumn, fks...))
+		s.Where(sql.InValues(s.C(doc.ChildrenColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

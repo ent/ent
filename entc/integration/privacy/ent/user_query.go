@@ -530,7 +530,7 @@ func (uq *UserQuery) loadTasks(ctx context.Context, query *TaskQuery, nodes []*U
 	}
 	query.withFKs = true
 	query.Where(predicate.Task(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.TasksColumn, fks...))
+		s.Where(sql.InValues(s.C(user.TasksColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

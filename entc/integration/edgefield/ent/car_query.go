@@ -418,7 +418,7 @@ func (cq *CarQuery) loadRentals(ctx context.Context, query *RentalQuery, nodes [
 		}
 	}
 	query.Where(predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.InValues(car.RentalsColumn, fks...))
+		s.Where(sql.InValues(s.C(car.RentalsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

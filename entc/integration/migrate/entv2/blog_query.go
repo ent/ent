@@ -418,7 +418,7 @@ func (bq *BlogQuery) loadAdmins(ctx context.Context, query *UserQuery, nodes []*
 	}
 	query.withFKs = true
 	query.Where(predicate.User(func(s *sql.Selector) {
-		s.Where(sql.InValues(blog.AdminsColumn, fks...))
+		s.Where(sql.InValues(s.C(blog.AdminsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

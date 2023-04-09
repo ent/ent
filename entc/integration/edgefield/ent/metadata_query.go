@@ -530,7 +530,7 @@ func (mq *MetadataQuery) loadChildren(ctx context.Context, query *MetadataQuery,
 		}
 	}
 	query.Where(predicate.Metadata(func(s *sql.Selector) {
-		s.Where(sql.InValues(metadata.ChildrenColumn, fks...))
+		s.Where(sql.InValues(s.C(metadata.ChildrenColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

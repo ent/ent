@@ -567,7 +567,7 @@ func (uq *UserQuery) loadPets(ctx context.Context, query *PetQuery, nodes []*Use
 		}
 	}
 	query.Where(predicate.Pet(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.PetsColumn, fks...))
+		s.Where(sql.InValues(s.C(user.PetsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -718,7 +718,7 @@ func (uq *UserQuery) loadFriendships(ctx context.Context, query *FriendshipQuery
 		}
 	}
 	query.Where(predicate.Friendship(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.FriendshipsColumn, fks...))
+		s.Where(sql.InValues(s.C(user.FriendshipsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

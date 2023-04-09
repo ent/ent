@@ -414,7 +414,7 @@ func (uq *UserQuery) loadCard(ctx context.Context, query *CardQuery, nodes []*Us
 	}
 	query.withFKs = true
 	query.Where(predicate.Card(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.CardColumn, fks...))
+		s.Where(sql.InValues(s.C(user.CardColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

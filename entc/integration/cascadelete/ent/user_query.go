@@ -417,7 +417,7 @@ func (uq *UserQuery) loadPosts(ctx context.Context, query *PostQuery, nodes []*U
 		}
 	}
 	query.Where(predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.PostsColumn, fks...))
+		s.Where(sql.InValues(s.C(user.PostsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

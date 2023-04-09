@@ -584,7 +584,7 @@ func (uq *UserQuery) loadChildren(ctx context.Context, query *UserQuery, nodes [
 	}
 	query.withFKs = true
 	query.Where(predicate.User(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.ChildrenColumn, fks...))
+		s.Where(sql.InValues(s.C(user.ChildrenColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -644,7 +644,7 @@ func (uq *UserQuery) loadCar(ctx context.Context, query *CarQuery, nodes []*User
 	}
 	query.withFKs = true
 	query.Where(predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.CarColumn, fks...))
+		s.Where(sql.InValues(s.C(user.CarColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

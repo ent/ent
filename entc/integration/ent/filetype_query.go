@@ -431,7 +431,7 @@ func (ftq *FileTypeQuery) loadFiles(ctx context.Context, query *FileQuery, nodes
 	}
 	query.withFKs = true
 	query.Where(predicate.File(func(s *sql.Selector) {
-		s.Where(sql.InValues(filetype.FilesColumn, fks...))
+		s.Where(sql.InValues(s.C(filetype.FilesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

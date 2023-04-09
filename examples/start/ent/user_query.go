@@ -462,7 +462,7 @@ func (uq *UserQuery) loadCars(ctx context.Context, query *CarQuery, nodes []*Use
 	}
 	query.withFKs = true
 	query.Where(predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.CarsColumn, fks...))
+		s.Where(sql.InValues(s.C(user.CarsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

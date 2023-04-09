@@ -431,7 +431,7 @@ func (giq *GroupInfoQuery) loadGroups(ctx context.Context, query *GroupQuery, no
 	}
 	query.withFKs = true
 	query.Where(predicate.Group(func(s *sql.Selector) {
-		s.Where(sql.InValues(groupinfo.GroupsColumn, fks...))
+		s.Where(sql.InValues(s.C(groupinfo.GroupsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

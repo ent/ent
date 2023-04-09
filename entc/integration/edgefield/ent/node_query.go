@@ -483,7 +483,7 @@ func (nq *NodeQuery) loadNext(ctx context.Context, query *NodeQuery, nodes []*No
 		nodeids[nodes[i].ID] = nodes[i]
 	}
 	query.Where(predicate.Node(func(s *sql.Selector) {
-		s.Where(sql.InValues(node.NextColumn, fks...))
+		s.Where(sql.InValues(s.C(node.NextColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
