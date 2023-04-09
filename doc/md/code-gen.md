@@ -26,7 +26,7 @@ is to have an `ent` directory under the root directory of the project.
 
 ## Generate Assets
 
-After adding a few [fields](schema-fields.md) and [edges](schema-edges), you want to generate
+After adding a few [fields](schema-fields.mdx) and [edges](schema-edges), you want to generate
 the assets for working with your entities. Run `ent generate` from the root directory of the project,
 or use `go generate`:
 

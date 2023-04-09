@@ -222,6 +222,13 @@ func OrderDesc() OrderTermOption {
 	}
 }
 
+// OrderAsc returns an option to sort in ascending order.
+func OrderAsc() OrderTermOption {
+	return func(o *OrderTermOptions) {
+		o.Desc = false
+	}
+}
+
 // OrderAs returns an option to set the alias for the ordering.
 func OrderAs(as string) OrderTermOption {
 	return func(o *OrderTermOptions) {
