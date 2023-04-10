@@ -487,7 +487,7 @@ func (nq *NodeQuery) loadChildren(ctx context.Context, query *NodeQuery, nodes [
 		}
 	}
 	query.Where(predicate.Node(func(s *sql.Selector) {
-		s.Where(sql.InValues(node.ChildrenColumn, fks...))
+		s.Where(sql.InValues(s.C(node.ChildrenColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

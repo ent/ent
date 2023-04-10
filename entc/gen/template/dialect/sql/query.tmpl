@@ -216,7 +216,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 				query.withFKs = true
 			{{- end }}
 			query.Where(predicate.{{ $e.Type.Name }}(func(s *sql.Selector) {
-				s.Where(sql.InValues({{ $.Package }}.{{ $e.ColumnConstant }}, fks...))
+				s.Where(sql.InValues(s.C({{ $.Package }}.{{ $e.ColumnConstant }}), fks...))
 			}))
 			neighbors, err := query.All(ctx)
 			if err != nil {

@@ -564,7 +564,7 @@ func (pq *PetQuery) loadCars(ctx context.Context, query *CarQuery, nodes []*Pet,
 	}
 	query.withFKs = true
 	query.Where(predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.InValues(pet.CarsColumn, fks...))
+		s.Where(sql.InValues(s.C(pet.CarsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

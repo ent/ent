@@ -671,7 +671,7 @@ func (gq *GroupQuery) loadJoinedUsers(ctx context.Context, query *UserGroupQuery
 		}
 	}
 	query.Where(predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.InValues(group.JoinedUsersColumn, fks...))
+		s.Where(sql.InValues(s.C(group.JoinedUsersColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -698,7 +698,7 @@ func (gq *GroupQuery) loadGroupTags(ctx context.Context, query *GroupTagQuery, n
 		}
 	}
 	query.Where(predicate.GroupTag(func(s *sql.Selector) {
-		s.Where(sql.InValues(group.GroupTagsColumn, fks...))
+		s.Where(sql.InValues(s.C(group.GroupTagsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

@@ -478,7 +478,7 @@ func (isq *IntSIDQuery) loadChildren(ctx context.Context, query *IntSIDQuery, no
 	}
 	query.withFKs = true
 	query.Where(predicate.IntSID(func(s *sql.Selector) {
-		s.Where(sql.InValues(intsid.ChildrenColumn, fks...))
+		s.Where(sql.InValues(s.C(intsid.ChildrenColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

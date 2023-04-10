@@ -1271,7 +1271,7 @@ func (uq *UserQuery) loadJoinedGroups(ctx context.Context, query *UserGroupQuery
 		}
 	}
 	query.Where(predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.JoinedGroupsColumn, fks...))
+		s.Where(sql.InValues(s.C(user.JoinedGroupsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -1298,7 +1298,7 @@ func (uq *UserQuery) loadFriendships(ctx context.Context, query *FriendshipQuery
 		}
 	}
 	query.Where(predicate.Friendship(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.FriendshipsColumn, fks...))
+		s.Where(sql.InValues(s.C(user.FriendshipsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -1325,7 +1325,7 @@ func (uq *UserQuery) loadRelationship(ctx context.Context, query *RelationshipQu
 		}
 	}
 	query.Where(predicate.Relationship(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.RelationshipColumn, fks...))
+		s.Where(sql.InValues(s.C(user.RelationshipColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -1352,7 +1352,7 @@ func (uq *UserQuery) loadLikes(ctx context.Context, query *TweetLikeQuery, nodes
 		}
 	}
 	query.Where(predicate.TweetLike(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.LikesColumn, fks...))
+		s.Where(sql.InValues(s.C(user.LikesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -1379,7 +1379,7 @@ func (uq *UserQuery) loadUserTweets(ctx context.Context, query *UserTweetQuery, 
 		}
 	}
 	query.Where(predicate.UserTweet(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.UserTweetsColumn, fks...))
+		s.Where(sql.InValues(s.C(user.UserTweetsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -1406,7 +1406,7 @@ func (uq *UserQuery) loadRolesUsers(ctx context.Context, query *RoleUserQuery, n
 		}
 	}
 	query.Where(predicate.RoleUser(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.RolesUsersColumn, fks...))
+		s.Where(sql.InValues(s.C(user.RolesUsersColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

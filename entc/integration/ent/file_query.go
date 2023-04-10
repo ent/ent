@@ -589,7 +589,7 @@ func (fq *FileQuery) loadField(ctx context.Context, query *FieldTypeQuery, nodes
 	}
 	query.withFKs = true
 	query.Where(predicate.FieldType(func(s *sql.Selector) {
-		s.Where(sql.InValues(file.FieldColumn, fks...))
+		s.Where(sql.InValues(s.C(file.FieldColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

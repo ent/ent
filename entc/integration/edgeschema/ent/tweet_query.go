@@ -819,7 +819,7 @@ func (tq *TweetQuery) loadLikes(ctx context.Context, query *TweetLikeQuery, node
 		}
 	}
 	query.Where(predicate.TweetLike(func(s *sql.Selector) {
-		s.Where(sql.InValues(tweet.LikesColumn, fks...))
+		s.Where(sql.InValues(s.C(tweet.LikesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -846,7 +846,7 @@ func (tq *TweetQuery) loadTweetUser(ctx context.Context, query *UserTweetQuery, 
 		}
 	}
 	query.Where(predicate.UserTweet(func(s *sql.Selector) {
-		s.Where(sql.InValues(tweet.TweetUserColumn, fks...))
+		s.Where(sql.InValues(s.C(tweet.TweetUserColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -873,7 +873,7 @@ func (tq *TweetQuery) loadTweetTags(ctx context.Context, query *TweetTagQuery, n
 		}
 	}
 	query.Where(predicate.TweetTag(func(s *sql.Selector) {
-		s.Where(sql.InValues(tweet.TweetTagsColumn, fks...))
+		s.Where(sql.InValues(s.C(tweet.TweetTagsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

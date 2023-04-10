@@ -500,7 +500,7 @@ func (nq *NoteQuery) loadChildren(ctx context.Context, query *NoteQuery, nodes [
 	}
 	query.withFKs = true
 	query.Where(predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.InValues(note.ChildrenColumn, fks...))
+		s.Where(sql.InValues(s.C(note.ChildrenColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

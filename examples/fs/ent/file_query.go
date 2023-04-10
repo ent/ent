@@ -487,7 +487,7 @@ func (fq *FileQuery) loadChildren(ctx context.Context, query *FileQuery, nodes [
 		}
 	}
 	query.Where(predicate.File(func(s *sql.Selector) {
-		s.Where(sql.InValues(file.ChildrenColumn, fks...))
+		s.Where(sql.InValues(s.C(file.ChildrenColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

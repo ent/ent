@@ -604,7 +604,7 @@ func (bq *BlobQuery) loadBlobLinks(ctx context.Context, query *BlobLinkQuery, no
 		}
 	}
 	query.Where(predicate.BlobLink(func(s *sql.Selector) {
-		s.Where(sql.InValues(blob.BlobLinksColumn, fks...))
+		s.Where(sql.InValues(s.C(blob.BlobLinksColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

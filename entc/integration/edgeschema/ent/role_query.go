@@ -522,7 +522,7 @@ func (rq *RoleQuery) loadRolesUsers(ctx context.Context, query *RoleUserQuery, n
 		}
 	}
 	query.Where(predicate.RoleUser(func(s *sql.Selector) {
-		s.Where(sql.InValues(role.RolesUsersColumn, fks...))
+		s.Where(sql.InValues(s.C(role.RolesUsersColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

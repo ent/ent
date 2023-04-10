@@ -467,7 +467,7 @@ func (uq *UserQuery) loadPets(ctx context.Context, query *PetQuery, nodes []*Use
 	}
 	query.withFKs = true
 	query.Where(predicate.Pet(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.PetsColumn, fks...))
+		s.Where(sql.InValues(s.C(user.PetsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

@@ -500,7 +500,7 @@ func (pq *ProcessQuery) loadAttachedFiles(ctx context.Context, query *AttachedFi
 		}
 	}
 	query.Where(predicate.AttachedFile(func(s *sql.Selector) {
-		s.Where(sql.InValues(process.AttachedFilesColumn, fks...))
+		s.Where(sql.InValues(s.C(process.AttachedFilesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

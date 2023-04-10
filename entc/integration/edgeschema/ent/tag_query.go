@@ -671,7 +671,7 @@ func (tq *TagQuery) loadTweetTags(ctx context.Context, query *TweetTagQuery, nod
 		}
 	}
 	query.Where(predicate.TweetTag(func(s *sql.Selector) {
-		s.Where(sql.InValues(tag.TweetTagsColumn, fks...))
+		s.Where(sql.InValues(s.C(tag.TweetTagsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -698,7 +698,7 @@ func (tq *TagQuery) loadGroupTags(ctx context.Context, query *GroupTagQuery, nod
 		}
 	}
 	query.Where(predicate.GroupTag(func(s *sql.Selector) {
-		s.Where(sql.InValues(tag.GroupTagsColumn, fks...))
+		s.Where(sql.InValues(s.C(tag.GroupTagsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

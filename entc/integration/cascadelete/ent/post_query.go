@@ -489,7 +489,7 @@ func (pq *PostQuery) loadComments(ctx context.Context, query *CommentQuery, node
 		}
 	}
 	query.Where(predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.InValues(post.CommentsColumn, fks...))
+		s.Where(sql.InValues(s.C(post.CommentsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

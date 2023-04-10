@@ -479,7 +479,7 @@ func (dq *DeviceQuery) loadSessions(ctx context.Context, query *SessionQuery, no
 	}
 	query.withFKs = true
 	query.Where(predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.InValues(device.SessionsColumn, fks...))
+		s.Where(sql.InValues(s.C(device.SessionsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

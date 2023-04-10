@@ -418,7 +418,7 @@ func (cq *CityQuery) loadStreets(ctx context.Context, query *StreetQuery, nodes 
 	}
 	query.withFKs = true
 	query.Where(predicate.Street(func(s *sql.Selector) {
-		s.Where(sql.InValues(city.StreetsColumn, fks...))
+		s.Where(sql.InValues(s.C(city.StreetsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

@@ -585,7 +585,7 @@ func (gq *GroupQuery) loadFiles(ctx context.Context, query *FileQuery, nodes []*
 	}
 	query.withFKs = true
 	query.Where(predicate.File(func(s *sql.Selector) {
-		s.Where(sql.InValues(group.FilesColumn, fks...))
+		s.Where(sql.InValues(s.C(group.FilesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -616,7 +616,7 @@ func (gq *GroupQuery) loadBlocked(ctx context.Context, query *UserQuery, nodes [
 	}
 	query.withFKs = true
 	query.Where(predicate.User(func(s *sql.Selector) {
-		s.Where(sql.InValues(group.BlockedColumn, fks...))
+		s.Where(sql.InValues(s.C(group.BlockedColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
