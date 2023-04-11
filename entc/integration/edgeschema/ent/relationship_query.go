@@ -24,7 +24,7 @@ import (
 type RelationshipQuery struct {
 	config
 	ctx          *QueryContext
-	order        []relationship.Order
+	order        []relationship.OrderOption
 	inters       []Interceptor
 	predicates   []predicate.Relationship
 	withUser     *UserQuery
@@ -61,7 +61,7 @@ func (rq *RelationshipQuery) Unique(unique bool) *RelationshipQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (rq *RelationshipQuery) Order(o ...relationship.Order) *RelationshipQuery {
+func (rq *RelationshipQuery) Order(o ...relationship.OrderOption) *RelationshipQuery {
 	rq.order = append(rq.order, o...)
 	return rq
 }
@@ -249,7 +249,7 @@ func (rq *RelationshipQuery) Clone() *RelationshipQuery {
 	return &RelationshipQuery{
 		config:       rq.config,
 		ctx:          rq.ctx.Clone(),
-		order:        append([]relationship.Order{}, rq.order...),
+		order:        append([]relationship.OrderOption{}, rq.order...),
 		inters:       append([]Interceptor{}, rq.inters...),
 		predicates:   append([]predicate.Relationship{}, rq.predicates...),
 		withUser:     rq.withUser.Clone(),

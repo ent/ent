@@ -59,33 +59,33 @@ func ValidColumn(column string) bool {
 	return false
 }
 
-// Order defines the ordering method for the GroupTag queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the GroupTag queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByTagID orders the results by the tag_id field.
-func ByTagID(opts ...sql.OrderTermOption) Order {
+func ByTagID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTagID, opts...).ToFunc()
 }
 
 // ByGroupID orders the results by the group_id field.
-func ByGroupID(opts ...sql.OrderTermOption) Order {
+func ByGroupID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldGroupID, opts...).ToFunc()
 }
 
 // ByTagField orders the results by tag field.
-func ByTagField(field string, opts ...sql.OrderTermOption) Order {
+func ByTagField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newTagStep(), sql.OrderByField(field, opts...))
 	}
 }
 
 // ByGroupField orders the results by group field.
-func ByGroupField(field string, opts ...sql.OrderTermOption) Order {
+func ByGroupField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newGroupStep(), sql.OrderByField(field, opts...))
 	}

@@ -149,8 +149,8 @@ func EmploymentValidator(e Employment) error {
 	}
 }
 
-// Order defines the ordering method for the User queries.
-type Order func(*dsl.Traversal)
+// OrderOption defines the ordering options for the User queries.
+type OrderOption func(*dsl.Traversal)
 
 // Ptr returns a new pointer to the enum value.
 func (r Role) Ptr() *Role {

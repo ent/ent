@@ -35,6 +35,10 @@ func (Task) Fields() []ent.Field {
 			Optional(),
 		field.String("owner").
 			Optional(),
+		field.Int("order").
+			Optional(),
+		field.Int("order_option").
+			Optional(),
 	}
 }
 

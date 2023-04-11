@@ -17,7 +17,7 @@ const (
 	FieldID = "id"
 )
 
-// Order defines the ordering method for the Goods queries.
-type Order func(*dsl.Traversal)
+// OrderOption defines the ordering options for the Goods queries.
+type OrderOption func(*dsl.Traversal)
 
 // comment from another template.

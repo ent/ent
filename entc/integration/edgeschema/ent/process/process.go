@@ -57,37 +57,37 @@ func ValidColumn(column string) bool {
 	return false
 }
 
-// Order defines the ordering method for the Process queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the Process queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByFilesCount orders the results by files count.
-func ByFilesCount(opts ...sql.OrderTermOption) Order {
+func ByFilesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newFilesStep(), opts...)
 	}
 }
 
 // ByFiles orders the results by files terms.
-func ByFiles(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByFiles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newFilesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
 // ByAttachedFilesCount orders the results by attached_files count.
-func ByAttachedFilesCount(opts ...sql.OrderTermOption) Order {
+func ByAttachedFilesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newAttachedFilesStep(), opts...)
 	}
 }
 
 // ByAttachedFiles orders the results by attached_files terms.
-func ByAttachedFiles(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByAttachedFiles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newAttachedFilesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}

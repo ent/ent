@@ -23,7 +23,7 @@ import (
 type PetQuery struct {
 	config
 	ctx        *QueryContext
-	order      []pet.Order
+	order      []pet.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Pet
 	withOwner  *UserQuery
@@ -62,7 +62,7 @@ func (pq *PetQuery) Unique(unique bool) *PetQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (pq *PetQuery) Order(o ...pet.Order) *PetQuery {
+func (pq *PetQuery) Order(o ...pet.OrderOption) *PetQuery {
 	pq.order = append(pq.order, o...)
 	return pq
 }
@@ -278,7 +278,7 @@ func (pq *PetQuery) Clone() *PetQuery {
 	return &PetQuery{
 		config:     pq.config,
 		ctx:        pq.ctx.Clone(),
-		order:      append([]pet.Order{}, pq.order...),
+		order:      append([]pet.OrderOption{}, pq.order...),
 		inters:     append([]Interceptor{}, pq.inters...),
 		predicates: append([]predicate.Pet{}, pq.predicates...),
 		withOwner:  pq.withOwner.Clone(),

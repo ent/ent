@@ -95,14 +95,14 @@ func ValidColumn(column string) bool {
 {{ define "dialect/sql/meta/order" }}
 	{{ if $.HasOneFieldID }}
 		// {{ $.ID.OrderName }} orders the results by the {{ $.ID.Name }} field.
-		func {{ $.ID.OrderName }}(opts ...sql.OrderTermOption) Order {
+		func {{ $.ID.OrderName }}(opts ...sql.OrderTermOption) OrderOption {
 			return sql.OrderByField({{ $.ID.Constant }}, opts...).ToFunc()
 		}
 	{{ end }}
 	{{- range $f := $.Fields }}
 		{{- if $f.Type.Comparable }}
 			// {{ $f.OrderName }} orders the results by the {{ $f.Name }} field.
-			func {{ $f.OrderName }}(opts ...sql.OrderTermOption) Order {
+			func {{ $f.OrderName }}(opts ...sql.OrderTermOption) OrderOption {
 				return sql.OrderByField({{ $f.Constant }}, opts...).ToFunc()
 			}
 		{{- end }}
@@ -110,21 +110,21 @@ func ValidColumn(column string) bool {
 	{{- range $e := $.Edges }}
 		{{- if $e.Unique }}
 			// {{ $e.OrderFieldName }} orders the results by {{ $e.Name }} field.
-			func {{ $e.OrderFieldName }}(field string, opts ...sql.OrderTermOption) Order {
+			func {{ $e.OrderFieldName }}(field string, opts ...sql.OrderTermOption) OrderOption {
 				return func(s *sql.Selector) {
 					sqlgraph.OrderByNeighborTerms(s, new{{ pascal $e.Name }}Step(), sql.OrderByField(field, opts...))
 				}
 			}
 		{{- else }}
 			// {{ $e.OrderCountName }} orders the results by {{ $e.Name }} count.
-			func {{ $e.OrderCountName }}(opts ...sql.OrderTermOption) Order {
+			func {{ $e.OrderCountName }}(opts ...sql.OrderTermOption) OrderOption {
 				return func(s *sql.Selector) {
 					sqlgraph.OrderByNeighborsCount(s, new{{ pascal $e.Name }}Step(), opts...)
 				}
 			}
 
 			// {{ $e.OrderTermsName }} orders the results by {{ $e.Name }} terms.
-			func {{ $e.OrderTermsName }}(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+			func {{ $e.OrderTermsName }}(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 				return func(s *sql.Selector) {
 					sqlgraph.OrderByNeighborTerms(s, new{{ pascal $e.Name }}Step(), append([]sql.OrderTerm{term}, terms...)...)
 				}

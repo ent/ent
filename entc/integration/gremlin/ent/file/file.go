@@ -48,7 +48,7 @@ var (
 	SizeValidator func(int) error
 )
 
-// Order defines the ordering method for the File queries.
-type Order func(*dsl.Traversal)
+// OrderOption defines the ordering options for the File queries.
+type OrderOption func(*dsl.Traversal)
 
 // comment from another template.

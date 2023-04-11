@@ -24,7 +24,7 @@ import (
 type NoteQuery struct {
 	config
 	ctx          *QueryContext
-	order        []note.Order
+	order        []note.OrderOption
 	inters       []Interceptor
 	predicates   []predicate.Note
 	withParent   *NoteQuery
@@ -61,7 +61,7 @@ func (nq *NoteQuery) Unique(unique bool) *NoteQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (nq *NoteQuery) Order(o ...note.Order) *NoteQuery {
+func (nq *NoteQuery) Order(o ...note.OrderOption) *NoteQuery {
 	nq.order = append(nq.order, o...)
 	return nq
 }
@@ -299,7 +299,7 @@ func (nq *NoteQuery) Clone() *NoteQuery {
 	return &NoteQuery{
 		config:       nq.config,
 		ctx:          nq.ctx.Clone(),
-		order:        append([]note.Order{}, nq.order...),
+		order:        append([]note.OrderOption{}, nq.order...),
 		inters:       append([]Interceptor{}, nq.inters...),
 		predicates:   append([]predicate.Note{}, nq.predicates...),
 		withParent:   nq.withParent.Clone(),

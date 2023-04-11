@@ -32,7 +32,7 @@ var (
 	UpdateDefaultUpdateTime func() time.Time
 )
 
-// Order defines the ordering method for the License queries.
-type Order func(*dsl.Traversal)
+// OrderOption defines the ordering options for the License queries.
+type OrderOption func(*dsl.Traversal)
 
 // comment from another template.

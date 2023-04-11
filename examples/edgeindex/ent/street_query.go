@@ -23,7 +23,7 @@ import (
 type StreetQuery struct {
 	config
 	ctx        *QueryContext
-	order      []street.Order
+	order      []street.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Street
 	withCity   *CityQuery
@@ -59,7 +59,7 @@ func (sq *StreetQuery) Unique(unique bool) *StreetQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (sq *StreetQuery) Order(o ...street.Order) *StreetQuery {
+func (sq *StreetQuery) Order(o ...street.OrderOption) *StreetQuery {
 	sq.order = append(sq.order, o...)
 	return sq
 }
@@ -275,7 +275,7 @@ func (sq *StreetQuery) Clone() *StreetQuery {
 	return &StreetQuery{
 		config:     sq.config,
 		ctx:        sq.ctx.Clone(),
-		order:      append([]street.Order{}, sq.order...),
+		order:      append([]street.OrderOption{}, sq.order...),
 		inters:     append([]Interceptor{}, sq.inters...),
 		predicates: append([]predicate.Street{}, sq.predicates...),
 		withCity:   sq.withCity.Clone(),

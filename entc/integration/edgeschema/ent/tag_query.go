@@ -27,7 +27,7 @@ import (
 type TagQuery struct {
 	config
 	ctx           *QueryContext
-	order         []tag.Order
+	order         []tag.OrderOption
 	inters        []Interceptor
 	predicates    []predicate.Tag
 	withTweets    *TweetQuery
@@ -65,7 +65,7 @@ func (tq *TagQuery) Unique(unique bool) *TagQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (tq *TagQuery) Order(o ...tag.Order) *TagQuery {
+func (tq *TagQuery) Order(o ...tag.OrderOption) *TagQuery {
 	tq.order = append(tq.order, o...)
 	return tq
 }
@@ -347,7 +347,7 @@ func (tq *TagQuery) Clone() *TagQuery {
 	return &TagQuery{
 		config:        tq.config,
 		ctx:           tq.ctx.Clone(),
-		order:         append([]tag.Order{}, tq.order...),
+		order:         append([]tag.OrderOption{}, tq.order...),
 		inters:        append([]Interceptor{}, tq.inters...),
 		predicates:    append([]predicate.Tag{}, tq.predicates...),
 		withTweets:    tq.withTweets.Clone(),

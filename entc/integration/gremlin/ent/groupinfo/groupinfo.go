@@ -30,7 +30,7 @@ var (
 	DefaultMaxUsers int
 )
 
-// Order defines the ordering method for the GroupInfo queries.
-type Order func(*dsl.Traversal)
+// OrderOption defines the ordering options for the GroupInfo queries.
+type OrderOption func(*dsl.Traversal)
 
 // comment from another template.

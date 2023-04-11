@@ -24,7 +24,7 @@ import (
 type AttachedFileQuery struct {
 	config
 	ctx        *QueryContext
-	order      []attachedfile.Order
+	order      []attachedfile.OrderOption
 	inters     []Interceptor
 	predicates []predicate.AttachedFile
 	withFi     *FileQuery
@@ -60,7 +60,7 @@ func (afq *AttachedFileQuery) Unique(unique bool) *AttachedFileQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (afq *AttachedFileQuery) Order(o ...attachedfile.Order) *AttachedFileQuery {
+func (afq *AttachedFileQuery) Order(o ...attachedfile.OrderOption) *AttachedFileQuery {
 	afq.order = append(afq.order, o...)
 	return afq
 }
@@ -298,7 +298,7 @@ func (afq *AttachedFileQuery) Clone() *AttachedFileQuery {
 	return &AttachedFileQuery{
 		config:     afq.config,
 		ctx:        afq.ctx.Clone(),
-		order:      append([]attachedfile.Order{}, afq.order...),
+		order:      append([]attachedfile.OrderOption{}, afq.order...),
 		inters:     append([]Interceptor{}, afq.inters...),
 		predicates: append([]predicate.AttachedFile{}, afq.predicates...),
 		withFi:     afq.withFi.Clone(),

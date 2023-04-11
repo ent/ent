@@ -64,33 +64,33 @@ var (
 	DefaultID func() uuid.UUID
 )
 
-// Order defines the ordering method for the Pet queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the Pet queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByBestFriendID orders the results by the best_friend_id field.
-func ByBestFriendID(opts ...sql.OrderTermOption) Order {
+func ByBestFriendID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBestFriendID, opts...).ToFunc()
 }
 
 // ByOwnerID orders the results by the owner_id field.
-func ByOwnerID(opts ...sql.OrderTermOption) Order {
+func ByOwnerID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOwnerID, opts...).ToFunc()
 }
 
 // ByBestFriendField orders the results by best_friend field.
-func ByBestFriendField(field string, opts ...sql.OrderTermOption) Order {
+func ByBestFriendField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newBestFriendStep(), sql.OrderByField(field, opts...))
 	}
 }
 
 // ByOwnerField orders the results by owner field.
-func ByOwnerField(field string, opts ...sql.OrderTermOption) Order {
+func ByOwnerField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newOwnerStep(), sql.OrderByField(field, opts...))
 	}

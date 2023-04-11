@@ -24,7 +24,7 @@ import (
 type UserTweetQuery struct {
 	config
 	ctx        *QueryContext
-	order      []usertweet.Order
+	order      []usertweet.OrderOption
 	inters     []Interceptor
 	predicates []predicate.UserTweet
 	withUser   *UserQuery
@@ -60,7 +60,7 @@ func (utq *UserTweetQuery) Unique(unique bool) *UserTweetQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (utq *UserTweetQuery) Order(o ...usertweet.Order) *UserTweetQuery {
+func (utq *UserTweetQuery) Order(o ...usertweet.OrderOption) *UserTweetQuery {
 	utq.order = append(utq.order, o...)
 	return utq
 }
@@ -298,7 +298,7 @@ func (utq *UserTweetQuery) Clone() *UserTweetQuery {
 	return &UserTweetQuery{
 		config:     utq.config,
 		ctx:        utq.ctx.Clone(),
-		order:      append([]usertweet.Order{}, utq.order...),
+		order:      append([]usertweet.OrderOption{}, utq.order...),
 		inters:     append([]Interceptor{}, utq.inters...),
 		predicates: append([]predicate.UserTweet{}, utq.predicates...),
 		withUser:   utq.withUser.Clone(),

@@ -87,54 +87,54 @@ var (
 	DefaultID func() uuid.UUID
 )
 
-// Order defines the ordering method for the Blob queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the Blob queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByUUID orders the results by the uuid field.
-func ByUUID(opts ...sql.OrderTermOption) Order {
+func ByUUID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUUID, opts...).ToFunc()
 }
 
 // ByCount orders the results by the count field.
-func ByCount(opts ...sql.OrderTermOption) Order {
+func ByCount(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCount, opts...).ToFunc()
 }
 
 // ByParentField orders the results by parent field.
-func ByParentField(field string, opts ...sql.OrderTermOption) Order {
+func ByParentField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newParentStep(), sql.OrderByField(field, opts...))
 	}
 }
 
 // ByLinksCount orders the results by links count.
-func ByLinksCount(opts ...sql.OrderTermOption) Order {
+func ByLinksCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newLinksStep(), opts...)
 	}
 }
 
 // ByLinks orders the results by links terms.
-func ByLinks(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByLinks(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newLinksStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
 // ByBlobLinksCount orders the results by blob_links count.
-func ByBlobLinksCount(opts ...sql.OrderTermOption) Order {
+func ByBlobLinksCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newBlobLinksStep(), opts...)
 	}
 }
 
 // ByBlobLinks orders the results by blob_links terms.
-func ByBlobLinks(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByBlobLinks(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newBlobLinksStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}

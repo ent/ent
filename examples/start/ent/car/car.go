@@ -61,26 +61,26 @@ func ValidColumn(column string) bool {
 	return false
 }
 
-// Order defines the ordering method for the Car queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the Car queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByModel orders the results by the model field.
-func ByModel(opts ...sql.OrderTermOption) Order {
+func ByModel(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldModel, opts...).ToFunc()
 }
 
 // ByRegisteredAt orders the results by the registered_at field.
-func ByRegisteredAt(opts ...sql.OrderTermOption) Order {
+func ByRegisteredAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRegisteredAt, opts...).ToFunc()
 }
 
 // ByOwnerField orders the results by owner field.
-func ByOwnerField(field string, opts ...sql.OrderTermOption) Order {
+func ByOwnerField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newOwnerStep(), sql.OrderByField(field, opts...))
 	}

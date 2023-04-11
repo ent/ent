@@ -52,36 +52,36 @@ func ValidColumn(column string) bool {
 	return false
 }
 
-// Order defines the ordering method for the Comment queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the Comment queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByUniqueInt orders the results by the unique_int field.
-func ByUniqueInt(opts ...sql.OrderTermOption) Order {
+func ByUniqueInt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUniqueInt, opts...).ToFunc()
 }
 
 // ByUniqueFloat orders the results by the unique_float field.
-func ByUniqueFloat(opts ...sql.OrderTermOption) Order {
+func ByUniqueFloat(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUniqueFloat, opts...).ToFunc()
 }
 
 // ByNillableInt orders the results by the nillable_int field.
-func ByNillableInt(opts ...sql.OrderTermOption) Order {
+func ByNillableInt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNillableInt, opts...).ToFunc()
 }
 
 // ByTable orders the results by the table field.
-func ByTable(opts ...sql.OrderTermOption) Order {
+func ByTable(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTable, opts...).ToFunc()
 }
 
 // ByClient orders the results by the client field.
-func ByClient(opts ...sql.OrderTermOption) Order {
+func ByClient(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldClient, opts...).ToFunc()
 }
 

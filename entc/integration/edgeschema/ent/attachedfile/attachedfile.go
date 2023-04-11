@@ -69,38 +69,38 @@ var (
 	DefaultAttachTime func() time.Time
 )
 
-// Order defines the ordering method for the AttachedFile queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the AttachedFile queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByAttachTime orders the results by the attach_time field.
-func ByAttachTime(opts ...sql.OrderTermOption) Order {
+func ByAttachTime(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAttachTime, opts...).ToFunc()
 }
 
 // ByFID orders the results by the f_id field.
-func ByFID(opts ...sql.OrderTermOption) Order {
+func ByFID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldFID, opts...).ToFunc()
 }
 
 // ByProcID orders the results by the proc_id field.
-func ByProcID(opts ...sql.OrderTermOption) Order {
+func ByProcID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldProcID, opts...).ToFunc()
 }
 
 // ByFiField orders the results by fi field.
-func ByFiField(field string, opts ...sql.OrderTermOption) Order {
+func ByFiField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newFiStep(), sql.OrderByField(field, opts...))
 	}
 }
 
 // ByProcField orders the results by proc field.
-func ByProcField(field string, opts ...sql.OrderTermOption) Order {
+func ByProcField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newProcStep(), sql.OrderByField(field, opts...))
 	}

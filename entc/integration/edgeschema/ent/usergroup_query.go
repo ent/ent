@@ -24,7 +24,7 @@ import (
 type UserGroupQuery struct {
 	config
 	ctx        *QueryContext
-	order      []usergroup.Order
+	order      []usergroup.OrderOption
 	inters     []Interceptor
 	predicates []predicate.UserGroup
 	withUser   *UserQuery
@@ -60,7 +60,7 @@ func (ugq *UserGroupQuery) Unique(unique bool) *UserGroupQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (ugq *UserGroupQuery) Order(o ...usergroup.Order) *UserGroupQuery {
+func (ugq *UserGroupQuery) Order(o ...usergroup.OrderOption) *UserGroupQuery {
 	ugq.order = append(ugq.order, o...)
 	return ugq
 }
@@ -298,7 +298,7 @@ func (ugq *UserGroupQuery) Clone() *UserGroupQuery {
 	return &UserGroupQuery{
 		config:     ugq.config,
 		ctx:        ugq.ctx.Clone(),
-		order:      append([]usergroup.Order{}, ugq.order...),
+		order:      append([]usergroup.OrderOption{}, ugq.order...),
 		inters:     append([]Interceptor{}, ugq.inters...),
 		predicates: append([]predicate.UserGroup{}, ugq.predicates...),
 		withUser:   ugq.withUser.Clone(),

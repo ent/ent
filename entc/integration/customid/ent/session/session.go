@@ -63,16 +63,16 @@ var (
 	IDValidator func([]byte) error
 )
 
-// Order defines the ordering method for the Session queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the Session queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByDeviceField orders the results by device field.
-func ByDeviceField(field string, opts ...sql.OrderTermOption) Order {
+func ByDeviceField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newDeviceStep(), sql.OrderByField(field, opts...))
 	}

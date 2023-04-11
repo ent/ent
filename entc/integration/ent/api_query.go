@@ -23,7 +23,7 @@ import (
 type APIQuery struct {
 	config
 	ctx        *QueryContext
-	order      []api.Order
+	order      []api.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Api
 	modifiers  []func(*sql.Selector)
@@ -58,7 +58,7 @@ func (aq *APIQuery) Unique(unique bool) *APIQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (aq *APIQuery) Order(o ...api.Order) *APIQuery {
+func (aq *APIQuery) Order(o ...api.OrderOption) *APIQuery {
 	aq.order = append(aq.order, o...)
 	return aq
 }
@@ -252,7 +252,7 @@ func (aq *APIQuery) Clone() *APIQuery {
 	return &APIQuery{
 		config:     aq.config,
 		ctx:        aq.ctx.Clone(),
-		order:      append([]api.Order{}, aq.order...),
+		order:      append([]api.OrderOption{}, aq.order...),
 		inters:     append([]Interceptor{}, aq.inters...),
 		predicates: append([]predicate.Api{}, aq.predicates...),
 		// clone intermediate query.

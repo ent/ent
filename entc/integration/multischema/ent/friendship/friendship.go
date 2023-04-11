@@ -74,43 +74,43 @@ var (
 	DefaultCreatedAt func() time.Time
 )
 
-// Order defines the ordering method for the Friendship queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the Friendship queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByWeight orders the results by the weight field.
-func ByWeight(opts ...sql.OrderTermOption) Order {
+func ByWeight(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldWeight, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.
-func ByCreatedAt(opts ...sql.OrderTermOption) Order {
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
 }
 
 // ByUserID orders the results by the user_id field.
-func ByUserID(opts ...sql.OrderTermOption) Order {
+func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
 }
 
 // ByFriendID orders the results by the friend_id field.
-func ByFriendID(opts ...sql.OrderTermOption) Order {
+func ByFriendID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldFriendID, opts...).ToFunc()
 }
 
 // ByUserField orders the results by user field.
-func ByUserField(field string, opts ...sql.OrderTermOption) Order {
+func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
 	}
 }
 
 // ByFriendField orders the results by friend field.
-func ByFriendField(field string, opts ...sql.OrderTermOption) Order {
+func ByFriendField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newFriendStep(), sql.OrderByField(field, opts...))
 	}

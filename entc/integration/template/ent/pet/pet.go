@@ -61,26 +61,26 @@ func ValidColumn(column string) bool {
 	return false
 }
 
-// Order defines the ordering method for the Pet queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the Pet queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByAge orders the results by the age field.
-func ByAge(opts ...sql.OrderTermOption) Order {
+func ByAge(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAge, opts...).ToFunc()
 }
 
 // ByLicensedAt orders the results by the licensed_at field.
-func ByLicensedAt(opts ...sql.OrderTermOption) Order {
+func ByLicensedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLicensedAt, opts...).ToFunc()
 }
 
 // ByOwnerField orders the results by owner field.
-func ByOwnerField(field string, opts ...sql.OrderTermOption) Order {
+func ByOwnerField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newOwnerStep(), sql.OrderByField(field, opts...))
 	}

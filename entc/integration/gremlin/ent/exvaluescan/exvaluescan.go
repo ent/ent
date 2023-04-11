@@ -48,7 +48,7 @@ var (
 	}
 )
 
-// Order defines the ordering method for the ExValueScan queries.
-type Order func(*dsl.Traversal)
+// OrderOption defines the ordering options for the ExValueScan queries.
+type OrderOption func(*dsl.Traversal)
 
 // comment from another template.

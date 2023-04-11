@@ -29,7 +29,7 @@ const (
 	FieldClient = "client"
 )
 
-// Order defines the ordering method for the Comment queries.
-type Order func(*dsl.Traversal)
+// OrderOption defines the ordering options for the Comment queries.
+type OrderOption func(*dsl.Traversal)
 
 // comment from another template.

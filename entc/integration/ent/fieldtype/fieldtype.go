@@ -333,306 +333,306 @@ func PriorityValidator(pr role.Priority) error {
 	}
 }
 
-// Order defines the ordering method for the FieldType queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the FieldType queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByInt orders the results by the int field.
-func ByInt(opts ...sql.OrderTermOption) Order {
+func ByInt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldInt, opts...).ToFunc()
 }
 
 // ByInt8 orders the results by the int8 field.
-func ByInt8(opts ...sql.OrderTermOption) Order {
+func ByInt8(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldInt8, opts...).ToFunc()
 }
 
 // ByInt16 orders the results by the int16 field.
-func ByInt16(opts ...sql.OrderTermOption) Order {
+func ByInt16(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldInt16, opts...).ToFunc()
 }
 
 // ByInt32 orders the results by the int32 field.
-func ByInt32(opts ...sql.OrderTermOption) Order {
+func ByInt32(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldInt32, opts...).ToFunc()
 }
 
 // ByInt64 orders the results by the int64 field.
-func ByInt64(opts ...sql.OrderTermOption) Order {
+func ByInt64(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldInt64, opts...).ToFunc()
 }
 
 // ByOptionalInt orders the results by the optional_int field.
-func ByOptionalInt(opts ...sql.OrderTermOption) Order {
+func ByOptionalInt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOptionalInt, opts...).ToFunc()
 }
 
 // ByOptionalInt8 orders the results by the optional_int8 field.
-func ByOptionalInt8(opts ...sql.OrderTermOption) Order {
+func ByOptionalInt8(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOptionalInt8, opts...).ToFunc()
 }
 
 // ByOptionalInt16 orders the results by the optional_int16 field.
-func ByOptionalInt16(opts ...sql.OrderTermOption) Order {
+func ByOptionalInt16(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOptionalInt16, opts...).ToFunc()
 }
 
 // ByOptionalInt32 orders the results by the optional_int32 field.
-func ByOptionalInt32(opts ...sql.OrderTermOption) Order {
+func ByOptionalInt32(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOptionalInt32, opts...).ToFunc()
 }
 
 // ByOptionalInt64 orders the results by the optional_int64 field.
-func ByOptionalInt64(opts ...sql.OrderTermOption) Order {
+func ByOptionalInt64(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOptionalInt64, opts...).ToFunc()
 }
 
 // ByNillableInt orders the results by the nillable_int field.
-func ByNillableInt(opts ...sql.OrderTermOption) Order {
+func ByNillableInt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNillableInt, opts...).ToFunc()
 }
 
 // ByNillableInt8 orders the results by the nillable_int8 field.
-func ByNillableInt8(opts ...sql.OrderTermOption) Order {
+func ByNillableInt8(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNillableInt8, opts...).ToFunc()
 }
 
 // ByNillableInt16 orders the results by the nillable_int16 field.
-func ByNillableInt16(opts ...sql.OrderTermOption) Order {
+func ByNillableInt16(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNillableInt16, opts...).ToFunc()
 }
 
 // ByNillableInt32 orders the results by the nillable_int32 field.
-func ByNillableInt32(opts ...sql.OrderTermOption) Order {
+func ByNillableInt32(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNillableInt32, opts...).ToFunc()
 }
 
 // ByNillableInt64 orders the results by the nillable_int64 field.
-func ByNillableInt64(opts ...sql.OrderTermOption) Order {
+func ByNillableInt64(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNillableInt64, opts...).ToFunc()
 }
 
 // ByValidateOptionalInt32 orders the results by the validate_optional_int32 field.
-func ByValidateOptionalInt32(opts ...sql.OrderTermOption) Order {
+func ByValidateOptionalInt32(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldValidateOptionalInt32, opts...).ToFunc()
 }
 
 // ByOptionalUint orders the results by the optional_uint field.
-func ByOptionalUint(opts ...sql.OrderTermOption) Order {
+func ByOptionalUint(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOptionalUint, opts...).ToFunc()
 }
 
 // ByOptionalUint8 orders the results by the optional_uint8 field.
-func ByOptionalUint8(opts ...sql.OrderTermOption) Order {
+func ByOptionalUint8(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOptionalUint8, opts...).ToFunc()
 }
 
 // ByOptionalUint16 orders the results by the optional_uint16 field.
-func ByOptionalUint16(opts ...sql.OrderTermOption) Order {
+func ByOptionalUint16(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOptionalUint16, opts...).ToFunc()
 }
 
 // ByOptionalUint32 orders the results by the optional_uint32 field.
-func ByOptionalUint32(opts ...sql.OrderTermOption) Order {
+func ByOptionalUint32(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOptionalUint32, opts...).ToFunc()
 }
 
 // ByOptionalUint64 orders the results by the optional_uint64 field.
-func ByOptionalUint64(opts ...sql.OrderTermOption) Order {
+func ByOptionalUint64(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOptionalUint64, opts...).ToFunc()
 }
 
 // ByState orders the results by the state field.
-func ByState(opts ...sql.OrderTermOption) Order {
+func ByState(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldState, opts...).ToFunc()
 }
 
 // ByOptionalFloat orders the results by the optional_float field.
-func ByOptionalFloat(opts ...sql.OrderTermOption) Order {
+func ByOptionalFloat(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOptionalFloat, opts...).ToFunc()
 }
 
 // ByOptionalFloat32 orders the results by the optional_float32 field.
-func ByOptionalFloat32(opts ...sql.OrderTermOption) Order {
+func ByOptionalFloat32(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOptionalFloat32, opts...).ToFunc()
 }
 
 // ByText orders the results by the text field.
-func ByText(opts ...sql.OrderTermOption) Order {
+func ByText(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldText, opts...).ToFunc()
 }
 
 // ByDatetime orders the results by the datetime field.
-func ByDatetime(opts ...sql.OrderTermOption) Order {
+func ByDatetime(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDatetime, opts...).ToFunc()
 }
 
 // ByDecimal orders the results by the decimal field.
-func ByDecimal(opts ...sql.OrderTermOption) Order {
+func ByDecimal(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDecimal, opts...).ToFunc()
 }
 
 // ByLinkOther orders the results by the link_other field.
-func ByLinkOther(opts ...sql.OrderTermOption) Order {
+func ByLinkOther(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLinkOther, opts...).ToFunc()
 }
 
 // ByLinkOtherFunc orders the results by the link_other_func field.
-func ByLinkOtherFunc(opts ...sql.OrderTermOption) Order {
+func ByLinkOtherFunc(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLinkOtherFunc, opts...).ToFunc()
 }
 
 // ByMAC orders the results by the mac field.
-func ByMAC(opts ...sql.OrderTermOption) Order {
+func ByMAC(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMAC, opts...).ToFunc()
 }
 
 // ByStringArray orders the results by the string_array field.
-func ByStringArray(opts ...sql.OrderTermOption) Order {
+func ByStringArray(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStringArray, opts...).ToFunc()
 }
 
 // ByPassword orders the results by the password field.
-func ByPassword(opts ...sql.OrderTermOption) Order {
+func ByPassword(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPassword, opts...).ToFunc()
 }
 
 // ByStringScanner orders the results by the string_scanner field.
-func ByStringScanner(opts ...sql.OrderTermOption) Order {
+func ByStringScanner(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStringScanner, opts...).ToFunc()
 }
 
 // ByDuration orders the results by the duration field.
-func ByDuration(opts ...sql.OrderTermOption) Order {
+func ByDuration(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDuration, opts...).ToFunc()
 }
 
 // ByDir orders the results by the dir field.
-func ByDir(opts ...sql.OrderTermOption) Order {
+func ByDir(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDir, opts...).ToFunc()
 }
 
 // ByNdir orders the results by the ndir field.
-func ByNdir(opts ...sql.OrderTermOption) Order {
+func ByNdir(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNdir, opts...).ToFunc()
 }
 
 // ByStr orders the results by the str field.
-func ByStr(opts ...sql.OrderTermOption) Order {
+func ByStr(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStr, opts...).ToFunc()
 }
 
 // ByNullStr orders the results by the null_str field.
-func ByNullStr(opts ...sql.OrderTermOption) Order {
+func ByNullStr(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNullStr, opts...).ToFunc()
 }
 
 // ByLink orders the results by the link field.
-func ByLink(opts ...sql.OrderTermOption) Order {
+func ByLink(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLink, opts...).ToFunc()
 }
 
 // ByNullLink orders the results by the null_link field.
-func ByNullLink(opts ...sql.OrderTermOption) Order {
+func ByNullLink(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNullLink, opts...).ToFunc()
 }
 
 // ByActive orders the results by the active field.
-func ByActive(opts ...sql.OrderTermOption) Order {
+func ByActive(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldActive, opts...).ToFunc()
 }
 
 // ByNullActive orders the results by the null_active field.
-func ByNullActive(opts ...sql.OrderTermOption) Order {
+func ByNullActive(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNullActive, opts...).ToFunc()
 }
 
 // ByDeleted orders the results by the deleted field.
-func ByDeleted(opts ...sql.OrderTermOption) Order {
+func ByDeleted(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeleted, opts...).ToFunc()
 }
 
 // ByDeletedAt orders the results by the deleted_at field.
-func ByDeletedAt(opts ...sql.OrderTermOption) Order {
+func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
 }
 
 // ByNullInt64 orders the results by the null_int64 field.
-func ByNullInt64(opts ...sql.OrderTermOption) Order {
+func ByNullInt64(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNullInt64, opts...).ToFunc()
 }
 
 // BySchemaInt orders the results by the schema_int field.
-func BySchemaInt(opts ...sql.OrderTermOption) Order {
+func BySchemaInt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSchemaInt, opts...).ToFunc()
 }
 
 // BySchemaInt8 orders the results by the schema_int8 field.
-func BySchemaInt8(opts ...sql.OrderTermOption) Order {
+func BySchemaInt8(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSchemaInt8, opts...).ToFunc()
 }
 
 // BySchemaInt64 orders the results by the schema_int64 field.
-func BySchemaInt64(opts ...sql.OrderTermOption) Order {
+func BySchemaInt64(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSchemaInt64, opts...).ToFunc()
 }
 
 // BySchemaFloat orders the results by the schema_float field.
-func BySchemaFloat(opts ...sql.OrderTermOption) Order {
+func BySchemaFloat(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSchemaFloat, opts...).ToFunc()
 }
 
 // BySchemaFloat32 orders the results by the schema_float32 field.
-func BySchemaFloat32(opts ...sql.OrderTermOption) Order {
+func BySchemaFloat32(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSchemaFloat32, opts...).ToFunc()
 }
 
 // ByNullFloat orders the results by the null_float field.
-func ByNullFloat(opts ...sql.OrderTermOption) Order {
+func ByNullFloat(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNullFloat, opts...).ToFunc()
 }
 
 // ByRole orders the results by the role field.
-func ByRole(opts ...sql.OrderTermOption) Order {
+func ByRole(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRole, opts...).ToFunc()
 }
 
 // ByPriority orders the results by the priority field.
-func ByPriority(opts ...sql.OrderTermOption) Order {
+func ByPriority(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPriority, opts...).ToFunc()
 }
 
 // ByOptionalUUID orders the results by the optional_uuid field.
-func ByOptionalUUID(opts ...sql.OrderTermOption) Order {
+func ByOptionalUUID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOptionalUUID, opts...).ToFunc()
 }
 
 // ByNillableUUID orders the results by the nillable_uuid field.
-func ByNillableUUID(opts ...sql.OrderTermOption) Order {
+func ByNillableUUID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNillableUUID, opts...).ToFunc()
 }
 
 // ByVstring orders the results by the vstring field.
-func ByVstring(opts ...sql.OrderTermOption) Order {
+func ByVstring(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldVstring, opts...).ToFunc()
 }
 
 // ByTriple orders the results by the triple field.
-func ByTriple(opts ...sql.OrderTermOption) Order {
+func ByTriple(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTriple, opts...).ToFunc()
 }
 
 // ByBigInt orders the results by the big_int field.
-func ByBigInt(opts ...sql.OrderTermOption) Order {
+func ByBigInt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBigInt, opts...).ToFunc()
 }
 
 // ByPasswordOther orders the results by the password_other field.
-func ByPasswordOther(opts ...sql.OrderTermOption) Order {
+func ByPasswordOther(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPasswordOther, opts...).ToFunc()
 }
 

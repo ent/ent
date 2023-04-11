@@ -22,7 +22,7 @@ import (
 type CustomTypeQuery struct {
 	config
 	ctx        *QueryContext
-	order      []customtype.Order
+	order      []customtype.OrderOption
 	inters     []Interceptor
 	predicates []predicate.CustomType
 	// intermediate query (i.e. traversal path).
@@ -56,7 +56,7 @@ func (ctq *CustomTypeQuery) Unique(unique bool) *CustomTypeQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (ctq *CustomTypeQuery) Order(o ...customtype.Order) *CustomTypeQuery {
+func (ctq *CustomTypeQuery) Order(o ...customtype.OrderOption) *CustomTypeQuery {
 	ctq.order = append(ctq.order, o...)
 	return ctq
 }
@@ -250,7 +250,7 @@ func (ctq *CustomTypeQuery) Clone() *CustomTypeQuery {
 	return &CustomTypeQuery{
 		config:     ctq.config,
 		ctx:        ctq.ctx.Clone(),
-		order:      append([]customtype.Order{}, ctq.order...),
+		order:      append([]customtype.OrderOption{}, ctq.order...),
 		inters:     append([]Interceptor{}, ctq.inters...),
 		predicates: append([]predicate.CustomType{}, ctq.predicates...),
 		// clone intermediate query.

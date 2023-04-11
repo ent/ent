@@ -23,7 +23,7 @@ import (
 type LinkQuery struct {
 	config
 	ctx        *QueryContext
-	order      []link.Order
+	order      []link.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Link
 	// intermediate query (i.e. traversal path).
@@ -57,7 +57,7 @@ func (lq *LinkQuery) Unique(unique bool) *LinkQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (lq *LinkQuery) Order(o ...link.Order) *LinkQuery {
+func (lq *LinkQuery) Order(o ...link.OrderOption) *LinkQuery {
 	lq.order = append(lq.order, o...)
 	return lq
 }
@@ -251,7 +251,7 @@ func (lq *LinkQuery) Clone() *LinkQuery {
 	return &LinkQuery{
 		config:     lq.config,
 		ctx:        lq.ctx.Clone(),
-		order:      append([]link.Order{}, lq.order...),
+		order:      append([]link.OrderOption{}, lq.order...),
 		inters:     append([]Interceptor{}, lq.inters...),
 		predicates: append([]predicate.Link{}, lq.predicates...),
 		// clone intermediate query.

@@ -36,7 +36,7 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 )
 
-// Order defines the ordering method for the Node queries.
-type Order func(*dsl.Traversal)
+// OrderOption defines the ordering options for the Node queries.
+type OrderOption func(*dsl.Traversal)
 
 // comment from another template.

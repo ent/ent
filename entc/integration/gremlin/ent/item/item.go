@@ -28,7 +28,7 @@ var (
 	IDValidator func(string) error
 )
 
-// Order defines the ordering method for the Item queries.
-type Order func(*dsl.Traversal)
+// OrderOption defines the ordering options for the Item queries.
+type OrderOption func(*dsl.Traversal)
 
 // comment from another template.

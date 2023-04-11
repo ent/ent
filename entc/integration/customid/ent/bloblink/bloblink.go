@@ -68,33 +68,33 @@ var (
 	DefaultCreatedAt func() time.Time
 )
 
-// Order defines the ordering method for the BlobLink queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the BlobLink queries.
+type OrderOption func(*sql.Selector)
 
 // ByCreatedAt orders the results by the created_at field.
-func ByCreatedAt(opts ...sql.OrderTermOption) Order {
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
 }
 
 // ByBlobID orders the results by the blob_id field.
-func ByBlobID(opts ...sql.OrderTermOption) Order {
+func ByBlobID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBlobID, opts...).ToFunc()
 }
 
 // ByLinkID orders the results by the link_id field.
-func ByLinkID(opts ...sql.OrderTermOption) Order {
+func ByLinkID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLinkID, opts...).ToFunc()
 }
 
 // ByBlobField orders the results by blob field.
-func ByBlobField(field string, opts ...sql.OrderTermOption) Order {
+func ByBlobField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newBlobStep(), sql.OrderByField(field, opts...))
 	}
 }
 
 // ByLinkField orders the results by link field.
-func ByLinkField(field string, opts ...sql.OrderTermOption) Order {
+func ByLinkField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newLinkStep(), sql.OrderByField(field, opts...))
 	}

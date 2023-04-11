@@ -42,7 +42,7 @@ var (
 	DefaultTrained bool
 )
 
-// Order defines the ordering method for the Pet queries.
-type Order func(*dsl.Traversal)
+// OrderOption defines the ordering options for the Pet queries.
+type OrderOption func(*dsl.Traversal)
 
 // comment from another template.

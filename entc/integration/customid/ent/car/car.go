@@ -73,31 +73,31 @@ var (
 	IDValidator func(int) error
 )
 
-// Order defines the ordering method for the Car queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the Car queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByBeforeID orders the results by the before_id field.
-func ByBeforeID(opts ...sql.OrderTermOption) Order {
+func ByBeforeID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBeforeID, opts...).ToFunc()
 }
 
 // ByAfterID orders the results by the after_id field.
-func ByAfterID(opts ...sql.OrderTermOption) Order {
+func ByAfterID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAfterID, opts...).ToFunc()
 }
 
 // ByModel orders the results by the model field.
-func ByModel(opts ...sql.OrderTermOption) Order {
+func ByModel(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldModel, opts...).ToFunc()
 }
 
 // ByOwnerField orders the results by owner field.
-func ByOwnerField(field string, opts ...sql.OrderTermOption) Order {
+func ByOwnerField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newOwnerStep(), sql.OrderByField(field, opts...))
 	}

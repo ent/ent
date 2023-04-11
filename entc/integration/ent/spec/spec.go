@@ -48,23 +48,23 @@ func ValidColumn(column string) bool {
 	return false
 }
 
-// Order defines the ordering method for the Spec queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the Spec queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByCardCount orders the results by card count.
-func ByCardCount(opts ...sql.OrderTermOption) Order {
+func ByCardCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newCardStep(), opts...)
 	}
 }
 
 // ByCard orders the results by card terms.
-func ByCard(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByCard(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newCardStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}

@@ -50,26 +50,26 @@ func ValidColumn(column string) bool {
 	return false
 }
 
-// Order defines the ordering method for the Post queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the Post queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByText orders the results by the text field.
-func ByText(opts ...sql.OrderTermOption) Order {
+func ByText(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldText, opts...).ToFunc()
 }
 
 // ByAuthorID orders the results by the author_id field.
-func ByAuthorID(opts ...sql.OrderTermOption) Order {
+func ByAuthorID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAuthorID, opts...).ToFunc()
 }
 
 // ByAuthorField orders the results by author field.
-func ByAuthorField(field string, opts ...sql.OrderTermOption) Order {
+func ByAuthorField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newAuthorStep(), sql.OrderByField(field, opts...))
 	}

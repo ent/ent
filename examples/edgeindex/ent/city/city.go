@@ -47,28 +47,28 @@ func ValidColumn(column string) bool {
 	return false
 }
 
-// Order defines the ordering method for the City queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the City queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) Order {
+func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
 // ByStreetsCount orders the results by streets count.
-func ByStreetsCount(opts ...sql.OrderTermOption) Order {
+func ByStreetsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newStreetsStep(), opts...)
 	}
 }
 
 // ByStreets orders the results by streets terms.
-func ByStreets(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByStreets(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newStreetsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}

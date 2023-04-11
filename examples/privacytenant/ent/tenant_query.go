@@ -23,7 +23,7 @@ import (
 type TenantQuery struct {
 	config
 	ctx        *QueryContext
-	order      []tenant.Order
+	order      []tenant.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Tenant
 	// intermediate query (i.e. traversal path).
@@ -57,7 +57,7 @@ func (tq *TenantQuery) Unique(unique bool) *TenantQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (tq *TenantQuery) Order(o ...tenant.Order) *TenantQuery {
+func (tq *TenantQuery) Order(o ...tenant.OrderOption) *TenantQuery {
 	tq.order = append(tq.order, o...)
 	return tq
 }
@@ -251,7 +251,7 @@ func (tq *TenantQuery) Clone() *TenantQuery {
 	return &TenantQuery{
 		config:     tq.config,
 		ctx:        tq.ctx.Clone(),
-		order:      append([]tenant.Order{}, tq.order...),
+		order:      append([]tenant.OrderOption{}, tq.order...),
 		inters:     append([]Interceptor{}, tq.inters...),
 		predicates: append([]predicate.Tenant{}, tq.predicates...),
 		// clone intermediate query.

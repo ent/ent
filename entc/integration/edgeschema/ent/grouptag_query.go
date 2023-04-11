@@ -24,7 +24,7 @@ import (
 type GroupTagQuery struct {
 	config
 	ctx        *QueryContext
-	order      []grouptag.Order
+	order      []grouptag.OrderOption
 	inters     []Interceptor
 	predicates []predicate.GroupTag
 	withTag    *TagQuery
@@ -60,7 +60,7 @@ func (gtq *GroupTagQuery) Unique(unique bool) *GroupTagQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (gtq *GroupTagQuery) Order(o ...grouptag.Order) *GroupTagQuery {
+func (gtq *GroupTagQuery) Order(o ...grouptag.OrderOption) *GroupTagQuery {
 	gtq.order = append(gtq.order, o...)
 	return gtq
 }
@@ -298,7 +298,7 @@ func (gtq *GroupTagQuery) Clone() *GroupTagQuery {
 	return &GroupTagQuery{
 		config:     gtq.config,
 		ctx:        gtq.ctx.Clone(),
-		order:      append([]grouptag.Order{}, gtq.order...),
+		order:      append([]grouptag.OrderOption{}, gtq.order...),
 		inters:     append([]Interceptor{}, gtq.inters...),
 		predicates: append([]predicate.GroupTag{}, gtq.predicates...),
 		withTag:    gtq.withTag.Clone(),

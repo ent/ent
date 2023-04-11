@@ -23,7 +23,7 @@ import (
 type InfoQuery struct {
 	config
 	ctx        *QueryContext
-	order      []info.Order
+	order      []info.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Info
 	withUser   *UserQuery
@@ -58,7 +58,7 @@ func (iq *InfoQuery) Unique(unique bool) *InfoQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (iq *InfoQuery) Order(o ...info.Order) *InfoQuery {
+func (iq *InfoQuery) Order(o ...info.OrderOption) *InfoQuery {
 	iq.order = append(iq.order, o...)
 	return iq
 }
@@ -274,7 +274,7 @@ func (iq *InfoQuery) Clone() *InfoQuery {
 	return &InfoQuery{
 		config:     iq.config,
 		ctx:        iq.ctx.Clone(),
-		order:      append([]info.Order{}, iq.order...),
+		order:      append([]info.OrderOption{}, iq.order...),
 		inters:     append([]Interceptor{}, iq.inters...),
 		predicates: append([]predicate.Info{}, iq.predicates...),
 		withUser:   iq.withUser.Clone(),

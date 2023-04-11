@@ -49,28 +49,28 @@ func ValidColumn(column string) bool {
 	return false
 }
 
-// Order defines the ordering method for the Blog queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the Blog queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByOid orders the results by the oid field.
-func ByOid(opts ...sql.OrderTermOption) Order {
+func ByOid(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOid, opts...).ToFunc()
 }
 
 // ByAdminsCount orders the results by admins count.
-func ByAdminsCount(opts ...sql.OrderTermOption) Order {
+func ByAdminsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newAdminsStep(), opts...)
 	}
 }
 
 // ByAdmins orders the results by admins terms.
-func ByAdmins(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByAdmins(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newAdminsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}

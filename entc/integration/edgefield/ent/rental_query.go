@@ -25,7 +25,7 @@ import (
 type RentalQuery struct {
 	config
 	ctx        *QueryContext
-	order      []rental.Order
+	order      []rental.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Rental
 	withUser   *UserQuery
@@ -61,7 +61,7 @@ func (rq *RentalQuery) Unique(unique bool) *RentalQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (rq *RentalQuery) Order(o ...rental.Order) *RentalQuery {
+func (rq *RentalQuery) Order(o ...rental.OrderOption) *RentalQuery {
 	rq.order = append(rq.order, o...)
 	return rq
 }
@@ -299,7 +299,7 @@ func (rq *RentalQuery) Clone() *RentalQuery {
 	return &RentalQuery{
 		config:     rq.config,
 		ctx:        rq.ctx.Clone(),
-		order:      append([]rental.Order{}, rq.order...),
+		order:      append([]rental.OrderOption{}, rq.order...),
 		inters:     append([]Interceptor{}, rq.inters...),
 		predicates: append([]predicate.Rental{}, rq.predicates...),
 		withUser:   rq.withUser.Clone(),

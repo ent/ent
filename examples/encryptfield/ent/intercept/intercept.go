@@ -103,7 +103,7 @@ func (f TraverseUser) Traverse(ctx context.Context, q ent.Query) error {
 func NewQuery(q ent.Query) (Query, error) {
 	switch q := q.(type) {
 	case *ent.UserQuery:
-		return &query[*ent.UserQuery, predicate.User, user.Order]{typ: ent.TypeUser, tq: q}, nil
+		return &query[*ent.UserQuery, predicate.User, user.OrderOption]{typ: ent.TypeUser, tq: q}, nil
 	default:
 		return nil, fmt.Errorf("unknown query type %T", q)
 	}
