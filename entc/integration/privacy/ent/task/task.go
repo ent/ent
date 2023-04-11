@@ -122,50 +122,50 @@ func StatusValidator(s Status) error {
 	}
 }
 
-// Order defines the ordering method for the Task queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the Task queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByTitle orders the results by the title field.
-func ByTitle(opts ...sql.OrderTermOption) Order {
+func ByTitle(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTitle, opts...).ToFunc()
 }
 
 // ByDescription orders the results by the description field.
-func ByDescription(opts ...sql.OrderTermOption) Order {
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
 // ByStatus orders the results by the status field.
-func ByStatus(opts ...sql.OrderTermOption) Order {
+func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
 }
 
 // ByUUID orders the results by the uuid field.
-func ByUUID(opts ...sql.OrderTermOption) Order {
+func ByUUID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUUID, opts...).ToFunc()
 }
 
 // ByTeamsCount orders the results by teams count.
-func ByTeamsCount(opts ...sql.OrderTermOption) Order {
+func ByTeamsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newTeamsStep(), opts...)
 	}
 }
 
 // ByTeams orders the results by teams terms.
-func ByTeams(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByTeams(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newTeamsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
 // ByOwnerField orders the results by owner field.
-func ByOwnerField(field string, opts ...sql.OrderTermOption) Order {
+func ByOwnerField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newOwnerStep(), sql.OrderByField(field, opts...))
 	}

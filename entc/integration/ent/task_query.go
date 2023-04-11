@@ -23,7 +23,7 @@ import (
 type TaskQuery struct {
 	config
 	ctx        *QueryContext
-	order      []enttask.Order
+	order      []enttask.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Task
 	modifiers  []func(*sql.Selector)
@@ -58,7 +58,7 @@ func (tq *TaskQuery) Unique(unique bool) *TaskQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (tq *TaskQuery) Order(o ...enttask.Order) *TaskQuery {
+func (tq *TaskQuery) Order(o ...enttask.OrderOption) *TaskQuery {
 	tq.order = append(tq.order, o...)
 	return tq
 }
@@ -252,7 +252,7 @@ func (tq *TaskQuery) Clone() *TaskQuery {
 	return &TaskQuery{
 		config:     tq.config,
 		ctx:        tq.ctx.Clone(),
-		order:      append([]enttask.Order{}, tq.order...),
+		order:      append([]enttask.OrderOption{}, tq.order...),
 		inters:     append([]Interceptor{}, tq.inters...),
 		predicates: append([]predicate.Task{}, tq.predicates...),
 		// clone intermediate query.

@@ -82,8 +82,8 @@ func StateValidator(s State) error {
 	}
 }
 
-// Order defines the ordering method for the FileType queries.
-type Order func(*dsl.Traversal)
+// OrderOption defines the ordering options for the FileType queries.
+type OrderOption func(*dsl.Traversal)
 
 // Ptr returns a new pointer to the enum value.
 func (_type Type) Ptr() *Type {

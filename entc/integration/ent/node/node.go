@@ -71,33 +71,33 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 )
 
-// Order defines the ordering method for the Node queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the Node queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByValue orders the results by the value field.
-func ByValue(opts ...sql.OrderTermOption) Order {
+func ByValue(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldValue, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.
-func ByUpdatedAt(opts ...sql.OrderTermOption) Order {
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
 // ByPrevField orders the results by prev field.
-func ByPrevField(field string, opts ...sql.OrderTermOption) Order {
+func ByPrevField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newPrevStep(), sql.OrderByField(field, opts...))
 	}
 }
 
 // ByNextField orders the results by next field.
-func ByNextField(field string, opts ...sql.OrderTermOption) Order {
+func ByNextField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newNextStep(), sql.OrderByField(field, opts...))
 	}

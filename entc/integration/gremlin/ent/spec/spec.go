@@ -21,7 +21,7 @@ const (
 	CardLabel = "spec_card"
 )
 
-// Order defines the ordering method for the Spec queries.
-type Order func(*dsl.Traversal)
+// OrderOption defines the ordering options for the Spec queries.
+type OrderOption func(*dsl.Traversal)
 
 // comment from another template.

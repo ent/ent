@@ -28,7 +28,7 @@ import (
 type UserQuery struct {
 	config
 	ctx                *QueryContext
-	order              []user.Order
+	order              []user.OrderOption
 	inters             []Interceptor
 	predicates         []predicate.User
 	withCard           *CardQuery
@@ -82,7 +82,7 @@ func (uq *UserQuery) Unique(unique bool) *UserQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (uq *UserQuery) Order(o ...user.Order) *UserQuery {
+func (uq *UserQuery) Order(o ...user.OrderOption) *UserQuery {
 	uq.order = append(uq.order, o...)
 	return uq
 }
@@ -518,7 +518,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 	return &UserQuery{
 		config:        uq.config,
 		ctx:           uq.ctx.Clone(),
-		order:         append([]user.Order{}, uq.order...),
+		order:         append([]user.OrderOption{}, uq.order...),
 		inters:        append([]Interceptor{}, uq.inters...),
 		predicates:    append([]predicate.User{}, uq.predicates...),
 		withCard:      uq.withCard.Clone(),

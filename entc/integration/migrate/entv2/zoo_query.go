@@ -22,7 +22,7 @@ import (
 type ZooQuery struct {
 	config
 	ctx        *QueryContext
-	order      []zoo.Order
+	order      []zoo.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Zoo
 	// intermediate query (i.e. traversal path).
@@ -56,7 +56,7 @@ func (zq *ZooQuery) Unique(unique bool) *ZooQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (zq *ZooQuery) Order(o ...zoo.Order) *ZooQuery {
+func (zq *ZooQuery) Order(o ...zoo.OrderOption) *ZooQuery {
 	zq.order = append(zq.order, o...)
 	return zq
 }
@@ -250,7 +250,7 @@ func (zq *ZooQuery) Clone() *ZooQuery {
 	return &ZooQuery{
 		config:     zq.config,
 		ctx:        zq.ctx.Clone(),
-		order:      append([]zoo.Order{}, zq.order...),
+		order:      append([]zoo.OrderOption{}, zq.order...),
 		inters:     append([]Interceptor{}, zq.inters...),
 		predicates: append([]predicate.Zoo{}, zq.predicates...),
 		// clone intermediate query.

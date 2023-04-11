@@ -32,7 +32,11 @@ type Task struct {
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Owner holds the value of the "owner" field.
-	Owner        string `json:"owner,omitempty"`
+	Owner string `json:"owner,omitempty"`
+	// Order holds the value of the "order" field.
+	Order int `json:"order,omitempty"`
+	// OrderOption holds the value of the "order_option" field.
+	OrderOption  int `json:"order_option,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -43,7 +47,7 @@ func (*Task) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case enttask.FieldPriorities:
 			values[i] = new([]byte)
-		case enttask.FieldID, enttask.FieldPriority:
+		case enttask.FieldID, enttask.FieldPriority, enttask.FieldOrder, enttask.FieldOrderOption:
 			values[i] = new(sql.NullInt64)
 		case enttask.FieldName, enttask.FieldOwner:
 			values[i] = new(sql.NullString)
@@ -103,6 +107,18 @@ func (t *Task) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				t.Owner = value.String
 			}
+		case enttask.FieldOrder:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field order", values[i])
+			} else if value.Valid {
+				t.Order = int(value.Int64)
+			}
+		case enttask.FieldOrderOption:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field order_option", values[i])
+			} else if value.Valid {
+				t.OrderOption = int(value.Int64)
+			}
 		default:
 			t.selectValues.Set(columns[i], values[i])
 		}
@@ -155,6 +171,12 @@ func (t *Task) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("owner=")
 	builder.WriteString(t.Owner)
+	builder.WriteString(", ")
+	builder.WriteString("order=")
+	builder.WriteString(fmt.Sprintf("%v", t.Order))
+	builder.WriteString(", ")
+	builder.WriteString("order_option=")
+	builder.WriteString(fmt.Sprintf("%v", t.OrderOption))
 	builder.WriteByte(')')
 	return builder.String()
 }

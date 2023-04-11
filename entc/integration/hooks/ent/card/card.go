@@ -89,41 +89,41 @@ var (
 	DefaultCreatedAt func() time.Time
 )
 
-// Order defines the ordering method for the Card queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the Card queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByNumber orders the results by the number field.
-func ByNumber(opts ...sql.OrderTermOption) Order {
+func ByNumber(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNumber, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) Order {
+func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.
-func ByCreatedAt(opts ...sql.OrderTermOption) Order {
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
 }
 
 // ByInHook orders the results by the in_hook field.
-func ByInHook(opts ...sql.OrderTermOption) Order {
+func ByInHook(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldInHook, opts...).ToFunc()
 }
 
 // ByExpiredAt orders the results by the expired_at field.
-func ByExpiredAt(opts ...sql.OrderTermOption) Order {
+func ByExpiredAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldExpiredAt, opts...).ToFunc()
 }
 
 // ByOwnerField orders the results by owner field.
-func ByOwnerField(field string, opts ...sql.OrderTermOption) Order {
+func ByOwnerField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newOwnerStep(), sql.OrderByField(field, opts...))
 	}

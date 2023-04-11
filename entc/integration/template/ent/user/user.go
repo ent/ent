@@ -57,42 +57,42 @@ func ValidColumn(column string) bool {
 	return false
 }
 
-// Order defines the ordering method for the User queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the User queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) Order {
+func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
 // ByPetsCount orders the results by pets count.
-func ByPetsCount(opts ...sql.OrderTermOption) Order {
+func ByPetsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newPetsStep(), opts...)
 	}
 }
 
 // ByPets orders the results by pets terms.
-func ByPets(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByPets(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newPetsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
 // ByFriendsCount orders the results by friends count.
-func ByFriendsCount(opts ...sql.OrderTermOption) Order {
+func ByFriendsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newFriendsStep(), opts...)
 	}
 }
 
 // ByFriends orders the results by friends terms.
-func ByFriends(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByFriends(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newFriendsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}

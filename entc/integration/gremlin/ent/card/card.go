@@ -52,7 +52,7 @@ var (
 	NameValidator func(string) error
 )
 
-// Order defines the ordering method for the Card queries.
-type Order func(*dsl.Traversal)
+// OrderOption defines the ordering options for the Card queries.
+type OrderOption func(*dsl.Traversal)
 
 // comment from another template.

@@ -24,7 +24,7 @@ import (
 type CityQuery struct {
 	config
 	ctx         *QueryContext
-	order       []city.Order
+	order       []city.OrderOption
 	inters      []Interceptor
 	predicates  []predicate.City
 	withStreets *StreetQuery
@@ -59,7 +59,7 @@ func (cq *CityQuery) Unique(unique bool) *CityQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (cq *CityQuery) Order(o ...city.Order) *CityQuery {
+func (cq *CityQuery) Order(o ...city.OrderOption) *CityQuery {
 	cq.order = append(cq.order, o...)
 	return cq
 }
@@ -275,7 +275,7 @@ func (cq *CityQuery) Clone() *CityQuery {
 	return &CityQuery{
 		config:      cq.config,
 		ctx:         cq.ctx.Clone(),
-		order:       append([]city.Order{}, cq.order...),
+		order:       append([]city.OrderOption{}, cq.order...),
 		inters:      append([]Interceptor{}, cq.inters...),
 		predicates:  append([]predicate.City{}, cq.predicates...),
 		withStreets: cq.withStreets.Clone(),

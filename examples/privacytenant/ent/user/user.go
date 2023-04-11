@@ -79,40 +79,40 @@ var (
 	DefaultName string
 )
 
-// Order defines the ordering method for the User queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the User queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByTenantID orders the results by the tenant_id field.
-func ByTenantID(opts ...sql.OrderTermOption) Order {
+func ByTenantID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTenantID, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) Order {
+func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
 // ByTenantField orders the results by tenant field.
-func ByTenantField(field string, opts ...sql.OrderTermOption) Order {
+func ByTenantField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newTenantStep(), sql.OrderByField(field, opts...))
 	}
 }
 
 // ByGroupsCount orders the results by groups count.
-func ByGroupsCount(opts ...sql.OrderTermOption) Order {
+func ByGroupsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newGroupsStep(), opts...)
 	}
 }
 
 // ByGroups orders the results by groups terms.
-func ByGroups(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByGroups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newGroupsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}

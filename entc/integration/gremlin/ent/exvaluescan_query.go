@@ -23,7 +23,7 @@ import (
 type ExValueScanQuery struct {
 	config
 	ctx        *QueryContext
-	order      []exvaluescan.Order
+	order      []exvaluescan.OrderOption
 	inters     []Interceptor
 	predicates []predicate.ExValueScan
 	// intermediate query (i.e. traversal path).
@@ -57,7 +57,7 @@ func (evsq *ExValueScanQuery) Unique(unique bool) *ExValueScanQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (evsq *ExValueScanQuery) Order(o ...exvaluescan.Order) *ExValueScanQuery {
+func (evsq *ExValueScanQuery) Order(o ...exvaluescan.OrderOption) *ExValueScanQuery {
 	evsq.order = append(evsq.order, o...)
 	return evsq
 }
@@ -251,7 +251,7 @@ func (evsq *ExValueScanQuery) Clone() *ExValueScanQuery {
 	return &ExValueScanQuery{
 		config:     evsq.config,
 		ctx:        evsq.ctx.Clone(),
-		order:      append([]exvaluescan.Order{}, evsq.order...),
+		order:      append([]exvaluescan.OrderOption{}, evsq.order...),
 		inters:     append([]Interceptor{}, evsq.inters...),
 		predicates: append([]predicate.ExValueScan{}, evsq.predicates...),
 		// clone intermediate query.

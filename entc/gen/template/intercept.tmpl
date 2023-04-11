@@ -109,7 +109,7 @@ func NewQuery(q {{ $pkg }}.Query) (Query, error) {
 	switch q := q.(type) {
 	{{- range $n := $.Nodes }}
 		case *{{ $pkg }}.{{ $n.QueryName }}:
-		return &query[*{{ $pkg }}.{{ $n.QueryName }}, predicate.{{ $n.Name }}, {{ $n.Package }}.Order]{typ: {{ $pkg }}.{{ $n.TypeName }}, tq: q}, nil
+		return &query[*{{ $pkg }}.{{ $n.QueryName }}, predicate.{{ $n.Name }}, {{ $n.Package }}.OrderOption]{typ: {{ $pkg }}.{{ $n.TypeName }}, tq: q}, nil
 	{{- end }}
 	default:
 		return nil, fmt.Errorf("unknown query type %T", q)

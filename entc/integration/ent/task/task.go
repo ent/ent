@@ -28,6 +28,10 @@ const (
 	FieldName = "name"
 	// FieldOwner holds the string denoting the owner field in the database.
 	FieldOwner = "owner"
+	// FieldOrder holds the string denoting the order field in the database.
+	FieldOrder = "order"
+	// FieldOrderOption holds the string denoting the order_option field in the database.
+	FieldOrderOption = "order_option"
 	// Table holds the table name of the task in the database.
 	Table = "tasks"
 )
@@ -40,6 +44,8 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldName,
 	FieldOwner,
+	FieldOrder,
+	FieldOrderOption,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -59,32 +65,42 @@ var (
 	DefaultCreatedAt func() time.Time
 )
 
-// Order defines the ordering method for the Task queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the Task queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByPriority orders the results by the priority field.
-func ByPriority(opts ...sql.OrderTermOption) Order {
+func ByPriority(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPriority, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.
-func ByCreatedAt(opts ...sql.OrderTermOption) Order {
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) Order {
+func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
 // ByOwner orders the results by the owner field.
-func ByOwner(opts ...sql.OrderTermOption) Order {
+func ByOwner(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOwner, opts...).ToFunc()
+}
+
+// ByOrder orders the results by the order field.
+func ByOrder(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOrder, opts...).ToFunc()
+}
+
+// ByOrderOption orders the results by the order_option field.
+func ByOrderOption(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOrderOption, opts...).ToFunc()
 }
 
 // comment from another template.

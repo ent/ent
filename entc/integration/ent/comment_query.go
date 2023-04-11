@@ -23,7 +23,7 @@ import (
 type CommentQuery struct {
 	config
 	ctx        *QueryContext
-	order      []comment.Order
+	order      []comment.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Comment
 	modifiers  []func(*sql.Selector)
@@ -58,7 +58,7 @@ func (cq *CommentQuery) Unique(unique bool) *CommentQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (cq *CommentQuery) Order(o ...comment.Order) *CommentQuery {
+func (cq *CommentQuery) Order(o ...comment.OrderOption) *CommentQuery {
 	cq.order = append(cq.order, o...)
 	return cq
 }
@@ -252,7 +252,7 @@ func (cq *CommentQuery) Clone() *CommentQuery {
 	return &CommentQuery{
 		config:     cq.config,
 		ctx:        cq.ctx.Clone(),
-		order:      append([]comment.Order{}, cq.order...),
+		order:      append([]comment.OrderOption{}, cq.order...),
 		inters:     append([]Interceptor{}, cq.inters...),
 		predicates: append([]predicate.Comment{}, cq.predicates...),
 		// clone intermediate query.

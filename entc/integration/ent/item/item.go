@@ -46,16 +46,16 @@ var (
 	IDValidator func(string) error
 )
 
-// Order defines the ordering method for the Item queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the Item queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByText orders the results by the text field.
-func ByText(opts ...sql.OrderTermOption) Order {
+func ByText(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldText, opts...).ToFunc()
 }
 

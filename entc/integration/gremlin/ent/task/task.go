@@ -28,6 +28,10 @@ const (
 	FieldName = "name"
 	// FieldOwner holds the string denoting the owner field in the database.
 	FieldOwner = "owner"
+	// FieldOrder holds the string denoting the order field in the database.
+	FieldOrder = "order"
+	// FieldOrderOption holds the string denoting the order_option field in the database.
+	FieldOrderOption = "order_option"
 )
 
 var (
@@ -37,7 +41,7 @@ var (
 	DefaultCreatedAt func() time.Time
 )
 
-// Order defines the ordering method for the Task queries.
-type Order func(*dsl.Traversal)
+// OrderOption defines the ordering options for the Task queries.
+type OrderOption func(*dsl.Traversal)
 
 // comment from another template.

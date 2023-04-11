@@ -70,47 +70,47 @@ var (
 	DefaultCreatedAt func() time.Time
 )
 
-// Order defines the ordering method for the Role queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the Role queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) Order {
+func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.
-func ByCreatedAt(opts ...sql.OrderTermOption) Order {
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
 }
 
 // ByUserCount orders the results by user count.
-func ByUserCount(opts ...sql.OrderTermOption) Order {
+func ByUserCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newUserStep(), opts...)
 	}
 }
 
 // ByUser orders the results by user terms.
-func ByUser(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByUser(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newUserStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
 // ByRolesUsersCount orders the results by roles_users count.
-func ByRolesUsersCount(opts ...sql.OrderTermOption) Order {
+func ByRolesUsersCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newRolesUsersStep(), opts...)
 	}
 }
 
 // ByRolesUsers orders the results by roles_users terms.
-func ByRolesUsers(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByRolesUsers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newRolesUsersStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}

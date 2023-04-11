@@ -108,38 +108,38 @@ func StateValidator(s State) error {
 	}
 }
 
-// Order defines the ordering method for the FileType queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the FileType queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) Order {
+func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
 // ByType orders the results by the type field.
-func ByType(opts ...sql.OrderTermOption) Order {
+func ByType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldType, opts...).ToFunc()
 }
 
 // ByState orders the results by the state field.
-func ByState(opts ...sql.OrderTermOption) Order {
+func ByState(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldState, opts...).ToFunc()
 }
 
 // ByFilesCount orders the results by files count.
-func ByFilesCount(opts ...sql.OrderTermOption) Order {
+func ByFilesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newFilesStep(), opts...)
 	}
 }
 
 // ByFiles orders the results by files terms.
-func ByFiles(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByFiles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newFilesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}

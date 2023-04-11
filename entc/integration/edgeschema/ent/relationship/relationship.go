@@ -88,45 +88,45 @@ var (
 	DefaultWeight int
 )
 
-// Order defines the ordering method for the Relationship queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the Relationship queries.
+type OrderOption func(*sql.Selector)
 
 // ByWeight orders the results by the weight field.
-func ByWeight(opts ...sql.OrderTermOption) Order {
+func ByWeight(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldWeight, opts...).ToFunc()
 }
 
 // ByUserID orders the results by the user_id field.
-func ByUserID(opts ...sql.OrderTermOption) Order {
+func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
 }
 
 // ByRelativeID orders the results by the relative_id field.
-func ByRelativeID(opts ...sql.OrderTermOption) Order {
+func ByRelativeID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRelativeID, opts...).ToFunc()
 }
 
 // ByInfoID orders the results by the info_id field.
-func ByInfoID(opts ...sql.OrderTermOption) Order {
+func ByInfoID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldInfoID, opts...).ToFunc()
 }
 
 // ByUserField orders the results by user field.
-func ByUserField(field string, opts ...sql.OrderTermOption) Order {
+func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
 	}
 }
 
 // ByRelativeField orders the results by relative field.
-func ByRelativeField(field string, opts ...sql.OrderTermOption) Order {
+func ByRelativeField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newRelativeStep(), sql.OrderByField(field, opts...))
 	}
 }
 
 // ByInfoField orders the results by info field.
-func ByInfoField(field string, opts ...sql.OrderTermOption) Order {
+func ByInfoField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newInfoStep(), sql.OrderByField(field, opts...))
 	}

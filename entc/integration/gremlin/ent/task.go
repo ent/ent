@@ -30,6 +30,10 @@ type Task struct {
 	Name string `json:"name,omitempty"`
 	// Owner holds the value of the "owner" field.
 	Owner string `json:"owner,omitempty"`
+	// Order holds the value of the "order" field.
+	Order int `json:"order,omitempty"`
+	// OrderOption holds the value of the "order_option" field.
+	OrderOption int `json:"order_option,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into Task.
@@ -39,12 +43,14 @@ func (t *Task) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scant struct {
-		ID         string                   `json:"id,omitempty"`
-		Priority   task.Priority            `json:"priority,omitempty"`
-		Priorities map[string]task.Priority `json:"priorities,omitempty"`
-		CreatedAt  int64                    `json:"created_at,omitempty"`
-		Name       string                   `json:"name,omitempty"`
-		Owner      string                   `json:"owner,omitempty"`
+		ID          string                   `json:"id,omitempty"`
+		Priority    task.Priority            `json:"priority,omitempty"`
+		Priorities  map[string]task.Priority `json:"priorities,omitempty"`
+		CreatedAt   int64                    `json:"created_at,omitempty"`
+		Name        string                   `json:"name,omitempty"`
+		Owner       string                   `json:"owner,omitempty"`
+		Order       int                      `json:"order,omitempty"`
+		OrderOption int                      `json:"order_option,omitempty"`
 	}
 	if err := vmap.Decode(&scant); err != nil {
 		return err
@@ -56,6 +62,8 @@ func (t *Task) FromResponse(res *gremlin.Response) error {
 	t.CreatedAt = &v2
 	t.Name = scant.Name
 	t.Owner = scant.Owner
+	t.Order = scant.Order
+	t.OrderOption = scant.OrderOption
 	return nil
 }
 
@@ -98,6 +106,12 @@ func (t *Task) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("owner=")
 	builder.WriteString(t.Owner)
+	builder.WriteString(", ")
+	builder.WriteString("order=")
+	builder.WriteString(fmt.Sprintf("%v", t.Order))
+	builder.WriteString(", ")
+	builder.WriteString("order_option=")
+	builder.WriteString(fmt.Sprintf("%v", t.OrderOption))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -112,12 +126,14 @@ func (t *Tasks) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scant []struct {
-		ID         string                   `json:"id,omitempty"`
-		Priority   task.Priority            `json:"priority,omitempty"`
-		Priorities map[string]task.Priority `json:"priorities,omitempty"`
-		CreatedAt  int64                    `json:"created_at,omitempty"`
-		Name       string                   `json:"name,omitempty"`
-		Owner      string                   `json:"owner,omitempty"`
+		ID          string                   `json:"id,omitempty"`
+		Priority    task.Priority            `json:"priority,omitempty"`
+		Priorities  map[string]task.Priority `json:"priorities,omitempty"`
+		CreatedAt   int64                    `json:"created_at,omitempty"`
+		Name        string                   `json:"name,omitempty"`
+		Owner       string                   `json:"owner,omitempty"`
+		Order       int                      `json:"order,omitempty"`
+		OrderOption int                      `json:"order_option,omitempty"`
 	}
 	if err := vmap.Decode(&scant); err != nil {
 		return err
@@ -130,6 +146,8 @@ func (t *Tasks) FromResponse(res *gremlin.Response) error {
 		node.CreatedAt = &v2
 		node.Name = v.Name
 		node.Owner = v.Owner
+		node.Order = v.Order
+		node.OrderOption = v.OrderOption
 		*t = append(*t, node)
 	}
 	return nil

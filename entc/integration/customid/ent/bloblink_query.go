@@ -23,7 +23,7 @@ import (
 type BlobLinkQuery struct {
 	config
 	ctx        *QueryContext
-	order      []bloblink.Order
+	order      []bloblink.OrderOption
 	inters     []Interceptor
 	predicates []predicate.BlobLink
 	withBlob   *BlobQuery
@@ -59,7 +59,7 @@ func (blq *BlobLinkQuery) Unique(unique bool) *BlobLinkQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (blq *BlobLinkQuery) Order(o ...bloblink.Order) *BlobLinkQuery {
+func (blq *BlobLinkQuery) Order(o ...bloblink.OrderOption) *BlobLinkQuery {
 	blq.order = append(blq.order, o...)
 	return blq
 }
@@ -225,7 +225,7 @@ func (blq *BlobLinkQuery) Clone() *BlobLinkQuery {
 	return &BlobLinkQuery{
 		config:     blq.config,
 		ctx:        blq.ctx.Clone(),
-		order:      append([]bloblink.Order{}, blq.order...),
+		order:      append([]bloblink.OrderOption{}, blq.order...),
 		inters:     append([]Interceptor{}, blq.inters...),
 		predicates: append([]predicate.BlobLink{}, blq.predicates...),
 		withBlob:   blq.withBlob.Clone(),

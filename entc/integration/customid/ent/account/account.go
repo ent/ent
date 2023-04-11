@@ -55,28 +55,28 @@ var (
 	DefaultID func() sid.ID
 )
 
-// Order defines the ordering method for the Account queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the Account queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByEmail orders the results by the email field.
-func ByEmail(opts ...sql.OrderTermOption) Order {
+func ByEmail(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldEmail, opts...).ToFunc()
 }
 
 // ByTokenCount orders the results by token count.
-func ByTokenCount(opts ...sql.OrderTermOption) Order {
+func ByTokenCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newTokenStep(), opts...)
 	}
 }
 
 // ByToken orders the results by token terms.
-func ByToken(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByToken(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newTokenStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}

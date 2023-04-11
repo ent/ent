@@ -106,6 +106,60 @@ func (tu *TaskUpdate) ClearOwner() *TaskUpdate {
 	return tu
 }
 
+// SetOrder sets the "order" field.
+func (tu *TaskUpdate) SetOrder(i int) *TaskUpdate {
+	tu.mutation.ResetOrder()
+	tu.mutation.SetOrder(i)
+	return tu
+}
+
+// SetNillableOrder sets the "order" field if the given value is not nil.
+func (tu *TaskUpdate) SetNillableOrder(i *int) *TaskUpdate {
+	if i != nil {
+		tu.SetOrder(*i)
+	}
+	return tu
+}
+
+// AddOrder adds i to the "order" field.
+func (tu *TaskUpdate) AddOrder(i int) *TaskUpdate {
+	tu.mutation.AddOrder(i)
+	return tu
+}
+
+// ClearOrder clears the value of the "order" field.
+func (tu *TaskUpdate) ClearOrder() *TaskUpdate {
+	tu.mutation.ClearOrder()
+	return tu
+}
+
+// SetOrderOption sets the "order_option" field.
+func (tu *TaskUpdate) SetOrderOption(i int) *TaskUpdate {
+	tu.mutation.ResetOrderOption()
+	tu.mutation.SetOrderOption(i)
+	return tu
+}
+
+// SetNillableOrderOption sets the "order_option" field if the given value is not nil.
+func (tu *TaskUpdate) SetNillableOrderOption(i *int) *TaskUpdate {
+	if i != nil {
+		tu.SetOrderOption(*i)
+	}
+	return tu
+}
+
+// AddOrderOption adds i to the "order_option" field.
+func (tu *TaskUpdate) AddOrderOption(i int) *TaskUpdate {
+	tu.mutation.AddOrderOption(i)
+	return tu
+}
+
+// ClearOrderOption clears the value of the "order_option" field.
+func (tu *TaskUpdate) ClearOrderOption() *TaskUpdate {
+	tu.mutation.ClearOrderOption()
+	return tu
+}
+
 // Mutation returns the TaskMutation object of the builder.
 func (tu *TaskUpdate) Mutation() *TaskMutation {
 	return tu.mutation
@@ -176,6 +230,24 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if tu.mutation.OwnerCleared() {
 		_spec.ClearField(enttask.FieldOwner, field.TypeString)
+	}
+	if value, ok := tu.mutation.Order(); ok {
+		_spec.SetField(enttask.FieldOrder, field.TypeInt, value)
+	}
+	if value, ok := tu.mutation.AddedOrder(); ok {
+		_spec.AddField(enttask.FieldOrder, field.TypeInt, value)
+	}
+	if tu.mutation.OrderCleared() {
+		_spec.ClearField(enttask.FieldOrder, field.TypeInt)
+	}
+	if value, ok := tu.mutation.OrderOption(); ok {
+		_spec.SetField(enttask.FieldOrderOption, field.TypeInt, value)
+	}
+	if value, ok := tu.mutation.AddedOrderOption(); ok {
+		_spec.AddField(enttask.FieldOrderOption, field.TypeInt, value)
+	}
+	if tu.mutation.OrderOptionCleared() {
+		_spec.ClearField(enttask.FieldOrderOption, field.TypeInt)
 	}
 	_spec.AddModifiers(tu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
@@ -269,6 +341,60 @@ func (tuo *TaskUpdateOne) SetNillableOwner(s *string) *TaskUpdateOne {
 // ClearOwner clears the value of the "owner" field.
 func (tuo *TaskUpdateOne) ClearOwner() *TaskUpdateOne {
 	tuo.mutation.ClearOwner()
+	return tuo
+}
+
+// SetOrder sets the "order" field.
+func (tuo *TaskUpdateOne) SetOrder(i int) *TaskUpdateOne {
+	tuo.mutation.ResetOrder()
+	tuo.mutation.SetOrder(i)
+	return tuo
+}
+
+// SetNillableOrder sets the "order" field if the given value is not nil.
+func (tuo *TaskUpdateOne) SetNillableOrder(i *int) *TaskUpdateOne {
+	if i != nil {
+		tuo.SetOrder(*i)
+	}
+	return tuo
+}
+
+// AddOrder adds i to the "order" field.
+func (tuo *TaskUpdateOne) AddOrder(i int) *TaskUpdateOne {
+	tuo.mutation.AddOrder(i)
+	return tuo
+}
+
+// ClearOrder clears the value of the "order" field.
+func (tuo *TaskUpdateOne) ClearOrder() *TaskUpdateOne {
+	tuo.mutation.ClearOrder()
+	return tuo
+}
+
+// SetOrderOption sets the "order_option" field.
+func (tuo *TaskUpdateOne) SetOrderOption(i int) *TaskUpdateOne {
+	tuo.mutation.ResetOrderOption()
+	tuo.mutation.SetOrderOption(i)
+	return tuo
+}
+
+// SetNillableOrderOption sets the "order_option" field if the given value is not nil.
+func (tuo *TaskUpdateOne) SetNillableOrderOption(i *int) *TaskUpdateOne {
+	if i != nil {
+		tuo.SetOrderOption(*i)
+	}
+	return tuo
+}
+
+// AddOrderOption adds i to the "order_option" field.
+func (tuo *TaskUpdateOne) AddOrderOption(i int) *TaskUpdateOne {
+	tuo.mutation.AddOrderOption(i)
+	return tuo
+}
+
+// ClearOrderOption clears the value of the "order_option" field.
+func (tuo *TaskUpdateOne) ClearOrderOption() *TaskUpdateOne {
+	tuo.mutation.ClearOrderOption()
 	return tuo
 }
 
@@ -372,6 +498,24 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 	}
 	if tuo.mutation.OwnerCleared() {
 		_spec.ClearField(enttask.FieldOwner, field.TypeString)
+	}
+	if value, ok := tuo.mutation.Order(); ok {
+		_spec.SetField(enttask.FieldOrder, field.TypeInt, value)
+	}
+	if value, ok := tuo.mutation.AddedOrder(); ok {
+		_spec.AddField(enttask.FieldOrder, field.TypeInt, value)
+	}
+	if tuo.mutation.OrderCleared() {
+		_spec.ClearField(enttask.FieldOrder, field.TypeInt)
+	}
+	if value, ok := tuo.mutation.OrderOption(); ok {
+		_spec.SetField(enttask.FieldOrderOption, field.TypeInt, value)
+	}
+	if value, ok := tuo.mutation.AddedOrderOption(); ok {
+		_spec.AddField(enttask.FieldOrderOption, field.TypeInt, value)
+	}
+	if tuo.mutation.OrderOptionCleared() {
+		_spec.ClearField(enttask.FieldOrderOption, field.TypeInt)
 	}
 	_spec.AddModifiers(tuo.modifiers...)
 	_node = &Task{config: tuo.config}

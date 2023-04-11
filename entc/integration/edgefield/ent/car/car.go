@@ -53,28 +53,28 @@ var (
 	DefaultID func() uuid.UUID
 )
 
-// Order defines the ordering method for the Car queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the Car queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByNumber orders the results by the number field.
-func ByNumber(opts ...sql.OrderTermOption) Order {
+func ByNumber(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNumber, opts...).ToFunc()
 }
 
 // ByRentalsCount orders the results by rentals count.
-func ByRentalsCount(opts ...sql.OrderTermOption) Order {
+func ByRentalsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newRentalsStep(), opts...)
 	}
 }
 
 // ByRentals orders the results by rentals terms.
-func ByRentals(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByRentals(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newRentalsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}

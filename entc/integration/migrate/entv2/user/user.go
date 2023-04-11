@@ -243,134 +243,134 @@ func StatusValidator(s Status) error {
 	}
 }
 
-// Order defines the ordering method for the User queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the User queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByMixedString orders the results by the mixed_string field.
-func ByMixedString(opts ...sql.OrderTermOption) Order {
+func ByMixedString(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMixedString, opts...).ToFunc()
 }
 
 // ByMixedEnum orders the results by the mixed_enum field.
-func ByMixedEnum(opts ...sql.OrderTermOption) Order {
+func ByMixedEnum(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMixedEnum, opts...).ToFunc()
 }
 
 // ByActive orders the results by the active field.
-func ByActive(opts ...sql.OrderTermOption) Order {
+func ByActive(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldActive, opts...).ToFunc()
 }
 
 // ByAge orders the results by the age field.
-func ByAge(opts ...sql.OrderTermOption) Order {
+func ByAge(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAge, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) Order {
+func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
 // ByDescription orders the results by the description field.
-func ByDescription(opts ...sql.OrderTermOption) Order {
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
 // ByNickname orders the results by the nickname field.
-func ByNickname(opts ...sql.OrderTermOption) Order {
+func ByNickname(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNickname, opts...).ToFunc()
 }
 
 // ByPhone orders the results by the phone field.
-func ByPhone(opts ...sql.OrderTermOption) Order {
+func ByPhone(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPhone, opts...).ToFunc()
 }
 
 // ByTitle orders the results by the title field.
-func ByTitle(opts ...sql.OrderTermOption) Order {
+func ByTitle(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTitle, opts...).ToFunc()
 }
 
 // ByNewName orders the results by the new_name field.
-func ByNewName(opts ...sql.OrderTermOption) Order {
+func ByNewName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNewName, opts...).ToFunc()
 }
 
 // ByNewToken orders the results by the new_token field.
-func ByNewToken(opts ...sql.OrderTermOption) Order {
+func ByNewToken(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNewToken, opts...).ToFunc()
 }
 
 // ByState orders the results by the state field.
-func ByState(opts ...sql.OrderTermOption) Order {
+func ByState(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldState, opts...).ToFunc()
 }
 
 // ByStatus orders the results by the status field.
-func ByStatus(opts ...sql.OrderTermOption) Order {
+func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
 }
 
 // ByWorkplace orders the results by the workplace field.
-func ByWorkplace(opts ...sql.OrderTermOption) Order {
+func ByWorkplace(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldWorkplace, opts...).ToFunc()
 }
 
 // ByDefaultExpr orders the results by the default_expr field.
-func ByDefaultExpr(opts ...sql.OrderTermOption) Order {
+func ByDefaultExpr(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDefaultExpr, opts...).ToFunc()
 }
 
 // ByDefaultExprs orders the results by the default_exprs field.
-func ByDefaultExprs(opts ...sql.OrderTermOption) Order {
+func ByDefaultExprs(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDefaultExprs, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.
-func ByCreatedAt(opts ...sql.OrderTermOption) Order {
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
 }
 
 // ByDropOptional orders the results by the drop_optional field.
-func ByDropOptional(opts ...sql.OrderTermOption) Order {
+func ByDropOptional(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDropOptional, opts...).ToFunc()
 }
 
 // ByCarCount orders the results by car count.
-func ByCarCount(opts ...sql.OrderTermOption) Order {
+func ByCarCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newCarStep(), opts...)
 	}
 }
 
 // ByCar orders the results by car terms.
-func ByCar(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByCar(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newCarStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
 // ByPetsField orders the results by pets field.
-func ByPetsField(field string, opts ...sql.OrderTermOption) Order {
+func ByPetsField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newPetsStep(), sql.OrderByField(field, opts...))
 	}
 }
 
 // ByFriendsCount orders the results by friends count.
-func ByFriendsCount(opts ...sql.OrderTermOption) Order {
+func ByFriendsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newFriendsStep(), opts...)
 	}
 }
 
 // ByFriends orders the results by friends terms.
-func ByFriends(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByFriends(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newFriendsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}

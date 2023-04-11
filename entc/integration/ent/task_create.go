@@ -89,6 +89,34 @@ func (tc *TaskCreate) SetNillableOwner(s *string) *TaskCreate {
 	return tc
 }
 
+// SetOrder sets the "order" field.
+func (tc *TaskCreate) SetOrder(i int) *TaskCreate {
+	tc.mutation.SetOrder(i)
+	return tc
+}
+
+// SetNillableOrder sets the "order" field if the given value is not nil.
+func (tc *TaskCreate) SetNillableOrder(i *int) *TaskCreate {
+	if i != nil {
+		tc.SetOrder(*i)
+	}
+	return tc
+}
+
+// SetOrderOption sets the "order_option" field.
+func (tc *TaskCreate) SetOrderOption(i int) *TaskCreate {
+	tc.mutation.SetOrderOption(i)
+	return tc
+}
+
+// SetNillableOrderOption sets the "order_option" field if the given value is not nil.
+func (tc *TaskCreate) SetNillableOrderOption(i *int) *TaskCreate {
+	if i != nil {
+		tc.SetOrderOption(*i)
+	}
+	return tc
+}
+
 // Mutation returns the TaskMutation object of the builder.
 func (tc *TaskCreate) Mutation() *TaskMutation {
 	return tc.mutation
@@ -193,6 +221,14 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 	if value, ok := tc.mutation.Owner(); ok {
 		_spec.SetField(enttask.FieldOwner, field.TypeString, value)
 		_node.Owner = value
+	}
+	if value, ok := tc.mutation.Order(); ok {
+		_spec.SetField(enttask.FieldOrder, field.TypeInt, value)
+		_node.Order = value
+	}
+	if value, ok := tc.mutation.OrderOption(); ok {
+		_spec.SetField(enttask.FieldOrderOption, field.TypeInt, value)
+		_node.OrderOption = value
 	}
 	return _node, _spec
 }
@@ -315,6 +351,54 @@ func (u *TaskUpsert) UpdateOwner() *TaskUpsert {
 // ClearOwner clears the value of the "owner" field.
 func (u *TaskUpsert) ClearOwner() *TaskUpsert {
 	u.SetNull(enttask.FieldOwner)
+	return u
+}
+
+// SetOrder sets the "order" field.
+func (u *TaskUpsert) SetOrder(v int) *TaskUpsert {
+	u.Set(enttask.FieldOrder, v)
+	return u
+}
+
+// UpdateOrder sets the "order" field to the value that was provided on create.
+func (u *TaskUpsert) UpdateOrder() *TaskUpsert {
+	u.SetExcluded(enttask.FieldOrder)
+	return u
+}
+
+// AddOrder adds v to the "order" field.
+func (u *TaskUpsert) AddOrder(v int) *TaskUpsert {
+	u.Add(enttask.FieldOrder, v)
+	return u
+}
+
+// ClearOrder clears the value of the "order" field.
+func (u *TaskUpsert) ClearOrder() *TaskUpsert {
+	u.SetNull(enttask.FieldOrder)
+	return u
+}
+
+// SetOrderOption sets the "order_option" field.
+func (u *TaskUpsert) SetOrderOption(v int) *TaskUpsert {
+	u.Set(enttask.FieldOrderOption, v)
+	return u
+}
+
+// UpdateOrderOption sets the "order_option" field to the value that was provided on create.
+func (u *TaskUpsert) UpdateOrderOption() *TaskUpsert {
+	u.SetExcluded(enttask.FieldOrderOption)
+	return u
+}
+
+// AddOrderOption adds v to the "order_option" field.
+func (u *TaskUpsert) AddOrderOption(v int) *TaskUpsert {
+	u.Add(enttask.FieldOrderOption, v)
+	return u
+}
+
+// ClearOrderOption clears the value of the "order_option" field.
+func (u *TaskUpsert) ClearOrderOption() *TaskUpsert {
+	u.SetNull(enttask.FieldOrderOption)
 	return u
 }
 
@@ -444,6 +528,62 @@ func (u *TaskUpsertOne) UpdateOwner() *TaskUpsertOne {
 func (u *TaskUpsertOne) ClearOwner() *TaskUpsertOne {
 	return u.Update(func(s *TaskUpsert) {
 		s.ClearOwner()
+	})
+}
+
+// SetOrder sets the "order" field.
+func (u *TaskUpsertOne) SetOrder(v int) *TaskUpsertOne {
+	return u.Update(func(s *TaskUpsert) {
+		s.SetOrder(v)
+	})
+}
+
+// AddOrder adds v to the "order" field.
+func (u *TaskUpsertOne) AddOrder(v int) *TaskUpsertOne {
+	return u.Update(func(s *TaskUpsert) {
+		s.AddOrder(v)
+	})
+}
+
+// UpdateOrder sets the "order" field to the value that was provided on create.
+func (u *TaskUpsertOne) UpdateOrder() *TaskUpsertOne {
+	return u.Update(func(s *TaskUpsert) {
+		s.UpdateOrder()
+	})
+}
+
+// ClearOrder clears the value of the "order" field.
+func (u *TaskUpsertOne) ClearOrder() *TaskUpsertOne {
+	return u.Update(func(s *TaskUpsert) {
+		s.ClearOrder()
+	})
+}
+
+// SetOrderOption sets the "order_option" field.
+func (u *TaskUpsertOne) SetOrderOption(v int) *TaskUpsertOne {
+	return u.Update(func(s *TaskUpsert) {
+		s.SetOrderOption(v)
+	})
+}
+
+// AddOrderOption adds v to the "order_option" field.
+func (u *TaskUpsertOne) AddOrderOption(v int) *TaskUpsertOne {
+	return u.Update(func(s *TaskUpsert) {
+		s.AddOrderOption(v)
+	})
+}
+
+// UpdateOrderOption sets the "order_option" field to the value that was provided on create.
+func (u *TaskUpsertOne) UpdateOrderOption() *TaskUpsertOne {
+	return u.Update(func(s *TaskUpsert) {
+		s.UpdateOrderOption()
+	})
+}
+
+// ClearOrderOption clears the value of the "order_option" field.
+func (u *TaskUpsertOne) ClearOrderOption() *TaskUpsertOne {
+	return u.Update(func(s *TaskUpsert) {
+		s.ClearOrderOption()
 	})
 }
 
@@ -735,6 +875,62 @@ func (u *TaskUpsertBulk) UpdateOwner() *TaskUpsertBulk {
 func (u *TaskUpsertBulk) ClearOwner() *TaskUpsertBulk {
 	return u.Update(func(s *TaskUpsert) {
 		s.ClearOwner()
+	})
+}
+
+// SetOrder sets the "order" field.
+func (u *TaskUpsertBulk) SetOrder(v int) *TaskUpsertBulk {
+	return u.Update(func(s *TaskUpsert) {
+		s.SetOrder(v)
+	})
+}
+
+// AddOrder adds v to the "order" field.
+func (u *TaskUpsertBulk) AddOrder(v int) *TaskUpsertBulk {
+	return u.Update(func(s *TaskUpsert) {
+		s.AddOrder(v)
+	})
+}
+
+// UpdateOrder sets the "order" field to the value that was provided on create.
+func (u *TaskUpsertBulk) UpdateOrder() *TaskUpsertBulk {
+	return u.Update(func(s *TaskUpsert) {
+		s.UpdateOrder()
+	})
+}
+
+// ClearOrder clears the value of the "order" field.
+func (u *TaskUpsertBulk) ClearOrder() *TaskUpsertBulk {
+	return u.Update(func(s *TaskUpsert) {
+		s.ClearOrder()
+	})
+}
+
+// SetOrderOption sets the "order_option" field.
+func (u *TaskUpsertBulk) SetOrderOption(v int) *TaskUpsertBulk {
+	return u.Update(func(s *TaskUpsert) {
+		s.SetOrderOption(v)
+	})
+}
+
+// AddOrderOption adds v to the "order_option" field.
+func (u *TaskUpsertBulk) AddOrderOption(v int) *TaskUpsertBulk {
+	return u.Update(func(s *TaskUpsert) {
+		s.AddOrderOption(v)
+	})
+}
+
+// UpdateOrderOption sets the "order_option" field to the value that was provided on create.
+func (u *TaskUpsertBulk) UpdateOrderOption() *TaskUpsertBulk {
+	return u.Update(func(s *TaskUpsert) {
+		s.UpdateOrderOption()
+	})
+}
+
+// ClearOrderOption clears the value of the "order_option" field.
+func (u *TaskUpsertBulk) ClearOrderOption() *TaskUpsertBulk {
+	return u.Update(func(s *TaskUpsert) {
+		s.ClearOrderOption()
 	})
 }
 

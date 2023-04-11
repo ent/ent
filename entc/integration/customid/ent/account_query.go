@@ -25,7 +25,7 @@ import (
 type AccountQuery struct {
 	config
 	ctx        *QueryContext
-	order      []account.Order
+	order      []account.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Account
 	withToken  *TokenQuery
@@ -60,7 +60,7 @@ func (aq *AccountQuery) Unique(unique bool) *AccountQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (aq *AccountQuery) Order(o ...account.Order) *AccountQuery {
+func (aq *AccountQuery) Order(o ...account.OrderOption) *AccountQuery {
 	aq.order = append(aq.order, o...)
 	return aq
 }
@@ -276,7 +276,7 @@ func (aq *AccountQuery) Clone() *AccountQuery {
 	return &AccountQuery{
 		config:     aq.config,
 		ctx:        aq.ctx.Clone(),
-		order:      append([]account.Order{}, aq.order...),
+		order:      append([]account.OrderOption{}, aq.order...),
 		inters:     append([]Interceptor{}, aq.inters...),
 		predicates: append([]predicate.Account{}, aq.predicates...),
 		withToken:  aq.withToken.Clone(),

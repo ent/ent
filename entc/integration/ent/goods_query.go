@@ -23,7 +23,7 @@ import (
 type GoodsQuery struct {
 	config
 	ctx        *QueryContext
-	order      []goods.Order
+	order      []goods.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Goods
 	modifiers  []func(*sql.Selector)
@@ -58,7 +58,7 @@ func (gq *GoodsQuery) Unique(unique bool) *GoodsQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (gq *GoodsQuery) Order(o ...goods.Order) *GoodsQuery {
+func (gq *GoodsQuery) Order(o ...goods.OrderOption) *GoodsQuery {
 	gq.order = append(gq.order, o...)
 	return gq
 }
@@ -252,7 +252,7 @@ func (gq *GoodsQuery) Clone() *GoodsQuery {
 	return &GoodsQuery{
 		config:     gq.config,
 		ctx:        gq.ctx.Clone(),
-		order:      append([]goods.Order{}, gq.order...),
+		order:      append([]goods.OrderOption{}, gq.order...),
 		inters:     append([]Interceptor{}, gq.inters...),
 		predicates: append([]predicate.Goods{}, gq.predicates...),
 		// clone intermediate query.

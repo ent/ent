@@ -87,48 +87,48 @@ var (
 	DefaultTrained bool
 )
 
-// Order defines the ordering method for the Pet queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the Pet queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByAge orders the results by the age field.
-func ByAge(opts ...sql.OrderTermOption) Order {
+func ByAge(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAge, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) Order {
+func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
 // ByUUID orders the results by the uuid field.
-func ByUUID(opts ...sql.OrderTermOption) Order {
+func ByUUID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUUID, opts...).ToFunc()
 }
 
 // ByNickname orders the results by the nickname field.
-func ByNickname(opts ...sql.OrderTermOption) Order {
+func ByNickname(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNickname, opts...).ToFunc()
 }
 
 // ByTrained orders the results by the trained field.
-func ByTrained(opts ...sql.OrderTermOption) Order {
+func ByTrained(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTrained, opts...).ToFunc()
 }
 
 // ByTeamField orders the results by team field.
-func ByTeamField(field string, opts ...sql.OrderTermOption) Order {
+func ByTeamField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newTeamStep(), sql.OrderByField(field, opts...))
 	}
 }
 
 // ByOwnerField orders the results by owner field.
-func ByOwnerField(field string, opts ...sql.OrderTermOption) Order {
+func ByOwnerField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newOwnerStep(), sql.OrderByField(field, opts...))
 	}

@@ -67,47 +67,47 @@ var (
 	DefaultAge int
 )
 
-// Order defines the ordering method for the Metadata queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the Metadata queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByAge orders the results by the age field.
-func ByAge(opts ...sql.OrderTermOption) Order {
+func ByAge(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAge, opts...).ToFunc()
 }
 
 // ByParentID orders the results by the parent_id field.
-func ByParentID(opts ...sql.OrderTermOption) Order {
+func ByParentID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldParentID, opts...).ToFunc()
 }
 
 // ByUserField orders the results by user field.
-func ByUserField(field string, opts ...sql.OrderTermOption) Order {
+func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
 	}
 }
 
 // ByChildrenCount orders the results by children count.
-func ByChildrenCount(opts ...sql.OrderTermOption) Order {
+func ByChildrenCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newChildrenStep(), opts...)
 	}
 }
 
 // ByChildren orders the results by children terms.
-func ByChildren(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByChildren(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newChildrenStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
 // ByParentField orders the results by parent field.
-func ByParentField(field string, opts ...sql.OrderTermOption) Order {
+func ByParentField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newParentStep(), sql.OrderByField(field, opts...))
 	}

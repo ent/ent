@@ -411,6 +411,8 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString, Nullable: true},
 		{Name: "owner", Type: field.TypeString, Nullable: true},
+		{Name: "order", Type: field.TypeInt, Nullable: true},
+		{Name: "order_option", Type: field.TypeInt, Nullable: true},
 	}
 	// TasksTable holds the schema information for the "tasks" table.
 	TasksTable = &schema.Table{

@@ -241,8 +241,8 @@ func PriorityValidator(pr role.Priority) error {
 	}
 }
 
-// Order defines the ordering method for the FieldType queries.
-type Order func(*dsl.Traversal)
+// OrderOption defines the ordering options for the FieldType queries.
+type OrderOption func(*dsl.Traversal)
 
 // Ptr returns a new pointer to the enum value.
 func (s State) Ptr() *State {

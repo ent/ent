@@ -88,6 +88,34 @@ func (tc *TaskCreate) SetNillableOwner(s *string) *TaskCreate {
 	return tc
 }
 
+// SetOrder sets the "order" field.
+func (tc *TaskCreate) SetOrder(i int) *TaskCreate {
+	tc.mutation.SetOrder(i)
+	return tc
+}
+
+// SetNillableOrder sets the "order" field if the given value is not nil.
+func (tc *TaskCreate) SetNillableOrder(i *int) *TaskCreate {
+	if i != nil {
+		tc.SetOrder(*i)
+	}
+	return tc
+}
+
+// SetOrderOption sets the "order_option" field.
+func (tc *TaskCreate) SetOrderOption(i int) *TaskCreate {
+	tc.mutation.SetOrderOption(i)
+	return tc
+}
+
+// SetNillableOrderOption sets the "order_option" field if the given value is not nil.
+func (tc *TaskCreate) SetNillableOrderOption(i *int) *TaskCreate {
+	if i != nil {
+		tc.SetOrderOption(*i)
+	}
+	return tc
+}
+
 // Mutation returns the TaskMutation object of the builder.
 func (tc *TaskCreate) Mutation() *TaskMutation {
 	return tc.mutation
@@ -186,6 +214,12 @@ func (tc *TaskCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := tc.mutation.Owner(); ok {
 		v.Property(dsl.Single, enttask.FieldOwner, value)
+	}
+	if value, ok := tc.mutation.Order(); ok {
+		v.Property(dsl.Single, enttask.FieldOrder, value)
+	}
+	if value, ok := tc.mutation.OrderOption(); ok {
+		v.Property(dsl.Single, enttask.FieldOrderOption, value)
 	}
 	return v.ValueMap(true)
 }

@@ -347,11 +347,13 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "Task",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			enttask.FieldPriority:   {Type: field.TypeInt, Column: enttask.FieldPriority},
-			enttask.FieldPriorities: {Type: field.TypeJSON, Column: enttask.FieldPriorities},
-			enttask.FieldCreatedAt:  {Type: field.TypeTime, Column: enttask.FieldCreatedAt},
-			enttask.FieldName:       {Type: field.TypeString, Column: enttask.FieldName},
-			enttask.FieldOwner:      {Type: field.TypeString, Column: enttask.FieldOwner},
+			enttask.FieldPriority:    {Type: field.TypeInt, Column: enttask.FieldPriority},
+			enttask.FieldPriorities:  {Type: field.TypeJSON, Column: enttask.FieldPriorities},
+			enttask.FieldCreatedAt:   {Type: field.TypeTime, Column: enttask.FieldCreatedAt},
+			enttask.FieldName:        {Type: field.TypeString, Column: enttask.FieldName},
+			enttask.FieldOwner:       {Type: field.TypeString, Column: enttask.FieldOwner},
+			enttask.FieldOrder:       {Type: field.TypeInt, Column: enttask.FieldOrder},
+			enttask.FieldOrderOption: {Type: field.TypeInt, Column: enttask.FieldOrderOption},
 		},
 	}
 	graph.Nodes[16] = &sqlgraph.Node{
@@ -2143,6 +2145,16 @@ func (f *TaskFilter) WhereName(p entql.StringP) {
 // WhereOwner applies the entql string predicate on the owner field.
 func (f *TaskFilter) WhereOwner(p entql.StringP) {
 	f.Where(p.Field(enttask.FieldOwner))
+}
+
+// WhereOrder applies the entql int predicate on the order field.
+func (f *TaskFilter) WhereOrder(p entql.IntP) {
+	f.Where(p.Field(enttask.FieldOrder))
+}
+
+// WhereOrderOption applies the entql int predicate on the order_option field.
+func (f *TaskFilter) WhereOrderOption(p entql.IntP) {
+	f.Where(p.Field(enttask.FieldOrderOption))
 }
 
 // addPredicate implements the predicateAdder interface.

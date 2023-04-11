@@ -43,7 +43,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{/* JSON cannot be compared using "=" and Enum has a type defined with the field name */}}
 	{{ $hasP := not (or $f.IsJSON $f.IsEnum) }}
 	{{ $comparable := or $f.ConvertedToBasic $f.Type.Valuer }}
-	{{ $undeclared := (and (ne $func "Label") (ne $func "Hooks") (ne $func "Policy") (ne $func "Table") (ne $func "FieldID")) }}
+	{{ $undeclared := (and (ne $func "Label") (ne $func "OrderOption") (ne $func "Hooks") (ne $func "Policy") (ne $func "Table") (ne $func "FieldID")) }}
 	{{- if and $hasP $comparable $undeclared }}
 		{{ $arg := "v" }}
 		// {{ $func }} applies equality check predicate on the {{ quote $f.Name }} field. It's identical to {{ $func }}EQ.

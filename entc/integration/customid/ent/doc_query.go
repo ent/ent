@@ -24,7 +24,7 @@ import (
 type DocQuery struct {
 	config
 	ctx          *QueryContext
-	order        []doc.Order
+	order        []doc.OrderOption
 	inters       []Interceptor
 	predicates   []predicate.Doc
 	withParent   *DocQuery
@@ -62,7 +62,7 @@ func (dq *DocQuery) Unique(unique bool) *DocQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (dq *DocQuery) Order(o ...doc.Order) *DocQuery {
+func (dq *DocQuery) Order(o ...doc.OrderOption) *DocQuery {
 	dq.order = append(dq.order, o...)
 	return dq
 }
@@ -322,7 +322,7 @@ func (dq *DocQuery) Clone() *DocQuery {
 	return &DocQuery{
 		config:       dq.config,
 		ctx:          dq.ctx.Clone(),
-		order:        append([]doc.Order{}, dq.order...),
+		order:        append([]doc.OrderOption{}, dq.order...),
 		inters:       append([]Interceptor{}, dq.inters...),
 		predicates:   append([]predicate.Doc{}, dq.predicates...),
 		withParent:   dq.withParent.Clone(),

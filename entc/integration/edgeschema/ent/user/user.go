@@ -162,182 +162,182 @@ var (
 	DefaultName string
 )
 
-// Order defines the ordering method for the User queries.
-type Order func(*sql.Selector)
+// OrderOption defines the ordering options for the User queries.
+type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) Order {
+func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) Order {
+func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
 // ByGroupsCount orders the results by groups count.
-func ByGroupsCount(opts ...sql.OrderTermOption) Order {
+func ByGroupsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newGroupsStep(), opts...)
 	}
 }
 
 // ByGroups orders the results by groups terms.
-func ByGroups(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByGroups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newGroupsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
 // ByFriendsCount orders the results by friends count.
-func ByFriendsCount(opts ...sql.OrderTermOption) Order {
+func ByFriendsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newFriendsStep(), opts...)
 	}
 }
 
 // ByFriends orders the results by friends terms.
-func ByFriends(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByFriends(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newFriendsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
 // ByRelativesCount orders the results by relatives count.
-func ByRelativesCount(opts ...sql.OrderTermOption) Order {
+func ByRelativesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newRelativesStep(), opts...)
 	}
 }
 
 // ByRelatives orders the results by relatives terms.
-func ByRelatives(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByRelatives(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newRelativesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
 // ByLikedTweetsCount orders the results by liked_tweets count.
-func ByLikedTweetsCount(opts ...sql.OrderTermOption) Order {
+func ByLikedTweetsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newLikedTweetsStep(), opts...)
 	}
 }
 
 // ByLikedTweets orders the results by liked_tweets terms.
-func ByLikedTweets(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByLikedTweets(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newLikedTweetsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
 // ByTweetsCount orders the results by tweets count.
-func ByTweetsCount(opts ...sql.OrderTermOption) Order {
+func ByTweetsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newTweetsStep(), opts...)
 	}
 }
 
 // ByTweets orders the results by tweets terms.
-func ByTweets(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByTweets(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newTweetsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
 // ByRolesCount orders the results by roles count.
-func ByRolesCount(opts ...sql.OrderTermOption) Order {
+func ByRolesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newRolesStep(), opts...)
 	}
 }
 
 // ByRoles orders the results by roles terms.
-func ByRoles(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByRoles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newRolesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
 // ByJoinedGroupsCount orders the results by joined_groups count.
-func ByJoinedGroupsCount(opts ...sql.OrderTermOption) Order {
+func ByJoinedGroupsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newJoinedGroupsStep(), opts...)
 	}
 }
 
 // ByJoinedGroups orders the results by joined_groups terms.
-func ByJoinedGroups(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByJoinedGroups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newJoinedGroupsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
 // ByFriendshipsCount orders the results by friendships count.
-func ByFriendshipsCount(opts ...sql.OrderTermOption) Order {
+func ByFriendshipsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newFriendshipsStep(), opts...)
 	}
 }
 
 // ByFriendships orders the results by friendships terms.
-func ByFriendships(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByFriendships(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newFriendshipsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
 // ByRelationshipCount orders the results by relationship count.
-func ByRelationshipCount(opts ...sql.OrderTermOption) Order {
+func ByRelationshipCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newRelationshipStep(), opts...)
 	}
 }
 
 // ByRelationship orders the results by relationship terms.
-func ByRelationship(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByRelationship(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newRelationshipStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
 // ByLikesCount orders the results by likes count.
-func ByLikesCount(opts ...sql.OrderTermOption) Order {
+func ByLikesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newLikesStep(), opts...)
 	}
 }
 
 // ByLikes orders the results by likes terms.
-func ByLikes(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByLikes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newLikesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
 // ByUserTweetsCount orders the results by user_tweets count.
-func ByUserTweetsCount(opts ...sql.OrderTermOption) Order {
+func ByUserTweetsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newUserTweetsStep(), opts...)
 	}
 }
 
 // ByUserTweets orders the results by user_tweets terms.
-func ByUserTweets(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByUserTweets(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newUserTweetsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
 // ByRolesUsersCount orders the results by roles_users count.
-func ByRolesUsersCount(opts ...sql.OrderTermOption) Order {
+func ByRolesUsersCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborsCount(s, newRolesUsersStep(), opts...)
 	}
 }
 
 // ByRolesUsers orders the results by roles_users terms.
-func ByRolesUsers(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+func ByRolesUsers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newRolesUsersStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
