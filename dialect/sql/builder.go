@@ -2612,6 +2612,10 @@ func (s *Selector) Prefix(queries ...Querier) *Selector {
 
 // C returns a formatted string for a selected column from this statement.
 func (s *Selector) C(column string) string {
+	// Skip formatting qualified columns.
+	if s.isQualified(column) {
+		return column
+	}
 	if s.as != "" {
 		b := &Builder{dialect: s.dialect}
 		b.Ident(s.as)
@@ -3721,6 +3725,14 @@ func (b *Builder) isIdent(s string) bool {
 	default:
 		return strings.Contains(s, "`")
 	}
+}
+
+// isIdent reports if the given string is a qualified identifier.
+func (b *Builder) isQualified(s string) bool {
+	ident, pg := b.isIdent(s), b.postgres()
+	return !ident && len(s) > 2 && strings.ContainsRune(s[1:len(s)-1], '.') || // <qualifier>.<column>
+		ident && pg && strings.Contains(s, `"."`) || // "qualifier"."column"
+		ident && !pg && strings.Contains(s, "`.`") // `qualifier`.`column`
 }
 
 // state wraps the all methods for setting and getting

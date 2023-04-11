@@ -2411,3 +2411,29 @@ func TestSelector_JoinedTableView(t *testing.T) {
 	require.True(t, ok)
 	require.Equal(t, "`t4`.`c`", t4.C("c"))
 }
+
+func TestSelector_Columns(t *testing.T) {
+	t.Run("MySQL", func(t *testing.T) {
+		s := Select("*").From(Table("users"))
+		require.Equal(t, []string{"`users`.`c`"}, s.Columns("c"))
+		// Already quoted.
+		require.Equal(t, []string{"`users`.`c`"}, s.Columns("`c`"))
+		t2 := Table("t2").As("t2")
+		s.Join(t2)
+		// Already quoted.
+		require.Equal(t, []string{"`t2`.`c1`"}, s.Columns(t2.C("c1")))
+		require.Equal(t, []string{"t2.c1"}, s.Columns("t2.c1"))
+	})
+	t.Run("Postgres", func(t *testing.T) {
+		b := Dialect(dialect.Postgres)
+		s := b.Select("*").From(Table("users"))
+		require.Equal(t, []string{`"users"."c"`}, s.Columns("c"))
+		// Already quoted.
+		require.Equal(t, []string{`"users"."c"`}, s.Columns(`"c"`))
+		t2 := b.Table("t2").As("t2")
+		s.Join(t2)
+		// Already quoted.
+		require.Equal(t, []string{`"t2"."c1"`}, s.Columns(t2.C("c1")))
+		require.Equal(t, []string{"t2.c1"}, s.Columns("t2.c1"))
+	})
+}
