@@ -19,7 +19,7 @@ import (
 {{ range $t := $.Ints }}
 	{{ $title := title $t.String }}
 	// {{ $title }} returns a new Field with type {{ $t }}.
-	func {{ $title }}(name string) *{{ $t }}Builder { return &{{ $t }}Builder{&Descriptor{
+	func {{ $title }}(name string) *{{ $title }}Builder { return &{{ $title }}Builder{&Descriptor{
 			Name: name,
 			Info: &TypeInfo{Type: Type{{ $title }} },
 		}}
@@ -27,21 +27,22 @@ import (
 {{ end }}
 
 // Float returns a new Field with type float64.
-func Float(name string) *float64Builder { return &float64Builder{&Descriptor{
+func Float(name string) *Float64Builder { return &Float64Builder{&Descriptor{
 		Name: name,
 		Info: &TypeInfo{Type: TypeFloat64},
 	}}
 }
 
 // Float32 returns a new Field with type float32.
-func Float32(name string) *float32Builder { return &float32Builder{&Descriptor{
+func Float32(name string) *Float32Builder { return &Float32Builder{&Descriptor{
 		Name: name,
 		Info: &TypeInfo{Type: TypeFloat32},
 	}}
 }
 
 {{ range $t := $.Ints }}
-{{ $builder := printf "%sBuilder" $t }}
+{{ $title := title $t.String }}
+{{ $builder := printf "%sBuilder" $title }}
 
 // {{ $builder }} is the builder for {{ $t }} field.
 type {{ $builder }} struct {
@@ -246,7 +247,8 @@ var (
 )
 
 {{ range $t := $.Floats }}
-{{ $builder := printf "%sBuilder" $t }}
+{{ $title := title $t.String }}
+{{ $builder := printf "%sBuilder" $title }}
 
 // {{ $builder }} is the builder for float fields.
 type {{ $builder }} struct {
