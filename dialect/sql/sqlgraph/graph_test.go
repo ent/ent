@@ -1006,6 +1006,23 @@ func TestOrderByNeighborTerms(t *testing.T) {
 		require.Empty(t, args)
 		require.Equal(t, `SELECT "users"."name" FROM "users" LEFT JOIN (SELECT "workplace"."id", "workplace"."name" FROM "workplace") AS "t1" ON "users"."workplace_id" = "t1"."id" ORDER BY "t1"."name" NULLS FIRST`, query)
 	})
+	t.Run("M2O/SelectedAs", func(t *testing.T) {
+		s := s.Clone()
+		OrderByNeighborTerms(s,
+			NewStep(
+				From("users", "id"),
+				To("workplace", "id"),
+				Edge(M2O, true, "users", "workplace_id"),
+			),
+			sql.OrderByField(
+				"name",
+				sql.OrderSelectAs("workplace_name"),
+			),
+		)
+		query, args := s.Query()
+		require.Empty(t, args)
+		require.Equal(t, `SELECT "users"."name", "t1"."workplace_name" FROM "users" LEFT JOIN (SELECT "workplace"."id", "workplace"."name" AS "workplace_name" FROM "workplace") AS "t1" ON "users"."workplace_id" = "t1"."id" ORDER BY "t1"."workplace_name" NULLS FIRST`, query)
+	})
 	t.Run("M2O/NullsLast", func(t *testing.T) {
 		s := s.Clone()
 		OrderByNeighborTerms(s,

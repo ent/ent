@@ -447,7 +447,11 @@ func selectTerms(q *sql.Selector, ts []sql.OrderTerm) {
 	for _, t := range ts {
 		switch t := t.(type) {
 		case *sql.OrderFieldTerm:
-			q.AppendSelect(q.C(t.Field))
+			if t.As != "" {
+				q.AppendSelectAs(q.C(t.Field), t.As)
+			} else {
+				q.AppendSelect(q.C(t.Field))
+			}
 		case *sql.OrderExprTerm:
 			q.AppendSelectExprAs(t.Expr(q), t.As)
 		}
