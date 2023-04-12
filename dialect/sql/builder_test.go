@@ -2437,3 +2437,41 @@ func TestSelector_Columns(t *testing.T) {
 		require.Equal(t, []string{"t2.c1"}, s.Columns("t2.c1"))
 	})
 }
+
+func TestSelector_SelectedColumn(t *testing.T) {
+	t.Run("MySQL", func(t *testing.T) {
+		s := Select("*").From(Table("t1"))
+		require.Empty(t, s.FindSelection("c"))
+		s.Select("c")
+		require.Equal(t, []string{"c"}, s.FindSelection("c"))
+		s.Select(s.C("c"))
+		require.Equal(t, []string{"`t1`.`c`"}, s.FindSelection("c"))
+		s.AppendSelectAs(s.C("d"), "e")
+		require.Equal(t, []string{"e"}, s.FindSelection("e"))
+		require.Empty(t, s.FindSelection("d"))
+		t2 := Table("t2").As("t2")
+		s.Join(t2)
+		s.Select(t2.C("e"), "t2.e", s.C("e"), "t1.e", "e")
+		require.Equal(t, []string{"`t2`.`e`", "t2.e", "`t1`.`e`", "t1.e", "e"}, s.FindSelection("e"))
+		s.AppendSelectExprAs(ExprFunc(func(b *Builder) {
+			b.S("COUNT(").Ident("post_id").S(")")
+		}), "post_count")
+		require.Equal(t, []string{"post_count"}, s.FindSelection("post_count"))
+	})
+	t.Run("Postgres", func(t *testing.T) {
+		b := Dialect(dialect.Postgres)
+		s := b.Select("*").From(Table("t1"))
+		require.Empty(t, s.FindSelection("c"))
+		s.Select("c")
+		require.Equal(t, []string{"c"}, s.FindSelection("c"))
+		s.Select(s.C("c"))
+		require.Equal(t, []string{`"t1"."c"`}, s.FindSelection("c"))
+		s.AppendSelectAs(s.C("d"), "e")
+		require.Equal(t, []string{"e"}, s.FindSelection("e"))
+		require.Empty(t, s.FindSelection("d"))
+		t2 := b.Table("t2").As("t2")
+		s.Join(t2)
+		s.Select(t2.C("e"), "t2.e", s.C("e"), "t1.e", "e")
+		require.Equal(t, []string{`"t2"."e"`, "t2.e", `"t1"."e"`, "t1.e", "e"}, s.FindSelection("e"))
+	})
+}
