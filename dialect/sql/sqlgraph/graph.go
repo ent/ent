@@ -390,37 +390,48 @@ func OrderByNeighborsCount(q *sql.Selector, s *Step, opts ...sql.OrderTermOption
 func orderTerms(q, join *sql.Selector, ts []sql.OrderTerm) {
 	for _, t := range ts {
 		t := t
-		q.OrderExprFunc(func(b *sql.Builder) {
-			var desc, nullsfirst, nullslast bool
-			switch t := t.(type) {
-			case *sql.OrderFieldTerm:
-				f := t.Field
-				if t.As != "" {
-					f = t.As
-				}
-				c := join.C(f)
-				b.WriteString(c)
+		var (
+			// Order by column or expression.
+			orderC string
+			orderX func(*sql.Selector) sql.Querier
+			// Order by options.
+			desc, nullsfirst, nullslast bool
+		)
+		switch t := t.(type) {
+		case *sql.OrderFieldTerm:
+			f := t.Field
+			if t.As != "" {
+				f = t.As
+			}
+			orderC = join.C(f)
+			if t.Selected {
+				q.AppendSelect(orderC)
+			}
+			desc = t.Desc
+			nullsfirst = t.NullsFirst
+			nullslast = t.NullsLast
+		case *sql.OrderExprTerm:
+			if t.As != "" {
+				orderC = join.C(t.As)
 				if t.Selected {
-					q.AppendSelect(c)
+					q.AppendSelect(orderC)
 				}
-				desc = t.Desc
-				nullsfirst = t.NullsFirst
-				nullslast = t.NullsLast
-			case *sql.OrderExprTerm:
-				if t.As != "" {
-					c := join.C(t.As)
-					b.WriteString(c)
-					if t.Selected {
-						q.AppendSelect(c)
-					}
-				} else {
-					b.Join(t.Expr(join))
-				}
-				desc = t.Desc
-				nullsfirst = t.NullsFirst
-				nullslast = t.NullsLast
-			default:
-				return
+			} else {
+				orderX = t.Expr
+			}
+			desc = t.Desc
+			nullsfirst = t.NullsFirst
+			nullslast = t.NullsLast
+		default:
+			continue
+		}
+		q.OrderExprFunc(func(b *sql.Builder) {
+			// Write the ORDER BY term.
+			switch {
+			case orderC != "":
+				b.WriteString(orderC)
+			case orderX != nil:
+				b.Join(orderX(join))
 			}
 			// Unlike MySQL and SQLite, NULL values sort as if larger than any other value. Therefore,
 			// we need to explicitly order NULLs first on ASC and last on DESC unless specified otherwise.
