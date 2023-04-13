@@ -413,9 +413,10 @@ func hasField(v any, name string) bool {
 }
 
 // hasImport reports if the package name exists in the predefined import packages.
-func hasImport(name string) bool {
-	_, ok := importPkg[name]
-	return ok
+func hasImport(path string) bool {
+	name := filepath.Base(path)
+	existingPath, ok := importPkg[name]
+	return ok && path == existingPath
 }
 
 // trimPackage trims the package name from the given identifier.

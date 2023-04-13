@@ -324,7 +324,9 @@ func (t Type) PackageDir() string { return strings.ToLower(t.Name) }
 // PackageAlias returns local package name of a type if there is one.
 // A package has an alias if its generated name conflicts with
 // one of the imports of the user-defined or ent builtin types.
-func (t Type) PackageAlias() string { return t.alias }
+func (t Type) PackageAlias() string {
+	return t.alias
+}
 
 // Receiver returns the receiver name of this node. It makes sure the
 // receiver names doesn't conflict with import names.
@@ -1003,6 +1005,13 @@ func (t Type) UnexportedForeignKeys() []*ForeignKey {
 	return fks
 }
 
+// replaces the package name for a given path
+func replacePkg(path, pkg string) string {
+	parts := strings.Split(path, ".")
+	parts[0] = pkg
+	return strings.Join(parts, ".")
+}
+
 // aliases adds package aliases (local names) for all type-packages that
 // their import identifier conflicts with user-defined packages (i.e. GoType).
 func aliases(g *Graph) {
@@ -1021,6 +1030,14 @@ func aliases(g *Graph) {
 				continue
 			}
 			name := f.Type.PkgName
+			// alias user-provided imports that conflict with internal imports
+			importPath, ok := importPkg[name]
+			if ok && importPath != f.Type.PkgPath {
+				name = fmt.Sprintf("ext%s", name)
+				f.Type.PkgName = name
+				f.Type.Ident = replacePkg(f.Type.Ident, name)
+				f.Type.RType.Ident = replacePkg(f.Type.RType.Ident, name)
+			}
 			if name == "" && f.Type.PkgPath != "" {
 				name = path.Base(f.Type.PkgPath)
 			}
