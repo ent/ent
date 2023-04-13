@@ -21,6 +21,7 @@ import (
 	"entgo.io/ent/entc/integration/json/ent/migrate"
 	"entgo.io/ent/entc/integration/json/ent/schema"
 	"entgo.io/ent/entc/integration/json/ent/user"
+	"entgo.io/ent/entc/integration/json/field"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
@@ -45,6 +46,7 @@ func TestMySQL(t *testing.T) {
 
 			URL(t, client)
 			Dirs(t, client)
+			Field(t, client)
 			Floats(t, client)
 			NetAddr(t, client)
 			RawMessage(t, client)
@@ -84,6 +86,7 @@ func TestMaria(t *testing.T) {
 			URL(t, client)
 			Dirs(t, client)
 			Ints(t, client)
+			Field(t, client)
 			Floats(t, client)
 			Strings(t, client)
 			NetAddr(t, client)
@@ -118,6 +121,7 @@ func TestPostgres(t *testing.T) {
 			URLs(t, client)
 			Dirs(t, client)
 			Ints(t, client)
+			Field(t, client)
 			Floats(t, client)
 			Strings(t, client)
 			NetAddr(t, client)
@@ -141,6 +145,7 @@ func TestSQLite(t *testing.T) {
 	URLs(t, client)
 	Dirs(t, client)
 	Ints(t, client)
+	Field(t, client)
 	Floats(t, client)
 	Strings(t, client)
 	NetAddr(t, client)
@@ -298,6 +303,19 @@ func NetAddr(t *testing.T, client *ent.Client) {
 	f, ok := reflect.TypeOf(ent.User{}).FieldByName("Addr")
 	require.True(t, ok)
 	require.Equal(t, "-", f.Tag.Get("json"))
+}
+
+func Field(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	f := field.TestField{A: "test"}
+	usr := client.User.Create().SetTestField(f).SaveX(ctx)
+	require.Equal(t, f, usr.TestField)
+	require.Equal(t, f, client.User.GetX(ctx, usr.ID).TestField)
+
+	usr = client.User.Create().SaveX(ctx)
+	require.Equal(t, field.TestField{}, usr.TestField)
+	usr = client.User.GetX(ctx, usr.ID)
+	require.Equal(t, field.TestField{}, usr.TestField)
 }
 
 func Dirs(t *testing.T, client *ent.Client) {

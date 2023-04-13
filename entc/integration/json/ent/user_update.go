@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/entc/integration/json/ent/predicate"
 	"entgo.io/ent/entc/integration/json/ent/schema"
 	"entgo.io/ent/entc/integration/json/ent/user"
+	extfield "entgo.io/ent/entc/integration/json/field"
 	"entgo.io/ent/schema/field"
 )
 
@@ -183,6 +184,26 @@ func (uu *UserUpdate) ClearAddr() *UserUpdate {
 	return uu
 }
 
+// SetTestField sets the "testField" field.
+func (uu *UserUpdate) SetTestField(ef extfield.TestField) *UserUpdate {
+	uu.mutation.SetTestField(ef)
+	return uu
+}
+
+// SetNillableTestField sets the "testField" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableTestField(ef *extfield.TestField) *UserUpdate {
+	if ef != nil {
+		uu.SetTestField(*ef)
+	}
+	return uu
+}
+
+// ClearTestField clears the value of the "testField" field.
+func (uu *UserUpdate) ClearTestField() *UserUpdate {
+	uu.mutation.ClearTestField()
+	return uu
+}
+
 // SetUnknown sets the "unknown" field.
 func (uu *UserUpdate) SetUnknown(a any) *UserUpdate {
 	uu.mutation.SetUnknown(a)
@@ -322,6 +343,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if uu.mutation.AddrCleared() {
 		_spec.ClearField(user.FieldAddr, field.TypeJSON)
+	}
+	if value, ok := uu.mutation.TestField(); ok {
+		_spec.SetField(user.FieldTestField, field.TypeJSON, value)
+	}
+	if uu.mutation.TestFieldCleared() {
+		_spec.ClearField(user.FieldTestField, field.TypeJSON)
 	}
 	if value, ok := uu.mutation.Unknown(); ok {
 		_spec.SetField(user.FieldUnknown, field.TypeJSON, value)
@@ -497,6 +524,26 @@ func (uuo *UserUpdateOne) ClearAddr() *UserUpdateOne {
 	return uuo
 }
 
+// SetTestField sets the "testField" field.
+func (uuo *UserUpdateOne) SetTestField(ef extfield.TestField) *UserUpdateOne {
+	uuo.mutation.SetTestField(ef)
+	return uuo
+}
+
+// SetNillableTestField sets the "testField" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableTestField(ef *extfield.TestField) *UserUpdateOne {
+	if ef != nil {
+		uuo.SetTestField(*ef)
+	}
+	return uuo
+}
+
+// ClearTestField clears the value of the "testField" field.
+func (uuo *UserUpdateOne) ClearTestField() *UserUpdateOne {
+	uuo.mutation.ClearTestField()
+	return uuo
+}
+
 // SetUnknown sets the "unknown" field.
 func (uuo *UserUpdateOne) SetUnknown(a any) *UserUpdateOne {
 	uuo.mutation.SetUnknown(a)
@@ -666,6 +713,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if uuo.mutation.AddrCleared() {
 		_spec.ClearField(user.FieldAddr, field.TypeJSON)
+	}
+	if value, ok := uuo.mutation.TestField(); ok {
+		_spec.SetField(user.FieldTestField, field.TypeJSON, value)
+	}
+	if uuo.mutation.TestFieldCleared() {
+		_spec.ClearField(user.FieldTestField, field.TypeJSON)
 	}
 	if value, ok := uuo.mutation.Unknown(); ok {
 		_spec.SetField(user.FieldUnknown, field.TypeJSON, value)
