@@ -101,6 +101,72 @@ func (Todo) Annotations() []schema.Annotation {
 
 By adding this annotation to the `Todo` schema, the `orderBy` argument will be changed from `TodoOrder` to `[TodoOrder!]`.
 
+## Order By Edge Count
+
+Non-unique edges can be annotated with the `OrderField` annotation to enable sorting nodes based on the count of specific
+edge types.
+
+```go title="ent/schema/todo/go"
+func (Todo) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("children", Todo.Type).
+			Annotations(
+				entgql.RelayConnection(),
+				// highlight-next-line
+				entgql.OrderField("CHILDREN_COUNT"),
+			).
+			From("parent").
+			Unique(),
+	}
+}
+```
+
+:::info
+The naming convention for this ordering term is: `UPPER(<edge-name>)_COUNT`. For example, `CHILDREN_COUNT`
+or `POSTS_COUNT`.
+:::
+
+## Order By Edge Field
+
+Unique edges can be annotated with the `OrderField` annotation to allow sorting nodes by their associated edge fields.
+For example, _sorting posts by their author's name_, or _ordering todos based on their parent's priority_. Note that
+in order to sort by an edge field, the field must be annotated with `OrderField` within the referenced type.
+
+The naming convention for this ordering term is: `UPPER(<edge-name>)_<edge-field>`. For example, `PARENT_PRIORITY`.
+
+```go title="ent/schema/todo.go"
+// Fields returns todo fields.
+func (Todo) Fields() []ent.Field {
+	return []ent.Field{
+		// ...
+		field.Int("priority").
+			Default(0).
+			Annotations(
+				// highlight-next-line
+				entgql.OrderField("PRIORITY"),
+			),
+    }
+}
+
+// Edges returns todo edges.
+func (Todo) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("children", Todo.Type).
+			From("parent").
+			Annotations(
+				// highlight-next-line
+				entgql.OrderField("PARENT_PRIORITY"),
+			).
+			Unique(),
+    }
+}
+```
+
+:::info
+The naming convention for this ordering term is: `UPPER(<edge-name>)_<edge-field>`. For example, `PARENT_PRIORITY` or
+`AUTHOR_NAME`.
+:::
+
 ## Add Pagination Support For Query
 
 1\. The next step for enabling pagination is to tell Ent that the `Todo` type is a Relay Connection.
