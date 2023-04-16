@@ -346,6 +346,9 @@ func (u *User) String() string {
 // Users is a parsable slice of User.
 type Users []*User
 
+// Len returns length of Users.
+func (u Users) Len() int { return len(u) }
+
 // FromResponse scans the gremlin response data into Users.
 func (u *Users) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()

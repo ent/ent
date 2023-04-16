@@ -175,3 +175,6 @@ func (f *File) String() string {
 
 // Files is a parsable slice of File.
 type Files []*File
+
+// Len returns length of Files.
+func (f Files) Len() int { return len(f) }

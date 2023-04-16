@@ -105,3 +105,6 @@ func (t *Tenant) String() string {
 
 // Tenants is a parsable slice of Tenant.
 type Tenants []*Tenant
+
+// Len returns length of Tenants.
+func (t Tenants) Len() int { return len(t) }

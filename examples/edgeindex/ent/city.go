@@ -131,3 +131,6 @@ func (c *City) String() string {
 
 // Cities is a parsable slice of City.
 type Cities []*City
+
+// Len returns length of Cities.
+func (c Cities) Len() int { return len(c) }

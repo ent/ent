@@ -171,3 +171,6 @@ func (ru *RoleUser) String() string {
 
 // RoleUsers is a parsable slice of RoleUser.
 type RoleUsers []*RoleUser
+
+// Len returns length of RoleUsers.
+func (ru RoleUsers) Len() int { return len(ru) }

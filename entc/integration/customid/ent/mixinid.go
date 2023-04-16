@@ -117,3 +117,6 @@ func (mi *MixinID) String() string {
 
 // MixinIDs is a parsable slice of MixinID.
 type MixinIDs []*MixinID
+
+// Len returns length of MixinIDs.
+func (mi MixinIDs) Len() int { return len(mi) }

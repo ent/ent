@@ -185,3 +185,6 @@ func (evs *ExValueScan) String() string {
 
 // ExValueScans is a parsable slice of ExValueScan.
 type ExValueScans []*ExValueScan
+
+// Len returns length of ExValueScans.
+func (evs ExValueScans) Len() int { return len(evs) }

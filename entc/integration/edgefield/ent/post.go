@@ -150,3 +150,6 @@ func (po *Post) String() string {
 
 // Posts is a parsable slice of Post.
 type Posts []*Post
+
+// Len returns length of Posts.
+func (po Posts) Len() int { return len(po) }

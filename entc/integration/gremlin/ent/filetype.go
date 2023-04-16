@@ -113,6 +113,9 @@ func (ft *FileType) String() string {
 // FileTypes is a parsable slice of FileType.
 type FileTypes []*FileType
 
+// Len returns length of FileTypes.
+func (ft FileTypes) Len() int { return len(ft) }
+
 // FromResponse scans the gremlin response data into FileTypes.
 func (ft *FileTypes) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()

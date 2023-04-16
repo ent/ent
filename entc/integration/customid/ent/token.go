@@ -147,3 +147,6 @@ func (t *Token) String() string {
 
 // Tokens is a parsable slice of Token.
 type Tokens []*Token
+
+// Len returns length of Tokens.
+func (t Tokens) Len() int { return len(t) }

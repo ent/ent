@@ -151,3 +151,6 @@ func (d *Device) String() string {
 
 // Devices is a parsable slice of Device.
 type Devices []*Device
+
+// Len returns length of Devices.
+func (d Devices) Len() int { return len(d) }

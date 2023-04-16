@@ -178,3 +178,6 @@ func (d *Doc) String() string {
 
 // Docs is a parsable slice of Doc.
 type Docs []*Doc
+
+// Len returns length of Docs.
+func (d Docs) Len() int { return len(d) }

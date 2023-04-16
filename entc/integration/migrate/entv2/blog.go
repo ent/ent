@@ -129,3 +129,6 @@ func (b *Blog) String() string {
 
 // Blogs is a parsable slice of Blog.
 type Blogs []*Blog
+
+// Len returns length of Blogs.
+func (b Blogs) Len() int { return len(b) }

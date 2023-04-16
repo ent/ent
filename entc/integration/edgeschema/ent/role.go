@@ -161,3 +161,6 @@ func (r *Role) String() string {
 
 // Roles is a parsable slice of Role.
 type Roles []*Role
+
+// Len returns length of Roles.
+func (r Roles) Len() int { return len(r) }

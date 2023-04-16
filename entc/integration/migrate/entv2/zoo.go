@@ -93,3 +93,6 @@ func (z *Zoo) String() string {
 
 // Zoos is a parsable slice of Zoo.
 type Zoos []*Zoo
+
+// Len returns length of Zoos.
+func (z Zoos) Len() int { return len(z) }

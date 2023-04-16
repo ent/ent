@@ -183,3 +183,6 @@ func (r *Rental) String() string {
 
 // Rentals is a parsable slice of Rental.
 type Rentals []*Rental
+
+// Len returns length of Rentals.
+func (r Rentals) Len() int { return len(r) }

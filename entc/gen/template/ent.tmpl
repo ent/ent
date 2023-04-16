@@ -122,6 +122,9 @@ func ({{ $receiver }} *{{ $.Name }}) Unwrap() *{{ $.Name }} {
 // {{ $slice }} is a parsable slice of {{ $.Name }}.
 type {{ $slice }} []*{{ $.Name }}
 
+// Len returns length of {{ $slice }}.
+func ({{ $receiver }} {{ $slice }}) Len() int { return len({{ $receiver }}) }
+
 {{ with extend $ "Slice" $slice }}
 	{{ $tmpl := printf "dialect/%s/decode/many" $.Storage }}
 	{{ xtemplate $tmpl . }}

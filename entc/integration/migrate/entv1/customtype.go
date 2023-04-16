@@ -105,3 +105,6 @@ func (ct *CustomType) String() string {
 
 // CustomTypes is a parsable slice of CustomType.
 type CustomTypes []*CustomType
+
+// Len returns length of CustomTypes.
+func (ct CustomTypes) Len() int { return len(ct) }

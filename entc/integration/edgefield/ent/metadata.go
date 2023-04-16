@@ -181,3 +181,6 @@ func (m *Metadata) String() string {
 
 // MetadataSlice is a parsable slice of Metadata.
 type MetadataSlice []*Metadata
+
+// Len returns length of MetadataSlice.
+func (m MetadataSlice) Len() int { return len(m) }

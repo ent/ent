@@ -135,3 +135,6 @@ func (pr *Process) String() string {
 
 // Processes is a parsable slice of Process.
 type Processes []*Process
+
+// Len returns length of Processes.
+func (pr Processes) Len() int { return len(pr) }

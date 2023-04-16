@@ -94,3 +94,6 @@ func (o *Other) String() string {
 
 // Others is a parsable slice of Other.
 type Others []*Other
+
+// Len returns length of Others.
+func (o Others) Len() int { return len(o) }

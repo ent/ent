@@ -146,3 +146,6 @@ func (s *Street) String() string {
 
 // Streets is a parsable slice of Street.
 type Streets []*Street
+
+// Len returns length of Streets.
+func (s Streets) Len() int { return len(s) }

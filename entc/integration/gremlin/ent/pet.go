@@ -152,6 +152,9 @@ func (pe *Pet) String() string {
 // Pets is a parsable slice of Pet.
 type Pets []*Pet
 
+// Len returns length of Pets.
+func (pe Pets) Len() int { return len(pe) }
+
 // FromResponse scans the gremlin response data into Pets.
 func (pe *Pets) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()

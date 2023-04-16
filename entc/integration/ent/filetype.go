@@ -178,3 +178,6 @@ func (ft *FileType) appendNamedFiles(name string, edges ...*File) {
 
 // FileTypes is a parsable slice of FileType.
 type FileTypes []*FileType
+
+// Len returns length of FileTypes.
+func (ft FileTypes) Len() int { return len(ft) }

@@ -167,3 +167,6 @@ func (gi *GroupInfo) appendNamedGroups(name string, edges ...*Group) {
 
 // GroupInfos is a parsable slice of GroupInfo.
 type GroupInfos []*GroupInfo
+
+// Len returns length of GroupInfos.
+func (gi GroupInfos) Len() int { return len(gi) }

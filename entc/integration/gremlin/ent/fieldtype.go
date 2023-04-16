@@ -551,6 +551,9 @@ func (ft *FieldType) String() string {
 // FieldTypes is a parsable slice of FieldType.
 type FieldTypes []*FieldType
 
+// Len returns length of FieldTypes.
+func (ft FieldTypes) Len() int { return len(ft) }
+
 // FromResponse scans the gremlin response data into FieldTypes.
 func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()

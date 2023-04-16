@@ -127,3 +127,6 @@ func (m *Media) String() string {
 
 // MediaSlice is a parsable slice of Media.
 type MediaSlice []*Media
+
+// Len returns length of MediaSlice.
+func (m MediaSlice) Len() int { return len(m) }

@@ -155,3 +155,6 @@ func (u *User) MarshalJSON() ([]byte, error) {
 
 // Users is a parsable slice of User.
 type Users []*User
+
+// Len returns length of Users.
+func (u Users) Len() int { return len(u) }

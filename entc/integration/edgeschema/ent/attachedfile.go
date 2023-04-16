@@ -180,3 +180,6 @@ func (af *AttachedFile) String() string {
 
 // AttachedFiles is a parsable slice of AttachedFile.
 type AttachedFiles []*AttachedFile
+
+// Len returns length of AttachedFiles.
+func (af AttachedFiles) Len() int { return len(af) }

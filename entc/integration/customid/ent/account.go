@@ -132,3 +132,6 @@ func (a *Account) String() string {
 
 // Accounts is a parsable slice of Account.
 type Accounts []*Account
+
+// Len returns length of Accounts.
+func (a Accounts) Len() int { return len(a) }

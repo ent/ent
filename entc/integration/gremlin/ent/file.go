@@ -177,6 +177,9 @@ func (f *File) String() string {
 // Files is a parsable slice of File.
 type Files []*File
 
+// Len returns length of Files.
+func (f Files) Len() int { return len(f) }
+
 // FromResponse scans the gremlin response data into Files.
 func (f *Files) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()

@@ -171,3 +171,6 @@ func (tl *TweetLike) String() string {
 
 // TweetLikes is a parsable slice of TweetLike.
 type TweetLikes []*TweetLike
+
+// Len returns length of TweetLikes.
+func (tl TweetLikes) Len() int { return len(tl) }

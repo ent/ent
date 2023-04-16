@@ -139,3 +139,6 @@ func (i *Info) String() string {
 
 // Infos is a parsable slice of Info.
 type Infos []*Info
+
+// Len returns length of Infos.
+func (i Infos) Len() int { return len(i) }

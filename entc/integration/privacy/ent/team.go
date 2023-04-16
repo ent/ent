@@ -147,3 +147,6 @@ func (t *Team) String() string {
 
 // Teams is a parsable slice of Team.
 type Teams []*Team
+
+// Len returns length of Teams.
+func (t Teams) Len() int { return len(t) }

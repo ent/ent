@@ -180,3 +180,6 @@ func (ut *UserTweet) String() string {
 
 // UserTweets is a parsable slice of UserTweet.
 type UserTweets []*UserTweet
+
+// Len returns length of UserTweets.
+func (ut UserTweets) Len() int { return len(ut) }

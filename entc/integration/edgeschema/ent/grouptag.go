@@ -166,3 +166,6 @@ func (gt *GroupTag) String() string {
 
 // GroupTags is a parsable slice of GroupTag.
 type GroupTags []*GroupTag
+
+// Len returns length of GroupTags.
+func (gt GroupTags) Len() int { return len(gt) }

@@ -180,3 +180,6 @@ func (ug *UserGroup) String() string {
 
 // UserGroups is a parsable slice of UserGroup.
 type UserGroups []*UserGroup
+
+// Len returns length of UserGroups.
+func (ug UserGroups) Len() int { return len(ug) }

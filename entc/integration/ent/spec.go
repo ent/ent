@@ -144,3 +144,6 @@ func (s *Spec) appendNamedCard(name string, edges ...*Card) {
 
 // Specs is a parsable slice of Spec.
 type Specs []*Spec
+
+// Len returns length of Specs.
+func (s Specs) Len() int { return len(s) }

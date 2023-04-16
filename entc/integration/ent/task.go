@@ -183,3 +183,6 @@ func (t *Task) String() string {
 
 // Tasks is a parsable slice of Task.
 type Tasks []*Task
+
+// Len returns length of Tasks.
+func (t Tasks) Len() int { return len(t) }

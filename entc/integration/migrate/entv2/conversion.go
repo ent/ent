@@ -193,3 +193,6 @@ func (c *Conversion) String() string {
 
 // Conversions is a parsable slice of Conversion.
 type Conversions []*Conversion
+
+// Len returns length of Conversions.
+func (c Conversions) Len() int { return len(c) }

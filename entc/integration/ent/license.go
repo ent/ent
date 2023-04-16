@@ -117,3 +117,6 @@ func (l *License) String() string {
 
 // Licenses is a parsable slice of License.
 type Licenses []*License
+
+// Len returns length of Licenses.
+func (l Licenses) Len() int { return len(l) }

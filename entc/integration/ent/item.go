@@ -103,3 +103,6 @@ func (i *Item) String() string {
 
 // Items is a parsable slice of Item.
 type Items []*Item
+
+// Len returns length of Items.
+func (i Items) Len() int { return len(i) }

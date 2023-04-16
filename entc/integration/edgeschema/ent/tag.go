@@ -179,3 +179,6 @@ func (t *Tag) String() string {
 
 // Tags is a parsable slice of Tag.
 type Tags []*Tag
+
+// Len returns length of Tags.
+func (t Tags) Len() int { return len(t) }

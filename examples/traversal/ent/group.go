@@ -162,3 +162,6 @@ func (gr *Group) String() string {
 
 // Groups is a parsable slice of Group.
 type Groups []*Group
+
+// Len returns length of Groups.
+func (gr Groups) Len() int { return len(gr) }

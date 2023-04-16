@@ -110,6 +110,9 @@ func (c *Comment) String() string {
 // Comments is a parsable slice of Comment.
 type Comments []*Comment
 
+// Len returns length of Comments.
+func (c Comments) Len() int { return len(c) }
+
 // FromResponse scans the gremlin response data into Comments.
 func (c *Comments) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()

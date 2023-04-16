@@ -132,3 +132,6 @@ func (c *Car) String() string {
 
 // Cars is a parsable slice of Car.
 type Cars []*Car
+
+// Len returns length of Cars.
+func (c Cars) Len() int { return len(c) }

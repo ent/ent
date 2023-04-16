@@ -199,3 +199,6 @@ func (r *Relationship) String() string {
 
 // Relationships is a parsable slice of Relationship.
 type Relationships []*Relationship
+
+// Len returns length of Relationships.
+func (r Relationships) Len() int { return len(r) }

@@ -160,3 +160,6 @@ func (pe *Pet) String() string {
 
 // Pets is a parsable slice of Pet.
 type Pets []*Pet
+
+// Len returns length of Pets.
+func (pe Pets) Len() int { return len(pe) }

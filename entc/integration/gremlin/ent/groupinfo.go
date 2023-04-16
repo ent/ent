@@ -105,6 +105,9 @@ func (gi *GroupInfo) String() string {
 // GroupInfos is a parsable slice of GroupInfo.
 type GroupInfos []*GroupInfo
 
+// Len returns length of GroupInfos.
+func (gi GroupInfos) Len() int { return len(gi) }
+
 // FromResponse scans the gremlin response data into GroupInfos.
 func (gi *GroupInfos) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()

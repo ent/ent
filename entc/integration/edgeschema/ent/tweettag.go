@@ -183,3 +183,6 @@ func (tt *TweetTag) String() string {
 
 // TweetTags is a parsable slice of TweetTag.
 type TweetTags []*TweetTag
+
+// Len returns length of TweetTags.
+func (tt TweetTags) Len() int { return len(tt) }

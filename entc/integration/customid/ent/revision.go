@@ -93,3 +93,6 @@ func (r *Revision) String() string {
 
 // Revisions is a parsable slice of Revision.
 type Revisions []*Revision
+
+// Len returns length of Revisions.
+func (r Revisions) Len() int { return len(r) }

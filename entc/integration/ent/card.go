@@ -239,3 +239,6 @@ func (c *Card) appendNamedSpec(name string, edges ...*Spec) {
 
 // Cards is a parsable slice of Card.
 type Cards []*Card
+
+// Len returns length of Cards.
+func (c Cards) Len() int { return len(c) }

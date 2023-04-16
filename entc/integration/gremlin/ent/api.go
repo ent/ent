@@ -66,6 +66,9 @@ func (a *Api) String() string {
 // Apis is a parsable slice of Api.
 type Apis []*Api
 
+// Len returns length of Apis.
+func (a Apis) Len() int { return len(a) }
+
 // FromResponse scans the gremlin response data into Apis.
 func (a *Apis) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()

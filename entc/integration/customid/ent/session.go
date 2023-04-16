@@ -135,3 +135,6 @@ func (s *Session) String() string {
 
 // Sessions is a parsable slice of Session.
 type Sessions []*Session
+
+// Len returns length of Sessions.
+func (s Sessions) Len() int { return len(s) }

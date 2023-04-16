@@ -190,3 +190,6 @@ func (f *Friendship) String() string {
 
 // Friendships is a parsable slice of Friendship.
 type Friendships []*Friendship
+
+// Len returns length of Friendships.
+func (f Friendships) Len() int { return len(f) }

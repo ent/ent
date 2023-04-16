@@ -160,3 +160,6 @@ func (n *Note) String() string {
 
 // Notes is a parsable slice of Note.
 type Notes []*Note
+
+// Len returns length of Notes.
+func (n Notes) Len() int { return len(n) }

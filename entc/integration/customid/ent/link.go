@@ -110,3 +110,6 @@ func (l *Link) String() string {
 
 // Links is a parsable slice of Link.
 type Links []*Link
+
+// Len returns length of Links.
+func (l Links) Len() int { return len(l) }

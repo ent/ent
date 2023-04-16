@@ -150,3 +150,6 @@ func (is *IntSID) String() string {
 
 // IntSIDs is a parsable slice of IntSID.
 type IntSIDs []*IntSID
+
+// Len returns length of IntSIDs.
+func (is IntSIDs) Len() int { return len(is) }

@@ -134,6 +134,9 @@ func (n *Node) String() string {
 // Nodes is a parsable slice of Node.
 type Nodes []*Node
 
+// Len returns length of Nodes.
+func (n Nodes) Len() int { return len(n) }
+
 // FromResponse scans the gremlin response data into Nodes.
 func (n *Nodes) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()

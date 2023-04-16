@@ -171,3 +171,6 @@ func (bl *BlobLink) String() string {
 
 // BlobLinks is a parsable slice of BlobLink.
 type BlobLinks []*BlobLink
+
+// Len returns length of BlobLinks.
+func (bl BlobLinks) Len() int { return len(bl) }

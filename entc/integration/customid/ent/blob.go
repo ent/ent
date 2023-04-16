@@ -189,3 +189,6 @@ func (b *Blob) String() string {
 
 // Blobs is a parsable slice of Blob.
 type Blobs []*Blob
+
+// Len returns length of Blobs.
+func (b Blobs) Len() int { return len(b) }
