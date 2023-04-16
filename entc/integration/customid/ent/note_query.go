@@ -211,7 +211,7 @@ func (nq *NoteQuery) OnlyIDX(ctx context.Context) schema.NoteID {
 }
 
 // All executes the query and returns a list of Notes.
-func (nq *NoteQuery) All(ctx context.Context) ([]*Note, error) {
+func (nq *NoteQuery) All(ctx context.Context) (Notes, error) {
 	ctx = setContextOp(ctx, nq.ctx, "All")
 	if err := nq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -221,7 +221,7 @@ func (nq *NoteQuery) All(ctx context.Context) ([]*Note, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (nq *NoteQuery) AllX(ctx context.Context) []*Note {
+func (nq *NoteQuery) AllX(ctx context.Context) Notes {
 	nodes, err := nq.All(ctx)
 	if err != nil {
 		panic(err)

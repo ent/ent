@@ -162,7 +162,7 @@ func (mq *MediaQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of MediaSlice.
-func (mq *MediaQuery) All(ctx context.Context) ([]*Media, error) {
+func (mq *MediaQuery) All(ctx context.Context) (MediaSlice, error) {
 	ctx = setContextOp(ctx, mq.ctx, "All")
 	if err := mq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -172,7 +172,7 @@ func (mq *MediaQuery) All(ctx context.Context) ([]*Media, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (mq *MediaQuery) AllX(ctx context.Context) []*Media {
+func (mq *MediaQuery) AllX(ctx context.Context) MediaSlice {
 	nodes, err := mq.All(ctx)
 	if err != nil {
 		panic(err)

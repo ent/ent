@@ -158,7 +158,7 @@ func (blq *BlobLinkQuery) OnlyX(ctx context.Context) *BlobLink {
 }
 
 // All executes the query and returns a list of BlobLinks.
-func (blq *BlobLinkQuery) All(ctx context.Context) ([]*BlobLink, error) {
+func (blq *BlobLinkQuery) All(ctx context.Context) (BlobLinks, error) {
 	ctx = setContextOp(ctx, blq.ctx, "All")
 	if err := blq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -168,7 +168,7 @@ func (blq *BlobLinkQuery) All(ctx context.Context) ([]*BlobLink, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (blq *BlobLinkQuery) AllX(ctx context.Context) []*BlobLink {
+func (blq *BlobLinkQuery) AllX(ctx context.Context) BlobLinks {
 	nodes, err := blq.All(ctx)
 	if err != nil {
 		panic(err)

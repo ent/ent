@@ -186,7 +186,7 @@ func (iq *InfoQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Infos.
-func (iq *InfoQuery) All(ctx context.Context) ([]*Info, error) {
+func (iq *InfoQuery) All(ctx context.Context) (Infos, error) {
 	ctx = setContextOp(ctx, iq.ctx, "All")
 	if err := iq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -196,7 +196,7 @@ func (iq *InfoQuery) All(ctx context.Context) ([]*Info, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (iq *InfoQuery) AllX(ctx context.Context) []*Info {
+func (iq *InfoQuery) AllX(ctx context.Context) Infos {
 	nodes, err := iq.All(ctx)
 	if err != nil {
 		panic(err)

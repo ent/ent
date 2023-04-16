@@ -211,7 +211,7 @@ func (rq *RoleQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Roles.
-func (rq *RoleQuery) All(ctx context.Context) ([]*Role, error) {
+func (rq *RoleQuery) All(ctx context.Context) (Roles, error) {
 	ctx = setContextOp(ctx, rq.ctx, "All")
 	if err := rq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -221,7 +221,7 @@ func (rq *RoleQuery) All(ctx context.Context) ([]*Role, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (rq *RoleQuery) AllX(ctx context.Context) []*Role {
+func (rq *RoleQuery) AllX(ctx context.Context) Roles {
 	nodes, err := rq.All(ctx)
 	if err != nil {
 		panic(err)

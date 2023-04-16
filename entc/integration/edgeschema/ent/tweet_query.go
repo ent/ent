@@ -306,7 +306,7 @@ func (tq *TweetQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Tweets.
-func (tq *TweetQuery) All(ctx context.Context) ([]*Tweet, error) {
+func (tq *TweetQuery) All(ctx context.Context) (Tweets, error) {
 	ctx = setContextOp(ctx, tq.ctx, "All")
 	if err := tq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -316,7 +316,7 @@ func (tq *TweetQuery) All(ctx context.Context) ([]*Tweet, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (tq *TweetQuery) AllX(ctx context.Context) []*Tweet {
+func (tq *TweetQuery) AllX(ctx context.Context) Tweets {
 	nodes, err := tq.All(ctx)
 	if err != nil {
 		panic(err)

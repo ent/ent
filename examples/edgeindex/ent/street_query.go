@@ -187,7 +187,7 @@ func (sq *StreetQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Streets.
-func (sq *StreetQuery) All(ctx context.Context) ([]*Street, error) {
+func (sq *StreetQuery) All(ctx context.Context) (Streets, error) {
 	ctx = setContextOp(ctx, sq.ctx, "All")
 	if err := sq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -197,7 +197,7 @@ func (sq *StreetQuery) All(ctx context.Context) ([]*Street, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (sq *StreetQuery) AllX(ctx context.Context) []*Street {
+func (sq *StreetQuery) AllX(ctx context.Context) Streets {
 	nodes, err := sq.All(ctx)
 	if err != nil {
 		panic(err)

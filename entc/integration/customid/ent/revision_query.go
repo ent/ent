@@ -162,7 +162,7 @@ func (rq *RevisionQuery) OnlyIDX(ctx context.Context) string {
 }
 
 // All executes the query and returns a list of Revisions.
-func (rq *RevisionQuery) All(ctx context.Context) ([]*Revision, error) {
+func (rq *RevisionQuery) All(ctx context.Context) (Revisions, error) {
 	ctx = setContextOp(ctx, rq.ctx, "All")
 	if err := rq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -172,7 +172,7 @@ func (rq *RevisionQuery) All(ctx context.Context) ([]*Revision, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (rq *RevisionQuery) AllX(ctx context.Context) []*Revision {
+func (rq *RevisionQuery) AllX(ctx context.Context) Revisions {
 	nodes, err := rq.All(ctx)
 	if err != nil {
 		panic(err)

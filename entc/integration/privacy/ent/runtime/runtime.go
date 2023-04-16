@@ -74,7 +74,3 @@ func init() {
 	// user.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	user.NameValidator = userDescName.Validators[0].(func(string) error)
 }
-
-const (
-	Version = "v0.0.0-00010101000000-000000000000" // Version of ent codegen.
-)

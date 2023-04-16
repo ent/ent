@@ -217,7 +217,7 @@ func (fq *FriendshipQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Friendships.
-func (fq *FriendshipQuery) All(ctx context.Context) ([]*Friendship, error) {
+func (fq *FriendshipQuery) All(ctx context.Context) (Friendships, error) {
 	ctx = setContextOp(ctx, fq.ctx, "All")
 	if err := fq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -227,7 +227,7 @@ func (fq *FriendshipQuery) All(ctx context.Context) ([]*Friendship, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (fq *FriendshipQuery) AllX(ctx context.Context) []*Friendship {
+func (fq *FriendshipQuery) AllX(ctx context.Context) Friendships {
 	nodes, err := fq.All(ctx)
 	if err != nil {
 		panic(err)

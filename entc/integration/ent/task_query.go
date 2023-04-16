@@ -164,7 +164,7 @@ func (tq *TaskQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Tasks.
-func (tq *TaskQuery) All(ctx context.Context) ([]*Task, error) {
+func (tq *TaskQuery) All(ctx context.Context) (Tasks, error) {
 	ctx = setContextOp(ctx, tq.ctx, "All")
 	if err := tq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -174,7 +174,7 @@ func (tq *TaskQuery) All(ctx context.Context) ([]*Task, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (tq *TaskQuery) AllX(ctx context.Context) []*Task {
+func (tq *TaskQuery) AllX(ctx context.Context) Tasks {
 	nodes, err := tq.All(ctx)
 	if err != nil {
 		panic(err)

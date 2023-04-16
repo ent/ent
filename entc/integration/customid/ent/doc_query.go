@@ -234,7 +234,7 @@ func (dq *DocQuery) OnlyIDX(ctx context.Context) schema.DocID {
 }
 
 // All executes the query and returns a list of Docs.
-func (dq *DocQuery) All(ctx context.Context) ([]*Doc, error) {
+func (dq *DocQuery) All(ctx context.Context) (Docs, error) {
 	ctx = setContextOp(ctx, dq.ctx, "All")
 	if err := dq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -244,7 +244,7 @@ func (dq *DocQuery) All(ctx context.Context) ([]*Doc, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (dq *DocQuery) AllX(ctx context.Context) []*Doc {
+func (dq *DocQuery) AllX(ctx context.Context) Docs {
 	nodes, err := dq.All(ctx)
 	if err != nil {
 		panic(err)

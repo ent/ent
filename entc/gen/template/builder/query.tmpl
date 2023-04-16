@@ -195,7 +195,7 @@ func ({{ $receiver }} *{{ $builder }}) OnlyX(ctx context.Context) *{{ $.Name }} 
 {{ end }}
 
 // All executes the query and returns a list of {{ plural $.Name }}.
-func ({{ $receiver }} *{{ $builder }}) All(ctx context.Context) ([]*{{ $.Name }}, error) {
+func ({{ $receiver }} *{{ $builder }}) All(ctx context.Context) ({{ plural $.Name }}, error) {
 	ctx = setContextOp(ctx, {{ $receiver }}.ctx, "All")
 	if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -205,7 +205,7 @@ func ({{ $receiver }} *{{ $builder }}) All(ctx context.Context) ([]*{{ $.Name }}
 }
 
 // AllX is like All, but panics if an error occurs.
-func ({{ $receiver }} *{{ $builder }}) AllX(ctx context.Context) []*{{ $.Name }} {
+func ({{ $receiver }} *{{ $builder }}) AllX(ctx context.Context) {{ plural $.Name }} {
 	nodes, err := {{ $receiver }}.All(ctx)
 	if err != nil {
 		panic(err)

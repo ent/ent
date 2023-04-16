@@ -210,7 +210,7 @@ func (afq *AttachedFileQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of AttachedFiles.
-func (afq *AttachedFileQuery) All(ctx context.Context) ([]*AttachedFile, error) {
+func (afq *AttachedFileQuery) All(ctx context.Context) (AttachedFiles, error) {
 	ctx = setContextOp(ctx, afq.ctx, "All")
 	if err := afq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -220,7 +220,7 @@ func (afq *AttachedFileQuery) All(ctx context.Context) ([]*AttachedFile, error) 
 }
 
 // AllX is like All, but panics if an error occurs.
-func (afq *AttachedFileQuery) AllX(ctx context.Context) []*AttachedFile {
+func (afq *AttachedFileQuery) AllX(ctx context.Context) AttachedFiles {
 	nodes, err := afq.All(ctx)
 	if err != nil {
 		panic(err)

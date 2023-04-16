@@ -163,7 +163,7 @@ func (lq *LicenseQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Licenses.
-func (lq *LicenseQuery) All(ctx context.Context) ([]*License, error) {
+func (lq *LicenseQuery) All(ctx context.Context) (Licenses, error) {
 	ctx = setContextOp(ctx, lq.ctx, "All")
 	if err := lq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -173,7 +173,7 @@ func (lq *LicenseQuery) All(ctx context.Context) ([]*License, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (lq *LicenseQuery) AllX(ctx context.Context) []*License {
+func (lq *LicenseQuery) AllX(ctx context.Context) Licenses {
 	nodes, err := lq.All(ctx)
 	if err != nil {
 		panic(err)

@@ -182,7 +182,7 @@ func (rq *RelationshipQuery) OnlyX(ctx context.Context) *Relationship {
 }
 
 // All executes the query and returns a list of Relationships.
-func (rq *RelationshipQuery) All(ctx context.Context) ([]*Relationship, error) {
+func (rq *RelationshipQuery) All(ctx context.Context) (Relationships, error) {
 	ctx = setContextOp(ctx, rq.ctx, "All")
 	if err := rq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -192,7 +192,7 @@ func (rq *RelationshipQuery) All(ctx context.Context) ([]*Relationship, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (rq *RelationshipQuery) AllX(ctx context.Context) []*Relationship {
+func (rq *RelationshipQuery) AllX(ctx context.Context) Relationships {
 	nodes, err := rq.All(ctx)
 	if err != nil {
 		panic(err)

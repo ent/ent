@@ -210,7 +210,7 @@ func (pq *PetQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 }
 
 // All executes the query and returns a list of Pets.
-func (pq *PetQuery) All(ctx context.Context) ([]*Pet, error) {
+func (pq *PetQuery) All(ctx context.Context) (Pets, error) {
 	ctx = setContextOp(ctx, pq.ctx, "All")
 	if err := pq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -220,7 +220,7 @@ func (pq *PetQuery) All(ctx context.Context) ([]*Pet, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (pq *PetQuery) AllX(ctx context.Context) []*Pet {
+func (pq *PetQuery) AllX(ctx context.Context) Pets {
 	nodes, err := pq.All(ctx)
 	if err != nil {
 		panic(err)

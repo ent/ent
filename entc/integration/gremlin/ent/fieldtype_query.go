@@ -163,7 +163,7 @@ func (ftq *FieldTypeQuery) OnlyIDX(ctx context.Context) string {
 }
 
 // All executes the query and returns a list of FieldTypes.
-func (ftq *FieldTypeQuery) All(ctx context.Context) ([]*FieldType, error) {
+func (ftq *FieldTypeQuery) All(ctx context.Context) (FieldTypes, error) {
 	ctx = setContextOp(ctx, ftq.ctx, "All")
 	if err := ftq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -173,7 +173,7 @@ func (ftq *FieldTypeQuery) All(ctx context.Context) ([]*FieldType, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (ftq *FieldTypeQuery) AllX(ctx context.Context) []*FieldType {
+func (ftq *FieldTypeQuery) AllX(ctx context.Context) FieldTypes {
 	nodes, err := ftq.All(ctx)
 	if err != nil {
 		panic(err)

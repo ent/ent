@@ -187,7 +187,7 @@ func (uq *UserQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Users.
-func (uq *UserQuery) All(ctx context.Context) ([]*User, error) {
+func (uq *UserQuery) All(ctx context.Context) (Users, error) {
 	ctx = setContextOp(ctx, uq.ctx, "All")
 	if err := uq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -197,7 +197,7 @@ func (uq *UserQuery) All(ctx context.Context) ([]*User, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (uq *UserQuery) AllX(ctx context.Context) []*User {
+func (uq *UserQuery) AllX(ctx context.Context) Users {
 	nodes, err := uq.All(ctx)
 	if err != nil {
 		panic(err)

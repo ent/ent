@@ -210,7 +210,7 @@ func (utq *UserTweetQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of UserTweets.
-func (utq *UserTweetQuery) All(ctx context.Context) ([]*UserTweet, error) {
+func (utq *UserTweetQuery) All(ctx context.Context) (UserTweets, error) {
 	ctx = setContextOp(ctx, utq.ctx, "All")
 	if err := utq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -220,7 +220,7 @@ func (utq *UserTweetQuery) All(ctx context.Context) ([]*UserTweet, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (utq *UserTweetQuery) AllX(ctx context.Context) []*UserTweet {
+func (utq *UserTweetQuery) AllX(ctx context.Context) UserTweets {
 	nodes, err := utq.All(ctx)
 	if err != nil {
 		panic(err)

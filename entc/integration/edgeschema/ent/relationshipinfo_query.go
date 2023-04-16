@@ -162,7 +162,7 @@ func (riq *RelationshipInfoQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of RelationshipInfos.
-func (riq *RelationshipInfoQuery) All(ctx context.Context) ([]*RelationshipInfo, error) {
+func (riq *RelationshipInfoQuery) All(ctx context.Context) (RelationshipInfos, error) {
 	ctx = setContextOp(ctx, riq.ctx, "All")
 	if err := riq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -172,7 +172,7 @@ func (riq *RelationshipInfoQuery) All(ctx context.Context) ([]*RelationshipInfo,
 }
 
 // AllX is like All, but panics if an error occurs.
-func (riq *RelationshipInfoQuery) AllX(ctx context.Context) []*RelationshipInfo {
+func (riq *RelationshipInfoQuery) AllX(ctx context.Context) RelationshipInfos {
 	nodes, err := riq.All(ctx)
 	if err != nil {
 		panic(err)

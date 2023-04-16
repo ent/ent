@@ -211,7 +211,7 @@ func (ttq *TweetTagQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 }
 
 // All executes the query and returns a list of TweetTags.
-func (ttq *TweetTagQuery) All(ctx context.Context) ([]*TweetTag, error) {
+func (ttq *TweetTagQuery) All(ctx context.Context) (TweetTags, error) {
 	ctx = setContextOp(ctx, ttq.ctx, "All")
 	if err := ttq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -221,7 +221,7 @@ func (ttq *TweetTagQuery) All(ctx context.Context) ([]*TweetTag, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (ttq *TweetTagQuery) AllX(ctx context.Context) []*TweetTag {
+func (ttq *TweetTagQuery) AllX(ctx context.Context) TweetTags {
 	nodes, err := ttq.All(ctx)
 	if err != nil {
 		panic(err)

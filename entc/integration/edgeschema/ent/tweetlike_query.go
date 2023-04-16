@@ -159,7 +159,7 @@ func (tlq *TweetLikeQuery) OnlyX(ctx context.Context) *TweetLike {
 }
 
 // All executes the query and returns a list of TweetLikes.
-func (tlq *TweetLikeQuery) All(ctx context.Context) ([]*TweetLike, error) {
+func (tlq *TweetLikeQuery) All(ctx context.Context) (TweetLikes, error) {
 	ctx = setContextOp(ctx, tlq.ctx, "All")
 	if err := tlq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -169,7 +169,7 @@ func (tlq *TweetLikeQuery) All(ctx context.Context) ([]*TweetLike, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (tlq *TweetLikeQuery) AllX(ctx context.Context) []*TweetLike {
+func (tlq *TweetLikeQuery) AllX(ctx context.Context) TweetLikes {
 	nodes, err := tlq.All(ctx)
 	if err != nil {
 		panic(err)

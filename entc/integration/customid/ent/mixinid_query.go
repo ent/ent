@@ -163,7 +163,7 @@ func (miq *MixinIDQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 }
 
 // All executes the query and returns a list of MixinIDs.
-func (miq *MixinIDQuery) All(ctx context.Context) ([]*MixinID, error) {
+func (miq *MixinIDQuery) All(ctx context.Context) (MixinIDs, error) {
 	ctx = setContextOp(ctx, miq.ctx, "All")
 	if err := miq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -173,7 +173,7 @@ func (miq *MixinIDQuery) All(ctx context.Context) ([]*MixinID, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (miq *MixinIDQuery) AllX(ctx context.Context) []*MixinID {
+func (miq *MixinIDQuery) AllX(ctx context.Context) MixinIDs {
 	nodes, err := miq.All(ctx)
 	if err != nil {
 		panic(err)

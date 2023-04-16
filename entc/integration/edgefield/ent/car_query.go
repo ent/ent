@@ -188,7 +188,7 @@ func (cq *CarQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 }
 
 // All executes the query and returns a list of Cars.
-func (cq *CarQuery) All(ctx context.Context) ([]*Car, error) {
+func (cq *CarQuery) All(ctx context.Context) (Cars, error) {
 	ctx = setContextOp(ctx, cq.ctx, "All")
 	if err := cq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -198,7 +198,7 @@ func (cq *CarQuery) All(ctx context.Context) ([]*Car, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (cq *CarQuery) AllX(ctx context.Context) []*Car {
+func (cq *CarQuery) AllX(ctx context.Context) Cars {
 	nodes, err := cq.All(ctx)
 	if err != nil {
 		panic(err)

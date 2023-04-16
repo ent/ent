@@ -188,7 +188,7 @@ func (tq *TokenQuery) OnlyIDX(ctx context.Context) sid.ID {
 }
 
 // All executes the query and returns a list of Tokens.
-func (tq *TokenQuery) All(ctx context.Context) ([]*Token, error) {
+func (tq *TokenQuery) All(ctx context.Context) (Tokens, error) {
 	ctx = setContextOp(ctx, tq.ctx, "All")
 	if err := tq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -198,7 +198,7 @@ func (tq *TokenQuery) All(ctx context.Context) ([]*Token, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (tq *TokenQuery) AllX(ctx context.Context) []*Token {
+func (tq *TokenQuery) AllX(ctx context.Context) Tokens {
 	nodes, err := tq.All(ctx)
 	if err != nil {
 		panic(err)

@@ -178,7 +178,7 @@ func (sq *SpecQuery) OnlyIDX(ctx context.Context) string {
 }
 
 // All executes the query and returns a list of Specs.
-func (sq *SpecQuery) All(ctx context.Context) ([]*Spec, error) {
+func (sq *SpecQuery) All(ctx context.Context) (Specs, error) {
 	ctx = setContextOp(ctx, sq.ctx, "All")
 	if err := sq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -188,7 +188,7 @@ func (sq *SpecQuery) All(ctx context.Context) ([]*Spec, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (sq *SpecQuery) AllX(ctx context.Context) []*Spec {
+func (sq *SpecQuery) AllX(ctx context.Context) Specs {
 	nodes, err := sq.All(ctx)
 	if err != nil {
 		panic(err)

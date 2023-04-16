@@ -163,7 +163,7 @@ func (evsq *ExValueScanQuery) OnlyIDX(ctx context.Context) string {
 }
 
 // All executes the query and returns a list of ExValueScans.
-func (evsq *ExValueScanQuery) All(ctx context.Context) ([]*ExValueScan, error) {
+func (evsq *ExValueScanQuery) All(ctx context.Context) (ExValueScans, error) {
 	ctx = setContextOp(ctx, evsq.ctx, "All")
 	if err := evsq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -173,7 +173,7 @@ func (evsq *ExValueScanQuery) All(ctx context.Context) ([]*ExValueScan, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (evsq *ExValueScanQuery) AllX(ctx context.Context) []*ExValueScan {
+func (evsq *ExValueScanQuery) AllX(ctx context.Context) ExValueScans {
 	nodes, err := evsq.All(ctx)
 	if err != nil {
 		panic(err)

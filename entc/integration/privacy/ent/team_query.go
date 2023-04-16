@@ -212,17 +212,17 @@ func (tq *TeamQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Teams.
-func (tq *TeamQuery) All(ctx context.Context) ([]*Team, error) {
+func (tq *TeamQuery) All(ctx context.Context) (Teams, error) {
 	ctx = setContextOp(ctx, tq.ctx, "All")
 	if err := tq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*Team, *TeamQuery]()
-	return withInterceptors[[]*Team](ctx, tq, qr, tq.inters)
+	return withInterceptors[Teams](ctx, tq, qr, tq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (tq *TeamQuery) AllX(ctx context.Context) []*Team {
+func (tq *TeamQuery) AllX(ctx context.Context) Teams {
 	nodes, err := tq.All(ctx)
 	if err != nil {
 		panic(err)

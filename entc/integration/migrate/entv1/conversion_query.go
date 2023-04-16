@@ -162,7 +162,7 @@ func (cq *ConversionQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Conversions.
-func (cq *ConversionQuery) All(ctx context.Context) ([]*Conversion, error) {
+func (cq *ConversionQuery) All(ctx context.Context) (Conversions, error) {
 	ctx = setContextOp(ctx, cq.ctx, "All")
 	if err := cq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -172,7 +172,7 @@ func (cq *ConversionQuery) All(ctx context.Context) ([]*Conversion, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (cq *ConversionQuery) AllX(ctx context.Context) []*Conversion {
+func (cq *ConversionQuery) AllX(ctx context.Context) Conversions {
 	nodes, err := cq.All(ctx)
 	if err != nil {
 		panic(err)

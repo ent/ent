@@ -259,7 +259,7 @@ func (tq *TagQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Tags.
-func (tq *TagQuery) All(ctx context.Context) ([]*Tag, error) {
+func (tq *TagQuery) All(ctx context.Context) (Tags, error) {
 	ctx = setContextOp(ctx, tq.ctx, "All")
 	if err := tq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -269,7 +269,7 @@ func (tq *TagQuery) All(ctx context.Context) ([]*Tag, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (tq *TagQuery) AllX(ctx context.Context) []*Tag {
+func (tq *TagQuery) AllX(ctx context.Context) Tags {
 	nodes, err := tq.All(ctx)
 	if err != nil {
 		panic(err)

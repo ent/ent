@@ -163,7 +163,7 @@ func (lq *LinkQuery) OnlyIDX(ctx context.Context) uuidc.UUIDC {
 }
 
 // All executes the query and returns a list of Links.
-func (lq *LinkQuery) All(ctx context.Context) ([]*Link, error) {
+func (lq *LinkQuery) All(ctx context.Context) (Links, error) {
 	ctx = setContextOp(ctx, lq.ctx, "All")
 	if err := lq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -173,7 +173,7 @@ func (lq *LinkQuery) All(ctx context.Context) ([]*Link, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (lq *LinkQuery) AllX(ctx context.Context) []*Link {
+func (lq *LinkQuery) AllX(ctx context.Context) Links {
 	nodes, err := lq.All(ctx)
 	if err != nil {
 		panic(err)

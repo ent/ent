@@ -210,7 +210,7 @@ func (ugq *UserGroupQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of UserGroups.
-func (ugq *UserGroupQuery) All(ctx context.Context) ([]*UserGroup, error) {
+func (ugq *UserGroupQuery) All(ctx context.Context) (UserGroups, error) {
 	ctx = setContextOp(ctx, ugq.ctx, "All")
 	if err := ugq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -220,7 +220,7 @@ func (ugq *UserGroupQuery) All(ctx context.Context) ([]*UserGroup, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (ugq *UserGroupQuery) AllX(ctx context.Context) []*UserGroup {
+func (ugq *UserGroupQuery) AllX(ctx context.Context) UserGroups {
 	nodes, err := ugq.All(ctx)
 	if err != nil {
 		panic(err)

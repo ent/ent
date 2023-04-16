@@ -163,7 +163,7 @@ func (tq *TenantQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Tenants.
-func (tq *TenantQuery) All(ctx context.Context) ([]*Tenant, error) {
+func (tq *TenantQuery) All(ctx context.Context) (Tenants, error) {
 	ctx = setContextOp(ctx, tq.ctx, "All")
 	if err := tq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -173,7 +173,7 @@ func (tq *TenantQuery) All(ctx context.Context) ([]*Tenant, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (tq *TenantQuery) AllX(ctx context.Context) []*Tenant {
+func (tq *TenantQuery) AllX(ctx context.Context) Tenants {
 	nodes, err := tq.All(ctx)
 	if err != nil {
 		panic(err)

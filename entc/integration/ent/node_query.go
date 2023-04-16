@@ -212,7 +212,7 @@ func (nq *NodeQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Nodes.
-func (nq *NodeQuery) All(ctx context.Context) ([]*Node, error) {
+func (nq *NodeQuery) All(ctx context.Context) (Nodes, error) {
 	ctx = setContextOp(ctx, nq.ctx, "All")
 	if err := nq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -222,7 +222,7 @@ func (nq *NodeQuery) All(ctx context.Context) ([]*Node, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (nq *NodeQuery) AllX(ctx context.Context) []*Node {
+func (nq *NodeQuery) AllX(ctx context.Context) Nodes {
 	nodes, err := nq.All(ctx)
 	if err != nil {
 		panic(err)

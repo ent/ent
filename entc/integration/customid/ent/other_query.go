@@ -163,7 +163,7 @@ func (oq *OtherQuery) OnlyIDX(ctx context.Context) sid.ID {
 }
 
 // All executes the query and returns a list of Others.
-func (oq *OtherQuery) All(ctx context.Context) ([]*Other, error) {
+func (oq *OtherQuery) All(ctx context.Context) (Others, error) {
 	ctx = setContextOp(ctx, oq.ctx, "All")
 	if err := oq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -173,7 +173,7 @@ func (oq *OtherQuery) All(ctx context.Context) ([]*Other, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (oq *OtherQuery) AllX(ctx context.Context) []*Other {
+func (oq *OtherQuery) AllX(ctx context.Context) Others {
 	nodes, err := oq.All(ctx)
 	if err != nil {
 		panic(err)

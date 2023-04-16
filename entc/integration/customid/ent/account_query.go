@@ -188,7 +188,7 @@ func (aq *AccountQuery) OnlyIDX(ctx context.Context) sid.ID {
 }
 
 // All executes the query and returns a list of Accounts.
-func (aq *AccountQuery) All(ctx context.Context) ([]*Account, error) {
+func (aq *AccountQuery) All(ctx context.Context) (Accounts, error) {
 	ctx = setContextOp(ctx, aq.ctx, "All")
 	if err := aq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -198,7 +198,7 @@ func (aq *AccountQuery) All(ctx context.Context) ([]*Account, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (aq *AccountQuery) AllX(ctx context.Context) []*Account {
+func (aq *AccountQuery) AllX(ctx context.Context) Accounts {
 	nodes, err := aq.All(ctx)
 	if err != nil {
 		panic(err)

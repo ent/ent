@@ -158,7 +158,7 @@ func (ruq *RoleUserQuery) OnlyX(ctx context.Context) *RoleUser {
 }
 
 // All executes the query and returns a list of RoleUsers.
-func (ruq *RoleUserQuery) All(ctx context.Context) ([]*RoleUser, error) {
+func (ruq *RoleUserQuery) All(ctx context.Context) (RoleUsers, error) {
 	ctx = setContextOp(ctx, ruq.ctx, "All")
 	if err := ruq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -168,7 +168,7 @@ func (ruq *RoleUserQuery) All(ctx context.Context) ([]*RoleUser, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (ruq *RoleUserQuery) AllX(ctx context.Context) []*RoleUser {
+func (ruq *RoleUserQuery) AllX(ctx context.Context) RoleUsers {
 	nodes, err := ruq.All(ctx)
 	if err != nil {
 		panic(err)

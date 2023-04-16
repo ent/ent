@@ -235,7 +235,7 @@ func (bq *BlobQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 }
 
 // All executes the query and returns a list of Blobs.
-func (bq *BlobQuery) All(ctx context.Context) ([]*Blob, error) {
+func (bq *BlobQuery) All(ctx context.Context) (Blobs, error) {
 	ctx = setContextOp(ctx, bq.ctx, "All")
 	if err := bq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -245,7 +245,7 @@ func (bq *BlobQuery) All(ctx context.Context) ([]*Blob, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (bq *BlobQuery) AllX(ctx context.Context) []*Blob {
+func (bq *BlobQuery) AllX(ctx context.Context) Blobs {
 	nodes, err := bq.All(ctx)
 	if err != nil {
 		panic(err)

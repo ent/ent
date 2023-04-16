@@ -211,7 +211,7 @@ func (isq *IntSIDQuery) OnlyIDX(ctx context.Context) sid.ID {
 }
 
 // All executes the query and returns a list of IntSIDs.
-func (isq *IntSIDQuery) All(ctx context.Context) ([]*IntSID, error) {
+func (isq *IntSIDQuery) All(ctx context.Context) (IntSIDs, error) {
 	ctx = setContextOp(ctx, isq.ctx, "All")
 	if err := isq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -221,7 +221,7 @@ func (isq *IntSIDQuery) All(ctx context.Context) ([]*IntSID, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (isq *IntSIDQuery) AllX(ctx context.Context) []*IntSID {
+func (isq *IntSIDQuery) AllX(ctx context.Context) IntSIDs {
 	nodes, err := isq.All(ctx)
 	if err != nil {
 		panic(err)

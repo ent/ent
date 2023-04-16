@@ -211,7 +211,7 @@ func (pq *ProcessQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Processes.
-func (pq *ProcessQuery) All(ctx context.Context) ([]*Process, error) {
+func (pq *ProcessQuery) All(ctx context.Context) (Processes, error) {
 	ctx = setContextOp(ctx, pq.ctx, "All")
 	if err := pq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -221,7 +221,7 @@ func (pq *ProcessQuery) All(ctx context.Context) ([]*Process, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (pq *ProcessQuery) AllX(ctx context.Context) []*Process {
+func (pq *ProcessQuery) AllX(ctx context.Context) Processes {
 	nodes, err := pq.All(ctx)
 	if err != nil {
 		panic(err)

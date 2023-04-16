@@ -233,7 +233,7 @@ func (mq *MetadataQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of MetadataSlice.
-func (mq *MetadataQuery) All(ctx context.Context) ([]*Metadata, error) {
+func (mq *MetadataQuery) All(ctx context.Context) (MetadataSlice, error) {
 	ctx = setContextOp(ctx, mq.ctx, "All")
 	if err := mq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -243,7 +243,7 @@ func (mq *MetadataQuery) All(ctx context.Context) ([]*Metadata, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (mq *MetadataQuery) AllX(ctx context.Context) []*Metadata {
+func (mq *MetadataQuery) AllX(ctx context.Context) MetadataSlice {
 	nodes, err := mq.All(ctx)
 	if err != nil {
 		panic(err)

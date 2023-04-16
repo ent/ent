@@ -187,7 +187,7 @@ func (bq *BlogQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Blogs.
-func (bq *BlogQuery) All(ctx context.Context) ([]*Blog, error) {
+func (bq *BlogQuery) All(ctx context.Context) (Blogs, error) {
 	ctx = setContextOp(ctx, bq.ctx, "All")
 	if err := bq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -197,7 +197,7 @@ func (bq *BlogQuery) All(ctx context.Context) ([]*Blog, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (bq *BlogQuery) AllX(ctx context.Context) []*Blog {
+func (bq *BlogQuery) AllX(ctx context.Context) Blogs {
 	nodes, err := bq.All(ctx)
 	if err != nil {
 		panic(err)

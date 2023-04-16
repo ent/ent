@@ -179,7 +179,7 @@ func (giq *GroupInfoQuery) OnlyIDX(ctx context.Context) string {
 }
 
 // All executes the query and returns a list of GroupInfos.
-func (giq *GroupInfoQuery) All(ctx context.Context) ([]*GroupInfo, error) {
+func (giq *GroupInfoQuery) All(ctx context.Context) (GroupInfos, error) {
 	ctx = setContextOp(ctx, giq.ctx, "All")
 	if err := giq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -189,7 +189,7 @@ func (giq *GroupInfoQuery) All(ctx context.Context) ([]*GroupInfo, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (giq *GroupInfoQuery) AllX(ctx context.Context) []*GroupInfo {
+func (giq *GroupInfoQuery) AllX(ctx context.Context) GroupInfos {
 	nodes, err := giq.All(ctx)
 	if err != nil {
 		panic(err)

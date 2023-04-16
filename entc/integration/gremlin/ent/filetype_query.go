@@ -178,7 +178,7 @@ func (ftq *FileTypeQuery) OnlyIDX(ctx context.Context) string {
 }
 
 // All executes the query and returns a list of FileTypes.
-func (ftq *FileTypeQuery) All(ctx context.Context) ([]*FileType, error) {
+func (ftq *FileTypeQuery) All(ctx context.Context) (FileTypes, error) {
 	ctx = setContextOp(ctx, ftq.ctx, "All")
 	if err := ftq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -188,7 +188,7 @@ func (ftq *FileTypeQuery) All(ctx context.Context) ([]*FileType, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (ftq *FileTypeQuery) AllX(ctx context.Context) []*FileType {
+func (ftq *FileTypeQuery) AllX(ctx context.Context) FileTypes {
 	nodes, err := ftq.All(ctx)
 	if err != nil {
 		panic(err)

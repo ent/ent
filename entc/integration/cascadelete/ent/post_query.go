@@ -211,7 +211,7 @@ func (pq *PostQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Posts.
-func (pq *PostQuery) All(ctx context.Context) ([]*Post, error) {
+func (pq *PostQuery) All(ctx context.Context) (Posts, error) {
 	ctx = setContextOp(ctx, pq.ctx, "All")
 	if err := pq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -221,7 +221,7 @@ func (pq *PostQuery) All(ctx context.Context) ([]*Post, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (pq *PostQuery) AllX(ctx context.Context) []*Post {
+func (pq *PostQuery) AllX(ctx context.Context) Posts {
 	nodes, err := pq.All(ctx)
 	if err != nil {
 		panic(err)

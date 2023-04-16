@@ -164,7 +164,7 @@ func (iq *ItemQuery) OnlyIDX(ctx context.Context) string {
 }
 
 // All executes the query and returns a list of Items.
-func (iq *ItemQuery) All(ctx context.Context) ([]*Item, error) {
+func (iq *ItemQuery) All(ctx context.Context) (Items, error) {
 	ctx = setContextOp(ctx, iq.ctx, "All")
 	if err := iq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -174,7 +174,7 @@ func (iq *ItemQuery) All(ctx context.Context) ([]*Item, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (iq *ItemQuery) AllX(ctx context.Context) []*Item {
+func (iq *ItemQuery) AllX(ctx context.Context) Items {
 	nodes, err := iq.All(ctx)
 	if err != nil {
 		panic(err)

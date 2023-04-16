@@ -163,7 +163,7 @@ func (cq *CommentQuery) OnlyIDX(ctx context.Context) string {
 }
 
 // All executes the query and returns a list of Comments.
-func (cq *CommentQuery) All(ctx context.Context) ([]*Comment, error) {
+func (cq *CommentQuery) All(ctx context.Context) (Comments, error) {
 	ctx = setContextOp(ctx, cq.ctx, "All")
 	if err := cq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -173,7 +173,7 @@ func (cq *CommentQuery) All(ctx context.Context) ([]*Comment, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (cq *CommentQuery) AllX(ctx context.Context) []*Comment {
+func (cq *CommentQuery) AllX(ctx context.Context) Comments {
 	nodes, err := cq.All(ctx)
 	if err != nil {
 		panic(err)

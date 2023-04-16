@@ -187,7 +187,7 @@ func (cq *CityQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Cities.
-func (cq *CityQuery) All(ctx context.Context) ([]*City, error) {
+func (cq *CityQuery) All(ctx context.Context) (Cities, error) {
 	ctx = setContextOp(ctx, cq.ctx, "All")
 	if err := cq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -197,7 +197,7 @@ func (cq *CityQuery) All(ctx context.Context) ([]*City, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (cq *CityQuery) AllX(ctx context.Context) []*City {
+func (cq *CityQuery) AllX(ctx context.Context) Cities {
 	nodes, err := cq.All(ctx)
 	if err != nil {
 		panic(err)

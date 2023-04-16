@@ -162,7 +162,7 @@ func (zq *ZooQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Zoos.
-func (zq *ZooQuery) All(ctx context.Context) ([]*Zoo, error) {
+func (zq *ZooQuery) All(ctx context.Context) (Zoos, error) {
 	ctx = setContextOp(ctx, zq.ctx, "All")
 	if err := zq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -172,7 +172,7 @@ func (zq *ZooQuery) All(ctx context.Context) ([]*Zoo, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (zq *ZooQuery) AllX(ctx context.Context) []*Zoo {
+func (zq *ZooQuery) AllX(ctx context.Context) Zoos {
 	nodes, err := zq.All(ctx)
 	if err != nil {
 		panic(err)

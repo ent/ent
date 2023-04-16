@@ -210,7 +210,7 @@ func (gtq *GroupTagQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of GroupTags.
-func (gtq *GroupTagQuery) All(ctx context.Context) ([]*GroupTag, error) {
+func (gtq *GroupTagQuery) All(ctx context.Context) (GroupTags, error) {
 	ctx = setContextOp(ctx, gtq.ctx, "All")
 	if err := gtq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -220,7 +220,7 @@ func (gtq *GroupTagQuery) All(ctx context.Context) ([]*GroupTag, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (gtq *GroupTagQuery) AllX(ctx context.Context) []*GroupTag {
+func (gtq *GroupTagQuery) AllX(ctx context.Context) GroupTags {
 	nodes, err := gtq.All(ctx)
 	if err != nil {
 		panic(err)

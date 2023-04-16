@@ -187,7 +187,7 @@ func (fq *FileQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Files.
-func (fq *FileQuery) All(ctx context.Context) ([]*File, error) {
+func (fq *FileQuery) All(ctx context.Context) (Files, error) {
 	ctx = setContextOp(ctx, fq.ctx, "All")
 	if err := fq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -197,7 +197,7 @@ func (fq *FileQuery) All(ctx context.Context) ([]*File, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (fq *FileQuery) AllX(ctx context.Context) []*File {
+func (fq *FileQuery) AllX(ctx context.Context) Files {
 	nodes, err := fq.All(ctx)
 	if err != nil {
 		panic(err)

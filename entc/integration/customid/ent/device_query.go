@@ -212,7 +212,7 @@ func (dq *DeviceQuery) OnlyIDX(ctx context.Context) schema.ID {
 }
 
 // All executes the query and returns a list of Devices.
-func (dq *DeviceQuery) All(ctx context.Context) ([]*Device, error) {
+func (dq *DeviceQuery) All(ctx context.Context) (Devices, error) {
 	ctx = setContextOp(ctx, dq.ctx, "All")
 	if err := dq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -222,7 +222,7 @@ func (dq *DeviceQuery) All(ctx context.Context) ([]*Device, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (dq *DeviceQuery) AllX(ctx context.Context) []*Device {
+func (dq *DeviceQuery) AllX(ctx context.Context) Devices {
 	nodes, err := dq.All(ctx)
 	if err != nil {
 		panic(err)

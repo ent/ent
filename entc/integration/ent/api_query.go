@@ -164,7 +164,7 @@ func (aq *APIQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Apis.
-func (aq *APIQuery) All(ctx context.Context) ([]*Api, error) {
+func (aq *APIQuery) All(ctx context.Context) (Apis, error) {
 	ctx = setContextOp(ctx, aq.ctx, "All")
 	if err := aq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -174,7 +174,7 @@ func (aq *APIQuery) All(ctx context.Context) ([]*Api, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (aq *APIQuery) AllX(ctx context.Context) []*Api {
+func (aq *APIQuery) AllX(ctx context.Context) Apis {
 	nodes, err := aq.All(ctx)
 	if err != nil {
 		panic(err)

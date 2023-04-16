@@ -188,7 +188,7 @@ func (sq *SessionQuery) OnlyIDX(ctx context.Context) schema.ID {
 }
 
 // All executes the query and returns a list of Sessions.
-func (sq *SessionQuery) All(ctx context.Context) ([]*Session, error) {
+func (sq *SessionQuery) All(ctx context.Context) (Sessions, error) {
 	ctx = setContextOp(ctx, sq.ctx, "All")
 	if err := sq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -198,7 +198,7 @@ func (sq *SessionQuery) All(ctx context.Context) ([]*Session, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (sq *SessionQuery) AllX(ctx context.Context) []*Session {
+func (sq *SessionQuery) AllX(ctx context.Context) Sessions {
 	nodes, err := sq.All(ctx)
 	if err != nil {
 		panic(err)

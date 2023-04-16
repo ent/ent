@@ -224,7 +224,7 @@ func (gq *GroupQuery) OnlyIDX(ctx context.Context) string {
 }
 
 // All executes the query and returns a list of Groups.
-func (gq *GroupQuery) All(ctx context.Context) ([]*Group, error) {
+func (gq *GroupQuery) All(ctx context.Context) (Groups, error) {
 	ctx = setContextOp(ctx, gq.ctx, "All")
 	if err := gq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -234,7 +234,7 @@ func (gq *GroupQuery) All(ctx context.Context) ([]*Group, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (gq *GroupQuery) AllX(ctx context.Context) []*Group {
+func (gq *GroupQuery) AllX(ctx context.Context) Groups {
 	nodes, err := gq.All(ctx)
 	if err != nil {
 		panic(err)

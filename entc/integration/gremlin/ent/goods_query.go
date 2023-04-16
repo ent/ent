@@ -163,7 +163,7 @@ func (gq *GoodsQuery) OnlyIDX(ctx context.Context) string {
 }
 
 // All executes the query and returns a list of GoodsSlice.
-func (gq *GoodsQuery) All(ctx context.Context) ([]*Goods, error) {
+func (gq *GoodsQuery) All(ctx context.Context) (GoodsSlice, error) {
 	ctx = setContextOp(ctx, gq.ctx, "All")
 	if err := gq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -173,7 +173,7 @@ func (gq *GoodsQuery) All(ctx context.Context) ([]*Goods, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (gq *GoodsQuery) AllX(ctx context.Context) []*Goods {
+func (gq *GoodsQuery) AllX(ctx context.Context) GoodsSlice {
 	nodes, err := gq.All(ctx)
 	if err != nil {
 		panic(err)

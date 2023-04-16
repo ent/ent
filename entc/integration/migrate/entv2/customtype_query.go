@@ -162,7 +162,7 @@ func (ctq *CustomTypeQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of CustomTypes.
-func (ctq *CustomTypeQuery) All(ctx context.Context) ([]*CustomType, error) {
+func (ctq *CustomTypeQuery) All(ctx context.Context) (CustomTypes, error) {
 	ctx = setContextOp(ctx, ctq.ctx, "All")
 	if err := ctq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -172,7 +172,7 @@ func (ctq *CustomTypeQuery) All(ctx context.Context) ([]*CustomType, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (ctq *CustomTypeQuery) AllX(ctx context.Context) []*CustomType {
+func (ctq *CustomTypeQuery) AllX(ctx context.Context) CustomTypes {
 	nodes, err := ctq.All(ctx)
 	if err != nil {
 		panic(err)

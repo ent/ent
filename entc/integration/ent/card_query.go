@@ -215,7 +215,7 @@ func (cq *CardQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Cards.
-func (cq *CardQuery) All(ctx context.Context) ([]*Card, error) {
+func (cq *CardQuery) All(ctx context.Context) (Cards, error) {
 	ctx = setContextOp(ctx, cq.ctx, "All")
 	if err := cq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -225,7 +225,7 @@ func (cq *CardQuery) All(ctx context.Context) ([]*Card, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (cq *CardQuery) AllX(ctx context.Context) []*Card {
+func (cq *CardQuery) AllX(ctx context.Context) Cards {
 	nodes, err := cq.All(ctx)
 	if err != nil {
 		panic(err)

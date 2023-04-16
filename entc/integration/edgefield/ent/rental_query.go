@@ -211,7 +211,7 @@ func (rq *RentalQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Rentals.
-func (rq *RentalQuery) All(ctx context.Context) ([]*Rental, error) {
+func (rq *RentalQuery) All(ctx context.Context) (Rentals, error) {
 	ctx = setContextOp(ctx, rq.ctx, "All")
 	if err := rq.prepareQuery(ctx); err != nil {
 		return nil, err
@@ -221,7 +221,7 @@ func (rq *RentalQuery) All(ctx context.Context) ([]*Rental, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (rq *RentalQuery) AllX(ctx context.Context) []*Rental {
+func (rq *RentalQuery) AllX(ctx context.Context) Rentals {
 	nodes, err := rq.All(ctx)
 	if err != nil {
 		panic(err)
