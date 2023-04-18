@@ -15,12 +15,12 @@ import (
 
 func TestCmd(t *testing.T) {
 	defer os.RemoveAll("ent")
-	cmd := exec.Command("go", "run", "entgo.io/ent/cmd/ent", "init", "User")
+	cmd := exec.Command("go", "run", "entgo.io/ent/cmd/ent", "new", "User")
 	stderr := bytes.NewBuffer(nil)
 	cmd.Stderr = stderr
 	require.NoError(t, cmd.Run())
 	require.Zero(t, stderr.String())
-	cmd = exec.Command("go", "run", "entgo.io/ent/cmd/ent", "init", "User")
+	cmd = exec.Command("go", "run", "entgo.io/ent/cmd/ent", "new", "User")
 	require.Error(t, cmd.Run())
 
 	_, err := os.Stat("ent/generate.go")

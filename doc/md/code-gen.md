@@ -92,7 +92,6 @@ Flags:
       --feature strings       extend codegen with additional features
       --header string         override codegen header
   -h, --help                  help for generate
-      --idtype [int string]   type of the id field (default int)
       --storage string        storage driver to support in codegen (default "sql")
       --target string         target directory for codegen
       --template strings      external templates to execute

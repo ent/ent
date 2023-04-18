@@ -50,6 +50,9 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+      - name: Run cmd tests
+        run: go test -race ./...
+        working-directory: cmd
       - name: Run dialect tests
         run: go test -race ./...
         working-directory: dialect
