@@ -202,10 +202,13 @@ func GenerateCmd(postRun ...func(*gen.Config)) *cobra.Command {
 	cmd.Flags().StringVar(&cfg.Target, "target", "", "target directory for codegen")
 	cmd.Flags().StringSliceVarP(&features, "feature", "", nil, "extend codegen with additional features")
 	cmd.Flags().StringSliceVarP(&templates, "template", "", nil, "external templates to execute")
+	// The --idtype flag predates the field.<Type>("id") option.
+	// See, https://entgo.io/docs/schema-fields#id-field.
+	cobra.CheckErr(cmd.Flags().MarkHidden("idtype"))
 	return cmd
 }
 
-// newEnv create an new environment for ent codegen.
+// newEnv create a new environment for ent codegen.
 func newEnv(target string, names []string, tmpl *template.Template) error {
 	if err := createDir(target); err != nil {
 		return fmt.Errorf("create dir %s: %w", target, err)
