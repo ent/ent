@@ -255,12 +255,21 @@ func HasNeighbors(q *sql.Selector, s *Step) {
 		q.Where(sql.NotNull(q.C(s.Edge.Columns[0])))
 	case s.ToEdgeOwner():
 		to := builder.Table(s.Edge.Table).Schema(s.Edge.Schema)
+		// In case the edge reside on the same table, give
+		// the edge an alias to make qualifier different.
+		if s.From.Table == s.Edge.Table {
+			to.As(fmt.Sprintf("%s_edge", s.Edge.Table))
+		}
 		q.Where(
-			sql.In(
-				q.C(s.From.Column),
+			sql.Exists(
 				builder.Select(to.C(s.Edge.Columns[0])).
 					From(to).
-					Where(sql.NotNull(to.C(s.Edge.Columns[0]))),
+					Where(
+						sql.ColumnsEQ(
+							q.C(s.From.Column),
+							to.C(s.Edge.Columns[0]),
+						),
+					),
 			),
 		)
 	}
