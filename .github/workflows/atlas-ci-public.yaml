@@ -38,6 +38,6 @@ jobs:
           fetch-depth: 0 # Mandatory unless "latest" is set below.
       - uses: ariga/atlas-action@v0
         with:
-          dir: 'migrations'
+          dir: 'examples/migration/ent/migrate/migrations'
           dev-url: mysql://root:pass@localhost:3306/dev
           cloud-public: true
