@@ -5,11 +5,11 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'examples/migration/*'
+    # paths:
+    #   - 'examples/migration/*'
   pull_request:
-    paths:
-      - 'examples/migration/*'
+    # paths:
+    #   - 'examples/migration/*'
 jobs:
   lint:
     permissions:
