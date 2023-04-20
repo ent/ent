@@ -1270,6 +1270,9 @@ func (uq *UserQuery) loadJoinedGroups(ctx context.Context, query *UserGroupQuery
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(usergroup.FieldUserID)
+	}
 	query.Where(predicate.UserGroup(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.JoinedGroupsColumn), fks...))
 	}))
@@ -1281,7 +1284,7 @@ func (uq *UserQuery) loadJoinedGroups(ctx context.Context, query *UserGroupQuery
 		fk := n.UserID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -1297,6 +1300,9 @@ func (uq *UserQuery) loadFriendships(ctx context.Context, query *FriendshipQuery
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(friendship.FieldUserID)
+	}
 	query.Where(predicate.Friendship(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.FriendshipsColumn), fks...))
 	}))
@@ -1308,7 +1314,7 @@ func (uq *UserQuery) loadFriendships(ctx context.Context, query *FriendshipQuery
 		fk := n.UserID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -1324,6 +1330,9 @@ func (uq *UserQuery) loadRelationship(ctx context.Context, query *RelationshipQu
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(relationship.FieldUserID)
+	}
 	query.Where(predicate.Relationship(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.RelationshipColumn), fks...))
 	}))
@@ -1335,7 +1344,7 @@ func (uq *UserQuery) loadRelationship(ctx context.Context, query *RelationshipQu
 		fk := n.UserID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v for node %v`, fk, n)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n)
 		}
 		assign(node, n)
 	}
@@ -1351,6 +1360,9 @@ func (uq *UserQuery) loadLikes(ctx context.Context, query *TweetLikeQuery, nodes
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(tweetlike.FieldUserID)
+	}
 	query.Where(predicate.TweetLike(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.LikesColumn), fks...))
 	}))
@@ -1362,7 +1374,7 @@ func (uq *UserQuery) loadLikes(ctx context.Context, query *TweetLikeQuery, nodes
 		fk := n.UserID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v for node %v`, fk, n)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n)
 		}
 		assign(node, n)
 	}
@@ -1378,6 +1390,9 @@ func (uq *UserQuery) loadUserTweets(ctx context.Context, query *UserTweetQuery, 
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(usertweet.FieldUserID)
+	}
 	query.Where(predicate.UserTweet(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.UserTweetsColumn), fks...))
 	}))
@@ -1389,7 +1404,7 @@ func (uq *UserQuery) loadUserTweets(ctx context.Context, query *UserTweetQuery, 
 		fk := n.UserID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -1405,6 +1420,9 @@ func (uq *UserQuery) loadRolesUsers(ctx context.Context, query *RoleUserQuery, n
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(roleuser.FieldUserID)
+	}
 	query.Where(predicate.RoleUser(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.RolesUsersColumn), fks...))
 	}))
@@ -1416,7 +1434,7 @@ func (uq *UserQuery) loadRolesUsers(ctx context.Context, query *RoleUserQuery, n
 		fk := n.UserID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v for node %v`, fk, n)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n)
 		}
 		assign(node, n)
 	}

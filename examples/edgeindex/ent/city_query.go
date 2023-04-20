@@ -431,7 +431,7 @@ func (cq *CityQuery) loadStreets(ctx context.Context, query *StreetQuery, nodes 
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "city_streets" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "city_streets" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

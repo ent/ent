@@ -598,7 +598,7 @@ func (gq *GroupQuery) loadFiles(ctx context.Context, query *FileQuery, nodes []*
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "group_files" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "group_files" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -629,7 +629,7 @@ func (gq *GroupQuery) loadBlocked(ctx context.Context, query *UserQuery, nodes [
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "group_blocked" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "group_blocked" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

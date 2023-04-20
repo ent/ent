@@ -431,7 +431,7 @@ func (bq *BlogQuery) loadAdmins(ctx context.Context, query *UserQuery, nodes []*
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "blog_admins" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "blog_admins" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

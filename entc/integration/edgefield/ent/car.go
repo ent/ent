@@ -35,7 +35,8 @@ type CarEdges struct {
 	Rentals []*Rental `json:"rentals,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes  [1]bool
+	namedRentals map[string][]*Rental
 }
 
 // RentalsOrErr returns the Rentals value or an error if the edge
@@ -128,6 +129,30 @@ func (c *Car) String() string {
 	builder.WriteString(c.Number)
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedRentals returns the Rentals named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (c *Car) NamedRentals(name string) ([]*Rental, error) {
+	if c.Edges.namedRentals == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := c.Edges.namedRentals[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (c *Car) appendNamedRentals(name string, edges ...*Rental) {
+	if c.Edges.namedRentals == nil {
+		c.Edges.namedRentals = make(map[string][]*Rental)
+	}
+	if len(edges) == 0 {
+		c.Edges.namedRentals[name] = []*Rental{}
+	} else {
+		c.Edges.namedRentals[name] = append(c.Edges.namedRentals[name], edges...)
+	}
 }
 
 // Cars is a parsable slice of Car.

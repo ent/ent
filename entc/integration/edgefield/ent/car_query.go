@@ -24,11 +24,12 @@ import (
 // CarQuery is the builder for querying Car entities.
 type CarQuery struct {
 	config
-	ctx         *QueryContext
-	order       []car.OrderOption
-	inters      []Interceptor
-	predicates  []predicate.Car
-	withRentals *RentalQuery
+	ctx              *QueryContext
+	order            []car.OrderOption
+	inters           []Interceptor
+	predicates       []predicate.Car
+	withRentals      *RentalQuery
+	withNamedRentals map[string]*RentalQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -404,6 +405,13 @@ func (cq *CarQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Car, err
 			return nil, err
 		}
 	}
+	for name, query := range cq.withNamedRentals {
+		if err := cq.loadRentals(ctx, query, nodes,
+			func(n *Car) { n.appendNamedRentals(name) },
+			func(n *Car, e *Rental) { n.appendNamedRentals(name, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -417,6 +425,9 @@ func (cq *CarQuery) loadRentals(ctx context.Context, query *RentalQuery, nodes [
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(rental.FieldCarID)
+	}
 	query.Where(predicate.Rental(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(car.RentalsColumn), fks...))
 	}))
@@ -428,7 +439,7 @@ func (cq *CarQuery) loadRentals(ctx context.Context, query *RentalQuery, nodes [
 		fk := n.CarID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "car_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "car_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -514,6 +525,20 @@ func (cq *CarQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// WithNamedRentals tells the query-builder to eager-load the nodes that are connected to the "rentals"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (cq *CarQuery) WithNamedRentals(name string, opts ...func(*RentalQuery)) *CarQuery {
+	query := (&RentalClient{config: cq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if cq.withNamedRentals == nil {
+		cq.withNamedRentals = make(map[string]*RentalQuery)
+	}
+	cq.withNamedRentals[name] = query
+	return cq
 }
 
 // CarGroupBy is the group-by builder for Car entities.

@@ -488,6 +488,9 @@ func (pq *PostQuery) loadComments(ctx context.Context, query *CommentQuery, node
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(comment.FieldPostID)
+	}
 	query.Where(predicate.Comment(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(post.CommentsColumn), fks...))
 	}))
@@ -499,7 +502,7 @@ func (pq *PostQuery) loadComments(ctx context.Context, query *CommentQuery, node
 		fk := n.PostID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "post_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "post_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

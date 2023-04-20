@@ -670,6 +670,9 @@ func (gq *GroupQuery) loadJoinedUsers(ctx context.Context, query *UserGroupQuery
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(usergroup.FieldGroupID)
+	}
 	query.Where(predicate.UserGroup(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(group.JoinedUsersColumn), fks...))
 	}))
@@ -681,7 +684,7 @@ func (gq *GroupQuery) loadJoinedUsers(ctx context.Context, query *UserGroupQuery
 		fk := n.GroupID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "group_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "group_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -697,6 +700,9 @@ func (gq *GroupQuery) loadGroupTags(ctx context.Context, query *GroupTagQuery, n
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(grouptag.FieldGroupID)
+	}
 	query.Where(predicate.GroupTag(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(group.GroupTagsColumn), fks...))
 	}))
@@ -708,7 +714,7 @@ func (gq *GroupQuery) loadGroupTags(ctx context.Context, query *GroupTagQuery, n
 		fk := n.GroupID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "group_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "group_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

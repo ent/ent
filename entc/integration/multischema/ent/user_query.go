@@ -566,6 +566,9 @@ func (uq *UserQuery) loadPets(ctx context.Context, query *PetQuery, nodes []*Use
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(pet.FieldOwnerID)
+	}
 	query.Where(predicate.Pet(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.PetsColumn), fks...))
 	}))
@@ -577,7 +580,7 @@ func (uq *UserQuery) loadPets(ctx context.Context, query *PetQuery, nodes []*Use
 		fk := n.OwnerID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "owner_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "owner_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -717,6 +720,9 @@ func (uq *UserQuery) loadFriendships(ctx context.Context, query *FriendshipQuery
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(friendship.FieldUserID)
+	}
 	query.Where(predicate.Friendship(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.FriendshipsColumn), fks...))
 	}))
@@ -728,7 +734,7 @@ func (uq *UserQuery) loadFriendships(ctx context.Context, query *FriendshipQuery
 		fk := n.UserID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

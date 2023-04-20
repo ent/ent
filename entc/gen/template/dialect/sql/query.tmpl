@@ -215,6 +215,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 			{{- with $e.Type.UnexportedForeignKeys }}
 				query.withFKs = true
 			{{- end }}
+			{{- /* In case of custom field selection, ensure edge-fields used for binding below were selected. */}}
+			{{- if and $e.Ref $e.Ref.Field }}
+				if len(query.ctx.Fields) > 0 {
+					query.ctx.AppendFieldOnce({{ $e.Type.Package }}.{{ $e.Ref.Field.Constant }})
+				}
+			{{- end }}
 			query.Where(predicate.{{ $e.Type.Name }}(func(s *sql.Selector) {
 				s.Where(sql.InValues(s.C({{ $.Package }}.{{ $e.ColumnConstant }}), fks...))
 			}))
@@ -232,7 +238,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 				{{- end }}
 				node, ok := nodeids[{{ if $fk.Field.Nillable }}*{{ end }}fk]
 				if !ok {
-					return fmt.Errorf(`unexpected foreign-key "{{ $fk.Field.Name }}" returned %v for node %v`, {{ if $fk.Field.Nillable }}*{{ end }}fk, n{{ if $e.Type.HasOneFieldID }}.ID{{ end }})
+					return fmt.Errorf(`unexpected referenced foreign-key "{{ $fk.Field.Name }}" returned %v for node %v`, {{ if $fk.Field.Nillable }}*{{ end }}fk, n{{ if $e.Type.HasOneFieldID }}.ID{{ end }})
 				}
 				assign(node, n)
 			}

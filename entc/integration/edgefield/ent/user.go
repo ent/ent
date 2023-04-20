@@ -52,7 +52,11 @@ type UserEdges struct {
 	Rentals []*Rental `json:"rentals,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [8]bool
+	loadedTypes   [8]bool
+	namedPets     map[string][]*Pet
+	namedChildren map[string][]*User
+	namedInfo     map[string][]*Info
+	namedRentals  map[string][]*Rental
 }
 
 // PetsOrErr returns the Pets value or an error if the edge
@@ -266,6 +270,102 @@ func (u *User) String() string {
 	builder.WriteString(fmt.Sprintf("%v", u.SpouseID))
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedPets returns the Pets named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (u *User) NamedPets(name string) ([]*Pet, error) {
+	if u.Edges.namedPets == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := u.Edges.namedPets[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (u *User) appendNamedPets(name string, edges ...*Pet) {
+	if u.Edges.namedPets == nil {
+		u.Edges.namedPets = make(map[string][]*Pet)
+	}
+	if len(edges) == 0 {
+		u.Edges.namedPets[name] = []*Pet{}
+	} else {
+		u.Edges.namedPets[name] = append(u.Edges.namedPets[name], edges...)
+	}
+}
+
+// NamedChildren returns the Children named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (u *User) NamedChildren(name string) ([]*User, error) {
+	if u.Edges.namedChildren == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := u.Edges.namedChildren[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (u *User) appendNamedChildren(name string, edges ...*User) {
+	if u.Edges.namedChildren == nil {
+		u.Edges.namedChildren = make(map[string][]*User)
+	}
+	if len(edges) == 0 {
+		u.Edges.namedChildren[name] = []*User{}
+	} else {
+		u.Edges.namedChildren[name] = append(u.Edges.namedChildren[name], edges...)
+	}
+}
+
+// NamedInfo returns the Info named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (u *User) NamedInfo(name string) ([]*Info, error) {
+	if u.Edges.namedInfo == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := u.Edges.namedInfo[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (u *User) appendNamedInfo(name string, edges ...*Info) {
+	if u.Edges.namedInfo == nil {
+		u.Edges.namedInfo = make(map[string][]*Info)
+	}
+	if len(edges) == 0 {
+		u.Edges.namedInfo[name] = []*Info{}
+	} else {
+		u.Edges.namedInfo[name] = append(u.Edges.namedInfo[name], edges...)
+	}
+}
+
+// NamedRentals returns the Rentals named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (u *User) NamedRentals(name string) ([]*Rental, error) {
+	if u.Edges.namedRentals == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := u.Edges.namedRentals[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (u *User) appendNamedRentals(name string, edges ...*Rental) {
+	if u.Edges.namedRentals == nil {
+		u.Edges.namedRentals = make(map[string][]*Rental)
+	}
+	if len(edges) == 0 {
+		u.Edges.namedRentals[name] = []*Rental{}
+	} else {
+		u.Edges.namedRentals[name] = append(u.Edges.namedRentals[name], edges...)
+	}
 }
 
 // Users is a parsable slice of User.

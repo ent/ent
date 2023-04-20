@@ -2061,6 +2061,13 @@ func NamedEagerLoading(t *testing.T, client *ent.Client) {
 	unknown, err := a8m.NamedPets("Unknown")
 	require.True(t, ent.IsNotLoaded(err))
 	require.Nil(t, unknown)
+
+	exists := client.User.Query().
+		WithNamedPets("WithSelection", func(q *ent.PetQuery) {
+			q.Select(pet.FieldID)
+		}).
+		ExistX(ctx)
+	require.True(t, exists)
 }
 
 // writerFunc is an io.Writer implemented by the underlying func.

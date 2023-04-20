@@ -6,7 +6,7 @@ replace entgo.io/ent => ../../
 
 require (
 	ariga.io/atlas v0.10.0
-	entgo.io/ent v0.0.0-00010101000000-000000000000
+	entgo.io/ent v0.12.2-0.20230420123650-f6de6bb2e04c
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/google/uuid v1.3.0
 	github.com/lib/pq v1.10.7

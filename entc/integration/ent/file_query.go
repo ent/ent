@@ -602,7 +602,7 @@ func (fq *FileQuery) loadField(ctx context.Context, query *FieldTypeQuery, nodes
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "file_field" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "file_field" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
