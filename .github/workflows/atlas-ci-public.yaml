@@ -4,12 +4,12 @@ on:
   # change this to your root branch.
   push:
     branches:
-      - main
-    # paths:
-    #   - 'examples/migration/*'
+      - master
+    paths:
+      - 'examples/migration/*'
   pull_request:
-    # paths:
-    #   - 'examples/migration/*'
+    paths:
+      - 'examples/migration/*'
 jobs:
   lint:
     permissions:
