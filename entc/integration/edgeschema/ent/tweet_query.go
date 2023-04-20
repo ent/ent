@@ -818,6 +818,9 @@ func (tq *TweetQuery) loadLikes(ctx context.Context, query *TweetLikeQuery, node
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(tweetlike.FieldTweetID)
+	}
 	query.Where(predicate.TweetLike(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(tweet.LikesColumn), fks...))
 	}))
@@ -829,7 +832,7 @@ func (tq *TweetQuery) loadLikes(ctx context.Context, query *TweetLikeQuery, node
 		fk := n.TweetID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "tweet_id" returned %v for node %v`, fk, n)
+			return fmt.Errorf(`unexpected referenced foreign-key "tweet_id" returned %v for node %v`, fk, n)
 		}
 		assign(node, n)
 	}
@@ -845,6 +848,9 @@ func (tq *TweetQuery) loadTweetUser(ctx context.Context, query *UserTweetQuery, 
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(usertweet.FieldTweetID)
+	}
 	query.Where(predicate.UserTweet(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(tweet.TweetUserColumn), fks...))
 	}))
@@ -856,7 +862,7 @@ func (tq *TweetQuery) loadTweetUser(ctx context.Context, query *UserTweetQuery, 
 		fk := n.TweetID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "tweet_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "tweet_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -872,6 +878,9 @@ func (tq *TweetQuery) loadTweetTags(ctx context.Context, query *TweetTagQuery, n
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(tweettag.FieldTweetID)
+	}
 	query.Where(predicate.TweetTag(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(tweet.TweetTagsColumn), fks...))
 	}))
@@ -883,7 +892,7 @@ func (tq *TweetQuery) loadTweetTags(ctx context.Context, query *TweetTagQuery, n
 		fk := n.TweetID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "tweet_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "tweet_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

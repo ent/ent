@@ -41,7 +41,8 @@ type MetadataEdges struct {
 	Parent *Metadata `json:"parent,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes   [3]bool
+	namedChildren map[string][]*Metadata
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -177,6 +178,30 @@ func (m *Metadata) String() string {
 	builder.WriteString(fmt.Sprintf("%v", m.ParentID))
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedChildren returns the Children named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (m *Metadata) NamedChildren(name string) ([]*Metadata, error) {
+	if m.Edges.namedChildren == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := m.Edges.namedChildren[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (m *Metadata) appendNamedChildren(name string, edges ...*Metadata) {
+	if m.Edges.namedChildren == nil {
+		m.Edges.namedChildren = make(map[string][]*Metadata)
+	}
+	if len(edges) == 0 {
+		m.Edges.namedChildren[name] = []*Metadata{}
+	} else {
+		m.Edges.namedChildren[name] = append(m.Edges.namedChildren[name], edges...)
+	}
 }
 
 // MetadataSlice is a parsable slice of Metadata.

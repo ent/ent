@@ -543,7 +543,7 @@ func (uq *UserQuery) loadTasks(ctx context.Context, query *TaskQuery, nodes []*U
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_tasks" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_tasks" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

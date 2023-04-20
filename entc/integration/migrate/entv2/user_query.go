@@ -522,7 +522,7 @@ func (uq *UserQuery) loadCar(ctx context.Context, query *CarQuery, nodes []*User
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_car" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_car" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -550,7 +550,7 @@ func (uq *UserQuery) loadPets(ctx context.Context, query *PetQuery, nodes []*Use
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "owner_id" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "owner_id" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

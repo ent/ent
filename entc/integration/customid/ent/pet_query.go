@@ -577,7 +577,7 @@ func (pq *PetQuery) loadCars(ctx context.Context, query *CarQuery, nodes []*Pet,
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "pet_cars" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "pet_cars" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

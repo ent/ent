@@ -23,13 +23,14 @@ import (
 // MetadataQuery is the builder for querying Metadata entities.
 type MetadataQuery struct {
 	config
-	ctx          *QueryContext
-	order        []metadata.OrderOption
-	inters       []Interceptor
-	predicates   []predicate.Metadata
-	withUser     *UserQuery
-	withChildren *MetadataQuery
-	withParent   *MetadataQuery
+	ctx               *QueryContext
+	order             []metadata.OrderOption
+	inters            []Interceptor
+	predicates        []predicate.Metadata
+	withUser          *UserQuery
+	withChildren      *MetadataQuery
+	withParent        *MetadataQuery
+	withNamedChildren map[string]*MetadataQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -487,6 +488,13 @@ func (mq *MetadataQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Met
 			return nil, err
 		}
 	}
+	for name, query := range mq.withNamedChildren {
+		if err := mq.loadChildren(ctx, query, nodes,
+			func(n *Metadata) { n.appendNamedChildren(name) },
+			func(n *Metadata, e *Metadata) { n.appendNamedChildren(name, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -529,6 +537,9 @@ func (mq *MetadataQuery) loadChildren(ctx context.Context, query *MetadataQuery,
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(metadata.FieldParentID)
+	}
 	query.Where(predicate.Metadata(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(metadata.ChildrenColumn), fks...))
 	}))
@@ -540,7 +551,7 @@ func (mq *MetadataQuery) loadChildren(ctx context.Context, query *MetadataQuery,
 		fk := n.ParentID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -658,6 +669,20 @@ func (mq *MetadataQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// WithNamedChildren tells the query-builder to eager-load the nodes that are connected to the "children"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (mq *MetadataQuery) WithNamedChildren(name string, opts ...func(*MetadataQuery)) *MetadataQuery {
+	query := (&MetadataClient{config: mq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if mq.withNamedChildren == nil {
+		mq.withNamedChildren = make(map[string]*MetadataQuery)
+	}
+	mq.withNamedChildren[name] = query
+	return mq
 }
 
 // MetadataGroupBy is the group-by builder for Metadata entities.

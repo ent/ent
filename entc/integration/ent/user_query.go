@@ -926,7 +926,7 @@ func (uq *UserQuery) loadCard(ctx context.Context, query *CardQuery, nodes []*Us
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_card" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_card" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -957,7 +957,7 @@ func (uq *UserQuery) loadPets(ctx context.Context, query *PetQuery, nodes []*Use
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_pets" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_pets" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -988,7 +988,7 @@ func (uq *UserQuery) loadFiles(ctx context.Context, query *FileQuery, nodes []*U
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_files" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_files" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -1260,7 +1260,7 @@ func (uq *UserQuery) loadTeam(ctx context.Context, query *PetQuery, nodes []*Use
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_team" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_team" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -1323,7 +1323,7 @@ func (uq *UserQuery) loadChildren(ctx context.Context, query *UserQuery, nodes [
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_parent" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_parent" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

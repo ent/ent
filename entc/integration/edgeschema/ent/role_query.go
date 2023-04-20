@@ -521,6 +521,9 @@ func (rq *RoleQuery) loadRolesUsers(ctx context.Context, query *RoleUserQuery, n
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(roleuser.FieldRoleID)
+	}
 	query.Where(predicate.RoleUser(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(role.RolesUsersColumn), fks...))
 	}))
@@ -532,7 +535,7 @@ func (rq *RoleQuery) loadRolesUsers(ctx context.Context, query *RoleUserQuery, n
 		fk := n.RoleID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "role_id" returned %v for node %v`, fk, n)
+			return fmt.Errorf(`unexpected referenced foreign-key "role_id" returned %v for node %v`, fk, n)
 		}
 		assign(node, n)
 	}

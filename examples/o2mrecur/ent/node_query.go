@@ -486,6 +486,9 @@ func (nq *NodeQuery) loadChildren(ctx context.Context, query *NodeQuery, nodes [
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(node.FieldParentID)
+	}
 	query.Where(predicate.Node(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(node.ChildrenColumn), fks...))
 	}))
@@ -497,7 +500,7 @@ func (nq *NodeQuery) loadChildren(ctx context.Context, query *NodeQuery, nodes [
 		fk := n.ParentID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

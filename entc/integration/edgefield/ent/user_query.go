@@ -27,18 +27,22 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	ctx          *QueryContext
-	order        []user.OrderOption
-	inters       []Interceptor
-	predicates   []predicate.User
-	withPets     *PetQuery
-	withParent   *UserQuery
-	withChildren *UserQuery
-	withSpouse   *UserQuery
-	withCard     *CardQuery
-	withMetadata *MetadataQuery
-	withInfo     *InfoQuery
-	withRentals  *RentalQuery
+	ctx               *QueryContext
+	order             []user.OrderOption
+	inters            []Interceptor
+	predicates        []predicate.User
+	withPets          *PetQuery
+	withParent        *UserQuery
+	withChildren      *UserQuery
+	withSpouse        *UserQuery
+	withCard          *CardQuery
+	withMetadata      *MetadataQuery
+	withInfo          *InfoQuery
+	withRentals       *RentalQuery
+	withNamedPets     map[string]*PetQuery
+	withNamedChildren map[string]*UserQuery
+	withNamedInfo     map[string]*InfoQuery
+	withNamedRentals  map[string]*RentalQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -704,6 +708,34 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
+	for name, query := range uq.withNamedPets {
+		if err := uq.loadPets(ctx, query, nodes,
+			func(n *User) { n.appendNamedPets(name) },
+			func(n *User, e *Pet) { n.appendNamedPets(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range uq.withNamedChildren {
+		if err := uq.loadChildren(ctx, query, nodes,
+			func(n *User) { n.appendNamedChildren(name) },
+			func(n *User, e *User) { n.appendNamedChildren(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range uq.withNamedInfo {
+		if err := uq.loadInfo(ctx, query, nodes,
+			func(n *User) { n.appendNamedInfo(name) },
+			func(n *User, e *Info) { n.appendNamedInfo(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range uq.withNamedRentals {
+		if err := uq.loadRentals(ctx, query, nodes,
+			func(n *User) { n.appendNamedRentals(name) },
+			func(n *User, e *Rental) { n.appendNamedRentals(name, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -717,6 +749,9 @@ func (uq *UserQuery) loadPets(ctx context.Context, query *PetQuery, nodes []*Use
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(pet.FieldOwnerID)
+	}
 	query.Where(predicate.Pet(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.PetsColumn), fks...))
 	}))
@@ -728,7 +763,7 @@ func (uq *UserQuery) loadPets(ctx context.Context, query *PetQuery, nodes []*Use
 		fk := n.OwnerID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "owner_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "owner_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -773,6 +808,9 @@ func (uq *UserQuery) loadChildren(ctx context.Context, query *UserQuery, nodes [
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(user.FieldParentID)
+	}
 	query.Where(predicate.User(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.ChildrenColumn), fks...))
 	}))
@@ -784,7 +822,7 @@ func (uq *UserQuery) loadChildren(ctx context.Context, query *UserQuery, nodes [
 		fk := n.ParentID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -826,6 +864,9 @@ func (uq *UserQuery) loadCard(ctx context.Context, query *CardQuery, nodes []*Us
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(card.FieldOwnerID)
+	}
 	query.Where(predicate.Card(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.CardColumn), fks...))
 	}))
@@ -837,7 +878,7 @@ func (uq *UserQuery) loadCard(ctx context.Context, query *CardQuery, nodes []*Us
 		fk := n.OwnerID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "owner_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "owner_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -861,7 +902,7 @@ func (uq *UserQuery) loadMetadata(ctx context.Context, query *MetadataQuery, nod
 		fk := n.ID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -888,7 +929,7 @@ func (uq *UserQuery) loadInfo(ctx context.Context, query *InfoQuery, nodes []*Us
 		fk := n.ID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -904,6 +945,9 @@ func (uq *UserQuery) loadRentals(ctx context.Context, query *RentalQuery, nodes 
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(rental.FieldUserID)
+	}
 	query.Where(predicate.Rental(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.RentalsColumn), fks...))
 	}))
@@ -915,7 +959,7 @@ func (uq *UserQuery) loadRentals(ctx context.Context, query *RentalQuery, nodes 
 		fk := n.UserID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -1007,6 +1051,62 @@ func (uq *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// WithNamedPets tells the query-builder to eager-load the nodes that are connected to the "pets"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithNamedPets(name string, opts ...func(*PetQuery)) *UserQuery {
+	query := (&PetClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if uq.withNamedPets == nil {
+		uq.withNamedPets = make(map[string]*PetQuery)
+	}
+	uq.withNamedPets[name] = query
+	return uq
+}
+
+// WithNamedChildren tells the query-builder to eager-load the nodes that are connected to the "children"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithNamedChildren(name string, opts ...func(*UserQuery)) *UserQuery {
+	query := (&UserClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if uq.withNamedChildren == nil {
+		uq.withNamedChildren = make(map[string]*UserQuery)
+	}
+	uq.withNamedChildren[name] = query
+	return uq
+}
+
+// WithNamedInfo tells the query-builder to eager-load the nodes that are connected to the "info"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithNamedInfo(name string, opts ...func(*InfoQuery)) *UserQuery {
+	query := (&InfoClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if uq.withNamedInfo == nil {
+		uq.withNamedInfo = make(map[string]*InfoQuery)
+	}
+	uq.withNamedInfo[name] = query
+	return uq
+}
+
+// WithNamedRentals tells the query-builder to eager-load the nodes that are connected to the "rentals"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithNamedRentals(name string, opts ...func(*RentalQuery)) *UserQuery {
+	query := (&RentalClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if uq.withNamedRentals == nil {
+		uq.withNamedRentals = make(map[string]*RentalQuery)
+	}
+	uq.withNamedRentals[name] = query
+	return uq
 }
 
 // UserGroupBy is the group-by builder for User entities.

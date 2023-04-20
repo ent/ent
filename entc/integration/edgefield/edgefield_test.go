@@ -118,3 +118,28 @@ func TestEdgeField(t *testing.T) {
 		head = curr
 	}
 }
+
+func TestNamedEdges(t *testing.T) {
+	client, err := ent.Open(dialect.SQLite, "file:ent?mode=memory&_fk=1")
+	require.NoError(t, err)
+	defer client.Close()
+	ctx := context.Background()
+	require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
+	u1 := client.User.Create().SaveX(ctx)
+	client.Pet.Create().SetOwner(u1).SaveX(ctx)
+
+	u1 = client.User.Query().
+		WithPets(func(q *ent.PetQuery) {
+			q.Select(pet.FieldID)
+		}).
+		WithNamedPets("Named", func(q *ent.PetQuery) {
+			q.Select(pet.FieldID)
+		}).
+		OnlyX(ctx)
+	require.Len(t, u1.Edges.Pets, 1)
+	require.Equal(t, u1.Edges.Pets[0].OwnerID, u1.ID)
+	pets, err := u1.NamedPets("Named")
+	require.NoError(t, err)
+	require.Len(t, pets, 1)
+	require.Equal(t, pets[0].OwnerID, u1.ID)
+}

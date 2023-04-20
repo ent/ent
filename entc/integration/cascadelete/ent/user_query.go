@@ -416,6 +416,9 @@ func (uq *UserQuery) loadPosts(ctx context.Context, query *PostQuery, nodes []*U
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(post.FieldAuthorID)
+	}
 	query.Where(predicate.Post(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.PostsColumn), fks...))
 	}))
@@ -427,7 +430,7 @@ func (uq *UserQuery) loadPosts(ctx context.Context, query *PostQuery, nodes []*U
 		fk := n.AuthorID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "author_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "author_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

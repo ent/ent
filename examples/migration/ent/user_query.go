@@ -416,6 +416,9 @@ func (uq *UserQuery) loadCards(ctx context.Context, query *CardQuery, nodes []*U
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(card.FieldOwnerID)
+	}
 	query.Where(predicate.Card(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.CardsColumn), fks...))
 	}))
@@ -427,7 +430,7 @@ func (uq *UserQuery) loadCards(ctx context.Context, query *CardQuery, nodes []*U
 		fk := n.OwnerID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "owner_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "owner_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

@@ -603,6 +603,9 @@ func (bq *BlobQuery) loadBlobLinks(ctx context.Context, query *BlobLinkQuery, no
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(bloblink.FieldBlobID)
+	}
 	query.Where(predicate.BlobLink(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(blob.BlobLinksColumn), fks...))
 	}))
@@ -614,7 +617,7 @@ func (bq *BlobQuery) loadBlobLinks(ctx context.Context, query *BlobLinkQuery, no
 		fk := n.BlobID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "blob_id" returned %v for node %v`, fk, n)
+			return fmt.Errorf(`unexpected referenced foreign-key "blob_id" returned %v for node %v`, fk, n)
 		}
 		assign(node, n)
 	}

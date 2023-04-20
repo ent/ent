@@ -556,7 +556,7 @@ func (dq *DocQuery) loadChildren(ctx context.Context, query *DocQuery, nodes []*
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "doc_children" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "doc_children" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

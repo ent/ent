@@ -499,6 +499,9 @@ func (pq *ProcessQuery) loadAttachedFiles(ctx context.Context, query *AttachedFi
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(attachedfile.FieldProcID)
+	}
 	query.Where(predicate.AttachedFile(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(process.AttachedFilesColumn), fks...))
 	}))
@@ -510,7 +513,7 @@ func (pq *ProcessQuery) loadAttachedFiles(ctx context.Context, query *AttachedFi
 		fk := n.ProcID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "proc_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "proc_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

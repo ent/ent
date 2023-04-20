@@ -444,7 +444,7 @@ func (giq *GroupInfoQuery) loadGroups(ctx context.Context, query *GroupQuery, no
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "group_info" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "group_info" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
