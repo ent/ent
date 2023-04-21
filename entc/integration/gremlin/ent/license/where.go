@@ -116,23 +116,15 @@ func CreateTimeNEQ(v time.Time) predicate.License {
 
 // CreateTimeIn applies the In predicate on the "create_time" field.
 func CreateTimeIn(vs ...time.Time) predicate.License {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.License(func(t *dsl.Traversal) {
-		t.Has(Label, FieldCreateTime, p.Within(v...))
+		t.Has(Label, FieldCreateTime, p.Within(vs...))
 	})
 }
 
 // CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
 func CreateTimeNotIn(vs ...time.Time) predicate.License {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.License(func(t *dsl.Traversal) {
-		t.Has(Label, FieldCreateTime, p.Without(v...))
+		t.Has(Label, FieldCreateTime, p.Without(vs...))
 	})
 }
 
@@ -180,23 +172,15 @@ func UpdateTimeNEQ(v time.Time) predicate.License {
 
 // UpdateTimeIn applies the In predicate on the "update_time" field.
 func UpdateTimeIn(vs ...time.Time) predicate.License {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.License(func(t *dsl.Traversal) {
-		t.Has(Label, FieldUpdateTime, p.Within(v...))
+		t.Has(Label, FieldUpdateTime, p.Within(vs...))
 	})
 }
 
 // UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
 func UpdateTimeNotIn(vs ...time.Time) predicate.License {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.License(func(t *dsl.Traversal) {
-		t.Has(Label, FieldUpdateTime, p.Without(v...))
+		t.Has(Label, FieldUpdateTime, p.Without(vs...))
 	})
 }
 

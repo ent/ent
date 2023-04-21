@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"fmt"
 	"math"
 
 	"entgo.io/ent/dialect/gremlin"
@@ -21,11 +22,9 @@ import (
 // LicenseQuery is the builder for querying License entities.
 type LicenseQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
+	ctx        *QueryContext
+	order      []license.OrderOption
+	inters     []Interceptor
 	predicates []predicate.License
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
@@ -38,27 +37,27 @@ func (lq *LicenseQuery) Where(ps ...predicate.License) *LicenseQuery {
 	return lq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (lq *LicenseQuery) Limit(limit int) *LicenseQuery {
-	lq.limit = &limit
+	lq.ctx.Limit = &limit
 	return lq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (lq *LicenseQuery) Offset(offset int) *LicenseQuery {
-	lq.offset = &offset
+	lq.ctx.Offset = &offset
 	return lq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (lq *LicenseQuery) Unique(unique bool) *LicenseQuery {
-	lq.unique = &unique
+	lq.ctx.Unique = &unique
 	return lq
 }
 
-// Order adds an order step to the query.
-func (lq *LicenseQuery) Order(o ...OrderFunc) *LicenseQuery {
+// Order specifies how the records should be ordered.
+func (lq *LicenseQuery) Order(o ...license.OrderOption) *LicenseQuery {
 	lq.order = append(lq.order, o...)
 	return lq
 }
@@ -66,7 +65,7 @@ func (lq *LicenseQuery) Order(o ...OrderFunc) *LicenseQuery {
 // First returns the first License entity from the query.
 // Returns a *NotFoundError when no License was found.
 func (lq *LicenseQuery) First(ctx context.Context) (*License, error) {
-	nodes, err := lq.Limit(1).All(ctx)
+	nodes, err := lq.Limit(1).All(setContextOp(ctx, lq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +88,7 @@ func (lq *LicenseQuery) FirstX(ctx context.Context) *License {
 // Returns a *NotFoundError when no License ID was found.
 func (lq *LicenseQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = lq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = lq.Limit(1).IDs(setContextOp(ctx, lq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -112,7 +111,7 @@ func (lq *LicenseQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one License entity is found.
 // Returns a *NotFoundError when no License entities are found.
 func (lq *LicenseQuery) Only(ctx context.Context) (*License, error) {
-	nodes, err := lq.Limit(2).All(ctx)
+	nodes, err := lq.Limit(2).All(setContextOp(ctx, lq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +139,7 @@ func (lq *LicenseQuery) OnlyX(ctx context.Context) *License {
 // Returns a *NotFoundError when no entities are found.
 func (lq *LicenseQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = lq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = lq.Limit(2).IDs(setContextOp(ctx, lq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -165,10 +164,12 @@ func (lq *LicenseQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Licenses.
 func (lq *LicenseQuery) All(ctx context.Context) ([]*License, error) {
+	ctx = setContextOp(ctx, lq.ctx, "All")
 	if err := lq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return lq.gremlinAll(ctx)
+	qr := querierAll[[]*License, *LicenseQuery]()
+	return withInterceptors[[]*License](ctx, lq, qr, lq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -181,9 +182,12 @@ func (lq *LicenseQuery) AllX(ctx context.Context) []*License {
 }
 
 // IDs executes the query and returns a list of License IDs.
-func (lq *LicenseQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
-	if err := lq.Select(license.FieldID).Scan(ctx, &ids); err != nil {
+func (lq *LicenseQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if lq.ctx.Unique == nil && lq.path != nil {
+		lq.Unique(true)
+	}
+	ctx = setContextOp(ctx, lq.ctx, "IDs")
+	if err = lq.Select(license.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -200,10 +204,11 @@ func (lq *LicenseQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (lq *LicenseQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, lq.ctx, "Count")
 	if err := lq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return lq.gremlinCount(ctx)
+	return withInterceptors[int](ctx, lq, querierCount[*LicenseQuery](), lq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -217,10 +222,15 @@ func (lq *LicenseQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (lq *LicenseQuery) Exist(ctx context.Context) (bool, error) {
-	if err := lq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, lq.ctx, "Exist")
+	switch _, err := lq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return lq.gremlinExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -240,14 +250,13 @@ func (lq *LicenseQuery) Clone() *LicenseQuery {
 	}
 	return &LicenseQuery{
 		config:     lq.config,
-		limit:      lq.limit,
-		offset:     lq.offset,
-		order:      append([]OrderFunc{}, lq.order...),
+		ctx:        lq.ctx.Clone(),
+		order:      append([]license.OrderOption{}, lq.order...),
+		inters:     append([]Interceptor{}, lq.inters...),
 		predicates: append([]predicate.License{}, lq.predicates...),
 		// clone intermediate query.
 		gremlin: lq.gremlin.Clone(),
 		path:    lq.path,
-		unique:  lq.unique,
 	}
 }
 
@@ -266,16 +275,11 @@ func (lq *LicenseQuery) Clone() *LicenseQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (lq *LicenseQuery) GroupBy(field string, fields ...string) *LicenseGroupBy {
-	grbuild := &LicenseGroupBy{config: lq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
-		if err := lq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return lq.gremlinQuery(ctx), nil
-	}
+	lq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &LicenseGroupBy{build: lq}
+	grbuild.flds = &lq.ctx.Fields
 	grbuild.label = license.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -292,11 +296,11 @@ func (lq *LicenseQuery) GroupBy(field string, fields ...string) *LicenseGroupBy 
 //		Select(license.FieldCreateTime).
 //		Scan(ctx, &v)
 func (lq *LicenseQuery) Select(fields ...string) *LicenseSelect {
-	lq.fields = append(lq.fields, fields...)
-	selbuild := &LicenseSelect{LicenseQuery: lq}
-	selbuild.label = license.Label
-	selbuild.flds, selbuild.scan = &lq.fields, selbuild.Scan
-	return selbuild
+	lq.ctx.Fields = append(lq.ctx.Fields, fields...)
+	sbuild := &LicenseSelect{LicenseQuery: lq}
+	sbuild.label = license.Label
+	sbuild.flds, sbuild.scan = &lq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a LicenseSelect configured with the given aggregations.
@@ -305,6 +309,16 @@ func (lq *LicenseQuery) Aggregate(fns ...AggregateFunc) *LicenseSelect {
 }
 
 func (lq *LicenseQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range lq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, lq); err != nil {
+				return err
+			}
+		}
+	}
 	if lq.path != nil {
 		prev, err := lq.path(ctx)
 		if err != nil {
@@ -315,12 +329,12 @@ func (lq *LicenseQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (lq *LicenseQuery) gremlinAll(ctx context.Context) ([]*License, error) {
+func (lq *LicenseQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*License, error) {
 	res := &gremlin.Response{}
 	traversal := lq.gremlinQuery(ctx)
-	if len(lq.fields) > 0 {
-		fields := make([]any, len(lq.fields))
-		for i, f := range lq.fields {
+	if len(lq.ctx.Fields) > 0 {
+		fields := make([]any, len(lq.ctx.Fields))
+		for i, f := range lq.ctx.Fields {
 			fields[i] = f
 		}
 		traversal.ValueMap(fields...)
@@ -335,7 +349,9 @@ func (lq *LicenseQuery) gremlinAll(ctx context.Context) ([]*License, error) {
 	if err := ls.FromResponse(res); err != nil {
 		return nil, err
 	}
-	ls.config(lq.config)
+	for i := range ls {
+		ls[i].config = lq.config
+	}
 	return ls, nil
 }
 
@@ -346,15 +362,6 @@ func (lq *LicenseQuery) gremlinCount(ctx context.Context) (int, error) {
 		return 0, err
 	}
 	return res.ReadInt()
-}
-
-func (lq *LicenseQuery) gremlinExist(ctx context.Context) (bool, error) {
-	res := &gremlin.Response{}
-	query, bindings := lq.gremlinQuery(ctx).HasNext().Query()
-	if err := lq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return false, err
-	}
-	return res.ReadBool()
 }
 
 func (lq *LicenseQuery) gremlinQuery(context.Context) *dsl.Traversal {
@@ -371,7 +378,7 @@ func (lq *LicenseQuery) gremlinQuery(context.Context) *dsl.Traversal {
 			p(v)
 		}
 	}
-	switch limit, offset := lq.limit, lq.offset; {
+	switch limit, offset := lq.ctx.Limit, lq.ctx.Offset; {
 	case limit != nil && offset != nil:
 		v.Range(*offset, *offset+*limit)
 	case offset != nil:
@@ -379,7 +386,7 @@ func (lq *LicenseQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := lq.unique; unique == nil || *unique {
+	if unique := lq.ctx.Unique; unique == nil || *unique {
 		v.Dedup()
 	}
 	return v
@@ -387,13 +394,8 @@ func (lq *LicenseQuery) gremlinQuery(context.Context) *dsl.Traversal {
 
 // LicenseGroupBy is the group-by builder for License entities.
 type LicenseGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	gremlin *dsl.Traversal
-	path    func(context.Context) (*dsl.Traversal, error)
+	build *LicenseQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -402,33 +404,16 @@ func (lgb *LicenseGroupBy) Aggregate(fns ...AggregateFunc) *LicenseGroupBy {
 	return lgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (lgb *LicenseGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := lgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, lgb.build.ctx, "GroupBy")
+	if err := lgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	lgb.gremlin = query
-	return lgb.gremlinScan(ctx, v)
+	return scanWithInterceptors[*LicenseQuery, *LicenseGroupBy](ctx, lgb.build, lgb, lgb.build.inters, v)
 }
 
-func (lgb *LicenseGroupBy) gremlinScan(ctx context.Context, v any) error {
-	res := &gremlin.Response{}
-	query, bindings := lgb.gremlinQuery().Query()
-	if err := lgb.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(lgb.fields)+len(lgb.fns) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
-}
-
-func (lgb *LicenseGroupBy) gremlinQuery() *dsl.Traversal {
+func (lgb *LicenseGroupBy) gremlinScan(ctx context.Context, root *LicenseQuery, v any) error {
 	var (
 		trs   []any
 		names []any
@@ -438,23 +423,34 @@ func (lgb *LicenseGroupBy) gremlinQuery() *dsl.Traversal {
 		trs = append(trs, tr)
 		names = append(names, name)
 	}
-	for _, f := range lgb.fields {
+	for _, f := range *lgb.flds {
 		names = append(names, f)
 		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
 	}
-	return lgb.gremlin.Group().
-		By(__.Values(lgb.fields...).Fold()).
+	query, bindings := root.gremlinQuery(ctx).Group().
+		By(__.Values(*lgb.flds...).Fold()).
 		By(__.Fold().Match(trs...).Select(names...)).
 		Select(dsl.Values).
-		Next()
+		Next().
+		Query()
+	res := &gremlin.Response{}
+	if err := lgb.build.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	if len(*lgb.flds)+len(lgb.fns) == 1 {
+		return res.ReadVal(v)
+	}
+	vm, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	return vm.Decode(v)
 }
 
 // LicenseSelect is the builder for selecting fields of License entities.
 type LicenseSelect struct {
 	*LicenseQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	gremlin *dsl.Traversal
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -465,36 +461,36 @@ func (ls *LicenseSelect) Aggregate(fns ...AggregateFunc) *LicenseSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ls *LicenseSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, ls.ctx, "Select")
 	if err := ls.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ls.gremlin = ls.LicenseQuery.gremlinQuery(ctx)
-	return ls.gremlinScan(ctx, v)
+	return scanWithInterceptors[*LicenseQuery, *LicenseSelect](ctx, ls.LicenseQuery, ls, ls.inters, v)
 }
 
-func (ls *LicenseSelect) gremlinScan(ctx context.Context, v any) error {
+func (ls *LicenseSelect) gremlinScan(ctx context.Context, root *LicenseQuery, v any) error {
 	var (
-		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
+		traversal = root.gremlinQuery(ctx)
 	)
-	if len(ls.fields) == 1 {
-		if ls.fields[0] != license.FieldID {
-			traversal = ls.gremlin.Values(ls.fields...)
+	if fields := ls.ctx.Fields; len(fields) == 1 {
+		if fields[0] != license.FieldID {
+			traversal = traversal.Values(fields...)
 		} else {
-			traversal = ls.gremlin.ID()
+			traversal = traversal.ID()
 		}
 	} else {
-		fields := make([]any, len(ls.fields))
-		for i, f := range ls.fields {
+		fields := make([]any, len(ls.ctx.Fields))
+		for i, f := range ls.ctx.Fields {
 			fields[i] = f
 		}
-		traversal = ls.gremlin.ValueMap(fields...)
+		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
 	if err := ls.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
-	if len(ls.fields) == 1 {
+	if len(root.ctx.Fields) == 1 {
 		return res.ReadVal(v)
 	}
 	vm, err := res.ReadValueMap()

@@ -8,6 +8,8 @@ package user
 
 import (
 	"fmt"
+
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
 )
 
 const (
@@ -146,6 +148,9 @@ func EmploymentValidator(e Employment) error {
 		return fmt.Errorf("user: invalid enum value for employment field: %q", e)
 	}
 }
+
+// OrderOption defines the ordering options for the User queries.
+type OrderOption func(*dsl.Traversal)
 
 // Ptr returns a new pointer to the enum value.
 func (r Role) Ptr() *Role {

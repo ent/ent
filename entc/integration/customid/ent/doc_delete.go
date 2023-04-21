@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -32,34 +31,7 @@ func (dd *DocDelete) Where(ps ...predicate.Doc) *DocDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (dd *DocDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(dd.hooks) == 0 {
-		affected, err = dd.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*DocMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			dd.mutation = mutation
-			affected, err = dd.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(dd.hooks) - 1; i >= 0; i-- {
-			if dd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = dd.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, dd.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, DocMutation](ctx, dd.sqlExec, dd.mutation, dd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -72,15 +44,7 @@ func (dd *DocDelete) ExecX(ctx context.Context) int {
 }
 
 func (dd *DocDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: doc.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
-				Column: doc.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(doc.Table, sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString))
 	if ps := dd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -92,12 +56,19 @@ func (dd *DocDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	dd.mutation.done = true
 	return affected, err
 }
 
 // DocDeleteOne is the builder for deleting a single Doc entity.
 type DocDeleteOne struct {
 	dd *DocDelete
+}
+
+// Where appends a list predicates to the DocDelete builder.
+func (ddo *DocDeleteOne) Where(ps ...predicate.Doc) *DocDeleteOne {
+	ddo.dd.mutation.Where(ps...)
+	return ddo
 }
 
 // Exec executes the deletion query.
@@ -115,5 +86,7 @@ func (ddo *DocDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (ddo *DocDeleteOne) ExecX(ctx context.Context) {
-	ddo.dd.ExecX(ctx)
+	if err := ddo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

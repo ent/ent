@@ -27,11 +27,9 @@ import (
 // TweetQuery is the builder for querying Tweet entities.
 type TweetQuery struct {
 	config
-	limit          *int
-	offset         *int
-	unique         *bool
-	order          []OrderFunc
-	fields         []string
+	ctx            *QueryContext
+	order          []tweet.OrderOption
+	inters         []Interceptor
 	predicates     []predicate.Tweet
 	withLikedUsers *UserQuery
 	withUser       *UserQuery
@@ -50,34 +48,34 @@ func (tq *TweetQuery) Where(ps ...predicate.Tweet) *TweetQuery {
 	return tq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (tq *TweetQuery) Limit(limit int) *TweetQuery {
-	tq.limit = &limit
+	tq.ctx.Limit = &limit
 	return tq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (tq *TweetQuery) Offset(offset int) *TweetQuery {
-	tq.offset = &offset
+	tq.ctx.Offset = &offset
 	return tq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (tq *TweetQuery) Unique(unique bool) *TweetQuery {
-	tq.unique = &unique
+	tq.ctx.Unique = &unique
 	return tq
 }
 
-// Order adds an order step to the query.
-func (tq *TweetQuery) Order(o ...OrderFunc) *TweetQuery {
+// Order specifies how the records should be ordered.
+func (tq *TweetQuery) Order(o ...tweet.OrderOption) *TweetQuery {
 	tq.order = append(tq.order, o...)
 	return tq
 }
 
 // QueryLikedUsers chains the current query on the "liked_users" edge.
 func (tq *TweetQuery) QueryLikedUsers() *UserQuery {
-	query := &UserQuery{config: tq.config}
+	query := (&UserClient{config: tq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := tq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -99,7 +97,7 @@ func (tq *TweetQuery) QueryLikedUsers() *UserQuery {
 
 // QueryUser chains the current query on the "user" edge.
 func (tq *TweetQuery) QueryUser() *UserQuery {
-	query := &UserQuery{config: tq.config}
+	query := (&UserClient{config: tq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := tq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -121,7 +119,7 @@ func (tq *TweetQuery) QueryUser() *UserQuery {
 
 // QueryTags chains the current query on the "tags" edge.
 func (tq *TweetQuery) QueryTags() *TagQuery {
-	query := &TagQuery{config: tq.config}
+	query := (&TagClient{config: tq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := tq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -143,7 +141,7 @@ func (tq *TweetQuery) QueryTags() *TagQuery {
 
 // QueryLikes chains the current query on the "likes" edge.
 func (tq *TweetQuery) QueryLikes() *TweetLikeQuery {
-	query := &TweetLikeQuery{config: tq.config}
+	query := (&TweetLikeClient{config: tq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := tq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -165,7 +163,7 @@ func (tq *TweetQuery) QueryLikes() *TweetLikeQuery {
 
 // QueryTweetUser chains the current query on the "tweet_user" edge.
 func (tq *TweetQuery) QueryTweetUser() *UserTweetQuery {
-	query := &UserTweetQuery{config: tq.config}
+	query := (&UserTweetClient{config: tq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := tq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -187,7 +185,7 @@ func (tq *TweetQuery) QueryTweetUser() *UserTweetQuery {
 
 // QueryTweetTags chains the current query on the "tweet_tags" edge.
 func (tq *TweetQuery) QueryTweetTags() *TweetTagQuery {
-	query := &TweetTagQuery{config: tq.config}
+	query := (&TweetTagClient{config: tq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := tq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -210,7 +208,7 @@ func (tq *TweetQuery) QueryTweetTags() *TweetTagQuery {
 // First returns the first Tweet entity from the query.
 // Returns a *NotFoundError when no Tweet was found.
 func (tq *TweetQuery) First(ctx context.Context) (*Tweet, error) {
-	nodes, err := tq.Limit(1).All(ctx)
+	nodes, err := tq.Limit(1).All(setContextOp(ctx, tq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -233,7 +231,7 @@ func (tq *TweetQuery) FirstX(ctx context.Context) *Tweet {
 // Returns a *NotFoundError when no Tweet ID was found.
 func (tq *TweetQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = tq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = tq.Limit(1).IDs(setContextOp(ctx, tq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -256,7 +254,7 @@ func (tq *TweetQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Tweet entity is found.
 // Returns a *NotFoundError when no Tweet entities are found.
 func (tq *TweetQuery) Only(ctx context.Context) (*Tweet, error) {
-	nodes, err := tq.Limit(2).All(ctx)
+	nodes, err := tq.Limit(2).All(setContextOp(ctx, tq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -284,7 +282,7 @@ func (tq *TweetQuery) OnlyX(ctx context.Context) *Tweet {
 // Returns a *NotFoundError when no entities are found.
 func (tq *TweetQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = tq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = tq.Limit(2).IDs(setContextOp(ctx, tq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -309,10 +307,12 @@ func (tq *TweetQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Tweets.
 func (tq *TweetQuery) All(ctx context.Context) ([]*Tweet, error) {
+	ctx = setContextOp(ctx, tq.ctx, "All")
 	if err := tq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return tq.sqlAll(ctx)
+	qr := querierAll[[]*Tweet, *TweetQuery]()
+	return withInterceptors[[]*Tweet](ctx, tq, qr, tq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -325,9 +325,12 @@ func (tq *TweetQuery) AllX(ctx context.Context) []*Tweet {
 }
 
 // IDs executes the query and returns a list of Tweet IDs.
-func (tq *TweetQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
-	if err := tq.Select(tweet.FieldID).Scan(ctx, &ids); err != nil {
+func (tq *TweetQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if tq.ctx.Unique == nil && tq.path != nil {
+		tq.Unique(true)
+	}
+	ctx = setContextOp(ctx, tq.ctx, "IDs")
+	if err = tq.Select(tweet.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -344,10 +347,11 @@ func (tq *TweetQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (tq *TweetQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, tq.ctx, "Count")
 	if err := tq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return tq.sqlCount(ctx)
+	return withInterceptors[int](ctx, tq, querierCount[*TweetQuery](), tq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -361,10 +365,15 @@ func (tq *TweetQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (tq *TweetQuery) Exist(ctx context.Context) (bool, error) {
-	if err := tq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, tq.ctx, "Exist")
+	switch _, err := tq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return tq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -384,9 +393,9 @@ func (tq *TweetQuery) Clone() *TweetQuery {
 	}
 	return &TweetQuery{
 		config:         tq.config,
-		limit:          tq.limit,
-		offset:         tq.offset,
-		order:          append([]OrderFunc{}, tq.order...),
+		ctx:            tq.ctx.Clone(),
+		order:          append([]tweet.OrderOption{}, tq.order...),
+		inters:         append([]Interceptor{}, tq.inters...),
 		predicates:     append([]predicate.Tweet{}, tq.predicates...),
 		withLikedUsers: tq.withLikedUsers.Clone(),
 		withUser:       tq.withUser.Clone(),
@@ -395,16 +404,15 @@ func (tq *TweetQuery) Clone() *TweetQuery {
 		withTweetUser:  tq.withTweetUser.Clone(),
 		withTweetTags:  tq.withTweetTags.Clone(),
 		// clone intermediate query.
-		sql:    tq.sql.Clone(),
-		path:   tq.path,
-		unique: tq.unique,
+		sql:  tq.sql.Clone(),
+		path: tq.path,
 	}
 }
 
 // WithLikedUsers tells the query-builder to eager-load the nodes that are connected to
 // the "liked_users" edge. The optional arguments are used to configure the query builder of the edge.
 func (tq *TweetQuery) WithLikedUsers(opts ...func(*UserQuery)) *TweetQuery {
-	query := &UserQuery{config: tq.config}
+	query := (&UserClient{config: tq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -415,7 +423,7 @@ func (tq *TweetQuery) WithLikedUsers(opts ...func(*UserQuery)) *TweetQuery {
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
 func (tq *TweetQuery) WithUser(opts ...func(*UserQuery)) *TweetQuery {
-	query := &UserQuery{config: tq.config}
+	query := (&UserClient{config: tq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -426,7 +434,7 @@ func (tq *TweetQuery) WithUser(opts ...func(*UserQuery)) *TweetQuery {
 // WithTags tells the query-builder to eager-load the nodes that are connected to
 // the "tags" edge. The optional arguments are used to configure the query builder of the edge.
 func (tq *TweetQuery) WithTags(opts ...func(*TagQuery)) *TweetQuery {
-	query := &TagQuery{config: tq.config}
+	query := (&TagClient{config: tq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -437,7 +445,7 @@ func (tq *TweetQuery) WithTags(opts ...func(*TagQuery)) *TweetQuery {
 // WithLikes tells the query-builder to eager-load the nodes that are connected to
 // the "likes" edge. The optional arguments are used to configure the query builder of the edge.
 func (tq *TweetQuery) WithLikes(opts ...func(*TweetLikeQuery)) *TweetQuery {
-	query := &TweetLikeQuery{config: tq.config}
+	query := (&TweetLikeClient{config: tq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -448,7 +456,7 @@ func (tq *TweetQuery) WithLikes(opts ...func(*TweetLikeQuery)) *TweetQuery {
 // WithTweetUser tells the query-builder to eager-load the nodes that are connected to
 // the "tweet_user" edge. The optional arguments are used to configure the query builder of the edge.
 func (tq *TweetQuery) WithTweetUser(opts ...func(*UserTweetQuery)) *TweetQuery {
-	query := &UserTweetQuery{config: tq.config}
+	query := (&UserTweetClient{config: tq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -459,7 +467,7 @@ func (tq *TweetQuery) WithTweetUser(opts ...func(*UserTweetQuery)) *TweetQuery {
 // WithTweetTags tells the query-builder to eager-load the nodes that are connected to
 // the "tweet_tags" edge. The optional arguments are used to configure the query builder of the edge.
 func (tq *TweetQuery) WithTweetTags(opts ...func(*TweetTagQuery)) *TweetQuery {
-	query := &TweetTagQuery{config: tq.config}
+	query := (&TweetTagClient{config: tq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -482,16 +490,11 @@ func (tq *TweetQuery) WithTweetTags(opts ...func(*TweetTagQuery)) *TweetQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (tq *TweetQuery) GroupBy(field string, fields ...string) *TweetGroupBy {
-	grbuild := &TweetGroupBy{config: tq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := tq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return tq.sqlQuery(ctx), nil
-	}
+	tq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &TweetGroupBy{build: tq}
+	grbuild.flds = &tq.ctx.Fields
 	grbuild.label = tweet.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -508,11 +511,11 @@ func (tq *TweetQuery) GroupBy(field string, fields ...string) *TweetGroupBy {
 //		Select(tweet.FieldText).
 //		Scan(ctx, &v)
 func (tq *TweetQuery) Select(fields ...string) *TweetSelect {
-	tq.fields = append(tq.fields, fields...)
-	selbuild := &TweetSelect{TweetQuery: tq}
-	selbuild.label = tweet.Label
-	selbuild.flds, selbuild.scan = &tq.fields, selbuild.Scan
-	return selbuild
+	tq.ctx.Fields = append(tq.ctx.Fields, fields...)
+	sbuild := &TweetSelect{TweetQuery: tq}
+	sbuild.label = tweet.Label
+	sbuild.flds, sbuild.scan = &tq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a TweetSelect configured with the given aggregations.
@@ -521,7 +524,17 @@ func (tq *TweetQuery) Aggregate(fns ...AggregateFunc) *TweetSelect {
 }
 
 func (tq *TweetQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range tq.fields {
+	for _, inter := range tq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, tq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range tq.ctx.Fields {
 		if !tweet.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -635,27 +648,30 @@ func (tq *TweetQuery) loadLikedUsers(ctx context.Context, query *UserQuery, node
 	if err := query.prepareQuery(ctx); err != nil {
 		return err
 	}
-	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-		assign := spec.Assign
-		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]any, error) {
-			values, err := values(columns[1:])
-			if err != nil {
-				return nil, err
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
-			return append([]any{new(sql.NullInt64)}, values...), nil
-		}
-		spec.Assign = func(columns []string, values []any) error {
-			outValue := int(values[0].(*sql.NullInt64).Int64)
-			inValue := int(values[1].(*sql.NullInt64).Int64)
-			if nids[inValue] == nil {
-				nids[inValue] = map[*Tweet]struct{}{byID[outValue]: {}}
-				return assign(columns[1:], values[1:])
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Tweet]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
 			}
-			nids[inValue][byID[outValue]] = struct{}{}
-			return nil
-		}
+		})
 	})
+	neighbors, err := withInterceptors[[]*User](ctx, query, qr, query.inters)
 	if err != nil {
 		return err
 	}
@@ -693,27 +709,30 @@ func (tq *TweetQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*T
 	if err := query.prepareQuery(ctx); err != nil {
 		return err
 	}
-	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-		assign := spec.Assign
-		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]any, error) {
-			values, err := values(columns[1:])
-			if err != nil {
-				return nil, err
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
-			return append([]any{new(sql.NullInt64)}, values...), nil
-		}
-		spec.Assign = func(columns []string, values []any) error {
-			outValue := int(values[0].(*sql.NullInt64).Int64)
-			inValue := int(values[1].(*sql.NullInt64).Int64)
-			if nids[inValue] == nil {
-				nids[inValue] = map[*Tweet]struct{}{byID[outValue]: {}}
-				return assign(columns[1:], values[1:])
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Tweet]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
 			}
-			nids[inValue][byID[outValue]] = struct{}{}
-			return nil
-		}
+		})
 	})
+	neighbors, err := withInterceptors[[]*User](ctx, query, qr, query.inters)
 	if err != nil {
 		return err
 	}
@@ -751,27 +770,30 @@ func (tq *TweetQuery) loadTags(ctx context.Context, query *TagQuery, nodes []*Tw
 	if err := query.prepareQuery(ctx); err != nil {
 		return err
 	}
-	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-		assign := spec.Assign
-		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]any, error) {
-			values, err := values(columns[1:])
-			if err != nil {
-				return nil, err
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
-			return append([]any{new(sql.NullInt64)}, values...), nil
-		}
-		spec.Assign = func(columns []string, values []any) error {
-			outValue := int(values[0].(*sql.NullInt64).Int64)
-			inValue := int(values[1].(*sql.NullInt64).Int64)
-			if nids[inValue] == nil {
-				nids[inValue] = map[*Tweet]struct{}{byID[outValue]: {}}
-				return assign(columns[1:], values[1:])
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Tweet]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
 			}
-			nids[inValue][byID[outValue]] = struct{}{}
-			return nil
-		}
+		})
 	})
+	neighbors, err := withInterceptors[[]*Tag](ctx, query, qr, query.inters)
 	if err != nil {
 		return err
 	}
@@ -796,8 +818,11 @@ func (tq *TweetQuery) loadLikes(ctx context.Context, query *TweetLikeQuery, node
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(tweetlike.FieldTweetID)
+	}
 	query.Where(predicate.TweetLike(func(s *sql.Selector) {
-		s.Where(sql.InValues(tweet.LikesColumn, fks...))
+		s.Where(sql.InValues(s.C(tweet.LikesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -807,7 +832,7 @@ func (tq *TweetQuery) loadLikes(ctx context.Context, query *TweetLikeQuery, node
 		fk := n.TweetID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "tweet_id" returned %v for node %v`, fk, n)
+			return fmt.Errorf(`unexpected referenced foreign-key "tweet_id" returned %v for node %v`, fk, n)
 		}
 		assign(node, n)
 	}
@@ -823,8 +848,11 @@ func (tq *TweetQuery) loadTweetUser(ctx context.Context, query *UserTweetQuery, 
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(usertweet.FieldTweetID)
+	}
 	query.Where(predicate.UserTweet(func(s *sql.Selector) {
-		s.Where(sql.InValues(tweet.TweetUserColumn, fks...))
+		s.Where(sql.InValues(s.C(tweet.TweetUserColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -834,7 +862,7 @@ func (tq *TweetQuery) loadTweetUser(ctx context.Context, query *UserTweetQuery, 
 		fk := n.TweetID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "tweet_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "tweet_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -850,8 +878,11 @@ func (tq *TweetQuery) loadTweetTags(ctx context.Context, query *TweetTagQuery, n
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(tweettag.FieldTweetID)
+	}
 	query.Where(predicate.TweetTag(func(s *sql.Selector) {
-		s.Where(sql.InValues(tweet.TweetTagsColumn, fks...))
+		s.Where(sql.InValues(s.C(tweet.TweetTagsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -861,7 +892,7 @@ func (tq *TweetQuery) loadTweetTags(ctx context.Context, query *TweetTagQuery, n
 		fk := n.TweetID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "tweet_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "tweet_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -870,41 +901,22 @@ func (tq *TweetQuery) loadTweetTags(ctx context.Context, query *TweetTagQuery, n
 
 func (tq *TweetQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := tq.querySpec()
-	_spec.Node.Columns = tq.fields
-	if len(tq.fields) > 0 {
-		_spec.Unique = tq.unique != nil && *tq.unique
+	_spec.Node.Columns = tq.ctx.Fields
+	if len(tq.ctx.Fields) > 0 {
+		_spec.Unique = tq.ctx.Unique != nil && *tq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, tq.driver, _spec)
 }
 
-func (tq *TweetQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := tq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (tq *TweetQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   tweet.Table,
-			Columns: tweet.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: tweet.FieldID,
-			},
-		},
-		From:   tq.sql,
-		Unique: true,
-	}
-	if unique := tq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(tweet.Table, tweet.Columns, sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt))
+	_spec.From = tq.sql
+	if unique := tq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if tq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := tq.fields; len(fields) > 0 {
+	if fields := tq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, tweet.FieldID)
 		for i := range fields {
@@ -920,10 +932,10 @@ func (tq *TweetQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := tq.limit; limit != nil {
+	if limit := tq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := tq.offset; offset != nil {
+	if offset := tq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := tq.order; len(ps) > 0 {
@@ -939,7 +951,7 @@ func (tq *TweetQuery) querySpec() *sqlgraph.QuerySpec {
 func (tq *TweetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(tq.driver.Dialect())
 	t1 := builder.Table(tweet.Table)
-	columns := tq.fields
+	columns := tq.ctx.Fields
 	if len(columns) == 0 {
 		columns = tweet.Columns
 	}
@@ -948,7 +960,7 @@ func (tq *TweetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = tq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if tq.unique != nil && *tq.unique {
+	if tq.ctx.Unique != nil && *tq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range tq.predicates {
@@ -957,12 +969,12 @@ func (tq *TweetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range tq.order {
 		p(selector)
 	}
-	if offset := tq.offset; offset != nil {
+	if offset := tq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := tq.limit; limit != nil {
+	if limit := tq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -970,13 +982,8 @@ func (tq *TweetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // TweetGroupBy is the group-by builder for Tweet entities.
 type TweetGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *TweetQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -985,58 +992,46 @@ func (tgb *TweetGroupBy) Aggregate(fns ...AggregateFunc) *TweetGroupBy {
 	return tgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (tgb *TweetGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := tgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, tgb.build.ctx, "GroupBy")
+	if err := tgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	tgb.sql = query
-	return tgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*TweetQuery, *TweetGroupBy](ctx, tgb.build, tgb, tgb.build.inters, v)
 }
 
-func (tgb *TweetGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range tgb.fields {
-		if !tweet.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (tgb *TweetGroupBy) sqlScan(ctx context.Context, root *TweetQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(tgb.fns))
+	for _, fn := range tgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := tgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*tgb.flds)+len(tgb.fns))
+		for _, f := range *tgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*tgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := tgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := tgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (tgb *TweetGroupBy) sqlQuery() *sql.Selector {
-	selector := tgb.sql.Select()
-	aggregation := make([]string, 0, len(tgb.fns))
-	for _, fn := range tgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(tgb.fields)+len(tgb.fns))
-		for _, f := range tgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(tgb.fields...)...)
-}
-
 // TweetSelect is the builder for selecting fields of Tweet entities.
 type TweetSelect struct {
 	*TweetQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -1047,26 +1042,27 @@ func (ts *TweetSelect) Aggregate(fns ...AggregateFunc) *TweetSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ts *TweetSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, ts.ctx, "Select")
 	if err := ts.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ts.sql = ts.TweetQuery.sqlQuery(ctx)
-	return ts.sqlScan(ctx, v)
+	return scanWithInterceptors[*TweetQuery, *TweetSelect](ctx, ts.TweetQuery, ts, ts.inters, v)
 }
 
-func (ts *TweetSelect) sqlScan(ctx context.Context, v any) error {
+func (ts *TweetSelect) sqlScan(ctx context.Context, root *TweetQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(ts.fns))
 	for _, fn := range ts.fns {
-		aggregation = append(aggregation, fn(ts.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*ts.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		ts.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		ts.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := ts.sql.Query()
+	query, args := selector.Query()
 	if err := ts.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

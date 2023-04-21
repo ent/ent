@@ -11,13 +11,9 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ template "header" $ }}
 
-{{ template "import" $ }}
-
-import (
-	{{- range $import := $.SiblingImports }}
-		{{ $import.Alias }} "{{ $import.Path }}"
-	{{- end }}
-)
+{{ with extend $ "Imports" $.SiblingImports }}
+	{{ template "import" . }}
+{{ end }}
 
 {{ $builder := $.UpdateName }}
 {{ $receiver := receiver $builder }}
@@ -46,10 +42,6 @@ func ({{ $receiver}} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $b
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (int, error) {
-	var (
-		err error
-		affected int
-	)
 	{{- if $.HasUpdateDefault }}
 		{{- if $runtimeRequired }}
 			if err := {{ $receiver }}.defaults(); err != nil {
@@ -59,40 +51,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (int, error) {
 			{{ $receiver }}.defaults()
 		{{- end }}
 	{{- end }}
-	if len({{ $receiver }}.hooks) == 0 {
-		{{- if $.HasUpdateCheckers }}
-			if err = {{ $receiver }}.check(); err != nil {
-				return 0, err
-			}
-		{{- end }}
-		affected, err = {{ $receiver }}.{{ $.Storage }}Save(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*{{ $.MutationName }})
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			{{- if $.HasUpdateCheckers }}
-				if err = {{ $receiver }}.check(); err != nil {
-					return 0, err
-				}
-			{{- end }}
-			{{ $mutation }} = mutation
-			affected, err = {{ $receiver }}.{{ $.Storage }}Save(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len({{ $receiver }}.hooks) - 1; i >= 0; i-- {
-			if {{ $receiver }}.hooks[i] == nil {
-				return 0, fmt.Errorf("{{ $pkg }}: uninitialized hook (forgotten import {{ $pkg }}/runtime?)")
-			}
-			mut = {{ $receiver }}.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, {{ $mutation }}); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, {{ $.MutationName }}](ctx, {{ $receiver }}.{{ $.Storage }}Save, {{ $mutation }}, {{ $receiver }}.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -146,6 +105,12 @@ type {{ $onebuilder }} struct {
 	{{ template "update/edges" . }}
 {{ end }}
 
+// Where appends a list predicates to the {{ $builder }} builder.
+func ({{ $receiver }} *{{ $onebuilder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $onebuilder }} {
+	{{ $mutation }}.Where(ps...)
+	return {{ $receiver }}
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func ({{ $receiver }} *{{ $onebuilder }}) Select(field string, fields ...string) *{{ $onebuilder }} {
@@ -155,10 +120,6 @@ func ({{ $receiver }} *{{ $onebuilder }}) Select(field string, fields ...string)
 
 // Save executes the query and returns the updated {{ $.Name }} entity.
 func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name }}, error) {
-	var (
-		err error
-		node *{{ $.Name }}
-	)
 	{{- if $.HasUpdateDefault }}
 		{{- if $runtimeRequired }}
 			if err := {{ $receiver }}.defaults(); err != nil {
@@ -168,46 +129,7 @@ func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name
 			{{ $receiver }}.defaults()
 		{{- end }}
 	{{- end }}
-	if len({{ $receiver }}.hooks) == 0 {
-		{{- if $.HasUpdateCheckers }}
-			if err = {{ $receiver }}.check(); err != nil {
-				return nil, err
-			}
-		{{- end }}
-		node, err = {{ $receiver }}.{{ $.Storage }}Save(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*{{ $.MutationName }})
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			{{- if $.HasUpdateCheckers }}
-				if err = {{ $receiver }}.check(); err != nil {
-					return nil, err
-				}
-			{{- end }}
-			{{ $mutation }} = mutation
-			node, err = {{ $receiver }}.{{ $.Storage }}Save(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len({{ $receiver }}.hooks) - 1; i >= 0; i-- {
-			if {{ $receiver }}.hooks[i] == nil {
-				return nil, fmt.Errorf("{{ $pkg }}: uninitialized hook (forgotten import {{ $pkg }}/runtime?)")
-			}
-			mut = {{ $receiver }}.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, {{ $mutation }})
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*{{ $.Name }})
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from {{ $.MutationName }}", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*{{ $.Name }}, {{ $.MutationName }}](ctx, {{ $receiver }}.{{ $.Storage }}Save, {{ $mutation }}, {{ $receiver }}.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -336,10 +258,10 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 	// check runs all checks and user-defined validators on the builder.
 	func ({{ $receiver }} *{{ $builder }}) check() error {
 		{{- range $f := $.Fields }}
-			{{- with and (or $f.Validators $f.IsEnum) (not $f.Immutable) }}
+			{{- $isValidator := and ($f.HasGoType) ($f.Type.Validator) }}
+			{{- with and (not $f.Immutable) (or $f.Validators $f.IsEnum $isValidator) }}
 				if v, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
-					{{- $basic := $f.BasicType "v" }}
-					if err := {{ $.Package }}.{{ $f.Validator }}({{ $basic }}); err != nil {
+					if err := {{ if or $f.Validators $f.IsEnum }}{{ $.Package }}.{{ $f.Validator }}({{ $f.BasicType "v" }}){{ else }}v.Validate(){{ end }}; err != nil {
 						return &ValidationError{Name: "{{ $f.Name }}", err: fmt.Errorf(`{{ $pkg }}: validator failed for field "{{ $.Name }}.{{ $f.Name }}": %w`, err)}
 					}
 				}

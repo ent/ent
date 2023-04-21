@@ -61,8 +61,8 @@ func (User) Edges() []ent.Edge {
 Notice a few things:
 
 * Our edges also receive an `entproto.Field` annotation. We will see why in a minute.
-* We created a one-to-many relation ship where a `Group` has a single `admin`, and a `User` can administer multiple
-  groups.
+* We created a one-to-many relationship where a `Category` has a single `admin`, and a `User` can administer multiple
+  categories.
 
 Re-generating the project with `go generate ./...`, notice the changes to the `.proto` file:
 
@@ -93,13 +93,13 @@ Observe the following changes:
 * A new message, `Category` was created. This message has a field named `admin` corresponding to the `admin` edge on
   the `Category` schema. It is a non-repeated field because we set the edge to be `.Unique()`. It's field number is `3`,
   corresponding to the `entproto.Field` annotation on the edge definition.
-* A new field `administered` was added to the `User` message definition. It is a `repeated` field, correspending to the
+* A new field `administered` was added to the `User` message definition. It is a `repeated` field, corresponding to the
   fact that we did not mark the edge as `Unique` in this direction. It's field number is `5`, corresponding to the
   `entproto.Field` annotation on the edge.
 
 ### Creating Entities with their Edges
 
-Let's demonstrate how to create an entity with it's edges by writing a test:
+Let's demonstrate how to create an entity with its edges by writing a test:
 
 ```go
 package main
@@ -110,10 +110,10 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 
-	"github.com/rotemtam/ent-grpc-example/ent/category"
-	"github.com/rotemtam/ent-grpc-example/ent/enttest"
-	"github.com/rotemtam/ent-grpc-example/ent/proto/entpb"
-	"github.com/rotemtam/ent-grpc-example/ent/user"
+	"ent-grpc-example/ent/category"
+	"ent-grpc-example/ent/enttest"
+	"ent-grpc-example/ent/proto/entpb"
+	"ent-grpc-example/ent/user"
 )
 
 func TestServiceWithEdges(t *testing.T) {

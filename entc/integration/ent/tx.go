@@ -18,10 +18,14 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// Api is the client for interacting with the Api builders.
+	Api *APIClient
 	// Card is the client for interacting with the Card builders.
 	Card *CardClient
 	// Comment is the client for interacting with the Comment builders.
 	Comment *CommentClient
+	// ExValueScan is the client for interacting with the ExValueScan builders.
+	ExValueScan *ExValueScanClient
 	// FieldType is the client for interacting with the FieldType builders.
 	FieldType *FieldTypeClient
 	// File is the client for interacting with the File builders.
@@ -179,8 +183,10 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.Api = NewAPIClient(tx.config)
 	tx.Card = NewCardClient(tx.config)
 	tx.Comment = NewCommentClient(tx.config)
+	tx.ExValueScan = NewExValueScanClient(tx.config)
 	tx.FieldType = NewFieldTypeClient(tx.config)
 	tx.File = NewFileClient(tx.config)
 	tx.FileType = NewFileTypeClient(tx.config)
@@ -203,7 +209,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Card.QueryXXX(), the query will be executed
+// applies a query, for example: Api.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

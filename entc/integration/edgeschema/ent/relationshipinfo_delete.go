@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -32,34 +31,7 @@ func (rid *RelationshipInfoDelete) Where(ps ...predicate.RelationshipInfo) *Rela
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (rid *RelationshipInfoDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(rid.hooks) == 0 {
-		affected, err = rid.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*RelationshipInfoMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			rid.mutation = mutation
-			affected, err = rid.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(rid.hooks) - 1; i >= 0; i-- {
-			if rid.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = rid.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, rid.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, RelationshipInfoMutation](ctx, rid.sqlExec, rid.mutation, rid.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -72,15 +44,7 @@ func (rid *RelationshipInfoDelete) ExecX(ctx context.Context) int {
 }
 
 func (rid *RelationshipInfoDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: relationshipinfo.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: relationshipinfo.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(relationshipinfo.Table, sqlgraph.NewFieldSpec(relationshipinfo.FieldID, field.TypeInt))
 	if ps := rid.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -92,12 +56,19 @@ func (rid *RelationshipInfoDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	rid.mutation.done = true
 	return affected, err
 }
 
 // RelationshipInfoDeleteOne is the builder for deleting a single RelationshipInfo entity.
 type RelationshipInfoDeleteOne struct {
 	rid *RelationshipInfoDelete
+}
+
+// Where appends a list predicates to the RelationshipInfoDelete builder.
+func (rido *RelationshipInfoDeleteOne) Where(ps ...predicate.RelationshipInfo) *RelationshipInfoDeleteOne {
+	rido.rid.mutation.Where(ps...)
+	return rido
 }
 
 // Exec executes the deletion query.
@@ -115,5 +86,7 @@ func (rido *RelationshipInfoDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (rido *RelationshipInfoDeleteOne) ExecX(ctx context.Context) {
-	rido.rid.ExecX(ctx)
+	if err := rido.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

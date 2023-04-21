@@ -8,6 +8,8 @@ package filetype
 
 import (
 	"fmt"
+
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
 )
 
 const (
@@ -79,6 +81,9 @@ func StateValidator(s State) error {
 		return fmt.Errorf("filetype: invalid enum value for state field: %q", s)
 	}
 }
+
+// OrderOption defines the ordering options for the FileType queries.
+type OrderOption func(*dsl.Traversal)
 
 // Ptr returns a new pointer to the enum value.
 func (_type Type) Ptr() *Type {

@@ -156,34 +156,7 @@ func (du *DocUpdate) RemoveRelated(d ...*Doc) *DocUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (du *DocUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(du.hooks) == 0 {
-		affected, err = du.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*DocMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			du.mutation = mutation
-			affected, err = du.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(du.hooks) - 1; i >= 0; i-- {
-			if du.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = du.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, du.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, DocMutation](ctx, du.sqlSave, du.mutation, du.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -209,16 +182,7 @@ func (du *DocUpdate) ExecX(ctx context.Context) {
 }
 
 func (du *DocUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   doc.Table,
-			Columns: doc.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
-				Column: doc.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(doc.Table, doc.Columns, sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString))
 	if ps := du.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -240,10 +204,7 @@ func (du *DocUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{doc.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -256,10 +217,7 @@ func (du *DocUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{doc.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -275,10 +233,7 @@ func (du *DocUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{doc.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -291,10 +246,7 @@ func (du *DocUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{doc.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -310,10 +262,7 @@ func (du *DocUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{doc.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -329,10 +278,7 @@ func (du *DocUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: doc.RelatedPrimaryKey,
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -345,10 +291,7 @@ func (du *DocUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: doc.RelatedPrimaryKey,
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -364,10 +307,7 @@ func (du *DocUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: doc.RelatedPrimaryKey,
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -383,6 +323,7 @@ func (du *DocUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	du.mutation.done = true
 	return n, nil
 }
 
@@ -516,6 +457,12 @@ func (duo *DocUpdateOne) RemoveRelated(d ...*Doc) *DocUpdateOne {
 	return duo.RemoveRelatedIDs(ids...)
 }
 
+// Where appends a list predicates to the DocUpdate builder.
+func (duo *DocUpdateOne) Where(ps ...predicate.Doc) *DocUpdateOne {
+	duo.mutation.Where(ps...)
+	return duo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (duo *DocUpdateOne) Select(field string, fields ...string) *DocUpdateOne {
@@ -525,40 +472,7 @@ func (duo *DocUpdateOne) Select(field string, fields ...string) *DocUpdateOne {
 
 // Save executes the query and returns the updated Doc entity.
 func (duo *DocUpdateOne) Save(ctx context.Context) (*Doc, error) {
-	var (
-		err  error
-		node *Doc
-	)
-	if len(duo.hooks) == 0 {
-		node, err = duo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*DocMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			duo.mutation = mutation
-			node, err = duo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(duo.hooks) - 1; i >= 0; i-- {
-			if duo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = duo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, duo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Doc)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from DocMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Doc, DocMutation](ctx, duo.sqlSave, duo.mutation, duo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -584,16 +498,7 @@ func (duo *DocUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (duo *DocUpdateOne) sqlSave(ctx context.Context) (_node *Doc, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   doc.Table,
-			Columns: doc.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
-				Column: doc.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(doc.Table, doc.Columns, sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString))
 	id, ok := duo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Doc.id" for update`)}
@@ -632,10 +537,7 @@ func (duo *DocUpdateOne) sqlSave(ctx context.Context) (_node *Doc, err error) {
 			Columns: []string{doc.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -648,10 +550,7 @@ func (duo *DocUpdateOne) sqlSave(ctx context.Context) (_node *Doc, err error) {
 			Columns: []string{doc.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -667,10 +566,7 @@ func (duo *DocUpdateOne) sqlSave(ctx context.Context) (_node *Doc, err error) {
 			Columns: []string{doc.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -683,10 +579,7 @@ func (duo *DocUpdateOne) sqlSave(ctx context.Context) (_node *Doc, err error) {
 			Columns: []string{doc.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -702,10 +595,7 @@ func (duo *DocUpdateOne) sqlSave(ctx context.Context) (_node *Doc, err error) {
 			Columns: []string{doc.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -721,10 +611,7 @@ func (duo *DocUpdateOne) sqlSave(ctx context.Context) (_node *Doc, err error) {
 			Columns: doc.RelatedPrimaryKey,
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -737,10 +624,7 @@ func (duo *DocUpdateOne) sqlSave(ctx context.Context) (_node *Doc, err error) {
 			Columns: doc.RelatedPrimaryKey,
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -756,10 +640,7 @@ func (duo *DocUpdateOne) sqlSave(ctx context.Context) (_node *Doc, err error) {
 			Columns: doc.RelatedPrimaryKey,
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: doc.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -778,5 +659,6 @@ func (duo *DocUpdateOne) sqlSave(ctx context.Context) (_node *Doc, err error) {
 		}
 		return nil, err
 	}
+	duo.mutation.done = true
 	return _node, nil
 }

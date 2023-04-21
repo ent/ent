@@ -100,34 +100,7 @@ func (isu *IntSIDUpdate) RemoveChildren(i ...*IntSID) *IntSIDUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (isu *IntSIDUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(isu.hooks) == 0 {
-		affected, err = isu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*IntSIDMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			isu.mutation = mutation
-			affected, err = isu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(isu.hooks) - 1; i >= 0; i-- {
-			if isu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = isu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, isu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, IntSIDMutation](ctx, isu.sqlSave, isu.mutation, isu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -153,16 +126,7 @@ func (isu *IntSIDUpdate) ExecX(ctx context.Context) {
 }
 
 func (isu *IntSIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   intsid.Table,
-			Columns: intsid.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: intsid.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(intsid.Table, intsid.Columns, sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64))
 	if ps := isu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -178,10 +142,7 @@ func (isu *IntSIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{intsid.ParentColumn},
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: intsid.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -194,10 +155,7 @@ func (isu *IntSIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{intsid.ParentColumn},
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: intsid.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -213,10 +171,7 @@ func (isu *IntSIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{intsid.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: intsid.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -229,10 +184,7 @@ func (isu *IntSIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{intsid.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: intsid.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -248,10 +200,7 @@ func (isu *IntSIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{intsid.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: intsid.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -267,6 +216,7 @@ func (isu *IntSIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	isu.mutation.done = true
 	return n, nil
 }
 
@@ -344,6 +294,12 @@ func (isuo *IntSIDUpdateOne) RemoveChildren(i ...*IntSID) *IntSIDUpdateOne {
 	return isuo.RemoveChildIDs(ids...)
 }
 
+// Where appends a list predicates to the IntSIDUpdate builder.
+func (isuo *IntSIDUpdateOne) Where(ps ...predicate.IntSID) *IntSIDUpdateOne {
+	isuo.mutation.Where(ps...)
+	return isuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (isuo *IntSIDUpdateOne) Select(field string, fields ...string) *IntSIDUpdateOne {
@@ -353,40 +309,7 @@ func (isuo *IntSIDUpdateOne) Select(field string, fields ...string) *IntSIDUpdat
 
 // Save executes the query and returns the updated IntSID entity.
 func (isuo *IntSIDUpdateOne) Save(ctx context.Context) (*IntSID, error) {
-	var (
-		err  error
-		node *IntSID
-	)
-	if len(isuo.hooks) == 0 {
-		node, err = isuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*IntSIDMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			isuo.mutation = mutation
-			node, err = isuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(isuo.hooks) - 1; i >= 0; i-- {
-			if isuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = isuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, isuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*IntSID)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from IntSIDMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*IntSID, IntSIDMutation](ctx, isuo.sqlSave, isuo.mutation, isuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -412,16 +335,7 @@ func (isuo *IntSIDUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (isuo *IntSIDUpdateOne) sqlSave(ctx context.Context) (_node *IntSID, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   intsid.Table,
-			Columns: intsid.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: intsid.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(intsid.Table, intsid.Columns, sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64))
 	id, ok := isuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "IntSID.id" for update`)}
@@ -454,10 +368,7 @@ func (isuo *IntSIDUpdateOne) sqlSave(ctx context.Context) (_node *IntSID, err er
 			Columns: []string{intsid.ParentColumn},
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: intsid.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -470,10 +381,7 @@ func (isuo *IntSIDUpdateOne) sqlSave(ctx context.Context) (_node *IntSID, err er
 			Columns: []string{intsid.ParentColumn},
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: intsid.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -489,10 +397,7 @@ func (isuo *IntSIDUpdateOne) sqlSave(ctx context.Context) (_node *IntSID, err er
 			Columns: []string{intsid.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: intsid.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -505,10 +410,7 @@ func (isuo *IntSIDUpdateOne) sqlSave(ctx context.Context) (_node *IntSID, err er
 			Columns: []string{intsid.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: intsid.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -524,10 +426,7 @@ func (isuo *IntSIDUpdateOne) sqlSave(ctx context.Context) (_node *IntSID, err er
 			Columns: []string{intsid.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: intsid.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -546,5 +445,6 @@ func (isuo *IntSIDUpdateOne) sqlSave(ctx context.Context) (_node *IntSID, err er
 		}
 		return nil, err
 	}
+	isuo.mutation.done = true
 	return _node, nil
 }

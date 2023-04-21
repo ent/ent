@@ -20,10 +20,10 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
-	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/stretchr/testify/require"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMigrateHookOmitTable(t *testing.T) {
@@ -246,7 +246,7 @@ func TestMigrate_Diff(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, m.Diff(ctx, &Table{Name: "users"}))
 	v := time.Now().UTC().Format("20060102150405")
-	requireFileEqual(t, filepath.Join(p, v+"_changes.up.sql"), "-- create \"users\" table\nCREATE TABLE `users` (, PRIMARY KEY ());\n")
+	requireFileEqual(t, filepath.Join(p, v+"_changes.up.sql"), "-- create \"users\" table\nCREATE TABLE `users` ();\n")
 	requireFileEqual(t, filepath.Join(p, v+"_changes.down.sql"), "-- reverse: create \"users\" table\nDROP TABLE `users`;\n")
 	require.FileExists(t, filepath.Join(p, migrate.HashFileName))
 
@@ -257,7 +257,7 @@ func TestMigrate_Diff(t *testing.T) {
 	m, err = NewMigrate(db, WithDir(d))
 	require.NoError(t, err)
 	require.NoError(t, m.Diff(ctx, &Table{Name: "users"}))
-	requireFileEqual(t, filepath.Join(p, v+"_changes.up.sql"), "-- create \"users\" table\nCREATE TABLE `users` (, PRIMARY KEY ());\n")
+	requireFileEqual(t, filepath.Join(p, v+"_changes.up.sql"), "-- create \"users\" table\nCREATE TABLE `users` ();\n")
 	requireFileEqual(t, filepath.Join(p, v+"_changes.down.sql"), "-- reverse: create \"users\" table\nDROP TABLE `users`;\n")
 	require.FileExists(t, filepath.Join(p, migrate.HashFileName))
 	require.NoError(t, d.WriteFile("tmp.sql", nil))
@@ -292,19 +292,29 @@ func TestMigrate_Diff(t *testing.T) {
 	}, "\n")
 	requireFileEqual(t, filepath.Join(p, "changes.sql"), changesSQL)
 
+	// Enable indentations.
+	m, err = NewMigrate(db, WithFormatter(f), WithDir(d), WithGlobalUniqueID(true), WithIndent("  "))
+	require.NoError(t, err)
 	// Adding another node will result in a new entry to the TypeTable (without actually creating it).
 	_, err = db.ExecContext(ctx, changesSQL, nil, nil)
 	require.NoError(t, err)
 	require.NoError(t, m.NamedDiff(ctx, "changes_2", petsTable))
 	requireFileEqual(t,
 		filepath.Join(p, "changes_2.sql"), strings.Join([]string{
-			"CREATE TABLE `pets` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT);",
+			"CREATE TABLE `pets` (\n  `id` integer NOT NULL PRIMARY KEY AUTOINCREMENT\n);",
 			fmt.Sprintf("INSERT INTO sqlite_sequence (name, seq) VALUES (\"pets\", %d);", 2<<32),
 			"INSERT INTO `ent_types` (`type`) VALUES ('pets');", "",
 		}, "\n"))
 
 	// Checksum will be updated as well.
 	require.NoError(t, migrate.Validate(d))
+
+	require.NoError(t, m.NamedDiff(ctx, "no_changes"), "should not error if WithErrNoPlan is not set")
+	// Enable WithErrNoPlan.
+	m, err = NewMigrate(db, WithFormatter(f), WithDir(d), WithGlobalUniqueID(true), WithErrNoPlan(true))
+	require.NoError(t, err)
+	err = m.NamedDiff(ctx, "no_changes")
+	require.ErrorIs(t, err, migrate.ErrNoPlan)
 }
 
 func requireFileEqual(t *testing.T, name, contents string) {
@@ -390,4 +400,30 @@ func TestMigrateWithoutForeignKeys(t *testing.T) {
 		require.True(t, ok)
 		require.EqualValues(t, "name", addColumn.C.Name)
 	})
+}
+
+func TestAtlas_StateReader(t *testing.T) {
+	db, err := sql.Open(dialect.SQLite, "file:test?mode=memory&_fk=1")
+	require.NoError(t, err)
+	m, err := NewMigrate(db)
+	require.NoError(t, err)
+	realm, err := m.StateReader(&Table{
+		Name: "users",
+		Columns: []*Column{
+			{Name: "name", Type: field.TypeString},
+			{Name: "active", Type: field.TypeBool},
+		},
+	}).ReadState(context.Background())
+	require.NoError(t, err)
+	require.NotNil(t, realm)
+	require.Len(t, realm.Schemas, 1)
+	require.Len(t, realm.Schemas[0].Tables, 1)
+	require.Equal(t, realm.Schemas[0].Tables[0].Name, "users")
+	require.Equal(t,
+		realm.Schemas[0].Tables[0].Columns,
+		[]*schema.Column{
+			schema.NewStringColumn("name", "text"),
+			schema.NewBoolColumn("active", "bool"),
+		},
+	)
 }

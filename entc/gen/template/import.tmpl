@@ -13,8 +13,9 @@ import (
 	"fmt"
 	"math"
 	"strings"
+	"sync"
 	"time"
-	{{- /* Ignore generting on graph templates (e.g. config.tmpl, client.tmpl, etc). */}}
+	{{- /* Ignore generating on graph templates (e.g. config.tmpl, client.tmpl, etc). */}}
 	{{- if ne $.Config.Package $.Package }}
 		"{{ $.Config.Package }}/predicate"
 		{{- if $.HasOneFieldID }}
@@ -31,6 +32,11 @@ import (
 	{{- with $.Storage }}
 		{{- range $import := .Imports }}
 			"{{ $import }}"
+		{{- end }}
+	{{- end }}
+	{{- if and (hasField $ "Scope") ($.Scope.Imports) }}
+		{{- range $import := $.Scope.Imports }}
+			{{ $import.Alias }} "{{ $import.Path }}"
 		{{- end }}
 	{{- end }}
 	{{- template "import/additional" $ }}

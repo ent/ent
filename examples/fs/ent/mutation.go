@@ -12,10 +12,10 @@ import (
 	"fmt"
 	"sync"
 
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/examples/fs/ent/file"
 	"entgo.io/ent/examples/fs/ent/predicate"
-
-	"entgo.io/ent"
 )
 
 const (
@@ -353,9 +353,24 @@ func (m *FileMutation) Where(ps ...predicate.File) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the FileMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *FileMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.File, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *FileMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *FileMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (File).

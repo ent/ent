@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -32,34 +31,7 @@ func (ttd *TweetTagDelete) Where(ps ...predicate.TweetTag) *TweetTagDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ttd *TweetTagDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(ttd.hooks) == 0 {
-		affected, err = ttd.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*TweetTagMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			ttd.mutation = mutation
-			affected, err = ttd.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(ttd.hooks) - 1; i >= 0; i-- {
-			if ttd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ttd.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, ttd.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, TweetTagMutation](ctx, ttd.sqlExec, ttd.mutation, ttd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -72,15 +44,7 @@ func (ttd *TweetTagDelete) ExecX(ctx context.Context) int {
 }
 
 func (ttd *TweetTagDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: tweettag.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: tweettag.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(tweettag.Table, sqlgraph.NewFieldSpec(tweettag.FieldID, field.TypeUUID))
 	if ps := ttd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -92,12 +56,19 @@ func (ttd *TweetTagDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	ttd.mutation.done = true
 	return affected, err
 }
 
 // TweetTagDeleteOne is the builder for deleting a single TweetTag entity.
 type TweetTagDeleteOne struct {
 	ttd *TweetTagDelete
+}
+
+// Where appends a list predicates to the TweetTagDelete builder.
+func (ttdo *TweetTagDeleteOne) Where(ps ...predicate.TweetTag) *TweetTagDeleteOne {
+	ttdo.ttd.mutation.Where(ps...)
+	return ttdo
 }
 
 // Exec executes the deletion query.
@@ -115,5 +86,7 @@ func (ttdo *TweetTagDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (ttdo *TweetTagDeleteOne) ExecX(ctx context.Context) {
-	ttdo.ttd.ExecX(ctx)
+	if err := ttdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

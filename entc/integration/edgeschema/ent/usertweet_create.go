@@ -71,50 +71,8 @@ func (utc *UserTweetCreate) Mutation() *UserTweetMutation {
 
 // Save creates the UserTweet in the database.
 func (utc *UserTweetCreate) Save(ctx context.Context) (*UserTweet, error) {
-	var (
-		err  error
-		node *UserTweet
-	)
 	utc.defaults()
-	if len(utc.hooks) == 0 {
-		if err = utc.check(); err != nil {
-			return nil, err
-		}
-		node, err = utc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*UserTweetMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = utc.check(); err != nil {
-				return nil, err
-			}
-			utc.mutation = mutation
-			if node, err = utc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(utc.hooks) - 1; i >= 0; i-- {
-			if utc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = utc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, utc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*UserTweet)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from UserTweetMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*UserTweet, UserTweetMutation](ctx, utc.sqlSave, utc.mutation, utc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -168,6 +126,9 @@ func (utc *UserTweetCreate) check() error {
 }
 
 func (utc *UserTweetCreate) sqlSave(ctx context.Context) (*UserTweet, error) {
+	if err := utc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := utc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, utc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -177,19 +138,15 @@ func (utc *UserTweetCreate) sqlSave(ctx context.Context) (*UserTweet, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
+	utc.mutation.id = &_node.ID
+	utc.mutation.done = true
 	return _node, nil
 }
 
 func (utc *UserTweetCreate) createSpec() (*UserTweet, *sqlgraph.CreateSpec) {
 	var (
 		_node = &UserTweet{config: utc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: usertweet.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: usertweet.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(usertweet.Table, sqlgraph.NewFieldSpec(usertweet.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = utc.conflict
 	if value, ok := utc.mutation.CreatedAt(); ok {
@@ -204,10 +161,7 @@ func (utc *UserTweetCreate) createSpec() (*UserTweet, *sqlgraph.CreateSpec) {
 			Columns: []string{usertweet.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -224,10 +178,7 @@ func (utc *UserTweetCreate) createSpec() (*UserTweet, *sqlgraph.CreateSpec) {
 			Columns: []string{usertweet.TweetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tweet.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -464,8 +415,8 @@ func (utcb *UserTweetCreateBulk) Save(ctx context.Context) ([]*UserTweet, error)
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, utcb.builders[i+1].mutation)
 				} else {

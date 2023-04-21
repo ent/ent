@@ -15,6 +15,9 @@ in the LICENSE file in the root directory of this source tree.
 	{{ $ctypes = set $ctypes $idscantype (list $.ID.Constant) }}
 {{ end }}
 {{ range $f := $.Fields }}
+	{{- if $f.HasValueScanner }}
+		{{- continue }}
+	{{- end }}
 	{{ $names := list }}
 	{{ if hasKey $ctypes $f.NewScanType }}
 		{{ $names = get $ctypes $f.NewScanType }}
@@ -32,13 +35,20 @@ func (*{{ $.Name }}) scanValues(columns []string) ([]any, error) {
 				case {{ range $i, $c := $columns }}{{ if ne $i 0 }},{{ end }}{{ $.Package }}.{{ $c }}{{ end }}:
 					values[i] = {{ $type }}
 			{{- end }}
+			{{- range $f := $.Fields }}
+				{{- if $f.HasValueScanner }}
+					case {{ $.Package }}.{{ $f.Constant }}:
+						values[i] = {{ $f.ScanValueFunc }}()
+				{{- end }}
+			{{- end }}
 			{{- range $i, $fk := $.UnexportedForeignKeys }}
 				{{- $f := $fk.Field }}
 				case {{ $.Package }}.ForeignKeys[{{ $i }}]: // {{ $f.Name }}
 					values[i] = {{ if not $f.UserDefined }}new(sql.NullInt64){{ else }}{{ $f.NewScanType }}{{ end }}
 			{{- end }}
 			default:
-				return nil, fmt.Errorf("unexpected column %q for type {{ $.Name }}", columns[i])
+				{{- /* In case of unknown column that was added by a modifier, predicate, etc., fallback to any. */}}
+				values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -89,9 +99,18 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []any
 					}
 				{{- end }}
 		{{- end }}
+		default:
+			{{- /* In case of no match, allow getting this value by its name. */}}
+			{{ $receiver }}.selectValues.Set(columns[{{ $idx }}], values[{{ $idx }}])
 		}
 	}
 	return nil
+}
+
+// {{ $.ValueName }} returns the ent.Value that was dynamically selected and assigned to the {{ $.Name }}.
+// This includes values selected through modifiers, order, etc.
+func ({{ $receiver }} *{{ $.Name }}) {{ $.ValueName }}(name string) (ent.Value, error) {
+	return {{ $receiver }}.selectValues.Get(name)
 }
 {{ end }}
 
@@ -100,7 +119,13 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []any
 	{{- $f := $.Scope.Field -}}
 	{{- $ret := $.Scope.Rec -}}
 	{{- $field := $f.StructField }}{{ with $.Scope.StructField }}{{ $field = . }}{{ end -}}
-	{{- if $f.IsJSON -}}
+	{{- if $f.HasValueScanner -}}
+		if value, err := {{ $f.FromValueFunc }}(values[{{ $i }}]); err != nil {
+			return err
+		} else {
+			{{ $ret }}.{{ $field }} = value
+		}
+	{{- else if $f.IsJSON -}}
 		if value, ok := values[{{ $i }}].(*{{ $f.ScanType }}); !ok {
 			return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[{{ $i }}])
 		} else if value != nil && len(*value) > 0 {

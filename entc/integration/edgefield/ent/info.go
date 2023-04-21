@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgefield/ent/info"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
@@ -25,7 +26,8 @@ type Info struct {
 	Content json.RawMessage `json:"content,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the InfoQuery when eager-loading is set.
-	Edges InfoEdges `json:"edges"`
+	Edges        InfoEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // InfoEdges holds the relations/edges for other nodes in the graph.
@@ -60,7 +62,7 @@ func (*Info) scanValues(columns []string) ([]any, error) {
 		case info.FieldID:
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Info", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -88,21 +90,29 @@ func (i *Info) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field content: %w", err)
 				}
 			}
+		default:
+			i.selectValues.Set(columns[j], values[j])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the Info.
+// This includes values selected through modifiers, order, etc.
+func (i *Info) Value(name string) (ent.Value, error) {
+	return i.selectValues.Get(name)
+}
+
 // QueryUser queries the "user" edge of the Info entity.
 func (i *Info) QueryUser() *UserQuery {
-	return (&InfoClient{config: i.config}).QueryUser(i)
+	return NewInfoClient(i.config).QueryUser(i)
 }
 
 // Update returns a builder for updating this Info.
 // Note that you need to call Info.Unwrap() before calling this method if this Info
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (i *Info) Update() *InfoUpdateOne {
-	return (&InfoClient{config: i.config}).UpdateOne(i)
+	return NewInfoClient(i.config).UpdateOne(i)
 }
 
 // Unwrap unwraps the Info entity that was returned from a transaction after it was closed,
@@ -129,9 +139,3 @@ func (i *Info) String() string {
 
 // Infos is a parsable slice of Info.
 type Infos []*Info
-
-func (i Infos) config(cfg config) {
-	for _i := range i {
-		i[_i].config = cfg
-	}
-}

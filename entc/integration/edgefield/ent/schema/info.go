@@ -23,6 +23,7 @@ func (Info) Fields() []ent.Field {
 		field.JSON("content", json.RawMessage{}),
 	}
 }
+
 func (Info) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("user", User.Type).

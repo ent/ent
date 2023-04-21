@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -31,34 +30,7 @@ func (bld *BlobLinkDelete) Where(ps ...predicate.BlobLink) *BlobLinkDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (bld *BlobLinkDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(bld.hooks) == 0 {
-		affected, err = bld.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*BlobLinkMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			bld.mutation = mutation
-			affected, err = bld.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(bld.hooks) - 1; i >= 0; i-- {
-			if bld.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = bld.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, bld.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, BlobLinkMutation](ctx, bld.sqlExec, bld.mutation, bld.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -71,11 +43,7 @@ func (bld *BlobLinkDelete) ExecX(ctx context.Context) int {
 }
 
 func (bld *BlobLinkDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: bloblink.Table,
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(bloblink.Table, nil)
 	if ps := bld.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -87,12 +55,19 @@ func (bld *BlobLinkDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	bld.mutation.done = true
 	return affected, err
 }
 
 // BlobLinkDeleteOne is the builder for deleting a single BlobLink entity.
 type BlobLinkDeleteOne struct {
 	bld *BlobLinkDelete
+}
+
+// Where appends a list predicates to the BlobLinkDelete builder.
+func (bldo *BlobLinkDeleteOne) Where(ps ...predicate.BlobLink) *BlobLinkDeleteOne {
+	bldo.bld.mutation.Where(ps...)
+	return bldo
 }
 
 // Exec executes the deletion query.
@@ -110,5 +85,7 @@ func (bldo *BlobLinkDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (bldo *BlobLinkDeleteOne) ExecX(ctx context.Context) {
-	bldo.bld.ExecX(ctx)
+	if err := bldo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

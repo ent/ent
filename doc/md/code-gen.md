@@ -17,7 +17,7 @@ go get -d entgo.io/ent/cmd/ent
 In order to generate one or more schema templates, run `ent init` as follows:
 
 ```bash
-go run -mod=mod entgo.io/ent/cmd/ent init User Pet
+go run -mod=mod entgo.io/ent/cmd/ent new User Pet
 ```
 
 `init` will create the 2 schemas (`user.go` and `pet.go`) under the `ent/schema` directory.
@@ -26,7 +26,7 @@ is to have an `ent` directory under the root directory of the project.
 
 ## Generate Assets
 
-After adding a few [fields](schema-fields.md) and [edges](schema-edges), you want to generate
+After adding a few [fields](schema-fields.mdx) and [edges](schema-edges), you want to generate
 the assets for working with your entities. Run `ent generate` from the root directory of the project,
 or use `go generate`:
 
@@ -92,7 +92,6 @@ Flags:
       --feature strings       extend codegen with additional features
       --header string         override codegen header
   -h, --help                  help for generate
-      --idtype [int string]   type of the id field (default int)
       --storage string        storage driver to support in codegen (default "sql")
       --target string         target directory for codegen
       --template strings      external templates to execute

@@ -32,6 +32,19 @@ func (bu *BlogUpdate) Where(ps ...predicate.Blog) *BlogUpdate {
 	return bu
 }
 
+// SetOid sets the "oid" field.
+func (bu *BlogUpdate) SetOid(i int) *BlogUpdate {
+	bu.mutation.ResetOid()
+	bu.mutation.SetOid(i)
+	return bu
+}
+
+// AddOid adds i to the "oid" field.
+func (bu *BlogUpdate) AddOid(i int) *BlogUpdate {
+	bu.mutation.AddOid(i)
+	return bu
+}
+
 // AddAdminIDs adds the "admins" edge to the User entity by IDs.
 func (bu *BlogUpdate) AddAdminIDs(ids ...int) *BlogUpdate {
 	bu.mutation.AddAdminIDs(ids...)
@@ -75,34 +88,7 @@ func (bu *BlogUpdate) RemoveAdmins(u ...*User) *BlogUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (bu *BlogUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(bu.hooks) == 0 {
-		affected, err = bu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*BlogMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			bu.mutation = mutation
-			affected, err = bu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(bu.hooks) - 1; i >= 0; i-- {
-			if bu.hooks[i] == nil {
-				return 0, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
-			}
-			mut = bu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, bu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, BlogMutation](ctx, bu.sqlSave, bu.mutation, bu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -128,22 +114,19 @@ func (bu *BlogUpdate) ExecX(ctx context.Context) {
 }
 
 func (bu *BlogUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   blog.Table,
-			Columns: blog.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: blog.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(blog.Table, blog.Columns, sqlgraph.NewFieldSpec(blog.FieldID, field.TypeInt))
 	if ps := bu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := bu.mutation.Oid(); ok {
+		_spec.SetField(blog.FieldOid, field.TypeInt, value)
+	}
+	if value, ok := bu.mutation.AddedOid(); ok {
+		_spec.AddField(blog.FieldOid, field.TypeInt, value)
 	}
 	if bu.mutation.AdminsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -153,10 +136,7 @@ func (bu *BlogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{blog.AdminsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -169,10 +149,7 @@ func (bu *BlogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{blog.AdminsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -188,10 +165,7 @@ func (bu *BlogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{blog.AdminsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -207,6 +181,7 @@ func (bu *BlogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	bu.mutation.done = true
 	return n, nil
 }
 
@@ -216,6 +191,19 @@ type BlogUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *BlogMutation
+}
+
+// SetOid sets the "oid" field.
+func (buo *BlogUpdateOne) SetOid(i int) *BlogUpdateOne {
+	buo.mutation.ResetOid()
+	buo.mutation.SetOid(i)
+	return buo
+}
+
+// AddOid adds i to the "oid" field.
+func (buo *BlogUpdateOne) AddOid(i int) *BlogUpdateOne {
+	buo.mutation.AddOid(i)
+	return buo
 }
 
 // AddAdminIDs adds the "admins" edge to the User entity by IDs.
@@ -259,6 +247,12 @@ func (buo *BlogUpdateOne) RemoveAdmins(u ...*User) *BlogUpdateOne {
 	return buo.RemoveAdminIDs(ids...)
 }
 
+// Where appends a list predicates to the BlogUpdate builder.
+func (buo *BlogUpdateOne) Where(ps ...predicate.Blog) *BlogUpdateOne {
+	buo.mutation.Where(ps...)
+	return buo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (buo *BlogUpdateOne) Select(field string, fields ...string) *BlogUpdateOne {
@@ -268,40 +262,7 @@ func (buo *BlogUpdateOne) Select(field string, fields ...string) *BlogUpdateOne 
 
 // Save executes the query and returns the updated Blog entity.
 func (buo *BlogUpdateOne) Save(ctx context.Context) (*Blog, error) {
-	var (
-		err  error
-		node *Blog
-	)
-	if len(buo.hooks) == 0 {
-		node, err = buo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*BlogMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			buo.mutation = mutation
-			node, err = buo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(buo.hooks) - 1; i >= 0; i-- {
-			if buo.hooks[i] == nil {
-				return nil, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
-			}
-			mut = buo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, buo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Blog)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from BlogMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Blog, BlogMutation](ctx, buo.sqlSave, buo.mutation, buo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -327,16 +288,7 @@ func (buo *BlogUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (buo *BlogUpdateOne) sqlSave(ctx context.Context) (_node *Blog, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   blog.Table,
-			Columns: blog.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: blog.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(blog.Table, blog.Columns, sqlgraph.NewFieldSpec(blog.FieldID, field.TypeInt))
 	id, ok := buo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`entv2: missing "Blog.id" for update`)}
@@ -361,6 +313,12 @@ func (buo *BlogUpdateOne) sqlSave(ctx context.Context) (_node *Blog, err error) 
 			}
 		}
 	}
+	if value, ok := buo.mutation.Oid(); ok {
+		_spec.SetField(blog.FieldOid, field.TypeInt, value)
+	}
+	if value, ok := buo.mutation.AddedOid(); ok {
+		_spec.AddField(blog.FieldOid, field.TypeInt, value)
+	}
 	if buo.mutation.AdminsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -369,10 +327,7 @@ func (buo *BlogUpdateOne) sqlSave(ctx context.Context) (_node *Blog, err error) 
 			Columns: []string{blog.AdminsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -385,10 +340,7 @@ func (buo *BlogUpdateOne) sqlSave(ctx context.Context) (_node *Blog, err error) 
 			Columns: []string{blog.AdminsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -404,10 +356,7 @@ func (buo *BlogUpdateOne) sqlSave(ctx context.Context) (_node *Blog, err error) 
 			Columns: []string{blog.AdminsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -426,5 +375,6 @@ func (buo *BlogUpdateOne) sqlSave(ctx context.Context) (_node *Blog, err error) 
 		}
 		return nil, err
 	}
+	buo.mutation.done = true
 	return _node, nil
 }

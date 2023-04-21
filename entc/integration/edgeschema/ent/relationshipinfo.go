@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
 )
@@ -20,7 +21,8 @@ type RelationshipInfo struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Text holds the value of the "text" field.
-	Text string `json:"text,omitempty"`
+	Text         string `json:"text,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -33,7 +35,7 @@ func (*RelationshipInfo) scanValues(columns []string) ([]any, error) {
 		case relationshipinfo.FieldText:
 			values[i] = new(sql.NullString)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type RelationshipInfo", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -59,16 +61,24 @@ func (ri *RelationshipInfo) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ri.Text = value.String
 			}
+		default:
+			ri.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the RelationshipInfo.
+// This includes values selected through modifiers, order, etc.
+func (ri *RelationshipInfo) Value(name string) (ent.Value, error) {
+	return ri.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this RelationshipInfo.
 // Note that you need to call RelationshipInfo.Unwrap() before calling this method if this RelationshipInfo
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (ri *RelationshipInfo) Update() *RelationshipInfoUpdateOne {
-	return (&RelationshipInfoClient{config: ri.config}).UpdateOne(ri)
+	return NewRelationshipInfoClient(ri.config).UpdateOne(ri)
 }
 
 // Unwrap unwraps the RelationshipInfo entity that was returned from a transaction after it was closed,
@@ -95,9 +105,3 @@ func (ri *RelationshipInfo) String() string {
 
 // RelationshipInfos is a parsable slice of RelationshipInfo.
 type RelationshipInfos []*RelationshipInfo
-
-func (ri RelationshipInfos) config(cfg config) {
-	for _i := range ri {
-		ri[_i].config = cfg
-	}
-}

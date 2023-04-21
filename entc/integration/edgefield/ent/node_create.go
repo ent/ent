@@ -82,50 +82,8 @@ func (nc *NodeCreate) Mutation() *NodeMutation {
 
 // Save creates the Node in the database.
 func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
-	var (
-		err  error
-		node *Node
-	)
 	nc.defaults()
-	if len(nc.hooks) == 0 {
-		if err = nc.check(); err != nil {
-			return nil, err
-		}
-		node, err = nc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*NodeMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = nc.check(); err != nil {
-				return nil, err
-			}
-			nc.mutation = mutation
-			if node, err = nc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(nc.hooks) - 1; i >= 0; i-- {
-			if nc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = nc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, nc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Node)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from NodeMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Node, NodeMutation](ctx, nc.sqlSave, nc.mutation, nc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -167,6 +125,9 @@ func (nc *NodeCreate) check() error {
 }
 
 func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
+	if err := nc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := nc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, nc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -176,19 +137,15 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
+	nc.mutation.id = &_node.ID
+	nc.mutation.done = true
 	return _node, nil
 }
 
 func (nc *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Node{config: nc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: node.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: node.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(node.Table, sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt))
 	)
 	if value, ok := nc.mutation.Value(); ok {
 		_spec.SetField(node.FieldValue, field.TypeInt, value)
@@ -202,10 +159,7 @@ func (nc *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 			Columns: []string{node.PrevColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: node.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -222,10 +176,7 @@ func (nc *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 			Columns: []string{node.NextColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: node.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -260,8 +211,8 @@ func (ncb *NodeCreateBulk) Save(ctx context.Context) ([]*Node, error) {
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, ncb.builders[i+1].mutation)
 				} else {

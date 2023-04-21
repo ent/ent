@@ -60,40 +60,7 @@ func (iu *ItemUpdate) Mutation() *ItemMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (iu *ItemUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(iu.hooks) == 0 {
-		if err = iu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = iu.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ItemMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = iu.check(); err != nil {
-				return 0, err
-			}
-			iu.mutation = mutation
-			affected, err = iu.gremlinSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(iu.hooks) - 1; i >= 0; i-- {
-			if iu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = iu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, iu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, ItemMutation](ctx, iu.gremlinSave, iu.mutation, iu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -129,6 +96,9 @@ func (iu *ItemUpdate) check() error {
 }
 
 func (iu *ItemUpdate) gremlinSave(ctx context.Context) (int, error) {
+	if err := iu.check(); err != nil {
+		return 0, err
+	}
 	res := &gremlin.Response{}
 	query, bindings := iu.gremlin().Query()
 	if err := iu.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -137,6 +107,7 @@ func (iu *ItemUpdate) gremlinSave(ctx context.Context) (int, error) {
 	if err, ok := isConstantError(res); ok {
 		return 0, err
 	}
+	iu.mutation.done = true
 	return res.ReadInt()
 }
 
@@ -218,6 +189,12 @@ func (iuo *ItemUpdateOne) Mutation() *ItemMutation {
 	return iuo.mutation
 }
 
+// Where appends a list predicates to the ItemUpdate builder.
+func (iuo *ItemUpdateOne) Where(ps ...predicate.Item) *ItemUpdateOne {
+	iuo.mutation.Where(ps...)
+	return iuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (iuo *ItemUpdateOne) Select(field string, fields ...string) *ItemUpdateOne {
@@ -227,46 +204,7 @@ func (iuo *ItemUpdateOne) Select(field string, fields ...string) *ItemUpdateOne 
 
 // Save executes the query and returns the updated Item entity.
 func (iuo *ItemUpdateOne) Save(ctx context.Context) (*Item, error) {
-	var (
-		err  error
-		node *Item
-	)
-	if len(iuo.hooks) == 0 {
-		if err = iuo.check(); err != nil {
-			return nil, err
-		}
-		node, err = iuo.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ItemMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = iuo.check(); err != nil {
-				return nil, err
-			}
-			iuo.mutation = mutation
-			node, err = iuo.gremlinSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(iuo.hooks) - 1; i >= 0; i-- {
-			if iuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = iuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, iuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Item)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from ItemMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Item, ItemMutation](ctx, iuo.gremlinSave, iuo.mutation, iuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -302,6 +240,9 @@ func (iuo *ItemUpdateOne) check() error {
 }
 
 func (iuo *ItemUpdateOne) gremlinSave(ctx context.Context) (*Item, error) {
+	if err := iuo.check(); err != nil {
+		return nil, err
+	}
 	res := &gremlin.Response{}
 	id, ok := iuo.mutation.ID()
 	if !ok {
@@ -314,6 +255,7 @@ func (iuo *ItemUpdateOne) gremlinSave(ctx context.Context) (*Item, error) {
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
+	iuo.mutation.done = true
 	i := &Item{config: iuo.config}
 	if err := i.FromResponse(res); err != nil {
 		return nil, err

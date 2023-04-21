@@ -12,10 +12,10 @@ import (
 	"fmt"
 	"sync"
 
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/examples/o2orecur/ent/node"
 	"entgo.io/ent/examples/o2orecur/ent/predicate"
-
-	"entgo.io/ent"
 )
 
 const (
@@ -202,9 +202,53 @@ func (m *NodeMutation) ResetValue() {
 	m.addvalue = nil
 }
 
-// SetPrevID sets the "prev" edge to the Node entity by id.
-func (m *NodeMutation) SetPrevID(id int) {
-	m.prev = &id
+// SetPrevID sets the "prev_id" field.
+func (m *NodeMutation) SetPrevID(i int) {
+	m.prev = &i
+}
+
+// PrevID returns the value of the "prev_id" field in the mutation.
+func (m *NodeMutation) PrevID() (r int, exists bool) {
+	v := m.prev
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPrevID returns the old "prev_id" field's value of the Node entity.
+// If the Node object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NodeMutation) OldPrevID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPrevID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPrevID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPrevID: %w", err)
+	}
+	return oldValue.PrevID, nil
+}
+
+// ClearPrevID clears the value of the "prev_id" field.
+func (m *NodeMutation) ClearPrevID() {
+	m.prev = nil
+	m.clearedFields[node.FieldPrevID] = struct{}{}
+}
+
+// PrevIDCleared returns if the "prev_id" field was cleared in this mutation.
+func (m *NodeMutation) PrevIDCleared() bool {
+	_, ok := m.clearedFields[node.FieldPrevID]
+	return ok
+}
+
+// ResetPrevID resets all changes to the "prev_id" field.
+func (m *NodeMutation) ResetPrevID() {
+	m.prev = nil
+	delete(m.clearedFields, node.FieldPrevID)
 }
 
 // ClearPrev clears the "prev" edge to the Node entity.
@@ -214,15 +258,7 @@ func (m *NodeMutation) ClearPrev() {
 
 // PrevCleared reports if the "prev" edge to the Node entity was cleared.
 func (m *NodeMutation) PrevCleared() bool {
-	return m.clearedprev
-}
-
-// PrevID returns the "prev" edge ID in the mutation.
-func (m *NodeMutation) PrevID() (id int, exists bool) {
-	if m.prev != nil {
-		return *m.prev, true
-	}
-	return
+	return m.PrevIDCleared() || m.clearedprev
 }
 
 // PrevIDs returns the "prev" edge IDs in the mutation.
@@ -285,9 +321,24 @@ func (m *NodeMutation) Where(ps ...predicate.Node) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the NodeMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *NodeMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Node, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *NodeMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *NodeMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Node).
@@ -299,9 +350,12 @@ func (m *NodeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *NodeMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 2)
 	if m.value != nil {
 		fields = append(fields, node.FieldValue)
+	}
+	if m.prev != nil {
+		fields = append(fields, node.FieldPrevID)
 	}
 	return fields
 }
@@ -313,6 +367,8 @@ func (m *NodeMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case node.FieldValue:
 		return m.Value()
+	case node.FieldPrevID:
+		return m.PrevID()
 	}
 	return nil, false
 }
@@ -324,6 +380,8 @@ func (m *NodeMutation) OldField(ctx context.Context, name string) (ent.Value, er
 	switch name {
 	case node.FieldValue:
 		return m.OldValue(ctx)
+	case node.FieldPrevID:
+		return m.OldPrevID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Node field %s", name)
 }
@@ -339,6 +397,13 @@ func (m *NodeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetValue(v)
+		return nil
+	case node.FieldPrevID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPrevID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Node field %s", name)
@@ -384,7 +449,11 @@ func (m *NodeMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *NodeMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(node.FieldPrevID) {
+		fields = append(fields, node.FieldPrevID)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -397,6 +466,11 @@ func (m *NodeMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *NodeMutation) ClearField(name string) error {
+	switch name {
+	case node.FieldPrevID:
+		m.ClearPrevID()
+		return nil
+	}
 	return fmt.Errorf("unknown Node nullable field %s", name)
 }
 
@@ -406,6 +480,9 @@ func (m *NodeMutation) ResetField(name string) error {
 	switch name {
 	case node.FieldValue:
 		m.ResetValue()
+		return nil
+	case node.FieldPrevID:
+		m.ResetPrevID()
 		return nil
 	}
 	return fmt.Errorf("unknown Node field %s", name)

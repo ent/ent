@@ -85,7 +85,7 @@ var drivers = []*Storage{
 	},
 }
 
-// NewStorage returns a the storage driver type from the given string.
+// NewStorage returns the storage driver type from the given string.
 // It fails if the provided string is not a valid option. this function
 // is here in order to remove the validation logic from entc command line.
 func NewStorage(s string) (*Storage, error) {

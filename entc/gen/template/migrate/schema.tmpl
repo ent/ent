@@ -36,6 +36,7 @@ var (
 				{{- if $c.Increment }} Increment: true,{{ end }}
 				{{- if $c.Nullable }} Nullable: {{ $c.Nullable }},{{ end }}
 				{{- with $c.Size }} Size: {{ . }},{{ end }}
+				{{- with $c.Comment }} Comment: "{{ $c.Comment }}",{{ end }}
 				{{- with $c.Attr }} Attr: "{{ . }}",{{ end }}
 				{{- with $c.Enums }} Enums: []string{ {{ range $e := . }}"{{ $e }}",{{ end }} },{{ end }}
 				{{- if not (isNil $c.Default) -}}
@@ -56,6 +57,9 @@ var (
 		// {{ $table }} holds the schema information for the "{{ $t.Name }}" table.
 		{{ $table }} = &schema.Table{
 			Name: "{{ $t.Name }}",
+			{{- with $t.Comment }}
+				Comment: "{{ . }}",
+			{{- end }}
 			Columns: {{ $columns }},
 			PrimaryKey: []*schema.Column{
 				{{- range $pk := $t.PrimaryKey }}
@@ -76,7 +80,7 @@ var (
 									{{- end }}
 								{{- end }}
 							},
-							{{- /* postpone refrencing to avoid typechecking loops */}}
+							{{- /* postpone referencing to avoid typechecking loops */}}
 							RefColumns: []*schema.Column{
 								{{- range $c1 := $fk.RefColumns }}
 									{{- range $i, $c2 := $fk.RefTable.Columns }}

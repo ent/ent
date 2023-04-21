@@ -12,9 +12,13 @@ import (
 	"fmt"
 	"log"
 
+	"entgo.io/ent"
 	"entgo.io/ent/entc/integration/edgefield/ent/migrate"
 	"github.com/google/uuid"
 
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/car"
 	"entgo.io/ent/entc/integration/edgefield/ent/card"
 	"entgo.io/ent/entc/integration/edgefield/ent/info"
@@ -24,10 +28,6 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/post"
 	"entgo.io/ent/entc/integration/edgefield/ent/rental"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
-
-	"entgo.io/ent/dialect"
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -57,7 +57,7 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	cfg := config{log: log.Println, hooks: &hooks{}}
+	cfg := config{log: log.Println, hooks: &hooks{}, inters: &inters{}}
 	cfg.options(opts...)
 	client := &Client{config: cfg}
 	client.init()
@@ -75,6 +75,55 @@ func (c *Client) init() {
 	c.Post = NewPostClient(c.config)
 	c.Rental = NewRentalClient(c.config)
 	c.User = NewUserClient(c.config)
+}
+
+type (
+	// config is the configuration for the client and its builder.
+	config struct {
+		// driver used for executing database requests.
+		driver dialect.Driver
+		// debug enable a debug logging.
+		debug bool
+		// log used for logging on debug mode.
+		log func(...any)
+		// hooks to execute on mutations.
+		hooks *hooks
+		// interceptors to execute on queries.
+		inters *inters
+	}
+	// Option function to configure the client.
+	Option func(*config)
+)
+
+// options applies the options on the config object.
+func (c *config) options(opts ...Option) {
+	for _, opt := range opts {
+		opt(c)
+	}
+	if c.debug {
+		c.driver = dialect.Debug(c.driver, c.log)
+	}
+}
+
+// Debug enables debug logging on the ent.Driver.
+func Debug() Option {
+	return func(c *config) {
+		c.debug = true
+	}
+}
+
+// Log sets the logging function for debug mode.
+func Log(fn func(...any)) Option {
+	return func(c *config) {
+		c.log = fn
+	}
+}
+
+// Driver configures the client driver.
+func Driver(driver dialect.Driver) Option {
+	return func(c *config) {
+		c.driver = driver
+	}
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -173,15 +222,47 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Car.Use(hooks...)
-	c.Card.Use(hooks...)
-	c.Info.Use(hooks...)
-	c.Metadata.Use(hooks...)
-	c.Node.Use(hooks...)
-	c.Pet.Use(hooks...)
-	c.Post.Use(hooks...)
-	c.Rental.Use(hooks...)
-	c.User.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.Car, c.Card, c.Info, c.Metadata, c.Node, c.Pet, c.Post, c.Rental, c.User,
+	} {
+		n.Use(hooks...)
+	}
+}
+
+// Intercept adds the query interceptors to all the entity clients.
+// In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
+func (c *Client) Intercept(interceptors ...Interceptor) {
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.Car, c.Card, c.Info, c.Metadata, c.Node, c.Pet, c.Post, c.Rental, c.User,
+	} {
+		n.Intercept(interceptors...)
+	}
+}
+
+// Mutate implements the ent.Mutator interface.
+func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
+	switch m := m.(type) {
+	case *CarMutation:
+		return c.Car.mutate(ctx, m)
+	case *CardMutation:
+		return c.Card.mutate(ctx, m)
+	case *InfoMutation:
+		return c.Info.mutate(ctx, m)
+	case *MetadataMutation:
+		return c.Metadata.mutate(ctx, m)
+	case *NodeMutation:
+		return c.Node.mutate(ctx, m)
+	case *PetMutation:
+		return c.Pet.mutate(ctx, m)
+	case *PostMutation:
+		return c.Post.mutate(ctx, m)
+	case *RentalMutation:
+		return c.Rental.mutate(ctx, m)
+	case *UserMutation:
+		return c.User.mutate(ctx, m)
+	default:
+		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
 }
 
 // CarClient is a client for the Car schema.
@@ -198,6 +279,12 @@ func NewCarClient(c config) *CarClient {
 // A call to `Use(f, g, h)` equals to `car.Hooks(f(g(h())))`.
 func (c *CarClient) Use(hooks ...Hook) {
 	c.hooks.Car = append(c.hooks.Car, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `car.Intercept(f(g(h())))`.
+func (c *CarClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Car = append(c.inters.Car, interceptors...)
 }
 
 // Create returns a builder for creating a Car entity.
@@ -252,6 +339,8 @@ func (c *CarClient) DeleteOneID(id uuid.UUID) *CarDeleteOne {
 func (c *CarClient) Query() *CarQuery {
 	return &CarQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeCar},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -271,7 +360,7 @@ func (c *CarClient) GetX(ctx context.Context, id uuid.UUID) *Car {
 
 // QueryRentals queries the rentals edge of a Car.
 func (c *CarClient) QueryRentals(ca *Car) *RentalQuery {
-	query := &RentalQuery{config: c.config}
+	query := (&RentalClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ca.ID
 		step := sqlgraph.NewStep(
@@ -290,6 +379,26 @@ func (c *CarClient) Hooks() []Hook {
 	return c.hooks.Car
 }
 
+// Interceptors returns the client interceptors.
+func (c *CarClient) Interceptors() []Interceptor {
+	return c.inters.Car
+}
+
+func (c *CarClient) mutate(ctx context.Context, m *CarMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CarCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CarUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CarUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CarDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Car mutation op: %q", m.Op())
+	}
+}
+
 // CardClient is a client for the Card schema.
 type CardClient struct {
 	config
@@ -304,6 +413,12 @@ func NewCardClient(c config) *CardClient {
 // A call to `Use(f, g, h)` equals to `card.Hooks(f(g(h())))`.
 func (c *CardClient) Use(hooks ...Hook) {
 	c.hooks.Card = append(c.hooks.Card, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `card.Intercept(f(g(h())))`.
+func (c *CardClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Card = append(c.inters.Card, interceptors...)
 }
 
 // Create returns a builder for creating a Card entity.
@@ -358,6 +473,8 @@ func (c *CardClient) DeleteOneID(id int) *CardDeleteOne {
 func (c *CardClient) Query() *CardQuery {
 	return &CardQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeCard},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -377,7 +494,7 @@ func (c *CardClient) GetX(ctx context.Context, id int) *Card {
 
 // QueryOwner queries the owner edge of a Card.
 func (c *CardClient) QueryOwner(ca *Card) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ca.ID
 		step := sqlgraph.NewStep(
@@ -396,6 +513,26 @@ func (c *CardClient) Hooks() []Hook {
 	return c.hooks.Card
 }
 
+// Interceptors returns the client interceptors.
+func (c *CardClient) Interceptors() []Interceptor {
+	return c.inters.Card
+}
+
+func (c *CardClient) mutate(ctx context.Context, m *CardMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CardCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CardUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CardDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Card mutation op: %q", m.Op())
+	}
+}
+
 // InfoClient is a client for the Info schema.
 type InfoClient struct {
 	config
@@ -410,6 +547,12 @@ func NewInfoClient(c config) *InfoClient {
 // A call to `Use(f, g, h)` equals to `info.Hooks(f(g(h())))`.
 func (c *InfoClient) Use(hooks ...Hook) {
 	c.hooks.Info = append(c.hooks.Info, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `info.Intercept(f(g(h())))`.
+func (c *InfoClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Info = append(c.inters.Info, interceptors...)
 }
 
 // Create returns a builder for creating a Info entity.
@@ -464,6 +607,8 @@ func (c *InfoClient) DeleteOneID(id int) *InfoDeleteOne {
 func (c *InfoClient) Query() *InfoQuery {
 	return &InfoQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeInfo},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -483,7 +628,7 @@ func (c *InfoClient) GetX(ctx context.Context, id int) *Info {
 
 // QueryUser queries the user edge of a Info.
 func (c *InfoClient) QueryUser(i *Info) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := i.ID
 		step := sqlgraph.NewStep(
@@ -502,6 +647,26 @@ func (c *InfoClient) Hooks() []Hook {
 	return c.hooks.Info
 }
 
+// Interceptors returns the client interceptors.
+func (c *InfoClient) Interceptors() []Interceptor {
+	return c.inters.Info
+}
+
+func (c *InfoClient) mutate(ctx context.Context, m *InfoMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&InfoCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&InfoUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&InfoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&InfoDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Info mutation op: %q", m.Op())
+	}
+}
+
 // MetadataClient is a client for the Metadata schema.
 type MetadataClient struct {
 	config
@@ -516,6 +681,12 @@ func NewMetadataClient(c config) *MetadataClient {
 // A call to `Use(f, g, h)` equals to `metadata.Hooks(f(g(h())))`.
 func (c *MetadataClient) Use(hooks ...Hook) {
 	c.hooks.Metadata = append(c.hooks.Metadata, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `metadata.Intercept(f(g(h())))`.
+func (c *MetadataClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Metadata = append(c.inters.Metadata, interceptors...)
 }
 
 // Create returns a builder for creating a Metadata entity.
@@ -570,6 +741,8 @@ func (c *MetadataClient) DeleteOneID(id int) *MetadataDeleteOne {
 func (c *MetadataClient) Query() *MetadataQuery {
 	return &MetadataQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeMetadata},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -589,7 +762,7 @@ func (c *MetadataClient) GetX(ctx context.Context, id int) *Metadata {
 
 // QueryUser queries the user edge of a Metadata.
 func (c *MetadataClient) QueryUser(m *Metadata) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := m.ID
 		step := sqlgraph.NewStep(
@@ -605,7 +778,7 @@ func (c *MetadataClient) QueryUser(m *Metadata) *UserQuery {
 
 // QueryChildren queries the children edge of a Metadata.
 func (c *MetadataClient) QueryChildren(m *Metadata) *MetadataQuery {
-	query := &MetadataQuery{config: c.config}
+	query := (&MetadataClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := m.ID
 		step := sqlgraph.NewStep(
@@ -621,7 +794,7 @@ func (c *MetadataClient) QueryChildren(m *Metadata) *MetadataQuery {
 
 // QueryParent queries the parent edge of a Metadata.
 func (c *MetadataClient) QueryParent(m *Metadata) *MetadataQuery {
-	query := &MetadataQuery{config: c.config}
+	query := (&MetadataClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := m.ID
 		step := sqlgraph.NewStep(
@@ -640,6 +813,26 @@ func (c *MetadataClient) Hooks() []Hook {
 	return c.hooks.Metadata
 }
 
+// Interceptors returns the client interceptors.
+func (c *MetadataClient) Interceptors() []Interceptor {
+	return c.inters.Metadata
+}
+
+func (c *MetadataClient) mutate(ctx context.Context, m *MetadataMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&MetadataCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&MetadataUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&MetadataUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&MetadataDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Metadata mutation op: %q", m.Op())
+	}
+}
+
 // NodeClient is a client for the Node schema.
 type NodeClient struct {
 	config
@@ -654,6 +847,12 @@ func NewNodeClient(c config) *NodeClient {
 // A call to `Use(f, g, h)` equals to `node.Hooks(f(g(h())))`.
 func (c *NodeClient) Use(hooks ...Hook) {
 	c.hooks.Node = append(c.hooks.Node, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `node.Intercept(f(g(h())))`.
+func (c *NodeClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Node = append(c.inters.Node, interceptors...)
 }
 
 // Create returns a builder for creating a Node entity.
@@ -708,6 +907,8 @@ func (c *NodeClient) DeleteOneID(id int) *NodeDeleteOne {
 func (c *NodeClient) Query() *NodeQuery {
 	return &NodeQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeNode},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -727,7 +928,7 @@ func (c *NodeClient) GetX(ctx context.Context, id int) *Node {
 
 // QueryPrev queries the prev edge of a Node.
 func (c *NodeClient) QueryPrev(n *Node) *NodeQuery {
-	query := &NodeQuery{config: c.config}
+	query := (&NodeClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := n.ID
 		step := sqlgraph.NewStep(
@@ -743,7 +944,7 @@ func (c *NodeClient) QueryPrev(n *Node) *NodeQuery {
 
 // QueryNext queries the next edge of a Node.
 func (c *NodeClient) QueryNext(n *Node) *NodeQuery {
-	query := &NodeQuery{config: c.config}
+	query := (&NodeClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := n.ID
 		step := sqlgraph.NewStep(
@@ -762,6 +963,26 @@ func (c *NodeClient) Hooks() []Hook {
 	return c.hooks.Node
 }
 
+// Interceptors returns the client interceptors.
+func (c *NodeClient) Interceptors() []Interceptor {
+	return c.inters.Node
+}
+
+func (c *NodeClient) mutate(ctx context.Context, m *NodeMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&NodeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&NodeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&NodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&NodeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Node mutation op: %q", m.Op())
+	}
+}
+
 // PetClient is a client for the Pet schema.
 type PetClient struct {
 	config
@@ -776,6 +997,12 @@ func NewPetClient(c config) *PetClient {
 // A call to `Use(f, g, h)` equals to `pet.Hooks(f(g(h())))`.
 func (c *PetClient) Use(hooks ...Hook) {
 	c.hooks.Pet = append(c.hooks.Pet, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `pet.Intercept(f(g(h())))`.
+func (c *PetClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Pet = append(c.inters.Pet, interceptors...)
 }
 
 // Create returns a builder for creating a Pet entity.
@@ -830,6 +1057,8 @@ func (c *PetClient) DeleteOneID(id int) *PetDeleteOne {
 func (c *PetClient) Query() *PetQuery {
 	return &PetQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypePet},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -849,7 +1078,7 @@ func (c *PetClient) GetX(ctx context.Context, id int) *Pet {
 
 // QueryOwner queries the owner edge of a Pet.
 func (c *PetClient) QueryOwner(pe *Pet) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := pe.ID
 		step := sqlgraph.NewStep(
@@ -868,6 +1097,26 @@ func (c *PetClient) Hooks() []Hook {
 	return c.hooks.Pet
 }
 
+// Interceptors returns the client interceptors.
+func (c *PetClient) Interceptors() []Interceptor {
+	return c.inters.Pet
+}
+
+func (c *PetClient) mutate(ctx context.Context, m *PetMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PetCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PetUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PetDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Pet mutation op: %q", m.Op())
+	}
+}
+
 // PostClient is a client for the Post schema.
 type PostClient struct {
 	config
@@ -882,6 +1131,12 @@ func NewPostClient(c config) *PostClient {
 // A call to `Use(f, g, h)` equals to `post.Hooks(f(g(h())))`.
 func (c *PostClient) Use(hooks ...Hook) {
 	c.hooks.Post = append(c.hooks.Post, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `post.Intercept(f(g(h())))`.
+func (c *PostClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Post = append(c.inters.Post, interceptors...)
 }
 
 // Create returns a builder for creating a Post entity.
@@ -936,6 +1191,8 @@ func (c *PostClient) DeleteOneID(id int) *PostDeleteOne {
 func (c *PostClient) Query() *PostQuery {
 	return &PostQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypePost},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -955,7 +1212,7 @@ func (c *PostClient) GetX(ctx context.Context, id int) *Post {
 
 // QueryAuthor queries the author edge of a Post.
 func (c *PostClient) QueryAuthor(po *Post) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := po.ID
 		step := sqlgraph.NewStep(
@@ -974,6 +1231,26 @@ func (c *PostClient) Hooks() []Hook {
 	return c.hooks.Post
 }
 
+// Interceptors returns the client interceptors.
+func (c *PostClient) Interceptors() []Interceptor {
+	return c.inters.Post
+}
+
+func (c *PostClient) mutate(ctx context.Context, m *PostMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PostCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PostUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PostUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PostDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Post mutation op: %q", m.Op())
+	}
+}
+
 // RentalClient is a client for the Rental schema.
 type RentalClient struct {
 	config
@@ -988,6 +1265,12 @@ func NewRentalClient(c config) *RentalClient {
 // A call to `Use(f, g, h)` equals to `rental.Hooks(f(g(h())))`.
 func (c *RentalClient) Use(hooks ...Hook) {
 	c.hooks.Rental = append(c.hooks.Rental, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `rental.Intercept(f(g(h())))`.
+func (c *RentalClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Rental = append(c.inters.Rental, interceptors...)
 }
 
 // Create returns a builder for creating a Rental entity.
@@ -1042,6 +1325,8 @@ func (c *RentalClient) DeleteOneID(id int) *RentalDeleteOne {
 func (c *RentalClient) Query() *RentalQuery {
 	return &RentalQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeRental},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1061,7 +1346,7 @@ func (c *RentalClient) GetX(ctx context.Context, id int) *Rental {
 
 // QueryUser queries the user edge of a Rental.
 func (c *RentalClient) QueryUser(r *Rental) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := r.ID
 		step := sqlgraph.NewStep(
@@ -1077,7 +1362,7 @@ func (c *RentalClient) QueryUser(r *Rental) *UserQuery {
 
 // QueryCar queries the car edge of a Rental.
 func (c *RentalClient) QueryCar(r *Rental) *CarQuery {
-	query := &CarQuery{config: c.config}
+	query := (&CarClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := r.ID
 		step := sqlgraph.NewStep(
@@ -1096,6 +1381,26 @@ func (c *RentalClient) Hooks() []Hook {
 	return c.hooks.Rental
 }
 
+// Interceptors returns the client interceptors.
+func (c *RentalClient) Interceptors() []Interceptor {
+	return c.inters.Rental
+}
+
+func (c *RentalClient) mutate(ctx context.Context, m *RentalMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&RentalCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&RentalUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&RentalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&RentalDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Rental mutation op: %q", m.Op())
+	}
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -1110,6 +1415,12 @@ func NewUserClient(c config) *UserClient {
 // A call to `Use(f, g, h)` equals to `user.Hooks(f(g(h())))`.
 func (c *UserClient) Use(hooks ...Hook) {
 	c.hooks.User = append(c.hooks.User, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `user.Intercept(f(g(h())))`.
+func (c *UserClient) Intercept(interceptors ...Interceptor) {
+	c.inters.User = append(c.inters.User, interceptors...)
 }
 
 // Create returns a builder for creating a User entity.
@@ -1164,6 +1475,8 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeUser},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1183,7 +1496,7 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 
 // QueryPets queries the pets edge of a User.
 func (c *UserClient) QueryPets(u *User) *PetQuery {
-	query := &PetQuery{config: c.config}
+	query := (&PetClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -1199,7 +1512,7 @@ func (c *UserClient) QueryPets(u *User) *PetQuery {
 
 // QueryParent queries the parent edge of a User.
 func (c *UserClient) QueryParent(u *User) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -1215,7 +1528,7 @@ func (c *UserClient) QueryParent(u *User) *UserQuery {
 
 // QueryChildren queries the children edge of a User.
 func (c *UserClient) QueryChildren(u *User) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -1231,7 +1544,7 @@ func (c *UserClient) QueryChildren(u *User) *UserQuery {
 
 // QuerySpouse queries the spouse edge of a User.
 func (c *UserClient) QuerySpouse(u *User) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -1247,7 +1560,7 @@ func (c *UserClient) QuerySpouse(u *User) *UserQuery {
 
 // QueryCard queries the card edge of a User.
 func (c *UserClient) QueryCard(u *User) *CardQuery {
-	query := &CardQuery{config: c.config}
+	query := (&CardClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -1263,7 +1576,7 @@ func (c *UserClient) QueryCard(u *User) *CardQuery {
 
 // QueryMetadata queries the metadata edge of a User.
 func (c *UserClient) QueryMetadata(u *User) *MetadataQuery {
-	query := &MetadataQuery{config: c.config}
+	query := (&MetadataClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -1279,7 +1592,7 @@ func (c *UserClient) QueryMetadata(u *User) *MetadataQuery {
 
 // QueryInfo queries the info edge of a User.
 func (c *UserClient) QueryInfo(u *User) *InfoQuery {
-	query := &InfoQuery{config: c.config}
+	query := (&InfoClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -1295,7 +1608,7 @@ func (c *UserClient) QueryInfo(u *User) *InfoQuery {
 
 // QueryRentals queries the rentals edge of a User.
 func (c *UserClient) QueryRentals(u *User) *RentalQuery {
-	query := &RentalQuery{config: c.config}
+	query := (&RentalClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -1313,3 +1626,33 @@ func (c *UserClient) QueryRentals(u *User) *RentalQuery {
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
 }
+
+// Interceptors returns the client interceptors.
+func (c *UserClient) Interceptors() []Interceptor {
+	return c.inters.User
+}
+
+func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&UserCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&UserUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&UserDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown User mutation op: %q", m.Op())
+	}
+}
+
+// hooks and interceptors per client, for fast access.
+type (
+	hooks struct {
+		Car, Card, Info, Metadata, Node, Pet, Post, Rental, User []ent.Hook
+	}
+	inters struct {
+		Car, Card, Info, Metadata, Node, Pet, Post, Rental, User []ent.Interceptor
+	}
+)

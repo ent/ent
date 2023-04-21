@@ -38,34 +38,7 @@ func (ou *OtherUpdate) Mutation() *OtherMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ou *OtherUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(ou.hooks) == 0 {
-		affected, err = ou.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*OtherMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			ou.mutation = mutation
-			affected, err = ou.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(ou.hooks) - 1; i >= 0; i-- {
-			if ou.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ou.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, ou.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, OtherMutation](ctx, ou.sqlSave, ou.mutation, ou.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -91,16 +64,7 @@ func (ou *OtherUpdate) ExecX(ctx context.Context) {
 }
 
 func (ou *OtherUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   other.Table,
-			Columns: other.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeOther,
-				Column: other.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(other.Table, other.Columns, sqlgraph.NewFieldSpec(other.FieldID, field.TypeOther))
 	if ps := ou.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -116,6 +80,7 @@ func (ou *OtherUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	ou.mutation.done = true
 	return n, nil
 }
 
@@ -132,6 +97,12 @@ func (ouo *OtherUpdateOne) Mutation() *OtherMutation {
 	return ouo.mutation
 }
 
+// Where appends a list predicates to the OtherUpdate builder.
+func (ouo *OtherUpdateOne) Where(ps ...predicate.Other) *OtherUpdateOne {
+	ouo.mutation.Where(ps...)
+	return ouo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (ouo *OtherUpdateOne) Select(field string, fields ...string) *OtherUpdateOne {
@@ -141,40 +112,7 @@ func (ouo *OtherUpdateOne) Select(field string, fields ...string) *OtherUpdateOn
 
 // Save executes the query and returns the updated Other entity.
 func (ouo *OtherUpdateOne) Save(ctx context.Context) (*Other, error) {
-	var (
-		err  error
-		node *Other
-	)
-	if len(ouo.hooks) == 0 {
-		node, err = ouo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*OtherMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			ouo.mutation = mutation
-			node, err = ouo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(ouo.hooks) - 1; i >= 0; i-- {
-			if ouo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ouo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, ouo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Other)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from OtherMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Other, OtherMutation](ctx, ouo.sqlSave, ouo.mutation, ouo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -200,16 +138,7 @@ func (ouo *OtherUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (ouo *OtherUpdateOne) sqlSave(ctx context.Context) (_node *Other, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   other.Table,
-			Columns: other.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeOther,
-				Column: other.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(other.Table, other.Columns, sqlgraph.NewFieldSpec(other.FieldID, field.TypeOther))
 	id, ok := ouo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Other.id" for update`)}
@@ -245,5 +174,6 @@ func (ouo *OtherUpdateOne) sqlSave(ctx context.Context) (_node *Other, err error
 		}
 		return nil, err
 	}
+	ouo.mutation.done = true
 	return _node, nil
 }

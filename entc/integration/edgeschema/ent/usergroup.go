@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
@@ -30,7 +31,8 @@ type UserGroup struct {
 	GroupID int `json:"group_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserGroupQuery when eager-loading is set.
-	Edges UserGroupEdges `json:"edges"`
+	Edges        UserGroupEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // UserGroupEdges holds the relations/edges for other nodes in the graph.
@@ -80,7 +82,7 @@ func (*UserGroup) scanValues(columns []string) ([]any, error) {
 		case usergroup.FieldJoinedAt:
 			values[i] = new(sql.NullTime)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type UserGroup", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -118,26 +120,34 @@ func (ug *UserGroup) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ug.GroupID = int(value.Int64)
 			}
+		default:
+			ug.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the UserGroup.
+// This includes values selected through modifiers, order, etc.
+func (ug *UserGroup) Value(name string) (ent.Value, error) {
+	return ug.selectValues.Get(name)
+}
+
 // QueryUser queries the "user" edge of the UserGroup entity.
 func (ug *UserGroup) QueryUser() *UserQuery {
-	return (&UserGroupClient{config: ug.config}).QueryUser(ug)
+	return NewUserGroupClient(ug.config).QueryUser(ug)
 }
 
 // QueryGroup queries the "group" edge of the UserGroup entity.
 func (ug *UserGroup) QueryGroup() *GroupQuery {
-	return (&UserGroupClient{config: ug.config}).QueryGroup(ug)
+	return NewUserGroupClient(ug.config).QueryGroup(ug)
 }
 
 // Update returns a builder for updating this UserGroup.
 // Note that you need to call UserGroup.Unwrap() before calling this method if this UserGroup
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (ug *UserGroup) Update() *UserGroupUpdateOne {
-	return (&UserGroupClient{config: ug.config}).UpdateOne(ug)
+	return NewUserGroupClient(ug.config).UpdateOne(ug)
 }
 
 // Unwrap unwraps the UserGroup entity that was returned from a transaction after it was closed,
@@ -170,9 +180,3 @@ func (ug *UserGroup) String() string {
 
 // UserGroups is a parsable slice of UserGroup.
 type UserGroups []*UserGroup
-
-func (ug UserGroups) config(cfg config) {
-	for _i := range ug {
-		ug[_i].config = cfg
-	}
-}

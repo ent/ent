@@ -10,21 +10,23 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/migrate/entv2/media"
 )
 
-// Media is the model entity for the Media schema.
+// Comment that appears in both the schema and the generated code
 type Media struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Source holds the value of the "source" field.
 	Source string `json:"source,omitempty"`
-	// SourceURI holds the value of the "source_uri" field.
+	// source_ui text
 	SourceURI string `json:"source_uri,omitempty"`
-	// Text holds the value of the "text" field.
-	Text string `json:"text,omitempty"`
+	// media text
+	Text         string `json:"text,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -37,7 +39,7 @@ func (*Media) scanValues(columns []string) ([]any, error) {
 		case media.FieldSource, media.FieldSourceURI, media.FieldText:
 			values[i] = new(sql.NullString)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Media", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -75,16 +77,24 @@ func (m *Media) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				m.Text = value.String
 			}
+		default:
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Media.
+// This includes values selected through modifiers, order, etc.
+func (m *Media) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Media.
 // Note that you need to call Media.Unwrap() before calling this method if this Media
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (m *Media) Update() *MediaUpdateOne {
-	return (&MediaClient{config: m.config}).UpdateOne(m)
+	return NewMediaClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Media entity that was returned from a transaction after it was closed,
@@ -117,9 +127,3 @@ func (m *Media) String() string {
 
 // MediaSlice is a parsable slice of Media.
 type MediaSlice []*Media
-
-func (m MediaSlice) config(cfg config) {
-	for _i := range m {
-		m[_i].config = cfg
-	}
-}

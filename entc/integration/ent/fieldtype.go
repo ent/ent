@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/fieldtype"
 	"entgo.io/ent/entc/integration/ent/role"
@@ -157,6 +158,7 @@ type FieldType struct {
 	// PasswordOther holds the value of the "password_other" field.
 	PasswordOther schema.Password `json:"-"`
 	file_field    *int
+	selectValues  sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -207,7 +209,7 @@ func (*FieldType) scanValues(columns []string) ([]any, error) {
 		case fieldtype.ForeignKeys[0]: // file_field
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type FieldType", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -635,16 +637,24 @@ func (ft *FieldType) assignValues(columns []string, values []any) error {
 				ft.file_field = new(int)
 				*ft.file_field = int(value.Int64)
 			}
+		default:
+			ft.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the FieldType.
+// This includes values selected through modifiers, order, etc.
+func (ft *FieldType) Value(name string) (ent.Value, error) {
+	return ft.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this FieldType.
 // Note that you need to call FieldType.Unwrap() before calling this method if this FieldType
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (ft *FieldType) Update() *FieldTypeUpdateOne {
-	return (&FieldTypeClient{config: ft.config}).UpdateOne(ft)
+	return NewFieldTypeClient(ft.config).UpdateOne(ft)
 }
 
 // Unwrap unwraps the FieldType entity that was returned from a transaction after it was closed,
@@ -886,9 +896,3 @@ func (ft *FieldType) String() string {
 
 // FieldTypes is a parsable slice of FieldType.
 type FieldTypes []*FieldType
-
-func (ft FieldTypes) config(cfg config) {
-	for _i := range ft {
-		ft[_i].config = cfg
-	}
-}

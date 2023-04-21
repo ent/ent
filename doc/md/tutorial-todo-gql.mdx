@@ -34,7 +34,7 @@ go run ./cmd/todo
 ## Basic Setup
 
 This tutorial begins where the previous one ended (with a working Todo-list schema). We start by installing the
-[contrib/entgql](https://entgo.io/contrib/entgql) Ent extension and use it for generating our first schema. Then,
+[contrib/entgql](https://pkg.go.dev/entgo.io/contrib/entgql) Ent extension and use it for generating our first schema. Then,
 install and configure the [99designs/gqlgen](https://github.com/99designs/gqlgen) framework for building our GraphQL
 server and explore the official integration Ent provides to it.
 
@@ -147,7 +147,7 @@ Let's add this file to the root of the project. Follow the comments in this file
 means:
 
 ```yaml title="gqlgen.yml"
-# schema tells gqlgen when the GraphQL schema is located.
+# schema tells gqlgen where the GraphQL schema is located.
 schema:
   - ent.graphql
 

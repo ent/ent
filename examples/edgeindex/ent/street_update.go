@@ -70,34 +70,7 @@ func (su *StreetUpdate) ClearCity() *StreetUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (su *StreetUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(su.hooks) == 0 {
-		affected, err = su.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*StreetMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			su.mutation = mutation
-			affected, err = su.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(su.hooks) - 1; i >= 0; i-- {
-			if su.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = su.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, su.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, StreetMutation](ctx, su.sqlSave, su.mutation, su.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -123,16 +96,7 @@ func (su *StreetUpdate) ExecX(ctx context.Context) {
 }
 
 func (su *StreetUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   street.Table,
-			Columns: street.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: street.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(street.Table, street.Columns, sqlgraph.NewFieldSpec(street.FieldID, field.TypeInt))
 	if ps := su.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -151,10 +115,7 @@ func (su *StreetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{street.CityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: city.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(city.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -167,10 +128,7 @@ func (su *StreetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{street.CityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: city.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(city.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -186,6 +144,7 @@ func (su *StreetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	su.mutation.done = true
 	return n, nil
 }
 
@@ -233,6 +192,12 @@ func (suo *StreetUpdateOne) ClearCity() *StreetUpdateOne {
 	return suo
 }
 
+// Where appends a list predicates to the StreetUpdate builder.
+func (suo *StreetUpdateOne) Where(ps ...predicate.Street) *StreetUpdateOne {
+	suo.mutation.Where(ps...)
+	return suo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (suo *StreetUpdateOne) Select(field string, fields ...string) *StreetUpdateOne {
@@ -242,40 +207,7 @@ func (suo *StreetUpdateOne) Select(field string, fields ...string) *StreetUpdate
 
 // Save executes the query and returns the updated Street entity.
 func (suo *StreetUpdateOne) Save(ctx context.Context) (*Street, error) {
-	var (
-		err  error
-		node *Street
-	)
-	if len(suo.hooks) == 0 {
-		node, err = suo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*StreetMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			suo.mutation = mutation
-			node, err = suo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(suo.hooks) - 1; i >= 0; i-- {
-			if suo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = suo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, suo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Street)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from StreetMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Street, StreetMutation](ctx, suo.sqlSave, suo.mutation, suo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -301,16 +233,7 @@ func (suo *StreetUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (_node *Street, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   street.Table,
-			Columns: street.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: street.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(street.Table, street.Columns, sqlgraph.NewFieldSpec(street.FieldID, field.TypeInt))
 	id, ok := suo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Street.id" for update`)}
@@ -346,10 +269,7 @@ func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (_node *Street, err err
 			Columns: []string{street.CityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: city.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(city.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -362,10 +282,7 @@ func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (_node *Street, err err
 			Columns: []string{street.CityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: city.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(city.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -384,5 +301,6 @@ func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (_node *Street, err err
 		}
 		return nil, err
 	}
+	suo.mutation.done = true
 	return _node, nil
 }

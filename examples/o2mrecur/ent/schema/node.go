@@ -19,6 +19,8 @@ type Node struct {
 func (Node) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("value"),
+		field.Int("parent_id").
+			Optional(),
 	}
 }
 
@@ -27,6 +29,7 @@ func (Node) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("children", Node.Type).
 			From("parent").
+			Field("parent_id").
 			Unique(),
 	}
 }

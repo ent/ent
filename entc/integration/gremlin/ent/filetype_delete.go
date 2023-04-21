@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -33,34 +32,7 @@ func (ftd *FileTypeDelete) Where(ps ...predicate.FileType) *FileTypeDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ftd *FileTypeDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(ftd.hooks) == 0 {
-		affected, err = ftd.gremlinExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*FileTypeMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			ftd.mutation = mutation
-			affected, err = ftd.gremlinExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(ftd.hooks) - 1; i >= 0; i-- {
-			if ftd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ftd.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, ftd.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, FileTypeMutation](ctx, ftd.gremlinExec, ftd.mutation, ftd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -78,6 +50,7 @@ func (ftd *FileTypeDelete) gremlinExec(ctx context.Context) (int, error) {
 	if err := ftd.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
+	ftd.mutation.done = true
 	return res.ReadInt()
 }
 
@@ -92,6 +65,12 @@ func (ftd *FileTypeDelete) gremlin() *dsl.Traversal {
 // FileTypeDeleteOne is the builder for deleting a single FileType entity.
 type FileTypeDeleteOne struct {
 	ftd *FileTypeDelete
+}
+
+// Where appends a list predicates to the FileTypeDelete builder.
+func (ftdo *FileTypeDeleteOne) Where(ps ...predicate.FileType) *FileTypeDeleteOne {
+	ftdo.ftd.mutation.Where(ps...)
+	return ftdo
 }
 
 // Exec executes the deletion query.
@@ -109,5 +88,7 @@ func (ftdo *FileTypeDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (ftdo *FileTypeDeleteOne) ExecX(ctx context.Context) {
-	ftdo.ftd.ExecX(ctx)
+	if err := ftdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgefield/ent/card"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
@@ -26,7 +27,8 @@ type Card struct {
 	OwnerID int `json:"owner_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CardQuery when eager-loading is set.
-	Edges CardEdges `json:"edges"`
+	Edges        CardEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // CardEdges holds the relations/edges for other nodes in the graph.
@@ -61,7 +63,7 @@ func (*Card) scanValues(columns []string) ([]any, error) {
 		case card.FieldNumber:
 			values[i] = new(sql.NullString)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Card", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -93,21 +95,29 @@ func (c *Card) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				c.OwnerID = int(value.Int64)
 			}
+		default:
+			c.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the Card.
+// This includes values selected through modifiers, order, etc.
+func (c *Card) Value(name string) (ent.Value, error) {
+	return c.selectValues.Get(name)
+}
+
 // QueryOwner queries the "owner" edge of the Card entity.
 func (c *Card) QueryOwner() *UserQuery {
-	return (&CardClient{config: c.config}).QueryOwner(c)
+	return NewCardClient(c.config).QueryOwner(c)
 }
 
 // Update returns a builder for updating this Card.
 // Note that you need to call Card.Unwrap() before calling this method if this Card
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (c *Card) Update() *CardUpdateOne {
-	return (&CardClient{config: c.config}).UpdateOne(c)
+	return NewCardClient(c.config).UpdateOne(c)
 }
 
 // Unwrap unwraps the Card entity that was returned from a transaction after it was closed,
@@ -137,9 +147,3 @@ func (c *Card) String() string {
 
 // Cards is a parsable slice of Card.
 type Cards []*Card
-
-func (c Cards) config(cfg config) {
-	for _i := range c {
-		c[_i].config = cfg
-	}
-}

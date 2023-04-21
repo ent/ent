@@ -154,6 +154,54 @@ func DenyMutationOperationRule(op ent.Op) MutationRule {
 	return OnMutationOperation(rule, op)
 }
 
+// The AttachedFileQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type AttachedFileQueryRuleFunc func(context.Context, *ent.AttachedFileQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f AttachedFileQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.AttachedFileQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("ent/privacy: unexpected query type %T, expect *ent.AttachedFileQuery", q)
+}
+
+// The AttachedFileMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type AttachedFileMutationRuleFunc func(context.Context, *ent.AttachedFileMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f AttachedFileMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	if m, ok := m.(*ent.AttachedFileMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.AttachedFileMutation", m)
+}
+
+// The FileQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type FileQueryRuleFunc func(context.Context, *ent.FileQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f FileQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.FileQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("ent/privacy: unexpected query type %T, expect *ent.FileQuery", q)
+}
+
+// The FileMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type FileMutationRuleFunc func(context.Context, *ent.FileMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f FileMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	if m, ok := m.(*ent.FileMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.FileMutation", m)
+}
+
 // The FriendshipQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
 type FriendshipQueryRuleFunc func(context.Context, *ent.FriendshipQuery) error
@@ -224,6 +272,30 @@ func (f GroupTagMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutati
 		return f(ctx, m)
 	}
 	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.GroupTagMutation", m)
+}
+
+// The ProcessQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type ProcessQueryRuleFunc func(context.Context, *ent.ProcessQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f ProcessQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.ProcessQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("ent/privacy: unexpected query type %T, expect *ent.ProcessQuery", q)
+}
+
+// The ProcessMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type ProcessMutationRuleFunc func(context.Context, *ent.ProcessMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f ProcessMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	if m, ok := m.(*ent.ProcessMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.ProcessMutation", m)
 }
 
 // The RelationshipQueryRuleFunc type is an adapter to allow the use of ordinary
@@ -525,11 +597,17 @@ var _ QueryMutationRule = FilterFunc(nil)
 
 func queryFilter(q ent.Query) (Filter, error) {
 	switch q := q.(type) {
+	case *ent.AttachedFileQuery:
+		return q.Filter(), nil
+	case *ent.FileQuery:
+		return q.Filter(), nil
 	case *ent.FriendshipQuery:
 		return q.Filter(), nil
 	case *ent.GroupQuery:
 		return q.Filter(), nil
 	case *ent.GroupTagQuery:
+		return q.Filter(), nil
+	case *ent.ProcessQuery:
 		return q.Filter(), nil
 	case *ent.RelationshipQuery:
 		return q.Filter(), nil
@@ -560,11 +638,17 @@ func queryFilter(q ent.Query) (Filter, error) {
 
 func mutationFilter(m ent.Mutation) (Filter, error) {
 	switch m := m.(type) {
+	case *ent.AttachedFileMutation:
+		return m.Filter(), nil
+	case *ent.FileMutation:
+		return m.Filter(), nil
 	case *ent.FriendshipMutation:
 		return m.Filter(), nil
 	case *ent.GroupMutation:
 		return m.Filter(), nil
 	case *ent.GroupTagMutation:
+		return m.Filter(), nil
+	case *ent.ProcessMutation:
 		return m.Filter(), nil
 	case *ent.RelationshipMutation:
 		return m.Filter(), nil

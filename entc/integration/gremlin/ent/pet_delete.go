@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -33,34 +32,7 @@ func (pd *PetDelete) Where(ps ...predicate.Pet) *PetDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (pd *PetDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(pd.hooks) == 0 {
-		affected, err = pd.gremlinExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*PetMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			pd.mutation = mutation
-			affected, err = pd.gremlinExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(pd.hooks) - 1; i >= 0; i-- {
-			if pd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = pd.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, pd.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, PetMutation](ctx, pd.gremlinExec, pd.mutation, pd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -78,6 +50,7 @@ func (pd *PetDelete) gremlinExec(ctx context.Context) (int, error) {
 	if err := pd.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
+	pd.mutation.done = true
 	return res.ReadInt()
 }
 
@@ -92,6 +65,12 @@ func (pd *PetDelete) gremlin() *dsl.Traversal {
 // PetDeleteOne is the builder for deleting a single Pet entity.
 type PetDeleteOne struct {
 	pd *PetDelete
+}
+
+// Where appends a list predicates to the PetDelete builder.
+func (pdo *PetDeleteOne) Where(ps ...predicate.Pet) *PetDeleteOne {
+	pdo.pd.mutation.Where(ps...)
+	return pdo
 }
 
 // Exec executes the deletion query.
@@ -109,5 +88,7 @@ func (pdo *PetDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (pdo *PetDeleteOne) ExecX(ctx context.Context) {
-	pdo.pd.ExecX(ctx)
+	if err := pdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

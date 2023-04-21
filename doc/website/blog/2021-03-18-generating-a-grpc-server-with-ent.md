@@ -29,7 +29,7 @@ go mod init ent-grpc-example
 Next we use `go run` to invoke the ent code generator to initialize a schema:
 
 ```console
-go run -mod=mod entgo.io/ent/cmd/ent init User
+go run -mod=mod entgo.io/ent/cmd/ent new User
 ```
 
 Our directory should now look like:
@@ -469,7 +469,7 @@ Do you want to build gRPC servers with `ent`? If you want some help setting up o
 
 
 :::note For more Ent news and updates:
-- Subscribe to our [Newsletter](https://www.getrevue.co/profile/ent)
+- Subscribe to our [Newsletter](https://entgo.substack.com/)
 - Follow us on [Twitter](https://twitter.com/entgo_io)
 - Join us on #ent on the [Gophers Slack](https://app.slack.com/client/T029RQSE6/C01FMSQDT53)
 - Join us on the [Ent Discord Server](https://discord.gg/qZmPgTE6RX)

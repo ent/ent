@@ -118,29 +118,29 @@ func (gr *Group) FromResponse(res *gremlin.Response) error {
 
 // QueryFiles queries the "files" edge of the Group entity.
 func (gr *Group) QueryFiles() *FileQuery {
-	return (&GroupClient{config: gr.config}).QueryFiles(gr)
+	return NewGroupClient(gr.config).QueryFiles(gr)
 }
 
 // QueryBlocked queries the "blocked" edge of the Group entity.
 func (gr *Group) QueryBlocked() *UserQuery {
-	return (&GroupClient{config: gr.config}).QueryBlocked(gr)
+	return NewGroupClient(gr.config).QueryBlocked(gr)
 }
 
 // QueryUsers queries the "users" edge of the Group entity.
 func (gr *Group) QueryUsers() *UserQuery {
-	return (&GroupClient{config: gr.config}).QueryUsers(gr)
+	return NewGroupClient(gr.config).QueryUsers(gr)
 }
 
 // QueryInfo queries the "info" edge of the Group entity.
 func (gr *Group) QueryInfo() *GroupInfoQuery {
-	return (&GroupClient{config: gr.config}).QueryInfo(gr)
+	return NewGroupClient(gr.config).QueryInfo(gr)
 }
 
 // Update returns a builder for updating this Group.
 // Note that you need to call Group.Unwrap() before calling this method if this Group
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (gr *Group) Update() *GroupUpdateOne {
-	return (&GroupClient{config: gr.config}).UpdateOne(gr)
+	return NewGroupClient(gr.config).UpdateOne(gr)
 }
 
 // Unwrap unwraps the Group entity that was returned from a transaction after it was closed,
@@ -209,10 +209,4 @@ func (gr *Groups) FromResponse(res *gremlin.Response) error {
 		*gr = append(*gr, node)
 	}
 	return nil
-}
-
-func (gr Groups) config(cfg config) {
-	for _i := range gr {
-		gr[_i].config = cfg
-	}
 }

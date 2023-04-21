@@ -40,7 +40,7 @@ func (_go *Goods) FromResponse(res *gremlin.Response) error {
 // Note that you need to call Goods.Unwrap() before calling this method if this Goods
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (_go *Goods) Update() *GoodsUpdateOne {
-	return (&GoodsClient{config: _go.config}).UpdateOne(_go)
+	return NewGoodsClient(_go.config).UpdateOne(_go)
 }
 
 // Unwrap unwraps the Goods entity that was returned from a transaction after it was closed,
@@ -83,10 +83,4 @@ func (_go *GoodsSlice) FromResponse(res *gremlin.Response) error {
 		*_go = append(*_go, node)
 	}
 	return nil
-}
-
-func (_go GoodsSlice) config(cfg config) {
-	for _i := range _go {
-		_go[_i].config = cfg
-	}
 }

@@ -72,7 +72,6 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, id int, input ent.Upd
 }
 ```
 
-
 ## Test the `CreateTodo` Resolver
 
 Let's start with creating 2 todo items by executing the `createTodo` mutations twice.
@@ -177,4 +176,129 @@ mutation UpdateTodo {
     }
   }
 }
+```
+
+## Create edges with mutations
+
+To create the edges of a node in the same mutation, you can extend the GQL mutation input with the edge fields:
+
+```graphql title="extended.graphql"
+extend input CreateTodoInput {
+  createChildren: [CreateTodoInput!]
+}
+```
+
+Next, run code generation again:
+```go
+go generate .
+```
+
+GQLGen will generate the resolver for the `createChildren` field, allowing you to use it in your resolver:
+
+```go title="extended.resolvers.go"
+// CreateChildren is the resolver for the createChildren field.
+func (r *createTodoInputResolver) CreateChildren(ctx context.Context, obj *ent.CreateTodoInput, data []*ent.CreateTodoInput) error {
+	panic(fmt.Errorf("not implemented: CreateChildren - createChildren"))
+}
+```
+
+Now, we need to implement the logic to create the children:
+
+```go title="extended.resolvers.go"
+// CreateChildren is the resolver for the createChildren field.
+func (r *createTodoInputResolver) CreateChildren(ctx context.Context, obj *ent.CreateTodoInput, data []*ent.CreateTodoInput) error {
+	// highlight-start
+	// NOTE: We need to use the Ent client from the context.
+	// To ensure we create all of the children in the same transaction.
+	// See: Transactional Mutations for more information.
+	c := ent.FromContext(ctx)
+	// highlight-end
+	builders := make([]*ent.TodoCreate, len(data))
+	for i := range data {
+		builders[i] = c.Todo.Create().SetInput(*data[i])
+	}
+	todos, err := c.Todo.CreateBulk(builders...).Save(ctx)
+	if err != nil {
+		return err
+	}
+	ids := make([]int, len(todos))
+	for i := range todos {
+		ids[i] = todos[i].ID
+	}
+	obj.ChildIDs = append(obj.ChildIDs, ids...)
+	return nil
+}
+```
+
+Change the following lines to use the transactional client:
+
+```go title="todo.resolvers.go"
+// CreateTodo is the resolver for the createTodo field.
+func (r *mutationResolver) CreateTodo(ctx context.Context, input ent.CreateTodoInput) (*ent.Todo, error) {
+	// highlight-next-line
+	return ent.FromContext(ctx).Todo.Create().SetInput(input).Save(ctx)
+}
+
+// UpdateTodo is the resolver for the updateTodo field.
+func (r *mutationResolver) UpdateTodo(ctx context.Context, id int, input ent.UpdateTodoInput) (*ent.Todo, error) {
+	// highlight-next-line
+	return ent.FromContext(ctx).Todo.UpdateOneID(id).SetInput(input).Save(ctx)
+}
+```
+
+Test the mutation with the children:
+
+**Mutation**
+```graphql
+mutation {
+  createTodo(input: {
+    text: "parent", status:IN_PROGRESS,
+    createChildren: [
+      { text: "children1", status: IN_PROGRESS },
+      { text: "children2", status: COMPLETED }
+    ]
+  }) {
+    id
+    text
+    children {
+      id
+      text
+      status
+    }
+  }
+}
+```
+
+**Output**
+```json
+{
+  "data": {
+    "createTodo": {
+      "id": "3",
+      "text": "parent",
+      "children": [
+        {
+          "id": "1",
+          "text": "children1",
+          "status": "IN_PROGRESS"
+        },
+        {
+          "id": "2",
+          "text": "children2",
+          "status": "COMPLETED"
+        }
+      ]
+    }
+  }
+}
+```
+
+If you enable the debug Client, you'll see that the children are created in the same transaction:
+```log
+2022/12/14 00:27:41 driver.Tx(7e04b00b-7941-41c5-9aee-41c8c2d85312): started
+2022/12/14 00:27:41 Tx(7e04b00b-7941-41c5-9aee-41c8c2d85312).Query: query=INSERT INTO `todos` (`created_at`, `priority`, `status`, `text`) VALUES (?, ?, ?, ?), (?, ?, ?, ?) RETURNING `id` args=[2022-12-14 00:27:41.046344 +0700 +07 m=+5.283557793 0 IN_PROGRESS children1 2022-12-14 00:27:41.046345 +0700 +07 m=+5.283558626 0 COMPLETED children2]
+2022/12/14 00:27:41 Tx(7e04b00b-7941-41c5-9aee-41c8c2d85312).Query: query=INSERT INTO `todos` (`text`, `created_at`, `status`, `priority`) VALUES (?, ?, ?, ?) RETURNING `id` args=[parent 2022-12-14 00:27:41.047455 +0700 +07 m=+5.284669251 IN_PROGRESS 0]
+2022/12/14 00:27:41 Tx(7e04b00b-7941-41c5-9aee-41c8c2d85312).Exec: query=UPDATE `todos` SET `todo_parent` = ? WHERE `id` IN (?, ?) AND `todo_parent` IS NULL args=[3 1 2]
+2022/12/14 00:27:41 Tx(7e04b00b-7941-41c5-9aee-41c8c2d85312).Query: query=SELECT DISTINCT `todos`.`id`, `todos`.`text`, `todos`.`created_at`, `todos`.`status`, `todos`.`priority` FROM `todos` WHERE `todo_parent` = ? args=[3]
+2022/12/14 00:27:41 Tx(7e04b00b-7941-41c5-9aee-41c8c2d85312): committed
 ```

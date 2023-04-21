@@ -12,7 +12,15 @@ in the LICENSE file in the root directory of this source tree.
 {{ $mutation := print $receiver ".mutation"  }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name }}, error) {
-	_node, _spec := {{ $receiver }}.createSpec()
+	if err := {{ $receiver }}.check(); err != nil {
+		return nil, err
+	}
+	_node, _spec {{ if $.HasValueScanner }}, err {{ end }} := {{ $receiver }}.createSpec()
+	{{- if $.HasValueScanner }}
+		if err != nil {
+			return nil, err
+		}
+	{{- end }}
 	if err := sqlgraph.CreateNode(ctx, {{ $receiver }}.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
@@ -49,21 +57,17 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 			}
 		{{- end }}
 	{{- end }}
+	{{- if $.HasOneFieldID }}
+		{{ $mutation }}.{{ $.ID.BuilderField }} = &_node.{{ $.ID.StructField }}
+		{{ $mutation }}.done = true
+	{{- end }}
 	return _node, nil
 }
 
-func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.CreateSpec) {
+func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.CreateSpec{{ if $.HasValueScanner }}, error{{ end }}) {
 	var (
 		_node = &{{ $.Name }}{config: {{ $receiver }}.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: {{ $.Package }}.Table,
-			{{- if $.HasOneFieldID }}
-				ID: &sqlgraph.FieldSpec{
-					Type: field.{{ $.ID.Type.ConstName }},
-					Column: {{ $.Package }}.{{ $.ID.Constant }},
-				},
-			{{- end }}
-		}
+		_spec = sqlgraph.NewCreateSpec({{ $.Package }}.Table, {{ if $.HasOneFieldID }}sqlgraph.NewFieldSpec({{ $.Package }}.{{ $.ID.Constant }}, field.{{ $.ID.Type.ConstName }}){{ else }}nil{{ end }})
 	)
 	{{- /* Allow mutating the sqlgraph.CreateSpec by ent extensions or user templates.*/}}
 	{{- with $tmpls := matchTemplate "dialect/sql/create/spec/*" }}
@@ -71,9 +75,7 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 			{{- xtemplate $tmpl $ }}
 		{{- end }}
 	{{- end }}
-	{{- if $.HasCompositeID }}
-	{{- /* TODO(a8m): Remove redudent if-s when Go 1.19 released as short-circuit was added in 1.18. */}}
-	{{- else if $.ID.UserDefined }}
+	{{- if and (not $.HasCompositeID) $.ID.UserDefined }}
 		if id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}(); ok {
 			_node.ID = id
 			_spec.ID.Value = {{ if and $.ID.Type.ValueScanner (not $.ID.Type.RType.IsPtr) }}&{{ end }}id
@@ -81,7 +83,15 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 	{{- end }}
 	{{- range $f := $.MutationFields }}
 		if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
-			_spec.SetField({{ $.Package }}.{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, value)
+			{{- if $f.HasValueScanner }}
+				vv, err := {{ $f.ValueFunc }}(value)
+				if err != nil {
+					return nil, nil, err
+				}
+				_spec.SetField({{ $.Package }}.{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, vv)
+			{{- else }}
+				_spec.SetField({{ $.Package }}.{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, value)
+			{{- end }}
 			_node.{{ $f.StructField }} = {{ if $f.NillableValue }}&{{ end }}value
 		}
 	{{- end }}
@@ -97,7 +107,7 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 			_spec.Edges = append(_spec.Edges, edge)
 		}
 	{{- end }}
-	return _node, _spec
+	return _node, _spec{{ if $.HasValueScanner }}, nil{{ end }}
 }
 
 {{- /* Allow adding methods to the create-builder by ent extensions or user templates.*/}}
@@ -151,8 +161,13 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] {{ if $.HasValueScanner }}, err {{ end }}= builder.createSpec()
+				{{- if $.HasValueScanner }}
+					if err != nil {
+						return nil, err
+					}
+				{{- end }}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, {{ $receiver }}.builders[i+1].mutation)
 				} else {

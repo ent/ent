@@ -82,7 +82,7 @@ func (i *ID) Scan(v any) error {
 	case string:
 		copy(i[:], v)
 	default:
-		return fmt.Errorf("unexpcted type: %T", v)
+		return fmt.Errorf("unexpected type: %T", v)
 	}
 	return nil
 }

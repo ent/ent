@@ -78,7 +78,7 @@ func (fc *FileCreate) SetNillableGroup(s *string) *FileCreate {
 
 // SetOp sets the "op" field.
 func (fc *FileCreate) SetOp(b bool) *FileCreate {
-	fc.mutation.SetOp(b)
+	fc.mutation.SetOpField(b)
 	return fc
 }
 
@@ -164,50 +164,8 @@ func (fc *FileCreate) Mutation() *FileMutation {
 
 // Save creates the File in the database.
 func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
-	var (
-		err  error
-		node *File
-	)
 	fc.defaults()
-	if len(fc.hooks) == 0 {
-		if err = fc.check(); err != nil {
-			return nil, err
-		}
-		node, err = fc.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*FileMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = fc.check(); err != nil {
-				return nil, err
-			}
-			fc.mutation = mutation
-			if node, err = fc.gremlinSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(fc.hooks) - 1; i >= 0; i-- {
-			if fc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = fc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, fc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*File)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from FileMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*File, FileMutation](ctx, fc.gremlinSave, fc.mutation, fc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -257,6 +215,9 @@ func (fc *FileCreate) check() error {
 }
 
 func (fc *FileCreate) gremlinSave(ctx context.Context) (*File, error) {
+	if err := fc.check(); err != nil {
+		return nil, err
+	}
 	res := &gremlin.Response{}
 	query, bindings := fc.gremlin().Query()
 	if err := fc.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -269,6 +230,8 @@ func (fc *FileCreate) gremlinSave(ctx context.Context) (*File, error) {
 	if err := f.FromResponse(res); err != nil {
 		return nil, err
 	}
+	fc.mutation.id = &f.ID
+	fc.mutation.done = true
 	return f, nil
 }
 

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/spec"
 )
@@ -21,7 +22,8 @@ type Spec struct {
 	ID int `json:"id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SpecQuery when eager-loading is set.
-	Edges SpecEdges `json:"edges"`
+	Edges        SpecEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // SpecEdges holds the relations/edges for other nodes in the graph.
@@ -51,7 +53,7 @@ func (*Spec) scanValues(columns []string) ([]any, error) {
 		case spec.FieldID:
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Spec", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -71,21 +73,29 @@ func (s *Spec) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			s.ID = int(value.Int64)
+		default:
+			s.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the Spec.
+// This includes values selected through modifiers, order, etc.
+func (s *Spec) Value(name string) (ent.Value, error) {
+	return s.selectValues.Get(name)
+}
+
 // QueryCard queries the "card" edge of the Spec entity.
 func (s *Spec) QueryCard() *CardQuery {
-	return (&SpecClient{config: s.config}).QueryCard(s)
+	return NewSpecClient(s.config).QueryCard(s)
 }
 
 // Update returns a builder for updating this Spec.
 // Note that you need to call Spec.Unwrap() before calling this method if this Spec
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (s *Spec) Update() *SpecUpdateOne {
-	return (&SpecClient{config: s.config}).UpdateOne(s)
+	return NewSpecClient(s.config).UpdateOne(s)
 }
 
 // Unwrap unwraps the Spec entity that was returned from a transaction after it was closed,
@@ -134,9 +144,3 @@ func (s *Spec) appendNamedCard(name string, edges ...*Card) {
 
 // Specs is a parsable slice of Spec.
 type Specs []*Spec
-
-func (s Specs) config(cfg config) {
-	for _i := range s {
-		s[_i].config = cfg
-	}
-}

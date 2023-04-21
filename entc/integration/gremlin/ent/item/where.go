@@ -107,23 +107,15 @@ func TextNEQ(v string) predicate.Item {
 
 // TextIn applies the In predicate on the "text" field.
 func TextIn(vs ...string) predicate.Item {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Item(func(t *dsl.Traversal) {
-		t.Has(Label, FieldText, p.Within(v...))
+		t.Has(Label, FieldText, p.Within(vs...))
 	})
 }
 
 // TextNotIn applies the NotIn predicate on the "text" field.
 func TextNotIn(vs ...string) predicate.Item {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Item(func(t *dsl.Traversal) {
-		t.Has(Label, FieldText, p.Without(v...))
+		t.Has(Label, FieldText, p.Without(vs...))
 	})
 }
 

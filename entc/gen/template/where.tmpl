@@ -43,21 +43,31 @@ in the LICENSE file in the root directory of this source tree.
 	{{/* JSON cannot be compared using "=" and Enum has a type defined with the field name */}}
 	{{ $hasP := not (or $f.IsJSON $f.IsEnum) }}
 	{{ $comparable := or $f.ConvertedToBasic $f.Type.Valuer }}
-	{{ $undeclared := (and (ne $func "Label") (ne $func "Hooks") (ne $func "Policy") (ne $func "Table") (ne $func "FieldID")) }}
+	{{ $undeclared := (and (ne $func "Label") (ne $func "OrderOption") (ne $func "Hooks") (ne $func "Policy") (ne $func "Table") (ne $func "FieldID")) }}
 	{{- if and $hasP $comparable $undeclared }}
 		{{ $arg := "v" }}
 		// {{ $func }} applies equality check predicate on the {{ quote $f.Name }} field. It's identical to {{ $func }}EQ.
 		func {{ $func }}({{ $arg }} {{ $f.Type }}) predicate.{{ $.Name }} {
-			{{- if and $f.HasGoType (not $f.Type.Valuer) }}
-				vc := {{ $f.BasicType "v" }}
+			{{- if $f.HasValueScanner }}
+				vc, err := ValueScanner.{{ $f.StructField }}.Value({{ $arg }})
 				{{- $arg = "vc" }}
+				return predicate.{{ $.Name }}OrErr(
+					{{- with extend $ "Arg" $arg "Field" $f -}}
+						{{ $tmpl := printf "dialect/%s/predicate/field" $.Storage }}
+						{{- xtemplate $tmpl . }}
+					{{- end }}, err)
+			{{- else }}
+				{{- if and $f.HasGoType (not $f.Type.Valuer) }}
+					vc := {{ $f.BasicType "v" }}
+					{{- $arg = "vc" }}
+				{{- end }}
+				return predicate.{{ $.Name }}(
+					{{- with extend $ "Arg" $arg "Field" $f -}}
+						{{ $tmpl := printf "dialect/%s/predicate/field" $.Storage }}
+						{{- xtemplate $tmpl . }}
+					{{- end -}}
+				)
 			{{- end }}
-			return predicate.{{ $.Name }}(
-				{{- with extend $ "Arg" $arg "Field" $f -}}
-					{{ $tmpl := printf "dialect/%s/predicate/field" $.Storage }}
-					{{- xtemplate $tmpl . }}
-				{{- end -}}
-			)
 		}
 	{{- end }}
 {{ end }}
@@ -70,26 +80,54 @@ in the LICENSE file in the root directory of this source tree.
 		{{ $type := $f.Type.String }}{{ if $f.IsEnum }}{{ $type = trimPackage $type $.Package }}{{ end }}
 		// {{ $func }} applies the {{ $op.Name }} predicate on the {{ quote $f.Name }} field.
 		func {{ $func }}({{ if not $op.Niladic }}{{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $type }}{{ end }}) predicate.{{ $.Name }} {
-			{{- if $op.Variadic }}
-				v := make([]any, len({{ $arg }}))
-				for i := range v {
-					{{- if and $f.HasGoType (not $f.Type.Valuer) }}
-						v[i] = {{ $f.BasicType (printf "%s[i]" $arg) }}
-					{{- else }}
-						v[i] = {{ $arg }}[i]
+			{{- if and $f.HasValueScanner (or $op.Variadic (not $op.Niladic)) }}
+				{{- if $op.Variadic }}
+					var (
+						err error
+						v = make([]any, len({{ $arg }}))
+					)
+					for i := range v {
+						if v[i], err = ValueScanner.{{ $f.StructField }}.Value({{ print $arg "[i]" }}); err != nil {
+							break
+						}
+					}
+					{{- $arg = "v" }}
+				{{- else }}
+					vc, err := ValueScanner.{{ $f.StructField }}.Value({{ $arg }})
+					{{- $arg = "vc" }}
+					{{- if $stringOp }}
+						{{- $arg = "vcs" }}
+						vcs, ok := vc.(string)
+						if err == nil && !ok {
+							err = fmt.Errorf("{{ $f.Name }} value is not a string: %T", vc)
+						}
 					{{- end }}
-				}
-				{{- $arg = "v" }}
-			{{- else if and (not $op.Niladic) $f.HasGoType (or $stringOp (not $f.Type.Valuer)) }}
-				vc := {{ $f.BasicType "v" }}
-				{{- $arg = "vc" }}
+				{{- end }}
+				return predicate.{{ $.Name }}OrErr(
+					{{- with extend $ "Arg" $arg "Field" $f "Op" $op "Storage" $.Storage -}}
+						{{ $tmpl := printf "dialect/%s/predicate/field/ops" $.Storage }}
+						{{- xtemplate $tmpl . }}
+					{{- end }}, err)
+			{{- else }}
+				{{- if and $f.HasGoType (or $stringOp (not $f.Type.Valuer)) }}
+					{{- if $op.Variadic }}
+						v := make([]any, len({{ $arg }}))
+						for i := range v {
+							v[i] = {{ $f.BasicType (printf "%s[i]" $arg) }}
+						}
+						{{- $arg = "v" }}
+					{{- else if not $op.Niladic }}
+						vc := {{ $f.BasicType "v" }}
+						{{- $arg = "vc" }}
+					{{- end }}
+				{{- end }}
+				return predicate.{{ $.Name }}(
+					{{- with extend $ "Arg" $arg "Field" $f "Op" $op "Storage" $.Storage -}}
+						{{ $tmpl := printf "dialect/%s/predicate/field/ops" $.Storage }}
+						{{- xtemplate $tmpl . }}
+					{{- end -}}
+				)
 			{{- end }}
-			return predicate.{{ $.Name }}(
-				{{- with extend $ "Arg" $arg "Field" $f "Op" $op "Storage" $.Storage -}}
-					{{ $tmpl := printf "dialect/%s/predicate/field/ops" $.Storage }}
-					{{- xtemplate $tmpl . }}
-				{{- end -}}
-			)
 		}
 	{{ end }}
 {{ end }}

@@ -114,23 +114,15 @@ func DescNEQ(v string) predicate.GroupInfo {
 
 // DescIn applies the In predicate on the "desc" field.
 func DescIn(vs ...string) predicate.GroupInfo {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.GroupInfo(func(t *dsl.Traversal) {
-		t.Has(Label, FieldDesc, p.Within(v...))
+		t.Has(Label, FieldDesc, p.Within(vs...))
 	})
 }
 
 // DescNotIn applies the NotIn predicate on the "desc" field.
 func DescNotIn(vs ...string) predicate.GroupInfo {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.GroupInfo(func(t *dsl.Traversal) {
-		t.Has(Label, FieldDesc, p.Without(v...))
+		t.Has(Label, FieldDesc, p.Without(vs...))
 	})
 }
 
@@ -199,23 +191,15 @@ func MaxUsersNEQ(v int) predicate.GroupInfo {
 
 // MaxUsersIn applies the In predicate on the "max_users" field.
 func MaxUsersIn(vs ...int) predicate.GroupInfo {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.GroupInfo(func(t *dsl.Traversal) {
-		t.Has(Label, FieldMaxUsers, p.Within(v...))
+		t.Has(Label, FieldMaxUsers, p.Within(vs...))
 	})
 }
 
 // MaxUsersNotIn applies the NotIn predicate on the "max_users" field.
 func MaxUsersNotIn(vs ...int) predicate.GroupInfo {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.GroupInfo(func(t *dsl.Traversal) {
-		t.Has(Label, FieldMaxUsers, p.Without(v...))
+		t.Has(Label, FieldMaxUsers, p.Without(vs...))
 	})
 }
 

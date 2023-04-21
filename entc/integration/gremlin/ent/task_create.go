@@ -16,7 +16,6 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/ent/schema/task"
-
 	enttask "entgo.io/ent/entc/integration/gremlin/ent/task"
 )
 
@@ -61,6 +60,62 @@ func (tc *TaskCreate) SetNillableCreatedAt(t *time.Time) *TaskCreate {
 	return tc
 }
 
+// SetName sets the "name" field.
+func (tc *TaskCreate) SetName(s string) *TaskCreate {
+	tc.mutation.SetName(s)
+	return tc
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (tc *TaskCreate) SetNillableName(s *string) *TaskCreate {
+	if s != nil {
+		tc.SetName(*s)
+	}
+	return tc
+}
+
+// SetOwner sets the "owner" field.
+func (tc *TaskCreate) SetOwner(s string) *TaskCreate {
+	tc.mutation.SetOwner(s)
+	return tc
+}
+
+// SetNillableOwner sets the "owner" field if the given value is not nil.
+func (tc *TaskCreate) SetNillableOwner(s *string) *TaskCreate {
+	if s != nil {
+		tc.SetOwner(*s)
+	}
+	return tc
+}
+
+// SetOrder sets the "order" field.
+func (tc *TaskCreate) SetOrder(i int) *TaskCreate {
+	tc.mutation.SetOrder(i)
+	return tc
+}
+
+// SetNillableOrder sets the "order" field if the given value is not nil.
+func (tc *TaskCreate) SetNillableOrder(i *int) *TaskCreate {
+	if i != nil {
+		tc.SetOrder(*i)
+	}
+	return tc
+}
+
+// SetOrderOption sets the "order_option" field.
+func (tc *TaskCreate) SetOrderOption(i int) *TaskCreate {
+	tc.mutation.SetOrderOption(i)
+	return tc
+}
+
+// SetNillableOrderOption sets the "order_option" field if the given value is not nil.
+func (tc *TaskCreate) SetNillableOrderOption(i *int) *TaskCreate {
+	if i != nil {
+		tc.SetOrderOption(*i)
+	}
+	return tc
+}
+
 // Mutation returns the TaskMutation object of the builder.
 func (tc *TaskCreate) Mutation() *TaskMutation {
 	return tc.mutation
@@ -68,50 +123,8 @@ func (tc *TaskCreate) Mutation() *TaskMutation {
 
 // Save creates the Task in the database.
 func (tc *TaskCreate) Save(ctx context.Context) (*Task, error) {
-	var (
-		err  error
-		node *Task
-	)
 	tc.defaults()
-	if len(tc.hooks) == 0 {
-		if err = tc.check(); err != nil {
-			return nil, err
-		}
-		node, err = tc.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*TaskMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = tc.check(); err != nil {
-				return nil, err
-			}
-			tc.mutation = mutation
-			if node, err = tc.gremlinSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(tc.hooks) - 1; i >= 0; i-- {
-			if tc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = tc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, tc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Task)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from TaskMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Task, TaskMutation](ctx, tc.gremlinSave, tc.mutation, tc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -154,7 +167,7 @@ func (tc *TaskCreate) check() error {
 		return &ValidationError{Name: "priority", err: errors.New(`ent: missing required field "Task.priority"`)}
 	}
 	if v, ok := tc.mutation.Priority(); ok {
-		if err := enttask.PriorityValidator(int(v)); err != nil {
+		if err := v.Validate(); err != nil {
 			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
 	}
@@ -165,6 +178,9 @@ func (tc *TaskCreate) check() error {
 }
 
 func (tc *TaskCreate) gremlinSave(ctx context.Context) (*Task, error) {
+	if err := tc.check(); err != nil {
+		return nil, err
+	}
 	res := &gremlin.Response{}
 	query, bindings := tc.gremlin().Query()
 	if err := tc.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -177,6 +193,8 @@ func (tc *TaskCreate) gremlinSave(ctx context.Context) (*Task, error) {
 	if err := t.FromResponse(res); err != nil {
 		return nil, err
 	}
+	tc.mutation.id = &t.ID
+	tc.mutation.done = true
 	return t, nil
 }
 
@@ -190,6 +208,18 @@ func (tc *TaskCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := tc.mutation.CreatedAt(); ok {
 		v.Property(dsl.Single, enttask.FieldCreatedAt, value)
+	}
+	if value, ok := tc.mutation.Name(); ok {
+		v.Property(dsl.Single, enttask.FieldName, value)
+	}
+	if value, ok := tc.mutation.Owner(); ok {
+		v.Property(dsl.Single, enttask.FieldOwner, value)
+	}
+	if value, ok := tc.mutation.Order(); ok {
+		v.Property(dsl.Single, enttask.FieldOrder, value)
+	}
+	if value, ok := tc.mutation.OrderOption(); ok {
+		v.Property(dsl.Single, enttask.FieldOrderOption, value)
 	}
 	return v.ValueMap(true)
 }

@@ -61,50 +61,8 @@ func (ic *ItemCreate) Mutation() *ItemMutation {
 
 // Save creates the Item in the database.
 func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
-	var (
-		err  error
-		node *Item
-	)
 	ic.defaults()
-	if len(ic.hooks) == 0 {
-		if err = ic.check(); err != nil {
-			return nil, err
-		}
-		node, err = ic.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ItemMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = ic.check(); err != nil {
-				return nil, err
-			}
-			ic.mutation = mutation
-			if node, err = ic.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(ic.hooks) - 1; i >= 0; i-- {
-			if ic.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ic.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, ic.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Item)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from ItemMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Item, ItemMutation](ctx, ic.sqlSave, ic.mutation, ic.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -153,6 +111,9 @@ func (ic *ItemCreate) check() error {
 }
 
 func (ic *ItemCreate) sqlSave(ctx context.Context) (*Item, error) {
+	if err := ic.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := ic.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ic.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -167,19 +128,15 @@ func (ic *ItemCreate) sqlSave(ctx context.Context) (*Item, error) {
 			return nil, fmt.Errorf("unexpected Item.ID type: %T", _spec.ID.Value)
 		}
 	}
+	ic.mutation.id = &_node.ID
+	ic.mutation.done = true
 	return _node, nil
 }
 
 func (ic *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Item{config: ic.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: item.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
-				Column: item.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(item.Table, sqlgraph.NewFieldSpec(item.FieldID, field.TypeString))
 	)
 	_spec.OnConflict = ic.conflict
 	if id, ok := ic.mutation.ID(); ok {
@@ -392,8 +349,8 @@ func (icb *ItemCreateBulk) Save(ctx context.Context) ([]*Item, error) {
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, icb.builders[i+1].mutation)
 				} else {

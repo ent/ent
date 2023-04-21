@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgefield/ent/metadata"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
@@ -26,7 +27,8 @@ type Metadata struct {
 	ParentID int `json:"parent_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MetadataQuery when eager-loading is set.
-	Edges MetadataEdges `json:"edges"`
+	Edges        MetadataEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // MetadataEdges holds the relations/edges for other nodes in the graph.
@@ -39,7 +41,8 @@ type MetadataEdges struct {
 	Parent *Metadata `json:"parent,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes   [3]bool
+	namedChildren map[string][]*Metadata
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -85,7 +88,7 @@ func (*Metadata) scanValues(columns []string) ([]any, error) {
 		case metadata.FieldID, metadata.FieldAge, metadata.FieldParentID:
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Metadata", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -117,31 +120,39 @@ func (m *Metadata) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				m.ParentID = int(value.Int64)
 			}
+		default:
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the Metadata.
+// This includes values selected through modifiers, order, etc.
+func (m *Metadata) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
+}
+
 // QueryUser queries the "user" edge of the Metadata entity.
 func (m *Metadata) QueryUser() *UserQuery {
-	return (&MetadataClient{config: m.config}).QueryUser(m)
+	return NewMetadataClient(m.config).QueryUser(m)
 }
 
 // QueryChildren queries the "children" edge of the Metadata entity.
 func (m *Metadata) QueryChildren() *MetadataQuery {
-	return (&MetadataClient{config: m.config}).QueryChildren(m)
+	return NewMetadataClient(m.config).QueryChildren(m)
 }
 
 // QueryParent queries the "parent" edge of the Metadata entity.
 func (m *Metadata) QueryParent() *MetadataQuery {
-	return (&MetadataClient{config: m.config}).QueryParent(m)
+	return NewMetadataClient(m.config).QueryParent(m)
 }
 
 // Update returns a builder for updating this Metadata.
 // Note that you need to call Metadata.Unwrap() before calling this method if this Metadata
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (m *Metadata) Update() *MetadataUpdateOne {
-	return (&MetadataClient{config: m.config}).UpdateOne(m)
+	return NewMetadataClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Metadata entity that was returned from a transaction after it was closed,
@@ -169,11 +180,29 @@ func (m *Metadata) String() string {
 	return builder.String()
 }
 
-// MetadataSlice is a parsable slice of Metadata.
-type MetadataSlice []*Metadata
+// NamedChildren returns the Children named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (m *Metadata) NamedChildren(name string) ([]*Metadata, error) {
+	if m.Edges.namedChildren == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := m.Edges.namedChildren[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
 
-func (m MetadataSlice) config(cfg config) {
-	for _i := range m {
-		m[_i].config = cfg
+func (m *Metadata) appendNamedChildren(name string, edges ...*Metadata) {
+	if m.Edges.namedChildren == nil {
+		m.Edges.namedChildren = make(map[string][]*Metadata)
+	}
+	if len(edges) == 0 {
+		m.Edges.namedChildren[name] = []*Metadata{}
+	} else {
+		m.Edges.namedChildren[name] = append(m.Edges.namedChildren[name], edges...)
 	}
 }
+
+// MetadataSlice is a parsable slice of Metadata.
+type MetadataSlice []*Metadata

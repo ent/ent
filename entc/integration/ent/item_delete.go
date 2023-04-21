@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -32,34 +31,7 @@ func (id *ItemDelete) Where(ps ...predicate.Item) *ItemDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (id *ItemDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(id.hooks) == 0 {
-		affected, err = id.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ItemMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			id.mutation = mutation
-			affected, err = id.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(id.hooks) - 1; i >= 0; i-- {
-			if id.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = id.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, id.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, ItemMutation](ctx, id.sqlExec, id.mutation, id.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -72,15 +44,7 @@ func (id *ItemDelete) ExecX(ctx context.Context) int {
 }
 
 func (id *ItemDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: item.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
-				Column: item.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(item.Table, sqlgraph.NewFieldSpec(item.FieldID, field.TypeString))
 	if ps := id.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -92,12 +56,19 @@ func (id *ItemDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	id.mutation.done = true
 	return affected, err
 }
 
 // ItemDeleteOne is the builder for deleting a single Item entity.
 type ItemDeleteOne struct {
 	id *ItemDelete
+}
+
+// Where appends a list predicates to the ItemDelete builder.
+func (ido *ItemDeleteOne) Where(ps ...predicate.Item) *ItemDeleteOne {
+	ido.id.mutation.Where(ps...)
+	return ido
 }
 
 // Exec executes the deletion query.
@@ -115,5 +86,7 @@ func (ido *ItemDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (ido *ItemDeleteOne) ExecX(ctx context.Context) {
-	ido.id.ExecX(ctx)
+	if err := ido.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

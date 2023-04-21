@@ -6,6 +6,10 @@
 
 package customtype
 
+import (
+	"entgo.io/ent/dialect/sql"
+)
+
 const (
 	// Label holds the string label denoting the customtype type in the database.
 	Label = "custom_type"
@@ -31,4 +35,17 @@ func ValidColumn(column string) bool {
 		}
 	}
 	return false
+}
+
+// OrderOption defines the ordering options for the CustomType queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByCustom orders the results by the custom field.
+func ByCustom(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCustom, opts...).ToFunc()
 }

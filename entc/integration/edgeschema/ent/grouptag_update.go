@@ -74,40 +74,7 @@ func (gtu *GroupTagUpdate) ClearGroup() *GroupTagUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (gtu *GroupTagUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(gtu.hooks) == 0 {
-		if err = gtu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = gtu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GroupTagMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = gtu.check(); err != nil {
-				return 0, err
-			}
-			gtu.mutation = mutation
-			affected, err = gtu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(gtu.hooks) - 1; i >= 0; i-- {
-			if gtu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = gtu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, gtu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, GroupTagMutation](ctx, gtu.sqlSave, gtu.mutation, gtu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -144,16 +111,10 @@ func (gtu *GroupTagUpdate) check() error {
 }
 
 func (gtu *GroupTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   grouptag.Table,
-			Columns: grouptag.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: grouptag.FieldID,
-			},
-		},
+	if err := gtu.check(); err != nil {
+		return n, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(grouptag.Table, grouptag.Columns, sqlgraph.NewFieldSpec(grouptag.FieldID, field.TypeInt))
 	if ps := gtu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -169,10 +130,7 @@ func (gtu *GroupTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{grouptag.TagColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tag.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -185,10 +143,7 @@ func (gtu *GroupTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{grouptag.TagColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tag.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -204,10 +159,7 @@ func (gtu *GroupTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{grouptag.GroupColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: group.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -220,10 +172,7 @@ func (gtu *GroupTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{grouptag.GroupColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: group.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -239,6 +188,7 @@ func (gtu *GroupTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	gtu.mutation.done = true
 	return n, nil
 }
 
@@ -289,6 +239,12 @@ func (gtuo *GroupTagUpdateOne) ClearGroup() *GroupTagUpdateOne {
 	return gtuo
 }
 
+// Where appends a list predicates to the GroupTagUpdate builder.
+func (gtuo *GroupTagUpdateOne) Where(ps ...predicate.GroupTag) *GroupTagUpdateOne {
+	gtuo.mutation.Where(ps...)
+	return gtuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (gtuo *GroupTagUpdateOne) Select(field string, fields ...string) *GroupTagUpdateOne {
@@ -298,46 +254,7 @@ func (gtuo *GroupTagUpdateOne) Select(field string, fields ...string) *GroupTagU
 
 // Save executes the query and returns the updated GroupTag entity.
 func (gtuo *GroupTagUpdateOne) Save(ctx context.Context) (*GroupTag, error) {
-	var (
-		err  error
-		node *GroupTag
-	)
-	if len(gtuo.hooks) == 0 {
-		if err = gtuo.check(); err != nil {
-			return nil, err
-		}
-		node, err = gtuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GroupTagMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = gtuo.check(); err != nil {
-				return nil, err
-			}
-			gtuo.mutation = mutation
-			node, err = gtuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(gtuo.hooks) - 1; i >= 0; i-- {
-			if gtuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = gtuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, gtuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*GroupTag)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from GroupTagMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*GroupTag, GroupTagMutation](ctx, gtuo.sqlSave, gtuo.mutation, gtuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -374,16 +291,10 @@ func (gtuo *GroupTagUpdateOne) check() error {
 }
 
 func (gtuo *GroupTagUpdateOne) sqlSave(ctx context.Context) (_node *GroupTag, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   grouptag.Table,
-			Columns: grouptag.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: grouptag.FieldID,
-			},
-		},
+	if err := gtuo.check(); err != nil {
+		return _node, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(grouptag.Table, grouptag.Columns, sqlgraph.NewFieldSpec(grouptag.FieldID, field.TypeInt))
 	id, ok := gtuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "GroupTag.id" for update`)}
@@ -416,10 +327,7 @@ func (gtuo *GroupTagUpdateOne) sqlSave(ctx context.Context) (_node *GroupTag, er
 			Columns: []string{grouptag.TagColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tag.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -432,10 +340,7 @@ func (gtuo *GroupTagUpdateOne) sqlSave(ctx context.Context) (_node *GroupTag, er
 			Columns: []string{grouptag.TagColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tag.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -451,10 +356,7 @@ func (gtuo *GroupTagUpdateOne) sqlSave(ctx context.Context) (_node *GroupTag, er
 			Columns: []string{grouptag.GroupColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: group.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -467,10 +369,7 @@ func (gtuo *GroupTagUpdateOne) sqlSave(ctx context.Context) (_node *GroupTag, er
 			Columns: []string{grouptag.GroupColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: group.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -489,5 +388,6 @@ func (gtuo *GroupTagUpdateOne) sqlSave(ctx context.Context) (_node *GroupTag, er
 		}
 		return nil, err
 	}
+	gtuo.mutation.done = true
 	return _node, nil
 }

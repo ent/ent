@@ -20,12 +20,12 @@ and it's being tested constantly on the following 5 versions: `10`, `11`, `12`, 
 
 ## CockroachDB **(<ins>preview</ins>)**
 
-CockroachDB support is in preview and requires the [Atlas migration engine](#atlas-integration).  
+CockroachDB support is in preview and requires the [Atlas migration engine](migrate.md#atlas-integration).  
 The integration with CRDB is currently tested on versions `v21.2.11`.
 
 ## SQLite
 
-Using [Atlas](https://github.ariga/atlas), the SQLite driver supports all the features that
+Using [Atlas](https://github.com/ariga/atlas), the SQLite driver supports all the features that
 are mentioned in the [Migration](migrate.md) section. Note that some changes, like column modification,
 are performed on a temporary table using the sequence of operations described in [SQLite official documentation](https://www.sqlite.org/lang_altertable.html#otheralter).
 
@@ -35,7 +35,7 @@ Gremlin does not support migration nor indexes, and **<ins>it's considered exper
 
 ## TiDB **(<ins>preview</ins>)**
 
-TiDB support is in preview and requires the [Atlas migration engine](#atlas-integration).  
+TiDB support is in preview and requires the [Atlas migration engine](migrate.md#atlas-integration).  
 TiDB is MySQL compatible and thus any feature that works on MySQL _should_ work on TiDB as well.  
 For a list of known compatibility issues, visit: https://docs.pingcap.com/tidb/stable/mysql-compatibility  
 The integration with TiDB is currently tested on versions `5.4.0`, `6.0.0`.

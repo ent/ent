@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/multischema/ent/pet"
 	"entgo.io/ent/entc/integration/multischema/ent/user"
@@ -26,7 +27,8 @@ type Pet struct {
 	OwnerID int `json:"owner_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PetQuery when eager-loading is set.
-	Edges PetEdges `json:"edges"`
+	Edges        PetEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // PetEdges holds the relations/edges for other nodes in the graph.
@@ -61,7 +63,7 @@ func (*Pet) scanValues(columns []string) ([]any, error) {
 		case pet.FieldName:
 			values[i] = new(sql.NullString)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Pet", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -93,21 +95,29 @@ func (pe *Pet) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				pe.OwnerID = int(value.Int64)
 			}
+		default:
+			pe.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the Pet.
+// This includes values selected through modifiers, order, etc.
+func (pe *Pet) Value(name string) (ent.Value, error) {
+	return pe.selectValues.Get(name)
+}
+
 // QueryOwner queries the "owner" edge of the Pet entity.
 func (pe *Pet) QueryOwner() *UserQuery {
-	return (&PetClient{config: pe.config}).QueryOwner(pe)
+	return NewPetClient(pe.config).QueryOwner(pe)
 }
 
 // Update returns a builder for updating this Pet.
 // Note that you need to call Pet.Unwrap() before calling this method if this Pet
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (pe *Pet) Update() *PetUpdateOne {
-	return (&PetClient{config: pe.config}).UpdateOne(pe)
+	return NewPetClient(pe.config).UpdateOne(pe)
 }
 
 // Unwrap unwraps the Pet entity that was returned from a transaction after it was closed,
@@ -137,9 +147,3 @@ func (pe *Pet) String() string {
 
 // Pets is a parsable slice of Pet.
 type Pets []*Pet
-
-func (pe Pets) config(cfg config) {
-	for _i := range pe {
-		pe[_i].config = cfg
-	}
-}

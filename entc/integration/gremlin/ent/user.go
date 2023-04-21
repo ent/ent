@@ -232,64 +232,64 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 
 // QueryCard queries the "card" edge of the User entity.
 func (u *User) QueryCard() *CardQuery {
-	return (&UserClient{config: u.config}).QueryCard(u)
+	return NewUserClient(u.config).QueryCard(u)
 }
 
 // QueryPets queries the "pets" edge of the User entity.
 func (u *User) QueryPets() *PetQuery {
-	return (&UserClient{config: u.config}).QueryPets(u)
+	return NewUserClient(u.config).QueryPets(u)
 }
 
 // QueryFiles queries the "files" edge of the User entity.
 func (u *User) QueryFiles() *FileQuery {
-	return (&UserClient{config: u.config}).QueryFiles(u)
+	return NewUserClient(u.config).QueryFiles(u)
 }
 
 // QueryGroups queries the "groups" edge of the User entity.
 func (u *User) QueryGroups() *GroupQuery {
-	return (&UserClient{config: u.config}).QueryGroups(u)
+	return NewUserClient(u.config).QueryGroups(u)
 }
 
 // QueryFriends queries the "friends" edge of the User entity.
 func (u *User) QueryFriends() *UserQuery {
-	return (&UserClient{config: u.config}).QueryFriends(u)
+	return NewUserClient(u.config).QueryFriends(u)
 }
 
 // QueryFollowers queries the "followers" edge of the User entity.
 func (u *User) QueryFollowers() *UserQuery {
-	return (&UserClient{config: u.config}).QueryFollowers(u)
+	return NewUserClient(u.config).QueryFollowers(u)
 }
 
 // QueryFollowing queries the "following" edge of the User entity.
 func (u *User) QueryFollowing() *UserQuery {
-	return (&UserClient{config: u.config}).QueryFollowing(u)
+	return NewUserClient(u.config).QueryFollowing(u)
 }
 
 // QueryTeam queries the "team" edge of the User entity.
 func (u *User) QueryTeam() *PetQuery {
-	return (&UserClient{config: u.config}).QueryTeam(u)
+	return NewUserClient(u.config).QueryTeam(u)
 }
 
 // QuerySpouse queries the "spouse" edge of the User entity.
 func (u *User) QuerySpouse() *UserQuery {
-	return (&UserClient{config: u.config}).QuerySpouse(u)
+	return NewUserClient(u.config).QuerySpouse(u)
 }
 
 // QueryChildren queries the "children" edge of the User entity.
 func (u *User) QueryChildren() *UserQuery {
-	return (&UserClient{config: u.config}).QueryChildren(u)
+	return NewUserClient(u.config).QueryChildren(u)
 }
 
 // QueryParent queries the "parent" edge of the User entity.
 func (u *User) QueryParent() *UserQuery {
-	return (&UserClient{config: u.config}).QueryParent(u)
+	return NewUserClient(u.config).QueryParent(u)
 }
 
 // Update returns a builder for updating this User.
 // Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (u *User) Update() *UserUpdateOne {
-	return (&UserClient{config: u.config}).UpdateOne(u)
+	return NewUserClient(u.config).UpdateOne(u)
 }
 
 // Unwrap unwraps the User entity that was returned from a transaction after it was closed,
@@ -385,10 +385,4 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 		*u = append(*u, node)
 	}
 	return nil
-}
-
-func (u Users) config(cfg config) {
-	for _i := range u {
-		u[_i].config = cfg
-	}
 }

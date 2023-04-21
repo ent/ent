@@ -14,11 +14,12 @@ type Traversal struct {
 	// nodes holds the dsl nodes. first element is the reference name
 	// of the TinkerGraph. defaults to "g".
 	nodes []Node
+	errs  []error
 }
 
 // NewTraversal returns a new default traversal with "g" as a reference name to the Graph.
 func NewTraversal() *Traversal {
-	return &Traversal{[]Node{G}}
+	return &Traversal{nodes: []Node{G}}
 }
 
 // Group groups a list of traversals into one. all traversals are assigned into a temporary
@@ -42,7 +43,7 @@ func Group(trs ...*Traversal) *Traversal {
 		tr.nodes = []Node{names[tr]}
 	}
 	b.Nodes = append(b.Nodes, names[trs[len(trs)-1]])
-	return &Traversal{[]Node{b}}
+	return &Traversal{nodes: []Node{b}}
 }
 
 // Join joins a list of traversals with a semicolon separator.
@@ -51,7 +52,29 @@ func Join(trs ...*Traversal) *Traversal {
 	for _, tr := range trs {
 		b.Nodes = append(b.Nodes, &Traversal{nodes: tr.nodes})
 	}
-	return &Traversal{[]Node{b}}
+	return &Traversal{nodes: []Node{b}}
+}
+
+// AddError adds an error to the traversal.
+func (t *Traversal) AddError(err error) *Traversal {
+	t.errs = append(t.errs, err)
+	return t
+}
+
+// Err returns a concatenated error of all errors encountered during
+// the query-building, or were added manually by calling AddError.
+func (t *Traversal) Err() error {
+	if len(t.errs) == 0 {
+		return nil
+	}
+	br := strings.Builder{}
+	for i := range t.errs {
+		if i > 0 {
+			br.WriteString("; ")
+		}
+		br.WriteString(t.errs[i].Error())
+	}
+	return fmt.Errorf(br.String())
 }
 
 // V step is usually used to start a traversal but it may also be used mid-traversal.
@@ -357,7 +380,7 @@ func Each(v any, cb func(it *Traversal) *Traversal) *Traversal {
 		t.Add(Token("undefined"))
 	}
 	t.Add(Dot, Token("each"), Token(" { "))
-	t.Add(cb(&Traversal{[]Node{Token("it")}}).nodes...)
+	t.Add(cb(&Traversal{nodes: []Node{Token("it")}}).nodes...)
 	t.Add(Token(" }"))
 	return t
 }
@@ -390,7 +413,7 @@ func (t *Traversal) Clone() *Traversal {
 	if t == nil {
 		return nil
 	}
-	return &Traversal{append(make([]Node, 0, len(t.nodes)), t.nodes...)}
+	return &Traversal{nodes: append(make([]Node, 0, len(t.nodes)), t.nodes...)}
 }
 
 // Undo reverts the last-step of the traversal.

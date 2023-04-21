@@ -98,19 +98,19 @@ func (c *Card) FromResponse(res *gremlin.Response) error {
 
 // QueryOwner queries the "owner" edge of the Card entity.
 func (c *Card) QueryOwner() *UserQuery {
-	return (&CardClient{config: c.config}).QueryOwner(c)
+	return NewCardClient(c.config).QueryOwner(c)
 }
 
 // QuerySpec queries the "spec" edge of the Card entity.
 func (c *Card) QuerySpec() *SpecQuery {
-	return (&CardClient{config: c.config}).QuerySpec(c)
+	return NewCardClient(c.config).QuerySpec(c)
 }
 
 // Update returns a builder for updating this Card.
 // Note that you need to call Card.Unwrap() before calling this method if this Card
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (c *Card) Update() *CardUpdateOne {
-	return (&CardClient{config: c.config}).UpdateOne(c)
+	return NewCardClient(c.config).UpdateOne(c)
 }
 
 // Unwrap unwraps the Card entity that was returned from a transaction after it was closed,
@@ -177,10 +177,4 @@ func (c *Cards) FromResponse(res *gremlin.Response) error {
 		*c = append(*c, node)
 	}
 	return nil
-}
-
-func (c Cards) config(cfg config) {
-	for _i := range c {
-		c[_i].config = cfg
-	}
 }

@@ -32,49 +32,7 @@ func (gc *GoodsCreate) Mutation() *GoodsMutation {
 
 // Save creates the Goods in the database.
 func (gc *GoodsCreate) Save(ctx context.Context) (*Goods, error) {
-	var (
-		err  error
-		node *Goods
-	)
-	if len(gc.hooks) == 0 {
-		if err = gc.check(); err != nil {
-			return nil, err
-		}
-		node, err = gc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GoodsMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = gc.check(); err != nil {
-				return nil, err
-			}
-			gc.mutation = mutation
-			if node, err = gc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(gc.hooks) - 1; i >= 0; i-- {
-			if gc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = gc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, gc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Goods)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from GoodsMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Goods, GoodsMutation](ctx, gc.sqlSave, gc.mutation, gc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -105,6 +63,9 @@ func (gc *GoodsCreate) check() error {
 }
 
 func (gc *GoodsCreate) sqlSave(ctx context.Context) (*Goods, error) {
+	if err := gc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := gc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, gc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -114,19 +75,15 @@ func (gc *GoodsCreate) sqlSave(ctx context.Context) (*Goods, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
+	gc.mutation.id = &_node.ID
+	gc.mutation.done = true
 	return _node, nil
 }
 
 func (gc *GoodsCreate) createSpec() (*Goods, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Goods{config: gc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: goods.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: goods.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(goods.Table, sqlgraph.NewFieldSpec(goods.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = gc.conflict
 	return _node, _spec
@@ -272,8 +229,8 @@ func (gcb *GoodsCreateBulk) Save(ctx context.Context) ([]*Goods, error) {
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, gcb.builders[i+1].mutation)
 				} else {

@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/migrate/entv2/pet"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
@@ -66,8 +67,9 @@ type User struct {
 	DropOptional string `json:"drop_optional,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges       UserEdges `json:"edges"`
-	blog_admins *int
+	Edges        UserEdges `json:"edges"`
+	blog_admins  *int
+	selectValues sql.SelectValues
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
@@ -132,7 +134,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 		case user.ForeignKeys[0]: // blog_admins
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -287,31 +289,39 @@ func (u *User) assignValues(columns []string, values []any) error {
 				u.blog_admins = new(int)
 				*u.blog_admins = int(value.Int64)
 			}
+		default:
+			u.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the User.
+// This includes values selected through modifiers, order, etc.
+func (u *User) Value(name string) (ent.Value, error) {
+	return u.selectValues.Get(name)
+}
+
 // QueryCar queries the "car" edge of the User entity.
 func (u *User) QueryCar() *CarQuery {
-	return (&UserClient{config: u.config}).QueryCar(u)
+	return NewUserClient(u.config).QueryCar(u)
 }
 
 // QueryPets queries the "pets" edge of the User entity.
 func (u *User) QueryPets() *PetQuery {
-	return (&UserClient{config: u.config}).QueryPets(u)
+	return NewUserClient(u.config).QueryPets(u)
 }
 
 // QueryFriends queries the "friends" edge of the User entity.
 func (u *User) QueryFriends() *UserQuery {
-	return (&UserClient{config: u.config}).QueryFriends(u)
+	return NewUserClient(u.config).QueryFriends(u)
 }
 
 // Update returns a builder for updating this User.
 // Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (u *User) Update() *UserUpdateOne {
-	return (&UserClient{config: u.config}).UpdateOne(u)
+	return NewUserClient(u.config).UpdateOne(u)
 }
 
 // Unwrap unwraps the User entity that was returned from a transaction after it was closed,
@@ -398,9 +408,3 @@ func (u *User) String() string {
 
 // Users is a parsable slice of User.
 type Users []*User
-
-func (u Users) config(cfg config) {
-	for _i := range u {
-		u[_i].config = cfg
-	}
-}

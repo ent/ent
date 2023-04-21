@@ -16,6 +16,7 @@ var (
 	// BlogsColumns holds the columns for the "blogs" table.
 	BlogsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "oid", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
 	}
 	// BlogsTable holds the schema information for the "blogs" table.
 	BlogsTable = &schema.Table{
@@ -90,11 +91,12 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "source", Type: field.TypeString, Nullable: true},
 		{Name: "source_uri", Type: field.TypeString, Nullable: true},
-		{Name: "text", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "text", Type: field.TypeString, Nullable: true, Size: 2147483647, Comment: "media text"},
 	}
 	// MediaTable holds the schema information for the "media" table.
 	MediaTable = &schema.Table{
 		Name:       "media",
+		Comment:    "Comment that appears in both the schema and the generated code",
 		Columns:    MediaColumns,
 		PrimaryKey: []*schema.Column{MediaColumns[0]},
 		Indexes: []*schema.Index{

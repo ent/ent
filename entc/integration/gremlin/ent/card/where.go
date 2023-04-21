@@ -137,23 +137,15 @@ func CreateTimeNEQ(v time.Time) predicate.Card {
 
 // CreateTimeIn applies the In predicate on the "create_time" field.
 func CreateTimeIn(vs ...time.Time) predicate.Card {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Card(func(t *dsl.Traversal) {
-		t.Has(Label, FieldCreateTime, p.Within(v...))
+		t.Has(Label, FieldCreateTime, p.Within(vs...))
 	})
 }
 
 // CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
 func CreateTimeNotIn(vs ...time.Time) predicate.Card {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Card(func(t *dsl.Traversal) {
-		t.Has(Label, FieldCreateTime, p.Without(v...))
+		t.Has(Label, FieldCreateTime, p.Without(vs...))
 	})
 }
 
@@ -201,23 +193,15 @@ func UpdateTimeNEQ(v time.Time) predicate.Card {
 
 // UpdateTimeIn applies the In predicate on the "update_time" field.
 func UpdateTimeIn(vs ...time.Time) predicate.Card {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Card(func(t *dsl.Traversal) {
-		t.Has(Label, FieldUpdateTime, p.Within(v...))
+		t.Has(Label, FieldUpdateTime, p.Within(vs...))
 	})
 }
 
 // UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
 func UpdateTimeNotIn(vs ...time.Time) predicate.Card {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Card(func(t *dsl.Traversal) {
-		t.Has(Label, FieldUpdateTime, p.Without(v...))
+		t.Has(Label, FieldUpdateTime, p.Without(vs...))
 	})
 }
 
@@ -265,23 +249,15 @@ func BalanceNEQ(v float64) predicate.Card {
 
 // BalanceIn applies the In predicate on the "balance" field.
 func BalanceIn(vs ...float64) predicate.Card {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Card(func(t *dsl.Traversal) {
-		t.Has(Label, FieldBalance, p.Within(v...))
+		t.Has(Label, FieldBalance, p.Within(vs...))
 	})
 }
 
 // BalanceNotIn applies the NotIn predicate on the "balance" field.
 func BalanceNotIn(vs ...float64) predicate.Card {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Card(func(t *dsl.Traversal) {
-		t.Has(Label, FieldBalance, p.Without(v...))
+		t.Has(Label, FieldBalance, p.Without(vs...))
 	})
 }
 
@@ -329,23 +305,15 @@ func NumberNEQ(v string) predicate.Card {
 
 // NumberIn applies the In predicate on the "number" field.
 func NumberIn(vs ...string) predicate.Card {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Card(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNumber, p.Within(v...))
+		t.Has(Label, FieldNumber, p.Within(vs...))
 	})
 }
 
 // NumberNotIn applies the NotIn predicate on the "number" field.
 func NumberNotIn(vs ...string) predicate.Card {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Card(func(t *dsl.Traversal) {
-		t.Has(Label, FieldNumber, p.Without(v...))
+		t.Has(Label, FieldNumber, p.Without(vs...))
 	})
 }
 
@@ -414,23 +382,15 @@ func NameNEQ(v string) predicate.Card {
 
 // NameIn applies the In predicate on the "name" field.
 func NameIn(vs ...string) predicate.Card {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Card(func(t *dsl.Traversal) {
-		t.Has(Label, FieldName, p.Within(v...))
+		t.Has(Label, FieldName, p.Within(vs...))
 	})
 }
 
 // NameNotIn applies the NotIn predicate on the "name" field.
 func NameNotIn(vs ...string) predicate.Card {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
 	return predicate.Card(func(t *dsl.Traversal) {
-		t.Has(Label, FieldName, p.Without(v...))
+		t.Has(Label, FieldName, p.Without(vs...))
 	})
 }
 

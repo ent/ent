@@ -22,11 +22,9 @@ import (
 // CardQuery is the builder for querying Card entities.
 type CardQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
+	ctx        *QueryContext
+	order      []card.OrderOption
+	inters     []Interceptor
 	predicates []predicate.Card
 	withOwner  *UserQuery
 	// intermediate query (i.e. traversal path).
@@ -40,34 +38,34 @@ func (cq *CardQuery) Where(ps ...predicate.Card) *CardQuery {
 	return cq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (cq *CardQuery) Limit(limit int) *CardQuery {
-	cq.limit = &limit
+	cq.ctx.Limit = &limit
 	return cq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (cq *CardQuery) Offset(offset int) *CardQuery {
-	cq.offset = &offset
+	cq.ctx.Offset = &offset
 	return cq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (cq *CardQuery) Unique(unique bool) *CardQuery {
-	cq.unique = &unique
+	cq.ctx.Unique = &unique
 	return cq
 }
 
-// Order adds an order step to the query.
-func (cq *CardQuery) Order(o ...OrderFunc) *CardQuery {
+// Order specifies how the records should be ordered.
+func (cq *CardQuery) Order(o ...card.OrderOption) *CardQuery {
 	cq.order = append(cq.order, o...)
 	return cq
 }
 
 // QueryOwner chains the current query on the "owner" edge.
 func (cq *CardQuery) QueryOwner() *UserQuery {
-	query := &UserQuery{config: cq.config}
+	query := (&UserClient{config: cq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -90,7 +88,7 @@ func (cq *CardQuery) QueryOwner() *UserQuery {
 // First returns the first Card entity from the query.
 // Returns a *NotFoundError when no Card was found.
 func (cq *CardQuery) First(ctx context.Context) (*Card, error) {
-	nodes, err := cq.Limit(1).All(ctx)
+	nodes, err := cq.Limit(1).All(setContextOp(ctx, cq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +111,7 @@ func (cq *CardQuery) FirstX(ctx context.Context) *Card {
 // Returns a *NotFoundError when no Card ID was found.
 func (cq *CardQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = cq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = cq.Limit(1).IDs(setContextOp(ctx, cq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -136,7 +134,7 @@ func (cq *CardQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Card entity is found.
 // Returns a *NotFoundError when no Card entities are found.
 func (cq *CardQuery) Only(ctx context.Context) (*Card, error) {
-	nodes, err := cq.Limit(2).All(ctx)
+	nodes, err := cq.Limit(2).All(setContextOp(ctx, cq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +162,7 @@ func (cq *CardQuery) OnlyX(ctx context.Context) *Card {
 // Returns a *NotFoundError when no entities are found.
 func (cq *CardQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = cq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = cq.Limit(2).IDs(setContextOp(ctx, cq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -189,10 +187,12 @@ func (cq *CardQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Cards.
 func (cq *CardQuery) All(ctx context.Context) ([]*Card, error) {
+	ctx = setContextOp(ctx, cq.ctx, "All")
 	if err := cq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return cq.sqlAll(ctx)
+	qr := querierAll[[]*Card, *CardQuery]()
+	return withInterceptors[[]*Card](ctx, cq, qr, cq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -205,9 +205,12 @@ func (cq *CardQuery) AllX(ctx context.Context) []*Card {
 }
 
 // IDs executes the query and returns a list of Card IDs.
-func (cq *CardQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
-	if err := cq.Select(card.FieldID).Scan(ctx, &ids); err != nil {
+func (cq *CardQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if cq.ctx.Unique == nil && cq.path != nil {
+		cq.Unique(true)
+	}
+	ctx = setContextOp(ctx, cq.ctx, "IDs")
+	if err = cq.Select(card.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -224,10 +227,11 @@ func (cq *CardQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (cq *CardQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, cq.ctx, "Count")
 	if err := cq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return cq.sqlCount(ctx)
+	return withInterceptors[int](ctx, cq, querierCount[*CardQuery](), cq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -241,10 +245,15 @@ func (cq *CardQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (cq *CardQuery) Exist(ctx context.Context) (bool, error) {
-	if err := cq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, cq.ctx, "Exist")
+	switch _, err := cq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return cq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -264,22 +273,21 @@ func (cq *CardQuery) Clone() *CardQuery {
 	}
 	return &CardQuery{
 		config:     cq.config,
-		limit:      cq.limit,
-		offset:     cq.offset,
-		order:      append([]OrderFunc{}, cq.order...),
+		ctx:        cq.ctx.Clone(),
+		order:      append([]card.OrderOption{}, cq.order...),
+		inters:     append([]Interceptor{}, cq.inters...),
 		predicates: append([]predicate.Card{}, cq.predicates...),
 		withOwner:  cq.withOwner.Clone(),
 		// clone intermediate query.
-		sql:    cq.sql.Clone(),
-		path:   cq.path,
-		unique: cq.unique,
+		sql:  cq.sql.Clone(),
+		path: cq.path,
 	}
 }
 
 // WithOwner tells the query-builder to eager-load the nodes that are connected to
 // the "owner" edge. The optional arguments are used to configure the query builder of the edge.
 func (cq *CardQuery) WithOwner(opts ...func(*UserQuery)) *CardQuery {
-	query := &UserQuery{config: cq.config}
+	query := (&UserClient{config: cq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -302,16 +310,11 @@ func (cq *CardQuery) WithOwner(opts ...func(*UserQuery)) *CardQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
-	grbuild := &CardGroupBy{config: cq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := cq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return cq.sqlQuery(ctx), nil
-	}
+	cq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &CardGroupBy{build: cq}
+	grbuild.flds = &cq.ctx.Fields
 	grbuild.label = card.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -328,11 +331,11 @@ func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 //		Select(card.FieldNumber).
 //		Scan(ctx, &v)
 func (cq *CardQuery) Select(fields ...string) *CardSelect {
-	cq.fields = append(cq.fields, fields...)
-	selbuild := &CardSelect{CardQuery: cq}
-	selbuild.label = card.Label
-	selbuild.flds, selbuild.scan = &cq.fields, selbuild.Scan
-	return selbuild
+	cq.ctx.Fields = append(cq.ctx.Fields, fields...)
+	sbuild := &CardSelect{CardQuery: cq}
+	sbuild.label = card.Label
+	sbuild.flds, sbuild.scan = &cq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a CardSelect configured with the given aggregations.
@@ -341,7 +344,17 @@ func (cq *CardQuery) Aggregate(fns ...AggregateFunc) *CardSelect {
 }
 
 func (cq *CardQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range cq.fields {
+	for _, inter := range cq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, cq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range cq.ctx.Fields {
 		if !card.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -401,6 +414,9 @@ func (cq *CardQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*C
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(user.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -420,47 +436,31 @@ func (cq *CardQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*C
 
 func (cq *CardQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := cq.querySpec()
-	_spec.Node.Columns = cq.fields
-	if len(cq.fields) > 0 {
-		_spec.Unique = cq.unique != nil && *cq.unique
+	_spec.Node.Columns = cq.ctx.Fields
+	if len(cq.ctx.Fields) > 0 {
+		_spec.Unique = cq.ctx.Unique != nil && *cq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, cq.driver, _spec)
 }
 
-func (cq *CardQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := cq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (cq *CardQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   card.Table,
-			Columns: card.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: card.FieldID,
-			},
-		},
-		From:   cq.sql,
-		Unique: true,
-	}
-	if unique := cq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(card.Table, card.Columns, sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt))
+	_spec.From = cq.sql
+	if unique := cq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if cq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := cq.fields; len(fields) > 0 {
+	if fields := cq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, card.FieldID)
 		for i := range fields {
 			if fields[i] != card.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if cq.withOwner != nil {
+			_spec.Node.AddColumnOnce(card.FieldOwnerID)
 		}
 	}
 	if ps := cq.predicates; len(ps) > 0 {
@@ -470,10 +470,10 @@ func (cq *CardQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := cq.limit; limit != nil {
+	if limit := cq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := cq.offset; offset != nil {
+	if offset := cq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := cq.order; len(ps) > 0 {
@@ -489,7 +489,7 @@ func (cq *CardQuery) querySpec() *sqlgraph.QuerySpec {
 func (cq *CardQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(cq.driver.Dialect())
 	t1 := builder.Table(card.Table)
-	columns := cq.fields
+	columns := cq.ctx.Fields
 	if len(columns) == 0 {
 		columns = card.Columns
 	}
@@ -498,7 +498,7 @@ func (cq *CardQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = cq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if cq.unique != nil && *cq.unique {
+	if cq.ctx.Unique != nil && *cq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range cq.predicates {
@@ -507,12 +507,12 @@ func (cq *CardQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range cq.order {
 		p(selector)
 	}
-	if offset := cq.offset; offset != nil {
+	if offset := cq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := cq.limit; limit != nil {
+	if limit := cq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -520,13 +520,8 @@ func (cq *CardQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // CardGroupBy is the group-by builder for Card entities.
 type CardGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *CardQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -535,58 +530,46 @@ func (cgb *CardGroupBy) Aggregate(fns ...AggregateFunc) *CardGroupBy {
 	return cgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (cgb *CardGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := cgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, cgb.build.ctx, "GroupBy")
+	if err := cgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cgb.sql = query
-	return cgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*CardQuery, *CardGroupBy](ctx, cgb.build, cgb, cgb.build.inters, v)
 }
 
-func (cgb *CardGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range cgb.fields {
-		if !card.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (cgb *CardGroupBy) sqlScan(ctx context.Context, root *CardQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(cgb.fns))
+	for _, fn := range cgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := cgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*cgb.flds)+len(cgb.fns))
+		for _, f := range *cgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*cgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := cgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := cgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (cgb *CardGroupBy) sqlQuery() *sql.Selector {
-	selector := cgb.sql.Select()
-	aggregation := make([]string, 0, len(cgb.fns))
-	for _, fn := range cgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(cgb.fields)+len(cgb.fns))
-		for _, f := range cgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(cgb.fields...)...)
-}
-
 // CardSelect is the builder for selecting fields of Card entities.
 type CardSelect struct {
 	*CardQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -597,26 +580,27 @@ func (cs *CardSelect) Aggregate(fns ...AggregateFunc) *CardSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (cs *CardSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, cs.ctx, "Select")
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cs.sql = cs.CardQuery.sqlQuery(ctx)
-	return cs.sqlScan(ctx, v)
+	return scanWithInterceptors[*CardQuery, *CardSelect](ctx, cs.CardQuery, cs, cs.inters, v)
 }
 
-func (cs *CardSelect) sqlScan(ctx context.Context, v any) error {
+func (cs *CardSelect) sqlScan(ctx context.Context, root *CardQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(cs.fns))
 	for _, fn := range cs.fns {
-		aggregation = append(aggregation, fn(cs.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*cs.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		cs.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		cs.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := cs.sql.Query()
+	query, args := selector.Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

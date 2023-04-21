@@ -68,50 +68,8 @@ func (gic *GroupInfoCreate) Mutation() *GroupInfoMutation {
 
 // Save creates the GroupInfo in the database.
 func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
-	var (
-		err  error
-		node *GroupInfo
-	)
 	gic.defaults()
-	if len(gic.hooks) == 0 {
-		if err = gic.check(); err != nil {
-			return nil, err
-		}
-		node, err = gic.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GroupInfoMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = gic.check(); err != nil {
-				return nil, err
-			}
-			gic.mutation = mutation
-			if node, err = gic.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(gic.hooks) - 1; i >= 0; i-- {
-			if gic.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = gic.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, gic.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*GroupInfo)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from GroupInfoMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*GroupInfo, GroupInfoMutation](ctx, gic.sqlSave, gic.mutation, gic.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -156,6 +114,9 @@ func (gic *GroupInfoCreate) check() error {
 }
 
 func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
+	if err := gic.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := gic.createSpec()
 	if err := sqlgraph.CreateNode(ctx, gic.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -165,19 +126,15 @@ func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
+	gic.mutation.id = &_node.ID
+	gic.mutation.done = true
 	return _node, nil
 }
 
 func (gic *GroupInfoCreate) createSpec() (*GroupInfo, *sqlgraph.CreateSpec) {
 	var (
 		_node = &GroupInfo{config: gic.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: groupinfo.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: groupinfo.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(groupinfo.Table, sqlgraph.NewFieldSpec(groupinfo.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = gic.conflict
 	if value, ok := gic.mutation.Desc(); ok {
@@ -196,10 +153,7 @@ func (gic *GroupInfoCreate) createSpec() (*GroupInfo, *sqlgraph.CreateSpec) {
 			Columns: []string{groupinfo.GroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: group.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -422,8 +376,8 @@ func (gicb *GroupInfoCreateBulk) Save(ctx context.Context) ([]*GroupInfo, error)
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, gicb.builders[i+1].mutation)
 				} else {

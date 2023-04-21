@@ -353,6 +353,12 @@ func TestInterface(t *testing.T) {
 	require.Equal(t, []driver.Value{int64(10), int64(20)}, values)
 }
 
+func TestScanTypeOf(t *testing.T) {
+	mock := &Rows{ColumnScanner: toRows(sqlmock.NewRows([]string{"age"}).AddRow(10))}
+	tv := ScanTypeOf(mock, 0)
+	require.IsType(t, (*any)(nil), tv)
+}
+
 func toRows(mrows *sqlmock.Rows) *sql.Rows {
 	db, mock, _ := sqlmock.New()
 	mock.ExpectQuery("").WillReturnRows(mrows)

@@ -71,50 +71,8 @@ func (ugc *UserGroupCreate) Mutation() *UserGroupMutation {
 
 // Save creates the UserGroup in the database.
 func (ugc *UserGroupCreate) Save(ctx context.Context) (*UserGroup, error) {
-	var (
-		err  error
-		node *UserGroup
-	)
 	ugc.defaults()
-	if len(ugc.hooks) == 0 {
-		if err = ugc.check(); err != nil {
-			return nil, err
-		}
-		node, err = ugc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*UserGroupMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = ugc.check(); err != nil {
-				return nil, err
-			}
-			ugc.mutation = mutation
-			if node, err = ugc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(ugc.hooks) - 1; i >= 0; i-- {
-			if ugc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ugc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, ugc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*UserGroup)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from UserGroupMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*UserGroup, UserGroupMutation](ctx, ugc.sqlSave, ugc.mutation, ugc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -168,6 +126,9 @@ func (ugc *UserGroupCreate) check() error {
 }
 
 func (ugc *UserGroupCreate) sqlSave(ctx context.Context) (*UserGroup, error) {
+	if err := ugc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := ugc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ugc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -177,19 +138,15 @@ func (ugc *UserGroupCreate) sqlSave(ctx context.Context) (*UserGroup, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
+	ugc.mutation.id = &_node.ID
+	ugc.mutation.done = true
 	return _node, nil
 }
 
 func (ugc *UserGroupCreate) createSpec() (*UserGroup, *sqlgraph.CreateSpec) {
 	var (
 		_node = &UserGroup{config: ugc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: usergroup.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: usergroup.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(usergroup.Table, sqlgraph.NewFieldSpec(usergroup.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = ugc.conflict
 	if value, ok := ugc.mutation.JoinedAt(); ok {
@@ -204,10 +161,7 @@ func (ugc *UserGroupCreate) createSpec() (*UserGroup, *sqlgraph.CreateSpec) {
 			Columns: []string{usergroup.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -224,10 +178,7 @@ func (ugc *UserGroupCreate) createSpec() (*UserGroup, *sqlgraph.CreateSpec) {
 			Columns: []string{usergroup.GroupColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: group.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -464,8 +415,8 @@ func (ugcb *UserGroupCreateBulk) Save(ctx context.Context) ([]*UserGroup, error)
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, ugcb.builders[i+1].mutation)
 				} else {

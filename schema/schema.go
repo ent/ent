@@ -22,3 +22,22 @@ type Annotation interface {
 type Merger interface {
 	Merge(Annotation) Annotation
 }
+
+// CommentAnnotation is a builtin schema annotation for
+// configuring the schema's Godoc comment.
+type CommentAnnotation struct {
+	Text string // Comment text.
+}
+
+// Name implements the Annotation interface.
+func (*CommentAnnotation) Name() string {
+	return "Comment"
+}
+
+// Comment is a builtin schema annotation for
+// configuring the schema's Godoc comment.
+func Comment(text string) *CommentAnnotation {
+	return &CommentAnnotation{Text: text}
+}
+
+var _ Annotation = (*CommentAnnotation)(nil)

@@ -73,6 +73,26 @@ func (cu *CardUpdate) SetInHook(s string) *CardUpdate {
 	return cu
 }
 
+// SetExpiredAt sets the "expired_at" field.
+func (cu *CardUpdate) SetExpiredAt(t time.Time) *CardUpdate {
+	cu.mutation.SetExpiredAt(t)
+	return cu
+}
+
+// SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
+func (cu *CardUpdate) SetNillableExpiredAt(t *time.Time) *CardUpdate {
+	if t != nil {
+		cu.SetExpiredAt(*t)
+	}
+	return cu
+}
+
+// ClearExpiredAt clears the value of the "expired_at" field.
+func (cu *CardUpdate) ClearExpiredAt() *CardUpdate {
+	cu.mutation.ClearExpiredAt()
+	return cu
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (cu *CardUpdate) SetOwnerID(id int) *CardUpdate {
 	cu.mutation.SetOwnerID(id)
@@ -105,34 +125,7 @@ func (cu *CardUpdate) ClearOwner() *CardUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (cu *CardUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(cu.hooks) == 0 {
-		affected, err = cu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*CardMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			cu.mutation = mutation
-			affected, err = cu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(cu.hooks) - 1; i >= 0; i-- {
-			if cu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = cu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, cu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, CardMutation](ctx, cu.sqlSave, cu.mutation, cu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -158,16 +151,7 @@ func (cu *CardUpdate) ExecX(ctx context.Context) {
 }
 
 func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   card.Table,
-			Columns: card.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: card.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(card.Table, card.Columns, sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt))
 	if ps := cu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -187,6 +171,12 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := cu.mutation.InHook(); ok {
 		_spec.SetField(card.FieldInHook, field.TypeString, value)
 	}
+	if value, ok := cu.mutation.ExpiredAt(); ok {
+		_spec.SetField(card.FieldExpiredAt, field.TypeTime, value)
+	}
+	if cu.mutation.ExpiredAtCleared() {
+		_spec.ClearField(card.FieldExpiredAt, field.TypeTime)
+	}
 	if cu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -195,10 +185,7 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{card.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -211,10 +198,7 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{card.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -230,6 +214,7 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	cu.mutation.done = true
 	return n, nil
 }
 
@@ -281,6 +266,26 @@ func (cuo *CardUpdateOne) SetInHook(s string) *CardUpdateOne {
 	return cuo
 }
 
+// SetExpiredAt sets the "expired_at" field.
+func (cuo *CardUpdateOne) SetExpiredAt(t time.Time) *CardUpdateOne {
+	cuo.mutation.SetExpiredAt(t)
+	return cuo
+}
+
+// SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
+func (cuo *CardUpdateOne) SetNillableExpiredAt(t *time.Time) *CardUpdateOne {
+	if t != nil {
+		cuo.SetExpiredAt(*t)
+	}
+	return cuo
+}
+
+// ClearExpiredAt clears the value of the "expired_at" field.
+func (cuo *CardUpdateOne) ClearExpiredAt() *CardUpdateOne {
+	cuo.mutation.ClearExpiredAt()
+	return cuo
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (cuo *CardUpdateOne) SetOwnerID(id int) *CardUpdateOne {
 	cuo.mutation.SetOwnerID(id)
@@ -311,6 +316,12 @@ func (cuo *CardUpdateOne) ClearOwner() *CardUpdateOne {
 	return cuo
 }
 
+// Where appends a list predicates to the CardUpdate builder.
+func (cuo *CardUpdateOne) Where(ps ...predicate.Card) *CardUpdateOne {
+	cuo.mutation.Where(ps...)
+	return cuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (cuo *CardUpdateOne) Select(field string, fields ...string) *CardUpdateOne {
@@ -320,40 +331,7 @@ func (cuo *CardUpdateOne) Select(field string, fields ...string) *CardUpdateOne 
 
 // Save executes the query and returns the updated Card entity.
 func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
-	var (
-		err  error
-		node *Card
-	)
-	if len(cuo.hooks) == 0 {
-		node, err = cuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*CardMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			cuo.mutation = mutation
-			node, err = cuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(cuo.hooks) - 1; i >= 0; i-- {
-			if cuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = cuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, cuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Card)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from CardMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Card, CardMutation](ctx, cuo.sqlSave, cuo.mutation, cuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -379,16 +357,7 @@ func (cuo *CardUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (_node *Card, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   card.Table,
-			Columns: card.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: card.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(card.Table, card.Columns, sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt))
 	id, ok := cuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Card.id" for update`)}
@@ -425,6 +394,12 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (_node *Card, err error) 
 	if value, ok := cuo.mutation.InHook(); ok {
 		_spec.SetField(card.FieldInHook, field.TypeString, value)
 	}
+	if value, ok := cuo.mutation.ExpiredAt(); ok {
+		_spec.SetField(card.FieldExpiredAt, field.TypeTime, value)
+	}
+	if cuo.mutation.ExpiredAtCleared() {
+		_spec.ClearField(card.FieldExpiredAt, field.TypeTime)
+	}
 	if cuo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -433,10 +408,7 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (_node *Card, err error) 
 			Columns: []string{card.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -449,10 +421,7 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (_node *Card, err error) 
 			Columns: []string{card.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -471,5 +440,6 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (_node *Card, err error) 
 		}
 		return nil, err
 	}
+	cuo.mutation.done = true
 	return _node, nil
 }

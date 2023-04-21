@@ -56,49 +56,7 @@ func (gtc *GroupTagCreate) Mutation() *GroupTagMutation {
 
 // Save creates the GroupTag in the database.
 func (gtc *GroupTagCreate) Save(ctx context.Context) (*GroupTag, error) {
-	var (
-		err  error
-		node *GroupTag
-	)
-	if len(gtc.hooks) == 0 {
-		if err = gtc.check(); err != nil {
-			return nil, err
-		}
-		node, err = gtc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GroupTagMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = gtc.check(); err != nil {
-				return nil, err
-			}
-			gtc.mutation = mutation
-			if node, err = gtc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(gtc.hooks) - 1; i >= 0; i-- {
-			if gtc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = gtc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, gtc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*GroupTag)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from GroupTagMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*GroupTag, GroupTagMutation](ctx, gtc.sqlSave, gtc.mutation, gtc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -141,6 +99,9 @@ func (gtc *GroupTagCreate) check() error {
 }
 
 func (gtc *GroupTagCreate) sqlSave(ctx context.Context) (*GroupTag, error) {
+	if err := gtc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := gtc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, gtc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -150,19 +111,15 @@ func (gtc *GroupTagCreate) sqlSave(ctx context.Context) (*GroupTag, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
+	gtc.mutation.id = &_node.ID
+	gtc.mutation.done = true
 	return _node, nil
 }
 
 func (gtc *GroupTagCreate) createSpec() (*GroupTag, *sqlgraph.CreateSpec) {
 	var (
 		_node = &GroupTag{config: gtc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: grouptag.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: grouptag.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(grouptag.Table, sqlgraph.NewFieldSpec(grouptag.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = gtc.conflict
 	if nodes := gtc.mutation.TagIDs(); len(nodes) > 0 {
@@ -173,10 +130,7 @@ func (gtc *GroupTagCreate) createSpec() (*GroupTag, *sqlgraph.CreateSpec) {
 			Columns: []string{grouptag.TagColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tag.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -193,10 +147,7 @@ func (gtc *GroupTagCreate) createSpec() (*GroupTag, *sqlgraph.CreateSpec) {
 			Columns: []string{grouptag.GroupColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: group.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -406,8 +357,8 @@ func (gtcb *GroupTagCreateBulk) Save(ctx context.Context) ([]*GroupTag, error) {
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, gtcb.builders[i+1].mutation)
 				} else {

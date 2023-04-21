@@ -89,40 +89,7 @@ func (utu *UserTweetUpdate) ClearTweet() *UserTweetUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (utu *UserTweetUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(utu.hooks) == 0 {
-		if err = utu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = utu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*UserTweetMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = utu.check(); err != nil {
-				return 0, err
-			}
-			utu.mutation = mutation
-			affected, err = utu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(utu.hooks) - 1; i >= 0; i-- {
-			if utu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = utu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, utu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, UserTweetMutation](ctx, utu.sqlSave, utu.mutation, utu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -159,16 +126,10 @@ func (utu *UserTweetUpdate) check() error {
 }
 
 func (utu *UserTweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   usertweet.Table,
-			Columns: usertweet.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: usertweet.FieldID,
-			},
-		},
+	if err := utu.check(); err != nil {
+		return n, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(usertweet.Table, usertweet.Columns, sqlgraph.NewFieldSpec(usertweet.FieldID, field.TypeInt))
 	if ps := utu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -187,10 +148,7 @@ func (utu *UserTweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{usertweet.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -203,10 +161,7 @@ func (utu *UserTweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{usertweet.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -222,10 +177,7 @@ func (utu *UserTweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{usertweet.TweetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tweet.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -238,10 +190,7 @@ func (utu *UserTweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{usertweet.TweetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tweet.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -257,6 +206,7 @@ func (utu *UserTweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	utu.mutation.done = true
 	return n, nil
 }
 
@@ -321,6 +271,12 @@ func (utuo *UserTweetUpdateOne) ClearTweet() *UserTweetUpdateOne {
 	return utuo
 }
 
+// Where appends a list predicates to the UserTweetUpdate builder.
+func (utuo *UserTweetUpdateOne) Where(ps ...predicate.UserTweet) *UserTweetUpdateOne {
+	utuo.mutation.Where(ps...)
+	return utuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (utuo *UserTweetUpdateOne) Select(field string, fields ...string) *UserTweetUpdateOne {
@@ -330,46 +286,7 @@ func (utuo *UserTweetUpdateOne) Select(field string, fields ...string) *UserTwee
 
 // Save executes the query and returns the updated UserTweet entity.
 func (utuo *UserTweetUpdateOne) Save(ctx context.Context) (*UserTweet, error) {
-	var (
-		err  error
-		node *UserTweet
-	)
-	if len(utuo.hooks) == 0 {
-		if err = utuo.check(); err != nil {
-			return nil, err
-		}
-		node, err = utuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*UserTweetMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = utuo.check(); err != nil {
-				return nil, err
-			}
-			utuo.mutation = mutation
-			node, err = utuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(utuo.hooks) - 1; i >= 0; i-- {
-			if utuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = utuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, utuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*UserTweet)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from UserTweetMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*UserTweet, UserTweetMutation](ctx, utuo.sqlSave, utuo.mutation, utuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -406,16 +323,10 @@ func (utuo *UserTweetUpdateOne) check() error {
 }
 
 func (utuo *UserTweetUpdateOne) sqlSave(ctx context.Context) (_node *UserTweet, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   usertweet.Table,
-			Columns: usertweet.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: usertweet.FieldID,
-			},
-		},
+	if err := utuo.check(); err != nil {
+		return _node, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(usertweet.Table, usertweet.Columns, sqlgraph.NewFieldSpec(usertweet.FieldID, field.TypeInt))
 	id, ok := utuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "UserTweet.id" for update`)}
@@ -451,10 +362,7 @@ func (utuo *UserTweetUpdateOne) sqlSave(ctx context.Context) (_node *UserTweet, 
 			Columns: []string{usertweet.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -467,10 +375,7 @@ func (utuo *UserTweetUpdateOne) sqlSave(ctx context.Context) (_node *UserTweet, 
 			Columns: []string{usertweet.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -486,10 +391,7 @@ func (utuo *UserTweetUpdateOne) sqlSave(ctx context.Context) (_node *UserTweet, 
 			Columns: []string{usertweet.TweetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tweet.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -502,10 +404,7 @@ func (utuo *UserTweetUpdateOne) sqlSave(ctx context.Context) (_node *UserTweet, 
 			Columns: []string{usertweet.TweetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tweet.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -524,5 +423,6 @@ func (utuo *UserTweetUpdateOne) sqlSave(ctx context.Context) (_node *UserTweet, 
 		}
 		return nil, err
 	}
+	utuo.mutation.done = true
 	return _node, nil
 }

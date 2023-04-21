@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgeschema/ent/role"
 )
@@ -26,7 +27,8 @@ type Role struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RoleQuery when eager-loading is set.
-	Edges RoleEdges `json:"edges"`
+	Edges        RoleEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // RoleEdges holds the relations/edges for other nodes in the graph.
@@ -70,7 +72,7 @@ func (*Role) scanValues(columns []string) ([]any, error) {
 		case role.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Role", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -102,26 +104,34 @@ func (r *Role) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				r.CreatedAt = value.Time
 			}
+		default:
+			r.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the Role.
+// This includes values selected through modifiers, order, etc.
+func (r *Role) Value(name string) (ent.Value, error) {
+	return r.selectValues.Get(name)
+}
+
 // QueryUser queries the "user" edge of the Role entity.
 func (r *Role) QueryUser() *UserQuery {
-	return (&RoleClient{config: r.config}).QueryUser(r)
+	return NewRoleClient(r.config).QueryUser(r)
 }
 
 // QueryRolesUsers queries the "roles_users" edge of the Role entity.
 func (r *Role) QueryRolesUsers() *RoleUserQuery {
-	return (&RoleClient{config: r.config}).QueryRolesUsers(r)
+	return NewRoleClient(r.config).QueryRolesUsers(r)
 }
 
 // Update returns a builder for updating this Role.
 // Note that you need to call Role.Unwrap() before calling this method if this Role
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (r *Role) Update() *RoleUpdateOne {
-	return (&RoleClient{config: r.config}).UpdateOne(r)
+	return NewRoleClient(r.config).UpdateOne(r)
 }
 
 // Unwrap unwraps the Role entity that was returned from a transaction after it was closed,
@@ -151,9 +161,3 @@ func (r *Role) String() string {
 
 // Roles is a parsable slice of Role.
 type Roles []*Role
-
-func (r Roles) config(cfg config) {
-	for _i := range r {
-		r[_i].config = cfg
-	}
-}

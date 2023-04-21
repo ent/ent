@@ -21,11 +21,9 @@ import (
 // RelationshipInfoQuery is the builder for querying RelationshipInfo entities.
 type RelationshipInfoQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
+	ctx        *QueryContext
+	order      []relationshipinfo.OrderOption
+	inters     []Interceptor
 	predicates []predicate.RelationshipInfo
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -38,27 +36,27 @@ func (riq *RelationshipInfoQuery) Where(ps ...predicate.RelationshipInfo) *Relat
 	return riq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (riq *RelationshipInfoQuery) Limit(limit int) *RelationshipInfoQuery {
-	riq.limit = &limit
+	riq.ctx.Limit = &limit
 	return riq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (riq *RelationshipInfoQuery) Offset(offset int) *RelationshipInfoQuery {
-	riq.offset = &offset
+	riq.ctx.Offset = &offset
 	return riq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (riq *RelationshipInfoQuery) Unique(unique bool) *RelationshipInfoQuery {
-	riq.unique = &unique
+	riq.ctx.Unique = &unique
 	return riq
 }
 
-// Order adds an order step to the query.
-func (riq *RelationshipInfoQuery) Order(o ...OrderFunc) *RelationshipInfoQuery {
+// Order specifies how the records should be ordered.
+func (riq *RelationshipInfoQuery) Order(o ...relationshipinfo.OrderOption) *RelationshipInfoQuery {
 	riq.order = append(riq.order, o...)
 	return riq
 }
@@ -66,7 +64,7 @@ func (riq *RelationshipInfoQuery) Order(o ...OrderFunc) *RelationshipInfoQuery {
 // First returns the first RelationshipInfo entity from the query.
 // Returns a *NotFoundError when no RelationshipInfo was found.
 func (riq *RelationshipInfoQuery) First(ctx context.Context) (*RelationshipInfo, error) {
-	nodes, err := riq.Limit(1).All(ctx)
+	nodes, err := riq.Limit(1).All(setContextOp(ctx, riq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +87,7 @@ func (riq *RelationshipInfoQuery) FirstX(ctx context.Context) *RelationshipInfo 
 // Returns a *NotFoundError when no RelationshipInfo ID was found.
 func (riq *RelationshipInfoQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = riq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = riq.Limit(1).IDs(setContextOp(ctx, riq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -112,7 +110,7 @@ func (riq *RelationshipInfoQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one RelationshipInfo entity is found.
 // Returns a *NotFoundError when no RelationshipInfo entities are found.
 func (riq *RelationshipInfoQuery) Only(ctx context.Context) (*RelationshipInfo, error) {
-	nodes, err := riq.Limit(2).All(ctx)
+	nodes, err := riq.Limit(2).All(setContextOp(ctx, riq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +138,7 @@ func (riq *RelationshipInfoQuery) OnlyX(ctx context.Context) *RelationshipInfo {
 // Returns a *NotFoundError when no entities are found.
 func (riq *RelationshipInfoQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = riq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = riq.Limit(2).IDs(setContextOp(ctx, riq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -165,10 +163,12 @@ func (riq *RelationshipInfoQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of RelationshipInfos.
 func (riq *RelationshipInfoQuery) All(ctx context.Context) ([]*RelationshipInfo, error) {
+	ctx = setContextOp(ctx, riq.ctx, "All")
 	if err := riq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return riq.sqlAll(ctx)
+	qr := querierAll[[]*RelationshipInfo, *RelationshipInfoQuery]()
+	return withInterceptors[[]*RelationshipInfo](ctx, riq, qr, riq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -181,9 +181,12 @@ func (riq *RelationshipInfoQuery) AllX(ctx context.Context) []*RelationshipInfo 
 }
 
 // IDs executes the query and returns a list of RelationshipInfo IDs.
-func (riq *RelationshipInfoQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
-	if err := riq.Select(relationshipinfo.FieldID).Scan(ctx, &ids); err != nil {
+func (riq *RelationshipInfoQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if riq.ctx.Unique == nil && riq.path != nil {
+		riq.Unique(true)
+	}
+	ctx = setContextOp(ctx, riq.ctx, "IDs")
+	if err = riq.Select(relationshipinfo.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -200,10 +203,11 @@ func (riq *RelationshipInfoQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (riq *RelationshipInfoQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, riq.ctx, "Count")
 	if err := riq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return riq.sqlCount(ctx)
+	return withInterceptors[int](ctx, riq, querierCount[*RelationshipInfoQuery](), riq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -217,10 +221,15 @@ func (riq *RelationshipInfoQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (riq *RelationshipInfoQuery) Exist(ctx context.Context) (bool, error) {
-	if err := riq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, riq.ctx, "Exist")
+	switch _, err := riq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return riq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -240,14 +249,13 @@ func (riq *RelationshipInfoQuery) Clone() *RelationshipInfoQuery {
 	}
 	return &RelationshipInfoQuery{
 		config:     riq.config,
-		limit:      riq.limit,
-		offset:     riq.offset,
-		order:      append([]OrderFunc{}, riq.order...),
+		ctx:        riq.ctx.Clone(),
+		order:      append([]relationshipinfo.OrderOption{}, riq.order...),
+		inters:     append([]Interceptor{}, riq.inters...),
 		predicates: append([]predicate.RelationshipInfo{}, riq.predicates...),
 		// clone intermediate query.
-		sql:    riq.sql.Clone(),
-		path:   riq.path,
-		unique: riq.unique,
+		sql:  riq.sql.Clone(),
+		path: riq.path,
 	}
 }
 
@@ -266,16 +274,11 @@ func (riq *RelationshipInfoQuery) Clone() *RelationshipInfoQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (riq *RelationshipInfoQuery) GroupBy(field string, fields ...string) *RelationshipInfoGroupBy {
-	grbuild := &RelationshipInfoGroupBy{config: riq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := riq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return riq.sqlQuery(ctx), nil
-	}
+	riq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &RelationshipInfoGroupBy{build: riq}
+	grbuild.flds = &riq.ctx.Fields
 	grbuild.label = relationshipinfo.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -292,11 +295,11 @@ func (riq *RelationshipInfoQuery) GroupBy(field string, fields ...string) *Relat
 //		Select(relationshipinfo.FieldText).
 //		Scan(ctx, &v)
 func (riq *RelationshipInfoQuery) Select(fields ...string) *RelationshipInfoSelect {
-	riq.fields = append(riq.fields, fields...)
-	selbuild := &RelationshipInfoSelect{RelationshipInfoQuery: riq}
-	selbuild.label = relationshipinfo.Label
-	selbuild.flds, selbuild.scan = &riq.fields, selbuild.Scan
-	return selbuild
+	riq.ctx.Fields = append(riq.ctx.Fields, fields...)
+	sbuild := &RelationshipInfoSelect{RelationshipInfoQuery: riq}
+	sbuild.label = relationshipinfo.Label
+	sbuild.flds, sbuild.scan = &riq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a RelationshipInfoSelect configured with the given aggregations.
@@ -305,7 +308,17 @@ func (riq *RelationshipInfoQuery) Aggregate(fns ...AggregateFunc) *RelationshipI
 }
 
 func (riq *RelationshipInfoQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range riq.fields {
+	for _, inter := range riq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, riq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range riq.ctx.Fields {
 		if !relationshipinfo.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -347,41 +360,22 @@ func (riq *RelationshipInfoQuery) sqlAll(ctx context.Context, hooks ...queryHook
 
 func (riq *RelationshipInfoQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := riq.querySpec()
-	_spec.Node.Columns = riq.fields
-	if len(riq.fields) > 0 {
-		_spec.Unique = riq.unique != nil && *riq.unique
+	_spec.Node.Columns = riq.ctx.Fields
+	if len(riq.ctx.Fields) > 0 {
+		_spec.Unique = riq.ctx.Unique != nil && *riq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, riq.driver, _spec)
 }
 
-func (riq *RelationshipInfoQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := riq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (riq *RelationshipInfoQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   relationshipinfo.Table,
-			Columns: relationshipinfo.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: relationshipinfo.FieldID,
-			},
-		},
-		From:   riq.sql,
-		Unique: true,
-	}
-	if unique := riq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(relationshipinfo.Table, relationshipinfo.Columns, sqlgraph.NewFieldSpec(relationshipinfo.FieldID, field.TypeInt))
+	_spec.From = riq.sql
+	if unique := riq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if riq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := riq.fields; len(fields) > 0 {
+	if fields := riq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, relationshipinfo.FieldID)
 		for i := range fields {
@@ -397,10 +391,10 @@ func (riq *RelationshipInfoQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := riq.limit; limit != nil {
+	if limit := riq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := riq.offset; offset != nil {
+	if offset := riq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := riq.order; len(ps) > 0 {
@@ -416,7 +410,7 @@ func (riq *RelationshipInfoQuery) querySpec() *sqlgraph.QuerySpec {
 func (riq *RelationshipInfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(riq.driver.Dialect())
 	t1 := builder.Table(relationshipinfo.Table)
-	columns := riq.fields
+	columns := riq.ctx.Fields
 	if len(columns) == 0 {
 		columns = relationshipinfo.Columns
 	}
@@ -425,7 +419,7 @@ func (riq *RelationshipInfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = riq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if riq.unique != nil && *riq.unique {
+	if riq.ctx.Unique != nil && *riq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range riq.predicates {
@@ -434,12 +428,12 @@ func (riq *RelationshipInfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range riq.order {
 		p(selector)
 	}
-	if offset := riq.offset; offset != nil {
+	if offset := riq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := riq.limit; limit != nil {
+	if limit := riq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -447,13 +441,8 @@ func (riq *RelationshipInfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // RelationshipInfoGroupBy is the group-by builder for RelationshipInfo entities.
 type RelationshipInfoGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *RelationshipInfoQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -462,58 +451,46 @@ func (rigb *RelationshipInfoGroupBy) Aggregate(fns ...AggregateFunc) *Relationsh
 	return rigb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (rigb *RelationshipInfoGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := rigb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, rigb.build.ctx, "GroupBy")
+	if err := rigb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	rigb.sql = query
-	return rigb.sqlScan(ctx, v)
+	return scanWithInterceptors[*RelationshipInfoQuery, *RelationshipInfoGroupBy](ctx, rigb.build, rigb, rigb.build.inters, v)
 }
 
-func (rigb *RelationshipInfoGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range rigb.fields {
-		if !relationshipinfo.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (rigb *RelationshipInfoGroupBy) sqlScan(ctx context.Context, root *RelationshipInfoQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(rigb.fns))
+	for _, fn := range rigb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := rigb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*rigb.flds)+len(rigb.fns))
+		for _, f := range *rigb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*rigb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := rigb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := rigb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (rigb *RelationshipInfoGroupBy) sqlQuery() *sql.Selector {
-	selector := rigb.sql.Select()
-	aggregation := make([]string, 0, len(rigb.fns))
-	for _, fn := range rigb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(rigb.fields)+len(rigb.fns))
-		for _, f := range rigb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(rigb.fields...)...)
-}
-
 // RelationshipInfoSelect is the builder for selecting fields of RelationshipInfo entities.
 type RelationshipInfoSelect struct {
 	*RelationshipInfoQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -524,26 +501,27 @@ func (ris *RelationshipInfoSelect) Aggregate(fns ...AggregateFunc) *Relationship
 
 // Scan applies the selector query and scans the result into the given value.
 func (ris *RelationshipInfoSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, ris.ctx, "Select")
 	if err := ris.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ris.sql = ris.RelationshipInfoQuery.sqlQuery(ctx)
-	return ris.sqlScan(ctx, v)
+	return scanWithInterceptors[*RelationshipInfoQuery, *RelationshipInfoSelect](ctx, ris.RelationshipInfoQuery, ris, ris.inters, v)
 }
 
-func (ris *RelationshipInfoSelect) sqlScan(ctx context.Context, v any) error {
+func (ris *RelationshipInfoSelect) sqlScan(ctx context.Context, root *RelationshipInfoQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(ris.fns))
 	for _, fn := range ris.fns {
-		aggregation = append(aggregation, fn(ris.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*ris.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		ris.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		ris.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := ris.sql.Query()
+	query, args := selector.Query()
 	if err := ris.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

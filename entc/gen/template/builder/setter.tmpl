@@ -26,9 +26,9 @@ in the LICENSE file in the root directory of this source tree.
 	func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ $f.Type }}) *{{ $builder }} {
 		{{- /* setting numeric type override previous calls to Add. */}}
 		{{- if and $updater $f.SupportsMutationAdd }}
-			{{ $receiver }}.mutation.{{ print "Reset" $f.StructField }}()
+			{{ $receiver }}.mutation.{{ $f.MutationReset }}()
 		{{- end }}
-		{{ $receiver }}.mutation.{{ $func }}({{ $p }})
+		{{ $receiver }}.mutation.{{ $f.MutationSet }}({{ $p }})
 		return {{ $receiver }}
 	}
 

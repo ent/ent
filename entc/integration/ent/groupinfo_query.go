@@ -24,11 +24,9 @@ import (
 // GroupInfoQuery is the builder for querying GroupInfo entities.
 type GroupInfoQuery struct {
 	config
-	limit           *int
-	offset          *int
-	unique          *bool
-	order           []OrderFunc
-	fields          []string
+	ctx             *QueryContext
+	order           []groupinfo.OrderOption
+	inters          []Interceptor
 	predicates      []predicate.GroupInfo
 	withGroups      *GroupQuery
 	modifiers       []func(*sql.Selector)
@@ -44,34 +42,34 @@ func (giq *GroupInfoQuery) Where(ps ...predicate.GroupInfo) *GroupInfoQuery {
 	return giq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (giq *GroupInfoQuery) Limit(limit int) *GroupInfoQuery {
-	giq.limit = &limit
+	giq.ctx.Limit = &limit
 	return giq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (giq *GroupInfoQuery) Offset(offset int) *GroupInfoQuery {
-	giq.offset = &offset
+	giq.ctx.Offset = &offset
 	return giq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (giq *GroupInfoQuery) Unique(unique bool) *GroupInfoQuery {
-	giq.unique = &unique
+	giq.ctx.Unique = &unique
 	return giq
 }
 
-// Order adds an order step to the query.
-func (giq *GroupInfoQuery) Order(o ...OrderFunc) *GroupInfoQuery {
+// Order specifies how the records should be ordered.
+func (giq *GroupInfoQuery) Order(o ...groupinfo.OrderOption) *GroupInfoQuery {
 	giq.order = append(giq.order, o...)
 	return giq
 }
 
 // QueryGroups chains the current query on the "groups" edge.
 func (giq *GroupInfoQuery) QueryGroups() *GroupQuery {
-	query := &GroupQuery{config: giq.config}
+	query := (&GroupClient{config: giq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := giq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -94,7 +92,7 @@ func (giq *GroupInfoQuery) QueryGroups() *GroupQuery {
 // First returns the first GroupInfo entity from the query.
 // Returns a *NotFoundError when no GroupInfo was found.
 func (giq *GroupInfoQuery) First(ctx context.Context) (*GroupInfo, error) {
-	nodes, err := giq.Limit(1).All(ctx)
+	nodes, err := giq.Limit(1).All(setContextOp(ctx, giq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +115,7 @@ func (giq *GroupInfoQuery) FirstX(ctx context.Context) *GroupInfo {
 // Returns a *NotFoundError when no GroupInfo ID was found.
 func (giq *GroupInfoQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = giq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = giq.Limit(1).IDs(setContextOp(ctx, giq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -140,7 +138,7 @@ func (giq *GroupInfoQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one GroupInfo entity is found.
 // Returns a *NotFoundError when no GroupInfo entities are found.
 func (giq *GroupInfoQuery) Only(ctx context.Context) (*GroupInfo, error) {
-	nodes, err := giq.Limit(2).All(ctx)
+	nodes, err := giq.Limit(2).All(setContextOp(ctx, giq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +166,7 @@ func (giq *GroupInfoQuery) OnlyX(ctx context.Context) *GroupInfo {
 // Returns a *NotFoundError when no entities are found.
 func (giq *GroupInfoQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = giq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = giq.Limit(2).IDs(setContextOp(ctx, giq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -193,10 +191,12 @@ func (giq *GroupInfoQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of GroupInfos.
 func (giq *GroupInfoQuery) All(ctx context.Context) ([]*GroupInfo, error) {
+	ctx = setContextOp(ctx, giq.ctx, "All")
 	if err := giq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return giq.sqlAll(ctx)
+	qr := querierAll[[]*GroupInfo, *GroupInfoQuery]()
+	return withInterceptors[[]*GroupInfo](ctx, giq, qr, giq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -209,9 +209,12 @@ func (giq *GroupInfoQuery) AllX(ctx context.Context) []*GroupInfo {
 }
 
 // IDs executes the query and returns a list of GroupInfo IDs.
-func (giq *GroupInfoQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
-	if err := giq.Select(groupinfo.FieldID).Scan(ctx, &ids); err != nil {
+func (giq *GroupInfoQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if giq.ctx.Unique == nil && giq.path != nil {
+		giq.Unique(true)
+	}
+	ctx = setContextOp(ctx, giq.ctx, "IDs")
+	if err = giq.Select(groupinfo.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -228,10 +231,11 @@ func (giq *GroupInfoQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (giq *GroupInfoQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, giq.ctx, "Count")
 	if err := giq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return giq.sqlCount(ctx)
+	return withInterceptors[int](ctx, giq, querierCount[*GroupInfoQuery](), giq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -245,10 +249,15 @@ func (giq *GroupInfoQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (giq *GroupInfoQuery) Exist(ctx context.Context) (bool, error) {
-	if err := giq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, giq.ctx, "Exist")
+	switch _, err := giq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return giq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -268,22 +277,21 @@ func (giq *GroupInfoQuery) Clone() *GroupInfoQuery {
 	}
 	return &GroupInfoQuery{
 		config:     giq.config,
-		limit:      giq.limit,
-		offset:     giq.offset,
-		order:      append([]OrderFunc{}, giq.order...),
+		ctx:        giq.ctx.Clone(),
+		order:      append([]groupinfo.OrderOption{}, giq.order...),
+		inters:     append([]Interceptor{}, giq.inters...),
 		predicates: append([]predicate.GroupInfo{}, giq.predicates...),
 		withGroups: giq.withGroups.Clone(),
 		// clone intermediate query.
-		sql:    giq.sql.Clone(),
-		path:   giq.path,
-		unique: giq.unique,
+		sql:  giq.sql.Clone(),
+		path: giq.path,
 	}
 }
 
 // WithGroups tells the query-builder to eager-load the nodes that are connected to
 // the "groups" edge. The optional arguments are used to configure the query builder of the edge.
 func (giq *GroupInfoQuery) WithGroups(opts ...func(*GroupQuery)) *GroupInfoQuery {
-	query := &GroupQuery{config: giq.config}
+	query := (&GroupClient{config: giq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -306,16 +314,11 @@ func (giq *GroupInfoQuery) WithGroups(opts ...func(*GroupQuery)) *GroupInfoQuery
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGroupBy {
-	grbuild := &GroupInfoGroupBy{config: giq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := giq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return giq.sqlQuery(ctx), nil
-	}
+	giq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &GroupInfoGroupBy{build: giq}
+	grbuild.flds = &giq.ctx.Fields
 	grbuild.label = groupinfo.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -332,11 +335,11 @@ func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGro
 //		Select(groupinfo.FieldDesc).
 //		Scan(ctx, &v)
 func (giq *GroupInfoQuery) Select(fields ...string) *GroupInfoSelect {
-	giq.fields = append(giq.fields, fields...)
-	selbuild := &GroupInfoSelect{GroupInfoQuery: giq}
-	selbuild.label = groupinfo.Label
-	selbuild.flds, selbuild.scan = &giq.fields, selbuild.Scan
-	return selbuild
+	giq.ctx.Fields = append(giq.ctx.Fields, fields...)
+	sbuild := &GroupInfoSelect{GroupInfoQuery: giq}
+	sbuild.label = groupinfo.Label
+	sbuild.flds, sbuild.scan = &giq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a GroupInfoSelect configured with the given aggregations.
@@ -345,7 +348,17 @@ func (giq *GroupInfoQuery) Aggregate(fns ...AggregateFunc) *GroupInfoSelect {
 }
 
 func (giq *GroupInfoQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range giq.fields {
+	for _, inter := range giq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, giq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range giq.ctx.Fields {
 		if !groupinfo.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -418,7 +431,7 @@ func (giq *GroupInfoQuery) loadGroups(ctx context.Context, query *GroupQuery, no
 	}
 	query.withFKs = true
 	query.Where(predicate.Group(func(s *sql.Selector) {
-		s.Where(sql.InValues(groupinfo.GroupsColumn, fks...))
+		s.Where(sql.InValues(s.C(groupinfo.GroupsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -431,7 +444,7 @@ func (giq *GroupInfoQuery) loadGroups(ctx context.Context, query *GroupQuery, no
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "group_info" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "group_info" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -443,41 +456,22 @@ func (giq *GroupInfoQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(giq.modifiers) > 0 {
 		_spec.Modifiers = giq.modifiers
 	}
-	_spec.Node.Columns = giq.fields
-	if len(giq.fields) > 0 {
-		_spec.Unique = giq.unique != nil && *giq.unique
+	_spec.Node.Columns = giq.ctx.Fields
+	if len(giq.ctx.Fields) > 0 {
+		_spec.Unique = giq.ctx.Unique != nil && *giq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, giq.driver, _spec)
 }
 
-func (giq *GroupInfoQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := giq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (giq *GroupInfoQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   groupinfo.Table,
-			Columns: groupinfo.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: groupinfo.FieldID,
-			},
-		},
-		From:   giq.sql,
-		Unique: true,
-	}
-	if unique := giq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(groupinfo.Table, groupinfo.Columns, sqlgraph.NewFieldSpec(groupinfo.FieldID, field.TypeInt))
+	_spec.From = giq.sql
+	if unique := giq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if giq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := giq.fields; len(fields) > 0 {
+	if fields := giq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, groupinfo.FieldID)
 		for i := range fields {
@@ -493,10 +487,10 @@ func (giq *GroupInfoQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := giq.limit; limit != nil {
+	if limit := giq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := giq.offset; offset != nil {
+	if offset := giq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := giq.order; len(ps) > 0 {
@@ -512,7 +506,7 @@ func (giq *GroupInfoQuery) querySpec() *sqlgraph.QuerySpec {
 func (giq *GroupInfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(giq.driver.Dialect())
 	t1 := builder.Table(groupinfo.Table)
-	columns := giq.fields
+	columns := giq.ctx.Fields
 	if len(columns) == 0 {
 		columns = groupinfo.Columns
 	}
@@ -521,7 +515,7 @@ func (giq *GroupInfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = giq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if giq.unique != nil && *giq.unique {
+	if giq.ctx.Unique != nil && *giq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, m := range giq.modifiers {
@@ -533,12 +527,12 @@ func (giq *GroupInfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range giq.order {
 		p(selector)
 	}
-	if offset := giq.offset; offset != nil {
+	if offset := giq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := giq.limit; limit != nil {
+	if limit := giq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -579,7 +573,7 @@ func (giq *GroupInfoQuery) Modify(modifiers ...func(s *sql.Selector)) *GroupInfo
 // WithNamedGroups tells the query-builder to eager-load the nodes that are connected to the "groups"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (giq *GroupInfoQuery) WithNamedGroups(name string, opts ...func(*GroupQuery)) *GroupInfoQuery {
-	query := &GroupQuery{config: giq.config}
+	query := (&GroupClient{config: giq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -592,13 +586,8 @@ func (giq *GroupInfoQuery) WithNamedGroups(name string, opts ...func(*GroupQuery
 
 // GroupInfoGroupBy is the group-by builder for GroupInfo entities.
 type GroupInfoGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *GroupInfoQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -607,58 +596,46 @@ func (gigb *GroupInfoGroupBy) Aggregate(fns ...AggregateFunc) *GroupInfoGroupBy 
 	return gigb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (gigb *GroupInfoGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := gigb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, gigb.build.ctx, "GroupBy")
+	if err := gigb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	gigb.sql = query
-	return gigb.sqlScan(ctx, v)
+	return scanWithInterceptors[*GroupInfoQuery, *GroupInfoGroupBy](ctx, gigb.build, gigb, gigb.build.inters, v)
 }
 
-func (gigb *GroupInfoGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range gigb.fields {
-		if !groupinfo.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (gigb *GroupInfoGroupBy) sqlScan(ctx context.Context, root *GroupInfoQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(gigb.fns))
+	for _, fn := range gigb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := gigb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*gigb.flds)+len(gigb.fns))
+		for _, f := range *gigb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*gigb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := gigb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := gigb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (gigb *GroupInfoGroupBy) sqlQuery() *sql.Selector {
-	selector := gigb.sql.Select()
-	aggregation := make([]string, 0, len(gigb.fns))
-	for _, fn := range gigb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(gigb.fields)+len(gigb.fns))
-		for _, f := range gigb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(gigb.fields...)...)
-}
-
 // GroupInfoSelect is the builder for selecting fields of GroupInfo entities.
 type GroupInfoSelect struct {
 	*GroupInfoQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -669,26 +646,27 @@ func (gis *GroupInfoSelect) Aggregate(fns ...AggregateFunc) *GroupInfoSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (gis *GroupInfoSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, gis.ctx, "Select")
 	if err := gis.prepareQuery(ctx); err != nil {
 		return err
 	}
-	gis.sql = gis.GroupInfoQuery.sqlQuery(ctx)
-	return gis.sqlScan(ctx, v)
+	return scanWithInterceptors[*GroupInfoQuery, *GroupInfoSelect](ctx, gis.GroupInfoQuery, gis, gis.inters, v)
 }
 
-func (gis *GroupInfoSelect) sqlScan(ctx context.Context, v any) error {
+func (gis *GroupInfoSelect) sqlScan(ctx context.Context, root *GroupInfoQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(gis.fns))
 	for _, fn := range gis.fns {
-		aggregation = append(aggregation, fn(gis.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*gis.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		gis.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		gis.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := gis.sql.Query()
+	query, args := selector.Query()
 	if err := gis.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/privacy/ent/task"
 	"entgo.io/ent/entc/integration/privacy/ent/user"
@@ -31,8 +32,9 @@ type Task struct {
 	UUID uuid.UUID `json:"uuid,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TaskQuery when eager-loading is set.
-	Edges      TaskEdges `json:"edges"`
-	user_tasks *int
+	Edges        TaskEdges `json:"edges"`
+	user_tasks   *int
+	selectValues sql.SelectValues
 }
 
 // TaskEdges holds the relations/edges for other nodes in the graph.
@@ -82,7 +84,7 @@ func (*Task) scanValues(columns []string) ([]any, error) {
 		case task.ForeignKeys[0]: // user_tasks
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Task", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -133,26 +135,34 @@ func (t *Task) assignValues(columns []string, values []any) error {
 				t.user_tasks = new(int)
 				*t.user_tasks = int(value.Int64)
 			}
+		default:
+			t.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the Task.
+// This includes values selected through modifiers, order, etc.
+func (t *Task) Value(name string) (ent.Value, error) {
+	return t.selectValues.Get(name)
+}
+
 // QueryTeams queries the "teams" edge of the Task entity.
 func (t *Task) QueryTeams() *TeamQuery {
-	return (&TaskClient{config: t.config}).QueryTeams(t)
+	return NewTaskClient(t.config).QueryTeams(t)
 }
 
 // QueryOwner queries the "owner" edge of the Task entity.
 func (t *Task) QueryOwner() *UserQuery {
-	return (&TaskClient{config: t.config}).QueryOwner(t)
+	return NewTaskClient(t.config).QueryOwner(t)
 }
 
 // Update returns a builder for updating this Task.
 // Note that you need to call Task.Unwrap() before calling this method if this Task
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (t *Task) Update() *TaskUpdateOne {
-	return (&TaskClient{config: t.config}).UpdateOne(t)
+	return NewTaskClient(t.config).UpdateOne(t)
 }
 
 // Unwrap unwraps the Task entity that was returned from a transaction after it was closed,
@@ -188,9 +198,3 @@ func (t *Task) String() string {
 
 // Tasks is a parsable slice of Task.
 type Tasks []*Task
-
-func (t Tasks) config(cfg config) {
-	for _i := range t {
-		t[_i].config = cfg
-	}
-}

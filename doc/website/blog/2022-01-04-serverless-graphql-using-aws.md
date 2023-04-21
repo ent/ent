@@ -29,7 +29,7 @@ The landing page of the AppSync service should render you a "Create API" button,
 
 <div style={{textAlign: 'center'}}>
   <img alt="Screenshot of getting started with AWS AppSync from scratch" src="https://entgo.io/images/assets/appsync/from-scratch.png" />
-  <p style={{fontSize: 12}}>Getting started from sratch with AWS AppSync</p>
+  <p style={{fontSize: 12}}>Getting started from scratch with AWS AppSync</p>
 </div>
 
 In the top panel reading "Customize your API or import from Amazon DynamoDB" select the option "Build from scratch" and click the "Start" button belonging to the panel.
@@ -134,7 +134,7 @@ Second, we add an environment the variable `DATABASE_URL` encoding the database 
 
 <div style={{textAlign: 'center'}}>
   <img alt="Screenshot of AWS Lambda landing page listing functions" src="https://entgo.io/images/assets/appsync/envars.png" />
-  <p style={{fontSize: 12}}>AWS Lambda environemnt variables settings of Ent function.</p>
+  <p style={{fontSize: 12}}>AWS Lambda environment variables settings of Ent function.</p>
 </div>
 
 To open a connection to the database, pass in a [DSN](https://en.wikipedia.org/wiki/Data_source_name), e.g., `postgres://username:password@hostname/dbname`.
@@ -166,7 +166,7 @@ go mod init entgo-aws-appsync
 Third, we create the `Todo` schema while pulling in the ent dependencies:
 
 ```console
-go run -mod=mod entgo.io/ent/cmd/ent init Todo
+go run -mod=mod entgo.io/ent/cmd/ent new Todo
 ```
 
 and add the `title` field:
@@ -396,7 +396,7 @@ import (
 )
 
 func main() {
-	// open the daatabase connection using the pgx driver
+	// open the database connection using the pgx driver
 	db, err := sql.Open("pgx", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatalf("failed opening database connection: %v", err)
@@ -406,7 +406,7 @@ func main() {
 	client := ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, db)))
 	defer client.Close()
 
-	// register our event handler to lissten on Lambda events
+	// register our event handler to listen on Lambda events
 	lambda.Start(handler.New(client).Handle)
 }
 ```
@@ -601,7 +601,7 @@ Have questions? Need help with getting started? Feel free to join our [Discord s
 
 :::note For more Ent news and updates:
 
-- Subscribe to our [Newsletter](https://www.getrevue.co/profile/ent)
+- Subscribe to our [Newsletter](https://entgo.substack.com/)
 - Follow us on [Twitter](https://twitter.com/entgo_io)
 - Join us on #ent on the [Gophers Slack](https://entgo.io/docs/slack)
 - Join us on the [Ent Discord Server](https://discord.gg/qZmPgTE6RX)

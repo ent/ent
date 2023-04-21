@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgefield/ent/post"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
@@ -26,7 +27,8 @@ type Post struct {
 	AuthorID *int `json:"author_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PostQuery when eager-loading is set.
-	Edges PostEdges `json:"edges"`
+	Edges        PostEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // PostEdges holds the relations/edges for other nodes in the graph.
@@ -61,7 +63,7 @@ func (*Post) scanValues(columns []string) ([]any, error) {
 		case post.FieldText:
 			values[i] = new(sql.NullString)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Post", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -94,21 +96,29 @@ func (po *Post) assignValues(columns []string, values []any) error {
 				po.AuthorID = new(int)
 				*po.AuthorID = int(value.Int64)
 			}
+		default:
+			po.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the Post.
+// This includes values selected through modifiers, order, etc.
+func (po *Post) Value(name string) (ent.Value, error) {
+	return po.selectValues.Get(name)
+}
+
 // QueryAuthor queries the "author" edge of the Post entity.
 func (po *Post) QueryAuthor() *UserQuery {
-	return (&PostClient{config: po.config}).QueryAuthor(po)
+	return NewPostClient(po.config).QueryAuthor(po)
 }
 
 // Update returns a builder for updating this Post.
 // Note that you need to call Post.Unwrap() before calling this method if this Post
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (po *Post) Update() *PostUpdateOne {
-	return (&PostClient{config: po.config}).UpdateOne(po)
+	return NewPostClient(po.config).UpdateOne(po)
 }
 
 // Unwrap unwraps the Post entity that was returned from a transaction after it was closed,
@@ -140,9 +150,3 @@ func (po *Post) String() string {
 
 // Posts is a parsable slice of Post.
 type Posts []*Post
-
-func (po Posts) config(cfg config) {
-	for _i := range po {
-		po[_i].config = cfg
-	}
-}

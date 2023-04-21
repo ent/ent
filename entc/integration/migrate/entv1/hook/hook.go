@@ -19,11 +19,10 @@ type CarFunc func(context.Context, *entv1.CarMutation) (entv1.Value, error)
 
 // Mutate calls f(ctx, m).
 func (f CarFunc) Mutate(ctx context.Context, m entv1.Mutation) (entv1.Value, error) {
-	mv, ok := m.(*entv1.CarMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *entv1.CarMutation", m)
+	if mv, ok := m.(*entv1.CarMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *entv1.CarMutation", m)
 }
 
 // The ConversionFunc type is an adapter to allow the use of ordinary
@@ -32,11 +31,10 @@ type ConversionFunc func(context.Context, *entv1.ConversionMutation) (entv1.Valu
 
 // Mutate calls f(ctx, m).
 func (f ConversionFunc) Mutate(ctx context.Context, m entv1.Mutation) (entv1.Value, error) {
-	mv, ok := m.(*entv1.ConversionMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *entv1.ConversionMutation", m)
+	if mv, ok := m.(*entv1.ConversionMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *entv1.ConversionMutation", m)
 }
 
 // The CustomTypeFunc type is an adapter to allow the use of ordinary
@@ -45,11 +43,10 @@ type CustomTypeFunc func(context.Context, *entv1.CustomTypeMutation) (entv1.Valu
 
 // Mutate calls f(ctx, m).
 func (f CustomTypeFunc) Mutate(ctx context.Context, m entv1.Mutation) (entv1.Value, error) {
-	mv, ok := m.(*entv1.CustomTypeMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *entv1.CustomTypeMutation", m)
+	if mv, ok := m.(*entv1.CustomTypeMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *entv1.CustomTypeMutation", m)
 }
 
 // The UserFunc type is an adapter to allow the use of ordinary
@@ -58,11 +55,10 @@ type UserFunc func(context.Context, *entv1.UserMutation) (entv1.Value, error)
 
 // Mutate calls f(ctx, m).
 func (f UserFunc) Mutate(ctx context.Context, m entv1.Mutation) (entv1.Value, error) {
-	mv, ok := m.(*entv1.UserMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *entv1.UserMutation", m)
+	if mv, ok := m.(*entv1.UserMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *entv1.UserMutation", m)
 }
 
 // Condition is a hook condition function.

@@ -12,9 +12,9 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/schema/task"
-
 	enttask "entgo.io/ent/entc/integration/ent/task"
 )
 
@@ -29,6 +29,15 @@ type Task struct {
 	Priorities map[string]task.Priority `json:"priorities,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt *time.Time `json:"created_at,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty"`
+	// Owner holds the value of the "owner" field.
+	Owner string `json:"owner,omitempty"`
+	// Order holds the value of the "order" field.
+	Order int `json:"order,omitempty"`
+	// OrderOption holds the value of the "order_option" field.
+	OrderOption  int `json:"order_option,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -38,12 +47,14 @@ func (*Task) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case enttask.FieldPriorities:
 			values[i] = new([]byte)
-		case enttask.FieldID, enttask.FieldPriority:
+		case enttask.FieldID, enttask.FieldPriority, enttask.FieldOrder, enttask.FieldOrderOption:
 			values[i] = new(sql.NullInt64)
+		case enttask.FieldName, enttask.FieldOwner:
+			values[i] = new(sql.NullString)
 		case enttask.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Task", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -84,16 +95,48 @@ func (t *Task) assignValues(columns []string, values []any) error {
 				t.CreatedAt = new(time.Time)
 				*t.CreatedAt = value.Time
 			}
+		case enttask.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				t.Name = value.String
+			}
+		case enttask.FieldOwner:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field owner", values[i])
+			} else if value.Valid {
+				t.Owner = value.String
+			}
+		case enttask.FieldOrder:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field order", values[i])
+			} else if value.Valid {
+				t.Order = int(value.Int64)
+			}
+		case enttask.FieldOrderOption:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field order_option", values[i])
+			} else if value.Valid {
+				t.OrderOption = int(value.Int64)
+			}
+		default:
+			t.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Task.
+// This includes values selected through modifiers, order, etc.
+func (t *Task) Value(name string) (ent.Value, error) {
+	return t.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Task.
 // Note that you need to call Task.Unwrap() before calling this method if this Task
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (t *Task) Update() *TaskUpdateOne {
-	return (&TaskClient{config: t.config}).UpdateOne(t)
+	return NewTaskClient(t.config).UpdateOne(t)
 }
 
 // Unwrap unwraps the Task entity that was returned from a transaction after it was closed,
@@ -122,15 +165,21 @@ func (t *Task) String() string {
 		builder.WriteString("created_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("name=")
+	builder.WriteString(t.Name)
+	builder.WriteString(", ")
+	builder.WriteString("owner=")
+	builder.WriteString(t.Owner)
+	builder.WriteString(", ")
+	builder.WriteString("order=")
+	builder.WriteString(fmt.Sprintf("%v", t.Order))
+	builder.WriteString(", ")
+	builder.WriteString("order_option=")
+	builder.WriteString(fmt.Sprintf("%v", t.OrderOption))
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // Tasks is a parsable slice of Task.
 type Tasks []*Task
-
-func (t Tasks) config(cfg config) {
-	for _i := range t {
-		t[_i].config = cfg
-	}
-}

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/migrate/entv2/zoo"
 )
@@ -18,7 +19,8 @@ import (
 type Zoo struct {
 	config
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID           int `json:"id,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -29,7 +31,7 @@ func (*Zoo) scanValues(columns []string) ([]any, error) {
 		case zoo.FieldID:
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Zoo", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -49,16 +51,24 @@ func (z *Zoo) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			z.ID = int(value.Int64)
+		default:
+			z.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Zoo.
+// This includes values selected through modifiers, order, etc.
+func (z *Zoo) Value(name string) (ent.Value, error) {
+	return z.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Zoo.
 // Note that you need to call Zoo.Unwrap() before calling this method if this Zoo
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (z *Zoo) Update() *ZooUpdateOne {
-	return (&ZooClient{config: z.config}).UpdateOne(z)
+	return NewZooClient(z.config).UpdateOne(z)
 }
 
 // Unwrap unwraps the Zoo entity that was returned from a transaction after it was closed,
@@ -83,9 +93,3 @@ func (z *Zoo) String() string {
 
 // Zoos is a parsable slice of Zoo.
 type Zoos []*Zoo
-
-func (z Zoos) config(cfg config) {
-	for _i := range z {
-		z[_i].config = cfg
-	}
-}

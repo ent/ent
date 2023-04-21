@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/examples/fs/ent/file"
 )
@@ -27,7 +28,8 @@ type File struct {
 	ParentID int `json:"parent_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FileQuery when eager-loading is set.
-	Edges FileEdges `json:"edges"`
+	Edges        FileEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // FileEdges holds the relations/edges for other nodes in the graph.
@@ -75,7 +77,7 @@ func (*File) scanValues(columns []string) ([]any, error) {
 		case file.FieldName:
 			values[i] = new(sql.NullString)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type File", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -113,26 +115,34 @@ func (f *File) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				f.ParentID = int(value.Int64)
 			}
+		default:
+			f.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the File.
+// This includes values selected through modifiers, order, etc.
+func (f *File) Value(name string) (ent.Value, error) {
+	return f.selectValues.Get(name)
+}
+
 // QueryParent queries the "parent" edge of the File entity.
 func (f *File) QueryParent() *FileQuery {
-	return (&FileClient{config: f.config}).QueryParent(f)
+	return NewFileClient(f.config).QueryParent(f)
 }
 
 // QueryChildren queries the "children" edge of the File entity.
 func (f *File) QueryChildren() *FileQuery {
-	return (&FileClient{config: f.config}).QueryChildren(f)
+	return NewFileClient(f.config).QueryChildren(f)
 }
 
 // Update returns a builder for updating this File.
 // Note that you need to call File.Unwrap() before calling this method if this File
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (f *File) Update() *FileUpdateOne {
-	return (&FileClient{config: f.config}).UpdateOne(f)
+	return NewFileClient(f.config).UpdateOne(f)
 }
 
 // Unwrap unwraps the File entity that was returned from a transaction after it was closed,
@@ -165,9 +175,3 @@ func (f *File) String() string {
 
 // Files is a parsable slice of File.
 type Files []*File
-
-func (f Files) config(cfg config) {
-	for _i := range f {
-		f[_i].config = cfg
-	}
-}

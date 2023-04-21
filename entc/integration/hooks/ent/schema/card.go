@@ -18,7 +18,7 @@ import (
 	"entgo.io/ent/schema/mixin"
 )
 
-// RejectUpdate rejects all update operations
+// RejectUpdate rejects ~all update operations
 // that are not on a specific entity.
 type RejectUpdate struct {
 	mixin.Schema
@@ -26,7 +26,11 @@ type RejectUpdate struct {
 
 func (RejectUpdate) Hooks() []ent.Hook {
 	return []ent.Hook{
-		hook.Reject(ent.OpUpdate),
+		hook.If(
+			hook.Reject(ent.OpUpdate),
+			// Accept only updates that contains the "expired_at" field.
+			hook.Not(hook.HasFields(card.FieldExpiredAt)),
+		),
 	}
 }
 
@@ -84,6 +88,8 @@ func (Card) Fields() []ent.Field {
 			Default(time.Now),
 		field.String("in_hook").
 			Comment("InHook is a mandatory field that is set by the hook."),
+		field.Time("expired_at").
+			Optional(),
 	}
 }
 
@@ -92,5 +98,15 @@ func (Card) Edges() []ent.Edge {
 		edge.From("owner", User.Type).
 			Ref("cards").
 			Unique(),
+	}
+}
+
+func (Card) Interceptors() []ent.Interceptor {
+	return []ent.Interceptor{
+		ent.InterceptFunc(func(next ent.Querier) ent.Querier {
+			return ent.QuerierFunc(func(ctx context.Context, q ent.Query) (ent.Value, error) {
+				return next.Query(ctx, q)
+			})
+		}),
 	}
 }

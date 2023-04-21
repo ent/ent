@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -34,34 +33,7 @@ func (td *TaskDelete) Where(ps ...predicate.Task) *TaskDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (td *TaskDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(td.hooks) == 0 {
-		affected, err = td.gremlinExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*TaskMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			td.mutation = mutation
-			affected, err = td.gremlinExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(td.hooks) - 1; i >= 0; i-- {
-			if td.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = td.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, td.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, TaskMutation](ctx, td.gremlinExec, td.mutation, td.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -79,6 +51,7 @@ func (td *TaskDelete) gremlinExec(ctx context.Context) (int, error) {
 	if err := td.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
+	td.mutation.done = true
 	return res.ReadInt()
 }
 
@@ -93,6 +66,12 @@ func (td *TaskDelete) gremlin() *dsl.Traversal {
 // TaskDeleteOne is the builder for deleting a single Task entity.
 type TaskDeleteOne struct {
 	td *TaskDelete
+}
+
+// Where appends a list predicates to the TaskDelete builder.
+func (tdo *TaskDeleteOne) Where(ps ...predicate.Task) *TaskDeleteOne {
+	tdo.td.mutation.Where(ps...)
+	return tdo
 }
 
 // Exec executes the deletion query.
@@ -110,5 +89,7 @@ func (tdo *TaskDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (tdo *TaskDeleteOne) ExecX(ctx context.Context) {
-	tdo.td.ExecX(ctx)
+	if err := tdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

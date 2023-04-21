@@ -11,15 +11,11 @@ in the LICENSE file in the root directory of this source tree.
 {{ $pkg := base $.Config.Package }}
 {{ template "header" $ }}
 
-{{ template "import" $ }}
+{{ with extend $ "Imports" $.SiblingImports }}
+	{{ template "import" . }}
+{{ end }}
 
-import (
-	{{- range $import := $.SiblingImports }}
-		{{ $import.Alias }} "{{ $import.Path }}"
-	{{- end }}
-)
-
-// {{ $.Name }} is the model entity for the {{ $.Name }} schema.
+{{ template "model/comment" $ }}
 {{- with $tmpls := matchTemplate "model/comment/additional/*" }}
 	{{- range $tmpl := $tmpls }}
 		{{- xtemplate $tmpl $ }}
@@ -96,7 +92,7 @@ type {{ $.Name }}Edges struct {
 	{{ $func := print "Query" $e.StructField }}
 	// {{ $func }} queries the "{{ $e.Name }}" edge of the {{ $.Name }} entity.
 	func ({{ $receiver }} *{{ $.Name }}) {{ $func }}() *{{ $e.Type.QueryName }} {
-		return (&{{ $.Name }}Client{config: {{ $receiver }}.config}).{{ $func }}({{ $receiver }})
+		return New{{ $.ClientName }}({{ $receiver }}.config).{{ $func }}({{ $receiver }})
 	}
 {{ end }}
 
@@ -104,7 +100,7 @@ type {{ $.Name }}Edges struct {
 // Note that you need to call {{ $.Name }}.Unwrap() before calling this method if this {{ $.Name }}
 // was returned from a transaction, and the transaction was committed or rolled back.
 func ({{ $receiver }} *{{ $.Name }}) Update() *{{ $.UpdateOneName }} {
-	return (&{{ $.Name }}Client{config: {{ $receiver }}.config}).UpdateOne({{ $receiver }})
+	return New{{ $.ClientName }}({{ $receiver }}.config).UpdateOne({{ $receiver }})
 }
 
 // Unwrap unwraps the {{ $.Name }} entity that was returned from a transaction after it was closed,
@@ -130,12 +126,6 @@ type {{ $slice }} []*{{ $.Name }}
 	{{ $tmpl := printf "dialect/%s/decode/many" $.Storage }}
 	{{ xtemplate $tmpl . }}
 {{ end }}
-
-func ({{ $receiver }} {{ $slice }}) config(cfg config) {
-	for _i := range {{ $receiver }} {
-		{{ $receiver }}[_i].config = cfg
-	}
-}
 {{ end }}
 
 {{/* A template to generate a fmt.Stringer implementation. */}}
@@ -184,6 +174,17 @@ func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 		return builder.String()
 	}
 {{ end }}
+
+{{/* A template for generating the Entity's comment. */}}
+{{- define "model/comment" }}
+	{{- if and $.Annotations.Comment $.Annotations.Comment.Text }}
+		{{- range $line := split $.Annotations.Comment.Text "\n" }}
+			// {{ $line }}
+		{{- end }}
+	{{- else }}
+		// {{ $.Name }} is the model entity for the {{ $.Name }} schema.
+	{{- end }}
+{{- end }}
 
 {{/* A template for generating the tag of the Edges struct-field. */}}
 {{- define "model/edgetags" }}

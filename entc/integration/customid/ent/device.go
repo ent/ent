@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/ent/device"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
@@ -25,6 +26,7 @@ type Device struct {
 	// The values are being populated by the DeviceQuery when eager-loading is set.
 	Edges                 DeviceEdges `json:"edges"`
 	device_active_session *schema.ID
+	selectValues          sql.SelectValues
 }
 
 // DeviceEdges holds the relations/edges for other nodes in the graph.
@@ -70,7 +72,7 @@ func (*Device) scanValues(columns []string) ([]any, error) {
 		case device.ForeignKeys[0]: // device_active_session
 			values[i] = &sql.NullScanner{S: new(schema.ID)}
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Device", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -97,26 +99,34 @@ func (d *Device) assignValues(columns []string, values []any) error {
 				d.device_active_session = new(schema.ID)
 				*d.device_active_session = *value.S.(*schema.ID)
 			}
+		default:
+			d.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the Device.
+// This includes values selected through modifiers, order, etc.
+func (d *Device) Value(name string) (ent.Value, error) {
+	return d.selectValues.Get(name)
+}
+
 // QueryActiveSession queries the "active_session" edge of the Device entity.
 func (d *Device) QueryActiveSession() *SessionQuery {
-	return (&DeviceClient{config: d.config}).QueryActiveSession(d)
+	return NewDeviceClient(d.config).QueryActiveSession(d)
 }
 
 // QuerySessions queries the "sessions" edge of the Device entity.
 func (d *Device) QuerySessions() *SessionQuery {
-	return (&DeviceClient{config: d.config}).QuerySessions(d)
+	return NewDeviceClient(d.config).QuerySessions(d)
 }
 
 // Update returns a builder for updating this Device.
 // Note that you need to call Device.Unwrap() before calling this method if this Device
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (d *Device) Update() *DeviceUpdateOne {
-	return (&DeviceClient{config: d.config}).UpdateOne(d)
+	return NewDeviceClient(d.config).UpdateOne(d)
 }
 
 // Unwrap unwraps the Device entity that was returned from a transaction after it was closed,
@@ -141,9 +151,3 @@ func (d *Device) String() string {
 
 // Devices is a parsable slice of Device.
 type Devices []*Device
-
-func (d Devices) config(cfg config) {
-	for _i := range d {
-		d[_i].config = cfg
-	}
-}

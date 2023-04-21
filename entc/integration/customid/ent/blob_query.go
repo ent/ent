@@ -24,11 +24,9 @@ import (
 // BlobQuery is the builder for querying Blob entities.
 type BlobQuery struct {
 	config
-	limit         *int
-	offset        *int
-	unique        *bool
-	order         []OrderFunc
-	fields        []string
+	ctx           *QueryContext
+	order         []blob.OrderOption
+	inters        []Interceptor
 	predicates    []predicate.Blob
 	withParent    *BlobQuery
 	withLinks     *BlobQuery
@@ -45,34 +43,34 @@ func (bq *BlobQuery) Where(ps ...predicate.Blob) *BlobQuery {
 	return bq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (bq *BlobQuery) Limit(limit int) *BlobQuery {
-	bq.limit = &limit
+	bq.ctx.Limit = &limit
 	return bq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (bq *BlobQuery) Offset(offset int) *BlobQuery {
-	bq.offset = &offset
+	bq.ctx.Offset = &offset
 	return bq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (bq *BlobQuery) Unique(unique bool) *BlobQuery {
-	bq.unique = &unique
+	bq.ctx.Unique = &unique
 	return bq
 }
 
-// Order adds an order step to the query.
-func (bq *BlobQuery) Order(o ...OrderFunc) *BlobQuery {
+// Order specifies how the records should be ordered.
+func (bq *BlobQuery) Order(o ...blob.OrderOption) *BlobQuery {
 	bq.order = append(bq.order, o...)
 	return bq
 }
 
 // QueryParent chains the current query on the "parent" edge.
 func (bq *BlobQuery) QueryParent() *BlobQuery {
-	query := &BlobQuery{config: bq.config}
+	query := (&BlobClient{config: bq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := bq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -94,7 +92,7 @@ func (bq *BlobQuery) QueryParent() *BlobQuery {
 
 // QueryLinks chains the current query on the "links" edge.
 func (bq *BlobQuery) QueryLinks() *BlobQuery {
-	query := &BlobQuery{config: bq.config}
+	query := (&BlobClient{config: bq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := bq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -116,7 +114,7 @@ func (bq *BlobQuery) QueryLinks() *BlobQuery {
 
 // QueryBlobLinks chains the current query on the "blob_links" edge.
 func (bq *BlobQuery) QueryBlobLinks() *BlobLinkQuery {
-	query := &BlobLinkQuery{config: bq.config}
+	query := (&BlobLinkClient{config: bq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := bq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -139,7 +137,7 @@ func (bq *BlobQuery) QueryBlobLinks() *BlobLinkQuery {
 // First returns the first Blob entity from the query.
 // Returns a *NotFoundError when no Blob was found.
 func (bq *BlobQuery) First(ctx context.Context) (*Blob, error) {
-	nodes, err := bq.Limit(1).All(ctx)
+	nodes, err := bq.Limit(1).All(setContextOp(ctx, bq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +160,7 @@ func (bq *BlobQuery) FirstX(ctx context.Context) *Blob {
 // Returns a *NotFoundError when no Blob ID was found.
 func (bq *BlobQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = bq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = bq.Limit(1).IDs(setContextOp(ctx, bq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -185,7 +183,7 @@ func (bq *BlobQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one Blob entity is found.
 // Returns a *NotFoundError when no Blob entities are found.
 func (bq *BlobQuery) Only(ctx context.Context) (*Blob, error) {
-	nodes, err := bq.Limit(2).All(ctx)
+	nodes, err := bq.Limit(2).All(setContextOp(ctx, bq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -213,7 +211,7 @@ func (bq *BlobQuery) OnlyX(ctx context.Context) *Blob {
 // Returns a *NotFoundError when no entities are found.
 func (bq *BlobQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = bq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = bq.Limit(2).IDs(setContextOp(ctx, bq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -238,10 +236,12 @@ func (bq *BlobQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of Blobs.
 func (bq *BlobQuery) All(ctx context.Context) ([]*Blob, error) {
+	ctx = setContextOp(ctx, bq.ctx, "All")
 	if err := bq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return bq.sqlAll(ctx)
+	qr := querierAll[[]*Blob, *BlobQuery]()
+	return withInterceptors[[]*Blob](ctx, bq, qr, bq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -254,9 +254,12 @@ func (bq *BlobQuery) AllX(ctx context.Context) []*Blob {
 }
 
 // IDs executes the query and returns a list of Blob IDs.
-func (bq *BlobQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
-	if err := bq.Select(blob.FieldID).Scan(ctx, &ids); err != nil {
+func (bq *BlobQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if bq.ctx.Unique == nil && bq.path != nil {
+		bq.Unique(true)
+	}
+	ctx = setContextOp(ctx, bq.ctx, "IDs")
+	if err = bq.Select(blob.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -273,10 +276,11 @@ func (bq *BlobQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (bq *BlobQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, bq.ctx, "Count")
 	if err := bq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return bq.sqlCount(ctx)
+	return withInterceptors[int](ctx, bq, querierCount[*BlobQuery](), bq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -290,10 +294,15 @@ func (bq *BlobQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (bq *BlobQuery) Exist(ctx context.Context) (bool, error) {
-	if err := bq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, bq.ctx, "Exist")
+	switch _, err := bq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return bq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -313,24 +322,23 @@ func (bq *BlobQuery) Clone() *BlobQuery {
 	}
 	return &BlobQuery{
 		config:        bq.config,
-		limit:         bq.limit,
-		offset:        bq.offset,
-		order:         append([]OrderFunc{}, bq.order...),
+		ctx:           bq.ctx.Clone(),
+		order:         append([]blob.OrderOption{}, bq.order...),
+		inters:        append([]Interceptor{}, bq.inters...),
 		predicates:    append([]predicate.Blob{}, bq.predicates...),
 		withParent:    bq.withParent.Clone(),
 		withLinks:     bq.withLinks.Clone(),
 		withBlobLinks: bq.withBlobLinks.Clone(),
 		// clone intermediate query.
-		sql:    bq.sql.Clone(),
-		path:   bq.path,
-		unique: bq.unique,
+		sql:  bq.sql.Clone(),
+		path: bq.path,
 	}
 }
 
 // WithParent tells the query-builder to eager-load the nodes that are connected to
 // the "parent" edge. The optional arguments are used to configure the query builder of the edge.
 func (bq *BlobQuery) WithParent(opts ...func(*BlobQuery)) *BlobQuery {
-	query := &BlobQuery{config: bq.config}
+	query := (&BlobClient{config: bq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -341,7 +349,7 @@ func (bq *BlobQuery) WithParent(opts ...func(*BlobQuery)) *BlobQuery {
 // WithLinks tells the query-builder to eager-load the nodes that are connected to
 // the "links" edge. The optional arguments are used to configure the query builder of the edge.
 func (bq *BlobQuery) WithLinks(opts ...func(*BlobQuery)) *BlobQuery {
-	query := &BlobQuery{config: bq.config}
+	query := (&BlobClient{config: bq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -352,7 +360,7 @@ func (bq *BlobQuery) WithLinks(opts ...func(*BlobQuery)) *BlobQuery {
 // WithBlobLinks tells the query-builder to eager-load the nodes that are connected to
 // the "blob_links" edge. The optional arguments are used to configure the query builder of the edge.
 func (bq *BlobQuery) WithBlobLinks(opts ...func(*BlobLinkQuery)) *BlobQuery {
-	query := &BlobLinkQuery{config: bq.config}
+	query := (&BlobLinkClient{config: bq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -375,16 +383,11 @@ func (bq *BlobQuery) WithBlobLinks(opts ...func(*BlobLinkQuery)) *BlobQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (bq *BlobQuery) GroupBy(field string, fields ...string) *BlobGroupBy {
-	grbuild := &BlobGroupBy{config: bq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := bq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return bq.sqlQuery(ctx), nil
-	}
+	bq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &BlobGroupBy{build: bq}
+	grbuild.flds = &bq.ctx.Fields
 	grbuild.label = blob.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -401,11 +404,11 @@ func (bq *BlobQuery) GroupBy(field string, fields ...string) *BlobGroupBy {
 //		Select(blob.FieldUUID).
 //		Scan(ctx, &v)
 func (bq *BlobQuery) Select(fields ...string) *BlobSelect {
-	bq.fields = append(bq.fields, fields...)
-	selbuild := &BlobSelect{BlobQuery: bq}
-	selbuild.label = blob.Label
-	selbuild.flds, selbuild.scan = &bq.fields, selbuild.Scan
-	return selbuild
+	bq.ctx.Fields = append(bq.ctx.Fields, fields...)
+	sbuild := &BlobSelect{BlobQuery: bq}
+	sbuild.label = blob.Label
+	sbuild.flds, sbuild.scan = &bq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a BlobSelect configured with the given aggregations.
@@ -414,7 +417,17 @@ func (bq *BlobQuery) Aggregate(fns ...AggregateFunc) *BlobSelect {
 }
 
 func (bq *BlobQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range bq.fields {
+	for _, inter := range bq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, bq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range bq.ctx.Fields {
 		if !blob.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -500,6 +513,9 @@ func (bq *BlobQuery) loadParent(ctx context.Context, query *BlobQuery, nodes []*
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(blob.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -539,27 +555,30 @@ func (bq *BlobQuery) loadLinks(ctx context.Context, query *BlobQuery, nodes []*B
 	if err := query.prepareQuery(ctx); err != nil {
 		return err
 	}
-	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-		assign := spec.Assign
-		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]any, error) {
-			values, err := values(columns[1:])
-			if err != nil {
-				return nil, err
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
-			return append([]any{new(uuid.UUID)}, values...), nil
-		}
-		spec.Assign = func(columns []string, values []any) error {
-			outValue := *values[0].(*uuid.UUID)
-			inValue := *values[1].(*uuid.UUID)
-			if nids[inValue] == nil {
-				nids[inValue] = map[*Blob]struct{}{byID[outValue]: {}}
-				return assign(columns[1:], values[1:])
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Blob]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
 			}
-			nids[inValue][byID[outValue]] = struct{}{}
-			return nil
-		}
+		})
 	})
+	neighbors, err := withInterceptors[[]*Blob](ctx, query, qr, query.inters)
 	if err != nil {
 		return err
 	}
@@ -584,8 +603,11 @@ func (bq *BlobQuery) loadBlobLinks(ctx context.Context, query *BlobLinkQuery, no
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(bloblink.FieldBlobID)
+	}
 	query.Where(predicate.BlobLink(func(s *sql.Selector) {
-		s.Where(sql.InValues(blob.BlobLinksColumn, fks...))
+		s.Where(sql.InValues(s.C(blob.BlobLinksColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -595,7 +617,7 @@ func (bq *BlobQuery) loadBlobLinks(ctx context.Context, query *BlobLinkQuery, no
 		fk := n.BlobID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "blob_id" returned %v for node %v`, fk, n)
+			return fmt.Errorf(`unexpected referenced foreign-key "blob_id" returned %v for node %v`, fk, n)
 		}
 		assign(node, n)
 	}
@@ -604,41 +626,22 @@ func (bq *BlobQuery) loadBlobLinks(ctx context.Context, query *BlobLinkQuery, no
 
 func (bq *BlobQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := bq.querySpec()
-	_spec.Node.Columns = bq.fields
-	if len(bq.fields) > 0 {
-		_spec.Unique = bq.unique != nil && *bq.unique
+	_spec.Node.Columns = bq.ctx.Fields
+	if len(bq.ctx.Fields) > 0 {
+		_spec.Unique = bq.ctx.Unique != nil && *bq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, bq.driver, _spec)
 }
 
-func (bq *BlobQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := bq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (bq *BlobQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   blob.Table,
-			Columns: blob.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: blob.FieldID,
-			},
-		},
-		From:   bq.sql,
-		Unique: true,
-	}
-	if unique := bq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(blob.Table, blob.Columns, sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID))
+	_spec.From = bq.sql
+	if unique := bq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if bq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := bq.fields; len(fields) > 0 {
+	if fields := bq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, blob.FieldID)
 		for i := range fields {
@@ -654,10 +657,10 @@ func (bq *BlobQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := bq.limit; limit != nil {
+	if limit := bq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := bq.offset; offset != nil {
+	if offset := bq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := bq.order; len(ps) > 0 {
@@ -673,7 +676,7 @@ func (bq *BlobQuery) querySpec() *sqlgraph.QuerySpec {
 func (bq *BlobQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(bq.driver.Dialect())
 	t1 := builder.Table(blob.Table)
-	columns := bq.fields
+	columns := bq.ctx.Fields
 	if len(columns) == 0 {
 		columns = blob.Columns
 	}
@@ -682,7 +685,7 @@ func (bq *BlobQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = bq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if bq.unique != nil && *bq.unique {
+	if bq.ctx.Unique != nil && *bq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range bq.predicates {
@@ -691,12 +694,12 @@ func (bq *BlobQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range bq.order {
 		p(selector)
 	}
-	if offset := bq.offset; offset != nil {
+	if offset := bq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := bq.limit; limit != nil {
+	if limit := bq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -704,13 +707,8 @@ func (bq *BlobQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // BlobGroupBy is the group-by builder for Blob entities.
 type BlobGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *BlobQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -719,58 +717,46 @@ func (bgb *BlobGroupBy) Aggregate(fns ...AggregateFunc) *BlobGroupBy {
 	return bgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (bgb *BlobGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := bgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, bgb.build.ctx, "GroupBy")
+	if err := bgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	bgb.sql = query
-	return bgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*BlobQuery, *BlobGroupBy](ctx, bgb.build, bgb, bgb.build.inters, v)
 }
 
-func (bgb *BlobGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range bgb.fields {
-		if !blob.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (bgb *BlobGroupBy) sqlScan(ctx context.Context, root *BlobQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(bgb.fns))
+	for _, fn := range bgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := bgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*bgb.flds)+len(bgb.fns))
+		for _, f := range *bgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*bgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := bgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := bgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (bgb *BlobGroupBy) sqlQuery() *sql.Selector {
-	selector := bgb.sql.Select()
-	aggregation := make([]string, 0, len(bgb.fns))
-	for _, fn := range bgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(bgb.fields)+len(bgb.fns))
-		for _, f := range bgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(bgb.fields...)...)
-}
-
 // BlobSelect is the builder for selecting fields of Blob entities.
 type BlobSelect struct {
 	*BlobQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -781,26 +767,27 @@ func (bs *BlobSelect) Aggregate(fns ...AggregateFunc) *BlobSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (bs *BlobSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, bs.ctx, "Select")
 	if err := bs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	bs.sql = bs.BlobQuery.sqlQuery(ctx)
-	return bs.sqlScan(ctx, v)
+	return scanWithInterceptors[*BlobQuery, *BlobSelect](ctx, bs.BlobQuery, bs, bs.inters, v)
 }
 
-func (bs *BlobSelect) sqlScan(ctx context.Context, v any) error {
+func (bs *BlobSelect) sqlScan(ctx context.Context, root *BlobQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(bs.fns))
 	for _, fn := range bs.fns {
-		aggregation = append(aggregation, fn(bs.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*bs.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		bs.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		bs.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := bs.sql.Query()
+	query, args := selector.Query()
 	if err := bs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

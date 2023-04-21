@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
 	"entgo.io/ent/entc/integration/edgeschema/ent/grouptag"
@@ -27,7 +28,8 @@ type GroupTag struct {
 	GroupID int `json:"group_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GroupTagQuery when eager-loading is set.
-	Edges GroupTagEdges `json:"edges"`
+	Edges        GroupTagEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // GroupTagEdges holds the relations/edges for other nodes in the graph.
@@ -75,7 +77,7 @@ func (*GroupTag) scanValues(columns []string) ([]any, error) {
 		case grouptag.FieldID, grouptag.FieldTagID, grouptag.FieldGroupID:
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type GroupTag", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -107,26 +109,34 @@ func (gt *GroupTag) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				gt.GroupID = int(value.Int64)
 			}
+		default:
+			gt.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the GroupTag.
+// This includes values selected through modifiers, order, etc.
+func (gt *GroupTag) Value(name string) (ent.Value, error) {
+	return gt.selectValues.Get(name)
+}
+
 // QueryTag queries the "tag" edge of the GroupTag entity.
 func (gt *GroupTag) QueryTag() *TagQuery {
-	return (&GroupTagClient{config: gt.config}).QueryTag(gt)
+	return NewGroupTagClient(gt.config).QueryTag(gt)
 }
 
 // QueryGroup queries the "group" edge of the GroupTag entity.
 func (gt *GroupTag) QueryGroup() *GroupQuery {
-	return (&GroupTagClient{config: gt.config}).QueryGroup(gt)
+	return NewGroupTagClient(gt.config).QueryGroup(gt)
 }
 
 // Update returns a builder for updating this GroupTag.
 // Note that you need to call GroupTag.Unwrap() before calling this method if this GroupTag
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (gt *GroupTag) Update() *GroupTagUpdateOne {
-	return (&GroupTagClient{config: gt.config}).UpdateOne(gt)
+	return NewGroupTagClient(gt.config).UpdateOne(gt)
 }
 
 // Unwrap unwraps the GroupTag entity that was returned from a transaction after it was closed,
@@ -156,9 +166,3 @@ func (gt *GroupTag) String() string {
 
 // GroupTags is a parsable slice of GroupTag.
 type GroupTags []*GroupTag
-
-func (gt GroupTags) config(cfg config) {
-	for _i := range gt {
-		gt[_i].config = cfg
-	}
-}

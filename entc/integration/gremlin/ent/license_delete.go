@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -33,34 +32,7 @@ func (ld *LicenseDelete) Where(ps ...predicate.License) *LicenseDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ld *LicenseDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(ld.hooks) == 0 {
-		affected, err = ld.gremlinExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*LicenseMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			ld.mutation = mutation
-			affected, err = ld.gremlinExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(ld.hooks) - 1; i >= 0; i-- {
-			if ld.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ld.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, ld.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, LicenseMutation](ctx, ld.gremlinExec, ld.mutation, ld.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -78,6 +50,7 @@ func (ld *LicenseDelete) gremlinExec(ctx context.Context) (int, error) {
 	if err := ld.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
+	ld.mutation.done = true
 	return res.ReadInt()
 }
 
@@ -92,6 +65,12 @@ func (ld *LicenseDelete) gremlin() *dsl.Traversal {
 // LicenseDeleteOne is the builder for deleting a single License entity.
 type LicenseDeleteOne struct {
 	ld *LicenseDelete
+}
+
+// Where appends a list predicates to the LicenseDelete builder.
+func (ldo *LicenseDeleteOne) Where(ps ...predicate.License) *LicenseDeleteOne {
+	ldo.ld.mutation.Where(ps...)
+	return ldo
 }
 
 // Exec executes the deletion query.
@@ -109,5 +88,7 @@ func (ldo *LicenseDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (ldo *LicenseDeleteOne) ExecX(ctx context.Context) {
-	ldo.ld.ExecX(ctx)
+	if err := ldo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

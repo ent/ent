@@ -7,11 +7,15 @@ package integration
 import (
 	"context"
 	stdsql "database/sql"
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
+	"math/big"
 	"net"
+	"net/url"
 	"reflect"
 	"runtime"
 	"sort"
@@ -27,6 +31,7 @@ import (
 	"entgo.io/ent/entc/integration/ent"
 	"entgo.io/ent/entc/integration/ent/card"
 	"entgo.io/ent/entc/integration/ent/enttest"
+	"entgo.io/ent/entc/integration/ent/exvaluescan"
 	"entgo.io/ent/entc/integration/ent/file"
 	"entgo.io/ent/entc/integration/ent/filetype"
 	"entgo.io/ent/entc/integration/ent/group"
@@ -38,6 +43,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/node"
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/schema"
+	"entgo.io/ent/entc/integration/ent/schema/task"
 	enttask "entgo.io/ent/entc/integration/ent/task"
 	"entgo.io/ent/entc/integration/ent/user"
 
@@ -98,7 +104,7 @@ func TestMaria(t *testing.T) {
 }
 
 func TestPostgres(t *testing.T) {
-	for version, port := range map[string]int{"10": 5430, "11": 5431, "12": 5432, "13": 5433, "14": 5434} {
+	for version, port := range map[string]int{"10": 5430, "11": 5431, "12": 5432, "13": 5433, "14": 5434, "15": 5435} {
 		addr := fmt.Sprintf("host=localhost port=%d user=postgres dbname=test password=pass sslmode=disable", port)
 		t.Run(version, func(t *testing.T) {
 			t.Parallel()
@@ -121,6 +127,7 @@ var (
 		migrate.WithDropColumn(true),
 	)
 	tests = [...]func(*testing.T, *ent.Client){
+		Sanity,
 		NoSchemaChanges,
 		Tx,
 		Lock,
@@ -128,7 +135,6 @@ var (
 		Types,
 		Clone,
 		EntQL,
-		Sanity,
 		Paging,
 		Select,
 		Aggregate,
@@ -158,6 +164,10 @@ var (
 		CreateBulk,
 		ConstraintChecks,
 		NillableRequired,
+		ExtValueScan,
+		OrderByEdgeCount,
+		OrderByEdgeTerms,
+		OrderByFluent,
 	}
 )
 
@@ -477,6 +487,18 @@ func Upsert(t *testing.T, client *ent.Client) {
 		ExecX(ctx)
 	require.Empty(t, client.Card.GetX(ctx, c3.ID).Name, "existing name fields should be cleared when not set (= set to nil)")
 	require.NotEmpty(t, client.Card.Query().Where(card.Number("708090")).OnlyX(ctx).Name, "new record should set their name")
+
+	// Conflict on a composite unique index.
+	t1 := client.Task.Create().SetName("todo1").SetOwner("a8m").SetPriority(task.PriorityLow).SaveX(ctx)
+	tid := client.Task.Create().
+		SetName("todo1").
+		SetOwner("a8m").
+		SetPriority(task.PriorityHigh).
+		OnConflictColumns(enttask.FieldName, enttask.FieldOwner).
+		UpdatePriority().
+		IDX(ctx)
+	require.Equal(t, t1.ID, tid)
+	require.Equal(t, task.PriorityHigh, client.Task.GetX(ctx, tid).Priority)
 }
 
 func Clone(t *testing.T, client *ent.Client) {
@@ -757,6 +779,19 @@ func Select(t *testing.T, client *ent.Client) {
 		}).
 		ExecX(ctx)
 	require.True(allUpper(), "at names must be upper-cased")
+
+	// Select and scan dynamic values.
+	const as = "name_length"
+	pets = client.Pet.Query().
+		Modify(func(s *sql.Selector) {
+			s.AppendSelectAs("LENGTH(name)", as)
+		}).
+		AllX(ctx)
+	for _, p := range pets {
+		n, err := p.Value(as)
+		require.NoError(err)
+		require.EqualValues(len(p.Name), n)
+	}
 }
 
 func Aggregate(t *testing.T, client *ent.Client) {
@@ -985,9 +1020,37 @@ func Delete(t *testing.T, client *ent.Client) {
 	require.Equal(3, affected)
 
 	info := client.GroupInfo.Create().SetDesc("group info").SaveX(ctx)
-	client.Group.Create().SetInfo(info).SetName("GitHub").SetExpire(time.Now().Add(time.Hour)).ExecX(ctx)
+	hub := client.Group.Create().SetInfo(info).SetName("GitHub").SetExpire(time.Now().Add(time.Hour)).SaveX(ctx)
 	err = client.GroupInfo.DeleteOne(info).Exec(ctx)
 	require.True(ent.IsConstraintError(err))
+
+	// Group.DeleteOneID(id).Where(...), is identical to Group.Delete().Where(group.ID(id), ...),
+	// but, in case the OpDelete is not an allowed operation, the DeleteOne can be used with Where.
+	n, err := client.Group.Delete().
+		Where(
+			group.ID(hub.ID),
+			group.ExpireLT(time.Now()), // Expired.
+		).Exec(ctx)
+	require.Zero(n)
+	require.NoError(err)
+
+	err = client.Group.DeleteOne(hub).
+		Where(group.ExpireLT(time.Now())).
+		Exec(ctx)
+	require.True(ent.IsNotFound(err))
+	hub.Update().SetExpire(time.Now().Add(-time.Hour)).ExecX(ctx)
+	client.Group.DeleteOne(hub).
+		Where(group.ExpireLT(time.Now())).
+		ExecX(ctx)
+
+	// The behavior described above it also applied to UpdateOne.
+	hub = client.Group.Create().SetInfo(info).SetName("GitHub").SetExpire(time.Now().Add(time.Hour)).SaveX(ctx)
+	err = hub.Update().
+		SetActive(false).
+		SetExpire(time.Time{}).
+		Where(group.ExpireLT(time.Now())). // Expired.
+		Exec(ctx)
+	require.True(ent.IsNotFound(err))
 }
 
 func Relation(t *testing.T, client *ent.Client) {
@@ -1146,7 +1209,7 @@ func Relation(t *testing.T, client *ent.Client) {
 	_, err = client.Group.Query().Select("unknown_field").String(ctx)
 	require.EqualError(err, "ent: invalid field \"unknown_field\" for query")
 	_, err = client.Group.Query().GroupBy("unknown_field").String(ctx)
-	require.EqualError(err, "invalid field \"unknown_field\" for group-by")
+	require.EqualError(err, "ent: invalid field \"unknown_field\" for query")
 	_, err = client.User.Query().Order(ent.Asc("invalid")).Only(ctx)
 	require.EqualError(err, "ent: unknown column \"invalid\" for table \"users\"")
 	_, err = client.User.Query().Order(ent.Asc("invalid")).QueryFollowing().Only(ctx)
@@ -1182,6 +1245,8 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.Equal(neta.Name, usr.QueryGroups().Where(group.Name("Github")).QueryUsers().QuerySpouse().OnlyX(ctx).Name)
 	require.Empty(client.GroupInfo.Query().Where(groupinfo.Desc("group info")).QueryGroups().Where(group.Name("boring")).AllX(ctx))
 	require.Equal(child.Name, client.GroupInfo.Query().Where(groupinfo.Desc("group info")).QueryGroups().Where(group.Name("Github")).QueryUsers().QueryChildren().FirstX(ctx).Name)
+	neta.Update().AddGroups(grp).ExecX(ctx)
+	require.Equal(grp.ID, client.User.Query().QueryGroups().OnlyIDX(ctx))
 
 	t.Log("query using string predicate")
 	require.Len(client.User.Query().Where(user.NameIn("a8m", "neta", "pedro")).AllX(ctx), 3)
@@ -1448,6 +1513,11 @@ func UniqueConstraint(t *testing.T, client *ent.Client) {
 	require.True(ent.IsConstraintError(err))
 	err = client.User.UpdateOne(foo).SetNickname("bar").SetPhone("2").Exec(ctx)
 	require.True(ent.IsConstraintError(err))
+	err = client.User.CreateBulk(
+		client.User.Create().SetAge(1).SetName("foo").SetNickname("baz"),
+		client.User.Create().SetAge(1).SetName("foo").SetNickname("baz"),
+	).Exec(ctx)
+	require.True(ent.IsConstraintError(err))
 
 	t.Log("o2o unique constraint on creation")
 	dan := client.User.Create().SetAge(1).SetName("dan").SetNickname("dan").SetSpouse(foo).SaveX(ctx)
@@ -1633,6 +1703,14 @@ func DefaultValue(t *testing.T, client *ent.Client) {
 		SetName("dario").
 		SaveX(ctx)
 	require.Equal(t, usr.Role, user.Role("user"))
+
+	b := time.Now().Add(-time.Hour)
+	n1 := client.Node.Create().SetValue(1).SetUpdatedAt(b).SaveX(ctx)
+	require.NotNil(t, n1.UpdatedAt)
+	require.WithinDuration(t, b, *n1.UpdatedAt, time.Second)
+	n1 = n1.Update().SetValue(2).SaveX(ctx)
+	require.NotNil(t, n1.UpdatedAt)
+	require.False(t, b.Equal(*n1.UpdatedAt))
 }
 
 func ImmutableValue(t *testing.T, client *ent.Client) {
@@ -1983,6 +2061,13 @@ func NamedEagerLoading(t *testing.T, client *ent.Client) {
 	unknown, err := a8m.NamedPets("Unknown")
 	require.True(t, ent.IsNotLoaded(err))
 	require.Nil(t, unknown)
+
+	exists := client.User.Query().
+		WithNamedPets("WithSelection", func(q *ent.PetQuery) {
+			q.Select(pet.FieldID)
+		}).
+		ExistX(ctx)
+	require.True(t, exists)
 }
 
 // writerFunc is an io.Writer implemented by the underlying func.
@@ -2242,6 +2327,513 @@ func Lock(t *testing.T, client *ent.Client) {
 	})
 }
 
+func ExtValueScan(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	u, err := url.Parse("https://entgo.io")
+	require.NoError(t, err)
+	check := func(ex *ent.ExValueScan, i *big.Int, u, b64, custom string) {
+		for _, e := range []*ent.ExValueScan{ex, client.ExValueScan.GetX(ctx, ex.ID)} {
+			require.Equal(t, i, e.Text)
+			require.Equal(t, u, e.Binary.String())
+			require.Equal(t, b64, e.Base64)
+			require.Equal(t, custom, e.Custom)
+		}
+	}
+	ex := client.ExValueScan.Create().
+		SetText(big.NewInt(10)).
+		SetBinary(u).
+		SetBase64("a8m").
+		SetCustom("atlasgo.io").
+		SaveX(ctx)
+	check(ex, big.NewInt(10), u.String(), "a8m", "atlasgo.io")
+
+	// Ensure the database values store as expected.
+	var raw []struct {
+		Text   string
+		Binary string
+		Base64 string
+		Custom string
+	}
+	client.ExValueScan.Query().
+		Select(exvaluescan.FieldText, exvaluescan.FieldBinary, exvaluescan.FieldBase64, exvaluescan.FieldCustom).
+		ScanX(ctx, &raw)
+	require.Len(t, raw, 1)
+	require.Equal(t, "10", raw[0].Text)
+	require.Equal(t, u.String(), raw[0].Binary)
+	require.Equal(t, base64.StdEncoding.EncodeToString([]byte(ex.Base64)), raw[0].Base64)
+	require.Equal(t, "0x:"+hex.EncodeToString([]byte(ex.Custom)), raw[0].Custom)
+
+	// Update the values and ensure they are updated as expected.
+	u.Path = "/docs"
+	ex = ex.Update().SetBinary(u).SetText(big.NewInt(20)).SetBase64("m8a").SetCustom("entgo.io").SaveX(ctx)
+	check(ex, big.NewInt(20), u.String(), "m8a", "entgo.io")
+
+	// Check predicates.
+	require.True(t, client.ExValueScan.Query().Where(exvaluescan.Text(big.NewInt(20))).ExistX(ctx))
+	require.False(t, client.ExValueScan.Query().Where(exvaluescan.Text(big.NewInt(10))).ExistX(ctx))
+	require.True(t, client.ExValueScan.Query().Where(exvaluescan.TextLTE(big.NewInt(20))).ExistX(ctx))
+	require.False(t, client.ExValueScan.Query().Where(exvaluescan.TextLTE(big.NewInt(10))).ExistX(ctx))
+	require.True(t, client.ExValueScan.Query().Where(exvaluescan.BinaryEQ(u)).ExistX(ctx))
+	require.False(t, client.ExValueScan.Query().Where(exvaluescan.BinaryEQ(&url.URL{})).ExistX(ctx))
+	require.True(t, client.ExValueScan.Query().Where(exvaluescan.Base64In("m8a")).ExistX(ctx))
+	require.False(t, client.ExValueScan.Query().Where(exvaluescan.Base64In("a8m")).ExistX(ctx))
+	require.True(t, client.ExValueScan.Query().Where(exvaluescan.CustomHasPrefix("ent")).ExistX(ctx))
+	require.False(t, client.ExValueScan.Query().Where(exvaluescan.CustomHasPrefix("atlas")).ExistX(ctx))
+	// HasSuffix cannot work with this field as the value is stored as hex (with additional prefix).
+	require.False(t, client.ExValueScan.Query().Where(exvaluescan.CustomHasSuffix("io")).ExistX(ctx))
+}
+
+func OrderByFluent(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	users := client.User.CreateBulk(
+		client.User.Create().SetName("a").SetAge(1),
+		client.User.Create().SetName("b").SetAge(2),
+		client.User.Create().SetName("c").SetAge(3),
+		client.User.Create().SetName("d").SetAge(4),
+		client.User.Create().SetName("e").SetAge(5),
+	).SaveX(ctx)
+	pets := client.Pet.CreateBulk(
+		client.Pet.Create().SetName("aa").SetOwner(users[1]).SetAge(2),
+		client.Pet.Create().SetName("ab").SetOwner(users[1]).SetAge(2),
+		client.Pet.Create().SetName("ac").SetOwner(users[0]).SetAge(1),
+		client.Pet.Create().SetName("ba").SetOwner(users[0]).SetAge(1),
+		client.Pet.Create().SetName("bb").SetOwner(users[0]).SetAge(1),
+		client.Pet.Create().SetName("ca").SetOwner(users[2]).SetAge(10),
+		client.Pet.Create().SetName("d"),
+		client.Pet.Create().SetName("e"),
+	).SaveX(ctx)
+
+	t.Run("M2O", func(t *testing.T) {
+		ids := client.Pet.Query().
+			Order(
+				pet.ByOwnerField(user.FieldName),
+				pet.ByID(),
+			).
+			IDsX(ctx)
+		require.Equal(t, []int{pets[6].ID, pets[7].ID, pets[2].ID, pets[3].ID, pets[4].ID, pets[0].ID, pets[1].ID, pets[5].ID}, ids)
+
+		ids = client.Pet.Query().
+			Order(
+				pet.ByOwnerField(user.FieldName, sql.OrderDesc()),
+				pet.ByID(sql.OrderDesc()),
+			).
+			IDsX(ctx)
+		require.Equal(t, []int{pets[5].ID, pets[1].ID, pets[0].ID, pets[4].ID, pets[3].ID, pets[2].ID, pets[7].ID, pets[6].ID}, ids)
+	})
+
+	t.Run("M2O/SelectedOwner", func(t *testing.T) {
+		const as = "owner_name"
+		query := client.Pet.Query().
+			Order(
+				pet.ByOwnerField(
+					user.FieldName,
+					sql.OrderSelectAs(as),
+				),
+			)
+		// No owner.
+		for _, u := range query.Clone().Limit(2).AllX(ctx) {
+			name, err := u.Value(as)
+			require.NoError(t, err)
+			require.Nil(t, name)
+		}
+		// User "a".
+		for _, u := range query.Clone().Offset(2).Limit(3).AllX(ctx) {
+			name, err := u.Value(as)
+			require.NoError(t, err)
+			require.EqualValues(t, users[0].Name, name)
+		}
+		// User "b".
+		for _, u := range query.Clone().Offset(5).Limit(2).AllX(ctx) {
+			name, err := u.Value(as)
+			require.NoError(t, err)
+			require.EqualValues(t, users[1].Name, name)
+		}
+		// User "c".
+		name, err := query.Clone().Offset(7).OnlyX(ctx).Value(as)
+		require.NoError(t, err)
+		require.EqualValues(t, users[2].Name, name)
+	})
+
+	t.Run("O2M/Count", func(t *testing.T) {
+		ids := client.User.Query().
+			Order(
+				user.ByPetsCount(),
+				user.ByID(sql.OrderDesc()),
+			).
+			IDsX(ctx)
+		require.Equal(t, []int{users[4].ID, users[3].ID, users[2].ID, users[1].ID, users[0].ID}, ids)
+
+		ids = client.User.Query().
+			Order(
+				user.ByPetsCount(sql.OrderDesc()),
+				user.ByID(sql.OrderDesc()),
+			).
+			IDsX(ctx)
+		require.Equal(t, []int{users[0].ID, users[1].ID, users[2].ID, users[4].ID, users[3].ID}, ids)
+	})
+
+	t.Run("O2M/SelectedCount", func(t *testing.T) {
+		const as = "pets_count"
+		ordered := client.User.Query().
+			Order(
+				user.ByPetsCount(
+					sql.OrderSelectAs(as),
+				),
+				user.ByID(sql.OrderDesc()),
+			).
+			AllX(ctx)
+		for i, v := range []struct {
+			id    int
+			count ent.Value
+		}{
+			{users[4].ID, nil}, {users[3].ID, nil}, {users[2].ID, 1}, {users[1].ID, 2}, {users[0].ID, 3},
+		} {
+			require.Equal(t, v.id, ordered[i].ID)
+			c, err := ordered[i].Value(as)
+			require.NoError(t, err)
+			require.EqualValues(t, v.count, c)
+		}
+
+		ordered = client.User.Query().
+			Order(
+				user.ByPetsCount(
+					sql.OrderDesc(),
+					sql.OrderSelectAs(as),
+				),
+				user.ByID(),
+			).
+			AllX(ctx)
+		for i, v := range []struct {
+			id    int
+			count ent.Value
+		}{
+			{users[0].ID, 3}, {users[1].ID, 2}, {users[2].ID, 1}, {users[3].ID, nil}, {users[4].ID, nil},
+		} {
+			require.Equal(t, v.id, ordered[i].ID)
+			c, err := ordered[i].Value(as)
+			require.NoError(t, err)
+			require.EqualValues(t, v.count, c)
+		}
+	})
+
+	t.Run("O2M/Sum", func(t *testing.T) {
+		ordered := client.User.Query().
+			Order(
+				user.ByPets(
+					sql.OrderBySum(
+						pet.FieldAge,
+						sql.OrderDesc(),
+					),
+				),
+				user.ByID(),
+			).
+			AllX(ctx)
+		require.Equal(t,
+			[]int{users[2].ID, users[1].ID, users[0].ID, users[3].ID, users[4].ID},
+			[]int{ordered[0].ID, ordered[1].ID, ordered[2].ID, ordered[3].ID, ordered[4].ID},
+		)
+
+		ordered = client.User.Query().
+			Order(
+				user.ByPets(
+					sql.OrderBySum(
+						pet.FieldAge,
+						sql.OrderDesc(),
+						sql.OrderSelected(),
+					),
+				),
+				user.ByID(
+					sql.OrderDesc(),
+				),
+			).
+			AllX(ctx)
+		require.Equal(t,
+			[]int{users[2].ID, users[1].ID, users[0].ID, users[3].ID, users[4].ID},
+			[]int{ordered[0].ID, ordered[1].ID, ordered[2].ID, ordered[4].ID, ordered[3].ID},
+		)
+		s, err := ordered[0].Value("sum_age")
+		require.NoError(t, err)
+		require.EqualValues(t, 10, s)
+		s, err = ordered[1].Value("sum_age")
+		require.NoError(t, err)
+		require.EqualValues(t, 4, s)
+		s, err = ordered[2].Value("sum_age")
+		require.NoError(t, err)
+		require.EqualValues(t, 3, s)
+	})
+}
+
+// Testing the "low-level" behavior of the sqlgraph package.
+// This functionality may be extended to the generated fluent API.
+func OrderByEdgeCount(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	users := client.User.CreateBulk(
+		client.User.Create().SetName("a").SetAge(1),
+		client.User.Create().SetName("b").SetAge(2),
+		client.User.Create().SetName("c").SetAge(3),
+		client.User.Create().SetName("d").SetAge(4),
+	).SaveX(ctx)
+	pets := client.Pet.CreateBulk(
+		client.Pet.Create().SetName("aa").SetOwner(users[0]),
+		client.Pet.Create().SetName("ab").SetOwner(users[0]),
+		client.Pet.Create().SetName("ac").SetOwner(users[0]),
+		client.Pet.Create().SetName("ba").SetOwner(users[1]),
+		client.Pet.Create().SetName("bb").SetOwner(users[1]),
+		client.Pet.Create().SetName("ca").SetOwner(users[2]),
+		client.Pet.Create().SetName("d"),
+		client.Pet.Create().SetName("e"),
+	).SaveX(ctx)
+	// O2M edge.
+	for _, tt := range []struct {
+		opts []sql.OrderTermOption
+		ids  []int
+	}{
+		{opts: []sql.OrderTermOption{sql.OrderDesc()}, ids: []int{users[0].ID, users[1].ID, users[2].ID, users[3].ID}},
+		{ids: []int{users[3].ID, users[2].ID, users[1].ID, users[0].ID}},
+	} {
+		ids := client.User.Query().
+			Order(func(s *sql.Selector) {
+				sqlgraph.OrderByNeighborsCount(s,
+					sqlgraph.NewStep(
+						sqlgraph.From(user.Table, user.FieldID),
+						sqlgraph.To(pet.Table, pet.OwnerColumn),
+						sqlgraph.Edge(sqlgraph.O2M, false, pet.Table, pet.OwnerColumn),
+					),
+					tt.opts...,
+				)
+			}).
+			IDsX(ctx)
+		require.Equal(t, tt.ids, ids)
+	}
+	// M2O edge (true or false).
+	for _, tt := range []struct {
+		opts []sql.OrderTermOption
+		ids  []int
+	}{
+		{opts: []sql.OrderTermOption{sql.OrderDesc()}, ids: []int{pets[6].ID, pets[7].ID, pets[0].ID, pets[1].ID, pets[2].ID, pets[3].ID, pets[4].ID, pets[5].ID}},
+		{ids: []int{pets[0].ID, pets[1].ID, pets[2].ID, pets[3].ID, pets[4].ID, pets[5].ID, pets[6].ID, pets[7].ID}},
+	} {
+		ids := client.Pet.Query().
+			Order(
+				func(s *sql.Selector) {
+					sqlgraph.OrderByNeighborsCount(s,
+						sqlgraph.NewStep(
+							sqlgraph.From(pet.Table, pet.OwnerColumn),
+							sqlgraph.To(user.Table, user.FieldID),
+							sqlgraph.Edge(sqlgraph.M2O, true, pet.Table, pet.OwnerColumn),
+						),
+						tt.opts...,
+					)
+				},
+				ent.Asc(pet.FieldID),
+			).
+			IDsX(ctx)
+		require.Equal(t, tt.ids, ids)
+	}
+	inf, exp := client.GroupInfo.Create().SetDesc("desc").SaveX(ctx), time.Now()
+	groups := client.Group.CreateBulk(
+		client.Group.Create().SetName("Group: 4 users").SetExpire(exp).SetInfo(inf).AddUsers(users...),
+		client.Group.Create().SetName("Group: 3 users").SetExpire(exp).SetInfo(inf).AddUsers(users[:3]...),
+		client.Group.Create().SetName("Group: 2 users").SetExpire(exp).SetInfo(inf).AddUsers(users[:2]...),
+		client.Group.Create().SetName("Group: 1 users").SetExpire(exp).SetInfo(inf).AddUsers(users[:1]...),
+		client.Group.Create().SetName("Group: 0 users").SetExpire(exp).SetInfo(inf),
+	).SaveX(ctx)
+	// M2M edge (inverse).
+	for _, tt := range []struct {
+		opts []sql.OrderTermOption
+		ids  []int
+	}{
+		{opts: []sql.OrderTermOption{sql.OrderDesc()}, ids: []int{groups[0].ID, groups[1].ID, groups[2].ID, groups[3].ID, groups[4].ID}},
+		{ids: []int{groups[4].ID, groups[3].ID, groups[2].ID, groups[1].ID, groups[0].ID}},
+	} {
+		ids := client.Group.Query().
+			Order(func(s *sql.Selector) {
+				sqlgraph.OrderByNeighborsCount(s,
+					sqlgraph.NewStep(
+						sqlgraph.From(group.Table, group.FieldID),
+						sqlgraph.To(user.Table, user.FieldID),
+						sqlgraph.Edge(sqlgraph.M2M, true, group.UsersTable, group.UsersPrimaryKey...),
+					),
+					tt.opts...,
+				)
+			}).
+			IDsX(ctx)
+		require.Equal(t, tt.ids, ids)
+	}
+	// M2M edge (assoc).
+	for _, tt := range []struct {
+		opts []sql.OrderTermOption
+		ids  []int
+	}{
+		{opts: []sql.OrderTermOption{sql.OrderDesc()}, ids: []int{users[0].ID, users[1].ID, users[2].ID, users[3].ID}},
+		{ids: []int{users[3].ID, users[2].ID, users[1].ID, users[0].ID}},
+	} {
+		ids := client.User.Query().
+			Order(func(s *sql.Selector) {
+				sqlgraph.OrderByNeighborsCount(s,
+					sqlgraph.NewStep(
+						sqlgraph.From(user.Table, user.FieldID),
+						sqlgraph.To(group.Table, group.FieldID),
+						sqlgraph.Edge(sqlgraph.M2M, false, user.GroupsTable, user.GroupsPrimaryKey...),
+					),
+					tt.opts...,
+				)
+			}).
+			IDsX(ctx)
+		require.Equal(t, tt.ids, ids)
+	}
+
+	t.Run("Value", func(t *testing.T) {
+		const as = "pets_count"
+		nodes := client.User.Query().
+			Order(func(s *sql.Selector) {
+				sqlgraph.OrderByNeighborsCount(s,
+					sqlgraph.NewStep(
+						sqlgraph.From(user.Table, user.FieldID),
+						sqlgraph.To(pet.Table, pet.FieldID),
+						sqlgraph.Edge(sqlgraph.O2M, false, pet.Table, pet.OwnerColumn),
+					),
+					sql.OrderDesc(),
+					sql.OrderSelectAs(as),
+				)
+			}).
+			AllX(ctx)
+		require.Equal(t, 4, len(nodes))
+		// Values may be nil in case of NULL.
+		for i, v := range []any{3, 2, 1, nil} {
+			vv, err := nodes[i].Value(as)
+			require.NoError(t, err)
+			require.EqualValues(t, v, vv)
+		}
+		// An error is returned if the value was not selected.
+		_, err := nodes[0].Value("unknown")
+		require.Error(t, err)
+	})
+}
+
+// Testing the "low-level" behavior of the sqlgraph package.
+// This functionality may be extended to the generated fluent API.
+func OrderByEdgeTerms(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	users := client.User.CreateBulk(
+		client.User.Create().SetName("a").SetAge(1),
+		client.User.Create().SetName("b").SetAge(2),
+		client.User.Create().SetName("c").SetAge(3),
+		client.User.Create().SetName("d").SetAge(4),
+	).SaveX(ctx)
+	pets := client.Pet.CreateBulk(
+		client.Pet.Create().SetName("aa").SetAge(2).SetOwner(users[1]),
+		client.Pet.Create().SetName("ab").SetAge(2).SetOwner(users[1]),
+		client.Pet.Create().SetName("ac").SetAge(1).SetOwner(users[0]),
+		client.Pet.Create().SetName("ba").SetAge(1).SetOwner(users[0]),
+		client.Pet.Create().SetName("bb").SetAge(1).SetOwner(users[0]),
+		client.Pet.Create().SetName("ca").SetAge(3).SetOwner(users[2]),
+		client.Pet.Create().SetName("d"),
+		client.Pet.Create().SetName("e"),
+	).SaveX(ctx)
+	// M2O edge (inverse).
+	// Order pets by their owner's name.
+	for _, tt := range []struct {
+		opt sql.OrderTerm
+		ids []int
+	}{
+		{
+			opt: sql.OrderByField(user.FieldName),
+			ids: []int{pets[6].ID, pets[7].ID, pets[2].ID, pets[3].ID, pets[4].ID, pets[0].ID, pets[1].ID, pets[5].ID},
+		},
+		{
+			opt: sql.OrderByField(user.FieldName, sql.OrderDesc()),
+			ids: []int{pets[5].ID, pets[0].ID, pets[1].ID, pets[2].ID, pets[3].ID, pets[4].ID, pets[6].ID, pets[7].ID},
+		},
+	} {
+		ids := client.Pet.Query().
+			Order(func(s *sql.Selector) {
+				sqlgraph.OrderByNeighborTerms(s,
+					sqlgraph.NewStep(
+						sqlgraph.From(pet.Table, pet.FieldID),
+						sqlgraph.To(user.Table, user.FieldID),
+						sqlgraph.Edge(sqlgraph.M2O, true, pet.Table, pet.OwnerColumn),
+					),
+					tt.opt,
+				)
+			}).
+			Order(ent.Asc(pet.FieldID)).
+			IDsX(ctx)
+		require.Equal(t, tt.ids, ids)
+	}
+	// O2M edge (aggregation).
+	for _, tt := range []struct {
+		opt sql.OrderTerm
+		ids []int
+	}{
+		{
+			opt: sql.OrderBySum(user.FieldAge),
+			ids: []int{users[3].ID, users[0].ID, users[2].ID, users[1].ID},
+		},
+		{
+			opt: sql.OrderBySum(user.FieldAge, sql.OrderDesc()),
+			ids: []int{users[1].ID, users[0].ID, users[2].ID, users[3].ID},
+		},
+	} {
+		ids := client.User.Query().
+			Order(func(s *sql.Selector) {
+				sqlgraph.OrderByNeighborTerms(s,
+					sqlgraph.NewStep(
+						sqlgraph.From(user.Table, user.FieldID),
+						sqlgraph.To(pet.Table, pet.FieldID),
+						sqlgraph.Edge(sqlgraph.O2M, false, pet.Table, pet.OwnerColumn),
+					),
+					tt.opt,
+				)
+			}).
+			Order(ent.Asc(user.FieldID)).
+			IDsX(ctx)
+		require.Equal(t, tt.ids, ids)
+	}
+
+	inf, exp := client.GroupInfo.Create().SetDesc("desc").SaveX(ctx), time.Now()
+	client.Group.CreateBulk(
+		client.Group.Create().SetName("Group: 4 users").SetExpire(exp).SetMaxUsers(40).SetInfo(inf).AddUsers(users...),
+		client.Group.Create().SetName("Group: 3 users").SetExpire(exp).SetMaxUsers(20).SetInfo(inf).AddUsers(users[:3]...),
+		client.Group.Create().SetName("Group: 2 users").SetExpire(exp).SetMaxUsers(20).SetInfo(inf).AddUsers(users[:2]...),
+		client.Group.Create().SetName("Group: 1 users").SetExpire(exp).SetMaxUsers(100).SetInfo(inf).AddUsers(users[:1]...),
+		client.Group.Create().SetName("Group: 0 users").SetExpire(exp).SetInfo(inf),
+	).ExecX(ctx)
+	// M2M edge.
+	for _, tt := range []struct {
+		opt sql.OrderTerm
+		ids []int
+	}{
+		{
+			opt: sql.OrderBySum(
+				group.FieldMaxUsers,
+			),
+			ids: []int{users[3].ID, users[2].ID, users[1].ID, users[0].ID},
+		},
+		{
+			opt: sql.OrderBySum(
+				group.FieldMaxUsers,
+				sql.OrderDesc(),
+			),
+			ids: []int{users[0].ID, users[1].ID, users[2].ID, users[3].ID},
+		},
+	} {
+		ids := client.User.Query().
+			Order(func(s *sql.Selector) {
+				sqlgraph.OrderByNeighborTerms(s,
+					sqlgraph.NewStep(
+						sqlgraph.From(user.Table, user.FieldID),
+						sqlgraph.To(group.Table, group.FieldID),
+						sqlgraph.Edge(sqlgraph.M2M, false, user.GroupsTable, user.GroupsPrimaryKey...),
+					),
+					tt.opt,
+				)
+			}).
+			IDsX(ctx)
+		require.Equal(t, tt.ids, ids)
+	}
+}
+
 func skip(t *testing.T, names ...string) {
 	for _, n := range names {
 		if strings.Contains(t.Name(), n) {
@@ -2265,4 +2857,5 @@ func drop(t *testing.T, client *ent.Client) {
 	client.GroupInfo.Delete().ExecX(ctx)
 	client.FieldType.Delete().ExecX(ctx)
 	client.FileType.Delete().ExecX(ctx)
+	client.ExValueScan.Delete().ExecX(ctx)
 }

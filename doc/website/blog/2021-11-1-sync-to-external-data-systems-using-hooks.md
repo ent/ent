@@ -34,7 +34,7 @@ In our example, we are going to create a simple `User` schema with 2 immutable s
 `"avatar_url"`. Let's run the `ent init` command for creating a skeleton schema for our `User`:
 
 ```shell
-go run entgo.io/ent/cmd/ent init User
+go run entgo.io/ent/cmd/ent new User
 ```
 
 Then, add the `name` and the `avatar_url` fields and run `go generate` to generate the assets.
@@ -298,7 +298,7 @@ The code for this example is available at [github.com/a8m/ent-sync-example](http
 
 :::note For more Ent news and updates:
 
-- Subscribe to our [Newsletter](https://www.getrevue.co/profile/ent)
+- Subscribe to our [Newsletter](https://entgo.substack.com/)
 - Follow us on [Twitter](https://twitter.com/entgo_io)
 - Join us on #ent on the [Gophers Slack](https://entgo.io/docs/slack)
 - Join us on the [Ent Discord Server](https://discord.gg/qZmPgTE6RX)

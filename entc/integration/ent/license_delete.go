@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -32,34 +31,7 @@ func (ld *LicenseDelete) Where(ps ...predicate.License) *LicenseDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ld *LicenseDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(ld.hooks) == 0 {
-		affected, err = ld.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*LicenseMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			ld.mutation = mutation
-			affected, err = ld.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(ld.hooks) - 1; i >= 0; i-- {
-			if ld.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ld.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, ld.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, LicenseMutation](ctx, ld.sqlExec, ld.mutation, ld.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -72,15 +44,7 @@ func (ld *LicenseDelete) ExecX(ctx context.Context) int {
 }
 
 func (ld *LicenseDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: license.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: license.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(license.Table, sqlgraph.NewFieldSpec(license.FieldID, field.TypeInt))
 	if ps := ld.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -92,12 +56,19 @@ func (ld *LicenseDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	ld.mutation.done = true
 	return affected, err
 }
 
 // LicenseDeleteOne is the builder for deleting a single License entity.
 type LicenseDeleteOne struct {
 	ld *LicenseDelete
+}
+
+// Where appends a list predicates to the LicenseDelete builder.
+func (ldo *LicenseDeleteOne) Where(ps ...predicate.License) *LicenseDeleteOne {
+	ldo.ld.mutation.Where(ps...)
+	return ldo
 }
 
 // Exec executes the deletion query.
@@ -115,5 +86,7 @@ func (ldo *LicenseDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (ldo *LicenseDeleteOne) ExecX(ctx context.Context) {
-	ldo.ld.ExecX(ctx)
+	if err := ldo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

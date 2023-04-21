@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/ent/intsid"
 	"entgo.io/ent/entc/integration/customid/sid"
@@ -24,6 +25,7 @@ type IntSID struct {
 	// The values are being populated by the IntSIDQuery when eager-loading is set.
 	Edges          IntSIDEdges `json:"edges"`
 	int_sid_parent *sid.ID
+	selectValues   sql.SelectValues
 }
 
 // IntSIDEdges holds the relations/edges for other nodes in the graph.
@@ -69,7 +71,7 @@ func (*IntSID) scanValues(columns []string) ([]any, error) {
 		case intsid.ForeignKeys[0]: // int_sid_parent
 			values[i] = &sql.NullScanner{S: new(sid.ID)}
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type IntSID", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -96,26 +98,34 @@ func (is *IntSID) assignValues(columns []string, values []any) error {
 				is.int_sid_parent = new(sid.ID)
 				*is.int_sid_parent = *value.S.(*sid.ID)
 			}
+		default:
+			is.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the IntSID.
+// This includes values selected through modifiers, order, etc.
+func (is *IntSID) Value(name string) (ent.Value, error) {
+	return is.selectValues.Get(name)
+}
+
 // QueryParent queries the "parent" edge of the IntSID entity.
 func (is *IntSID) QueryParent() *IntSIDQuery {
-	return (&IntSIDClient{config: is.config}).QueryParent(is)
+	return NewIntSIDClient(is.config).QueryParent(is)
 }
 
 // QueryChildren queries the "children" edge of the IntSID entity.
 func (is *IntSID) QueryChildren() *IntSIDQuery {
-	return (&IntSIDClient{config: is.config}).QueryChildren(is)
+	return NewIntSIDClient(is.config).QueryChildren(is)
 }
 
 // Update returns a builder for updating this IntSID.
 // Note that you need to call IntSID.Unwrap() before calling this method if this IntSID
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (is *IntSID) Update() *IntSIDUpdateOne {
-	return (&IntSIDClient{config: is.config}).UpdateOne(is)
+	return NewIntSIDClient(is.config).UpdateOne(is)
 }
 
 // Unwrap unwraps the IntSID entity that was returned from a transaction after it was closed,
@@ -140,9 +150,3 @@ func (is *IntSID) String() string {
 
 // IntSIDs is a parsable slice of IntSID.
 type IntSIDs []*IntSID
-
-func (is IntSIDs) config(cfg config) {
-	for _i := range is {
-		is[_i].config = cfg
-	}
-}

@@ -1,0 +1,43 @@
+name: Atlas CI Public
+on:
+  # Run whenever code is changed in the master branch,
+  # change this to your root branch.
+  push:
+    branches:
+      - master
+    paths:
+      - 'examples/migration/*'
+  pull_request:
+    paths:
+      - 'examples/migration/*'
+jobs:
+  lint:
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+    services:
+      # Spin up a mysql:8.0.29 container to be used as the dev-database for analysis.
+      mysql:
+        image: mysql:8.0.29
+        env:
+          MYSQL_ROOT_PASSWORD: pass
+          MYSQL_DATABASE: dev
+        ports:
+          - "3306:3306"
+        options: >-
+          --health-cmd "mysqladmin ping -ppass"
+          --health-interval 10s
+          --health-start-period 10s
+          --health-timeout 5s
+          --health-retries 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3.0.1
+        with:
+          fetch-depth: 0 # Mandatory unless "latest" is set below.
+      - uses: ariga/atlas-action@v0
+        with:
+          dir: 'examples/migration/ent/migrate/migrations'
+          dev-url: mysql://root:pass@localhost:3306/dev
+          cloud-public: true

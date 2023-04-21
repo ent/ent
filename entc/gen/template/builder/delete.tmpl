@@ -35,44 +35,18 @@ func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func ({{ $receiver}} *{{ $builder }}) Exec(ctx context.Context) (int, error) {
-	var (
-		err error
-		affected int
-	)
-	if len({{ $receiver }}.hooks) == 0 {
-		affected, err = {{ $receiver }}.{{ $.Storage }}Exec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*{{ $.MutationName }})
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			{{ $mutation }} = mutation
-			affected, err = {{ $receiver }}.{{ $.Storage }}Exec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len({{ $receiver }}.hooks) - 1; i >= 0; i-- {
-			if {{ $receiver }}.hooks[i] == nil {
-				return 0, fmt.Errorf("{{ $pkg }}: uninitialized hook (forgotten import {{ $pkg }}/runtime?)")
-			}
-			mut = {{ $receiver }}.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, {{ $mutation }}); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+func ({{ $receiver }} *{{ $builder }}) Exec(ctx context.Context) (int, error) {
+	return withHooks[int, {{ $.MutationName }}](ctx, {{ $receiver }}.{{ $.Storage }}Exec, {{ $mutation }}, {{ $receiver }}.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
 func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) int {
-	n, err := {{ $receiver }}.Exec(ctx)
+	{{- $n := "n" }}{{ if eq $receiver $n }}{{ $n = "_n" }}{{ end }}
+	{{ $n }}, err := {{ $receiver }}.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return n
+	return {{ $n }}
 }
 
 {{ with extend $ "Builder" $builder }}
@@ -95,6 +69,12 @@ type {{ $onebuilder }} struct {
 	{{ $receiver }} *{{ $builder }}
 }
 
+// Where appends a list predicates to the {{ $builder }} builder.
+func ({{ $oneReceiver }} *{{ $onebuilder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $onebuilder }} {
+	{{ $oneReceiver }}.{{ $mutation }}.Where(ps...)
+	return {{ $oneReceiver }}
+}
+
 // Exec executes the deletion query.
 func ({{ $oneReceiver }} *{{ $onebuilder }}) Exec(ctx context.Context) error {
 	n, err := {{ $oneReceiver }}.{{ $receiver }}.Exec(ctx)
@@ -110,7 +90,9 @@ func ({{ $oneReceiver }} *{{ $onebuilder }}) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func ({{ $oneReceiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
-	{{ $oneReceiver }}.{{ $receiver }}.ExecX(ctx)
+	if err := {{ $oneReceiver }}.Exec(ctx); err != nil {
+		panic(err)
+	}
 }
 
 {{ end }}

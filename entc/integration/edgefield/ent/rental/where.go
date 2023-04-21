@@ -17,230 +17,142 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id int) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Rental(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id int) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Rental(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id int) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.Rental(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.Rental(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.Rental(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id int) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.Rental(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id int) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.Rental(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id int) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.Rental(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id int) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.Rental(sql.FieldLTE(FieldID, id))
 }
 
 // Date applies equality check predicate on the "date" field. It's identical to DateEQ.
 func Date(v time.Time) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDate), v))
-	})
+	return predicate.Rental(sql.FieldEQ(FieldDate, v))
 }
 
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
 func UserID(v int) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUserID), v))
-	})
+	return predicate.Rental(sql.FieldEQ(FieldUserID, v))
 }
 
 // CarID applies equality check predicate on the "car_id" field. It's identical to CarIDEQ.
 func CarID(v uuid.UUID) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCarID), v))
-	})
+	return predicate.Rental(sql.FieldEQ(FieldCarID, v))
 }
 
 // DateEQ applies the EQ predicate on the "date" field.
 func DateEQ(v time.Time) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDate), v))
-	})
+	return predicate.Rental(sql.FieldEQ(FieldDate, v))
 }
 
 // DateNEQ applies the NEQ predicate on the "date" field.
 func DateNEQ(v time.Time) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldDate), v))
-	})
+	return predicate.Rental(sql.FieldNEQ(FieldDate, v))
 }
 
 // DateIn applies the In predicate on the "date" field.
 func DateIn(vs ...time.Time) predicate.Rental {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldDate), v...))
-	})
+	return predicate.Rental(sql.FieldIn(FieldDate, vs...))
 }
 
 // DateNotIn applies the NotIn predicate on the "date" field.
 func DateNotIn(vs ...time.Time) predicate.Rental {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldDate), v...))
-	})
+	return predicate.Rental(sql.FieldNotIn(FieldDate, vs...))
 }
 
 // DateGT applies the GT predicate on the "date" field.
 func DateGT(v time.Time) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldDate), v))
-	})
+	return predicate.Rental(sql.FieldGT(FieldDate, v))
 }
 
 // DateGTE applies the GTE predicate on the "date" field.
 func DateGTE(v time.Time) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldDate), v))
-	})
+	return predicate.Rental(sql.FieldGTE(FieldDate, v))
 }
 
 // DateLT applies the LT predicate on the "date" field.
 func DateLT(v time.Time) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldDate), v))
-	})
+	return predicate.Rental(sql.FieldLT(FieldDate, v))
 }
 
 // DateLTE applies the LTE predicate on the "date" field.
 func DateLTE(v time.Time) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldDate), v))
-	})
+	return predicate.Rental(sql.FieldLTE(FieldDate, v))
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.
 func UserIDEQ(v int) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUserID), v))
-	})
+	return predicate.Rental(sql.FieldEQ(FieldUserID, v))
 }
 
 // UserIDNEQ applies the NEQ predicate on the "user_id" field.
 func UserIDNEQ(v int) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldUserID), v))
-	})
+	return predicate.Rental(sql.FieldNEQ(FieldUserID, v))
 }
 
 // UserIDIn applies the In predicate on the "user_id" field.
 func UserIDIn(vs ...int) predicate.Rental {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldUserID), v...))
-	})
+	return predicate.Rental(sql.FieldIn(FieldUserID, vs...))
 }
 
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
 func UserIDNotIn(vs ...int) predicate.Rental {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldUserID), v...))
-	})
+	return predicate.Rental(sql.FieldNotIn(FieldUserID, vs...))
 }
 
 // CarIDEQ applies the EQ predicate on the "car_id" field.
 func CarIDEQ(v uuid.UUID) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCarID), v))
-	})
+	return predicate.Rental(sql.FieldEQ(FieldCarID, v))
 }
 
 // CarIDNEQ applies the NEQ predicate on the "car_id" field.
 func CarIDNEQ(v uuid.UUID) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCarID), v))
-	})
+	return predicate.Rental(sql.FieldNEQ(FieldCarID, v))
 }
 
 // CarIDIn applies the In predicate on the "car_id" field.
 func CarIDIn(vs ...uuid.UUID) predicate.Rental {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldCarID), v...))
-	})
+	return predicate.Rental(sql.FieldIn(FieldCarID, vs...))
 }
 
 // CarIDNotIn applies the NotIn predicate on the "car_id" field.
 func CarIDNotIn(vs ...uuid.UUID) predicate.Rental {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldCarID), v...))
-	})
+	return predicate.Rental(sql.FieldNotIn(FieldCarID, vs...))
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.
@@ -248,7 +160,6 @@ func HasUser() predicate.Rental {
 	return predicate.Rental(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UserTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -258,11 +169,7 @@ func HasUser() predicate.Rental {
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
 func HasUserWith(preds ...predicate.User) predicate.Rental {
 	return predicate.Rental(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UserInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
-		)
+		step := newUserStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -276,7 +183,6 @@ func HasCar() predicate.Rental {
 	return predicate.Rental(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(CarTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, CarTable, CarColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -286,11 +192,7 @@ func HasCar() predicate.Rental {
 // HasCarWith applies the HasEdge predicate on the "car" edge with a given conditions (other predicates).
 func HasCarWith(preds ...predicate.Car) predicate.Rental {
 	return predicate.Rental(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(CarInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, CarTable, CarColumn),
-		)
+		step := newCarStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

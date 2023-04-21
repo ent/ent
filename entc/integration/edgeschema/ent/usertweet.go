@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
@@ -30,7 +31,8 @@ type UserTweet struct {
 	TweetID int `json:"tweet_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserTweetQuery when eager-loading is set.
-	Edges UserTweetEdges `json:"edges"`
+	Edges        UserTweetEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // UserTweetEdges holds the relations/edges for other nodes in the graph.
@@ -80,7 +82,7 @@ func (*UserTweet) scanValues(columns []string) ([]any, error) {
 		case usertweet.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type UserTweet", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -118,26 +120,34 @@ func (ut *UserTweet) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ut.TweetID = int(value.Int64)
 			}
+		default:
+			ut.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the UserTweet.
+// This includes values selected through modifiers, order, etc.
+func (ut *UserTweet) Value(name string) (ent.Value, error) {
+	return ut.selectValues.Get(name)
+}
+
 // QueryUser queries the "user" edge of the UserTweet entity.
 func (ut *UserTweet) QueryUser() *UserQuery {
-	return (&UserTweetClient{config: ut.config}).QueryUser(ut)
+	return NewUserTweetClient(ut.config).QueryUser(ut)
 }
 
 // QueryTweet queries the "tweet" edge of the UserTweet entity.
 func (ut *UserTweet) QueryTweet() *TweetQuery {
-	return (&UserTweetClient{config: ut.config}).QueryTweet(ut)
+	return NewUserTweetClient(ut.config).QueryTweet(ut)
 }
 
 // Update returns a builder for updating this UserTweet.
 // Note that you need to call UserTweet.Unwrap() before calling this method if this UserTweet
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (ut *UserTweet) Update() *UserTweetUpdateOne {
-	return (&UserTweetClient{config: ut.config}).UpdateOne(ut)
+	return NewUserTweetClient(ut.config).UpdateOne(ut)
 }
 
 // Unwrap unwraps the UserTweet entity that was returned from a transaction after it was closed,
@@ -170,9 +180,3 @@ func (ut *UserTweet) String() string {
 
 // UserTweets is a parsable slice of UserTweet.
 type UserTweets []*UserTweet
-
-func (ut UserTweets) config(cfg config) {
-	for _i := range ut {
-		ut[_i].config = cfg
-	}
-}

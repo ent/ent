@@ -60,50 +60,8 @@ func (mic *MixinIDCreate) Mutation() *MixinIDMutation {
 
 // Save creates the MixinID in the database.
 func (mic *MixinIDCreate) Save(ctx context.Context) (*MixinID, error) {
-	var (
-		err  error
-		node *MixinID
-	)
 	mic.defaults()
-	if len(mic.hooks) == 0 {
-		if err = mic.check(); err != nil {
-			return nil, err
-		}
-		node, err = mic.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*MixinIDMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = mic.check(); err != nil {
-				return nil, err
-			}
-			mic.mutation = mutation
-			if node, err = mic.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(mic.hooks) - 1; i >= 0; i-- {
-			if mic.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = mic.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, mic.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*MixinID)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from MixinIDMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*MixinID, MixinIDMutation](ctx, mic.sqlSave, mic.mutation, mic.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -148,6 +106,9 @@ func (mic *MixinIDCreate) check() error {
 }
 
 func (mic *MixinIDCreate) sqlSave(ctx context.Context) (*MixinID, error) {
+	if err := mic.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := mic.createSpec()
 	if err := sqlgraph.CreateNode(ctx, mic.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -162,19 +123,15 @@ func (mic *MixinIDCreate) sqlSave(ctx context.Context) (*MixinID, error) {
 			return nil, err
 		}
 	}
+	mic.mutation.id = &_node.ID
+	mic.mutation.done = true
 	return _node, nil
 }
 
 func (mic *MixinIDCreate) createSpec() (*MixinID, *sqlgraph.CreateSpec) {
 	var (
 		_node = &MixinID{config: mic.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: mixinid.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: mixinid.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(mixinid.Table, sqlgraph.NewFieldSpec(mixinid.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = mic.conflict
 	if id, ok := mic.mutation.ID(); ok {
@@ -404,8 +361,8 @@ func (micb *MixinIDCreateBulk) Save(ctx context.Context) ([]*MixinID, error) {
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, micb.builders[i+1].mutation)
 				} else {

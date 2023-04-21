@@ -8,6 +8,8 @@ package user
 
 import (
 	"net/http"
+
+	"entgo.io/ent/dialect/sql"
 )
 
 const (
@@ -33,6 +35,8 @@ const (
 	FieldStrings = "strings"
 	// FieldAddr holds the string denoting the addr field in the database.
 	FieldAddr = "addr"
+	// FieldUnknown holds the string denoting the unknown field in the database.
+	FieldUnknown = "unknown"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 )
@@ -49,6 +53,7 @@ var Columns = []string{
 	FieldFloats,
 	FieldStrings,
 	FieldAddr,
+	FieldUnknown,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -67,3 +72,11 @@ var (
 	// DefaultInts holds the default value on creation for the "ints" field.
 	DefaultInts []int
 )
+
+// OrderOption defines the ordering options for the User queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}

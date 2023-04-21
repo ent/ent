@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
@@ -31,7 +32,8 @@ type TweetTag struct {
 	TweetID int `json:"tweet_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TweetTagQuery when eager-loading is set.
-	Edges TweetTagEdges `json:"edges"`
+	Edges        TweetTagEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // TweetTagEdges holds the relations/edges for other nodes in the graph.
@@ -83,7 +85,7 @@ func (*TweetTag) scanValues(columns []string) ([]any, error) {
 		case tweettag.FieldID:
 			values[i] = new(uuid.UUID)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type TweetTag", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -121,26 +123,34 @@ func (tt *TweetTag) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				tt.TweetID = int(value.Int64)
 			}
+		default:
+			tt.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the TweetTag.
+// This includes values selected through modifiers, order, etc.
+func (tt *TweetTag) Value(name string) (ent.Value, error) {
+	return tt.selectValues.Get(name)
+}
+
 // QueryTag queries the "tag" edge of the TweetTag entity.
 func (tt *TweetTag) QueryTag() *TagQuery {
-	return (&TweetTagClient{config: tt.config}).QueryTag(tt)
+	return NewTweetTagClient(tt.config).QueryTag(tt)
 }
 
 // QueryTweet queries the "tweet" edge of the TweetTag entity.
 func (tt *TweetTag) QueryTweet() *TweetQuery {
-	return (&TweetTagClient{config: tt.config}).QueryTweet(tt)
+	return NewTweetTagClient(tt.config).QueryTweet(tt)
 }
 
 // Update returns a builder for updating this TweetTag.
 // Note that you need to call TweetTag.Unwrap() before calling this method if this TweetTag
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (tt *TweetTag) Update() *TweetTagUpdateOne {
-	return (&TweetTagClient{config: tt.config}).UpdateOne(tt)
+	return NewTweetTagClient(tt.config).UpdateOne(tt)
 }
 
 // Unwrap unwraps the TweetTag entity that was returned from a transaction after it was closed,
@@ -173,9 +183,3 @@ func (tt *TweetTag) String() string {
 
 // TweetTags is a parsable slice of TweetTag.
 type TweetTags []*TweetTag
-
-func (tt TweetTags) config(cfg config) {
-	for _i := range tt {
-		tt[_i].config = cfg
-	}
-}

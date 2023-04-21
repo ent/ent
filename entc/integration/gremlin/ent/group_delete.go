@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -33,34 +32,7 @@ func (gd *GroupDelete) Where(ps ...predicate.Group) *GroupDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (gd *GroupDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(gd.hooks) == 0 {
-		affected, err = gd.gremlinExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GroupMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			gd.mutation = mutation
-			affected, err = gd.gremlinExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(gd.hooks) - 1; i >= 0; i-- {
-			if gd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = gd.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, gd.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, GroupMutation](ctx, gd.gremlinExec, gd.mutation, gd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -78,6 +50,7 @@ func (gd *GroupDelete) gremlinExec(ctx context.Context) (int, error) {
 	if err := gd.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
+	gd.mutation.done = true
 	return res.ReadInt()
 }
 
@@ -92,6 +65,12 @@ func (gd *GroupDelete) gremlin() *dsl.Traversal {
 // GroupDeleteOne is the builder for deleting a single Group entity.
 type GroupDeleteOne struct {
 	gd *GroupDelete
+}
+
+// Where appends a list predicates to the GroupDelete builder.
+func (gdo *GroupDeleteOne) Where(ps ...predicate.Group) *GroupDeleteOne {
+	gdo.gd.mutation.Where(ps...)
+	return gdo
 }
 
 // Exec executes the deletion query.
@@ -109,5 +88,7 @@ func (gdo *GroupDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (gdo *GroupDeleteOne) ExecX(ctx context.Context) {
-	gdo.gd.ExecX(ctx)
+	if err := gdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

@@ -12,13 +12,9 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ template "header" $ }}
 
-{{ template "import" $ }}
-
-import (
-	{{- range $import := $.SiblingImports }}
-		{{ $import.Alias }} "{{ $import.Path }}"
-	{{- end }}
-)
+{{ with extend $ "Imports" $.SiblingImports }}
+	{{ template "import" . }}
+{{ end }}
 
 {{ $builder := $.CreateName }}
 {{ $receiver := receiver $builder }}
@@ -42,10 +38,6 @@ type {{ $builder }} struct {
 
 // Save creates the {{ $.Name }} in the database.
 func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }}, error) {
-	var (
-		err error
-		node *{{ $.Name }}
-	)
 	{{- if $.HasDefault }}
 		{{- if $runtimeRequired }}
 			if err := {{ $receiver }}.defaults(); err != nil {
@@ -55,47 +47,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }},
 			{{ $receiver }}.defaults()
 		{{- end }}
 	{{- end }}
-	if len({{ $receiver }}.hooks) == 0 {
-		if err = {{ $receiver }}.check(); err != nil {
-			return nil, err
-		}
-		node, err = {{ $receiver }}.{{ $.Storage }}Save(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*{{ $.MutationName }})
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = {{ $receiver }}.check(); err != nil {
-				return nil, err
-			}
-			{{ $mutation }} = mutation
-			if node, err = {{ $receiver }}.{{ $.Storage }}Save(ctx) ; err != nil {
-				return nil, err
-			}
-			{{- if $.HasOneFieldID }}
-				mutation.{{ $.ID.BuilderField }} = &node.{{ $.ID.StructField }}
-				mutation.done = true
-			{{- end }}
-			return node, err
-		})
-		for i := len({{ $receiver }}.hooks) - 1; i >= 0; i-- {
-			if {{ $receiver }}.hooks[i] == nil {
-				return nil, fmt.Errorf("{{ $pkg }}: uninitialized hook (forgotten import {{ $pkg }}/runtime?)")
-			}
-			mut = {{ $receiver }}.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, {{ $mutation }})
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*{{ $.Name }})
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from {{ $.MutationName }}", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*{{ $.Name }}, {{ $.MutationName }}](ctx, {{ $receiver }}.{{ $.Storage }}Save, {{ $mutation }}, {{ $receiver }}.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -148,14 +100,26 @@ func ({{ $receiver }} *{{ $builder }}) check() error {
 	{{- range $f := $fields }}
 		{{- $skip := false }}{{ if $.HasOneFieldID }}{{ if eq $f.Name $.ID.Name }}{{ $skip = true }}{{ end }}{{ end }}
 		{{- if and (not $f.Optional) (not $skip) }}
-			if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {
-				return &ValidationError{Name: "{{ $f.Name }}", err: errors.New(`{{ $pkg }}: missing required field "{{ $.Name }}.{{ $f.Name }}"`)}
-			}
+			{{- $dialects := $f.RequiredFor }}
+			{{- $n := len $dialects }}
+			{{- if $n }}
+				{{- $partially := ne $n (len $.Config.Storage.Dialects) }}
+				{{- if $partially }}
+					switch {{ $receiver }}.driver.Dialect() {
+					case {{ join $dialects ", " }}:
+				{{- end }}
+					if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {
+						return &ValidationError{Name: "{{ $f.Name }}", err: errors.New(`{{ $pkg }}: missing required field "{{ $.Name }}.{{ $f.Name }}"`)}
+					}
+				{{- if $partially }}
+					}
+				{{- end }}
+			{{- end }}
 		{{- end }}
-		{{- with or $f.Validators $f.IsEnum }}
+		{{- $isValidator := and ($f.HasGoType) ($f.Type.Validator) }}
+		{{- with or $f.Validators $f.IsEnum $isValidator }}
 			if v, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
-				{{- $basic := $f.BasicType "v" }}
-				if err := {{ $.Package }}.{{ $f.Validator }}({{ $basic }}); err != nil {
+				if err := {{ if or $f.Validators $f.IsEnum }}{{ $.Package }}.{{ $f.Validator }}({{ $f.BasicType "v" }}){{ else }}v.Validate(){{ end }}; err != nil {
 					return &ValidationError{Name: "{{ $f.Name }}", err: fmt.Errorf(`{{ $pkg }}: validator failed for field "{{ $.Name }}.{{ $f.Name }}": %w`, err)}
 				}
 			}

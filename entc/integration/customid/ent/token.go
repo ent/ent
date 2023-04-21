@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/ent/account"
 	"entgo.io/ent/entc/integration/customid/ent/token"
@@ -27,6 +28,7 @@ type Token struct {
 	// The values are being populated by the TokenQuery when eager-loading is set.
 	Edges         TokenEdges `json:"edges"`
 	account_token *sid.ID
+	selectValues  sql.SelectValues
 }
 
 // TokenEdges holds the relations/edges for other nodes in the graph.
@@ -63,7 +65,7 @@ func (*Token) scanValues(columns []string) ([]any, error) {
 		case token.ForeignKeys[0]: // account_token
 			values[i] = &sql.NullScanner{S: new(sid.ID)}
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Token", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -96,21 +98,29 @@ func (t *Token) assignValues(columns []string, values []any) error {
 				t.account_token = new(sid.ID)
 				*t.account_token = *value.S.(*sid.ID)
 			}
+		default:
+			t.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the Token.
+// This includes values selected through modifiers, order, etc.
+func (t *Token) Value(name string) (ent.Value, error) {
+	return t.selectValues.Get(name)
+}
+
 // QueryAccount queries the "account" edge of the Token entity.
 func (t *Token) QueryAccount() *AccountQuery {
-	return (&TokenClient{config: t.config}).QueryAccount(t)
+	return NewTokenClient(t.config).QueryAccount(t)
 }
 
 // Update returns a builder for updating this Token.
 // Note that you need to call Token.Unwrap() before calling this method if this Token
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (t *Token) Update() *TokenUpdateOne {
-	return (&TokenClient{config: t.config}).UpdateOne(t)
+	return NewTokenClient(t.config).UpdateOne(t)
 }
 
 // Unwrap unwraps the Token entity that was returned from a transaction after it was closed,
@@ -137,9 +147,3 @@ func (t *Token) String() string {
 
 // Tokens is a parsable slice of Token.
 type Tokens []*Token
-
-func (t Tokens) config(cfg config) {
-	for _i := range t {
-		t[_i].config = cfg
-	}
-}

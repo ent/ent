@@ -50,12 +50,12 @@ const (
 {{ $hasDefault := false }}{{ range $f := $fields }}{{ if and $f.Default (not $f.IsEnum) }}{{ $hasDefault = true }}{{ end }}{{ end }}
 
 {{/* Generate global variables for hooks, validators and policy checkers */}}
-{{ if or $hasDefault $.HasValidators $.NumHooks $.NumPolicy }}
+{{ if or $hasDefault $.HasUpdateDefault $.HasValidators $.NumHooks $.NumPolicy $.NumInterceptors $.HasValueScanner }}
 	{{- $numHooks := $.NumHooks }}
 	{{- if $.NumPolicy }}
 		{{- $numHooks = add $numHooks 1 }}
 	{{- end }}
-	{{- if $numHooks }}
+	{{- if or $numHooks $.NumInterceptors }}
 		// Note that the variables below are initialized by the runtime
 		// package on the initialization of the application. Therefore,
 		// it should be imported in the main as follows:
@@ -64,8 +64,11 @@ const (
 		//
 	{{- end }}
 	var (
-		{{- if $numHooks }}
-			Hooks [{{ $numHooks }}]ent.Hook
+		{{- if $n := $numHooks }}
+			Hooks [{{ $n }}]ent.Hook
+		{{- end }}
+		{{- if $n := $.NumInterceptors }}
+			Interceptors [{{ $n }}]ent.Interceptor
 		{{- end }}
 		{{- if $.NumPolicy }}
 			Policy ent.Policy
@@ -89,6 +92,16 @@ const (
 				{{ $name }} {{ $type }}
 			{{- end }}
 		{{- end }}
+		{{- if $.HasValueScanner }}
+		// ValueScanner of all {{ $.Name }} fields.
+		ValueScanner struct {
+			{{- range $f := $.Fields }}
+				{{- if $f.HasValueScanner }}
+					{{ $f.StructField }} field.TypeValueScanner[{{ $f.Type }}]
+				{{- end }}
+			{{- end }}
+		}
+		{{- end }}
 	)
 {{ end }}
 
@@ -101,13 +114,13 @@ const (
 			const {{ $f.DefaultName }} {{ $enum }} = "{{ $f.DefaultValue }}"
 		{{ end }}
 	{{ else }}
-		{{/* omit the package name from the type. */}}
+		{{/* Omit the package name from the type. */}}
 		{{ $enum = trimPackage $f.Type.String $.Package }}
 		// {{ $enum }} defines the type for the "{{ $f.Name }}" enum field.
 		type {{ $enum }} string
 
 		{{- if $f.Default }}
-			{{- /*  find the enum that holds the default value. */ -}}
+			{{- /*  Find the enum that holds the default value. */ -}}
 			{{- range $e := $f.Enums }}
 				{{- if eq $e.Value $f.DefaultValue }}
 					// {{ $e.Name }} is the default value of the {{ $enum }} enum.
@@ -147,6 +160,13 @@ const (
 				return fmt.Errorf("{{ $.Package }}: invalid enum value for {{ $f.Name }} field: %q", {{ $receiver }})
 		}
 	}
+{{ end }}
+
+{{ $tmpl = printf "dialect/%s/meta/order" $.Storage }}
+// OrderOption defines the ordering options for the {{ $.Name }} queries.
+type OrderOption func({{ $.Config.Storage.Builder }})
+{{ if hasTemplate $tmpl }}
+	{{ xtemplate $tmpl $ }}
 {{ end }}
 
 {{ template "meta/additional" $ }}

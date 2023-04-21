@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/groupinfo"
 )
@@ -25,7 +26,8 @@ type GroupInfo struct {
 	MaxUsers int `json:"max_users,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GroupInfoQuery when eager-loading is set.
-	Edges GroupInfoEdges `json:"edges"`
+	Edges        GroupInfoEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // GroupInfoEdges holds the relations/edges for other nodes in the graph.
@@ -57,7 +59,7 @@ func (*GroupInfo) scanValues(columns []string) ([]any, error) {
 		case groupinfo.FieldDesc:
 			values[i] = new(sql.NullString)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type GroupInfo", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -89,21 +91,29 @@ func (gi *GroupInfo) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				gi.MaxUsers = int(value.Int64)
 			}
+		default:
+			gi.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the GroupInfo.
+// This includes values selected through modifiers, order, etc.
+func (gi *GroupInfo) Value(name string) (ent.Value, error) {
+	return gi.selectValues.Get(name)
+}
+
 // QueryGroups queries the "groups" edge of the GroupInfo entity.
 func (gi *GroupInfo) QueryGroups() *GroupQuery {
-	return (&GroupInfoClient{config: gi.config}).QueryGroups(gi)
+	return NewGroupInfoClient(gi.config).QueryGroups(gi)
 }
 
 // Update returns a builder for updating this GroupInfo.
 // Note that you need to call GroupInfo.Unwrap() before calling this method if this GroupInfo
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (gi *GroupInfo) Update() *GroupInfoUpdateOne {
-	return (&GroupInfoClient{config: gi.config}).UpdateOne(gi)
+	return NewGroupInfoClient(gi.config).UpdateOne(gi)
 }
 
 // Unwrap unwraps the GroupInfo entity that was returned from a transaction after it was closed,
@@ -157,9 +167,3 @@ func (gi *GroupInfo) appendNamedGroups(name string, edges ...*Group) {
 
 // GroupInfos is a parsable slice of GroupInfo.
 type GroupInfos []*GroupInfo
-
-func (gi GroupInfos) config(cfg config) {
-	for _i := range gi {
-		gi[_i].config = cfg
-	}
-}

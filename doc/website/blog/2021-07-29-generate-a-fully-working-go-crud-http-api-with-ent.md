@@ -41,7 +41,7 @@ go mod init elk-example
 Invoke the ent code generator and create two schemas: User, Pet:
 
 ```shell
-go run -mod=mod entgo.io/ent/cmd/ent init Pet User
+go run -mod=mod entgo.io/ent/cmd/ent new Pet User
 ```
 
 Your project should now look like this:

@@ -64,14 +64,28 @@ func (IDType) String() string {
 
 // InitCmd returns the init command for ent/c packages.
 func InitCmd() *cobra.Command {
+	c := NewCmd()
+	c.Use = "init [flags] [schemas]"
+	c.Short = "initialize an environment with zero or more schemas"
+	c.Example = examples(
+		"ent init Example",
+		"ent init --target entv1/schema User Group",
+		"ent init --template ./path/to/file.tmpl User",
+	)
+	c.Deprecated = `use "ent new" instead`
+	return c
+}
+
+// NewCmd returns the new command for ent/c packages.
+func NewCmd() *cobra.Command {
 	var target, tmplPath string
 	cmd := &cobra.Command{
-		Use:   "init [flags] [schemas]",
-		Short: "initialize an environment with zero or more schemas",
+		Use:   "new [flags] [schemas]",
+		Short: "initialize a new environment with zero or more schemas",
 		Example: examples(
-			"ent init Example",
-			"ent init --target entv1/schema User Group",
-			"ent init --template ./path/to/file.tmpl User",
+			"ent new Example",
+			"ent new --target entv1/schema User Group",
+			"ent new --template ./path/to/file.tmpl User",
 		),
 		Args: func(_ *cobra.Command, names []string) error {
 			for _, name := range names {
@@ -87,15 +101,17 @@ func InitCmd() *cobra.Command {
 				tmpl *template.Template
 			)
 			if tmplPath != "" {
-				tmpl, err = template.ParseFiles(tmplPath)
+				tmpl = template.New(filepath.Base(tmplPath)).Funcs(gen.Funcs)
+				tmpl, err = tmpl.ParseFiles(tmplPath)
 			} else {
-				tmpl, err = template.New("schema").Parse(defaultTemplate)
+				tmpl = template.New("schema").Funcs(gen.Funcs)
+				tmpl, err = tmpl.Parse(defaultTemplate)
 			}
 			if err != nil {
-				log.Fatalln(fmt.Errorf("ent/init: could not parse template %w", err))
+				log.Fatalln(fmt.Errorf("ent/new: could not parse template %w", err))
 			}
-			if err := initEnv(target, names, tmpl); err != nil {
-				log.Fatalln(fmt.Errorf("ent/init: %w", err))
+			if err := newEnv(target, names, tmpl); err != nil {
+				log.Fatalln(fmt.Errorf("ent/new: %w", err))
 			}
 		},
 	}
@@ -108,7 +124,7 @@ func InitCmd() *cobra.Command {
 func DescribeCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "describe [flags] path",
-		Short: "printer a description of the graph schema",
+		Short: "print a description of the graph schema",
 		Example: examples(
 			"ent describe ./ent/schema",
 			"ent describe github.com/a8m/x",
@@ -186,20 +202,23 @@ func GenerateCmd(postRun ...func(*gen.Config)) *cobra.Command {
 	cmd.Flags().StringVar(&cfg.Target, "target", "", "target directory for codegen")
 	cmd.Flags().StringSliceVarP(&features, "feature", "", nil, "extend codegen with additional features")
 	cmd.Flags().StringSliceVarP(&templates, "template", "", nil, "external templates to execute")
+	// The --idtype flag predates the field.<Type>("id") option.
+	// See, https://entgo.io/docs/schema-fields#id-field.
+	cobra.CheckErr(cmd.Flags().MarkHidden("idtype"))
 	return cmd
 }
 
-// initEnv initialize an environment for ent codegen.
-func initEnv(target string, names []string, tmpl *template.Template) error {
+// newEnv create a new environment for ent codegen.
+func newEnv(target string, names []string, tmpl *template.Template) error {
 	if err := createDir(target); err != nil {
 		return fmt.Errorf("create dir %s: %w", target, err)
 	}
 	for _, name := range names {
 		if err := gen.ValidSchemaName(name); err != nil {
-			return fmt.Errorf("init schema %s: %w", name, err)
+			return fmt.Errorf("new schema %s: %w", name, err)
 		}
 		if fileExists(target, name) {
-			return fmt.Errorf("init schema %s: already exists", name)
+			return fmt.Errorf("new schema %s: already exists", name)
 		}
 		b := bytes.NewBuffer(nil)
 		if err := tmpl.Execute(b, name); err != nil {

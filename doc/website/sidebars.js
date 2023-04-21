@@ -30,6 +30,7 @@ module.exports = {
         'traversals',
         'eager-load',
         'hooks',
+        'interceptors',
         'privacy',
         'transactions',
         'predicates',
@@ -44,6 +45,7 @@ module.exports = {
       items: [
         'migrate',
         'versioned-migrations',
+        'data-migrations',
         'dialects',
       ],
       collapsed: false,
@@ -64,7 +66,7 @@ module.exports = {
         'translations',
         'contributors',
         'writing-docs',
-        'slack'
+        'community'
       ],
       collapsed: false,
     },
@@ -107,6 +109,7 @@ module.exports = {
           'grpc-edges',
           'grpc-optional-fields',
           'grpc-service-generation-options',
+          'grpc-external-service',
       ]
     },
     {
@@ -117,10 +120,6 @@ module.exports = {
         {
           type: 'doc',
           id: 'versioned/intro',
-        },
-        {
-          type: 'doc',
-          id: 'versioned/enable-ff',
         },
         {
           type: 'doc',
@@ -141,7 +140,11 @@ module.exports = {
         {
           type: 'doc',
           id: 'versioned/verifying-safety',
-        }
+        },
+        {
+          type: 'doc',
+          id: 'versioned/programmatically',
+        },
       ]
     }
   ]

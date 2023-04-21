@@ -8,6 +8,7 @@ package load
 import (
 	"bytes"
 	"embed"
+	"errors"
 	"fmt"
 	"go/ast"
 	"go/format"
@@ -16,14 +17,17 @@ import (
 	"go/types"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"reflect"
 	"sort"
+	"strconv"
 	"strings"
 	"text/template"
 	"time"
 
 	"entgo.io/ent"
 
+	"golang.org/x/tools/go/ast/astutil"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -59,7 +63,7 @@ type (
 func (c *Config) Load() (*SchemaSpec, error) {
 	spec, err := c.load()
 	if err != nil {
-		return nil, fmt.Errorf("entc/load: load schema dir: %w", err)
+		return nil, fmt.Errorf("entc/load: parse schema dir: %w", err)
 	}
 	if len(c.Names) == 0 {
 		return nil, fmt.Errorf("entc/load: no schema found in: %s", c.Path)
@@ -104,7 +108,7 @@ func (c *Config) Load() (*SchemaSpec, error) {
 // entInterface holds the reflect.Type of ent.Interface.
 var entInterface = reflect.TypeOf(struct{ ent.Interface }{}).Field(0).Type
 
-// load loads the schemas info.
+// load the ent/schema info.
 func (c *Config) load() (*SchemaSpec, error) {
 	pkgs, err := packages.Load(&packages.Config{
 		BuildFlags: c.BuildFlags,
@@ -118,7 +122,10 @@ func (c *Config) load() (*SchemaSpec, error) {
 	}
 	entPkg, pkg := pkgs[0], pkgs[1]
 	if len(pkg.Errors) != 0 {
-		return nil, pkg.Errors[0]
+		return nil, c.loadError(pkg.Errors[0])
+	}
+	if len(entPkg.Errors) != 0 {
+		return nil, entPkg.Errors[0]
 	}
 	if pkgs[0].PkgPath != entInterface.PkgPath() {
 		entPkg, pkg = pkgs[1], pkgs[0]
@@ -144,6 +151,112 @@ func (c *Config) load() (*SchemaSpec, error) {
 	}
 	sort.Strings(c.Names)
 	return &SchemaSpec{PkgPath: pkg.PkgPath, Module: pkg.Module}, nil
+}
+
+func (c *Config) loadError(perr packages.Error) (err error) {
+	if strings.Contains(perr.Msg, "import cycle not allowed") {
+		if cause := c.cycleCause(); cause != "" {
+			perr.Msg += "\n" + cause
+		}
+	}
+	err = perr
+	if perr.Pos == "" {
+		// Strip "-:" prefix in case of empty position.
+		err = errors.New(perr.Msg)
+	}
+	return err
+}
+
+func (c *Config) cycleCause() (cause string) {
+	dir, err := parser.ParseDir(token.NewFileSet(), c.Path, nil, 0)
+	// Ignore reporting in case of parsing
+	// error, or there no packages to parse.
+	if err != nil || len(dir) == 0 {
+		return
+	}
+	// Find the package that contains the schema, or
+	// extract the first package if there is only one.
+	pkg := dir[filepath.Base(c.Path)]
+	if pkg == nil {
+		for _, v := range dir {
+			pkg = v
+			break
+		}
+	}
+	// Package local declarations used by schema fields.
+	locals := make(map[string]bool)
+	for _, f := range pkg.Files {
+		for _, d := range f.Decls {
+			g, ok := d.(*ast.GenDecl)
+			if !ok || g.Tok != token.TYPE {
+				continue
+			}
+			for _, s := range g.Specs {
+				ts, ok := s.(*ast.TypeSpec)
+				if !ok || !ts.Name.IsExported() {
+					continue
+				}
+				// Non-struct types such as "type Role int".
+				st, ok := ts.Type.(*ast.StructType)
+				if !ok {
+					locals[ts.Name.Name] = true
+					continue
+				}
+				var embedSchema bool
+				astutil.Apply(st.Fields, func(c *astutil.Cursor) bool {
+					f, ok := c.Node().(*ast.Field)
+					if ok {
+						switch x := f.Type.(type) {
+						case *ast.SelectorExpr:
+							if x.Sel.Name == "Schema" || x.Sel.Name == "Mixin" {
+								embedSchema = true
+							}
+						case *ast.Ident:
+							// A common pattern is to create local base schema to be embedded by other schemas.
+							if name := strings.ToLower(x.Name); name == "schema" || name == "mixin" {
+								embedSchema = true
+							}
+						}
+					}
+					// Stop traversing the AST in case an ~ent.Schema is embedded.
+					return !embedSchema
+				}, nil)
+				if !embedSchema {
+					locals[ts.Name.Name] = true
+				}
+			}
+		}
+	}
+	// No local declarations to report.
+	if len(locals) == 0 {
+		return
+	}
+	// Usage of local declarations by schema fields.
+	goTypes := make(map[string]bool)
+	for _, f := range pkg.Files {
+		for _, d := range f.Decls {
+			f, ok := d.(*ast.FuncDecl)
+			if !ok || f.Name.Name != "Fields" || f.Type.Params.NumFields() != 0 || f.Type.Results.NumFields() != 1 {
+				continue
+			}
+			astutil.Apply(f.Body, func(cursor *astutil.Cursor) bool {
+				i, ok := cursor.Node().(*ast.Ident)
+				if ok && locals[i.Name] {
+					goTypes[i.Name] = true
+				}
+				return true
+			}, nil)
+		}
+	}
+	names := make([]string, 0, len(goTypes))
+	for k := range goTypes {
+		names = append(names, strconv.Quote(k))
+	}
+	sort.Strings(names)
+	if len(names) > 0 {
+		cause = fmt.Sprintf("To resolve this issue, move the custom types used by the generated code to a separate package: %s", strings.Join(names, ", "))
+	}
+	return
 }
 
 var (

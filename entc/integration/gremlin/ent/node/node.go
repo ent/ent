@@ -6,6 +6,12 @@
 
 package node
 
+import (
+	"time"
+
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+)
+
 const (
 	// Label holds the string label denoting the node type in the database.
 	Label = "node"
@@ -13,6 +19,8 @@ const (
 	FieldID = "id"
 	// FieldValue holds the string denoting the value field in the database.
 	FieldValue = "value"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
 	// EdgePrev holds the string denoting the prev edge name in mutations.
 	EdgePrev = "prev"
 	// EdgeNext holds the string denoting the next edge name in mutations.
@@ -22,5 +30,13 @@ const (
 	// NextLabel holds the string label denoting the next edge type in the database.
 	NextLabel = "node_next"
 )
+
+var (
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
+)
+
+// OrderOption defines the ordering options for the Node queries.
+type OrderOption func(*dsl.Traversal)
 
 // comment from another template.

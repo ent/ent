@@ -15,193 +15,127 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id schema.NoteID) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Note(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id schema.NoteID) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Note(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id schema.NoteID) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.Note(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...schema.NoteID) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.Note(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...schema.NoteID) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.Note(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id schema.NoteID) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.Note(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id schema.NoteID) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.Note(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id schema.NoteID) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.Note(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id schema.NoteID) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.Note(sql.FieldLTE(FieldID, id))
 }
 
 // Text applies equality check predicate on the "text" field. It's identical to TextEQ.
 func Text(v string) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldText), v))
-	})
+	return predicate.Note(sql.FieldEQ(FieldText, v))
 }
 
 // TextEQ applies the EQ predicate on the "text" field.
 func TextEQ(v string) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldText), v))
-	})
+	return predicate.Note(sql.FieldEQ(FieldText, v))
 }
 
 // TextNEQ applies the NEQ predicate on the "text" field.
 func TextNEQ(v string) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldText), v))
-	})
+	return predicate.Note(sql.FieldNEQ(FieldText, v))
 }
 
 // TextIn applies the In predicate on the "text" field.
 func TextIn(vs ...string) predicate.Note {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldText), v...))
-	})
+	return predicate.Note(sql.FieldIn(FieldText, vs...))
 }
 
 // TextNotIn applies the NotIn predicate on the "text" field.
 func TextNotIn(vs ...string) predicate.Note {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldText), v...))
-	})
+	return predicate.Note(sql.FieldNotIn(FieldText, vs...))
 }
 
 // TextGT applies the GT predicate on the "text" field.
 func TextGT(v string) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldText), v))
-	})
+	return predicate.Note(sql.FieldGT(FieldText, v))
 }
 
 // TextGTE applies the GTE predicate on the "text" field.
 func TextGTE(v string) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldText), v))
-	})
+	return predicate.Note(sql.FieldGTE(FieldText, v))
 }
 
 // TextLT applies the LT predicate on the "text" field.
 func TextLT(v string) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldText), v))
-	})
+	return predicate.Note(sql.FieldLT(FieldText, v))
 }
 
 // TextLTE applies the LTE predicate on the "text" field.
 func TextLTE(v string) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldText), v))
-	})
+	return predicate.Note(sql.FieldLTE(FieldText, v))
 }
 
 // TextContains applies the Contains predicate on the "text" field.
 func TextContains(v string) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldText), v))
-	})
+	return predicate.Note(sql.FieldContains(FieldText, v))
 }
 
 // TextHasPrefix applies the HasPrefix predicate on the "text" field.
 func TextHasPrefix(v string) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldText), v))
-	})
+	return predicate.Note(sql.FieldHasPrefix(FieldText, v))
 }
 
 // TextHasSuffix applies the HasSuffix predicate on the "text" field.
 func TextHasSuffix(v string) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldText), v))
-	})
+	return predicate.Note(sql.FieldHasSuffix(FieldText, v))
 }
 
 // TextIsNil applies the IsNil predicate on the "text" field.
 func TextIsNil() predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldText)))
-	})
+	return predicate.Note(sql.FieldIsNull(FieldText))
 }
 
 // TextNotNil applies the NotNil predicate on the "text" field.
 func TextNotNil() predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldText)))
-	})
+	return predicate.Note(sql.FieldNotNull(FieldText))
 }
 
 // TextEqualFold applies the EqualFold predicate on the "text" field.
 func TextEqualFold(v string) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldText), v))
-	})
+	return predicate.Note(sql.FieldEqualFold(FieldText, v))
 }
 
 // TextContainsFold applies the ContainsFold predicate on the "text" field.
 func TextContainsFold(v string) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldText), v))
-	})
+	return predicate.Note(sql.FieldContainsFold(FieldText, v))
 }
 
 // HasParent applies the HasEdge predicate on the "parent" edge.
@@ -209,7 +143,6 @@ func HasParent() predicate.Note {
 	return predicate.Note(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ParentTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, ParentTable, ParentColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -219,11 +152,7 @@ func HasParent() predicate.Note {
 // HasParentWith applies the HasEdge predicate on the "parent" edge with a given conditions (other predicates).
 func HasParentWith(preds ...predicate.Note) predicate.Note {
 	return predicate.Note(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, ParentTable, ParentColumn),
-		)
+		step := newParentStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -237,7 +166,6 @@ func HasChildren() predicate.Note {
 	return predicate.Note(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ChildrenTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, ChildrenTable, ChildrenColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -247,11 +175,7 @@ func HasChildren() predicate.Note {
 // HasChildrenWith applies the HasEdge predicate on the "children" edge with a given conditions (other predicates).
 func HasChildrenWith(preds ...predicate.Note) predicate.Note {
 	return predicate.Note(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, ChildrenTable, ChildrenColumn),
-		)
+		step := newChildrenStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

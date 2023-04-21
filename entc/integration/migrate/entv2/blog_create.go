@@ -8,8 +8,10 @@ package entv2
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/blog"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
@@ -21,6 +23,12 @@ type BlogCreate struct {
 	config
 	mutation *BlogMutation
 	hooks    []Hook
+}
+
+// SetOid sets the "oid" field.
+func (bc *BlogCreate) SetOid(i int) *BlogCreate {
+	bc.mutation.SetOid(i)
+	return bc
 }
 
 // SetID sets the "id" field.
@@ -51,49 +59,7 @@ func (bc *BlogCreate) Mutation() *BlogMutation {
 
 // Save creates the Blog in the database.
 func (bc *BlogCreate) Save(ctx context.Context) (*Blog, error) {
-	var (
-		err  error
-		node *Blog
-	)
-	if len(bc.hooks) == 0 {
-		if err = bc.check(); err != nil {
-			return nil, err
-		}
-		node, err = bc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*BlogMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = bc.check(); err != nil {
-				return nil, err
-			}
-			bc.mutation = mutation
-			if node, err = bc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(bc.hooks) - 1; i >= 0; i-- {
-			if bc.hooks[i] == nil {
-				return nil, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
-			}
-			mut = bc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, bc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Blog)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from BlogMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Blog, BlogMutation](ctx, bc.sqlSave, bc.mutation, bc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -120,10 +86,19 @@ func (bc *BlogCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (bc *BlogCreate) check() error {
+	switch bc.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		if _, ok := bc.mutation.Oid(); !ok {
+			return &ValidationError{Name: "oid", err: errors.New(`entv2: missing required field "Blog.oid"`)}
+		}
+	}
 	return nil
 }
 
 func (bc *BlogCreate) sqlSave(ctx context.Context) (*Blog, error) {
+	if err := bc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := bc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, bc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -135,23 +110,23 @@ func (bc *BlogCreate) sqlSave(ctx context.Context) (*Blog, error) {
 		id := _spec.ID.Value.(int64)
 		_node.ID = int(id)
 	}
+	bc.mutation.id = &_node.ID
+	bc.mutation.done = true
 	return _node, nil
 }
 
 func (bc *BlogCreate) createSpec() (*Blog, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Blog{config: bc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: blog.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: blog.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(blog.Table, sqlgraph.NewFieldSpec(blog.FieldID, field.TypeInt))
 	)
 	if id, ok := bc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
+	}
+	if value, ok := bc.mutation.Oid(); ok {
+		_spec.SetField(blog.FieldOid, field.TypeInt, value)
+		_node.Oid = value
 	}
 	if nodes := bc.mutation.AdminsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -161,10 +136,7 @@ func (bc *BlogCreate) createSpec() (*Blog, *sqlgraph.CreateSpec) {
 			Columns: []string{blog.AdminsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -198,8 +170,8 @@ func (bcb *BlogCreateBulk) Save(ctx context.Context) ([]*Blog, error) {
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, bcb.builders[i+1].mutation)
 				} else {

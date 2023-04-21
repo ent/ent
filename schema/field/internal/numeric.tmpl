@@ -189,6 +189,9 @@ func (b *{{ $builder }}) SchemaType(types map[string]string) *{{ $builder }} {
 
 {{ $tt := title $t.String }}
 // GoType overrides the default Go type with a custom one.
+// If the provided type implements the Validator interface
+// and no validators have been set, the type validator will
+// be used.
 //
 //	field.{{ $tt }}("{{ $t }}").
 //		GoType(pkg.{{ $tt }}(0))
@@ -202,7 +205,15 @@ func (b *{{ $builder }}) SchemaType(types map[string]string) *{{ $builder }} {
 //	}
 //
 func (b *{{ $builder }}) GoType(typ any) *{{ $builder }} {
-	b.desc.goType(typ, {{ $t }}Type)
+	b.desc.goType(typ)
+	return b
+}
+
+// ValueScanner provides an external value scanner for the given GoType.
+// Using this option allow users to use field types that do not implement
+// the sql.Scanner and driver.Valuer interfaces.
+func (b *{{ $builder }}) ValueScanner(vs any) *{{ $builder }} {
+	b.desc.ValueScanner = vs
 	return b
 }
 
@@ -222,6 +233,7 @@ func (b *{{ $builder }}) Descriptor() *Descriptor {
 	if b.desc.Default != nil || b.desc.UpdateDefault != nil {
 		b.desc.checkDefaultFunc({{ $t }}Type)
 	}
+	b.desc.checkGoType({{ $t }}Type)
 	return b.desc
 }
 
@@ -358,6 +370,9 @@ func (b *{{ $builder }}) SchemaType(types map[string]string) *{{ $builder }} {
 
 {{ $tt := title $t.String }}
 // GoType overrides the default Go type with a custom one.
+// If the provided type implements the Validator interface
+// and no validators have been set, the type validator will
+// be used.
 //
 //	field.{{ $tt }}("{{ $t }}").
 //		GoType(pkg.{{ $tt }}(0))
@@ -371,7 +386,15 @@ func (b *{{ $builder }}) SchemaType(types map[string]string) *{{ $builder }} {
 //	}
 //
 func (b *{{ $builder }}) GoType(typ any) *{{ $builder }} {
-	b.desc.goType(typ, {{ $t }}Type)
+	b.desc.goType(typ)
+	return b
+}
+
+// ValueScanner provides an external value scanner for the given GoType.
+// Using this option allow users to use field types that do not implement
+// the sql.Scanner and driver.Valuer interfaces.
+func (b *{{ $builder }}) ValueScanner(vs any) *{{ $builder }} {
+	b.desc.ValueScanner = vs
 	return b
 }
 
@@ -388,6 +411,7 @@ func (b *{{ $builder }}) Annotations(annotations ...schema.Annotation) *{{ $buil
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *{{ $builder }}) Descriptor() *Descriptor {
+	b.desc.checkGoType({{ $t }}Type)
 	return b.desc
 }
 {{ end }}

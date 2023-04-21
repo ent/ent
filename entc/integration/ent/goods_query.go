@@ -22,11 +22,9 @@ import (
 // GoodsQuery is the builder for querying Goods entities.
 type GoodsQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
+	ctx        *QueryContext
+	order      []goods.OrderOption
+	inters     []Interceptor
 	predicates []predicate.Goods
 	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
@@ -40,27 +38,27 @@ func (gq *GoodsQuery) Where(ps ...predicate.Goods) *GoodsQuery {
 	return gq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (gq *GoodsQuery) Limit(limit int) *GoodsQuery {
-	gq.limit = &limit
+	gq.ctx.Limit = &limit
 	return gq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (gq *GoodsQuery) Offset(offset int) *GoodsQuery {
-	gq.offset = &offset
+	gq.ctx.Offset = &offset
 	return gq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (gq *GoodsQuery) Unique(unique bool) *GoodsQuery {
-	gq.unique = &unique
+	gq.ctx.Unique = &unique
 	return gq
 }
 
-// Order adds an order step to the query.
-func (gq *GoodsQuery) Order(o ...OrderFunc) *GoodsQuery {
+// Order specifies how the records should be ordered.
+func (gq *GoodsQuery) Order(o ...goods.OrderOption) *GoodsQuery {
 	gq.order = append(gq.order, o...)
 	return gq
 }
@@ -68,7 +66,7 @@ func (gq *GoodsQuery) Order(o ...OrderFunc) *GoodsQuery {
 // First returns the first Goods entity from the query.
 // Returns a *NotFoundError when no Goods was found.
 func (gq *GoodsQuery) First(ctx context.Context) (*Goods, error) {
-	nodes, err := gq.Limit(1).All(ctx)
+	nodes, err := gq.Limit(1).All(setContextOp(ctx, gq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +89,7 @@ func (gq *GoodsQuery) FirstX(ctx context.Context) *Goods {
 // Returns a *NotFoundError when no Goods ID was found.
 func (gq *GoodsQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = gq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = gq.Limit(1).IDs(setContextOp(ctx, gq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -114,7 +112,7 @@ func (gq *GoodsQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Goods entity is found.
 // Returns a *NotFoundError when no Goods entities are found.
 func (gq *GoodsQuery) Only(ctx context.Context) (*Goods, error) {
-	nodes, err := gq.Limit(2).All(ctx)
+	nodes, err := gq.Limit(2).All(setContextOp(ctx, gq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +140,7 @@ func (gq *GoodsQuery) OnlyX(ctx context.Context) *Goods {
 // Returns a *NotFoundError when no entities are found.
 func (gq *GoodsQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = gq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = gq.Limit(2).IDs(setContextOp(ctx, gq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -167,10 +165,12 @@ func (gq *GoodsQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of GoodsSlice.
 func (gq *GoodsQuery) All(ctx context.Context) ([]*Goods, error) {
+	ctx = setContextOp(ctx, gq.ctx, "All")
 	if err := gq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return gq.sqlAll(ctx)
+	qr := querierAll[[]*Goods, *GoodsQuery]()
+	return withInterceptors[[]*Goods](ctx, gq, qr, gq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -183,9 +183,12 @@ func (gq *GoodsQuery) AllX(ctx context.Context) []*Goods {
 }
 
 // IDs executes the query and returns a list of Goods IDs.
-func (gq *GoodsQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
-	if err := gq.Select(goods.FieldID).Scan(ctx, &ids); err != nil {
+func (gq *GoodsQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if gq.ctx.Unique == nil && gq.path != nil {
+		gq.Unique(true)
+	}
+	ctx = setContextOp(ctx, gq.ctx, "IDs")
+	if err = gq.Select(goods.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -202,10 +205,11 @@ func (gq *GoodsQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (gq *GoodsQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, gq.ctx, "Count")
 	if err := gq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return gq.sqlCount(ctx)
+	return withInterceptors[int](ctx, gq, querierCount[*GoodsQuery](), gq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -219,10 +223,15 @@ func (gq *GoodsQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (gq *GoodsQuery) Exist(ctx context.Context) (bool, error) {
-	if err := gq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, gq.ctx, "Exist")
+	switch _, err := gq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return gq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -242,41 +251,35 @@ func (gq *GoodsQuery) Clone() *GoodsQuery {
 	}
 	return &GoodsQuery{
 		config:     gq.config,
-		limit:      gq.limit,
-		offset:     gq.offset,
-		order:      append([]OrderFunc{}, gq.order...),
+		ctx:        gq.ctx.Clone(),
+		order:      append([]goods.OrderOption{}, gq.order...),
+		inters:     append([]Interceptor{}, gq.inters...),
 		predicates: append([]predicate.Goods{}, gq.predicates...),
 		// clone intermediate query.
-		sql:    gq.sql.Clone(),
-		path:   gq.path,
-		unique: gq.unique,
+		sql:  gq.sql.Clone(),
+		path: gq.path,
 	}
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (gq *GoodsQuery) GroupBy(field string, fields ...string) *GoodsGroupBy {
-	grbuild := &GoodsGroupBy{config: gq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := gq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return gq.sqlQuery(ctx), nil
-	}
+	gq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &GoodsGroupBy{build: gq}
+	grbuild.flds = &gq.ctx.Fields
 	grbuild.label = goods.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
 func (gq *GoodsQuery) Select(fields ...string) *GoodsSelect {
-	gq.fields = append(gq.fields, fields...)
-	selbuild := &GoodsSelect{GoodsQuery: gq}
-	selbuild.label = goods.Label
-	selbuild.flds, selbuild.scan = &gq.fields, selbuild.Scan
-	return selbuild
+	gq.ctx.Fields = append(gq.ctx.Fields, fields...)
+	sbuild := &GoodsSelect{GoodsQuery: gq}
+	sbuild.label = goods.Label
+	sbuild.flds, sbuild.scan = &gq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a GoodsSelect configured with the given aggregations.
@@ -285,7 +288,17 @@ func (gq *GoodsQuery) Aggregate(fns ...AggregateFunc) *GoodsSelect {
 }
 
 func (gq *GoodsQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range gq.fields {
+	for _, inter := range gq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, gq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range gq.ctx.Fields {
 		if !goods.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -333,41 +346,22 @@ func (gq *GoodsQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(gq.modifiers) > 0 {
 		_spec.Modifiers = gq.modifiers
 	}
-	_spec.Node.Columns = gq.fields
-	if len(gq.fields) > 0 {
-		_spec.Unique = gq.unique != nil && *gq.unique
+	_spec.Node.Columns = gq.ctx.Fields
+	if len(gq.ctx.Fields) > 0 {
+		_spec.Unique = gq.ctx.Unique != nil && *gq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, gq.driver, _spec)
 }
 
-func (gq *GoodsQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := gq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (gq *GoodsQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   goods.Table,
-			Columns: goods.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: goods.FieldID,
-			},
-		},
-		From:   gq.sql,
-		Unique: true,
-	}
-	if unique := gq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(goods.Table, goods.Columns, sqlgraph.NewFieldSpec(goods.FieldID, field.TypeInt))
+	_spec.From = gq.sql
+	if unique := gq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if gq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := gq.fields; len(fields) > 0 {
+	if fields := gq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, goods.FieldID)
 		for i := range fields {
@@ -383,10 +377,10 @@ func (gq *GoodsQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := gq.limit; limit != nil {
+	if limit := gq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := gq.offset; offset != nil {
+	if offset := gq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := gq.order; len(ps) > 0 {
@@ -402,7 +396,7 @@ func (gq *GoodsQuery) querySpec() *sqlgraph.QuerySpec {
 func (gq *GoodsQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(gq.driver.Dialect())
 	t1 := builder.Table(goods.Table)
-	columns := gq.fields
+	columns := gq.ctx.Fields
 	if len(columns) == 0 {
 		columns = goods.Columns
 	}
@@ -411,7 +405,7 @@ func (gq *GoodsQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = gq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if gq.unique != nil && *gq.unique {
+	if gq.ctx.Unique != nil && *gq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, m := range gq.modifiers {
@@ -423,12 +417,12 @@ func (gq *GoodsQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range gq.order {
 		p(selector)
 	}
-	if offset := gq.offset; offset != nil {
+	if offset := gq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := gq.limit; limit != nil {
+	if limit := gq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -468,13 +462,8 @@ func (gq *GoodsQuery) Modify(modifiers ...func(s *sql.Selector)) *GoodsSelect {
 
 // GoodsGroupBy is the group-by builder for Goods entities.
 type GoodsGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *GoodsQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -483,58 +472,46 @@ func (ggb *GoodsGroupBy) Aggregate(fns ...AggregateFunc) *GoodsGroupBy {
 	return ggb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (ggb *GoodsGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := ggb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, ggb.build.ctx, "GroupBy")
+	if err := ggb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ggb.sql = query
-	return ggb.sqlScan(ctx, v)
+	return scanWithInterceptors[*GoodsQuery, *GoodsGroupBy](ctx, ggb.build, ggb, ggb.build.inters, v)
 }
 
-func (ggb *GoodsGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range ggb.fields {
-		if !goods.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (ggb *GoodsGroupBy) sqlScan(ctx context.Context, root *GoodsQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(ggb.fns))
+	for _, fn := range ggb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := ggb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*ggb.flds)+len(ggb.fns))
+		for _, f := range *ggb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*ggb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ggb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := ggb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (ggb *GoodsGroupBy) sqlQuery() *sql.Selector {
-	selector := ggb.sql.Select()
-	aggregation := make([]string, 0, len(ggb.fns))
-	for _, fn := range ggb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(ggb.fields)+len(ggb.fns))
-		for _, f := range ggb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(ggb.fields...)...)
-}
-
 // GoodsSelect is the builder for selecting fields of Goods entities.
 type GoodsSelect struct {
 	*GoodsQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -545,26 +522,27 @@ func (gs *GoodsSelect) Aggregate(fns ...AggregateFunc) *GoodsSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (gs *GoodsSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, gs.ctx, "Select")
 	if err := gs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	gs.sql = gs.GoodsQuery.sqlQuery(ctx)
-	return gs.sqlScan(ctx, v)
+	return scanWithInterceptors[*GoodsQuery, *GoodsSelect](ctx, gs.GoodsQuery, gs, gs.inters, v)
 }
 
-func (gs *GoodsSelect) sqlScan(ctx context.Context, v any) error {
+func (gs *GoodsSelect) sqlScan(ctx context.Context, root *GoodsQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(gs.fns))
 	for _, fn := range gs.fns {
-		aggregation = append(aggregation, fn(gs.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*gs.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		gs.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		gs.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := gs.sql.Query()
+	query, args := selector.Query()
 	if err := gs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

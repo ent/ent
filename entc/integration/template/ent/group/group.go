@@ -6,6 +6,10 @@
 
 package group
 
+import (
+	"entgo.io/ent/dialect/sql"
+)
+
 const (
 	// Label holds the string label denoting the group type in the database.
 	Label = "group"
@@ -31,4 +35,17 @@ func ValidColumn(column string) bool {
 		}
 	}
 	return false
+}
+
+// OrderOption defines the ordering options for the Group queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByMaxUsers orders the results by the max_users field.
+func ByMaxUsers(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMaxUsers, opts...).ToFunc()
 }

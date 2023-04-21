@@ -335,3 +335,86 @@ func supportsScan(t reflect.Type) bool {
 		return t == reflect.TypeOf(time.Time{}) || t.Implements(scannerType)
 	}
 }
+
+// UnknownType is a named type to any indicates the info
+// needs to be extracted from the underlying rows.
+type UnknownType any
+
+// ScanTypeOf returns the type used for scanning column i from the database.
+func ScanTypeOf(rows *Rows, i int) any {
+	unknown := new(any)
+	ct, err := rows.ColumnTypes()
+	if err != nil || len(ct) <= i {
+		return unknown
+	}
+	rt := ct[i].ScanType()
+	if rt.Kind() == reflect.Pointer {
+		rt = rt.Elem()
+	}
+	// Handle NULL values.
+	switch rt.Kind() {
+	case reflect.Bool:
+		rt = reflect.TypeOf(sql.NullBool{})
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		rt = reflect.TypeOf(sql.NullInt64{})
+	case reflect.Float32, reflect.Float64:
+		rt = reflect.TypeOf(sql.NullFloat64{})
+	case reflect.String:
+		rt = reflect.TypeOf(sql.NullString{})
+	}
+	return reflect.New(rt).Interface()
+}
+
+// SelectValues maps a selected column to its value.
+// Used by the generated code for storing runtime selected columns/expressions.
+type SelectValues map[string]any
+
+// Set sets the value of the given column.
+func (s *SelectValues) Set(name string, v any) {
+	if *s == nil {
+		*s = make(SelectValues)
+	}
+	if pv, ok := v.(*any); ok && pv != nil {
+		v = *pv
+	}
+	(*s)[name] = v
+}
+
+// Get returns the value of the given column.
+func (s SelectValues) Get(name string) (any, error) {
+	v, ok := s[name]
+	if !ok {
+		return nil, fmt.Errorf("%s value was not selected", name)
+	}
+	if v == nil {
+		return nil, nil
+	}
+	switch rv := reflect.Indirect(reflect.ValueOf(v)).Interface().(type) {
+	case NullString:
+		if rv.Valid {
+			return rv.String, nil
+		}
+	case NullInt64:
+		if rv.Valid {
+			return rv.Int64, nil
+		}
+	case NullFloat64:
+		if rv.Valid {
+			return rv.Float64, nil
+		}
+	case NullBool:
+		if rv.Valid {
+			return rv.Bool, nil
+		}
+	case NullTime:
+		if rv.Valid {
+			return rv.Time, nil
+		}
+	case sql.RawBytes:
+		return []byte(rv), nil
+	default:
+		return rv, nil
+	}
+	return nil, nil
+}

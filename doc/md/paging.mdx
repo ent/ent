@@ -1,0 +1,269 @@
+---
+id: paging
+title: Paging And Ordering
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+## Limit
+
+`Limit` limits the query result to `n` entities.
+
+```go
+users, err := client.User.
+	Query().
+	Limit(n).
+	All(ctx)
+```
+
+
+## Offset
+
+`Offset` sets the first node to return from the query. 
+
+```go
+users, err := client.User.
+	Query().
+	Offset(10).
+	All(ctx)
+```
+
+## Ordering
+
+`Order` returns the entities sorted by the values of one or more fields. Note that, an error
+is returned if the given fields are not valid columns or foreign-keys.
+
+```go
+users, err := client.User.Query().
+	Order(ent.Asc(user.FieldName)).
+	All(ctx)
+```
+
+Starting with version `v0.12.0`, Ent generates type-safe ordering functions for fields and edges. The following
+example demonstrates how to use these generated functions:
+
+```go
+// Get all users sorted by their name (and nickname) in ascending order.
+users, err := client.User.Query().
+	Order(
+		// highlight-start
+		user.ByName(),
+		user.ByNickname(),
+		// highlight-end
+	).
+	All(ctx)
+
+// Get all users sorted by their nickname in descending order.
+users, err := client.User.Query().
+	Order(
+		// highlight-start
+		user.ByNickname(
+			sql.OrderDesc(),
+		),
+		// highlight-end
+	).
+	All(ctx)
+```
+
+## Order By Edge Count
+
+`Order` can also be used to sort entities based on the number of edges they have. For example, the following query
+returns all users sorted by the number of posts they have:
+
+```go
+users, err := client.User.Query().
+	Order(
+		// highlight-start
+		// Users without posts are sorted first.
+		user.ByPostsCount(),
+		// highlight-end
+	).
+	All(ctx)
+
+users, err := client.User.Query().
+	Order(
+		// highlight-start
+		// Users without posts are sorted last.
+		user.ByPostsCount(
+			sql.OrderDesc(),
+		),
+		// highlight-end
+	).
+	All(ctx)
+```
+
+## Order By Edge Field
+
+Entities can also be sorted by the value of an edge field. For example, the following query returns all posts sorted by
+their author's name:
+
+```go
+// Posts are sorted by their author's name in ascending
+// order with NULLs first unless otherwise specified.
+posts, err := client.Post.Query().
+	Order(
+		// highlight-next-line
+		post.ByAuthorField(user.FieldName),
+	).
+	All(ctx)
+
+posts, err := client.Post.Query().
+	Order(
+		// highlight-start
+		post.ByAuthorField(
+			user.FieldName,
+			sql.OrderDesc(),
+			sql.OrderNullsFirst(),
+		),
+		// highlight-end
+	).
+	All(ctx)
+```
+
+## Custom Edge Terms
+
+The generated edge ordering functions support custom terms. For example, the following query returns all users sorted
+by the sum of their posts' likes and views:
+
+```go
+// Ascending order.
+posts, err := client.User.Query().
+	Order(
+		// highlight-start
+		user.ByPosts(
+			sql.OrderBySum(post.FieldNumLikes),
+			sql.OrderBySum(post.FieldNumViews),
+		),
+		// highlight-end
+	).
+	All(ctx)
+
+// Descending order.
+posts, err := client.User.Query().
+	Order(
+		// highlight-start
+		user.ByPosts(
+			sql.OrderBySum(
+				post.FieldNumLikes,
+				sql.OrderDesc(),
+			),
+			sql.OrderBySum(
+				post.FieldNumViews,
+				sql.OrderDesc(),
+			),
+		),
+		// highlight-end
+	).
+	All(ctx)
+```
+
+## Select Order Terms
+
+Ordered terms like `SUM()` and `COUNT()` are not defined in the schema and thus do not exist on the generated entities.
+However, sometimes there is a need to retrieve their information in order to either display it to the user or implement
+cursor-based pagination. The `Value` method, defined on each entity, allows you to obtain the order value if it was
+selected in the query:
+
+```go
+// Define the alias for the order term.
+const as = "pets_count"
+
+// Query users sorted by the number of pets
+// they have and select the order term.
+users := client.User.Query().
+	Order(
+		user.ByPetsCount(
+			sql.OrderDesc(),
+			// highlight-next-line
+			sql.OrderSelectAs(as),
+		),
+		user.ByID(),
+	).
+	AllX(ctx)
+
+// Retrieve the order term value.
+for _, u := range users {
+	// highlight-next-line
+	fmt.Println(u.Value(as))
+}
+```
+
+## Custom Ordering
+
+Custom ordering functions can be useful if you want to write your own storage-specific logic.
+
+```go
+names, err := client.Pet.Query().
+	Order(func(s *sql.Selector) {
+		// Logic goes here.
+	}).
+	Select(pet.FieldName).
+	Strings(ctx)
+```
+
+#### Order by JSON fields
+
+The [`sqljson`](https://pkg.go.dev/entgo.io/ent/dialect/sql/sqljson) package allows to easily sort data based on the
+value of a JSON object:
+
+<Tabs>
+<TabItem value="value" label="By Value" default>
+
+```go {3}
+users := client.User.Query().
+    Order(
+        sqljson.OrderValue(user.FieldData, sqljson.Path("key1", "key2")),
+    ).
+    AllX(ctx)
+```
+
+</TabItem>
+<TabItem value="length" label="By Length">
+
+```go {3}
+users := client.User.Query().
+    Order(
+        sqljson.OrderLen(user.FieldData, sqljson.Path("key1", "key2")),
+    ).
+    AllX(ctx)
+```
+
+</TabItem>
+<TabItem value="desc" label="Descending">
+
+```go {3,9}
+users := client.User.Query().
+    Order(
+        sqljson.OrderValueDesc(user.FieldData, sqljson.Path("key1", "key2")),
+    ).
+    AllX(ctx)
+
+pets := client.Pet.Query().
+    Order(
+        sqljson.OrderLenDesc(pet.FieldData, sqljson.Path("key1", "key2")),
+    ).
+    AllX(ctx)
+```
+
+</TabItem>
+</Tabs>
+
+<details>
+<summary>PostgreSQL limitation on <code>ORDER BY</code> expressions with <code>SELECT DISTINCT</code></summary>
+<div>
+
+PostgreSQL does not support `ORDER BY` expressions with `SELECT DISTINCT`. Thus, the `Unique` modifier should be set
+to `false`. However, keep in mind that this may result in duplicate results when performing graph traversals.
+
+```diff
+users := client.User.Query().
+    Order(
+        sqljson.OrderValue(user.FieldData, sqljson.Path("key1", "key2")),
+    ).
++   Unique(false).
+    AllX(ctx)
+```
+
+</div>
+</details>

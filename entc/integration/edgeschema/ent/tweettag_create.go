@@ -87,50 +87,8 @@ func (ttc *TweetTagCreate) Mutation() *TweetTagMutation {
 
 // Save creates the TweetTag in the database.
 func (ttc *TweetTagCreate) Save(ctx context.Context) (*TweetTag, error) {
-	var (
-		err  error
-		node *TweetTag
-	)
 	ttc.defaults()
-	if len(ttc.hooks) == 0 {
-		if err = ttc.check(); err != nil {
-			return nil, err
-		}
-		node, err = ttc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*TweetTagMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = ttc.check(); err != nil {
-				return nil, err
-			}
-			ttc.mutation = mutation
-			if node, err = ttc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(ttc.hooks) - 1; i >= 0; i-- {
-			if ttc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ttc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, ttc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*TweetTag)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from TweetTagMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*TweetTag, TweetTagMutation](ctx, ttc.sqlSave, ttc.mutation, ttc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -188,6 +146,9 @@ func (ttc *TweetTagCreate) check() error {
 }
 
 func (ttc *TweetTagCreate) sqlSave(ctx context.Context) (*TweetTag, error) {
+	if err := ttc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := ttc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ttc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -202,19 +163,15 @@ func (ttc *TweetTagCreate) sqlSave(ctx context.Context) (*TweetTag, error) {
 			return nil, err
 		}
 	}
+	ttc.mutation.id = &_node.ID
+	ttc.mutation.done = true
 	return _node, nil
 }
 
 func (ttc *TweetTagCreate) createSpec() (*TweetTag, *sqlgraph.CreateSpec) {
 	var (
 		_node = &TweetTag{config: ttc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: tweettag.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: tweettag.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(tweettag.Table, sqlgraph.NewFieldSpec(tweettag.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = ttc.conflict
 	if id, ok := ttc.mutation.ID(); ok {
@@ -233,10 +190,7 @@ func (ttc *TweetTagCreate) createSpec() (*TweetTag, *sqlgraph.CreateSpec) {
 			Columns: []string{tweettag.TagColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tag.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -253,10 +207,7 @@ func (ttc *TweetTagCreate) createSpec() (*TweetTag, *sqlgraph.CreateSpec) {
 			Columns: []string{tweettag.TweetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: tweet.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -506,8 +457,8 @@ func (ttcb *TweetTagCreateBulk) Save(ctx context.Context) ([]*TweetTag, error) {
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, ttcb.builders[i+1].mutation)
 				} else {

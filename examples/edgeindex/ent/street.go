@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/examples/edgeindex/ent/city"
 	"entgo.io/ent/examples/edgeindex/ent/street"
@@ -26,6 +27,7 @@ type Street struct {
 	// The values are being populated by the StreetQuery when eager-loading is set.
 	Edges        StreetEdges `json:"edges"`
 	city_streets *int
+	selectValues sql.SelectValues
 }
 
 // StreetEdges holds the relations/edges for other nodes in the graph.
@@ -62,7 +64,7 @@ func (*Street) scanValues(columns []string) ([]any, error) {
 		case street.ForeignKeys[0]: // city_streets
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Street", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -95,21 +97,29 @@ func (s *Street) assignValues(columns []string, values []any) error {
 				s.city_streets = new(int)
 				*s.city_streets = int(value.Int64)
 			}
+		default:
+			s.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the Street.
+// This includes values selected through modifiers, order, etc.
+func (s *Street) Value(name string) (ent.Value, error) {
+	return s.selectValues.Get(name)
+}
+
 // QueryCity queries the "city" edge of the Street entity.
 func (s *Street) QueryCity() *CityQuery {
-	return (&StreetClient{config: s.config}).QueryCity(s)
+	return NewStreetClient(s.config).QueryCity(s)
 }
 
 // Update returns a builder for updating this Street.
 // Note that you need to call Street.Unwrap() before calling this method if this Street
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (s *Street) Update() *StreetUpdateOne {
-	return (&StreetClient{config: s.config}).UpdateOne(s)
+	return NewStreetClient(s.config).UpdateOne(s)
 }
 
 // Unwrap unwraps the Street entity that was returned from a transaction after it was closed,
@@ -136,9 +146,3 @@ func (s *Street) String() string {
 
 // Streets is a parsable slice of Street.
 type Streets []*Street
-
-func (s Streets) config(cfg config) {
-	for _i := range s {
-		s[_i].config = cfg
-	}
-}

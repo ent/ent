@@ -15,11 +15,11 @@ import (
 	"net/url"
 	"sync"
 
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/json/ent/predicate"
 	"entgo.io/ent/entc/integration/json/ent/schema"
 	"entgo.io/ent/entc/integration/json/ent/user"
-
-	"entgo.io/ent"
 )
 
 const (
@@ -55,6 +55,7 @@ type UserMutation struct {
 	strings       *[]string
 	appendstrings []string
 	addr          *schema.Addr
+	unknown       *any
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*User, error)
@@ -682,14 +683,78 @@ func (m *UserMutation) ResetAddr() {
 	delete(m.clearedFields, user.FieldAddr)
 }
 
+// SetUnknown sets the "unknown" field.
+func (m *UserMutation) SetUnknown(a any) {
+	m.unknown = &a
+}
+
+// Unknown returns the value of the "unknown" field in the mutation.
+func (m *UserMutation) Unknown() (r any, exists bool) {
+	v := m.unknown
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUnknown returns the old "unknown" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldUnknown(ctx context.Context) (v any, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUnknown is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUnknown requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUnknown: %w", err)
+	}
+	return oldValue.Unknown, nil
+}
+
+// ClearUnknown clears the value of the "unknown" field.
+func (m *UserMutation) ClearUnknown() {
+	m.unknown = nil
+	m.clearedFields[user.FieldUnknown] = struct{}{}
+}
+
+// UnknownCleared returns if the "unknown" field was cleared in this mutation.
+func (m *UserMutation) UnknownCleared() bool {
+	_, ok := m.clearedFields[user.FieldUnknown]
+	return ok
+}
+
+// ResetUnknown resets all changes to the "unknown" field.
+func (m *UserMutation) ResetUnknown() {
+	m.unknown = nil
+	delete(m.clearedFields, user.FieldUnknown)
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the UserMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *UserMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.User, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *UserMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *UserMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (User).
@@ -701,7 +766,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 10)
 	if m.t != nil {
 		fields = append(fields, user.FieldT)
 	}
@@ -729,6 +794,9 @@ func (m *UserMutation) Fields() []string {
 	if m.addr != nil {
 		fields = append(fields, user.FieldAddr)
 	}
+	if m.unknown != nil {
+		fields = append(fields, user.FieldUnknown)
+	}
 	return fields
 }
 
@@ -755,6 +823,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Strings()
 	case user.FieldAddr:
 		return m.Addr()
+	case user.FieldUnknown:
+		return m.Unknown()
 	}
 	return nil, false
 }
@@ -782,6 +852,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldStrings(ctx)
 	case user.FieldAddr:
 		return m.OldAddr(ctx)
+	case user.FieldUnknown:
+		return m.OldUnknown(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -854,6 +926,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAddr(v)
 		return nil
+	case user.FieldUnknown:
+		v, ok := value.(any)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUnknown(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
 }
@@ -908,6 +987,9 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldAddr) {
 		fields = append(fields, user.FieldAddr)
 	}
+	if m.FieldCleared(user.FieldUnknown) {
+		fields = append(fields, user.FieldUnknown)
+	}
 	return fields
 }
 
@@ -946,6 +1028,9 @@ func (m *UserMutation) ClearField(name string) error {
 	case user.FieldAddr:
 		m.ClearAddr()
 		return nil
+	case user.FieldUnknown:
+		m.ClearUnknown()
+		return nil
 	}
 	return fmt.Errorf("unknown User nullable field %s", name)
 }
@@ -980,6 +1065,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldAddr:
 		m.ResetAddr()
+		return nil
+	case user.FieldUnknown:
+		m.ResetUnknown()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)

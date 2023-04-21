@@ -50,34 +50,7 @@ func (miu *MixinIDUpdate) Mutation() *MixinIDMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (miu *MixinIDUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(miu.hooks) == 0 {
-		affected, err = miu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*MixinIDMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			miu.mutation = mutation
-			affected, err = miu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(miu.hooks) - 1; i >= 0; i-- {
-			if miu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = miu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, miu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, MixinIDMutation](ctx, miu.sqlSave, miu.mutation, miu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -103,16 +76,7 @@ func (miu *MixinIDUpdate) ExecX(ctx context.Context) {
 }
 
 func (miu *MixinIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   mixinid.Table,
-			Columns: mixinid.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: mixinid.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(mixinid.Table, mixinid.Columns, sqlgraph.NewFieldSpec(mixinid.FieldID, field.TypeUUID))
 	if ps := miu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -134,6 +98,7 @@ func (miu *MixinIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	miu.mutation.done = true
 	return n, nil
 }
 
@@ -162,6 +127,12 @@ func (miuo *MixinIDUpdateOne) Mutation() *MixinIDMutation {
 	return miuo.mutation
 }
 
+// Where appends a list predicates to the MixinIDUpdate builder.
+func (miuo *MixinIDUpdateOne) Where(ps ...predicate.MixinID) *MixinIDUpdateOne {
+	miuo.mutation.Where(ps...)
+	return miuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (miuo *MixinIDUpdateOne) Select(field string, fields ...string) *MixinIDUpdateOne {
@@ -171,40 +142,7 @@ func (miuo *MixinIDUpdateOne) Select(field string, fields ...string) *MixinIDUpd
 
 // Save executes the query and returns the updated MixinID entity.
 func (miuo *MixinIDUpdateOne) Save(ctx context.Context) (*MixinID, error) {
-	var (
-		err  error
-		node *MixinID
-	)
-	if len(miuo.hooks) == 0 {
-		node, err = miuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*MixinIDMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			miuo.mutation = mutation
-			node, err = miuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(miuo.hooks) - 1; i >= 0; i-- {
-			if miuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = miuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, miuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*MixinID)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from MixinIDMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*MixinID, MixinIDMutation](ctx, miuo.sqlSave, miuo.mutation, miuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -230,16 +168,7 @@ func (miuo *MixinIDUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (miuo *MixinIDUpdateOne) sqlSave(ctx context.Context) (_node *MixinID, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   mixinid.Table,
-			Columns: mixinid.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: mixinid.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(mixinid.Table, mixinid.Columns, sqlgraph.NewFieldSpec(mixinid.FieldID, field.TypeUUID))
 	id, ok := miuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "MixinID.id" for update`)}
@@ -281,5 +210,6 @@ func (miuo *MixinIDUpdateOne) sqlSave(ctx context.Context) (_node *MixinID, err 
 		}
 		return nil, err
 	}
+	miuo.mutation.done = true
 	return _node, nil
 }

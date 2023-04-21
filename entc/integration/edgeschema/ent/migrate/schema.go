@@ -12,6 +12,51 @@ import (
 )
 
 var (
+	// AttachedFilesColumns holds the columns for the "attached_files" table.
+	AttachedFilesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "attach_time", Type: field.TypeTime},
+		{Name: "f_id", Type: field.TypeInt},
+		{Name: "proc_id", Type: field.TypeInt},
+	}
+	// AttachedFilesTable holds the schema information for the "attached_files" table.
+	AttachedFilesTable = &schema.Table{
+		Name:       "attached_files",
+		Columns:    AttachedFilesColumns,
+		PrimaryKey: []*schema.Column{AttachedFilesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "attached_files_files_fi",
+				Columns:    []*schema.Column{AttachedFilesColumns[2]},
+				RefColumns: []*schema.Column{FilesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "attached_files_processes_proc",
+				Columns:    []*schema.Column{AttachedFilesColumns[3]},
+				RefColumns: []*schema.Column{ProcessesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "attachedfile_proc_id_f_id",
+				Unique:  true,
+				Columns: []*schema.Column{AttachedFilesColumns[3], AttachedFilesColumns[2]},
+			},
+		},
+	}
+	// FilesColumns holds the columns for the "files" table.
+	FilesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+	}
+	// FilesTable holds the schema information for the "files" table.
+	FilesTable = &schema.Table{
+		Name:       "files",
+		Columns:    FilesColumns,
+		PrimaryKey: []*schema.Column{FilesColumns[0]},
+	}
 	// FriendshipsColumns holds the columns for the "friendships" table.
 	FriendshipsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -95,6 +140,16 @@ var (
 				Columns: []*schema.Column{GroupTagsColumns[1], GroupTagsColumns[2]},
 			},
 		},
+	}
+	// ProcessesColumns holds the columns for the "processes" table.
+	ProcessesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+	}
+	// ProcessesTable holds the schema information for the "processes" table.
+	ProcessesTable = &schema.Table{
+		Name:       "processes",
+		Columns:    ProcessesColumns,
+		PrimaryKey: []*schema.Column{ProcessesColumns[0]},
 	}
 	// RelationshipsColumns holds the columns for the "relationships" table.
 	RelationshipsColumns = []*schema.Column{
@@ -358,9 +413,12 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		AttachedFilesTable,
+		FilesTable,
 		FriendshipsTable,
 		GroupsTable,
 		GroupTagsTable,
+		ProcessesTable,
 		RelationshipsTable,
 		RelationshipInfosTable,
 		RolesTable,
@@ -376,6 +434,8 @@ var (
 )
 
 func init() {
+	AttachedFilesTable.ForeignKeys[0].RefTable = FilesTable
+	AttachedFilesTable.ForeignKeys[1].RefTable = ProcessesTable
 	FriendshipsTable.ForeignKeys[0].RefTable = UsersTable
 	FriendshipsTable.ForeignKeys[1].RefTable = UsersTable
 	GroupTagsTable.ForeignKeys[0].RefTable = TagsTable

@@ -20,9 +20,10 @@ func main() {
 	log.SetFlags(0)
 	cmd := &cobra.Command{Use: "entc"}
 	cmd.AddCommand(
-		base.InitCmd(),
+		base.NewCmd(),
 		base.DescribeCmd(),
 		base.GenerateCmd(migrate),
+		base.InitCmd(),
 	)
 	_ = cmd.Execute()
 }

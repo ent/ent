@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 
 	"entgo.io/ent/entc/integration/ent/schema/task"
 )
@@ -23,15 +24,28 @@ func (Task) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("priority").
 			GoType(task.Priority(0)).
-			Default(int(task.PriorityMid)).
-			Validate(func(i int) error {
-				return task.Priority(i).Validate()
-			}),
+			Default(int(task.PriorityMid)),
 		field.JSON("priorities", map[string]task.Priority{}).
 			Optional(),
 		field.Time("created_at").
 			Default(time.Now).
 			Immutable().
 			Nillable(),
+		field.String("name").
+			Optional(),
+		field.String("owner").
+			Optional(),
+		field.Int("order").
+			Optional(),
+		field.Int("order_option").
+			Optional(),
+	}
+}
+
+// Indexes of the Task.
+func (Task) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("name", "owner").
+			Unique(),
 	}
 }

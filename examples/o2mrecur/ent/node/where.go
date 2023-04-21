@@ -14,144 +14,127 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id int) predicate.Node {
-	return predicate.Node(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Node(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id int) predicate.Node {
-	return predicate.Node(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Node(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id int) predicate.Node {
-	return predicate.Node(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.Node(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Node {
-	return predicate.Node(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.Node(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.Node {
-	return predicate.Node(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.Node(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id int) predicate.Node {
-	return predicate.Node(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.Node(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id int) predicate.Node {
-	return predicate.Node(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.Node(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id int) predicate.Node {
-	return predicate.Node(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.Node(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id int) predicate.Node {
-	return predicate.Node(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.Node(sql.FieldLTE(FieldID, id))
 }
 
 // Value applies equality check predicate on the "value" field. It's identical to ValueEQ.
 func Value(v int) predicate.Node {
-	return predicate.Node(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldValue), v))
-	})
+	return predicate.Node(sql.FieldEQ(FieldValue, v))
+}
+
+// ParentID applies equality check predicate on the "parent_id" field. It's identical to ParentIDEQ.
+func ParentID(v int) predicate.Node {
+	return predicate.Node(sql.FieldEQ(FieldParentID, v))
 }
 
 // ValueEQ applies the EQ predicate on the "value" field.
 func ValueEQ(v int) predicate.Node {
-	return predicate.Node(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldValue), v))
-	})
+	return predicate.Node(sql.FieldEQ(FieldValue, v))
 }
 
 // ValueNEQ applies the NEQ predicate on the "value" field.
 func ValueNEQ(v int) predicate.Node {
-	return predicate.Node(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldValue), v))
-	})
+	return predicate.Node(sql.FieldNEQ(FieldValue, v))
 }
 
 // ValueIn applies the In predicate on the "value" field.
 func ValueIn(vs ...int) predicate.Node {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Node(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldValue), v...))
-	})
+	return predicate.Node(sql.FieldIn(FieldValue, vs...))
 }
 
 // ValueNotIn applies the NotIn predicate on the "value" field.
 func ValueNotIn(vs ...int) predicate.Node {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Node(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldValue), v...))
-	})
+	return predicate.Node(sql.FieldNotIn(FieldValue, vs...))
 }
 
 // ValueGT applies the GT predicate on the "value" field.
 func ValueGT(v int) predicate.Node {
-	return predicate.Node(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldValue), v))
-	})
+	return predicate.Node(sql.FieldGT(FieldValue, v))
 }
 
 // ValueGTE applies the GTE predicate on the "value" field.
 func ValueGTE(v int) predicate.Node {
-	return predicate.Node(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldValue), v))
-	})
+	return predicate.Node(sql.FieldGTE(FieldValue, v))
 }
 
 // ValueLT applies the LT predicate on the "value" field.
 func ValueLT(v int) predicate.Node {
-	return predicate.Node(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldValue), v))
-	})
+	return predicate.Node(sql.FieldLT(FieldValue, v))
 }
 
 // ValueLTE applies the LTE predicate on the "value" field.
 func ValueLTE(v int) predicate.Node {
-	return predicate.Node(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldValue), v))
-	})
+	return predicate.Node(sql.FieldLTE(FieldValue, v))
+}
+
+// ParentIDEQ applies the EQ predicate on the "parent_id" field.
+func ParentIDEQ(v int) predicate.Node {
+	return predicate.Node(sql.FieldEQ(FieldParentID, v))
+}
+
+// ParentIDNEQ applies the NEQ predicate on the "parent_id" field.
+func ParentIDNEQ(v int) predicate.Node {
+	return predicate.Node(sql.FieldNEQ(FieldParentID, v))
+}
+
+// ParentIDIn applies the In predicate on the "parent_id" field.
+func ParentIDIn(vs ...int) predicate.Node {
+	return predicate.Node(sql.FieldIn(FieldParentID, vs...))
+}
+
+// ParentIDNotIn applies the NotIn predicate on the "parent_id" field.
+func ParentIDNotIn(vs ...int) predicate.Node {
+	return predicate.Node(sql.FieldNotIn(FieldParentID, vs...))
+}
+
+// ParentIDIsNil applies the IsNil predicate on the "parent_id" field.
+func ParentIDIsNil() predicate.Node {
+	return predicate.Node(sql.FieldIsNull(FieldParentID))
+}
+
+// ParentIDNotNil applies the NotNil predicate on the "parent_id" field.
+func ParentIDNotNil() predicate.Node {
+	return predicate.Node(sql.FieldNotNull(FieldParentID))
 }
 
 // HasParent applies the HasEdge predicate on the "parent" edge.
@@ -159,7 +142,6 @@ func HasParent() predicate.Node {
 	return predicate.Node(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ParentTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, ParentTable, ParentColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -169,11 +151,7 @@ func HasParent() predicate.Node {
 // HasParentWith applies the HasEdge predicate on the "parent" edge with a given conditions (other predicates).
 func HasParentWith(preds ...predicate.Node) predicate.Node {
 	return predicate.Node(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, ParentTable, ParentColumn),
-		)
+		step := newParentStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -187,7 +165,6 @@ func HasChildren() predicate.Node {
 	return predicate.Node(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ChildrenTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, ChildrenTable, ChildrenColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -197,11 +174,7 @@ func HasChildren() predicate.Node {
 // HasChildrenWith applies the HasEdge predicate on the "children" edge with a given conditions (other predicates).
 func HasChildrenWith(preds ...predicate.Node) predicate.Node {
 	return predicate.Node(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, ChildrenTable, ChildrenColumn),
-		)
+		step := newChildrenStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

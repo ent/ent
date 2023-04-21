@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
@@ -29,7 +30,8 @@ type Relationship struct {
 	InfoID int `json:"info_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RelationshipQuery when eager-loading is set.
-	Edges RelationshipEdges `json:"edges"`
+	Edges        RelationshipEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // RelationshipEdges holds the relations/edges for other nodes in the graph.
@@ -92,7 +94,7 @@ func (*Relationship) scanValues(columns []string) ([]any, error) {
 		case relationship.FieldWeight, relationship.FieldUserID, relationship.FieldRelativeID, relationship.FieldInfoID:
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Relationship", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -130,31 +132,39 @@ func (r *Relationship) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				r.InfoID = int(value.Int64)
 			}
+		default:
+			r.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the Relationship.
+// This includes values selected through modifiers, order, etc.
+func (r *Relationship) Value(name string) (ent.Value, error) {
+	return r.selectValues.Get(name)
+}
+
 // QueryUser queries the "user" edge of the Relationship entity.
 func (r *Relationship) QueryUser() *UserQuery {
-	return (&RelationshipClient{config: r.config}).QueryUser(r)
+	return NewRelationshipClient(r.config).QueryUser(r)
 }
 
 // QueryRelative queries the "relative" edge of the Relationship entity.
 func (r *Relationship) QueryRelative() *UserQuery {
-	return (&RelationshipClient{config: r.config}).QueryRelative(r)
+	return NewRelationshipClient(r.config).QueryRelative(r)
 }
 
 // QueryInfo queries the "info" edge of the Relationship entity.
 func (r *Relationship) QueryInfo() *RelationshipInfoQuery {
-	return (&RelationshipClient{config: r.config}).QueryInfo(r)
+	return NewRelationshipClient(r.config).QueryInfo(r)
 }
 
 // Update returns a builder for updating this Relationship.
 // Note that you need to call Relationship.Unwrap() before calling this method if this Relationship
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (r *Relationship) Update() *RelationshipUpdateOne {
-	return (&RelationshipClient{config: r.config}).UpdateOne(r)
+	return NewRelationshipClient(r.config).UpdateOne(r)
 }
 
 // Unwrap unwraps the Relationship entity that was returned from a transaction after it was closed,
@@ -189,9 +199,3 @@ func (r *Relationship) String() string {
 
 // Relationships is a parsable slice of Relationship.
 type Relationships []*Relationship
-
-func (r Relationships) config(cfg config) {
-	for _i := range r {
-		r[_i].config = cfg
-	}
-}

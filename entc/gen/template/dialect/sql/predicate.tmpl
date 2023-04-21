@@ -7,32 +7,19 @@ in the LICENSE file in the root directory of this source tree.
 {{/* gotype: entgo.io/ent/entc/gen.typeScope */}}
 
 {{ define "dialect/sql/predicate/id" -}}
-	func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C({{ $.ID.Constant }}), id))
-	}
+	sql.FieldEQ({{ $.ID.Constant }}, id)
 {{- end }}
 
 {{ define "dialect/sql/predicate/id/ops" -}}
 	{{- $op := $.Scope.Op -}}
-	{{- $arg := $.Scope.Arg -}}
 	{{- $storage := $.Scope.Storage -}}
-	func(s *sql.Selector) {
-		{{- if $op.Variadic }}
-			v := make([]any, len({{ $arg }}))
-			for i := range v {
-				v[i] = {{ $arg }}[i]
-			}
-		{{- end }}
-		s.Where(sql.{{ call $storage.OpCode $op }}(s.C({{ $.ID.Constant }}){{ if not $op.Niladic }},{{ if $op.Variadic }}v...{{ else }}id{{ end }}{{ end }}))
-	}
+	sql.Field{{ call $storage.OpCode $op }}({{ $.ID.Constant }}{{ if not $op.Niladic }},{{ if $op.Variadic }}ids...{{ else }}id{{ end }}{{ end }})
 {{- end }}
 
 {{ define "dialect/sql/predicate/field" -}}
 	{{- $f := $.Scope.Field -}}
 	{{- $arg := $.Scope.Arg -}}
-	func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C({{ $f.Constant }}), {{ $arg }}))
-	}
+	sql.FieldEQ({{ $f.Constant }}, {{ $arg }})
 {{- end }}
 
 {{ define "dialect/sql/predicate/field/ops" -}}
@@ -40,9 +27,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{- $op := $.Scope.Op -}}
 	{{- $arg := $.Scope.Arg -}}
 	{{- $storage := $.Scope.Storage -}}
-	func(s *sql.Selector) {
-		s.Where(sql.{{ call $storage.OpCode $op }}(s.C({{ $f.Constant }}){{ if not $op.Niladic }}, {{ $arg }}{{ if $op.Variadic }}...{{ end }}{{ end }}))
-	}
+	sql.Field{{ call $storage.OpCode $op }}({{ $f.Constant }}{{ if not $op.Niladic }}, {{ $arg }}{{ if $op.Variadic }}...{{ end }}{{ end }})
 {{- end }}
 
 {{ define "dialect/sql/predicate/edge/has" -}}
@@ -52,16 +37,8 @@ in the LICENSE file in the root directory of this source tree.
 			{{- if $.HasCompositeID }}
 				{{- /* Query that goes from the edge schema. */}}
 				sqlgraph.From(Table, {{ $e.ColumnConstant }}),
-				sqlgraph.To({{ $e.InverseTableConstant }}, {{ print $e.Type.Name "FieldID" }}),
 			{{- else }}
 				sqlgraph.From(Table, {{ $.ID.Constant }}),
-				{{- if $e.Type.HasOneFieldID }}
-					{{- $refid := $.ID.Constant }}{{ if ne $e.Type.ID.StorageKey $.ID.StorageKey }}{{ $refid = print $e.Type.Name "FieldID" }}{{ end }}
-					sqlgraph.To({{ $e.TableConstant }}, {{ $refid }}),
-				{{- else }}
-					{{- /* Query that goes to the edge schema. */}}
-					sqlgraph.To({{ $e.TableConstant }}, {{ $e.ColumnConstant }}),
-				{{- end }}
 			{{- end }}
 			sqlgraph.Edge(sqlgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $e.TableConstant }},
 				{{- if $e.M2M -}}
@@ -77,6 +54,7 @@ in the LICENSE file in the root directory of this source tree.
 				{{- xtemplate $tmpl $ }}
 			{{- end }}
 		{{- end }}
+		{{- /* sqlgraph.To is meaningless on Has<E> (without predicates), because unlike Has<E>With no predicates are applied on the "other" table. */}}
 		sqlgraph.HasNeighbors(s, step)
 	}
 {{- end }}
@@ -84,29 +62,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/sql/predicate/edge/haswith" -}}
 	{{- $e := $.Scope.Edge -}}
 	func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			{{- if $.HasCompositeID }}
-				{{- /* Query that goes from the edge schema. */}}
-				sqlgraph.From(Table, {{ $e.ColumnConstant }}),
-				sqlgraph.To({{ $e.InverseTableConstant }}, {{ print $e.Type.Name "FieldID" }}),
-			{{- else }}
-				sqlgraph.From(Table, {{ $.ID.Constant }}),
-				{{- if $e.Type.HasOneFieldID }}
-					{{- $refid := $.ID.Constant }}{{ if ne $e.Type.ID.StorageKey $.ID.StorageKey }}{{ $refid = print $e.Type.Name "FieldID" }}{{ end }}
-					sqlgraph.To({{ if ne $.Table $e.Type.Table }}{{ $e.InverseTableConstant }}{{ else }}Table{{ end }}, {{ $refid }}),
-				{{- else }}
-					{{- /* Query that goes to the edge schema. */}}
-					sqlgraph.To({{ if ne $.Table $e.Type.Table }}{{ $e.InverseTableConstant }}{{ else }}Table{{ end }}, {{ $e.ColumnConstant }}),
-				{{- end }}
-			{{- end }}
-			sqlgraph.Edge(sqlgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $e.TableConstant }},
-				{{- if $e.M2M -}}
-					{{ $e.PKConstant }}...
-				{{- else -}}
-					{{ $e.ColumnConstant }}
-				{{- end -}}
-			),
-		)
+		step := new{{ pascal $e.Name }}Step()
 		{{- /* Allow mutating the sqlgraph.Step by ent extensions or user templates.*/}}
 		{{- with $tmpls := matchTemplate "dialect/sql/predicate/edge/haswith/*" }}
 			{{- range $tmpl := $tmpls }}

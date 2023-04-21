@@ -460,7 +460,7 @@ func TestHasNeighbors(t *testing.T) {
 				Edge(O2O, false, "nodes", "prev_id"),
 			),
 			selector:  sql.Select("*").From(sql.Table("nodes")),
-			wantQuery: "SELECT * FROM `nodes` WHERE `nodes`.`id` IN (SELECT `nodes`.`prev_id` FROM `nodes` WHERE `nodes`.`prev_id` IS NOT NULL)",
+			wantQuery: "SELECT * FROM `nodes` WHERE EXISTS (SELECT `nodes_edge`.`prev_id` FROM `nodes` AS `nodes_edge` WHERE `nodes`.`id` = `nodes_edge`.`prev_id`)",
 		},
 		{
 			name: "O2O/1type/inverse",
@@ -482,7 +482,7 @@ func TestHasNeighbors(t *testing.T) {
 				Edge(O2M, false, "pets", "owner_id"),
 			),
 			selector:  sql.Select("*").From(sql.Table("users")),
-			wantQuery: "SELECT * FROM `users` WHERE `users`.`id` IN (SELECT `pets`.`owner_id` FROM `pets` WHERE `pets`.`owner_id` IS NOT NULL)",
+			wantQuery: "SELECT * FROM `users` WHERE EXISTS (SELECT `pets`.`owner_id` FROM `pets` WHERE `users`.`id` = `pets`.`owner_id`)",
 		},
 		{
 			name: "M2O/2type2",
@@ -526,7 +526,7 @@ func TestHasNeighbors(t *testing.T) {
 				return step
 			}(),
 			selector:  sql.Select("*").From(sql.Table("nodes").Schema("s1")),
-			wantQuery: "SELECT * FROM `s1`.`nodes` WHERE `s1`.`nodes`.`id` IN (SELECT `s1`.`nodes`.`prev_id` FROM `s1`.`nodes` WHERE `s1`.`nodes`.`prev_id` IS NOT NULL)",
+			wantQuery: "SELECT * FROM `s1`.`nodes` WHERE EXISTS (SELECT `nodes_edge`.`prev_id` FROM `s1`.`nodes` AS `nodes_edge` WHERE `s1`.`nodes`.`id` = `nodes_edge`.`prev_id`)",
 		},
 		{
 			name: "schema/O2O/1type/inverse",
@@ -552,7 +552,7 @@ func TestHasNeighbors(t *testing.T) {
 				return step
 			}(),
 			selector:  sql.Select("*").From(sql.Table("users").Schema("s1")),
-			wantQuery: "SELECT * FROM `s1`.`users` WHERE `s1`.`users`.`id` IN (SELECT `s2`.`pets`.`owner_id` FROM `s2`.`pets` WHERE `s2`.`pets`.`owner_id` IS NOT NULL)",
+			wantQuery: "SELECT * FROM `s1`.`users` WHERE EXISTS (SELECT `s2`.`pets`.`owner_id` FROM `s2`.`pets` WHERE `s1`.`users`.`id` = `s2`.`pets`.`owner_id`)",
 		},
 		{
 			name: "schema/M2O/2type2",
@@ -600,7 +600,7 @@ func TestHasNeighbors(t *testing.T) {
 				Edge(O2M, false, "pets", "owner_id"),
 			),
 			selector:  sql.Select("*").From(sql.Select("*").From(sql.Table("users")).As("users")).As("users"),
-			wantQuery: "SELECT * FROM (SELECT * FROM `users`) AS `users` WHERE `users`.`id` IN (SELECT `pets`.`owner_id` FROM `pets` WHERE `pets`.`owner_id` IS NOT NULL)",
+			wantQuery: "SELECT * FROM (SELECT * FROM `users`) AS `users` WHERE EXISTS (SELECT `pets`.`owner_id` FROM `pets` WHERE `users`.`id` = `pets`.`owner_id`)",
 		},
 		{
 			name: "M2O/2type2/selector",
@@ -909,6 +909,189 @@ func TestHasNeighborsWithContext(t *testing.T) {
 			require.True(t, called, "expected predicate function to be called")
 		})
 	}
+}
+
+func TestOrderByNeighborsCount(t *testing.T) {
+	build := sql.Dialect(dialect.Postgres)
+	t1 := build.Table("users")
+	s := build.Select(t1.C("name")).
+		From(t1)
+	t.Run("O2M", func(t *testing.T) {
+		s := s.Clone()
+		OrderByNeighborsCount(s,
+			NewStep(
+				From("users", "id"),
+				To("pets", "owner_id"),
+				Edge(O2M, false, "pets", "owner_id"),
+			),
+			sql.OrderDesc(),
+			sql.OrderAs("count_pets"),
+		)
+		query, args := s.Query()
+		require.Empty(t, args)
+		require.Equal(t, `SELECT "users"."name" FROM "users" LEFT JOIN (SELECT "pets"."owner_id", COUNT(*) AS "count_pets" FROM "pets" GROUP BY "pets"."owner_id") AS "t1" ON "users"."id" = "t1"."owner_id" ORDER BY "t1"."count_pets" DESC NULLS LAST`, query)
+	})
+	t.Run("O2M/Selected", func(t *testing.T) {
+		s := s.Clone()
+		OrderByNeighborsCount(s,
+			NewStep(
+				From("users", "id"),
+				To("pets", "owner_id"),
+				Edge(O2M, false, "pets", "owner_id"),
+			),
+			sql.OrderDesc(),
+			sql.OrderSelectAs("count_pets"),
+		)
+		query, args := s.Query()
+		require.Empty(t, args)
+		require.Equal(t, `SELECT "users"."name", "t1"."count_pets" FROM "users" LEFT JOIN (SELECT "pets"."owner_id", COUNT(*) AS "count_pets" FROM "pets" GROUP BY "pets"."owner_id") AS "t1" ON "users"."id" = "t1"."owner_id" ORDER BY "t1"."count_pets" DESC NULLS LAST`, query)
+	})
+	t.Run("M2M", func(t *testing.T) {
+		s := s.Clone()
+		OrderByNeighborsCount(s,
+			NewStep(
+				From("users", "id"),
+				To("groups", "id"),
+				Edge(M2M, false, "user_groups", "user_id", "group_id"),
+			),
+		)
+		query, args := s.Query()
+		require.Empty(t, args)
+		require.Equal(t, `SELECT "users"."name" FROM "users" LEFT JOIN (SELECT "user_groups"."user_id", COUNT(*) AS "count_groups" FROM "user_groups" GROUP BY "user_groups"."user_id") AS "t1" ON "users"."id" = "t1"."user_id" ORDER BY "t1"."count_groups" NULLS FIRST`, query)
+	})
+	// Zero or one.
+	t.Run("M2O", func(t *testing.T) {
+		s1, s2 := s.Clone(), s.Clone()
+		OrderByNeighborsCount(s1,
+			NewStep(
+				From("pets", "owner_id"),
+				To("users", "id"),
+				Edge(M2O, true, "pets", "owner_id"),
+			),
+		)
+		query, args := s1.Query()
+		require.Empty(t, args)
+		require.Equal(t, `SELECT "users"."name" FROM "users" ORDER BY "owner_id" IS NULL`, query)
+
+		OrderByNeighborsCount(s2,
+			NewStep(
+				From("pets", "owner_id"),
+				To("users", "id"),
+				Edge(M2O, true, "pets", "owner_id"),
+			),
+			sql.OrderDesc(),
+		)
+		query, args = s2.Query()
+		require.Empty(t, args)
+		require.Equal(t, `SELECT "users"."name" FROM "users" ORDER BY "owner_id" IS NOT NULL`, query)
+	})
+}
+
+func TestOrderByNeighborTerms(t *testing.T) {
+	build := sql.Dialect(dialect.Postgres)
+	t1 := build.Table("users")
+	s := build.Select(t1.C("name")).
+		From(t1)
+	t.Run("M2O", func(t *testing.T) {
+		s := s.Clone()
+		OrderByNeighborTerms(s,
+			NewStep(
+				From("users", "id"),
+				To("workplace", "id"),
+				Edge(M2O, true, "users", "workplace_id"),
+			),
+			sql.OrderByField("name"),
+		)
+		query, args := s.Query()
+		require.Empty(t, args)
+		require.Equal(t, `SELECT "users"."name" FROM "users" LEFT JOIN (SELECT "workplace"."id", "workplace"."name" FROM "workplace") AS "t1" ON "users"."workplace_id" = "t1"."id" ORDER BY "t1"."name" NULLS FIRST`, query)
+	})
+	t.Run("M2O/SelectedAs", func(t *testing.T) {
+		s := s.Clone()
+		OrderByNeighborTerms(s,
+			NewStep(
+				From("users", "id"),
+				To("workplace", "id"),
+				Edge(M2O, true, "users", "workplace_id"),
+			),
+			sql.OrderByField(
+				"name",
+				sql.OrderSelectAs("workplace_name"),
+			),
+		)
+		query, args := s.Query()
+		require.Empty(t, args)
+		require.Equal(t, `SELECT "users"."name", "t1"."workplace_name" FROM "users" LEFT JOIN (SELECT "workplace"."id", "workplace"."name" AS "workplace_name" FROM "workplace") AS "t1" ON "users"."workplace_id" = "t1"."id" ORDER BY "t1"."workplace_name" NULLS FIRST`, query)
+	})
+	t.Run("M2O/NullsLast", func(t *testing.T) {
+		s := s.Clone()
+		OrderByNeighborTerms(s,
+			NewStep(
+				From("users", "id"),
+				To("workplace", "id"),
+				Edge(M2O, true, "users", "workplace_id"),
+			),
+			sql.OrderByField(
+				"name",
+				sql.OrderNullsLast(),
+			),
+		)
+		query, args := s.Query()
+		require.Empty(t, args)
+		require.Equal(t, `SELECT "users"."name" FROM "users" LEFT JOIN (SELECT "workplace"."id", "workplace"."name" FROM "workplace") AS "t1" ON "users"."workplace_id" = "t1"."id" ORDER BY "t1"."name" NULLS LAST`, query)
+	})
+	t.Run("O2M", func(t *testing.T) {
+		s := s.Clone()
+		OrderByNeighborTerms(s,
+			NewStep(
+				From("users", "id"),
+				To("repos", "id"),
+				Edge(O2M, false, "repo", "owner_id"),
+			),
+			sql.OrderBySum(
+				"num_stars",
+				sql.OrderSelectAs("total_stars"),
+			),
+		)
+		query, args := s.Query()
+		require.Empty(t, args)
+		require.Equal(t, `SELECT "users"."name", "t1"."total_stars" FROM "users" LEFT JOIN (SELECT "repo"."owner_id", SUM("repo"."num_stars") AS "total_stars" FROM "repo" GROUP BY "repo"."owner_id") AS "t1" ON "users"."id" = "t1"."owner_id" ORDER BY "t1"."total_stars" NULLS FIRST`, query)
+	})
+	t.Run("M2M", func(t *testing.T) {
+		s := s.Clone()
+		OrderByNeighborTerms(s,
+			NewStep(
+				From("users", "id"),
+				To("group", "id"),
+				Edge(M2M, false, "user_groups", "user_id", "group_id"),
+			),
+			sql.OrderBySum(
+				"num_users",
+				sql.OrderSelectAs("total_users"),
+			),
+		)
+		query, args := s.Query()
+		require.Empty(t, args)
+		require.Equal(t, `SELECT "users"."name", "t1"."total_users" FROM "users" LEFT JOIN (SELECT "user_id", SUM("group"."num_users") AS "total_users" FROM "group" JOIN "user_groups" AS "t1" ON "group"."id" = "t1"."group_id" GROUP BY "user_id") AS "t1" ON "users"."id" = "t1"."user_id" ORDER BY "t1"."total_users" NULLS FIRST`, query)
+	})
+	t.Run("M2M/NullsLast", func(t *testing.T) {
+		s := s.Clone()
+		OrderByNeighborTerms(s,
+			NewStep(
+				From("users", "id"),
+				To("group", "id"),
+				Edge(M2M, false, "user_groups", "user_id", "group_id"),
+			),
+			sql.OrderBySum(
+				"num_users",
+				sql.OrderAs("total_users"),
+				sql.OrderNullsLast(),
+			),
+		)
+		query, args := s.Query()
+		require.Empty(t, args)
+		require.Equal(t, `SELECT "users"."name" FROM "users" LEFT JOIN (SELECT "user_id", SUM("group"."num_users") AS "total_users" FROM "group" JOIN "user_groups" AS "t1" ON "group"."id" = "t1"."group_id" GROUP BY "user_id") AS "t1" ON "users"."id" = "t1"."user_id" ORDER BY "t1"."total_users" NULLS LAST`, query)
+	})
 }
 
 func TestCreateNode(t *testing.T) {
@@ -2198,11 +2381,11 @@ func TestQueryNodes(t *testing.T) {
 			AddRow(1, 10, nil, nil, nil).
 			AddRow(2, 20, "", 0, 0).
 			AddRow(3, 30, "a8m", 1, 1))
-	mock.ExpectQuery(escape("SELECT COUNT(DISTINCT `users`.`id`) FROM `users` WHERE `age` < ? ORDER BY `id` LIMIT 3 OFFSET 4 FOR UPDATE NOWAIT")).
+	mock.ExpectQuery(escape("SELECT COUNT(DISTINCT `users`.`id`) FROM `users` WHERE `age` < ? LIMIT 3 OFFSET 4 FOR UPDATE NOWAIT")).
 		WithArgs(40).
 		WillReturnRows(sqlmock.NewRows([]string{"COUNT"}).
 			AddRow(3))
-	mock.ExpectQuery(escape("SELECT COUNT(DISTINCT `users`.`name`) FROM `users` WHERE `age` < ? ORDER BY `id` LIMIT 3 OFFSET 4 FOR UPDATE NOWAIT")).
+	mock.ExpectQuery(escape("SELECT COUNT(DISTINCT `users`.`name`) FROM `users` WHERE `age` < ? LIMIT 3 OFFSET 4 FOR UPDATE NOWAIT")).
 		WithArgs(40).
 		WillReturnRows(sqlmock.NewRows([]string{"COUNT"}).
 			AddRow(3))

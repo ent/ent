@@ -45,8 +45,8 @@ const config = {
         "pinned": true
       }
     ],
-    "slackChannel": "/docs/slack",
-    "newsletter": "https://www.getrevue.co/profile/ent",
+    "slackChannel": "/docs/community#slack",
+    "newsletter": "https://entgo.substack.com/",
     "githubRepo": "https://github.com/ent/ent"
   },
   "onBrokenLinks": "log",
@@ -80,7 +80,18 @@ const config = {
       }
     ]
   ],
-  "plugins": [],
+  "plugins": [
+      [
+        `@docusaurus/plugin-client-redirects`,{
+          redirects: [
+            {
+              to:'/docs/community',
+              from:'/docs/slack',
+            },
+          ],
+        },
+      ]
+  ],
   "themeConfig": {
     prism: {
       additionalLanguages: ['gotemplate', 'protobuf'],
@@ -97,6 +108,7 @@ const config = {
         {
           className: 'code-block-info-line',
           line: 'highlight-next-line-info',
+          block: {start: 'highlight-info-start', end: 'highlight-info-end'},
         },
       ],
     },
@@ -132,7 +144,7 @@ const config = {
         },
         {to: 'blog', label: 'Blog', position: 'left'},
         {
-          href: '/docs/slack',
+          href: '/docs/community#slack',
           position: 'right',
           className: 'header-slack-link',
           'aria-label': 'Slack channel',
@@ -144,7 +156,7 @@ const config = {
           'aria-label': 'Discord Server',
         },
         {
-          href: 'https://www.getrevue.co/profile/ent',
+          href: 'https://entgo.substack.com/',
           position: 'right',
           className: 'header-newsletter-link',
           'aria-label': 'Newsletter page',
@@ -192,9 +204,9 @@ const config = {
           "title": "Community",
           "items": [
             {"label": "GitHub", "to": "https://github.com/ent/ent"},
-            {"label": "Slack", "to": "/docs/slack"},
+            {"label": "Slack", "to": "/docs/community#slack"},
             {"label": "Discord", "to": "https://discord.gg/qZmPgTE6RX"},
-            {"label": "Newsletter", "to": "https://www.getrevue.co/profile/ent"},
+            {"label": "Newsletter", "to": "https://entgo.substack.com/"},
             {"label": "Discussions", "to": "https://github.com/ent/ent/discussions"},
             {
               "label": "Twitter",

@@ -16,7 +16,7 @@ var (
 	NodesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "value", Type: field.TypeInt},
-		{Name: "node_children", Type: field.TypeInt, Nullable: true},
+		{Name: "parent_id", Type: field.TypeInt, Nullable: true},
 	}
 	// NodesTable holds the schema information for the "nodes" table.
 	NodesTable = &schema.Table{

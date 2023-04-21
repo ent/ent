@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -33,34 +32,7 @@ func (nd *NodeDelete) Where(ps ...predicate.Node) *NodeDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (nd *NodeDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(nd.hooks) == 0 {
-		affected, err = nd.gremlinExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*NodeMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			nd.mutation = mutation
-			affected, err = nd.gremlinExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(nd.hooks) - 1; i >= 0; i-- {
-			if nd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = nd.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, nd.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, NodeMutation](ctx, nd.gremlinExec, nd.mutation, nd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -78,6 +50,7 @@ func (nd *NodeDelete) gremlinExec(ctx context.Context) (int, error) {
 	if err := nd.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
+	nd.mutation.done = true
 	return res.ReadInt()
 }
 
@@ -92,6 +65,12 @@ func (nd *NodeDelete) gremlin() *dsl.Traversal {
 // NodeDeleteOne is the builder for deleting a single Node entity.
 type NodeDeleteOne struct {
 	nd *NodeDelete
+}
+
+// Where appends a list predicates to the NodeDelete builder.
+func (ndo *NodeDeleteOne) Where(ps ...predicate.Node) *NodeDeleteOne {
+	ndo.nd.mutation.Where(ps...)
+	return ndo
 }
 
 // Exec executes the deletion query.
@@ -109,5 +88,7 @@ func (ndo *NodeDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (ndo *NodeDeleteOne) ExecX(ctx context.Context) {
-	ndo.nd.ExecX(ctx)
+	if err := ndo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

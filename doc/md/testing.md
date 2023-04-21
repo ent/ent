@@ -18,7 +18,7 @@ import (
 )
 
 func TestXXX(t *testing.T) {
-	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&_fk=1")
 	defer client.Close()
 	// ...
 }
@@ -32,7 +32,7 @@ func TestXXX(t *testing.T) {
 		enttest.WithOptions(ent.Log(t.Log)),
 		enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)),
 	}
-	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", opts...)
+	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&_fk=1", opts...)
 	defer client.Close()
 	// ...
 }

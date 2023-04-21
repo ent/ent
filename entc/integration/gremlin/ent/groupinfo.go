@@ -67,14 +67,14 @@ func (gi *GroupInfo) FromResponse(res *gremlin.Response) error {
 
 // QueryGroups queries the "groups" edge of the GroupInfo entity.
 func (gi *GroupInfo) QueryGroups() *GroupQuery {
-	return (&GroupInfoClient{config: gi.config}).QueryGroups(gi)
+	return NewGroupInfoClient(gi.config).QueryGroups(gi)
 }
 
 // Update returns a builder for updating this GroupInfo.
 // Note that you need to call GroupInfo.Unwrap() before calling this method if this GroupInfo
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (gi *GroupInfo) Update() *GroupInfoUpdateOne {
-	return (&GroupInfoClient{config: gi.config}).UpdateOne(gi)
+	return NewGroupInfoClient(gi.config).UpdateOne(gi)
 }
 
 // Unwrap unwraps the GroupInfo entity that was returned from a transaction after it was closed,
@@ -126,10 +126,4 @@ func (gi *GroupInfos) FromResponse(res *gremlin.Response) error {
 		*gi = append(*gi, node)
 	}
 	return nil
-}
-
-func (gi GroupInfos) config(cfg config) {
-	for _i := range gi {
-		gi[_i].config = cfg
-	}
 }

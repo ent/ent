@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -104,34 +103,7 @@ func (giu *GroupInfoUpdate) RemoveGroups(g ...*Group) *GroupInfoUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (giu *GroupInfoUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(giu.hooks) == 0 {
-		affected, err = giu.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GroupInfoMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			giu.mutation = mutation
-			affected, err = giu.gremlinSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(giu.hooks) - 1; i >= 0; i-- {
-			if giu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = giu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, giu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, GroupInfoMutation](ctx, giu.gremlinSave, giu.mutation, giu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -165,6 +137,7 @@ func (giu *GroupInfoUpdate) gremlinSave(ctx context.Context) (int, error) {
 	if err, ok := isConstantError(res); ok {
 		return 0, err
 	}
+	giu.mutation.done = true
 	return res.ReadInt()
 }
 
@@ -295,6 +268,12 @@ func (giuo *GroupInfoUpdateOne) RemoveGroups(g ...*Group) *GroupInfoUpdateOne {
 	return giuo.RemoveGroupIDs(ids...)
 }
 
+// Where appends a list predicates to the GroupInfoUpdate builder.
+func (giuo *GroupInfoUpdateOne) Where(ps ...predicate.GroupInfo) *GroupInfoUpdateOne {
+	giuo.mutation.Where(ps...)
+	return giuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (giuo *GroupInfoUpdateOne) Select(field string, fields ...string) *GroupInfoUpdateOne {
@@ -304,40 +283,7 @@ func (giuo *GroupInfoUpdateOne) Select(field string, fields ...string) *GroupInf
 
 // Save executes the query and returns the updated GroupInfo entity.
 func (giuo *GroupInfoUpdateOne) Save(ctx context.Context) (*GroupInfo, error) {
-	var (
-		err  error
-		node *GroupInfo
-	)
-	if len(giuo.hooks) == 0 {
-		node, err = giuo.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GroupInfoMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			giuo.mutation = mutation
-			node, err = giuo.gremlinSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(giuo.hooks) - 1; i >= 0; i-- {
-			if giuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = giuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, giuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*GroupInfo)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from GroupInfoMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*GroupInfo, GroupInfoMutation](ctx, giuo.gremlinSave, giuo.mutation, giuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -375,6 +321,7 @@ func (giuo *GroupInfoUpdateOne) gremlinSave(ctx context.Context) (*GroupInfo, er
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
+	giuo.mutation.done = true
 	gi := &GroupInfo{config: giuo.config}
 	if err := gi.FromResponse(res); err != nil {
 		return nil, err

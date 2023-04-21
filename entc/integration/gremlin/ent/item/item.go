@@ -6,6 +6,10 @@
 
 package item
 
+import (
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+)
+
 const (
 	// Label holds the string label denoting the item type in the database.
 	Label = "item"
@@ -23,5 +27,8 @@ var (
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(string) error
 )
+
+// OrderOption defines the ordering options for the Item queries.
+type OrderOption func(*dsl.Traversal)
 
 // comment from another template.

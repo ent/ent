@@ -94,7 +94,7 @@ mkdir ent-sum-file
 cd ent-sum-file
 go mod init ent-sum-file
 go install entgo.io/ent/cmd/ent@master
-go run entgo.io/ent/cmd/ent init User
+go run entgo.io/ent/cmd/ent new User
 sed -i -E 's|^//go(.*)$|//go\1 --feature sql/versioned-migration|' ent/generate.go
 go generate ./...
 docker run --rm --name atlas-sum --detach --env MYSQL_ROOT_PASSWORD=pass --env MYSQL_DATABASE=ent -p 3306:3306 mysql
@@ -240,7 +240,7 @@ our [Ent Discord Server](https://discord.gg/qZmPgTE6RX).
 
 :::note For more Ent news and updates:
 
-- Subscribe to our [Newsletter](https://www.getrevue.co/profile/ent)
+- Subscribe to our [Newsletter](https://entgo.substack.com/)
 - Follow us on [Twitter](https://twitter.com/entgo_io)
 - Join us on #ent on the [Gophers Slack](https://entgo.io/docs/slack)
 - Join us on the [Ent Discord Server](https://discord.gg/qZmPgTE6RX)

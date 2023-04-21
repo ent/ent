@@ -18,7 +18,6 @@ import (
 //	type M struct {
 //		mixin.Schema
 //	}
-//
 type Schema struct{}
 
 // Fields of the mixin.
@@ -32,6 +31,9 @@ func (Schema) Indexes() []ent.Index { return nil }
 
 // Hooks of the mixin.
 func (Schema) Hooks() []ent.Hook { return nil }
+
+// Interceptors of the schema.
+func (Schema) Interceptors() []ent.Interceptor { return nil }
 
 // Policy of the mixin.
 func (Schema) Policy() ent.Policy { return nil }

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"fmt"
 	"math"
 
 	"entgo.io/ent/dialect/gremlin"
@@ -22,11 +23,9 @@ import (
 // GroupQuery is the builder for querying Group entities.
 type GroupQuery struct {
 	config
-	limit       *int
-	offset      *int
-	unique      *bool
-	order       []OrderFunc
-	fields      []string
+	ctx         *QueryContext
+	order       []group.OrderOption
+	inters      []Interceptor
 	predicates  []predicate.Group
 	withFiles   *FileQuery
 	withBlocked *UserQuery
@@ -43,34 +42,34 @@ func (gq *GroupQuery) Where(ps ...predicate.Group) *GroupQuery {
 	return gq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (gq *GroupQuery) Limit(limit int) *GroupQuery {
-	gq.limit = &limit
+	gq.ctx.Limit = &limit
 	return gq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (gq *GroupQuery) Offset(offset int) *GroupQuery {
-	gq.offset = &offset
+	gq.ctx.Offset = &offset
 	return gq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (gq *GroupQuery) Unique(unique bool) *GroupQuery {
-	gq.unique = &unique
+	gq.ctx.Unique = &unique
 	return gq
 }
 
-// Order adds an order step to the query.
-func (gq *GroupQuery) Order(o ...OrderFunc) *GroupQuery {
+// Order specifies how the records should be ordered.
+func (gq *GroupQuery) Order(o ...group.OrderOption) *GroupQuery {
 	gq.order = append(gq.order, o...)
 	return gq
 }
 
 // QueryFiles chains the current query on the "files" edge.
 func (gq *GroupQuery) QueryFiles() *FileQuery {
-	query := &FileQuery{config: gq.config}
+	query := (&FileClient{config: gq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -84,7 +83,7 @@ func (gq *GroupQuery) QueryFiles() *FileQuery {
 
 // QueryBlocked chains the current query on the "blocked" edge.
 func (gq *GroupQuery) QueryBlocked() *UserQuery {
-	query := &UserQuery{config: gq.config}
+	query := (&UserClient{config: gq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -98,7 +97,7 @@ func (gq *GroupQuery) QueryBlocked() *UserQuery {
 
 // QueryUsers chains the current query on the "users" edge.
 func (gq *GroupQuery) QueryUsers() *UserQuery {
-	query := &UserQuery{config: gq.config}
+	query := (&UserClient{config: gq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -112,7 +111,7 @@ func (gq *GroupQuery) QueryUsers() *UserQuery {
 
 // QueryInfo chains the current query on the "info" edge.
 func (gq *GroupQuery) QueryInfo() *GroupInfoQuery {
-	query := &GroupInfoQuery{config: gq.config}
+	query := (&GroupInfoClient{config: gq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -127,7 +126,7 @@ func (gq *GroupQuery) QueryInfo() *GroupInfoQuery {
 // First returns the first Group entity from the query.
 // Returns a *NotFoundError when no Group was found.
 func (gq *GroupQuery) First(ctx context.Context) (*Group, error) {
-	nodes, err := gq.Limit(1).All(ctx)
+	nodes, err := gq.Limit(1).All(setContextOp(ctx, gq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +149,7 @@ func (gq *GroupQuery) FirstX(ctx context.Context) *Group {
 // Returns a *NotFoundError when no Group ID was found.
 func (gq *GroupQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = gq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = gq.Limit(1).IDs(setContextOp(ctx, gq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -173,7 +172,7 @@ func (gq *GroupQuery) FirstIDX(ctx context.Context) string {
 // Returns a *NotSingularError when more than one Group entity is found.
 // Returns a *NotFoundError when no Group entities are found.
 func (gq *GroupQuery) Only(ctx context.Context) (*Group, error) {
-	nodes, err := gq.Limit(2).All(ctx)
+	nodes, err := gq.Limit(2).All(setContextOp(ctx, gq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -201,7 +200,7 @@ func (gq *GroupQuery) OnlyX(ctx context.Context) *Group {
 // Returns a *NotFoundError when no entities are found.
 func (gq *GroupQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = gq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = gq.Limit(2).IDs(setContextOp(ctx, gq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -226,10 +225,12 @@ func (gq *GroupQuery) OnlyIDX(ctx context.Context) string {
 
 // All executes the query and returns a list of Groups.
 func (gq *GroupQuery) All(ctx context.Context) ([]*Group, error) {
+	ctx = setContextOp(ctx, gq.ctx, "All")
 	if err := gq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return gq.gremlinAll(ctx)
+	qr := querierAll[[]*Group, *GroupQuery]()
+	return withInterceptors[[]*Group](ctx, gq, qr, gq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -242,9 +243,12 @@ func (gq *GroupQuery) AllX(ctx context.Context) []*Group {
 }
 
 // IDs executes the query and returns a list of Group IDs.
-func (gq *GroupQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
-	if err := gq.Select(group.FieldID).Scan(ctx, &ids); err != nil {
+func (gq *GroupQuery) IDs(ctx context.Context) (ids []string, err error) {
+	if gq.ctx.Unique == nil && gq.path != nil {
+		gq.Unique(true)
+	}
+	ctx = setContextOp(ctx, gq.ctx, "IDs")
+	if err = gq.Select(group.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -261,10 +265,11 @@ func (gq *GroupQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (gq *GroupQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, gq.ctx, "Count")
 	if err := gq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return gq.gremlinCount(ctx)
+	return withInterceptors[int](ctx, gq, querierCount[*GroupQuery](), gq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -278,10 +283,15 @@ func (gq *GroupQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (gq *GroupQuery) Exist(ctx context.Context) (bool, error) {
-	if err := gq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, gq.ctx, "Exist")
+	switch _, err := gq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return gq.gremlinExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -301,9 +311,9 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 	}
 	return &GroupQuery{
 		config:      gq.config,
-		limit:       gq.limit,
-		offset:      gq.offset,
-		order:       append([]OrderFunc{}, gq.order...),
+		ctx:         gq.ctx.Clone(),
+		order:       append([]group.OrderOption{}, gq.order...),
+		inters:      append([]Interceptor{}, gq.inters...),
 		predicates:  append([]predicate.Group{}, gq.predicates...),
 		withFiles:   gq.withFiles.Clone(),
 		withBlocked: gq.withBlocked.Clone(),
@@ -312,14 +322,13 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		// clone intermediate query.
 		gremlin: gq.gremlin.Clone(),
 		path:    gq.path,
-		unique:  gq.unique,
 	}
 }
 
 // WithFiles tells the query-builder to eager-load the nodes that are connected to
 // the "files" edge. The optional arguments are used to configure the query builder of the edge.
 func (gq *GroupQuery) WithFiles(opts ...func(*FileQuery)) *GroupQuery {
-	query := &FileQuery{config: gq.config}
+	query := (&FileClient{config: gq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -330,7 +339,7 @@ func (gq *GroupQuery) WithFiles(opts ...func(*FileQuery)) *GroupQuery {
 // WithBlocked tells the query-builder to eager-load the nodes that are connected to
 // the "blocked" edge. The optional arguments are used to configure the query builder of the edge.
 func (gq *GroupQuery) WithBlocked(opts ...func(*UserQuery)) *GroupQuery {
-	query := &UserQuery{config: gq.config}
+	query := (&UserClient{config: gq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -341,7 +350,7 @@ func (gq *GroupQuery) WithBlocked(opts ...func(*UserQuery)) *GroupQuery {
 // WithUsers tells the query-builder to eager-load the nodes that are connected to
 // the "users" edge. The optional arguments are used to configure the query builder of the edge.
 func (gq *GroupQuery) WithUsers(opts ...func(*UserQuery)) *GroupQuery {
-	query := &UserQuery{config: gq.config}
+	query := (&UserClient{config: gq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -352,7 +361,7 @@ func (gq *GroupQuery) WithUsers(opts ...func(*UserQuery)) *GroupQuery {
 // WithInfo tells the query-builder to eager-load the nodes that are connected to
 // the "info" edge. The optional arguments are used to configure the query builder of the edge.
 func (gq *GroupQuery) WithInfo(opts ...func(*GroupInfoQuery)) *GroupQuery {
-	query := &GroupInfoQuery{config: gq.config}
+	query := (&GroupInfoClient{config: gq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -375,16 +384,11 @@ func (gq *GroupQuery) WithInfo(opts ...func(*GroupInfoQuery)) *GroupQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
-	grbuild := &GroupGroupBy{config: gq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
-		if err := gq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return gq.gremlinQuery(ctx), nil
-	}
+	gq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &GroupGroupBy{build: gq}
+	grbuild.flds = &gq.ctx.Fields
 	grbuild.label = group.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -401,11 +405,11 @@ func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 //		Select(group.FieldActive).
 //		Scan(ctx, &v)
 func (gq *GroupQuery) Select(fields ...string) *GroupSelect {
-	gq.fields = append(gq.fields, fields...)
-	selbuild := &GroupSelect{GroupQuery: gq}
-	selbuild.label = group.Label
-	selbuild.flds, selbuild.scan = &gq.fields, selbuild.Scan
-	return selbuild
+	gq.ctx.Fields = append(gq.ctx.Fields, fields...)
+	sbuild := &GroupSelect{GroupQuery: gq}
+	sbuild.label = group.Label
+	sbuild.flds, sbuild.scan = &gq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a GroupSelect configured with the given aggregations.
@@ -414,6 +418,16 @@ func (gq *GroupQuery) Aggregate(fns ...AggregateFunc) *GroupSelect {
 }
 
 func (gq *GroupQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range gq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, gq); err != nil {
+				return err
+			}
+		}
+	}
 	if gq.path != nil {
 		prev, err := gq.path(ctx)
 		if err != nil {
@@ -424,12 +438,12 @@ func (gq *GroupQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (gq *GroupQuery) gremlinAll(ctx context.Context) ([]*Group, error) {
+func (gq *GroupQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Group, error) {
 	res := &gremlin.Response{}
 	traversal := gq.gremlinQuery(ctx)
-	if len(gq.fields) > 0 {
-		fields := make([]any, len(gq.fields))
-		for i, f := range gq.fields {
+	if len(gq.ctx.Fields) > 0 {
+		fields := make([]any, len(gq.ctx.Fields))
+		for i, f := range gq.ctx.Fields {
 			fields[i] = f
 		}
 		traversal.ValueMap(fields...)
@@ -444,7 +458,9 @@ func (gq *GroupQuery) gremlinAll(ctx context.Context) ([]*Group, error) {
 	if err := grs.FromResponse(res); err != nil {
 		return nil, err
 	}
-	grs.config(gq.config)
+	for i := range grs {
+		grs[i].config = gq.config
+	}
 	return grs, nil
 }
 
@@ -455,15 +471,6 @@ func (gq *GroupQuery) gremlinCount(ctx context.Context) (int, error) {
 		return 0, err
 	}
 	return res.ReadInt()
-}
-
-func (gq *GroupQuery) gremlinExist(ctx context.Context) (bool, error) {
-	res := &gremlin.Response{}
-	query, bindings := gq.gremlinQuery(ctx).HasNext().Query()
-	if err := gq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return false, err
-	}
-	return res.ReadBool()
 }
 
 func (gq *GroupQuery) gremlinQuery(context.Context) *dsl.Traversal {
@@ -480,7 +487,7 @@ func (gq *GroupQuery) gremlinQuery(context.Context) *dsl.Traversal {
 			p(v)
 		}
 	}
-	switch limit, offset := gq.limit, gq.offset; {
+	switch limit, offset := gq.ctx.Limit, gq.ctx.Offset; {
 	case limit != nil && offset != nil:
 		v.Range(*offset, *offset+*limit)
 	case offset != nil:
@@ -488,7 +495,7 @@ func (gq *GroupQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := gq.unique; unique == nil || *unique {
+	if unique := gq.ctx.Unique; unique == nil || *unique {
 		v.Dedup()
 	}
 	return v
@@ -496,13 +503,8 @@ func (gq *GroupQuery) gremlinQuery(context.Context) *dsl.Traversal {
 
 // GroupGroupBy is the group-by builder for Group entities.
 type GroupGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	gremlin *dsl.Traversal
-	path    func(context.Context) (*dsl.Traversal, error)
+	build *GroupQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -511,33 +513,16 @@ func (ggb *GroupGroupBy) Aggregate(fns ...AggregateFunc) *GroupGroupBy {
 	return ggb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (ggb *GroupGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := ggb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, ggb.build.ctx, "GroupBy")
+	if err := ggb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ggb.gremlin = query
-	return ggb.gremlinScan(ctx, v)
+	return scanWithInterceptors[*GroupQuery, *GroupGroupBy](ctx, ggb.build, ggb, ggb.build.inters, v)
 }
 
-func (ggb *GroupGroupBy) gremlinScan(ctx context.Context, v any) error {
-	res := &gremlin.Response{}
-	query, bindings := ggb.gremlinQuery().Query()
-	if err := ggb.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(ggb.fields)+len(ggb.fns) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
-}
-
-func (ggb *GroupGroupBy) gremlinQuery() *dsl.Traversal {
+func (ggb *GroupGroupBy) gremlinScan(ctx context.Context, root *GroupQuery, v any) error {
 	var (
 		trs   []any
 		names []any
@@ -547,23 +532,34 @@ func (ggb *GroupGroupBy) gremlinQuery() *dsl.Traversal {
 		trs = append(trs, tr)
 		names = append(names, name)
 	}
-	for _, f := range ggb.fields {
+	for _, f := range *ggb.flds {
 		names = append(names, f)
 		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
 	}
-	return ggb.gremlin.Group().
-		By(__.Values(ggb.fields...).Fold()).
+	query, bindings := root.gremlinQuery(ctx).Group().
+		By(__.Values(*ggb.flds...).Fold()).
 		By(__.Fold().Match(trs...).Select(names...)).
 		Select(dsl.Values).
-		Next()
+		Next().
+		Query()
+	res := &gremlin.Response{}
+	if err := ggb.build.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	if len(*ggb.flds)+len(ggb.fns) == 1 {
+		return res.ReadVal(v)
+	}
+	vm, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	return vm.Decode(v)
 }
 
 // GroupSelect is the builder for selecting fields of Group entities.
 type GroupSelect struct {
 	*GroupQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	gremlin *dsl.Traversal
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -574,36 +570,36 @@ func (gs *GroupSelect) Aggregate(fns ...AggregateFunc) *GroupSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (gs *GroupSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, gs.ctx, "Select")
 	if err := gs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	gs.gremlin = gs.GroupQuery.gremlinQuery(ctx)
-	return gs.gremlinScan(ctx, v)
+	return scanWithInterceptors[*GroupQuery, *GroupSelect](ctx, gs.GroupQuery, gs, gs.inters, v)
 }
 
-func (gs *GroupSelect) gremlinScan(ctx context.Context, v any) error {
+func (gs *GroupSelect) gremlinScan(ctx context.Context, root *GroupQuery, v any) error {
 	var (
-		traversal *dsl.Traversal
 		res       = &gremlin.Response{}
+		traversal = root.gremlinQuery(ctx)
 	)
-	if len(gs.fields) == 1 {
-		if gs.fields[0] != group.FieldID {
-			traversal = gs.gremlin.Values(gs.fields...)
+	if fields := gs.ctx.Fields; len(fields) == 1 {
+		if fields[0] != group.FieldID {
+			traversal = traversal.Values(fields...)
 		} else {
-			traversal = gs.gremlin.ID()
+			traversal = traversal.ID()
 		}
 	} else {
-		fields := make([]any, len(gs.fields))
-		for i, f := range gs.fields {
+		fields := make([]any, len(gs.ctx.Fields))
+		for i, f := range gs.ctx.Fields {
 			fields[i] = f
 		}
-		traversal = gs.gremlin.ValueMap(fields...)
+		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
 	if err := gs.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
-	if len(gs.fields) == 1 {
+	if len(root.ctx.Fields) == 1 {
 		return res.ReadVal(v)
 	}
 	vm, err := res.ReadValueMap()

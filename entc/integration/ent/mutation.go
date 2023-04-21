@@ -10,14 +10,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/big"
 	"net"
 	"net/http"
+	"net/url"
 	"sync"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/card"
 	"entgo.io/ent/entc/integration/ent/comment"
+	"entgo.io/ent/entc/integration/ent/exvaluescan"
 	"entgo.io/ent/entc/integration/ent/fieldtype"
 	"entgo.io/ent/entc/integration/ent/file"
 	"entgo.io/ent/entc/integration/ent/filetype"
@@ -36,8 +40,6 @@ import (
 	enttask "entgo.io/ent/entc/integration/ent/task"
 	"entgo.io/ent/entc/integration/ent/user"
 	"github.com/google/uuid"
-
-	"entgo.io/ent"
 )
 
 const (
@@ -49,22 +51,288 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeCard      = "Card"
-	TypeComment   = "Comment"
-	TypeFieldType = "FieldType"
-	TypeFile      = "File"
-	TypeFileType  = "FileType"
-	TypeGoods     = "Goods"
-	TypeGroup     = "Group"
-	TypeGroupInfo = "GroupInfo"
-	TypeItem      = "Item"
-	TypeLicense   = "License"
-	TypeNode      = "Node"
-	TypePet       = "Pet"
-	TypeSpec      = "Spec"
-	TypeTask      = "Task"
-	TypeUser      = "User"
+	TypeAPI         = "Api"
+	TypeCard        = "Card"
+	TypeComment     = "Comment"
+	TypeExValueScan = "ExValueScan"
+	TypeFieldType   = "FieldType"
+	TypeFile        = "File"
+	TypeFileType    = "FileType"
+	TypeGoods       = "Goods"
+	TypeGroup       = "Group"
+	TypeGroupInfo   = "GroupInfo"
+	TypeItem        = "Item"
+	TypeLicense     = "License"
+	TypeNode        = "Node"
+	TypePet         = "Pet"
+	TypeSpec        = "Spec"
+	TypeTask        = "Task"
+	TypeUser        = "User"
 )
+
+// APIMutation represents an operation that mutates the Api nodes in the graph.
+type APIMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*Api, error)
+	predicates    []predicate.Api
+}
+
+var _ ent.Mutation = (*APIMutation)(nil)
+
+// apiOption allows management of the mutation configuration using functional options.
+type apiOption func(*APIMutation)
+
+// newAPIMutation creates new mutation for the Api entity.
+func newAPIMutation(c config, op Op, opts ...apiOption) *APIMutation {
+	m := &APIMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAPI,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withApiID sets the ID field of the mutation.
+func withApiID(id int) apiOption {
+	return func(m *APIMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Api
+		)
+		m.oldValue = func(ctx context.Context) (*Api, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Api.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withApi sets the old Api of the mutation.
+func withApi(node *Api) apiOption {
+	return func(m *APIMutation) {
+		m.oldValue = func(context.Context) (*Api, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m APIMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m APIMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *APIMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *APIMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Api.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// Where appends a list predicates to the APIMutation builder.
+func (m *APIMutation) Where(ps ...predicate.Api) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the APIMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *APIMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Api, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *APIMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *APIMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Api).
+func (m *APIMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *APIMutation) Fields() []string {
+	fields := make([]string, 0, 0)
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *APIMutation) Field(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *APIMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	return nil, fmt.Errorf("unknown Api field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *APIMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Api field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *APIMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *APIMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *APIMutation) AddField(name string, value ent.Value) error {
+	return fmt.Errorf("unknown Api numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *APIMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *APIMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *APIMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Api nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *APIMutation) ResetField(name string) error {
+	return fmt.Errorf("unknown Api field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *APIMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *APIMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *APIMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *APIMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *APIMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *APIMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *APIMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Api unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *APIMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Api edge %s", name)
+}
 
 // CardMutation represents an operation that mutates the Card nodes in the graph.
 type CardMutation struct {
@@ -498,9 +766,24 @@ func (m *CardMutation) Where(ps ...predicate.Card) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the CardMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CardMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Card, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *CardMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CardMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Card).
@@ -1256,9 +1539,24 @@ func (m *CommentMutation) Where(ps ...predicate.Comment) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the CommentMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CommentMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Comment, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *CommentMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CommentMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Comment).
@@ -1564,6 +1862,716 @@ func (m *CommentMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *CommentMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Comment edge %s", name)
+}
+
+// ExValueScanMutation represents an operation that mutates the ExValueScan nodes in the graph.
+type ExValueScanMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *int
+	binary          **url.URL
+	binary_optional **url.URL
+	text            **big.Int
+	text_optional   **big.Int
+	base64          *string
+	custom          *string
+	custom_optional *string
+	clearedFields   map[string]struct{}
+	done            bool
+	oldValue        func(context.Context) (*ExValueScan, error)
+	predicates      []predicate.ExValueScan
+}
+
+var _ ent.Mutation = (*ExValueScanMutation)(nil)
+
+// exvaluescanOption allows management of the mutation configuration using functional options.
+type exvaluescanOption func(*ExValueScanMutation)
+
+// newExValueScanMutation creates new mutation for the ExValueScan entity.
+func newExValueScanMutation(c config, op Op, opts ...exvaluescanOption) *ExValueScanMutation {
+	m := &ExValueScanMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeExValueScan,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withExValueScanID sets the ID field of the mutation.
+func withExValueScanID(id int) exvaluescanOption {
+	return func(m *ExValueScanMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *ExValueScan
+		)
+		m.oldValue = func(ctx context.Context) (*ExValueScan, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().ExValueScan.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withExValueScan sets the old ExValueScan of the mutation.
+func withExValueScan(node *ExValueScan) exvaluescanOption {
+	return func(m *ExValueScanMutation) {
+		m.oldValue = func(context.Context) (*ExValueScan, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ExValueScanMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ExValueScanMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ExValueScanMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ExValueScanMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().ExValueScan.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetBinary sets the "binary" field.
+func (m *ExValueScanMutation) SetBinary(u *url.URL) {
+	m.binary = &u
+}
+
+// Binary returns the value of the "binary" field in the mutation.
+func (m *ExValueScanMutation) Binary() (r *url.URL, exists bool) {
+	v := m.binary
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBinary returns the old "binary" field's value of the ExValueScan entity.
+// If the ExValueScan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ExValueScanMutation) OldBinary(ctx context.Context) (v *url.URL, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBinary is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBinary requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBinary: %w", err)
+	}
+	return oldValue.Binary, nil
+}
+
+// ResetBinary resets all changes to the "binary" field.
+func (m *ExValueScanMutation) ResetBinary() {
+	m.binary = nil
+}
+
+// SetBinaryOptional sets the "binary_optional" field.
+func (m *ExValueScanMutation) SetBinaryOptional(u *url.URL) {
+	m.binary_optional = &u
+}
+
+// BinaryOptional returns the value of the "binary_optional" field in the mutation.
+func (m *ExValueScanMutation) BinaryOptional() (r *url.URL, exists bool) {
+	v := m.binary_optional
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBinaryOptional returns the old "binary_optional" field's value of the ExValueScan entity.
+// If the ExValueScan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ExValueScanMutation) OldBinaryOptional(ctx context.Context) (v *url.URL, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBinaryOptional is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBinaryOptional requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBinaryOptional: %w", err)
+	}
+	return oldValue.BinaryOptional, nil
+}
+
+// ClearBinaryOptional clears the value of the "binary_optional" field.
+func (m *ExValueScanMutation) ClearBinaryOptional() {
+	m.binary_optional = nil
+	m.clearedFields[exvaluescan.FieldBinaryOptional] = struct{}{}
+}
+
+// BinaryOptionalCleared returns if the "binary_optional" field was cleared in this mutation.
+func (m *ExValueScanMutation) BinaryOptionalCleared() bool {
+	_, ok := m.clearedFields[exvaluescan.FieldBinaryOptional]
+	return ok
+}
+
+// ResetBinaryOptional resets all changes to the "binary_optional" field.
+func (m *ExValueScanMutation) ResetBinaryOptional() {
+	m.binary_optional = nil
+	delete(m.clearedFields, exvaluescan.FieldBinaryOptional)
+}
+
+// SetText sets the "text" field.
+func (m *ExValueScanMutation) SetText(b *big.Int) {
+	m.text = &b
+}
+
+// Text returns the value of the "text" field in the mutation.
+func (m *ExValueScanMutation) Text() (r *big.Int, exists bool) {
+	v := m.text
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldText returns the old "text" field's value of the ExValueScan entity.
+// If the ExValueScan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ExValueScanMutation) OldText(ctx context.Context) (v *big.Int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldText is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldText requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldText: %w", err)
+	}
+	return oldValue.Text, nil
+}
+
+// ResetText resets all changes to the "text" field.
+func (m *ExValueScanMutation) ResetText() {
+	m.text = nil
+}
+
+// SetTextOptional sets the "text_optional" field.
+func (m *ExValueScanMutation) SetTextOptional(b *big.Int) {
+	m.text_optional = &b
+}
+
+// TextOptional returns the value of the "text_optional" field in the mutation.
+func (m *ExValueScanMutation) TextOptional() (r *big.Int, exists bool) {
+	v := m.text_optional
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTextOptional returns the old "text_optional" field's value of the ExValueScan entity.
+// If the ExValueScan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ExValueScanMutation) OldTextOptional(ctx context.Context) (v *big.Int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTextOptional is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTextOptional requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTextOptional: %w", err)
+	}
+	return oldValue.TextOptional, nil
+}
+
+// ClearTextOptional clears the value of the "text_optional" field.
+func (m *ExValueScanMutation) ClearTextOptional() {
+	m.text_optional = nil
+	m.clearedFields[exvaluescan.FieldTextOptional] = struct{}{}
+}
+
+// TextOptionalCleared returns if the "text_optional" field was cleared in this mutation.
+func (m *ExValueScanMutation) TextOptionalCleared() bool {
+	_, ok := m.clearedFields[exvaluescan.FieldTextOptional]
+	return ok
+}
+
+// ResetTextOptional resets all changes to the "text_optional" field.
+func (m *ExValueScanMutation) ResetTextOptional() {
+	m.text_optional = nil
+	delete(m.clearedFields, exvaluescan.FieldTextOptional)
+}
+
+// SetBase64 sets the "base64" field.
+func (m *ExValueScanMutation) SetBase64(s string) {
+	m.base64 = &s
+}
+
+// Base64 returns the value of the "base64" field in the mutation.
+func (m *ExValueScanMutation) Base64() (r string, exists bool) {
+	v := m.base64
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBase64 returns the old "base64" field's value of the ExValueScan entity.
+// If the ExValueScan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ExValueScanMutation) OldBase64(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBase64 is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBase64 requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBase64: %w", err)
+	}
+	return oldValue.Base64, nil
+}
+
+// ResetBase64 resets all changes to the "base64" field.
+func (m *ExValueScanMutation) ResetBase64() {
+	m.base64 = nil
+}
+
+// SetCustom sets the "custom" field.
+func (m *ExValueScanMutation) SetCustom(s string) {
+	m.custom = &s
+}
+
+// Custom returns the value of the "custom" field in the mutation.
+func (m *ExValueScanMutation) Custom() (r string, exists bool) {
+	v := m.custom
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCustom returns the old "custom" field's value of the ExValueScan entity.
+// If the ExValueScan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ExValueScanMutation) OldCustom(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCustom is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCustom requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCustom: %w", err)
+	}
+	return oldValue.Custom, nil
+}
+
+// ResetCustom resets all changes to the "custom" field.
+func (m *ExValueScanMutation) ResetCustom() {
+	m.custom = nil
+}
+
+// SetCustomOptional sets the "custom_optional" field.
+func (m *ExValueScanMutation) SetCustomOptional(s string) {
+	m.custom_optional = &s
+}
+
+// CustomOptional returns the value of the "custom_optional" field in the mutation.
+func (m *ExValueScanMutation) CustomOptional() (r string, exists bool) {
+	v := m.custom_optional
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCustomOptional returns the old "custom_optional" field's value of the ExValueScan entity.
+// If the ExValueScan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ExValueScanMutation) OldCustomOptional(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCustomOptional is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCustomOptional requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCustomOptional: %w", err)
+	}
+	return oldValue.CustomOptional, nil
+}
+
+// ClearCustomOptional clears the value of the "custom_optional" field.
+func (m *ExValueScanMutation) ClearCustomOptional() {
+	m.custom_optional = nil
+	m.clearedFields[exvaluescan.FieldCustomOptional] = struct{}{}
+}
+
+// CustomOptionalCleared returns if the "custom_optional" field was cleared in this mutation.
+func (m *ExValueScanMutation) CustomOptionalCleared() bool {
+	_, ok := m.clearedFields[exvaluescan.FieldCustomOptional]
+	return ok
+}
+
+// ResetCustomOptional resets all changes to the "custom_optional" field.
+func (m *ExValueScanMutation) ResetCustomOptional() {
+	m.custom_optional = nil
+	delete(m.clearedFields, exvaluescan.FieldCustomOptional)
+}
+
+// Where appends a list predicates to the ExValueScanMutation builder.
+func (m *ExValueScanMutation) Where(ps ...predicate.ExValueScan) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the ExValueScanMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ExValueScanMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.ExValueScan, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *ExValueScanMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ExValueScanMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (ExValueScan).
+func (m *ExValueScanMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ExValueScanMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.binary != nil {
+		fields = append(fields, exvaluescan.FieldBinary)
+	}
+	if m.binary_optional != nil {
+		fields = append(fields, exvaluescan.FieldBinaryOptional)
+	}
+	if m.text != nil {
+		fields = append(fields, exvaluescan.FieldText)
+	}
+	if m.text_optional != nil {
+		fields = append(fields, exvaluescan.FieldTextOptional)
+	}
+	if m.base64 != nil {
+		fields = append(fields, exvaluescan.FieldBase64)
+	}
+	if m.custom != nil {
+		fields = append(fields, exvaluescan.FieldCustom)
+	}
+	if m.custom_optional != nil {
+		fields = append(fields, exvaluescan.FieldCustomOptional)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ExValueScanMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case exvaluescan.FieldBinary:
+		return m.Binary()
+	case exvaluescan.FieldBinaryOptional:
+		return m.BinaryOptional()
+	case exvaluescan.FieldText:
+		return m.Text()
+	case exvaluescan.FieldTextOptional:
+		return m.TextOptional()
+	case exvaluescan.FieldBase64:
+		return m.Base64()
+	case exvaluescan.FieldCustom:
+		return m.Custom()
+	case exvaluescan.FieldCustomOptional:
+		return m.CustomOptional()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ExValueScanMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case exvaluescan.FieldBinary:
+		return m.OldBinary(ctx)
+	case exvaluescan.FieldBinaryOptional:
+		return m.OldBinaryOptional(ctx)
+	case exvaluescan.FieldText:
+		return m.OldText(ctx)
+	case exvaluescan.FieldTextOptional:
+		return m.OldTextOptional(ctx)
+	case exvaluescan.FieldBase64:
+		return m.OldBase64(ctx)
+	case exvaluescan.FieldCustom:
+		return m.OldCustom(ctx)
+	case exvaluescan.FieldCustomOptional:
+		return m.OldCustomOptional(ctx)
+	}
+	return nil, fmt.Errorf("unknown ExValueScan field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ExValueScanMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case exvaluescan.FieldBinary:
+		v, ok := value.(*url.URL)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBinary(v)
+		return nil
+	case exvaluescan.FieldBinaryOptional:
+		v, ok := value.(*url.URL)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBinaryOptional(v)
+		return nil
+	case exvaluescan.FieldText:
+		v, ok := value.(*big.Int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetText(v)
+		return nil
+	case exvaluescan.FieldTextOptional:
+		v, ok := value.(*big.Int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTextOptional(v)
+		return nil
+	case exvaluescan.FieldBase64:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBase64(v)
+		return nil
+	case exvaluescan.FieldCustom:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCustom(v)
+		return nil
+	case exvaluescan.FieldCustomOptional:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCustomOptional(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ExValueScan field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ExValueScanMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ExValueScanMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ExValueScanMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown ExValueScan numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ExValueScanMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(exvaluescan.FieldBinaryOptional) {
+		fields = append(fields, exvaluescan.FieldBinaryOptional)
+	}
+	if m.FieldCleared(exvaluescan.FieldTextOptional) {
+		fields = append(fields, exvaluescan.FieldTextOptional)
+	}
+	if m.FieldCleared(exvaluescan.FieldCustomOptional) {
+		fields = append(fields, exvaluescan.FieldCustomOptional)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ExValueScanMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ExValueScanMutation) ClearField(name string) error {
+	switch name {
+	case exvaluescan.FieldBinaryOptional:
+		m.ClearBinaryOptional()
+		return nil
+	case exvaluescan.FieldTextOptional:
+		m.ClearTextOptional()
+		return nil
+	case exvaluescan.FieldCustomOptional:
+		m.ClearCustomOptional()
+		return nil
+	}
+	return fmt.Errorf("unknown ExValueScan nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ExValueScanMutation) ResetField(name string) error {
+	switch name {
+	case exvaluescan.FieldBinary:
+		m.ResetBinary()
+		return nil
+	case exvaluescan.FieldBinaryOptional:
+		m.ResetBinaryOptional()
+		return nil
+	case exvaluescan.FieldText:
+		m.ResetText()
+		return nil
+	case exvaluescan.FieldTextOptional:
+		m.ResetTextOptional()
+		return nil
+	case exvaluescan.FieldBase64:
+		m.ResetBase64()
+		return nil
+	case exvaluescan.FieldCustom:
+		m.ResetCustom()
+		return nil
+	case exvaluescan.FieldCustomOptional:
+		m.ResetCustomOptional()
+		return nil
+	}
+	return fmt.Errorf("unknown ExValueScan field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ExValueScanMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ExValueScanMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ExValueScanMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ExValueScanMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ExValueScanMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ExValueScanMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ExValueScanMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown ExValueScan unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ExValueScanMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown ExValueScan edge %s", name)
 }
 
 // FieldTypeMutation represents an operation that mutates the FieldType nodes in the graph.
@@ -5495,9 +6503,24 @@ func (m *FieldTypeMutation) Where(ps ...predicate.FieldType) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the FieldTypeMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *FieldTypeMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.FieldType, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *FieldTypeMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *FieldTypeMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (FieldType).
@@ -7765,8 +8788,8 @@ func (m *FileMutation) ResetGroup() {
 	delete(m.clearedFields, file.FieldGroup)
 }
 
-// SetOp sets the "op" field.
-func (m *FileMutation) SetOp(b bool) {
+// SetOpField sets the "op" field.
+func (m *FileMutation) SetOpField(b bool) {
 	m._op = &b
 }
 
@@ -8021,9 +9044,24 @@ func (m *FileMutation) Where(ps ...predicate.File) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the FileMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *FileMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.File, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *FileMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *FileMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (File).
@@ -8137,7 +9175,7 @@ func (m *FileMutation) SetField(name string, value ent.Value) error {
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetOp(v)
+		m.SetOpField(v)
 		return nil
 	case file.FieldFieldID:
 		v, ok := value.(int)
@@ -8674,9 +9712,24 @@ func (m *FileTypeMutation) Where(ps ...predicate.FileType) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the FileTypeMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *FileTypeMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.FileType, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *FileTypeMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *FileTypeMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (FileType).
@@ -9018,9 +10071,24 @@ func (m *GoodsMutation) Where(ps ...predicate.Goods) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the GoodsMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *GoodsMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Goods, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *GoodsMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *GoodsMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Goods).
@@ -9712,9 +10780,24 @@ func (m *GroupMutation) Where(ps ...predicate.Group) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the GroupMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *GroupMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Group, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *GroupMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *GroupMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Group).
@@ -10342,9 +11425,24 @@ func (m *GroupInfoMutation) Where(ps ...predicate.GroupInfo) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the GroupInfoMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *GroupInfoMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.GroupInfo, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *GroupInfoMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *GroupInfoMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (GroupInfo).
@@ -10740,9 +11838,24 @@ func (m *ItemMutation) Where(ps ...predicate.Item) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the ItemMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ItemMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Item, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *ItemMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ItemMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Item).
@@ -11103,9 +12216,24 @@ func (m *LicenseMutation) Where(ps ...predicate.License) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the LicenseMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *LicenseMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.License, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *LicenseMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *LicenseMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (License).
@@ -11287,6 +12415,7 @@ type NodeMutation struct {
 	id            *int
 	value         *int
 	addvalue      *int
+	updated_at    *time.Time
 	clearedFields map[string]struct{}
 	prev          *int
 	clearedprev   bool
@@ -11465,6 +12594,55 @@ func (m *NodeMutation) ResetValue() {
 	delete(m.clearedFields, node.FieldValue)
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (m *NodeMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *NodeMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the Node entity.
+// If the Node object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NodeMutation) OldUpdatedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ClearUpdatedAt clears the value of the "updated_at" field.
+func (m *NodeMutation) ClearUpdatedAt() {
+	m.updated_at = nil
+	m.clearedFields[node.FieldUpdatedAt] = struct{}{}
+}
+
+// UpdatedAtCleared returns if the "updated_at" field was cleared in this mutation.
+func (m *NodeMutation) UpdatedAtCleared() bool {
+	_, ok := m.clearedFields[node.FieldUpdatedAt]
+	return ok
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *NodeMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+	delete(m.clearedFields, node.FieldUpdatedAt)
+}
+
 // SetPrevID sets the "prev" edge to the Node entity by id.
 func (m *NodeMutation) SetPrevID(id int) {
 	m.prev = &id
@@ -11548,9 +12726,24 @@ func (m *NodeMutation) Where(ps ...predicate.Node) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the NodeMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *NodeMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Node, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *NodeMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *NodeMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Node).
@@ -11562,9 +12755,12 @@ func (m *NodeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *NodeMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 2)
 	if m.value != nil {
 		fields = append(fields, node.FieldValue)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, node.FieldUpdatedAt)
 	}
 	return fields
 }
@@ -11576,6 +12772,8 @@ func (m *NodeMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case node.FieldValue:
 		return m.Value()
+	case node.FieldUpdatedAt:
+		return m.UpdatedAt()
 	}
 	return nil, false
 }
@@ -11587,6 +12785,8 @@ func (m *NodeMutation) OldField(ctx context.Context, name string) (ent.Value, er
 	switch name {
 	case node.FieldValue:
 		return m.OldValue(ctx)
+	case node.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown Node field %s", name)
 }
@@ -11602,6 +12802,13 @@ func (m *NodeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetValue(v)
+		return nil
+	case node.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Node field %s", name)
@@ -11651,6 +12858,9 @@ func (m *NodeMutation) ClearedFields() []string {
 	if m.FieldCleared(node.FieldValue) {
 		fields = append(fields, node.FieldValue)
 	}
+	if m.FieldCleared(node.FieldUpdatedAt) {
+		fields = append(fields, node.FieldUpdatedAt)
+	}
 	return fields
 }
 
@@ -11668,6 +12878,9 @@ func (m *NodeMutation) ClearField(name string) error {
 	case node.FieldValue:
 		m.ClearValue()
 		return nil
+	case node.FieldUpdatedAt:
+		m.ClearUpdatedAt()
+		return nil
 	}
 	return fmt.Errorf("unknown Node nullable field %s", name)
 }
@@ -11678,6 +12891,9 @@ func (m *NodeMutation) ResetField(name string) error {
 	switch name {
 	case node.FieldValue:
 		m.ResetValue()
+		return nil
+	case node.FieldUpdatedAt:
+		m.ResetUpdatedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Node field %s", name)
@@ -12204,9 +13420,24 @@ func (m *PetMutation) Where(ps ...predicate.Pet) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the PetMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PetMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Pet, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *PetMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PetMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Pet).
@@ -12677,9 +13908,24 @@ func (m *SpecMutation) Where(ps ...predicate.Spec) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the SpecMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SpecMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Spec, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *SpecMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SpecMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Spec).
@@ -12850,17 +14096,23 @@ func (m *SpecMutation) ResetEdge(name string) error {
 // TaskMutation represents an operation that mutates the Task nodes in the graph.
 type TaskMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	priority      *task.Priority
-	addpriority   *task.Priority
-	priorities    *map[string]task.Priority
-	created_at    *time.Time
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*Task, error)
-	predicates    []predicate.Task
+	op              Op
+	typ             string
+	id              *int
+	priority        *task.Priority
+	addpriority     *task.Priority
+	priorities      *map[string]task.Priority
+	created_at      *time.Time
+	name            *string
+	owner           *string
+	_order          *int
+	add_order       *int
+	order_option    *int
+	addorder_option *int
+	clearedFields   map[string]struct{}
+	done            bool
+	oldValue        func(context.Context) (*Task, error)
+	predicates      []predicate.Task
 }
 
 var _ ent.Mutation = (*TaskMutation)(nil)
@@ -13102,14 +14354,267 @@ func (m *TaskMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
+// SetName sets the "name" field.
+func (m *TaskMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *TaskMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Task entity.
+// If the Task object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TaskMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ClearName clears the value of the "name" field.
+func (m *TaskMutation) ClearName() {
+	m.name = nil
+	m.clearedFields[enttask.FieldName] = struct{}{}
+}
+
+// NameCleared returns if the "name" field was cleared in this mutation.
+func (m *TaskMutation) NameCleared() bool {
+	_, ok := m.clearedFields[enttask.FieldName]
+	return ok
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *TaskMutation) ResetName() {
+	m.name = nil
+	delete(m.clearedFields, enttask.FieldName)
+}
+
+// SetOwner sets the "owner" field.
+func (m *TaskMutation) SetOwner(s string) {
+	m.owner = &s
+}
+
+// Owner returns the value of the "owner" field in the mutation.
+func (m *TaskMutation) Owner() (r string, exists bool) {
+	v := m.owner
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOwner returns the old "owner" field's value of the Task entity.
+// If the Task object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TaskMutation) OldOwner(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOwner is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOwner requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOwner: %w", err)
+	}
+	return oldValue.Owner, nil
+}
+
+// ClearOwner clears the value of the "owner" field.
+func (m *TaskMutation) ClearOwner() {
+	m.owner = nil
+	m.clearedFields[enttask.FieldOwner] = struct{}{}
+}
+
+// OwnerCleared returns if the "owner" field was cleared in this mutation.
+func (m *TaskMutation) OwnerCleared() bool {
+	_, ok := m.clearedFields[enttask.FieldOwner]
+	return ok
+}
+
+// ResetOwner resets all changes to the "owner" field.
+func (m *TaskMutation) ResetOwner() {
+	m.owner = nil
+	delete(m.clearedFields, enttask.FieldOwner)
+}
+
+// SetOrder sets the "order" field.
+func (m *TaskMutation) SetOrder(i int) {
+	m._order = &i
+	m.add_order = nil
+}
+
+// Order returns the value of the "order" field in the mutation.
+func (m *TaskMutation) Order() (r int, exists bool) {
+	v := m._order
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrder returns the old "order" field's value of the Task entity.
+// If the Task object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TaskMutation) OldOrder(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrder is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrder requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrder: %w", err)
+	}
+	return oldValue.Order, nil
+}
+
+// AddOrder adds i to the "order" field.
+func (m *TaskMutation) AddOrder(i int) {
+	if m.add_order != nil {
+		*m.add_order += i
+	} else {
+		m.add_order = &i
+	}
+}
+
+// AddedOrder returns the value that was added to the "order" field in this mutation.
+func (m *TaskMutation) AddedOrder() (r int, exists bool) {
+	v := m.add_order
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearOrder clears the value of the "order" field.
+func (m *TaskMutation) ClearOrder() {
+	m._order = nil
+	m.add_order = nil
+	m.clearedFields[enttask.FieldOrder] = struct{}{}
+}
+
+// OrderCleared returns if the "order" field was cleared in this mutation.
+func (m *TaskMutation) OrderCleared() bool {
+	_, ok := m.clearedFields[enttask.FieldOrder]
+	return ok
+}
+
+// ResetOrder resets all changes to the "order" field.
+func (m *TaskMutation) ResetOrder() {
+	m._order = nil
+	m.add_order = nil
+	delete(m.clearedFields, enttask.FieldOrder)
+}
+
+// SetOrderOption sets the "order_option" field.
+func (m *TaskMutation) SetOrderOption(i int) {
+	m.order_option = &i
+	m.addorder_option = nil
+}
+
+// OrderOption returns the value of the "order_option" field in the mutation.
+func (m *TaskMutation) OrderOption() (r int, exists bool) {
+	v := m.order_option
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrderOption returns the old "order_option" field's value of the Task entity.
+// If the Task object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TaskMutation) OldOrderOption(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrderOption is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrderOption requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrderOption: %w", err)
+	}
+	return oldValue.OrderOption, nil
+}
+
+// AddOrderOption adds i to the "order_option" field.
+func (m *TaskMutation) AddOrderOption(i int) {
+	if m.addorder_option != nil {
+		*m.addorder_option += i
+	} else {
+		m.addorder_option = &i
+	}
+}
+
+// AddedOrderOption returns the value that was added to the "order_option" field in this mutation.
+func (m *TaskMutation) AddedOrderOption() (r int, exists bool) {
+	v := m.addorder_option
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearOrderOption clears the value of the "order_option" field.
+func (m *TaskMutation) ClearOrderOption() {
+	m.order_option = nil
+	m.addorder_option = nil
+	m.clearedFields[enttask.FieldOrderOption] = struct{}{}
+}
+
+// OrderOptionCleared returns if the "order_option" field was cleared in this mutation.
+func (m *TaskMutation) OrderOptionCleared() bool {
+	_, ok := m.clearedFields[enttask.FieldOrderOption]
+	return ok
+}
+
+// ResetOrderOption resets all changes to the "order_option" field.
+func (m *TaskMutation) ResetOrderOption() {
+	m.order_option = nil
+	m.addorder_option = nil
+	delete(m.clearedFields, enttask.FieldOrderOption)
+}
+
 // Where appends a list predicates to the TaskMutation builder.
 func (m *TaskMutation) Where(ps ...predicate.Task) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the TaskMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TaskMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Task, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *TaskMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TaskMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Task).
@@ -13121,7 +14626,7 @@ func (m *TaskMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TaskMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 7)
 	if m.priority != nil {
 		fields = append(fields, enttask.FieldPriority)
 	}
@@ -13130,6 +14635,18 @@ func (m *TaskMutation) Fields() []string {
 	}
 	if m.created_at != nil {
 		fields = append(fields, enttask.FieldCreatedAt)
+	}
+	if m.name != nil {
+		fields = append(fields, enttask.FieldName)
+	}
+	if m.owner != nil {
+		fields = append(fields, enttask.FieldOwner)
+	}
+	if m._order != nil {
+		fields = append(fields, enttask.FieldOrder)
+	}
+	if m.order_option != nil {
+		fields = append(fields, enttask.FieldOrderOption)
 	}
 	return fields
 }
@@ -13145,6 +14662,14 @@ func (m *TaskMutation) Field(name string) (ent.Value, bool) {
 		return m.Priorities()
 	case enttask.FieldCreatedAt:
 		return m.CreatedAt()
+	case enttask.FieldName:
+		return m.Name()
+	case enttask.FieldOwner:
+		return m.Owner()
+	case enttask.FieldOrder:
+		return m.Order()
+	case enttask.FieldOrderOption:
+		return m.OrderOption()
 	}
 	return nil, false
 }
@@ -13160,6 +14685,14 @@ func (m *TaskMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldPriorities(ctx)
 	case enttask.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
+	case enttask.FieldName:
+		return m.OldName(ctx)
+	case enttask.FieldOwner:
+		return m.OldOwner(ctx)
+	case enttask.FieldOrder:
+		return m.OldOrder(ctx)
+	case enttask.FieldOrderOption:
+		return m.OldOrderOption(ctx)
 	}
 	return nil, fmt.Errorf("unknown Task field %s", name)
 }
@@ -13190,6 +14723,34 @@ func (m *TaskMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetCreatedAt(v)
 		return nil
+	case enttask.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case enttask.FieldOwner:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOwner(v)
+		return nil
+	case enttask.FieldOrder:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrder(v)
+		return nil
+	case enttask.FieldOrderOption:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrderOption(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Task field %s", name)
 }
@@ -13201,6 +14762,12 @@ func (m *TaskMutation) AddedFields() []string {
 	if m.addpriority != nil {
 		fields = append(fields, enttask.FieldPriority)
 	}
+	if m.add_order != nil {
+		fields = append(fields, enttask.FieldOrder)
+	}
+	if m.addorder_option != nil {
+		fields = append(fields, enttask.FieldOrderOption)
+	}
 	return fields
 }
 
@@ -13211,6 +14778,10 @@ func (m *TaskMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case enttask.FieldPriority:
 		return m.AddedPriority()
+	case enttask.FieldOrder:
+		return m.AddedOrder()
+	case enttask.FieldOrderOption:
+		return m.AddedOrderOption()
 	}
 	return nil, false
 }
@@ -13227,6 +14798,20 @@ func (m *TaskMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddPriority(v)
 		return nil
+	case enttask.FieldOrder:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOrder(v)
+		return nil
+	case enttask.FieldOrderOption:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOrderOption(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Task numeric field %s", name)
 }
@@ -13237,6 +14822,18 @@ func (m *TaskMutation) ClearedFields() []string {
 	var fields []string
 	if m.FieldCleared(enttask.FieldPriorities) {
 		fields = append(fields, enttask.FieldPriorities)
+	}
+	if m.FieldCleared(enttask.FieldName) {
+		fields = append(fields, enttask.FieldName)
+	}
+	if m.FieldCleared(enttask.FieldOwner) {
+		fields = append(fields, enttask.FieldOwner)
+	}
+	if m.FieldCleared(enttask.FieldOrder) {
+		fields = append(fields, enttask.FieldOrder)
+	}
+	if m.FieldCleared(enttask.FieldOrderOption) {
+		fields = append(fields, enttask.FieldOrderOption)
 	}
 	return fields
 }
@@ -13255,6 +14852,18 @@ func (m *TaskMutation) ClearField(name string) error {
 	case enttask.FieldPriorities:
 		m.ClearPriorities()
 		return nil
+	case enttask.FieldName:
+		m.ClearName()
+		return nil
+	case enttask.FieldOwner:
+		m.ClearOwner()
+		return nil
+	case enttask.FieldOrder:
+		m.ClearOrder()
+		return nil
+	case enttask.FieldOrderOption:
+		m.ClearOrderOption()
+		return nil
 	}
 	return fmt.Errorf("unknown Task nullable field %s", name)
 }
@@ -13271,6 +14880,18 @@ func (m *TaskMutation) ResetField(name string) error {
 		return nil
 	case enttask.FieldCreatedAt:
 		m.ResetCreatedAt()
+		return nil
+	case enttask.FieldName:
+		m.ResetName()
+		return nil
+	case enttask.FieldOwner:
+		m.ResetOwner()
+		return nil
+	case enttask.FieldOrder:
+		m.ResetOrder()
+		return nil
+	case enttask.FieldOrderOption:
+		m.ResetOrderOption()
 		return nil
 	}
 	return fmt.Errorf("unknown Task field %s", name)
@@ -14530,9 +16151,24 @@ func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the UserMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *UserMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.User, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *UserMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *UserMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (User).

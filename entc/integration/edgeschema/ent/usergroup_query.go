@@ -23,11 +23,9 @@ import (
 // UserGroupQuery is the builder for querying UserGroup entities.
 type UserGroupQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
+	ctx        *QueryContext
+	order      []usergroup.OrderOption
+	inters     []Interceptor
 	predicates []predicate.UserGroup
 	withUser   *UserQuery
 	withGroup  *GroupQuery
@@ -42,34 +40,34 @@ func (ugq *UserGroupQuery) Where(ps ...predicate.UserGroup) *UserGroupQuery {
 	return ugq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (ugq *UserGroupQuery) Limit(limit int) *UserGroupQuery {
-	ugq.limit = &limit
+	ugq.ctx.Limit = &limit
 	return ugq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (ugq *UserGroupQuery) Offset(offset int) *UserGroupQuery {
-	ugq.offset = &offset
+	ugq.ctx.Offset = &offset
 	return ugq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (ugq *UserGroupQuery) Unique(unique bool) *UserGroupQuery {
-	ugq.unique = &unique
+	ugq.ctx.Unique = &unique
 	return ugq
 }
 
-// Order adds an order step to the query.
-func (ugq *UserGroupQuery) Order(o ...OrderFunc) *UserGroupQuery {
+// Order specifies how the records should be ordered.
+func (ugq *UserGroupQuery) Order(o ...usergroup.OrderOption) *UserGroupQuery {
 	ugq.order = append(ugq.order, o...)
 	return ugq
 }
 
 // QueryUser chains the current query on the "user" edge.
 func (ugq *UserGroupQuery) QueryUser() *UserQuery {
-	query := &UserQuery{config: ugq.config}
+	query := (&UserClient{config: ugq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := ugq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -91,7 +89,7 @@ func (ugq *UserGroupQuery) QueryUser() *UserQuery {
 
 // QueryGroup chains the current query on the "group" edge.
 func (ugq *UserGroupQuery) QueryGroup() *GroupQuery {
-	query := &GroupQuery{config: ugq.config}
+	query := (&GroupClient{config: ugq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := ugq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -114,7 +112,7 @@ func (ugq *UserGroupQuery) QueryGroup() *GroupQuery {
 // First returns the first UserGroup entity from the query.
 // Returns a *NotFoundError when no UserGroup was found.
 func (ugq *UserGroupQuery) First(ctx context.Context) (*UserGroup, error) {
-	nodes, err := ugq.Limit(1).All(ctx)
+	nodes, err := ugq.Limit(1).All(setContextOp(ctx, ugq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +135,7 @@ func (ugq *UserGroupQuery) FirstX(ctx context.Context) *UserGroup {
 // Returns a *NotFoundError when no UserGroup ID was found.
 func (ugq *UserGroupQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = ugq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = ugq.Limit(1).IDs(setContextOp(ctx, ugq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -160,7 +158,7 @@ func (ugq *UserGroupQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one UserGroup entity is found.
 // Returns a *NotFoundError when no UserGroup entities are found.
 func (ugq *UserGroupQuery) Only(ctx context.Context) (*UserGroup, error) {
-	nodes, err := ugq.Limit(2).All(ctx)
+	nodes, err := ugq.Limit(2).All(setContextOp(ctx, ugq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -188,7 +186,7 @@ func (ugq *UserGroupQuery) OnlyX(ctx context.Context) *UserGroup {
 // Returns a *NotFoundError when no entities are found.
 func (ugq *UserGroupQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = ugq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = ugq.Limit(2).IDs(setContextOp(ctx, ugq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -213,10 +211,12 @@ func (ugq *UserGroupQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of UserGroups.
 func (ugq *UserGroupQuery) All(ctx context.Context) ([]*UserGroup, error) {
+	ctx = setContextOp(ctx, ugq.ctx, "All")
 	if err := ugq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return ugq.sqlAll(ctx)
+	qr := querierAll[[]*UserGroup, *UserGroupQuery]()
+	return withInterceptors[[]*UserGroup](ctx, ugq, qr, ugq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -229,9 +229,12 @@ func (ugq *UserGroupQuery) AllX(ctx context.Context) []*UserGroup {
 }
 
 // IDs executes the query and returns a list of UserGroup IDs.
-func (ugq *UserGroupQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
-	if err := ugq.Select(usergroup.FieldID).Scan(ctx, &ids); err != nil {
+func (ugq *UserGroupQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if ugq.ctx.Unique == nil && ugq.path != nil {
+		ugq.Unique(true)
+	}
+	ctx = setContextOp(ctx, ugq.ctx, "IDs")
+	if err = ugq.Select(usergroup.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -248,10 +251,11 @@ func (ugq *UserGroupQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (ugq *UserGroupQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, ugq.ctx, "Count")
 	if err := ugq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return ugq.sqlCount(ctx)
+	return withInterceptors[int](ctx, ugq, querierCount[*UserGroupQuery](), ugq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -265,10 +269,15 @@ func (ugq *UserGroupQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (ugq *UserGroupQuery) Exist(ctx context.Context) (bool, error) {
-	if err := ugq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, ugq.ctx, "Exist")
+	switch _, err := ugq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return ugq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -288,23 +297,22 @@ func (ugq *UserGroupQuery) Clone() *UserGroupQuery {
 	}
 	return &UserGroupQuery{
 		config:     ugq.config,
-		limit:      ugq.limit,
-		offset:     ugq.offset,
-		order:      append([]OrderFunc{}, ugq.order...),
+		ctx:        ugq.ctx.Clone(),
+		order:      append([]usergroup.OrderOption{}, ugq.order...),
+		inters:     append([]Interceptor{}, ugq.inters...),
 		predicates: append([]predicate.UserGroup{}, ugq.predicates...),
 		withUser:   ugq.withUser.Clone(),
 		withGroup:  ugq.withGroup.Clone(),
 		// clone intermediate query.
-		sql:    ugq.sql.Clone(),
-		path:   ugq.path,
-		unique: ugq.unique,
+		sql:  ugq.sql.Clone(),
+		path: ugq.path,
 	}
 }
 
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
 func (ugq *UserGroupQuery) WithUser(opts ...func(*UserQuery)) *UserGroupQuery {
-	query := &UserQuery{config: ugq.config}
+	query := (&UserClient{config: ugq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -315,7 +323,7 @@ func (ugq *UserGroupQuery) WithUser(opts ...func(*UserQuery)) *UserGroupQuery {
 // WithGroup tells the query-builder to eager-load the nodes that are connected to
 // the "group" edge. The optional arguments are used to configure the query builder of the edge.
 func (ugq *UserGroupQuery) WithGroup(opts ...func(*GroupQuery)) *UserGroupQuery {
-	query := &GroupQuery{config: ugq.config}
+	query := (&GroupClient{config: ugq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -338,16 +346,11 @@ func (ugq *UserGroupQuery) WithGroup(opts ...func(*GroupQuery)) *UserGroupQuery 
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (ugq *UserGroupQuery) GroupBy(field string, fields ...string) *UserGroupGroupBy {
-	grbuild := &UserGroupGroupBy{config: ugq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := ugq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return ugq.sqlQuery(ctx), nil
-	}
+	ugq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &UserGroupGroupBy{build: ugq}
+	grbuild.flds = &ugq.ctx.Fields
 	grbuild.label = usergroup.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -364,11 +367,11 @@ func (ugq *UserGroupQuery) GroupBy(field string, fields ...string) *UserGroupGro
 //		Select(usergroup.FieldJoinedAt).
 //		Scan(ctx, &v)
 func (ugq *UserGroupQuery) Select(fields ...string) *UserGroupSelect {
-	ugq.fields = append(ugq.fields, fields...)
-	selbuild := &UserGroupSelect{UserGroupQuery: ugq}
-	selbuild.label = usergroup.Label
-	selbuild.flds, selbuild.scan = &ugq.fields, selbuild.Scan
-	return selbuild
+	ugq.ctx.Fields = append(ugq.ctx.Fields, fields...)
+	sbuild := &UserGroupSelect{UserGroupQuery: ugq}
+	sbuild.label = usergroup.Label
+	sbuild.flds, sbuild.scan = &ugq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a UserGroupSelect configured with the given aggregations.
@@ -377,7 +380,17 @@ func (ugq *UserGroupQuery) Aggregate(fns ...AggregateFunc) *UserGroupSelect {
 }
 
 func (ugq *UserGroupQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range ugq.fields {
+	for _, inter := range ugq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, ugq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range ugq.ctx.Fields {
 		if !usergroup.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -444,6 +457,9 @@ func (ugq *UserGroupQuery) loadUser(ctx context.Context, query *UserQuery, nodes
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(user.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -470,6 +486,9 @@ func (ugq *UserGroupQuery) loadGroup(ctx context.Context, query *GroupQuery, nod
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(group.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -489,47 +508,34 @@ func (ugq *UserGroupQuery) loadGroup(ctx context.Context, query *GroupQuery, nod
 
 func (ugq *UserGroupQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := ugq.querySpec()
-	_spec.Node.Columns = ugq.fields
-	if len(ugq.fields) > 0 {
-		_spec.Unique = ugq.unique != nil && *ugq.unique
+	_spec.Node.Columns = ugq.ctx.Fields
+	if len(ugq.ctx.Fields) > 0 {
+		_spec.Unique = ugq.ctx.Unique != nil && *ugq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, ugq.driver, _spec)
 }
 
-func (ugq *UserGroupQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := ugq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (ugq *UserGroupQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   usergroup.Table,
-			Columns: usergroup.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: usergroup.FieldID,
-			},
-		},
-		From:   ugq.sql,
-		Unique: true,
-	}
-	if unique := ugq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(usergroup.Table, usergroup.Columns, sqlgraph.NewFieldSpec(usergroup.FieldID, field.TypeInt))
+	_spec.From = ugq.sql
+	if unique := ugq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if ugq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := ugq.fields; len(fields) > 0 {
+	if fields := ugq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, usergroup.FieldID)
 		for i := range fields {
 			if fields[i] != usergroup.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if ugq.withUser != nil {
+			_spec.Node.AddColumnOnce(usergroup.FieldUserID)
+		}
+		if ugq.withGroup != nil {
+			_spec.Node.AddColumnOnce(usergroup.FieldGroupID)
 		}
 	}
 	if ps := ugq.predicates; len(ps) > 0 {
@@ -539,10 +545,10 @@ func (ugq *UserGroupQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := ugq.limit; limit != nil {
+	if limit := ugq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := ugq.offset; offset != nil {
+	if offset := ugq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := ugq.order; len(ps) > 0 {
@@ -558,7 +564,7 @@ func (ugq *UserGroupQuery) querySpec() *sqlgraph.QuerySpec {
 func (ugq *UserGroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(ugq.driver.Dialect())
 	t1 := builder.Table(usergroup.Table)
-	columns := ugq.fields
+	columns := ugq.ctx.Fields
 	if len(columns) == 0 {
 		columns = usergroup.Columns
 	}
@@ -567,7 +573,7 @@ func (ugq *UserGroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = ugq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if ugq.unique != nil && *ugq.unique {
+	if ugq.ctx.Unique != nil && *ugq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range ugq.predicates {
@@ -576,12 +582,12 @@ func (ugq *UserGroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range ugq.order {
 		p(selector)
 	}
-	if offset := ugq.offset; offset != nil {
+	if offset := ugq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := ugq.limit; limit != nil {
+	if limit := ugq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -589,13 +595,8 @@ func (ugq *UserGroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // UserGroupGroupBy is the group-by builder for UserGroup entities.
 type UserGroupGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *UserGroupQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -604,58 +605,46 @@ func (uggb *UserGroupGroupBy) Aggregate(fns ...AggregateFunc) *UserGroupGroupBy 
 	return uggb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (uggb *UserGroupGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := uggb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, uggb.build.ctx, "GroupBy")
+	if err := uggb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	uggb.sql = query
-	return uggb.sqlScan(ctx, v)
+	return scanWithInterceptors[*UserGroupQuery, *UserGroupGroupBy](ctx, uggb.build, uggb, uggb.build.inters, v)
 }
 
-func (uggb *UserGroupGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range uggb.fields {
-		if !usergroup.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (uggb *UserGroupGroupBy) sqlScan(ctx context.Context, root *UserGroupQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(uggb.fns))
+	for _, fn := range uggb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := uggb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*uggb.flds)+len(uggb.fns))
+		for _, f := range *uggb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*uggb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := uggb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := uggb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (uggb *UserGroupGroupBy) sqlQuery() *sql.Selector {
-	selector := uggb.sql.Select()
-	aggregation := make([]string, 0, len(uggb.fns))
-	for _, fn := range uggb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(uggb.fields)+len(uggb.fns))
-		for _, f := range uggb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(uggb.fields...)...)
-}
-
 // UserGroupSelect is the builder for selecting fields of UserGroup entities.
 type UserGroupSelect struct {
 	*UserGroupQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -666,26 +655,27 @@ func (ugs *UserGroupSelect) Aggregate(fns ...AggregateFunc) *UserGroupSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ugs *UserGroupSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, ugs.ctx, "Select")
 	if err := ugs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ugs.sql = ugs.UserGroupQuery.sqlQuery(ctx)
-	return ugs.sqlScan(ctx, v)
+	return scanWithInterceptors[*UserGroupQuery, *UserGroupSelect](ctx, ugs.UserGroupQuery, ugs, ugs.inters, v)
 }
 
-func (ugs *UserGroupSelect) sqlScan(ctx context.Context, v any) error {
+func (ugs *UserGroupSelect) sqlScan(ctx context.Context, root *UserGroupQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(ugs.fns))
 	for _, fn := range ugs.fns {
-		aggregation = append(aggregation, fn(ugs.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*ugs.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		ugs.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		ugs.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := ugs.sql.Query()
+	query, args := selector.Query()
 	if err := ugs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

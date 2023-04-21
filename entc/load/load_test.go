@@ -89,3 +89,11 @@ func TestLoadTags(t *testing.T) {
 
 	require.Equal(t, all.Schemas[1], notags.Schemas[0])
 }
+
+func TestLoadCycleError(t *testing.T) {
+	cfg := &Config{Path: "./testdata/cycle"}
+	spec, err := cfg.Load()
+	require.Nil(t, spec)
+	require.EqualError(t, err, `entc/load: parse schema dir: import cycle not allowed: import stack: [entgo.io/ent/entc/load/testdata/cycle entgo.io/ent/entc/load/testdata/cycle/fakent entgo.io/ent/entc/load/testdata/cycle]
+To resolve this issue, move the custom types used by the generated code to a separate package: "Enum", "Used"`)
+}

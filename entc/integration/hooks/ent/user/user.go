@@ -8,6 +8,8 @@ package user
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -23,8 +25,12 @@ const (
 	FieldWorth = "worth"
 	// FieldPassword holds the string denoting the password field in the database.
 	FieldPassword = "password"
+	// FieldActive holds the string denoting the active field in the database.
+	FieldActive = "active"
 	// EdgeCards holds the string denoting the cards edge name in mutations.
 	EdgeCards = "cards"
+	// EdgePets holds the string denoting the pets edge name in mutations.
+	EdgePets = "pets"
 	// EdgeFriends holds the string denoting the friends edge name in mutations.
 	EdgeFriends = "friends"
 	// EdgeBestFriend holds the string denoting the best_friend edge name in mutations.
@@ -38,6 +44,13 @@ const (
 	CardsInverseTable = "cards"
 	// CardsColumn is the table column denoting the cards relation/edge.
 	CardsColumn = "user_cards"
+	// PetsTable is the table that holds the pets relation/edge.
+	PetsTable = "pets"
+	// PetsInverseTable is the table name for the Pet entity.
+	// It exists in this package in order to avoid circular dependency with the "pet" package.
+	PetsInverseTable = "pets"
+	// PetsColumn is the table column denoting the pets relation/edge.
+	PetsColumn = "user_pets"
 	// FriendsTable is the table that holds the friends relation/edge. The primary key declared below.
 	FriendsTable = "user_friends"
 	// BestFriendTable is the table that holds the best_friend relation/edge.
@@ -53,6 +66,7 @@ var Columns = []string{
 	FieldName,
 	FieldWorth,
 	FieldPassword,
+	FieldActive,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "users"
@@ -91,4 +105,116 @@ var (
 	Hooks [2]ent.Hook
 	// DefaultVersion holds the default value on creation for the "version" field.
 	DefaultVersion int
+	// DefaultActive holds the default value on creation for the "active" field.
+	DefaultActive bool
 )
+
+// OrderOption defines the ordering options for the User queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByVersion orders the results by the version field.
+func ByVersion(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVersion, opts...).ToFunc()
+}
+
+// ByName orders the results by the name field.
+func ByName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByWorth orders the results by the worth field.
+func ByWorth(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWorth, opts...).ToFunc()
+}
+
+// ByPassword orders the results by the password field.
+func ByPassword(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPassword, opts...).ToFunc()
+}
+
+// ByActive orders the results by the active field.
+func ByActive(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldActive, opts...).ToFunc()
+}
+
+// ByCardsCount orders the results by cards count.
+func ByCardsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newCardsStep(), opts...)
+	}
+}
+
+// ByCards orders the results by cards terms.
+func ByCards(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCardsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByPetsCount orders the results by pets count.
+func ByPetsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPetsStep(), opts...)
+	}
+}
+
+// ByPets orders the results by pets terms.
+func ByPets(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPetsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByFriendsCount orders the results by friends count.
+func ByFriendsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newFriendsStep(), opts...)
+	}
+}
+
+// ByFriends orders the results by friends terms.
+func ByFriends(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newFriendsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByBestFriendField orders the results by best_friend field.
+func ByBestFriendField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newBestFriendStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newCardsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CardsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, CardsTable, CardsColumn),
+	)
+}
+func newPetsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PetsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PetsTable, PetsColumn),
+	)
+}
+func newFriendsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(Table, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, FriendsTable, FriendsPrimaryKey...),
+	)
+}
+func newBestFriendStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(Table, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, BestFriendTable, BestFriendColumn),
+	)
+}

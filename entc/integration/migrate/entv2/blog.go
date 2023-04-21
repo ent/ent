@@ -10,18 +10,22 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/migrate/entv2/blog"
 )
 
 // Blog is the model entity for the Blog schema.
 type Blog struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// Oid holds the value of the "oid" field.
+	Oid int `json:"oid,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the BlogQuery when eager-loading is set.
-	Edges BlogEdges `json:"edges"`
+	Edges        BlogEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // BlogEdges holds the relations/edges for other nodes in the graph.
@@ -47,10 +51,10 @@ func (*Blog) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case blog.FieldID:
+		case blog.FieldID, blog.FieldOid:
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Blog", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -70,21 +74,35 @@ func (b *Blog) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			b.ID = int(value.Int64)
+		case blog.FieldOid:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field oid", values[i])
+			} else if value.Valid {
+				b.Oid = int(value.Int64)
+			}
+		default:
+			b.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the Blog.
+// This includes values selected through modifiers, order, etc.
+func (b *Blog) Value(name string) (ent.Value, error) {
+	return b.selectValues.Get(name)
+}
+
 // QueryAdmins queries the "admins" edge of the Blog entity.
 func (b *Blog) QueryAdmins() *UserQuery {
-	return (&BlogClient{config: b.config}).QueryAdmins(b)
+	return NewBlogClient(b.config).QueryAdmins(b)
 }
 
 // Update returns a builder for updating this Blog.
 // Note that you need to call Blog.Unwrap() before calling this method if this Blog
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (b *Blog) Update() *BlogUpdateOne {
-	return (&BlogClient{config: b.config}).UpdateOne(b)
+	return NewBlogClient(b.config).UpdateOne(b)
 }
 
 // Unwrap unwraps the Blog entity that was returned from a transaction after it was closed,
@@ -102,16 +120,12 @@ func (b *Blog) Unwrap() *Blog {
 func (b *Blog) String() string {
 	var builder strings.Builder
 	builder.WriteString("Blog(")
-	builder.WriteString(fmt.Sprintf("id=%v", b.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", b.ID))
+	builder.WriteString("oid=")
+	builder.WriteString(fmt.Sprintf("%v", b.Oid))
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // Blogs is a parsable slice of Blog.
 type Blogs []*Blog
-
-func (b Blogs) config(cfg config) {
-	for _i := range b {
-		b[_i].config = cfg
-	}
-}

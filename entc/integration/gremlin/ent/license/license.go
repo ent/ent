@@ -8,6 +8,8 @@ package license
 
 import (
 	"time"
+
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
 )
 
 const (
@@ -29,5 +31,8 @@ var (
 	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
 	UpdateDefaultUpdateTime func() time.Time
 )
+
+// OrderOption defines the ordering options for the License queries.
+type OrderOption func(*dsl.Traversal)
 
 // comment from another template.

@@ -46,35 +46,8 @@ func (lu *LicenseUpdate) Mutation() *LicenseMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (lu *LicenseUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
 	lu.defaults()
-	if len(lu.hooks) == 0 {
-		affected, err = lu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*LicenseMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			lu.mutation = mutation
-			affected, err = lu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(lu.hooks) - 1; i >= 0; i-- {
-			if lu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = lu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, lu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, LicenseMutation](ctx, lu.sqlSave, lu.mutation, lu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -114,16 +87,7 @@ func (lu *LicenseUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Licens
 }
 
 func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   license.Table,
-			Columns: license.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: license.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(license.Table, license.Columns, sqlgraph.NewFieldSpec(license.FieldID, field.TypeInt))
 	if ps := lu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -143,6 +107,7 @@ func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	lu.mutation.done = true
 	return n, nil
 }
 
@@ -166,6 +131,12 @@ func (luo *LicenseUpdateOne) Mutation() *LicenseMutation {
 	return luo.mutation
 }
 
+// Where appends a list predicates to the LicenseUpdate builder.
+func (luo *LicenseUpdateOne) Where(ps ...predicate.License) *LicenseUpdateOne {
+	luo.mutation.Where(ps...)
+	return luo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (luo *LicenseUpdateOne) Select(field string, fields ...string) *LicenseUpdateOne {
@@ -175,41 +146,8 @@ func (luo *LicenseUpdateOne) Select(field string, fields ...string) *LicenseUpda
 
 // Save executes the query and returns the updated License entity.
 func (luo *LicenseUpdateOne) Save(ctx context.Context) (*License, error) {
-	var (
-		err  error
-		node *License
-	)
 	luo.defaults()
-	if len(luo.hooks) == 0 {
-		node, err = luo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*LicenseMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			luo.mutation = mutation
-			node, err = luo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(luo.hooks) - 1; i >= 0; i-- {
-			if luo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = luo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, luo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*License)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from LicenseMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*License, LicenseMutation](ctx, luo.sqlSave, luo.mutation, luo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -249,16 +187,7 @@ func (luo *LicenseUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Li
 }
 
 func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   license.Table,
-			Columns: license.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: license.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(license.Table, license.Columns, sqlgraph.NewFieldSpec(license.FieldID, field.TypeInt))
 	id, ok := luo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "License.id" for update`)}
@@ -298,5 +227,6 @@ func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err e
 		}
 		return nil, err
 	}
+	luo.mutation.done = true
 	return _node, nil
 }

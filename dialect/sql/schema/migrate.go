@@ -23,6 +23,13 @@ const (
 	MaxTypes = math.MaxUint16
 )
 
+// NewTypesTable returns a new table for holding the global-id information.
+func NewTypesTable() *Table {
+	return NewTable(TypeTable).
+		AddPrimary(&Column{Name: "id", Type: field.TypeUint, Increment: true}).
+		AddColumn(&Column{Name: "type", Type: field.TypeString, Unique: true})
+}
+
 // MigrateOption allows configuring Atlas using functional arguments.
 type MigrateOption func(*Atlas)
 
@@ -31,6 +38,22 @@ type MigrateOption func(*Atlas)
 func WithGlobalUniqueID(b bool) MigrateOption {
 	return func(a *Atlas) {
 		a.universalID = b
+	}
+}
+
+// WithIndent sets Atlas to generate SQL statements with indentation.
+// An empty string indicates no indentation.
+func WithIndent(indent string) MigrateOption {
+	return func(a *Atlas) {
+		a.indent = indent
+	}
+}
+
+// WithErrNoPlan sets Atlas to returns a migrate.ErrNoPlan in case
+// the migration plan is empty. Defaults to false.
+func WithErrNoPlan(b bool) MigrateOption {
+	return func(a *Atlas) {
+		a.errNoPlan = b
 	}
 }
 
@@ -494,9 +517,7 @@ func (m *Migrate) types(ctx context.Context, tx dialect.ExecQuerier) error {
 		return err
 	}
 	if !exists {
-		t := NewTable(TypeTable).
-			AddPrimary(&Column{Name: "id", Type: field.TypeUint, Increment: true}).
-			AddColumn(&Column{Name: "type", Type: field.TypeString, Unique: true})
+		t := NewTypesTable()
 		query, args := m.tBuilder(t).Query()
 		if err := tx.Exec(ctx, query, args, nil); err != nil {
 			return fmt.Errorf("create types table: %w", err)

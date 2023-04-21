@@ -15,12 +15,10 @@ import (
 	"context"
 	"fmt"
 	"sync"
-
 	{{- range $n := $.Nodes }}
 		{{ $n.PackageAlias }} "{{ $.Config.Package }}/{{ $n.PackageDir }}"
 		{{- template "import/types" $n }}
 	{{- end }}
-
 	"entgo.io/ent"
 )
 
@@ -34,7 +32,7 @@ const (
 
 	// Node types.
 	{{- range $n := $.Nodes }}
-		Type{{ $n.Name }} = "{{ $n.Name }}"
+		{{ $n.TypeName }} = "{{ $n.Name }}"
 	{{- end }}
 )
 
@@ -84,7 +82,7 @@ func new{{ $mutation }}(c config, op Op, opts ...{{ $mutationOption }}) *{{ $mut
 	m := &{{ $mutation }}{
 		config: c,
 		op: op,
-		typ: Type{{ $n.Name }},
+		typ: {{ $n.TypeName }},
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -406,9 +404,24 @@ func (m *{{ $mutation }}) Where(ps ...predicate.{{ $n.Name }}) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the {{ $mutation }} builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *{{ $mutation }}) WhereP(ps ...func({{ $.Storage.Builder }})) {
+	p := make([]predicate.{{ $n.Name }}, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *{{ $mutation }}) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *{{ $mutation }}) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation ({{ $n.Name }}).
@@ -479,7 +492,7 @@ func (m *{{ $mutation }}) SetField(name string, value ent.Value) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field %s", value, name)
 			}
-			m.Set{{ $f.StructField }}(v)
+			m.{{ $f.MutationSet }}(v)
 			return nil
 	{{- end }}
 	}

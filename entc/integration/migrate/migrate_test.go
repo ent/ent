@@ -29,6 +29,7 @@ import (
 	"entgo.io/ent/entc/integration/migrate/entv2/blog"
 	"entgo.io/ent/entc/integration/migrate/entv2/conversion"
 	"entgo.io/ent/entc/integration/migrate/entv2/customtype"
+	"entgo.io/ent/entc/integration/migrate/entv2/media"
 	migratev2 "entgo.io/ent/entc/integration/migrate/entv2/migrate"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
@@ -72,6 +73,8 @@ func TestMySQL(t *testing.T) {
 			}
 			NicknameSearch(t, clientv2)
 			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_schema = 'migrate' AND table_name = ? AND column_name = ?")
+			ColumnComments(t, drv, "SELECT column_name as name, column_comment as comment FROM information_schema.columns WHERE table_schema = 'migrate' AND table_name = 'media' ORDER BY ordinal_position")
+			TableComment(t, drv, "SELECT table_comment FROM information_schema.tables WHERE table_schema = 'migrate' AND table_name = 'media'")
 
 			require.NoError(t, err, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []any{}, new(sql.Result)))
 			require.NoError(t, root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS versioned_migrate", []any{}, new(sql.Result)))
@@ -139,10 +142,12 @@ func TestPostgres(t *testing.T) {
 			DefaultExpr(t, drv, `SELECT column_default FROM information_schema.columns WHERE table_name = 'users' AND column_name = $1`, "lower('hello'::text)", "md5('ent'::text)")
 			PKDefault(t, drv, `SELECT column_default FROM information_schema.columns WHERE table_name = 'zoos' AND column_name = $1`, "floor((random() * ((~ (1 << 31)))::double precision))")
 			IndexOpClass(t, drv)
+			ColumnComments(t, drv, `SELECT column_name as name, col_description(table_name::regclass::oid, ordinal_position) as comment FROM information_schema.columns WHERE table_name = 'media' ORDER BY ordinal_position`)
+			TableComment(t, drv, "SELECT obj_description('media'::regclass::oid)")
 			if version != "10" {
 				IncludeColumns(t, drv)
 			}
-
+			SerialType(t, clientv2)
 			vdrv, err := sql.Open(dialect.Postgres, dsn+" dbname=versioned_migrate")
 			require.NoError(t, err, "connecting to versioned migrate database")
 			defer vdrv.Close()
@@ -211,7 +216,7 @@ func TestSQLite(t *testing.T) {
 
 	SanityV2(t, drv.Dialect(), client)
 	u := client.User.Create().SetAge(1).SetName("x").SetNickname("x'").SetPhone("y").SaveX(ctx)
-	idRange(t, client.Blog.Create().SaveX(ctx).ID, 0, 1<<32)
+	idRange(t, client.Blog.Create().SetOid(1).SaveX(ctx).ID, 0, 1<<32)
 	idRange(t, client.Car.Create().SetOwner(u).SaveX(ctx).ID, 1<<32-1, 2<<32)
 	idRange(t, client.Conversion.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
 	idRange(t, client.CustomType.Create().SaveX(ctx).ID, 3<<32-1, 4<<32)
@@ -422,7 +427,7 @@ func Versioned(t *testing.T, drv sql.ExecQuerier, devURL string, client *version
 	hf, err := dir.Checksum()
 	require.NoError(t, err)
 	require.NoError(t, migrate.WriteSumFile(dir, hf))
-	require.ErrorAs(t, client.Schema.Diff(ctx, opts...), &migrate.NotCleanError{})
+	require.ErrorAs(t, client.Schema.Diff(ctx, opts...), new(*migrate.NotCleanError))
 
 	// Diffing by replaying should not create new files.
 	require.Equal(t, 2, countFiles(t, dir))
@@ -709,6 +714,30 @@ func JSONDefault(t *testing.T, drv *sql.Driver, query string) {
 	require.NotEmpty(t, s)
 }
 
+func TableComment(t *testing.T, drv *sql.Driver, query string) {
+	ctx := context.Background()
+	rows, err := drv.QueryContext(ctx, query)
+	require.NoError(t, err)
+	comment, err := sql.ScanString(rows)
+	require.NoError(t, err)
+	require.NoError(t, rows.Close())
+	require.Equal(t, "Comment that appears in both the schema and the generated code", comment)
+}
+
+func ColumnComments(t *testing.T, drv *sql.Driver, query string) {
+	ctx := context.Background()
+	rows, err := drv.QueryContext(ctx, query)
+	require.NoError(t, err)
+	var n2c []struct{ Name, Comment string }
+	require.NoError(t, sql.ScanSlice(rows, &n2c))
+	require.NoError(t, rows.Close())
+	// 0 and 1 are "id" and "source".
+	require.Equal(t, media.FieldSourceURI, n2c[2].Name)
+	require.Empty(t, n2c[2].Comment, "source_uri is disabled using annotation")
+	require.Equal(t, media.FieldText, n2c[3].Name)
+	require.Equal(t, "media text", n2c[3].Comment)
+}
+
 func DefaultExpr(t *testing.T, drv *sql.Driver, query string, expected1, expected2 string) {
 	ctx := context.Background()
 	rows, err := drv.QueryContext(ctx, query, user.FieldDefaultExpr)
@@ -751,6 +780,12 @@ func IndexOpClass(t *testing.T, drv *sql.Driver) {
 	require.NoError(t, err)
 	require.NoError(t, rows.Close())
 	require.Equal(t, d, "CREATE INDEX user_age_phone ON public.users USING btree (age, phone bpchar_pattern_ops)")
+}
+
+func SerialType(t *testing.T, c *entv2.Client) {
+	ctx := context.Background()
+	c.Blog.Create().ExecX(ctx)
+	require.NotZero(t, c.Blog.Query().OnlyX(ctx).Oid)
 }
 
 func PartialIndexes(t *testing.T, drv *sql.Driver, query, def string) {

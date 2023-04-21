@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/ent/doc"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
@@ -26,6 +27,7 @@ type Doc struct {
 	// The values are being populated by the DocQuery when eager-loading is set.
 	Edges        DocEdges `json:"edges"`
 	doc_children *schema.DocID
+	selectValues sql.SelectValues
 }
 
 // DocEdges holds the relations/edges for other nodes in the graph.
@@ -84,7 +86,7 @@ func (*Doc) scanValues(columns []string) ([]any, error) {
 		case doc.ForeignKeys[0]: // doc_children
 			values[i] = &sql.NullScanner{S: new(schema.DocID)}
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Doc", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -117,31 +119,39 @@ func (d *Doc) assignValues(columns []string, values []any) error {
 				d.doc_children = new(schema.DocID)
 				*d.doc_children = *value.S.(*schema.DocID)
 			}
+		default:
+			d.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the Doc.
+// This includes values selected through modifiers, order, etc.
+func (d *Doc) Value(name string) (ent.Value, error) {
+	return d.selectValues.Get(name)
+}
+
 // QueryParent queries the "parent" edge of the Doc entity.
 func (d *Doc) QueryParent() *DocQuery {
-	return (&DocClient{config: d.config}).QueryParent(d)
+	return NewDocClient(d.config).QueryParent(d)
 }
 
 // QueryChildren queries the "children" edge of the Doc entity.
 func (d *Doc) QueryChildren() *DocQuery {
-	return (&DocClient{config: d.config}).QueryChildren(d)
+	return NewDocClient(d.config).QueryChildren(d)
 }
 
 // QueryRelated queries the "related" edge of the Doc entity.
 func (d *Doc) QueryRelated() *DocQuery {
-	return (&DocClient{config: d.config}).QueryRelated(d)
+	return NewDocClient(d.config).QueryRelated(d)
 }
 
 // Update returns a builder for updating this Doc.
 // Note that you need to call Doc.Unwrap() before calling this method if this Doc
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (d *Doc) Update() *DocUpdateOne {
-	return (&DocClient{config: d.config}).UpdateOne(d)
+	return NewDocClient(d.config).UpdateOne(d)
 }
 
 // Unwrap unwraps the Doc entity that was returned from a transaction after it was closed,
@@ -168,9 +178,3 @@ func (d *Doc) String() string {
 
 // Docs is a parsable slice of Doc.
 type Docs []*Doc
-
-func (d Docs) config(cfg config) {
-	for _i := range d {
-		d[_i].config = cfg
-	}
-}

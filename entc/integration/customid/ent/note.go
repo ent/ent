@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/ent/note"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
@@ -26,6 +27,7 @@ type Note struct {
 	// The values are being populated by the NoteQuery when eager-loading is set.
 	Edges         NoteEdges `json:"edges"`
 	note_children *schema.NoteID
+	selectValues  sql.SelectValues
 }
 
 // NoteEdges holds the relations/edges for other nodes in the graph.
@@ -71,7 +73,7 @@ func (*Note) scanValues(columns []string) ([]any, error) {
 		case note.ForeignKeys[0]: // note_children
 			values[i] = new(sql.NullString)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Note", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -104,26 +106,34 @@ func (n *Note) assignValues(columns []string, values []any) error {
 				n.note_children = new(schema.NoteID)
 				*n.note_children = schema.NoteID(value.String)
 			}
+		default:
+			n.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the Note.
+// This includes values selected through modifiers, order, etc.
+func (n *Note) Value(name string) (ent.Value, error) {
+	return n.selectValues.Get(name)
+}
+
 // QueryParent queries the "parent" edge of the Note entity.
 func (n *Note) QueryParent() *NoteQuery {
-	return (&NoteClient{config: n.config}).QueryParent(n)
+	return NewNoteClient(n.config).QueryParent(n)
 }
 
 // QueryChildren queries the "children" edge of the Note entity.
 func (n *Note) QueryChildren() *NoteQuery {
-	return (&NoteClient{config: n.config}).QueryChildren(n)
+	return NewNoteClient(n.config).QueryChildren(n)
 }
 
 // Update returns a builder for updating this Note.
 // Note that you need to call Note.Unwrap() before calling this method if this Note
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (n *Note) Update() *NoteUpdateOne {
-	return (&NoteClient{config: n.config}).UpdateOne(n)
+	return NewNoteClient(n.config).UpdateOne(n)
 }
 
 // Unwrap unwraps the Note entity that was returned from a transaction after it was closed,
@@ -150,9 +160,3 @@ func (n *Note) String() string {
 
 // Notes is a parsable slice of Note.
 type Notes []*Note
-
-func (n Notes) config(cfg config) {
-	for _i := range n {
-		n[_i].config = cfg
-	}
-}

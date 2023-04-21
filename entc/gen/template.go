@@ -104,19 +104,8 @@ var (
 			},
 		},
 		{
-			Name:   "context",
-			Format: "context.go",
-		},
-		{
 			Name:   "tx",
 			Format: "tx.go",
-		},
-		{
-			Name:   "config",
-			Format: "config.go",
-			ExtendPatterns: []string{
-				"dialect/*/config/*/*",
-			},
 		},
 		{
 			Name:   "mutation",
@@ -148,6 +137,13 @@ var (
 			},
 		},
 		{
+			Name:   "intercept",
+			Format: "intercept/intercept.go",
+			Skip: func(g *Graph) bool {
+				return !g.featureEnabled(FeatureIntercept)
+			},
+		},
+		{
 			Name:   "entql",
 			Format: "entql.go",
 			Skip: func(g *Graph) bool {
@@ -167,6 +163,8 @@ var (
 			Format: "runtime/runtime.go",
 		},
 	}
+	// template files that were deleted and should be removed by the codegen.
+	deletedTemplates = []string{"config.go", "context.go"}
 	// patterns for extending partial-templates (included by other templates).
 	partialPatterns = [...]string{
 		"client/additional/*",

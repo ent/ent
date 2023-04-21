@@ -6,6 +6,10 @@
 
 package groupinfo
 
+import (
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+)
+
 const (
 	// Label holds the string label denoting the groupinfo type in the database.
 	Label = "group_info"
@@ -25,5 +29,8 @@ var (
 	// DefaultMaxUsers holds the default value on creation for the "max_users" field.
 	DefaultMaxUsers int
 )
+
+// OrderOption defines the ordering options for the GroupInfo queries.
+type OrderOption func(*dsl.Traversal)
 
 // comment from another template.

@@ -11,6 +11,8 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/ent/link"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
@@ -23,6 +25,7 @@ type Link struct {
 	ID uuidc.UUIDC `json:"id,omitempty"`
 	// LinkInformation holds the value of the "link_information" field.
 	LinkInformation map[string]schema.LinkInformation `json:"link_information,omitempty"`
+	selectValues    sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -35,7 +38,7 @@ func (*Link) scanValues(columns []string) ([]any, error) {
 		case link.FieldID:
 			values[i] = new(uuidc.UUIDC)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Link", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -63,16 +66,24 @@ func (l *Link) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field link_information: %w", err)
 				}
 			}
+		default:
+			l.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Link.
+// This includes values selected through modifiers, order, etc.
+func (l *Link) Value(name string) (ent.Value, error) {
+	return l.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Link.
 // Note that you need to call Link.Unwrap() before calling this method if this Link
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (l *Link) Update() *LinkUpdateOne {
-	return (&LinkClient{config: l.config}).UpdateOne(l)
+	return NewLinkClient(l.config).UpdateOne(l)
 }
 
 // Unwrap unwraps the Link entity that was returned from a transaction after it was closed,
@@ -99,9 +110,3 @@ func (l *Link) String() string {
 
 // Links is a parsable slice of Link.
 type Links []*Link
-
-func (l Links) config(cfg config) {
-	for _i := range l {
-		l[_i].config = cfg
-	}
-}

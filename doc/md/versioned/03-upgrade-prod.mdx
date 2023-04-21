@@ -1,0 +1,78 @@
+---
+id: upgrade-prod
+title: Upgrading Production
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+:::info Supporting repository
+
+The change described in this section can be found in
+[PR #5](https://github.com/rotemtam/ent-versioned-migrations-demo/pull/5/files)
+in the supporting repository.
+
+:::
+
+## Upgrading our production database to use versioned migrations
+
+If you have been following our tutorial to this point, you may be asking yourself how do we
+upgrade the production instance of our database to be managed by the versioned migraions workflow? 
+With local development, we can just delete the database and start over, but that is not an option
+for production for obvious reasons.
+
+Like many other database schema management tools, [Atlas](https://atlasgo.io) uses a metadata table
+on the target database to keep track of which migrations were already applied.
+In the case where we start using Atlas on an existing database, we must somehow
+inform Atlas that all migrations up to a certain version were already applied.
+
+To illustrate this, let's try to run Atlas's `migrate apply` command on a database
+that is currently managed by an auto-migration workflow using the migration directory that we just
+created. Notice that we use a connection string to a database that _already has_ the application schema
+instantiated (we use the `/db` suffix to indicate that we want to connect to the `db` database).
+
+```text
+atlas migrate apply --dir file://ent/migrate/migrations --url mysql://root:pass@localhost:3306/db
+```
+
+Atlas returns an error:
+
+```text
+Error: sql/migrate: connected database is not clean: found table "atlas_schema_revisions" in schema "db". baseline version or allow-dirty is required
+```
+
+This error is expected, as this is the first time we are running Atlas on this database, but as the error said
+we need to "baseline" the database. This means that we tell Atlas that the database is already at a certain state
+that correlates with one of the versions in the migration directory.
+
+To fix this, we use the `--baseline` flag to tell Atlas that the database is already at
+a certain version:
+
+```text
+atlas migrate apply --dir file://ent/migrate/migrations --url mysql://root:pass@localhost:3306/db --baseline 20221114165732
+```
+
+Atlas reports that there's nothing new to run:
+
+```text
+No migration files to execute
+```
+
+That's better! Next, let's verify that Atlas is aware of what migrations
+were already applied by using the `migrate status` command:
+
+```text
+atlas migrate status --dir file://ent/migrate/migrations --url mysql://root:pass@localhost:3306/db
+```
+Atlas reports:
+```text
+Migration Status: OK
+  -- Current Version: 20221114165732
+  -- Next Version:    Already at latest version
+  -- Executed Files:  1
+  -- Pending Files:   0
+```
+Great! We have successfully upgraded our project to use versioned migrations with Atlas.
+
+Next, let's see how we add a new migration to our project when we make a change to our
+Ent schema.

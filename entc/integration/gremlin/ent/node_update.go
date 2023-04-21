@@ -9,7 +9,7 @@ package ent
 import (
 	"context"
 	"errors"
-	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -57,6 +57,18 @@ func (nu *NodeUpdate) AddValue(i int) *NodeUpdate {
 // ClearValue clears the value of the "value" field.
 func (nu *NodeUpdate) ClearValue() *NodeUpdate {
 	nu.mutation.ClearValue()
+	return nu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (nu *NodeUpdate) SetUpdatedAt(t time.Time) *NodeUpdate {
+	nu.mutation.SetUpdatedAt(t)
+	return nu
+}
+
+// ClearUpdatedAt clears the value of the "updated_at" field.
+func (nu *NodeUpdate) ClearUpdatedAt() *NodeUpdate {
+	nu.mutation.ClearUpdatedAt()
 	return nu
 }
 
@@ -117,34 +129,8 @@ func (nu *NodeUpdate) ClearNext() *NodeUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (nu *NodeUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(nu.hooks) == 0 {
-		affected, err = nu.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*NodeMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			nu.mutation = mutation
-			affected, err = nu.gremlinSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(nu.hooks) - 1; i >= 0; i-- {
-			if nu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = nu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, nu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	nu.defaults()
+	return withHooks[int, NodeMutation](ctx, nu.gremlinSave, nu.mutation, nu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -169,6 +155,14 @@ func (nu *NodeUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (nu *NodeUpdate) defaults() {
+	if _, ok := nu.mutation.UpdatedAt(); !ok && !nu.mutation.UpdatedAtCleared() {
+		v := node.UpdateDefaultUpdatedAt()
+		nu.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (nu *NodeUpdate) gremlinSave(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := nu.gremlin().Query()
@@ -178,6 +172,7 @@ func (nu *NodeUpdate) gremlinSave(ctx context.Context) (int, error) {
 	if err, ok := isConstantError(res); ok {
 		return 0, err
 	}
+	nu.mutation.done = true
 	return res.ReadInt()
 }
 
@@ -203,9 +198,15 @@ func (nu *NodeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := nu.mutation.AddedValue(); ok {
 		v.Property(dsl.Single, node.FieldValue, __.Union(__.Values(node.FieldValue), __.Constant(value)).Sum())
 	}
+	if value, ok := nu.mutation.UpdatedAt(); ok {
+		v.Property(dsl.Single, node.FieldUpdatedAt, value)
+	}
 	var properties []any
 	if nu.mutation.ValueCleared() {
 		properties = append(properties, node.FieldValue)
+	}
+	if nu.mutation.UpdatedAtCleared() {
+		properties = append(properties, node.FieldUpdatedAt)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -282,6 +283,18 @@ func (nuo *NodeUpdateOne) ClearValue() *NodeUpdateOne {
 	return nuo
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (nuo *NodeUpdateOne) SetUpdatedAt(t time.Time) *NodeUpdateOne {
+	nuo.mutation.SetUpdatedAt(t)
+	return nuo
+}
+
+// ClearUpdatedAt clears the value of the "updated_at" field.
+func (nuo *NodeUpdateOne) ClearUpdatedAt() *NodeUpdateOne {
+	nuo.mutation.ClearUpdatedAt()
+	return nuo
+}
+
 // SetPrevID sets the "prev" edge to the Node entity by ID.
 func (nuo *NodeUpdateOne) SetPrevID(id string) *NodeUpdateOne {
 	nuo.mutation.SetPrevID(id)
@@ -337,6 +350,12 @@ func (nuo *NodeUpdateOne) ClearNext() *NodeUpdateOne {
 	return nuo
 }
 
+// Where appends a list predicates to the NodeUpdate builder.
+func (nuo *NodeUpdateOne) Where(ps ...predicate.Node) *NodeUpdateOne {
+	nuo.mutation.Where(ps...)
+	return nuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (nuo *NodeUpdateOne) Select(field string, fields ...string) *NodeUpdateOne {
@@ -346,40 +365,8 @@ func (nuo *NodeUpdateOne) Select(field string, fields ...string) *NodeUpdateOne 
 
 // Save executes the query and returns the updated Node entity.
 func (nuo *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
-	var (
-		err  error
-		node *Node
-	)
-	if len(nuo.hooks) == 0 {
-		node, err = nuo.gremlinSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*NodeMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			nuo.mutation = mutation
-			node, err = nuo.gremlinSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(nuo.hooks) - 1; i >= 0; i-- {
-			if nuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = nuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, nuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Node)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from NodeMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	nuo.defaults()
+	return withHooks[*Node, NodeMutation](ctx, nuo.gremlinSave, nuo.mutation, nuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -404,6 +391,14 @@ func (nuo *NodeUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (nuo *NodeUpdateOne) defaults() {
+	if _, ok := nuo.mutation.UpdatedAt(); !ok && !nuo.mutation.UpdatedAtCleared() {
+		v := node.UpdateDefaultUpdatedAt()
+		nuo.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (nuo *NodeUpdateOne) gremlinSave(ctx context.Context) (*Node, error) {
 	res := &gremlin.Response{}
 	id, ok := nuo.mutation.ID()
@@ -417,6 +412,7 @@ func (nuo *NodeUpdateOne) gremlinSave(ctx context.Context) (*Node, error) {
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
+	nuo.mutation.done = true
 	n := &Node{config: nuo.config}
 	if err := n.FromResponse(res); err != nil {
 		return nil, err
@@ -443,9 +439,15 @@ func (nuo *NodeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := nuo.mutation.AddedValue(); ok {
 		v.Property(dsl.Single, node.FieldValue, __.Union(__.Values(node.FieldValue), __.Constant(value)).Sum())
 	}
+	if value, ok := nuo.mutation.UpdatedAt(); ok {
+		v.Property(dsl.Single, node.FieldUpdatedAt, value)
+	}
 	var properties []any
 	if nuo.mutation.ValueCleared() {
 		properties = append(properties, node.FieldValue)
+	}
+	if nuo.mutation.UpdatedAtCleared() {
+		properties = append(properties, node.FieldUpdatedAt)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())

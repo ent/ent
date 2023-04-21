@@ -15,193 +15,127 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id uuid.UUID) predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Car(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id uuid.UUID) predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Car(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id uuid.UUID) predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.Car(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.Car(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.Car(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id uuid.UUID) predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.Car(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id uuid.UUID) predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.Car(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id uuid.UUID) predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.Car(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id uuid.UUID) predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.Car(sql.FieldLTE(FieldID, id))
 }
 
 // Number applies equality check predicate on the "number" field. It's identical to NumberEQ.
 func Number(v string) predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldNumber), v))
-	})
+	return predicate.Car(sql.FieldEQ(FieldNumber, v))
 }
 
 // NumberEQ applies the EQ predicate on the "number" field.
 func NumberEQ(v string) predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldNumber), v))
-	})
+	return predicate.Car(sql.FieldEQ(FieldNumber, v))
 }
 
 // NumberNEQ applies the NEQ predicate on the "number" field.
 func NumberNEQ(v string) predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldNumber), v))
-	})
+	return predicate.Car(sql.FieldNEQ(FieldNumber, v))
 }
 
 // NumberIn applies the In predicate on the "number" field.
 func NumberIn(vs ...string) predicate.Car {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldNumber), v...))
-	})
+	return predicate.Car(sql.FieldIn(FieldNumber, vs...))
 }
 
 // NumberNotIn applies the NotIn predicate on the "number" field.
 func NumberNotIn(vs ...string) predicate.Car {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldNumber), v...))
-	})
+	return predicate.Car(sql.FieldNotIn(FieldNumber, vs...))
 }
 
 // NumberGT applies the GT predicate on the "number" field.
 func NumberGT(v string) predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldNumber), v))
-	})
+	return predicate.Car(sql.FieldGT(FieldNumber, v))
 }
 
 // NumberGTE applies the GTE predicate on the "number" field.
 func NumberGTE(v string) predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldNumber), v))
-	})
+	return predicate.Car(sql.FieldGTE(FieldNumber, v))
 }
 
 // NumberLT applies the LT predicate on the "number" field.
 func NumberLT(v string) predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldNumber), v))
-	})
+	return predicate.Car(sql.FieldLT(FieldNumber, v))
 }
 
 // NumberLTE applies the LTE predicate on the "number" field.
 func NumberLTE(v string) predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldNumber), v))
-	})
+	return predicate.Car(sql.FieldLTE(FieldNumber, v))
 }
 
 // NumberContains applies the Contains predicate on the "number" field.
 func NumberContains(v string) predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldNumber), v))
-	})
+	return predicate.Car(sql.FieldContains(FieldNumber, v))
 }
 
 // NumberHasPrefix applies the HasPrefix predicate on the "number" field.
 func NumberHasPrefix(v string) predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldNumber), v))
-	})
+	return predicate.Car(sql.FieldHasPrefix(FieldNumber, v))
 }
 
 // NumberHasSuffix applies the HasSuffix predicate on the "number" field.
 func NumberHasSuffix(v string) predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldNumber), v))
-	})
+	return predicate.Car(sql.FieldHasSuffix(FieldNumber, v))
 }
 
 // NumberIsNil applies the IsNil predicate on the "number" field.
 func NumberIsNil() predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldNumber)))
-	})
+	return predicate.Car(sql.FieldIsNull(FieldNumber))
 }
 
 // NumberNotNil applies the NotNil predicate on the "number" field.
 func NumberNotNil() predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldNumber)))
-	})
+	return predicate.Car(sql.FieldNotNull(FieldNumber))
 }
 
 // NumberEqualFold applies the EqualFold predicate on the "number" field.
 func NumberEqualFold(v string) predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldNumber), v))
-	})
+	return predicate.Car(sql.FieldEqualFold(FieldNumber, v))
 }
 
 // NumberContainsFold applies the ContainsFold predicate on the "number" field.
 func NumberContainsFold(v string) predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldNumber), v))
-	})
+	return predicate.Car(sql.FieldContainsFold(FieldNumber, v))
 }
 
 // HasRentals applies the HasEdge predicate on the "rentals" edge.
@@ -209,7 +143,6 @@ func HasRentals() predicate.Car {
 	return predicate.Car(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(RentalsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, RentalsTable, RentalsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -219,11 +152,7 @@ func HasRentals() predicate.Car {
 // HasRentalsWith applies the HasEdge predicate on the "rentals" edge with a given conditions (other predicates).
 func HasRentalsWith(preds ...predicate.Rental) predicate.Car {
 	return predicate.Car(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(RentalsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, RentalsTable, RentalsColumn),
-		)
+		step := newRentalsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

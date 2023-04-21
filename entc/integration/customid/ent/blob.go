@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"github.com/google/uuid"
@@ -26,8 +27,9 @@ type Blob struct {
 	Count int `json:"count,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the BlobQuery when eager-loading is set.
-	Edges       BlobEdges `json:"edges"`
-	blob_parent *uuid.UUID
+	Edges        BlobEdges `json:"edges"`
+	blob_parent  *uuid.UUID
+	selectValues sql.SelectValues
 }
 
 // BlobEdges holds the relations/edges for other nodes in the graph.
@@ -86,7 +88,7 @@ func (*Blob) scanValues(columns []string) ([]any, error) {
 		case blob.ForeignKeys[0]: // blob_parent
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Blob", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -125,31 +127,39 @@ func (b *Blob) assignValues(columns []string, values []any) error {
 				b.blob_parent = new(uuid.UUID)
 				*b.blob_parent = *value.S.(*uuid.UUID)
 			}
+		default:
+			b.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the Blob.
+// This includes values selected through modifiers, order, etc.
+func (b *Blob) Value(name string) (ent.Value, error) {
+	return b.selectValues.Get(name)
+}
+
 // QueryParent queries the "parent" edge of the Blob entity.
 func (b *Blob) QueryParent() *BlobQuery {
-	return (&BlobClient{config: b.config}).QueryParent(b)
+	return NewBlobClient(b.config).QueryParent(b)
 }
 
 // QueryLinks queries the "links" edge of the Blob entity.
 func (b *Blob) QueryLinks() *BlobQuery {
-	return (&BlobClient{config: b.config}).QueryLinks(b)
+	return NewBlobClient(b.config).QueryLinks(b)
 }
 
 // QueryBlobLinks queries the "blob_links" edge of the Blob entity.
 func (b *Blob) QueryBlobLinks() *BlobLinkQuery {
-	return (&BlobClient{config: b.config}).QueryBlobLinks(b)
+	return NewBlobClient(b.config).QueryBlobLinks(b)
 }
 
 // Update returns a builder for updating this Blob.
 // Note that you need to call Blob.Unwrap() before calling this method if this Blob
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (b *Blob) Update() *BlobUpdateOne {
-	return (&BlobClient{config: b.config}).UpdateOne(b)
+	return NewBlobClient(b.config).UpdateOne(b)
 }
 
 // Unwrap unwraps the Blob entity that was returned from a transaction after it was closed,
@@ -179,9 +189,3 @@ func (b *Blob) String() string {
 
 // Blobs is a parsable slice of Blob.
 type Blobs []*Blob
-
-func (b Blobs) config(cfg config) {
-	for _i := range b {
-		b[_i].config = cfg
-	}
-}

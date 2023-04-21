@@ -8,22 +8,27 @@ package ent
 
 import (
 	"database/sql"
+	"math/big"
 	"net"
 	"net/http"
+	"net/url"
 	"time"
 
 	"entgo.io/ent/entc/integration/ent/schema"
 	"entgo.io/ent/entc/integration/ent/schema/task"
 	"entgo.io/ent/entc/integration/gremlin/ent/card"
+	"entgo.io/ent/entc/integration/gremlin/ent/exvaluescan"
 	"entgo.io/ent/entc/integration/gremlin/ent/fieldtype"
 	"entgo.io/ent/entc/integration/gremlin/ent/file"
 	"entgo.io/ent/entc/integration/gremlin/ent/group"
 	"entgo.io/ent/entc/integration/gremlin/ent/groupinfo"
 	"entgo.io/ent/entc/integration/gremlin/ent/item"
 	"entgo.io/ent/entc/integration/gremlin/ent/license"
+	"entgo.io/ent/entc/integration/gremlin/ent/node"
 	"entgo.io/ent/entc/integration/gremlin/ent/pet"
 	enttask "entgo.io/ent/entc/integration/gremlin/ent/task"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/schema/field"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -57,6 +62,29 @@ func init() {
 	cardDescName := cardFields[2].Descriptor()
 	// card.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	card.NameValidator = cardDescName.Validators[0].(func(string) error)
+	exvaluescanFields := schema.ExValueScan{}.Fields()
+	_ = exvaluescanFields
+	// exvaluescanDescBinary is the schema descriptor for binary field.
+	exvaluescanDescBinary := exvaluescanFields[0].Descriptor()
+	exvaluescan.ValueScanner.Binary = exvaluescanDescBinary.ValueScanner.(field.TypeValueScanner[*url.URL])
+	// exvaluescanDescBinaryOptional is the schema descriptor for binary_optional field.
+	exvaluescanDescBinaryOptional := exvaluescanFields[1].Descriptor()
+	exvaluescan.ValueScanner.BinaryOptional = exvaluescanDescBinaryOptional.ValueScanner.(field.TypeValueScanner[*url.URL])
+	// exvaluescanDescText is the schema descriptor for text field.
+	exvaluescanDescText := exvaluescanFields[2].Descriptor()
+	exvaluescan.ValueScanner.Text = exvaluescanDescText.ValueScanner.(field.TypeValueScanner[*big.Int])
+	// exvaluescanDescTextOptional is the schema descriptor for text_optional field.
+	exvaluescanDescTextOptional := exvaluescanFields[3].Descriptor()
+	exvaluescan.ValueScanner.TextOptional = exvaluescanDescTextOptional.ValueScanner.(field.TypeValueScanner[*big.Int])
+	// exvaluescanDescBase64 is the schema descriptor for base64 field.
+	exvaluescanDescBase64 := exvaluescanFields[4].Descriptor()
+	exvaluescan.ValueScanner.Base64 = exvaluescanDescBase64.ValueScanner.(field.TypeValueScanner[string])
+	// exvaluescanDescCustom is the schema descriptor for custom field.
+	exvaluescanDescCustom := exvaluescanFields[5].Descriptor()
+	exvaluescan.ValueScanner.Custom = exvaluescanDescCustom.ValueScanner.(field.TypeValueScanner[string])
+	// exvaluescanDescCustomOptional is the schema descriptor for custom_optional field.
+	exvaluescanDescCustomOptional := exvaluescanFields[6].Descriptor()
+	exvaluescan.ValueScanner.CustomOptional = exvaluescanDescCustomOptional.ValueScanner.(field.TypeValueScanner[string])
 	fieldtypeFields := schema.FieldType{}.Fields()
 	_ = fieldtypeFields
 	// fieldtypeDescInt64 is the schema descriptor for int64 field.
@@ -236,6 +264,12 @@ func init() {
 	license.DefaultUpdateTime = licenseDescUpdateTime.Default.(func() time.Time)
 	// license.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
 	license.UpdateDefaultUpdateTime = licenseDescUpdateTime.UpdateDefault.(func() time.Time)
+	nodeFields := schema.Node{}.Fields()
+	_ = nodeFields
+	// nodeDescUpdatedAt is the schema descriptor for updated_at field.
+	nodeDescUpdatedAt := nodeFields[1].Descriptor()
+	// node.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	node.UpdateDefaultUpdatedAt = nodeDescUpdatedAt.UpdateDefault.(func() time.Time)
 	petFields := schema.Pet{}.Fields()
 	_ = petFields
 	// petDescAge is the schema descriptor for age field.
@@ -252,8 +286,6 @@ func init() {
 	enttaskDescPriority := enttaskFields[0].Descriptor()
 	// enttask.DefaultPriority holds the default value on creation for the priority field.
 	enttask.DefaultPriority = task.Priority(enttaskDescPriority.Default.(int))
-	// enttask.PriorityValidator is a validator for the "priority" field. It is called by the builders before save.
-	enttask.PriorityValidator = enttaskDescPriority.Validators[0].(func(int) error)
 	// enttaskDescCreatedAt is the schema descriptor for created_at field.
 	enttaskDescCreatedAt := enttaskFields[2].Descriptor()
 	// enttask.DefaultCreatedAt holds the default value on creation for the created_at field.

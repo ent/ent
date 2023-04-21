@@ -12,6 +12,8 @@ import (
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/entc/integration/edgeschema/ent"
+	"entgo.io/ent/entc/integration/edgeschema/ent/attachedfile"
+	"entgo.io/ent/entc/integration/edgeschema/ent/file"
 	"entgo.io/ent/entc/integration/edgeschema/ent/friendship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
 	"entgo.io/ent/entc/integration/edgeschema/ent/migrate"
@@ -367,4 +369,42 @@ func TestEdgeSchemaEntQL(t *testing.T) {
 	require.Equal(t, rl1.UserID, rl2.UserID)
 	require.Equal(t, rl1.RelativeID, rl2.RelativeID)
 	require.Equal(t, rl1.InfoID, rl2.InfoID)
+}
+
+func TestEdgeSchemaTypeMatching(t *testing.T) {
+	client, err := ent.Open(dialect.SQLite, "file:ent?mode=memory&_fk=1")
+	require.NoError(t, err)
+	defer client.Close()
+	ctx := context.Background()
+	require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
+
+	files := client.File.CreateBulk(
+		client.File.Create().SetName("a"),
+		client.File.Create().SetName("b"),
+		client.File.Create().SetName("c"),
+	).SaveX(ctx)
+	proc := client.Process.Create().AddFiles(files[:2]...).SaveX(ctx)
+
+	// Assoc query.
+	require.Equal(t, []string{"a", "b"}, proc.QueryFiles().Order(ent.Asc(file.FieldName)).Select(file.FieldName).StringsX(ctx))
+	require.Equal(t, []int{files[0].ID, files[1].ID}, proc.QueryAttachedFiles().Order(ent.Asc(attachedfile.FieldFID)).Select(attachedfile.FieldFID).IntsX(ctx))
+	require.Equal(t, []int{files[0].ID, files[1].ID}, proc.QueryAttachedFiles().QueryFi().IDsX(ctx))
+	require.Equal(t, proc.ID, client.Process.Query().QueryAttachedFiles().QueryProc().OnlyIDX(ctx))
+
+	// Inverse query.
+	require.Equal(t, proc.ID, files[0].QueryProcesses().OnlyIDX(ctx))
+	require.Equal(t, proc.ID, files[1].QueryProcesses().OnlyIDX(ctx))
+	require.False(t, files[2].QueryProcesses().ExistX(ctx))
+	require.Equal(t, []int{files[0].ID, files[1].ID}, client.File.Query().QueryProcesses().QueryFiles().IDsX(ctx))
+	require.Equal(t, []int{files[0].ID, files[1].ID}, client.File.Query().QueryProcesses().QueryAttachedFiles().QueryFi().IDsX(ctx))
+
+	// Edge schema query and mutation.
+	require.Equal(t, []int{files[0].ID, files[1].ID}, client.AttachedFile.Query().QueryFi().IDsX(ctx))
+	require.Equal(t, []int{files[0].ID, files[1].ID}, client.AttachedFile.Query().QueryProc().QueryFiles().IDsX(ctx))
+	require.Equal(t, proc.ID, client.AttachedFile.Query().QueryProc().OnlyIDX(ctx))
+	af := client.AttachedFile.Create().SetFi(files[2]).SetProc(proc).SaveX(ctx)
+	require.Equal(t, proc.ID, af.QueryProc().OnlyIDX(ctx))
+	require.Equal(t, files[2].ID, af.QueryFi().OnlyIDX(ctx))
+	require.Equal(t, []int{files[0].ID, files[1].ID, files[2].ID}, client.AttachedFile.Query().QueryFi().IDsX(ctx))
+	require.Equal(t, files[2].ID, client.AttachedFile.Query().QueryProc().QueryFiles().Where(file.Name(files[2].Name)).OnlyIDX(ctx))
 }

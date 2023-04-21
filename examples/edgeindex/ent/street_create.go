@@ -56,49 +56,7 @@ func (sc *StreetCreate) Mutation() *StreetMutation {
 
 // Save creates the Street in the database.
 func (sc *StreetCreate) Save(ctx context.Context) (*Street, error) {
-	var (
-		err  error
-		node *Street
-	)
-	if len(sc.hooks) == 0 {
-		if err = sc.check(); err != nil {
-			return nil, err
-		}
-		node, err = sc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*StreetMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = sc.check(); err != nil {
-				return nil, err
-			}
-			sc.mutation = mutation
-			if node, err = sc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(sc.hooks) - 1; i >= 0; i-- {
-			if sc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = sc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, sc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Street)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from StreetMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Street, StreetMutation](ctx, sc.sqlSave, sc.mutation, sc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -132,6 +90,9 @@ func (sc *StreetCreate) check() error {
 }
 
 func (sc *StreetCreate) sqlSave(ctx context.Context) (*Street, error) {
+	if err := sc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := sc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, sc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -141,19 +102,15 @@ func (sc *StreetCreate) sqlSave(ctx context.Context) (*Street, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
+	sc.mutation.id = &_node.ID
+	sc.mutation.done = true
 	return _node, nil
 }
 
 func (sc *StreetCreate) createSpec() (*Street, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Street{config: sc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: street.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: street.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(street.Table, sqlgraph.NewFieldSpec(street.FieldID, field.TypeInt))
 	)
 	if value, ok := sc.mutation.Name(); ok {
 		_spec.SetField(street.FieldName, field.TypeString, value)
@@ -167,10 +124,7 @@ func (sc *StreetCreate) createSpec() (*Street, *sqlgraph.CreateSpec) {
 			Columns: []string{street.CityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: city.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(city.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -205,8 +159,8 @@ func (scb *StreetCreateBulk) Save(ctx context.Context) ([]*Street, error) {
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, scb.builders[i+1].mutation)
 				} else {

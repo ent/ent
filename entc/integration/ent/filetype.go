@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/filetype"
 )
@@ -27,7 +28,8 @@ type FileType struct {
 	State filetype.State `json:"state,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FileTypeQuery when eager-loading is set.
-	Edges FileTypeEdges `json:"edges"`
+	Edges        FileTypeEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // FileTypeEdges holds the relations/edges for other nodes in the graph.
@@ -59,7 +61,7 @@ func (*FileType) scanValues(columns []string) ([]any, error) {
 		case filetype.FieldName, filetype.FieldType, filetype.FieldState:
 			values[i] = new(sql.NullString)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type FileType", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -97,21 +99,29 @@ func (ft *FileType) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ft.State = filetype.State(value.String)
 			}
+		default:
+			ft.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the FileType.
+// This includes values selected through modifiers, order, etc.
+func (ft *FileType) Value(name string) (ent.Value, error) {
+	return ft.selectValues.Get(name)
+}
+
 // QueryFiles queries the "files" edge of the FileType entity.
 func (ft *FileType) QueryFiles() *FileQuery {
-	return (&FileTypeClient{config: ft.config}).QueryFiles(ft)
+	return NewFileTypeClient(ft.config).QueryFiles(ft)
 }
 
 // Update returns a builder for updating this FileType.
 // Note that you need to call FileType.Unwrap() before calling this method if this FileType
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (ft *FileType) Update() *FileTypeUpdateOne {
-	return (&FileTypeClient{config: ft.config}).UpdateOne(ft)
+	return NewFileTypeClient(ft.config).UpdateOne(ft)
 }
 
 // Unwrap unwraps the FileType entity that was returned from a transaction after it was closed,
@@ -168,9 +178,3 @@ func (ft *FileType) appendNamedFiles(name string, edges ...*File) {
 
 // FileTypes is a parsable slice of FileType.
 type FileTypes []*FileType
-
-func (ft FileTypes) config(cfg config) {
-	for _i := range ft {
-		ft[_i].config = cfg
-	}
-}

@@ -48,6 +48,8 @@ func (User) Fields() []ent.Field {
 		field.JSON("addr", Addr{}).
 			Sensitive().
 			Optional(),
+		field.Any("unknown").
+			Optional(),
 	}
 }
 

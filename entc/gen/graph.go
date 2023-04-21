@@ -143,6 +143,15 @@ func (f GenerateFunc) Generate(g *Graph) error {
 	return f(g)
 }
 
+// Set sets an annotation a new annotation in the map.
+// A new map is created if the receiver is nil.
+func (a *Annotations) Set(k string, v any) {
+	if *a == nil {
+		*a = make(Annotations)
+	}
+	(*a)[k] = v
+}
+
 // NewGraph creates a new Graph for the code generation from the given schema definitions.
 // It fails if one of the schemas is invalid.
 func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
@@ -250,8 +259,14 @@ func generate(g *Graph) error {
 	if err := assets.write(); err != nil {
 		return err
 	}
-	// cleanup assets that are not needed anymore.
+	// Cleanup nodes' assets and old template
+	// files that are not needed anymore.
 	cleanOldNodes(assets, g.Config.Target)
+	for _, n := range deletedTemplates {
+		if err := os.Remove(filepath.Join(g.Target, n)); err != nil && !os.IsNotExist(err) {
+			log.Printf("remove old file %s: %s\n", filepath.Join(g.Target, n), err)
+		}
+	}
 	// We can't run "imports" on files when the state is not completed.
 	// Because, "goimports" will drop undefined package. Therefore, it
 	// is suspended to the end of the writing.
@@ -413,13 +428,15 @@ func (g *Graph) resolve(t *Type) error {
 				if c1 == c2 {
 					c2 = rules.Singularize(e.Name) + "_id"
 				}
+				// Share the same backing array for the relation columns so
+				// that any changes to one will be reflected in both edges.
 				e.Rel.Columns = []string{c1, c2}
-				ref.Rel.Columns = []string{c1, c2}
+				ref.Rel.Columns = e.Rel.Columns
 			}
 			e.Rel.Table, ref.Rel.Table = table, table
 			if !e.M2M() {
 				e.Rel.Columns = []string{column}
-				ref.Rel.Columns = []string{column}
+				ref.Rel.Columns = e.Rel.Columns
 			}
 		// Assoc with uninitialized relation.
 		case !e.IsInverse() && e.Rel.Type == Unk:
@@ -461,49 +478,75 @@ func (g *Graph) edgeSchemas() error {
 			if !e.M2M() {
 				return fmt.Errorf("edge %s.%s Through(%q, %s.Type) is allowed only on M2M edges, but got: %q", n.Name, e.Name, e.def.Through.N, e.def.Through.T, e.Rel.Type)
 			}
-			typ, ok := g.typ(e.def.Through.T)
+			edgeT, ok := g.typ(e.def.Through.T)
 			switch {
 			case !ok:
 				return fmt.Errorf("edge %s.%s defined with Through(%q, %s.Type), but type %[4]s was not found", n.Name, e.Name, e.def.Through.N, e.def.Through.T, e.def.Through.T)
-			case typ == n:
+			case edgeT == n:
 				return fmt.Errorf("edge %s.%s defined with Through(%q, %s.Type), but edge cannot go through itself", n.Name, e.Name, e.def.Through.N, e.def.Through.T)
 			case e.def.Through.N == "" || n.hasEdge(e.def.Through.N):
 				return fmt.Errorf("edge %s.%s defined with Through(%q, %s.Type), but schema %[1]s already has an edge named %[3]s", n.Name, e.Name, e.def.Through.N, e.def.Through.T)
 			case e.IsInverse():
-				if typ.EdgeSchema.From != nil {
-					return fmt.Errorf("type %s is already used as an edge schema by other edge.From: %s.%s", typ.Name, typ.EdgeSchema.From.Name, typ.EdgeSchema.From.Owner.Name)
+				if edgeT.EdgeSchema.From != nil {
+					return fmt.Errorf("type %s is already used as an edge-schema by other edge.From: %s.%s", edgeT.Name, edgeT.EdgeSchema.From.Name, edgeT.EdgeSchema.From.Owner.Name)
 				}
-				e.Through = typ
-				typ.EdgeSchema.From = e
-				if to, from := typ.EdgeSchema.To, typ.EdgeSchema.From; to != nil && from.Ref != to {
-					return fmt.Errorf("mismtached edge.From(%q, %s.Type) and edge.To(%q, %s.Type) for edge schema %s", from.Name, from.Type.Name, to.Name, to.Type.Name, typ.Name)
+				e.Through = edgeT
+				edgeT.EdgeSchema.From = e
+				if to, from := edgeT.EdgeSchema.To, edgeT.EdgeSchema.From; to != nil && from.Ref != to {
+					return fmt.Errorf("mismtached edge.From(%q, %s.Type) and edge.To(%q, %s.Type) for edge schema %s", from.Name, from.Type.Name, to.Name, to.Type.Name, edgeT.Name)
 				}
 			default: // Assoc.
-				if typ.EdgeSchema.To != nil {
-					return fmt.Errorf("type %s is already used as an edge schema by other edge.To: %s.%s", typ.Name, typ.EdgeSchema.From.Name, typ.EdgeSchema.From.Owner.Name)
+				if edgeT.EdgeSchema.To != nil {
+					return fmt.Errorf("type %s is already used as an edge schema by other edge.To: %s.%s", edgeT.Name, edgeT.EdgeSchema.From.Name, edgeT.EdgeSchema.From.Owner.Name)
 				}
-				e.Through = typ
-				typ.EdgeSchema.To = e
-				if to, from := typ.EdgeSchema.To, typ.EdgeSchema.From; from != nil && from.Ref != to {
-					return fmt.Errorf("mismtached edge.To(%q, %s.Type) and edge.From(%q, %s.Type) for edge schema %s", from.Name, from.Type.Name, to.Name, to.Type.Name, typ.Name)
+				e.Through = edgeT
+				edgeT.EdgeSchema.To = e
+				if to, from := edgeT.EdgeSchema.To, edgeT.EdgeSchema.From; from != nil && from.Ref != to {
+					return fmt.Errorf("mismtached edge.To(%q, %s.Type) and edge.From(%q, %s.Type) for edge schema %s", from.Name, from.Type.Name, to.Name, to.Type.Name, edgeT.Name)
 				}
 			}
-			e.Rel.Table = typ.Table()
+			// Update both Assoc/To and Inverse/From
+			// relation tables to the edge schema table.
+			e.Rel.Table = edgeT.Table()
+			if e.Ref != nil {
+				e.Ref.Rel.Table = edgeT.Table()
+			}
 			var ref *Edge
 			for i, c := range e.Rel.Columns {
 				r, ok := func() (*Edge, bool) {
-					for _, fk := range typ.ForeignKeys {
+					// Search first for matching by edge-field.
+					for _, fk := range edgeT.ForeignKeys {
 						if fk.Field.Name == c {
 							return fk.Edge, true
 						}
 					}
+					// In case of no match, search by edge-type. This can happen if the type (edge owner)
+					// is named "T", but the edge-schema "E" names its edge field as "u_id". We consider
+					// it as a match if there is only one usage of "T" in "E".
+					var (
+						matches []*Edge
+						matchOn = n
+					)
+					if i == 0 && e.IsInverse() || i == 1 && !e.IsInverse() {
+						matchOn = e.Type
+					}
+					for _, e2 := range edgeT.Edges {
+						if e2.Type == matchOn && e2.Field() != nil {
+							matches = append(matches, e2)
+						}
+					}
+					if len(matches) == 1 {
+						// Ensure the M2M foreign key is updated accordingly.
+						e.Rel.Columns[i] = matches[0].Field().Name
+						return matches[0], true
+					}
 					return nil, false
 				}()
 				if !ok {
-					return fmt.Errorf("missing edge-field %s.%s for edge schema used by %s.%s in Through(%q, %s.Type)", typ.Name, c, n.Name, e.Name, e.def.Through.N, typ.Name)
+					return fmt.Errorf("missing edge-field %s.%s for edge schema used by %s.%s in Through(%q, %s.Type)", edgeT.Name, c, n.Name, e.Name, e.def.Through.N, edgeT.Name)
 				}
 				if r.Optional {
-					return fmt.Errorf("edge-schema %s is missing a Required() attribute for its reference edge %q", typ.Name, e.Name)
+					return fmt.Errorf("edge-schema %s is missing a Required() attribute for its reference edge %q", edgeT.Name, e.Name)
 				}
 				if !e.IsInverse() && i == 0 || e.IsInverse() && i == 1 {
 					ref = r
@@ -514,7 +557,7 @@ func (g *Graph) edgeSchemas() error {
 			n.Edges = append(n.Edges, &Edge{
 				def:         &load.Edge{},
 				Name:        e.def.Through.N,
-				Type:        typ,
+				Type:        edgeT,
 				Inverse:     ref.Name,
 				Ref:         ref,
 				Owner:       n,
@@ -529,21 +572,21 @@ func (g *Graph) edgeSchemas() error {
 				},
 			})
 			// Edge schema contains a composite primary key, and it was not resolved in previous iterations.
-			if ant := fieldAnnotate(typ.Annotations); ant != nil && len(ant.ID) > 0 && len(typ.EdgeSchema.ID) == 0 {
+			if ant := fieldAnnotate(edgeT.Annotations); ant != nil && len(ant.ID) > 0 && len(edgeT.EdgeSchema.ID) == 0 {
 				r1, r2 := e.Rel.Columns[0], e.Rel.Columns[1]
 				if len(ant.ID) != 2 || ant.ID[0] != r1 || ant.ID[1] != r2 {
 					return fmt.Errorf(`edge schema primary key can only be defined on "id" or (%q, %q) in the same order`, r1, r2)
 				}
-				typ.ID = nil
+				edgeT.ID = nil
 				for _, f := range ant.ID {
-					typ.EdgeSchema.ID = append(typ.EdgeSchema.ID, typ.fields[f])
+					edgeT.EdgeSchema.ID = append(edgeT.EdgeSchema.ID, edgeT.fields[f])
 				}
 			}
-			if typ.HasCompositeID() {
+			if edgeT.HasCompositeID() {
 				continue
 			}
 			hasI := func() bool {
-				for _, idx := range typ.Indexes {
+				for _, idx := range edgeT.Indexes {
 					if !idx.Unique || len(idx.Columns) != 2 {
 						continue
 					}
@@ -556,7 +599,7 @@ func (g *Graph) edgeSchemas() error {
 				return false
 			}()
 			if !hasI {
-				if err := typ.AddIndex(&load.Index{Unique: true, Fields: e.Rel.Columns}); err != nil {
+				if err := edgeT.AddIndex(&load.Index{Unique: true, Fields: e.Rel.Columns}); err != nil {
 					return err
 				}
 			}
@@ -569,7 +612,8 @@ func (g *Graph) edgeSchemas() error {
 func (g *Graph) Tables() (all []*schema.Table, err error) {
 	tables := make(map[string]*schema.Table)
 	for _, n := range g.Nodes {
-		table := schema.NewTable(n.Table())
+		table := schema.NewTable(n.Table()).
+			SetComment(n.sqlComment())
 		if n.HasOneFieldID() {
 			table.AddPrimary(n.ID.PK())
 		}
@@ -593,8 +637,7 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 				// The "owner" is the table that owns the relation (we set
 				// the foreign-key on) and "ref" is the referenced table.
 				owner, ref := tables[e.Rel.Table], tables[n.Table()]
-				pk := ref.PrimaryKey[0]
-				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, Unique: e.Rel.Type == O2O, SchemaType: pk.SchemaType, Nullable: true}
+				column := fkColumn(e, owner, ref.PrimaryKey[0])
 				// If it's not a circular reference (self-referencing table),
 				// and the inverse edge is required, make it non-nullable.
 				if n != e.Type && e.Ref != nil && !e.Ref.Optional {
@@ -610,8 +653,7 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 				})
 			case M2O:
 				ref, owner := tables[e.Type.Table()], tables[e.Rel.Table]
-				pk := ref.PrimaryKey[0]
-				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, SchemaType: pk.SchemaType, Nullable: true}
+				column := fkColumn(e, owner, ref.PrimaryKey[0])
 				// If it's not a circular reference (self-referencing table),
 				// and the edge is non-optional (required), make it non-nullable.
 				if n != e.Type && !e.Optional {
@@ -678,7 +720,7 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 			table.AddIndex(idx.Name, idx.Unique, idx.Columns)
 			// Set the entsql.IndexAnnotation from the schema if exists.
 			index, _ := table.Index(idx.Name)
-			index.Annotation = entsqlIndexAnnotate(idx.Annotations)
+			index.Annotation = sqlIndexAnnotate(idx.Annotations)
 		}
 	}
 	if err := ensureUniqueFKs(tables); err != nil {
@@ -692,6 +734,21 @@ func mayAddColumn(t *schema.Table, c *schema.Column) {
 	if !t.HasColumn(c.Name) {
 		t.AddColumn(c)
 	}
+}
+
+// fkColumn returns the foreign key column for the given edge.
+func fkColumn(e *Edge, owner *schema.Table, refPK *schema.Column) *schema.Column {
+	// If the foreign-key also functions as a primary key, it cannot be nullable.
+	ispk := len(owner.PrimaryKey) == 1 && owner.PrimaryKey[0].Name == e.Rel.Column()
+	column := &schema.Column{Name: e.Rel.Column(), Size: refPK.Size, Type: refPK.Type, SchemaType: refPK.SchemaType, Nullable: !ispk}
+	// O2O relations are enforced using a unique index.
+	column.Unique = e.Rel.Type == O2O
+	// Foreign key was defined as an edge field.
+	if e.Rel.fk != nil && e.Rel.fk.Field != nil {
+		fc := e.Rel.fk.Field.Column()
+		column.Comment, column.Default = fc.Comment, fc.Default
+	}
+	return column
 }
 
 func addCompositePK(t *schema.Table, n *Type) error {

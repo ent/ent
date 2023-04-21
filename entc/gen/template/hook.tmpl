@@ -26,11 +26,10 @@ import "{{ $.Config.Package }}"
 
 	// Mutate calls f(ctx, m).
 	func (f {{ $name }}) Mutate(ctx context.Context, m {{ $pkg }}.Mutation) ({{ $pkg }}.Value, error) {
-		mv, ok := m.({{ $type }})
-		if !ok {
-			return nil, fmt.Errorf("unexpected mutation type %T. expect {{ $type }}", m)
+		if mv, ok := m.({{ $type }}); ok {
+			return f(ctx, mv)
 		}
-		return f(ctx, mv)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect {{ $type }}", m)
 	}
 {{ end }}
 

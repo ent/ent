@@ -342,7 +342,7 @@ func (s *Strings) scan(v string) error {
 		return nil
 	}
 	if l := len(v); l < 2 || v[0] != '{' && v[l-1] != '}' {
-		return fmt.Errorf("unexpcted array format %q", v)
+		return fmt.Errorf("unexpected array format %q", v)
 	}
 	*s = strings.Split(v[1:len(v)-1], ",")
 	return nil

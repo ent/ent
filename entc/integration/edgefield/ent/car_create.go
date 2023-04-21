@@ -74,50 +74,8 @@ func (cc *CarCreate) Mutation() *CarMutation {
 
 // Save creates the Car in the database.
 func (cc *CarCreate) Save(ctx context.Context) (*Car, error) {
-	var (
-		err  error
-		node *Car
-	)
 	cc.defaults()
-	if len(cc.hooks) == 0 {
-		if err = cc.check(); err != nil {
-			return nil, err
-		}
-		node, err = cc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*CarMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = cc.check(); err != nil {
-				return nil, err
-			}
-			cc.mutation = mutation
-			if node, err = cc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(cc.hooks) - 1; i >= 0; i-- {
-			if cc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = cc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, cc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Car)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from CarMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Car, CarMutation](ctx, cc.sqlSave, cc.mutation, cc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -156,6 +114,9 @@ func (cc *CarCreate) check() error {
 }
 
 func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
+	if err := cc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := cc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -170,19 +131,15 @@ func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 			return nil, err
 		}
 	}
+	cc.mutation.id = &_node.ID
+	cc.mutation.done = true
 	return _node, nil
 }
 
 func (cc *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Car{config: cc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: car.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: car.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(car.Table, sqlgraph.NewFieldSpec(car.FieldID, field.TypeUUID))
 	)
 	if id, ok := cc.mutation.ID(); ok {
 		_node.ID = id
@@ -200,10 +157,7 @@ func (cc *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 			Columns: []string{car.RentalsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: rental.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(rental.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -238,8 +192,8 @@ func (ccb *CarCreateBulk) Save(ctx context.Context) ([]*Car, error) {
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, ccb.builders[i+1].mutation)
 				} else {

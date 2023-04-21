@@ -64,14 +64,14 @@ This option can be added to a project using the `--feature schema/snapshot` flag
 The privacy layer allows configuring privacy policy for queries and mutations of entities in the database.
 
 This option can be added to a project using the `--feature privacy` flag, and you can learn more about in the
-[privacy](privacy.md) documentation.
+[privacy](privacy.mdx) documentation.
 
 ### EntQL Filtering
 
 The `entql` option provides a generic and dynamic filtering capability at runtime for the different query builders.
 
 This option can be added to a project using the `--feature entql` flag, and you can learn more about in the
-[privacy](privacy.md#multi-tenancy) documentation.
+[privacy](privacy.mdx#multi-tenancy) documentation.
 
 ### Named Edges
 
@@ -142,6 +142,30 @@ The above code will produce the following SQL query:
 
 ```sql
 SELECT SUM(LENGTH(name)) FROM `pet`
+```
+
+#### Select and Scan Dynamic Values
+
+If you work with SQL modifiers and need to scan dynamic values not present in your Ent schema definition, such as
+aggregation or custom ordering, you can apply `AppendSelect`/`AppendSelectAs` to the `sql.Selector`. You can later
+access their values using the `Value` method defined on each entity:
+
+```go {6,11}
+const as = "name_length"
+
+// Query the entity with the dynamic value.
+p := client.Pet.Query().
+	Modify(func(s *sql.Selector) {
+		s.AppendSelectAs("LENGTH(name)", as)
+	}).
+	FirstX(ctx)
+
+// Read the value from the entity.
+n, err := p.Value(as)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Println("Name length: %d == %d", n, len(p.Name))
 ```
 
 #### Modify Example 2

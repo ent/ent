@@ -1,0 +1,43 @@
+---
+title: Automatic migration planning
+id: auto-plan
+---
+
+import InstallationInstructions from '../components/_installation_instructions.mdx';
+import AtlasMigrateDiff from '../components/_atlas_migrate_diff.mdx';
+
+## Automatic migration planning
+
+One of the convenient features of Automatic Migrations is that developers do not
+need to write the SQL statements to create or modify the database schema. To 
+achieve similar benefits, we will now add a script to our project that will 
+automatically plan migration files for us based on the changes to our schema. 
+
+To do this, Ent uses [Atlas](https://atlasgo.io), an open-source tool for managing database
+schemas, created by the same people behind Ent. 
+
+If you have been following our example repo, we have been using SQLite as our database
+until this point. To demonstrate a more realistic use case, we will now switch to MySQL.
+See this change in [PR #3](https://github.com/rotemtam/ent-versioned-migrations-demo/pull/3/files).
+
+## Using the Atlas CLI to plan migrations
+
+In this section, we will demonstrate how to use the Atlas CLI to automatically plan
+schema migrations for us. In the past, users had to create a custom Go program to
+do this (as described [here](07-programmatically.mdx)). With recent versions of Atlas,
+this is no longer necessary: Atlas can natively load the desired databaes schema from an Ent schema.
+
+<InstallationInstructions />
+
+Then, run the following command to automatically generate migration files for your Ent schema:
+
+<AtlasMigrateDiff/>
+
+:::info The role of the [dev database](https://atlasgo.io/concepts/dev-database)
+Atlas loads the **current state** by executing the SQL files stored in the migration directory onto the provided
+[dev database](https://atlasgo.io/concepts/dev-database). It then compares this state against the **desired state**
+defined by the `ent/schema` package and writes a migration plan for moving from the current state to the desired state.
+:::
+
+
+Next, let's see how to upgrade an existing production database to be managed with versioned migrations. 

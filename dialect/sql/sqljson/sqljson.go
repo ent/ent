@@ -268,7 +268,7 @@ func valueInOp(column string, args []any, opts []Option, op sql.Op) *sql.Predica
 //	sqljson.LenEQ("a", 1, sqljson.Path("b"))
 func LenEQ(column string, size int, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
-		LenPath(b, column, opts...)
+		lenPath(b, column, opts...)
 		b.WriteOp(sql.OpEQ).Arg(size)
 	})
 }
@@ -279,7 +279,7 @@ func LenEQ(column string, size int, opts ...Option) *sql.Predicate {
 //	sqljson.LenEQ("a", 1, sqljson.Path("b"))
 func LenNEQ(column string, size int, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
-		LenPath(b, column, opts...)
+		lenPath(b, column, opts...)
 		b.WriteOp(sql.OpNEQ).Arg(size)
 	})
 }
@@ -291,7 +291,7 @@ func LenNEQ(column string, size int, opts ...Option) *sql.Predicate {
 //	sqljson.LenGT("a", 1, sqljson.Path("b"))
 func LenGT(column string, size int, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
-		LenPath(b, column, opts...)
+		lenPath(b, column, opts...)
 		b.WriteOp(sql.OpGT).Arg(size)
 	})
 }
@@ -303,7 +303,7 @@ func LenGT(column string, size int, opts ...Option) *sql.Predicate {
 //	sqljson.LenGTE("a", 1, sqljson.Path("b"))
 func LenGTE(column string, size int, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
-		LenPath(b, column, opts...)
+		lenPath(b, column, opts...)
 		b.WriteOp(sql.OpGTE).Arg(size)
 	})
 }
@@ -315,7 +315,7 @@ func LenGTE(column string, size int, opts ...Option) *sql.Predicate {
 //	sqljson.LenLT("a", 1, sqljson.Path("b"))
 func LenLT(column string, size int, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
-		LenPath(b, column, opts...)
+		lenPath(b, column, opts...)
 		b.WriteOp(sql.OpLT).Arg(size)
 	})
 }
@@ -327,16 +327,42 @@ func LenLT(column string, size int, opts ...Option) *sql.Predicate {
 //	sqljson.LenLTE("a", 1, sqljson.Path("b"))
 func LenLTE(column string, size int, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
-		LenPath(b, column, opts...)
+		lenPath(b, column, opts...)
 		b.WriteOp(sql.OpLTE).Arg(size)
 	})
+}
+
+// LenPath returns an SQL expression for getting the length
+// of a JSON value (returned by the path).
+func LenPath(column string, opts ...Option) sql.Querier {
+	return sql.ExprFunc(func(b *sql.Builder) {
+		lenPath(b, column, opts...)
+	})
+}
+
+// OrderLen returns a custom predicate function (as defined in the doc),
+// that sets the result order by the length of the given JSON value.
+func OrderLen(column string, opts ...Option) func(*sql.Selector) {
+	return func(s *sql.Selector) {
+		s.OrderExpr(LenPath(column, opts...))
+	}
+}
+
+// OrderLenDesc returns a custom predicate function (as defined in the doc), that
+// sets the result order by the length of the given JSON value, but in descending order.
+func OrderLenDesc(column string, opts ...Option) func(*sql.Selector) {
+	return func(s *sql.Selector) {
+		s.OrderExpr(
+			sql.DescExpr(LenPath(column, opts...)),
+		)
+	}
 }
 
 // LenPath writes to the given SQL builder the JSON path for
 // getting the length of a given JSON path.
 //
 //	sqljson.LenPath(b, Path("a", "b", "[1]", "c"))
-func LenPath(b *sql.Builder, column string, opts ...Option) {
+func lenPath(b *sql.Builder, column string, opts ...Option) {
 	path := identPath(column, opts...)
 	path.length(b)
 }
@@ -377,7 +403,7 @@ type Option func(*PathOptions)
 
 // Path sets the path to the JSON value of a column.
 //
-//	valuePath(b, "column", Path("a", "b", "[1]", "c"))
+//	ValuePath(b, "column", Path("a", "b", "[1]", "c"))
 func Path(path ...string) Option {
 	return func(p *PathOptions) {
 		p.Path = path
@@ -386,8 +412,8 @@ func Path(path ...string) Option {
 
 // DotPath is similar to Path, but accepts string with dot format.
 //
-//	valuePath(b, "column", DotPath("a.b.c"))
-//	valuePath(b, "column", DotPath("a.b[2].c"))
+//	ValuePath(b, "column", DotPath("a.b.c"))
+//	ValuePath(b, "column", DotPath("a.b[2].c"))
 //
 // Note that DotPath is ignored if the input is invalid.
 func DotPath(dotpath string) Option {
@@ -399,7 +425,7 @@ func DotPath(dotpath string) Option {
 
 // Unquote indicates that the result value should be unquoted.
 //
-//	valuePath(b, "column", Path("a", "b", "[1]", "c"), Unquote(true))
+//	ValuePath(b, "column", Path("a", "b", "[1]", "c"), Unquote(true))
 func Unquote(unquote bool) Option {
 	return func(p *PathOptions) {
 		p.Unquote = unquote
@@ -408,7 +434,7 @@ func Unquote(unquote bool) Option {
 
 // Cast indicates that the result value should be cast to the given type.
 //
-//	valuePath(b, "column", Path("a", "b", "[1]", "c"), Cast("int"))
+//	ValuePath(b, "column", Path("a", "b", "[1]", "c"), Cast("int"))
 func Cast(typ string) Option {
 	return func(p *PathOptions) {
 		p.Cast = typ
@@ -448,6 +474,24 @@ func ValuePath(column string, opts ...Option) sql.Querier {
 	return sql.ExprFunc(func(b *sql.Builder) {
 		valuePath(b, column, opts...)
 	})
+}
+
+// OrderValue returns a custom predicate function (as defined in the doc),
+// that sets the result order by the given JSON value.
+func OrderValue(column string, opts ...Option) func(*sql.Selector) {
+	return func(s *sql.Selector) {
+		s.OrderExpr(ValuePath(column, opts...))
+	}
+}
+
+// OrderValueDesc returns a custom predicate function (as defined in the doc),
+// that sets the result order by the given JSON value, but in descending order.
+func OrderValueDesc(column string, opts ...Option) func(*sql.Selector) {
+	return func(s *sql.Selector) {
+		s.OrderExpr(
+			sql.DescExpr(ValuePath(column, opts...)),
+		)
+	}
 }
 
 // valuePath writes to the given SQL builder the JSON path for

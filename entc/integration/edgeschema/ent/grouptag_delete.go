@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -32,34 +31,7 @@ func (gtd *GroupTagDelete) Where(ps ...predicate.GroupTag) *GroupTagDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (gtd *GroupTagDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(gtd.hooks) == 0 {
-		affected, err = gtd.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GroupTagMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			gtd.mutation = mutation
-			affected, err = gtd.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(gtd.hooks) - 1; i >= 0; i-- {
-			if gtd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = gtd.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, gtd.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, GroupTagMutation](ctx, gtd.sqlExec, gtd.mutation, gtd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -72,15 +44,7 @@ func (gtd *GroupTagDelete) ExecX(ctx context.Context) int {
 }
 
 func (gtd *GroupTagDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: grouptag.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: grouptag.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(grouptag.Table, sqlgraph.NewFieldSpec(grouptag.FieldID, field.TypeInt))
 	if ps := gtd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -92,12 +56,19 @@ func (gtd *GroupTagDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	gtd.mutation.done = true
 	return affected, err
 }
 
 // GroupTagDeleteOne is the builder for deleting a single GroupTag entity.
 type GroupTagDeleteOne struct {
 	gtd *GroupTagDelete
+}
+
+// Where appends a list predicates to the GroupTagDelete builder.
+func (gtdo *GroupTagDeleteOne) Where(ps ...predicate.GroupTag) *GroupTagDeleteOne {
+	gtdo.gtd.mutation.Where(ps...)
+	return gtdo
 }
 
 // Exec executes the deletion query.
@@ -115,5 +86,7 @@ func (gtdo *GroupTagDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (gtdo *GroupTagDeleteOne) ExecX(ctx context.Context) {
-	gtdo.gtd.ExecX(ctx)
+	if err := gtdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

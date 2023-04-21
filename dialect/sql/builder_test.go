@@ -1631,6 +1631,11 @@ WHERE (((("users"."id1" = "users"."id2" AND "users"."id1" <> "users"."id2")
 AND "users"."id1" > "users"."id2") AND "users"."id1" >= "users"."id2") 
 AND "users"."id1" < "users"."id2") AND "users"."id1" <= "users"."id2"`, "\n", ""),
 		},
+		{
+			input: Select("name").
+				From(Select("name", "age").From(Table("users"))),
+			wantQuery: "SELECT `name` FROM (SELECT `name`, `age` FROM `users`)",
+		},
 	}
 	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
@@ -1679,6 +1684,17 @@ func TestSelector_OrderByExpr(t *testing.T) {
 		Query()
 	require.Equal(t, `SELECT * FROM "users" WHERE "age" > $1 ORDER BY "name", CASE WHEN "id" = $2 THEN "id" WHEN "id" = $3 THEN "name" END DESC`, query)
 	require.Equal(t, []any{28, 1, 2}, args)
+}
+
+func TestSelector_ClearOrder(t *testing.T) {
+	query, args := Select("*").
+		From(Table("users")).
+		OrderBy("name").
+		ClearOrder().
+		OrderBy("id").
+		Query()
+	require.Equal(t, "SELECT * FROM `users` ORDER BY `id`", query)
+	require.Empty(t, args)
 }
 
 func TestSelector_SelectExpr(t *testing.T) {
@@ -1743,7 +1759,69 @@ func TestSelector_Union(t *testing.T) {
 		Query()
 	require.Equal(t, `SELECT * FROM "users" WHERE "active" UNION SELECT * FROM "old_users1" WHERE "is_active" AND "age" > $1 UNION ALL SELECT * FROM "old_users2" WHERE "is_active" = $2 AND "age" < $3`, query)
 	require.Equal(t, []any{20, "true", 18}, args)
+}
 
+func TestSelector_Except(t *testing.T) {
+	query, args := Dialect(dialect.Postgres).
+		Select("*").
+		From(Table("users")).
+		Where(EQ("active", true)).
+		Except(
+			Select("*").
+				From(Table("old_users1")).
+				Where(
+					And(
+						EQ("is_active", true),
+						GT("age", 20),
+					),
+				),
+		).
+		ExceptAll(
+			Select("*").
+				From(Table("old_users2")).
+				Where(
+					And(
+						EQ("is_active", "true"),
+						LT("age", 18),
+					),
+				),
+		).
+		Query()
+	require.Equal(t, `SELECT * FROM "users" WHERE "active" EXCEPT SELECT * FROM "old_users1" WHERE "is_active" AND "age" > $1 EXCEPT ALL SELECT * FROM "old_users2" WHERE "is_active" = $2 AND "age" < $3`, query)
+	require.Equal(t, []any{20, "true", 18}, args)
+}
+
+func TestSelector_Intersect(t *testing.T) {
+	query, args := Dialect(dialect.Postgres).
+		Select("*").
+		From(Table("users")).
+		Where(EQ("active", true)).
+		Intersect(
+			Select("*").
+				From(Table("old_users1")).
+				Where(
+					And(
+						EQ("is_active", true),
+						GT("age", 20),
+					),
+				),
+		).
+		IntersectAll(
+			Select("*").
+				From(Table("old_users2")).
+				Where(
+					And(
+						EQ("is_active", "true"),
+						LT("age", 18),
+					),
+				),
+		).
+		Query()
+	require.Equal(t, `SELECT * FROM "users" WHERE "active" INTERSECT SELECT * FROM "old_users1" WHERE "is_active" AND "age" > $1 INTERSECT ALL SELECT * FROM "old_users2" WHERE "is_active" = $2 AND "age" < $3`, query)
+	require.Equal(t, []any{20, "true", 18}, args)
+}
+
+func TestSelector_SetOperatorWithRecursive(t *testing.T) {
 	t1, t2, t3 := Table("files"), Table("files"), Table("path")
 	n := Queries{
 		WithRecursive("path", "id", "name", "parent_id").
@@ -1768,7 +1846,7 @@ func TestSelector_Union(t *testing.T) {
 		Select(t3.Columns("id", "name", "parent_id")...).
 			From(t3),
 	}
-	query, args = n.Query()
+	query, args := n.Query()
 	require.Equal(t, "WITH RECURSIVE `path`(`id`, `name`, `parent_id`) AS (SELECT `files`.`id`, `files`.`name`, `files`.`parent_id` FROM `files` WHERE `files`.`parent_id` IS NULL AND NOT `files`.`deleted` UNION ALL SELECT `files`.`id`, `files`.`name`, `files`.`parent_id` FROM `files` JOIN `path` AS `t1` ON `files`.`parent_id` = `t1`.`id` WHERE NOT `files`.`deleted`) SELECT `t1`.`id`, `t1`.`name`, `t1`.`parent_id` FROM `path` AS `t1`", query)
 	require.Nil(t, args)
 }
@@ -2067,6 +2145,11 @@ func TestEscapePatterns(t *testing.T) {
 		Query()
 	require.Equal(t, "UPDATE `users` SET `name` = NULL WHERE `nickname` LIKE ? ESCAPE ? OR `nickname` LIKE ? ESCAPE ? OR `nickname` LIKE ? ESCAPE ? OR LOWER(`nickname`) LIKE ? ESCAPE ?", q)
 	require.Equal(t, []any{"\\%a8m\\%%", "\\", "%\\_alexsn\\_", "\\", "%\\\\pedro\\\\%", "\\", "%\\%abcd\\%efg%", "\\"}, args)
+
+	q, args = Select("*").From(Table("dataset")).
+		Where(Contains("title", "_第一")).Query()
+	require.Equal(t, "SELECT * FROM `dataset` WHERE `title` LIKE ?", q)
+	require.Equal(t, []any{"%\\_第一%"}, args)
 }
 
 func TestReusePredicates(t *testing.T) {
@@ -2276,4 +2359,119 @@ func TestMultipleFrom(t *testing.T) {
 		Query()
 	require.Equal(t, []any{"neutrino|(dark & matter)", 10}, args)
 	require.Equal(t, `SELECT items.*, ts_rank_cd(search, search_query) AS "rank" FROM "items", to_tsquery($1) AS search_query WHERE "value" = $2 AND search @@ search_query`, query)
+}
+
+func TestFormattedColumnFromSubQuery(t *testing.T) {
+	q := Select("*").From(Select("*").AppendSelectExprAs(P(func(b *Builder) {
+		b.SetDialect(dialect.Postgres)
+		b.WriteString("calculate_score")
+		b.Wrap(func(bb *Builder) {
+			bb.WriteString(Table("table_name").C("field_name")).Comma().Args("test")
+		})
+	}), "score").From(Table("table_name").As("table_name_alias")))
+	require.Equal(t, "`table_name_alias`.`score`", q.C("score"))
+}
+
+func TestSelector_HasJoins(t *testing.T) {
+	s := Select("*").From(Table("t1"))
+	require.False(t, s.HasJoins())
+	s.Join(Table("t2"))
+	require.True(t, s.HasJoins())
+}
+
+func TestSelector_JoinedTable(t *testing.T) {
+	s := Select("*").From(Table("t1"))
+	t2, ok := s.JoinedTable("t2")
+	require.False(t, ok)
+	require.Nil(t, t2)
+	s.Join(Table("t2").As("t2"))
+	t2, ok = s.JoinedTable("t2")
+	require.True(t, ok)
+	require.Equal(t, "`t2`.`c`", t2.C("c"))
+	s.LeftJoin(Select().From(Table("t3").As("t3")).Where(EQ("id", 1)))
+	t3, ok := s.JoinedTable("t3")
+	require.True(t, ok)
+	require.Equal(t, "`t3`.`c`", t3.C("c"))
+}
+
+func TestSelector_JoinedTableView(t *testing.T) {
+	s := Select("*").From(Table("t1"))
+	t2, ok := s.JoinedTableView("t2")
+	require.False(t, ok)
+	require.Nil(t, t2)
+	s.Join(Table("users").As("t2"))
+	t2, ok = s.JoinedTableView("t2")
+	require.True(t, ok)
+	require.Equal(t, "`t2`.`c`", t2.C("c"))
+	s.LeftJoin(Select().From(Table("pets").As("t3")).Where(EQ("id", 1)).As("t4"))
+	t3, ok := s.JoinedTableView("t3")
+	require.True(t, ok)
+	require.Equal(t, "`t3`.`c`", t3.C("c"))
+	t4, ok := s.JoinedTableView("t4")
+	require.True(t, ok)
+	require.Equal(t, "`t4`.`c`", t4.C("c"))
+}
+
+func TestSelector_Columns(t *testing.T) {
+	t.Run("MySQL", func(t *testing.T) {
+		s := Select("*").From(Table("users"))
+		require.Equal(t, []string{"`users`.`c`"}, s.Columns("c"))
+		// Already quoted.
+		require.Equal(t, []string{"`users`.`c`"}, s.Columns("`c`"))
+		t2 := Table("t2").As("t2")
+		s.Join(t2)
+		// Already quoted.
+		require.Equal(t, []string{"`t2`.`c1`"}, s.Columns(t2.C("c1")))
+		require.Equal(t, []string{"t2.c1"}, s.Columns("t2.c1"))
+	})
+	t.Run("Postgres", func(t *testing.T) {
+		b := Dialect(dialect.Postgres)
+		s := b.Select("*").From(Table("users"))
+		require.Equal(t, []string{`"users"."c"`}, s.Columns("c"))
+		// Already quoted.
+		require.Equal(t, []string{`"users"."c"`}, s.Columns(`"c"`))
+		t2 := b.Table("t2").As("t2")
+		s.Join(t2)
+		// Already quoted.
+		require.Equal(t, []string{`"t2"."c1"`}, s.Columns(t2.C("c1")))
+		require.Equal(t, []string{"t2.c1"}, s.Columns("t2.c1"))
+	})
+}
+
+func TestSelector_SelectedColumn(t *testing.T) {
+	t.Run("MySQL", func(t *testing.T) {
+		s := Select("*").From(Table("t1"))
+		require.Empty(t, s.FindSelection("c"))
+		s.Select("c")
+		require.Equal(t, []string{"c"}, s.FindSelection("c"))
+		s.Select(s.C("c"))
+		require.Equal(t, []string{"`t1`.`c`"}, s.FindSelection("c"))
+		s.AppendSelectAs(s.C("d"), "e")
+		require.Equal(t, []string{"e"}, s.FindSelection("e"))
+		require.Empty(t, s.FindSelection("d"))
+		t2 := Table("t2").As("t2")
+		s.Join(t2)
+		s.Select(t2.C("e"), "t2.e", s.C("e"), "t1.e", "e")
+		require.Equal(t, []string{"`t2`.`e`", "t2.e", "`t1`.`e`", "t1.e", "e"}, s.FindSelection("e"))
+		s.AppendSelectExprAs(ExprFunc(func(b *Builder) {
+			b.S("COUNT(").Ident("post_id").S(")")
+		}), "post_count")
+		require.Equal(t, []string{"post_count"}, s.FindSelection("post_count"))
+	})
+	t.Run("Postgres", func(t *testing.T) {
+		b := Dialect(dialect.Postgres)
+		s := b.Select("*").From(Table("t1"))
+		require.Empty(t, s.FindSelection("c"))
+		s.Select("c")
+		require.Equal(t, []string{"c"}, s.FindSelection("c"))
+		s.Select(s.C("c"))
+		require.Equal(t, []string{`"t1"."c"`}, s.FindSelection("c"))
+		s.AppendSelectAs(s.C("d"), "e")
+		require.Equal(t, []string{"e"}, s.FindSelection("e"))
+		require.Empty(t, s.FindSelection("d"))
+		t2 := b.Table("t2").As("t2")
+		s.Join(t2)
+		s.Select(t2.C("e"), "t2.e", s.C("e"), "t1.e", "e")
+		require.Equal(t, []string{`"t2"."e"`, "t2.e", `"t1"."e"`, "t1.e", "e"}, s.FindSelection("e"))
+	})
 }

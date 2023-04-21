@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	// FeaturePrivacy provides a feature-flag for the privacy extension for ent.
+	// FeaturePrivacy provides a feature-flag for the privacy extension.
 	FeaturePrivacy = Feature{
 		Name:        "privacy",
 		Stage:       Alpha,
@@ -21,7 +21,18 @@ var (
 		},
 	}
 
-	// FeatureEntQL provides a feature-flag for the EntQL extension for ent.
+	// FeatureIntercept provides a feature-flag for the interceptors' extension.
+	FeatureIntercept = Feature{
+		Name:        "intercept",
+		Stage:       Alpha,
+		Default:     false,
+		Description: "Intercept generates a helper package to make working with interceptors easier",
+		cleanup: func(c *Config) error {
+			return os.RemoveAll(filepath.Join(c.Target, "intercept"))
+		},
+	}
+
+	// FeatureEntQL provides a feature-flag for the EntQL extension.
 	FeatureEntQL = Feature{
 		Name:        "entql",
 		Stage:       Experimental,
@@ -76,7 +87,7 @@ var (
 		},
 	}
 
-	// FeatureLock provides a feature-flag for sql locking extension for ent.
+	// FeatureLock provides a feature-flag for sql locking extension.
 	FeatureLock = Feature{
 		Name:        "sql/lock",
 		Stage:       Experimental,
@@ -118,6 +129,7 @@ var (
 	// AllFeatures holds a list of all feature-flags.
 	AllFeatures = []Feature{
 		FeaturePrivacy,
+		FeatureIntercept,
 		FeatureEntQL,
 		FeatureNamedEdges,
 		FeatureSnapshot,

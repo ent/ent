@@ -1,7 +1,7 @@
 {{/* The line below tells Intellij/GoLand to enable the autocompletion based on the *gen.Graph type. */}}
 {{/* gotype: entgo.io/ent/entc/gen.Graph */}}
 
-{{/* An example privacy rule that is appeneded to the generated privacy package. For more info: https://entgo.io/docs/privacy#template-based */}}
+{{/* An example privacy rule that is appended to the generated privacy package. For more info: https://entgo.io/docs/privacy#template-based */}}
 {{ define "privacy/additional/privacy" }}
 // FilterTenantRule is a query/mutation rule that filters out entities that are not in the tenant.
 func FilterTenantRule() QueryMutationRule {
