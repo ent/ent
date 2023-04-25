@@ -49,7 +49,7 @@ func (oc *OtherCreate) Mutation() *OtherMutation {
 // Save creates the Other in the database.
 func (oc *OtherCreate) Save(ctx context.Context) (*Other, error) {
 	oc.defaults()
-	return withHooks[*Other, OtherMutation](ctx, oc.sqlSave, oc.mutation, oc.hooks)
+	return withHooks(ctx, oc.sqlSave, oc.mutation, oc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

@@ -100,7 +100,7 @@ func (isu *IntSIDUpdate) RemoveChildren(i ...*IntSID) *IntSIDUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (isu *IntSIDUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, IntSIDMutation](ctx, isu.sqlSave, isu.mutation, isu.hooks)
+	return withHooks(ctx, isu.sqlSave, isu.mutation, isu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -309,7 +309,7 @@ func (isuo *IntSIDUpdateOne) Select(field string, fields ...string) *IntSIDUpdat
 
 // Save executes the query and returns the updated IntSID entity.
 func (isuo *IntSIDUpdateOne) Save(ctx context.Context) (*IntSID, error) {
-	return withHooks[*IntSID, IntSIDMutation](ctx, isuo.sqlSave, isuo.mutation, isuo.hooks)
+	return withHooks(ctx, isuo.sqlSave, isuo.mutation, isuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

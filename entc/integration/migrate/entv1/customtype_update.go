@@ -58,7 +58,7 @@ func (ctu *CustomTypeUpdate) Mutation() *CustomTypeMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ctu *CustomTypeUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, CustomTypeMutation](ctx, ctu.sqlSave, ctu.mutation, ctu.hooks)
+	return withHooks(ctx, ctu.sqlSave, ctu.mutation, ctu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -158,7 +158,7 @@ func (ctuo *CustomTypeUpdateOne) Select(field string, fields ...string) *CustomT
 
 // Save executes the query and returns the updated CustomType entity.
 func (ctuo *CustomTypeUpdateOne) Save(ctx context.Context) (*CustomType, error) {
-	return withHooks[*CustomType, CustomTypeMutation](ctx, ctuo.sqlSave, ctuo.mutation, ctuo.hooks)
+	return withHooks(ctx, ctuo.sqlSave, ctuo.mutation, ctuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

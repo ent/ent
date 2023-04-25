@@ -111,7 +111,7 @@ func (bc *BlobCreate) Mutation() *BlobMutation {
 // Save creates the Blob in the database.
 func (bc *BlobCreate) Save(ctx context.Context) (*Blob, error) {
 	bc.defaults()
-	return withHooks[*Blob, BlobMutation](ctx, bc.sqlSave, bc.mutation, bc.hooks)
+	return withHooks(ctx, bc.sqlSave, bc.mutation, bc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

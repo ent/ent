@@ -108,7 +108,7 @@ func (uc *UserCreate) Mutation() *UserMutation {
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	uc.defaults()
-	return withHooks[*User, UserMutation](ctx, uc.sqlSave, uc.mutation, uc.hooks)
+	return withHooks(ctx, uc.sqlSave, uc.mutation, uc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

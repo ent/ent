@@ -50,7 +50,7 @@ func (miu *MixinIDUpdate) Mutation() *MixinIDMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (miu *MixinIDUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, MixinIDMutation](ctx, miu.sqlSave, miu.mutation, miu.hooks)
+	return withHooks(ctx, miu.sqlSave, miu.mutation, miu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -142,7 +142,7 @@ func (miuo *MixinIDUpdateOne) Select(field string, fields ...string) *MixinIDUpd
 
 // Save executes the query and returns the updated MixinID entity.
 func (miuo *MixinIDUpdateOne) Save(ctx context.Context) (*MixinID, error) {
-	return withHooks[*MixinID, MixinIDMutation](ctx, miuo.sqlSave, miuo.mutation, miuo.hooks)
+	return withHooks(ctx, miuo.sqlSave, miuo.mutation, miuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

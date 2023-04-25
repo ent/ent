@@ -78,7 +78,7 @@ func (afc *AttachedFileCreate) Mutation() *AttachedFileMutation {
 // Save creates the AttachedFile in the database.
 func (afc *AttachedFileCreate) Save(ctx context.Context) (*AttachedFile, error) {
 	afc.defaults()
-	return withHooks[*AttachedFile, AttachedFileMutation](ctx, afc.sqlSave, afc.mutation, afc.hooks)
+	return withHooks(ctx, afc.sqlSave, afc.mutation, afc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

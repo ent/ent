@@ -156,7 +156,7 @@ func (du *DocUpdate) RemoveRelated(d ...*Doc) *DocUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (du *DocUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, DocMutation](ctx, du.sqlSave, du.mutation, du.hooks)
+	return withHooks(ctx, du.sqlSave, du.mutation, du.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -472,7 +472,7 @@ func (duo *DocUpdateOne) Select(field string, fields ...string) *DocUpdateOne {
 
 // Save executes the query and returns the updated Doc entity.
 func (duo *DocUpdateOne) Save(ctx context.Context) (*Doc, error) {
-	return withHooks[*Doc, DocMutation](ctx, duo.sqlSave, duo.mutation, duo.hooks)
+	return withHooks(ctx, duo.sqlSave, duo.mutation, duo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

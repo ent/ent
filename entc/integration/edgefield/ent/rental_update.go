@@ -53,7 +53,7 @@ func (ru *RentalUpdate) Mutation() *RentalMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ru *RentalUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, RentalMutation](ctx, ru.sqlSave, ru.mutation, ru.hooks)
+	return withHooks(ctx, ru.sqlSave, ru.mutation, ru.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -158,7 +158,7 @@ func (ruo *RentalUpdateOne) Select(field string, fields ...string) *RentalUpdate
 
 // Save executes the query and returns the updated Rental entity.
 func (ruo *RentalUpdateOne) Save(ctx context.Context) (*Rental, error) {
-	return withHooks[*Rental, RentalMutation](ctx, ruo.sqlSave, ruo.mutation, ruo.hooks)
+	return withHooks(ctx, ruo.sqlSave, ruo.mutation, ruo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

@@ -74,7 +74,7 @@ func (gtu *GroupTagUpdate) ClearGroup() *GroupTagUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (gtu *GroupTagUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, GroupTagMutation](ctx, gtu.sqlSave, gtu.mutation, gtu.hooks)
+	return withHooks(ctx, gtu.sqlSave, gtu.mutation, gtu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -254,7 +254,7 @@ func (gtuo *GroupTagUpdateOne) Select(field string, fields ...string) *GroupTagU
 
 // Save executes the query and returns the updated GroupTag entity.
 func (gtuo *GroupTagUpdateOne) Save(ctx context.Context) (*GroupTag, error) {
-	return withHooks[*GroupTag, GroupTagMutation](ctx, gtuo.sqlSave, gtuo.mutation, gtuo.hooks)
+	return withHooks(ctx, gtuo.sqlSave, gtuo.mutation, gtuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

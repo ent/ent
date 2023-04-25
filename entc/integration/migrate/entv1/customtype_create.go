@@ -43,7 +43,7 @@ func (ctc *CustomTypeCreate) Mutation() *CustomTypeMutation {
 
 // Save creates the CustomType in the database.
 func (ctc *CustomTypeCreate) Save(ctx context.Context) (*CustomType, error) {
-	return withHooks[*CustomType, CustomTypeMutation](ctx, ctc.sqlSave, ctc.mutation, ctc.hooks)
+	return withHooks(ctx, ctc.sqlSave, ctc.mutation, ctc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

@@ -89,7 +89,7 @@ func (utu *UserTweetUpdate) ClearTweet() *UserTweetUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (utu *UserTweetUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, UserTweetMutation](ctx, utu.sqlSave, utu.mutation, utu.hooks)
+	return withHooks(ctx, utu.sqlSave, utu.mutation, utu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -286,7 +286,7 @@ func (utuo *UserTweetUpdateOne) Select(field string, fields ...string) *UserTwee
 
 // Save executes the query and returns the updated UserTweet entity.
 func (utuo *UserTweetUpdateOne) Save(ctx context.Context) (*UserTweet, error) {
-	return withHooks[*UserTweet, UserTweetMutation](ctx, utuo.sqlSave, utuo.mutation, utuo.hooks)
+	return withHooks(ctx, utuo.sqlSave, utuo.mutation, utuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

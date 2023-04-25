@@ -38,7 +38,7 @@ func (ric *RelationshipInfoCreate) Mutation() *RelationshipInfoMutation {
 
 // Save creates the RelationshipInfo in the database.
 func (ric *RelationshipInfoCreate) Save(ctx context.Context) (*RelationshipInfo, error) {
-	return withHooks[*RelationshipInfo, RelationshipInfoMutation](ctx, ric.sqlSave, ric.mutation, ric.hooks)
+	return withHooks(ctx, ric.sqlSave, ric.mutation, ric.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

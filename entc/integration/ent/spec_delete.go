@@ -31,7 +31,7 @@ func (sd *SpecDelete) Where(ps ...predicate.Spec) *SpecDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (sd *SpecDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, SpecMutation](ctx, sd.sqlExec, sd.mutation, sd.hooks)
+	return withHooks(ctx, sd.sqlExec, sd.mutation, sd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

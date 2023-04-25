@@ -39,7 +39,7 @@ func (rc *RevisionCreate) Mutation() *RevisionMutation {
 
 // Save creates the Revision in the database.
 func (rc *RevisionCreate) Save(ctx context.Context) (*Revision, error) {
-	return withHooks[*Revision, RevisionMutation](ctx, rc.sqlSave, rc.mutation, rc.hooks)
+	return withHooks(ctx, rc.sqlSave, rc.mutation, rc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

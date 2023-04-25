@@ -1350,7 +1350,7 @@ func (ftu *FieldTypeUpdate) Mutation() *FieldTypeMutation {
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	ftu.defaults()
-	return withHooks[int, FieldTypeMutation](ctx, ftu.sqlSave, ftu.mutation, ftu.hooks)
+	return withHooks(ctx, ftu.sqlSave, ftu.mutation, ftu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -3263,7 +3263,7 @@ func (ftuo *FieldTypeUpdateOne) Select(field string, fields ...string) *FieldTyp
 // Save executes the query and returns the updated FieldType entity.
 func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	ftuo.defaults()
-	return withHooks[*FieldType, FieldTypeMutation](ctx, ftuo.sqlSave, ftuo.mutation, ftuo.hooks)
+	return withHooks(ctx, ftuo.sqlSave, ftuo.mutation, ftuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

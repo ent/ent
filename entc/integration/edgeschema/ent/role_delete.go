@@ -31,7 +31,7 @@ func (rd *RoleDelete) Where(ps ...predicate.Role) *RoleDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (rd *RoleDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, RoleMutation](ctx, rd.sqlExec, rd.mutation, rd.hooks)
+	return withHooks(ctx, rd.sqlExec, rd.mutation, rd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

@@ -32,7 +32,7 @@ func (gc *GoodsCreate) Mutation() *GoodsMutation {
 
 // Save creates the Goods in the database.
 func (gc *GoodsCreate) Save(ctx context.Context) (*Goods, error) {
-	return withHooks[*Goods, GoodsMutation](ctx, gc.sqlSave, gc.mutation, gc.hooks)
+	return withHooks(ctx, gc.sqlSave, gc.mutation, gc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

@@ -31,7 +31,7 @@ func (nd *NoteDelete) Where(ps ...predicate.Note) *NoteDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (nd *NoteDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, NoteMutation](ctx, nd.sqlExec, nd.mutation, nd.hooks)
+	return withHooks(ctx, nd.sqlExec, nd.mutation, nd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

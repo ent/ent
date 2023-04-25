@@ -71,7 +71,7 @@ func (ac *AccountCreate) Mutation() *AccountMutation {
 // Save creates the Account in the database.
 func (ac *AccountCreate) Save(ctx context.Context) (*Account, error) {
 	ac.defaults()
-	return withHooks[*Account, AccountMutation](ctx, ac.sqlSave, ac.mutation, ac.hooks)
+	return withHooks(ctx, ac.sqlSave, ac.mutation, ac.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

@@ -68,7 +68,7 @@ func (lc *LicenseCreate) Mutation() *LicenseMutation {
 // Save creates the License in the database.
 func (lc *LicenseCreate) Save(ctx context.Context) (*License, error) {
 	lc.defaults()
-	return withHooks[*License, LicenseMutation](ctx, lc.sqlSave, lc.mutation, lc.hooks)
+	return withHooks(ctx, lc.sqlSave, lc.mutation, lc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

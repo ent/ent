@@ -82,7 +82,7 @@ func (au *AccountUpdate) RemoveToken(t ...*Token) *AccountUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (au *AccountUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, AccountMutation](ctx, au.sqlSave, au.mutation, au.hooks)
+	return withHooks(ctx, au.sqlSave, au.mutation, au.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -259,7 +259,7 @@ func (auo *AccountUpdateOne) Select(field string, fields ...string) *AccountUpda
 
 // Save executes the query and returns the updated Account entity.
 func (auo *AccountUpdateOne) Save(ctx context.Context) (*Account, error) {
-	return withHooks[*Account, AccountMutation](ctx, auo.sqlSave, auo.mutation, auo.hooks)
+	return withHooks(ctx, auo.sqlSave, auo.mutation, auo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

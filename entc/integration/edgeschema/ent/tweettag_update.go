@@ -89,7 +89,7 @@ func (ttu *TweetTagUpdate) ClearTweet() *TweetTagUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ttu *TweetTagUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, TweetTagMutation](ctx, ttu.sqlSave, ttu.mutation, ttu.hooks)
+	return withHooks(ctx, ttu.sqlSave, ttu.mutation, ttu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -286,7 +286,7 @@ func (ttuo *TweetTagUpdateOne) Select(field string, fields ...string) *TweetTagU
 
 // Save executes the query and returns the updated TweetTag entity.
 func (ttuo *TweetTagUpdateOne) Save(ctx context.Context) (*TweetTag, error) {
-	return withHooks[*TweetTag, TweetTagMutation](ctx, ttuo.sqlSave, ttuo.mutation, ttuo.hooks)
+	return withHooks(ctx, ttuo.sqlSave, ttuo.mutation, ttuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

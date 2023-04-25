@@ -83,7 +83,7 @@ func (fc *FriendshipCreate) Mutation() *FriendshipMutation {
 // Save creates the Friendship in the database.
 func (fc *FriendshipCreate) Save(ctx context.Context) (*Friendship, error) {
 	fc.defaults()
-	return withHooks[*Friendship, FriendshipMutation](ctx, fc.sqlSave, fc.mutation, fc.hooks)
+	return withHooks(ctx, fc.sqlSave, fc.mutation, fc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

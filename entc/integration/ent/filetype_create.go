@@ -83,7 +83,7 @@ func (ftc *FileTypeCreate) Mutation() *FileTypeMutation {
 // Save creates the FileType in the database.
 func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
 	ftc.defaults()
-	return withHooks[*FileType, FileTypeMutation](ctx, ftc.sqlSave, ftc.mutation, ftc.hooks)
+	return withHooks(ctx, ftc.sqlSave, ftc.mutation, ftc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

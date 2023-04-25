@@ -89,7 +89,7 @@ func (tlu *TweetLikeUpdate) ClearUser() *TweetLikeUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (tlu *TweetLikeUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, TweetLikeMutation](ctx, tlu.sqlSave, tlu.mutation, tlu.hooks)
+	return withHooks(ctx, tlu.sqlSave, tlu.mutation, tlu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -286,7 +286,7 @@ func (tluo *TweetLikeUpdateOne) Select(field string, fields ...string) *TweetLik
 
 // Save executes the query and returns the updated TweetLike entity.
 func (tluo *TweetLikeUpdateOne) Save(ctx context.Context) (*TweetLike, error) {
-	return withHooks[*TweetLike, TweetLikeMutation](ctx, tluo.sqlSave, tluo.mutation, tluo.hooks)
+	return withHooks(ctx, tluo.sqlSave, tluo.mutation, tluo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

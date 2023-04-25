@@ -105,7 +105,7 @@ func (mc *MetadataCreate) Mutation() *MetadataMutation {
 // Save creates the Metadata in the database.
 func (mc *MetadataCreate) Save(ctx context.Context) (*Metadata, error) {
 	mc.defaults()
-	return withHooks[*Metadata, MetadataMutation](ctx, mc.sqlSave, mc.mutation, mc.hooks)
+	return withHooks(ctx, mc.sqlSave, mc.mutation, mc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

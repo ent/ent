@@ -78,7 +78,7 @@ func (iu *InfoUpdate) ClearUser() *InfoUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (iu *InfoUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, InfoMutation](ctx, iu.sqlSave, iu.mutation, iu.hooks)
+	return withHooks(ctx, iu.sqlSave, iu.mutation, iu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -226,7 +226,7 @@ func (iuo *InfoUpdateOne) Select(field string, fields ...string) *InfoUpdateOne 
 
 // Save executes the query and returns the updated Info entity.
 func (iuo *InfoUpdateOne) Save(ctx context.Context) (*Info, error) {
-	return withHooks[*Info, InfoMutation](ctx, iuo.sqlSave, iuo.mutation, iuo.hooks)
+	return withHooks(ctx, iuo.sqlSave, iuo.mutation, iuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

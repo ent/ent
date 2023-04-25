@@ -88,7 +88,7 @@ func (bu *BlogUpdate) RemoveAdmins(u ...*User) *BlogUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (bu *BlogUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, BlogMutation](ctx, bu.sqlSave, bu.mutation, bu.hooks)
+	return withHooks(ctx, bu.sqlSave, bu.mutation, bu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -262,7 +262,7 @@ func (buo *BlogUpdateOne) Select(field string, fields ...string) *BlogUpdateOne 
 
 // Save executes the query and returns the updated Blog entity.
 func (buo *BlogUpdateOne) Save(ctx context.Context) (*Blog, error) {
-	return withHooks[*Blog, BlogMutation](ctx, buo.sqlSave, buo.mutation, buo.hooks)
+	return withHooks(ctx, buo.sqlSave, buo.mutation, buo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

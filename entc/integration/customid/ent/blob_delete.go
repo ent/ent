@@ -31,7 +31,7 @@ func (bd *BlobDelete) Where(ps ...predicate.Blob) *BlobDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (bd *BlobDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, BlobMutation](ctx, bd.sqlExec, bd.mutation, bd.hooks)
+	return withHooks(ctx, bd.sqlExec, bd.mutation, bd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

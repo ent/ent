@@ -797,7 +797,7 @@ func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	ftc.defaults()
-	return withHooks[*FieldType, FieldTypeMutation](ctx, ftc.sqlSave, ftc.mutation, ftc.hooks)
+	return withHooks(ctx, ftc.sqlSave, ftc.mutation, ftc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

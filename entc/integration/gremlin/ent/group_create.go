@@ -146,7 +146,7 @@ func (gc *GroupCreate) Mutation() *GroupMutation {
 // Save creates the Group in the database.
 func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 	gc.defaults()
-	return withHooks[*Group, GroupMutation](ctx, gc.gremlinSave, gc.mutation, gc.hooks)
+	return withHooks(ctx, gc.gremlinSave, gc.mutation, gc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

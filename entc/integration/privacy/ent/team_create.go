@@ -68,7 +68,7 @@ func (tc *TeamCreate) Mutation() *TeamMutation {
 
 // Save creates the Team in the database.
 func (tc *TeamCreate) Save(ctx context.Context) (*Team, error) {
-	return withHooks[*Team, TeamMutation](ctx, tc.sqlSave, tc.mutation, tc.hooks)
+	return withHooks(ctx, tc.sqlSave, tc.mutation, tc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

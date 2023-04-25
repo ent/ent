@@ -124,7 +124,7 @@ func (cu *CarUpdate) ClearOwner() *CarUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (cu *CarUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, CarMutation](ctx, cu.sqlSave, cu.mutation, cu.hooks)
+	return withHooks(ctx, cu.sqlSave, cu.mutation, cu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -351,7 +351,7 @@ func (cuo *CarUpdateOne) Select(field string, fields ...string) *CarUpdateOne {
 
 // Save executes the query and returns the updated Car entity.
 func (cuo *CarUpdateOne) Save(ctx context.Context) (*Car, error) {
-	return withHooks[*Car, CarMutation](ctx, cuo.sqlSave, cuo.mutation, cuo.hooks)
+	return withHooks(ctx, cuo.sqlSave, cuo.mutation, cuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

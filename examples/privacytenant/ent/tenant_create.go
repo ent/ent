@@ -36,7 +36,7 @@ func (tc *TenantCreate) Mutation() *TenantMutation {
 
 // Save creates the Tenant in the database.
 func (tc *TenantCreate) Save(ctx context.Context) (*Tenant, error) {
-	return withHooks[*Tenant, TenantMutation](ctx, tc.sqlSave, tc.mutation, tc.hooks)
+	return withHooks(ctx, tc.sqlSave, tc.mutation, tc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

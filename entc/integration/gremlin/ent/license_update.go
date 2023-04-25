@@ -45,7 +45,7 @@ func (lu *LicenseUpdate) Mutation() *LicenseMutation {
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (lu *LicenseUpdate) Save(ctx context.Context) (int, error) {
 	lu.defaults()
-	return withHooks[int, LicenseMutation](ctx, lu.gremlinSave, lu.mutation, lu.hooks)
+	return withHooks(ctx, lu.gremlinSave, lu.mutation, lu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -142,7 +142,7 @@ func (luo *LicenseUpdateOne) Select(field string, fields ...string) *LicenseUpda
 // Save executes the query and returns the updated License entity.
 func (luo *LicenseUpdateOne) Save(ctx context.Context) (*License, error) {
 	luo.defaults()
-	return withHooks[*License, LicenseMutation](ctx, luo.gremlinSave, luo.mutation, luo.hooks)
+	return withHooks(ctx, luo.gremlinSave, luo.mutation, luo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

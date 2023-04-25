@@ -72,7 +72,7 @@ func (ugc *UserGroupCreate) Mutation() *UserGroupMutation {
 // Save creates the UserGroup in the database.
 func (ugc *UserGroupCreate) Save(ctx context.Context) (*UserGroup, error) {
 	ugc.defaults()
-	return withHooks[*UserGroup, UserGroupMutation](ctx, ugc.sqlSave, ugc.mutation, ugc.hooks)
+	return withHooks(ctx, ugc.sqlSave, ugc.mutation, ugc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

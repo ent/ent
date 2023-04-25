@@ -89,7 +89,7 @@ func (ruu *RoleUserUpdate) ClearUser() *RoleUserUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ruu *RoleUserUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, RoleUserMutation](ctx, ruu.sqlSave, ruu.mutation, ruu.hooks)
+	return withHooks(ctx, ruu.sqlSave, ruu.mutation, ruu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -286,7 +286,7 @@ func (ruuo *RoleUserUpdateOne) Select(field string, fields ...string) *RoleUserU
 
 // Save executes the query and returns the updated RoleUser entity.
 func (ruuo *RoleUserUpdateOne) Save(ctx context.Context) (*RoleUser, error) {
-	return withHooks[*RoleUser, RoleUserMutation](ctx, ruuo.sqlSave, ruuo.mutation, ruuo.hooks)
+	return withHooks(ctx, ruuo.sqlSave, ruuo.mutation, ruuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

@@ -130,7 +130,7 @@ func (nu *NodeUpdate) ClearNext() *NodeUpdate {
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (nu *NodeUpdate) Save(ctx context.Context) (int, error) {
 	nu.defaults()
-	return withHooks[int, NodeMutation](ctx, nu.gremlinSave, nu.mutation, nu.hooks)
+	return withHooks(ctx, nu.gremlinSave, nu.mutation, nu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -366,7 +366,7 @@ func (nuo *NodeUpdateOne) Select(field string, fields ...string) *NodeUpdateOne 
 // Save executes the query and returns the updated Node entity.
 func (nuo *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
 	nuo.defaults()
-	return withHooks[*Node, NodeMutation](ctx, nuo.gremlinSave, nuo.mutation, nuo.hooks)
+	return withHooks(ctx, nuo.gremlinSave, nuo.mutation, nuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

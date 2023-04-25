@@ -120,7 +120,7 @@ func (nu *NoteUpdate) RemoveChildren(n ...*Note) *NoteUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (nu *NoteUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, NoteMutation](ctx, nu.sqlSave, nu.mutation, nu.hooks)
+	return withHooks(ctx, nu.sqlSave, nu.mutation, nu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -355,7 +355,7 @@ func (nuo *NoteUpdateOne) Select(field string, fields ...string) *NoteUpdateOne 
 
 // Save executes the query and returns the updated Note entity.
 func (nuo *NoteUpdateOne) Save(ctx context.Context) (*Note, error) {
-	return withHooks[*Note, NoteMutation](ctx, nuo.sqlSave, nuo.mutation, nuo.hooks)
+	return withHooks(ctx, nuo.sqlSave, nuo.mutation, nuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

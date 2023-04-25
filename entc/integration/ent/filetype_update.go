@@ -110,7 +110,7 @@ func (ftu *FileTypeUpdate) RemoveFiles(f ...*File) *FileTypeUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ftu *FileTypeUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, FileTypeMutation](ctx, ftu.sqlSave, ftu.mutation, ftu.hooks)
+	return withHooks(ctx, ftu.sqlSave, ftu.mutation, ftu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -334,7 +334,7 @@ func (ftuo *FileTypeUpdateOne) Select(field string, fields ...string) *FileTypeU
 
 // Save executes the query and returns the updated FileType entity.
 func (ftuo *FileTypeUpdateOne) Save(ctx context.Context) (*FileType, error) {
-	return withHooks[*FileType, FileTypeMutation](ctx, ftuo.sqlSave, ftuo.mutation, ftuo.hooks)
+	return withHooks(ctx, ftuo.sqlSave, ftuo.mutation, ftuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

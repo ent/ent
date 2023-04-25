@@ -126,7 +126,7 @@ func (ru *RelationshipUpdate) ClearInfo() *RelationshipUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ru *RelationshipUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, RelationshipMutation](ctx, ru.sqlSave, ru.mutation, ru.hooks)
+	return withHooks(ctx, ru.sqlSave, ru.mutation, ru.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -393,7 +393,7 @@ func (ruo *RelationshipUpdateOne) Select(field string, fields ...string) *Relati
 
 // Save executes the query and returns the updated Relationship entity.
 func (ruo *RelationshipUpdateOne) Save(ctx context.Context) (*Relationship, error) {
-	return withHooks[*Relationship, RelationshipMutation](ctx, ruo.sqlSave, ruo.mutation, ruo.hooks)
+	return withHooks(ctx, ruo.sqlSave, ruo.mutation, ruo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

@@ -190,7 +190,7 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	if err := uc.defaults(); err != nil {
 		return nil, err
 	}
-	return withHooks[*User, UserMutation](ctx, uc.sqlSave, uc.mutation, uc.hooks)
+	return withHooks(ctx, uc.sqlSave, uc.mutation, uc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

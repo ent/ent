@@ -108,7 +108,7 @@ func (evsu *ExValueScanUpdate) Mutation() *ExValueScanMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (evsu *ExValueScanUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, ExValueScanMutation](ctx, evsu.gremlinSave, evsu.mutation, evsu.hooks)
+	return withHooks(ctx, evsu.gremlinSave, evsu.mutation, evsu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -289,7 +289,7 @@ func (evsuo *ExValueScanUpdateOne) Select(field string, fields ...string) *ExVal
 
 // Save executes the query and returns the updated ExValueScan entity.
 func (evsuo *ExValueScanUpdateOne) Save(ctx context.Context) (*ExValueScan, error) {
-	return withHooks[*ExValueScan, ExValueScanMutation](ctx, evsuo.gremlinSave, evsuo.mutation, evsuo.hooks)
+	return withHooks(ctx, evsuo.gremlinSave, evsuo.mutation, evsuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

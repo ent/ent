@@ -84,7 +84,7 @@ func (evsc *ExValueScanCreate) Mutation() *ExValueScanMutation {
 
 // Save creates the ExValueScan in the database.
 func (evsc *ExValueScanCreate) Save(ctx context.Context) (*ExValueScan, error) {
-	return withHooks[*ExValueScan, ExValueScanMutation](ctx, evsc.sqlSave, evsc.mutation, evsc.hooks)
+	return withHooks(ctx, evsc.sqlSave, evsc.mutation, evsc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

@@ -52,7 +52,7 @@ func (cc *CityCreate) Mutation() *CityMutation {
 
 // Save creates the City in the database.
 func (cc *CityCreate) Save(ctx context.Context) (*City, error) {
-	return withHooks[*City, CityMutation](ctx, cc.sqlSave, cc.mutation, cc.hooks)
+	return withHooks(ctx, cc.sqlSave, cc.mutation, cc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

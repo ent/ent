@@ -133,7 +133,7 @@ func (cc *CardCreate) Mutation() *CardMutation {
 // Save creates the Card in the database.
 func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 	cc.defaults()
-	return withHooks[*Card, CardMutation](ctx, cc.gremlinSave, cc.mutation, cc.hooks)
+	return withHooks(ctx, cc.gremlinSave, cc.mutation, cc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

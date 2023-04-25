@@ -73,7 +73,7 @@ func (isc *IntSIDCreate) Mutation() *IntSIDMutation {
 
 // Save creates the IntSID in the database.
 func (isc *IntSIDCreate) Save(ctx context.Context) (*IntSID, error) {
-	return withHooks[*IntSID, IntSIDMutation](ctx, isc.sqlSave, isc.mutation, isc.hooks)
+	return withHooks(ctx, isc.sqlSave, isc.mutation, isc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

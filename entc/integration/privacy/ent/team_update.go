@@ -118,7 +118,7 @@ func (tu *TeamUpdate) RemoveUsers(u ...*User) *TeamUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (tu *TeamUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, TeamMutation](ctx, tu.sqlSave, tu.mutation, tu.hooks)
+	return withHooks(ctx, tu.sqlSave, tu.mutation, tu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -376,7 +376,7 @@ func (tuo *TeamUpdateOne) Select(field string, fields ...string) *TeamUpdateOne 
 
 // Save executes the query and returns the updated Team entity.
 func (tuo *TeamUpdateOne) Save(ctx context.Context) (*Team, error) {
-	return withHooks[*Team, TeamMutation](ctx, tuo.sqlSave, tuo.mutation, tuo.hooks)
+	return withHooks(ctx, tuo.sqlSave, tuo.mutation, tuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

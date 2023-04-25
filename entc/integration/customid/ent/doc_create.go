@@ -112,7 +112,7 @@ func (dc *DocCreate) Mutation() *DocMutation {
 // Save creates the Doc in the database.
 func (dc *DocCreate) Save(ctx context.Context) (*Doc, error) {
 	dc.defaults()
-	return withHooks[*Doc, DocMutation](ctx, dc.sqlSave, dc.mutation, dc.hooks)
+	return withHooks(ctx, dc.sqlSave, dc.mutation, dc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

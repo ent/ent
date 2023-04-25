@@ -31,7 +31,7 @@ func (mid *MixinIDDelete) Where(ps ...predicate.MixinID) *MixinIDDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (mid *MixinIDDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, MixinIDMutation](ctx, mid.sqlExec, mid.mutation, mid.hooks)
+	return withHooks(ctx, mid.sqlExec, mid.mutation, mid.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

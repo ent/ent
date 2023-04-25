@@ -76,7 +76,7 @@ func (su *SpecUpdate) RemoveCard(c ...*Card) *SpecUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (su *SpecUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, SpecMutation](ctx, su.sqlSave, su.mutation, su.hooks)
+	return withHooks(ctx, su.sqlSave, su.mutation, su.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -239,7 +239,7 @@ func (suo *SpecUpdateOne) Select(field string, fields ...string) *SpecUpdateOne 
 
 // Save executes the query and returns the updated Spec entity.
 func (suo *SpecUpdateOne) Save(ctx context.Context) (*Spec, error) {
-	return withHooks[*Spec, SpecMutation](ctx, suo.sqlSave, suo.mutation, suo.hooks)
+	return withHooks(ctx, suo.sqlSave, suo.mutation, suo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

@@ -72,7 +72,7 @@ func (utc *UserTweetCreate) Mutation() *UserTweetMutation {
 // Save creates the UserTweet in the database.
 func (utc *UserTweetCreate) Save(ctx context.Context) (*UserTweet, error) {
 	utc.defaults()
-	return withHooks[*UserTweet, UserTweetMutation](ctx, utc.sqlSave, utc.mutation, utc.hooks)
+	return withHooks(ctx, utc.sqlSave, utc.mutation, utc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

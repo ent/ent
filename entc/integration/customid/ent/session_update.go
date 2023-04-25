@@ -65,7 +65,7 @@ func (su *SessionUpdate) ClearDevice() *SessionUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (su *SessionUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, SessionMutation](ctx, su.sqlSave, su.mutation, su.hooks)
+	return withHooks(ctx, su.sqlSave, su.mutation, su.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -193,7 +193,7 @@ func (suo *SessionUpdateOne) Select(field string, fields ...string) *SessionUpda
 
 // Save executes the query and returns the updated Session entity.
 func (suo *SessionUpdateOne) Save(ctx context.Context) (*Session, error) {
-	return withHooks[*Session, SessionMutation](ctx, suo.sqlSave, suo.mutation, suo.hooks)
+	return withHooks(ctx, suo.sqlSave, suo.mutation, suo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

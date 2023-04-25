@@ -31,7 +31,7 @@ func (pd *ProcessDelete) Where(ps ...predicate.Process) *ProcessDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (pd *ProcessDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, ProcessMutation](ctx, pd.sqlExec, pd.mutation, pd.hooks)
+	return withHooks(ctx, pd.sqlExec, pd.mutation, pd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

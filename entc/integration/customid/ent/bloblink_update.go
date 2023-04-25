@@ -89,7 +89,7 @@ func (blu *BlobLinkUpdate) ClearLink() *BlobLinkUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (blu *BlobLinkUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, BlobLinkMutation](ctx, blu.sqlSave, blu.mutation, blu.hooks)
+	return withHooks(ctx, blu.sqlSave, blu.mutation, blu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -286,7 +286,7 @@ func (bluo *BlobLinkUpdateOne) Select(field string, fields ...string) *BlobLinkU
 
 // Save executes the query and returns the updated BlobLink entity.
 func (bluo *BlobLinkUpdateOne) Save(ctx context.Context) (*BlobLink, error) {
-	return withHooks[*BlobLink, BlobLinkMutation](ctx, bluo.sqlSave, bluo.mutation, bluo.hooks)
+	return withHooks(ctx, bluo.sqlSave, bluo.mutation, bluo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

@@ -67,7 +67,7 @@ func (tc *TokenCreate) Mutation() *TokenMutation {
 // Save creates the Token in the database.
 func (tc *TokenCreate) Save(ctx context.Context) (*Token, error) {
 	tc.defaults()
-	return withHooks[*Token, TokenMutation](ctx, tc.sqlSave, tc.mutation, tc.hooks)
+	return withHooks(ctx, tc.sqlSave, tc.mutation, tc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

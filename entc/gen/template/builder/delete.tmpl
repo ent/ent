@@ -36,7 +36,7 @@ func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func ({{ $receiver }} *{{ $builder }}) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, {{ $.MutationName }}](ctx, {{ $receiver }}.{{ $.Storage }}Exec, {{ $mutation }}, {{ $receiver }}.hooks)
+	return withHooks(ctx, {{ $receiver }}.{{ $.Storage }}Exec, {{ $mutation }}, {{ $receiver }}.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

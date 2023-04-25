@@ -51,7 +51,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (int, error) {
 			{{ $receiver }}.defaults()
 		{{- end }}
 	{{- end }}
-	return withHooks[int, {{ $.MutationName }}](ctx, {{ $receiver }}.{{ $.Storage }}Save, {{ $mutation }}, {{ $receiver }}.hooks)
+	return withHooks(ctx, {{ $receiver }}.{{ $.Storage }}Save, {{ $mutation }}, {{ $receiver }}.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -129,7 +129,7 @@ func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name
 			{{ $receiver }}.defaults()
 		{{- end }}
 	{{- end }}
-	return withHooks[*{{ $.Name }}, {{ $.MutationName }}](ctx, {{ $receiver }}.{{ $.Storage }}Save, {{ $mutation }}, {{ $receiver }}.hooks)
+	return withHooks(ctx, {{ $receiver }}.{{ $.Storage }}Save, {{ $mutation }}, {{ $receiver }}.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

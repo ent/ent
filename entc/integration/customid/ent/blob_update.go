@@ -135,7 +135,7 @@ func (bu *BlobUpdate) RemoveLinks(b ...*Blob) *BlobUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (bu *BlobUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, BlobMutation](ctx, bu.sqlSave, bu.mutation, bu.hooks)
+	return withHooks(ctx, bu.sqlSave, bu.mutation, bu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -400,7 +400,7 @@ func (buo *BlobUpdateOne) Select(field string, fields ...string) *BlobUpdateOne 
 
 // Save executes the query and returns the updated Blob entity.
 func (buo *BlobUpdateOne) Save(ctx context.Context) (*Blob, error) {
-	return withHooks[*Blob, BlobMutation](ctx, buo.sqlSave, buo.mutation, buo.hooks)
+	return withHooks(ctx, buo.sqlSave, buo.mutation, buo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

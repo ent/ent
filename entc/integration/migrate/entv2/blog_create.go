@@ -59,7 +59,7 @@ func (bc *BlogCreate) Mutation() *BlogMutation {
 
 // Save creates the Blog in the database.
 func (bc *BlogCreate) Save(ctx context.Context) (*Blog, error) {
-	return withHooks[*Blog, BlogMutation](ctx, bc.sqlSave, bc.mutation, bc.hooks)
+	return withHooks(ctx, bc.sqlSave, bc.mutation, bc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

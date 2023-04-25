@@ -98,7 +98,7 @@ func (mu *MediaUpdate) Mutation() *MediaMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (mu *MediaUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, MediaMutation](ctx, mu.sqlSave, mu.mutation, mu.hooks)
+	return withHooks(ctx, mu.sqlSave, mu.mutation, mu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -250,7 +250,7 @@ func (muo *MediaUpdateOne) Select(field string, fields ...string) *MediaUpdateOn
 
 // Save executes the query and returns the updated Media entity.
 func (muo *MediaUpdateOne) Save(ctx context.Context) (*Media, error) {
-	return withHooks[*Media, MediaMutation](ctx, muo.sqlSave, muo.mutation, muo.hooks)
+	return withHooks(ctx, muo.sqlSave, muo.mutation, muo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

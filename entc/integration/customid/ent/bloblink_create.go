@@ -72,7 +72,7 @@ func (blc *BlobLinkCreate) Mutation() *BlobLinkMutation {
 // Save creates the BlobLink in the database.
 func (blc *BlobLinkCreate) Save(ctx context.Context) (*BlobLink, error) {
 	blc.defaults()
-	return withHooks[*BlobLink, BlobLinkMutation](ctx, blc.sqlSave, blc.mutation, blc.hooks)
+	return withHooks(ctx, blc.sqlSave, blc.mutation, blc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

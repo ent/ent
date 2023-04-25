@@ -31,7 +31,7 @@ func (sd *SessionDelete) Where(ps ...predicate.Session) *SessionDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (sd *SessionDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, SessionMutation](ctx, sd.sqlExec, sd.mutation, sd.hooks)
+	return withHooks(ctx, sd.sqlExec, sd.mutation, sd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

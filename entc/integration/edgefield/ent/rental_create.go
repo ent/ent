@@ -71,7 +71,7 @@ func (rc *RentalCreate) Mutation() *RentalMutation {
 // Save creates the Rental in the database.
 func (rc *RentalCreate) Save(ctx context.Context) (*Rental, error) {
 	rc.defaults()
-	return withHooks[*Rental, RentalMutation](ctx, rc.sqlSave, rc.mutation, rc.hooks)
+	return withHooks(ctx, rc.sqlSave, rc.mutation, rc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
