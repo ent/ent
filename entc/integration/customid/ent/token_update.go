@@ -63,7 +63,7 @@ func (tu *TokenUpdate) ClearAccount() *TokenUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (tu *TokenUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, TokenMutation](ctx, tu.sqlSave, tu.mutation, tu.hooks)
+	return withHooks(ctx, tu.sqlSave, tu.mutation, tu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -208,7 +208,7 @@ func (tuo *TokenUpdateOne) Select(field string, fields ...string) *TokenUpdateOn
 
 // Save executes the query and returns the updated Token entity.
 func (tuo *TokenUpdateOne) Save(ctx context.Context) (*Token, error) {
-	return withHooks[*Token, TokenMutation](ctx, tuo.sqlSave, tuo.mutation, tuo.hooks)
+	return withHooks(ctx, tuo.sqlSave, tuo.mutation, tuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

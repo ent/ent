@@ -97,7 +97,7 @@ func (nc *NoteCreate) Mutation() *NoteMutation {
 // Save creates the Note in the database.
 func (nc *NoteCreate) Save(ctx context.Context) (*Note, error) {
 	nc.defaults()
-	return withHooks[*Note, NoteMutation](ctx, nc.sqlSave, nc.mutation, nc.hooks)
+	return withHooks(ctx, nc.sqlSave, nc.mutation, nc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

@@ -38,7 +38,7 @@ func (ou *OtherUpdate) Mutation() *OtherMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ou *OtherUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, OtherMutation](ctx, ou.sqlSave, ou.mutation, ou.hooks)
+	return withHooks(ctx, ou.sqlSave, ou.mutation, ou.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -112,7 +112,7 @@ func (ouo *OtherUpdateOne) Select(field string, fields ...string) *OtherUpdateOn
 
 // Save executes the query and returns the updated Other entity.
 func (ouo *OtherUpdateOne) Save(ctx context.Context) (*Other, error) {
-	return withHooks[*Other, OtherMutation](ctx, ouo.sqlSave, ouo.mutation, ouo.hooks)
+	return withHooks(ctx, ouo.sqlSave, ouo.mutation, ouo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

@@ -118,7 +118,7 @@ func (tc *TaskCreate) Save(ctx context.Context) (*Task, error) {
 	if err := tc.defaults(); err != nil {
 		return nil, err
 	}
-	return withHooks[*Task, TaskMutation](ctx, tc.sqlSave, tc.mutation, tc.hooks)
+	return withHooks(ctx, tc.sqlSave, tc.mutation, tc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

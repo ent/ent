@@ -32,7 +32,7 @@ func (cd *CommentDelete) Where(ps ...predicate.Comment) *CommentDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (cd *CommentDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, CommentMutation](ctx, cd.gremlinExec, cd.mutation, cd.hooks)
+	return withHooks(ctx, cd.gremlinExec, cd.mutation, cd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

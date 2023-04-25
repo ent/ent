@@ -45,7 +45,7 @@ func (lu *LinkUpdate) Mutation() *LinkMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (lu *LinkUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, LinkMutation](ctx, lu.sqlSave, lu.mutation, lu.hooks)
+	return withHooks(ctx, lu.sqlSave, lu.mutation, lu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -128,7 +128,7 @@ func (luo *LinkUpdateOne) Select(field string, fields ...string) *LinkUpdateOne 
 
 // Save executes the query and returns the updated Link entity.
 func (luo *LinkUpdateOne) Save(ctx context.Context) (*Link, error) {
-	return withHooks[*Link, LinkMutation](ctx, luo.sqlSave, luo.mutation, luo.hooks)
+	return withHooks(ctx, luo.sqlSave, luo.mutation, luo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

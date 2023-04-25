@@ -69,7 +69,7 @@ func (gic *GroupInfoCreate) Mutation() *GroupInfoMutation {
 // Save creates the GroupInfo in the database.
 func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
 	gic.defaults()
-	return withHooks[*GroupInfo, GroupInfoMutation](ctx, gic.gremlinSave, gic.mutation, gic.hooks)
+	return withHooks(ctx, gic.gremlinSave, gic.mutation, gic.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

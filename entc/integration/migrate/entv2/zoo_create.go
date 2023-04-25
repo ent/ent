@@ -35,7 +35,7 @@ func (zc *ZooCreate) Mutation() *ZooMutation {
 
 // Save creates the Zoo in the database.
 func (zc *ZooCreate) Save(ctx context.Context) (*Zoo, error) {
-	return withHooks[*Zoo, ZooMutation](ctx, zc.sqlSave, zc.mutation, zc.hooks)
+	return withHooks(ctx, zc.sqlSave, zc.mutation, zc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

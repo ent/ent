@@ -31,7 +31,7 @@ func (ad *APIDelete) Where(ps ...predicate.Api) *APIDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ad *APIDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, APIMutation](ctx, ad.sqlExec, ad.mutation, ad.hooks)
+	return withHooks(ctx, ad.sqlExec, ad.mutation, ad.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

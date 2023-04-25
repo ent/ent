@@ -60,7 +60,7 @@ func (iu *ItemUpdate) Mutation() *ItemMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (iu *ItemUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, ItemMutation](ctx, iu.gremlinSave, iu.mutation, iu.hooks)
+	return withHooks(ctx, iu.gremlinSave, iu.mutation, iu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -204,7 +204,7 @@ func (iuo *ItemUpdateOne) Select(field string, fields ...string) *ItemUpdateOne 
 
 // Save executes the query and returns the updated Item entity.
 func (iuo *ItemUpdateOne) Save(ctx context.Context) (*Item, error) {
-	return withHooks[*Item, ItemMutation](ctx, iuo.gremlinSave, iuo.mutation, iuo.hooks)
+	return withHooks(ctx, iuo.gremlinSave, iuo.mutation, iuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

@@ -75,7 +75,7 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 	if err := gc.defaults(); err != nil {
 		return nil, err
 	}
-	return withHooks[*Group, GroupMutation](ctx, gc.sqlSave, gc.mutation, gc.hooks)
+	return withHooks(ctx, gc.sqlSave, gc.mutation, gc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

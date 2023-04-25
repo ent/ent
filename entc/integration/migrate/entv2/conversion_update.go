@@ -218,7 +218,7 @@ func (cu *ConversionUpdate) Mutation() *ConversionMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (cu *ConversionUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, ConversionMutation](ctx, cu.sqlSave, cu.mutation, cu.hooks)
+	return withHooks(ctx, cu.sqlSave, cu.mutation, cu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -526,7 +526,7 @@ func (cuo *ConversionUpdateOne) Select(field string, fields ...string) *Conversi
 
 // Save executes the query and returns the updated Conversion entity.
 func (cuo *ConversionUpdateOne) Save(ctx context.Context) (*Conversion, error) {
-	return withHooks[*Conversion, ConversionMutation](ctx, cuo.sqlSave, cuo.mutation, cuo.hooks)
+	return withHooks(ctx, cuo.sqlSave, cuo.mutation, cuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

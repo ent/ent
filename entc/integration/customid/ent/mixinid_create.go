@@ -61,7 +61,7 @@ func (mic *MixinIDCreate) Mutation() *MixinIDMutation {
 // Save creates the MixinID in the database.
 func (mic *MixinIDCreate) Save(ctx context.Context) (*MixinID, error) {
 	mic.defaults()
-	return withHooks[*MixinID, MixinIDMutation](ctx, mic.sqlSave, mic.mutation, mic.hooks)
+	return withHooks(ctx, mic.sqlSave, mic.mutation, mic.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

@@ -240,7 +240,7 @@ func (gu *GroupUpdate) ClearInfo() *GroupUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, GroupMutation](ctx, gu.gremlinSave, gu.mutation, gu.hooks)
+	return withHooks(ctx, gu.gremlinSave, gu.mutation, gu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -625,7 +625,7 @@ func (guo *GroupUpdateOne) Select(field string, fields ...string) *GroupUpdateOn
 
 // Save executes the query and returns the updated Group entity.
 func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
-	return withHooks[*Group, GroupMutation](ctx, guo.gremlinSave, guo.mutation, guo.hooks)
+	return withHooks(ctx, guo.gremlinSave, guo.mutation, guo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

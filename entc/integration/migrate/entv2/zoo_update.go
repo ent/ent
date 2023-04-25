@@ -38,7 +38,7 @@ func (zu *ZooUpdate) Mutation() *ZooMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (zu *ZooUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, ZooMutation](ctx, zu.sqlSave, zu.mutation, zu.hooks)
+	return withHooks(ctx, zu.sqlSave, zu.mutation, zu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -112,7 +112,7 @@ func (zuo *ZooUpdateOne) Select(field string, fields ...string) *ZooUpdateOne {
 
 // Save executes the query and returns the updated Zoo entity.
 func (zuo *ZooUpdateOne) Save(ctx context.Context) (*Zoo, error) {
-	return withHooks[*Zoo, ZooMutation](ctx, zuo.sqlSave, zuo.mutation, zuo.hooks)
+	return withHooks(ctx, zuo.sqlSave, zuo.mutation, zuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

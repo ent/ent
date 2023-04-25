@@ -88,7 +88,7 @@ func (ttc *TweetTagCreate) Mutation() *TweetTagMutation {
 // Save creates the TweetTag in the database.
 func (ttc *TweetTagCreate) Save(ctx context.Context) (*TweetTag, error) {
 	ttc.defaults()
-	return withHooks[*TweetTag, TweetTagMutation](ctx, ttc.sqlSave, ttc.mutation, ttc.hooks)
+	return withHooks(ctx, ttc.sqlSave, ttc.mutation, ttc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

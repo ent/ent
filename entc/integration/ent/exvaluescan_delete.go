@@ -31,7 +31,7 @@ func (evsd *ExValueScanDelete) Where(ps ...predicate.ExValueScan) *ExValueScanDe
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (evsd *ExValueScanDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, ExValueScanMutation](ctx, evsd.sqlExec, evsd.mutation, evsd.hooks)
+	return withHooks(ctx, evsd.sqlExec, evsd.mutation, evsd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

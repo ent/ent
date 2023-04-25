@@ -31,7 +31,7 @@ func (ftd *FieldTypeDelete) Where(ps ...predicate.FieldType) *FieldTypeDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ftd *FieldTypeDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, FieldTypeMutation](ctx, ftd.sqlExec, ftd.mutation, ftd.hooks)
+	return withHooks(ctx, ftd.sqlExec, ftd.mutation, ftd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

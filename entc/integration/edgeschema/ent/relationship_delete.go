@@ -30,7 +30,7 @@ func (rd *RelationshipDelete) Where(ps ...predicate.Relationship) *RelationshipD
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (rd *RelationshipDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, RelationshipMutation](ctx, rd.sqlExec, rd.mutation, rd.hooks)
+	return withHooks(ctx, rd.sqlExec, rd.mutation, rd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

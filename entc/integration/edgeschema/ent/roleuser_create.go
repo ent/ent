@@ -72,7 +72,7 @@ func (ruc *RoleUserCreate) Mutation() *RoleUserMutation {
 // Save creates the RoleUser in the database.
 func (ruc *RoleUserCreate) Save(ctx context.Context) (*RoleUser, error) {
 	ruc.defaults()
-	return withHooks[*RoleUser, RoleUserMutation](ctx, ruc.sqlSave, ruc.mutation, ruc.hooks)
+	return withHooks(ctx, ruc.sqlSave, ruc.mutation, ruc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

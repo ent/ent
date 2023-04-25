@@ -31,7 +31,7 @@ func (td *TagDelete) Where(ps ...predicate.Tag) *TagDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (td *TagDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, TagMutation](ctx, td.sqlExec, td.mutation, td.hooks)
+	return withHooks(ctx, td.sqlExec, td.mutation, td.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

@@ -155,7 +155,7 @@ func (cc *ConversionCreate) Mutation() *ConversionMutation {
 
 // Save creates the Conversion in the database.
 func (cc *ConversionCreate) Save(ctx context.Context) (*Conversion, error) {
-	return withHooks[*Conversion, ConversionMutation](ctx, cc.sqlSave, cc.mutation, cc.hooks)
+	return withHooks(ctx, cc.sqlSave, cc.mutation, cc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

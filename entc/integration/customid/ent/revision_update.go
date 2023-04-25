@@ -38,7 +38,7 @@ func (ru *RevisionUpdate) Mutation() *RevisionMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ru *RevisionUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, RevisionMutation](ctx, ru.sqlSave, ru.mutation, ru.hooks)
+	return withHooks(ctx, ru.sqlSave, ru.mutation, ru.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -112,7 +112,7 @@ func (ruo *RevisionUpdateOne) Select(field string, fields ...string) *RevisionUp
 
 // Save executes the query and returns the updated Revision entity.
 func (ruo *RevisionUpdateOne) Save(ctx context.Context) (*Revision, error) {
-	return withHooks[*Revision, RevisionMutation](ctx, ruo.sqlSave, ruo.mutation, ruo.hooks)
+	return withHooks(ctx, ruo.sqlSave, ruo.mutation, ruo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

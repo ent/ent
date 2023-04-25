@@ -64,7 +64,7 @@ func (pc *ProcessCreate) Mutation() *ProcessMutation {
 
 // Save creates the Process in the database.
 func (pc *ProcessCreate) Save(ctx context.Context) (*Process, error) {
-	return withHooks[*Process, ProcessMutation](ctx, pc.sqlSave, pc.mutation, pc.hooks)
+	return withHooks(ctx, pc.sqlSave, pc.mutation, pc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

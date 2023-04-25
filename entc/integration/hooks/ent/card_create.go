@@ -116,7 +116,7 @@ func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 	if err := cc.defaults(); err != nil {
 		return nil, err
 	}
-	return withHooks[*Card, CardMutation](ctx, cc.sqlSave, cc.mutation, cc.hooks)
+	return withHooks(ctx, cc.sqlSave, cc.mutation, cc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

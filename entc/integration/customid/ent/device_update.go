@@ -101,7 +101,7 @@ func (du *DeviceUpdate) RemoveSessions(s ...*Session) *DeviceUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (du *DeviceUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, DeviceMutation](ctx, du.sqlSave, du.mutation, du.hooks)
+	return withHooks(ctx, du.sqlSave, du.mutation, du.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -310,7 +310,7 @@ func (duo *DeviceUpdateOne) Select(field string, fields ...string) *DeviceUpdate
 
 // Save executes the query and returns the updated Device entity.
 func (duo *DeviceUpdateOne) Save(ctx context.Context) (*Device, error) {
-	return withHooks[*Device, DeviceMutation](ctx, duo.sqlSave, duo.mutation, duo.hooks)
+	return withHooks(ctx, duo.sqlSave, duo.mutation, duo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

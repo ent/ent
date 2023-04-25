@@ -74,7 +74,7 @@ func (tlc *TweetLikeCreate) Save(ctx context.Context) (*TweetLike, error) {
 	if err := tlc.defaults(); err != nil {
 		return nil, err
 	}
-	return withHooks[*TweetLike, TweetLikeMutation](ctx, tlc.sqlSave, tlc.mutation, tlc.hooks)
+	return withHooks(ctx, tlc.sqlSave, tlc.mutation, tlc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

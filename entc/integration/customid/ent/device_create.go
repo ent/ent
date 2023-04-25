@@ -84,7 +84,7 @@ func (dc *DeviceCreate) Mutation() *DeviceMutation {
 // Save creates the Device in the database.
 func (dc *DeviceCreate) Save(ctx context.Context) (*Device, error) {
 	dc.defaults()
-	return withHooks[*Device, DeviceMutation](ctx, dc.sqlSave, dc.mutation, dc.hooks)
+	return withHooks(ctx, dc.sqlSave, dc.mutation, dc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

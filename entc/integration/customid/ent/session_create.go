@@ -69,7 +69,7 @@ func (sc *SessionCreate) Mutation() *SessionMutation {
 // Save creates the Session in the database.
 func (sc *SessionCreate) Save(ctx context.Context) (*Session, error) {
 	sc.defaults()
-	return withHooks[*Session, SessionMutation](ctx, sc.sqlSave, sc.mutation, sc.hooks)
+	return withHooks(ctx, sc.sqlSave, sc.mutation, sc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

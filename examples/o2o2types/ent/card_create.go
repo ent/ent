@@ -55,7 +55,7 @@ func (cc *CardCreate) Mutation() *CardMutation {
 
 // Save creates the Card in the database.
 func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
-	return withHooks[*Card, CardMutation](ctx, cc.sqlSave, cc.mutation, cc.hooks)
+	return withHooks(ctx, cc.sqlSave, cc.mutation, cc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

@@ -44,7 +44,7 @@ func (riu *RelationshipInfoUpdate) Mutation() *RelationshipInfoMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (riu *RelationshipInfoUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, RelationshipInfoMutation](ctx, riu.sqlSave, riu.mutation, riu.hooks)
+	return withHooks(ctx, riu.sqlSave, riu.mutation, riu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -127,7 +127,7 @@ func (riuo *RelationshipInfoUpdateOne) Select(field string, fields ...string) *R
 
 // Save executes the query and returns the updated RelationshipInfo entity.
 func (riuo *RelationshipInfoUpdateOne) Save(ctx context.Context) (*RelationshipInfo, error) {
-	return withHooks[*RelationshipInfo, RelationshipInfoMutation](ctx, riuo.sqlSave, riuo.mutation, riuo.hooks)
+	return withHooks(ctx, riuo.sqlSave, riuo.mutation, riuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

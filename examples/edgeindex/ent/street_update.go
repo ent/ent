@@ -70,7 +70,7 @@ func (su *StreetUpdate) ClearCity() *StreetUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (su *StreetUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, StreetMutation](ctx, su.sqlSave, su.mutation, su.hooks)
+	return withHooks(ctx, su.sqlSave, su.mutation, su.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -207,7 +207,7 @@ func (suo *StreetUpdateOne) Select(field string, fields ...string) *StreetUpdate
 
 // Save executes the query and returns the updated Street entity.
 func (suo *StreetUpdateOne) Save(ctx context.Context) (*Street, error) {
-	return withHooks[*Street, StreetMutation](ctx, suo.sqlSave, suo.mutation, suo.hooks)
+	return withHooks(ctx, suo.sqlSave, suo.mutation, suo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

@@ -154,7 +154,7 @@ func (cu *CommentUpdate) Mutation() *CommentMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (cu *CommentUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, CommentMutation](ctx, cu.gremlinSave, cu.mutation, cu.hooks)
+	return withHooks(ctx, cu.gremlinSave, cu.mutation, cu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -425,7 +425,7 @@ func (cuo *CommentUpdateOne) Select(field string, fields ...string) *CommentUpda
 
 // Save executes the query and returns the updated Comment entity.
 func (cuo *CommentUpdateOne) Save(ctx context.Context) (*Comment, error) {
-	return withHooks[*Comment, CommentMutation](ctx, cuo.gremlinSave, cuo.mutation, cuo.hooks)
+	return withHooks(ctx, cuo.gremlinSave, cuo.mutation, cuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

@@ -56,7 +56,7 @@ func (gtc *GroupTagCreate) Mutation() *GroupTagMutation {
 
 // Save creates the GroupTag in the database.
 func (gtc *GroupTagCreate) Save(ctx context.Context) (*GroupTag, error) {
-	return withHooks[*GroupTag, GroupTagMutation](ctx, gtc.sqlSave, gtc.mutation, gtc.hooks)
+	return withHooks(ctx, gtc.sqlSave, gtc.mutation, gtc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

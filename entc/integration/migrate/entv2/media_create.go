@@ -71,7 +71,7 @@ func (mc *MediaCreate) Mutation() *MediaMutation {
 
 // Save creates the Media in the database.
 func (mc *MediaCreate) Save(ctx context.Context) (*Media, error) {
-	return withHooks[*Media, MediaMutation](ctx, mc.sqlSave, mc.mutation, mc.hooks)
+	return withHooks(ctx, mc.sqlSave, mc.mutation, mc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

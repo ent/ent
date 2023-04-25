@@ -56,7 +56,7 @@ func (sc *StreetCreate) Mutation() *StreetMutation {
 
 // Save creates the Street in the database.
 func (sc *StreetCreate) Save(ctx context.Context) (*Street, error) {
-	return withHooks[*Street, StreetMutation](ctx, sc.sqlSave, sc.mutation, sc.hooks)
+	return withHooks(ctx, sc.sqlSave, sc.mutation, sc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

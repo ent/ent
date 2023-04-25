@@ -103,7 +103,7 @@ func (giu *GroupInfoUpdate) RemoveGroups(g ...*Group) *GroupInfoUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (giu *GroupInfoUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, GroupInfoMutation](ctx, giu.sqlSave, giu.mutation, giu.hooks)
+	return withHooks(ctx, giu.sqlSave, giu.mutation, giu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -302,7 +302,7 @@ func (giuo *GroupInfoUpdateOne) Select(field string, fields ...string) *GroupInf
 
 // Save executes the query and returns the updated GroupInfo entity.
 func (giuo *GroupInfoUpdateOne) Save(ctx context.Context) (*GroupInfo, error) {
-	return withHooks[*GroupInfo, GroupInfoMutation](ctx, giuo.sqlSave, giuo.mutation, giuo.hooks)
+	return withHooks(ctx, giuo.sqlSave, giuo.mutation, giuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

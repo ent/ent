@@ -48,7 +48,7 @@ func (sc *SpecCreate) Mutation() *SpecMutation {
 
 // Save creates the Spec in the database.
 func (sc *SpecCreate) Save(ctx context.Context) (*Spec, error) {
-	return withHooks[*Spec, SpecMutation](ctx, sc.sqlSave, sc.mutation, sc.hooks)
+	return withHooks(ctx, sc.sqlSave, sc.mutation, sc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

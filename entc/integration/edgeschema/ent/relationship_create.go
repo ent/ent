@@ -92,7 +92,7 @@ func (rc *RelationshipCreate) Save(ctx context.Context) (*Relationship, error) {
 	if err := rc.defaults(); err != nil {
 		return nil, err
 	}
-	return withHooks[*Relationship, RelationshipMutation](ctx, rc.sqlSave, rc.mutation, rc.hooks)
+	return withHooks(ctx, rc.sqlSave, rc.mutation, rc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

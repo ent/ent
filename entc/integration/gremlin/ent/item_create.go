@@ -61,7 +61,7 @@ func (ic *ItemCreate) Mutation() *ItemMutation {
 // Save creates the Item in the database.
 func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
 	ic.defaults()
-	return withHooks[*Item, ItemMutation](ctx, ic.gremlinSave, ic.mutation, ic.hooks)
+	return withHooks(ctx, ic.gremlinSave, ic.mutation, ic.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

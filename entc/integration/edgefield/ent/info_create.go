@@ -63,7 +63,7 @@ func (ic *InfoCreate) Mutation() *InfoMutation {
 
 // Save creates the Info in the database.
 func (ic *InfoCreate) Save(ctx context.Context) (*Info, error) {
-	return withHooks[*Info, InfoMutation](ctx, ic.sqlSave, ic.mutation, ic.hooks)
+	return withHooks(ctx, ic.sqlSave, ic.mutation, ic.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

@@ -81,7 +81,7 @@ func (cu *CityUpdate) RemoveStreets(s ...*Street) *CityUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (cu *CityUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, CityMutation](ctx, cu.sqlSave, cu.mutation, cu.hooks)
+	return withHooks(ctx, cu.sqlSave, cu.mutation, cu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -245,7 +245,7 @@ func (cuo *CityUpdateOne) Select(field string, fields ...string) *CityUpdateOne 
 
 // Save executes the query and returns the updated City entity.
 func (cuo *CityUpdateOne) Save(ctx context.Context) (*City, error) {
-	return withHooks[*City, CityMutation](ctx, cuo.sqlSave, cuo.mutation, cuo.hooks)
+	return withHooks(ctx, cuo.sqlSave, cuo.mutation, cuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

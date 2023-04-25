@@ -193,7 +193,7 @@ func (tu *TagUpdate) RemoveGroupTags(g ...*GroupTag) *TagUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (tu *TagUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, TagMutation](ctx, tu.sqlSave, tu.mutation, tu.hooks)
+	return withHooks(ctx, tu.sqlSave, tu.mutation, tu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -621,7 +621,7 @@ func (tuo *TagUpdateOne) Select(field string, fields ...string) *TagUpdateOne {
 
 // Save executes the query and returns the updated Tag entity.
 func (tuo *TagUpdateOne) Save(ctx context.Context) (*Tag, error) {
-	return withHooks[*Tag, TagMutation](ctx, tuo.sqlSave, tuo.mutation, tuo.hooks)
+	return withHooks(ctx, tuo.sqlSave, tuo.mutation, tuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

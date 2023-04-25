@@ -70,7 +70,7 @@ func (nc *NodeCreate) Mutation() *NodeMutation {
 
 // Save creates the Node in the database.
 func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
-	return withHooks[*Node, NodeMutation](ctx, nc.sqlSave, nc.mutation, nc.hooks)
+	return withHooks(ctx, nc.sqlSave, nc.mutation, nc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

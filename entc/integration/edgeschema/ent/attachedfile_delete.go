@@ -31,7 +31,7 @@ func (afd *AttachedFileDelete) Where(ps ...predicate.AttachedFile) *AttachedFile
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (afd *AttachedFileDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, AttachedFileMutation](ctx, afd.sqlExec, afd.mutation, afd.hooks)
+	return withHooks(ctx, afd.sqlExec, afd.mutation, afd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

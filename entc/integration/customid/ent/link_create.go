@@ -56,7 +56,7 @@ func (lc *LinkCreate) Mutation() *LinkMutation {
 // Save creates the Link in the database.
 func (lc *LinkCreate) Save(ctx context.Context) (*Link, error) {
 	lc.defaults()
-	return withHooks[*Link, LinkMutation](ctx, lc.sqlSave, lc.mutation, lc.hooks)
+	return withHooks(ctx, lc.sqlSave, lc.mutation, lc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

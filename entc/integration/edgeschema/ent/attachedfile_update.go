@@ -95,7 +95,7 @@ func (afu *AttachedFileUpdate) ClearProc() *AttachedFileUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (afu *AttachedFileUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, AttachedFileMutation](ctx, afu.sqlSave, afu.mutation, afu.hooks)
+	return withHooks(ctx, afu.sqlSave, afu.mutation, afu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -298,7 +298,7 @@ func (afuo *AttachedFileUpdateOne) Select(field string, fields ...string) *Attac
 
 // Save executes the query and returns the updated AttachedFile entity.
 func (afuo *AttachedFileUpdateOne) Save(ctx context.Context) (*AttachedFile, error) {
-	return withHooks[*AttachedFile, AttachedFileMutation](ctx, afuo.sqlSave, afuo.mutation, afuo.hooks)
+	return withHooks(ctx, afuo.sqlSave, afuo.mutation, afuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

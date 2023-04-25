@@ -32,7 +32,7 @@ func (ftd *FileTypeDelete) Where(ps ...predicate.FileType) *FileTypeDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ftd *FileTypeDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, FileTypeMutation](ctx, ftd.gremlinExec, ftd.mutation, ftd.hooks)
+	return withHooks(ctx, ftd.gremlinExec, ftd.mutation, ftd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

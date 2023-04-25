@@ -112,7 +112,7 @@ func (pu *ProcessUpdate) RemoveAttachedFiles(a ...*AttachedFile) *ProcessUpdate 
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (pu *ProcessUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, ProcessMutation](ctx, pu.sqlSave, pu.mutation, pu.hooks)
+	return withHooks(ctx, pu.sqlSave, pu.mutation, pu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -360,7 +360,7 @@ func (puo *ProcessUpdateOne) Select(field string, fields ...string) *ProcessUpda
 
 // Save executes the query and returns the updated Process entity.
 func (puo *ProcessUpdateOne) Save(ctx context.Context) (*Process, error) {
-	return withHooks[*Process, ProcessMutation](ctx, puo.sqlSave, puo.mutation, puo.hooks)
+	return withHooks(ctx, puo.sqlSave, puo.mutation, puo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

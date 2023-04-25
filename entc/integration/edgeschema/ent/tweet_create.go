@@ -118,7 +118,7 @@ func (tc *TweetCreate) Mutation() *TweetMutation {
 
 // Save creates the Tweet in the database.
 func (tc *TweetCreate) Save(ctx context.Context) (*Tweet, error) {
-	return withHooks[*Tweet, TweetMutation](ctx, tc.sqlSave, tc.mutation, tc.hooks)
+	return withHooks(ctx, tc.sqlSave, tc.mutation, tc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.

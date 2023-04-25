@@ -30,7 +30,7 @@ func (tld *TweetLikeDelete) Where(ps ...predicate.TweetLike) *TweetLikeDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (tld *TweetLikeDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, TweetLikeMutation](ctx, tld.sqlExec, tld.mutation, tld.hooks)
+	return withHooks(ctx, tld.sqlExec, tld.mutation, tld.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

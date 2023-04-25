@@ -31,7 +31,7 @@ func (bd *BlogDelete) Where(ps ...predicate.Blog) *BlogDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (bd *BlogDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, BlogMutation](ctx, bd.sqlExec, bd.mutation, bd.hooks)
+	return withHooks(ctx, bd.sqlExec, bd.mutation, bd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

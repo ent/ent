@@ -89,7 +89,7 @@ func (ugu *UserGroupUpdate) ClearGroup() *UserGroupUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ugu *UserGroupUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, UserGroupMutation](ctx, ugu.sqlSave, ugu.mutation, ugu.hooks)
+	return withHooks(ctx, ugu.sqlSave, ugu.mutation, ugu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -286,7 +286,7 @@ func (uguo *UserGroupUpdateOne) Select(field string, fields ...string) *UserGrou
 
 // Save executes the query and returns the updated UserGroup entity.
 func (uguo *UserGroupUpdateOne) Save(ctx context.Context) (*UserGroup, error) {
-	return withHooks[*UserGroup, UserGroupMutation](ctx, uguo.sqlSave, uguo.mutation, uguo.hooks)
+	return withHooks(ctx, uguo.sqlSave, uguo.mutation, uguo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

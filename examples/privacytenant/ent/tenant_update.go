@@ -44,7 +44,7 @@ func (tu *TenantUpdate) Mutation() *TenantMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (tu *TenantUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, TenantMutation](ctx, tu.sqlSave, tu.mutation, tu.hooks)
+	return withHooks(ctx, tu.sqlSave, tu.mutation, tu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -140,7 +140,7 @@ func (tuo *TenantUpdateOne) Select(field string, fields ...string) *TenantUpdate
 
 // Save executes the query and returns the updated Tenant entity.
 func (tuo *TenantUpdateOne) Save(ctx context.Context) (*Tenant, error) {
-	return withHooks[*Tenant, TenantMutation](ctx, tuo.sqlSave, tuo.mutation, tuo.hooks)
+	return withHooks(ctx, tuo.sqlSave, tuo.mutation, tuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
