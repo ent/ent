@@ -12,7 +12,12 @@ in the LICENSE file in the root directory of this source tree.
 	{{ template "header" . }}
 {{ end }}
 
-import "{{ $.Config.Package }}"
+import (
+	"{{ $.Config.Package }}"
+	{{- range $n := $.Nodes }}
+		{{ $n.PackageAlias }} "{{ $n.Config.Package }}/{{ $n.PackageDir }}"
+	{{- end }}
+)
 
 {{ $pkg := base $.Config.Package }}
 
