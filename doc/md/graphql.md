@@ -134,7 +134,6 @@ The ordering option allows us to apply an ordering on the edges returned from a 
 ### Usage Notes
 
 - The generated types will be `autobind`ed to GraphQL types if a naming convention is preserved (see example below).
-- Ordering can only be defined on ent fields (no edges).
 - Ordering fields should normally be [indexed](schema-indexes.md) to avoid full table DB scan.
 - Pagination queries can be sorted by a single field (no order by ... then by ... semantics).
 
