@@ -224,7 +224,7 @@ func StringContains(column string, sub string, opts ...Option) *sql.Predicate {
 }
 
 // StringContainsFold return a predicate for checking that a JSON string value
-// (returned by the path) contains the given substring
+// (returned by the path) contains the given substring (case insensitive)
 func StringContainsFold(column string, sub string, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		opts = append([]Option{Unquote(true)}, opts...)
