@@ -91,7 +91,7 @@ func (c *Config) Load() (*SchemaSpec, error) {
 		return nil, fmt.Errorf("entc/load: write file %s: %w", target, err)
 	}
 	defer os.RemoveAll(".entc")
-	out, err := run(target, c.BuildFlags)
+	out, err := gorun(target, c.BuildFlags)
 	if err != nil {
 		return nil, err
 	}
@@ -118,6 +118,11 @@ func (c *Config) load() (*SchemaSpec, error) {
 		return nil, fmt.Errorf("loading package: %w", err)
 	}
 	if len(pkgs) < 2 {
+		// Check if the package loading failed due to Go-related
+		// errors, such as 'missing go.sum entry'.
+		if err := golist(c.Path, c.BuildFlags); err != nil {
+			return nil, err
+		}
 		return nil, fmt.Errorf("missing package information for: %s", c.Path)
 	}
 	entPkg, pkg := pkgs[0], pkgs[1]
@@ -314,8 +319,23 @@ func filename(pkg string) string {
 }
 
 // run 'go run' command and return its output.
-func run(target string, buildFlags []string) (string, error) {
-	args := []string{"run"}
+func gorun(target string, buildFlags []string) (string, error) {
+	s, err := gocmd("run", target, buildFlags)
+	if err != nil {
+		return "", fmt.Errorf("entc/load: %s", err)
+	}
+	return s, nil
+}
+
+// golist checks if 'go list' can be executed on the given target.
+func golist(target string, buildFlags []string) error {
+	_, err := gocmd("list", target, buildFlags)
+	return err
+}
+
+// goCmd runs a go command and returns its output.
+func gocmd(command, target string, buildFlags []string) (string, error) {
+	args := []string{command}
 	args = append(args, buildFlags...)
 	args = append(args, target)
 	cmd := exec.Command("go", args...)
@@ -324,7 +344,7 @@ func run(target string, buildFlags []string) (string, error) {
 	cmd.Stderr = stderr
 	cmd.Stdout = stdout
 	if err := cmd.Run(); err != nil {
-		return "", fmt.Errorf("entc/load: %s", stderr)
+		return "", errors.New(stderr.String())
 	}
 	return stdout.String(), nil
 }
