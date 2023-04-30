@@ -290,7 +290,7 @@ func TestWritePath(t *testing.T) {
 				Select("*").
 				From(sql.Table("users")).
 				Where(sqljson.StringContainsFold("a", "substr", sqljson.Path("b", "c", "[1]", "d"))),
-			wantQuery: `SELECT * FROM "users" WHERE lower("a"->'b'->'c'->1->>'d') LIKE lower($1)`,
+			wantQuery: `SELECT * FROM "users" WHERE "a"->'b'->'c'->1->>'d' ILIKE $1`,
 			wantArgs:  []any{"%substr%"},
 		},
 		{
@@ -316,7 +316,7 @@ func TestWritePath(t *testing.T) {
 						sqljson.StringContainsFold("b", "d", sqljson.Path("b")),
 					),
 				),
-			wantQuery: `SELECT * FROM "users" WHERE lower("a"->>'a') LIKE lower($1) AND lower("b"->>'b') LIKE lower($2)`,
+			wantQuery: `SELECT * FROM "users" WHERE "a"->>'a' ILIKE $1 AND "b"->>'b' ILIKE $2`,
 			wantArgs:  []any{"%c%", "%d%"},
 		},
 		{
@@ -332,7 +332,7 @@ func TestWritePath(t *testing.T) {
 				Select("*").
 				From(sql.Table("users")).
 				Where(sqljson.StringContainsFold("a", "substr", sqljson.Path("b", "c", "[1]", "d"))),
-			wantQuery: "SELECT * FROM `users` WHERE lower(JSON_UNQUOTE(JSON_EXTRACT(`a`, '$.b.c[1].d'))) LIKE lower(?)",
+			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, '$.b.c[1].d')) COLLATE utf8mb4_general_ci LIKE ?",
 			wantArgs:  []any{"%substr%"},
 		},
 		{
@@ -358,7 +358,7 @@ func TestWritePath(t *testing.T) {
 						sqljson.StringContainsFold("b", "d", sqljson.Path("b")),
 					),
 				),
-			wantQuery: "SELECT * FROM `users` WHERE lower(JSON_UNQUOTE(JSON_EXTRACT(`a`, '$.a'))) LIKE lower(?) AND lower(JSON_UNQUOTE(JSON_EXTRACT(`b`, '$.b'))) LIKE lower(?)",
+			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, '$.a')) COLLATE utf8mb4_general_ci LIKE ? AND JSON_UNQUOTE(JSON_EXTRACT(`b`, '$.b')) COLLATE utf8mb4_general_ci LIKE ?",
 			wantArgs:  []any{"%c%", "%d%"},
 		},
 		{
