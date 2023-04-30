@@ -15,7 +15,7 @@ import (
 // CheckDir checks the given dir and reports if there are any VCS conflicts.
 func CheckDir(dir string) error {
 	return filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		if info.IsDir() && dir != path {
+		if info != nil && info.IsDir() && dir != path {
 			return filepath.SkipDir
 		}
 		return checkFile(path)
