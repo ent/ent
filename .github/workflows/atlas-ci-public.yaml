@@ -11,6 +11,20 @@ on:
     paths:
       - 'examples/migration/*'
 jobs:
+  sync:
+    permissions:
+      contents: read
+      id-token: write
+    needs: lint
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ariga/atlas-sync-action@v0
+        with:
+          dir: 'examples/migration/ent/migrate/migrations'
+          driver: mysql # or: postgres | sqlite
+          cloud-public: true
   lint:
     permissions:
       contents: read
