@@ -16,7 +16,7 @@ jobs:
       contents: read
       id-token: write
     needs: lint
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
