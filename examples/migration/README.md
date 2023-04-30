@@ -29,7 +29,7 @@ go run -mod=mod ent/migrate/main.go <name>
 ### Run migration linting
 
 ```bash
-go run -mod=mod ariga.io/atlas/cmd/atlas@latest migrate lint \
+atlas migrate lint \
   --dev-url="mysql://root:pass@localhost:3306/test" \
   --dir="file://ent/migrate/migrations" \
   --latest=1
