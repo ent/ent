@@ -2748,7 +2748,7 @@ type (
 		// custom clause for locking.
 		clause string
 	}
-	// LockOption allows configuring the LockConfig using functional options.
+	// LockOption allows configuring the LockOptions using functional options.
 	LockOption func(*LockOptions)
 )
 
