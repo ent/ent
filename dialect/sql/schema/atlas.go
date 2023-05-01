@@ -1153,7 +1153,9 @@ func (r *diffDriver) RealmDiff(_, _ *schema.Realm) ([]schema.Change, error) {
 
 // SchemaDiff creates the diff between two schemas, but includes "diff hooks".
 func (r *diffDriver) SchemaDiff(from, to *schema.Schema) ([]schema.Change, error) {
-	var d Differ = DiffFunc(r.Driver.SchemaDiff)
+	var d Differ = DiffFunc(func(current, desired *schema.Schema) ([]schema.Change, error) {
+		return r.Driver.SchemaDiff(current, desired)
+	})
 	for i := len(r.hooks) - 1; i >= 0; i-- {
 		d = r.hooks[i](d)
 	}
