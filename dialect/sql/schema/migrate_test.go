@@ -292,6 +292,12 @@ func TestMigrate_Diff(t *testing.T) {
 	}, "\n")
 	requireFileEqual(t, filepath.Join(p, "changes.sql"), changesSQL)
 
+	// Skipping table creation should write only the ent_type insertion.
+	m, err = NewMigrate(db, WithFormatter(f), WithDir(d), WithGlobalUniqueID(true), WithDiffOptions(schema.DiffSkipChanges(&schema.AddTable{})))
+	require.NoError(t, err)
+	require.NoError(t, m.Diff(ctx, tables...))
+	requireFileEqual(t, filepath.Join(p, "changes.sql"), "INSERT INTO `ent_types` (`type`) VALUES ('groups'), ('users');\n")
+
 	// Enable indentations.
 	m, err = NewMigrate(db, WithFormatter(f), WithDir(d), WithGlobalUniqueID(true), WithIndent("  "))
 	require.NoError(t, err)
