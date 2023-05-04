@@ -7,6 +7,8 @@ package sql
 import (
 	"fmt"
 	"strings"
+
+	"entgo.io/ent/dialect"
 )
 
 // The following helpers exist to simplify the way raw predicates
@@ -309,6 +311,20 @@ func orderByAgg(fn, field string, opts ...OrderTermOption) *OrderExprTerm {
 			}
 			return Raw(fmt.Sprintf("%s(%s)", fn, c))
 		},
+	}
+}
+
+// OrderByRand returns a term to natively order by a random value.
+func OrderByRand() func(*Selector) {
+	return func(s *Selector) {
+		s.OrderExprFunc(func(b *Builder) {
+			switch s.Dialect() {
+			case dialect.MySQL:
+				b.WriteString("RAND()")
+			default:
+				b.WriteString("RANDOM()")
+			}
+		})
 	}
 }
 
