@@ -792,6 +792,10 @@ func Select(t *testing.T, client *ent.Client) {
 		require.NoError(err)
 		require.EqualValues(len(p.Name), n)
 	}
+
+	// Order by random value should compile a valid query.
+	_, err = client.User.Query().Order(sql.OrderByRand()).All(ctx)
+	require.NoError(err)
 }
 
 func Aggregate(t *testing.T, client *ent.Client) {
