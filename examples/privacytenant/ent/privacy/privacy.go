@@ -8,7 +8,6 @@ package privacy
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/entql"
 	"entgo.io/ent/examples/privacytenant/ent"
@@ -30,19 +29,19 @@ var (
 	Skip = privacy.Skip
 )
 
-// Allowf returns an formatted wrapped Allow decision.
+// Allowf returns a formatted wrapped Allow decision.
 func Allowf(format string, a ...any) error {
-	return fmt.Errorf(format+": %w", append(a, Allow)...)
+	return privacy.Allowf(format, a...)
 }
 
-// Denyf returns an formatted wrapped Deny decision.
+// Denyf returns a formatted wrapped Deny decision.
 func Denyf(format string, a ...any) error {
-	return fmt.Errorf(format+": %w", append(a, Deny)...)
+	return privacy.Denyf(format, a...)
 }
 
-// Skipf returns an formatted wrapped Skip decision.
+// Skipf returns a formatted wrapped Skip decision.
 func Skipf(format string, a ...any) error {
-	return fmt.Errorf(format+": %w", append(a, Skip)...)
+	return privacy.Skipf(format, a...)
 }
 
 // DecisionContext creates a new context from the given parent context with
@@ -71,6 +70,12 @@ type (
 	MutationRule = privacy.MutationRule
 	// MutationPolicy combines multiple mutation rules into a single policy.
 	MutationPolicy = privacy.MutationPolicy
+	// MutationRuleFunc type is an adapter which allows the use of
+	// ordinary functions as mutation rules.
+	MutationRuleFunc = privacy.MutationRuleFunc
+
+	// QueryMutationRule is an interface which groups query and mutation rules.
+	QueryMutationRule = privacy.QueryMutationRule
 )
 
 // QueryRuleFunc type is an adapter to allow the use of
@@ -82,68 +87,24 @@ func (f QueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
 	return f(ctx, q)
 }
 
-// MutationRuleFunc type is an adapter which allows the use of
-// ordinary functions as mutation rules.
-type MutationRuleFunc func(context.Context, ent.Mutation) error
-
-// EvalMutation returns f(ctx, m).
-func (f MutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
-	return f(ctx, m)
-}
-
-// QueryMutationRule is an interface which groups query and mutation rules.
-type QueryMutationRule interface {
-	QueryRule
-	MutationRule
-}
-
 // AlwaysAllowRule returns a rule that returns an allow decision.
 func AlwaysAllowRule() QueryMutationRule {
-	return fixedDecision{Allow}
+	return privacy.AlwaysAllowRule()
 }
 
 // AlwaysDenyRule returns a rule that returns a deny decision.
 func AlwaysDenyRule() QueryMutationRule {
-	return fixedDecision{Deny}
-}
-
-type fixedDecision struct {
-	decision error
-}
-
-func (f fixedDecision) EvalQuery(context.Context, ent.Query) error {
-	return f.decision
-}
-
-func (f fixedDecision) EvalMutation(context.Context, ent.Mutation) error {
-	return f.decision
-}
-
-type contextDecision struct {
-	eval func(context.Context) error
+	return privacy.AlwaysDenyRule()
 }
 
 // ContextQueryMutationRule creates a query/mutation rule from a context eval func.
 func ContextQueryMutationRule(eval func(context.Context) error) QueryMutationRule {
-	return contextDecision{eval}
-}
-
-func (c contextDecision) EvalQuery(ctx context.Context, _ ent.Query) error {
-	return c.eval(ctx)
-}
-
-func (c contextDecision) EvalMutation(ctx context.Context, _ ent.Mutation) error {
-	return c.eval(ctx)
+	return privacy.ContextQueryMutationRule(eval)
 }
 
 // OnMutationOperation evaluates the given rule only on a given mutation operation.
 func OnMutationOperation(rule MutationRule, op ent.Op) MutationRule {
-	return MutationRuleFunc(func(ctx context.Context, m ent.Mutation) error {
-		if m.Op().Is(op) {
-			return rule.EvalMutation(ctx, m)
-		}
-		return Skip
-	})
+	return privacy.OnMutationOperation(rule, op)
 }
 
 // DenyMutationOperationRule returns a rule denying specified mutation operation.
