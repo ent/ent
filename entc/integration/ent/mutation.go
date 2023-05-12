@@ -14964,6 +14964,8 @@ type UserMutation struct {
 	role             *user.Role
 	employment       *user.Employment
 	_SSOCert         *string
+	files_count      *int
+	addfiles_count   *int
 	clearedFields    map[string]struct{}
 	card             *int
 	clearedcard      bool
@@ -15612,6 +15614,76 @@ func (m *UserMutation) ResetSSOCert() {
 	delete(m.clearedFields, user.FieldSSOCert)
 }
 
+// SetFilesCount sets the "files_count" field.
+func (m *UserMutation) SetFilesCount(i int) {
+	m.files_count = &i
+	m.addfiles_count = nil
+}
+
+// FilesCount returns the value of the "files_count" field in the mutation.
+func (m *UserMutation) FilesCount() (r int, exists bool) {
+	v := m.files_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFilesCount returns the old "files_count" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldFilesCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFilesCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFilesCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFilesCount: %w", err)
+	}
+	return oldValue.FilesCount, nil
+}
+
+// AddFilesCount adds i to the "files_count" field.
+func (m *UserMutation) AddFilesCount(i int) {
+	if m.addfiles_count != nil {
+		*m.addfiles_count += i
+	} else {
+		m.addfiles_count = &i
+	}
+}
+
+// AddedFilesCount returns the value that was added to the "files_count" field in this mutation.
+func (m *UserMutation) AddedFilesCount() (r int, exists bool) {
+	v := m.addfiles_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearFilesCount clears the value of the "files_count" field.
+func (m *UserMutation) ClearFilesCount() {
+	m.files_count = nil
+	m.addfiles_count = nil
+	m.clearedFields[user.FieldFilesCount] = struct{}{}
+}
+
+// FilesCountCleared returns if the "files_count" field was cleared in this mutation.
+func (m *UserMutation) FilesCountCleared() bool {
+	_, ok := m.clearedFields[user.FieldFilesCount]
+	return ok
+}
+
+// ResetFilesCount resets all changes to the "files_count" field.
+func (m *UserMutation) ResetFilesCount() {
+	m.files_count = nil
+	m.addfiles_count = nil
+	delete(m.clearedFields, user.FieldFilesCount)
+}
+
 // SetCardID sets the "card" edge to the Card entity by id.
 func (m *UserMutation) SetCardID(id int) {
 	m.card = &id
@@ -16180,7 +16252,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.optional_int != nil {
 		fields = append(fields, user.FieldOptionalInt)
 	}
@@ -16214,6 +16286,9 @@ func (m *UserMutation) Fields() []string {
 	if m._SSOCert != nil {
 		fields = append(fields, user.FieldSSOCert)
 	}
+	if m.files_count != nil {
+		fields = append(fields, user.FieldFilesCount)
+	}
 	return fields
 }
 
@@ -16244,6 +16319,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Employment()
 	case user.FieldSSOCert:
 		return m.SSOCert()
+	case user.FieldFilesCount:
+		return m.FilesCount()
 	}
 	return nil, false
 }
@@ -16275,6 +16352,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldEmployment(ctx)
 	case user.FieldSSOCert:
 		return m.OldSSOCert(ctx)
+	case user.FieldFilesCount:
+		return m.OldFilesCount(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -16361,6 +16440,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetSSOCert(v)
 		return nil
+	case user.FieldFilesCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFilesCount(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
 }
@@ -16375,6 +16461,9 @@ func (m *UserMutation) AddedFields() []string {
 	if m.addage != nil {
 		fields = append(fields, user.FieldAge)
 	}
+	if m.addfiles_count != nil {
+		fields = append(fields, user.FieldFilesCount)
+	}
 	return fields
 }
 
@@ -16387,6 +16476,8 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedOptionalInt()
 	case user.FieldAge:
 		return m.AddedAge()
+	case user.FieldFilesCount:
+		return m.AddedFilesCount()
 	}
 	return nil, false
 }
@@ -16409,6 +16500,13 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddAge(v)
+		return nil
+	case user.FieldFilesCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddFilesCount(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User numeric field %s", name)
@@ -16435,6 +16533,9 @@ func (m *UserMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(user.FieldSSOCert) {
 		fields = append(fields, user.FieldSSOCert)
+	}
+	if m.FieldCleared(user.FieldFilesCount) {
+		fields = append(fields, user.FieldFilesCount)
 	}
 	return fields
 }
@@ -16467,6 +16568,9 @@ func (m *UserMutation) ClearField(name string) error {
 		return nil
 	case user.FieldSSOCert:
 		m.ClearSSOCert()
+		return nil
+	case user.FieldFilesCount:
+		m.ClearFilesCount()
 		return nil
 	}
 	return fmt.Errorf("unknown User nullable field %s", name)
@@ -16508,6 +16612,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldSSOCert:
 		m.ResetSSOCert()
+		return nil
+	case user.FieldFilesCount:
+		m.ResetFilesCount()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)

@@ -1067,7 +1067,20 @@ func (f Field) DefaultValue() any { return f.def.DefaultValue }
 func (f Field) DefaultFunc() bool { return f.def.DefaultKind == reflect.Func }
 
 // OrderName returns the function/option name for ordering by this field.
-func (f Field) OrderName() string { return "By" + pascal(f.Name) }
+func (f Field) OrderName() string {
+	name := "By" + pascal(f.Name)
+	// Some users store associations count as a separate field.
+	// In this case, we suffix the order name with "Field".
+	if f.typ == nil || !strings.HasSuffix(name, "Count") {
+		return name
+	}
+	for _, e := range f.typ.Edges {
+		if nameE, err := e.OrderCountName(); err == nil && nameE == name {
+			return name + "Field"
+		}
+	}
+	return name
+}
 
 // BuilderField returns the struct member of the field in the builder.
 func (f Field) BuilderField() string {

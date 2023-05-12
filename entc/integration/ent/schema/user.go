@@ -51,6 +51,10 @@ func (User) Fields() []ent.Field {
 			Default("Full-Time"),
 		field.String("SSOCert").
 			Optional(),
+		// Some users store the associations
+		// count as a separate field.
+		field.Int("files_count").
+			Optional(),
 	}
 }
 
