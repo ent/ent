@@ -378,6 +378,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			user.FieldRole:        {Type: field.TypeEnum, Column: user.FieldRole},
 			user.FieldEmployment:  {Type: field.TypeEnum, Column: user.FieldEmployment},
 			user.FieldSSOCert:     {Type: field.TypeString, Column: user.FieldSSOCert},
+			user.FieldFilesCount:  {Type: field.TypeInt, Column: user.FieldFilesCount},
 		},
 	}
 	graph.MustAddE(
@@ -2250,6 +2251,11 @@ func (f *UserFilter) WhereEmployment(p entql.StringP) {
 // WhereSSOCert applies the entql string predicate on the SSOCert field.
 func (f *UserFilter) WhereSSOCert(p entql.StringP) {
 	f.Where(p.Field(user.FieldSSOCert))
+}
+
+// WhereFilesCount applies the entql int predicate on the files_count field.
+func (f *UserFilter) WhereFilesCount(p entql.IntP) {
+	f.Where(p.Field(user.FieldFilesCount))
 }
 
 // WhereHasCard applies a predicate to check if query has an edge card.

@@ -102,6 +102,11 @@ func SSOCert(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldSSOCert, v))
 }
 
+// FilesCount applies equality check predicate on the "files_count" field. It's identical to FilesCountEQ.
+func FilesCount(v int) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldFilesCount, v))
+}
+
 // OptionalIntEQ applies the EQ predicate on the "optional_int" field.
 func OptionalIntEQ(v int) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldOptionalInt, v))
@@ -735,6 +740,56 @@ func SSOCertEqualFold(v string) predicate.User {
 // SSOCertContainsFold applies the ContainsFold predicate on the "SSOCert" field.
 func SSOCertContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldSSOCert, v))
+}
+
+// FilesCountEQ applies the EQ predicate on the "files_count" field.
+func FilesCountEQ(v int) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldFilesCount, v))
+}
+
+// FilesCountNEQ applies the NEQ predicate on the "files_count" field.
+func FilesCountNEQ(v int) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldFilesCount, v))
+}
+
+// FilesCountIn applies the In predicate on the "files_count" field.
+func FilesCountIn(vs ...int) predicate.User {
+	return predicate.User(sql.FieldIn(FieldFilesCount, vs...))
+}
+
+// FilesCountNotIn applies the NotIn predicate on the "files_count" field.
+func FilesCountNotIn(vs ...int) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldFilesCount, vs...))
+}
+
+// FilesCountGT applies the GT predicate on the "files_count" field.
+func FilesCountGT(v int) predicate.User {
+	return predicate.User(sql.FieldGT(FieldFilesCount, v))
+}
+
+// FilesCountGTE applies the GTE predicate on the "files_count" field.
+func FilesCountGTE(v int) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldFilesCount, v))
+}
+
+// FilesCountLT applies the LT predicate on the "files_count" field.
+func FilesCountLT(v int) predicate.User {
+	return predicate.User(sql.FieldLT(FieldFilesCount, v))
+}
+
+// FilesCountLTE applies the LTE predicate on the "files_count" field.
+func FilesCountLTE(v int) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldFilesCount, v))
+}
+
+// FilesCountIsNil applies the IsNil predicate on the "files_count" field.
+func FilesCountIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldFilesCount))
+}
+
+// FilesCountNotNil applies the NotNil predicate on the "files_count" field.
+func FilesCountNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldFilesCount))
 }
 
 // HasCard applies the HasEdge predicate on the "card" edge.

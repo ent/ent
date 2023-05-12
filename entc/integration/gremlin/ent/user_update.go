@@ -221,6 +221,33 @@ func (uu *UserUpdate) ClearSSOCert() *UserUpdate {
 	return uu
 }
 
+// SetFilesCount sets the "files_count" field.
+func (uu *UserUpdate) SetFilesCount(i int) *UserUpdate {
+	uu.mutation.ResetFilesCount()
+	uu.mutation.SetFilesCount(i)
+	return uu
+}
+
+// SetNillableFilesCount sets the "files_count" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableFilesCount(i *int) *UserUpdate {
+	if i != nil {
+		uu.SetFilesCount(*i)
+	}
+	return uu
+}
+
+// AddFilesCount adds i to the "files_count" field.
+func (uu *UserUpdate) AddFilesCount(i int) *UserUpdate {
+	uu.mutation.AddFilesCount(i)
+	return uu
+}
+
+// ClearFilesCount clears the value of the "files_count" field.
+func (uu *UserUpdate) ClearFilesCount() *UserUpdate {
+	uu.mutation.ClearFilesCount()
+	return uu
+}
+
 // SetCardID sets the "card" edge to the Card entity by ID.
 func (uu *UserUpdate) SetCardID(id string) *UserUpdate {
 	uu.mutation.SetCardID(id)
@@ -704,6 +731,12 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 	if value, ok := uu.mutation.SSOCert(); ok {
 		v.Property(dsl.Single, user.FieldSSOCert, value)
 	}
+	if value, ok := uu.mutation.FilesCount(); ok {
+		v.Property(dsl.Single, user.FieldFilesCount, value)
+	}
+	if value, ok := uu.mutation.AddedFilesCount(); ok {
+		v.Property(dsl.Single, user.FieldFilesCount, __.Union(__.Values(user.FieldFilesCount), __.Constant(value)).Sum())
+	}
 	var properties []any
 	if uu.mutation.OptionalIntCleared() {
 		properties = append(properties, user.FieldOptionalInt)
@@ -722,6 +755,9 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 	}
 	if uu.mutation.SSOCertCleared() {
 		properties = append(properties, user.FieldSSOCert)
+	}
+	if uu.mutation.FilesCountCleared() {
+		properties = append(properties, user.FieldFilesCount)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -1039,6 +1075,33 @@ func (uuo *UserUpdateOne) SetNillableSSOCert(s *string) *UserUpdateOne {
 // ClearSSOCert clears the value of the "SSOCert" field.
 func (uuo *UserUpdateOne) ClearSSOCert() *UserUpdateOne {
 	uuo.mutation.ClearSSOCert()
+	return uuo
+}
+
+// SetFilesCount sets the "files_count" field.
+func (uuo *UserUpdateOne) SetFilesCount(i int) *UserUpdateOne {
+	uuo.mutation.ResetFilesCount()
+	uuo.mutation.SetFilesCount(i)
+	return uuo
+}
+
+// SetNillableFilesCount sets the "files_count" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableFilesCount(i *int) *UserUpdateOne {
+	if i != nil {
+		uuo.SetFilesCount(*i)
+	}
+	return uuo
+}
+
+// AddFilesCount adds i to the "files_count" field.
+func (uuo *UserUpdateOne) AddFilesCount(i int) *UserUpdateOne {
+	uuo.mutation.AddFilesCount(i)
+	return uuo
+}
+
+// ClearFilesCount clears the value of the "files_count" field.
+func (uuo *UserUpdateOne) ClearFilesCount() *UserUpdateOne {
+	uuo.mutation.ClearFilesCount()
 	return uuo
 }
 
@@ -1543,6 +1606,12 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := uuo.mutation.SSOCert(); ok {
 		v.Property(dsl.Single, user.FieldSSOCert, value)
 	}
+	if value, ok := uuo.mutation.FilesCount(); ok {
+		v.Property(dsl.Single, user.FieldFilesCount, value)
+	}
+	if value, ok := uuo.mutation.AddedFilesCount(); ok {
+		v.Property(dsl.Single, user.FieldFilesCount, __.Union(__.Values(user.FieldFilesCount), __.Constant(value)).Sum())
+	}
 	var properties []any
 	if uuo.mutation.OptionalIntCleared() {
 		properties = append(properties, user.FieldOptionalInt)
@@ -1561,6 +1630,9 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if uuo.mutation.SSOCertCleared() {
 		properties = append(properties, user.FieldSSOCert)
+	}
+	if uuo.mutation.FilesCountCleared() {
+		properties = append(properties, user.FieldFilesCount)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())

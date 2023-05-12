@@ -43,6 +43,8 @@ type User struct {
 	Employment user.Employment `json:"employment,omitempty"`
 	// SSOCert holds the value of the "SSOCert" field.
 	SSOCert string `json:"SSOCert,omitempty"`
+	// FilesCount holds the value of the "files_count" field.
+	FilesCount int `json:"files_count,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges UserEdges `json:"edges"`
@@ -211,6 +213,7 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 		Role        user.Role       `json:"role,omitempty"`
 		Employment  user.Employment `json:"employment,omitempty"`
 		SSOCert     string          `json:"sso_cert,omitempty"`
+		FilesCount  int             `json:"files_count,omitempty"`
 	}
 	if err := vmap.Decode(&scanu); err != nil {
 		return err
@@ -227,6 +230,7 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 	u.Role = scanu.Role
 	u.Employment = scanu.Employment
 	u.SSOCert = scanu.SSOCert
+	u.FilesCount = scanu.FilesCount
 	return nil
 }
 
@@ -339,6 +343,9 @@ func (u *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("SSOCert=")
 	builder.WriteString(u.SSOCert)
+	builder.WriteString(", ")
+	builder.WriteString("files_count=")
+	builder.WriteString(fmt.Sprintf("%v", u.FilesCount))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -365,6 +372,7 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 		Role        user.Role       `json:"role,omitempty"`
 		Employment  user.Employment `json:"employment,omitempty"`
 		SSOCert     string          `json:"sso_cert,omitempty"`
+		FilesCount  int             `json:"files_count,omitempty"`
 	}
 	if err := vmap.Decode(&scanu); err != nil {
 		return err
@@ -382,6 +390,7 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 		node.Role = v.Role
 		node.Employment = v.Employment
 		node.SSOCert = v.SSOCert
+		node.FilesCount = v.FilesCount
 		*u = append(*u, node)
 	}
 	return nil

@@ -224,6 +224,33 @@ func (uu *UserUpdate) ClearSSOCert() *UserUpdate {
 	return uu
 }
 
+// SetFilesCount sets the "files_count" field.
+func (uu *UserUpdate) SetFilesCount(i int) *UserUpdate {
+	uu.mutation.ResetFilesCount()
+	uu.mutation.SetFilesCount(i)
+	return uu
+}
+
+// SetNillableFilesCount sets the "files_count" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableFilesCount(i *int) *UserUpdate {
+	if i != nil {
+		uu.SetFilesCount(*i)
+	}
+	return uu
+}
+
+// AddFilesCount adds i to the "files_count" field.
+func (uu *UserUpdate) AddFilesCount(i int) *UserUpdate {
+	uu.mutation.AddFilesCount(i)
+	return uu
+}
+
+// ClearFilesCount clears the value of the "files_count" field.
+func (uu *UserUpdate) ClearFilesCount() *UserUpdate {
+	uu.mutation.ClearFilesCount()
+	return uu
+}
+
 // SetCardID sets the "card" edge to the Card entity by ID.
 func (uu *UserUpdate) SetCardID(id int) *UserUpdate {
 	uu.mutation.SetCardID(id)
@@ -702,6 +729,15 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if uu.mutation.SSOCertCleared() {
 		_spec.ClearField(user.FieldSSOCert, field.TypeString)
+	}
+	if value, ok := uu.mutation.FilesCount(); ok {
+		_spec.SetField(user.FieldFilesCount, field.TypeInt, value)
+	}
+	if value, ok := uu.mutation.AddedFilesCount(); ok {
+		_spec.AddField(user.FieldFilesCount, field.TypeInt, value)
+	}
+	if uu.mutation.FilesCountCleared() {
+		_spec.ClearField(user.FieldFilesCount, field.TypeInt)
 	}
 	if uu.mutation.CardCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -1344,6 +1380,33 @@ func (uuo *UserUpdateOne) ClearSSOCert() *UserUpdateOne {
 	return uuo
 }
 
+// SetFilesCount sets the "files_count" field.
+func (uuo *UserUpdateOne) SetFilesCount(i int) *UserUpdateOne {
+	uuo.mutation.ResetFilesCount()
+	uuo.mutation.SetFilesCount(i)
+	return uuo
+}
+
+// SetNillableFilesCount sets the "files_count" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableFilesCount(i *int) *UserUpdateOne {
+	if i != nil {
+		uuo.SetFilesCount(*i)
+	}
+	return uuo
+}
+
+// AddFilesCount adds i to the "files_count" field.
+func (uuo *UserUpdateOne) AddFilesCount(i int) *UserUpdateOne {
+	uuo.mutation.AddFilesCount(i)
+	return uuo
+}
+
+// ClearFilesCount clears the value of the "files_count" field.
+func (uuo *UserUpdateOne) ClearFilesCount() *UserUpdateOne {
+	uuo.mutation.ClearFilesCount()
+	return uuo
+}
+
 // SetCardID sets the "card" edge to the Card entity by ID.
 func (uuo *UserUpdateOne) SetCardID(id int) *UserUpdateOne {
 	uuo.mutation.SetCardID(id)
@@ -1852,6 +1915,15 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if uuo.mutation.SSOCertCleared() {
 		_spec.ClearField(user.FieldSSOCert, field.TypeString)
+	}
+	if value, ok := uuo.mutation.FilesCount(); ok {
+		_spec.SetField(user.FieldFilesCount, field.TypeInt, value)
+	}
+	if value, ok := uuo.mutation.AddedFilesCount(); ok {
+		_spec.AddField(user.FieldFilesCount, field.TypeInt, value)
+	}
+	if uuo.mutation.FilesCountCleared() {
+		_spec.ClearField(user.FieldFilesCount, field.TypeInt)
 	}
 	if uuo.mutation.CardCleared() {
 		edge := &sqlgraph.EdgeSpec{

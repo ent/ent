@@ -147,6 +147,13 @@ func SSOCert(v string) predicate.User {
 	})
 }
 
+// FilesCount applies equality check predicate on the "files_count" field. It's identical to FilesCountEQ.
+func FilesCount(v int) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldFilesCount, p.EQ(v))
+	})
+}
+
 // OptionalIntEQ applies the EQ predicate on the "optional_int" field.
 func OptionalIntEQ(v int) predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
@@ -935,6 +942,76 @@ func SSOCertIsNil() predicate.User {
 func SSOCertNotNil() predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
 		t.HasLabel(Label).Has(FieldSSOCert)
+	})
+}
+
+// FilesCountEQ applies the EQ predicate on the "files_count" field.
+func FilesCountEQ(v int) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldFilesCount, p.EQ(v))
+	})
+}
+
+// FilesCountNEQ applies the NEQ predicate on the "files_count" field.
+func FilesCountNEQ(v int) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldFilesCount, p.NEQ(v))
+	})
+}
+
+// FilesCountIn applies the In predicate on the "files_count" field.
+func FilesCountIn(vs ...int) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldFilesCount, p.Within(vs...))
+	})
+}
+
+// FilesCountNotIn applies the NotIn predicate on the "files_count" field.
+func FilesCountNotIn(vs ...int) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldFilesCount, p.Without(vs...))
+	})
+}
+
+// FilesCountGT applies the GT predicate on the "files_count" field.
+func FilesCountGT(v int) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldFilesCount, p.GT(v))
+	})
+}
+
+// FilesCountGTE applies the GTE predicate on the "files_count" field.
+func FilesCountGTE(v int) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldFilesCount, p.GTE(v))
+	})
+}
+
+// FilesCountLT applies the LT predicate on the "files_count" field.
+func FilesCountLT(v int) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldFilesCount, p.LT(v))
+	})
+}
+
+// FilesCountLTE applies the LTE predicate on the "files_count" field.
+func FilesCountLTE(v int) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldFilesCount, p.LTE(v))
+	})
+}
+
+// FilesCountIsNil applies the IsNil predicate on the "files_count" field.
+func FilesCountIsNil() predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldFilesCount)
+	})
+}
+
+// FilesCountNotNil applies the NotNil predicate on the "files_count" field.
+func FilesCountNotNil() predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldFilesCount)
 	})
 }
 

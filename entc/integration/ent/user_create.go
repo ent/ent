@@ -167,6 +167,20 @@ func (uc *UserCreate) SetNillableSSOCert(s *string) *UserCreate {
 	return uc
 }
 
+// SetFilesCount sets the "files_count" field.
+func (uc *UserCreate) SetFilesCount(i int) *UserCreate {
+	uc.mutation.SetFilesCount(i)
+	return uc
+}
+
+// SetNillableFilesCount sets the "files_count" field if the given value is not nil.
+func (uc *UserCreate) SetNillableFilesCount(i *int) *UserCreate {
+	if i != nil {
+		uc.SetFilesCount(*i)
+	}
+	return uc
+}
+
 // SetCardID sets the "card" edge to the Card entity by ID.
 func (uc *UserCreate) SetCardID(id int) *UserCreate {
 	uc.mutation.SetCardID(id)
@@ -503,6 +517,10 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.SSOCert(); ok {
 		_spec.SetField(user.FieldSSOCert, field.TypeString, value)
 		_node.SSOCert = value
+	}
+	if value, ok := uc.mutation.FilesCount(); ok {
+		_spec.SetField(user.FieldFilesCount, field.TypeInt, value)
+		_node.FilesCount = value
 	}
 	if nodes := uc.mutation.CardIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -914,6 +932,30 @@ func (u *UserUpsert) ClearSSOCert() *UserUpsert {
 	return u
 }
 
+// SetFilesCount sets the "files_count" field.
+func (u *UserUpsert) SetFilesCount(v int) *UserUpsert {
+	u.Set(user.FieldFilesCount, v)
+	return u
+}
+
+// UpdateFilesCount sets the "files_count" field to the value that was provided on create.
+func (u *UserUpsert) UpdateFilesCount() *UserUpsert {
+	u.SetExcluded(user.FieldFilesCount)
+	return u
+}
+
+// AddFilesCount adds v to the "files_count" field.
+func (u *UserUpsert) AddFilesCount(v int) *UserUpsert {
+	u.Add(user.FieldFilesCount, v)
+	return u
+}
+
+// ClearFilesCount clears the value of the "files_count" field.
+func (u *UserUpsert) ClearFilesCount() *UserUpsert {
+	u.SetNull(user.FieldFilesCount)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -1161,6 +1203,34 @@ func (u *UserUpsertOne) UpdateSSOCert() *UserUpsertOne {
 func (u *UserUpsertOne) ClearSSOCert() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.ClearSSOCert()
+	})
+}
+
+// SetFilesCount sets the "files_count" field.
+func (u *UserUpsertOne) SetFilesCount(v int) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetFilesCount(v)
+	})
+}
+
+// AddFilesCount adds v to the "files_count" field.
+func (u *UserUpsertOne) AddFilesCount(v int) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.AddFilesCount(v)
+	})
+}
+
+// UpdateFilesCount sets the "files_count" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateFilesCount() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateFilesCount()
+	})
+}
+
+// ClearFilesCount clears the value of the "files_count" field.
+func (u *UserUpsertOne) ClearFilesCount() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearFilesCount()
 	})
 }
 
@@ -1571,6 +1641,34 @@ func (u *UserUpsertBulk) UpdateSSOCert() *UserUpsertBulk {
 func (u *UserUpsertBulk) ClearSSOCert() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.ClearSSOCert()
+	})
+}
+
+// SetFilesCount sets the "files_count" field.
+func (u *UserUpsertBulk) SetFilesCount(v int) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetFilesCount(v)
+	})
+}
+
+// AddFilesCount adds v to the "files_count" field.
+func (u *UserUpsertBulk) AddFilesCount(v int) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.AddFilesCount(v)
+	})
+}
+
+// UpdateFilesCount sets the "files_count" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateFilesCount() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateFilesCount()
+	})
+}
+
+// ClearFilesCount clears the value of the "files_count" field.
+func (u *UserUpsertBulk) ClearFilesCount() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearFilesCount()
 	})
 }
 

@@ -40,6 +40,8 @@ const (
 	FieldEmployment = "employment"
 	// FieldSSOCert holds the string denoting the ssocert field in the database.
 	FieldSSOCert = "sso_cert"
+	// FieldFilesCount holds the string denoting the files_count field in the database.
+	FieldFilesCount = "files_count"
 	// EdgeCard holds the string denoting the card edge name in mutations.
 	EdgeCard = "card"
 	// EdgePets holds the string denoting the pets edge name in mutations.
@@ -131,6 +133,7 @@ var Columns = []string{
 	FieldRole,
 	FieldEmployment,
 	FieldSSOCert,
+	FieldFilesCount,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "users"
@@ -296,6 +299,11 @@ func ByEmployment(opts ...sql.OrderTermOption) OrderOption {
 // BySSOCert orders the results by the SSOCert field.
 func BySSOCert(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSSOCert, opts...).ToFunc()
+}
+
+// ByFilesCountField orders the results by the files_count field.
+func ByFilesCountField(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFilesCount, opts...).ToFunc()
 }
 
 // ByCardField orders the results by card field.
