@@ -1079,14 +1079,13 @@ func (a *Atlas) symbol(name string) string {
 // entDialect returns the Ent dialect as configured by the dialect option.
 func (a *Atlas) entDialect(ctx context.Context, drv dialect.Driver) (sqlDialect, error) {
 	var d sqlDialect
-	switch a.dialect {
-	case dialect.MySQL:
+	if strings.Contains(a.dialect, dialect.MySQL) {
 		d = &MySQL{Driver: drv}
-	case dialect.SQLite:
+	} else if strings.Contains(a.dialect, dialect.SQLite) {
 		d = &SQLite{Driver: drv, WithForeignKeys: a.withForeignKeys}
-	case dialect.Postgres:
+	} else if strings.Contains(a.dialect, dialect.Postgres) {
 		d = &Postgres{Driver: drv}
-	default:
+	} else {
 		return nil, fmt.Errorf("sql/schema: unsupported dialect %q", a.dialect)
 	}
 	if err := d.init(ctx); err != nil {
