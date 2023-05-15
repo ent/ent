@@ -890,13 +890,13 @@ func (i *InsertBuilder) OnConflict(opts ...ConflictOption) *InsertBuilder {
 
 // UpdateSet describes a set of changes of the `DO UPDATE` clause.
 type UpdateSet struct {
+	*UpdateBuilder
 	columns []string
-	update  *UpdateBuilder
 }
 
 // Table returns the table the `UPSERT` statement is executed on.
 func (u *UpdateSet) Table() *SelectTable {
-	return Dialect(u.update.dialect).Table(u.update.table)
+	return Dialect(u.UpdateBuilder.dialect).Table(u.UpdateBuilder.table)
 }
 
 // Columns returns all columns in the `INSERT` statement.
@@ -906,24 +906,24 @@ func (u *UpdateSet) Columns() []string {
 
 // UpdateColumns returns all columns in the `UPDATE` statement.
 func (u *UpdateSet) UpdateColumns() []string {
-	return append(u.update.nulls, u.update.columns...)
+	return append(u.UpdateBuilder.nulls, u.UpdateBuilder.columns...)
 }
 
 // Set sets a column to a given value.
 func (u *UpdateSet) Set(column string, v any) *UpdateSet {
-	u.update.Set(column, v)
+	u.UpdateBuilder.Set(column, v)
 	return u
 }
 
 // Add adds a numeric value to the given column.
 func (u *UpdateSet) Add(column string, v any) *UpdateSet {
-	u.update.Add(column, v)
+	u.UpdateBuilder.Add(column, v)
 	return u
 }
 
 // SetNull sets a column as null value.
 func (u *UpdateSet) SetNull(column string) *UpdateSet {
-	u.update.SetNull(column)
+	u.UpdateBuilder.SetNull(column)
 	return u
 }
 
@@ -935,14 +935,14 @@ func (u *UpdateSet) SetIgnore(name string) *UpdateSet {
 // SetExcluded sets the column name to its EXCLUDED/VALUES value.
 // For example, "c" = "excluded"."c", or `c` = VALUES(`c`).
 func (u *UpdateSet) SetExcluded(name string) *UpdateSet {
-	switch u.update.Dialect() {
+	switch u.UpdateBuilder.Dialect() {
 	case dialect.MySQL:
-		u.update.Set(name, ExprFunc(func(b *Builder) {
+		u.UpdateBuilder.Set(name, ExprFunc(func(b *Builder) {
 			b.WriteString("VALUES(").Ident(name).WriteByte(')')
 		}))
 	default:
-		t := Dialect(u.update.dialect).Table("excluded")
-		u.update.Set(name, Expr(t.C(name)))
+		t := Dialect(u.UpdateBuilder.dialect).Table("excluded")
+		u.UpdateBuilder.Set(name, Expr(t.C(name)))
 	}
 	return u
 }
@@ -1019,12 +1019,12 @@ func (i *InsertBuilder) writeConflict(b *Builder) {
 	if len(i.conflict.action.update) == 0 {
 		b.AddError(errors.New("missing action for 'DO UPDATE SET' clause"))
 	}
-	u := &UpdateSet{columns: i.columns, update: Dialect(i.dialect).Update(i.table)}
-	u.update.Builder = *b
+	u := &UpdateSet{UpdateBuilder: Dialect(i.dialect).Update(i.table), columns: i.columns}
+	u.Builder = *b
 	for _, f := range i.conflict.action.update {
 		f(u)
 	}
-	u.update.writeSetter(b)
+	u.writeSetter(b)
 	if p := i.conflict.action.where; p != nil {
 		p.qualifier = i.table
 		b.WriteString(" WHERE ").Join(p)
