@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -159,6 +160,20 @@ func (tu *TaskUpdate) ClearOrderOption() *TaskUpdate {
 	return tu
 }
 
+// SetOp sets the "op" field.
+func (tu *TaskUpdate) SetOp(s string) *TaskUpdate {
+	tu.mutation.SetOpField(s)
+	return tu
+}
+
+// SetNillableOp sets the "op" field if the given value is not nil.
+func (tu *TaskUpdate) SetNillableOp(s *string) *TaskUpdate {
+	if s != nil {
+		tu.SetOp(*s)
+	}
+	return tu
+}
+
 // Mutation returns the TaskMutation object of the builder.
 func (tu *TaskUpdate) Mutation() *TaskMutation {
 	return tu.mutation
@@ -191,7 +206,25 @@ func (tu *TaskUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (tu *TaskUpdate) check() error {
+	if v, ok := tu.mutation.Priority(); ok {
+		if err := v.Validate(); err != nil {
+			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
+		}
+	}
+	if v, ok := tu.mutation.GetOp(); ok {
+		if err := enttask.OpValidator(v); err != nil {
+			return &ValidationError{Name: "op", err: fmt.Errorf(`ent: validator failed for field "Task.op": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (tu *TaskUpdate) gremlinSave(ctx context.Context) (int, error) {
+	if err := tu.check(); err != nil {
+		return 0, err
+	}
 	res := &gremlin.Response{}
 	query, bindings := tu.gremlin().Query()
 	if err := tu.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -238,6 +271,9 @@ func (tu *TaskUpdate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := tu.mutation.AddedOrderOption(); ok {
 		v.Property(dsl.Single, enttask.FieldOrderOption, __.Union(__.Values(enttask.FieldOrderOption), __.Constant(value)).Sum())
+	}
+	if value, ok := tu.mutation.GetOp(); ok {
+		v.Property(dsl.Single, enttask.FieldOp, value)
 	}
 	var properties []any
 	if tu.mutation.PrioritiesCleared() {
@@ -398,6 +434,20 @@ func (tuo *TaskUpdateOne) ClearOrderOption() *TaskUpdateOne {
 	return tuo
 }
 
+// SetOp sets the "op" field.
+func (tuo *TaskUpdateOne) SetOp(s string) *TaskUpdateOne {
+	tuo.mutation.SetOpField(s)
+	return tuo
+}
+
+// SetNillableOp sets the "op" field if the given value is not nil.
+func (tuo *TaskUpdateOne) SetNillableOp(s *string) *TaskUpdateOne {
+	if s != nil {
+		tuo.SetOp(*s)
+	}
+	return tuo
+}
+
 // Mutation returns the TaskMutation object of the builder.
 func (tuo *TaskUpdateOne) Mutation() *TaskMutation {
 	return tuo.mutation
@@ -443,7 +493,25 @@ func (tuo *TaskUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (tuo *TaskUpdateOne) check() error {
+	if v, ok := tuo.mutation.Priority(); ok {
+		if err := v.Validate(); err != nil {
+			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
+		}
+	}
+	if v, ok := tuo.mutation.GetOp(); ok {
+		if err := enttask.OpValidator(v); err != nil {
+			return &ValidationError{Name: "op", err: fmt.Errorf(`ent: validator failed for field "Task.op": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (tuo *TaskUpdateOne) gremlinSave(ctx context.Context) (*Task, error) {
+	if err := tuo.check(); err != nil {
+		return nil, err
+	}
 	res := &gremlin.Response{}
 	id, ok := tuo.mutation.ID()
 	if !ok {
@@ -495,6 +563,9 @@ func (tuo *TaskUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if value, ok := tuo.mutation.AddedOrderOption(); ok {
 		v.Property(dsl.Single, enttask.FieldOrderOption, __.Union(__.Values(enttask.FieldOrderOption), __.Constant(value)).Sum())
+	}
+	if value, ok := tuo.mutation.GetOp(); ok {
+		v.Property(dsl.Single, enttask.FieldOp, value)
 	}
 	var properties []any
 	if tuo.mutation.PrioritiesCleared() {

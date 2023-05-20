@@ -34,6 +34,8 @@ type Task struct {
 	Order int `json:"order,omitempty"`
 	// OrderOption holds the value of the "order_option" field.
 	OrderOption int `json:"order_option,omitempty"`
+	// Op holds the value of the "op" field.
+	Op string `json:"op,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into Task.
@@ -51,6 +53,7 @@ func (t *Task) FromResponse(res *gremlin.Response) error {
 		Owner       string                   `json:"owner,omitempty"`
 		Order       int                      `json:"order,omitempty"`
 		OrderOption int                      `json:"order_option,omitempty"`
+		Op          string                   `json:"op,omitempty"`
 	}
 	if err := vmap.Decode(&scant); err != nil {
 		return err
@@ -64,6 +67,7 @@ func (t *Task) FromResponse(res *gremlin.Response) error {
 	t.Owner = scant.Owner
 	t.Order = scant.Order
 	t.OrderOption = scant.OrderOption
+	t.Op = scant.Op
 	return nil
 }
 
@@ -112,6 +116,9 @@ func (t *Task) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("order_option=")
 	builder.WriteString(fmt.Sprintf("%v", t.OrderOption))
+	builder.WriteString(", ")
+	builder.WriteString("op=")
+	builder.WriteString(t.Op)
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -134,6 +141,7 @@ func (t *Tasks) FromResponse(res *gremlin.Response) error {
 		Owner       string                   `json:"owner,omitempty"`
 		Order       int                      `json:"order,omitempty"`
 		OrderOption int                      `json:"order_option,omitempty"`
+		Op          string                   `json:"op,omitempty"`
 	}
 	if err := vmap.Decode(&scant); err != nil {
 		return err
@@ -148,6 +156,7 @@ func (t *Tasks) FromResponse(res *gremlin.Response) error {
 		node.Owner = v.Owner
 		node.Order = v.Order
 		node.OrderOption = v.OrderOption
+		node.Op = v.Op
 		*t = append(*t, node)
 	}
 	return nil

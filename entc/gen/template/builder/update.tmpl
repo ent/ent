@@ -244,7 +244,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 						}
 					{{- end }}
 					v := {{ $.Package }}.{{ $f.UpdateDefaultName }}()
-					{{ $mutation }}.Set{{ $f.StructField }}(v)
+					{{ $mutation }}.{{ $f.MutationSet }}(v)
 				}
 			{{- end }}
 		{{- end }}

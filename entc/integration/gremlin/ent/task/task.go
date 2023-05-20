@@ -32,6 +32,8 @@ const (
 	FieldOrder = "order"
 	// FieldOrderOption holds the string denoting the order_option field in the database.
 	FieldOrderOption = "order_option"
+	// FieldOp holds the string denoting the op field in the database.
+	FieldOp = "op"
 )
 
 var (
@@ -39,6 +41,10 @@ var (
 	DefaultPriority task.Priority
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
+	// DefaultOp holds the default value on creation for the "op" field.
+	DefaultOp string
+	// OpValidator is a validator for the "op" field. It is called by the builders before save.
+	OpValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the Task queries.

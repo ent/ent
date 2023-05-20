@@ -354,6 +354,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			enttask.FieldOwner:       {Type: field.TypeString, Column: enttask.FieldOwner},
 			enttask.FieldOrder:       {Type: field.TypeInt, Column: enttask.FieldOrder},
 			enttask.FieldOrderOption: {Type: field.TypeInt, Column: enttask.FieldOrderOption},
+			enttask.FieldOp:          {Type: field.TypeString, Column: enttask.FieldOp},
 		},
 	}
 	graph.Nodes[16] = &sqlgraph.Node{
@@ -2156,6 +2157,11 @@ func (f *TaskFilter) WhereOrder(p entql.IntP) {
 // WhereOrderOption applies the entql int predicate on the order_option field.
 func (f *TaskFilter) WhereOrderOption(p entql.IntP) {
 	f.Where(p.Field(enttask.FieldOrderOption))
+}
+
+// WhereOp applies the entql string predicate on the op field.
+func (f *TaskFilter) WhereOp(p entql.StringP) {
+	f.Where(p.Field(enttask.FieldOp))
 }
 
 // addPredicate implements the predicateAdder interface.

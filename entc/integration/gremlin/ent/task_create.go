@@ -116,6 +116,20 @@ func (tc *TaskCreate) SetNillableOrderOption(i *int) *TaskCreate {
 	return tc
 }
 
+// SetOp sets the "op" field.
+func (tc *TaskCreate) SetOp(s string) *TaskCreate {
+	tc.mutation.SetOpField(s)
+	return tc
+}
+
+// SetNillableOp sets the "op" field if the given value is not nil.
+func (tc *TaskCreate) SetNillableOp(s *string) *TaskCreate {
+	if s != nil {
+		tc.SetOp(*s)
+	}
+	return tc
+}
+
 // Mutation returns the TaskMutation object of the builder.
 func (tc *TaskCreate) Mutation() *TaskMutation {
 	return tc.mutation
@@ -159,6 +173,10 @@ func (tc *TaskCreate) defaults() {
 		v := enttask.DefaultCreatedAt()
 		tc.mutation.SetCreatedAt(v)
 	}
+	if _, ok := tc.mutation.GetOp(); !ok {
+		v := enttask.DefaultOp
+		tc.mutation.SetOpField(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -173,6 +191,14 @@ func (tc *TaskCreate) check() error {
 	}
 	if _, ok := tc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Task.created_at"`)}
+	}
+	if _, ok := tc.mutation.GetOp(); !ok {
+		return &ValidationError{Name: "op", err: errors.New(`ent: missing required field "Task.op"`)}
+	}
+	if v, ok := tc.mutation.GetOp(); ok {
+		if err := enttask.OpValidator(v); err != nil {
+			return &ValidationError{Name: "op", err: fmt.Errorf(`ent: validator failed for field "Task.op": %w`, err)}
+		}
 	}
 	return nil
 }
@@ -220,6 +246,9 @@ func (tc *TaskCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := tc.mutation.OrderOption(); ok {
 		v.Property(dsl.Single, enttask.FieldOrderOption, value)
+	}
+	if value, ok := tc.mutation.GetOp(); ok {
+		v.Property(dsl.Single, enttask.FieldOp, value)
 	}
 	return v.ValueMap(true)
 }
