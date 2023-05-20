@@ -85,7 +85,7 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
 						}
 					{{- end }}
 					v := {{ $.Package }}.{{ $f.DefaultName }}{{ if $f.DefaultFunc }}(){{ end }}
-					{{ $mutation }}.Set{{ $f.StructField }}(v)
+					{{ $mutation }}.{{ $f.MutationSet }}(v)
 				}
 			{{- end }}
 		{{- end }}

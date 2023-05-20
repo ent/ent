@@ -32,6 +32,8 @@ const (
 	FieldOrder = "order"
 	// FieldOrderOption holds the string denoting the order_option field in the database.
 	FieldOrderOption = "order_option"
+	// FieldOp holds the string denoting the op field in the database.
+	FieldOp = "op"
 	// Table holds the table name of the task in the database.
 	Table = "tasks"
 )
@@ -46,6 +48,7 @@ var Columns = []string{
 	FieldOwner,
 	FieldOrder,
 	FieldOrderOption,
+	FieldOp,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -63,6 +66,10 @@ var (
 	DefaultPriority task.Priority
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
+	// DefaultOp holds the default value on creation for the "op" field.
+	DefaultOp string
+	// OpValidator is a validator for the "op" field. It is called by the builders before save.
+	OpValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the Task queries.
@@ -101,6 +108,11 @@ func ByOrder(opts ...sql.OrderTermOption) OrderOption {
 // ByOrderOption orders the results by the order_option field.
 func ByOrderOption(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOrderOption, opts...).ToFunc()
+}
+
+// ByOp orders the results by the op field.
+func ByOp(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOp, opts...).ToFunc()
 }
 
 // comment from another template.

@@ -413,6 +413,7 @@ var (
 		{Name: "owner", Type: field.TypeString, Nullable: true},
 		{Name: "order", Type: field.TypeInt, Nullable: true},
 		{Name: "order_option", Type: field.TypeInt, Nullable: true},
+		{Name: "op", Type: field.TypeString, Size: 45, Default: ""},
 	}
 	// TasksTable holds the schema information for the "tasks" table.
 	TasksTable = &schema.Table{

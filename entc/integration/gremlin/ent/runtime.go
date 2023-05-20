@@ -290,6 +290,12 @@ func init() {
 	enttaskDescCreatedAt := enttaskFields[2].Descriptor()
 	// enttask.DefaultCreatedAt holds the default value on creation for the created_at field.
 	enttask.DefaultCreatedAt = enttaskDescCreatedAt.Default.(func() time.Time)
+	// enttaskDescOp is the schema descriptor for op field.
+	enttaskDescOp := enttaskFields[7].Descriptor()
+	// enttask.DefaultOp holds the default value on creation for the op field.
+	enttask.DefaultOp = enttaskDescOp.Default.(string)
+	// enttask.OpValidator is a validator for the "op" field. It is called by the builders before save.
+	enttask.OpValidator = enttaskDescOp.Validators[0].(func(string) error)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
 	_ = userMixinFields0

@@ -117,6 +117,20 @@ func (tc *TaskCreate) SetNillableOrderOption(i *int) *TaskCreate {
 	return tc
 }
 
+// SetOp sets the "op" field.
+func (tc *TaskCreate) SetOp(s string) *TaskCreate {
+	tc.mutation.SetOpField(s)
+	return tc
+}
+
+// SetNillableOp sets the "op" field if the given value is not nil.
+func (tc *TaskCreate) SetNillableOp(s *string) *TaskCreate {
+	if s != nil {
+		tc.SetOp(*s)
+	}
+	return tc
+}
+
 // Mutation returns the TaskMutation object of the builder.
 func (tc *TaskCreate) Mutation() *TaskMutation {
 	return tc.mutation
@@ -160,6 +174,10 @@ func (tc *TaskCreate) defaults() {
 		v := enttask.DefaultCreatedAt()
 		tc.mutation.SetCreatedAt(v)
 	}
+	if _, ok := tc.mutation.GetOp(); !ok {
+		v := enttask.DefaultOp
+		tc.mutation.SetOpField(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -174,6 +192,14 @@ func (tc *TaskCreate) check() error {
 	}
 	if _, ok := tc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Task.created_at"`)}
+	}
+	if _, ok := tc.mutation.GetOp(); !ok {
+		return &ValidationError{Name: "op", err: errors.New(`ent: missing required field "Task.op"`)}
+	}
+	if v, ok := tc.mutation.GetOp(); ok {
+		if err := enttask.OpValidator(v); err != nil {
+			return &ValidationError{Name: "op", err: fmt.Errorf(`ent: validator failed for field "Task.op": %w`, err)}
+		}
 	}
 	return nil
 }
@@ -229,6 +255,10 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 	if value, ok := tc.mutation.OrderOption(); ok {
 		_spec.SetField(enttask.FieldOrderOption, field.TypeInt, value)
 		_node.OrderOption = value
+	}
+	if value, ok := tc.mutation.GetOp(); ok {
+		_spec.SetField(enttask.FieldOp, field.TypeString, value)
+		_node.Op = value
 	}
 	return _node, _spec
 }
@@ -399,6 +429,18 @@ func (u *TaskUpsert) AddOrderOption(v int) *TaskUpsert {
 // ClearOrderOption clears the value of the "order_option" field.
 func (u *TaskUpsert) ClearOrderOption() *TaskUpsert {
 	u.SetNull(enttask.FieldOrderOption)
+	return u
+}
+
+// SetOp sets the "op" field.
+func (u *TaskUpsert) SetOp(v string) *TaskUpsert {
+	u.Set(enttask.FieldOp, v)
+	return u
+}
+
+// UpdateOp sets the "op" field to the value that was provided on create.
+func (u *TaskUpsert) UpdateOp() *TaskUpsert {
+	u.SetExcluded(enttask.FieldOp)
 	return u
 }
 
@@ -584,6 +626,20 @@ func (u *TaskUpsertOne) UpdateOrderOption() *TaskUpsertOne {
 func (u *TaskUpsertOne) ClearOrderOption() *TaskUpsertOne {
 	return u.Update(func(s *TaskUpsert) {
 		s.ClearOrderOption()
+	})
+}
+
+// SetOp sets the "op" field.
+func (u *TaskUpsertOne) SetOp(v string) *TaskUpsertOne {
+	return u.Update(func(s *TaskUpsert) {
+		s.SetOp(v)
+	})
+}
+
+// UpdateOp sets the "op" field to the value that was provided on create.
+func (u *TaskUpsertOne) UpdateOp() *TaskUpsertOne {
+	return u.Update(func(s *TaskUpsert) {
+		s.UpdateOp()
 	})
 }
 
@@ -931,6 +987,20 @@ func (u *TaskUpsertBulk) UpdateOrderOption() *TaskUpsertBulk {
 func (u *TaskUpsertBulk) ClearOrderOption() *TaskUpsertBulk {
 	return u.Update(func(s *TaskUpsert) {
 		s.ClearOrderOption()
+	})
+}
+
+// SetOp sets the "op" field.
+func (u *TaskUpsertBulk) SetOp(v string) *TaskUpsertBulk {
+	return u.Update(func(s *TaskUpsert) {
+		s.SetOp(v)
+	})
+}
+
+// UpdateOp sets the "op" field to the value that was provided on create.
+func (u *TaskUpsertBulk) UpdateOp() *TaskUpsertBulk {
+	return u.Update(func(s *TaskUpsert) {
+		s.UpdateOp()
 	})
 }
 

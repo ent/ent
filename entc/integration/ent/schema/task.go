@@ -39,6 +39,9 @@ func (Task) Fields() []ent.Field {
 			Optional(),
 		field.Int("order_option").
 			Optional(),
+		field.String("op").
+			MaxLen(45).
+			Default(""),
 	}
 }
 

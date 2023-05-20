@@ -14109,6 +14109,7 @@ type TaskMutation struct {
 	add_order       *int
 	order_option    *int
 	addorder_option *int
+	_op             *string
 	clearedFields   map[string]struct{}
 	done            bool
 	oldValue        func(context.Context) (*Task, error)
@@ -14592,6 +14593,42 @@ func (m *TaskMutation) ResetOrderOption() {
 	delete(m.clearedFields, enttask.FieldOrderOption)
 }
 
+// SetOpField sets the "op" field.
+func (m *TaskMutation) SetOpField(s string) {
+	m._op = &s
+}
+
+// GetOp returns the value of the "op" field in the mutation.
+func (m *TaskMutation) GetOp() (r string, exists bool) {
+	v := m._op
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOp returns the old "op" field's value of the Task entity.
+// If the Task object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TaskMutation) OldOp(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOp is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOp requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOp: %w", err)
+	}
+	return oldValue.Op, nil
+}
+
+// ResetOp resets all changes to the "op" field.
+func (m *TaskMutation) ResetOp() {
+	m._op = nil
+}
+
 // Where appends a list predicates to the TaskMutation builder.
 func (m *TaskMutation) Where(ps ...predicate.Task) {
 	m.predicates = append(m.predicates, ps...)
@@ -14626,7 +14663,7 @@ func (m *TaskMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TaskMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m.priority != nil {
 		fields = append(fields, enttask.FieldPriority)
 	}
@@ -14647,6 +14684,9 @@ func (m *TaskMutation) Fields() []string {
 	}
 	if m.order_option != nil {
 		fields = append(fields, enttask.FieldOrderOption)
+	}
+	if m._op != nil {
+		fields = append(fields, enttask.FieldOp)
 	}
 	return fields
 }
@@ -14670,6 +14710,8 @@ func (m *TaskMutation) Field(name string) (ent.Value, bool) {
 		return m.Order()
 	case enttask.FieldOrderOption:
 		return m.OrderOption()
+	case enttask.FieldOp:
+		return m.GetOp()
 	}
 	return nil, false
 }
@@ -14693,6 +14735,8 @@ func (m *TaskMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldOrder(ctx)
 	case enttask.FieldOrderOption:
 		return m.OldOrderOption(ctx)
+	case enttask.FieldOp:
+		return m.OldOp(ctx)
 	}
 	return nil, fmt.Errorf("unknown Task field %s", name)
 }
@@ -14750,6 +14794,13 @@ func (m *TaskMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetOrderOption(v)
+		return nil
+	case enttask.FieldOp:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOpField(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Task field %s", name)
@@ -14892,6 +14943,9 @@ func (m *TaskMutation) ResetField(name string) error {
 		return nil
 	case enttask.FieldOrderOption:
 		m.ResetOrderOption()
+		return nil
+	case enttask.FieldOp:
+		m.ResetOp()
 		return nil
 	}
 	return fmt.Errorf("unknown Task field %s", name)
