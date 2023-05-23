@@ -239,7 +239,7 @@ func (Schema) Policy() Policy { return nil }
 func (Schema) Annotations() []schema.Annotation { return nil }
 
 type (
-	// Value represents a value returned by ent.
+	// Value represents a dynamic value returned by mutations or queries.
 	Value any
 
 	// Mutation represents an operation that mutate the graph.
@@ -328,7 +328,14 @@ type (
 
 	// Mutator is the interface that wraps the Mutate method.
 	Mutator interface {
-		// Mutate apply the given mutation on the graph.
+		// Mutate apply the given mutation on the graph. The returned
+		// ent.Value is changing according to the mutation operation:
+		//
+		// OpCreate, the returned value is the created node (T).
+		// OpUpdateOne, the returned value is the updated node (T).
+		// OpUpdate, the returned value is the amount of updated nodes (int).
+		// OpDeleteOne, OpDelete, the returned value is the amount of deleted nodes (int).
+		//
 		Mutate(context.Context, Mutation) (Value, error)
 	}
 
