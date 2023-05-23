@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"go/token"
 	"path/filepath"
 	"reflect"
 	"sort"
@@ -238,11 +237,7 @@ func receiver(s string) (r string) {
 			break
 		}
 	}
-	name := strings.ToLower(s)
-	if token.Lookup(name).IsKeyword() {
-		name = "_" + name
-	}
-	return name
+	return "_" + strings.ToLower(s)
 }
 
 // typeScope wraps the Type object with extended scope.
