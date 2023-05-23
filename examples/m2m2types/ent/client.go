@@ -107,7 +107,7 @@ func Open(driverName, dataSourceName string, options ...Option) (*Client, error)
 		if err != nil {
 			return nil, err
 		}
-		return NewClient(append(options, Driver(drv))...), nil
+		return NewClient(append([]Option{Driver(drv)}, options...)...), nil
 	default:
 		return nil, fmt.Errorf("unsupported driver: %q", driverName)
 	}
