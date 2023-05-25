@@ -350,6 +350,16 @@ var (
 			},
 		},
 	}
+	// PcsColumns holds the columns for the "pcs" table.
+	PcsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+	}
+	// PcsTable holds the schema information for the "pcs" table.
+	PcsTable = &schema.Table{
+		Name:       "pcs",
+		Columns:    PcsColumns,
+		PrimaryKey: []*schema.Column{PcsColumns[0]},
+	}
 	// PetColumns holds the columns for the "pet" table.
 	PetColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -588,6 +598,7 @@ var (
 		ItemsTable,
 		LicensesTable,
 		NodesTable,
+		PcsTable,
 		PetTable,
 		SpecsTable,
 		TasksTable,

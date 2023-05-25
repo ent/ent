@@ -213,13 +213,13 @@ func (cc *CardCreate) gremlinSave(ctx context.Context) (*Card, error) {
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	c := &Card{config: cc.config}
-	if err := c.FromResponse(res); err != nil {
+	rnode := &Card{config: cc.config}
+	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	cc.mutation.id = &c.ID
+	cc.mutation.id = &rnode.ID
 	cc.mutation.done = true
-	return c, nil
+	return rnode, nil
 }
 
 func (cc *CardCreate) gremlin() *dsl.Traversal {

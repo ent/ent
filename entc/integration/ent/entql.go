@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/item"
 	"entgo.io/ent/entc/integration/ent/license"
 	"entgo.io/ent/entc/integration/ent/node"
+	"entgo.io/ent/entc/integration/ent/pc"
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/spec"
@@ -34,7 +35,7 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 17)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 18)}
 	graph.Nodes[0] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   api.Table,
@@ -308,6 +309,18 @@ var schemaGraph = func() *sqlgraph.Schema {
 	}
 	graph.Nodes[13] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
+			Table:   pc.Table,
+			Columns: pc.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: pc.FieldID,
+			},
+		},
+		Type:   "PC",
+		Fields: map[string]*sqlgraph.FieldSpec{},
+	}
+	graph.Nodes[14] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
 			Table:   pet.Table,
 			Columns: pet.Columns,
 			ID: &sqlgraph.FieldSpec{
@@ -324,7 +337,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			pet.FieldTrained:  {Type: field.TypeBool, Column: pet.FieldTrained},
 		},
 	}
-	graph.Nodes[14] = &sqlgraph.Node{
+	graph.Nodes[15] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   spec.Table,
 			Columns: spec.Columns,
@@ -336,7 +349,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Type:   "Spec",
 		Fields: map[string]*sqlgraph.FieldSpec{},
 	}
-	graph.Nodes[15] = &sqlgraph.Node{
+	graph.Nodes[16] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   enttask.Table,
 			Columns: enttask.Columns,
@@ -357,7 +370,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			enttask.FieldOp:          {Type: field.TypeString, Column: enttask.FieldOp},
 		},
 	}
-	graph.Nodes[16] = &sqlgraph.Node{
+	graph.Nodes[17] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
@@ -1938,6 +1951,46 @@ func (f *NodeFilter) WhereHasNextWith(preds ...predicate.Node) {
 }
 
 // addPredicate implements the predicateAdder interface.
+func (pq *PCQuery) addPredicate(pred func(s *sql.Selector)) {
+	pq.predicates = append(pq.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the PCQuery builder.
+func (pq *PCQuery) Filter() *PCFilter {
+	return &PCFilter{config: pq.config, predicateAdder: pq}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *PCMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the PCMutation builder.
+func (m *PCMutation) Filter() *PCFilter {
+	return &PCFilter{config: m.config, predicateAdder: m}
+}
+
+// PCFilter provides a generic filtering capability at runtime for PCQuery.
+type PCFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *PCFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[13].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql int predicate on the id field.
+func (f *PCFilter) WhereID(p entql.IntP) {
+	f.Where(p.Field(pc.FieldID))
+}
+
+// addPredicate implements the predicateAdder interface.
 func (pq *PetQuery) addPredicate(pred func(s *sql.Selector)) {
 	pq.predicates = append(pq.predicates, pred)
 }
@@ -1966,7 +2019,7 @@ type PetFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *PetFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[13].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[14].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -2059,7 +2112,7 @@ type SpecFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *SpecFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[14].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[15].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -2113,7 +2166,7 @@ type TaskFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TaskFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[15].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[16].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -2193,7 +2246,7 @@ type UserFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[16].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[17].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})

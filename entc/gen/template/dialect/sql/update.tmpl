@@ -18,7 +18,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/sql/update" }}
 {{ $pkg := $.Scope.Package }}
 {{ $builder := pascal $.Scope.Builder }}
-{{ $receiver := receiver $builder }}
+{{ $receiver := $.Scope.Receiver }}
 {{ $mutation := print $receiver ".mutation" }}
 {{ $one := hasSuffix $builder "One" }}
 {{- $zero := 0 }}{{ if $one }}{{ $zero = "nil" }}{{ end }}
@@ -186,7 +186,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 
 {{ define "dialect/sql/defedge" }}
 	{{- $e := $.Scope.Edge -}}
-	{{- $receiver := pascal $.Scope.Builder | receiver -}}
+	{{- $receiver := $.Scope.Receiver -}}
 	edge := &sqlgraph.EdgeSpec{
 		Rel: sqlgraph.{{ $e.Rel.Type }},
 		Inverse: {{ $e.IsInverse }},

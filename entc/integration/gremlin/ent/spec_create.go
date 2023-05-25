@@ -86,13 +86,13 @@ func (sc *SpecCreate) gremlinSave(ctx context.Context) (*Spec, error) {
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	s := &Spec{config: sc.config}
-	if err := s.FromResponse(res); err != nil {
+	rnode := &Spec{config: sc.config}
+	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	sc.mutation.id = &s.ID
+	sc.mutation.id = &rnode.ID
 	sc.mutation.done = true
-	return s, nil
+	return rnode, nil
 }
 
 func (sc *SpecCreate) gremlin() *dsl.Traversal {

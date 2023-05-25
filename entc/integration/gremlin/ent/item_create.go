@@ -121,13 +121,13 @@ func (ic *ItemCreate) gremlinSave(ctx context.Context) (*Item, error) {
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	i := &Item{config: ic.config}
-	if err := i.FromResponse(res); err != nil {
+	rnode := &Item{config: ic.config}
+	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	ic.mutation.id = &i.ID
+	ic.mutation.id = &rnode.ID
 	ic.mutation.done = true
-	return i, nil
+	return rnode, nil
 }
 
 func (ic *ItemCreate) gremlin() *dsl.Traversal {

@@ -16,7 +16,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ end }}
 
 {{ $builder := $.UpdateName }}
-{{ $receiver := receiver $builder }}
+{{ $receiver := $.UpdateReceiver }}
 {{ $mutation := print $receiver ".mutation" }}
 {{ $runtimeRequired := or $.NumHooks $.NumPolicy }}
 
@@ -32,11 +32,11 @@ func ({{ $receiver}} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $b
 	return {{ $receiver }}
 }
 
-{{ with extend $ "Builder" $builder }}
+{{ with extend $ "Receiver" $receiver "Builder" $builder }}
 	{{ template "setter" . }}
 {{ end }}
 
-{{ with extend $ "Builder" $builder }}
+{{ with extend $ "Receiver" $receiver "Builder" $builder }}
 	{{ template "update/edges" . }}
 {{ end }}
 
@@ -80,7 +80,7 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
 	{{ template "update/checks" . }}
 {{ end }}
 
-{{ with extend $ "Builder" $builder "Package" $pkg }}
+{{ with extend $ "Receiver" $receiver "Builder" $builder "Package" $pkg }}
 	{{ $tmpl := printf "dialect/%s/update" $.Storage }}
 	{{ xtemplate $tmpl . }}
 {{ end }}
@@ -96,12 +96,12 @@ type {{ $onebuilder }} struct {
 	{{- template "update/fields" $ }}
 }
 
-{{ with extend $ "Builder" $onebuilder }}
+{{ with extend $ "Receiver" $receiver "Builder" $onebuilder }}
 	{{ template "setter" . }}
 {{ end }}
 
 
-{{ with extend $ "Builder" $onebuilder }}
+{{ with extend $ "Receiver" $receiver "Builder" $onebuilder }}
 	{{ template "update/edges" . }}
 {{ end }}
 
@@ -158,7 +158,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 	{{ template "update/checks" . }}
 {{ end }}
 
-{{ with extend $ "Builder" $onebuilder "Package" $pkg }}
+{{ with extend $ "Receiver" $receiver "Builder" $onebuilder "Package" $pkg }}
 	{{ $tmpl := printf "dialect/%s/update" $.Storage }}
 	{{ xtemplate $tmpl . }}
 {{ end }}
@@ -186,7 +186,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 {{/* shared edges removal between the two updaters */}}
 {{ define "update/edges" }}
 {{ $builder := pascal .Scope.Builder }}
-{{ $receiver := receiver $builder }}
+{{ $receiver := .Scope.Receiver }}
 {{ $mutation := print $receiver ".mutation" }}
 
 {{ range $e := $.EdgesWithID }}

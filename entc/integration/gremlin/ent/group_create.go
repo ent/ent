@@ -227,13 +227,13 @@ func (gc *GroupCreate) gremlinSave(ctx context.Context) (*Group, error) {
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	gr := &Group{config: gc.config}
-	if err := gr.FromResponse(res); err != nil {
+	rnode := &Group{config: gc.config}
+	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	gc.mutation.id = &gr.ID
+	gc.mutation.id = &rnode.ID
 	gc.mutation.done = true
-	return gr, nil
+	return rnode, nil
 }
 
 func (gc *GroupCreate) gremlin() *dsl.Traversal {

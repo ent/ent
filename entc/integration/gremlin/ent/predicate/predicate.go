@@ -60,6 +60,9 @@ type License func(*dsl.Traversal)
 // Node is the predicate function for node builders.
 type Node func(*dsl.Traversal)
 
+// PC is the predicate function for pc builders.
+type PC func(*dsl.Traversal)
+
 // Pet is the predicate function for pet builders.
 type Pet func(*dsl.Traversal)
 

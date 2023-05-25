@@ -9,7 +9,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/gremlin/update" }}
 {{ $pkg := $.Scope.Package }}
 {{ $builder := pascal $.Scope.Builder }}
-{{ $receiver := receiver $builder }}
+{{ $receiver := $.Scope.Receiver }}
 {{ $mutation := print $receiver ".mutation" }}
 {{ $one := hasSuffix $builder "One" }}
 {{ $zero := 0 }}{{ if $one }}{{ $zero = "nil" }}{{ end }}

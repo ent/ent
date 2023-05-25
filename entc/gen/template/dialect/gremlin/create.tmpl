@@ -8,7 +8,7 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/gremlin/create" }}
 {{ $builder := pascal $.Scope.Builder }}
-{{ $receiver := receiver $builder }}
+{{ $receiver := $.Scope.Receiver }}
 {{ $mutation := print $receiver ".mutation"  }}
 
 func ({{ $receiver }} *{{ $builder }}) gremlinSave(ctx context.Context) (*{{ $.Name }}, error) {
@@ -23,15 +23,15 @@ func ({{ $receiver }} *{{ $builder }}) gremlinSave(ctx context.Context) (*{{ $.N
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	{{ $.Receiver }} := &{{ $.Name }}{config: {{ $receiver }}.config}
-	if err := {{ $.Receiver }}.FromResponse(res); err != nil {
+	rnode := &{{ $.Name }}{config: {{ $receiver }}.config}
+	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
 	{{- if $.HasOneFieldID }}
-		{{ $mutation }}.{{ $.ID.BuilderField }} = &{{ $.Receiver }} .{{ $.ID.StructField }}
+		{{ $mutation }}.{{ $.ID.BuilderField }} = &rnode.{{ $.ID.StructField }}
 		{{ $mutation }}.done = true
 	{{- end }}
-	return {{ $.Receiver }}, nil
+	return rnode, nil
 }
 
 func ({{ $receiver }} *{{ $builder }}) gremlin() *dsl.Traversal {

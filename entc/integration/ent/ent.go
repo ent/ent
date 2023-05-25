@@ -29,6 +29,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/item"
 	"entgo.io/ent/entc/integration/ent/license"
 	"entgo.io/ent/entc/integration/ent/node"
+	"entgo.io/ent/entc/integration/ent/pc"
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/spec"
 
@@ -107,6 +108,7 @@ func checkColumn(table, column string) error {
 			item.Table:        item.ValidColumn,
 			license.Table:     license.ValidColumn,
 			node.Table:        node.ValidColumn,
+			pc.Table:          pc.ValidColumn,
 			pet.Table:         pet.ValidColumn,
 			spec.Table:        spec.ValidColumn,
 			enttask.Table:     enttask.ValidColumn,

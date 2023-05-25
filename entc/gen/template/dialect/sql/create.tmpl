@@ -8,7 +8,7 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/sql/create" }}
 {{ $builder := pascal $.Scope.Builder }}
-{{ $receiver := receiver $builder }}
+{{ $receiver := $.Scope.Receiver }}
 {{ $mutation := print $receiver ".mutation"  }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name }}, error) {
@@ -139,7 +139,7 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 
 {{ define "dialect/sql/create_bulk" }}
 {{ $builder := pascal $.Scope.Builder }}
-{{ $receiver := receiver $builder }}
+{{ $receiver := $.Scope.Receiver }}
 
 // Save creates the {{ $.Name }} entities in the database.
 func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }}, error) {

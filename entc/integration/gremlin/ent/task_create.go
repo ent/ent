@@ -215,13 +215,13 @@ func (tc *TaskCreate) gremlinSave(ctx context.Context) (*Task, error) {
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	t := &Task{config: tc.config}
-	if err := t.FromResponse(res); err != nil {
+	rnode := &Task{config: tc.config}
+	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	tc.mutation.id = &t.ID
+	tc.mutation.id = &rnode.ID
 	tc.mutation.done = true
-	return t, nil
+	return rnode, nil
 }
 
 func (tc *TaskCreate) gremlin() *dsl.Traversal {

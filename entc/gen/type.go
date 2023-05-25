@@ -329,7 +329,11 @@ func (t Type) PackageAlias() string { return t.alias }
 // Receiver returns the receiver name of this node. It makes sure the
 // receiver names doesn't conflict with import names.
 func (t Type) Receiver() string {
-	return receiver(t.Name)
+	r := receiver(t.Name)
+	if t.Package() == r {
+		return "_" + r
+	}
+	return r
 }
 
 // hasEdge returns true if this type as an edge (reverse or assoc)
@@ -822,9 +826,27 @@ func (t Type) CreateName() string {
 	return pascal(t.Name) + "Create"
 }
 
+// CreateReceiver returns the receiver name of the create-builder for this type.
+func (t Type) CreateReceiver() string {
+	r := receiver(t.CreateName())
+	if t.Package() == r {
+		return "_" + r
+	}
+	return r
+}
+
 // CreateBulkName returns the struct name denoting the create-bulk-builder for this type.
 func (t Type) CreateBulkName() string {
 	return pascal(t.Name) + "CreateBulk"
+}
+
+// CreateBulReceiver returns the receiver name of the create-bulk-builder for this type.
+func (t Type) CreateBulReceiver() string {
+	r := receiver(t.CreateBulkName())
+	if t.Package() == r {
+		return "_" + r
+	}
+	return r
 }
 
 // UpdateName returns the struct name denoting the update-builder for this type.
@@ -832,9 +854,27 @@ func (t Type) UpdateName() string {
 	return pascal(t.Name) + "Update"
 }
 
+// UpdateReceiver returns the receiver name of the update-builder for this type.
+func (t Type) UpdateReceiver() string {
+	r := receiver(t.UpdateName())
+	if t.Package() == r {
+		return "_" + r
+	}
+	return r
+}
+
 // UpdateOneName returns the struct name denoting the update-one-builder for this type.
 func (t Type) UpdateOneName() string {
 	return pascal(t.Name) + "UpdateOne"
+}
+
+// UpdateOneReceiver returns the receiver name of the update-one-builder for this type.
+func (t Type) UpdateOneReceiver() string {
+	r := receiver(t.UpdateOneName())
+	if t.Package() == r {
+		return "_" + r
+	}
+	return r
 }
 
 // DeleteName returns the struct name denoting the delete-builder for this type.
@@ -842,9 +882,27 @@ func (t Type) DeleteName() string {
 	return pascal(t.Name) + "Delete"
 }
 
+// DeleteReceiver returns the receiver name of the delete-builder for this type.
+func (t Type) DeleteReceiver() string {
+	r := receiver(t.DeleteName())
+	if t.Package() == r {
+		return "_" + r
+	}
+	return r
+}
+
 // DeleteOneName returns the struct name denoting the delete-one-builder for this type.
 func (t Type) DeleteOneName() string {
 	return pascal(t.Name) + "DeleteOne"
+}
+
+// DeleteOneReceiver returns the receiver name of the delete-one-builder for this type.
+func (t Type) DeleteOneReceiver() string {
+	r := receiver(t.DeleteOneName())
+	if t.Package() == r {
+		return "_" + r
+	}
+	return r
 }
 
 // MutationName returns the struct name of the mutation builder for this type.

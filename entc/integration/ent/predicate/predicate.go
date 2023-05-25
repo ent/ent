@@ -60,6 +60,9 @@ type License func(*sql.Selector)
 // Node is the predicate function for node builders.
 type Node func(*sql.Selector)
 
+// PC is the predicate function for pc builders.
+type PC func(*sql.Selector)
+
 // Pet is the predicate function for pet builders.
 type Pet func(*sql.Selector)
 
