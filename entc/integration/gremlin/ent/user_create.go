@@ -459,13 +459,13 @@ func (uc *UserCreate) gremlinSave(ctx context.Context) (*User, error) {
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	u := &User{config: uc.config}
-	if err := u.FromResponse(res); err != nil {
+	rnode := &User{config: uc.config}
+	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	uc.mutation.id = &u.ID
+	uc.mutation.id = &rnode.ID
 	uc.mutation.done = true
-	return u, nil
+	return rnode, nil
 }
 
 func (uc *UserCreate) gremlin() *dsl.Traversal {

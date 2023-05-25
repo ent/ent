@@ -156,13 +156,13 @@ func (ftc *FileTypeCreate) gremlinSave(ctx context.Context) (*FileType, error) {
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	ft := &FileType{config: ftc.config}
-	if err := ft.FromResponse(res); err != nil {
+	rnode := &FileType{config: ftc.config}
+	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	ftc.mutation.id = &ft.ID
+	ftc.mutation.id = &rnode.ID
 	ftc.mutation.done = true
-	return ft, nil
+	return rnode, nil
 }
 
 func (ftc *FileTypeCreate) gremlin() *dsl.Traversal {

@@ -140,13 +140,13 @@ func (nc *NodeCreate) gremlinSave(ctx context.Context) (*Node, error) {
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	n := &Node{config: nc.config}
-	if err := n.FromResponse(res); err != nil {
+	rnode := &Node{config: nc.config}
+	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	nc.mutation.id = &n.ID
+	nc.mutation.id = &rnode.ID
 	nc.mutation.done = true
-	return n, nil
+	return rnode, nil
 }
 
 func (nc *NodeCreate) gremlin() *dsl.Traversal {

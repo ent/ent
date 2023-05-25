@@ -169,6 +169,18 @@ func (f NodeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.NodeMutation", m)
 }
 
+// The PCFunc type is an adapter to allow the use of ordinary
+// function as PC mutator.
+type PCFunc func(context.Context, *ent.PCMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PCFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PCMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PCMutation", m)
+}
+
 // The PetFunc type is an adapter to allow the use of ordinary
 // function as Pet mutator.
 type PetFunc func(context.Context, *ent.PetMutation) (ent.Value, error)

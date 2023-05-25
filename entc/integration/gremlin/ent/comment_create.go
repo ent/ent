@@ -149,13 +149,13 @@ func (cc *CommentCreate) gremlinSave(ctx context.Context) (*Comment, error) {
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	c := &Comment{config: cc.config}
-	if err := c.FromResponse(res); err != nil {
+	rnode := &Comment{config: cc.config}
+	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	cc.mutation.id = &c.ID
+	cc.mutation.id = &rnode.ID
 	cc.mutation.done = true
-	return c, nil
+	return rnode, nil
 }
 
 func (cc *CommentCreate) gremlin() *dsl.Traversal {

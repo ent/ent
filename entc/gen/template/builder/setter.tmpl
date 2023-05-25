@@ -8,7 +8,7 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "setter" }}
 {{ $builder := pascal $.Scope.Builder }}
-{{ $receiver := receiver $builder }}
+{{ $receiver := $.Scope.Receiver }}
 {{ $fields := $.Fields }}
 {{ $updater := false }}
 {{- if or (hasSuffix $builder "Update") (hasSuffix $builder "UpdateOne") }}

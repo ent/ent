@@ -71,13 +71,13 @@ func (gc *GoodsCreate) gremlinSave(ctx context.Context) (*Goods, error) {
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	_go := &Goods{config: gc.config}
-	if err := _go.FromResponse(res); err != nil {
+	rnode := &Goods{config: gc.config}
+	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	gc.mutation.id = &_go.ID
+	gc.mutation.id = &rnode.ID
 	gc.mutation.done = true
-	return _go, nil
+	return rnode, nil
 }
 
 func (gc *GoodsCreate) gremlin() *dsl.Traversal {

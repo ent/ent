@@ -71,13 +71,13 @@ func (ac *APICreate) gremlinSave(ctx context.Context) (*Api, error) {
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	a := &Api{config: ac.config}
-	if err := a.FromResponse(res); err != nil {
+	rnode := &Api{config: ac.config}
+	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	ac.mutation.id = &a.ID
+	ac.mutation.id = &rnode.ID
 	ac.mutation.done = true
-	return a, nil
+	return rnode, nil
 }
 
 func (ac *APICreate) gremlin() *dsl.Traversal {

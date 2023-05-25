@@ -8,7 +8,7 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/gremlin/delete" }}
 {{ $builder := pascal $.Scope.Builder }}
-{{ $receiver := receiver $builder }}
+{{ $receiver := $.Scope.Receiver }}
 {{ $mutation := print $receiver ".mutation" }}
 
 func ({{ $receiver}} *{{ $builder }}) gremlinExec(ctx context.Context) (int, error) {

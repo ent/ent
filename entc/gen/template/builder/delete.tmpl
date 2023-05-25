@@ -18,7 +18,7 @@ import (
 )
 
 {{ $builder := $.DeleteName }}
-{{ $receiver := receiver $builder }}
+{{ $receiver := $.DeleteReceiver }}
 {{ $mutation := print $receiver ".mutation" }}
 
 // {{ $builder }} is the builder for deleting a {{ $.Name }} entity.
@@ -49,7 +49,7 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) int {
 	return {{ $n }}
 }
 
-{{ with extend $ "Builder" $builder }}
+{{ with extend $ "Receiver" $receiver "Builder" $builder }}
 	{{ $tmpl := printf "dialect/%s/delete" $.Storage }}
 	{{ xtemplate $tmpl . }}
 {{ end }}
@@ -62,7 +62,7 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) int {
 {{- end }}
 
 {{ $onebuilder := $.DeleteOneName }}
-{{ $oneReceiver := receiver $onebuilder }}
+{{ $oneReceiver := $.DeleteOneReceiver }}
 
 // {{ $onebuilder }} is the builder for deleting a single {{ $.Name }} entity.
 type {{ $onebuilder }} struct {

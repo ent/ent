@@ -26,14 +26,14 @@ in the LICENSE file in the root directory of this source tree.
 {{/* Template for passing the "OnConflict" options to the sqlgraph.CreateSpec. */}}
 {{- define "dialect/sql/create/spec/upsert" }}
 	{{- if $.FeatureEnabled "sql/upsert" }}
-		_spec.OnConflict = {{ pascal $.Scope.Builder | receiver }}.conflict
+		_spec.OnConflict = {{ $.Scope.Receiver }}.conflict
 	{{- end }}
 {{- end }}
 
 {{/* Template for passing the "OnConflict" options to the sqlgraph.BatchCreateSpec. */}}
 {{- define "dialect/sql/create_bulk/spec/upsert" }}
 	{{- if $.FeatureEnabled "sql/upsert" }}
-		spec.OnConflict = {{ pascal $.Scope.Builder | receiver }}.conflict
+		spec.OnConflict = {{ $.Scope.Receiver }}.conflict
 	{{- end }}
 {{- end }}
 
@@ -47,7 +47,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "helper/upsertone" }}
 {{ $pkg := base $.Config.Package }}
 {{ $builder := pascal $.Scope.Builder }}
-{{ $receiver := receiver $builder }}
+{{ $receiver := $.Scope.Receiver }}
 {{ $upsertOne := print $.Name "UpsertOne" }}
 {{ $upsertSet := print $.Name "Upsert" }}
 
@@ -264,7 +264,7 @@ func (u *{{ $upsertOne }}) ExecX(ctx context.Context) {
 {{ define "helper/upsertbulk" }}
 {{ $pkg := base $.Config.Package }}
 {{ $builder := pascal $.Scope.Builder }}
-{{ $receiver := receiver $builder }}
+{{ $receiver := $.Scope.Receiver }}
 {{ $upsertBulk := print $.Name "UpsertBulk" }}
 {{ $upsertSet := print $.Name "Upsert" }}
 {{ $udfID := false }}{{ if $.HasOneFieldID }}{{ $udfID = $.ID.UserDefined }}{{ end }}

@@ -31,6 +31,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/item"
 	"entgo.io/ent/entc/integration/ent/license"
 	"entgo.io/ent/entc/integration/ent/node"
+	"entgo.io/ent/entc/integration/ent/pc"
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/spec"
 	enttask "entgo.io/ent/entc/integration/ent/task"
@@ -70,6 +71,8 @@ type Client struct {
 	License *LicenseClient
 	// Node is the client for interacting with the Node builders.
 	Node *NodeClient
+	// PC is the client for interacting with the PC builders.
+	PC *PCClient
 	// Pet is the client for interacting with the Pet builders.
 	Pet *PetClient
 	// Spec is the client for interacting with the Spec builders.
@@ -105,6 +108,7 @@ func (c *Client) init() {
 	c.Item = NewItemClient(c.config)
 	c.License = NewLicenseClient(c.config)
 	c.Node = NewNodeClient(c.config)
+	c.PC = NewPCClient(c.config)
 	c.Pet = NewPetClient(c.config)
 	c.Spec = NewSpecClient(c.config)
 	c.Task = NewTaskClient(c.config)
@@ -204,6 +208,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Item:        NewItemClient(cfg),
 		License:     NewLicenseClient(cfg),
 		Node:        NewNodeClient(cfg),
+		PC:          NewPCClient(cfg),
 		Pet:         NewPetClient(cfg),
 		Spec:        NewSpecClient(cfg),
 		Task:        NewTaskClient(cfg),
@@ -240,6 +245,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Item:        NewItemClient(cfg),
 		License:     NewLicenseClient(cfg),
 		Node:        NewNodeClient(cfg),
+		PC:          NewPCClient(cfg),
 		Pet:         NewPetClient(cfg),
 		Spec:        NewSpecClient(cfg),
 		Task:        NewTaskClient(cfg),
@@ -274,7 +280,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Api, c.Card, c.Comment, c.ExValueScan, c.FieldType, c.File, c.FileType,
-		c.Goods, c.Group, c.GroupInfo, c.Item, c.License, c.Node, c.Pet, c.Spec,
+		c.Goods, c.Group, c.GroupInfo, c.Item, c.License, c.Node, c.PC, c.Pet, c.Spec,
 		c.Task, c.User,
 	} {
 		n.Use(hooks...)
@@ -286,7 +292,7 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Api, c.Card, c.Comment, c.ExValueScan, c.FieldType, c.File, c.FileType,
-		c.Goods, c.Group, c.GroupInfo, c.Item, c.License, c.Node, c.Pet, c.Spec,
+		c.Goods, c.Group, c.GroupInfo, c.Item, c.License, c.Node, c.PC, c.Pet, c.Spec,
 		c.Task, c.User,
 	} {
 		n.Intercept(interceptors...)
@@ -332,6 +338,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.License.mutate(ctx, m)
 	case *NodeMutation:
 		return c.Node.mutate(ctx, m)
+	case *PCMutation:
+		return c.PC.mutate(ctx, m)
 	case *PetMutation:
 		return c.Pet.mutate(ctx, m)
 	case *SpecMutation:
@@ -2087,6 +2095,124 @@ func (c *NodeClient) mutate(ctx context.Context, m *NodeMutation) (Value, error)
 	}
 }
 
+// PCClient is a client for the PC schema.
+type PCClient struct {
+	config
+}
+
+// NewPCClient returns a client for the PC from the given config.
+func NewPCClient(c config) *PCClient {
+	return &PCClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `pc.Hooks(f(g(h())))`.
+func (c *PCClient) Use(hooks ...Hook) {
+	c.hooks.PC = append(c.hooks.PC, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `pc.Intercept(f(g(h())))`.
+func (c *PCClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PC = append(c.inters.PC, interceptors...)
+}
+
+// Create returns a builder for creating a PC entity.
+func (c *PCClient) Create() *PCCreate {
+	mutation := newPCMutation(c.config, OpCreate)
+	return &PCCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PC entities.
+func (c *PCClient) CreateBulk(builders ...*PCCreate) *PCCreateBulk {
+	return &PCCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PC.
+func (c *PCClient) Update() *PCUpdate {
+	mutation := newPCMutation(c.config, OpUpdate)
+	return &PCUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PCClient) UpdateOne(_pc *PC) *PCUpdateOne {
+	mutation := newPCMutation(c.config, OpUpdateOne, withPC(_pc))
+	return &PCUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PCClient) UpdateOneID(id int) *PCUpdateOne {
+	mutation := newPCMutation(c.config, OpUpdateOne, withPCID(id))
+	return &PCUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PC.
+func (c *PCClient) Delete() *PCDelete {
+	mutation := newPCMutation(c.config, OpDelete)
+	return &PCDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PCClient) DeleteOne(_pc *PC) *PCDeleteOne {
+	return c.DeleteOneID(_pc.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PCClient) DeleteOneID(id int) *PCDeleteOne {
+	builder := c.Delete().Where(pc.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PCDeleteOne{builder}
+}
+
+// Query returns a query builder for PC.
+func (c *PCClient) Query() *PCQuery {
+	return &PCQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePC},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PC entity by its id.
+func (c *PCClient) Get(ctx context.Context, id int) (*PC, error) {
+	return c.Query().Where(pc.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PCClient) GetX(ctx context.Context, id int) *PC {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *PCClient) Hooks() []Hook {
+	return c.hooks.PC
+}
+
+// Interceptors returns the client interceptors.
+func (c *PCClient) Interceptors() []Interceptor {
+	return c.inters.PC
+}
+
+func (c *PCClient) mutate(ctx context.Context, m *PCMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PCCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PCUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PCUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PCDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PC mutation op: %q", m.Op())
+	}
+}
+
 // PetClient is a client for the Pet schema.
 type PetClient struct {
 	config
@@ -2787,11 +2913,11 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 type (
 	hooks struct {
 		Api, Card, Comment, ExValueScan, FieldType, File, FileType, Goods, Group,
-		GroupInfo, Item, License, Node, Pet, Spec, Task, User []ent.Hook
+		GroupInfo, Item, License, Node, PC, Pet, Spec, Task, User []ent.Hook
 	}
 	inters struct {
 		Api, Card, Comment, ExValueScan, FieldType, File, FileType, Goods, Group,
-		GroupInfo, Item, License, Node, Pet, Spec, Task, User []ent.Interceptor
+		GroupInfo, Item, License, Node, PC, Pet, Spec, Task, User []ent.Interceptor
 	}
 )
 

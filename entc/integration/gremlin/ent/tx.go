@@ -42,6 +42,8 @@ type Tx struct {
 	License *LicenseClient
 	// Node is the client for interacting with the Node builders.
 	Node *NodeClient
+	// PC is the client for interacting with the PC builders.
+	PC *PCClient
 	// Pet is the client for interacting with the Pet builders.
 	Pet *PetClient
 	// Spec is the client for interacting with the Spec builders.
@@ -194,6 +196,7 @@ func (tx *Tx) init() {
 	tx.Item = NewItemClient(tx.config)
 	tx.License = NewLicenseClient(tx.config)
 	tx.Node = NewNodeClient(tx.config)
+	tx.PC = NewPCClient(tx.config)
 	tx.Pet = NewPetClient(tx.config)
 	tx.Spec = NewSpecClient(tx.config)
 	tx.Task = NewTaskClient(tx.config)
