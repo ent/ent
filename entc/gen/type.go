@@ -1539,14 +1539,21 @@ func (f Field) standardNullType() bool {
 // Column returns the table column. It sets it as a primary key (auto_increment)
 // in case of ID field, unless stated otherwise.
 func (f Field) Column() *schema.Column {
+	// MySQL SQLite PG?
+	autoIncrement := false
+	annotation := f.EntSQL()
+	if annotation != nil && *annotation.Incremental {
+		autoIncrement = true
+	}
 	c := &schema.Column{
-		Name:     f.StorageKey(),
-		Type:     f.Type.Type,
-		Unique:   f.Unique,
-		Nullable: f.Optional,
-		Size:     f.size(),
-		Enums:    f.EnumValues(),
-		Comment:  f.sqlComment(),
+		Name:      f.StorageKey(),
+		Type:      f.Type.Type,
+		Unique:    f.Unique,
+		Increment: autoIncrement,
+		Nullable:  f.Optional,
+		Size:      f.size(),
+		Enums:     f.EnumValues(),
+		Comment:   f.sqlComment(),
 	}
 	switch {
 	case f.Default && (f.Type.Numeric() || f.Type.Type == field.TypeBool):
