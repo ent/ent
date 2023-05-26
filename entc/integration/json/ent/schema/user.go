@@ -45,6 +45,15 @@ func (User) Fields() []ent.Field {
 			Optional(),
 		field.Strings("strings").
 			Optional(),
+		field.Ints("ints_validate").
+			Optional().
+			Validate(validate[int]),
+		field.Floats("floats_validate").
+			Optional().
+			Validate(validate[float64]),
+		field.Strings("strings_validate").
+			Optional().
+			Validate(validate[string]),
 		field.JSON("addr", Addr{}).
 			Sensitive().
 			Optional(),
@@ -107,4 +116,13 @@ func (a Addr) String() string {
 		return ""
 	}
 	return a.Addr.String()
+}
+
+var ErrValidate = errors.New("validation error")
+
+func validate[T int | string | float64](xs []T) error {
+	if xs != nil {
+		return ErrValidate
+	}
+	return nil
 }

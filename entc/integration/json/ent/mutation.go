@@ -37,29 +37,35 @@ const (
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	t             **schema.T
-	url           **url.URL
-	_URLs         *[]*url.URL
-	append_URLs   []*url.URL
-	raw           *json.RawMessage
-	appendraw     json.RawMessage
-	dirs          *[]http.Dir
-	appenddirs    []http.Dir
-	ints          *[]int
-	appendints    []int
-	floats        *[]float64
-	appendfloats  []float64
-	strings       *[]string
-	appendstrings []string
-	addr          *schema.Addr
-	unknown       *any
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*User, error)
-	predicates    []predicate.User
+	op                     Op
+	typ                    string
+	id                     *int
+	t                      **schema.T
+	url                    **url.URL
+	_URLs                  *[]*url.URL
+	append_URLs            []*url.URL
+	raw                    *json.RawMessage
+	appendraw              json.RawMessage
+	dirs                   *[]http.Dir
+	appenddirs             []http.Dir
+	ints                   *[]int
+	appendints             []int
+	floats                 *[]float64
+	appendfloats           []float64
+	strings                *[]string
+	appendstrings          []string
+	ints_validate          *[]int
+	appendints_validate    []int
+	floats_validate        *[]float64
+	appendfloats_validate  []float64
+	strings_validate       *[]string
+	appendstrings_validate []string
+	addr                   *schema.Addr
+	unknown                *any
+	clearedFields          map[string]struct{}
+	done                   bool
+	oldValue               func(context.Context) (*User, error)
+	predicates             []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -634,6 +640,201 @@ func (m *UserMutation) ResetStrings() {
 	delete(m.clearedFields, user.FieldStrings)
 }
 
+// SetIntsValidate sets the "ints_validate" field.
+func (m *UserMutation) SetIntsValidate(i []int) {
+	m.ints_validate = &i
+	m.appendints_validate = nil
+}
+
+// IntsValidate returns the value of the "ints_validate" field in the mutation.
+func (m *UserMutation) IntsValidate() (r []int, exists bool) {
+	v := m.ints_validate
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIntsValidate returns the old "ints_validate" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldIntsValidate(ctx context.Context) (v []int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIntsValidate is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIntsValidate requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIntsValidate: %w", err)
+	}
+	return oldValue.IntsValidate, nil
+}
+
+// AppendIntsValidate adds i to the "ints_validate" field.
+func (m *UserMutation) AppendIntsValidate(i []int) {
+	m.appendints_validate = append(m.appendints_validate, i...)
+}
+
+// AppendedIntsValidate returns the list of values that were appended to the "ints_validate" field in this mutation.
+func (m *UserMutation) AppendedIntsValidate() ([]int, bool) {
+	if len(m.appendints_validate) == 0 {
+		return nil, false
+	}
+	return m.appendints_validate, true
+}
+
+// ClearIntsValidate clears the value of the "ints_validate" field.
+func (m *UserMutation) ClearIntsValidate() {
+	m.ints_validate = nil
+	m.appendints_validate = nil
+	m.clearedFields[user.FieldIntsValidate] = struct{}{}
+}
+
+// IntsValidateCleared returns if the "ints_validate" field was cleared in this mutation.
+func (m *UserMutation) IntsValidateCleared() bool {
+	_, ok := m.clearedFields[user.FieldIntsValidate]
+	return ok
+}
+
+// ResetIntsValidate resets all changes to the "ints_validate" field.
+func (m *UserMutation) ResetIntsValidate() {
+	m.ints_validate = nil
+	m.appendints_validate = nil
+	delete(m.clearedFields, user.FieldIntsValidate)
+}
+
+// SetFloatsValidate sets the "floats_validate" field.
+func (m *UserMutation) SetFloatsValidate(f []float64) {
+	m.floats_validate = &f
+	m.appendfloats_validate = nil
+}
+
+// FloatsValidate returns the value of the "floats_validate" field in the mutation.
+func (m *UserMutation) FloatsValidate() (r []float64, exists bool) {
+	v := m.floats_validate
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFloatsValidate returns the old "floats_validate" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldFloatsValidate(ctx context.Context) (v []float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFloatsValidate is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFloatsValidate requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFloatsValidate: %w", err)
+	}
+	return oldValue.FloatsValidate, nil
+}
+
+// AppendFloatsValidate adds f to the "floats_validate" field.
+func (m *UserMutation) AppendFloatsValidate(f []float64) {
+	m.appendfloats_validate = append(m.appendfloats_validate, f...)
+}
+
+// AppendedFloatsValidate returns the list of values that were appended to the "floats_validate" field in this mutation.
+func (m *UserMutation) AppendedFloatsValidate() ([]float64, bool) {
+	if len(m.appendfloats_validate) == 0 {
+		return nil, false
+	}
+	return m.appendfloats_validate, true
+}
+
+// ClearFloatsValidate clears the value of the "floats_validate" field.
+func (m *UserMutation) ClearFloatsValidate() {
+	m.floats_validate = nil
+	m.appendfloats_validate = nil
+	m.clearedFields[user.FieldFloatsValidate] = struct{}{}
+}
+
+// FloatsValidateCleared returns if the "floats_validate" field was cleared in this mutation.
+func (m *UserMutation) FloatsValidateCleared() bool {
+	_, ok := m.clearedFields[user.FieldFloatsValidate]
+	return ok
+}
+
+// ResetFloatsValidate resets all changes to the "floats_validate" field.
+func (m *UserMutation) ResetFloatsValidate() {
+	m.floats_validate = nil
+	m.appendfloats_validate = nil
+	delete(m.clearedFields, user.FieldFloatsValidate)
+}
+
+// SetStringsValidate sets the "strings_validate" field.
+func (m *UserMutation) SetStringsValidate(s []string) {
+	m.strings_validate = &s
+	m.appendstrings_validate = nil
+}
+
+// StringsValidate returns the value of the "strings_validate" field in the mutation.
+func (m *UserMutation) StringsValidate() (r []string, exists bool) {
+	v := m.strings_validate
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStringsValidate returns the old "strings_validate" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldStringsValidate(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStringsValidate is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStringsValidate requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStringsValidate: %w", err)
+	}
+	return oldValue.StringsValidate, nil
+}
+
+// AppendStringsValidate adds s to the "strings_validate" field.
+func (m *UserMutation) AppendStringsValidate(s []string) {
+	m.appendstrings_validate = append(m.appendstrings_validate, s...)
+}
+
+// AppendedStringsValidate returns the list of values that were appended to the "strings_validate" field in this mutation.
+func (m *UserMutation) AppendedStringsValidate() ([]string, bool) {
+	if len(m.appendstrings_validate) == 0 {
+		return nil, false
+	}
+	return m.appendstrings_validate, true
+}
+
+// ClearStringsValidate clears the value of the "strings_validate" field.
+func (m *UserMutation) ClearStringsValidate() {
+	m.strings_validate = nil
+	m.appendstrings_validate = nil
+	m.clearedFields[user.FieldStringsValidate] = struct{}{}
+}
+
+// StringsValidateCleared returns if the "strings_validate" field was cleared in this mutation.
+func (m *UserMutation) StringsValidateCleared() bool {
+	_, ok := m.clearedFields[user.FieldStringsValidate]
+	return ok
+}
+
+// ResetStringsValidate resets all changes to the "strings_validate" field.
+func (m *UserMutation) ResetStringsValidate() {
+	m.strings_validate = nil
+	m.appendstrings_validate = nil
+	delete(m.clearedFields, user.FieldStringsValidate)
+}
+
 // SetAddr sets the "addr" field.
 func (m *UserMutation) SetAddr(s schema.Addr) {
 	m.addr = &s
@@ -766,7 +967,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 13)
 	if m.t != nil {
 		fields = append(fields, user.FieldT)
 	}
@@ -790,6 +991,15 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.strings != nil {
 		fields = append(fields, user.FieldStrings)
+	}
+	if m.ints_validate != nil {
+		fields = append(fields, user.FieldIntsValidate)
+	}
+	if m.floats_validate != nil {
+		fields = append(fields, user.FieldFloatsValidate)
+	}
+	if m.strings_validate != nil {
+		fields = append(fields, user.FieldStringsValidate)
 	}
 	if m.addr != nil {
 		fields = append(fields, user.FieldAddr)
@@ -821,6 +1031,12 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Floats()
 	case user.FieldStrings:
 		return m.Strings()
+	case user.FieldIntsValidate:
+		return m.IntsValidate()
+	case user.FieldFloatsValidate:
+		return m.FloatsValidate()
+	case user.FieldStringsValidate:
+		return m.StringsValidate()
 	case user.FieldAddr:
 		return m.Addr()
 	case user.FieldUnknown:
@@ -850,6 +1066,12 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldFloats(ctx)
 	case user.FieldStrings:
 		return m.OldStrings(ctx)
+	case user.FieldIntsValidate:
+		return m.OldIntsValidate(ctx)
+	case user.FieldFloatsValidate:
+		return m.OldFloatsValidate(ctx)
+	case user.FieldStringsValidate:
+		return m.OldStringsValidate(ctx)
 	case user.FieldAddr:
 		return m.OldAddr(ctx)
 	case user.FieldUnknown:
@@ -919,6 +1141,27 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetStrings(v)
 		return nil
+	case user.FieldIntsValidate:
+		v, ok := value.([]int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIntsValidate(v)
+		return nil
+	case user.FieldFloatsValidate:
+		v, ok := value.([]float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFloatsValidate(v)
+		return nil
+	case user.FieldStringsValidate:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStringsValidate(v)
+		return nil
 	case user.FieldAddr:
 		v, ok := value.(schema.Addr)
 		if !ok {
@@ -984,6 +1227,15 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldStrings) {
 		fields = append(fields, user.FieldStrings)
 	}
+	if m.FieldCleared(user.FieldIntsValidate) {
+		fields = append(fields, user.FieldIntsValidate)
+	}
+	if m.FieldCleared(user.FieldFloatsValidate) {
+		fields = append(fields, user.FieldFloatsValidate)
+	}
+	if m.FieldCleared(user.FieldStringsValidate) {
+		fields = append(fields, user.FieldStringsValidate)
+	}
 	if m.FieldCleared(user.FieldAddr) {
 		fields = append(fields, user.FieldAddr)
 	}
@@ -1025,6 +1277,15 @@ func (m *UserMutation) ClearField(name string) error {
 	case user.FieldStrings:
 		m.ClearStrings()
 		return nil
+	case user.FieldIntsValidate:
+		m.ClearIntsValidate()
+		return nil
+	case user.FieldFloatsValidate:
+		m.ClearFloatsValidate()
+		return nil
+	case user.FieldStringsValidate:
+		m.ClearStringsValidate()
+		return nil
 	case user.FieldAddr:
 		m.ClearAddr()
 		return nil
@@ -1062,6 +1323,15 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldStrings:
 		m.ResetStrings()
+		return nil
+	case user.FieldIntsValidate:
+		m.ResetIntsValidate()
+		return nil
+	case user.FieldFloatsValidate:
+		m.ResetFloatsValidate()
+		return nil
+	case user.FieldStringsValidate:
+		m.ResetStringsValidate()
 		return nil
 	case user.FieldAddr:
 		m.ResetAddr()

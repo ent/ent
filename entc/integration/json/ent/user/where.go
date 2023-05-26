@@ -126,6 +126,36 @@ func StringsNotNil() predicate.User {
 	return predicate.User(sql.FieldNotNull(FieldStrings))
 }
 
+// IntsValidateIsNil applies the IsNil predicate on the "ints_validate" field.
+func IntsValidateIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldIntsValidate))
+}
+
+// IntsValidateNotNil applies the NotNil predicate on the "ints_validate" field.
+func IntsValidateNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldIntsValidate))
+}
+
+// FloatsValidateIsNil applies the IsNil predicate on the "floats_validate" field.
+func FloatsValidateIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldFloatsValidate))
+}
+
+// FloatsValidateNotNil applies the NotNil predicate on the "floats_validate" field.
+func FloatsValidateNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldFloatsValidate))
+}
+
+// StringsValidateIsNil applies the IsNil predicate on the "strings_validate" field.
+func StringsValidateIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldStringsValidate))
+}
+
+// StringsValidateNotNil applies the NotNil predicate on the "strings_validate" field.
+func StringsValidateNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldStringsValidate))
+}
+
 // AddrIsNil applies the IsNil predicate on the "addr" field.
 func AddrIsNil() predicate.User {
 	return predicate.User(sql.FieldIsNull(FieldAddr))

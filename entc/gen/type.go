@@ -1039,7 +1039,7 @@ func (t *Type) checkField(tf *Field, f *load.Field) (err error) {
 			// Enum types should be named as follows: typepkg.Field.
 			f.Info.Ident = fmt.Sprintf("%s.%s", t.PackageDir(), pascal(f.Name))
 		}
-	case tf.Validators > 0 && !tf.ConvertedToBasic():
+	case tf.Validators > 0 && !tf.ConvertedToBasic() && f.Info.Type != field.TypeJSON:
 		err = fmt.Errorf("GoType %q for field %q must be converted to the basic %q type for validators", tf.Type, f.Name, tf.Type.Type)
 	case ant != nil && ant.Default != "" && (ant.DefaultExpr != "" || ant.DefaultExprs != nil):
 		err = fmt.Errorf("field %q cannot have both default value and default expression annotations", f.Name)
@@ -1804,6 +1804,8 @@ func (f Field) BasicType(ident string) (expr string) {
 		case rt.TypeEqual(nullStringType) || rt.TypeEqual(nullStringPType):
 			expr = fmt.Sprintf("%s.String", ident)
 		}
+	case field.TypeJSON:
+		expr = ident
 	default:
 		if t.Numeric() && rt.Kind >= reflect.Int && rt.Kind <= reflect.Float64 {
 			expr = fmt.Sprintf("%s(%s)", rt.Kind, ident)

@@ -96,18 +96,18 @@ func JSON(name string, typ any) *jsonBuilder {
 }
 
 // Strings returns a new JSON Field with type []string.
-func Strings(name string) *jsonBuilder {
-	return JSON(name, []string{})
+func Strings(name string) *sliceBuilder[string] {
+	return sb[string](name)
 }
 
 // Ints returns a new JSON Field with type []int.
-func Ints(name string) *jsonBuilder {
-	return JSON(name, []int{})
+func Ints(name string) *sliceBuilder[int] {
+	return sb[int](name)
 }
 
 // Floats returns a new JSON Field with type []float.
-func Floats(name string) *jsonBuilder {
-	return JSON(name, []float64{})
+func Floats(name string) *sliceBuilder[float64] {
+	return sb[float64](name)
 }
 
 // Any returns a new JSON Field with type any. Although this field type can be
@@ -807,6 +807,120 @@ func (b *jsonBuilder) Default(v any) *jsonBuilder {
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *jsonBuilder) Descriptor() *Descriptor {
 	return b.desc
+}
+
+type (
+	sliceType interface {
+		int | string | float64
+	}
+	// sliceBuilder is the builder for string slice fields.
+	sliceBuilder[T sliceType] struct {
+		*jsonBuilder
+	}
+)
+
+// Validate adds a validator for this field. Operation fails if the validation fails.
+func (b *sliceBuilder[T]) Validate(fn func([]T) error) *sliceBuilder[T] {
+	b.desc.Validators = append(b.desc.Validators, fn)
+	return b
+}
+
+// StorageKey sets the storage key of the field.
+// In SQL dialects is the column name and Gremlin is the property.
+func (b *sliceBuilder[T]) StorageKey(key string) *sliceBuilder[T] {
+	b.desc.StorageKey = key
+	return b
+}
+
+// Optional indicates that this field is optional on create.
+// Unlike edges, fields are required by default.
+func (b *sliceBuilder[T]) Optional() *sliceBuilder[T] {
+	b.desc.Optional = true
+	return b
+}
+
+// Immutable indicates that this field cannot be updated.
+func (b *sliceBuilder[T]) Immutable() *sliceBuilder[T] {
+	b.desc.Immutable = true
+	return b
+}
+
+// Comment sets the comment of the field.
+func (b *sliceBuilder[T]) Comment(c string) *sliceBuilder[T] {
+	b.desc.Comment = c
+	return b
+}
+
+// Sensitive fields not printable and not serializable.
+func (b *sliceBuilder[T]) Sensitive() *sliceBuilder[T] {
+	b.desc.Sensitive = true
+	return b
+}
+
+// StructTag sets the struct tag of the field.
+func (b *sliceBuilder[T]) StructTag(s string) *sliceBuilder[T] {
+	b.desc.Tag = s
+	return b
+}
+
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for json.
+//
+//	field.Strings("strings").
+//		SchemaType(map[string]string{
+//			dialect.MySQL:		"json",
+//			dialect.Postgres:	"jsonb",
+//		})
+func (b *sliceBuilder[T]) SchemaType(types map[string]string) *sliceBuilder[T] {
+	b.desc.SchemaType = types
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+func (b *sliceBuilder[T]) Annotations(annotations ...schema.Annotation) *sliceBuilder[T] {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
+// Default sets the default value of the field. For example:
+//
+//	field.Strings("names").
+//		Default([]string{"a8m", "masseelch"})
+func (b *sliceBuilder[T]) Default(v []T) *sliceBuilder[T] {
+	b.desc.Default = v
+	return b
+}
+
+// Descriptor implements the ent.Field interface by returning its descriptor.
+func (b *sliceBuilder[T]) Descriptor() *Descriptor {
+	return b.desc
+}
+
+// sb is a generic helper method to share code between Strings, Ints and Floats builder.
+func sb[T sliceType](name string) *sliceBuilder[T] {
+	var typ []T
+	b := &jsonBuilder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{
+			Type: TypeJSON,
+		},
+	}}
+	t := reflect.TypeOf(typ)
+	if t == nil {
+		b.desc.Err = errors.New("expect a Go value as JSON type but got nil")
+		return &sliceBuilder[T]{b}
+	}
+	b.desc.Info.Ident = t.String()
+	b.desc.Info.PkgPath = t.PkgPath()
+	b.desc.goType(typ)
+	b.desc.checkGoType(t)
+	switch t.Kind() {
+	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
+		b.desc.Info.Nillable = true
+		b.desc.Info.PkgPath = pkgPath(t)
+	}
+	return &sliceBuilder[T]{b}
 }
 
 // enumBuilder is the builder for enum fields.

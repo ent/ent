@@ -346,6 +346,50 @@ func TestString_ValueScanner(t *testing.T) {
 	require.True(t, ok)
 }
 
+func TestSlices(t *testing.T) {
+	fd := field.Strings("strings").
+		Default([]string{}).
+		Comment("comment").
+		Validate(func(xs []string) error {
+			return nil
+		}).
+		Descriptor()
+	assert.Equal(t, "strings", fd.Name)
+	assert.Equal(t, field.TypeJSON, fd.Info.Type)
+	assert.NotNil(t, fd.Default)
+	assert.Equal(t, []string{}, fd.Default)
+	assert.Equal(t, "comment", fd.Comment)
+	assert.Len(t, fd.Validators, 1)
+
+	fd = field.Ints("ints").
+		Default([]int{}).
+		Comment("comment").
+		Validate(func(xs []int) error {
+			return nil
+		}).
+		Descriptor()
+	assert.Equal(t, "ints", fd.Name)
+	assert.Equal(t, field.TypeJSON, fd.Info.Type)
+	assert.NotNil(t, fd.Default)
+	assert.Equal(t, []int{}, fd.Default)
+	assert.Equal(t, "comment", fd.Comment)
+	assert.Len(t, fd.Validators, 1)
+
+	fd = field.Floats("floats").
+		Default([]float64{}).
+		Comment("comment").
+		Validate(func(xs []float64) error {
+			return nil
+		}).
+		Descriptor()
+	assert.Equal(t, "floats", fd.Name)
+	assert.Equal(t, field.TypeJSON, fd.Info.Type)
+	assert.NotNil(t, fd.Default)
+	assert.Equal(t, []float64{}, fd.Default)
+	assert.Equal(t, "comment", fd.Comment)
+	assert.Len(t, fd.Validators, 1)
+}
+
 type VString string
 
 func (s *VString) Scan(any) error {

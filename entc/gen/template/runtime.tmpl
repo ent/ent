@@ -195,12 +195,15 @@ func init() {
 			{{- end }}
 			{{- with $f.Validators }}
 				{{- $name := print $pkg "." $f.Validator }}
-				{{- $type :=  printf "func (%s) error" $f.Type.Type }}
+				{{- $type := $f.Type.Type.String }}
+				{{- if $f.IsJSON }}
+					{{- $type = $f.Type.String }}
+				{{- end }}
 				// {{ $name }} is a validator for the "{{ $f.Name }}" field. It is called by the builders before save.
 				{{- if eq $f.Validators 1 }}
-					{{ $name }} = {{ $desc }}.Validators[0].({{ $type }})
+					{{ $name }} = {{ $desc }}.Validators[0].({{ printf "func (%s) error" $type }})
 				{{- else }}
-					{{ $name }} = func() {{ $type }} {
+					{{ $name }} = func() {{ printf "func (%s) error" $type }} {
 						validators := {{ $desc }}.Validators
 						fns := [...]func({{ $f.Type.Type }}) error {
 							{{- range $j, $n := xrange $f.Validators }}
