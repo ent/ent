@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/entc/integration/json/ent/predicate"
 	"entgo.io/ent/entc/integration/json/ent/schema"
 	"entgo.io/ent/entc/integration/json/ent/user"
+	extfield "entgo.io/ent/entc/integration/json/field"
 )
 
 const (
@@ -55,6 +56,7 @@ type UserMutation struct {
 	strings       *[]string
 	appendstrings []string
 	addr          *schema.Addr
+	testField     *extfield.TestField
 	unknown       *any
 	clearedFields map[string]struct{}
 	done          bool
@@ -683,6 +685,55 @@ func (m *UserMutation) ResetAddr() {
 	delete(m.clearedFields, user.FieldAddr)
 }
 
+// SetTestField sets the "testField" field.
+func (m *UserMutation) SetTestField(ef extfield.TestField) {
+	m.testField = &ef
+}
+
+// TestField returns the value of the "testField" field in the mutation.
+func (m *UserMutation) TestField() (r extfield.TestField, exists bool) {
+	v := m.testField
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTestField returns the old "testField" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldTestField(ctx context.Context) (v extfield.TestField, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTestField is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTestField requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTestField: %w", err)
+	}
+	return oldValue.TestField, nil
+}
+
+// ClearTestField clears the value of the "testField" field.
+func (m *UserMutation) ClearTestField() {
+	m.testField = nil
+	m.clearedFields[user.FieldTestField] = struct{}{}
+}
+
+// TestFieldCleared returns if the "testField" field was cleared in this mutation.
+func (m *UserMutation) TestFieldCleared() bool {
+	_, ok := m.clearedFields[user.FieldTestField]
+	return ok
+}
+
+// ResetTestField resets all changes to the "testField" field.
+func (m *UserMutation) ResetTestField() {
+	m.testField = nil
+	delete(m.clearedFields, user.FieldTestField)
+}
+
 // SetUnknown sets the "unknown" field.
 func (m *UserMutation) SetUnknown(a any) {
 	m.unknown = &a
@@ -766,7 +817,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.t != nil {
 		fields = append(fields, user.FieldT)
 	}
@@ -793,6 +844,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.addr != nil {
 		fields = append(fields, user.FieldAddr)
+	}
+	if m.testField != nil {
+		fields = append(fields, user.FieldTestField)
 	}
 	if m.unknown != nil {
 		fields = append(fields, user.FieldUnknown)
@@ -823,6 +877,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Strings()
 	case user.FieldAddr:
 		return m.Addr()
+	case user.FieldTestField:
+		return m.TestField()
 	case user.FieldUnknown:
 		return m.Unknown()
 	}
@@ -852,6 +908,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldStrings(ctx)
 	case user.FieldAddr:
 		return m.OldAddr(ctx)
+	case user.FieldTestField:
+		return m.OldTestField(ctx)
 	case user.FieldUnknown:
 		return m.OldUnknown(ctx)
 	}
@@ -926,6 +984,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAddr(v)
 		return nil
+	case user.FieldTestField:
+		v, ok := value.(extfield.TestField)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTestField(v)
+		return nil
 	case user.FieldUnknown:
 		v, ok := value.(any)
 		if !ok {
@@ -987,6 +1052,9 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldAddr) {
 		fields = append(fields, user.FieldAddr)
 	}
+	if m.FieldCleared(user.FieldTestField) {
+		fields = append(fields, user.FieldTestField)
+	}
 	if m.FieldCleared(user.FieldUnknown) {
 		fields = append(fields, user.FieldUnknown)
 	}
@@ -1028,6 +1096,9 @@ func (m *UserMutation) ClearField(name string) error {
 	case user.FieldAddr:
 		m.ClearAddr()
 		return nil
+	case user.FieldTestField:
+		m.ClearTestField()
+		return nil
 	case user.FieldUnknown:
 		m.ClearUnknown()
 		return nil
@@ -1065,6 +1136,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldAddr:
 		m.ResetAddr()
+		return nil
+	case user.FieldTestField:
+		m.ResetTestField()
 		return nil
 	case user.FieldUnknown:
 		m.ResetUnknown()

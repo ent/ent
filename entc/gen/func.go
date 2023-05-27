@@ -412,10 +412,11 @@ func hasField(v any, name string) bool {
 	return vr.FieldByName(name).IsValid()
 }
 
-// hasImport reports if the package name exists in the predefined import packages.
-func hasImport(name string) bool {
-	_, ok := importPkg[name]
-	return ok
+// hasImport reports if the package exists in the predefined import packages.
+func hasImport(path string) bool {
+	name := filepath.Base(path)
+	existingPath, ok := importPkg[name]
+	return ok && path == existingPath
 }
 
 // trimPackage trims the package name from the given identifier.

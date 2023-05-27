@@ -49,7 +49,7 @@ import (
 	{{- $fields := $.Fields }}{{ if $.HasOneFieldID }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}{{ end }}
 	{{- range $f := $fields }}
 		{{- $pkg := $f.Type.PkgPath }}
-		{{- if and $pkg (not (hasImport (base $pkg))) (not (hasKey $seen $pkg)) }}
+		{{- if and $pkg (not (hasImport $pkg)) (not (hasKey $seen $pkg)) }}
 			{{- $name := $f.Type.PkgName }}
 			{{ if ne $name (base $pkg) }}{{ $name }} {{ end}}"{{ $pkg }}"
 			{{- $seen = set $seen $pkg true }}

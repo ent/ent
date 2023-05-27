@@ -136,6 +136,16 @@ func AddrNotNil() predicate.User {
 	return predicate.User(sql.FieldNotNull(FieldAddr))
 }
 
+// TestFieldIsNil applies the IsNil predicate on the "testField" field.
+func TestFieldIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldTestField))
+}
+
+// TestFieldNotNil applies the NotNil predicate on the "testField" field.
+func TestFieldNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldTestField))
+}
+
 // UnknownIsNil applies the IsNil predicate on the "unknown" field.
 func UnknownIsNil() predicate.User {
 	return predicate.User(sql.FieldIsNull(FieldUnknown))

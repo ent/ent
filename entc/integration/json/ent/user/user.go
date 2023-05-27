@@ -35,6 +35,8 @@ const (
 	FieldStrings = "strings"
 	// FieldAddr holds the string denoting the addr field in the database.
 	FieldAddr = "addr"
+	// FieldTestField holds the string denoting the testfield field in the database.
+	FieldTestField = "test_field"
 	// FieldUnknown holds the string denoting the unknown field in the database.
 	FieldUnknown = "unknown"
 	// Table holds the table name of the user in the database.
@@ -53,6 +55,7 @@ var Columns = []string{
 	FieldFloats,
 	FieldStrings,
 	FieldAddr,
+	FieldTestField,
 	FieldUnknown,
 }
 

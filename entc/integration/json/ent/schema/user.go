@@ -13,6 +13,7 @@ import (
 	"net/url"
 
 	"entgo.io/ent"
+	f "entgo.io/ent/entc/integration/json/field"
 	"entgo.io/ent/schema/field"
 )
 
@@ -47,6 +48,8 @@ func (User) Fields() []ent.Field {
 			Optional(),
 		field.JSON("addr", Addr{}).
 			Sensitive().
+			Optional(),
+		field.JSON("testField", f.TestField{}).
 			Optional(),
 		field.Any("unknown").
 			Optional(),

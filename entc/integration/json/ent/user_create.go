@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/json/ent/schema"
 	"entgo.io/ent/entc/integration/json/ent/user"
+	extfield "entgo.io/ent/entc/integration/json/field"
 	"entgo.io/ent/schema/field"
 )
 
@@ -85,6 +86,20 @@ func (uc *UserCreate) SetAddr(s schema.Addr) *UserCreate {
 func (uc *UserCreate) SetNillableAddr(s *schema.Addr) *UserCreate {
 	if s != nil {
 		uc.SetAddr(*s)
+	}
+	return uc
+}
+
+// SetTestField sets the "testField" field.
+func (uc *UserCreate) SetTestField(ef extfield.TestField) *UserCreate {
+	uc.mutation.SetTestField(ef)
+	return uc
+}
+
+// SetNillableTestField sets the "testField" field if the given value is not nil.
+func (uc *UserCreate) SetNillableTestField(ef *extfield.TestField) *UserCreate {
+	if ef != nil {
+		uc.SetTestField(*ef)
 	}
 	return uc
 }
@@ -206,6 +221,10 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.Addr(); ok {
 		_spec.SetField(user.FieldAddr, field.TypeJSON, value)
 		_node.Addr = value
+	}
+	if value, ok := uc.mutation.TestField(); ok {
+		_spec.SetField(user.FieldTestField, field.TypeJSON, value)
+		_node.TestField = value
 	}
 	if value, ok := uc.mutation.Unknown(); ok {
 		_spec.SetField(user.FieldUnknown, field.TypeJSON, value)
