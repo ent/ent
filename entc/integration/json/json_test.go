@@ -616,6 +616,22 @@ func Predicates(t *testing.T, client *ent.Client) {
 		}).CountX(ctx)
 		require.Equal(t, 4, n)
 	})
+
+	t.Run("Boolean", func(t *testing.T) {
+		users := client.User.Query().
+			Where(func(s *sql.Selector) {
+				s.Where(sqljson.ValueEQ(user.FieldT, true, sqljson.Path("b")))
+			}).
+			AllX(ctx)
+		require.Empty(t, users)
+		client.User.Create().SetT(&schema.T{B: true}).ExecX(ctx)
+		u1 := client.User.Query().
+			Where(func(s *sql.Selector) {
+				s.Where(sqljson.ValueEQ(user.FieldT, true, sqljson.Path("b")))
+			}).
+			OnlyX(ctx)
+		require.True(t, u1.T.B)
+	})
 }
 
 func Order(t *testing.T, client *ent.Client) {

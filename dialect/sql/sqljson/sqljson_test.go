@@ -40,6 +40,13 @@ func TestWritePath(t *testing.T) {
 			input: sql.Dialect(dialect.MySQL).
 				Select("*").
 				From(sql.Table("users")).
+				Where(sqljson.ValueEQ("a", true, sqljson.DotPath("b.c[1].d"))),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_EXTRACT(`a`, '$.b.c[1].d') = true",
+		},
+		{
+			input: sql.Dialect(dialect.MySQL).
+				Select("*").
+				From(sql.Table("users")).
 				Where(sqljson.ValueEQ("a", "a", sqljson.DotPath("b.\"c[1]\".d[1][2].e"))),
 			wantQuery: "SELECT * FROM `users` WHERE JSON_EXTRACT(`a`, '$.b.\"c[1]\".d[1][2].e') = ?",
 			wantArgs:  []any{"a"},

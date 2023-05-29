@@ -7,6 +7,7 @@ package sqljson
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -95,7 +96,13 @@ func ValueEQ(column string, arg any, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		opts = normalizePG(b, arg, opts)
 		valuePath(b, column, opts...)
-		b.WriteOp(sql.OpEQ).Arg(arg)
+		b.WriteOp(sql.OpEQ)
+		// Inline boolean values, as some drivers (e.g., MySQL) encode them as 0/1.
+		if v, ok := arg.(bool); ok {
+			b.WriteString(strconv.FormatBool(v))
+		} else {
+			b.Arg(arg)
+		}
 	})
 }
 
