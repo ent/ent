@@ -40,6 +40,12 @@ type User struct {
 	Floats []float64 `json:"floats,omitempty"`
 	// Strings holds the value of the "strings" field.
 	Strings []string `json:"strings,omitempty"`
+	// IntsValidate holds the value of the "ints_validate" field.
+	IntsValidate []int `json:"ints_validate,omitempty"`
+	// FloatsValidate holds the value of the "floats_validate" field.
+	FloatsValidate []float64 `json:"floats_validate,omitempty"`
+	// StringsValidate holds the value of the "strings_validate" field.
+	StringsValidate []string `json:"strings_validate,omitempty"`
 	// Addr holds the value of the "addr" field.
 	Addr schema.Addr `json:"-"`
 	// Unknown holds the value of the "unknown" field.
@@ -52,7 +58,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldT, user.FieldURL, user.FieldURLs, user.FieldRaw, user.FieldDirs, user.FieldInts, user.FieldFloats, user.FieldStrings, user.FieldAddr, user.FieldUnknown:
+		case user.FieldT, user.FieldURL, user.FieldURLs, user.FieldRaw, user.FieldDirs, user.FieldInts, user.FieldFloats, user.FieldStrings, user.FieldIntsValidate, user.FieldFloatsValidate, user.FieldStringsValidate, user.FieldAddr, user.FieldUnknown:
 			values[i] = new([]byte)
 		case user.FieldID:
 			values[i] = new(sql.NullInt64)
@@ -141,6 +147,30 @@ func (u *User) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field strings: %w", err)
 				}
 			}
+		case user.FieldIntsValidate:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field ints_validate", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &u.IntsValidate); err != nil {
+					return fmt.Errorf("unmarshal field ints_validate: %w", err)
+				}
+			}
+		case user.FieldFloatsValidate:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field floats_validate", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &u.FloatsValidate); err != nil {
+					return fmt.Errorf("unmarshal field floats_validate: %w", err)
+				}
+			}
+		case user.FieldStringsValidate:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field strings_validate", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &u.StringsValidate); err != nil {
+					return fmt.Errorf("unmarshal field strings_validate: %w", err)
+				}
+			}
 		case user.FieldAddr:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field addr", values[i])
@@ -216,6 +246,15 @@ func (u *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("strings=")
 	builder.WriteString(fmt.Sprintf("%v", u.Strings))
+	builder.WriteString(", ")
+	builder.WriteString("ints_validate=")
+	builder.WriteString(fmt.Sprintf("%v", u.IntsValidate))
+	builder.WriteString(", ")
+	builder.WriteString("floats_validate=")
+	builder.WriteString(fmt.Sprintf("%v", u.FloatsValidate))
+	builder.WriteString(", ")
+	builder.WriteString("strings_validate=")
+	builder.WriteString(fmt.Sprintf("%v", u.StringsValidate))
 	builder.WriteString(", ")
 	builder.WriteString("addr=<sensitive>")
 	builder.WriteString(", ")

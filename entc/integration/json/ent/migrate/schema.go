@@ -23,6 +23,9 @@ var (
 		{Name: "ints", Type: field.TypeJSON, Nullable: true},
 		{Name: "floats", Type: field.TypeJSON, Nullable: true},
 		{Name: "strings", Type: field.TypeJSON, Nullable: true},
+		{Name: "ints_validate", Type: field.TypeJSON, Nullable: true},
+		{Name: "floats_validate", Type: field.TypeJSON, Nullable: true},
+		{Name: "strings_validate", Type: field.TypeJSON, Nullable: true},
 		{Name: "addr", Type: field.TypeJSON, Nullable: true},
 		{Name: "unknown", Type: field.TypeJSON, Nullable: true},
 	}

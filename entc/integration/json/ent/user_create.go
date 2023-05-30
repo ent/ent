@@ -75,6 +75,24 @@ func (uc *UserCreate) SetStrings(s []string) *UserCreate {
 	return uc
 }
 
+// SetIntsValidate sets the "ints_validate" field.
+func (uc *UserCreate) SetIntsValidate(i []int) *UserCreate {
+	uc.mutation.SetIntsValidate(i)
+	return uc
+}
+
+// SetFloatsValidate sets the "floats_validate" field.
+func (uc *UserCreate) SetFloatsValidate(f []float64) *UserCreate {
+	uc.mutation.SetFloatsValidate(f)
+	return uc
+}
+
+// SetStringsValidate sets the "strings_validate" field.
+func (uc *UserCreate) SetStringsValidate(s []string) *UserCreate {
+	uc.mutation.SetStringsValidate(s)
+	return uc
+}
+
 // SetAddr sets the "addr" field.
 func (uc *UserCreate) SetAddr(s schema.Addr) *UserCreate {
 	uc.mutation.SetAddr(s)
@@ -145,6 +163,21 @@ func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.Dirs(); !ok {
 		return &ValidationError{Name: "dirs", err: errors.New(`ent: missing required field "User.dirs"`)}
 	}
+	if v, ok := uc.mutation.IntsValidate(); ok {
+		if err := user.IntsValidateValidator(v); err != nil {
+			return &ValidationError{Name: "ints_validate", err: fmt.Errorf(`ent: validator failed for field "User.ints_validate": %w`, err)}
+		}
+	}
+	if v, ok := uc.mutation.FloatsValidate(); ok {
+		if err := user.FloatsValidateValidator(v); err != nil {
+			return &ValidationError{Name: "floats_validate", err: fmt.Errorf(`ent: validator failed for field "User.floats_validate": %w`, err)}
+		}
+	}
+	if v, ok := uc.mutation.StringsValidate(); ok {
+		if err := user.StringsValidateValidator(v); err != nil {
+			return &ValidationError{Name: "strings_validate", err: fmt.Errorf(`ent: validator failed for field "User.strings_validate": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -202,6 +235,18 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.Strings(); ok {
 		_spec.SetField(user.FieldStrings, field.TypeJSON, value)
 		_node.Strings = value
+	}
+	if value, ok := uc.mutation.IntsValidate(); ok {
+		_spec.SetField(user.FieldIntsValidate, field.TypeJSON, value)
+		_node.IntsValidate = value
+	}
+	if value, ok := uc.mutation.FloatsValidate(); ok {
+		_spec.SetField(user.FieldFloatsValidate, field.TypeJSON, value)
+		_node.FloatsValidate = value
+	}
+	if value, ok := uc.mutation.StringsValidate(); ok {
+		_spec.SetField(user.FieldStringsValidate, field.TypeJSON, value)
+		_node.StringsValidate = value
 	}
 	if value, ok := uc.mutation.Addr(); ok {
 		_spec.SetField(user.FieldAddr, field.TypeJSON, value)

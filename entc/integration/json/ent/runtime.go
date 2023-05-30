@@ -27,4 +27,16 @@ func init() {
 	userDescInts := userFields[5].Descriptor()
 	// user.DefaultInts holds the default value on creation for the ints field.
 	user.DefaultInts = userDescInts.Default.([]int)
+	// userDescIntsValidate is the schema descriptor for ints_validate field.
+	userDescIntsValidate := userFields[8].Descriptor()
+	// user.IntsValidateValidator is a validator for the "ints_validate" field. It is called by the builders before save.
+	user.IntsValidateValidator = userDescIntsValidate.Validators[0].(func([]int) error)
+	// userDescFloatsValidate is the schema descriptor for floats_validate field.
+	userDescFloatsValidate := userFields[9].Descriptor()
+	// user.FloatsValidateValidator is a validator for the "floats_validate" field. It is called by the builders before save.
+	user.FloatsValidateValidator = userDescFloatsValidate.Validators[0].(func([]float64) error)
+	// userDescStringsValidate is the schema descriptor for strings_validate field.
+	userDescStringsValidate := userFields[10].Descriptor()
+	// user.StringsValidateValidator is a validator for the "strings_validate" field. It is called by the builders before save.
+	user.StringsValidateValidator = userDescStringsValidate.Validators[0].(func([]string) error)
 }

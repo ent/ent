@@ -33,6 +33,12 @@ const (
 	FieldFloats = "floats"
 	// FieldStrings holds the string denoting the strings field in the database.
 	FieldStrings = "strings"
+	// FieldIntsValidate holds the string denoting the ints_validate field in the database.
+	FieldIntsValidate = "ints_validate"
+	// FieldFloatsValidate holds the string denoting the floats_validate field in the database.
+	FieldFloatsValidate = "floats_validate"
+	// FieldStringsValidate holds the string denoting the strings_validate field in the database.
+	FieldStringsValidate = "strings_validate"
 	// FieldAddr holds the string denoting the addr field in the database.
 	FieldAddr = "addr"
 	// FieldUnknown holds the string denoting the unknown field in the database.
@@ -52,6 +58,9 @@ var Columns = []string{
 	FieldInts,
 	FieldFloats,
 	FieldStrings,
+	FieldIntsValidate,
+	FieldFloatsValidate,
+	FieldStringsValidate,
 	FieldAddr,
 	FieldUnknown,
 }
@@ -71,6 +80,12 @@ var (
 	DefaultDirs func() []http.Dir
 	// DefaultInts holds the default value on creation for the "ints" field.
 	DefaultInts []int
+	// IntsValidateValidator is a validator for the "ints_validate" field. It is called by the builders before save.
+	IntsValidateValidator func([]int) error
+	// FloatsValidateValidator is a validator for the "floats_validate" field. It is called by the builders before save.
+	FloatsValidateValidator func([]float64) error
+	// StringsValidateValidator is a validator for the "strings_validate" field. It is called by the builders before save.
+	StringsValidateValidator func([]string) error
 )
 
 // OrderOption defines the ordering options for the User queries.

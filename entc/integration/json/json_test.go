@@ -54,6 +54,9 @@ func TestMySQL(t *testing.T) {
 				URLs(t, client)
 				Ints(t, client)
 				Strings(t, client)
+				IntsValidate(t, client)
+				FloatsValidate(t, client)
+				StringsValidate(t, client)
 				Predicates(t, client)
 				Order(t, client)
 			}
@@ -86,6 +89,9 @@ func TestMaria(t *testing.T) {
 			Ints(t, client)
 			Floats(t, client)
 			Strings(t, client)
+			IntsValidate(t, client)
+			FloatsValidate(t, client)
+			StringsValidate(t, client)
 			NetAddr(t, client)
 			RawMessage(t, client)
 			Any(t, client)
@@ -120,6 +126,9 @@ func TestPostgres(t *testing.T) {
 			Ints(t, client)
 			Floats(t, client)
 			Strings(t, client)
+			IntsValidate(t, client)
+			FloatsValidate(t, client)
+			StringsValidate(t, client)
 			NetAddr(t, client)
 			RawMessage(t, client)
 			Any(t, client)
@@ -143,6 +152,9 @@ func TestSQLite(t *testing.T) {
 	Ints(t, client)
 	Floats(t, client)
 	Strings(t, client)
+	IntsValidate(t, client)
+	FloatsValidate(t, client)
+	StringsValidate(t, client)
 	NetAddr(t, client)
 	RawMessage(t, client)
 	Any(t, client)
@@ -172,6 +184,15 @@ func Ints(t *testing.T, client *ent.Client) {
 	require.Equal(t, []int{1, 2, 3, 4, 5, 6}, usr.Ints)
 }
 
+func IntsValidate(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	xs := []int{1, 2, 3}
+	err := client.User.Create().SetIntsValidate(xs).Exec(ctx)
+	require.ErrorIs(t, err, schema.ErrValidate)
+	err = client.User.Create().Exec(ctx)
+	require.NoError(t, err, schema.ErrValidate)
+}
+
 func Floats(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	flts := []float64{1, 2, 3}
@@ -184,6 +205,15 @@ func Floats(t *testing.T, client *ent.Client) {
 	usr = usr.Update().ClearFloats().SaveX(ctx)
 	require.Empty(t, usr.Floats)
 	require.Empty(t, client.User.GetX(ctx, usr.ID).Floats)
+}
+
+func FloatsValidate(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	xs := []float64{1, 2, 3}
+	err := client.User.Create().SetFloatsValidate(xs).Exec(ctx)
+	require.ErrorIs(t, err, schema.ErrValidate)
+	err = client.User.Create().Exec(ctx)
+	require.NoError(t, err, schema.ErrValidate)
 }
 
 func Strings(t *testing.T, client *ent.Client) {
@@ -267,6 +297,15 @@ func Strings(t *testing.T, client *ent.Client) {
 		require.Empty(t, usr.Strings)
 		require.Equal(t, []http.Dir{"/etc", "/dev"}, usr.Dirs)
 	})
+}
+
+func StringsValidate(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	xs := []string{"a", "b", "c"}
+	err := client.User.Create().SetStringsValidate(xs).Exec(ctx)
+	require.ErrorIs(t, err, schema.ErrValidate)
+	err = client.User.Create().Exec(ctx)
+	require.NoError(t, err, schema.ErrValidate)
 }
 
 func Any(t *testing.T, client *ent.Client) {
