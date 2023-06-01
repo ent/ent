@@ -180,7 +180,7 @@ var (
 										},
 									{{- end }}
 									{{- with $ant.Where }}
-										Where: "{{ . }}",
+										Where: {{ quote . }},
 									{{- end }}
 								},
 							{{- end }}
@@ -216,10 +216,10 @@ func init() {
 					Collation: "{{ . }}",
 				{{- end }}
 				{{- with $ant.Options }}
-					Options: "{{ . }}",
+					Options: {{ quote . }},
 				{{- end }}
 				{{- with $ant.Check }}
-					Check: "{{ . }}",
+					Check: {{ quote . }},
 				{{- end }}
 			}
 			{{- with $ant.Incremental }}
@@ -229,7 +229,7 @@ func init() {
 			{{- with $keys := keys $ant.Checks }}
 				{{ $table }}.Annotation.Checks = map[string]string{
 					{{- range $k := $keys }}
-						"{{ $k }}": "{{ index $ant.Checks $k }}",
+						"{{ $k }}": {{ index $ant.Checks $k | quote }},
 					{{- end }}
 				}
 			{{- end }}
