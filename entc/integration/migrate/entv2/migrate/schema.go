@@ -226,7 +226,7 @@ var (
 				Unique:  false,
 				Columns: []*schema.Column{UsersColumns[8]},
 				Annotation: &entsql.IndexAnnotation{
-					Where: "active",
+					Where: "active AND \"phone\" <> ''",
 				},
 			},
 			{

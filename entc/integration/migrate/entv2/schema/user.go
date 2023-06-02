@@ -173,7 +173,7 @@ func (User) Indexes() []ent.Index {
 		// For PostgreSQL and SQLite, users can define partial indexes.
 		index.Fields("phone").
 			Annotations(
-				entsql.IndexWhere("active"),
+				entsql.IndexWhere(`active AND "phone" <> ''`),
 			),
 		// For PostgreSQL, operator classes can be configured for each field.
 		index.Fields("age", "phone").
