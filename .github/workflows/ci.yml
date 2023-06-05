@@ -30,7 +30,7 @@ jobs:
         with:
           go-version: 1.19
       - name: Run linters
-        uses: golangci/golangci-lint-action@v3.4.0
+        uses: golangci/golangci-lint-action@v3.5.0
         with:
           version: v1.50.1 # The next version requires Go 1.20
 
