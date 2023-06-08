@@ -341,10 +341,11 @@ func (c *{{ $client }}) Delete() *{{ $n.DeleteName }} {
 
 	// DeleteOneID returns a builder for deleting the given entity by its id.
 	func (c *{{ $client }}) DeleteOneID(id {{ $n.ID.Type }}) *{{ $n.DeleteOneName }} {
-		builder := c.Delete().Where({{ $n.Package }}.ID(id))
-		builder.mutation.id = &id
-		builder.mutation.op = OpDeleteOne
-		return &{{ $n.DeleteOneName }}{builder}
+		{{- $builder := "builder" }}{{ if eq $n.Package $builder }}{{ $builder = "builderC" }}{{ end }}
+		{{ $builder }} := c.Delete().Where({{ $n.Package }}.ID(id))
+		{{ $builder }}.mutation.id = &id
+		{{ $builder }}.mutation.op = OpDeleteOne
+		return &{{ $n.DeleteOneName }}{ {{ $builder }} }
 	}
 {{ end }}
 

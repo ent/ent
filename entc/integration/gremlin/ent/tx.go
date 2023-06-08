@@ -18,6 +18,8 @@ type Tx struct {
 	config
 	// Api is the client for interacting with the Api builders.
 	Api *APIClient
+	// Builder is the client for interacting with the Builder builders.
+	Builder *BuilderClient
 	// Card is the client for interacting with the Card builders.
 	Card *CardClient
 	// Comment is the client for interacting with the Comment builders.
@@ -184,6 +186,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Api = NewAPIClient(tx.config)
+	tx.Builder = NewBuilderClient(tx.config)
 	tx.Card = NewCardClient(tx.config)
 	tx.Comment = NewCommentClient(tx.config)
 	tx.ExValueScan = NewExValueScanClient(tx.config)

@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/api"
+	"entgo.io/ent/entc/integration/ent/builder"
 	"entgo.io/ent/entc/integration/ent/card"
 	"entgo.io/ent/entc/integration/ent/comment"
 	"entgo.io/ent/entc/integration/ent/exvaluescan"
@@ -47,6 +48,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Api is the client for interacting with the Api builders.
 	Api *APIClient
+	// Builder is the client for interacting with the Builder builders.
+	Builder *BuilderClient
 	// Card is the client for interacting with the Card builders.
 	Card *CardClient
 	// Comment is the client for interacting with the Comment builders.
@@ -96,6 +99,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Api = NewAPIClient(c.config)
+	c.Builder = NewBuilderClient(c.config)
 	c.Card = NewCardClient(c.config)
 	c.Comment = NewCommentClient(c.config)
 	c.ExValueScan = NewExValueScanClient(c.config)
@@ -196,6 +200,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:         ctx,
 		config:      cfg,
 		Api:         NewAPIClient(cfg),
+		Builder:     NewBuilderClient(cfg),
 		Card:        NewCardClient(cfg),
 		Comment:     NewCommentClient(cfg),
 		ExValueScan: NewExValueScanClient(cfg),
@@ -233,6 +238,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:         ctx,
 		config:      cfg,
 		Api:         NewAPIClient(cfg),
+		Builder:     NewBuilderClient(cfg),
 		Card:        NewCardClient(cfg),
 		Comment:     NewCommentClient(cfg),
 		ExValueScan: NewExValueScanClient(cfg),
@@ -279,9 +285,9 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Api, c.Card, c.Comment, c.ExValueScan, c.FieldType, c.File, c.FileType,
-		c.Goods, c.Group, c.GroupInfo, c.Item, c.License, c.Node, c.PC, c.Pet, c.Spec,
-		c.Task, c.User,
+		c.Api, c.Builder, c.Card, c.Comment, c.ExValueScan, c.FieldType, c.File,
+		c.FileType, c.Goods, c.Group, c.GroupInfo, c.Item, c.License, c.Node, c.PC,
+		c.Pet, c.Spec, c.Task, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -291,9 +297,9 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Api, c.Card, c.Comment, c.ExValueScan, c.FieldType, c.File, c.FileType,
-		c.Goods, c.Group, c.GroupInfo, c.Item, c.License, c.Node, c.PC, c.Pet, c.Spec,
-		c.Task, c.User,
+		c.Api, c.Builder, c.Card, c.Comment, c.ExValueScan, c.FieldType, c.File,
+		c.FileType, c.Goods, c.Group, c.GroupInfo, c.Item, c.License, c.Node, c.PC,
+		c.Pet, c.Spec, c.Task, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -314,6 +320,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *APIMutation:
 		return c.Api.mutate(ctx, m)
+	case *BuilderMutation:
+		return c.Builder.mutate(ctx, m)
 	case *CardMutation:
 		return c.Card.mutate(ctx, m)
 	case *CommentMutation:
@@ -468,6 +476,124 @@ func (c *APIClient) mutate(ctx context.Context, m *APIMutation) (Value, error) {
 		return (&APIDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Api mutation op: %q", m.Op())
+	}
+}
+
+// BuilderClient is a client for the Builder schema.
+type BuilderClient struct {
+	config
+}
+
+// NewBuilderClient returns a client for the Builder from the given config.
+func NewBuilderClient(c config) *BuilderClient {
+	return &BuilderClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `builder.Hooks(f(g(h())))`.
+func (c *BuilderClient) Use(hooks ...Hook) {
+	c.hooks.Builder = append(c.hooks.Builder, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `builder.Intercept(f(g(h())))`.
+func (c *BuilderClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Builder = append(c.inters.Builder, interceptors...)
+}
+
+// Create returns a builder for creating a Builder entity.
+func (c *BuilderClient) Create() *BuilderCreate {
+	mutation := newBuilderMutation(c.config, OpCreate)
+	return &BuilderCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Builder entities.
+func (c *BuilderClient) CreateBulk(builders ...*BuilderCreate) *BuilderCreateBulk {
+	return &BuilderCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Builder.
+func (c *BuilderClient) Update() *BuilderUpdate {
+	mutation := newBuilderMutation(c.config, OpUpdate)
+	return &BuilderUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *BuilderClient) UpdateOne(b *Builder) *BuilderUpdateOne {
+	mutation := newBuilderMutation(c.config, OpUpdateOne, withBuilder(b))
+	return &BuilderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *BuilderClient) UpdateOneID(id int) *BuilderUpdateOne {
+	mutation := newBuilderMutation(c.config, OpUpdateOne, withBuilderID(id))
+	return &BuilderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Builder.
+func (c *BuilderClient) Delete() *BuilderDelete {
+	mutation := newBuilderMutation(c.config, OpDelete)
+	return &BuilderDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *BuilderClient) DeleteOne(b *Builder) *BuilderDeleteOne {
+	return c.DeleteOneID(b.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *BuilderClient) DeleteOneID(id int) *BuilderDeleteOne {
+	builderC := c.Delete().Where(builder.ID(id))
+	builderC.mutation.id = &id
+	builderC.mutation.op = OpDeleteOne
+	return &BuilderDeleteOne{builderC}
+}
+
+// Query returns a query builder for Builder.
+func (c *BuilderClient) Query() *BuilderQuery {
+	return &BuilderQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeBuilder},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Builder entity by its id.
+func (c *BuilderClient) Get(ctx context.Context, id int) (*Builder, error) {
+	return c.Query().Where(builder.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *BuilderClient) GetX(ctx context.Context, id int) *Builder {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *BuilderClient) Hooks() []Hook {
+	return c.hooks.Builder
+}
+
+// Interceptors returns the client interceptors.
+func (c *BuilderClient) Interceptors() []Interceptor {
+	return c.inters.Builder
+}
+
+func (c *BuilderClient) mutate(ctx context.Context, m *BuilderMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&BuilderCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&BuilderUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&BuilderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&BuilderDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Builder mutation op: %q", m.Op())
 	}
 }
 
@@ -2912,12 +3038,13 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Api, Card, Comment, ExValueScan, FieldType, File, FileType, Goods, Group,
-		GroupInfo, Item, License, Node, PC, Pet, Spec, Task, User []ent.Hook
+		Api, Builder, Card, Comment, ExValueScan, FieldType, File, FileType, Goods,
+		Group, GroupInfo, Item, License, Node, PC, Pet, Spec, Task, User []ent.Hook
 	}
 	inters struct {
-		Api, Card, Comment, ExValueScan, FieldType, File, FileType, Goods, Group,
-		GroupInfo, Item, License, Node, PC, Pet, Spec, Task, User []ent.Interceptor
+		Api, Builder, Card, Comment, ExValueScan, FieldType, File, FileType, Goods,
+		Group, GroupInfo, Item, License, Node, PC, Pet, Spec, Task,
+		User []ent.Interceptor
 	}
 )
 
