@@ -13,6 +13,9 @@ import (
 // Api is the predicate function for api builders.
 type Api func(*dsl.Traversal)
 
+// Builder is the predicate function for builder builders.
+type Builder func(*dsl.Traversal)
+
 // Card is the predicate function for card builders.
 type Card func(*dsl.Traversal)
 

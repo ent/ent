@@ -342,13 +342,14 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 {{ $receiver := receiver $builder }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect({{ $receiver }}.driver.Dialect())
-	t1 := builder.Table({{ $.Package }}.Table)
+	{{- $builderV := "builder" }}{{ if eq $.Package $builderV }}{{ $builderV = "builderC" }}{{ end }}
+	{{ $builderV }} := sql.Dialect({{ $receiver }}.driver.Dialect())
+	t1 := {{ $builderV }}.Table({{ $.Package }}.Table)
 	columns := {{ $receiver }}.ctx.Fields
 	if len(columns) == 0 {
 		columns = {{ $.Package }}.Columns
 	}
-	selector := builder.Select(t1.Columns(columns...)...).From(t1)
+	selector := {{ $builderV }}.Select(t1.Columns(columns...)...).From(t1)
 	if {{ $receiver }}.sql != nil {
 		selector = {{ $receiver }}.sql
 		selector.Select(selector.Columns(columns...)...)

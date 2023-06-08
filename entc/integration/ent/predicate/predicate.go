@@ -13,6 +13,9 @@ import (
 // Api is the predicate function for api builders.
 type Api func(*sql.Selector)
 
+// Builder is the predicate function for builder builders.
+type Builder func(*sql.Selector)
+
 // Card is the predicate function for card builders.
 type Card func(*sql.Selector)
 

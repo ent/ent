@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/api"
+	"entgo.io/ent/entc/integration/ent/builder"
 	"entgo.io/ent/entc/integration/ent/card"
 	"entgo.io/ent/entc/integration/ent/comment"
 	"entgo.io/ent/entc/integration/ent/exvaluescan"
@@ -96,6 +97,7 @@ func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			api.Table:         api.ValidColumn,
+			builder.Table:     builder.ValidColumn,
 			card.Table:        card.ValidColumn,
 			comment.Table:     comment.ValidColumn,
 			exvaluescan.Table: exvaluescan.ValidColumn,
