@@ -2648,6 +2648,33 @@ func TestIsConstraintError(t *testing.T) {
 	}
 }
 
+func TestLimitNeighbors(t *testing.T) {
+	t.Run("O2M", func(t *testing.T) {
+		const fk = "author_id"
+		// Authors load their posts.
+		s := sql.Select(fk, "id").From(sql.Table("posts"))
+		LimitNeighbors(fk, 2)(s)
+		query, args := s.Query()
+		require.Equal(t,
+			"WITH `src_query` AS (SELECT `author_id`, `id` FROM `posts`), `limited_query` AS (SELECT *, (ROW_NUMBER() OVER (PARTITION BY `author_id` ORDER BY `id`)) AS `row_number` FROM `src_query`) SELECT `author_id`, `id` FROM `limited_query` AS `posts` WHERE `posts`.`row_number` <= ?",
+			query,
+		)
+		require.Equal(t, []any{2}, args)
+	})
+	t.Run("M2M", func(t *testing.T) {
+		const fk = "user_id"
+		edgeT, neighborsT := sql.Table("user_groups"), sql.Table("groups")
+		s := sql.Select(fk, "id", "name").From(neighborsT).Join(edgeT).On(neighborsT.C("id"), edgeT.C("group_id"))
+		LimitNeighbors(fk, 1, sql.ExprFunc(func(b *sql.Builder) { b.Ident("updated_at") }))(s)
+		query, args := s.Query()
+		require.Equal(t,
+			"WITH `src_query` AS (SELECT `user_id`, `id`, `name` FROM `groups` JOIN `user_groups` AS `t1` ON `groups`.`id` = `t1`.`group_id`), `limited_query` AS (SELECT *, (ROW_NUMBER() OVER (PARTITION BY `user_id` ORDER BY `updated_at`)) AS `row_number` FROM `src_query`) SELECT `user_id`, `id`, `name` FROM `limited_query` AS `groups` WHERE `groups`.`row_number` <= ?",
+			query,
+		)
+		require.Equal(t, []any{1}, args)
+	})
+}
+
 func escape(query string) string {
 	rows := strings.Split(query, "\n")
 	for i := range rows {

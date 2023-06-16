@@ -143,7 +143,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
       maria:
-        image: mariadb
+        image: mariadb:10.4 # Temporary to unblock PRs from failing.
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: pass
@@ -321,7 +321,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
       maria:
-        image: mariadb
+        image: mariadb:10.4 # Temporary to unblock PRs from failing.
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: pass
