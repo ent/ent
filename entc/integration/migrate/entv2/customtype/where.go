@@ -250,32 +250,15 @@ func Tz3NotNil() predicate.CustomType {
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.CustomType) predicate.CustomType {
-	return predicate.CustomType(func(s *sql.Selector) {
-		s1 := s.Clone().SetP(nil)
-		for _, p := range predicates {
-			p(s1)
-		}
-		s.Where(s1.P())
-	})
+	return predicate.CustomType(sql.AndPredicates(predicates...))
 }
 
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.CustomType) predicate.CustomType {
-	return predicate.CustomType(func(s *sql.Selector) {
-		s1 := s.Clone().SetP(nil)
-		for i, p := range predicates {
-			if i > 0 {
-				s1.Or()
-			}
-			p(s1)
-		}
-		s.Where(s1.P())
-	})
+	return predicate.CustomType(sql.OrPredicates(predicates...))
 }
 
 // Not applies the not operator on the given predicate.
 func Not(p predicate.CustomType) predicate.CustomType {
-	return predicate.CustomType(func(s *sql.Selector) {
-		p(s.Not())
-	})
+	return predicate.CustomType(sql.NotPredicates(p))
 }

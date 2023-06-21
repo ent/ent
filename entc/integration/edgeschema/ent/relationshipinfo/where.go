@@ -128,32 +128,15 @@ func TextContainsFold(v string) predicate.RelationshipInfo {
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.RelationshipInfo) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(func(s *sql.Selector) {
-		s1 := s.Clone().SetP(nil)
-		for _, p := range predicates {
-			p(s1)
-		}
-		s.Where(s1.P())
-	})
+	return predicate.RelationshipInfo(sql.AndPredicates(predicates...))
 }
 
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.RelationshipInfo) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(func(s *sql.Selector) {
-		s1 := s.Clone().SetP(nil)
-		for i, p := range predicates {
-			if i > 0 {
-				s1.Or()
-			}
-			p(s1)
-		}
-		s.Where(s1.P())
-	})
+	return predicate.RelationshipInfo(sql.OrPredicates(predicates...))
 }
 
 // Not applies the not operator on the given predicate.
 func Not(p predicate.RelationshipInfo) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(func(s *sql.Selector) {
-		p(s.Not())
-	})
+	return predicate.RelationshipInfo(sql.NotPredicates(p))
 }

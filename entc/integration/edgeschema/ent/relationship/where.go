@@ -213,32 +213,15 @@ func HasInfoWith(preds ...predicate.RelationshipInfo) predicate.Relationship {
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Relationship) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		s1 := s.Clone().SetP(nil)
-		for _, p := range predicates {
-			p(s1)
-		}
-		s.Where(s1.P())
-	})
+	return predicate.Relationship(sql.AndPredicates(predicates...))
 }
 
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Relationship) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		s1 := s.Clone().SetP(nil)
-		for i, p := range predicates {
-			if i > 0 {
-				s1.Or()
-			}
-			p(s1)
-		}
-		s.Where(s1.P())
-	})
+	return predicate.Relationship(sql.OrPredicates(predicates...))
 }
 
 // Not applies the not operator on the given predicate.
 func Not(p predicate.Relationship) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		p(s.Not())
-	})
+	return predicate.Relationship(sql.NotPredicates(p))
 }

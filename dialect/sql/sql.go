@@ -170,6 +170,63 @@ func FieldContainsFold(name string, substr string) func(*Selector) {
 	}
 }
 
+// AndPredicates returns a new predicate for joining multiple generated predicates with AND between them.
+func AndPredicates[P ~func(*Selector)](predicates ...P) func(*Selector) {
+	return func(s *Selector) {
+		s.CollectPredicates()
+		for _, p := range predicates {
+			p(s)
+		}
+		collected := s.CollectedPredicates()
+		s.UncollectedPredicates()
+		switch len(collected) {
+		case 0:
+		case 1:
+			s.Where(collected[0])
+		default:
+			s.Where(And(collected...))
+		}
+	}
+}
+
+// OrPredicates returns a new predicate for joining multiple generated predicates with OR between them.
+func OrPredicates[P ~func(*Selector)](predicates ...P) func(*Selector) {
+	return func(s *Selector) {
+		s.CollectPredicates()
+		for _, p := range predicates {
+			p(s)
+		}
+		collected := s.CollectedPredicates()
+		s.UncollectedPredicates()
+		switch len(collected) {
+		case 0:
+		case 1:
+			s.Where(collected[0])
+		default:
+			s.Where(Or(collected...))
+		}
+	}
+}
+
+// NotPredicates wraps the generated predicates with NOT. For example, NOT(P), NOT((P1 AND P2)).
+func NotPredicates[P ~func(*Selector)](predicates ...P) func(*Selector) {
+	return func(s *Selector) {
+		s.CollectPredicates()
+		for _, p := range predicates {
+			p(s)
+		}
+		collected := s.CollectedPredicates()
+		s.UncollectedPredicates()
+		switch len(collected) {
+		case 0:
+		case 1:
+			s.Where(Not(collected[0]))
+		default:
+			s.Where(Not(And(collected...)))
+		}
+	}
+}
+
 // ColumnCheck is a function that verifies whether the
 // specified column exists within the given table.
 type ColumnCheck func(table, column string) error
