@@ -389,3 +389,47 @@ func TestFieldContainsFold(t *testing.T) {
 		require.Equal(t, []any{"%a8m%"}, args)
 	})
 }
+
+func TestAndPredicates(t *testing.T) {
+	s := Select("*").From(Table("users")).Where(EQ("name", "a8m"))
+	p := AndPredicates(
+		FieldEQ("a", "foo"),
+		FieldEQ("b", 1),
+		func(s *Selector) {
+			petT := Table("pets").As("p")
+			s.Join(petT).On(petT.C("owner_id"), s.C("id"))
+		},
+	)
+	p(s)
+	query, args := s.Query()
+	require.Equal(t, "SELECT * FROM `users` JOIN `pets` AS `p` ON `p`.`owner_id` = `users`.`id` WHERE `name` = ? AND (`users`.`a` = ? AND `users`.`b` = ?)", query)
+	require.Equal(t, []any{"a8m", "foo", 1}, args)
+}
+
+func TestOrPredicates(t *testing.T) {
+	s := Select("*").From(Table("users")).Where(EQ("name", "a8m"))
+	p := OrPredicates(
+		AndPredicates(
+			FieldEQ("a", "foo"),
+			FieldEQ("b", 1),
+		),
+		func(s *Selector) {
+			petT := Table("pets").As("p")
+			s.Join(petT).On(petT.C("owner_id"), s.C("id"))
+			s.Where(EQ(petT.C("name"), "c"))
+		},
+	)
+	p(s)
+	query, args := s.Query()
+	require.Equal(t, "SELECT * FROM `users` JOIN `pets` AS `p` ON `p`.`owner_id` = `users`.`id` WHERE `name` = ? AND ((`users`.`a` = ? AND `users`.`b` = ?) OR `p`.`name` = ?)", query)
+	require.Equal(t, []any{"a8m", "foo", 1, "c"}, args)
+}
+
+func TestNotPredicates(t *testing.T) {
+	s := Select("*").From(Table("users")).Where(EQ("name", "a8m"))
+	NotPredicates(FieldEQ("a", "a"), FieldEQ("b", "b"))(s)
+	NotPredicates(FieldEQ("c", "c"))(s)
+	query, args := s.Query()
+	require.Equal(t, "SELECT * FROM `users` WHERE (`name` = ? AND (NOT (`users`.`a` = ? AND `users`.`b` = ?))) AND (NOT (`users`.`c` = ?))", query)
+	require.Equal(t, []any{"a8m", "a", "b", "c"}, args)
+}
