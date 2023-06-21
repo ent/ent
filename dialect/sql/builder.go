@@ -2146,6 +2146,7 @@ type Selector struct {
 	selection []selection
 	from      []TableView
 	joins     []join
+	collected [][]*Predicate
 	where     *Predicate
 	or        bool
 	not       bool
@@ -2385,8 +2386,35 @@ func (s *Selector) Offset(offset int) *Selector {
 	return s
 }
 
+// CollectPredicates indicates the appended predicated should be collected
+// and not appended to the `WHERE` clause.
+func (s *Selector) CollectPredicates() *Selector {
+	s.collected = append(s.collected, []*Predicate{})
+	return s
+}
+
+// CollectedPredicates returns the collected predicates.
+func (s *Selector) CollectedPredicates() []*Predicate {
+	if len(s.collected) == 0 {
+		return nil
+	}
+	return s.collected[len(s.collected)-1]
+}
+
+// UncollectedPredicates stop collecting predicates.
+func (s *Selector) UncollectedPredicates() *Selector {
+	if len(s.collected) > 0 {
+		s.collected = s.collected[:len(s.collected)-1]
+	}
+	return s
+}
+
 // Where sets or appends the given predicate to the statement.
 func (s *Selector) Where(p *Predicate) *Selector {
+	if len(s.collected) > 0 {
+		s.collected[len(s.collected)-1] = append(s.collected[len(s.collected)-1], p)
+		return s
+	}
 	if s.not {
 		p = Not(p)
 		s.not = false

@@ -202,32 +202,15 @@ func HasProcWith(preds ...predicate.Process) predicate.AttachedFile {
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.AttachedFile) predicate.AttachedFile {
-	return predicate.AttachedFile(func(s *sql.Selector) {
-		s1 := s.Clone().SetP(nil)
-		for _, p := range predicates {
-			p(s1)
-		}
-		s.Where(s1.P())
-	})
+	return predicate.AttachedFile(sql.AndPredicates(predicates...))
 }
 
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.AttachedFile) predicate.AttachedFile {
-	return predicate.AttachedFile(func(s *sql.Selector) {
-		s1 := s.Clone().SetP(nil)
-		for i, p := range predicates {
-			if i > 0 {
-				s1.Or()
-			}
-			p(s1)
-		}
-		s.Where(s1.P())
-	})
+	return predicate.AttachedFile(sql.OrPredicates(predicates...))
 }
 
 // Not applies the not operator on the given predicate.
 func Not(p predicate.AttachedFile) predicate.AttachedFile {
-	return predicate.AttachedFile(func(s *sql.Selector) {
-		p(s.Not())
-	})
+	return predicate.AttachedFile(sql.NotPredicates(p))
 }
