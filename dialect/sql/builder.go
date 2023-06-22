@@ -1726,6 +1726,32 @@ func (p *Predicate) HasPrefix(col, prefix string) *Predicate {
 	return p.escapedLike(col, "", "%", prefix)
 }
 
+// ColumnsHasPrefix appends a new predicate that checks if the given column begins with the other column (prefix).
+func ColumnsHasPrefix(col, prefixC string) *Predicate {
+	return P().ColumnsHasPrefix(col, prefixC)
+}
+
+// ColumnsHasPrefix appends a new predicate that checks if the given column begins with the other column (prefix).
+func (p *Predicate) ColumnsHasPrefix(col, prefixC string) *Predicate {
+	return p.Append(func(b *Builder) {
+		switch p.dialect {
+		case dialect.MySQL:
+			b.Ident(col)
+			b.WriteOp(OpLike)
+			b.S("CONCAT(REPLACE(REPLACE(").Ident(prefixC).S(", '_', '\\_'), '%', '\\%'), '%')")
+		case dialect.Postgres, dialect.SQLite:
+			b.Ident(col)
+			b.WriteOp(OpLike)
+			b.S("(REPLACE(REPLACE(").Ident(prefixC).S(", '_', '\\_'), '%', '\\%') || '%')")
+			if p.dialect == dialect.SQLite {
+				p.WriteString(" ESCAPE ").Arg("\\")
+			}
+		default:
+			b.AddError(fmt.Errorf("ColumnsHasPrefix: unsupported dialect: %q", p.dialect))
+		}
+	})
+}
+
 // HasSuffix is a helper predicate that checks suffix using the LIKE predicate.
 func HasSuffix(col, suffix string) *Predicate { return P().HasSuffix(col, suffix) }
 

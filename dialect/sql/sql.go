@@ -113,6 +113,13 @@ func FieldsLTE(field1, field2 string) func(*Selector) {
 	}
 }
 
+// FieldsHasPrefix returns a raw predicate to checks if field1 begins with the value of field2.
+func FieldsHasPrefix(field1, field2 string) func(*Selector) {
+	return func(s *Selector) {
+		s.Where(ColumnsHasPrefix(s.C(field1), s.C(field2)))
+	}
+}
+
 // FieldIn returns a raw predicate to check if the value of the field is IN the given values.
 func FieldIn[T any](name string, vs ...T) func(*Selector) {
 	return func(s *Selector) {
