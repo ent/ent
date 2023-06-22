@@ -2475,3 +2475,24 @@ func TestSelector_SelectedColumn(t *testing.T) {
 		require.Equal(t, []string{`"t2"."e"`, "t2.e", `"t1"."e"`, "t1.e", "e"}, s.FindSelection("e"))
 	})
 }
+
+func TestColumnsHasPrefix(t *testing.T) {
+	t.Run("MySQL", func(t *testing.T) {
+		query, args := Dialect(dialect.MySQL).
+			Select("*").From(Table("t1")).Where(ColumnsHasPrefix("a", "b")).Query()
+		require.Equal(t, "SELECT * FROM `t1` WHERE `a` LIKE CONCAT(REPLACE(REPLACE(`b`, '_', '\\_'), '%', '\\%'), '%')", query)
+		require.Empty(t, args)
+	})
+	t.Run("Postgres", func(t *testing.T) {
+		query, args := Dialect(dialect.Postgres).
+			Select("*").From(Table("t1")).Where(ColumnsHasPrefix("a", "b")).Query()
+		require.Equal(t, `SELECT * FROM "t1" WHERE "a" LIKE (REPLACE(REPLACE("b", '_', '\_'), '%', '\%') || '%')`, query)
+		require.Empty(t, args)
+	})
+	t.Run("SQLite", func(t *testing.T) {
+		query, args := Dialect(dialect.SQLite).
+			Select("*").From(Table("t1")).Where(ColumnsHasPrefix("a", "b")).Query()
+		require.Equal(t, "SELECT * FROM `t1` WHERE `a` LIKE (REPLACE(REPLACE(`b`, '_', '\\_'), '%', '\\%') || '%') ESCAPE ?", query)
+		require.Equal(t, []any{`\`}, args)
+	})
+}
