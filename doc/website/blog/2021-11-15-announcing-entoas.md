@@ -253,7 +253,7 @@ func (Fridge) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("compartments", Compartment.Type).
 			// Do not generate an endpoint for POST /fridges/{id}/compartments
-			Annotation(
+			Annotations(
 				entoas.CreateOperation(
 					entoas.OperationPolicy(entoas.PolicyExclude),
 				),

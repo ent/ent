@@ -68,7 +68,7 @@ func (Todo) Edges() []ent.Edge {
 		edge.To("parent", Todo.Type).
 			Unique().
 			From("children").
-			Annotation(entgql.RelayConnection()),
+			Annotations(entgql.RelayConnection()),
 	}
 }
 ```
