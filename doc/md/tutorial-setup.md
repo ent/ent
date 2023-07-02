@@ -32,7 +32,7 @@ go get -d entgo.io/ent/cmd/ent
 go run -mod=mod entgo.io/ent/cmd/ent new Todo
 ```
 
-After installing Ent and running `ent init`, your project directory should look like this:
+After installing Ent and running `ent new`, your project directory should look like this:
 
 ```console
 .
