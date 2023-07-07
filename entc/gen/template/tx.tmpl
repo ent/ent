@@ -72,7 +72,10 @@ type Tx struct {
 	{{- $onFuncs := print "on" $func }}
 	// {{ $func }} {{ lower $func }}s the transaction.
 	func (tx *Tx) {{ $func }}() error {
-		txDriver := tx.config.driver.(*txDriver)
+		txDriver, ok := tx.config.driver.(*txDriver)
+		if !ok {
+		    return errors.New("ent: tx config haven't driver")
+		}
 		var fn {{ $iface }} = {{ $func }}Func(func(context.Context, *Tx) error {
 			return txDriver.tx.{{ $func }}()
 		})

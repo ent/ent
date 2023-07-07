@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"sync"
 
 	"entgo.io/ent/dialect"
@@ -62,7 +63,10 @@ func (f CommitFunc) Commit(ctx context.Context, tx *Tx) error {
 
 // Commit commits the transaction.
 func (tx *Tx) Commit() error {
-	txDriver := tx.config.driver.(*txDriver)
+	txDriver, ok := tx.config.driver.(*txDriver)
+	if !ok {
+		return errors.New("ent: tx config haven't driver")
+	}
 	var fn Committer = CommitFunc(func(context.Context, *Tx) error {
 		return txDriver.tx.Commit()
 	})
@@ -118,7 +122,10 @@ func (f RollbackFunc) Rollback(ctx context.Context, tx *Tx) error {
 
 // Rollback rollbacks the transaction.
 func (tx *Tx) Rollback() error {
-	txDriver := tx.config.driver.(*txDriver)
+	txDriver, ok := tx.config.driver.(*txDriver)
+	if !ok {
+		return errors.New("ent: tx config haven't driver")
+	}
 	var fn Rollbacker = RollbackFunc(func(context.Context, *Tx) error {
 		return txDriver.tx.Rollback()
 	})
