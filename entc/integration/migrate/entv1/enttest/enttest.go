@@ -75,6 +75,7 @@ func NewClient(t TestingT, opts ...Option) *entv1.Client {
 	migrateSchema(t, c, o)
 	return c
 }
+
 func migrateSchema(t TestingT, c *entv1.Client, o *options) {
 	tables, err := schema.CopyTables(migrate.Tables)
 	if err != nil {
