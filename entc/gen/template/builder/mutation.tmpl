@@ -329,10 +329,10 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 	// {{ $func }} clears the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity.
 	func (m *{{ $mutation }}) {{ $func }}() {
 		m.cleared{{ $e.BuilderField }} = true
-		{{ if $e.Field }}
-			{{ $const := print $n.Package "." $e.Field.Constant }}
+		{{- if $e.Field }}
+			{{- $const := print $n.Package "." $e.Field.Constant }}
 			m.clearedFields[{{ $const }}] = struct{}{}
-		{{ end }}
+		{{- end }}
 	}
 
 	{{ $func = $e.MutationCleared }}

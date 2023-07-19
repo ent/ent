@@ -606,6 +606,7 @@ func (m *PetMutation) ResetOwnerID() {
 // ClearOwner clears the "owner" edge to the User entity.
 func (m *PetMutation) ClearOwner() {
 	m.clearedowner = true
+	m.clearedFields[pet.FieldOwnerID] = struct{}{}
 }
 
 // OwnerCleared reports if the "owner" edge to the User entity was cleared.
