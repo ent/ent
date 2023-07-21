@@ -271,6 +271,7 @@ func (m *FileMutation) ResetParentID() {
 // ClearParent clears the "parent" edge to the File entity.
 func (m *FileMutation) ClearParent() {
 	m.clearedparent = true
+	m.clearedFields[file.FieldParentID] = struct{}{}
 }
 
 // ParentCleared reports if the "parent" edge to the File entity was cleared.

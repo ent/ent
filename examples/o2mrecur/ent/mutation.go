@@ -255,6 +255,7 @@ func (m *NodeMutation) ResetParentID() {
 // ClearParent clears the "parent" edge to the Node entity.
 func (m *NodeMutation) ClearParent() {
 	m.clearedparent = true
+	m.clearedFields[node.FieldParentID] = struct{}{}
 }
 
 // ParentCleared reports if the "parent" edge to the Node entity was cleared.

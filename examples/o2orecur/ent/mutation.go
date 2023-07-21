@@ -254,6 +254,7 @@ func (m *NodeMutation) ResetPrevID() {
 // ClearPrev clears the "prev" edge to the Node entity.
 func (m *NodeMutation) ClearPrev() {
 	m.clearedprev = true
+	m.clearedFields[node.FieldPrevID] = struct{}{}
 }
 
 // PrevCleared reports if the "prev" edge to the Node entity was cleared.

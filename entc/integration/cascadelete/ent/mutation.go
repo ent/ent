@@ -222,6 +222,7 @@ func (m *CommentMutation) ResetPostID() {
 // ClearPost clears the "post" edge to the Post entity.
 func (m *CommentMutation) ClearPost() {
 	m.clearedpost = true
+	m.clearedFields[comment.FieldPostID] = struct{}{}
 }
 
 // PostCleared reports if the "post" edge to the Post entity was cleared.
@@ -674,6 +675,7 @@ func (m *PostMutation) ResetAuthorID() {
 // ClearAuthor clears the "author" edge to the User entity.
 func (m *PostMutation) ClearAuthor() {
 	m.clearedauthor = true
+	m.clearedFields[post.FieldAuthorID] = struct{}{}
 }
 
 // AuthorCleared reports if the "author" edge to the User entity was cleared.

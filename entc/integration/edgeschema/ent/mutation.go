@@ -295,6 +295,7 @@ func (m *AttachedFileMutation) SetFiID(id int) {
 // ClearFi clears the "fi" edge to the File entity.
 func (m *AttachedFileMutation) ClearFi() {
 	m.clearedfi = true
+	m.clearedFields[attachedfile.FieldFID] = struct{}{}
 }
 
 // FiCleared reports if the "fi" edge to the File entity was cleared.
@@ -329,6 +330,7 @@ func (m *AttachedFileMutation) ResetFi() {
 // ClearProc clears the "proc" edge to the Process entity.
 func (m *AttachedFileMutation) ClearProc() {
 	m.clearedproc = true
+	m.clearedFields[attachedfile.FieldProcID] = struct{}{}
 }
 
 // ProcCleared reports if the "proc" edge to the Process entity was cleared.
@@ -1315,6 +1317,7 @@ func (m *FriendshipMutation) ResetFriendID() {
 // ClearUser clears the "user" edge to the User entity.
 func (m *FriendshipMutation) ClearUser() {
 	m.cleareduser = true
+	m.clearedFields[friendship.FieldUserID] = struct{}{}
 }
 
 // UserCleared reports if the "user" edge to the User entity was cleared.
@@ -1341,6 +1344,7 @@ func (m *FriendshipMutation) ResetUser() {
 // ClearFriend clears the "friend" edge to the User entity.
 func (m *FriendshipMutation) ClearFriend() {
 	m.clearedfriend = true
+	m.clearedFields[friendship.FieldFriendID] = struct{}{}
 }
 
 // FriendCleared reports if the "friend" edge to the User entity was cleared.
@@ -2510,6 +2514,7 @@ func (m *GroupTagMutation) ResetGroupID() {
 // ClearTag clears the "tag" edge to the Tag entity.
 func (m *GroupTagMutation) ClearTag() {
 	m.clearedtag = true
+	m.clearedFields[grouptag.FieldTagID] = struct{}{}
 }
 
 // TagCleared reports if the "tag" edge to the Tag entity was cleared.
@@ -2536,6 +2541,7 @@ func (m *GroupTagMutation) ResetTag() {
 // ClearGroup clears the "group" edge to the Group entity.
 func (m *GroupTagMutation) ClearGroup() {
 	m.clearedgroup = true
+	m.clearedFields[grouptag.FieldGroupID] = struct{}{}
 }
 
 // GroupCleared reports if the "group" edge to the Group entity was cleared.
@@ -3411,6 +3417,7 @@ func (m *RelationshipMutation) ResetInfoID() {
 // ClearUser clears the "user" edge to the User entity.
 func (m *RelationshipMutation) ClearUser() {
 	m.cleareduser = true
+	m.clearedFields[relationship.FieldUserID] = struct{}{}
 }
 
 // UserCleared reports if the "user" edge to the User entity was cleared.
@@ -3437,6 +3444,7 @@ func (m *RelationshipMutation) ResetUser() {
 // ClearRelative clears the "relative" edge to the User entity.
 func (m *RelationshipMutation) ClearRelative() {
 	m.clearedrelative = true
+	m.clearedFields[relationship.FieldRelativeID] = struct{}{}
 }
 
 // RelativeCleared reports if the "relative" edge to the User entity was cleared.
@@ -3463,6 +3471,7 @@ func (m *RelationshipMutation) ResetRelative() {
 // ClearInfo clears the "info" edge to the RelationshipInfo entity.
 func (m *RelationshipMutation) ClearInfo() {
 	m.clearedinfo = true
+	m.clearedFields[relationship.FieldInfoID] = struct{}{}
 }
 
 // InfoCleared reports if the "info" edge to the RelationshipInfo entity was cleared.
@@ -4705,6 +4714,7 @@ func (m *RoleUserMutation) ResetUserID() {
 // ClearRole clears the "role" edge to the Role entity.
 func (m *RoleUserMutation) ClearRole() {
 	m.clearedrole = true
+	m.clearedFields[roleuser.FieldRoleID] = struct{}{}
 }
 
 // RoleCleared reports if the "role" edge to the Role entity was cleared.
@@ -4731,6 +4741,7 @@ func (m *RoleUserMutation) ResetRole() {
 // ClearUser clears the "user" edge to the User entity.
 func (m *RoleUserMutation) ClearUser() {
 	m.cleareduser = true
+	m.clearedFields[roleuser.FieldUserID] = struct{}{}
 }
 
 // UserCleared reports if the "user" edge to the User entity was cleared.
@@ -6539,6 +6550,7 @@ func (m *TweetLikeMutation) ResetTweetID() {
 // ClearTweet clears the "tweet" edge to the Tweet entity.
 func (m *TweetLikeMutation) ClearTweet() {
 	m.clearedtweet = true
+	m.clearedFields[tweetlike.FieldTweetID] = struct{}{}
 }
 
 // TweetCleared reports if the "tweet" edge to the Tweet entity was cleared.
@@ -6565,6 +6577,7 @@ func (m *TweetLikeMutation) ResetTweet() {
 // ClearUser clears the "user" edge to the User entity.
 func (m *TweetLikeMutation) ClearUser() {
 	m.cleareduser = true
+	m.clearedFields[tweetlike.FieldUserID] = struct{}{}
 }
 
 // UserCleared reports if the "user" edge to the User entity was cleared.
@@ -7072,6 +7085,7 @@ func (m *TweetTagMutation) ResetTweetID() {
 // ClearTag clears the "tag" edge to the Tag entity.
 func (m *TweetTagMutation) ClearTag() {
 	m.clearedtag = true
+	m.clearedFields[tweettag.FieldTagID] = struct{}{}
 }
 
 // TagCleared reports if the "tag" edge to the Tag entity was cleared.
@@ -7098,6 +7112,7 @@ func (m *TweetTagMutation) ResetTag() {
 // ClearTweet clears the "tweet" edge to the Tweet entity.
 func (m *TweetTagMutation) ClearTweet() {
 	m.clearedtweet = true
+	m.clearedFields[tweettag.FieldTweetID] = struct{}{}
 }
 
 // TweetCleared reports if the "tweet" edge to the Tweet entity was cleared.
@@ -8690,6 +8705,7 @@ func (m *UserGroupMutation) ResetGroupID() {
 // ClearUser clears the "user" edge to the User entity.
 func (m *UserGroupMutation) ClearUser() {
 	m.cleareduser = true
+	m.clearedFields[usergroup.FieldUserID] = struct{}{}
 }
 
 // UserCleared reports if the "user" edge to the User entity was cleared.
@@ -8716,6 +8732,7 @@ func (m *UserGroupMutation) ResetUser() {
 // ClearGroup clears the "group" edge to the Group entity.
 func (m *UserGroupMutation) ClearGroup() {
 	m.clearedgroup = true
+	m.clearedFields[usergroup.FieldGroupID] = struct{}{}
 }
 
 // GroupCleared reports if the "group" edge to the Group entity was cleared.
@@ -9225,6 +9242,7 @@ func (m *UserTweetMutation) ResetTweetID() {
 // ClearUser clears the "user" edge to the User entity.
 func (m *UserTweetMutation) ClearUser() {
 	m.cleareduser = true
+	m.clearedFields[usertweet.FieldUserID] = struct{}{}
 }
 
 // UserCleared reports if the "user" edge to the User entity was cleared.
@@ -9251,6 +9269,7 @@ func (m *UserTweetMutation) ResetUser() {
 // ClearTweet clears the "tweet" edge to the Tweet entity.
 func (m *UserTweetMutation) ClearTweet() {
 	m.clearedtweet = true
+	m.clearedFields[usertweet.FieldTweetID] = struct{}{}
 }
 
 // TweetCleared reports if the "tweet" edge to the Tweet entity was cleared.
