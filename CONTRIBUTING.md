@@ -26,7 +26,7 @@ possible.
   In order to test your documentation changes, run `npm start` from the `doc/website` directory, and open [localhost:3000](http://localhost:3000/).
 
 # Run integration tests
-If you touch any file in `entc`, run the following command in `entc` and 'examples' dirs:
+If you touch any file in `entc`, run the following command in `entc/integration` and 'examples' dirs:
 
 ```
 go generate ./...
