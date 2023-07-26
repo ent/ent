@@ -805,11 +805,12 @@ func (a *Atlas) diff(ctx context.Context, name string, current, desired *schema.
 	}
 	filtered := make([]schema.Change, 0, len(changes))
 	for _, c := range changes {
-		// Skip any table drops explicitly. The reason we may encounter this, even though specific tables are passed
-		// to Inspect, is if the MySQL system variable 'lower_case_table_names' is set to 1. In such a case, the given
-		// tables will be returned from inspection because MySQL compares case-insensitive, but they won't match when
-		// compare them in code.
-		if _, ok := c.(*schema.DropTable); !ok {
+		switch c.(type) {
+		// Select only table creation and modification. The reason we may encounter this, even though specific tables
+		// are passed to Inspect, is if the MySQL system variable 'lower_case_table_names' is set to 1. In such a case,
+		// the given tables will be returned from inspection because MySQL compares case-insensitive, but they won't
+		// match when compare them in code.
+		case *schema.AddTable, *schema.ModifyTable:
 			filtered = append(filtered, c)
 		}
 	}
