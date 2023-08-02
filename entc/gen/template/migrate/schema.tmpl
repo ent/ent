@@ -36,7 +36,7 @@ var (
 				{{- if $c.Increment }} Increment: true,{{ end }}
 				{{- if $c.Nullable }} Nullable: {{ $c.Nullable }},{{ end }}
 				{{- with $c.Size }} Size: {{ . }},{{ end }}
-				{{- with $c.Comment }} Comment: "{{ $c.Comment }}",{{ end }}
+				{{- with $c.Comment }} Comment: "{{ replace $c.Comment "\n" "\\n" }}",{{ end }}
 				{{- with $c.Attr }} Attr: "{{ . }}",{{ end }}
 				{{- with $c.Enums }} Enums: []string{ {{ range $e := . }}"{{ $e }}",{{ end }} },{{ end }}
 				{{- if not (isNil $c.Default) -}}
@@ -58,7 +58,7 @@ var (
 		{{ $table }} = &schema.Table{
 			Name: "{{ $t.Name }}",
 			{{- with $t.Comment }}
-				Comment: "{{ . }}",
+				Comment: "{{ replace . "\n" "\\n" }}",
 			{{- end }}
 			Columns: {{ $columns }},
 			PrimaryKey: []*schema.Column{
