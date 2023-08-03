@@ -1086,7 +1086,7 @@ func (a *Atlas) entDialect(ctx context.Context, drv dialect.Driver) (sqlDialect,
 	case dialect.SQLite:
 		d = &SQLite{Driver: drv, WithForeignKeys: a.withForeignKeys}
 	case dialect.Postgres:
-		d = &Postgres{Driver: drv}
+		d = &Postgres{Driver: drv, symbolFunc: a.symbol}
 	default:
 		return nil, fmt.Errorf("sql/schema: unsupported dialect %q", a.dialect)
 	}

@@ -11,11 +11,11 @@ import (
 	"strings"
 	"testing"
 
+	"ariga.io/atlas/sql/schema"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
-
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/require"
 )
@@ -1033,4 +1033,149 @@ func (m pgMock) fkExists(fk string, exists bool) {
 	m.ExpectQuery(escape(`SELECT COUNT(*) FROM "information_schema"."table_constraints" WHERE "table_schema" = CURRENT_SCHEMA() AND "constraint_type" = $1 AND "constraint_name" = $2`)).
 		WithArgs("FOREIGN KEY", fk).
 		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(count))
+}
+
+func TestPostgres_atUniqueC(t *testing.T) {
+	type fields struct {
+		Driver  dialect.Driver
+		schema  string
+		version string
+		dialect string
+		atlas   *Atlas
+	}
+	type args struct {
+		t1 *Table
+		c1 *Column
+		t2 *schema.Table
+		c2 *schema.Column
+	}
+	tests := []struct {
+		name     string
+		fields   fields
+		args     args
+		expected *schema.Table
+	}{
+		{
+			name: "not over 63 chars, no symbolFunc",
+			fields: fields{
+				atlas: &Atlas{
+					dialect: dialect.Postgres,
+				},
+			},
+			args: args{
+				t1: &Table{
+					Name: "users",
+				},
+				c1: &Column{
+					Name: "age",
+				},
+				t2: &schema.Table{},
+				c2: &schema.Column{
+					Name: "age",
+				},
+			},
+			expected: &schema.Table{
+				Indexes: []*schema.Index{
+					{
+						// <table>_<column>_key
+						Name: "users_age_key",
+					},
+				},
+			},
+		},
+		{
+			name: "not over 63 chars, with symbolFunc",
+			fields: fields{
+				atlas: &Atlas{
+					dialect: dialect.Postgres,
+				},
+			},
+			args: args{
+				t1: &Table{
+					Name: "users",
+				},
+				c1: &Column{
+					Name: "age",
+				},
+				t2: &schema.Table{},
+				c2: &schema.Column{
+					Name: "age",
+				},
+			},
+			expected: &schema.Table{
+				Indexes: []*schema.Index{
+					{
+						Name: "users_age_key",
+					},
+				},
+			},
+		},
+		{
+			name: "over 64 chars and dialect is postgres",
+			fields: fields{
+				atlas: &Atlas{
+					dialect: dialect.Postgres,
+				},
+			},
+			args: args{
+				t1: &Table{
+					Name: "users",
+				},
+				c1: &Column{
+					Name: "unique_index_name_of_this_column_will_be_over_63_characters",
+				},
+				t2: &schema.Table{},
+				c2: &schema.Column{
+					Name: "unique_index_name_of_this_column_will_be_over_63_characters",
+				},
+			},
+			expected: &schema.Table{
+				Indexes: []*schema.Index{
+					{
+						Name: "users_unique_index_name_of_thi_31ceeb611411a4f3fba7f2109514722d", // 63 chars
+					},
+				},
+			},
+		},
+		{
+			name: "over 64 chars and dialect is mysql",
+			fields: fields{
+				atlas: &Atlas{
+					dialect: dialect.MySQL,
+				},
+			},
+			args: args{
+				t1: &Table{
+					Name: "users",
+				},
+				c1: &Column{
+					Name: "unique_index_name_of_this_column_will_be_over_63_characters",
+				},
+				t2: &schema.Table{},
+				c2: &schema.Column{
+					Name: "unique_index_name_of_this_column_will_be_over_63_characters",
+				},
+			},
+			expected: &schema.Table{
+				Indexes: []*schema.Index{
+					{
+						Name: "users_unique_index_name_of_this_31ceeb611411a4f3fba7f2109514722d", // 64 chars
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			d := &Postgres{
+				Driver:     tt.fields.Driver,
+				schema:     tt.fields.schema,
+				version:    tt.fields.version,
+				symbolFunc: tt.fields.atlas.symbol,
+			}
+			d.atUniqueC(tt.args.t1, tt.args.c1, tt.args.t2, tt.args.c2)
+			require.Len(t, tt.args.t2.Indexes, len(tt.expected.Indexes))
+			require.Equal(t, tt.expected.Indexes[0].Name, tt.args.t2.Indexes[0].Name)
+		})
+	}
 }
