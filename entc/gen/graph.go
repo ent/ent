@@ -11,11 +11,13 @@ import (
 	"fmt"
 	"go/parser"
 	"go/token"
+	"golang.org/x/sync/errgroup"
 	"log"
 	"os"
 	"path/filepath"
 	"runtime/debug"
 	"strings"
+	"sync"
 	"text/template/parse"
 
 	"entgo.io/ent/dialect/sql/schema"
@@ -39,6 +41,19 @@ type (
 		// By default, 'ent generate ./ent/schema' uses './ent' as a
 		// target directory.
 		Target string
+
+		// Format defines if the generated files should be formatted.
+		//
+		// By default, formatting is enabled
+		Format bool
+
+		// ConcurrentTemplateExecution improves generation speed
+		// by executing templates in a concurrent manner.
+		// Depending on custom templates, this can break things,
+		// hence the default option is disabled.
+		//
+		// By default, concurrent template execution is disabled
+		ConcurrentTemplateExecution bool
 
 		// Package defines the Go package path of the target directory
 		// mentioned above. For example, "github.com/org/project/ent".
@@ -222,30 +237,68 @@ func generate(g *Graph) error {
 		assets   assets
 		external []GraphTemplate
 	)
+
 	templates, external = g.templates()
+	var wg sync.WaitGroup
+	var errOnce sync.Once
+	var firstErr error
 	for _, n := range g.Nodes {
 		assets.addDir(filepath.Join(g.Config.Target, n.PackageDir()))
 		for _, tmpl := range Templates {
-			b := bytes.NewBuffer(nil)
-			if err := templates.ExecuteTemplate(b, tmpl.Name, n); err != nil {
-				return fmt.Errorf("execute template %q: %w", tmpl.Name, err)
+			wg.Add(1)
+			action := func(n *Type, tmpl TypeTemplate) {
+				defer wg.Done()
+				b := bytes.NewBuffer(nil)
+				if err := templates.ExecuteTemplate(b, tmpl.Name, n); err != nil {
+					errOnce.Do(func() {
+						firstErr = fmt.Errorf("execute template %q: %w", tmpl.Name, err)
+					})
+					return
+				}
+				assets.add(filepath.Join(g.Config.Target, tmpl.Format(n)), b.Bytes())
 			}
-			assets.add(filepath.Join(g.Config.Target, tmpl.Format(n)), b.Bytes())
+			if g.Config.ConcurrentTemplateExecution {
+				go action(n, tmpl)
+			} else {
+				action(n, tmpl)
+			}
 		}
 	}
+	wg.Wait() // wait for all goroutines to finish
+	if firstErr != nil {
+		return firstErr
+	}
+
 	for _, tmpl := range append(GraphTemplates, external...) {
-		if tmpl.Skip != nil && tmpl.Skip(g) {
-			continue
+		wg.Add(1)
+		action := func(tmpl GraphTemplate) {
+			defer wg.Done()
+			if tmpl.Skip != nil && tmpl.Skip(g) {
+				return
+			}
+			if dir := filepath.Dir(tmpl.Format); dir != "." {
+				assets.addDir(filepath.Join(g.Config.Target, dir))
+			}
+			b := bytes.NewBuffer(nil)
+			if err := templates.ExecuteTemplate(b, tmpl.Name, g); err != nil {
+				errOnce.Do(func() {
+					firstErr = fmt.Errorf("execute template %q: %w", tmpl.Name, err)
+				})
+				return
+			}
+			assets.add(filepath.Join(g.Config.Target, tmpl.Format), b.Bytes())
 		}
-		if dir := filepath.Dir(tmpl.Format); dir != "." {
-			assets.addDir(filepath.Join(g.Config.Target, dir))
+		if g.Config.ConcurrentTemplateExecution {
+			go action(tmpl)
+		} else {
+			action(tmpl)
 		}
-		b := bytes.NewBuffer(nil)
-		if err := templates.ExecuteTemplate(b, tmpl.Name, g); err != nil {
-			return fmt.Errorf("execute template %q: %w", tmpl.Name, err)
-		}
-		assets.add(filepath.Join(g.Config.Target, tmpl.Format), b.Bytes())
 	}
+	wg.Wait() // wait for all goroutines to finish
+	if firstErr != nil {
+		return firstErr
+	}
+
 	for _, f := range AllFeatures {
 		if f.cleanup == nil || g.featureEnabled(f) {
 			continue
@@ -254,23 +307,31 @@ func generate(g *Graph) error {
 			return fmt.Errorf("cleanup %q feature assets: %w", f.Name, err)
 		}
 	}
+
 	// Write and format assets only if template execution
 	// finished successfully.
 	if err := assets.write(); err != nil {
 		return err
 	}
+
 	// Cleanup nodes' assets and old template
 	// files that are not needed anymore.
-	cleanOldNodes(assets, g.Config.Target)
+	cleanOldNodes(&assets, g.Config.Target)
 	for _, n := range deletedTemplates {
 		if err := os.Remove(filepath.Join(g.Target, n)); err != nil && !os.IsNotExist(err) {
 			log.Printf("remove old file %s: %s\n", filepath.Join(g.Target, n), err)
 		}
 	}
+
 	// We can't run "imports" on files when the state is not completed.
 	// Because, "goimports" will drop undefined package. Therefore, it
 	// is suspended to the end of the writing.
-	return assets.format()
+	if g.Config.Format {
+		if err := assets.format(); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // addNode creates a new Type/Node/Ent to the graph.
@@ -1001,7 +1062,7 @@ func PrepareEnv(c *Config) (undo func() error, err error) {
 
 // cleanOldNodes removes all files that were generated
 // for nodes that were removed from the schema.
-func cleanOldNodes(assets assets, target string) {
+func cleanOldNodes(assets *assets, target string) {
 	d, err := os.ReadDir(target)
 	if err != nil {
 		return
@@ -1042,24 +1103,29 @@ func cleanOldNodes(assets assets, target string) {
 type assets struct {
 	dirs  map[string]struct{}
 	files map[string][]byte
+	mu    sync.RWMutex
 }
 
 func (a *assets) add(path string, content []byte) {
 	if a.files == nil {
 		a.files = make(map[string][]byte)
 	}
+	a.mu.Lock()
 	a.files[path] = content
+	a.mu.Unlock()
 }
 
 func (a *assets) addDir(path string) {
 	if a.dirs == nil {
 		a.dirs = make(map[string]struct{})
 	}
+	a.mu.Lock()
 	a.dirs[path] = struct{}{}
+	a.mu.Unlock()
 }
 
 // write files and dirs in the assets.
-func (a assets) write() error {
+func (a *assets) write() error {
 	for dir := range a.dirs {
 		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
 			return fmt.Errorf("create dir %q: %w", dir, err)
@@ -1074,16 +1140,31 @@ func (a assets) write() error {
 }
 
 // format runs "goimports" on all assets.
-func (a assets) format() error {
+func (a *assets) format() error {
+	var g errgroup.Group
+
 	for path, content := range a.files {
-		src, err := imports.Process(path, content, nil)
-		if err != nil {
-			return fmt.Errorf("format file %s: %w", path, err)
-		}
-		if err := os.WriteFile(path, src, 0644); err != nil {
-			return fmt.Errorf("write file %s: %w", path, err)
-		}
+		// avoid race conditions
+		p, c := path, content
+
+		// create a new goroutine for each file
+		g.Go(func() error {
+			src, err := imports.Process(p, c, nil)
+			if err != nil {
+				return fmt.Errorf("format file %s: %w", p, err)
+			}
+			if err := os.WriteFile(p, src, 0644); err != nil {
+				return fmt.Errorf("write file %s: %w", p, err)
+			}
+			return nil
+		})
 	}
+
+	// wait for all goroutines to finish and return the first error, if any
+	if err := g.Wait(); err != nil {
+		return err
+	}
+
 	return nil
 }
 

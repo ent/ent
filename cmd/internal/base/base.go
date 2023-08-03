@@ -200,6 +200,8 @@ func GenerateCmd(postRun ...func(*gen.Config)) *cobra.Command {
 	cmd.Flags().StringVar(&storage, "storage", "sql", "storage driver to support in codegen")
 	cmd.Flags().StringVar(&cfg.Header, "header", "", "override codegen header")
 	cmd.Flags().StringVar(&cfg.Target, "target", "", "target directory for codegen")
+	cmd.Flags().BoolVar(&cfg.Format, "format", true, "format generated files")
+	cmd.Flags().BoolVar(&cfg.ConcurrentTemplateExecution, "concurrent-template-execution", false, "enable to improve generate speed if needed, can break certain custom templates")
 	cmd.Flags().StringSliceVarP(&features, "feature", "", nil, "extend codegen with additional features")
 	cmd.Flags().StringSliceVarP(&templates, "template", "", nil, "external templates to execute")
 	// The --idtype flag predates the field.<Type>("id") option.
