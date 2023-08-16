@@ -88,5 +88,6 @@ func (_pc *PCCreate) gremlin() *dsl.Traversal {
 // PCCreateBulk is the builder for creating many PC entities in bulk.
 type PCCreateBulk struct {
 	config
+	err      error
 	builders []*PCCreate
 }

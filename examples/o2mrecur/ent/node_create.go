@@ -169,11 +169,15 @@ func (nc *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 // NodeCreateBulk is the builder for creating many Node entities in bulk.
 type NodeCreateBulk struct {
 	config
+	err      error
 	builders []*NodeCreate
 }
 
 // Save creates the Node entities in the database.
 func (ncb *NodeCreateBulk) Save(ctx context.Context) ([]*Node, error) {
+	if ncb.err != nil {
+		return nil, ncb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(ncb.builders))
 	nodes := make([]*Node, len(ncb.builders))
 	mutators := make([]Mutator, len(ncb.builders))

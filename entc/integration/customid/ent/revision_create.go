@@ -237,12 +237,16 @@ func (u *RevisionUpsertOne) IDX(ctx context.Context) string {
 // RevisionCreateBulk is the builder for creating many Revision entities in bulk.
 type RevisionCreateBulk struct {
 	config
+	err      error
 	builders []*RevisionCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the Revision entities in the database.
 func (rcb *RevisionCreateBulk) Save(ctx context.Context) ([]*Revision, error) {
+	if rcb.err != nil {
+		return nil, rcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(rcb.builders))
 	nodes := make([]*Revision, len(rcb.builders))
 	mutators := make([]Mutator, len(rcb.builders))
@@ -403,6 +407,9 @@ func (u *RevisionUpsertBulk) Update(set func(*RevisionUpsert)) *RevisionUpsertBu
 
 // Exec executes the query.
 func (u *RevisionUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the RevisionCreateBulk instead", i)

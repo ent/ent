@@ -205,5 +205,6 @@ func (ftc *FileTypeCreate) gremlin() *dsl.Traversal {
 // FileTypeCreateBulk is the builder for creating many FileType entities in bulk.
 type FileTypeCreateBulk struct {
 	config
+	err      error
 	builders []*FileTypeCreate
 }

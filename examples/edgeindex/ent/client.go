@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"reflect"
 
 	"entgo.io/ent"
 	"entgo.io/ent/examples/edgeindex/ent/migrate"
@@ -238,6 +239,21 @@ func (c *CityClient) CreateBulk(builders ...*CityCreate) *CityCreateBulk {
 	return &CityCreateBulk{config: c.config, builders: builders}
 }
 
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CityClient) MapCreateBulk(slice any, setFunc func(*CityCreate, int)) *CityCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CityCreateBulk{err: fmt.Errorf("calling to CityClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CityCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CityCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for City.
 func (c *CityClient) Update() *CityUpdate {
 	mutation := newCityMutation(c.config, OpUpdate)
@@ -369,6 +385,21 @@ func (c *StreetClient) Create() *StreetCreate {
 
 // CreateBulk returns a builder for creating a bulk of Street entities.
 func (c *StreetClient) CreateBulk(builders ...*StreetCreate) *StreetCreateBulk {
+	return &StreetCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StreetClient) MapCreateBulk(slice any, setFunc func(*StreetCreate, int)) *StreetCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StreetCreateBulk{err: fmt.Errorf("calling to StreetClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StreetCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
 	return &StreetCreateBulk{config: c.config, builders: builders}
 }
 

@@ -435,12 +435,16 @@ func (u *TweetTagUpsertOne) IDX(ctx context.Context) uuid.UUID {
 // TweetTagCreateBulk is the builder for creating many TweetTag entities in bulk.
 type TweetTagCreateBulk struct {
 	config
+	err      error
 	builders []*TweetTagCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the TweetTag entities in the database.
 func (ttcb *TweetTagCreateBulk) Save(ctx context.Context) ([]*TweetTag, error) {
+	if ttcb.err != nil {
+		return nil, ttcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(ttcb.builders))
 	nodes := make([]*TweetTag, len(ttcb.builders))
 	mutators := make([]Mutator, len(ttcb.builders))
@@ -649,6 +653,9 @@ func (u *TweetTagUpsertBulk) UpdateTweetID() *TweetTagUpsertBulk {
 
 // Exec executes the query.
 func (u *TweetTagUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the TweetTagCreateBulk instead", i)

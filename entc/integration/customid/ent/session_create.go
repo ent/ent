@@ -297,12 +297,16 @@ func (u *SessionUpsertOne) IDX(ctx context.Context) schema.ID {
 // SessionCreateBulk is the builder for creating many Session entities in bulk.
 type SessionCreateBulk struct {
 	config
+	err      error
 	builders []*SessionCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the Session entities in the database.
 func (scb *SessionCreateBulk) Save(ctx context.Context) ([]*Session, error) {
+	if scb.err != nil {
+		return nil, scb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(scb.builders))
 	nodes := make([]*Session, len(scb.builders))
 	mutators := make([]Mutator, len(scb.builders))
@@ -464,6 +468,9 @@ func (u *SessionUpsertBulk) Update(set func(*SessionUpsert)) *SessionUpsertBulk 
 
 // Exec executes the query.
 func (u *SessionUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the SessionCreateBulk instead", i)

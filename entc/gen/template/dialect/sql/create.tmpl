@@ -143,6 +143,10 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 
 // Save creates the {{ $.Name }} entities in the database.
 func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }}, error) {
+	{{- /* Initialization error was set by MapCreateBulk. */}}
+	if {{ $receiver }}.err != nil {
+		return nil, {{ $receiver }}.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len({{ $receiver }}.builders))
 	nodes := make([]*{{ $.Name }}, len({{ $receiver }}.builders))
 	mutators := make([]Mutator, len({{ $receiver }}.builders))

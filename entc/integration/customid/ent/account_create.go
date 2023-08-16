@@ -337,12 +337,16 @@ func (u *AccountUpsertOne) IDX(ctx context.Context) sid.ID {
 // AccountCreateBulk is the builder for creating many Account entities in bulk.
 type AccountCreateBulk struct {
 	config
+	err      error
 	builders []*AccountCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the Account entities in the database.
 func (acb *AccountCreateBulk) Save(ctx context.Context) ([]*Account, error) {
+	if acb.err != nil {
+		return nil, acb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(acb.builders))
 	nodes := make([]*Account, len(acb.builders))
 	mutators := make([]Mutator, len(acb.builders))
@@ -523,6 +527,9 @@ func (u *AccountUpsertBulk) UpdateEmail() *AccountUpsertBulk {
 
 // Exec executes the query.
 func (u *AccountUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the AccountCreateBulk instead", i)

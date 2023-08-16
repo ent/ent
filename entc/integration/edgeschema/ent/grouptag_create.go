@@ -336,12 +336,16 @@ func (u *GroupTagUpsertOne) IDX(ctx context.Context) int {
 // GroupTagCreateBulk is the builder for creating many GroupTag entities in bulk.
 type GroupTagCreateBulk struct {
 	config
+	err      error
 	builders []*GroupTagCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the GroupTag entities in the database.
 func (gtcb *GroupTagCreateBulk) Save(ctx context.Context) ([]*GroupTag, error) {
+	if gtcb.err != nil {
+		return nil, gtcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(gtcb.builders))
 	nodes := make([]*GroupTag, len(gtcb.builders))
 	mutators := make([]Mutator, len(gtcb.builders))
@@ -529,6 +533,9 @@ func (u *GroupTagUpsertBulk) UpdateGroupID() *GroupTagUpsertBulk {
 
 // Exec executes the query.
 func (u *GroupTagUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the GroupTagCreateBulk instead", i)

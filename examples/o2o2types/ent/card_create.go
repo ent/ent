@@ -148,11 +148,15 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 // CardCreateBulk is the builder for creating many Card entities in bulk.
 type CardCreateBulk struct {
 	config
+	err      error
 	builders []*CardCreate
 }
 
 // Save creates the Card entities in the database.
 func (ccb *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
+	if ccb.err != nil {
+		return nil, ccb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))
 	nodes := make([]*Card, len(ccb.builders))
 	mutators := make([]Mutator, len(ccb.builders))

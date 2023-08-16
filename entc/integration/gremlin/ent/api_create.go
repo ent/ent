@@ -88,5 +88,6 @@ func (ac *APICreate) gremlin() *dsl.Traversal {
 // APICreateBulk is the builder for creating many Api entities in bulk.
 type APICreateBulk struct {
 	config
+	err      error
 	builders []*APICreate
 }

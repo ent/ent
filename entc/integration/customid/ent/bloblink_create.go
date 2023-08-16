@@ -371,12 +371,16 @@ func (u *BlobLinkUpsertOne) ExecX(ctx context.Context) {
 // BlobLinkCreateBulk is the builder for creating many BlobLink entities in bulk.
 type BlobLinkCreateBulk struct {
 	config
+	err      error
 	builders []*BlobLinkCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the BlobLink entities in the database.
 func (blcb *BlobLinkCreateBulk) Save(ctx context.Context) ([]*BlobLink, error) {
+	if blcb.err != nil {
+		return nil, blcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(blcb.builders))
 	nodes := make([]*BlobLink, len(blcb.builders))
 	mutators := make([]Mutator, len(blcb.builders))
@@ -574,6 +578,9 @@ func (u *BlobLinkUpsertBulk) UpdateLinkID() *BlobLinkUpsertBulk {
 
 // Exec executes the query.
 func (u *BlobLinkUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the BlobLinkCreateBulk instead", i)

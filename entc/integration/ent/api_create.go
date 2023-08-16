@@ -208,12 +208,16 @@ func (u *ApiUpsertOne) IDX(ctx context.Context) int {
 // APICreateBulk is the builder for creating many Api entities in bulk.
 type APICreateBulk struct {
 	config
+	err      error
 	builders []*APICreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the Api entities in the database.
 func (acb *APICreateBulk) Save(ctx context.Context) ([]*Api, error) {
+	if acb.err != nil {
+		return nil, acb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(acb.builders))
 	nodes := make([]*Api, len(acb.builders))
 	mutators := make([]Mutator, len(acb.builders))
@@ -368,6 +372,9 @@ func (u *ApiUpsertBulk) Update(set func(*ApiUpsert)) *ApiUpsertBulk {
 
 // Exec executes the query.
 func (u *ApiUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the APICreateBulk instead", i)

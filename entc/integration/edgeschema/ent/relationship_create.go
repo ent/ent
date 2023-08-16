@@ -461,12 +461,16 @@ func (u *RelationshipUpsertOne) ExecX(ctx context.Context) {
 // RelationshipCreateBulk is the builder for creating many Relationship entities in bulk.
 type RelationshipCreateBulk struct {
 	config
+	err      error
 	builders []*RelationshipCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the Relationship entities in the database.
 func (rcb *RelationshipCreateBulk) Save(ctx context.Context) ([]*Relationship, error) {
+	if rcb.err != nil {
+		return nil, rcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(rcb.builders))
 	nodes := make([]*Relationship, len(rcb.builders))
 	mutators := make([]Mutator, len(rcb.builders))
@@ -692,6 +696,9 @@ func (u *RelationshipUpsertBulk) ClearInfoID() *RelationshipUpsertBulk {
 
 // Exec executes the query.
 func (u *RelationshipUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the RelationshipCreateBulk instead", i)

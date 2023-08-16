@@ -171,11 +171,15 @@ func (cc *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 // CarCreateBulk is the builder for creating many Car entities in bulk.
 type CarCreateBulk struct {
 	config
+	err      error
 	builders []*CarCreate
 }
 
 // Save creates the Car entities in the database.
 func (ccb *CarCreateBulk) Save(ctx context.Context) ([]*Car, error) {
+	if ccb.err != nil {
+		return nil, ccb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))
 	nodes := make([]*Car, len(ccb.builders))
 	mutators := make([]Mutator, len(ccb.builders))

@@ -152,11 +152,15 @@ func (ic *InfoCreate) createSpec() (*Info, *sqlgraph.CreateSpec) {
 // InfoCreateBulk is the builder for creating many Info entities in bulk.
 type InfoCreateBulk struct {
 	config
+	err      error
 	builders []*InfoCreate
 }
 
 // Save creates the Info entities in the database.
 func (icb *InfoCreateBulk) Save(ctx context.Context) ([]*Info, error) {
+	if icb.err != nil {
+		return nil, icb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(icb.builders))
 	nodes := make([]*Info, len(icb.builders))
 	mutators := make([]Mutator, len(icb.builders))

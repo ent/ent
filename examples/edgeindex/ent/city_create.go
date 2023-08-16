@@ -134,11 +134,15 @@ func (cc *CityCreate) createSpec() (*City, *sqlgraph.CreateSpec) {
 // CityCreateBulk is the builder for creating many City entities in bulk.
 type CityCreateBulk struct {
 	config
+	err      error
 	builders []*CityCreate
 }
 
 // Save creates the City entities in the database.
 func (ccb *CityCreateBulk) Save(ctx context.Context) ([]*City, error) {
+	if ccb.err != nil {
+		return nil, ccb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))
 	nodes := make([]*City, len(ccb.builders))
 	mutators := make([]Mutator, len(ccb.builders))

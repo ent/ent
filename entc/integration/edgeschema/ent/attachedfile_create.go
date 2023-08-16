@@ -399,12 +399,16 @@ func (u *AttachedFileUpsertOne) IDX(ctx context.Context) int {
 // AttachedFileCreateBulk is the builder for creating many AttachedFile entities in bulk.
 type AttachedFileCreateBulk struct {
 	config
+	err      error
 	builders []*AttachedFileCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the AttachedFile entities in the database.
 func (afcb *AttachedFileCreateBulk) Save(ctx context.Context) ([]*AttachedFile, error) {
+	if afcb.err != nil {
+		return nil, afcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(afcb.builders))
 	nodes := make([]*AttachedFile, len(afcb.builders))
 	mutators := make([]Mutator, len(afcb.builders))
@@ -607,6 +611,9 @@ func (u *AttachedFileUpsertBulk) UpdateProcID() *AttachedFileUpsertBulk {
 
 // Exec executes the query.
 func (u *AttachedFileUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the AttachedFileCreateBulk instead", i)

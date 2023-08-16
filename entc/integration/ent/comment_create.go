@@ -560,12 +560,16 @@ func (u *CommentUpsertOne) IDX(ctx context.Context) int {
 // CommentCreateBulk is the builder for creating many Comment entities in bulk.
 type CommentCreateBulk struct {
 	config
+	err      error
 	builders []*CommentCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the Comment entities in the database.
 func (ccb *CommentCreateBulk) Save(ctx context.Context) ([]*Comment, error) {
+	if ccb.err != nil {
+		return nil, ccb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))
 	nodes := make([]*Comment, len(ccb.builders))
 	mutators := make([]Mutator, len(ccb.builders))
@@ -858,6 +862,9 @@ func (u *CommentUpsertBulk) ClearClient() *CommentUpsertBulk {
 
 // Exec executes the query.
 func (u *CommentUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the CommentCreateBulk instead", i)

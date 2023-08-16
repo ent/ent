@@ -167,5 +167,6 @@ func (gic *GroupInfoCreate) gremlin() *dsl.Traversal {
 // GroupInfoCreateBulk is the builder for creating many GroupInfo entities in bulk.
 type GroupInfoCreateBulk struct {
 	config
+	err      error
 	builders []*GroupInfoCreate
 }

@@ -139,11 +139,15 @@ func (sc *StreetCreate) createSpec() (*Street, *sqlgraph.CreateSpec) {
 // StreetCreateBulk is the builder for creating many Street entities in bulk.
 type StreetCreateBulk struct {
 	config
+	err      error
 	builders []*StreetCreate
 }
 
 // Save creates the Street entities in the database.
 func (scb *StreetCreateBulk) Save(ctx context.Context) ([]*Street, error) {
+	if scb.err != nil {
+		return nil, scb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(scb.builders))
 	nodes := make([]*Street, len(scb.builders))
 	mutators := make([]Mutator, len(scb.builders))

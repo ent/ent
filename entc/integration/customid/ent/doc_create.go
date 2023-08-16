@@ -421,12 +421,16 @@ func (u *DocUpsertOne) IDX(ctx context.Context) schema.DocID {
 // DocCreateBulk is the builder for creating many Doc entities in bulk.
 type DocCreateBulk struct {
 	config
+	err      error
 	builders []*DocCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the Doc entities in the database.
 func (dcb *DocCreateBulk) Save(ctx context.Context) ([]*Doc, error) {
+	if dcb.err != nil {
+		return nil, dcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(dcb.builders))
 	nodes := make([]*Doc, len(dcb.builders))
 	mutators := make([]Mutator, len(dcb.builders))
@@ -614,6 +618,9 @@ func (u *DocUpsertBulk) ClearText() *DocUpsertBulk {
 
 // Exec executes the query.
 func (u *DocUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the DocCreateBulk instead", i)

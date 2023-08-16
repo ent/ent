@@ -160,5 +160,6 @@ func (ic *ItemCreate) gremlin() *dsl.Traversal {
 // ItemCreateBulk is the builder for creating many Item entities in bulk.
 type ItemCreateBulk struct {
 	config
+	err      error
 	builders []*ItemCreate
 }

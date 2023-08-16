@@ -189,5 +189,6 @@ func (nc *NodeCreate) gremlin() *dsl.Traversal {
 // NodeCreateBulk is the builder for creating many Node entities in bulk.
 type NodeCreateBulk struct {
 	config
+	err      error
 	builders []*NodeCreate
 }

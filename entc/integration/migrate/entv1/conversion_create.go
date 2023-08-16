@@ -250,11 +250,15 @@ func (cc *ConversionCreate) createSpec() (*Conversion, *sqlgraph.CreateSpec) {
 // ConversionCreateBulk is the builder for creating many Conversion entities in bulk.
 type ConversionCreateBulk struct {
 	config
+	err      error
 	builders []*ConversionCreate
 }
 
 // Save creates the Conversion entities in the database.
 func (ccb *ConversionCreateBulk) Save(ctx context.Context) ([]*Conversion, error) {
+	if ccb.err != nil {
+		return nil, ccb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))
 	nodes := make([]*Conversion, len(ccb.builders))
 	mutators := make([]Mutator, len(ccb.builders))

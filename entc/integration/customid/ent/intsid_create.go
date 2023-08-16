@@ -299,12 +299,16 @@ func (u *IntSIDUpsertOne) IDX(ctx context.Context) sid.ID {
 // IntSIDCreateBulk is the builder for creating many IntSID entities in bulk.
 type IntSIDCreateBulk struct {
 	config
+	err      error
 	builders []*IntSIDCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the IntSID entities in the database.
 func (iscb *IntSIDCreateBulk) Save(ctx context.Context) ([]*IntSID, error) {
+	if iscb.err != nil {
+		return nil, iscb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(iscb.builders))
 	nodes := make([]*IntSID, len(iscb.builders))
 	mutators := make([]Mutator, len(iscb.builders))
@@ -470,6 +474,9 @@ func (u *IntSIDUpsertBulk) Update(set func(*IntSIDUpsert)) *IntSIDUpsertBulk {
 
 // Exec executes the query.
 func (u *IntSIDUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the IntSIDCreateBulk instead", i)

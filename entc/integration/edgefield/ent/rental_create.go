@@ -191,11 +191,15 @@ func (rc *RentalCreate) createSpec() (*Rental, *sqlgraph.CreateSpec) {
 // RentalCreateBulk is the builder for creating many Rental entities in bulk.
 type RentalCreateBulk struct {
 	config
+	err      error
 	builders []*RentalCreate
 }
 
 // Save creates the Rental entities in the database.
 func (rcb *RentalCreateBulk) Save(ctx context.Context) ([]*Rental, error) {
+	if rcb.err != nil {
+		return nil, rcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(rcb.builders))
 	nodes := make([]*Rental, len(rcb.builders))
 	mutators := make([]Mutator, len(rcb.builders))

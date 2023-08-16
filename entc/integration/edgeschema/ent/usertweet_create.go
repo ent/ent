@@ -393,12 +393,16 @@ func (u *UserTweetUpsertOne) IDX(ctx context.Context) int {
 // UserTweetCreateBulk is the builder for creating many UserTweet entities in bulk.
 type UserTweetCreateBulk struct {
 	config
+	err      error
 	builders []*UserTweetCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the UserTweet entities in the database.
 func (utcb *UserTweetCreateBulk) Save(ctx context.Context) ([]*UserTweet, error) {
+	if utcb.err != nil {
+		return nil, utcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(utcb.builders))
 	nodes := make([]*UserTweet, len(utcb.builders))
 	mutators := make([]Mutator, len(utcb.builders))
@@ -601,6 +605,9 @@ func (u *UserTweetUpsertBulk) UpdateTweetID() *UserTweetUpsertBulk {
 
 // Exec executes the query.
 func (u *UserTweetUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the UserTweetCreateBulk instead", i)

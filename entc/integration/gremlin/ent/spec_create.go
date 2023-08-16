@@ -106,5 +106,6 @@ func (sc *SpecCreate) gremlin() *dsl.Traversal {
 // SpecCreateBulk is the builder for creating many Spec entities in bulk.
 type SpecCreateBulk struct {
 	config
+	err      error
 	builders []*SpecCreate
 }

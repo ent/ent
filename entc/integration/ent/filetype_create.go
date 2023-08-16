@@ -402,12 +402,16 @@ func (u *FileTypeUpsertOne) IDX(ctx context.Context) int {
 // FileTypeCreateBulk is the builder for creating many FileType entities in bulk.
 type FileTypeCreateBulk struct {
 	config
+	err      error
 	builders []*FileTypeCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the FileType entities in the database.
 func (ftcb *FileTypeCreateBulk) Save(ctx context.Context) ([]*FileType, error) {
+	if ftcb.err != nil {
+		return nil, ftcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(ftcb.builders))
 	nodes := make([]*FileType, len(ftcb.builders))
 	mutators := make([]Mutator, len(ftcb.builders))
@@ -610,6 +614,9 @@ func (u *FileTypeUpsertBulk) UpdateState() *FileTypeUpsertBulk {
 
 // Exec executes the query.
 func (u *FileTypeUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the FileTypeCreateBulk instead", i)

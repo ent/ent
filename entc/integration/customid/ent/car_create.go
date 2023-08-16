@@ -465,12 +465,16 @@ func (u *CarUpsertOne) IDX(ctx context.Context) int {
 // CarCreateBulk is the builder for creating many Car entities in bulk.
 type CarCreateBulk struct {
 	config
+	err      error
 	builders []*CarCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the Car entities in the database.
 func (ccb *CarCreateBulk) Save(ctx context.Context) ([]*Car, error) {
+	if ccb.err != nil {
+		return nil, ccb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))
 	nodes := make([]*Car, len(ccb.builders))
 	mutators := make([]Mutator, len(ccb.builders))
@@ -710,6 +714,9 @@ func (u *CarUpsertBulk) UpdateModel() *CarUpsertBulk {
 
 // Exec executes the query.
 func (u *CarUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the CarCreateBulk instead", i)

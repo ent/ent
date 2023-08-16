@@ -354,12 +354,16 @@ func (u *GroupInfoUpsertOne) IDX(ctx context.Context) int {
 // GroupInfoCreateBulk is the builder for creating many GroupInfo entities in bulk.
 type GroupInfoCreateBulk struct {
 	config
+	err      error
 	builders []*GroupInfoCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the GroupInfo entities in the database.
 func (gicb *GroupInfoCreateBulk) Save(ctx context.Context) ([]*GroupInfo, error) {
+	if gicb.err != nil {
+		return nil, gicb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(gicb.builders))
 	nodes := make([]*GroupInfo, len(gicb.builders))
 	mutators := make([]Mutator, len(gicb.builders))
@@ -555,6 +559,9 @@ func (u *GroupInfoUpsertBulk) UpdateMaxUsers() *GroupInfoUpsertBulk {
 
 // Exec executes the query.
 func (u *GroupInfoUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the GroupInfoCreateBulk instead", i)

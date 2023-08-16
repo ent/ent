@@ -142,11 +142,15 @@ func (mc *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 // MediaCreateBulk is the builder for creating many Media entities in bulk.
 type MediaCreateBulk struct {
 	config
+	err      error
 	builders []*MediaCreate
 }
 
 // Save creates the Media entities in the database.
 func (mcb *MediaCreateBulk) Save(ctx context.Context) ([]*Media, error) {
+	if mcb.err != nil {
+		return nil, mcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(mcb.builders))
 	nodes := make([]*Media, len(mcb.builders))
 	mutators := make([]Mutator, len(mcb.builders))

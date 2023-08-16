@@ -561,12 +561,16 @@ func (u *PetUpsertOne) IDX(ctx context.Context) int {
 // PetCreateBulk is the builder for creating many Pet entities in bulk.
 type PetCreateBulk struct {
 	config
+	err      error
 	builders []*PetCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the Pet entities in the database.
 func (pcb *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
+	if pcb.err != nil {
+		return nil, pcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(pcb.builders))
 	nodes := make([]*Pet, len(pcb.builders))
 	mutators := make([]Mutator, len(pcb.builders))
@@ -818,6 +822,9 @@ func (u *PetUpsertBulk) UpdateTrained() *PetUpsertBulk {
 
 // Exec executes the query.
 func (u *PetUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the PetCreateBulk instead", i)

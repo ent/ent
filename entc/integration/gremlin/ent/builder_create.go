@@ -88,5 +88,6 @@ func (bc *BuilderCreate) gremlin() *dsl.Traversal {
 // BuilderCreateBulk is the builder for creating many Builder entities in bulk.
 type BuilderCreateBulk struct {
 	config
+	err      error
 	builders []*BuilderCreate
 }

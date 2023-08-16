@@ -413,12 +413,16 @@ func (u *NodeUpsertOne) IDX(ctx context.Context) int {
 // NodeCreateBulk is the builder for creating many Node entities in bulk.
 type NodeCreateBulk struct {
 	config
+	err      error
 	builders []*NodeCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the Node entities in the database.
 func (ncb *NodeCreateBulk) Save(ctx context.Context) ([]*Node, error) {
+	if ncb.err != nil {
+		return nil, ncb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(ncb.builders))
 	nodes := make([]*Node, len(ncb.builders))
 	mutators := make([]Mutator, len(ncb.builders))
@@ -627,6 +631,9 @@ func (u *NodeUpsertBulk) ClearUpdatedAt() *NodeUpsertBulk {
 
 // Exec executes the query.
 func (u *NodeUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the NodeCreateBulk instead", i)

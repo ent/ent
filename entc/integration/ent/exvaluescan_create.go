@@ -558,12 +558,16 @@ func (u *ExValueScanUpsertOne) IDX(ctx context.Context) int {
 // ExValueScanCreateBulk is the builder for creating many ExValueScan entities in bulk.
 type ExValueScanCreateBulk struct {
 	config
+	err      error
 	builders []*ExValueScanCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the ExValueScan entities in the database.
 func (evscb *ExValueScanCreateBulk) Save(ctx context.Context) ([]*ExValueScan, error) {
+	if evscb.err != nil {
+		return nil, evscb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(evscb.builders))
 	nodes := make([]*ExValueScan, len(evscb.builders))
 	mutators := make([]Mutator, len(evscb.builders))
@@ -845,6 +849,9 @@ func (u *ExValueScanUpsertBulk) ClearCustomOptional() *ExValueScanUpsertBulk {
 
 // Exec executes the query.
 func (u *ExValueScanUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the ExValueScanCreateBulk instead", i)

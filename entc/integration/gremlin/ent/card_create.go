@@ -267,5 +267,6 @@ func (cc *CardCreate) gremlin() *dsl.Traversal {
 // CardCreateBulk is the builder for creating many Card entities in bulk.
 type CardCreateBulk struct {
 	config
+	err      error
 	builders []*CardCreate
 }

@@ -217,11 +217,15 @@ func (fc *FriendshipCreate) createSpec() (*Friendship, *sqlgraph.CreateSpec) {
 // FriendshipCreateBulk is the builder for creating many Friendship entities in bulk.
 type FriendshipCreateBulk struct {
 	config
+	err      error
 	builders []*FriendshipCreate
 }
 
 // Save creates the Friendship entities in the database.
 func (fcb *FriendshipCreateBulk) Save(ctx context.Context) ([]*Friendship, error) {
+	if fcb.err != nil {
+		return nil, fcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(fcb.builders))
 	nodes := make([]*Friendship, len(fcb.builders))
 	mutators := make([]Mutator, len(fcb.builders))

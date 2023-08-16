@@ -255,12 +255,16 @@ func (u *OtherUpsertOne) IDX(ctx context.Context) sid.ID {
 // OtherCreateBulk is the builder for creating many Other entities in bulk.
 type OtherCreateBulk struct {
 	config
+	err      error
 	builders []*OtherCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the Other entities in the database.
 func (ocb *OtherCreateBulk) Save(ctx context.Context) ([]*Other, error) {
+	if ocb.err != nil {
+		return nil, ocb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(ocb.builders))
 	nodes := make([]*Other, len(ocb.builders))
 	mutators := make([]Mutator, len(ocb.builders))
@@ -422,6 +426,9 @@ func (u *OtherUpsertBulk) Update(set func(*OtherUpsert)) *OtherUpsertBulk {
 
 // Exec executes the query.
 func (u *OtherUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the OtherCreateBulk instead", i)

@@ -377,12 +377,16 @@ func (u *TweetLikeUpsertOne) ExecX(ctx context.Context) {
 // TweetLikeCreateBulk is the builder for creating many TweetLike entities in bulk.
 type TweetLikeCreateBulk struct {
 	config
+	err      error
 	builders []*TweetLikeCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the TweetLike entities in the database.
 func (tlcb *TweetLikeCreateBulk) Save(ctx context.Context) ([]*TweetLike, error) {
+	if tlcb.err != nil {
+		return nil, tlcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(tlcb.builders))
 	nodes := make([]*TweetLike, len(tlcb.builders))
 	mutators := make([]Mutator, len(tlcb.builders))
@@ -580,6 +584,9 @@ func (u *TweetLikeUpsertBulk) UpdateTweetID() *TweetLikeUpsertBulk {
 
 // Exec executes the query.
 func (u *TweetLikeUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the TweetLikeCreateBulk instead", i)

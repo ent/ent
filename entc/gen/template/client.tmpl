@@ -303,6 +303,22 @@ func (c *{{ $client }}) CreateBulk(builders ...*{{ $n.CreateName }}) *{{ $n.Crea
 	return &{{ $n.CreateBulkName }}{config: c.config, builders: builders}
 }
 
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *{{ $client }}) MapCreateBulk(slice any, setFunc func(*{{ $n.CreateName }}, int)) *{{ $n.CreateBulkName }} {
+	{{- /* This check should be replaced with type-parameter method, if it will be supported by Go. */}}
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &{{ $n.CreateBulkName }}{err: fmt.Errorf("calling to {{ $client }}.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*{{ $n.CreateName }}, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &{{ $n.CreateBulkName }}{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for {{ $n.Name }}.
 func (c *{{ $client }}) Update() *{{ $n.UpdateName }} {
 	mutation := new{{ $n.MutationName }}(c.config, OpUpdate)

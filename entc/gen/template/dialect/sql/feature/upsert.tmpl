@@ -385,6 +385,9 @@ func (u *{{ $upsertBulk }}) Update(set func(*{{ $upsertSet }})) *{{ $upsertBulk 
 
 // Exec executes the query.
 func (u *{{ $upsertBulk }}) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("{{ $pkg }}: OnConflict was set for builder %d. Set it on the {{ $builder }} instead", i)

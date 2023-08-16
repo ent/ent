@@ -390,12 +390,16 @@ func (u *NoteUpsertOne) IDX(ctx context.Context) schema.NoteID {
 // NoteCreateBulk is the builder for creating many Note entities in bulk.
 type NoteCreateBulk struct {
 	config
+	err      error
 	builders []*NoteCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the Note entities in the database.
 func (ncb *NoteCreateBulk) Save(ctx context.Context) ([]*Note, error) {
+	if ncb.err != nil {
+		return nil, ncb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(ncb.builders))
 	nodes := make([]*Note, len(ncb.builders))
 	mutators := make([]Mutator, len(ncb.builders))
@@ -583,6 +587,9 @@ func (u *NoteUpsertBulk) ClearText() *NoteUpsertBulk {
 
 // Exec executes the query.
 func (u *NoteUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the NoteCreateBulk instead", i)

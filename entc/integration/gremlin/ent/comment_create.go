@@ -204,5 +204,6 @@ func (cc *CommentCreate) gremlin() *dsl.Traversal {
 // CommentCreateBulk is the builder for creating many Comment entities in bulk.
 type CommentCreateBulk struct {
 	config
+	err      error
 	builders []*CommentCreate
 }
