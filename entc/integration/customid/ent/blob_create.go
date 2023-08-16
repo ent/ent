@@ -447,12 +447,16 @@ func (u *BlobUpsertOne) IDX(ctx context.Context) uuid.UUID {
 // BlobCreateBulk is the builder for creating many Blob entities in bulk.
 type BlobCreateBulk struct {
 	config
+	err      error
 	builders []*BlobCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the Blob entities in the database.
 func (bcb *BlobCreateBulk) Save(ctx context.Context) ([]*Blob, error) {
+	if bcb.err != nil {
+		return nil, bcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(bcb.builders))
 	nodes := make([]*Blob, len(bcb.builders))
 	mutators := make([]Mutator, len(bcb.builders))
@@ -654,6 +658,9 @@ func (u *BlobUpsertBulk) UpdateCount() *BlobUpsertBulk {
 
 // Exec executes the query.
 func (u *BlobUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the BlobCreateBulk instead", i)

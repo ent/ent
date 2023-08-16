@@ -412,12 +412,16 @@ func (u *FriendshipUpsertOne) IDX(ctx context.Context) int {
 // FriendshipCreateBulk is the builder for creating many Friendship entities in bulk.
 type FriendshipCreateBulk struct {
 	config
+	err      error
 	builders []*FriendshipCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the Friendship entities in the database.
 func (fcb *FriendshipCreateBulk) Save(ctx context.Context) ([]*Friendship, error) {
+	if fcb.err != nil {
+		return nil, fcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(fcb.builders))
 	nodes := make([]*Friendship, len(fcb.builders))
 	mutators := make([]Mutator, len(fcb.builders))
@@ -623,6 +627,9 @@ func (u *FriendshipUpsertBulk) UpdateCreatedAt() *FriendshipUpsertBulk {
 
 // Exec executes the query.
 func (u *FriendshipUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the FriendshipCreateBulk instead", i)

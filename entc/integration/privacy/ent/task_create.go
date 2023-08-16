@@ -251,11 +251,15 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 // TaskCreateBulk is the builder for creating many Task entities in bulk.
 type TaskCreateBulk struct {
 	config
+	err      error
 	builders []*TaskCreate
 }
 
 // Save creates the Task entities in the database.
 func (tcb *TaskCreateBulk) Save(ctx context.Context) ([]*Task, error) {
+	if tcb.err != nil {
+		return nil, tcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(tcb.builders))
 	nodes := make([]*Task, len(tcb.builders))
 	mutators := make([]Mutator, len(tcb.builders))

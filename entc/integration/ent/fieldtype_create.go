@@ -4170,12 +4170,16 @@ func (u *FieldTypeUpsertOne) IDX(ctx context.Context) int {
 // FieldTypeCreateBulk is the builder for creating many FieldType entities in bulk.
 type FieldTypeCreateBulk struct {
 	config
+	err      error
 	builders []*FieldTypeCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the FieldType entities in the database.
 func (ftcb *FieldTypeCreateBulk) Save(ctx context.Context) ([]*FieldType, error) {
+	if ftcb.err != nil {
+		return nil, ftcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(ftcb.builders))
 	nodes := make([]*FieldType, len(ftcb.builders))
 	mutators := make([]Mutator, len(ftcb.builders))
@@ -5848,6 +5852,9 @@ func (u *FieldTypeUpsertBulk) ClearPasswordOther() *FieldTypeUpsertBulk {
 
 // Exec executes the query.
 func (u *FieldTypeUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the FieldTypeCreateBulk instead", i)

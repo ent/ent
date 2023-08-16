@@ -137,11 +137,15 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 // CommentCreateBulk is the builder for creating many Comment entities in bulk.
 type CommentCreateBulk struct {
 	config
+	err      error
 	builders []*CommentCreate
 }
 
 // Save creates the Comment entities in the database.
 func (ccb *CommentCreateBulk) Save(ctx context.Context) ([]*Comment, error) {
+	if ccb.err != nil {
+		return nil, ccb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))
 	nodes := make([]*Comment, len(ccb.builders))
 	mutators := make([]Mutator, len(ccb.builders))

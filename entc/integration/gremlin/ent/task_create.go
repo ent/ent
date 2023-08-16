@@ -256,5 +256,6 @@ func (tc *TaskCreate) gremlin() *dsl.Traversal {
 // TaskCreateBulk is the builder for creating many Task entities in bulk.
 type TaskCreateBulk struct {
 	config
+	err      error
 	builders []*TaskCreate
 }

@@ -157,6 +157,7 @@ func ({{ $receiver }} *{{ $builder }}) check() error {
 // {{ $bulk }} is the builder for creating many {{ $.Name }} entities in bulk.
 type {{ $bulk }} struct {
 	config
+	err error
 	builders []*{{  $builder }}
 	{{- /* Additional fields to add to the builder. */}}
 	{{- $tmpl = printf "dialect/%s/create_bulk/fields" $.Storage }}

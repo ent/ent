@@ -291,5 +291,6 @@ func (gc *GroupCreate) gremlin() *dsl.Traversal {
 // GroupCreateBulk is the builder for creating many Group entities in bulk.
 type GroupCreateBulk struct {
 	config
+	err      error
 	builders []*GroupCreate
 }

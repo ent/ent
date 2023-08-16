@@ -1174,5 +1174,6 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 // FieldTypeCreateBulk is the builder for creating many FieldType entities in bulk.
 type FieldTypeCreateBulk struct {
 	config
+	err      error
 	builders []*FieldTypeCreate
 }

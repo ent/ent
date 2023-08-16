@@ -171,11 +171,15 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 // TeamCreateBulk is the builder for creating many Team entities in bulk.
 type TeamCreateBulk struct {
 	config
+	err      error
 	builders []*TeamCreate
 }
 
 // Save creates the Team entities in the database.
 func (tcb *TeamCreateBulk) Save(ctx context.Context) ([]*Team, error) {
+	if tcb.err != nil {
+		return nil, tcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(tcb.builders))
 	nodes := make([]*Team, len(tcb.builders))
 	mutators := make([]Mutator, len(tcb.builders))

@@ -107,11 +107,15 @@ func (tc *TenantCreate) createSpec() (*Tenant, *sqlgraph.CreateSpec) {
 // TenantCreateBulk is the builder for creating many Tenant entities in bulk.
 type TenantCreateBulk struct {
 	config
+	err      error
 	builders []*TenantCreate
 }
 
 // Save creates the Tenant entities in the database.
 func (tcb *TenantCreateBulk) Save(ctx context.Context) ([]*Tenant, error) {
+	if tcb.err != nil {
+		return nil, tcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(tcb.builders))
 	nodes := make([]*Tenant, len(tcb.builders))
 	mutators := make([]Mutator, len(tcb.builders))

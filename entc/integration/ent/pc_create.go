@@ -208,12 +208,16 @@ func (u *PCUpsertOne) IDX(ctx context.Context) int {
 // PCCreateBulk is the builder for creating many PC entities in bulk.
 type PCCreateBulk struct {
 	config
+	err      error
 	builders []*PCCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the PC entities in the database.
 func (pcb *PCCreateBulk) Save(ctx context.Context) ([]*PC, error) {
+	if pcb.err != nil {
+		return nil, pcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(pcb.builders))
 	nodes := make([]*PC, len(pcb.builders))
 	mutators := make([]Mutator, len(pcb.builders))
@@ -368,6 +372,9 @@ func (u *PCUpsertBulk) Update(set func(*PCUpsert)) *PCUpsertBulk {
 
 // Exec executes the query.
 func (u *PCUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the PCCreateBulk instead", i)

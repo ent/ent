@@ -285,12 +285,16 @@ func (u *FileUpsertOne) IDX(ctx context.Context) int {
 // FileCreateBulk is the builder for creating many File entities in bulk.
 type FileCreateBulk struct {
 	config
+	err      error
 	builders []*FileCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the File entities in the database.
 func (fcb *FileCreateBulk) Save(ctx context.Context) ([]*File, error) {
+	if fcb.err != nil {
+		return nil, fcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(fcb.builders))
 	nodes := make([]*File, len(fcb.builders))
 	mutators := make([]Mutator, len(fcb.builders))
@@ -464,6 +468,9 @@ func (u *FileUpsertBulk) UpdateName() *FileUpsertBulk {
 
 // Exec executes the query.
 func (u *FileUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the FileCreateBulk instead", i)

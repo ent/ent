@@ -252,5 +252,6 @@ func (pc *PetCreate) gremlin() *dsl.Traversal {
 // PetCreateBulk is the builder for creating many Pet entities in bulk.
 type PetCreateBulk struct {
 	config
+	err      error
 	builders []*PetCreate
 }

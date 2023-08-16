@@ -393,12 +393,16 @@ func (u *UserGroupUpsertOne) IDX(ctx context.Context) int {
 // UserGroupCreateBulk is the builder for creating many UserGroup entities in bulk.
 type UserGroupCreateBulk struct {
 	config
+	err      error
 	builders []*UserGroupCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the UserGroup entities in the database.
 func (ugcb *UserGroupCreateBulk) Save(ctx context.Context) ([]*UserGroup, error) {
+	if ugcb.err != nil {
+		return nil, ugcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(ugcb.builders))
 	nodes := make([]*UserGroup, len(ugcb.builders))
 	mutators := make([]Mutator, len(ugcb.builders))
@@ -601,6 +605,9 @@ func (u *UserGroupUpsertBulk) UpdateGroupID() *UserGroupUpsertBulk {
 
 // Exec executes the query.
 func (u *UserGroupUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the UserGroupCreateBulk instead", i)

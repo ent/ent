@@ -100,11 +100,15 @@ func (zc *ZooCreate) createSpec() (*Zoo, *sqlgraph.CreateSpec) {
 // ZooCreateBulk is the builder for creating many Zoo entities in bulk.
 type ZooCreateBulk struct {
 	config
+	err      error
 	builders []*ZooCreate
 }
 
 // Save creates the Zoo entities in the database.
 func (zcb *ZooCreateBulk) Save(ctx context.Context) ([]*Zoo, error) {
+	if zcb.err != nil {
+		return nil, zcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(zcb.builders))
 	nodes := make([]*Zoo, len(zcb.builders))
 	mutators := make([]Mutator, len(zcb.builders))

@@ -150,11 +150,15 @@ func (bc *BlogCreate) createSpec() (*Blog, *sqlgraph.CreateSpec) {
 // BlogCreateBulk is the builder for creating many Blog entities in bulk.
 type BlogCreateBulk struct {
 	config
+	err      error
 	builders []*BlogCreate
 }
 
 // Save creates the Blog entities in the database.
 func (bcb *BlogCreateBulk) Save(ctx context.Context) ([]*Blog, error) {
+	if bcb.err != nil {
+		return nil, bcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(bcb.builders))
 	nodes := make([]*Blog, len(bcb.builders))
 	mutators := make([]Mutator, len(bcb.builders))

@@ -589,5 +589,6 @@ func (uc *UserCreate) gremlin() *dsl.Traversal {
 // UserCreateBulk is the builder for creating many User entities in bulk.
 type UserCreateBulk struct {
 	config
+	err      error
 	builders []*UserCreate
 }

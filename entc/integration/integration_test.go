@@ -2218,12 +2218,15 @@ func CreateBulk(t *testing.T, client *ent.Client) {
 	require.Equal(t, cards[1].ID, cards[2].ID-1)
 
 	inf := client.GroupInfo.Create().SetDesc("group info").SaveX(ctx)
-	groups := client.Group.CreateBulk(
-		client.Group.Create().SetName("Github").SetExpire(time.Now()).SetInfo(inf),
-		client.Group.Create().SetName("GitLab").SetExpire(time.Now()).SetInfo(inf),
-	).SaveX(ctx)
+	names := []string{"GitHub", "GitLab"}
+	groups := client.Group.MapCreateBulk(names, func(c *ent.GroupCreate, i int) {
+		c.SetName(names[i]).SetExpire(time.Now()).SetInfo(inf)
+	}).SaveX(ctx)
 	require.Equal(t, inf.ID, groups[0].QueryInfo().OnlyIDX(ctx))
 	require.Equal(t, inf.ID, groups[1].QueryInfo().OnlyIDX(ctx))
+
+	_, err := client.Group.MapCreateBulk(1, nil).Save(ctx)
+	require.Error(t, err)
 
 	client.User.Use(
 		func(next ent.Mutator) ent.Mutator {

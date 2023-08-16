@@ -319,12 +319,16 @@ func (u *LicenseUpsertOne) IDX(ctx context.Context) int {
 // LicenseCreateBulk is the builder for creating many License entities in bulk.
 type LicenseCreateBulk struct {
 	config
+	err      error
 	builders []*LicenseCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the License entities in the database.
 func (lcb *LicenseCreateBulk) Save(ctx context.Context) ([]*License, error) {
+	if lcb.err != nil {
+		return nil, lcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(lcb.builders))
 	nodes := make([]*License, len(lcb.builders))
 	mutators := make([]Mutator, len(lcb.builders))
@@ -512,6 +516,9 @@ func (u *LicenseUpsertBulk) UpdateUpdateTime() *LicenseUpsertBulk {
 
 // Exec executes the query.
 func (u *LicenseUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the LicenseCreateBulk instead", i)

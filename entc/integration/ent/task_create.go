@@ -679,12 +679,16 @@ func (u *TaskUpsertOne) IDX(ctx context.Context) int {
 // TaskCreateBulk is the builder for creating many Task entities in bulk.
 type TaskCreateBulk struct {
 	config
+	err      error
 	builders []*TaskCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the Task entities in the database.
 func (tcb *TaskCreateBulk) Save(ctx context.Context) ([]*Task, error) {
+	if tcb.err != nil {
+		return nil, tcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(tcb.builders))
 	nodes := make([]*Task, len(tcb.builders))
 	mutators := make([]Mutator, len(tcb.builders))
@@ -1006,6 +1010,9 @@ func (u *TaskUpsertBulk) UpdateOp() *TaskUpsertBulk {
 
 // Exec executes the query.
 func (u *TaskUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the TaskCreateBulk instead", i)

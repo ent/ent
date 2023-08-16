@@ -339,12 +339,16 @@ func (u *MixinIDUpsertOne) IDX(ctx context.Context) uuid.UUID {
 // MixinIDCreateBulk is the builder for creating many MixinID entities in bulk.
 type MixinIDCreateBulk struct {
 	config
+	err      error
 	builders []*MixinIDCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the MixinID entities in the database.
 func (micb *MixinIDCreateBulk) Save(ctx context.Context) ([]*MixinID, error) {
+	if micb.err != nil {
+		return nil, micb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(micb.builders))
 	nodes := make([]*MixinID, len(micb.builders))
 	mutators := make([]Mutator, len(micb.builders))
@@ -539,6 +543,9 @@ func (u *MixinIDUpsertBulk) UpdateMixinField() *MixinIDUpsertBulk {
 
 // Exec executes the query.
 func (u *MixinIDUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the MixinIDCreateBulk instead", i)

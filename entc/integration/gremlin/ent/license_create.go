@@ -152,5 +152,6 @@ func (lc *LicenseCreate) gremlin() *dsl.Traversal {
 // LicenseCreateBulk is the builder for creating many License entities in bulk.
 type LicenseCreateBulk struct {
 	config
+	err      error
 	builders []*LicenseCreate
 }

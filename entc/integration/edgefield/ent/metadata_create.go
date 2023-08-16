@@ -235,11 +235,15 @@ func (mc *MetadataCreate) createSpec() (*Metadata, *sqlgraph.CreateSpec) {
 // MetadataCreateBulk is the builder for creating many Metadata entities in bulk.
 type MetadataCreateBulk struct {
 	config
+	err      error
 	builders []*MetadataCreate
 }
 
 // Save creates the Metadata entities in the database.
 func (mcb *MetadataCreateBulk) Save(ctx context.Context) ([]*Metadata, error) {
+	if mcb.err != nil {
+		return nil, mcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(mcb.builders))
 	nodes := make([]*Metadata, len(mcb.builders))
 	mutators := make([]Mutator, len(mcb.builders))

@@ -37,7 +37,7 @@ additional tool.
 Previously, you could only share a visualization of your schema to the
 [Atlas Public Playground](https://gh.atlasgo.cloud/explore). While this is convenient
 for sharing your schema with others, it is not acceptable for many teams who maintain
-schemas that themselves are senstive and cannot be shared publicly.
+schemas that themselves are sensitive and cannot be shared publicly.
 
 With this new release, you can easily publish your schema directly to your private
 workspace on [Atlas Cloud](https://atlasgo.cloud). This means that only you and your

@@ -174,5 +174,6 @@ func (evsc *ExValueScanCreate) gremlin() *dsl.Traversal {
 // ExValueScanCreateBulk is the builder for creating many ExValueScan entities in bulk.
 type ExValueScanCreateBulk struct {
 	config
+	err      error
 	builders []*ExValueScanCreate
 }

@@ -208,12 +208,16 @@ func (u *BuilderUpsertOne) IDX(ctx context.Context) int {
 // BuilderCreateBulk is the builder for creating many Builder entities in bulk.
 type BuilderCreateBulk struct {
 	config
+	err      error
 	builders []*BuilderCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the Builder entities in the database.
 func (bcb *BuilderCreateBulk) Save(ctx context.Context) ([]*Builder, error) {
+	if bcb.err != nil {
+		return nil, bcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(bcb.builders))
 	nodes := make([]*Builder, len(bcb.builders))
 	mutators := make([]Mutator, len(bcb.builders))
@@ -368,6 +372,9 @@ func (u *BuilderUpsertBulk) Update(set func(*BuilderUpsert)) *BuilderUpsertBulk 
 
 // Exec executes the query.
 func (u *BuilderUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the BuilderCreateBulk instead", i)

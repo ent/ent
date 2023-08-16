@@ -159,13 +159,17 @@ pedro := client.Pet.	// PetClient.
 
 **Save** a bulk of pets.
 
-```go
+```go {1,8}
+pets, err := client.Pet.CreateBulk(
+    client.Pet.Create().SetName("pedro").SetOwner(a8m),
+    client.Pet.Create().SetName("xabi").SetOwner(a8m),
+    client.Pet.Create().SetName("layla").SetOwner(a8m),
+).Save(ctx)
+
 names := []string{"pedro", "xabi", "layla"}
-bulk := make([]*ent.PetCreate, len(names))
-for i, name := range names {
-    bulk[i] = client.Pet.Create().SetName(name).SetOwner(a8m)
-}
-pets, err := client.Pet.CreateBulk(bulk...).Save(ctx)
+pets, err := client.Pet.MapCreateBulk(names, func(c *ent.PetCreate, i int) {
+    client.Pet.Create().SetName(names[i]).SetOwner(a8m)
+}).Save(ctx)
 ```
 
 ## Update One

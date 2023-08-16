@@ -253,12 +253,16 @@ func (u *RelationshipInfoUpsertOne) IDX(ctx context.Context) int {
 // RelationshipInfoCreateBulk is the builder for creating many RelationshipInfo entities in bulk.
 type RelationshipInfoCreateBulk struct {
 	config
+	err      error
 	builders []*RelationshipInfoCreate
 	conflict []sql.ConflictOption
 }
 
 // Save creates the RelationshipInfo entities in the database.
 func (ricb *RelationshipInfoCreateBulk) Save(ctx context.Context) ([]*RelationshipInfo, error) {
+	if ricb.err != nil {
+		return nil, ricb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(ricb.builders))
 	nodes := make([]*RelationshipInfo, len(ricb.builders))
 	mutators := make([]Mutator, len(ricb.builders))
@@ -432,6 +436,9 @@ func (u *RelationshipInfoUpsertBulk) UpdateText() *RelationshipInfoUpsertBulk {
 
 // Exec executes the query.
 func (u *RelationshipInfoUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the RelationshipInfoCreateBulk instead", i)

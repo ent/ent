@@ -139,11 +139,15 @@ func (pc *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 // PostCreateBulk is the builder for creating many Post entities in bulk.
 type PostCreateBulk struct {
 	config
+	err      error
 	builders []*PostCreate
 }
 
 // Save creates the Post entities in the database.
 func (pcb *PostCreateBulk) Save(ctx context.Context) ([]*Post, error) {
+	if pcb.err != nil {
+		return nil, pcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(pcb.builders))
 	nodes := make([]*Post, len(pcb.builders))
 	mutators := make([]Mutator, len(pcb.builders))

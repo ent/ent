@@ -106,11 +106,15 @@ func (ctc *CustomTypeCreate) createSpec() (*CustomType, *sqlgraph.CreateSpec) {
 // CustomTypeCreateBulk is the builder for creating many CustomType entities in bulk.
 type CustomTypeCreateBulk struct {
 	config
+	err      error
 	builders []*CustomTypeCreate
 }
 
 // Save creates the CustomType entities in the database.
 func (ctcb *CustomTypeCreateBulk) Save(ctx context.Context) ([]*CustomType, error) {
+	if ctcb.err != nil {
+		return nil, ctcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(ctcb.builders))
 	nodes := make([]*CustomType, len(ctcb.builders))
 	mutators := make([]Mutator, len(ctcb.builders))
