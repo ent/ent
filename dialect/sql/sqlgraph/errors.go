@@ -21,7 +21,6 @@ func IsUniqueConstraintError(err error) bool {
 	if err == nil {
 		return false
 	}
-
 	for _, s := range []string{
 		"Error 1062",                 // MySQL
 		"violates unique constraint", // Postgres
@@ -40,7 +39,6 @@ func IsForeignKeyConstraintError(err error) bool {
 	if err == nil {
 		return false
 	}
-
 	for _, s := range []string{
 		"Error 1451",                      // MySQL (Cannot delete or update a parent row).
 		"Error 1452",                      // MySQL (Cannot add or update a child row).
