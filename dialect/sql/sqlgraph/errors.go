@@ -18,6 +18,9 @@ func IsConstraintError(err error) bool {
 // IsUniqueConstraintError reports if the error resulted from a DB uniqueness constraint violation.
 // e.g. duplicate value in unique index.
 func IsUniqueConstraintError(err error) bool {
+	if err == nil {
+		return false
+	}
 	for _, s := range []string{
 		"Error 1062",                 // MySQL
 		"violates unique constraint", // Postgres
@@ -33,6 +36,9 @@ func IsUniqueConstraintError(err error) bool {
 // IsForeignKeyConstraintError reports if the error resulted from a database foreign-key constraint violation.
 // e.g. parent row does not exist.
 func IsForeignKeyConstraintError(err error) bool {
+	if err == nil {
+		return false
+	}
 	for _, s := range []string{
 		"Error 1451",                      // MySQL (Cannot delete or update a parent row).
 		"Error 1452",                      // MySQL (Cannot add or update a child row).
