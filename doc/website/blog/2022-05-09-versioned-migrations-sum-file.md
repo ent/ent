@@ -226,7 +226,7 @@ go run -mod=mod ariga.io/atlas/cmd/atlas migrate hash --force
 As a safety measure, the Atlas CLI does not operate on a migration directory that is not in sync with its `atlas.sum`
 file. Therefore, you need to add the `--force` flag to the command. 
 
-For cases, where a developer forgets to update the `atlas.sum` file after making a manual change, you can add
+For cases where a developer forgets to update the `atlas.sum` file after making a manual change, you can add
 an `atlas migrate validate` call to your CI. We are actively working on a GitHub action and CI solution, that does this 
 (among and other things) for you _out-of-the-box_.
 
