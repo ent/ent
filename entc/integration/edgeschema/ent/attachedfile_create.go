@@ -169,6 +169,7 @@ func (afc *AttachedFileCreate) createSpec() (*AttachedFile, *sqlgraph.CreateSpec
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
@@ -186,6 +187,7 @@ func (afc *AttachedFileCreate) createSpec() (*AttachedFile, *sqlgraph.CreateSpec
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(process.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)

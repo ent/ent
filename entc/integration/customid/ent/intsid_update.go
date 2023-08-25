@@ -144,6 +144,7 @@ func (isu *IntSIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
 			},
+			RefRequired: false,
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
@@ -157,6 +158,7 @@ func (isu *IntSIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
 			},
+			RefRequired: false,
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
@@ -173,6 +175,7 @@ func (isu *IntSIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
 			},
+			RefRequired: false,
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
@@ -186,6 +189,7 @@ func (isu *IntSIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
 			},
+			RefRequired: false,
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
@@ -202,6 +206,7 @@ func (isu *IntSIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
 			},
+			RefRequired: false,
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
@@ -370,6 +375,7 @@ func (isuo *IntSIDUpdateOne) sqlSave(ctx context.Context) (_node *IntSID, err er
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
 			},
+			RefRequired: false,
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
@@ -383,6 +389,7 @@ func (isuo *IntSIDUpdateOne) sqlSave(ctx context.Context) (_node *IntSID, err er
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
 			},
+			RefRequired: false,
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
@@ -399,6 +406,7 @@ func (isuo *IntSIDUpdateOne) sqlSave(ctx context.Context) (_node *IntSID, err er
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
 			},
+			RefRequired: false,
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
@@ -412,6 +420,7 @@ func (isuo *IntSIDUpdateOne) sqlSave(ctx context.Context) (_node *IntSID, err er
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
 			},
+			RefRequired: false,
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
@@ -428,6 +437,7 @@ func (isuo *IntSIDUpdateOne) sqlSave(ctx context.Context) (_node *IntSID, err er
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
 			},
+			RefRequired: false,
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)

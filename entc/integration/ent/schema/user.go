@@ -70,6 +70,7 @@ func (User) Edges() []ent.Edge {
 		edge.To("team", Pet.Type).Unique(),
 		edge.To("spouse", User.Type).Unique(),
 		edge.To("parent", User.Type).Unique().From("children"),
+		edge.To("social_profiles", SocialProfile.Type),
 	}
 }
 

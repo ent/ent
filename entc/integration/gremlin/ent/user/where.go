@@ -1225,6 +1225,24 @@ func HasParentWith(preds ...predicate.User) predicate.User {
 	})
 }
 
+// HasSocialProfiles applies the HasEdge predicate on the "social_profiles" edge.
+func HasSocialProfiles() predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.OutE(SocialProfilesLabel).OutV()
+	})
+}
+
+// HasSocialProfilesWith applies the HasEdge predicate on the "social_profiles" edge with a given conditions (other predicates).
+func HasSocialProfilesWith(preds ...predicate.SocialProfile) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		tr := __.InV()
+		for _, p := range preds {
+			p(tr)
+		}
+		t.OutE(SocialProfilesLabel).Where(tr).OutV()
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(func(tr *dsl.Traversal) {

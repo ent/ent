@@ -254,6 +254,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = uu.schemaConfig.Pet
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -268,6 +269,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = uu.schemaConfig.Pet
 		for _, k := range nodes {
@@ -285,6 +287,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = uu.schemaConfig.Pet
 		for _, k := range nodes {
@@ -302,6 +305,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = uu.schemaConfig.GroupUsers
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -316,6 +320,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = uu.schemaConfig.GroupUsers
 		for _, k := range nodes {
@@ -333,6 +338,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = uu.schemaConfig.GroupUsers
 		for _, k := range nodes {
@@ -350,6 +356,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = uu.schemaConfig.Friendship
 		createE := &FriendshipCreate{config: uu.config, mutation: newFriendshipMutation(uu.config, OpCreate)}
@@ -368,6 +375,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = uu.schemaConfig.Friendship
 		for _, k := range nodes {
@@ -389,6 +397,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = uu.schemaConfig.Friendship
 		for _, k := range nodes {
@@ -410,6 +419,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(friendship.FieldID, field.TypeInt),
 			},
+			RefRequired: true,
 		}
 		edge.Schema = uu.schemaConfig.Friendship
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -424,6 +434,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(friendship.FieldID, field.TypeInt),
 			},
+			RefRequired: true,
 		}
 		edge.Schema = uu.schemaConfig.Friendship
 		for _, k := range nodes {
@@ -441,6 +452,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(friendship.FieldID, field.TypeInt),
 			},
+			RefRequired: true,
 		}
 		edge.Schema = uu.schemaConfig.Friendship
 		for _, k := range nodes {
@@ -720,6 +732,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = uuo.schemaConfig.Pet
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -734,6 +747,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = uuo.schemaConfig.Pet
 		for _, k := range nodes {
@@ -751,6 +765,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = uuo.schemaConfig.Pet
 		for _, k := range nodes {
@@ -768,6 +783,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = uuo.schemaConfig.GroupUsers
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -782,6 +798,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = uuo.schemaConfig.GroupUsers
 		for _, k := range nodes {
@@ -799,6 +816,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = uuo.schemaConfig.GroupUsers
 		for _, k := range nodes {
@@ -816,6 +834,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = uuo.schemaConfig.Friendship
 		createE := &FriendshipCreate{config: uuo.config, mutation: newFriendshipMutation(uuo.config, OpCreate)}
@@ -834,6 +853,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = uuo.schemaConfig.Friendship
 		for _, k := range nodes {
@@ -855,6 +875,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = uuo.schemaConfig.Friendship
 		for _, k := range nodes {
@@ -876,6 +897,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(friendship.FieldID, field.TypeInt),
 			},
+			RefRequired: true,
 		}
 		edge.Schema = uuo.schemaConfig.Friendship
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -890,6 +912,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(friendship.FieldID, field.TypeInt),
 			},
+			RefRequired: true,
 		}
 		edge.Schema = uuo.schemaConfig.Friendship
 		for _, k := range nodes {
@@ -907,6 +930,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(friendship.FieldID, field.TypeInt),
 			},
+			RefRequired: true,
 		}
 		edge.Schema = uuo.schemaConfig.Friendship
 		for _, k := range nodes {

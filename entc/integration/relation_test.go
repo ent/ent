@@ -558,6 +558,17 @@ func O2MTwoTypes(t *testing.T, client *ent.Client) {
 			QueryPets().  // xabi
 			OnlyX(ctx).Name,
 	)
+
+	t.Log("remove pets by id")
+	usrX := client.User.Create().SetAge(30).SetName("mwoelk").SaveX(ctx)
+	p := client.Pet.Create().SetName("p").SetOwner(usrX).SaveX(ctx)
+	client.User.UpdateOne(usrX).RemovePetIDs(p.ID).ExecX(ctx)
+	require.Zero(usrX.QueryPets().CountX(ctx))
+
+	t.Log("remove required edge by id")
+	reqE := client.SocialProfile.Create().SetUserID(usrX.ID).SetDesc("required edge").SaveX(ctx)
+	client.User.UpdateOne(usrX).RemoveSocialProfileIDs(reqE.ID).ExecX(ctx)
+	require.Zero(usrX.QuerySocialProfiles().CountX(ctx))
 }
 
 // Demonstrate a O2M/M2O relation between two instances of the same type. A "parent" and

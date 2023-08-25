@@ -2861,6 +2861,7 @@ func skip(t *testing.T, names ...string) {
 func drop(t *testing.T, client *ent.Client) {
 	t.Log("drop data from database")
 	ctx := context.Background()
+	client.SocialProfile.Delete().ExecX(ctx)
 	client.Pet.Delete().ExecX(ctx)
 	client.Item.Delete().ExecX(ctx)
 	client.Task.Delete().ExecX(ctx)

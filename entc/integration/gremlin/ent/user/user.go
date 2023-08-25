@@ -63,6 +63,8 @@ const (
 	EdgeChildren = "children"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
+	// EdgeSocialProfiles holds the string denoting the social_profiles edge name in mutations.
+	EdgeSocialProfiles = "social_profiles"
 	// CardLabel holds the string label denoting the card edge type in the database.
 	CardLabel = "user_card"
 	// PetsLabel holds the string label denoting the pets edge type in the database.
@@ -85,6 +87,8 @@ const (
 	ChildrenInverseLabel = "user_parent"
 	// ParentLabel holds the string label denoting the parent edge type in the database.
 	ParentLabel = "user_parent"
+	// SocialProfilesLabel holds the string label denoting the social_profiles edge type in the database.
+	SocialProfilesLabel = "user_social_profiles"
 )
 
 var (

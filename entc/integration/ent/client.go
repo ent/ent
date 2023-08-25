@@ -35,6 +35,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/node"
 	"entgo.io/ent/entc/integration/ent/pc"
 	"entgo.io/ent/entc/integration/ent/pet"
+	"entgo.io/ent/entc/integration/ent/socialprofile"
 	"entgo.io/ent/entc/integration/ent/spec"
 	enttask "entgo.io/ent/entc/integration/ent/task"
 	"entgo.io/ent/entc/integration/ent/user"
@@ -79,6 +80,8 @@ type Client struct {
 	PC *PCClient
 	// Pet is the client for interacting with the Pet builders.
 	Pet *PetClient
+	// SocialProfile is the client for interacting with the SocialProfile builders.
+	SocialProfile *SocialProfileClient
 	// Spec is the client for interacting with the Spec builders.
 	Spec *SpecClient
 	// Task is the client for interacting with the Task builders.
@@ -115,6 +118,7 @@ func (c *Client) init() {
 	c.Node = NewNodeClient(c.config)
 	c.PC = NewPCClient(c.config)
 	c.Pet = NewPetClient(c.config)
+	c.SocialProfile = NewSocialProfileClient(c.config)
 	c.Spec = NewSpecClient(c.config)
 	c.Task = NewTaskClient(c.config)
 	c.User = NewUserClient(c.config)
@@ -201,27 +205,28 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:         ctx,
-		config:      cfg,
-		Api:         NewAPIClient(cfg),
-		Builder:     NewBuilderClient(cfg),
-		Card:        NewCardClient(cfg),
-		Comment:     NewCommentClient(cfg),
-		ExValueScan: NewExValueScanClient(cfg),
-		FieldType:   NewFieldTypeClient(cfg),
-		File:        NewFileClient(cfg),
-		FileType:    NewFileTypeClient(cfg),
-		Goods:       NewGoodsClient(cfg),
-		Group:       NewGroupClient(cfg),
-		GroupInfo:   NewGroupInfoClient(cfg),
-		Item:        NewItemClient(cfg),
-		License:     NewLicenseClient(cfg),
-		Node:        NewNodeClient(cfg),
-		PC:          NewPCClient(cfg),
-		Pet:         NewPetClient(cfg),
-		Spec:        NewSpecClient(cfg),
-		Task:        NewTaskClient(cfg),
-		User:        NewUserClient(cfg),
+		ctx:           ctx,
+		config:        cfg,
+		Api:           NewAPIClient(cfg),
+		Builder:       NewBuilderClient(cfg),
+		Card:          NewCardClient(cfg),
+		Comment:       NewCommentClient(cfg),
+		ExValueScan:   NewExValueScanClient(cfg),
+		FieldType:     NewFieldTypeClient(cfg),
+		File:          NewFileClient(cfg),
+		FileType:      NewFileTypeClient(cfg),
+		Goods:         NewGoodsClient(cfg),
+		Group:         NewGroupClient(cfg),
+		GroupInfo:     NewGroupInfoClient(cfg),
+		Item:          NewItemClient(cfg),
+		License:       NewLicenseClient(cfg),
+		Node:          NewNodeClient(cfg),
+		PC:            NewPCClient(cfg),
+		Pet:           NewPetClient(cfg),
+		SocialProfile: NewSocialProfileClient(cfg),
+		Spec:          NewSpecClient(cfg),
+		Task:          NewTaskClient(cfg),
+		User:          NewUserClient(cfg),
 	}, nil
 }
 
@@ -239,27 +244,28 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:         ctx,
-		config:      cfg,
-		Api:         NewAPIClient(cfg),
-		Builder:     NewBuilderClient(cfg),
-		Card:        NewCardClient(cfg),
-		Comment:     NewCommentClient(cfg),
-		ExValueScan: NewExValueScanClient(cfg),
-		FieldType:   NewFieldTypeClient(cfg),
-		File:        NewFileClient(cfg),
-		FileType:    NewFileTypeClient(cfg),
-		Goods:       NewGoodsClient(cfg),
-		Group:       NewGroupClient(cfg),
-		GroupInfo:   NewGroupInfoClient(cfg),
-		Item:        NewItemClient(cfg),
-		License:     NewLicenseClient(cfg),
-		Node:        NewNodeClient(cfg),
-		PC:          NewPCClient(cfg),
-		Pet:         NewPetClient(cfg),
-		Spec:        NewSpecClient(cfg),
-		Task:        NewTaskClient(cfg),
-		User:        NewUserClient(cfg),
+		ctx:           ctx,
+		config:        cfg,
+		Api:           NewAPIClient(cfg),
+		Builder:       NewBuilderClient(cfg),
+		Card:          NewCardClient(cfg),
+		Comment:       NewCommentClient(cfg),
+		ExValueScan:   NewExValueScanClient(cfg),
+		FieldType:     NewFieldTypeClient(cfg),
+		File:          NewFileClient(cfg),
+		FileType:      NewFileTypeClient(cfg),
+		Goods:         NewGoodsClient(cfg),
+		Group:         NewGroupClient(cfg),
+		GroupInfo:     NewGroupInfoClient(cfg),
+		Item:          NewItemClient(cfg),
+		License:       NewLicenseClient(cfg),
+		Node:          NewNodeClient(cfg),
+		PC:            NewPCClient(cfg),
+		Pet:           NewPetClient(cfg),
+		SocialProfile: NewSocialProfileClient(cfg),
+		Spec:          NewSpecClient(cfg),
+		Task:          NewTaskClient(cfg),
+		User:          NewUserClient(cfg),
 	}, nil
 }
 
@@ -291,7 +297,7 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Api, c.Builder, c.Card, c.Comment, c.ExValueScan, c.FieldType, c.File,
 		c.FileType, c.Goods, c.Group, c.GroupInfo, c.Item, c.License, c.Node, c.PC,
-		c.Pet, c.Spec, c.Task, c.User,
+		c.Pet, c.SocialProfile, c.Spec, c.Task, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -303,7 +309,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Api, c.Builder, c.Card, c.Comment, c.ExValueScan, c.FieldType, c.File,
 		c.FileType, c.Goods, c.Group, c.GroupInfo, c.Item, c.License, c.Node, c.PC,
-		c.Pet, c.Spec, c.Task, c.User,
+		c.Pet, c.SocialProfile, c.Spec, c.Task, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -354,6 +360,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.PC.mutate(ctx, m)
 	case *PetMutation:
 		return c.Pet.mutate(ctx, m)
+	case *SocialProfileMutation:
+		return c.SocialProfile.mutate(ctx, m)
 	case *SpecMutation:
 		return c.Spec.mutate(ctx, m)
 	case *TaskMutation:
@@ -2733,6 +2741,155 @@ func (c *PetClient) mutate(ctx context.Context, m *PetMutation) (Value, error) {
 	}
 }
 
+// SocialProfileClient is a client for the SocialProfile schema.
+type SocialProfileClient struct {
+	config
+}
+
+// NewSocialProfileClient returns a client for the SocialProfile from the given config.
+func NewSocialProfileClient(c config) *SocialProfileClient {
+	return &SocialProfileClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `socialprofile.Hooks(f(g(h())))`.
+func (c *SocialProfileClient) Use(hooks ...Hook) {
+	c.hooks.SocialProfile = append(c.hooks.SocialProfile, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `socialprofile.Intercept(f(g(h())))`.
+func (c *SocialProfileClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SocialProfile = append(c.inters.SocialProfile, interceptors...)
+}
+
+// Create returns a builder for creating a SocialProfile entity.
+func (c *SocialProfileClient) Create() *SocialProfileCreate {
+	mutation := newSocialProfileMutation(c.config, OpCreate)
+	return &SocialProfileCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SocialProfile entities.
+func (c *SocialProfileClient) CreateBulk(builders ...*SocialProfileCreate) *SocialProfileCreateBulk {
+	return &SocialProfileCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SocialProfileClient) MapCreateBulk(slice any, setFunc func(*SocialProfileCreate, int)) *SocialProfileCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SocialProfileCreateBulk{err: fmt.Errorf("calling to SocialProfileClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SocialProfileCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SocialProfileCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SocialProfile.
+func (c *SocialProfileClient) Update() *SocialProfileUpdate {
+	mutation := newSocialProfileMutation(c.config, OpUpdate)
+	return &SocialProfileUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SocialProfileClient) UpdateOne(sp *SocialProfile) *SocialProfileUpdateOne {
+	mutation := newSocialProfileMutation(c.config, OpUpdateOne, withSocialProfile(sp))
+	return &SocialProfileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SocialProfileClient) UpdateOneID(id int) *SocialProfileUpdateOne {
+	mutation := newSocialProfileMutation(c.config, OpUpdateOne, withSocialProfileID(id))
+	return &SocialProfileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SocialProfile.
+func (c *SocialProfileClient) Delete() *SocialProfileDelete {
+	mutation := newSocialProfileMutation(c.config, OpDelete)
+	return &SocialProfileDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SocialProfileClient) DeleteOne(sp *SocialProfile) *SocialProfileDeleteOne {
+	return c.DeleteOneID(sp.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SocialProfileClient) DeleteOneID(id int) *SocialProfileDeleteOne {
+	builder := c.Delete().Where(socialprofile.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SocialProfileDeleteOne{builder}
+}
+
+// Query returns a query builder for SocialProfile.
+func (c *SocialProfileClient) Query() *SocialProfileQuery {
+	return &SocialProfileQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSocialProfile},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SocialProfile entity by its id.
+func (c *SocialProfileClient) Get(ctx context.Context, id int) (*SocialProfile, error) {
+	return c.Query().Where(socialprofile.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SocialProfileClient) GetX(ctx context.Context, id int) *SocialProfile {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a SocialProfile.
+func (c *SocialProfileClient) QueryUser(sp *SocialProfile) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := sp.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(socialprofile.Table, socialprofile.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, socialprofile.UserTable, socialprofile.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(sp.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SocialProfileClient) Hooks() []Hook {
+	return c.hooks.SocialProfile
+}
+
+// Interceptors returns the client interceptors.
+func (c *SocialProfileClient) Interceptors() []Interceptor {
+	return c.inters.SocialProfile
+}
+
+func (c *SocialProfileClient) mutate(ctx context.Context, m *SocialProfileMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SocialProfileCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SocialProfileUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SocialProfileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SocialProfileDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SocialProfile mutation op: %q", m.Op())
+	}
+}
+
 // SpecClient is a client for the Spec schema.
 type SpecClient struct {
 	config
@@ -3299,6 +3456,22 @@ func (c *UserClient) QueryParent(u *User) *UserQuery {
 	return query
 }
 
+// QuerySocialProfiles queries the social_profiles edge of a User.
+func (c *UserClient) QuerySocialProfiles(u *User) *SocialProfileQuery {
+	query := (&SocialProfileClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(socialprofile.Table, socialprofile.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.SocialProfilesTable, user.SocialProfilesColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
@@ -3328,11 +3501,12 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 type (
 	hooks struct {
 		Api, Builder, Card, Comment, ExValueScan, FieldType, File, FileType, Goods,
-		Group, GroupInfo, Item, License, Node, PC, Pet, Spec, Task, User []ent.Hook
+		Group, GroupInfo, Item, License, Node, PC, Pet, SocialProfile, Spec, Task,
+		User []ent.Hook
 	}
 	inters struct {
 		Api, Builder, Card, Comment, ExValueScan, FieldType, File, FileType, Goods,
-		Group, GroupInfo, Item, License, Node, PC, Pet, Spec, Task,
+		Group, GroupInfo, Item, License, Node, PC, Pet, SocialProfile, Spec, Task,
 		User []ent.Interceptor
 	}
 )

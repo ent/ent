@@ -196,6 +196,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 		Target: &sqlgraph.EdgeTarget{
 			IDSpec: sqlgraph.NewFieldSpec({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}, field.{{ $e.Type.ID.Type.ConstName }}),
 		},
+		RefRequired: {{ if $e.Ref }}{{ not $e.Ref.Optional }}{{else}}false{{end}},
 	}
 	{{- /* Allow mutating the sqlgraph.EdgeSpec by ent extensions or user templates.*/}}
 	{{- with $tmpls := matchTemplate "dialect/sql/defedge/spec/*" }}

@@ -413,6 +413,26 @@ var (
 			},
 		},
 	}
+	// SocialProfilesColumns holds the columns for the "social_profiles" table.
+	SocialProfilesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "desc", Type: field.TypeString},
+		{Name: "user_social_profiles", Type: field.TypeInt},
+	}
+	// SocialProfilesTable holds the schema information for the "social_profiles" table.
+	SocialProfilesTable = &schema.Table{
+		Name:       "social_profiles",
+		Columns:    SocialProfilesColumns,
+		PrimaryKey: []*schema.Column{SocialProfilesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "social_profiles_users_social_profiles",
+				Columns:    []*schema.Column{SocialProfilesColumns[2]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// SpecsColumns holds the columns for the "specs" table.
 	SpecsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -611,6 +631,7 @@ var (
 		NodesTable,
 		PcsTable,
 		PetTable,
+		SocialProfilesTable,
 		SpecsTable,
 		TasksTable,
 		UsersTable,
@@ -634,6 +655,7 @@ func init() {
 	PetTable.Annotation = &entsql.Annotation{
 		Table: "pet",
 	}
+	SocialProfilesTable.ForeignKeys[0].RefTable = UsersTable
 	UsersTable.ForeignKeys[0].RefTable = GroupsTable
 	UsersTable.ForeignKeys[1].RefTable = UsersTable
 	UsersTable.ForeignKeys[2].RefTable = UsersTable

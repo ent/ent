@@ -74,9 +74,11 @@ type UserEdges struct {
 	Children []*User `json:"children,omitempty"`
 	// Parent holds the value of the parent edge.
 	Parent *User `json:"parent,omitempty"`
+	// SocialProfiles holds the value of the social_profiles edge.
+	SocialProfiles []*SocialProfile `json:"social_profiles,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [11]bool
+	loadedTypes [12]bool
 }
 
 // CardOrErr returns the Card value or an error if the edge
@@ -194,6 +196,15 @@ func (e UserEdges) ParentOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "parent"}
 }
 
+// SocialProfilesOrErr returns the SocialProfiles value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) SocialProfilesOrErr() ([]*SocialProfile, error) {
+	if e.loadedTypes[11] {
+		return e.SocialProfiles, nil
+	}
+	return nil, &NotLoadedError{edge: "social_profiles"}
+}
+
 // FromResponse scans the gremlin response data into User.
 func (u *User) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
@@ -287,6 +298,11 @@ func (u *User) QueryChildren() *UserQuery {
 // QueryParent queries the "parent" edge of the User entity.
 func (u *User) QueryParent() *UserQuery {
 	return NewUserClient(u.config).QueryParent(u)
+}
+
+// QuerySocialProfiles queries the "social_profiles" edge of the User entity.
+func (u *User) QuerySocialProfiles() *SocialProfileQuery {
+	return NewUserClient(u.config).QuerySocialProfiles(u)
 }
 
 // Update returns a builder for updating this User.

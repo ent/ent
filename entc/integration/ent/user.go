@@ -79,16 +79,19 @@ type UserEdges struct {
 	Children []*User `json:"children,omitempty"`
 	// Parent holds the value of the parent edge.
 	Parent *User `json:"parent,omitempty"`
+	// SocialProfiles holds the value of the social_profiles edge.
+	SocialProfiles []*SocialProfile `json:"social_profiles,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes    [11]bool
-	namedPets      map[string][]*Pet
-	namedFiles     map[string][]*File
-	namedGroups    map[string][]*Group
-	namedFriends   map[string][]*User
-	namedFollowers map[string][]*User
-	namedFollowing map[string][]*User
-	namedChildren  map[string][]*User
+	loadedTypes         [12]bool
+	namedPets           map[string][]*Pet
+	namedFiles          map[string][]*File
+	namedGroups         map[string][]*Group
+	namedFriends        map[string][]*User
+	namedFollowers      map[string][]*User
+	namedFollowing      map[string][]*User
+	namedChildren       map[string][]*User
+	namedSocialProfiles map[string][]*SocialProfile
 }
 
 // CardOrErr returns the Card value or an error if the edge
@@ -204,6 +207,15 @@ func (e UserEdges) ParentOrErr() (*User, error) {
 		return e.Parent, nil
 	}
 	return nil, &NotLoadedError{edge: "parent"}
+}
+
+// SocialProfilesOrErr returns the SocialProfiles value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) SocialProfilesOrErr() ([]*SocialProfile, error) {
+	if e.loadedTypes[11] {
+		return e.SocialProfiles, nil
+	}
+	return nil, &NotLoadedError{edge: "social_profiles"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -401,6 +413,11 @@ func (u *User) QueryChildren() *UserQuery {
 // QueryParent queries the "parent" edge of the User entity.
 func (u *User) QueryParent() *UserQuery {
 	return NewUserClient(u.config).QueryParent(u)
+}
+
+// QuerySocialProfiles queries the "social_profiles" edge of the User entity.
+func (u *User) QuerySocialProfiles() *SocialProfileQuery {
+	return NewUserClient(u.config).QuerySocialProfiles(u)
 }
 
 // Update returns a builder for updating this User.
@@ -629,6 +646,30 @@ func (u *User) appendNamedChildren(name string, edges ...*User) {
 		u.Edges.namedChildren[name] = []*User{}
 	} else {
 		u.Edges.namedChildren[name] = append(u.Edges.namedChildren[name], edges...)
+	}
+}
+
+// NamedSocialProfiles returns the SocialProfiles named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (u *User) NamedSocialProfiles(name string) ([]*SocialProfile, error) {
+	if u.Edges.namedSocialProfiles == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := u.Edges.namedSocialProfiles[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (u *User) appendNamedSocialProfiles(name string, edges ...*SocialProfile) {
+	if u.Edges.namedSocialProfiles == nil {
+		u.Edges.namedSocialProfiles = make(map[string][]*SocialProfile)
+	}
+	if len(edges) == 0 {
+		u.Edges.namedSocialProfiles[name] = []*SocialProfile{}
+	} else {
+		u.Edges.namedSocialProfiles[name] = append(u.Edges.namedSocialProfiles[name], edges...)
 	}
 }
 

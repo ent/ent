@@ -48,6 +48,8 @@ type Tx struct {
 	PC *PCClient
 	// Pet is the client for interacting with the Pet builders.
 	Pet *PetClient
+	// SocialProfile is the client for interacting with the SocialProfile builders.
+	SocialProfile *SocialProfileClient
 	// Spec is the client for interacting with the Spec builders.
 	Spec *SpecClient
 	// Task is the client for interacting with the Task builders.
@@ -201,6 +203,7 @@ func (tx *Tx) init() {
 	tx.Node = NewNodeClient(tx.config)
 	tx.PC = NewPCClient(tx.config)
 	tx.Pet = NewPetClient(tx.config)
+	tx.SocialProfile = NewSocialProfileClient(tx.config)
 	tx.Spec = NewSpecClient(tx.config)
 	tx.Task = NewTaskClient(tx.config)
 	tx.User = NewUserClient(tx.config)

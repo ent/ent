@@ -139,6 +139,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = pu.schemaConfig.Pet
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -153,6 +154,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = pu.schemaConfig.Pet
 		for _, k := range nodes {
@@ -319,6 +321,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = puo.schemaConfig.Pet
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -333,6 +336,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = puo.schemaConfig.Pet
 		for _, k := range nodes {

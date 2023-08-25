@@ -429,6 +429,21 @@ func (uu *UserUpdate) SetParent(u *User) *UserUpdate {
 	return uu.SetParentID(u.ID)
 }
 
+// AddSocialProfileIDs adds the "social_profiles" edge to the SocialProfile entity by IDs.
+func (uu *UserUpdate) AddSocialProfileIDs(ids ...string) *UserUpdate {
+	uu.mutation.AddSocialProfileIDs(ids...)
+	return uu
+}
+
+// AddSocialProfiles adds the "social_profiles" edges to the SocialProfile entity.
+func (uu *UserUpdate) AddSocialProfiles(s ...*SocialProfile) *UserUpdate {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return uu.AddSocialProfileIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -605,6 +620,27 @@ func (uu *UserUpdate) ClearParent() *UserUpdate {
 	return uu
 }
 
+// ClearSocialProfiles clears all "social_profiles" edges to the SocialProfile entity.
+func (uu *UserUpdate) ClearSocialProfiles() *UserUpdate {
+	uu.mutation.ClearSocialProfiles()
+	return uu
+}
+
+// RemoveSocialProfileIDs removes the "social_profiles" edge to SocialProfile entities by IDs.
+func (uu *UserUpdate) RemoveSocialProfileIDs(ids ...string) *UserUpdate {
+	uu.mutation.RemoveSocialProfileIDs(ids...)
+	return uu
+}
+
+// RemoveSocialProfiles removes "social_profiles" edges to SocialProfile entities.
+func (uu *UserUpdate) RemoveSocialProfiles(s ...*SocialProfile) *UserUpdate {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return uu.RemoveSocialProfileIDs(ids...)
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 	return withHooks(ctx, uu.gremlinSave, uu.mutation, uu.hooks)
@@ -673,7 +709,7 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
 	}
-	constraints := make([]*constraint, 0, 8)
+	constraints := make([]*constraint, 0, 9)
 	v := g.V().HasLabel(user.Label)
 	for _, p := range uu.mutation.predicates {
 		p(v)
@@ -866,6 +902,17 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 	}
 	for _, id := range uu.mutation.ParentIDs() {
 		v.AddE(user.ParentLabel).To(g.V(id)).OutV()
+	}
+	for _, id := range uu.mutation.RemovedSocialProfilesIDs() {
+		tr := rv.Clone().OutE(user.SocialProfilesLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
+		trs = append(trs, tr)
+	}
+	for _, id := range uu.mutation.SocialProfilesIDs() {
+		v.AddE(user.SocialProfilesLabel).To(g.V(id)).OutV()
+		constraints = append(constraints, &constraint{
+			pred: g.E().HasLabel(user.SocialProfilesLabel).InV().HasID(id).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.SocialProfilesLabel, id)),
+		})
 	}
 	v.Count()
 	if len(constraints) > 0 {
@@ -1286,6 +1333,21 @@ func (uuo *UserUpdateOne) SetParent(u *User) *UserUpdateOne {
 	return uuo.SetParentID(u.ID)
 }
 
+// AddSocialProfileIDs adds the "social_profiles" edge to the SocialProfile entity by IDs.
+func (uuo *UserUpdateOne) AddSocialProfileIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.AddSocialProfileIDs(ids...)
+	return uuo
+}
+
+// AddSocialProfiles adds the "social_profiles" edges to the SocialProfile entity.
+func (uuo *UserUpdateOne) AddSocialProfiles(s ...*SocialProfile) *UserUpdateOne {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return uuo.AddSocialProfileIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -1462,6 +1524,27 @@ func (uuo *UserUpdateOne) ClearParent() *UserUpdateOne {
 	return uuo
 }
 
+// ClearSocialProfiles clears all "social_profiles" edges to the SocialProfile entity.
+func (uuo *UserUpdateOne) ClearSocialProfiles() *UserUpdateOne {
+	uuo.mutation.ClearSocialProfiles()
+	return uuo
+}
+
+// RemoveSocialProfileIDs removes the "social_profiles" edge to SocialProfile entities by IDs.
+func (uuo *UserUpdateOne) RemoveSocialProfileIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.RemoveSocialProfileIDs(ids...)
+	return uuo
+}
+
+// RemoveSocialProfiles removes "social_profiles" edges to SocialProfile entities.
+func (uuo *UserUpdateOne) RemoveSocialProfiles(s ...*SocialProfile) *UserUpdateOne {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return uuo.RemoveSocialProfileIDs(ids...)
+}
+
 // Where appends a list predicates to the UserUpdate builder.
 func (uuo *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
 	uuo.mutation.Where(ps...)
@@ -1551,7 +1634,7 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
 	}
-	constraints := make([]*constraint, 0, 8)
+	constraints := make([]*constraint, 0, 9)
 	v := g.V(id)
 	var (
 		rv = v.Clone()
@@ -1741,6 +1824,17 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	for _, id := range uuo.mutation.ParentIDs() {
 		v.AddE(user.ParentLabel).To(g.V(id)).OutV()
+	}
+	for _, id := range uuo.mutation.RemovedSocialProfilesIDs() {
+		tr := rv.Clone().OutE(user.SocialProfilesLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
+		trs = append(trs, tr)
+	}
+	for _, id := range uuo.mutation.SocialProfilesIDs() {
+		v.AddE(user.SocialProfilesLabel).To(g.V(id)).OutV()
+		constraints = append(constraints, &constraint{
+			pred: g.E().HasLabel(user.SocialProfilesLabel).InV().HasID(id).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.SocialProfilesLabel, id)),
+		})
 	}
 	if len(uuo.fields) > 0 {
 		fields := make([]any, 0, len(uuo.fields)+1)

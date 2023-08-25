@@ -605,13 +605,14 @@ type (
 	// EdgeSpec holds the information for updating a field
 	// column in the database.
 	EdgeSpec struct {
-		Rel     Rel
-		Inverse bool
-		Table   string
-		Schema  string
-		Columns []string
-		Bidi    bool        // bidirectional edge.
-		Target  *EdgeTarget // target nodes.
+		Rel         Rel
+		Inverse     bool
+		Table       string
+		Schema      string
+		Columns     []string
+		Bidi        bool        // bidirectional edge.
+		Target      *EdgeTarget // target nodes.
+		RefRequired bool        // true if ref edge is required.
 	}
 
 	// EdgeSpecs used for perform common operations on list of edges.
@@ -1762,13 +1763,26 @@ func (g *graph) clearFKEdges(ctx context.Context, ids []driver.Value, edges []*E
 		if nodes := edge.Target.Nodes; len(nodes) > 0 {
 			pred = matchIDs(edge.Target.IDSpec.Column, edge.Target.Nodes, edge.Columns[0], ids)
 		}
-		query, args := g.builder.Update(edge.Table).
-			SetNull(edge.Columns[0]).
-			Where(pred).
-			Query()
-		if err := g.tx.Exec(ctx, query, args, nil); err != nil {
-			return fmt.Errorf("add %s edge for table %s: %w", edge.Rel, edge.Table, err)
+
+		// If the ref edge is required, the FK is non-nullable.
+		// Therefore, we need to delete the node instead of setting the FK to NULL.
+		if edge.RefRequired {
+			query, args := g.builder.Delete(edge.Table).
+				Where(pred).
+				Query()
+			if err := g.tx.Exec(ctx, query, args, nil); err != nil {
+				return fmt.Errorf("delete %s edge for table %s: %w", edge.Rel, edge.Table, err)
+			}
+		} else {
+			query, args := g.builder.Update(edge.Table).
+				SetNull(edge.Columns[0]).
+				Where(pred).
+				Query()
+			if err := g.tx.Exec(ctx, query, args, nil); err != nil {
+				return fmt.Errorf("set fk null %s edge for table %s: %w", edge.Rel, edge.Table, err)
+			}
 		}
+
 	}
 	return nil
 }

@@ -187,6 +187,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = uc.schemaConfig.Pet
 		for _, k := range nodes {
@@ -204,6 +205,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = uc.schemaConfig.GroupUsers
 		for _, k := range nodes {
@@ -221,6 +223,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
+			RefRequired: false,
 		}
 		edge.Schema = uc.schemaConfig.Friendship
 		for _, k := range nodes {
@@ -242,6 +245,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(friendship.FieldID, field.TypeInt),
 			},
+			RefRequired: true,
 		}
 		edge.Schema = uc.schemaConfig.Friendship
 		for _, k := range nodes {

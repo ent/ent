@@ -32,6 +32,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/node"
 	"entgo.io/ent/entc/integration/ent/pc"
 	"entgo.io/ent/entc/integration/ent/pet"
+	"entgo.io/ent/entc/integration/ent/socialprofile"
 	"entgo.io/ent/entc/integration/ent/spec"
 
 	enttask "entgo.io/ent/entc/integration/ent/task"
@@ -96,25 +97,26 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			api.Table:         api.ValidColumn,
-			builder.Table:     builder.ValidColumn,
-			card.Table:        card.ValidColumn,
-			comment.Table:     comment.ValidColumn,
-			exvaluescan.Table: exvaluescan.ValidColumn,
-			fieldtype.Table:   fieldtype.ValidColumn,
-			file.Table:        file.ValidColumn,
-			filetype.Table:    filetype.ValidColumn,
-			goods.Table:       goods.ValidColumn,
-			group.Table:       group.ValidColumn,
-			groupinfo.Table:   groupinfo.ValidColumn,
-			item.Table:        item.ValidColumn,
-			license.Table:     license.ValidColumn,
-			node.Table:        node.ValidColumn,
-			pc.Table:          pc.ValidColumn,
-			pet.Table:         pet.ValidColumn,
-			spec.Table:        spec.ValidColumn,
-			enttask.Table:     enttask.ValidColumn,
-			user.Table:        user.ValidColumn,
+			api.Table:           api.ValidColumn,
+			builder.Table:       builder.ValidColumn,
+			card.Table:          card.ValidColumn,
+			comment.Table:       comment.ValidColumn,
+			exvaluescan.Table:   exvaluescan.ValidColumn,
+			fieldtype.Table:     fieldtype.ValidColumn,
+			file.Table:          file.ValidColumn,
+			filetype.Table:      filetype.ValidColumn,
+			goods.Table:         goods.ValidColumn,
+			group.Table:         group.ValidColumn,
+			groupinfo.Table:     groupinfo.ValidColumn,
+			item.Table:          item.ValidColumn,
+			license.Table:       license.ValidColumn,
+			node.Table:          node.ValidColumn,
+			pc.Table:            pc.ValidColumn,
+			pet.Table:           pet.ValidColumn,
+			socialprofile.Table: socialprofile.ValidColumn,
+			spec.Table:          spec.ValidColumn,
+			enttask.Table:       enttask.ValidColumn,
+			user.Table:          user.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

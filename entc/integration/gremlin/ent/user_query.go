@@ -22,21 +22,22 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	ctx           *QueryContext
-	order         []user.OrderOption
-	inters        []Interceptor
-	predicates    []predicate.User
-	withCard      *CardQuery
-	withPets      *PetQuery
-	withFiles     *FileQuery
-	withGroups    *GroupQuery
-	withFriends   *UserQuery
-	withFollowers *UserQuery
-	withFollowing *UserQuery
-	withTeam      *PetQuery
-	withSpouse    *UserQuery
-	withChildren  *UserQuery
-	withParent    *UserQuery
+	ctx                *QueryContext
+	order              []user.OrderOption
+	inters             []Interceptor
+	predicates         []predicate.User
+	withCard           *CardQuery
+	withPets           *PetQuery
+	withFiles          *FileQuery
+	withGroups         *GroupQuery
+	withFriends        *UserQuery
+	withFollowers      *UserQuery
+	withFollowing      *UserQuery
+	withTeam           *PetQuery
+	withSpouse         *UserQuery
+	withChildren       *UserQuery
+	withParent         *UserQuery
+	withSocialProfiles *SocialProfileQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
 	path    func(context.Context) (*dsl.Traversal, error)
@@ -222,6 +223,20 @@ func (uq *UserQuery) QueryParent() *UserQuery {
 		}
 		gremlin := uq.gremlinQuery(ctx)
 		fromU = gremlin.OutE(user.ParentLabel).InV()
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySocialProfiles chains the current query on the "social_profiles" edge.
+func (uq *UserQuery) QuerySocialProfiles() *SocialProfileQuery {
+	query := (&SocialProfileClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := uq.gremlinQuery(ctx)
+		fromU = gremlin.OutE(user.SocialProfilesLabel).InV()
 		return fromU, nil
 	}
 	return query
@@ -414,22 +429,23 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:        uq.config,
-		ctx:           uq.ctx.Clone(),
-		order:         append([]user.OrderOption{}, uq.order...),
-		inters:        append([]Interceptor{}, uq.inters...),
-		predicates:    append([]predicate.User{}, uq.predicates...),
-		withCard:      uq.withCard.Clone(),
-		withPets:      uq.withPets.Clone(),
-		withFiles:     uq.withFiles.Clone(),
-		withGroups:    uq.withGroups.Clone(),
-		withFriends:   uq.withFriends.Clone(),
-		withFollowers: uq.withFollowers.Clone(),
-		withFollowing: uq.withFollowing.Clone(),
-		withTeam:      uq.withTeam.Clone(),
-		withSpouse:    uq.withSpouse.Clone(),
-		withChildren:  uq.withChildren.Clone(),
-		withParent:    uq.withParent.Clone(),
+		config:             uq.config,
+		ctx:                uq.ctx.Clone(),
+		order:              append([]user.OrderOption{}, uq.order...),
+		inters:             append([]Interceptor{}, uq.inters...),
+		predicates:         append([]predicate.User{}, uq.predicates...),
+		withCard:           uq.withCard.Clone(),
+		withPets:           uq.withPets.Clone(),
+		withFiles:          uq.withFiles.Clone(),
+		withGroups:         uq.withGroups.Clone(),
+		withFriends:        uq.withFriends.Clone(),
+		withFollowers:      uq.withFollowers.Clone(),
+		withFollowing:      uq.withFollowing.Clone(),
+		withTeam:           uq.withTeam.Clone(),
+		withSpouse:         uq.withSpouse.Clone(),
+		withChildren:       uq.withChildren.Clone(),
+		withParent:         uq.withParent.Clone(),
+		withSocialProfiles: uq.withSocialProfiles.Clone(),
 		// clone intermediate query.
 		gremlin: uq.gremlin.Clone(),
 		path:    uq.path,
@@ -554,6 +570,17 @@ func (uq *UserQuery) WithParent(opts ...func(*UserQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withParent = query
+	return uq
+}
+
+// WithSocialProfiles tells the query-builder to eager-load the nodes that are connected to
+// the "social_profiles" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithSocialProfiles(opts ...func(*SocialProfileQuery)) *UserQuery {
+	query := (&SocialProfileClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withSocialProfiles = query
 	return uq
 }
 

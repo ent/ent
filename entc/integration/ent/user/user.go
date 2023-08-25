@@ -64,6 +64,8 @@ const (
 	EdgeChildren = "children"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
+	// EdgeSocialProfiles holds the string denoting the social_profiles edge name in mutations.
+	EdgeSocialProfiles = "social_profiles"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// CardTable is the table that holds the card relation/edge.
@@ -117,6 +119,13 @@ const (
 	ParentTable = "users"
 	// ParentColumn is the table column denoting the parent relation/edge.
 	ParentColumn = "user_parent"
+	// SocialProfilesTable is the table that holds the social_profiles relation/edge.
+	SocialProfilesTable = "social_profiles"
+	// SocialProfilesInverseTable is the table name for the SocialProfile entity.
+	// It exists in this package in order to avoid circular dependency with the "socialprofile" package.
+	SocialProfilesInverseTable = "social_profiles"
+	// SocialProfilesColumn is the table column denoting the social_profiles relation/edge.
+	SocialProfilesColumn = "user_social_profiles"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -431,6 +440,20 @@ func ByParentField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newParentStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// BySocialProfilesCount orders the results by social_profiles count.
+func BySocialProfilesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSocialProfilesStep(), opts...)
+	}
+}
+
+// BySocialProfiles orders the results by social_profiles terms.
+func BySocialProfiles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSocialProfilesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newCardStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -506,6 +529,13 @@ func newParentStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(Table, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, false, ParentTable, ParentColumn),
+	)
+}
+func newSocialProfilesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SocialProfilesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SocialProfilesTable, SocialProfilesColumn),
 	)
 }
 

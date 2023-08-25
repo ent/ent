@@ -24,6 +24,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/pc"
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/entc/integration/ent/socialprofile"
 	"entgo.io/ent/entc/integration/ent/spec"
 	enttask "entgo.io/ent/entc/integration/ent/task"
 	"entgo.io/ent/entc/integration/ent/user"
@@ -36,7 +37,7 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 19)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 20)}
 	graph.Nodes[0] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   api.Table,
@@ -352,6 +353,20 @@ var schemaGraph = func() *sqlgraph.Schema {
 	}
 	graph.Nodes[16] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
+			Table:   socialprofile.Table,
+			Columns: socialprofile.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: socialprofile.FieldID,
+			},
+		},
+		Type: "SocialProfile",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			socialprofile.FieldDesc: {Type: field.TypeString, Column: socialprofile.FieldDesc},
+		},
+	}
+	graph.Nodes[17] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
 			Table:   spec.Table,
 			Columns: spec.Columns,
 			ID: &sqlgraph.FieldSpec{
@@ -362,7 +377,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Type:   "Spec",
 		Fields: map[string]*sqlgraph.FieldSpec{},
 	}
-	graph.Nodes[17] = &sqlgraph.Node{
+	graph.Nodes[18] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   enttask.Table,
 			Columns: enttask.Columns,
@@ -383,7 +398,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			enttask.FieldOp:          {Type: field.TypeString, Column: enttask.FieldOp},
 		},
 	}
-	graph.Nodes[18] = &sqlgraph.Node{
+	graph.Nodes[19] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
@@ -589,6 +604,18 @@ var schemaGraph = func() *sqlgraph.Schema {
 		"User",
 	)
 	graph.MustAddE(
+		"user",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   socialprofile.UserTable,
+			Columns: []string{socialprofile.UserColumn},
+			Bidi:    false,
+		},
+		"SocialProfile",
+		"User",
+	)
+	graph.MustAddE(
 		"card",
 		&sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -731,6 +758,18 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		"User",
 		"User",
+	)
+	graph.MustAddE(
+		"social_profiles",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SocialProfilesTable,
+			Columns: []string{user.SocialProfilesColumn},
+			Bidi:    false,
+		},
+		"User",
+		"SocialProfile",
 	)
 	return graph
 }()
@@ -2137,6 +2176,65 @@ func (f *PetFilter) WhereHasOwnerWith(preds ...predicate.User) {
 }
 
 // addPredicate implements the predicateAdder interface.
+func (spq *SocialProfileQuery) addPredicate(pred func(s *sql.Selector)) {
+	spq.predicates = append(spq.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the SocialProfileQuery builder.
+func (spq *SocialProfileQuery) Filter() *SocialProfileFilter {
+	return &SocialProfileFilter{config: spq.config, predicateAdder: spq}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *SocialProfileMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the SocialProfileMutation builder.
+func (m *SocialProfileMutation) Filter() *SocialProfileFilter {
+	return &SocialProfileFilter{config: m.config, predicateAdder: m}
+}
+
+// SocialProfileFilter provides a generic filtering capability at runtime for SocialProfileQuery.
+type SocialProfileFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *SocialProfileFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[16].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql int predicate on the id field.
+func (f *SocialProfileFilter) WhereID(p entql.IntP) {
+	f.Where(p.Field(socialprofile.FieldID))
+}
+
+// WhereDesc applies the entql string predicate on the desc field.
+func (f *SocialProfileFilter) WhereDesc(p entql.StringP) {
+	f.Where(p.Field(socialprofile.FieldDesc))
+}
+
+// WhereHasUser applies a predicate to check if query has an edge user.
+func (f *SocialProfileFilter) WhereHasUser() {
+	f.Where(entql.HasEdge("user"))
+}
+
+// WhereHasUserWith applies a predicate to check if query has an edge user with a given conditions (other predicates).
+func (f *SocialProfileFilter) WhereHasUserWith(preds ...predicate.User) {
+	f.Where(entql.HasEdgeWith("user", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// addPredicate implements the predicateAdder interface.
 func (sq *SpecQuery) addPredicate(pred func(s *sql.Selector)) {
 	sq.predicates = append(sq.predicates, pred)
 }
@@ -2165,7 +2263,7 @@ type SpecFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *SpecFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[16].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[17].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -2219,7 +2317,7 @@ type TaskFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TaskFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[17].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[18].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -2299,7 +2397,7 @@ type UserFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[18].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[19].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -2518,6 +2616,20 @@ func (f *UserFilter) WhereHasParent() {
 // WhereHasParentWith applies a predicate to check if query has an edge parent with a given conditions (other predicates).
 func (f *UserFilter) WhereHasParentWith(preds ...predicate.User) {
 	f.Where(entql.HasEdgeWith("parent", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// WhereHasSocialProfiles applies a predicate to check if query has an edge social_profiles.
+func (f *UserFilter) WhereHasSocialProfiles() {
+	f.Where(entql.HasEdge("social_profiles"))
+}
+
+// WhereHasSocialProfilesWith applies a predicate to check if query has an edge social_profiles with a given conditions (other predicates).
+func (f *UserFilter) WhereHasSocialProfilesWith(preds ...predicate.SocialProfile) {
+	f.Where(entql.HasEdgeWith("social_profiles", sqlgraph.WrapFunc(func(s *sql.Selector) {
 		for _, p := range preds {
 			p(s)
 		}

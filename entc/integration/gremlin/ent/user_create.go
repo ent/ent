@@ -359,6 +359,21 @@ func (uc *UserCreate) SetParent(u *User) *UserCreate {
 	return uc.SetParentID(u.ID)
 }
 
+// AddSocialProfileIDs adds the "social_profiles" edge to the SocialProfile entity by IDs.
+func (uc *UserCreate) AddSocialProfileIDs(ids ...string) *UserCreate {
+	uc.mutation.AddSocialProfileIDs(ids...)
+	return uc
+}
+
+// AddSocialProfiles adds the "social_profiles" edges to the SocialProfile entity.
+func (uc *UserCreate) AddSocialProfiles(s ...*SocialProfile) *UserCreate {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return uc.AddSocialProfileIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uc *UserCreate) Mutation() *UserMutation {
 	return uc.mutation
@@ -473,7 +488,7 @@ func (uc *UserCreate) gremlin() *dsl.Traversal {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
 	}
-	constraints := make([]*constraint, 0, 8)
+	constraints := make([]*constraint, 0, 9)
 	v := g.AddV(user.Label)
 	if value, ok := uc.mutation.OptionalInt(); ok {
 		v.Property(dsl.Single, user.FieldOptionalInt, value)
@@ -575,6 +590,13 @@ func (uc *UserCreate) gremlin() *dsl.Traversal {
 	}
 	for _, id := range uc.mutation.ParentIDs() {
 		v.AddE(user.ParentLabel).To(g.V(id)).OutV()
+	}
+	for _, id := range uc.mutation.SocialProfilesIDs() {
+		v.AddE(user.SocialProfilesLabel).To(g.V(id)).OutV()
+		constraints = append(constraints, &constraint{
+			pred: g.E().HasLabel(user.SocialProfilesLabel).InV().HasID(id).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.SocialProfilesLabel, id)),
+		})
 	}
 	if len(constraints) == 0 {
 		return v.ValueMap(true)

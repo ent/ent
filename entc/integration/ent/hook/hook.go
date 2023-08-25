@@ -205,6 +205,18 @@ func (f PetFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PetMutation", m)
 }
 
+// The SocialProfileFunc type is an adapter to allow the use of ordinary
+// function as SocialProfile mutator.
+type SocialProfileFunc func(context.Context, *ent.SocialProfileMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SocialProfileFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SocialProfileMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SocialProfileMutation", m)
+}
+
 // The SpecFunc type is an adapter to allow the use of ordinary
 // function as Spec mutator.
 type SpecFunc func(context.Context, *ent.SpecMutation) (ent.Value, error)
