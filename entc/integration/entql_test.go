@@ -8,13 +8,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/google/uuid"
-
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent"
+	"entgo.io/ent/entc/integration/ent/comment"
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/user"
 	"entgo.io/ent/entql"
-
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -94,4 +94,11 @@ func EntQL(t *testing.T, client *ent.Client) {
 	uq = uq.QueryFriends()
 	uq.Filter().WhereName(entql.StringEQ(nati.Name))
 	require.Equal(luna.ID, uq.QueryPets().OnlyIDX(ctx))
+
+	client.Comment.Create().SetUniqueInt(1).SetUniqueFloat(1.0).SaveX(ctx)
+	client.Comment.Create().SetUniqueInt(2).SetUniqueFloat(2.0).SetNillableInt(1).SaveX(ctx)
+
+	comments := client.Comment.Query().Order(comment.ByNillableInt(sql.OrderNullsFirst())).AllX(ctx)
+	require.True(comments[0].NillableInt == nil)
+	require.True(*comments[1].NillableInt == 1)
 }
