@@ -101,4 +101,9 @@ func EntQL(t *testing.T, client *ent.Client) {
 	comments := client.Comment.Query().Order(comment.ByNillableInt(sql.OrderNullsFirst())).AllX(ctx)
 	require.True(comments[0].NillableInt == nil)
 	require.True(*comments[1].NillableInt == 1)
+
+	comments = client.Comment.Query().Order(comment.ByNillableInt(sql.OrderNullsLast())).AllX(ctx)
+	require.True(*comments[0].NillableInt == 1)
+	require.True(comments[1].NillableInt == nil)
+
 }
