@@ -168,7 +168,7 @@ pets, err := client.Pet.CreateBulk(
 
 names := []string{"pedro", "xabi", "layla"}
 pets, err := client.Pet.MapCreateBulk(names, func(c *ent.PetCreate, i int) {
-    client.Pet.Create().SetName(names[i]).SetOwner(a8m)
+    c.SetName(names[i]).SetOwner(a8m)
 }).Save(ctx)
 ```
 
