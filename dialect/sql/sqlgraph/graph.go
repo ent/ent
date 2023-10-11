@@ -511,9 +511,13 @@ func OrderByNeighborTerms(q *sql.Selector, s *Step, opts ...sql.OrderTerm) {
 			On(q.C(s.From.Column), join.C(pk2))
 	case s.ToEdgeOwner():
 		toT := build.Table(s.Edge.Table).Schema(s.Edge.Schema)
+		var groupByColumns []string
+		for _, c := range s.Edge.Columns {
+			groupByColumns = append(groupByColumns, toT.C(c))
+		}
 		join = build.Select(toT.C(s.Edge.Columns[0])).
 			From(toT).
-			GroupBy(toT.C(s.Edge.Columns[0]))
+			GroupBy(groupByColumns...)
 		selectTerms(join, opts)
 		q.LeftJoin(join).
 			On(q.C(s.From.Column), join.C(s.Edge.Columns[0]))

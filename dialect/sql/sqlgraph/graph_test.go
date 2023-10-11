@@ -1057,6 +1057,20 @@ func TestOrderByNeighborTerms(t *testing.T) {
 		require.Empty(t, args)
 		require.Equal(t, `SELECT "users"."name", "t1"."total_stars" FROM "users" LEFT JOIN (SELECT "repo"."owner_id", SUM("repo"."num_stars") AS "total_stars" FROM "repo" GROUP BY "repo"."owner_id") AS "t1" ON "users"."id" = "t1"."owner_id" ORDER BY "t1"."total_stars" NULLS FIRST`, query)
 	})
+	t.Run("O2M without aggregate", func(t *testing.T) {
+		s := s.Clone()
+		OrderByNeighborTerms(s,
+			NewStep(
+				From("users", "id"),
+				To("repos", "id"),
+				Edge(O2M, false, "repo", "owner_id", "number"),
+			),
+			sql.OrderByField("number"),
+		)
+		query, args := s.Query()
+		require.Empty(t, args)
+		require.Equal(t, `SELECT "users"."name" FROM "users" LEFT JOIN (SELECT "repo"."owner_id", "repo"."number" FROM "repo" GROUP BY "repo"."owner_id", "repo"."number") AS "t1" ON "users"."id" = "t1"."owner_id" ORDER BY "t1"."number" NULLS FIRST`, query)
+	})
 	t.Run("M2M", func(t *testing.T) {
 		s := s.Clone()
 		OrderByNeighborTerms(s,
