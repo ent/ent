@@ -2777,6 +2777,21 @@ func OrderByEdgeTerms(t *testing.T, client *ent.Client) {
 			IDsX(ctx)
 		require.Equal(t, tt.ids, ids)
 	}
+	// O2M edge.
+	ids := client.User.Query().
+		Order(func(s *sql.Selector) {
+			sqlgraph.OrderByNeighborTerms(s,
+				sqlgraph.NewStep(
+					sqlgraph.From(user.Table, user.FieldID),
+					sqlgraph.To(pet.Table, pet.FieldID),
+					sqlgraph.Edge(sqlgraph.O2M, false, pet.Table, pet.OwnerColumn, pet.FieldAge),
+				),
+				sql.OrderByField(pet.FieldAge, sql.OrderDesc()),
+			)
+		}).
+		Order(ent.Asc(user.FieldID)).
+		IDsX(ctx)
+	require.Equal(t, []int{users[2].ID, users[1].ID, users[0].ID, users[3].ID}, ids)
 	// O2M edge (aggregation).
 	for _, tt := range []struct {
 		opt sql.OrderTerm
