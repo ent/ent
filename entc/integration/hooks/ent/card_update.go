@@ -73,6 +73,14 @@ func (cu *CardUpdate) SetInHook(s string) *CardUpdate {
 	return cu
 }
 
+// SetNillableInHook sets the "in_hook" field if the given value is not nil.
+func (cu *CardUpdate) SetNillableInHook(s *string) *CardUpdate {
+	if s != nil {
+		cu.SetInHook(*s)
+	}
+	return cu
+}
+
 // SetExpiredAt sets the "expired_at" field.
 func (cu *CardUpdate) SetExpiredAt(t time.Time) *CardUpdate {
 	cu.mutation.SetExpiredAt(t)
@@ -263,6 +271,14 @@ func (cuo *CardUpdateOne) SetNillableCreatedAt(t *time.Time) *CardUpdateOne {
 // SetInHook sets the "in_hook" field.
 func (cuo *CardUpdateOne) SetInHook(s string) *CardUpdateOne {
 	cuo.mutation.SetInHook(s)
+	return cuo
+}
+
+// SetNillableInHook sets the "in_hook" field if the given value is not nil.
+func (cuo *CardUpdateOne) SetNillableInHook(s *string) *CardUpdateOne {
+	if s != nil {
+		cuo.SetInHook(*s)
+	}
 	return cuo
 }
 

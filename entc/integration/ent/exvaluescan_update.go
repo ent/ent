@@ -76,9 +76,25 @@ func (evsu *ExValueScanUpdate) SetBase64(s string) *ExValueScanUpdate {
 	return evsu
 }
 
+// SetNillableBase64 sets the "base64" field if the given value is not nil.
+func (evsu *ExValueScanUpdate) SetNillableBase64(s *string) *ExValueScanUpdate {
+	if s != nil {
+		evsu.SetBase64(*s)
+	}
+	return evsu
+}
+
 // SetCustom sets the "custom" field.
 func (evsu *ExValueScanUpdate) SetCustom(s string) *ExValueScanUpdate {
 	evsu.mutation.SetCustom(s)
+	return evsu
+}
+
+// SetNillableCustom sets the "custom" field if the given value is not nil.
+func (evsu *ExValueScanUpdate) SetNillableCustom(s *string) *ExValueScanUpdate {
+	if s != nil {
+		evsu.SetCustom(*s)
+	}
 	return evsu
 }
 
@@ -271,9 +287,25 @@ func (evsuo *ExValueScanUpdateOne) SetBase64(s string) *ExValueScanUpdateOne {
 	return evsuo
 }
 
+// SetNillableBase64 sets the "base64" field if the given value is not nil.
+func (evsuo *ExValueScanUpdateOne) SetNillableBase64(s *string) *ExValueScanUpdateOne {
+	if s != nil {
+		evsuo.SetBase64(*s)
+	}
+	return evsuo
+}
+
 // SetCustom sets the "custom" field.
 func (evsuo *ExValueScanUpdateOne) SetCustom(s string) *ExValueScanUpdateOne {
 	evsuo.mutation.SetCustom(s)
+	return evsuo
+}
+
+// SetNillableCustom sets the "custom" field if the given value is not nil.
+func (evsuo *ExValueScanUpdateOne) SetNillableCustom(s *string) *ExValueScanUpdateOne {
+	if s != nil {
+		evsuo.SetCustom(*s)
+	}
 	return evsuo
 }
 

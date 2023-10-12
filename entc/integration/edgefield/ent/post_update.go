@@ -38,6 +38,14 @@ func (pu *PostUpdate) SetText(s string) *PostUpdate {
 	return pu
 }
 
+// SetNillableText sets the "text" field if the given value is not nil.
+func (pu *PostUpdate) SetNillableText(s *string) *PostUpdate {
+	if s != nil {
+		pu.SetText(*s)
+	}
+	return pu
+}
+
 // SetAuthorID sets the "author_id" field.
 func (pu *PostUpdate) SetAuthorID(i int) *PostUpdate {
 	pu.mutation.SetAuthorID(i)
@@ -165,6 +173,14 @@ type PostUpdateOne struct {
 // SetText sets the "text" field.
 func (puo *PostUpdateOne) SetText(s string) *PostUpdateOne {
 	puo.mutation.SetText(s)
+	return puo
+}
+
+// SetNillableText sets the "text" field if the given value is not nil.
+func (puo *PostUpdateOne) SetNillableText(s *string) *PostUpdateOne {
+	if s != nil {
+		puo.SetText(*s)
+	}
 	return puo
 }
 

@@ -40,6 +40,14 @@ func (pu *PetUpdate) SetAge(i int) *PetUpdate {
 	return pu
 }
 
+// SetNillableAge sets the "age" field if the given value is not nil.
+func (pu *PetUpdate) SetNillableAge(i *int) *PetUpdate {
+	if i != nil {
+		pu.SetAge(*i)
+	}
+	return pu
+}
+
 // AddAge adds i to the "age" field.
 func (pu *PetUpdate) AddAge(i int) *PetUpdate {
 	pu.mutation.AddAge(i)
@@ -197,6 +205,14 @@ type PetUpdateOne struct {
 func (puo *PetUpdateOne) SetAge(i int) *PetUpdateOne {
 	puo.mutation.ResetAge()
 	puo.mutation.SetAge(i)
+	return puo
+}
+
+// SetNillableAge sets the "age" field if the given value is not nil.
+func (puo *PetUpdateOne) SetNillableAge(i *int) *PetUpdateOne {
+	if i != nil {
+		puo.SetAge(*i)
+	}
 	return puo
 }
 

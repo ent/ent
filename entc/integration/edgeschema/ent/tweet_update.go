@@ -42,6 +42,14 @@ func (tu *TweetUpdate) SetText(s string) *TweetUpdate {
 	return tu
 }
 
+// SetNillableText sets the "text" field if the given value is not nil.
+func (tu *TweetUpdate) SetNillableText(s *string) *TweetUpdate {
+	if s != nil {
+		tu.SetText(*s)
+	}
+	return tu
+}
+
 // AddLikedUserIDs adds the "liked_users" edge to the User entity by IDs.
 func (tu *TweetUpdate) AddLikedUserIDs(ids ...int) *TweetUpdate {
 	tu.mutation.AddLikedUserIDs(ids...)
@@ -559,6 +567,14 @@ type TweetUpdateOne struct {
 // SetText sets the "text" field.
 func (tuo *TweetUpdateOne) SetText(s string) *TweetUpdateOne {
 	tuo.mutation.SetText(s)
+	return tuo
+}
+
+// SetNillableText sets the "text" field if the given value is not nil.
+func (tuo *TweetUpdateOne) SetNillableText(s *string) *TweetUpdateOne {
+	if s != nil {
+		tuo.SetText(*s)
+	}
 	return tuo
 }
 

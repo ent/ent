@@ -39,6 +39,14 @@ func (pu *PetUpdate) SetBestFriendID(u uuid.UUID) *PetUpdate {
 	return pu
 }
 
+// SetNillableBestFriendID sets the "best_friend_id" field if the given value is not nil.
+func (pu *PetUpdate) SetNillableBestFriendID(u *uuid.UUID) *PetUpdate {
+	if u != nil {
+		pu.SetBestFriendID(*u)
+	}
+	return pu
+}
+
 // SetOwnerID sets the "owner_id" field.
 func (pu *PetUpdate) SetOwnerID(i int) *PetUpdate {
 	pu.mutation.SetOwnerID(i)
@@ -211,6 +219,14 @@ type PetUpdateOne struct {
 // SetBestFriendID sets the "best_friend_id" field.
 func (puo *PetUpdateOne) SetBestFriendID(u uuid.UUID) *PetUpdateOne {
 	puo.mutation.SetBestFriendID(u)
+	return puo
+}
+
+// SetNillableBestFriendID sets the "best_friend_id" field if the given value is not nil.
+func (puo *PetUpdateOne) SetNillableBestFriendID(u *uuid.UUID) *PetUpdateOne {
+	if u != nil {
+		puo.SetBestFriendID(*u)
+	}
 	return puo
 }
 

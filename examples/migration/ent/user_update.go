@@ -40,6 +40,14 @@ func (uu *UserUpdate) SetAge(f float64) *UserUpdate {
 	return uu
 }
 
+// SetNillableAge sets the "age" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableAge(f *float64) *UserUpdate {
+	if f != nil {
+		uu.SetAge(*f)
+	}
+	return uu
+}
+
 // AddAge adds f to the "age" field.
 func (uu *UserUpdate) AddAge(f float64) *UserUpdate {
 	uu.mutation.AddAge(f)
@@ -49,6 +57,14 @@ func (uu *UserUpdate) AddAge(f float64) *UserUpdate {
 // SetName sets the "name" field.
 func (uu *UserUpdate) SetName(s string) *UserUpdate {
 	uu.mutation.SetName(s)
+	return uu
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableName(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetName(*s)
+	}
 	return uu
 }
 
@@ -239,6 +255,14 @@ func (uuo *UserUpdateOne) SetAge(f float64) *UserUpdateOne {
 	return uuo
 }
 
+// SetNillableAge sets the "age" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableAge(f *float64) *UserUpdateOne {
+	if f != nil {
+		uuo.SetAge(*f)
+	}
+	return uuo
+}
+
 // AddAge adds f to the "age" field.
 func (uuo *UserUpdateOne) AddAge(f float64) *UserUpdateOne {
 	uuo.mutation.AddAge(f)
@@ -248,6 +272,14 @@ func (uuo *UserUpdateOne) AddAge(f float64) *UserUpdateOne {
 // SetName sets the "name" field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
 	uuo.mutation.SetName(s)
+	return uuo
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetName(*s)
+	}
 	return uuo
 }
 

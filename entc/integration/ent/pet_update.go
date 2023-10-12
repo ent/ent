@@ -61,6 +61,14 @@ func (pu *PetUpdate) SetName(s string) *PetUpdate {
 	return pu
 }
 
+// SetNillableName sets the "name" field if the given value is not nil.
+func (pu *PetUpdate) SetNillableName(s *string) *PetUpdate {
+	if s != nil {
+		pu.SetName(*s)
+	}
+	return pu
+}
+
 // SetUUID sets the "uuid" field.
 func (pu *PetUpdate) SetUUID(u uuid.UUID) *PetUpdate {
 	pu.mutation.SetUUID(u)
@@ -340,6 +348,14 @@ func (puo *PetUpdateOne) AddAge(f float64) *PetUpdateOne {
 // SetName sets the "name" field.
 func (puo *PetUpdateOne) SetName(s string) *PetUpdateOne {
 	puo.mutation.SetName(s)
+	return puo
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (puo *PetUpdateOne) SetNillableName(s *string) *PetUpdateOne {
+	if s != nil {
+		puo.SetName(*s)
+	}
 	return puo
 }
 

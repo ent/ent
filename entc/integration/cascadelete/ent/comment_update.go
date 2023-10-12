@@ -38,9 +38,25 @@ func (cu *CommentUpdate) SetText(s string) *CommentUpdate {
 	return cu
 }
 
+// SetNillableText sets the "text" field if the given value is not nil.
+func (cu *CommentUpdate) SetNillableText(s *string) *CommentUpdate {
+	if s != nil {
+		cu.SetText(*s)
+	}
+	return cu
+}
+
 // SetPostID sets the "post_id" field.
 func (cu *CommentUpdate) SetPostID(i int) *CommentUpdate {
 	cu.mutation.SetPostID(i)
+	return cu
+}
+
+// SetNillablePostID sets the "post_id" field if the given value is not nil.
+func (cu *CommentUpdate) SetNillablePostID(i *int) *CommentUpdate {
+	if i != nil {
+		cu.SetPostID(*i)
+	}
 	return cu
 }
 
@@ -165,9 +181,25 @@ func (cuo *CommentUpdateOne) SetText(s string) *CommentUpdateOne {
 	return cuo
 }
 
+// SetNillableText sets the "text" field if the given value is not nil.
+func (cuo *CommentUpdateOne) SetNillableText(s *string) *CommentUpdateOne {
+	if s != nil {
+		cuo.SetText(*s)
+	}
+	return cuo
+}
+
 // SetPostID sets the "post_id" field.
 func (cuo *CommentUpdateOne) SetPostID(i int) *CommentUpdateOne {
 	cuo.mutation.SetPostID(i)
+	return cuo
+}
+
+// SetNillablePostID sets the "post_id" field if the given value is not nil.
+func (cuo *CommentUpdateOne) SetNillablePostID(i *int) *CommentUpdateOne {
+	if i != nil {
+		cuo.SetPostID(*i)
+	}
 	return cuo
 }
 

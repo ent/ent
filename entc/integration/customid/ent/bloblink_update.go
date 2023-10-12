@@ -54,9 +54,25 @@ func (blu *BlobLinkUpdate) SetBlobID(u uuid.UUID) *BlobLinkUpdate {
 	return blu
 }
 
+// SetNillableBlobID sets the "blob_id" field if the given value is not nil.
+func (blu *BlobLinkUpdate) SetNillableBlobID(u *uuid.UUID) *BlobLinkUpdate {
+	if u != nil {
+		blu.SetBlobID(*u)
+	}
+	return blu
+}
+
 // SetLinkID sets the "link_id" field.
 func (blu *BlobLinkUpdate) SetLinkID(u uuid.UUID) *BlobLinkUpdate {
 	blu.mutation.SetLinkID(u)
+	return blu
+}
+
+// SetNillableLinkID sets the "link_id" field if the given value is not nil.
+func (blu *BlobLinkUpdate) SetNillableLinkID(u *uuid.UUID) *BlobLinkUpdate {
+	if u != nil {
+		blu.SetLinkID(*u)
+	}
 	return blu
 }
 
@@ -238,9 +254,25 @@ func (bluo *BlobLinkUpdateOne) SetBlobID(u uuid.UUID) *BlobLinkUpdateOne {
 	return bluo
 }
 
+// SetNillableBlobID sets the "blob_id" field if the given value is not nil.
+func (bluo *BlobLinkUpdateOne) SetNillableBlobID(u *uuid.UUID) *BlobLinkUpdateOne {
+	if u != nil {
+		bluo.SetBlobID(*u)
+	}
+	return bluo
+}
+
 // SetLinkID sets the "link_id" field.
 func (bluo *BlobLinkUpdateOne) SetLinkID(u uuid.UUID) *BlobLinkUpdateOne {
 	bluo.mutation.SetLinkID(u)
+	return bluo
+}
+
+// SetNillableLinkID sets the "link_id" field if the given value is not nil.
+func (bluo *BlobLinkUpdateOne) SetNillableLinkID(u *uuid.UUID) *BlobLinkUpdateOne {
+	if u != nil {
+		bluo.SetLinkID(*u)
+	}
 	return bluo
 }
 

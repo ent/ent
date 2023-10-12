@@ -39,6 +39,14 @@ func (bu *BlogUpdate) SetOid(i int) *BlogUpdate {
 	return bu
 }
 
+// SetNillableOid sets the "oid" field if the given value is not nil.
+func (bu *BlogUpdate) SetNillableOid(i *int) *BlogUpdate {
+	if i != nil {
+		bu.SetOid(*i)
+	}
+	return bu
+}
+
 // AddOid adds i to the "oid" field.
 func (bu *BlogUpdate) AddOid(i int) *BlogUpdate {
 	bu.mutation.AddOid(i)
@@ -197,6 +205,14 @@ type BlogUpdateOne struct {
 func (buo *BlogUpdateOne) SetOid(i int) *BlogUpdateOne {
 	buo.mutation.ResetOid()
 	buo.mutation.SetOid(i)
+	return buo
+}
+
+// SetNillableOid sets the "oid" field if the given value is not nil.
+func (buo *BlogUpdateOne) SetNillableOid(i *int) *BlogUpdateOne {
+	if i != nil {
+		buo.SetOid(*i)
+	}
 	return buo
 }
 

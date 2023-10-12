@@ -39,9 +39,25 @@ func (cu *CardUpdate) SetExpired(t time.Time) *CardUpdate {
 	return cu
 }
 
+// SetNillableExpired sets the "expired" field if the given value is not nil.
+func (cu *CardUpdate) SetNillableExpired(t *time.Time) *CardUpdate {
+	if t != nil {
+		cu.SetExpired(*t)
+	}
+	return cu
+}
+
 // SetNumber sets the "number" field.
 func (cu *CardUpdate) SetNumber(s string) *CardUpdate {
 	cu.mutation.SetNumber(s)
+	return cu
+}
+
+// SetNillableNumber sets the "number" field if the given value is not nil.
+func (cu *CardUpdate) SetNillableNumber(s *string) *CardUpdate {
+	if s != nil {
+		cu.SetNumber(*s)
+	}
 	return cu
 }
 
@@ -175,9 +191,25 @@ func (cuo *CardUpdateOne) SetExpired(t time.Time) *CardUpdateOne {
 	return cuo
 }
 
+// SetNillableExpired sets the "expired" field if the given value is not nil.
+func (cuo *CardUpdateOne) SetNillableExpired(t *time.Time) *CardUpdateOne {
+	if t != nil {
+		cuo.SetExpired(*t)
+	}
+	return cuo
+}
+
 // SetNumber sets the "number" field.
 func (cuo *CardUpdateOne) SetNumber(s string) *CardUpdateOne {
 	cuo.mutation.SetNumber(s)
+	return cuo
+}
+
+// SetNillableNumber sets the "number" field if the given value is not nil.
+func (cuo *CardUpdateOne) SetNillableNumber(s *string) *CardUpdateOne {
+	if s != nil {
+		cuo.SetNumber(*s)
+	}
 	return cuo
 }
 
