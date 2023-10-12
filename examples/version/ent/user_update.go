@@ -58,6 +58,14 @@ func (uu *UserUpdate) SetStatus(u user.Status) *UserUpdate {
 	return uu
 }
 
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableStatus(u *user.Status) *UserUpdate {
+	if u != nil {
+		uu.SetStatus(*u)
+	}
+	return uu
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -165,6 +173,14 @@ func (uuo *UserUpdateOne) AddVersion(i int64) *UserUpdateOne {
 // SetStatus sets the "status" field.
 func (uuo *UserUpdateOne) SetStatus(u user.Status) *UserUpdateOne {
 	uuo.mutation.SetStatus(u)
+	return uuo
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableStatus(u *user.Status) *UserUpdateOne {
+	if u != nil {
+		uuo.SetStatus(*u)
+	}
 	return uuo
 }
 

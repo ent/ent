@@ -42,6 +42,14 @@ func (tu *TagUpdate) SetValue(s string) *TagUpdate {
 	return tu
 }
 
+// SetNillableValue sets the "value" field if the given value is not nil.
+func (tu *TagUpdate) SetNillableValue(s *string) *TagUpdate {
+	if s != nil {
+		tu.SetValue(*s)
+	}
+	return tu
+}
+
 // AddTweetIDs adds the "tweets" edge to the Tweet entity by IDs.
 func (tu *TagUpdate) AddTweetIDs(ids ...int) *TagUpdate {
 	tu.mutation.AddTweetIDs(ids...)
@@ -454,6 +462,14 @@ type TagUpdateOne struct {
 // SetValue sets the "value" field.
 func (tuo *TagUpdateOne) SetValue(s string) *TagUpdateOne {
 	tuo.mutation.SetValue(s)
+	return tuo
+}
+
+// SetNillableValue sets the "value" field if the given value is not nil.
+func (tuo *TagUpdateOne) SetNillableValue(s *string) *TagUpdateOne {
+	if s != nil {
+		tuo.SetValue(*s)
+	}
 	return tuo
 }
 

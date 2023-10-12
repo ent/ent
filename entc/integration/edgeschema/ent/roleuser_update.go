@@ -54,9 +54,25 @@ func (ruu *RoleUserUpdate) SetRoleID(i int) *RoleUserUpdate {
 	return ruu
 }
 
+// SetNillableRoleID sets the "role_id" field if the given value is not nil.
+func (ruu *RoleUserUpdate) SetNillableRoleID(i *int) *RoleUserUpdate {
+	if i != nil {
+		ruu.SetRoleID(*i)
+	}
+	return ruu
+}
+
 // SetUserID sets the "user_id" field.
 func (ruu *RoleUserUpdate) SetUserID(i int) *RoleUserUpdate {
 	ruu.mutation.SetUserID(i)
+	return ruu
+}
+
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (ruu *RoleUserUpdate) SetNillableUserID(i *int) *RoleUserUpdate {
+	if i != nil {
+		ruu.SetUserID(*i)
+	}
 	return ruu
 }
 
@@ -238,9 +254,25 @@ func (ruuo *RoleUserUpdateOne) SetRoleID(i int) *RoleUserUpdateOne {
 	return ruuo
 }
 
+// SetNillableRoleID sets the "role_id" field if the given value is not nil.
+func (ruuo *RoleUserUpdateOne) SetNillableRoleID(i *int) *RoleUserUpdateOne {
+	if i != nil {
+		ruuo.SetRoleID(*i)
+	}
+	return ruuo
+}
+
 // SetUserID sets the "user_id" field.
 func (ruuo *RoleUserUpdateOne) SetUserID(i int) *RoleUserUpdateOne {
 	ruuo.mutation.SetUserID(i)
+	return ruuo
+}
+
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (ruuo *RoleUserUpdateOne) SetNillableUserID(i *int) *RoleUserUpdateOne {
+	if i != nil {
+		ruuo.SetUserID(*i)
+	}
 	return ruuo
 }
 

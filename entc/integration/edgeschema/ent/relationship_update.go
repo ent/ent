@@ -60,9 +60,25 @@ func (ru *RelationshipUpdate) SetUserID(i int) *RelationshipUpdate {
 	return ru
 }
 
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (ru *RelationshipUpdate) SetNillableUserID(i *int) *RelationshipUpdate {
+	if i != nil {
+		ru.SetUserID(*i)
+	}
+	return ru
+}
+
 // SetRelativeID sets the "relative_id" field.
 func (ru *RelationshipUpdate) SetRelativeID(i int) *RelationshipUpdate {
 	ru.mutation.SetRelativeID(i)
+	return ru
+}
+
+// SetNillableRelativeID sets the "relative_id" field if the given value is not nil.
+func (ru *RelationshipUpdate) SetNillableRelativeID(i *int) *RelationshipUpdate {
+	if i != nil {
+		ru.SetRelativeID(*i)
+	}
 	return ru
 }
 
@@ -314,9 +330,25 @@ func (ruo *RelationshipUpdateOne) SetUserID(i int) *RelationshipUpdateOne {
 	return ruo
 }
 
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (ruo *RelationshipUpdateOne) SetNillableUserID(i *int) *RelationshipUpdateOne {
+	if i != nil {
+		ruo.SetUserID(*i)
+	}
+	return ruo
+}
+
 // SetRelativeID sets the "relative_id" field.
 func (ruo *RelationshipUpdateOne) SetRelativeID(i int) *RelationshipUpdateOne {
 	ruo.mutation.SetRelativeID(i)
+	return ruo
+}
+
+// SetNillableRelativeID sets the "relative_id" field if the given value is not nil.
+func (ruo *RelationshipUpdateOne) SetNillableRelativeID(i *int) *RelationshipUpdateOne {
+	if i != nil {
+		ruo.SetRelativeID(*i)
+	}
 	return ruo
 }
 

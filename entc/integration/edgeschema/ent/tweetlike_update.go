@@ -54,9 +54,25 @@ func (tlu *TweetLikeUpdate) SetUserID(i int) *TweetLikeUpdate {
 	return tlu
 }
 
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (tlu *TweetLikeUpdate) SetNillableUserID(i *int) *TweetLikeUpdate {
+	if i != nil {
+		tlu.SetUserID(*i)
+	}
+	return tlu
+}
+
 // SetTweetID sets the "tweet_id" field.
 func (tlu *TweetLikeUpdate) SetTweetID(i int) *TweetLikeUpdate {
 	tlu.mutation.SetTweetID(i)
+	return tlu
+}
+
+// SetNillableTweetID sets the "tweet_id" field if the given value is not nil.
+func (tlu *TweetLikeUpdate) SetNillableTweetID(i *int) *TweetLikeUpdate {
+	if i != nil {
+		tlu.SetTweetID(*i)
+	}
 	return tlu
 }
 
@@ -238,9 +254,25 @@ func (tluo *TweetLikeUpdateOne) SetUserID(i int) *TweetLikeUpdateOne {
 	return tluo
 }
 
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (tluo *TweetLikeUpdateOne) SetNillableUserID(i *int) *TweetLikeUpdateOne {
+	if i != nil {
+		tluo.SetUserID(*i)
+	}
+	return tluo
+}
+
 // SetTweetID sets the "tweet_id" field.
 func (tluo *TweetLikeUpdateOne) SetTweetID(i int) *TweetLikeUpdateOne {
 	tluo.mutation.SetTweetID(i)
+	return tluo
+}
+
+// SetNillableTweetID sets the "tweet_id" field if the given value is not nil.
+func (tluo *TweetLikeUpdateOne) SetNillableTweetID(i *int) *TweetLikeUpdateOne {
+	if i != nil {
+		tluo.SetTweetID(*i)
+	}
 	return tluo
 }
 

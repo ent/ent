@@ -55,6 +55,14 @@ func (gu *GroupUpdate) SetExpire(t time.Time) *GroupUpdate {
 	return gu
 }
 
+// SetNillableExpire sets the "expire" field if the given value is not nil.
+func (gu *GroupUpdate) SetNillableExpire(t *time.Time) *GroupUpdate {
+	if t != nil {
+		gu.SetExpire(*t)
+	}
+	return gu
+}
+
 // SetType sets the "type" field.
 func (gu *GroupUpdate) SetType(s string) *GroupUpdate {
 	gu.mutation.SetType(s)
@@ -105,6 +113,14 @@ func (gu *GroupUpdate) ClearMaxUsers() *GroupUpdate {
 // SetName sets the "name" field.
 func (gu *GroupUpdate) SetName(s string) *GroupUpdate {
 	gu.mutation.SetName(s)
+	return gu
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (gu *GroupUpdate) SetNillableName(s *string) *GroupUpdate {
+	if s != nil {
+		gu.SetName(*s)
+	}
 	return gu
 }
 
@@ -427,6 +443,14 @@ func (guo *GroupUpdateOne) SetExpire(t time.Time) *GroupUpdateOne {
 	return guo
 }
 
+// SetNillableExpire sets the "expire" field if the given value is not nil.
+func (guo *GroupUpdateOne) SetNillableExpire(t *time.Time) *GroupUpdateOne {
+	if t != nil {
+		guo.SetExpire(*t)
+	}
+	return guo
+}
+
 // SetType sets the "type" field.
 func (guo *GroupUpdateOne) SetType(s string) *GroupUpdateOne {
 	guo.mutation.SetType(s)
@@ -477,6 +501,14 @@ func (guo *GroupUpdateOne) ClearMaxUsers() *GroupUpdateOne {
 // SetName sets the "name" field.
 func (guo *GroupUpdateOne) SetName(s string) *GroupUpdateOne {
 	guo.mutation.SetName(s)
+	return guo
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (guo *GroupUpdateOne) SetNillableName(s *string) *GroupUpdateOne {
+	if s != nil {
+		guo.SetName(*s)
+	}
 	return guo
 }
 

@@ -39,6 +39,14 @@ func (ftu *FileTypeUpdate) SetName(s string) *FileTypeUpdate {
 	return ftu
 }
 
+// SetNillableName sets the "name" field if the given value is not nil.
+func (ftu *FileTypeUpdate) SetNillableName(s *string) *FileTypeUpdate {
+	if s != nil {
+		ftu.SetName(*s)
+	}
+	return ftu
+}
+
 // SetType sets the "type" field.
 func (ftu *FileTypeUpdate) SetType(f filetype.Type) *FileTypeUpdate {
 	ftu.mutation.SetType(f)
@@ -232,6 +240,14 @@ type FileTypeUpdateOne struct {
 // SetName sets the "name" field.
 func (ftuo *FileTypeUpdateOne) SetName(s string) *FileTypeUpdateOne {
 	ftuo.mutation.SetName(s)
+	return ftuo
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (ftuo *FileTypeUpdateOne) SetNillableName(s *string) *FileTypeUpdateOne {
+	if s != nil {
+		ftuo.SetName(*s)
+	}
 	return ftuo
 }
 

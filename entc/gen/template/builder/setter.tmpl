@@ -11,8 +11,10 @@ in the LICENSE file in the root directory of this source tree.
 {{ $receiver := $.Scope.Receiver }}
 {{ $fields := $.Fields }}
 {{ $updater := false }}
+{{ $creator := true }}
 {{- if or (hasSuffix $builder "Update") (hasSuffix $builder "UpdateOne") }}
 	{{ $updater = true }}
+	{{ $creator = false }}
 	{{ $fields = $.MutableFields }}
 {{- else if $.HasCompositeID }}
 {{- else if $.ID.UserDefined }}
@@ -33,8 +35,11 @@ in the LICENSE file in the root directory of this source tree.
 	}
 
 	{{/* Avoid generating nillable setters for nillable types. */}}
-	{{ if and (not $f.Type.Nillable) (or $f.Optional $f.Default) (not (and $updater $f.UpdateDefault)) }}
-		{{ $nillableFunc := print "SetNillable" $f.StructField }}
+	{{ $nillableC := and $creator (or $f.Optional $f.Default) }}
+	{{ $nillableU := and $updater (not $f.UpdateDefault) }}
+	{{ $nillableFunc := print "SetNillable" $f.StructField }}
+	{{ $skipNillable := false }}{{ range $fields }}{{ if and (ne .Name $f.Name) (eq .MutationSet $nillableFunc) }}{{ $skipNillable = true }}{{ break }}{{ end }}{{ end }}
+	{{ if and (not $f.Type.Nillable) (not $skipNillable) (or $nillableC $nillableU) }}
 		// {{ $nillableFunc }} sets the "{{ $f.Name }}" field if the given value is not nil.
 		func ({{ $receiver }} *{{ $builder }}) {{ $nillableFunc }}({{ $p }} *{{ $f.Type }}) *{{ $builder }} {
 			if {{ $p }} != nil {

@@ -38,6 +38,14 @@ func (gu *GroupUpdate) SetMaxUsers(i int) *GroupUpdate {
 	return gu
 }
 
+// SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
+func (gu *GroupUpdate) SetNillableMaxUsers(i *int) *GroupUpdate {
+	if i != nil {
+		gu.SetMaxUsers(*i)
+	}
+	return gu
+}
+
 // AddMaxUsers adds i to the "max_users" field.
 func (gu *GroupUpdate) AddMaxUsers(i int) *GroupUpdate {
 	gu.mutation.AddMaxUsers(i)
@@ -115,6 +123,14 @@ type GroupUpdateOne struct {
 func (guo *GroupUpdateOne) SetMaxUsers(i int) *GroupUpdateOne {
 	guo.mutation.ResetMaxUsers()
 	guo.mutation.SetMaxUsers(i)
+	return guo
+}
+
+// SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
+func (guo *GroupUpdateOne) SetNillableMaxUsers(i *int) *GroupUpdateOne {
+	if i != nil {
+		guo.SetMaxUsers(*i)
+	}
 	return guo
 }
 

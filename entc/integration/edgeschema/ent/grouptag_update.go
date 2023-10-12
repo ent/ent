@@ -39,9 +39,25 @@ func (gtu *GroupTagUpdate) SetTagID(i int) *GroupTagUpdate {
 	return gtu
 }
 
+// SetNillableTagID sets the "tag_id" field if the given value is not nil.
+func (gtu *GroupTagUpdate) SetNillableTagID(i *int) *GroupTagUpdate {
+	if i != nil {
+		gtu.SetTagID(*i)
+	}
+	return gtu
+}
+
 // SetGroupID sets the "group_id" field.
 func (gtu *GroupTagUpdate) SetGroupID(i int) *GroupTagUpdate {
 	gtu.mutation.SetGroupID(i)
+	return gtu
+}
+
+// SetNillableGroupID sets the "group_id" field if the given value is not nil.
+func (gtu *GroupTagUpdate) SetNillableGroupID(i *int) *GroupTagUpdate {
+	if i != nil {
+		gtu.SetGroupID(*i)
+	}
 	return gtu
 }
 
@@ -206,9 +222,25 @@ func (gtuo *GroupTagUpdateOne) SetTagID(i int) *GroupTagUpdateOne {
 	return gtuo
 }
 
+// SetNillableTagID sets the "tag_id" field if the given value is not nil.
+func (gtuo *GroupTagUpdateOne) SetNillableTagID(i *int) *GroupTagUpdateOne {
+	if i != nil {
+		gtuo.SetTagID(*i)
+	}
+	return gtuo
+}
+
 // SetGroupID sets the "group_id" field.
 func (gtuo *GroupTagUpdateOne) SetGroupID(i int) *GroupTagUpdateOne {
 	gtuo.mutation.SetGroupID(i)
+	return gtuo
+}
+
+// SetNillableGroupID sets the "group_id" field if the given value is not nil.
+func (gtuo *GroupTagUpdateOne) SetNillableGroupID(i *int) *GroupTagUpdateOne {
+	if i != nil {
+		gtuo.SetGroupID(*i)
+	}
 	return gtuo
 }
 

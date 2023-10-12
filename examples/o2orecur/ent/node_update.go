@@ -38,6 +38,14 @@ func (nu *NodeUpdate) SetValue(i int) *NodeUpdate {
 	return nu
 }
 
+// SetNillableValue sets the "value" field if the given value is not nil.
+func (nu *NodeUpdate) SetNillableValue(i *int) *NodeUpdate {
+	if i != nil {
+		nu.SetValue(*i)
+	}
+	return nu
+}
+
 // AddValue adds i to the "value" field.
 func (nu *NodeUpdate) AddValue(i int) *NodeUpdate {
 	nu.mutation.AddValue(i)
@@ -229,6 +237,14 @@ type NodeUpdateOne struct {
 func (nuo *NodeUpdateOne) SetValue(i int) *NodeUpdateOne {
 	nuo.mutation.ResetValue()
 	nuo.mutation.SetValue(i)
+	return nuo
+}
+
+// SetNillableValue sets the "value" field if the given value is not nil.
+func (nuo *NodeUpdateOne) SetNillableValue(i *int) *NodeUpdateOne {
+	if i != nil {
+		nuo.SetValue(*i)
+	}
 	return nuo
 }
 

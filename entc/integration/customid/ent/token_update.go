@@ -39,6 +39,14 @@ func (tu *TokenUpdate) SetBody(s string) *TokenUpdate {
 	return tu
 }
 
+// SetNillableBody sets the "body" field if the given value is not nil.
+func (tu *TokenUpdate) SetNillableBody(s *string) *TokenUpdate {
+	if s != nil {
+		tu.SetBody(*s)
+	}
+	return tu
+}
+
 // SetAccountID sets the "account" edge to the Account entity by ID.
 func (tu *TokenUpdate) SetAccountID(id sid.ID) *TokenUpdate {
 	tu.mutation.SetAccountID(id)
@@ -168,6 +176,14 @@ type TokenUpdateOne struct {
 // SetBody sets the "body" field.
 func (tuo *TokenUpdateOne) SetBody(s string) *TokenUpdateOne {
 	tuo.mutation.SetBody(s)
+	return tuo
+}
+
+// SetNillableBody sets the "body" field if the given value is not nil.
+func (tuo *TokenUpdateOne) SetNillableBody(s *string) *TokenUpdateOne {
+	if s != nil {
+		tuo.SetBody(*s)
+	}
 	return tuo
 }
 

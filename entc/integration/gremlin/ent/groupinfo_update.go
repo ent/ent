@@ -39,6 +39,14 @@ func (giu *GroupInfoUpdate) SetDesc(s string) *GroupInfoUpdate {
 	return giu
 }
 
+// SetNillableDesc sets the "desc" field if the given value is not nil.
+func (giu *GroupInfoUpdate) SetNillableDesc(s *string) *GroupInfoUpdate {
+	if s != nil {
+		giu.SetDesc(*s)
+	}
+	return giu
+}
+
 // SetMaxUsers sets the "max_users" field.
 func (giu *GroupInfoUpdate) SetMaxUsers(i int) *GroupInfoUpdate {
 	giu.mutation.ResetMaxUsers()
@@ -203,6 +211,14 @@ type GroupInfoUpdateOne struct {
 // SetDesc sets the "desc" field.
 func (giuo *GroupInfoUpdateOne) SetDesc(s string) *GroupInfoUpdateOne {
 	giuo.mutation.SetDesc(s)
+	return giuo
+}
+
+// SetNillableDesc sets the "desc" field if the given value is not nil.
+func (giuo *GroupInfoUpdateOne) SetNillableDesc(s *string) *GroupInfoUpdateOne {
+	if s != nil {
+		giuo.SetDesc(*s)
+	}
 	return giuo
 }
 

@@ -37,6 +37,14 @@ func (cu *CardUpdate) SetNumber(s string) *CardUpdate {
 	return cu
 }
 
+// SetNillableNumber sets the "number" field if the given value is not nil.
+func (cu *CardUpdate) SetNillableNumber(s *string) *CardUpdate {
+	if s != nil {
+		cu.SetNumber(*s)
+	}
+	return cu
+}
+
 // Mutation returns the CardMutation object of the builder.
 func (cu *CardUpdate) Mutation() *CardMutation {
 	return cu.mutation
@@ -104,6 +112,14 @@ type CardUpdateOne struct {
 // SetNumber sets the "number" field.
 func (cuo *CardUpdateOne) SetNumber(s string) *CardUpdateOne {
 	cuo.mutation.SetNumber(s)
+	return cuo
+}
+
+// SetNillableNumber sets the "number" field if the given value is not nil.
+func (cuo *CardUpdateOne) SetNillableNumber(s *string) *CardUpdateOne {
+	if s != nil {
+		cuo.SetNumber(*s)
+	}
 	return cuo
 }
 

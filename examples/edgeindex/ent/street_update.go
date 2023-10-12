@@ -38,6 +38,14 @@ func (su *StreetUpdate) SetName(s string) *StreetUpdate {
 	return su
 }
 
+// SetNillableName sets the "name" field if the given value is not nil.
+func (su *StreetUpdate) SetNillableName(s *string) *StreetUpdate {
+	if s != nil {
+		su.SetName(*s)
+	}
+	return su
+}
+
 // SetCityID sets the "city" edge to the City entity by ID.
 func (su *StreetUpdate) SetCityID(id int) *StreetUpdate {
 	su.mutation.SetCityID(id)
@@ -159,6 +167,14 @@ type StreetUpdateOne struct {
 // SetName sets the "name" field.
 func (suo *StreetUpdateOne) SetName(s string) *StreetUpdateOne {
 	suo.mutation.SetName(s)
+	return suo
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (suo *StreetUpdateOne) SetNillableName(s *string) *StreetUpdateOne {
+	if s != nil {
+		suo.SetName(*s)
+	}
 	return suo
 }
 
