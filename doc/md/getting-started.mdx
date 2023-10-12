@@ -26,7 +26,10 @@ and maintain applications with large data-models and sticks with the following p
 If your project directory is outside [GOPATH](https://github.com/golang/go/wiki/GOPATH) or you are not familiar with
 GOPATH, setup a [Go module](https://github.com/golang/go/wiki/Modules#quick-start) project as follows:
 
+
 ```console
+mkdir entdemo
+cd entdemo
 go mod init entdemo
 ```
 
@@ -217,6 +220,11 @@ func main() {
 
 </TabItem>
 </Tabs>
+
+Run the schema migration
+```console
+go run start.go
+```
 
 After running schema migration, we're ready to create our user. For the sake of this example, let's name this function
 _CreateUser_:
