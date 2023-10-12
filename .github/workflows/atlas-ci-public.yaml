@@ -50,7 +50,7 @@ jobs:
       - uses: actions/checkout@v3.0.1
         with:
           fetch-depth: 0 # Mandatory unless "latest" is set below.
-      - uses: ariga/atlas-action@v0
+      - uses: ariga/atlas-action@v1
         with:
           dir: 'examples/migration/ent/migrate/migrations'
           dev-url: mysql://root:pass@localhost:3306/dev
