@@ -867,7 +867,9 @@ div[class^='announcementBar_'] {
           var(--site-announcement-bar-stripe-color2) 10px,
           var(--site-announcement-bar-stripe-color2) 40px
   );
-  font-weight: bold;
+  font-weight: 700;
+  height: 34px;
+  font-size: 19px;
 }
 
 .code-block-error-message {
