@@ -2,7 +2,7 @@
 
 [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/entgo_io.svg?style=social&label=Follow%20%40entgo_io)](https://twitter.com/entgo_io)
 
-[English](README.md) | [中文](README_zh.md) | [日本語](README_jp.md)
+[English](README.md) | [中文](README_zh.md) | [日本語](README_jp.md) | [한국어](README_kr.md)
 
 <img width="50%"
 align="right"
