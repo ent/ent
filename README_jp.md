@@ -1,4 +1,4 @@
-## ent - Goのエンティティーフレームワーク
+# ent - Goのエンティティーフレームワーク
 
 [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/entgo_io.svg?style=social&label=Follow%20%40entgo_io)](https://twitter.com/entgo_io)
 
@@ -18,18 +18,21 @@ src="https://s3.eu-central-1.amazonaws.com/entgo.io/assets/gopher_graph.png"/>
 - **拡張性** - Goテンプレートを使用して簡単に拡張、カスタマイズできます。
 
 ## クイックインストール
+
 ```console
 go install entgo.io/ent/cmd/ent@latest
 ```
 
-[Go modules]を使ったインストールについては、[entgo.ioのWebサイト](https://entgo.io/ja/docs/code-gen/#entc-%E3%81%A8-ent-%E3%81%AE%E3%83%90%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%B3%E3%82%92%E4%B8%80%E8%87%B4%E3%81%95%E3%81%9B%E3%82%8B)をご覧ください。
+[Go modules]を使ったインストールについては、[entgo.ioのWebサイト](https://entgo.io/ja/docs/code-gen/#entc-%E3%81%A8-ent-%E3%81%AE%E3%83%90%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%B3%E3%82%92%E4%B8%80%E8%87%B4%E3%81%95%E3%81%9B%E3%82%8B) [entgo install]をご覧ください。
 
 ## ドキュメントとサポート
-entを開発・使用するためのドキュメントは、こちら: https://entgo.io
+
+entを開発・使用するためのドキュメントは、こちら: [https://entgo.io](https://entgo.io)。
 
 議論やサポートについては、[Issueを開く](https://github.com/ent/ent/issues/new/choose)か、gophers Slackの[チャンネル](https://gophers.slack.com/archives/C01FMSQDT53)に参加してください。
 
 ## entコミュニティへの参加
+
 `ent`の構築は、コミュニティ全体の協力なしには実現できませんでした。 私たちは、この`ent`の貢献者をリストアップした[contributorsページ](doc/md/contributors.md)を管理しています。
 
 `ent`に貢献するときは、まず[CONTRIBUTING](CONTRIBUTING.md)を参照してください。
@@ -37,18 +40,17 @@ entを開発・使用するためのドキュメントは、こちら: https://e
 
 最新情報については、Twitter(<https://twitter.com/entgo_io>)をフォローしてください。
 
-
-
 ## プロジェクトについて
+
 `ent`プロジェクトは、私たちが社内で使用しているエンティティフレームワークであるEntからインスピレーションを得ています。
 entは、[Facebook Connectivity][fbc]チームの[a8m](https://github.com/a8m)と[alexsn](https://github.com/alexsn)が開発・保守しています。
 本番環境では複数のチームやプロジェクトで使用されており、v1リリースまでのロードマップは[こちら](https://github.com/ent/ent/issues/46)に記載されています。
 このプロジェクトの動機については[こちら](https://entgo.io/blog/2019/10/03/introducing-ent)をご覧ください。
 
 ## ライセンス
+
 entは、[LICENSEファイル](LICENSE)にもある通り、Apache 2.0でライセンスされています。
 
-
-[entgo instal]: https://entgo.io/docs/code-gen/#version-compatibility-between-entc-and-ent
+[entgo install]: https://entgo.io/docs/code-gen/#version-compatibility-between-entc-and-ent
 [Go modules]: https://github.com/golang/go/wiki/Modules#quick-start
 [fbc]: https://connectivity.fb.com
