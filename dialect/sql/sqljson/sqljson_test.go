@@ -296,6 +296,14 @@ func TestWritePath(t *testing.T) {
 			input: sql.Dialect(dialect.Postgres).
 				Select("*").
 				From(sql.Table("users")).
+				Where(sqljson.StringContainsFold("a", "substr", sqljson.Path("b", "c", "[1]", "d"))),
+			wantQuery: `SELECT * FROM "users" WHERE "a"->'b'->'c'->1->>'d' ILIKE $1`,
+			wantArgs:  []any{"%substr%"},
+		},
+		{
+			input: sql.Dialect(dialect.Postgres).
+				Select("*").
+				From(sql.Table("users")).
 				Where(
 					sql.And(
 						sqljson.StringContains("a", "c", sqljson.Path("a")),
@@ -303,6 +311,19 @@ func TestWritePath(t *testing.T) {
 					),
 				),
 			wantQuery: `SELECT * FROM "users" WHERE "a"->>'a' LIKE $1 AND "b"->>'b' LIKE $2`,
+			wantArgs:  []any{"%c%", "%d%"},
+		},
+		{
+			input: sql.Dialect(dialect.Postgres).
+				Select("*").
+				From(sql.Table("users")).
+				Where(
+					sql.And(
+						sqljson.StringContainsFold("a", "c", sqljson.Path("a")),
+						sqljson.StringContainsFold("b", "d", sqljson.Path("b")),
+					),
+				),
+			wantQuery: `SELECT * FROM "users" WHERE "a"->>'a' ILIKE $1 AND "b"->>'b' ILIKE $2`,
 			wantArgs:  []any{"%c%", "%d%"},
 		},
 		{
@@ -317,6 +338,14 @@ func TestWritePath(t *testing.T) {
 			input: sql.Dialect(dialect.MySQL).
 				Select("*").
 				From(sql.Table("users")).
+				Where(sqljson.StringContainsFold("a", "substr", sqljson.Path("b", "c", "[1]", "d"))),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, '$.b.c[1].d')) COLLATE utf8mb4_general_ci LIKE ?",
+			wantArgs:  []any{"%substr%"},
+		},
+		{
+			input: sql.Dialect(dialect.MySQL).
+				Select("*").
+				From(sql.Table("users")).
 				Where(
 					sql.And(
 						sqljson.StringContains("a", "c", sqljson.Path("a")),
@@ -324,6 +353,19 @@ func TestWritePath(t *testing.T) {
 					),
 				),
 			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, '$.a')) LIKE ? AND JSON_UNQUOTE(JSON_EXTRACT(`b`, '$.b')) LIKE ?",
+			wantArgs:  []any{"%c%", "%d%"},
+		},
+		{
+			input: sql.Dialect(dialect.MySQL).
+				Select("*").
+				From(sql.Table("users")).
+				Where(
+					sql.And(
+						sqljson.StringContainsFold("a", "c", sqljson.Path("a")),
+						sqljson.StringContainsFold("b", "d", sqljson.Path("b")),
+					),
+				),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, '$.a')) COLLATE utf8mb4_general_ci LIKE ? AND JSON_UNQUOTE(JSON_EXTRACT(`b`, '$.b')) COLLATE utf8mb4_general_ci LIKE ?",
 			wantArgs:  []any{"%c%", "%d%"},
 		},
 		{
