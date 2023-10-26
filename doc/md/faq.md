@@ -44,8 +44,11 @@ use the following template:
 
     func ({{ $receiver }} *{{ $builder }}) Set{{ $n.Name }}(input *{{ $n.Name }}) *{{ $builder }} {
         {{- range $f := $n.Fields }}
-            {{- $setter := print "Set" $f.StructField }}
-            {{ $receiver }}.{{ $setter }}(input.{{ $f.StructField }})
+            {{- if $f.Nillable }}
+                {{ $receiver }}.{{ print "SetNillable" $f.StructField }}(input.{{ $f.StructField }})
+            {{- else }}
+                {{ $receiver }}.{{ print "Set" $f.StructField }}(input.{{ $f.StructField }})
+            {{- end }}
         {{- end }}
         return {{ $receiver }}
     }
