@@ -51,6 +51,14 @@ var (
 		Description: "NamedEdges provides an API for eager-loading edges with dynamic names",
 	}
 
+	// FeatureJsonTags provides a feature-flag for JSON tags in generated field and edge structs.
+	FeatureJsonTags = Feature{
+		Name:        "jsontags",
+		Stage:       Experimental,
+		Default:     false,
+		Description: "JsonTags provides a feature-flag for JSON tags in generated field and edge structs",
+	}
+
 	// FeatureSnapshot stores a snapshot of ent/schema and auto-solve merge-conflict (issue #852).
 	FeatureSnapshot = Feature{
 		Name:        "schema/snapshot",
@@ -132,6 +140,7 @@ var (
 		FeatureIntercept,
 		FeatureEntQL,
 		FeatureNamedEdges,
+		FeatureJsonTags,
 		FeatureSnapshot,
 		FeatureSchemaConfig,
 		FeatureLock,
