@@ -35,8 +35,7 @@ For discussion and support, [open an issue](https://github.com/ent/ent/issues/ne
 
 ## Join the ent Community
 
-Building `ent` would not have been possible without the collective work of our entire community. We maintain a [contributors page](doc/md/contributors.md).
-which lists the contributors to this `ent`.
+Building `ent` would not have been possible without the collective work of our entire community. We maintain a [contributors page](doc/md/contributors.md). Which lists the contributors to this `ent`.
 
 In order to contribute to `ent`, see the [CONTRIBUTING](CONTRIBUTING.md) file for how to go get started.
 If your company or your product is using `ent`, please let us know by adding yourself to the [ent users page](https://github.com/ent/ent/wiki/ent-users).
