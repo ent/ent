@@ -356,7 +356,7 @@ func keys(v reflect.Value) ([]string, error) {
 
 // primitives returns all primitives types.
 func primitives() []string {
-	return []string{field.TypeString.String(), field.TypeInt.String(), field.TypeFloat64.String(), field.TypeBool.String()}
+	return []string{field.TypeString.String(), field.TypeInt.String(), field.TypeInt64.String(), field.TypeFloat64.String(), field.TypeBool.String()}
 }
 
 // join is a wrapper around strings.Join to provide consistent output.
