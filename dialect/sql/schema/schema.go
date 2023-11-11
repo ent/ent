@@ -54,6 +54,12 @@ func (t *Table) SetComment(c string) *Table {
 	return t
 }
 
+// SetSchema sets the table schema.
+func (t *Table) SetSchema(s string) *Table {
+	t.Schema = s
+	return t
+}
+
 // AddPrimary adds a new primary key to the table.
 func (t *Table) AddPrimary(c *Column) *Table {
 	c.Key = PrimaryKey

@@ -192,3 +192,29 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 	{{- end }}
 	step.Edge.Schema = schemaConfig.{{ $schema }}
 {{- end -}}
+
+{{- define "config/init/fields/multischema" }}
+	{{- if $.FeatureEnabled "sql/multischema" }}
+		cfg.schemaConfig = DefaultSchemaConfig
+	{{- end }}
+{{- end }}
+
+{{- define "dialect/sql/config/options/multischema" }}
+	{{- if $.FeatureEnabled "sql/multischema" }}
+		{{- $all := $.TableSchemas }}
+		var (
+			// DefaultSchemaConfig represents the default schema names for all tables as defined in ent/schema.
+			DefaultSchemaConfig = SchemaConfig {
+				{{- range $n := $.Nodes }}
+					{{ $n.Name }}: tableSchemas[{{ indexOf $all $n.TableSchema }}],
+					{{- range $e := $n.Edges }}
+			    		{{- if and $e.M2M (not $e.Inverse) (not $e.Through) }}
+				    		{{ $n.Name }}{{ $e.StructField }}: tableSchemas[{{ indexOf $all $e.TableSchema }}],
+			    		{{- end }}
+					{{- end }}
+				{{- end }}
+			}
+			tableSchemas = [...]string{ {{- range $i, $s := $all }}{{ if $i }},{{ end }}"{{ $s }}"{{ end }} }
+		)
+	{{- end }}
+{{- end }}
