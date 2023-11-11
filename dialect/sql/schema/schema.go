@@ -30,6 +30,7 @@ const (
 // Table schema definition for SQL dialects.
 type Table struct {
 	Name        string
+	Schema      string
 	Columns     []*Column
 	columns     map[string]*Column
 	Indexes     []*Index
