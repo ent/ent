@@ -44,6 +44,11 @@ func (User) Fields() []ent.Field {
 }
 ```
 
+## Custom Table Schema
+
+Using the [Atlas](https://atlasgo.io) migration engine, an Ent schema can be defined and managed across multiple
+database schemas. Check out the [multi-schema doc](multischema-migrations) for more information.
+
 ## Foreign Keys Configuration
 
 Ent allows to customize the foreign key creation and provide a [referential action](https://dev.mysql.com/doc/refman/8.0/en/create-table-foreign-keys.html#foreign-key-referential-actions)
