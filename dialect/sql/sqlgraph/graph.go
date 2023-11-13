@@ -1944,19 +1944,6 @@ func (c *batchCreator) insertLastIDs(ctx context.Context, tx dialect.ExecQuerier
 					return err
 				}
 			}
-			/*
-				if node.ID.Type.Numeric() {
-					// Normalize the type to int64 to make it looks
-					// like LastInsertId.
-					var id int64
-					if err := rows.Scan(&id); err != nil {
-						return err
-					}
-					node.ID.Value = id
-				} else if err := rows.Scan(&node.ID.Value); err != nil {
-					return err
-				}
-			*/
 		}
 		return rows.Err()
 	}
