@@ -43,8 +43,9 @@ module.exports = {
       type: 'category',
       label: 'Migration',
       items: [
-        'migrate',
         'versioned-migrations',
+        'multischema-migrations',
+        'migrate',
         'data-migrations',
         'dialects',
       ],
