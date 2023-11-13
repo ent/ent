@@ -1924,7 +1924,14 @@ func (c *batchCreator) insertLastIDs(ctx context.Context, tx dialect.ExecQuerier
 		defer rows.Close()
 		for i := 0; rows.Next(); i++ {
 			node := c.Nodes[i]
-			if node.ID.Type.Numeric() {
+			switch _, ok := node.ID.Value.(field.ValueScanner); {
+			case ok:
+				// If the ID implements the sql.Scanner
+				// interface it should be a pointer type.
+				if err := rows.Scan(node.ID.Value); err != nil {
+					return err
+				}
+			case node.ID.Type.Numeric():
 				// Normalize the type to int64 to make it looks
 				// like LastInsertId.
 				var id int64
@@ -1932,9 +1939,24 @@ func (c *batchCreator) insertLastIDs(ctx context.Context, tx dialect.ExecQuerier
 					return err
 				}
 				node.ID.Value = id
-			} else if err := rows.Scan(&node.ID.Value); err != nil {
-				return err
+			default:
+				if err := rows.Scan(&node.ID.Value); err != nil {
+					return err
+				}
 			}
+			/*
+				if node.ID.Type.Numeric() {
+					// Normalize the type to int64 to make it looks
+					// like LastInsertId.
+					var id int64
+					if err := rows.Scan(&id); err != nil {
+						return err
+					}
+					node.ID.Value = id
+				} else if err := rows.Scan(&node.ID.Value); err != nil {
+					return err
+				}
+			*/
 		}
 		return rows.Err()
 	}
