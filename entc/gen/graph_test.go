@@ -434,7 +434,18 @@ func TestGraph_Gen(t *testing.T) {
 		Storage:   drivers[0],
 		Templates: []*Template{external, skipped},
 		IDType:    &field.TypeInfo{Type: field.TypeInt},
-		Features:  AllFeatures,
+		Features: []Feature{
+			FeaturePrivacy,
+			FeatureIntercept,
+			FeatureEntQL,
+			FeatureNamedEdges,
+			FeatureSnapshot,
+			FeatureSchemaConfig,
+			FeatureLock,
+			FeatureModifier,
+			FeatureExecQuery,
+			FeatureUpsert,
+		},
 	}, schemas...)
 	require.NoError(err)
 	require.NotNil(graph)
@@ -482,7 +493,18 @@ func TestGraph_Gen(t *testing.T) {
 		Storage:   drivers[0],
 		Templates: []*Template{external, skipped},
 		IDType:    &field.TypeInfo{Type: field.TypeInt},
-		Features:  AllFeatures,
+		Features: []Feature{
+			FeaturePrivacy,
+			FeatureIntercept,
+			FeatureEntQL,
+			FeatureNamedEdges,
+			FeatureSnapshot,
+			FeatureSchemaConfig,
+			FeatureLock,
+			FeatureModifier,
+			FeatureExecQuery,
+			FeatureUpsert,
+		},
 	}, schemas...)
 	require.NoError(err)
 	require.NotNil(graph)
