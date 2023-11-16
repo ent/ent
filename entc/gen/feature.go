@@ -142,13 +142,14 @@ var (
 		FeatureNamedEdges,
 		FeatureSnapshot,
 		FeatureSchemaConfig,
-		featureMultiSchema,
 		FeatureLock,
 		FeatureModifier,
 		FeatureExecQuery,
 		FeatureUpsert,
 		FeatureVersionedMigration,
 	}
+	// allFeatures includes all public and private features.
+	allFeatures = append(AllFeatures, featureMultiSchema)
 )
 
 // FeatureStage describes the stage of the codegen feature.

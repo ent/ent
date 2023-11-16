@@ -249,7 +249,7 @@ func generate(g *Graph) error {
 		}
 		assets.add(filepath.Join(g.Config.Target, tmpl.Format), b.Bytes())
 	}
-	for _, f := range AllFeatures {
+	for _, f := range allFeatures {
 		if f.cleanup == nil || g.featureEnabled(f) {
 			continue
 		}
@@ -979,7 +979,7 @@ func (Config) ModuleInfo() (m debug.Module) {
 //		...
 //	{{ end }}
 func (c Config) FeatureEnabled(name string) (bool, error) {
-	for _, f := range AllFeatures {
+	for _, f := range allFeatures {
 		if name == f.Name {
 			return c.featureEnabled(f), nil
 		}
