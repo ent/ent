@@ -16,7 +16,7 @@ and it's being tested constantly on the following 3 versions: `10.2`, `10.3` and
 ## PostgreSQL
 
 PostgreSQL supports all the features that are mentioned in the [Migration](migrate.md) section,
-and it's being tested constantly on the following 5 versions: `10`, `11`, `12`, `13` and `14`.
+and it's being tested constantly on the following 5 versions: `11`, `12`, `13`, `14` and `15`.
 
 ## CockroachDB **(<ins>preview</ins>)**
 

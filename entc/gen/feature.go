@@ -73,7 +73,7 @@ var (
 	// multiple databases.
 	FeatureSchemaConfig = Feature{
 		Name:        "sql/schemaconfig",
-		Stage:       Experimental,
+		Stage:       Stable,
 		Default:     false,
 		Description: "Allows alternate schema names for each ent model. Useful if SQL tables are spread out against multiple databases",
 		GraphTemplates: []GraphTemplate{
@@ -85,6 +85,14 @@ var (
 		cleanup: func(c *Config) error {
 			return remove(filepath.Join(c.Target, "internal"), "schemaconfig.go")
 		},
+	}
+
+	// featureMultiSchema indicates that ent/schema is annotated with multiple schemas.
+	// This feature-flag is enabled by default by the storage driver and exists to pass
+	// this info to the templates.
+	featureMultiSchema = Feature{
+		Name:  "sql/multischema",
+		Stage: Beta,
 	}
 
 	// FeatureLock provides a feature-flag for sql locking extension.
@@ -140,6 +148,8 @@ var (
 		FeatureUpsert,
 		FeatureVersionedMigration,
 	}
+	// allFeatures includes all public and private features.
+	allFeatures = append(AllFeatures, featureMultiSchema)
 )
 
 // FeatureStage describes the stage of the codegen feature.

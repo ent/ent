@@ -175,6 +175,9 @@ func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 	check(g.edgeSchemas(), "resolving edges")
 	aliases(g)
 	g.defaults()
+	if c.Storage != nil && c.Storage.Init != nil {
+		check(c.Storage.Init(g), "storage driver init")
+	}
 	return
 }
 
@@ -246,7 +249,7 @@ func generate(g *Graph) error {
 		}
 		assets.add(filepath.Join(g.Config.Target, tmpl.Format), b.Bytes())
 	}
-	for _, f := range AllFeatures {
+	for _, f := range allFeatures {
 		if f.cleanup == nil || g.featureEnabled(f) {
 			continue
 		}
@@ -617,14 +620,24 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 		if n.HasOneFieldID() {
 			table.AddPrimary(n.ID.PK())
 		}
-		table.SetAnnotation(n.EntSQL())
+		ant := n.EntSQL()
+		if ant != nil {
+			table.SetAnnotation(ant).SetSchema(ant.Schema)
+		}
 		for _, f := range n.Fields {
 			if !f.IsEdgeField() {
 				table.AddColumn(f.Column())
 			}
 		}
-		tables[table.Name] = table
-		all = append(all, table)
+		switch {
+		case tables[table.Name] == nil:
+			tables[table.Name] = table
+			all = append(all, table)
+		case tables[table.Name].Schema != table.Schema:
+			return nil, fmt.Errorf("cannot use the same table name %q in different schemas: %q, %q", table.Name, tables[table.Name].Schema, table.Schema)
+		default:
+			return nil, fmt.Errorf("duplicate table name %q in schema %q", table.Name, table.Schema)
+		}
 	}
 	for _, n := range g.Nodes {
 		// Foreign key and its reference, or a join table.
@@ -683,9 +696,22 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 					c2.Type = ref.Type.Type
 					c2.Size = ref.size()
 				}
+				ant := e.EntSQL()
 				s1, s2 := fkSymbols(e, c1, c2)
 				all = append(all, &schema.Table{
-					Name:       e.Rel.Table,
+					Name: e.Rel.Table,
+					// Search for edge annotation, or
+					// default to edge owner annotation.
+					Schema: func() string {
+						if ant != nil && ant.Schema != "" {
+							return ant.Schema
+						}
+						if ant := n.EntSQL(); ant != nil && ant.Schema != "" {
+							return ant.Schema
+						}
+						return ""
+					}(),
+					Annotation: ant,
 					Columns:    []*schema.Column{c1, c2},
 					PrimaryKey: []*schema.Column{c1, c2},
 					ForeignKeys: []*schema.ForeignKey{
@@ -953,7 +979,7 @@ func (Config) ModuleInfo() (m debug.Module) {
 //		...
 //	{{ end }}
 func (c Config) FeatureEnabled(name string) (bool, error) {
-	for _, f := range AllFeatures {
+	for _, f := range allFeatures {
 		if name == f.Name {
 			return c.featureEnabled(f), nil
 		}

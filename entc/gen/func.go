@@ -44,6 +44,7 @@ var (
 		"quote":         quote,
 		"base":          filepath.Base,
 		"keys":          keys,
+		"indexOf":       indexOf,
 		"join":          join,
 		"joinWords":     joinWords,
 		"isNil":         isNil,
@@ -94,6 +95,16 @@ func joinWords(words []string, maxSize int) string {
 		n += len(w) + 1
 	}
 	return b.String()
+}
+
+// indexOf returns the index of the given string in the slice.
+func indexOf(s []string, v string) int {
+	for i, x := range s {
+		if x == v {
+			return i
+		}
+	}
+	return -1
 }
 
 // quote only strings.
