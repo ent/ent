@@ -159,7 +159,8 @@ func (Post) Fields() []ent.Field {
    }  
 }  
   
-// Edges of the Post.func (Post) Edges() []ent.Edge {  
+// Edges of the Post.
+func (Post) Edges() []ent.Edge {  
    return []ent.Edge{  
       edge.From("author", User.Type).  
          Unique().  
