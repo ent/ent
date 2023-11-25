@@ -177,7 +177,7 @@ pets, err := client.Pet.MapCreateBulk(names, func(c *ent.PetCreate, i int) {
 Update an entity that was returned from the database.
 
 ```go
-a8m, err = a8m.Update().	// User update builder.
+a8m, err = a8m.UpdateOne().	// User update builder.
 	RemoveGroup(g2).		// Remove a specific edge.
 	ClearCard().			// Clear a unique edge.
 	SetAge(30).				// Set a field value.
