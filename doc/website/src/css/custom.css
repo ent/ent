@@ -4,82 +4,6 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */
 
-@font-face {
-  font-family: 'Calibre Medium';
-  font-style: normal;
-  font-weight: normal;
-  src: local('Calibre Medium'), url('../font/CalibreMedium.woff') format('woff');
-}
-
-@font-face {
-  font-family: 'Calibre Light';
-  font-style: normal;
-  font-weight: normal;
-  src: local('Calibre Light'), url('../font/CalibreLight.woff') format('woff');
-}
-
-@font-face {
-  font-family: 'Calibre Regular';
-  font-style: normal;
-  font-weight: normal;
-  src: local('Calibre Regular'),
-  url('../font/CalibreRegular.woff') format('woff');
-}
-
-@font-face {
-  font-family: 'Calibre Thin';
-  font-style: normal;
-  font-weight: normal;
-  src: local('Calibre Thin'), url('../font/CalibreThin.woff') format('woff');
-}
-
-@font-face {
-  font-family: 'Calibre Thin Italic';
-  font-style: normal;
-  font-weight: normal;
-  src: local('Calibre Thin Italic'),
-  url('../font/CalibreThinItalic.woff') format('woff');
-}
-
-@font-face {
-  font-family: 'Calibre Light Italic';
-  font-style: normal;
-  font-weight: normal;
-  src: local('Calibre Light Italic'),
-  url('../font/CalibreLightItalic.woff') format('woff');
-}
-
-@font-face {
-  font-family: 'Calibre Semibold';
-  font-style: normal;
-  font-weight: normal;
-  src: local('Calibre Semibold'),
-  url('../font/CalibreSemibold.woff') format('woff');
-}
-
-@font-face {
-  font-family: 'Calibre Bold';
-  font-style: normal;
-  font-weight: normal;
-  src: local('Calibre Bold'), url('../font/CalibreBold.woff') format('woff');
-}
-
-@font-face {
-  font-family: 'Calibre Medium Italic';
-  font-style: normal;
-  font-weight: normal;
-  src: local('Calibre Medium Italic'),
-  url('../font/CalibreMediumItalic.woff') format('woff');
-}
-
-@font-face {
-  font-family: 'Calibre Regular Italic';
-  font-style: normal;
-  font-weight: normal;
-  src: local('Calibre Regular Italic'),
-  url('../font/CalibreRegularItalic.woff') format('woff');
-}
-
 @media only screen and (min-device-width: 360px) and (max-device-width: 736px) {
 }
 
@@ -167,7 +91,7 @@ body.blog {
 }
 
 .projectDesc {
-  font-family: 'Calibre Light Italic', sans-serif;
+  font-weight: 200;
   font-size: 26px;
   line-height: 34px;
   color: white;
@@ -191,6 +115,7 @@ body.blog {
 
 .block {
   width: 320px;
+  padding-right: 7px;
 }
 
 .navigationSlider .slidingNav ul li a {
@@ -198,7 +123,7 @@ body.blog {
 }
 
 .block .blockTitle {
-  font-family: 'Calibre Light Italic', sans-serif;
+  font-weight: 500;
   line-height: 26px;
   font-size: 23px;
   color: #ffe800;
@@ -207,21 +132,21 @@ body.blog {
 }
 
 .blockContent {
-  font-family: 'Calibre Thin', sans-serif;
-  font-size: 22px;
+  font-weight: 200;
+  font-size: 18px;
   line-height: 26px;
   color: white;
 }
 
 .gettingStartedButton {
   display: inline-block;
-  border-radius: 31px;
-  padding: 11px 15px 5px 22px;
+  border-radius: 40px;
+  padding: 13px 15px 13px 22px;
   background-image: linear-gradient(to right, #85c3e1, #29bbaf);
 }
 
 .gettingStartedText {
-  font-family: 'Calibre Regular', sans-serif;
+  font-weight: 400;
   letter-spacing: 0.03mm;
   font-size: 27px;
   color: white;
@@ -229,11 +154,10 @@ body.blog {
 }
 
 .gettingStartedButtonArrow {
-  font-family: 'Calibre Medium', sans-serif;
+  font-weight: 400;
   line-height: 35px;
   font-size: 35px;
   color: white;
-  margin-top: 7px;
   margin-left: 9px;
 }
 
@@ -250,7 +174,7 @@ body.blog {
 .projectTitle p {
   display: inline-block;
   color: white;
-  font-family: 'Calibre Medium', sans-serif;
+  font-weight: 500;
   font-size: 56px;
   margin-left: 15px;
   margin-bottom: 8px;
@@ -266,19 +190,18 @@ body.blog {
 
 .navigationSlider .slidingNav ul li a {
   color: white;
-  font-family: 'Calibre Thin', sans-serif;
   font-size: 22px;
   padding: 0;
 }
 
 .home-nav li a:hover {
   text-decoration: none;
-  font-family: Calibre Light,sans-serif;
+  font-weight: 200;
 }
 
 .navigationSlider .slidingNav ul li a:hover {
   background-color: transparent;
-  font-family: 'Calibre Light', sans-serif;
+  font-weight: 200;
 }
 
 .headerWrapper.wrapper {
@@ -611,18 +534,17 @@ header ul, header ol {
 
 .blog .slidingNav ul li a,
 .sideNavVisible .navigationSlider .slidingNav ul li a {
-  font-family: 'Calibre Light', sans-serif;
 }
 
 .yellowArrow {
   display: inline-block;
-  font-family: 'Calibre Light', sans-serif;
   height: 26px;
   position: relative;
   top: 4px;
   left: 5px;
   font-size: 30px;
   color: #ffe800;
+  font-weight: 200;
 
   -webkit-transition: all 0.2s ease-in-out;
   -moz-transition: all 0.2s ease-in-out;
@@ -642,11 +564,13 @@ header ul, header ol {
 .blockTitleText {
   display: inline;
   color: #ffe800;
+  font-weight: 300;
+  font-size: 20px;
+  font-style: italic;
 }
 
 .footer .sitemap {
   max-width: 1100px;
-  font-family: 'Calibre Light', sans-serif;
   font-size: 18px;
 }
 
@@ -708,7 +632,7 @@ img#tutorial-todo-create {
 
 .home-nav li a {
   color: #fff;
-  font-family: Calibre Thin,sans-serif;
+  font-weight: 200;
   font-size: 22px;
   padding: 0;
 }
