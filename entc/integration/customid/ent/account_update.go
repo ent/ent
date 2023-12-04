@@ -39,6 +39,14 @@ func (au *AccountUpdate) SetEmail(s string) *AccountUpdate {
 	return au
 }
 
+// SetNillableEmail sets the "email" field if the given value is not nil.
+func (au *AccountUpdate) SetNillableEmail(s *string) *AccountUpdate {
+	if s != nil {
+		au.SetEmail(*s)
+	}
+	return au
+}
+
 // AddTokenIDs adds the "token" edge to the Token entity by IDs.
 func (au *AccountUpdate) AddTokenIDs(ids ...sid.ID) *AccountUpdate {
 	au.mutation.AddTokenIDs(ids...)
@@ -200,6 +208,14 @@ type AccountUpdateOne struct {
 // SetEmail sets the "email" field.
 func (auo *AccountUpdateOne) SetEmail(s string) *AccountUpdateOne {
 	auo.mutation.SetEmail(s)
+	return auo
+}
+
+// SetNillableEmail sets the "email" field if the given value is not nil.
+func (auo *AccountUpdateOne) SetNillableEmail(s *string) *AccountUpdateOne {
+	if s != nil {
+		auo.SetEmail(*s)
+	}
 	return auo
 }
 

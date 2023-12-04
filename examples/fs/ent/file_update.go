@@ -37,6 +37,14 @@ func (fu *FileUpdate) SetName(s string) *FileUpdate {
 	return fu
 }
 
+// SetNillableName sets the "name" field if the given value is not nil.
+func (fu *FileUpdate) SetNillableName(s *string) *FileUpdate {
+	if s != nil {
+		fu.SetName(*s)
+	}
+	return fu
+}
+
 // SetDeleted sets the "deleted" field.
 func (fu *FileUpdate) SetDeleted(b bool) *FileUpdate {
 	fu.mutation.SetDeleted(b)
@@ -262,6 +270,14 @@ type FileUpdateOne struct {
 // SetName sets the "name" field.
 func (fuo *FileUpdateOne) SetName(s string) *FileUpdateOne {
 	fuo.mutation.SetName(s)
+	return fuo
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableName(s *string) *FileUpdateOne {
+	if s != nil {
+		fuo.SetName(*s)
+	}
 	return fuo
 }
 

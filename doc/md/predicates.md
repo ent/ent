@@ -214,9 +214,11 @@ In order to use built-in SQL functions such as `DATE()`, use one of the followin
 ```go
 users := client.User.Query().
 	Select(user.FieldID).
-	Where(sql.P(func(b *sql.Builder) {
-		b.WriteString("DATE(").Ident("last_login_at").WriteByte(')').WriteOp(OpGTE).Arg(value)
-	})).
+	Where(func(s *sql.Selector) {
+		s.Where(sql.P(func(b *sql.Builder) {
+			b.WriteString("DATE(").Ident("last_login_at").WriteByte(')').WriteOp(OpGTE).Arg(value)
+		}))
+	}).
 	AllX(ctx)
 ```
 

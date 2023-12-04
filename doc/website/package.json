@@ -1,7 +1,7 @@
 {
   "scripts": {
     "examples": "docusaurus-examples",
-    "start": "docusaurus start",
+    "start": "NODE_OPTIONS=--openssl-legacy-provider docusaurus start",
     "build": "docusaurus build",
     "publish-gh-pages": "docusaurus-publish",
     "write-translations": "docusaurus write-translations",
@@ -15,10 +15,11 @@
   },
   "dependencies": {
     "@crowdin/cli": "3",
-    "@docusaurus/core": "^2.0.1",
-    "@docusaurus/plugin-client-redirects": "^2.0.1",
-    "@docusaurus/preset-classic": "^2.0.1",
+    "@docusaurus/core": "^2.4.3",
+    "@docusaurus/plugin-client-redirects": "^2.4.3",
+    "@docusaurus/preset-classic": "^2.4.3",
     "clsx": "^1.1.1",
+    "docusaurus": "^1.14.7",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-github-btn": "^1.2.0"

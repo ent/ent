@@ -54,9 +54,25 @@ func (afu *AttachedFileUpdate) SetFID(i int) *AttachedFileUpdate {
 	return afu
 }
 
+// SetNillableFID sets the "f_id" field if the given value is not nil.
+func (afu *AttachedFileUpdate) SetNillableFID(i *int) *AttachedFileUpdate {
+	if i != nil {
+		afu.SetFID(*i)
+	}
+	return afu
+}
+
 // SetProcID sets the "proc_id" field.
 func (afu *AttachedFileUpdate) SetProcID(i int) *AttachedFileUpdate {
 	afu.mutation.SetProcID(i)
+	return afu
+}
+
+// SetNillableProcID sets the "proc_id" field if the given value is not nil.
+func (afu *AttachedFileUpdate) SetNillableProcID(i *int) *AttachedFileUpdate {
+	if i != nil {
+		afu.SetProcID(*i)
+	}
 	return afu
 }
 
@@ -244,9 +260,25 @@ func (afuo *AttachedFileUpdateOne) SetFID(i int) *AttachedFileUpdateOne {
 	return afuo
 }
 
+// SetNillableFID sets the "f_id" field if the given value is not nil.
+func (afuo *AttachedFileUpdateOne) SetNillableFID(i *int) *AttachedFileUpdateOne {
+	if i != nil {
+		afuo.SetFID(*i)
+	}
+	return afuo
+}
+
 // SetProcID sets the "proc_id" field.
 func (afuo *AttachedFileUpdateOne) SetProcID(i int) *AttachedFileUpdateOne {
 	afuo.mutation.SetProcID(i)
+	return afuo
+}
+
+// SetNillableProcID sets the "proc_id" field if the given value is not nil.
+func (afuo *AttachedFileUpdateOne) SetNillableProcID(i *int) *AttachedFileUpdateOne {
+	if i != nil {
+		afuo.SetProcID(*i)
+	}
 	return afuo
 }
 

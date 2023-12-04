@@ -54,9 +54,25 @@ func (ttu *TweetTagUpdate) SetTagID(i int) *TweetTagUpdate {
 	return ttu
 }
 
+// SetNillableTagID sets the "tag_id" field if the given value is not nil.
+func (ttu *TweetTagUpdate) SetNillableTagID(i *int) *TweetTagUpdate {
+	if i != nil {
+		ttu.SetTagID(*i)
+	}
+	return ttu
+}
+
 // SetTweetID sets the "tweet_id" field.
 func (ttu *TweetTagUpdate) SetTweetID(i int) *TweetTagUpdate {
 	ttu.mutation.SetTweetID(i)
+	return ttu
+}
+
+// SetNillableTweetID sets the "tweet_id" field if the given value is not nil.
+func (ttu *TweetTagUpdate) SetNillableTweetID(i *int) *TweetTagUpdate {
+	if i != nil {
+		ttu.SetTweetID(*i)
+	}
 	return ttu
 }
 
@@ -238,9 +254,25 @@ func (ttuo *TweetTagUpdateOne) SetTagID(i int) *TweetTagUpdateOne {
 	return ttuo
 }
 
+// SetNillableTagID sets the "tag_id" field if the given value is not nil.
+func (ttuo *TweetTagUpdateOne) SetNillableTagID(i *int) *TweetTagUpdateOne {
+	if i != nil {
+		ttuo.SetTagID(*i)
+	}
+	return ttuo
+}
+
 // SetTweetID sets the "tweet_id" field.
 func (ttuo *TweetTagUpdateOne) SetTweetID(i int) *TweetTagUpdateOne {
 	ttuo.mutation.SetTweetID(i)
+	return ttuo
+}
+
+// SetNillableTweetID sets the "tweet_id" field if the given value is not nil.
+func (ttuo *TweetTagUpdateOne) SetNillableTweetID(i *int) *TweetTagUpdateOne {
+	if i != nil {
+		ttuo.SetTweetID(*i)
+	}
 	return ttuo
 }
 

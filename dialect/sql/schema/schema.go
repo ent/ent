@@ -30,6 +30,7 @@ const (
 // Table schema definition for SQL dialects.
 type Table struct {
 	Name        string
+	Schema      string
 	Columns     []*Column
 	columns     map[string]*Column
 	Indexes     []*Index
@@ -50,6 +51,12 @@ func NewTable(name string) *Table {
 // SetComment sets the table comment.
 func (t *Table) SetComment(c string) *Table {
 	t.Comment = c
+	return t
+}
+
+// SetSchema sets the table schema.
+func (t *Table) SetSchema(s string) *Table {
+	t.Schema = s
 	return t
 }
 

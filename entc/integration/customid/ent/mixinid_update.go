@@ -37,9 +37,25 @@ func (miu *MixinIDUpdate) SetSomeField(s string) *MixinIDUpdate {
 	return miu
 }
 
+// SetNillableSomeField sets the "some_field" field if the given value is not nil.
+func (miu *MixinIDUpdate) SetNillableSomeField(s *string) *MixinIDUpdate {
+	if s != nil {
+		miu.SetSomeField(*s)
+	}
+	return miu
+}
+
 // SetMixinField sets the "mixin_field" field.
 func (miu *MixinIDUpdate) SetMixinField(s string) *MixinIDUpdate {
 	miu.mutation.SetMixinField(s)
+	return miu
+}
+
+// SetNillableMixinField sets the "mixin_field" field if the given value is not nil.
+func (miu *MixinIDUpdate) SetNillableMixinField(s *string) *MixinIDUpdate {
+	if s != nil {
+		miu.SetMixinField(*s)
+	}
 	return miu
 }
 
@@ -116,9 +132,25 @@ func (miuo *MixinIDUpdateOne) SetSomeField(s string) *MixinIDUpdateOne {
 	return miuo
 }
 
+// SetNillableSomeField sets the "some_field" field if the given value is not nil.
+func (miuo *MixinIDUpdateOne) SetNillableSomeField(s *string) *MixinIDUpdateOne {
+	if s != nil {
+		miuo.SetSomeField(*s)
+	}
+	return miuo
+}
+
 // SetMixinField sets the "mixin_field" field.
 func (miuo *MixinIDUpdateOne) SetMixinField(s string) *MixinIDUpdateOne {
 	miuo.mutation.SetMixinField(s)
+	return miuo
+}
+
+// SetNillableMixinField sets the "mixin_field" field if the given value is not nil.
+func (miuo *MixinIDUpdateOne) SetNillableMixinField(s *string) *MixinIDUpdateOne {
+	if s != nil {
+		miuo.SetMixinField(*s)
+	}
 	return miuo
 }
 

@@ -37,6 +37,14 @@ func (riu *RelationshipInfoUpdate) SetText(s string) *RelationshipInfoUpdate {
 	return riu
 }
 
+// SetNillableText sets the "text" field if the given value is not nil.
+func (riu *RelationshipInfoUpdate) SetNillableText(s *string) *RelationshipInfoUpdate {
+	if s != nil {
+		riu.SetText(*s)
+	}
+	return riu
+}
+
 // Mutation returns the RelationshipInfoMutation object of the builder.
 func (riu *RelationshipInfoUpdate) Mutation() *RelationshipInfoMutation {
 	return riu.mutation
@@ -104,6 +112,14 @@ type RelationshipInfoUpdateOne struct {
 // SetText sets the "text" field.
 func (riuo *RelationshipInfoUpdateOne) SetText(s string) *RelationshipInfoUpdateOne {
 	riuo.mutation.SetText(s)
+	return riuo
+}
+
+// SetNillableText sets the "text" field if the given value is not nil.
+func (riuo *RelationshipInfoUpdateOne) SetNillableText(s *string) *RelationshipInfoUpdateOne {
+	if s != nil {
+		riuo.SetText(*s)
+	}
 	return riuo
 }
 

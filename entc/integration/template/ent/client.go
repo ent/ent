@@ -83,6 +83,13 @@ type (
 	Option func(*config)
 )
 
+// newConfig creates a new config for the client.
+func newConfig(opts ...Option) config {
+	cfg := config{log: log.Println, hooks: &hooks{}, inters: &inters{}}
+	cfg.options(opts...)
+	return cfg
+}
+
 // options applies the options on the config object.
 func (c *config) options(opts ...Option) {
 	for _, opt := range opts {

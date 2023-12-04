@@ -253,11 +253,12 @@ const config = {
       `,
     },
     announcementBar: {
-      id: 'announcementBar-1', // Increment on change
-      content: `⭐️ If you like Ent, give it a star on <a target="_blank" rel="noopener noreferrer" href="https://github.com/ent/ent">GitHub</a> and follow us on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/entgo_io" >Twitter</a> ${TwitterSvg}`,
+      id: 'announcementBar-2', // Increment on change
+      // content: `⭐️ If you like Ent, give it a star on <a target="_blank" rel="noopener noreferrer" href="https://github.com/ent/ent">GitHub</a> and follow us on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/entgo_io" >Twitter</a> ${TwitterSvg}`,
+      content: `<a style="text-decoration: none;" target="_blank" rel="noopener noreferrer" href="https://twitter.com/Israel/status/1713931519620788538">The Ent Team Stands With Israel 🇮🇱</a>`,
       backgroundColor: '#fafbfc',
-      textColor: '#091E42',
-      isCloseable: true,
+      textColor: '#404756',
+      isCloseable: false,
     },
   }
 };

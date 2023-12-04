@@ -92,6 +92,14 @@ func (cu *CarUpdate) SetModel(s string) *CarUpdate {
 	return cu
 }
 
+// SetNillableModel sets the "model" field if the given value is not nil.
+func (cu *CarUpdate) SetNillableModel(s *string) *CarUpdate {
+	if s != nil {
+		cu.SetModel(*s)
+	}
+	return cu
+}
+
 // SetOwnerID sets the "owner" edge to the Pet entity by ID.
 func (cu *CarUpdate) SetOwnerID(id string) *CarUpdate {
 	cu.mutation.SetOwnerID(id)
@@ -303,6 +311,14 @@ func (cuo *CarUpdateOne) ClearAfterID() *CarUpdateOne {
 // SetModel sets the "model" field.
 func (cuo *CarUpdateOne) SetModel(s string) *CarUpdateOne {
 	cuo.mutation.SetModel(s)
+	return cuo
+}
+
+// SetNillableModel sets the "model" field if the given value is not nil.
+func (cuo *CarUpdateOne) SetNillableModel(s *string) *CarUpdateOne {
+	if s != nil {
+		cuo.SetModel(*s)
+	}
 	return cuo
 }
 

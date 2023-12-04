@@ -1,0 +1,159 @@
+---
+id: multischema-migrations
+title: Multiple Schema Migrations
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import InstallationInstructions from './components/_installation_instructions.mdx';
+
+Using the [Atlas](https://atlasgo.io) migration engine, an Ent schema can be defined and managed across multiple
+database schemas. This guides show how to achieve this with three simple steps:
+
+:::info ATLAS LOGIN REQUIRED
+The _multi-schema migration_ feature is implemented completely in the Atlas CLI and requires login to Atlas:
+```
+atlas login
+```
+:::
+
+## Install Atlas
+
+<InstallationInstructions />
+
+
+## Login to Atlas
+
+```shell
+$ atlas login a8m
+//highlight-next-line-info
+You are now connected to "a8m" on Atlas Cloud.
+```
+
+## Annotate your Ent schemas
+
+The `entsql` package allows annotating an Ent schema with a database schema name. For example:
+
+```go
+// Annotations of the User.
+func (User) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Schema("db3"),
+	}
+}
+```
+
+To share the same schema configuration across multiple Ent schemas, you can either use `ent.Mixin` or define and embed a _base_ schema:
+
+<Tabs>
+<TabItem value="mixin" label="Mixin schema">
+
+```go title="mixin.go"
+// Mixin holds the default configuration for most schemas in this package.
+type Mixin struct {
+	mixin.Schema
+}
+
+// Annotations of the Mixin.
+func (Mixin) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Schema("db1"),
+	}
+}
+```
+
+```go title="user.go"
+// User holds the edge schema definition of the User entity.
+type User struct {
+	ent.Schema
+}
+
+// Mixin defines the schemas that mixed into this schema.
+func (User) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+//highlight-next-line
+		Mixin{},
+	}
+}
+```
+
+</TabItem>
+<TabItem value="base" label="Base schema">
+
+```go title="base.go"
+// base holds the default configuration for most schemas in this package.
+type base struct {
+	ent.Schema
+}
+
+// Annotations of the base schema.
+func (base) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Schema("db1"),
+	}
+}
+```
+
+```go title="user.go"
+// User holds the edge schema definition of the User entity.
+type User struct {
+//highlight-next-line
+    base
+}
+```
+
+</TabItem>
+</Tabs>
+
+## Generate migrations
+
+To generate a migration, use the `atlas migrate diff` command. For example:
+
+<Tabs
+defaultValue="mysql"
+values={[
+{label: 'MySQL', value: 'mysql'},
+{label: 'MariaDB', value: 'maria'},
+{label: 'PostgreSQL', value: 'postgres'},
+]}>
+<TabItem value="mysql">
+
+```shell
+atlas migrate diff \
+  --to "ent://ent/schema" \
+  --dev-url "docker://mysql/8"
+```
+
+</TabItem>
+<TabItem value="maria">
+
+```shell
+atlas migrate diff \
+  --to "ent://ent/schema" \
+  --dev-url "docker://maria/8"
+```
+
+</TabItem>
+<TabItem value="postgres">
+
+```shell
+atlas migrate diff \
+  --to "ent://ent/schema" \
+  --dev-url "docker://postgres/15/dev"
+```
+
+</TabItem>
+</Tabs>
+
+:::note
+The `migrate` diff command generates a list of SQL statements without indentation by default. If you would like to
+generate the SQL statements with indentation, use the `--format` flag. For example:
+
+```shell
+atlas migrate diff \
+  --to "ent://ent/schema" \
+  --dev-url "docker://postgres/15/dev" \
+// highlight-next-line
+  --format "{{ sql . \"  \" }}"
+```
+:::
