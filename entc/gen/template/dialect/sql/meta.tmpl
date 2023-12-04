@@ -117,28 +117,28 @@ func ValidColumn(column string) bool {
 			// {{ $e.OrderFieldName }} orders the results by {{ $e.Name }} field.
 			func {{ $e.OrderFieldName }}(field string, opts ...sql.OrderTermOption) OrderOption {
 				return func(s *sql.Selector) {
-					sqlgraph.OrderByNeighborTerms(s, new{{ pascal $e.Name }}Step(), sql.OrderByField(field, opts...))
+					sqlgraph.OrderByNeighborTerms(s, new{{ pascal $e.Name }}Step(s), sql.OrderByField(field, opts...))
 				}
 			}
 		{{- else }}
 			// {{ $e.OrderCountName }} orders the results by {{ $e.Name }} count.
 			func {{ $e.OrderCountName }}(opts ...sql.OrderTermOption) OrderOption {
 				return func(s *sql.Selector) {
-					sqlgraph.OrderByNeighborsCount(s, new{{ pascal $e.Name }}Step(), opts...)
+					sqlgraph.OrderByNeighborsCount(s, new{{ pascal $e.Name }}Step(s), opts...)
 				}
 			}
 
 			// {{ $e.OrderTermsName }} orders the results by {{ $e.Name }} terms.
 			func {{ $e.OrderTermsName }}(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 				return func(s *sql.Selector) {
-					sqlgraph.OrderByNeighborTerms(s, new{{ pascal $e.Name }}Step(), append([]sql.OrderTerm{term}, terms...)...)
+					sqlgraph.OrderByNeighborTerms(s, new{{ pascal $e.Name }}Step(s), append([]sql.OrderTerm{term}, terms...)...)
 				}
 			}
 		{{- end }}
 	{{- end }}
 	{{- range $e := $.Edges }}
-		func new{{ pascal $e.Name }}Step() *sqlgraph.Step {
-			return sqlgraph.NewStep(
+		func new{{ pascal $e.Name }}Step(s *sql.Selector) *sqlgraph.Step {
+			step := sqlgraph.NewStep(
 				{{- if $.HasCompositeID }}
 					{{- /* Query that goes from the edge schema. */}}
 					sqlgraph.From(Table, {{ $e.ColumnConstant }}),
@@ -161,6 +161,13 @@ func ValidColumn(column string) bool {
 					{{- end -}}
 				),
 			)
+			{{- /* Allow mutating the sqlgraph.Step by ent extensions or user templates.*/}}
+			{{- with $tmpls := matchTemplate "dialect/sql/predicate/edge/*" }}
+				{{- range $tmpl := $tmpls }}
+					{{- xtemplate $tmpl $ }}
+				{{- end }}
+			{{- end }}
+			return step
 		}
 	{{- end }}
 {{ end }}
