@@ -1034,11 +1034,11 @@ func (q *query) selector(ctx context.Context) (*sql.Selector, error) {
 		selector = q.From
 	}
 	selector.Select(selector.Columns(q.Node.Columns...)...)
-	if pred := q.Predicate; pred != nil {
-		pred(selector)
-	}
 	if order := q.Order; order != nil {
 		order(selector)
+	}
+	if pred := q.Predicate; pred != nil {
+		pred(selector)
 	}
 	if q.Offset != 0 {
 		// Limit is mandatory for the offset clause. We start
