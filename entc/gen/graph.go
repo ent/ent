@@ -15,6 +15,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/debug"
+	"strconv"
 	"strings"
 	"text/template/parse"
 
@@ -885,7 +886,7 @@ func (g *Graph) SchemaSnapshot() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return string(out), nil
+	return strconv.Quote(string(out)), nil
 }
 
 func (g *Graph) typ(name string) (*Type, bool) {
