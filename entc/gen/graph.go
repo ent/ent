@@ -274,6 +274,10 @@ func generate(g *Graph) error {
 	// We can't run "imports" on files when the state is not completed.
 	// Because, "goimports" will drop undefined package. Therefore, it
 	// is suspended to the end of the writing.
+	skipFormat := g.Config.featureEnabled(FeatureSkipFormat)
+	if skipFormat {
+		return nil
+	}
 	return assets.format()
 }
 

@@ -51,6 +51,14 @@ var (
 		Description: "NamedEdges provides an API for eager-loading edges with dynamic names",
 	}
 
+	// FeatureSkipFormat provides a feature-flag for skipping the format phase of code generation.
+	FeatureSkipFormat = Feature{
+		Name:        "skipformat",
+		Stage:       Experimental,
+		Default:     false,
+		Description: "SkipFormat allows you to skip the auto-formatting stage of code generation for development iteration speed",
+	}
+
 	// FeatureSnapshot stores a snapshot of ent/schema and auto-solve merge-conflict (issue #852).
 	FeatureSnapshot = Feature{
 		Name:        "schema/snapshot",
@@ -142,6 +150,7 @@ var (
 		FeatureNamedEdges,
 		FeatureSnapshot,
 		FeatureSchemaConfig,
+		FeatureSkipFormat,
 		FeatureLock,
 		FeatureModifier,
 		FeatureExecQuery,
