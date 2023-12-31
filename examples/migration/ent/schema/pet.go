@@ -9,6 +9,7 @@ import (
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 	"github.com/google/uuid"
 )
 
@@ -22,6 +23,7 @@ func (Pet) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.Nil).
 			Default(uuid.New),
+		field.String("name"),
 		field.UUID("best_friend_id", uuid.Nil).
 			Annotations(
 				entsql.Default(uuid.Nil.String()),
@@ -42,5 +44,13 @@ func (Pet) Edges() []ent.Edge {
 			Unique().
 			Required().
 			Field("owner_id"),
+	}
+}
+
+// Indexes of the Pet.
+func (Pet) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("name", "owner_id").
+			Unique(),
 	}
 }

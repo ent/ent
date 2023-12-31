@@ -17,6 +17,8 @@ const (
 	Label = "pet"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
 	// FieldBestFriendID holds the string denoting the best_friend_id field in the database.
 	FieldBestFriendID = "best_friend_id"
 	// FieldOwnerID holds the string denoting the owner_id field in the database.
@@ -43,6 +45,7 @@ const (
 // Columns holds all SQL columns for pet fields.
 var Columns = []string{
 	FieldID,
+	FieldName,
 	FieldBestFriendID,
 	FieldOwnerID,
 }
@@ -70,6 +73,11 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByName orders the results by the name field.
+func ByName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
 // ByBestFriendID orders the results by the best_friend_id field.
