@@ -24,6 +24,12 @@ type CardCreate struct {
 	hooks    []Hook
 }
 
+// SetNumber sets the "number" field.
+func (cc *CardCreate) SetNumber(s string) *CardCreate {
+	cc.mutation.SetNumber(s)
+	return cc
+}
+
 // SetOwnerID sets the "owner_id" field.
 func (cc *CardCreate) SetOwnerID(i int) *CardCreate {
 	cc.mutation.SetOwnerID(i)
@@ -86,6 +92,9 @@ func (cc *CardCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (cc *CardCreate) check() error {
+	if _, ok := cc.mutation.Number(); !ok {
+		return &ValidationError{Name: "number", err: errors.New(`ent: missing required field "Card.number"`)}
+	}
 	if _, ok := cc.mutation.OwnerID(); !ok {
 		return &ValidationError{Name: "owner_id", err: errors.New(`ent: missing required field "Card.owner_id"`)}
 	}
@@ -118,6 +127,10 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 		_node = &Card{config: cc.config}
 		_spec = sqlgraph.NewCreateSpec(card.Table, sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt))
 	)
+	if value, ok := cc.mutation.Number(); ok {
+		_spec.SetField(card.FieldNumber, field.TypeString, value)
+		_node.Number = value
+	}
 	if nodes := cc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,

@@ -4,7 +4,7 @@ The full reference example for https://entgo.io/docs/versioned-migrations#create
 
 ### Migration directory
 
-Versioned migration files exists under `ent/migrate/migrations` and follows the `golang-migrate` format.
+Versioned migration files exists under `ent/migrate/migrations`.
 
 ### Changes to the Ent schema
 
@@ -12,18 +12,13 @@ Versioned migration files exists under `ent/migrate/migrations` and follows the 
 
 2\. Run `go generate ./ent`
 
-### Generate new versioned migration
+### Generate a new migration file
 
-1\. Create a dev-database container if there is no one.
-
-```shell
-docker run --name migration --rm -p 3306:3306 -e MYSQL_ROOT_PASSWORD=pass -e MYSQL_DATABASE=test -d mysql
-```
-
-2\. Generate a new versioned migration file:
-
-```go
-go run -mod=mod ent/migrate/main.go <name>
+```bash
+atlas migrate diff <migration_name> \
+  --dir "file://ent/migrate/migrations" \
+  --to "ent://ent/schema" \
+  --dev-url "docker://mysql/8/ent"
 ```
 
 ### Run migration linting

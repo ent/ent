@@ -32,6 +32,20 @@ func (cu *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
 	return cu
 }
 
+// SetNumber sets the "number" field.
+func (cu *CardUpdate) SetNumber(s string) *CardUpdate {
+	cu.mutation.SetNumber(s)
+	return cu
+}
+
+// SetNillableNumber sets the "number" field if the given value is not nil.
+func (cu *CardUpdate) SetNillableNumber(s *string) *CardUpdate {
+	if s != nil {
+		cu.SetNumber(*s)
+	}
+	return cu
+}
+
 // SetOwnerID sets the "owner_id" field.
 func (cu *CardUpdate) SetOwnerID(i int) *CardUpdate {
 	cu.mutation.SetOwnerID(i)
@@ -109,6 +123,9 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := cu.mutation.Number(); ok {
+		_spec.SetField(card.FieldNumber, field.TypeString, value)
+	}
 	if cu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -156,6 +173,20 @@ type CardUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *CardMutation
+}
+
+// SetNumber sets the "number" field.
+func (cuo *CardUpdateOne) SetNumber(s string) *CardUpdateOne {
+	cuo.mutation.SetNumber(s)
+	return cuo
+}
+
+// SetNillableNumber sets the "number" field if the given value is not nil.
+func (cuo *CardUpdateOne) SetNillableNumber(s *string) *CardUpdateOne {
+	if s != nil {
+		cuo.SetNumber(*s)
+	}
+	return cuo
 }
 
 // SetOwnerID sets the "owner_id" field.
@@ -264,6 +295,9 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (_node *Card, err error) 
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := cuo.mutation.Number(); ok {
+		_spec.SetField(card.FieldNumber, field.TypeString, value)
 	}
 	if cuo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -16,6 +16,8 @@ const (
 	Label = "card"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldNumber holds the string denoting the number field in the database.
+	FieldNumber = "number"
 	// FieldOwnerID holds the string denoting the owner_id field in the database.
 	FieldOwnerID = "owner_id"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
@@ -34,6 +36,7 @@ const (
 // Columns holds all SQL columns for card fields.
 var Columns = []string{
 	FieldID,
+	FieldNumber,
 	FieldOwnerID,
 }
 
@@ -58,6 +61,11 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByNumber orders the results by the number field.
+func ByNumber(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldNumber, opts...).ToFunc()
 }
 
 // ByOwnerID orders the results by the owner_id field.
