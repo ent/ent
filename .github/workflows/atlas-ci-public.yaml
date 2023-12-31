@@ -6,10 +6,10 @@ on:
     branches:
       - master
     paths:
-      - 'examples/migration/*'
+      - 'examples/migration/ent/migrate/migrations/*'
   pull_request:
     paths:
-      - 'examples/migration/*'
+      - 'examples/migration/ent/migrate/migrations/*'
 jobs:
   sync:
     permissions:

@@ -337,12 +337,12 @@ func (pq *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
 // Example:
 //
 //	var v []struct {
-//		BestFriendID uuid.UUID `json:"best_friend_id,omitempty"`
+//		Name string `json:"name,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Pet.Query().
-//		GroupBy(pet.FieldBestFriendID).
+//		GroupBy(pet.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
@@ -360,11 +360,11 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 // Example:
 //
 //	var v []struct {
-//		BestFriendID uuid.UUID `json:"best_friend_id,omitempty"`
+//		Name string `json:"name,omitempty"`
 //	}
 //
 //	client.Pet.Query().
-//		Select(pet.FieldBestFriendID).
+//		Select(pet.FieldName).
 //		Scan(ctx, &v)
 func (pq *PetQuery) Select(fields ...string) *PetSelect {
 	pq.ctx.Fields = append(pq.ctx.Fields, fields...)

@@ -22,6 +22,8 @@ type Pet struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty"`
 	// BestFriendID holds the value of the "best_friend_id" field.
 	BestFriendID uuid.UUID `json:"best_friend_id,omitempty"`
 	// OwnerID holds the value of the "owner_id" field.
@@ -76,6 +78,8 @@ func (*Pet) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case pet.FieldOwnerID:
 			values[i] = new(sql.NullInt64)
+		case pet.FieldName:
+			values[i] = new(sql.NullString)
 		case pet.FieldID, pet.FieldBestFriendID:
 			values[i] = new(uuid.UUID)
 		default:
@@ -98,6 +102,12 @@ func (pe *Pet) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				pe.ID = *value
+			}
+		case pet.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				pe.Name = value.String
 			}
 		case pet.FieldBestFriendID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
@@ -157,6 +167,9 @@ func (pe *Pet) String() string {
 	var builder strings.Builder
 	builder.WriteString("Pet(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", pe.ID))
+	builder.WriteString("name=")
+	builder.WriteString(pe.Name)
+	builder.WriteString(", ")
 	builder.WriteString("best_friend_id=")
 	builder.WriteString(fmt.Sprintf("%v", pe.BestFriendID))
 	builder.WriteString(", ")

@@ -25,6 +25,12 @@ type PetCreate struct {
 	hooks    []Hook
 }
 
+// SetName sets the "name" field.
+func (pc *PetCreate) SetName(s string) *PetCreate {
+	pc.mutation.SetName(s)
+	return pc
+}
+
 // SetBestFriendID sets the "best_friend_id" field.
 func (pc *PetCreate) SetBestFriendID(u uuid.UUID) *PetCreate {
 	pc.mutation.SetBestFriendID(u)
@@ -116,6 +122,9 @@ func (pc *PetCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (pc *PetCreate) check() error {
+	if _, ok := pc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Pet.name"`)}
+	}
 	if _, ok := pc.mutation.BestFriendID(); !ok {
 		return &ValidationError{Name: "best_friend_id", err: errors.New(`ent: missing required field "Pet.best_friend_id"`)}
 	}
@@ -162,6 +171,10 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 	if id, ok := pc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
+	}
+	if value, ok := pc.mutation.Name(); ok {
+		_spec.SetField(pet.FieldName, field.TypeString, value)
+		_node.Name = value
 	}
 	if nodes := pc.mutation.BestFriendIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

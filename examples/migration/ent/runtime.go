@@ -26,7 +26,7 @@ func init() {
 	petFields := schema.Pet{}.Fields()
 	_ = petFields
 	// petDescOwnerID is the schema descriptor for owner_id field.
-	petDescOwnerID := petFields[2].Descriptor()
+	petDescOwnerID := petFields[3].Descriptor()
 	// pet.DefaultOwnerID holds the default value on creation for the owner_id field.
 	pet.DefaultOwnerID = petDescOwnerID.Default.(int)
 	// petDescID is the schema descriptor for id field.
