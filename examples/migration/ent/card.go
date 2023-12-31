@@ -9,6 +9,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -21,8 +22,12 @@ type Card struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// Number holds the value of the "number" field.
-	Number string `json:"number,omitempty"`
+	// NumberHash holds the value of the "number_hash" field.
+	NumberHash string `json:"number_hash,omitempty"`
+	// CvvHash holds the value of the "cvv_hash" field.
+	CvvHash string `json:"cvv_hash,omitempty"`
+	// ExpiresAt holds the value of the "expires_at" field.
+	ExpiresAt time.Time `json:"expires_at,omitempty"`
 	// OwnerID holds the value of the "owner_id" field.
 	OwnerID int `json:"owner_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -71,8 +76,10 @@ func (*Card) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case card.FieldID, card.FieldOwnerID:
 			values[i] = new(sql.NullInt64)
-		case card.FieldNumber:
+		case card.FieldNumberHash, card.FieldCvvHash:
 			values[i] = new(sql.NullString)
+		case card.FieldExpiresAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -94,11 +101,23 @@ func (c *Card) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			c.ID = int(value.Int64)
-		case card.FieldNumber:
+		case card.FieldNumberHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field number", values[i])
+				return fmt.Errorf("unexpected type %T for field number_hash", values[i])
 			} else if value.Valid {
-				c.Number = value.String
+				c.NumberHash = value.String
+			}
+		case card.FieldCvvHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field cvv_hash", values[i])
+			} else if value.Valid {
+				c.CvvHash = value.String
+			}
+		case card.FieldExpiresAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field expires_at", values[i])
+			} else if value.Valid {
+				c.ExpiresAt = value.Time
 			}
 		case card.FieldOwnerID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -152,8 +171,14 @@ func (c *Card) String() string {
 	var builder strings.Builder
 	builder.WriteString("Card(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
-	builder.WriteString("number=")
-	builder.WriteString(c.Number)
+	builder.WriteString("number_hash=")
+	builder.WriteString(c.NumberHash)
+	builder.WriteString(", ")
+	builder.WriteString("cvv_hash=")
+	builder.WriteString(c.CvvHash)
+	builder.WriteString(", ")
+	builder.WriteString("expires_at=")
+	builder.WriteString(c.ExpiresAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("owner_id=")
 	builder.WriteString(fmt.Sprintf("%v", c.OwnerID))

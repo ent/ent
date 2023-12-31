@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -33,17 +34,51 @@ func (cu *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
 	return cu
 }
 
-// SetNumber sets the "number" field.
-func (cu *CardUpdate) SetNumber(s string) *CardUpdate {
-	cu.mutation.SetNumber(s)
+// SetNumberHash sets the "number_hash" field.
+func (cu *CardUpdate) SetNumberHash(s string) *CardUpdate {
+	cu.mutation.SetNumberHash(s)
 	return cu
 }
 
-// SetNillableNumber sets the "number" field if the given value is not nil.
-func (cu *CardUpdate) SetNillableNumber(s *string) *CardUpdate {
+// SetNillableNumberHash sets the "number_hash" field if the given value is not nil.
+func (cu *CardUpdate) SetNillableNumberHash(s *string) *CardUpdate {
 	if s != nil {
-		cu.SetNumber(*s)
+		cu.SetNumberHash(*s)
 	}
+	return cu
+}
+
+// SetCvvHash sets the "cvv_hash" field.
+func (cu *CardUpdate) SetCvvHash(s string) *CardUpdate {
+	cu.mutation.SetCvvHash(s)
+	return cu
+}
+
+// SetNillableCvvHash sets the "cvv_hash" field if the given value is not nil.
+func (cu *CardUpdate) SetNillableCvvHash(s *string) *CardUpdate {
+	if s != nil {
+		cu.SetCvvHash(*s)
+	}
+	return cu
+}
+
+// SetExpiresAt sets the "expires_at" field.
+func (cu *CardUpdate) SetExpiresAt(t time.Time) *CardUpdate {
+	cu.mutation.SetExpiresAt(t)
+	return cu
+}
+
+// SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
+func (cu *CardUpdate) SetNillableExpiresAt(t *time.Time) *CardUpdate {
+	if t != nil {
+		cu.SetExpiresAt(*t)
+	}
+	return cu
+}
+
+// ClearExpiresAt clears the value of the "expires_at" field.
+func (cu *CardUpdate) ClearExpiresAt() *CardUpdate {
+	cu.mutation.ClearExpiresAt()
 	return cu
 }
 
@@ -160,8 +195,17 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := cu.mutation.Number(); ok {
-		_spec.SetField(card.FieldNumber, field.TypeString, value)
+	if value, ok := cu.mutation.NumberHash(); ok {
+		_spec.SetField(card.FieldNumberHash, field.TypeString, value)
+	}
+	if value, ok := cu.mutation.CvvHash(); ok {
+		_spec.SetField(card.FieldCvvHash, field.TypeString, value)
+	}
+	if value, ok := cu.mutation.ExpiresAt(); ok {
+		_spec.SetField(card.FieldExpiresAt, field.TypeTime, value)
+	}
+	if cu.mutation.ExpiresAtCleared() {
+		_spec.ClearField(card.FieldExpiresAt, field.TypeTime)
 	}
 	if cu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -257,17 +301,51 @@ type CardUpdateOne struct {
 	mutation *CardMutation
 }
 
-// SetNumber sets the "number" field.
-func (cuo *CardUpdateOne) SetNumber(s string) *CardUpdateOne {
-	cuo.mutation.SetNumber(s)
+// SetNumberHash sets the "number_hash" field.
+func (cuo *CardUpdateOne) SetNumberHash(s string) *CardUpdateOne {
+	cuo.mutation.SetNumberHash(s)
 	return cuo
 }
 
-// SetNillableNumber sets the "number" field if the given value is not nil.
-func (cuo *CardUpdateOne) SetNillableNumber(s *string) *CardUpdateOne {
+// SetNillableNumberHash sets the "number_hash" field if the given value is not nil.
+func (cuo *CardUpdateOne) SetNillableNumberHash(s *string) *CardUpdateOne {
 	if s != nil {
-		cuo.SetNumber(*s)
+		cuo.SetNumberHash(*s)
 	}
+	return cuo
+}
+
+// SetCvvHash sets the "cvv_hash" field.
+func (cuo *CardUpdateOne) SetCvvHash(s string) *CardUpdateOne {
+	cuo.mutation.SetCvvHash(s)
+	return cuo
+}
+
+// SetNillableCvvHash sets the "cvv_hash" field if the given value is not nil.
+func (cuo *CardUpdateOne) SetNillableCvvHash(s *string) *CardUpdateOne {
+	if s != nil {
+		cuo.SetCvvHash(*s)
+	}
+	return cuo
+}
+
+// SetExpiresAt sets the "expires_at" field.
+func (cuo *CardUpdateOne) SetExpiresAt(t time.Time) *CardUpdateOne {
+	cuo.mutation.SetExpiresAt(t)
+	return cuo
+}
+
+// SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
+func (cuo *CardUpdateOne) SetNillableExpiresAt(t *time.Time) *CardUpdateOne {
+	if t != nil {
+		cuo.SetExpiresAt(*t)
+	}
+	return cuo
+}
+
+// ClearExpiresAt clears the value of the "expires_at" field.
+func (cuo *CardUpdateOne) ClearExpiresAt() *CardUpdateOne {
+	cuo.mutation.ClearExpiresAt()
 	return cuo
 }
 
@@ -414,8 +492,17 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (_node *Card, err error) 
 			}
 		}
 	}
-	if value, ok := cuo.mutation.Number(); ok {
-		_spec.SetField(card.FieldNumber, field.TypeString, value)
+	if value, ok := cuo.mutation.NumberHash(); ok {
+		_spec.SetField(card.FieldNumberHash, field.TypeString, value)
+	}
+	if value, ok := cuo.mutation.CvvHash(); ok {
+		_spec.SetField(card.FieldCvvHash, field.TypeString, value)
+	}
+	if value, ok := cuo.mutation.ExpiresAt(); ok {
+		_spec.SetField(card.FieldExpiresAt, field.TypeTime, value)
+	}
+	if cuo.mutation.ExpiresAtCleared() {
+		_spec.ClearField(card.FieldExpiresAt, field.TypeTime)
 	}
 	if cuo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -48,7 +48,9 @@ type CardMutation struct {
 	op              Op
 	typ             string
 	id              *int
-	number          *string
+	number_hash     *string
+	cvv_hash        *string
+	expires_at      *time.Time
 	clearedFields   map[string]struct{}
 	owner           *int
 	clearedowner    bool
@@ -158,40 +160,125 @@ func (m *CardMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
-// SetNumber sets the "number" field.
-func (m *CardMutation) SetNumber(s string) {
-	m.number = &s
+// SetNumberHash sets the "number_hash" field.
+func (m *CardMutation) SetNumberHash(s string) {
+	m.number_hash = &s
 }
 
-// Number returns the value of the "number" field in the mutation.
-func (m *CardMutation) Number() (r string, exists bool) {
-	v := m.number
+// NumberHash returns the value of the "number_hash" field in the mutation.
+func (m *CardMutation) NumberHash() (r string, exists bool) {
+	v := m.number_hash
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldNumber returns the old "number" field's value of the Card entity.
+// OldNumberHash returns the old "number_hash" field's value of the Card entity.
 // If the Card object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CardMutation) OldNumber(ctx context.Context) (v string, err error) {
+func (m *CardMutation) OldNumberHash(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldNumber is only allowed on UpdateOne operations")
+		return v, errors.New("OldNumberHash is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldNumber requires an ID field in the mutation")
+		return v, errors.New("OldNumberHash requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldNumber: %w", err)
+		return v, fmt.Errorf("querying old value for OldNumberHash: %w", err)
 	}
-	return oldValue.Number, nil
+	return oldValue.NumberHash, nil
 }
 
-// ResetNumber resets all changes to the "number" field.
-func (m *CardMutation) ResetNumber() {
-	m.number = nil
+// ResetNumberHash resets all changes to the "number_hash" field.
+func (m *CardMutation) ResetNumberHash() {
+	m.number_hash = nil
+}
+
+// SetCvvHash sets the "cvv_hash" field.
+func (m *CardMutation) SetCvvHash(s string) {
+	m.cvv_hash = &s
+}
+
+// CvvHash returns the value of the "cvv_hash" field in the mutation.
+func (m *CardMutation) CvvHash() (r string, exists bool) {
+	v := m.cvv_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCvvHash returns the old "cvv_hash" field's value of the Card entity.
+// If the Card object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CardMutation) OldCvvHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCvvHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCvvHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCvvHash: %w", err)
+	}
+	return oldValue.CvvHash, nil
+}
+
+// ResetCvvHash resets all changes to the "cvv_hash" field.
+func (m *CardMutation) ResetCvvHash() {
+	m.cvv_hash = nil
+}
+
+// SetExpiresAt sets the "expires_at" field.
+func (m *CardMutation) SetExpiresAt(t time.Time) {
+	m.expires_at = &t
+}
+
+// ExpiresAt returns the value of the "expires_at" field in the mutation.
+func (m *CardMutation) ExpiresAt() (r time.Time, exists bool) {
+	v := m.expires_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExpiresAt returns the old "expires_at" field's value of the Card entity.
+// If the Card object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CardMutation) OldExpiresAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExpiresAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExpiresAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExpiresAt: %w", err)
+	}
+	return oldValue.ExpiresAt, nil
+}
+
+// ClearExpiresAt clears the value of the "expires_at" field.
+func (m *CardMutation) ClearExpiresAt() {
+	m.expires_at = nil
+	m.clearedFields[card.FieldExpiresAt] = struct{}{}
+}
+
+// ExpiresAtCleared returns if the "expires_at" field was cleared in this mutation.
+func (m *CardMutation) ExpiresAtCleared() bool {
+	_, ok := m.clearedFields[card.FieldExpiresAt]
+	return ok
+}
+
+// ResetExpiresAt resets all changes to the "expires_at" field.
+func (m *CardMutation) ResetExpiresAt() {
+	m.expires_at = nil
+	delete(m.clearedFields, card.FieldExpiresAt)
 }
 
 // SetOwnerID sets the "owner_id" field.
@@ -345,9 +432,15 @@ func (m *CardMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CardMutation) Fields() []string {
-	fields := make([]string, 0, 2)
-	if m.number != nil {
-		fields = append(fields, card.FieldNumber)
+	fields := make([]string, 0, 4)
+	if m.number_hash != nil {
+		fields = append(fields, card.FieldNumberHash)
+	}
+	if m.cvv_hash != nil {
+		fields = append(fields, card.FieldCvvHash)
+	}
+	if m.expires_at != nil {
+		fields = append(fields, card.FieldExpiresAt)
 	}
 	if m.owner != nil {
 		fields = append(fields, card.FieldOwnerID)
@@ -360,8 +453,12 @@ func (m *CardMutation) Fields() []string {
 // schema.
 func (m *CardMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case card.FieldNumber:
-		return m.Number()
+	case card.FieldNumberHash:
+		return m.NumberHash()
+	case card.FieldCvvHash:
+		return m.CvvHash()
+	case card.FieldExpiresAt:
+		return m.ExpiresAt()
 	case card.FieldOwnerID:
 		return m.OwnerID()
 	}
@@ -373,8 +470,12 @@ func (m *CardMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *CardMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case card.FieldNumber:
-		return m.OldNumber(ctx)
+	case card.FieldNumberHash:
+		return m.OldNumberHash(ctx)
+	case card.FieldCvvHash:
+		return m.OldCvvHash(ctx)
+	case card.FieldExpiresAt:
+		return m.OldExpiresAt(ctx)
 	case card.FieldOwnerID:
 		return m.OldOwnerID(ctx)
 	}
@@ -386,12 +487,26 @@ func (m *CardMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *CardMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case card.FieldNumber:
+	case card.FieldNumberHash:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetNumber(v)
+		m.SetNumberHash(v)
+		return nil
+	case card.FieldCvvHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCvvHash(v)
+		return nil
+	case card.FieldExpiresAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExpiresAt(v)
 		return nil
 	case card.FieldOwnerID:
 		v, ok := value.(int)
@@ -432,7 +547,11 @@ func (m *CardMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *CardMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(card.FieldExpiresAt) {
+		fields = append(fields, card.FieldExpiresAt)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -445,6 +564,11 @@ func (m *CardMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *CardMutation) ClearField(name string) error {
+	switch name {
+	case card.FieldExpiresAt:
+		m.ClearExpiresAt()
+		return nil
+	}
 	return fmt.Errorf("unknown Card nullable field %s", name)
 }
 
@@ -452,8 +576,14 @@ func (m *CardMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *CardMutation) ResetField(name string) error {
 	switch name {
-	case card.FieldNumber:
-		m.ResetNumber()
+	case card.FieldNumberHash:
+		m.ResetNumberHash()
+		return nil
+	case card.FieldCvvHash:
+		m.ResetCvvHash()
+		return nil
+	case card.FieldExpiresAt:
+		m.ResetExpiresAt()
 		return nil
 	case card.FieldOwnerID:
 		m.ResetOwnerID()
@@ -1257,6 +1387,10 @@ type PetMutation struct {
 	typ                string
 	id                 *uuid.UUID
 	name               *string
+	age                *float64
+	addage             *float64
+	weight             *float64
+	addweight          *float64
 	clearedFields      map[string]struct{}
 	best_friend        *uuid.UUID
 	clearedbest_friend bool
@@ -1405,6 +1539,118 @@ func (m *PetMutation) OldName(ctx context.Context) (v string, err error) {
 // ResetName resets all changes to the "name" field.
 func (m *PetMutation) ResetName() {
 	m.name = nil
+}
+
+// SetAge sets the "age" field.
+func (m *PetMutation) SetAge(f float64) {
+	m.age = &f
+	m.addage = nil
+}
+
+// Age returns the value of the "age" field in the mutation.
+func (m *PetMutation) Age() (r float64, exists bool) {
+	v := m.age
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAge returns the old "age" field's value of the Pet entity.
+// If the Pet object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PetMutation) OldAge(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAge is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAge requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAge: %w", err)
+	}
+	return oldValue.Age, nil
+}
+
+// AddAge adds f to the "age" field.
+func (m *PetMutation) AddAge(f float64) {
+	if m.addage != nil {
+		*m.addage += f
+	} else {
+		m.addage = &f
+	}
+}
+
+// AddedAge returns the value that was added to the "age" field in this mutation.
+func (m *PetMutation) AddedAge() (r float64, exists bool) {
+	v := m.addage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAge resets all changes to the "age" field.
+func (m *PetMutation) ResetAge() {
+	m.age = nil
+	m.addage = nil
+}
+
+// SetWeight sets the "weight" field.
+func (m *PetMutation) SetWeight(f float64) {
+	m.weight = &f
+	m.addweight = nil
+}
+
+// Weight returns the value of the "weight" field in the mutation.
+func (m *PetMutation) Weight() (r float64, exists bool) {
+	v := m.weight
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWeight returns the old "weight" field's value of the Pet entity.
+// If the Pet object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PetMutation) OldWeight(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWeight is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWeight requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWeight: %w", err)
+	}
+	return oldValue.Weight, nil
+}
+
+// AddWeight adds f to the "weight" field.
+func (m *PetMutation) AddWeight(f float64) {
+	if m.addweight != nil {
+		*m.addweight += f
+	} else {
+		m.addweight = &f
+	}
+}
+
+// AddedWeight returns the value that was added to the "weight" field in this mutation.
+func (m *PetMutation) AddedWeight() (r float64, exists bool) {
+	v := m.addweight
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetWeight resets all changes to the "weight" field.
+func (m *PetMutation) ResetWeight() {
+	m.weight = nil
+	m.addweight = nil
 }
 
 // SetBestFriendID sets the "best_friend_id" field.
@@ -1567,9 +1813,15 @@ func (m *PetMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PetMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 5)
 	if m.name != nil {
 		fields = append(fields, pet.FieldName)
+	}
+	if m.age != nil {
+		fields = append(fields, pet.FieldAge)
+	}
+	if m.weight != nil {
+		fields = append(fields, pet.FieldWeight)
 	}
 	if m.best_friend != nil {
 		fields = append(fields, pet.FieldBestFriendID)
@@ -1587,6 +1839,10 @@ func (m *PetMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case pet.FieldName:
 		return m.Name()
+	case pet.FieldAge:
+		return m.Age()
+	case pet.FieldWeight:
+		return m.Weight()
 	case pet.FieldBestFriendID:
 		return m.BestFriendID()
 	case pet.FieldOwnerID:
@@ -1602,6 +1858,10 @@ func (m *PetMutation) OldField(ctx context.Context, name string) (ent.Value, err
 	switch name {
 	case pet.FieldName:
 		return m.OldName(ctx)
+	case pet.FieldAge:
+		return m.OldAge(ctx)
+	case pet.FieldWeight:
+		return m.OldWeight(ctx)
 	case pet.FieldBestFriendID:
 		return m.OldBestFriendID(ctx)
 	case pet.FieldOwnerID:
@@ -1621,6 +1881,20 @@ func (m *PetMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
+		return nil
+	case pet.FieldAge:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAge(v)
+		return nil
+	case pet.FieldWeight:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWeight(v)
 		return nil
 	case pet.FieldBestFriendID:
 		v, ok := value.(uuid.UUID)
@@ -1644,6 +1918,12 @@ func (m *PetMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *PetMutation) AddedFields() []string {
 	var fields []string
+	if m.addage != nil {
+		fields = append(fields, pet.FieldAge)
+	}
+	if m.addweight != nil {
+		fields = append(fields, pet.FieldWeight)
+	}
 	return fields
 }
 
@@ -1652,6 +1932,10 @@ func (m *PetMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *PetMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
+	case pet.FieldAge:
+		return m.AddedAge()
+	case pet.FieldWeight:
+		return m.AddedWeight()
 	}
 	return nil, false
 }
@@ -1661,6 +1945,20 @@ func (m *PetMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *PetMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case pet.FieldAge:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAge(v)
+		return nil
+	case pet.FieldWeight:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddWeight(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Pet numeric field %s", name)
 }
@@ -1690,6 +1988,12 @@ func (m *PetMutation) ResetField(name string) error {
 	switch name {
 	case pet.FieldName:
 		m.ResetName()
+		return nil
+	case pet.FieldAge:
+		m.ResetAge()
+		return nil
+	case pet.FieldWeight:
+		m.ResetWeight()
 		return nil
 	case pet.FieldBestFriendID:
 		m.ResetBestFriendID()

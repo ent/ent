@@ -47,6 +47,48 @@ func (pu *PetUpdate) SetNillableName(s *string) *PetUpdate {
 	return pu
 }
 
+// SetAge sets the "age" field.
+func (pu *PetUpdate) SetAge(f float64) *PetUpdate {
+	pu.mutation.ResetAge()
+	pu.mutation.SetAge(f)
+	return pu
+}
+
+// SetNillableAge sets the "age" field if the given value is not nil.
+func (pu *PetUpdate) SetNillableAge(f *float64) *PetUpdate {
+	if f != nil {
+		pu.SetAge(*f)
+	}
+	return pu
+}
+
+// AddAge adds f to the "age" field.
+func (pu *PetUpdate) AddAge(f float64) *PetUpdate {
+	pu.mutation.AddAge(f)
+	return pu
+}
+
+// SetWeight sets the "weight" field.
+func (pu *PetUpdate) SetWeight(f float64) *PetUpdate {
+	pu.mutation.ResetWeight()
+	pu.mutation.SetWeight(f)
+	return pu
+}
+
+// SetNillableWeight sets the "weight" field if the given value is not nil.
+func (pu *PetUpdate) SetNillableWeight(f *float64) *PetUpdate {
+	if f != nil {
+		pu.SetWeight(*f)
+	}
+	return pu
+}
+
+// AddWeight adds f to the "weight" field.
+func (pu *PetUpdate) AddWeight(f float64) *PetUpdate {
+	pu.mutation.AddWeight(f)
+	return pu
+}
+
 // SetBestFriendID sets the "best_friend_id" field.
 func (pu *PetUpdate) SetBestFriendID(u uuid.UUID) *PetUpdate {
 	pu.mutation.SetBestFriendID(u)
@@ -155,6 +197,18 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := pu.mutation.Name(); ok {
 		_spec.SetField(pet.FieldName, field.TypeString, value)
 	}
+	if value, ok := pu.mutation.Age(); ok {
+		_spec.SetField(pet.FieldAge, field.TypeFloat64, value)
+	}
+	if value, ok := pu.mutation.AddedAge(); ok {
+		_spec.AddField(pet.FieldAge, field.TypeFloat64, value)
+	}
+	if value, ok := pu.mutation.Weight(); ok {
+		_spec.SetField(pet.FieldWeight, field.TypeFloat64, value)
+	}
+	if value, ok := pu.mutation.AddedWeight(); ok {
+		_spec.AddField(pet.FieldWeight, field.TypeFloat64, value)
+	}
 	if pu.mutation.BestFriendCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -244,6 +298,48 @@ func (puo *PetUpdateOne) SetNillableName(s *string) *PetUpdateOne {
 	if s != nil {
 		puo.SetName(*s)
 	}
+	return puo
+}
+
+// SetAge sets the "age" field.
+func (puo *PetUpdateOne) SetAge(f float64) *PetUpdateOne {
+	puo.mutation.ResetAge()
+	puo.mutation.SetAge(f)
+	return puo
+}
+
+// SetNillableAge sets the "age" field if the given value is not nil.
+func (puo *PetUpdateOne) SetNillableAge(f *float64) *PetUpdateOne {
+	if f != nil {
+		puo.SetAge(*f)
+	}
+	return puo
+}
+
+// AddAge adds f to the "age" field.
+func (puo *PetUpdateOne) AddAge(f float64) *PetUpdateOne {
+	puo.mutation.AddAge(f)
+	return puo
+}
+
+// SetWeight sets the "weight" field.
+func (puo *PetUpdateOne) SetWeight(f float64) *PetUpdateOne {
+	puo.mutation.ResetWeight()
+	puo.mutation.SetWeight(f)
+	return puo
+}
+
+// SetNillableWeight sets the "weight" field if the given value is not nil.
+func (puo *PetUpdateOne) SetNillableWeight(f *float64) *PetUpdateOne {
+	if f != nil {
+		puo.SetWeight(*f)
+	}
+	return puo
+}
+
+// AddWeight adds f to the "weight" field.
+func (puo *PetUpdateOne) AddWeight(f float64) *PetUpdateOne {
+	puo.mutation.AddWeight(f)
 	return puo
 }
 
@@ -384,6 +480,18 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 	}
 	if value, ok := puo.mutation.Name(); ok {
 		_spec.SetField(pet.FieldName, field.TypeString, value)
+	}
+	if value, ok := puo.mutation.Age(); ok {
+		_spec.SetField(pet.FieldAge, field.TypeFloat64, value)
+	}
+	if value, ok := puo.mutation.AddedAge(); ok {
+		_spec.AddField(pet.FieldAge, field.TypeFloat64, value)
+	}
+	if value, ok := puo.mutation.Weight(); ok {
+		_spec.SetField(pet.FieldWeight, field.TypeFloat64, value)
+	}
+	if value, ok := puo.mutation.AddedWeight(); ok {
+		_spec.AddField(pet.FieldWeight, field.TypeFloat64, value)
 	}
 	if puo.mutation.BestFriendCleared() {
 		edge := &sqlgraph.EdgeSpec{

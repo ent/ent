@@ -24,6 +24,10 @@ type Pet struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Age holds the value of the "age" field.
+	Age float64 `json:"age,omitempty"`
+	// Weight holds the value of the "weight" field.
+	Weight float64 `json:"weight,omitempty"`
 	// BestFriendID holds the value of the "best_friend_id" field.
 	BestFriendID uuid.UUID `json:"best_friend_id,omitempty"`
 	// OwnerID holds the value of the "owner_id" field.
@@ -76,6 +80,8 @@ func (*Pet) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case pet.FieldAge, pet.FieldWeight:
+			values[i] = new(sql.NullFloat64)
 		case pet.FieldOwnerID:
 			values[i] = new(sql.NullInt64)
 		case pet.FieldName:
@@ -108,6 +114,18 @@ func (pe *Pet) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				pe.Name = value.String
+			}
+		case pet.FieldAge:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field age", values[i])
+			} else if value.Valid {
+				pe.Age = value.Float64
+			}
+		case pet.FieldWeight:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field weight", values[i])
+			} else if value.Valid {
+				pe.Weight = value.Float64
 			}
 		case pet.FieldBestFriendID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
@@ -169,6 +187,12 @@ func (pe *Pet) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", pe.ID))
 	builder.WriteString("name=")
 	builder.WriteString(pe.Name)
+	builder.WriteString(", ")
+	builder.WriteString("age=")
+	builder.WriteString(fmt.Sprintf("%v", pe.Age))
+	builder.WriteString(", ")
+	builder.WriteString("weight=")
+	builder.WriteString(fmt.Sprintf("%v", pe.Weight))
 	builder.WriteString(", ")
 	builder.WriteString("best_friend_id=")
 	builder.WriteString(fmt.Sprintf("%v", pe.BestFriendID))
