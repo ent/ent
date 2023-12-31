@@ -6,6 +6,8 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
@@ -18,6 +20,7 @@ type Card struct {
 // Fields of the Card.
 func (Card) Fields() []ent.Field {
 	return []ent.Field{
+		field.String("number"),
 		field.Int("owner_id").
 			Default(0),
 	}
@@ -31,5 +34,16 @@ func (Card) Edges() []ent.Edge {
 			Unique().
 			Required().
 			Field("owner_id"),
+	}
+}
+
+// Annotations of the Card.
+func (Card) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		// Named check constraints are compared by their name.
+		// Thus, the definition does not need to be normalized.
+		entsql.Checks(map[string]string{
+			"number_length": "(LENGTH(`number`) = 16)",
+		}),
 	}
 }

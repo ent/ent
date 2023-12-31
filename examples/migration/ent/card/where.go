@@ -57,9 +57,79 @@ func IDLTE(id int) predicate.Card {
 	return predicate.Card(sql.FieldLTE(FieldID, id))
 }
 
+// Number applies equality check predicate on the "number" field. It's identical to NumberEQ.
+func Number(v string) predicate.Card {
+	return predicate.Card(sql.FieldEQ(FieldNumber, v))
+}
+
 // OwnerID applies equality check predicate on the "owner_id" field. It's identical to OwnerIDEQ.
 func OwnerID(v int) predicate.Card {
 	return predicate.Card(sql.FieldEQ(FieldOwnerID, v))
+}
+
+// NumberEQ applies the EQ predicate on the "number" field.
+func NumberEQ(v string) predicate.Card {
+	return predicate.Card(sql.FieldEQ(FieldNumber, v))
+}
+
+// NumberNEQ applies the NEQ predicate on the "number" field.
+func NumberNEQ(v string) predicate.Card {
+	return predicate.Card(sql.FieldNEQ(FieldNumber, v))
+}
+
+// NumberIn applies the In predicate on the "number" field.
+func NumberIn(vs ...string) predicate.Card {
+	return predicate.Card(sql.FieldIn(FieldNumber, vs...))
+}
+
+// NumberNotIn applies the NotIn predicate on the "number" field.
+func NumberNotIn(vs ...string) predicate.Card {
+	return predicate.Card(sql.FieldNotIn(FieldNumber, vs...))
+}
+
+// NumberGT applies the GT predicate on the "number" field.
+func NumberGT(v string) predicate.Card {
+	return predicate.Card(sql.FieldGT(FieldNumber, v))
+}
+
+// NumberGTE applies the GTE predicate on the "number" field.
+func NumberGTE(v string) predicate.Card {
+	return predicate.Card(sql.FieldGTE(FieldNumber, v))
+}
+
+// NumberLT applies the LT predicate on the "number" field.
+func NumberLT(v string) predicate.Card {
+	return predicate.Card(sql.FieldLT(FieldNumber, v))
+}
+
+// NumberLTE applies the LTE predicate on the "number" field.
+func NumberLTE(v string) predicate.Card {
+	return predicate.Card(sql.FieldLTE(FieldNumber, v))
+}
+
+// NumberContains applies the Contains predicate on the "number" field.
+func NumberContains(v string) predicate.Card {
+	return predicate.Card(sql.FieldContains(FieldNumber, v))
+}
+
+// NumberHasPrefix applies the HasPrefix predicate on the "number" field.
+func NumberHasPrefix(v string) predicate.Card {
+	return predicate.Card(sql.FieldHasPrefix(FieldNumber, v))
+}
+
+// NumberHasSuffix applies the HasSuffix predicate on the "number" field.
+func NumberHasSuffix(v string) predicate.Card {
+	return predicate.Card(sql.FieldHasSuffix(FieldNumber, v))
+}
+
+// NumberEqualFold applies the EqualFold predicate on the "number" field.
+func NumberEqualFold(v string) predicate.Card {
+	return predicate.Card(sql.FieldEqualFold(FieldNumber, v))
+}
+
+// NumberContainsFold applies the ContainsFold predicate on the "number" field.
+func NumberContainsFold(v string) predicate.Card {
+	return predicate.Card(sql.FieldContainsFold(FieldNumber, v))
 }
 
 // OwnerIDEQ applies the EQ predicate on the "owner_id" field.

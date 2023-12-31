@@ -16,6 +16,7 @@ var (
 	// CardsColumns holds the columns for the "cards" table.
 	CardsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "number", Type: field.TypeString},
 		{Name: "owner_id", Type: field.TypeInt, Default: 0},
 	}
 	// CardsTable holds the schema information for the "cards" table.
@@ -26,7 +27,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "cards_users_cards",
-				Columns:    []*schema.Column{CardsColumns[1]},
+				Columns:    []*schema.Column{CardsColumns[2]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -81,6 +82,10 @@ var (
 
 func init() {
 	CardsTable.ForeignKeys[0].RefTable = UsersTable
+	CardsTable.Annotation = &entsql.Annotation{}
+	CardsTable.Annotation.Checks = map[string]string{
+		"number_length": "(LENGTH(`number`) = 16)",
+	}
 	PetsTable.ForeignKeys[0].RefTable = PetsTable
 	PetsTable.ForeignKeys[1].RefTable = UsersTable
 	UsersTable.Annotation = &entsql.Annotation{

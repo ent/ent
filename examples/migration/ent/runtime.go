@@ -20,7 +20,7 @@ func init() {
 	cardFields := schema.Card{}.Fields()
 	_ = cardFields
 	// cardDescOwnerID is the schema descriptor for owner_id field.
-	cardDescOwnerID := cardFields[0].Descriptor()
+	cardDescOwnerID := cardFields[1].Descriptor()
 	// card.DefaultOwnerID holds the default value on creation for the owner_id field.
 	card.DefaultOwnerID = cardDescOwnerID.Default.(int)
 	petFields := schema.Pet{}.Fields()
