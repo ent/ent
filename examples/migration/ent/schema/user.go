@@ -21,7 +21,8 @@ type User struct {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.Float("age"),
-		field.String("name"),
+		field.String("first_name"),
+		field.String("last_name"),
 		field.Strings("tags").
 			Optional(),
 	}
@@ -38,7 +39,7 @@ func (User) Annotations() []schema.Annotation {
 		// Named check constraints are compared by their name.
 		// Thus, the definition does not need to be normalized.
 		entsql.Checks(map[string]string{
-			"name_not_empty": "name <> ''",
+			"first_last_not_empty": "(`first_name` <> '' AND `last_name` <> '')",
 		}),
 	}
 }
