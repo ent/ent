@@ -478,6 +478,7 @@ type PetMutation struct {
 	op                 Op
 	typ                string
 	id                 *uuid.UUID
+	name               *string
 	clearedFields      map[string]struct{}
 	best_friend        *uuid.UUID
 	clearedbest_friend bool
@@ -590,6 +591,42 @@ func (m *PetMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetName sets the "name" field.
+func (m *PetMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *PetMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Pet entity.
+// If the Pet object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PetMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *PetMutation) ResetName() {
+	m.name = nil
 }
 
 // SetBestFriendID sets the "best_friend_id" field.
@@ -752,7 +789,10 @@ func (m *PetMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PetMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
+	if m.name != nil {
+		fields = append(fields, pet.FieldName)
+	}
 	if m.best_friend != nil {
 		fields = append(fields, pet.FieldBestFriendID)
 	}
@@ -767,6 +807,8 @@ func (m *PetMutation) Fields() []string {
 // schema.
 func (m *PetMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case pet.FieldName:
+		return m.Name()
 	case pet.FieldBestFriendID:
 		return m.BestFriendID()
 	case pet.FieldOwnerID:
@@ -780,6 +822,8 @@ func (m *PetMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *PetMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case pet.FieldName:
+		return m.OldName(ctx)
 	case pet.FieldBestFriendID:
 		return m.OldBestFriendID(ctx)
 	case pet.FieldOwnerID:
@@ -793,6 +837,13 @@ func (m *PetMutation) OldField(ctx context.Context, name string) (ent.Value, err
 // type.
 func (m *PetMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case pet.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
 	case pet.FieldBestFriendID:
 		v, ok := value.(uuid.UUID)
 		if !ok {
@@ -859,6 +910,9 @@ func (m *PetMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *PetMutation) ResetField(name string) error {
 	switch name {
+	case pet.FieldName:
+		m.ResetName()
+		return nil
 	case pet.FieldBestFriendID:
 		m.ResetBestFriendID()
 		return nil

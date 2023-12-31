@@ -36,6 +36,7 @@ var (
 	// PetsColumns holds the columns for the "pets" table.
 	PetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString},
 		{Name: "best_friend_id", Type: field.TypeUUID, Unique: true, Nullable: true, Default: "00000000-0000-0000-0000-000000000000"},
 		{Name: "owner_id", Type: field.TypeInt, Default: 0},
 	}
@@ -47,15 +48,22 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "pets_pets_best_friend",
-				Columns:    []*schema.Column{PetsColumns[1]},
+				Columns:    []*schema.Column{PetsColumns[2]},
 				RefColumns: []*schema.Column{PetsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "pets_users_owner",
-				Columns:    []*schema.Column{PetsColumns[2]},
+				Columns:    []*schema.Column{PetsColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "pet_name_owner_id",
+				Unique:  true,
+				Columns: []*schema.Column{PetsColumns[1], PetsColumns[3]},
 			},
 		},
 	}

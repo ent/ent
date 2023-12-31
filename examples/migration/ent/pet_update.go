@@ -33,6 +33,20 @@ func (pu *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 	return pu
 }
 
+// SetName sets the "name" field.
+func (pu *PetUpdate) SetName(s string) *PetUpdate {
+	pu.mutation.SetName(s)
+	return pu
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (pu *PetUpdate) SetNillableName(s *string) *PetUpdate {
+	if s != nil {
+		pu.SetName(*s)
+	}
+	return pu
+}
+
 // SetBestFriendID sets the "best_friend_id" field.
 func (pu *PetUpdate) SetBestFriendID(u uuid.UUID) *PetUpdate {
 	pu.mutation.SetBestFriendID(u)
@@ -138,6 +152,9 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := pu.mutation.Name(); ok {
+		_spec.SetField(pet.FieldName, field.TypeString, value)
+	}
 	if pu.mutation.BestFriendCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -214,6 +231,20 @@ type PetUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *PetMutation
+}
+
+// SetName sets the "name" field.
+func (puo *PetUpdateOne) SetName(s string) *PetUpdateOne {
+	puo.mutation.SetName(s)
+	return puo
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (puo *PetUpdateOne) SetNillableName(s *string) *PetUpdateOne {
+	if s != nil {
+		puo.SetName(*s)
+	}
+	return puo
 }
 
 // SetBestFriendID sets the "best_friend_id" field.
@@ -350,6 +381,9 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := puo.mutation.Name(); ok {
+		_spec.SetField(pet.FieldName, field.TypeString, value)
 	}
 	if puo.mutation.BestFriendCleared() {
 		edge := &sqlgraph.EdgeSpec{
