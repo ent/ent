@@ -2,6 +2,8 @@
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
+//go:build migratedata_20221126185750
+
 // Package migratedata holds the functions for generating data migration files.
 // It exists here for documentation and reference purpose only and has no runtime
 // effect on the actual migration files.

@@ -31,6 +31,18 @@ func (pc *PetCreate) SetName(s string) *PetCreate {
 	return pc
 }
 
+// SetAge sets the "age" field.
+func (pc *PetCreate) SetAge(f float64) *PetCreate {
+	pc.mutation.SetAge(f)
+	return pc
+}
+
+// SetWeight sets the "weight" field.
+func (pc *PetCreate) SetWeight(f float64) *PetCreate {
+	pc.mutation.SetWeight(f)
+	return pc
+}
+
 // SetBestFriendID sets the "best_friend_id" field.
 func (pc *PetCreate) SetBestFriendID(u uuid.UUID) *PetCreate {
 	pc.mutation.SetBestFriendID(u)
@@ -125,6 +137,12 @@ func (pc *PetCreate) check() error {
 	if _, ok := pc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Pet.name"`)}
 	}
+	if _, ok := pc.mutation.Age(); !ok {
+		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "Pet.age"`)}
+	}
+	if _, ok := pc.mutation.Weight(); !ok {
+		return &ValidationError{Name: "weight", err: errors.New(`ent: missing required field "Pet.weight"`)}
+	}
 	if _, ok := pc.mutation.BestFriendID(); !ok {
 		return &ValidationError{Name: "best_friend_id", err: errors.New(`ent: missing required field "Pet.best_friend_id"`)}
 	}
@@ -175,6 +193,14 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 	if value, ok := pc.mutation.Name(); ok {
 		_spec.SetField(pet.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := pc.mutation.Age(); ok {
+		_spec.SetField(pet.FieldAge, field.TypeFloat64, value)
+		_node.Age = value
+	}
+	if value, ok := pc.mutation.Weight(); ok {
+		_spec.SetField(pet.FieldWeight, field.TypeFloat64, value)
+		_node.Weight = value
 	}
 	if nodes := pc.mutation.BestFriendIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

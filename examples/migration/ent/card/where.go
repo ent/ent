@@ -7,6 +7,8 @@
 package card
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/migration/ent/predicate"
@@ -57,9 +59,19 @@ func IDLTE(id int) predicate.Card {
 	return predicate.Card(sql.FieldLTE(FieldID, id))
 }
 
-// Number applies equality check predicate on the "number" field. It's identical to NumberEQ.
-func Number(v string) predicate.Card {
-	return predicate.Card(sql.FieldEQ(FieldNumber, v))
+// NumberHash applies equality check predicate on the "number_hash" field. It's identical to NumberHashEQ.
+func NumberHash(v string) predicate.Card {
+	return predicate.Card(sql.FieldEQ(FieldNumberHash, v))
+}
+
+// CvvHash applies equality check predicate on the "cvv_hash" field. It's identical to CvvHashEQ.
+func CvvHash(v string) predicate.Card {
+	return predicate.Card(sql.FieldEQ(FieldCvvHash, v))
+}
+
+// ExpiresAt applies equality check predicate on the "expires_at" field. It's identical to ExpiresAtEQ.
+func ExpiresAt(v time.Time) predicate.Card {
+	return predicate.Card(sql.FieldEQ(FieldExpiresAt, v))
 }
 
 // OwnerID applies equality check predicate on the "owner_id" field. It's identical to OwnerIDEQ.
@@ -67,69 +79,184 @@ func OwnerID(v int) predicate.Card {
 	return predicate.Card(sql.FieldEQ(FieldOwnerID, v))
 }
 
-// NumberEQ applies the EQ predicate on the "number" field.
-func NumberEQ(v string) predicate.Card {
-	return predicate.Card(sql.FieldEQ(FieldNumber, v))
+// NumberHashEQ applies the EQ predicate on the "number_hash" field.
+func NumberHashEQ(v string) predicate.Card {
+	return predicate.Card(sql.FieldEQ(FieldNumberHash, v))
 }
 
-// NumberNEQ applies the NEQ predicate on the "number" field.
-func NumberNEQ(v string) predicate.Card {
-	return predicate.Card(sql.FieldNEQ(FieldNumber, v))
+// NumberHashNEQ applies the NEQ predicate on the "number_hash" field.
+func NumberHashNEQ(v string) predicate.Card {
+	return predicate.Card(sql.FieldNEQ(FieldNumberHash, v))
 }
 
-// NumberIn applies the In predicate on the "number" field.
-func NumberIn(vs ...string) predicate.Card {
-	return predicate.Card(sql.FieldIn(FieldNumber, vs...))
+// NumberHashIn applies the In predicate on the "number_hash" field.
+func NumberHashIn(vs ...string) predicate.Card {
+	return predicate.Card(sql.FieldIn(FieldNumberHash, vs...))
 }
 
-// NumberNotIn applies the NotIn predicate on the "number" field.
-func NumberNotIn(vs ...string) predicate.Card {
-	return predicate.Card(sql.FieldNotIn(FieldNumber, vs...))
+// NumberHashNotIn applies the NotIn predicate on the "number_hash" field.
+func NumberHashNotIn(vs ...string) predicate.Card {
+	return predicate.Card(sql.FieldNotIn(FieldNumberHash, vs...))
 }
 
-// NumberGT applies the GT predicate on the "number" field.
-func NumberGT(v string) predicate.Card {
-	return predicate.Card(sql.FieldGT(FieldNumber, v))
+// NumberHashGT applies the GT predicate on the "number_hash" field.
+func NumberHashGT(v string) predicate.Card {
+	return predicate.Card(sql.FieldGT(FieldNumberHash, v))
 }
 
-// NumberGTE applies the GTE predicate on the "number" field.
-func NumberGTE(v string) predicate.Card {
-	return predicate.Card(sql.FieldGTE(FieldNumber, v))
+// NumberHashGTE applies the GTE predicate on the "number_hash" field.
+func NumberHashGTE(v string) predicate.Card {
+	return predicate.Card(sql.FieldGTE(FieldNumberHash, v))
 }
 
-// NumberLT applies the LT predicate on the "number" field.
-func NumberLT(v string) predicate.Card {
-	return predicate.Card(sql.FieldLT(FieldNumber, v))
+// NumberHashLT applies the LT predicate on the "number_hash" field.
+func NumberHashLT(v string) predicate.Card {
+	return predicate.Card(sql.FieldLT(FieldNumberHash, v))
 }
 
-// NumberLTE applies the LTE predicate on the "number" field.
-func NumberLTE(v string) predicate.Card {
-	return predicate.Card(sql.FieldLTE(FieldNumber, v))
+// NumberHashLTE applies the LTE predicate on the "number_hash" field.
+func NumberHashLTE(v string) predicate.Card {
+	return predicate.Card(sql.FieldLTE(FieldNumberHash, v))
 }
 
-// NumberContains applies the Contains predicate on the "number" field.
-func NumberContains(v string) predicate.Card {
-	return predicate.Card(sql.FieldContains(FieldNumber, v))
+// NumberHashContains applies the Contains predicate on the "number_hash" field.
+func NumberHashContains(v string) predicate.Card {
+	return predicate.Card(sql.FieldContains(FieldNumberHash, v))
 }
 
-// NumberHasPrefix applies the HasPrefix predicate on the "number" field.
-func NumberHasPrefix(v string) predicate.Card {
-	return predicate.Card(sql.FieldHasPrefix(FieldNumber, v))
+// NumberHashHasPrefix applies the HasPrefix predicate on the "number_hash" field.
+func NumberHashHasPrefix(v string) predicate.Card {
+	return predicate.Card(sql.FieldHasPrefix(FieldNumberHash, v))
 }
 
-// NumberHasSuffix applies the HasSuffix predicate on the "number" field.
-func NumberHasSuffix(v string) predicate.Card {
-	return predicate.Card(sql.FieldHasSuffix(FieldNumber, v))
+// NumberHashHasSuffix applies the HasSuffix predicate on the "number_hash" field.
+func NumberHashHasSuffix(v string) predicate.Card {
+	return predicate.Card(sql.FieldHasSuffix(FieldNumberHash, v))
 }
 
-// NumberEqualFold applies the EqualFold predicate on the "number" field.
-func NumberEqualFold(v string) predicate.Card {
-	return predicate.Card(sql.FieldEqualFold(FieldNumber, v))
+// NumberHashEqualFold applies the EqualFold predicate on the "number_hash" field.
+func NumberHashEqualFold(v string) predicate.Card {
+	return predicate.Card(sql.FieldEqualFold(FieldNumberHash, v))
 }
 
-// NumberContainsFold applies the ContainsFold predicate on the "number" field.
-func NumberContainsFold(v string) predicate.Card {
-	return predicate.Card(sql.FieldContainsFold(FieldNumber, v))
+// NumberHashContainsFold applies the ContainsFold predicate on the "number_hash" field.
+func NumberHashContainsFold(v string) predicate.Card {
+	return predicate.Card(sql.FieldContainsFold(FieldNumberHash, v))
+}
+
+// CvvHashEQ applies the EQ predicate on the "cvv_hash" field.
+func CvvHashEQ(v string) predicate.Card {
+	return predicate.Card(sql.FieldEQ(FieldCvvHash, v))
+}
+
+// CvvHashNEQ applies the NEQ predicate on the "cvv_hash" field.
+func CvvHashNEQ(v string) predicate.Card {
+	return predicate.Card(sql.FieldNEQ(FieldCvvHash, v))
+}
+
+// CvvHashIn applies the In predicate on the "cvv_hash" field.
+func CvvHashIn(vs ...string) predicate.Card {
+	return predicate.Card(sql.FieldIn(FieldCvvHash, vs...))
+}
+
+// CvvHashNotIn applies the NotIn predicate on the "cvv_hash" field.
+func CvvHashNotIn(vs ...string) predicate.Card {
+	return predicate.Card(sql.FieldNotIn(FieldCvvHash, vs...))
+}
+
+// CvvHashGT applies the GT predicate on the "cvv_hash" field.
+func CvvHashGT(v string) predicate.Card {
+	return predicate.Card(sql.FieldGT(FieldCvvHash, v))
+}
+
+// CvvHashGTE applies the GTE predicate on the "cvv_hash" field.
+func CvvHashGTE(v string) predicate.Card {
+	return predicate.Card(sql.FieldGTE(FieldCvvHash, v))
+}
+
+// CvvHashLT applies the LT predicate on the "cvv_hash" field.
+func CvvHashLT(v string) predicate.Card {
+	return predicate.Card(sql.FieldLT(FieldCvvHash, v))
+}
+
+// CvvHashLTE applies the LTE predicate on the "cvv_hash" field.
+func CvvHashLTE(v string) predicate.Card {
+	return predicate.Card(sql.FieldLTE(FieldCvvHash, v))
+}
+
+// CvvHashContains applies the Contains predicate on the "cvv_hash" field.
+func CvvHashContains(v string) predicate.Card {
+	return predicate.Card(sql.FieldContains(FieldCvvHash, v))
+}
+
+// CvvHashHasPrefix applies the HasPrefix predicate on the "cvv_hash" field.
+func CvvHashHasPrefix(v string) predicate.Card {
+	return predicate.Card(sql.FieldHasPrefix(FieldCvvHash, v))
+}
+
+// CvvHashHasSuffix applies the HasSuffix predicate on the "cvv_hash" field.
+func CvvHashHasSuffix(v string) predicate.Card {
+	return predicate.Card(sql.FieldHasSuffix(FieldCvvHash, v))
+}
+
+// CvvHashEqualFold applies the EqualFold predicate on the "cvv_hash" field.
+func CvvHashEqualFold(v string) predicate.Card {
+	return predicate.Card(sql.FieldEqualFold(FieldCvvHash, v))
+}
+
+// CvvHashContainsFold applies the ContainsFold predicate on the "cvv_hash" field.
+func CvvHashContainsFold(v string) predicate.Card {
+	return predicate.Card(sql.FieldContainsFold(FieldCvvHash, v))
+}
+
+// ExpiresAtEQ applies the EQ predicate on the "expires_at" field.
+func ExpiresAtEQ(v time.Time) predicate.Card {
+	return predicate.Card(sql.FieldEQ(FieldExpiresAt, v))
+}
+
+// ExpiresAtNEQ applies the NEQ predicate on the "expires_at" field.
+func ExpiresAtNEQ(v time.Time) predicate.Card {
+	return predicate.Card(sql.FieldNEQ(FieldExpiresAt, v))
+}
+
+// ExpiresAtIn applies the In predicate on the "expires_at" field.
+func ExpiresAtIn(vs ...time.Time) predicate.Card {
+	return predicate.Card(sql.FieldIn(FieldExpiresAt, vs...))
+}
+
+// ExpiresAtNotIn applies the NotIn predicate on the "expires_at" field.
+func ExpiresAtNotIn(vs ...time.Time) predicate.Card {
+	return predicate.Card(sql.FieldNotIn(FieldExpiresAt, vs...))
+}
+
+// ExpiresAtGT applies the GT predicate on the "expires_at" field.
+func ExpiresAtGT(v time.Time) predicate.Card {
+	return predicate.Card(sql.FieldGT(FieldExpiresAt, v))
+}
+
+// ExpiresAtGTE applies the GTE predicate on the "expires_at" field.
+func ExpiresAtGTE(v time.Time) predicate.Card {
+	return predicate.Card(sql.FieldGTE(FieldExpiresAt, v))
+}
+
+// ExpiresAtLT applies the LT predicate on the "expires_at" field.
+func ExpiresAtLT(v time.Time) predicate.Card {
+	return predicate.Card(sql.FieldLT(FieldExpiresAt, v))
+}
+
+// ExpiresAtLTE applies the LTE predicate on the "expires_at" field.
+func ExpiresAtLTE(v time.Time) predicate.Card {
+	return predicate.Card(sql.FieldLTE(FieldExpiresAt, v))
+}
+
+// ExpiresAtIsNil applies the IsNil predicate on the "expires_at" field.
+func ExpiresAtIsNil() predicate.Card {
+	return predicate.Card(sql.FieldIsNull(FieldExpiresAt))
+}
+
+// ExpiresAtNotNil applies the NotNil predicate on the "expires_at" field.
+func ExpiresAtNotNil() predicate.Card {
+	return predicate.Card(sql.FieldNotNull(FieldExpiresAt))
 }
 
 // OwnerIDEQ applies the EQ predicate on the "owner_id" field.

@@ -24,6 +24,8 @@ func (Pet) Fields() []ent.Field {
 		field.UUID("id", uuid.Nil).
 			Default(uuid.New),
 		field.String("name"),
+		field.Float("age"),
+		field.Float("weight"),
 		field.UUID("best_friend_id", uuid.Nil).
 			Annotations(
 				entsql.Default(uuid.Nil.String()),

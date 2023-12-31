@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/migration/ent/card"
@@ -25,9 +26,29 @@ type CardCreate struct {
 	hooks    []Hook
 }
 
-// SetNumber sets the "number" field.
-func (cc *CardCreate) SetNumber(s string) *CardCreate {
-	cc.mutation.SetNumber(s)
+// SetNumberHash sets the "number_hash" field.
+func (cc *CardCreate) SetNumberHash(s string) *CardCreate {
+	cc.mutation.SetNumberHash(s)
+	return cc
+}
+
+// SetCvvHash sets the "cvv_hash" field.
+func (cc *CardCreate) SetCvvHash(s string) *CardCreate {
+	cc.mutation.SetCvvHash(s)
+	return cc
+}
+
+// SetExpiresAt sets the "expires_at" field.
+func (cc *CardCreate) SetExpiresAt(t time.Time) *CardCreate {
+	cc.mutation.SetExpiresAt(t)
+	return cc
+}
+
+// SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
+func (cc *CardCreate) SetNillableExpiresAt(t *time.Time) *CardCreate {
+	if t != nil {
+		cc.SetExpiresAt(*t)
+	}
 	return cc
 }
 
@@ -108,8 +129,11 @@ func (cc *CardCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (cc *CardCreate) check() error {
-	if _, ok := cc.mutation.Number(); !ok {
-		return &ValidationError{Name: "number", err: errors.New(`ent: missing required field "Card.number"`)}
+	if _, ok := cc.mutation.NumberHash(); !ok {
+		return &ValidationError{Name: "number_hash", err: errors.New(`ent: missing required field "Card.number_hash"`)}
+	}
+	if _, ok := cc.mutation.CvvHash(); !ok {
+		return &ValidationError{Name: "cvv_hash", err: errors.New(`ent: missing required field "Card.cvv_hash"`)}
 	}
 	if _, ok := cc.mutation.OwnerID(); !ok {
 		return &ValidationError{Name: "owner_id", err: errors.New(`ent: missing required field "Card.owner_id"`)}
@@ -143,9 +167,17 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 		_node = &Card{config: cc.config}
 		_spec = sqlgraph.NewCreateSpec(card.Table, sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt))
 	)
-	if value, ok := cc.mutation.Number(); ok {
-		_spec.SetField(card.FieldNumber, field.TypeString, value)
-		_node.Number = value
+	if value, ok := cc.mutation.NumberHash(); ok {
+		_spec.SetField(card.FieldNumberHash, field.TypeString, value)
+		_node.NumberHash = value
+	}
+	if value, ok := cc.mutation.CvvHash(); ok {
+		_spec.SetField(card.FieldCvvHash, field.TypeString, value)
+		_node.CvvHash = value
+	}
+	if value, ok := cc.mutation.ExpiresAt(); ok {
+		_spec.SetField(card.FieldExpiresAt, field.TypeTime, value)
+		_node.ExpiresAt = value
 	}
 	if nodes := cc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

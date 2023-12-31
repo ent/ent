@@ -16,8 +16,12 @@ const (
 	Label = "card"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldNumber holds the string denoting the number field in the database.
-	FieldNumber = "number"
+	// FieldNumberHash holds the string denoting the number_hash field in the database.
+	FieldNumberHash = "number_hash"
+	// FieldCvvHash holds the string denoting the cvv_hash field in the database.
+	FieldCvvHash = "cvv_hash"
+	// FieldExpiresAt holds the string denoting the expires_at field in the database.
+	FieldExpiresAt = "expires_at"
 	// FieldOwnerID holds the string denoting the owner_id field in the database.
 	FieldOwnerID = "owner_id"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
@@ -45,7 +49,9 @@ const (
 // Columns holds all SQL columns for card fields.
 var Columns = []string{
 	FieldID,
-	FieldNumber,
+	FieldNumberHash,
+	FieldCvvHash,
+	FieldExpiresAt,
 	FieldOwnerID,
 }
 
@@ -72,9 +78,19 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByNumber orders the results by the number field.
-func ByNumber(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldNumber, opts...).ToFunc()
+// ByNumberHash orders the results by the number_hash field.
+func ByNumberHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldNumberHash, opts...).ToFunc()
+}
+
+// ByCvvHash orders the results by the cvv_hash field.
+func ByCvvHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCvvHash, opts...).ToFunc()
+}
+
+// ByExpiresAt orders the results by the expires_at field.
+func ByExpiresAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldExpiresAt, opts...).ToFunc()
 }
 
 // ByOwnerID orders the results by the owner_id field.

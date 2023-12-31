@@ -16,7 +16,9 @@ var (
 	// CardsColumns holds the columns for the "cards" table.
 	CardsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "number", Type: field.TypeString},
+		{Name: "number_hash", Type: field.TypeString},
+		{Name: "cvv_hash", Type: field.TypeString},
+		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
 		{Name: "owner_id", Type: field.TypeInt, Default: 0},
 	}
 	// CardsTable holds the schema information for the "cards" table.
@@ -27,7 +29,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "cards_users_cards",
-				Columns:    []*schema.Column{CardsColumns[2]},
+				Columns:    []*schema.Column{CardsColumns[4]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -68,6 +70,8 @@ var (
 	PetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "name", Type: field.TypeString},
+		{Name: "age", Type: field.TypeFloat64},
+		{Name: "weight", Type: field.TypeFloat64},
 		{Name: "best_friend_id", Type: field.TypeUUID, Unique: true, Nullable: true, Default: "00000000-0000-0000-0000-000000000000"},
 		{Name: "owner_id", Type: field.TypeInt, Default: 0},
 	}
@@ -79,13 +83,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "pets_pets_best_friend",
-				Columns:    []*schema.Column{PetsColumns[2]},
+				Columns:    []*schema.Column{PetsColumns[4]},
 				RefColumns: []*schema.Column{PetsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "pets_users_owner",
-				Columns:    []*schema.Column{PetsColumns[3]},
+				Columns:    []*schema.Column{PetsColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -94,7 +98,7 @@ var (
 			{
 				Name:    "pet_name_owner_id",
 				Unique:  true,
-				Columns: []*schema.Column{PetsColumns[1], PetsColumns[3]},
+				Columns: []*schema.Column{PetsColumns[1], PetsColumns[5]},
 			},
 		},
 	}
@@ -185,7 +189,7 @@ func init() {
 	CardsTable.ForeignKeys[0].RefTable = UsersTable
 	CardsTable.Annotation = &entsql.Annotation{}
 	CardsTable.Annotation.Checks = map[string]string{
-		"number_length": "(LENGTH(`number`) = 16)",
+		"number_hash_length": "(LENGTH(`number_hash`) = 16)",
 	}
 	PaymentsTable.ForeignKeys[0].RefTable = CardsTable
 	PaymentsTable.Annotation = &entsql.Annotation{}
@@ -203,6 +207,6 @@ func init() {
 		Check: "age > 0",
 	}
 	UsersTable.Annotation.Checks = map[string]string{
-		"name_not_empty": "name <> ''",
+		"first_last_not_empty": "(`first_name` <> '' AND `last_name` <> '')",
 	}
 }
