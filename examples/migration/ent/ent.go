@@ -19,6 +19,8 @@ import (
 	"entgo.io/ent/examples/migration/ent/card"
 	"entgo.io/ent/examples/migration/ent/payment"
 	"entgo.io/ent/examples/migration/ent/pet"
+	"entgo.io/ent/examples/migration/ent/session"
+	"entgo.io/ent/examples/migration/ent/sessiondevice"
 	"entgo.io/ent/examples/migration/ent/user"
 )
 
@@ -80,10 +82,12 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			card.Table:    card.ValidColumn,
-			payment.Table: payment.ValidColumn,
-			pet.Table:     pet.ValidColumn,
-			user.Table:    user.ValidColumn,
+			card.Table:          card.ValidColumn,
+			payment.Table:       payment.ValidColumn,
+			pet.Table:           pet.ValidColumn,
+			session.Table:       session.ValidColumn,
+			sessiondevice.Table: sessiondevice.ValidColumn,
+			user.Table:          user.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)
