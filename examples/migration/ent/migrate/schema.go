@@ -33,6 +33,37 @@ var (
 			},
 		},
 	}
+	// PaymentsColumns holds the columns for the "payments" table.
+	PaymentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "amount", Type: field.TypeFloat64},
+		{Name: "currency", Type: field.TypeEnum, Enums: []string{"USD", "ILS"}},
+		{Name: "time", Type: field.TypeTime},
+		{Name: "description", Type: field.TypeString},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "completed", "failed"}},
+		{Name: "card_id", Type: field.TypeInt},
+	}
+	// PaymentsTable holds the schema information for the "payments" table.
+	PaymentsTable = &schema.Table{
+		Name:       "payments",
+		Columns:    PaymentsColumns,
+		PrimaryKey: []*schema.Column{PaymentsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "payments_cards_payments",
+				Columns:    []*schema.Column{PaymentsColumns[6]},
+				RefColumns: []*schema.Column{CardsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "payment_status_time",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentsColumns[5], PaymentsColumns[3]},
+			},
+		},
+	}
 	// PetsColumns holds the columns for the "pets" table.
 	PetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -83,6 +114,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		CardsTable,
+		PaymentsTable,
 		PetsTable,
 		UsersTable,
 	}
@@ -93,6 +125,11 @@ func init() {
 	CardsTable.Annotation = &entsql.Annotation{}
 	CardsTable.Annotation.Checks = map[string]string{
 		"number_length": "(LENGTH(`number`) = 16)",
+	}
+	PaymentsTable.ForeignKeys[0].RefTable = CardsTable
+	PaymentsTable.Annotation = &entsql.Annotation{}
+	PaymentsTable.Annotation.Checks = map[string]string{
+		"amount_positive": "(`amount` > 0)",
 	}
 	PetsTable.ForeignKeys[0].RefTable = PetsTable
 	PetsTable.ForeignKeys[1].RefTable = UsersTable

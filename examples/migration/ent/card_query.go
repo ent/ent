@@ -8,12 +8,14 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/migration/ent/card"
+	"entgo.io/ent/examples/migration/ent/payment"
 	"entgo.io/ent/examples/migration/ent/predicate"
 	"entgo.io/ent/examples/migration/ent/user"
 	"entgo.io/ent/schema/field"
@@ -22,11 +24,12 @@ import (
 // CardQuery is the builder for querying Card entities.
 type CardQuery struct {
 	config
-	ctx        *QueryContext
-	order      []card.OrderOption
-	inters     []Interceptor
-	predicates []predicate.Card
-	withOwner  *UserQuery
+	ctx          *QueryContext
+	order        []card.OrderOption
+	inters       []Interceptor
+	predicates   []predicate.Card
+	withOwner    *UserQuery
+	withPayments *PaymentQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -78,6 +81,28 @@ func (cq *CardQuery) QueryOwner() *UserQuery {
 			sqlgraph.From(card.Table, card.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, card.OwnerTable, card.OwnerColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPayments chains the current query on the "payments" edge.
+func (cq *CardQuery) QueryPayments() *PaymentQuery {
+	query := (&PaymentClient{config: cq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(card.Table, card.FieldID, selector),
+			sqlgraph.To(payment.Table, payment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, card.PaymentsTable, card.PaymentsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -272,12 +297,13 @@ func (cq *CardQuery) Clone() *CardQuery {
 		return nil
 	}
 	return &CardQuery{
-		config:     cq.config,
-		ctx:        cq.ctx.Clone(),
-		order:      append([]card.OrderOption{}, cq.order...),
-		inters:     append([]Interceptor{}, cq.inters...),
-		predicates: append([]predicate.Card{}, cq.predicates...),
-		withOwner:  cq.withOwner.Clone(),
+		config:       cq.config,
+		ctx:          cq.ctx.Clone(),
+		order:        append([]card.OrderOption{}, cq.order...),
+		inters:       append([]Interceptor{}, cq.inters...),
+		predicates:   append([]predicate.Card{}, cq.predicates...),
+		withOwner:    cq.withOwner.Clone(),
+		withPayments: cq.withPayments.Clone(),
 		// clone intermediate query.
 		sql:  cq.sql.Clone(),
 		path: cq.path,
@@ -292,6 +318,17 @@ func (cq *CardQuery) WithOwner(opts ...func(*UserQuery)) *CardQuery {
 		opt(query)
 	}
 	cq.withOwner = query
+	return cq
+}
+
+// WithPayments tells the query-builder to eager-load the nodes that are connected to
+// the "payments" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *CardQuery) WithPayments(opts ...func(*PaymentQuery)) *CardQuery {
+	query := (&PaymentClient{config: cq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withPayments = query
 	return cq
 }
 
@@ -373,8 +410,9 @@ func (cq *CardQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Card, e
 	var (
 		nodes       = []*Card{}
 		_spec       = cq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			cq.withOwner != nil,
+			cq.withPayments != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -398,6 +436,13 @@ func (cq *CardQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Card, e
 	if query := cq.withOwner; query != nil {
 		if err := cq.loadOwner(ctx, query, nodes, nil,
 			func(n *Card, e *User) { n.Edges.Owner = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := cq.withPayments; query != nil {
+		if err := cq.loadPayments(ctx, query, nodes,
+			func(n *Card) { n.Edges.Payments = []*Payment{} },
+			func(n *Card, e *Payment) { n.Edges.Payments = append(n.Edges.Payments, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -430,6 +475,36 @@ func (cq *CardQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*C
 		for i := range nodes {
 			assign(nodes[i], n)
 		}
+	}
+	return nil
+}
+func (cq *CardQuery) loadPayments(ctx context.Context, query *PaymentQuery, nodes []*Card, init func(*Card), assign func(*Card, *Payment)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Card)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(payment.FieldCardID)
+	}
+	query.Where(predicate.Payment(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(card.PaymentsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.CardID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "card_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
 	}
 	return nil
 }

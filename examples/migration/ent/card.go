@@ -35,9 +35,11 @@ type Card struct {
 type CardEdges struct {
 	// Owner holds the value of the owner edge.
 	Owner *User `json:"owner,omitempty"`
+	// Payments holds the value of the payments edge.
+	Payments []*Payment `json:"payments,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // OwnerOrErr returns the Owner value or an error if the edge
@@ -51,6 +53,15 @@ func (e CardEdges) OwnerOrErr() (*User, error) {
 		return e.Owner, nil
 	}
 	return nil, &NotLoadedError{edge: "owner"}
+}
+
+// PaymentsOrErr returns the Payments value or an error if the edge
+// was not loaded in eager-loading.
+func (e CardEdges) PaymentsOrErr() ([]*Payment, error) {
+	if e.loadedTypes[1] {
+		return e.Payments, nil
+	}
+	return nil, &NotLoadedError{edge: "payments"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -111,6 +122,11 @@ func (c *Card) Value(name string) (ent.Value, error) {
 // QueryOwner queries the "owner" edge of the Card entity.
 func (c *Card) QueryOwner() *UserQuery {
 	return NewCardClient(c.config).QueryOwner(c)
+}
+
+// QueryPayments queries the "payments" edge of the Card entity.
+func (c *Card) QueryPayments() *PaymentQuery {
+	return NewCardClient(c.config).QueryPayments(c)
 }
 
 // Update returns a builder for updating this Card.

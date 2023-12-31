@@ -34,6 +34,7 @@ func (Card) Edges() []ent.Edge {
 			Unique().
 			Required().
 			Field("owner_id"),
+		edge.To("payments", Payment.Type),
 	}
 }
 
