@@ -1,4 +1,4 @@
-h1:bWNwoQD451P0fV9kAd46VfreaOAJdrpDXYJ9xmgATtw=
+h1:BZ/m+1lip4UqNLaufWxuuYirZn+gqq4srr3X5JpGuOY=
 20221114082343_create_users.sql h1:EeOPKbOeYUHO830P1MCXKUsxT3wLk/hSgcpT9GzlGZQ=
 20221114090322_add_age.sql h1:weRCTqS5cqKyrvIjGXk7Bn24YUXo0nhLNWD0EZBcaoQ=
 20221114101516_add_name.sql h1:leQgI2JN3URZyujlNzX3gI53MSiTA02MKI/G9cnMu6I=
@@ -7,3 +7,4 @@ h1:bWNwoQD451P0fV9kAd46VfreaOAJdrpDXYJ9xmgATtw=
 20230101214930_default_values.sql h1:W07mGRkz22lrW0dvcChRtRc5b03Kp2CsFAQZvsnb8qs=
 20231231083716_add_card_number.sql h1:sBxY6RlbqEsE8hx6Q/hSuNXfBGvVmZ0OYiZcP8uDNOc=
 20231231091550_add_pet_name.sql h1:80NyHhZ/ZC4Um0j0NLzUpf1UBj4GKvMu678EqkJsFuU=
+20231231101555_add_payment.sql h1:Je16hh6fEWuL5/nbQN5v+MNkC8ruhtTgEcEgkh+Gyyg=

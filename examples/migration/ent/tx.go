@@ -18,6 +18,8 @@ type Tx struct {
 	config
 	// Card is the client for interacting with the Card builders.
 	Card *CardClient
+	// Payment is the client for interacting with the Payment builders.
+	Payment *PaymentClient
 	// Pet is the client for interacting with the Pet builders.
 	Pet *PetClient
 	// User is the client for interacting with the User builders.
@@ -154,6 +156,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Card = NewCardClient(tx.config)
+	tx.Payment = NewPaymentClient(tx.config)
 	tx.Pet = NewPetClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }

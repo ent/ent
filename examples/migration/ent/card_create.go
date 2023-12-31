@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/migration/ent/card"
+	"entgo.io/ent/examples/migration/ent/payment"
 	"entgo.io/ent/examples/migration/ent/user"
 	"entgo.io/ent/schema/field"
 )
@@ -47,6 +48,21 @@ func (cc *CardCreate) SetNillableOwnerID(i *int) *CardCreate {
 // SetOwner sets the "owner" edge to the User entity.
 func (cc *CardCreate) SetOwner(u *User) *CardCreate {
 	return cc.SetOwnerID(u.ID)
+}
+
+// AddPaymentIDs adds the "payments" edge to the Payment entity by IDs.
+func (cc *CardCreate) AddPaymentIDs(ids ...int) *CardCreate {
+	cc.mutation.AddPaymentIDs(ids...)
+	return cc
+}
+
+// AddPayments adds the "payments" edges to the Payment entity.
+func (cc *CardCreate) AddPayments(p ...*Payment) *CardCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return cc.AddPaymentIDs(ids...)
 }
 
 // Mutation returns the CardMutation object of the builder.
@@ -146,6 +162,22 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.OwnerID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.PaymentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   card.PaymentsTable,
+			Columns: []string{card.PaymentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(payment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

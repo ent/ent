@@ -8,6 +8,7 @@ package ent
 
 import (
 	"entgo.io/ent/examples/migration/ent/card"
+	"entgo.io/ent/examples/migration/ent/payment"
 	"entgo.io/ent/examples/migration/ent/pet"
 	"entgo.io/ent/examples/migration/ent/schema"
 	"github.com/google/uuid"
@@ -23,6 +24,12 @@ func init() {
 	cardDescOwnerID := cardFields[1].Descriptor()
 	// card.DefaultOwnerID holds the default value on creation for the owner_id field.
 	card.DefaultOwnerID = cardDescOwnerID.Default.(int)
+	paymentFields := schema.Payment{}.Fields()
+	_ = paymentFields
+	// paymentDescAmount is the schema descriptor for amount field.
+	paymentDescAmount := paymentFields[1].Descriptor()
+	// payment.AmountValidator is a validator for the "amount" field. It is called by the builders before save.
+	payment.AmountValidator = paymentDescAmount.Validators[0].(func(float64) error)
 	petFields := schema.Pet{}.Fields()
 	_ = petFields
 	// petDescOwnerID is the schema descriptor for owner_id field.
