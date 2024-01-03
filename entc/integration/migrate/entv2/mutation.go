@@ -19,10 +19,12 @@ import (
 	"entgo.io/ent/entc/integration/migrate/entv2/car"
 	"entgo.io/ent/entc/integration/migrate/entv2/conversion"
 	"entgo.io/ent/entc/integration/migrate/entv2/customtype"
+	"entgo.io/ent/entc/integration/migrate/entv2/group"
 	"entgo.io/ent/entc/integration/migrate/entv2/media"
 	"entgo.io/ent/entc/integration/migrate/entv2/pet"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
+	"entgo.io/ent/entc/integration/migrate/entv2/zoo"
 )
 
 const (
@@ -155,7 +157,10 @@ func (m *BlogMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, blog.ID(id))
+			return m.Client().Blog.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []int{id}, nil
 		}
 		fallthrough
@@ -608,7 +613,10 @@ func (m *CarMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, car.ID(id))
+			return m.Client().Car.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []int{id}, nil
 		}
 		fallthrough
@@ -1029,7 +1037,10 @@ func (m *ConversionMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, conversion.ID(id))
+			return m.Client().Conversion.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []int{id}, nil
 		}
 		fallthrough
@@ -1955,7 +1966,10 @@ func (m *CustomTypeMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, customtype.ID(id))
+			return m.Client().CustomType.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []int{id}, nil
 		}
 		fallthrough
@@ -2446,7 +2460,10 @@ func (m *GroupMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, group.ID(id))
+			return m.Client().Group.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []int{id}, nil
 		}
 		fallthrough
@@ -2713,7 +2730,10 @@ func (m *MediaMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, media.ID(id))
+			return m.Client().Media.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []int{id}, nil
 		}
 		fallthrough
@@ -3207,7 +3227,10 @@ func (m *PetMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, pet.ID(id))
+			return m.Client().Pet.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []int{id}, nil
 		}
 		fallthrough
@@ -3656,7 +3679,10 @@ func (m *UserMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, user.ID(id))
+			return m.Client().User.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []int{id}, nil
 		}
 		fallthrough
@@ -5518,7 +5544,10 @@ func (m *ZooMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, zoo.ID(id))
+			return m.Client().Zoo.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []int{id}, nil
 		}
 		fallthrough
