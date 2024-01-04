@@ -56,11 +56,20 @@ type (
 		// BuildFlags are forwarded to the package.Config when
 		// loading the schema package.
 		BuildFlags []string
+		// SchemaSpec can be used to provide your own pre-built spec. If provided,
+		// this means no `go` commands are run to built, and we take the provided
+		// spec at face value. Setting this field to a non-null value will cause all
+		// other fields on this Config to be ignored during the load process.
+		SchemaSpec *SchemaSpec
 	}
 )
 
 // Load loads the schemas package and build the Go plugin with this info.
 func (c *Config) Load() (*SchemaSpec, error) {
+	// short circuit to use the SchemaSpec if they provided one up front
+	if c.SchemaSpec != nil {
+		return c.SchemaSpec, nil
+	}
 	spec, err := c.load()
 	if err != nil {
 		return nil, fmt.Errorf("entc/load: parse schema dir: %w", err)

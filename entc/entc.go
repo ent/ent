@@ -27,7 +27,11 @@ import (
 // LoadGraph loads the schema package from the given schema path,
 // and constructs a *gen.Graph.
 func LoadGraph(schemaPath string, cfg *gen.Config) (*gen.Graph, error) {
-	spec, err := (&load.Config{Path: schemaPath, BuildFlags: cfg.BuildFlags}).Load()
+	spec, err := (&load.Config{
+		Path:       schemaPath,
+		BuildFlags: cfg.BuildFlags,
+		SchemaSpec: cfg.SchemaSpec,
+	}).Load()
 	if err != nil {
 		return nil, err
 	}
