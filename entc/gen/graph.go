@@ -102,46 +102,10 @@ type (
 		//
 		// This can be useful for environments where `go` tooling is not available
 		// at runtime or package namespacing is not compatible with the OSS model.
-		// For example, in your schema package:
 		//
-		// type Address struct {
-		// 	ent.Schema
-		// }
-		//
-		// func NewLoadSpec() (*load.SchemaSpec, error) {
-		// 	schemas := []*load.Schema{}
-		// 	converting to a []byte, then unmarshal into a load.Schema
-		// 	b, err := load.MarshalSchema(Address{})
-		// 	if err != nil {
-		// 		return nil, err
-		// 	}
-		// 	loaded, err := load.UnmarshalSchema(b)
-		// 	if err != nil {
-		// 		return nil, err
-		// 	}
-		// 	schemas = append(schemas, loaded)
-		//
-		// 	return &load.SchemaSpec{
-		// 		Schemas: schemas,
-		// 		PkgPath: "some/nonstandard/pkg/path",
-		// 	}, nil
-		// }
-		//
-		// And then provide your schema spec to the config in your entc code:
-		//
-		// opts := []entc.Option{ ... }
-		// spec, err := schemapkg.NewLoadSpec()
-		// if err != nil { ... }
-		// entc.Generate(
-		// 	"", // schema path is not used when providing your own spec
-		// 	&gen.Config{
-		// 		SchemaSpec: spec,
-		// 		Package: "some/package",
-		// 		Target: "output/location",
-		// 		etc
-		// 	},
-		// 	opts...,
-		// )
+		// An example of this is in ent/entc/integration/schemaspec/ent/schema/schema.go for
+		// the creation of the SchemaSpec and in ent/entc/integration/schemaspec/ent/entc.go
+		// for an example of using it.
 		SchemaSpec *load.SchemaSpec
 	}
 
