@@ -13,6 +13,18 @@ import (
 	"entgo.io/ent/entc/integration/privacy/ent"
 )
 
+// The NoteFunc type is an adapter to allow the use of ordinary
+// function as Note mutator.
+type NoteFunc func(context.Context, *ent.NoteMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f NoteFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.NoteMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.NoteMutation", m)
+}
+
 // The TaskFunc type is an adapter to allow the use of ordinary
 // function as Task mutator.
 type TaskFunc func(context.Context, *ent.TaskMutation) (ent.Value, error)

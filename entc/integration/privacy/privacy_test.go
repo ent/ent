@@ -9,6 +9,7 @@ import (
 	"errors"
 	"testing"
 
+	"entgo.io/ent/entc/integration/privacy/ent"
 	"entgo.io/ent/entc/integration/privacy/ent/enttest"
 	"entgo.io/ent/entc/integration/privacy/ent/privacy"
 	"entgo.io/ent/entc/integration/privacy/ent/task"
@@ -79,4 +80,50 @@ func TestPrivacyRules(t *testing.T) {
 	// Update description is allowed for other users in the team.
 	task3.Update().SetDescription("boring description").SaveX(natctx)
 	task3.Update().SetDescription("boring description").SaveX(a8mctx)
+
+	// Create some notes (if not readonly can be updated by anyone).
+	note1 := client.Note.Create().SetTitle("note 1").SetReadonly(true).SaveX(a8mctx)
+	note2 := client.Note.Create().SetTitle("note 2").SetReadonly(false).SaveX(a8mctx)
+	note3 := client.Note.Create().SetTitle("note 3").SetReadonly(false).SaveX(a8mctx)
+
+	requireIDsInHook := func(expected []int, message string) func(ctx context.Context, next ent.Mutator, m *ent.NoteMutation) (ent.Value, error) {
+		return func(ctx context.Context, next ent.Mutator, m *ent.NoteMutation) (ent.Value, error) {
+			ids, err := m.IDs(ctx)
+			require.NoError(t, err, "expected no error in hook")
+			require.Len(t, ids, len(expected), message)
+			for i, id := range ids {
+				require.Equal(t, expected[i], id, message)
+			}
+			return next.Mutate(ctx, m)
+		}
+	}
+
+	// Update note 2 is allowed
+	rule.SetNoteMockHook(requireIDsInHook([]int{note2.ID}, "expected only note 2 in hook"))
+	note2.Update().SetDescription("boring description").SaveX(a8mctx)
+
+	// Update note 1 is not allowed
+	rule.SetNoteMockHook(requireIDsInHook([]int{}, "expected no notes in hook"))
+	_, err = note1.Update().SetDescription("boring description").Save(a8mctx)
+	require.True(t, ent.IsNotFound(err), "viewer is not allowed to update the note")
+
+	// Update many should only affect note 2 and 3
+	rule.SetNoteMockHook(requireIDsInHook([]int{note2.ID, note3.ID}, "expected one note 2 and 3 in hook"))
+	n := client.Note.Update().SetDescription("boring description").SaveX(a8mctx)
+	require.Equal(t, 2, n, "expected one note to be updated")
+
+	// Delete note 1 is not allowed
+	rule.SetNoteMockHook(requireIDsInHook([]int{}, "expected no notes in hook"))
+	err = client.Note.DeleteOne(note1).Exec(a8mctx)
+	require.True(t, ent.IsNotFound(err), "viewer is not allowed to delete the note")
+
+	// Delete note 2 is allowed
+	rule.SetNoteMockHook(requireIDsInHook([]int{note2.ID}, "expected only note 2 in hook"))
+	client.Note.DeleteOne(note2).ExecX(a8mctx)
+
+	// Delete many should only affect note 3
+	rule.SetNoteMockHook(requireIDsInHook([]int{note3.ID}, "expected only note 3 in hook"))
+	n = client.Note.Delete().ExecX(a8mctx)
+	require.Equal(t, 1, n, "expected one note to be deleted")
+
 }

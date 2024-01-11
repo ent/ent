@@ -9,6 +9,7 @@ package runtime
 import (
 	"context"
 
+	"entgo.io/ent/entc/integration/privacy/ent/note"
 	"entgo.io/ent/entc/integration/privacy/ent/schema"
 	"entgo.io/ent/entc/integration/privacy/ent/task"
 	"entgo.io/ent/entc/integration/privacy/ent/team"
@@ -22,6 +23,28 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	note.Policy = privacy.NewPolicies(schema.Note{})
+	note.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := note.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	noteHooks := schema.Note{}.Hooks()
+
+	note.Hooks[1] = noteHooks[0]
+	noteFields := schema.Note{}.Fields()
+	_ = noteFields
+	// noteDescTitle is the schema descriptor for title field.
+	noteDescTitle := noteFields[0].Descriptor()
+	// note.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	note.TitleValidator = noteDescTitle.Validators[0].(func(string) error)
+	// noteDescReadonly is the schema descriptor for readonly field.
+	noteDescReadonly := noteFields[2].Descriptor()
+	// note.DefaultReadonly holds the default value on creation for the readonly field.
+	note.DefaultReadonly = noteDescReadonly.Default.(bool)
 	taskMixin := schema.Task{}.Mixin()
 	task.Policy = privacy.NewPolicies(taskMixin[0], taskMixin[1], schema.Task{})
 	task.Hooks[0] = func(next ent.Mutator) ent.Mutator {
