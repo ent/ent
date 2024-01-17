@@ -29,6 +29,8 @@ type GroupInfoQuery struct {
 	inters          []Interceptor
 	predicates      []predicate.GroupInfo
 	withGroups      *GroupQuery
+	useIndex        []string
+	forceIndex      []string
 	modifiers       []func(*sql.Selector)
 	withNamedGroups map[string]*GroupQuery
 	// intermediate query (i.e. traversal path).
@@ -390,6 +392,12 @@ func (giq *GroupInfoQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*G
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if useIndex := giq.useIndex; len(useIndex) > 0 {
+		_spec.UseIndex = useIndex
+	}
+	if forceIndex := giq.forceIndex; len(forceIndex) > 0 {
+		_spec.ForceIndex = forceIndex
+	}
 	if len(giq.modifiers) > 0 {
 		_spec.Modifiers = giq.modifiers
 	}
@@ -453,6 +461,12 @@ func (giq *GroupInfoQuery) loadGroups(ctx context.Context, query *GroupQuery, no
 
 func (giq *GroupInfoQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := giq.querySpec()
+	if useIndex := giq.useIndex; len(useIndex) > 0 {
+		_spec.UseIndex = useIndex
+	}
+	if forceIndex := giq.forceIndex; len(forceIndex) > 0 {
+		_spec.ForceIndex = forceIndex
+	}
 	if len(giq.modifiers) > 0 {
 		_spec.Modifiers = giq.modifiers
 	}
@@ -518,6 +532,12 @@ func (giq *GroupInfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if giq.ctx.Unique != nil && *giq.ctx.Unique {
 		selector.Distinct()
 	}
+	if useIndex := giq.useIndex; len(useIndex) > 0 {
+		t1.UseIndex(useIndex...)
+	}
+	if forceIndex := giq.forceIndex; len(forceIndex) > 0 {
+		t1.ForceIndex(forceIndex...)
+	}
 	for _, m := range giq.modifiers {
 		m(selector)
 	}
@@ -536,6 +556,18 @@ func (giq *GroupInfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// UseIndex hints which indexes to use.
+func (giq *GroupInfoQuery) UseIndex(idx ...string) *GroupInfoQuery {
+	giq.useIndex = append(giq.useIndex, idx...)
+	return giq
+}
+
+// ForceIndex forces which indexes to use.
+func (giq *GroupInfoQuery) ForceIndex(idx ...string) *GroupInfoQuery {
+	giq.forceIndex = append(giq.forceIndex, idx...)
+	return giq
 }
 
 // ForUpdate locks the selected rows against concurrent updates, and prevent them from being

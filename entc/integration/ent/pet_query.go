@@ -30,6 +30,8 @@ type PetQuery struct {
 	withTeam   *UserQuery
 	withOwner  *UserQuery
 	withFKs    bool
+	useIndex   []string
+	forceIndex []string
 	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -432,6 +434,12 @@ func (pq *PetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pet, err
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if useIndex := pq.useIndex; len(useIndex) > 0 {
+		_spec.UseIndex = useIndex
+	}
+	if forceIndex := pq.forceIndex; len(forceIndex) > 0 {
+		_spec.ForceIndex = forceIndex
+	}
 	if len(pq.modifiers) > 0 {
 		_spec.Modifiers = pq.modifiers
 	}
@@ -526,6 +534,12 @@ func (pq *PetQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*Pe
 
 func (pq *PetQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := pq.querySpec()
+	if useIndex := pq.useIndex; len(useIndex) > 0 {
+		_spec.UseIndex = useIndex
+	}
+	if forceIndex := pq.forceIndex; len(forceIndex) > 0 {
+		_spec.ForceIndex = forceIndex
+	}
 	if len(pq.modifiers) > 0 {
 		_spec.Modifiers = pq.modifiers
 	}
@@ -591,6 +605,12 @@ func (pq *PetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if pq.ctx.Unique != nil && *pq.ctx.Unique {
 		selector.Distinct()
 	}
+	if useIndex := pq.useIndex; len(useIndex) > 0 {
+		t1.UseIndex(useIndex...)
+	}
+	if forceIndex := pq.forceIndex; len(forceIndex) > 0 {
+		t1.ForceIndex(forceIndex...)
+	}
 	for _, m := range pq.modifiers {
 		m(selector)
 	}
@@ -609,6 +629,18 @@ func (pq *PetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// UseIndex hints which indexes to use.
+func (pq *PetQuery) UseIndex(idx ...string) *PetQuery {
+	pq.useIndex = append(pq.useIndex, idx...)
+	return pq
+}
+
+// ForceIndex forces which indexes to use.
+func (pq *PetQuery) ForceIndex(idx ...string) *PetQuery {
+	pq.forceIndex = append(pq.forceIndex, idx...)
+	return pq
 }
 
 // ForUpdate locks the selected rows against concurrent updates, and prevent them from being

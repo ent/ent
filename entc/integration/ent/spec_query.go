@@ -29,6 +29,8 @@ type SpecQuery struct {
 	inters        []Interceptor
 	predicates    []predicate.Spec
 	withCard      *CardQuery
+	useIndex      []string
+	forceIndex    []string
 	modifiers     []func(*sql.Selector)
 	withNamedCard map[string]*CardQuery
 	// intermediate query (i.e. traversal path).
@@ -368,6 +370,12 @@ func (sq *SpecQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Spec, e
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if useIndex := sq.useIndex; len(useIndex) > 0 {
+		_spec.UseIndex = useIndex
+	}
+	if forceIndex := sq.forceIndex; len(forceIndex) > 0 {
+		_spec.ForceIndex = forceIndex
+	}
 	if len(sq.modifiers) > 0 {
 		_spec.Modifiers = sq.modifiers
 	}
@@ -461,6 +469,12 @@ func (sq *SpecQuery) loadCard(ctx context.Context, query *CardQuery, nodes []*Sp
 
 func (sq *SpecQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := sq.querySpec()
+	if useIndex := sq.useIndex; len(useIndex) > 0 {
+		_spec.UseIndex = useIndex
+	}
+	if forceIndex := sq.forceIndex; len(forceIndex) > 0 {
+		_spec.ForceIndex = forceIndex
+	}
 	if len(sq.modifiers) > 0 {
 		_spec.Modifiers = sq.modifiers
 	}
@@ -526,6 +540,12 @@ func (sq *SpecQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if sq.ctx.Unique != nil && *sq.ctx.Unique {
 		selector.Distinct()
 	}
+	if useIndex := sq.useIndex; len(useIndex) > 0 {
+		t1.UseIndex(useIndex...)
+	}
+	if forceIndex := sq.forceIndex; len(forceIndex) > 0 {
+		t1.ForceIndex(forceIndex...)
+	}
 	for _, m := range sq.modifiers {
 		m(selector)
 	}
@@ -544,6 +564,18 @@ func (sq *SpecQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// UseIndex hints which indexes to use.
+func (sq *SpecQuery) UseIndex(idx ...string) *SpecQuery {
+	sq.useIndex = append(sq.useIndex, idx...)
+	return sq
+}
+
+// ForceIndex forces which indexes to use.
+func (sq *SpecQuery) ForceIndex(idx ...string) *SpecQuery {
+	sq.forceIndex = append(sq.forceIndex, idx...)
+	return sq
 }
 
 // ForUpdate locks the selected rows against concurrent updates, and prevent them from being

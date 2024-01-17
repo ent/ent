@@ -43,6 +43,8 @@ type UserQuery struct {
 	withChildren       *UserQuery
 	withParent         *UserQuery
 	withFKs            bool
+	useIndex           []string
+	forceIndex         []string
 	modifiers          []func(*sql.Selector)
 	withNamedPets      map[string]*PetQuery
 	withNamedFiles     map[string]*FileQuery
@@ -767,6 +769,12 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if useIndex := uq.useIndex; len(useIndex) > 0 {
+		_spec.UseIndex = useIndex
+	}
+	if forceIndex := uq.forceIndex; len(forceIndex) > 0 {
+		_spec.ForceIndex = forceIndex
+	}
 	if len(uq.modifiers) > 0 {
 		_spec.Modifiers = uq.modifiers
 	}
@@ -1364,6 +1372,12 @@ func (uq *UserQuery) loadParent(ctx context.Context, query *UserQuery, nodes []*
 
 func (uq *UserQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := uq.querySpec()
+	if useIndex := uq.useIndex; len(useIndex) > 0 {
+		_spec.UseIndex = useIndex
+	}
+	if forceIndex := uq.forceIndex; len(forceIndex) > 0 {
+		_spec.ForceIndex = forceIndex
+	}
 	if len(uq.modifiers) > 0 {
 		_spec.Modifiers = uq.modifiers
 	}
@@ -1429,6 +1443,12 @@ func (uq *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if uq.ctx.Unique != nil && *uq.ctx.Unique {
 		selector.Distinct()
 	}
+	if useIndex := uq.useIndex; len(useIndex) > 0 {
+		t1.UseIndex(useIndex...)
+	}
+	if forceIndex := uq.forceIndex; len(forceIndex) > 0 {
+		t1.ForceIndex(forceIndex...)
+	}
 	for _, m := range uq.modifiers {
 		m(selector)
 	}
@@ -1447,6 +1467,18 @@ func (uq *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// UseIndex hints which indexes to use.
+func (uq *UserQuery) UseIndex(idx ...string) *UserQuery {
+	uq.useIndex = append(uq.useIndex, idx...)
+	return uq
+}
+
+// ForceIndex forces which indexes to use.
+func (uq *UserQuery) ForceIndex(idx ...string) *UserQuery {
+	uq.forceIndex = append(uq.forceIndex, idx...)
+	return uq
 }
 
 // ForUpdate locks the selected rows against concurrent updates, and prevent them from being

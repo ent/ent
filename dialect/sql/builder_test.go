@@ -1636,6 +1636,31 @@ AND "users"."id1" < "users"."id2") AND "users"."id1" <= "users"."id2"`, "\n", ""
 				From(Select("name", "age").From(Table("users"))),
 			wantQuery: "SELECT `name` FROM (SELECT `name`, `age` FROM `users`)",
 		},
+		{
+			input: Select("name").
+				From(Table("users").UseIndex("my_index")),
+			wantQuery: "SELECT `name` FROM `users` USE INDEX (`my_index`)",
+		},
+		{
+			input: Select("name").
+				From(Table("users").UseIndex("my_index1", "my_index2").UseIndex("my_index3")),
+			wantQuery: "SELECT `name` FROM `users` USE INDEX (`my_index1`, `my_index2`, `my_index3`)",
+		},
+		{
+			input: Select("name").
+				From(Table("users").ForceIndex("my_index")),
+			wantQuery: "SELECT `name` FROM `users` FORCE INDEX (`my_index`)",
+		},
+		{
+			input: Select("name").
+				From(Table("users").ForceIndex("my_index1", "my_index2").ForceIndex("my_index3")),
+			wantQuery: "SELECT `name` FROM `users` FORCE INDEX (`my_index1`, `my_index2`, `my_index3`)",
+		},
+		{
+			input: Select("name").
+				From(Table("users").UseIndex("my_index1", "my_index2").ForceIndex("my_index3")),
+			wantQuery: "SELECT `name` FROM `users` USE INDEX (`my_index1`, `my_index2`) FORCE INDEX (`my_index3`)",
+		},
 	}
 	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
