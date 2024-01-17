@@ -403,3 +403,23 @@ client.User.
 
 // INSERT INTO "users" (...) VALUES ... ON CONFLICT WHERE ... DO UPDATE SET ... WHERE ...
 ```
+
+### Index Hints
+
+The `sql/indexhint` option allows users to add `USE INDEX` or `FORCE INDEX` clauses in SQL statements.
+
+This option can be added to a project using the `--feature sql/indexhint` flag.
+
+```go
+files, err := client.File.
+    Query().
+    Where(
+        file.NameEQ("example.txt"),
+        file.SizeGTE(1024),
+        file.SizeLTE(1048576),
+    ).
+    UseIndex("file_name_size").
+    All(ctx)
+
+// SELECT "id" FROM `files` USE INDEX `file_name_size` ...
+```
