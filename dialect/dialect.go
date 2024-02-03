@@ -90,10 +90,10 @@ func timeSubToMilliseconds(t1, t2 time.Time) float64 {
 func Debug(d Driver, logger ...func(...any)) Driver {
 	logf := log.Println
 	errLogf := log.Println
-	if len(logger) == 1 {
+	if len(logger) > 0 {
 		logf = logger[0]
 	}
-	if len(logger) == 2 {
+	if len(logger) >= 2 {
 		errLogf = logger[1]
 	}
 	drv := &DebugDriver{d, func(_ context.Context, v ...any) { logf(v...) }, func(_ context.Context, v ...any) { errLogf(v...) }}
@@ -105,10 +105,10 @@ func Debug(d Driver, logger ...func(...any)) Driver {
 func DebugWithContext(d Driver, logger ...func(context.Context, ...any)) Driver {
 	logf := DefaultContextLogger
 	errLogf := DefaultContextLogger
-	if len(logger) == 1 {
+	if len(logger) > 0 {
 		logf = logger[0]
 	}
-	if len(logger) == 2 {
+	if len(logger) > 1 {
 		errLogf = logger[1]
 	}
 	drv := &DebugDriver{d, logf, errLogf}
