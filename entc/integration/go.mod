@@ -5,8 +5,8 @@ go 1.21
 replace entgo.io/ent => ../../
 
 require (
-	ariga.io/atlas v0.14.3-0.20231010104048-0c071bfc9161
-	ariga.io/atlas-go-sdk v0.2.0
+	ariga.io/atlas v0.19.1-0.20240203083654-5948b60a8e43
+	ariga.io/atlas-go-sdk v0.4.0
 	entgo.io/ent v0.0.0-00010101000000-000000000000
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/google/uuid v1.3.0
@@ -21,7 +21,7 @@ require (
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect
-	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.18.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
