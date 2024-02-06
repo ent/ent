@@ -13,19 +13,6 @@ import (
 )
 
 var (
-	// NotesColumns holds the columns for the "notes" table.
-	NotesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "title", Type: field.TypeString},
-		{Name: "description", Type: field.TypeString, Nullable: true},
-		{Name: "readonly", Type: field.TypeBool, Default: false},
-	}
-	// NotesTable holds the schema information for the "notes" table.
-	NotesTable = &schema.Table{
-		Name:       "notes",
-		Columns:    NotesColumns,
-		PrimaryKey: []*schema.Column{NotesColumns[0]},
-	}
 	// TasksColumns holds the columns for the "tasks" table.
 	TasksColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -124,7 +111,6 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		NotesTable,
 		TasksTable,
 		TeamsTable,
 		UsersTable,

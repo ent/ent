@@ -11,7 +11,6 @@ import (
 
 	"entgo.io/ent/entc/integration/privacy/ent"
 	"entgo.io/ent/entc/integration/privacy/ent/hook"
-	"entgo.io/ent/entc/integration/privacy/ent/note"
 	"entgo.io/ent/entc/integration/privacy/ent/predicate"
 	"entgo.io/ent/entc/integration/privacy/ent/privacy"
 	"entgo.io/ent/entc/integration/privacy/ent/task"
@@ -182,13 +181,6 @@ func AllowIfViewerInTheSameTeam() privacy.MutationRule {
 	return privacy.OnMutationOperation(policy, ent.OpUpdateOne)
 }
 
-func FilterReadonlyNoteRule() privacy.MutationRule {
-	return privacy.NoteMutationRuleFunc(func(ctx context.Context, m *ent.NoteMutation) error {
-		m.Where(note.Readonly(false))
-		return privacy.Skip
-	})
-}
-
 var logger = struct {
 	logf func(string, ...any)
 	sync.RWMutex
@@ -214,35 +206,6 @@ func LogTaskMutationHook() ent.Hook {
 			defer logger.RUnlock()
 			logger.logf("task mutation: type %s, value %v, err %v", m.Op(), value, err)
 			return value, err
-		})
-	}
-}
-
-var mockHook = struct {
-	mockf func(context.Context, ent.Mutator, *ent.NoteMutation) (ent.Value, error)
-	sync.RWMutex
-}{
-	mockf: func(ctx context.Context, next ent.Mutator, m *ent.NoteMutation) (ent.Value, error) {
-		return next.Mutate(ctx, m)
-	},
-}
-
-// SetNoteMockHook overrides the hook used by the privacy rules.
-func SetNoteMockHook(f func(context.Context, ent.Mutator, *ent.NoteMutation) (ent.Value, error)) func(context.Context, ent.Mutator, *ent.NoteMutation) (ent.Value, error) {
-	mockHook.Lock()
-	defer mockHook.Unlock()
-	mockf := mockHook.mockf
-	mockHook.mockf = f
-	return mockf
-}
-
-// NoteMockHook returns a note hook that can be used to mock the privacy rules.
-func NoteMockHook() ent.Hook {
-	return func(next ent.Mutator) ent.Mutator {
-		return hook.NoteFunc(func(ctx context.Context, m *ent.NoteMutation) (ent.Value, error) {
-			mockHook.RLock()
-			defer mockHook.RUnlock()
-			return mockHook.mockf(ctx, next, m)
 		})
 	}
 }

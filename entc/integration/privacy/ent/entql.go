@@ -7,7 +7,6 @@
 package ent
 
 import (
-	"entgo.io/ent/entc/integration/privacy/ent/note"
 	"entgo.io/ent/entc/integration/privacy/ent/predicate"
 	"entgo.io/ent/entc/integration/privacy/ent/task"
 	"entgo.io/ent/entc/integration/privacy/ent/team"
@@ -21,24 +20,8 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 4)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 3)}
 	graph.Nodes[0] = &sqlgraph.Node{
-		NodeSpec: sqlgraph.NodeSpec{
-			Table:   note.Table,
-			Columns: note.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: note.FieldID,
-			},
-		},
-		Type: "Note",
-		Fields: map[string]*sqlgraph.FieldSpec{
-			note.FieldTitle:       {Type: field.TypeString, Column: note.FieldTitle},
-			note.FieldDescription: {Type: field.TypeString, Column: note.FieldDescription},
-			note.FieldReadonly:    {Type: field.TypeBool, Column: note.FieldReadonly},
-		},
-	}
-	graph.Nodes[1] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   task.Table,
 			Columns: task.Columns,
@@ -55,7 +38,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			task.FieldUUID:        {Type: field.TypeUUID, Column: task.FieldUUID},
 		},
 	}
-	graph.Nodes[2] = &sqlgraph.Node{
+	graph.Nodes[1] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   team.Table,
 			Columns: team.Columns,
@@ -69,7 +52,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			team.FieldName: {Type: field.TypeString, Column: team.FieldName},
 		},
 	}
-	graph.Nodes[3] = &sqlgraph.Node{
+	graph.Nodes[2] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
@@ -166,61 +149,6 @@ type predicateAdder interface {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (nq *NoteQuery) addPredicate(pred func(s *sql.Selector)) {
-	nq.predicates = append(nq.predicates, pred)
-}
-
-// Filter returns a Filter implementation to apply filters on the NoteQuery builder.
-func (nq *NoteQuery) Filter() *NoteFilter {
-	return &NoteFilter{config: nq.config, predicateAdder: nq}
-}
-
-// addPredicate implements the predicateAdder interface.
-func (m *NoteMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
-}
-
-// Filter returns an entql.Where implementation to apply filters on the NoteMutation builder.
-func (m *NoteMutation) Filter() *NoteFilter {
-	return &NoteFilter{config: m.config, predicateAdder: m}
-}
-
-// NoteFilter provides a generic filtering capability at runtime for NoteQuery.
-type NoteFilter struct {
-	predicateAdder
-	config
-}
-
-// Where applies the entql predicate on the query filter.
-func (f *NoteFilter) Where(p entql.P) {
-	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[0].Type, p, s); err != nil {
-			s.AddError(err)
-		}
-	})
-}
-
-// WhereID applies the entql int predicate on the id field.
-func (f *NoteFilter) WhereID(p entql.IntP) {
-	f.Where(p.Field(note.FieldID))
-}
-
-// WhereTitle applies the entql string predicate on the title field.
-func (f *NoteFilter) WhereTitle(p entql.StringP) {
-	f.Where(p.Field(note.FieldTitle))
-}
-
-// WhereDescription applies the entql string predicate on the description field.
-func (f *NoteFilter) WhereDescription(p entql.StringP) {
-	f.Where(p.Field(note.FieldDescription))
-}
-
-// WhereReadonly applies the entql bool predicate on the readonly field.
-func (f *NoteFilter) WhereReadonly(p entql.BoolP) {
-	f.Where(p.Field(note.FieldReadonly))
-}
-
-// addPredicate implements the predicateAdder interface.
 func (tq *TaskQuery) addPredicate(pred func(s *sql.Selector)) {
 	tq.predicates = append(tq.predicates, pred)
 }
@@ -249,7 +177,7 @@ type TaskFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TaskFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[1].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[0].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -337,7 +265,7 @@ type TeamFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TeamFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[2].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[1].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -410,7 +338,7 @@ type UserFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[3].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[2].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})

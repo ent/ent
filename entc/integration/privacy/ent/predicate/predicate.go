@@ -10,9 +10,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// Note is the predicate function for note builders.
-type Note func(*sql.Selector)
-
 // Task is the predicate function for task builders.
 type Task func(*sql.Selector)
 
