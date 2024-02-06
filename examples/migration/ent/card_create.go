@@ -10,9 +10,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/migration/ent/card"
+	"entgo.io/ent/examples/migration/ent/payment"
 	"entgo.io/ent/examples/migration/ent/user"
 	"entgo.io/ent/schema/field"
 )
@@ -22,6 +24,32 @@ type CardCreate struct {
 	config
 	mutation *CardMutation
 	hooks    []Hook
+}
+
+// SetNumberHash sets the "number_hash" field.
+func (cc *CardCreate) SetNumberHash(s string) *CardCreate {
+	cc.mutation.SetNumberHash(s)
+	return cc
+}
+
+// SetCvvHash sets the "cvv_hash" field.
+func (cc *CardCreate) SetCvvHash(s string) *CardCreate {
+	cc.mutation.SetCvvHash(s)
+	return cc
+}
+
+// SetExpiresAt sets the "expires_at" field.
+func (cc *CardCreate) SetExpiresAt(t time.Time) *CardCreate {
+	cc.mutation.SetExpiresAt(t)
+	return cc
+}
+
+// SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
+func (cc *CardCreate) SetNillableExpiresAt(t *time.Time) *CardCreate {
+	if t != nil {
+		cc.SetExpiresAt(*t)
+	}
+	return cc
 }
 
 // SetOwnerID sets the "owner_id" field.
@@ -41,6 +69,21 @@ func (cc *CardCreate) SetNillableOwnerID(i *int) *CardCreate {
 // SetOwner sets the "owner" edge to the User entity.
 func (cc *CardCreate) SetOwner(u *User) *CardCreate {
 	return cc.SetOwnerID(u.ID)
+}
+
+// AddPaymentIDs adds the "payments" edge to the Payment entity by IDs.
+func (cc *CardCreate) AddPaymentIDs(ids ...int) *CardCreate {
+	cc.mutation.AddPaymentIDs(ids...)
+	return cc
+}
+
+// AddPayments adds the "payments" edges to the Payment entity.
+func (cc *CardCreate) AddPayments(p ...*Payment) *CardCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return cc.AddPaymentIDs(ids...)
 }
 
 // Mutation returns the CardMutation object of the builder.
@@ -86,6 +129,12 @@ func (cc *CardCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (cc *CardCreate) check() error {
+	if _, ok := cc.mutation.NumberHash(); !ok {
+		return &ValidationError{Name: "number_hash", err: errors.New(`ent: missing required field "Card.number_hash"`)}
+	}
+	if _, ok := cc.mutation.CvvHash(); !ok {
+		return &ValidationError{Name: "cvv_hash", err: errors.New(`ent: missing required field "Card.cvv_hash"`)}
+	}
 	if _, ok := cc.mutation.OwnerID(); !ok {
 		return &ValidationError{Name: "owner_id", err: errors.New(`ent: missing required field "Card.owner_id"`)}
 	}
@@ -118,6 +167,18 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 		_node = &Card{config: cc.config}
 		_spec = sqlgraph.NewCreateSpec(card.Table, sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt))
 	)
+	if value, ok := cc.mutation.NumberHash(); ok {
+		_spec.SetField(card.FieldNumberHash, field.TypeString, value)
+		_node.NumberHash = value
+	}
+	if value, ok := cc.mutation.CvvHash(); ok {
+		_spec.SetField(card.FieldCvvHash, field.TypeString, value)
+		_node.CvvHash = value
+	}
+	if value, ok := cc.mutation.ExpiresAt(); ok {
+		_spec.SetField(card.FieldExpiresAt, field.TypeTime, value)
+		_node.ExpiresAt = value
+	}
 	if nodes := cc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -133,6 +194,22 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.OwnerID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.PaymentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   card.PaymentsTable,
+			Columns: []string{card.PaymentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(payment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

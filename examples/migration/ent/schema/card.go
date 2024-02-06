@@ -6,6 +6,8 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
@@ -18,6 +20,10 @@ type Card struct {
 // Fields of the Card.
 func (Card) Fields() []ent.Field {
 	return []ent.Field{
+		field.String("number_hash"),
+		field.String("cvv_hash"),
+		field.Time("expires_at").
+			Optional(),
 		field.Int("owner_id").
 			Default(0),
 	}
@@ -31,5 +37,17 @@ func (Card) Edges() []ent.Edge {
 			Unique().
 			Required().
 			Field("owner_id"),
+		edge.To("payments", Payment.Type),
+	}
+}
+
+// Annotations of the Card.
+func (Card) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		// Named check constraints are compared by their name.
+		// Thus, the definition does not need to be normalized.
+		entsql.Checks(map[string]string{
+			"number_hash_length": "(LENGTH(`number_hash`) = 16)",
+		}),
 	}
 }

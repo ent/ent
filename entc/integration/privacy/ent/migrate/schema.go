@@ -7,6 +7,7 @@
 package migrate
 
 import (
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/schema/field"
 )
@@ -120,6 +121,10 @@ var (
 
 func init() {
 	TasksTable.ForeignKeys[0].RefTable = UsersTable
+	UsersTable.Annotation = &entsql.Annotation{}
+	UsersTable.Annotation.Checks = map[string]string{
+		"backticks": "`name` IS NOT NULL",
+	}
 	TaskTeamsTable.ForeignKeys[0].RefTable = TasksTable
 	TaskTeamsTable.ForeignKeys[1].RefTable = TeamsTable
 	UserTeamsTable.ForeignKeys[0].RefTable = UsersTable

@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"entgo.io/ent/entc/gen"
@@ -233,10 +234,14 @@ func IsBuildError(err error) bool {
 }
 
 func trim(line []byte) ([]byte, error) {
-	start := bytes.IndexByte(line, '`')
-	end := bytes.LastIndexByte(line, '`')
+	start := bytes.IndexByte(line, '"')
+	end := bytes.LastIndexByte(line, '"')
 	if start == -1 || start >= end {
 		return nil, fmt.Errorf("unexpected snapshot line %s", line)
 	}
-	return line[start+1 : end], nil
+	l, err := strconv.Unquote(string(line[start : end+1]))
+	if err != nil {
+		return nil, err
+	}
+	return []byte(l), nil
 }

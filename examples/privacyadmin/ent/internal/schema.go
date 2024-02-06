@@ -10,4 +10,4 @@
 // Package internal holds a loadable version of the latest schema.
 package internal
 
-const Schema = `{"Schema":"entgo.io/ent/examples/privacyadmin/ent/schema","Package":"entgo.io/ent/examples/privacyadmin/ent","Schemas":[{"name":"User","config":{"Table":""},"fields":[{"name":"name","type":{"Type":7,"Ident":"","PkgPath":"","PkgName":"","Nillable":false,"RType":null},"default":true,"default_value":"Unknown","default_kind":24,"position":{"Index":0,"MixedIn":false,"MixinIndex":0}}],"policy":[{"Index":0,"MixedIn":false,"MixinIndex":0}]}],"Features":["schema/snapshot","privacy"]}`
+const Schema = "{\"Schema\":\"entgo.io/ent/examples/privacyadmin/ent/schema\",\"Package\":\"entgo.io/ent/examples/privacyadmin/ent\",\"Schemas\":[{\"name\":\"User\",\"config\":{\"Table\":\"\"},\"fields\":[{\"name\":\"name\",\"type\":{\"Type\":7,\"Ident\":\"\",\"PkgPath\":\"\",\"PkgName\":\"\",\"Nillable\":false,\"RType\":null},\"default\":true,\"default_value\":\"Unknown\",\"default_kind\":24,\"position\":{\"Index\":0,\"MixedIn\":false,\"MixinIndex\":0}}],\"policy\":[{\"Index\":0,\"MixedIn\":false,\"MixinIndex\":0}]}],\"Features\":[\"schema/snapshot\",\"privacy\"]}"

@@ -18,8 +18,10 @@ const (
 	FieldID = "id"
 	// FieldAge holds the string denoting the age field in the database.
 	FieldAge = "age"
-	// FieldName holds the string denoting the name field in the database.
-	FieldName = "name"
+	// FieldFirstName holds the string denoting the first_name field in the database.
+	FieldFirstName = "first_name"
+	// FieldLastName holds the string denoting the last_name field in the database.
+	FieldLastName = "last_name"
 	// FieldTags holds the string denoting the tags field in the database.
 	FieldTags = "tags"
 	// EdgeCards holds the string denoting the cards edge name in mutations.
@@ -39,7 +41,8 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldAge,
-	FieldName,
+	FieldFirstName,
+	FieldLastName,
 	FieldTags,
 }
 
@@ -66,9 +69,14 @@ func ByAge(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAge, opts...).ToFunc()
 }
 
-// ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldName, opts...).ToFunc()
+// ByFirstName orders the results by the first_name field.
+func ByFirstName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFirstName, opts...).ToFunc()
+}
+
+// ByLastName orders the results by the last_name field.
+func ByLastName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastName, opts...).ToFunc()
 }
 
 // ByCardsCount orders the results by cards count.
