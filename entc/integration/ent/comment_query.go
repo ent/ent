@@ -26,6 +26,8 @@ type CommentQuery struct {
 	order      []comment.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Comment
+	useIndex   []string
+	forceIndex []string
 	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -348,6 +350,12 @@ func (cq *CommentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Comm
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
+	if useIndex := cq.useIndex; len(useIndex) > 0 {
+		_spec.UseIndex = useIndex
+	}
+	if forceIndex := cq.forceIndex; len(forceIndex) > 0 {
+		_spec.ForceIndex = forceIndex
+	}
 	if len(cq.modifiers) > 0 {
 		_spec.Modifiers = cq.modifiers
 	}
@@ -365,6 +373,12 @@ func (cq *CommentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Comm
 
 func (cq *CommentQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := cq.querySpec()
+	if useIndex := cq.useIndex; len(useIndex) > 0 {
+		_spec.UseIndex = useIndex
+	}
+	if forceIndex := cq.forceIndex; len(forceIndex) > 0 {
+		_spec.ForceIndex = forceIndex
+	}
 	if len(cq.modifiers) > 0 {
 		_spec.Modifiers = cq.modifiers
 	}
@@ -430,6 +444,12 @@ func (cq *CommentQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if cq.ctx.Unique != nil && *cq.ctx.Unique {
 		selector.Distinct()
 	}
+	if useIndex := cq.useIndex; len(useIndex) > 0 {
+		t1.UseIndex(useIndex...)
+	}
+	if forceIndex := cq.forceIndex; len(forceIndex) > 0 {
+		t1.ForceIndex(forceIndex...)
+	}
 	for _, m := range cq.modifiers {
 		m(selector)
 	}
@@ -448,6 +468,18 @@ func (cq *CommentQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// UseIndex hints which indexes to use.
+func (cq *CommentQuery) UseIndex(idx ...string) *CommentQuery {
+	cq.useIndex = append(cq.useIndex, idx...)
+	return cq
+}
+
+// ForceIndex forces which indexes to use.
+func (cq *CommentQuery) ForceIndex(idx ...string) *CommentQuery {
+	cq.forceIndex = append(cq.forceIndex, idx...)
+	return cq
 }
 
 // ForUpdate locks the selected rows against concurrent updates, and prevent them from being

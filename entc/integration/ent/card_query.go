@@ -32,6 +32,8 @@ type CardQuery struct {
 	withOwner     *UserQuery
 	withSpec      *SpecQuery
 	withFKs       bool
+	useIndex      []string
+	forceIndex    []string
 	modifiers     []func(*sql.Selector)
 	withNamedSpec map[string]*SpecQuery
 	// intermediate query (i.e. traversal path).
@@ -435,6 +437,12 @@ func (cq *CardQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Card, e
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if useIndex := cq.useIndex; len(useIndex) > 0 {
+		_spec.UseIndex = useIndex
+	}
+	if forceIndex := cq.forceIndex; len(forceIndex) > 0 {
+		_spec.ForceIndex = forceIndex
+	}
 	if len(cq.modifiers) > 0 {
 		_spec.Modifiers = cq.modifiers
 	}
@@ -566,6 +574,12 @@ func (cq *CardQuery) loadSpec(ctx context.Context, query *SpecQuery, nodes []*Ca
 
 func (cq *CardQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := cq.querySpec()
+	if useIndex := cq.useIndex; len(useIndex) > 0 {
+		_spec.UseIndex = useIndex
+	}
+	if forceIndex := cq.forceIndex; len(forceIndex) > 0 {
+		_spec.ForceIndex = forceIndex
+	}
 	if len(cq.modifiers) > 0 {
 		_spec.Modifiers = cq.modifiers
 	}
@@ -631,6 +645,12 @@ func (cq *CardQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if cq.ctx.Unique != nil && *cq.ctx.Unique {
 		selector.Distinct()
 	}
+	if useIndex := cq.useIndex; len(useIndex) > 0 {
+		t1.UseIndex(useIndex...)
+	}
+	if forceIndex := cq.forceIndex; len(forceIndex) > 0 {
+		t1.ForceIndex(forceIndex...)
+	}
 	for _, m := range cq.modifiers {
 		m(selector)
 	}
@@ -649,6 +669,18 @@ func (cq *CardQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// UseIndex hints which indexes to use.
+func (cq *CardQuery) UseIndex(idx ...string) *CardQuery {
+	cq.useIndex = append(cq.useIndex, idx...)
+	return cq
+}
+
+// ForceIndex forces which indexes to use.
+func (cq *CardQuery) ForceIndex(idx ...string) *CardQuery {
+	cq.forceIndex = append(cq.forceIndex, idx...)
+	return cq
 }
 
 // ForUpdate locks the selected rows against concurrent updates, and prevent them from being

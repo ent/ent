@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"entgo.io/ent/entc/integration/ent"
+	"entgo.io/ent/entc/integration/ent/file"
 
 	"github.com/stretchr/testify/require"
 )
@@ -70,4 +71,56 @@ func Indexes(t *testing.T, client *ent.Client) {
 
 	require.Equal(1, a8m.QueryFiles().CountX(ctx))
 	require.Equal(1, nati.QueryFiles().CountX(ctx))
+}
+
+func IndexHint(t *testing.T, client *ent.Client) {
+	skip(t, "SQLite", "Postgres")
+	ctx := context.Background()
+	require := require.New(t)
+
+	err := client.File.Create().SetName("example.txt").SetUser("amy").SetSize(256).Exec(ctx)
+	require.NoError(err)
+	err = client.File.Create().SetName("example.txt").SetUser("bob").SetSize(131072).Exec(ctx)
+	require.NoError(err)
+	err = client.File.Create().SetName("example.txt").SetUser("charlie").SetSize(2097152).Exec(ctx)
+	require.NoError(err)
+
+	files, err := client.File.
+		Query().
+		Where(
+			file.NameEQ("example.txt"),
+			file.SizeGTE(1024),
+			file.SizeLTE(1048576),
+		).
+		UseIndex("file_name_size").
+		All(ctx)
+
+	require.Nil(err)
+	require.Len(files, 1)
+	require.NotNil(files[0].User)
+	require.Equal("bob", *files[0].User)
+
+	// SELECT (specific fields)
+	_, err = client.File.
+		Query().
+		Where(
+			file.NameEQ("example.txt"),
+			file.SizeGTE(1024),
+			file.SizeLTE(1048576),
+		).
+		UseIndex("file_name_size").
+		Select(file.FieldUser).Strings(ctx)
+	require.Nil(err)
+
+	// SELECT COUNT(*)
+	_, err = client.File.
+		Query().
+		Where(
+			file.NameEQ("example.txt"),
+			file.SizeGTE(1024),
+			file.SizeLTE(1048576),
+		).
+		UseIndex("file_name_size").
+		Count(ctx)
+	require.Nil(err)
 }

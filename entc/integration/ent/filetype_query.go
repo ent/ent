@@ -29,6 +29,8 @@ type FileTypeQuery struct {
 	inters         []Interceptor
 	predicates     []predicate.FileType
 	withFiles      *FileQuery
+	useIndex       []string
+	forceIndex     []string
 	modifiers      []func(*sql.Selector)
 	withNamedFiles map[string]*FileQuery
 	// intermediate query (i.e. traversal path).
@@ -390,6 +392,12 @@ func (ftq *FileTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Fi
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if useIndex := ftq.useIndex; len(useIndex) > 0 {
+		_spec.UseIndex = useIndex
+	}
+	if forceIndex := ftq.forceIndex; len(forceIndex) > 0 {
+		_spec.ForceIndex = forceIndex
+	}
 	if len(ftq.modifiers) > 0 {
 		_spec.Modifiers = ftq.modifiers
 	}
@@ -453,6 +461,12 @@ func (ftq *FileTypeQuery) loadFiles(ctx context.Context, query *FileQuery, nodes
 
 func (ftq *FileTypeQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := ftq.querySpec()
+	if useIndex := ftq.useIndex; len(useIndex) > 0 {
+		_spec.UseIndex = useIndex
+	}
+	if forceIndex := ftq.forceIndex; len(forceIndex) > 0 {
+		_spec.ForceIndex = forceIndex
+	}
 	if len(ftq.modifiers) > 0 {
 		_spec.Modifiers = ftq.modifiers
 	}
@@ -518,6 +532,12 @@ func (ftq *FileTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if ftq.ctx.Unique != nil && *ftq.ctx.Unique {
 		selector.Distinct()
 	}
+	if useIndex := ftq.useIndex; len(useIndex) > 0 {
+		t1.UseIndex(useIndex...)
+	}
+	if forceIndex := ftq.forceIndex; len(forceIndex) > 0 {
+		t1.ForceIndex(forceIndex...)
+	}
 	for _, m := range ftq.modifiers {
 		m(selector)
 	}
@@ -536,6 +556,18 @@ func (ftq *FileTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// UseIndex hints which indexes to use.
+func (ftq *FileTypeQuery) UseIndex(idx ...string) *FileTypeQuery {
+	ftq.useIndex = append(ftq.useIndex, idx...)
+	return ftq
+}
+
+// ForceIndex forces which indexes to use.
+func (ftq *FileTypeQuery) ForceIndex(idx ...string) *FileTypeQuery {
+	ftq.forceIndex = append(ftq.forceIndex, idx...)
+	return ftq
 }
 
 // ForUpdate locks the selected rows against concurrent updates, and prevent them from being

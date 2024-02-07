@@ -26,6 +26,8 @@ type ExValueScanQuery struct {
 	order      []exvaluescan.OrderOption
 	inters     []Interceptor
 	predicates []predicate.ExValueScan
+	useIndex   []string
+	forceIndex []string
 	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -348,6 +350,12 @@ func (evsq *ExValueScanQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
+	if useIndex := evsq.useIndex; len(useIndex) > 0 {
+		_spec.UseIndex = useIndex
+	}
+	if forceIndex := evsq.forceIndex; len(forceIndex) > 0 {
+		_spec.ForceIndex = forceIndex
+	}
 	if len(evsq.modifiers) > 0 {
 		_spec.Modifiers = evsq.modifiers
 	}
@@ -365,6 +373,12 @@ func (evsq *ExValueScanQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 
 func (evsq *ExValueScanQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := evsq.querySpec()
+	if useIndex := evsq.useIndex; len(useIndex) > 0 {
+		_spec.UseIndex = useIndex
+	}
+	if forceIndex := evsq.forceIndex; len(forceIndex) > 0 {
+		_spec.ForceIndex = forceIndex
+	}
 	if len(evsq.modifiers) > 0 {
 		_spec.Modifiers = evsq.modifiers
 	}
@@ -430,6 +444,12 @@ func (evsq *ExValueScanQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if evsq.ctx.Unique != nil && *evsq.ctx.Unique {
 		selector.Distinct()
 	}
+	if useIndex := evsq.useIndex; len(useIndex) > 0 {
+		t1.UseIndex(useIndex...)
+	}
+	if forceIndex := evsq.forceIndex; len(forceIndex) > 0 {
+		t1.ForceIndex(forceIndex...)
+	}
 	for _, m := range evsq.modifiers {
 		m(selector)
 	}
@@ -448,6 +468,18 @@ func (evsq *ExValueScanQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// UseIndex hints which indexes to use.
+func (evsq *ExValueScanQuery) UseIndex(idx ...string) *ExValueScanQuery {
+	evsq.useIndex = append(evsq.useIndex, idx...)
+	return evsq
+}
+
+// ForceIndex forces which indexes to use.
+func (evsq *ExValueScanQuery) ForceIndex(idx ...string) *ExValueScanQuery {
+	evsq.forceIndex = append(evsq.forceIndex, idx...)
+	return evsq
 }
 
 // ForUpdate locks the selected rows against concurrent updates, and prevent them from being

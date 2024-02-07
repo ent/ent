@@ -873,12 +873,14 @@ type QuerySpec struct {
 	Node *NodeSpec     // Nodes info.
 	From *sql.Selector // Optional query source (from path).
 
-	Limit     int
-	Offset    int
-	Unique    bool
-	Order     func(*sql.Selector)
-	Predicate func(*sql.Selector)
-	Modifiers []func(*sql.Selector)
+	Limit      int
+	Offset     int
+	Unique     bool
+	UseIndex   []string
+	ForceIndex []string
+	Order      func(*sql.Selector)
+	Predicate  func(*sql.Selector)
+	Modifiers  []func(*sql.Selector)
 
 	ScanValues func(columns []string) ([]any, error)
 	Assign     func(columns []string, values []any) error
@@ -1028,7 +1030,12 @@ func (q *query) count(ctx context.Context, drv dialect.Driver) (int, error) {
 func (q *query) selector(ctx context.Context) (*sql.Selector, error) {
 	selector := q.builder.
 		Select().
-		From(q.builder.Table(q.Node.Table).Schema(q.Node.Schema)).
+		From(q.builder.
+			Table(q.Node.Table).
+			Schema(q.Node.Schema).
+			UseIndex(q.UseIndex...).
+			ForceIndex(q.ForceIndex...),
+		).
 		WithContext(ctx)
 	if q.From != nil {
 		selector = q.From
