@@ -149,6 +149,12 @@ func (s *Step) FromEdgeOwner() bool {
 	return s.Edge.Rel == M2O || (s.Edge.Rel == O2O && s.Edge.Inverse)
 }
 
+// ToO2OEdgeOwner returns true if the step is from an O2O edge owner.
+// i.e., to the table that holds the foreign-key.
+func (s *Step) ToO2OEdgeOwner() bool {
+	return s.Edge.Rel == O2O && !s.Edge.Inverse
+}
+
 // ToEdgeOwner returns true if the step is to an edge owner.
 // i.e., to the table that holds the foreign-key.
 func (s *Step) ToEdgeOwner() bool {
@@ -512,8 +518,10 @@ func OrderByNeighborTerms(q *sql.Selector, s *Step, opts ...sql.OrderTerm) {
 	case s.ToEdgeOwner():
 		toT := build.Table(s.Edge.Table).Schema(s.Edge.Schema)
 		join = build.Select(toT.C(s.Edge.Columns[0])).
-			From(toT).
-			GroupBy(toT.C(s.Edge.Columns[0]))
+			From(toT)
+		if s.Edge.Rel != O2O {
+			join = join.GroupBy(toT.C(s.Edge.Columns[0]))
+		}
 		selectTerms(join, opts)
 		q.LeftJoin(join).
 			On(q.C(s.From.Column), join.C(s.Edge.Columns[0]))
@@ -1153,8 +1161,8 @@ func (u *updater) nodes(ctx context.Context, drv dialect.Driver) (int, error) {
 		multiple   = hasExternalEdges(addEdges, clearEdges)
 		update     = u.builder.Update(u.Node.Table).Schema(u.Node.Schema)
 		selector   = u.builder.Select().
-				From(u.builder.Table(u.Node.Table).Schema(u.Node.Schema)).
-				WithContext(ctx)
+			From(u.builder.Table(u.Node.Table).Schema(u.Node.Schema)).
+			WithContext(ctx)
 	)
 	switch {
 	// In case it is not an edge schema, the id holds the PK of
