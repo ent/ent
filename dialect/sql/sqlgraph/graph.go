@@ -1477,7 +1477,7 @@ func (c *batchCreator) nodes(ctx context.Context, drv dialect.Driver) error {
 			return fmt.Errorf("more than 1 table for batch insert: %q != %q", node.Table, c.Nodes[i-1].Table)
 		}
 		values[i] = make(map[string]driver.Value)
-		if node.ID != nil && node.ID.Value != nil {
+		if node.ID != nil && (node.ID.Value != nil || len(node.Fields) == 0) {
 			columns[node.ID.Column] = struct{}{}
 			values[i][node.ID.Column] = node.ID.Value
 		}

@@ -1595,6 +1595,52 @@ func TestBatchCreate(t *testing.T) {
 			},
 		},
 		{
+			name: "empty fields",
+			spec: &BatchCreateSpec{
+				Nodes: []*CreateSpec{
+					{
+						Table:  "users",
+						ID:     &FieldSpec{Column: "id", Type: field.TypeInt},
+						Fields: []*FieldSpec{},
+						Edges: []*EdgeSpec{
+							{Rel: M2M, Inverse: true, Table: "group_users", Columns: []string{"group_id", "user_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+							{Rel: M2M, Table: "user_products", Columns: []string{"user_id", "product_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+							{Rel: M2M, Table: "user_friends", Bidi: true, Columns: []string{"user_id", "friend_id"}, Target: &EdgeTarget{IDSpec: &FieldSpec{Column: "id", Type: field.TypeInt}, Nodes: []driver.Value{2}}},
+						},
+					},
+					{
+						Table:  "users",
+						ID:     &FieldSpec{Column: "id", Type: field.TypeInt},
+						Fields: []*FieldSpec{},
+						Edges: []*EdgeSpec{
+							{Rel: M2M, Inverse: true, Table: "group_users", Columns: []string{"group_id", "user_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+							{Rel: M2M, Table: "user_products", Columns: []string{"user_id", "product_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+							{Rel: M2M, Table: "user_friends", Bidi: true, Columns: []string{"user_id", "friend_id"}, Target: &EdgeTarget{IDSpec: &FieldSpec{Column: "id", Type: field.TypeInt}, Nodes: []driver.Value{2}}},
+						},
+					},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				// Insert nodes with FKs.
+				m.ExpectExec(escape("INSERT INTO `users` (`id`) VALUES (NULL), (NULL)")).
+					WillReturnResult(sqlmock.NewResult(10, 2))
+				// Insert M2M inverse-edges.
+				m.ExpectExec(escape("INSERT INTO `group_users` (`group_id`, `user_id`) VALUES (?, ?), (?, ?) ON DUPLICATE KEY UPDATE `group_id` = `group_users`.`group_id`, `user_id` = `group_users`.`user_id`")).
+					WithArgs(2, 10, 2, 11).
+					WillReturnResult(sqlmock.NewResult(2, 2))
+				// Insert M2M bidirectional edges.
+				m.ExpectExec(escape("INSERT INTO `user_friends` (`user_id`, `friend_id`) VALUES (?, ?), (?, ?), (?, ?), (?, ?) ON DUPLICATE KEY UPDATE `user_id` = `user_friends`.`user_id`, `friend_id` = `user_friends`.`friend_id`")).
+					WithArgs(10, 2, 2, 10, 11, 2, 2, 11).
+					WillReturnResult(sqlmock.NewResult(2, 2))
+				// Insert M2M edges.
+				m.ExpectExec(escape("INSERT INTO `user_products` (`user_id`, `product_id`) VALUES (?, ?), (?, ?) ON DUPLICATE KEY UPDATE `user_id` = `user_products`.`user_id`, `product_id` = `user_products`.`product_id`")).
+					WithArgs(10, 2, 11, 2).
+					WillReturnResult(sqlmock.NewResult(2, 2))
+				m.ExpectCommit()
+			},
+		},
+		{
 			name: "multiple",
 			spec: &BatchCreateSpec{
 				Nodes: []*CreateSpec{
