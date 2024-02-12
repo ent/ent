@@ -1511,7 +1511,7 @@ func TestBatchCreate(t *testing.T) {
 				},
 			},
 			expect: func(m sqlmock.Sqlmock) {
-				m.ExpectExec(escape("INSERT INTO `users` (`active`, `age`, `name`) VALUES (?, ?, ?), (?, ?, ?) ON DUPLICATE KEY UPDATE `active` = `users`.`active`, `age` = `users`.`age`, `name` = `users`.`name`")).
+				m.ExpectExec(escape("INSERT INTO `users` (`active`, `age`, `id`, `name`) VALUES (?, ?, NULL, ?), (?, ?, NULL, ?) ON DUPLICATE KEY UPDATE `active` = `users`.`active`, `age` = `users`.`age`, `id` = `users`.`id`, `name` = `users`.`name`")).
 					WithArgs(false, 32, "a8m", true, 30, "nati").
 					WillReturnResult(sqlmock.NewResult(10, 2))
 			},
@@ -1549,7 +1549,7 @@ func TestBatchCreate(t *testing.T) {
 			},
 			expect: func(m sqlmock.Sqlmock) {
 				// Insert nodes with FKs.
-				m.ExpectExec(escape("INSERT INTO `users` (`active`, `age`, `best_friend_id`, `name`, `workplace_id`) VALUES (?, ?, ?, ?, ?), (NULL, ?, ?, ?, ?)")).
+				m.ExpectExec(escape("INSERT INTO `users` (`active`, `age`, `best_friend_id`, `id`, `name`, `workplace_id`) VALUES (?, ?, ?, NULL, ?, ?), (NULL, ?, ?, NULL, ?, ?)")).
 					WithArgs(false, 32, 3, "a8m", 2, 30, 4, "nati", 2).
 					WillReturnResult(sqlmock.NewResult(10, 2))
 			},
@@ -1582,7 +1582,7 @@ func TestBatchCreate(t *testing.T) {
 			},
 			expect: func(m sqlmock.Sqlmock) {
 				m.ExpectBegin()
-				m.ExpectExec(escape("INSERT INTO `users` (`name`) VALUES (?), (?)")).
+				m.ExpectExec(escape("INSERT INTO `users` (`id`, `name`) VALUES (NULL, ?), (NULL, ?)")).
 					WithArgs("a8m", "nati").
 					WillReturnResult(sqlmock.NewResult(10, 2))
 				m.ExpectExec(escape("UPDATE `cards` SET `owner_id` = ? WHERE `id` = ? AND `owner_id` IS NULL")).
@@ -1679,7 +1679,7 @@ func TestBatchCreate(t *testing.T) {
 			expect: func(m sqlmock.Sqlmock) {
 				m.ExpectBegin()
 				// Insert nodes with FKs.
-				m.ExpectExec(escape("INSERT INTO `users` (`active`, `age`, `name`, `workplace_id`) VALUES (?, ?, ?, ?), (NULL, ?, ?, NULL)")).
+				m.ExpectExec(escape("INSERT INTO `users` (`active`, `age`, `id`, `name`, `workplace_id`) VALUES (?, ?, NULL, ?, ?), (NULL, ?, NULL, ?, NULL)")).
 					WithArgs(false, 32, "a8m", 2, 30, "nati").
 					WillReturnResult(sqlmock.NewResult(10, 2))
 				// Insert M2M inverse-edges.
