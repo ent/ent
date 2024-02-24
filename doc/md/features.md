@@ -80,6 +80,16 @@ The `namedges` option provides an API for preloading edges with custom names.
 This option can be added to a project using the `--feature namedges` flag, and you can learn more about in the
 [Eager Loading](eager-load.mdx) documentation.
 
+### Bidirectional Edge Refs
+
+The `bidiedges` option guides Ent to set two-way references when eager-loading (O2M/O2O) edges.
+
+This option can be added to a project using the `--feature bidiedges` flag.
+
+:::note
+Users that use the standard encoding/json.MarshalJSON should detach the circular references before calling `json.Marshal`.
+:::
+
 ### Schema Config
 
 The `sql/schemaconfig` option lets you pass alternate SQL database names to models. This is useful when your models don't all live under one database and are spread out across different schemas.
