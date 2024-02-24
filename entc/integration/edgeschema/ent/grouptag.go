@@ -46,12 +46,10 @@ type GroupTagEdges struct {
 // TagOrErr returns the Tag value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e GroupTagEdges) TagOrErr() (*Tag, error) {
-	if e.loadedTypes[0] {
-		if e.Tag == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: tag.Label}
-		}
+	if e.Tag != nil {
 		return e.Tag, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: tag.Label}
 	}
 	return nil, &NotLoadedError{edge: "tag"}
 }
@@ -59,12 +57,10 @@ func (e GroupTagEdges) TagOrErr() (*Tag, error) {
 // GroupOrErr returns the Group value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e GroupTagEdges) GroupOrErr() (*Group, error) {
-	if e.loadedTypes[1] {
-		if e.Group == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: group.Label}
-		}
+	if e.Group != nil {
 		return e.Group, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: group.Label}
 	}
 	return nil, &NotLoadedError{edge: "group"}
 }

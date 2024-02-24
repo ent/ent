@@ -446,7 +446,12 @@ func (pq *PetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pet, err
 	}
 	if query := pq.withTeam; query != nil {
 		if err := pq.loadTeam(ctx, query, nodes, nil,
-			func(n *Pet, e *User) { n.Edges.Team = e }); err != nil {
+			func(n *Pet, e *User) {
+				n.Edges.Team = e
+				if !e.Edges.loadedTypes[7] {
+					e.Edges.Team = n
+				}
+			}); err != nil {
 			return nil, err
 		}
 	}

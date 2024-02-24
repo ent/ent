@@ -405,7 +405,12 @@ func (ftq *FileTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Fi
 	if query := ftq.withFiles; query != nil {
 		if err := ftq.loadFiles(ctx, query, nodes,
 			func(n *FileType) { n.Edges.Files = []*File{} },
-			func(n *FileType, e *File) { n.Edges.Files = append(n.Edges.Files, e) }); err != nil {
+			func(n *FileType, e *File) {
+				n.Edges.Files = append(n.Edges.Files, e)
+				if !e.Edges.loadedTypes[1] {
+					e.Edges.Type = n
+				}
+			}); err != nil {
 			return nil, err
 		}
 	}

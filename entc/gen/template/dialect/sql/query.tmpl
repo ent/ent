@@ -80,7 +80,21 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 		if query := {{ $receiver }}.{{ $e.EagerLoadField }}; query != nil {
 			if err := {{ $receiver }}.load{{ $e.StructField }}(ctx, query, nodes, {{ if $e.Unique }}nil{{ else }}
 				func(n *{{ $.Name }}){ n.Edges.{{ $e.StructField }} = []*{{ $e.Type.Name }}{} }{{ end }},
-				func(n *{{ $.Name }}, e *{{ $e.Type.Name }}){ n.Edges.{{ $e.StructField }} = {{ if $e.Unique }}e{{ else }}append(n.Edges.{{ $e.StructField }}, e){{ end }} }); err != nil {
+				{{- $lhs := printf "n.Edges.%s" $e.StructField }}
+				{{- $rhs := print "e" }}{{- if not $e.Unique }}{{ $rhs = printf "append(%s, e)" $lhs }}{{ end }}
+				{{- if and ($.FeatureEnabled "bidiedges") $e.Ref $e.Ref.Unique }}
+					func(n *{{ $.Name }}, e *{{ $e.Type.Name }}){
+						{{ printf "%s = %s" $lhs $rhs }}
+						{{- $idx := $e.Ref.Index }}
+						{{- /* Set only in case this type was not loaded explicitly (without custom options). */}}
+						if !e.Edges.loadedTypes[{{ $idx }}] {
+							e.Edges.{{ $e.Ref.StructField }} = n
+						}
+					}); err != nil {
+				{{- else }}
+					{{- /* Keep it one-liner if there is not inverse-condition. */}}
+					func(n *{{ $.Name }}, e *{{ $e.Type.Name }}){ {{ printf "%s = %s" $lhs $rhs }} }); err != nil {
+				{{- end }}
 				return nil, err
 			}
 		}

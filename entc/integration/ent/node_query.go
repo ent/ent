@@ -446,13 +446,23 @@ func (nq *NodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Node, e
 	}
 	if query := nq.withPrev; query != nil {
 		if err := nq.loadPrev(ctx, query, nodes, nil,
-			func(n *Node, e *Node) { n.Edges.Prev = e }); err != nil {
+			func(n *Node, e *Node) {
+				n.Edges.Prev = e
+				if !e.Edges.loadedTypes[1] {
+					e.Edges.Next = n
+				}
+			}); err != nil {
 			return nil, err
 		}
 	}
 	if query := nq.withNext; query != nil {
 		if err := nq.loadNext(ctx, query, nodes, nil,
-			func(n *Node, e *Node) { n.Edges.Next = e }); err != nil {
+			func(n *Node, e *Node) {
+				n.Edges.Next = e
+				if !e.Edges.loadedTypes[0] {
+					e.Edges.Prev = n
+				}
+			}); err != nil {
 			return nil, err
 		}
 	}

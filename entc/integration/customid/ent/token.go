@@ -43,12 +43,10 @@ type TokenEdges struct {
 // AccountOrErr returns the Account value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e TokenEdges) AccountOrErr() (*Account, error) {
-	if e.loadedTypes[0] {
-		if e.Account == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: account.Label}
-		}
+	if e.Account != nil {
 		return e.Account, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: account.Label}
 	}
 	return nil, &NotLoadedError{edge: "account"}
 }

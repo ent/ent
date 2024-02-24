@@ -80,12 +80,10 @@ func (e GroupEdges) UsersOrErr() ([]*User, error) {
 // InfoOrErr returns the Info value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e GroupEdges) InfoOrErr() (*GroupInfo, error) {
-	if e.loadedTypes[3] {
-		if e.Info == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: groupinfo.Label}
-		}
+	if e.Info != nil {
 		return e.Info, nil
+	} else if e.loadedTypes[3] {
+		return nil, &NotFoundError{label: groupinfo.Label}
 	}
 	return nil, &NotLoadedError{edge: "info"}
 }
