@@ -781,21 +781,36 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	}
 	if query := uq.withCard; query != nil {
 		if err := uq.loadCard(ctx, query, nodes, nil,
-			func(n *User, e *Card) { n.Edges.Card = e }); err != nil {
+			func(n *User, e *Card) {
+				n.Edges.Card = e
+				if !e.Edges.loadedTypes[0] {
+					e.Edges.Owner = n
+				}
+			}); err != nil {
 			return nil, err
 		}
 	}
 	if query := uq.withPets; query != nil {
 		if err := uq.loadPets(ctx, query, nodes,
 			func(n *User) { n.Edges.Pets = []*Pet{} },
-			func(n *User, e *Pet) { n.Edges.Pets = append(n.Edges.Pets, e) }); err != nil {
+			func(n *User, e *Pet) {
+				n.Edges.Pets = append(n.Edges.Pets, e)
+				if !e.Edges.loadedTypes[1] {
+					e.Edges.Owner = n
+				}
+			}); err != nil {
 			return nil, err
 		}
 	}
 	if query := uq.withFiles; query != nil {
 		if err := uq.loadFiles(ctx, query, nodes,
 			func(n *User) { n.Edges.Files = []*File{} },
-			func(n *User, e *File) { n.Edges.Files = append(n.Edges.Files, e) }); err != nil {
+			func(n *User, e *File) {
+				n.Edges.Files = append(n.Edges.Files, e)
+				if !e.Edges.loadedTypes[0] {
+					e.Edges.Owner = n
+				}
+			}); err != nil {
 			return nil, err
 		}
 	}
@@ -829,7 +844,12 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	}
 	if query := uq.withTeam; query != nil {
 		if err := uq.loadTeam(ctx, query, nodes, nil,
-			func(n *User, e *Pet) { n.Edges.Team = e }); err != nil {
+			func(n *User, e *Pet) {
+				n.Edges.Team = e
+				if !e.Edges.loadedTypes[0] {
+					e.Edges.Team = n
+				}
+			}); err != nil {
 			return nil, err
 		}
 	}
@@ -842,7 +862,12 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	if query := uq.withChildren; query != nil {
 		if err := uq.loadChildren(ctx, query, nodes,
 			func(n *User) { n.Edges.Children = []*User{} },
-			func(n *User, e *User) { n.Edges.Children = append(n.Edges.Children, e) }); err != nil {
+			func(n *User, e *User) {
+				n.Edges.Children = append(n.Edges.Children, e)
+				if !e.Edges.loadedTypes[10] {
+					e.Edges.Parent = n
+				}
+			}); err != nil {
 			return nil, err
 		}
 	}

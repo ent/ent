@@ -47,12 +47,10 @@ type BlobLinkEdges struct {
 // BlobOrErr returns the Blob value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e BlobLinkEdges) BlobOrErr() (*Blob, error) {
-	if e.loadedTypes[0] {
-		if e.Blob == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: blob.Label}
-		}
+	if e.Blob != nil {
 		return e.Blob, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: blob.Label}
 	}
 	return nil, &NotLoadedError{edge: "blob"}
 }
@@ -60,12 +58,10 @@ func (e BlobLinkEdges) BlobOrErr() (*Blob, error) {
 // LinkOrErr returns the Link value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e BlobLinkEdges) LinkOrErr() (*Blob, error) {
-	if e.loadedTypes[1] {
-		if e.Link == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: blob.Label}
-		}
+	if e.Link != nil {
 		return e.Link, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: blob.Label}
 	}
 	return nil, &NotLoadedError{edge: "link"}
 }

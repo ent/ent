@@ -43,12 +43,10 @@ type DeviceEdges struct {
 // ActiveSessionOrErr returns the ActiveSession value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e DeviceEdges) ActiveSessionOrErr() (*Session, error) {
-	if e.loadedTypes[0] {
-		if e.ActiveSession == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: session.Label}
-		}
+	if e.ActiveSession != nil {
 		return e.ActiveSession, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: session.Label}
 	}
 	return nil, &NotLoadedError{edge: "active_session"}
 }

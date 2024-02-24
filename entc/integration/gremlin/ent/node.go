@@ -43,12 +43,10 @@ type NodeEdges struct {
 // PrevOrErr returns the Prev value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e NodeEdges) PrevOrErr() (*Node, error) {
-	if e.loadedTypes[0] {
-		if e.Prev == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: node.Label}
-		}
+	if e.Prev != nil {
 		return e.Prev, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: node.Label}
 	}
 	return nil, &NotLoadedError{edge: "prev"}
 }
@@ -56,12 +54,10 @@ func (e NodeEdges) PrevOrErr() (*Node, error) {
 // NextOrErr returns the Next value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e NodeEdges) NextOrErr() (*Node, error) {
-	if e.loadedTypes[1] {
-		if e.Next == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: node.Label}
-		}
+	if e.Next != nil {
 		return e.Next, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: node.Label}
 	}
 	return nil, &NotLoadedError{edge: "next"}
 }
