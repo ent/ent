@@ -417,7 +417,12 @@ func (giq *GroupInfoQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*G
 	for name, query := range giq.withNamedGroups {
 		if err := giq.loadGroups(ctx, query, nodes,
 			func(n *GroupInfo) { n.appendNamedGroups(name) },
-			func(n *GroupInfo, e *Group) { n.appendNamedGroups(name, e) }); err != nil {
+			func(n *GroupInfo, e *Group) {
+				n.appendNamedGroups(name, e)
+				if !e.Edges.loadedTypes[3] {
+					e.Edges.Info = n
+				}
+			}); err != nil {
 			return nil, err
 		}
 	}
