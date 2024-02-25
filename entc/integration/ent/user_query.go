@@ -880,14 +880,24 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	for name, query := range uq.withNamedPets {
 		if err := uq.loadPets(ctx, query, nodes,
 			func(n *User) { n.appendNamedPets(name) },
-			func(n *User, e *Pet) { n.appendNamedPets(name, e) }); err != nil {
+			func(n *User, e *Pet) {
+				n.appendNamedPets(name, e)
+				if !e.Edges.loadedTypes[1] {
+					e.Edges.Owner = n
+				}
+			}); err != nil {
 			return nil, err
 		}
 	}
 	for name, query := range uq.withNamedFiles {
 		if err := uq.loadFiles(ctx, query, nodes,
 			func(n *User) { n.appendNamedFiles(name) },
-			func(n *User, e *File) { n.appendNamedFiles(name, e) }); err != nil {
+			func(n *User, e *File) {
+				n.appendNamedFiles(name, e)
+				if !e.Edges.loadedTypes[0] {
+					e.Edges.Owner = n
+				}
+			}); err != nil {
 			return nil, err
 		}
 	}
@@ -922,7 +932,12 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	for name, query := range uq.withNamedChildren {
 		if err := uq.loadChildren(ctx, query, nodes,
 			func(n *User) { n.appendNamedChildren(name) },
-			func(n *User, e *User) { n.appendNamedChildren(name, e) }); err != nil {
+			func(n *User, e *User) {
+				n.appendNamedChildren(name, e)
+				if !e.Edges.loadedTypes[10] {
+					e.Edges.Parent = n
+				}
+			}); err != nil {
 			return nil, err
 		}
 	}
