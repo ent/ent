@@ -20,6 +20,32 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestPostgres_scanPostgresColumnDefault(t *testing.T) {
+	for _, test := range []struct {
+		c   Column
+		def string
+	}{
+		{Column{Type: field.TypeInt, Default: int64(1)}, "1::bigint"},
+		{Column{Type: field.TypeString, Default: "val"}, "'val'::character varying"},
+		{Column{Type: field.TypeString}, "val"}, // must quote
+		{Column{Type: field.TypeString}, "current_setting('block_size')::bigint"},
+		{Column{Type: field.TypeString}, "(current_setting('block_size'::text))::bigint"},
+		{Column{Type: field.TypeInt, Default: int64(1)}, "1"},
+		{Column{Type: field.TypeTime}, "CURRENT_TIMESTAMP"},
+		{Column{Type: field.TypeUUID}, "gen_random_uuid()"},
+		{Column{Type: field.TypeInt}, "('1')::bigint"}, // unable to detect
+	} {
+		c := &test.c
+		e := c.Default
+		c.Default = nil
+		require.NoError(t, scanPostgresColumnDefault(c, sql.NullString{
+			String: test.def,
+			Valid:  true,
+		}))
+		require.Equalf(t, e, c.Default, "expect %v default to %v", test.def, e)
+	}
+}
+
 func TestPostgres_Create(t *testing.T) {
 	tests := []struct {
 		name    string
