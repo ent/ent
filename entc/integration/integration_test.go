@@ -1853,6 +1853,12 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 		require.Len(a8m.Edges.Pets, 1)
 		require.Equal("pedro", a8m.Edges.Pets[0].Name)
 		require.Equal(nati.Name, a8m.Edges.Pets[0].Edges.Team.Name)
+		for _, p := range a8m.Edges.Pets {
+			require.Equal(a8m, p.Edges.Owner)
+			u, err := p.Edges.OwnerOrErr()
+			require.NoError(err)
+			require.Equal(a8m, u)
+		}
 
 		a8m = client.User.
 			Query().

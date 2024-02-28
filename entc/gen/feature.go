@@ -51,6 +51,16 @@ var (
 		Description: "NamedEdges provides an API for eager-loading edges with dynamic names",
 	}
 
+	// FeatureBidiEdgeRefs provides a feature-flag for sql dialect to set two-way
+	// references when loading (unique) edges. Note, users that use the standard
+	// encoding/json.MarshalJSON should detach the circular references before marshaling.
+	FeatureBidiEdgeRefs = Feature{
+		Name:        "bidiedges",
+		Stage:       Experimental,
+		Default:     false,
+		Description: "This features guides Ent to set two-way references when loading (O2M/O2O) edges",
+	}
+
 	// FeatureSnapshot stores a snapshot of ent/schema and auto-solve merge-conflict (issue #852).
 	FeatureSnapshot = Feature{
 		Name:        "schema/snapshot",
@@ -140,6 +150,7 @@ var (
 		FeatureIntercept,
 		FeatureEntQL,
 		FeatureNamedEdges,
+		FeatureBidiEdgeRefs,
 		FeatureSnapshot,
 		FeatureSchemaConfig,
 		FeatureLock,

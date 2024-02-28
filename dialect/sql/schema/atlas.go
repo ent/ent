@@ -211,7 +211,7 @@ func (a *Atlas) cleanSchema(ctx context.Context, name string, err0 error) (err e
 	}
 	drop := make([]schema.Change, len(s.Tables))
 	for i, t := range s.Tables {
-		drop[i] = &schema.DropTable{T: t}
+		drop[i] = &schema.DropTable{T: t, Extra: []schema.Clause{&schema.IfExists{}}}
 	}
 	return a.atDriver.ApplyChanges(ctx, drop)
 }

@@ -50,12 +50,10 @@ type RelationshipEdges struct {
 // UserOrErr returns the User value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e RelationshipEdges) UserOrErr() (*User, error) {
-	if e.loadedTypes[0] {
-		if e.User == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: user.Label}
-		}
+	if e.User != nil {
 		return e.User, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "user"}
 }
@@ -63,12 +61,10 @@ func (e RelationshipEdges) UserOrErr() (*User, error) {
 // RelativeOrErr returns the Relative value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e RelationshipEdges) RelativeOrErr() (*User, error) {
-	if e.loadedTypes[1] {
-		if e.Relative == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: user.Label}
-		}
+	if e.Relative != nil {
 		return e.Relative, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "relative"}
 }
@@ -76,12 +72,10 @@ func (e RelationshipEdges) RelativeOrErr() (*User, error) {
 // InfoOrErr returns the Info value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e RelationshipEdges) InfoOrErr() (*RelationshipInfo, error) {
-	if e.loadedTypes[2] {
-		if e.Info == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: relationshipinfo.Label}
-		}
+	if e.Info != nil {
 		return e.Info, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: relationshipinfo.Label}
 	}
 	return nil, &NotLoadedError{edge: "info"}
 }

@@ -97,12 +97,10 @@ func (e UserEdges) CarOrErr() ([]*Car, error) {
 // PetsOrErr returns the Pets value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e UserEdges) PetsOrErr() (*Pet, error) {
-	if e.loadedTypes[1] {
-		if e.Pets == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: pet.Label}
-		}
+	if e.Pets != nil {
 		return e.Pets, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: pet.Label}
 	}
 	return nil, &NotLoadedError{edge: "pets"}
 }
