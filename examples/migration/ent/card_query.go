@@ -338,12 +338,12 @@ func (cq *CardQuery) WithPayments(opts ...func(*PaymentQuery)) *CardQuery {
 // Example:
 //
 //	var v []struct {
-//		NumberHash string `json:"number_hash,omitempty"`
+//		Type string `json:"type,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Card.Query().
-//		GroupBy(card.FieldNumberHash).
+//		GroupBy(card.FieldType).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
@@ -361,11 +361,11 @@ func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 // Example:
 //
 //	var v []struct {
-//		NumberHash string `json:"number_hash,omitempty"`
+//		Type string `json:"type,omitempty"`
 //	}
 //
 //	client.Card.Query().
-//		Select(card.FieldNumberHash).
+//		Select(card.FieldType).
 //		Scan(ctx, &v)
 func (cq *CardQuery) Select(fields ...string) *CardSelect {
 	cq.ctx.Fields = append(cq.ctx.Fields, fields...)
