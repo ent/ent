@@ -16,6 +16,7 @@ var (
 	// CardsColumns holds the columns for the "cards" table.
 	CardsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "type", Type: field.TypeString, Default: "unknown"},
 		{Name: "number_hash", Type: field.TypeString},
 		{Name: "cvv_hash", Type: field.TypeString},
 		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
@@ -29,7 +30,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "cards_users_cards",
-				Columns:    []*schema.Column{CardsColumns[4]},
+				Columns:    []*schema.Column{CardsColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},

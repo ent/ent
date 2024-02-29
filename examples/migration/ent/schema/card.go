@@ -20,6 +20,8 @@ type Card struct {
 // Fields of the Card.
 func (Card) Fields() []ent.Field {
 	return []ent.Field{
+		field.String("type").
+			Default("unknown"),
 		field.String("number_hash"),
 		field.String("cvv_hash"),
 		field.Time("expires_at").
