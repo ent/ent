@@ -449,7 +449,12 @@ func (cq *CardQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Card, e
 	}
 	if query := cq.withOwner; query != nil {
 		if err := cq.loadOwner(ctx, query, nodes, nil,
-			func(n *Card, e *User) { n.Edges.Owner = e }); err != nil {
+			func(n *Card, e *User) {
+				n.Edges.Owner = e
+				if !e.Edges.loadedTypes[0] {
+					e.Edges.Card = n
+				}
+			}); err != nil {
 			return nil, err
 		}
 	}

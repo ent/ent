@@ -2122,6 +2122,22 @@ func (e Edge) EntSQL() *entsql.Annotation {
 	return sqlAnnotate(e.Annotations)
 }
 
+// Index returns the index of the edge in the schema.
+// Used mainly to extract its position in the "loadedTypes" array.
+func (e Edge) Index() (int, error) {
+	// "owner" is the type that holds the edge.
+	owner := e.Owner
+	if e.IsInverse() {
+		owner = e.Ref.Type
+	}
+	for i, e1 := range owner.Edges {
+		if e1.Name == e.Name {
+			return i, nil
+		}
+	}
+	return 0, fmt.Errorf("edge %q was not found in its owner schema %q", e.Name, e.Owner.Name)
+}
+
 // Column returns the first element from the columns slice.
 func (r Relation) Column() string {
 	if len(r.Columns) == 0 {

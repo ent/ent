@@ -49,12 +49,10 @@ type AttachedFileEdges struct {
 // FiOrErr returns the Fi value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e AttachedFileEdges) FiOrErr() (*File, error) {
-	if e.loadedTypes[0] {
-		if e.Fi == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: file.Label}
-		}
+	if e.Fi != nil {
 		return e.Fi, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: file.Label}
 	}
 	return nil, &NotLoadedError{edge: "fi"}
 }
@@ -62,12 +60,10 @@ func (e AttachedFileEdges) FiOrErr() (*File, error) {
 // ProcOrErr returns the Proc value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e AttachedFileEdges) ProcOrErr() (*Process, error) {
-	if e.loadedTypes[1] {
-		if e.Proc == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: process.Label}
-		}
+	if e.Proc != nil {
 		return e.Proc, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: process.Label}
 	}
 	return nil, &NotLoadedError{edge: "proc"}
 }

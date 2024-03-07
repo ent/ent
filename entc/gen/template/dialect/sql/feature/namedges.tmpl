@@ -99,7 +99,19 @@ in the LICENSE file in the root directory of this source tree.
                 for name, query := range {{ $receiver }}.{{ $e.EagerLoadNamedField }} {
                     if err := {{ $receiver }}.load{{ $e.StructField }}(ctx, query, nodes,
                         func(n *{{ $.Name }}) { n.appendNamed{{ $e.StructField }}(name) },
-                        func(n *{{ $.Name }}, e *{{ $e.Type.Name }}){ n.appendNamed{{ $e.StructField }}(name, e) }); err != nil {
+                        {{- if and ($.FeatureEnabled "bidiedges") $e.Ref $e.Ref.Unique }}
+                            func(n *{{ $.Name }}, e *{{ $e.Type.Name }}){
+                                n.appendNamed{{ $e.StructField }}(name, e)
+                                {{- $idx := $e.Ref.Index }}
+                                {{- /* Set only in case this type was not loaded explicitly (without custom options). */}}
+                                if !e.Edges.loadedTypes[{{ $idx }}] {
+                                    e.Edges.{{ $e.Ref.StructField }} = n
+                                }
+                            }); err != nil {
+                        {{- else }}
+                            {{- /* Keep it one-liner if there is not inverse-condition. */}}
+                            func(n *{{ $.Name }}, e *{{ $e.Type.Name }}){ n.appendNamed{{ $e.StructField }}(name, e) }); err != nil {
+                        {{- end }}
                         return nil, err
                     }
                 }

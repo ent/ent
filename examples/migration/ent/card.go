@@ -22,6 +22,8 @@ type Card struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// Type holds the value of the "type" field.
+	Type string `json:"type,omitempty"`
 	// NumberHash holds the value of the "number_hash" field.
 	NumberHash string `json:"number_hash,omitempty"`
 	// CvvHash holds the value of the "cvv_hash" field.
@@ -50,12 +52,10 @@ type CardEdges struct {
 // OwnerOrErr returns the Owner value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e CardEdges) OwnerOrErr() (*User, error) {
-	if e.loadedTypes[0] {
-		if e.Owner == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: user.Label}
-		}
+	if e.Owner != nil {
 		return e.Owner, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "owner"}
 }
@@ -76,7 +76,7 @@ func (*Card) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case card.FieldID, card.FieldOwnerID:
 			values[i] = new(sql.NullInt64)
-		case card.FieldNumberHash, card.FieldCvvHash:
+		case card.FieldType, card.FieldNumberHash, card.FieldCvvHash:
 			values[i] = new(sql.NullString)
 		case card.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
@@ -101,6 +101,12 @@ func (c *Card) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			c.ID = int(value.Int64)
+		case card.FieldType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field type", values[i])
+			} else if value.Valid {
+				c.Type = value.String
+			}
 		case card.FieldNumberHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field number_hash", values[i])
@@ -171,6 +177,9 @@ func (c *Card) String() string {
 	var builder strings.Builder
 	builder.WriteString("Card(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString("type=")
+	builder.WriteString(c.Type)
+	builder.WriteString(", ")
 	builder.WriteString("number_hash=")
 	builder.WriteString(c.NumberHash)
 	builder.WriteString(", ")

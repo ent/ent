@@ -52,8 +52,9 @@ type {{ $.Name }} struct {
 }
 
 {{- with $.Edges }}
+{{- $edgesType := print $.Name "Edges"}}
 // {{ $.Name }}Edges holds the relations/edges for other nodes in the graph.
-type {{ $.Name }}Edges struct {
+type {{ $edgesType }} struct {
 	{{- range $e := . }}
 		{{- template "model/edgecomment" $e }}
 		{{ $e.StructField }} {{ if not $e.Unique }}[]{{ end }}*{{ $e.Type.Name }} {{ with $e.StructTag }}`{{ . }}`{{ end }}
@@ -68,16 +69,19 @@ type {{ $.Name }}Edges struct {
 {{- range $i, $e := . }}
 	// {{ $e.StructField }}OrErr returns the {{ $e.StructField }} value or an error if the edge
 	// was not loaded in eager-loading{{ if $e.Unique }}, or loaded but was not found{{ end }}.
-	func (e {{ $.Name }}Edges) {{ $e.StructField }}OrErr() ({{ if not $e.Unique }}[]{{ end }}*{{ $e.Type.Name }}, error) {
-		if e.loadedTypes[{{ $i }}] {
-			{{- if $e.Unique }}
-				if e.{{ $e.StructField }} == nil {
-					// Edge was loaded but was not found.
-					return nil, &NotFoundError{label: {{ $e.Type.Package }}.Label}
-				}
-			{{- end }}
-			return e.{{ $e.StructField }}, nil
-		}
+	func (e {{ $edgesType }}) {{ $e.StructField }}OrErr() ({{ if not $e.Unique }}[]{{ end }}*{{ $e.Type.Name }}, error) {
+		{{- if $e.Unique }}
+			if e.{{ $e.StructField }} != nil {
+				return e.{{ $e.StructField }}, nil
+			} else if e.loadedTypes[{{ $i }}] {
+				{{- /* Edge was loaded but was not found. */}}
+				return nil, &NotFoundError{label: {{ $e.Type.Package }}.Label}
+			}
+		{{- else }}
+			if e.loadedTypes[{{ $i }}] {
+				return e.{{ $e.StructField }}, nil
+			}
+		{{- end }}
 		return nil, &NotLoadedError{edge: "{{ $e.Name }}"}
 	}
 {{- end }}

@@ -22,8 +22,12 @@ import (
 func init() {
 	cardFields := schema.Card{}.Fields()
 	_ = cardFields
+	// cardDescType is the schema descriptor for type field.
+	cardDescType := cardFields[0].Descriptor()
+	// card.DefaultType holds the default value on creation for the type field.
+	card.DefaultType = cardDescType.Default.(string)
 	// cardDescOwnerID is the schema descriptor for owner_id field.
-	cardDescOwnerID := cardFields[3].Descriptor()
+	cardDescOwnerID := cardFields[4].Descriptor()
 	// card.DefaultOwnerID holds the default value on creation for the owner_id field.
 	card.DefaultOwnerID = cardDescOwnerID.Default.(int)
 	paymentFields := schema.Payment{}.Fields()
