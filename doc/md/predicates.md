@@ -177,7 +177,7 @@ The above code will produce the following SQL query:
 
 ```sql
 -- `IN` version.
-SELECT DISTINCT `users`.`id`, `users`.`age`, `users`.`name` FROM `users` WHERE `users`.`id` IN (SELECT `cars`.`id` FROM `cars` WHERE `cars`.`model` = 'Tesla')
+SELECT DISTINCT `users`.`id`, `users`.`age`, `users`.`name` FROM `users` WHERE `users`.`id` IN (SELECT `cars`.`owner_id` FROM `cars` WHERE `cars`.`model` = 'Tesla')
 
 -- `JOIN` version.
 SELECT DISTINCT `users`.`id`, `users`.`age`, `users`.`name` FROM `users` JOIN `cars` ON `users`.`id` = `cars`.`owner_id` WHERE `cars`.`model` = 'Tesla'
