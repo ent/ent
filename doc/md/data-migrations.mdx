@@ -269,7 +269,7 @@ until the data migration file achieves the desired result.
 
 In the declarative workflow, data migrations are implemented using Diff or Apply [Hooks](migrate#atlas-diff-and-apply-hooks).
 This is because, unlike the versioned option, migrations of this type do not hold a name or a version when they are applied.
-Therefore, when a data is are written using hooks, the type of the `schema.Change` must be checked before its
+Therefore, when a data is written using hooks, the type of the `schema.Change` must be checked before its
 execution to ensure the data migration was not applied more than once.
 
 ```go
