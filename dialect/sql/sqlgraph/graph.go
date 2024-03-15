@@ -1031,7 +1031,7 @@ func (q *query) selector(ctx context.Context) (*sql.Selector, error) {
 		From(q.builder.Table(q.Node.Table).Schema(q.Node.Schema)).
 		WithContext(ctx)
 	if q.From != nil {
-		selector = q.From
+		selector = q.From.WithContext(ctx)
 	}
 	selector.Select(selector.Columns(q.Node.Columns...)...)
 	if order := q.Order; order != nil {
