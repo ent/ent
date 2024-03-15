@@ -22,8 +22,10 @@ import (
 	"entgo.io/ent/schema/field"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
+
+	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/tursodatabase/libsql-client-go/libsql"
 )
 
 func TestMigrateHookOmitTable(t *testing.T) {
@@ -235,92 +237,94 @@ func init() {
 func TestMigrate_Diff(t *testing.T) {
 	ctx := context.Background()
 
-	db, err := sql.Open(dialect.SQLite, "file:test?mode=memory&_fk=1")
-	require.NoError(t, err)
+	for _, d := range []string{dialect.SQLite, dialect.LibSQL} {
+		db, err := sql.Open(d, "file:test?mode=memory&_fk=1")
+		require.NoError(t, err)
 
-	p := t.TempDir()
-	d, err := migrate.NewLocalDir(p)
-	require.NoError(t, err)
+		p := t.TempDir()
+		d, err := migrate.NewLocalDir(p)
+		require.NoError(t, err)
 
-	m, err := NewMigrate(db, WithDir(d))
-	require.NoError(t, err)
-	require.NoError(t, m.Diff(ctx, &Table{Name: "users"}))
-	v := time.Now().UTC().Format("20060102150405")
-	requireFileEqual(t, filepath.Join(p, v+"_changes.up.sql"), "-- create \"users\" table\nCREATE TABLE `users` ();\n")
-	requireFileEqual(t, filepath.Join(p, v+"_changes.down.sql"), "-- reverse: create \"users\" table\nDROP TABLE `users`;\n")
-	require.FileExists(t, filepath.Join(p, migrate.HashFileName))
+		m, err := NewMigrate(db, WithDir(d))
+		require.NoError(t, err)
+		require.NoError(t, m.Diff(ctx, &Table{Name: "users"}))
+		v := time.Now().UTC().Format("20060102150405")
+		requireFileEqual(t, filepath.Join(p, v+"_changes.up.sql"), "-- create \"users\" table\nCREATE TABLE `users` ();\n")
+		requireFileEqual(t, filepath.Join(p, v+"_changes.down.sql"), "-- reverse: create \"users\" table\nDROP TABLE `users`;\n")
+		require.FileExists(t, filepath.Join(p, migrate.HashFileName))
 
-	// Test integrity file.
-	p = t.TempDir()
-	d, err = migrate.NewLocalDir(p)
-	require.NoError(t, err)
-	m, err = NewMigrate(db, WithDir(d))
-	require.NoError(t, err)
-	require.NoError(t, m.Diff(ctx, &Table{Name: "users"}))
-	requireFileEqual(t, filepath.Join(p, v+"_changes.up.sql"), "-- create \"users\" table\nCREATE TABLE `users` ();\n")
-	requireFileEqual(t, filepath.Join(p, v+"_changes.down.sql"), "-- reverse: create \"users\" table\nDROP TABLE `users`;\n")
-	require.FileExists(t, filepath.Join(p, migrate.HashFileName))
-	require.NoError(t, d.WriteFile("tmp.sql", nil))
-	require.ErrorIs(t, m.Diff(ctx, &Table{Name: "users"}), migrate.ErrChecksumMismatch)
+		// Test integrity file.
+		p = t.TempDir()
+		d, err = migrate.NewLocalDir(p)
+		require.NoError(t, err)
+		m, err = NewMigrate(db, WithDir(d))
+		require.NoError(t, err)
+		require.NoError(t, m.Diff(ctx, &Table{Name: "users"}))
+		requireFileEqual(t, filepath.Join(p, v+"_changes.up.sql"), "-- create \"users\" table\nCREATE TABLE `users` ();\n")
+		requireFileEqual(t, filepath.Join(p, v+"_changes.down.sql"), "-- reverse: create \"users\" table\nDROP TABLE `users`;\n")
+		require.FileExists(t, filepath.Join(p, migrate.HashFileName))
+		require.NoError(t, d.WriteFile("tmp.sql", nil))
+		require.ErrorIs(t, m.Diff(ctx, &Table{Name: "users"}), migrate.ErrChecksumMismatch)
 
-	p = t.TempDir()
-	d, err = migrate.NewLocalDir(p)
-	require.NoError(t, err)
-	f, err := migrate.NewTemplateFormatter(
-		template.Must(template.New("").Parse("{{ .Name }}.sql")),
-		template.Must(template.New("").Parse(
-			`{{ range .Changes }}{{ printf "%s;\n" .Cmd }}{{ end }}`,
-		)),
-	)
-	require.NoError(t, err)
+		p = t.TempDir()
+		d, err = migrate.NewLocalDir(p)
+		require.NoError(t, err)
+		f, err := migrate.NewTemplateFormatter(
+			template.Must(template.New("").Parse("{{ .Name }}.sql")),
+			template.Must(template.New("").Parse(
+				`{{ range .Changes }}{{ printf "%s;\n" .Cmd }}{{ end }}`,
+			)),
+		)
+		require.NoError(t, err)
 
-	// Join tables (mapping between user and group) will not result in an entry to the types table.
-	m, err = NewMigrate(db, WithFormatter(f), WithDir(d), WithGlobalUniqueID(true))
-	require.NoError(t, err)
-	require.NoError(t, m.Diff(ctx, tables...))
-	changesSQL := strings.Join([]string{
-		"CREATE TABLE `groups` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT, `name` text NOT NULL);",
-		"CREATE INDEX `short` ON `groups` (`id`);",
-		"CREATE INDEX `long____________________________1cb2e7e47a309191385af4ad320875b1` ON `groups` (`id`);",
-		"CREATE TABLE `users` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT, `name` text NOT NULL);",
-		fmt.Sprintf("INSERT INTO sqlite_sequence (name, seq) VALUES (\"users\", %d);", 1<<32),
-		"CREATE TABLE `user_groups` (`user_id` integer NOT NULL, `group_id` integer NOT NULL, PRIMARY KEY (`user_id`, `group_id`), CONSTRAINT `user_groups_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE, CONSTRAINT `user_groups_group_id` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE);",
-		"CREATE TABLE `ent_types` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT, `type` text NOT NULL);",
-		"CREATE UNIQUE INDEX `ent_types_type_key` ON `ent_types` (`type`);",
-		"INSERT INTO `ent_types` (`type`) VALUES ('groups'), ('users');",
-		"",
-	}, "\n")
-	requireFileEqual(t, filepath.Join(p, "changes.sql"), changesSQL)
+		// Join tables (mapping between user and group) will not result in an entry to the types table.
+		m, err = NewMigrate(db, WithFormatter(f), WithDir(d), WithGlobalUniqueID(true))
+		require.NoError(t, err)
+		require.NoError(t, m.Diff(ctx, tables...))
+		changesSQL := strings.Join([]string{
+			"CREATE TABLE `groups` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT, `name` text NOT NULL);",
+			"CREATE INDEX `short` ON `groups` (`id`);",
+			"CREATE INDEX `long____________________________1cb2e7e47a309191385af4ad320875b1` ON `groups` (`id`);",
+			"CREATE TABLE `users` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT, `name` text NOT NULL);",
+			fmt.Sprintf("INSERT INTO sqlite_sequence (name, seq) VALUES (\"users\", %d);", 1<<32),
+			"CREATE TABLE `user_groups` (`user_id` integer NOT NULL, `group_id` integer NOT NULL, PRIMARY KEY (`user_id`, `group_id`), CONSTRAINT `user_groups_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE, CONSTRAINT `user_groups_group_id` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE);",
+			"CREATE TABLE `ent_types` (`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT, `type` text NOT NULL);",
+			"CREATE UNIQUE INDEX `ent_types_type_key` ON `ent_types` (`type`);",
+			"INSERT INTO `ent_types` (`type`) VALUES ('groups'), ('users');",
+			"",
+		}, "\n")
+		requireFileEqual(t, filepath.Join(p, "changes.sql"), changesSQL)
 
-	// Skipping table creation should write only the ent_type insertion.
-	m, err = NewMigrate(db, WithFormatter(f), WithDir(d), WithGlobalUniqueID(true), WithDiffOptions(schema.DiffSkipChanges(&schema.AddTable{})))
-	require.NoError(t, err)
-	require.NoError(t, m.Diff(ctx, tables...))
-	requireFileEqual(t, filepath.Join(p, "changes.sql"), "INSERT INTO `ent_types` (`type`) VALUES ('groups'), ('users');\n")
+		// Skipping table creation should write only the ent_type insertion.
+		m, err = NewMigrate(db, WithFormatter(f), WithDir(d), WithGlobalUniqueID(true), WithDiffOptions(schema.DiffSkipChanges(&schema.AddTable{})))
+		require.NoError(t, err)
+		require.NoError(t, m.Diff(ctx, tables...))
+		requireFileEqual(t, filepath.Join(p, "changes.sql"), "INSERT INTO `ent_types` (`type`) VALUES ('groups'), ('users');\n")
 
-	// Enable indentations.
-	m, err = NewMigrate(db, WithFormatter(f), WithDir(d), WithGlobalUniqueID(true), WithIndent("  "))
-	require.NoError(t, err)
-	// Adding another node will result in a new entry to the TypeTable (without actually creating it).
-	_, err = db.ExecContext(ctx, changesSQL, nil, nil)
-	require.NoError(t, err)
-	require.NoError(t, m.NamedDiff(ctx, "changes_2", petsTable))
-	requireFileEqual(t,
-		filepath.Join(p, "changes_2.sql"), strings.Join([]string{
-			"CREATE TABLE `pets` (\n  `id` integer NOT NULL PRIMARY KEY AUTOINCREMENT\n);",
-			fmt.Sprintf("INSERT INTO sqlite_sequence (name, seq) VALUES (\"pets\", %d);", 2<<32),
-			"INSERT INTO `ent_types` (`type`) VALUES ('pets');", "",
-		}, "\n"))
+		// Enable indentations.
+		m, err = NewMigrate(db, WithFormatter(f), WithDir(d), WithGlobalUniqueID(true), WithIndent("  "))
+		require.NoError(t, err)
+		// Adding another node will result in a new entry to the TypeTable (without actually creating it).
+		_, err = db.ExecContext(ctx, changesSQL, nil, nil)
+		require.NoError(t, err)
+		require.NoError(t, m.NamedDiff(ctx, "changes_2", petsTable))
+		requireFileEqual(t,
+			filepath.Join(p, "changes_2.sql"), strings.Join([]string{
+				"CREATE TABLE `pets` (\n  `id` integer NOT NULL PRIMARY KEY AUTOINCREMENT\n);",
+				fmt.Sprintf("INSERT INTO sqlite_sequence (name, seq) VALUES (\"pets\", %d);", 2<<32),
+				"INSERT INTO `ent_types` (`type`) VALUES ('pets');", "",
+			}, "\n"))
 
-	// Checksum will be updated as well.
-	require.NoError(t, migrate.Validate(d))
+		// Checksum will be updated as well.
+		require.NoError(t, migrate.Validate(d))
 
-	require.NoError(t, m.NamedDiff(ctx, "no_changes"), "should not error if WithErrNoPlan is not set")
-	// Enable WithErrNoPlan.
-	m, err = NewMigrate(db, WithFormatter(f), WithDir(d), WithGlobalUniqueID(true), WithErrNoPlan(true))
-	require.NoError(t, err)
-	err = m.NamedDiff(ctx, "no_changes")
-	require.ErrorIs(t, err, migrate.ErrNoPlan)
+		require.NoError(t, m.NamedDiff(ctx, "no_changes"), "should not error if WithErrNoPlan is not set")
+		// Enable WithErrNoPlan.
+		m, err = NewMigrate(db, WithFormatter(f), WithDir(d), WithGlobalUniqueID(true), WithErrNoPlan(true))
+		require.NoError(t, err)
+		err = m.NamedDiff(ctx, "no_changes")
+		require.ErrorIs(t, err, migrate.ErrNoPlan)
+	}
 }
 
 func requireFileEqual(t *testing.T, name, contents string) {

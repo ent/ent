@@ -983,7 +983,7 @@ func (i *InsertBuilder) writeDefault(b *Builder) {
 	switch i.Dialect() {
 	case dialect.MySQL:
 		b.WriteString("VALUES ()")
-	case dialect.SQLite, dialect.Postgres:
+	case dialect.SQLite, dialect.LibSQL, dialect.Postgres:
 		b.WriteString("DEFAULT VALUES")
 	}
 }
@@ -997,7 +997,7 @@ func (i *InsertBuilder) writeConflict(b *Builder) {
 		if i.conflict.action.nothing {
 			i.OnConflict(ResolveWithIgnore())
 		}
-	case dialect.SQLite, dialect.Postgres:
+	case dialect.SQLite, dialect.LibSQL, dialect.Postgres:
 		b.WriteString(" ON CONFLICT")
 		switch t := i.conflict.target; {
 		case t.constraint != "" && len(t.columns) != 0:
@@ -1710,7 +1710,7 @@ func (p *Predicate) escapedLike(col, left, right, word string) *Predicate {
 		w, escaped := escape(word)
 		b.Ident(col).WriteOp(OpLike)
 		b.Arg(left + w + right)
-		if p.dialect == dialect.SQLite && escaped {
+		if (p.sqlite()) && escaped {
 			p.WriteString(" ESCAPE ").Arg("\\")
 		}
 	})
@@ -1739,11 +1739,11 @@ func (p *Predicate) ColumnsHasPrefix(col, prefixC string) *Predicate {
 			b.Ident(col)
 			b.WriteOp(OpLike)
 			b.S("CONCAT(REPLACE(REPLACE(").Ident(prefixC).S(", '_', '\\_'), '%', '\\%'), '%')")
-		case dialect.Postgres, dialect.SQLite:
+		case dialect.Postgres, dialect.SQLite, dialect.LibSQL:
 			b.Ident(col)
 			b.WriteOp(OpLike)
 			b.S("(REPLACE(REPLACE(").Ident(prefixC).S(", '_', '\\_'), '%', '\\%') || '%')")
-			if p.dialect == dialect.SQLite {
+			if p.sqlite() {
 				p.WriteString(" ESCAPE ").Arg("\\")
 			}
 		default:
@@ -2837,7 +2837,7 @@ func WithLockClause(clause string) LockOption {
 // For sets the lock configuration for suffixing the `SELECT`
 // statement with the `FOR [SHARE | UPDATE] ...` clause.
 func (s *Selector) For(l LockStrength, opts ...LockOption) *Selector {
-	if s.Dialect() == dialect.SQLite {
+	if s.sqlite() {
 		s.AddError(errors.New("sql: SELECT .. FOR UPDATE/SHARE not supported in SQLite"))
 	}
 	s.lock = &LockOptions{Strength: l}
@@ -3539,7 +3539,7 @@ func (b *Builder) AddError(err error) *Builder {
 }
 
 func (b *Builder) writeSchema(schema string) {
-	if schema != "" && b.dialect != dialect.SQLite {
+	if schema != "" && !b.sqlite() {
 		b.Ident(schema).WriteByte('.')
 	}
 }
@@ -3802,7 +3802,7 @@ func (b Builder) postgres() bool {
 
 // sqlite reports if the builder dialect is SQLite.
 func (b Builder) sqlite() bool {
-	return b.Dialect() == dialect.SQLite
+	return b.Dialect() == dialect.SQLite || b.Dialect() == dialect.LibSQL
 }
 
 // fromIdent sets the builder dialect from the identifier format.

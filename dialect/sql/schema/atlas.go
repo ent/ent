@@ -1083,7 +1083,7 @@ func (a *Atlas) entDialect(ctx context.Context, drv dialect.Driver) (sqlDialect,
 	switch a.dialect {
 	case dialect.MySQL:
 		d = &MySQL{Driver: drv}
-	case dialect.SQLite:
+	case dialect.SQLite, dialect.LibSQL:
 		d = &SQLite{Driver: drv, WithForeignKeys: a.withForeignKeys}
 	case dialect.Postgres:
 		d = &Postgres{Driver: drv}
