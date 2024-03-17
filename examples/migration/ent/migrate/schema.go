@@ -40,7 +40,7 @@ var (
 	PaymentsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "amount", Type: field.TypeFloat64},
-		{Name: "currency", Type: field.TypeEnum, Enums: []string{"USD", "EUR", "ILS"}},
+		{Name: "currency", Type: field.TypeEnum, Enums: []string{"USD", "EUR", "VND", "ILS"}},
 		{Name: "time", Type: field.TypeTime},
 		{Name: "description", Type: field.TypeString},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "completed", "failed"}},
