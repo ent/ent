@@ -25,7 +25,7 @@ atlas migrate diff <migration_name> \
 
 ```bash
 atlas migrate lint \
-  --dev-url="mysql://root:pass@localhost:3306/test" \
+  --dev-url="docker://mysql/8/dev" \
   --dir="file://ent/migrate/migrations" \
   --latest=1
 ```
