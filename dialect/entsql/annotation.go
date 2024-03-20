@@ -83,6 +83,16 @@ type Annotation struct {
 	//
 	DefaultExprs map[string]string `json:"default_exprs,omitempty"`
 
+	// GeneratedExprs specifies the generated expression for a column per dialect.
+	// For example:
+	//
+	//	entsql.Annotation{
+	//		GeneratedExprs: map[string]string{
+	//			dialect.Postgres: entsql.GeneratedExpr{Expr: "tsvector(title)", Type: "STORED"},
+	//		}
+	//
+	GeneratedExprs map[string]GeneratedExpr `json:"generated_exprs,omitempty"`
+
 	// Options defines the additional table options. For example:
 	//
 	//	entsql.Annotation{
@@ -378,6 +388,13 @@ const (
 	SetNull    ReferenceOption = "SET NULL"
 	SetDefault ReferenceOption = "SET DEFAULT"
 )
+
+// GeneratedExpr describes the expression used for generating
+// the value of a generated/virtual column.
+type GeneratedExpr struct {
+	Expr string
+	Type string // Optional type. e.g. STORED or VIRTUAL.
+}
 
 // IndexAnnotation is a builtin schema annotation for attaching
 // SQL metadata to schema indexes for both codegen and runtime.
