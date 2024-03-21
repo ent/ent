@@ -960,8 +960,8 @@ func (a *Atlas) aColumns(et *Table, at *schema.Table) error {
 		if c1.Increment {
 			a.sqlDialect.atIncrementC(at, c2)
 		}
-		if c1.Generated != nil {
-			expr := c1.Generated[a.sqlDialect.Dialect()]
+		if c1.GeneratedExprs != nil {
+			expr := c1.GeneratedExprs[a.sqlDialect.Dialect()]
 			if expr.Expr != "" {
 				c2.SetNull(false)
 				c2.SetGeneratedExpr(&schema.GeneratedExpr{

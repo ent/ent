@@ -294,23 +294,23 @@ func CopyTables(tables []*Table) ([]*Table, error) {
 
 // Column schema definition for SQL dialects.
 type Column struct {
-	Name       string                   // column name.
-	Type       field.Type               // column type.
-	SchemaType map[string]string        // optional schema type per dialect.
-	Attr       string                   // extra attributes.
-	Size       int64                    // max size parameter for string, blob, etc.
-	Key        string                   // key definition (PRI, UNI or MUL).
-	Unique     bool                     // column with unique constraint.
-	Increment  bool                     // auto increment attribute.
-	Nullable   bool                     // null or not null attribute.
-	Default    any                      // default value.
-	Generated  map[string]GeneratedExpr // generated expression.
-	Enums      []string                 // enum values.
-	Collation  string                   // collation type (utf8mb4_unicode_ci, utf8mb4_general_ci)
-	typ        string                   // row column type (used for Rows.Scan).
-	indexes    Indexes                  // linked indexes.
-	foreign    *ForeignKey              // linked foreign-key.
-	Comment    string                   // optional column comment.
+	Name           string                   // column name.
+	Type           field.Type               // column type.
+	SchemaType     map[string]string        // optional schema type per dialect.
+	Attr           string                   // extra attributes.
+	Size           int64                    // max size parameter for string, blob, etc.
+	Key            string                   // key definition (PRI, UNI or MUL).
+	Unique         bool                     // column with unique constraint.
+	Increment      bool                     // auto increment attribute.
+	Nullable       bool                     // null or not null attribute.
+	Default        any                      // default value.
+	GeneratedExprs map[string]GeneratedExpr // generated expression.
+	Enums          []string                 // enum values.
+	Collation      string                   // collation type (utf8mb4_unicode_ci, utf8mb4_general_ci)
+	typ            string                   // row column type (used for Rows.Scan).
+	indexes        Indexes                  // linked indexes.
+	foreign        *ForeignKey              // linked foreign-key.
+	Comment        string                   // optional column comment.
 }
 
 // Expr represents a raw expression. It is used to distinguish between

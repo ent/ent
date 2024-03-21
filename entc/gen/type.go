@@ -1634,6 +1634,12 @@ func (f Field) PK() *schema.Column {
 			x[k] = schema.Expr(v)
 		}
 		c.Default = x
+	case len(ant.GeneratedExprs) > 0:
+		x := make(map[string]schema.GeneratedExpr)
+		for k, v := range ant.GeneratedExprs {
+			x[k] = schema.GeneratedExpr(v)
+		}
+		c.GeneratedExprs = x
 	}
 	if f.def != nil {
 		c.SchemaType = f.def.SchemaType

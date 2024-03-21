@@ -270,7 +270,7 @@ func TestPostgres_Create(t *testing.T) {
 						{Name: "macaddr8", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{dialect.Postgres: "macaddr8"}},
 						{Name: "strings", Type: field.TypeOther, SchemaType: map[string]string{dialect.Postgres: "text[]"}, Nullable: true},
 						{Name: "searchable", Type: field.TypeOther, SchemaType: map[string]string{dialect.Postgres: "tsvector"}, Nullable: true,
-							Generated: map[string]GeneratedExpr{
+							GeneratedExprs: map[string]GeneratedExpr{
 								dialect.Postgres: {Expr: "to_tsvector('english'::regconfig, (((COALESCE(name, ''::character varying))::text || ' '::text))", Type: "STORED"},
 							},
 						},
