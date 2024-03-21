@@ -311,8 +311,6 @@ func GeneratedAs(expr string) *Annotation {
 	return &Annotation{
 		GeneratedExprs: map[string]GeneratedExpr{
 			dialect.Postgres: {Expr: expr, Type: "STORED"},
-			dialect.MySQL:    {Expr: expr, Type: "STORED"},
-			dialect.SQLite:   {Expr: expr, Type: "STORED"},
 		},
 	}
 }

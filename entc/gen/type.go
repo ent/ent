@@ -1575,6 +1575,7 @@ func (f Field) Column() *schema.Column {
 		for k, v := range ant.GeneratedExprs {
 			x[k] = schema.GeneratedExpr(v)
 		}
+		c.Nullable = false
 		c.GeneratedExprs = x
 	}
 	// Override the collation defined in the
