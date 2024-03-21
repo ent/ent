@@ -15533,57 +15533,58 @@ func (m *TaskMutation) ResetEdge(name string) error {
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *string
-	optional_int     *int
-	addoptional_int  *int
-	age              *int
-	addage           *int
-	name             *string
-	last             *string
-	nickname         *string
-	address          *string
-	phone            *string
-	password         *string
-	role             *user.Role
-	employment       *user.Employment
-	_SSOCert         *string
-	files_count      *int
-	addfiles_count   *int
-	clearedFields    map[string]struct{}
-	card             *string
-	clearedcard      bool
-	pets             map[string]struct{}
-	removedpets      map[string]struct{}
-	clearedpets      bool
-	files            map[string]struct{}
-	removedfiles     map[string]struct{}
-	clearedfiles     bool
-	groups           map[string]struct{}
-	removedgroups    map[string]struct{}
-	clearedgroups    bool
-	friends          map[string]struct{}
-	removedfriends   map[string]struct{}
-	clearedfriends   bool
-	followers        map[string]struct{}
-	removedfollowers map[string]struct{}
-	clearedfollowers bool
-	following        map[string]struct{}
-	removedfollowing map[string]struct{}
-	clearedfollowing bool
-	team             *string
-	clearedteam      bool
-	spouse           *string
-	clearedspouse    bool
-	children         map[string]struct{}
-	removedchildren  map[string]struct{}
-	clearedchildren  bool
-	parent           *string
-	clearedparent    bool
-	done             bool
-	oldValue         func(context.Context) (*User, error)
-	predicates       []predicate.User
+	op                 Op
+	typ                string
+	id                 *string
+	optional_int       *int
+	addoptional_int    *int
+	age                *int
+	addage             *int
+	name               *string
+	last               *string
+	nickname           *string
+	address            *string
+	phone              *string
+	password           *string
+	searchable_profile *string
+	role               *user.Role
+	employment         *user.Employment
+	_SSOCert           *string
+	files_count        *int
+	addfiles_count     *int
+	clearedFields      map[string]struct{}
+	card               *string
+	clearedcard        bool
+	pets               map[string]struct{}
+	removedpets        map[string]struct{}
+	clearedpets        bool
+	files              map[string]struct{}
+	removedfiles       map[string]struct{}
+	clearedfiles       bool
+	groups             map[string]struct{}
+	removedgroups      map[string]struct{}
+	clearedgroups      bool
+	friends            map[string]struct{}
+	removedfriends     map[string]struct{}
+	clearedfriends     bool
+	followers          map[string]struct{}
+	removedfollowers   map[string]struct{}
+	clearedfollowers   bool
+	following          map[string]struct{}
+	removedfollowing   map[string]struct{}
+	clearedfollowing   bool
+	team               *string
+	clearedteam        bool
+	spouse             *string
+	clearedspouse      bool
+	children           map[string]struct{}
+	removedchildren    map[string]struct{}
+	clearedchildren    bool
+	parent             *string
+	clearedparent      bool
+	done               bool
+	oldValue           func(context.Context) (*User, error)
+	predicates         []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -16076,6 +16077,55 @@ func (m *UserMutation) PasswordCleared() bool {
 func (m *UserMutation) ResetPassword() {
 	m.password = nil
 	delete(m.clearedFields, user.FieldPassword)
+}
+
+// SetSearchableProfile sets the "searchable_profile" field.
+func (m *UserMutation) SetSearchableProfile(s string) {
+	m.searchable_profile = &s
+}
+
+// SearchableProfile returns the value of the "searchable_profile" field in the mutation.
+func (m *UserMutation) SearchableProfile() (r string, exists bool) {
+	v := m.searchable_profile
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSearchableProfile returns the old "searchable_profile" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldSearchableProfile(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSearchableProfile is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSearchableProfile requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSearchableProfile: %w", err)
+	}
+	return oldValue.SearchableProfile, nil
+}
+
+// ClearSearchableProfile clears the value of the "searchable_profile" field.
+func (m *UserMutation) ClearSearchableProfile() {
+	m.searchable_profile = nil
+	m.clearedFields[user.FieldSearchableProfile] = struct{}{}
+}
+
+// SearchableProfileCleared returns if the "searchable_profile" field was cleared in this mutation.
+func (m *UserMutation) SearchableProfileCleared() bool {
+	_, ok := m.clearedFields[user.FieldSearchableProfile]
+	return ok
+}
+
+// ResetSearchableProfile resets all changes to the "searchable_profile" field.
+func (m *UserMutation) ResetSearchableProfile() {
+	m.searchable_profile = nil
+	delete(m.clearedFields, user.FieldSearchableProfile)
 }
 
 // SetRole sets the "role" field.
@@ -16837,7 +16887,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 12)
+	fields := make([]string, 0, 13)
 	if m.optional_int != nil {
 		fields = append(fields, user.FieldOptionalInt)
 	}
@@ -16861,6 +16911,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.password != nil {
 		fields = append(fields, user.FieldPassword)
+	}
+	if m.searchable_profile != nil {
+		fields = append(fields, user.FieldSearchableProfile)
 	}
 	if m.role != nil {
 		fields = append(fields, user.FieldRole)
@@ -16898,6 +16951,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Phone()
 	case user.FieldPassword:
 		return m.Password()
+	case user.FieldSearchableProfile:
+		return m.SearchableProfile()
 	case user.FieldRole:
 		return m.Role()
 	case user.FieldEmployment:
@@ -16931,6 +16986,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldPhone(ctx)
 	case user.FieldPassword:
 		return m.OldPassword(ctx)
+	case user.FieldSearchableProfile:
+		return m.OldSearchableProfile(ctx)
 	case user.FieldRole:
 		return m.OldRole(ctx)
 	case user.FieldEmployment:
@@ -17003,6 +17060,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPassword(v)
+		return nil
+	case user.FieldSearchableProfile:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSearchableProfile(v)
 		return nil
 	case user.FieldRole:
 		v, ok := value.(user.Role)
@@ -17116,6 +17180,9 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldPassword) {
 		fields = append(fields, user.FieldPassword)
 	}
+	if m.FieldCleared(user.FieldSearchableProfile) {
+		fields = append(fields, user.FieldSearchableProfile)
+	}
 	if m.FieldCleared(user.FieldSSOCert) {
 		fields = append(fields, user.FieldSSOCert)
 	}
@@ -17150,6 +17217,9 @@ func (m *UserMutation) ClearField(name string) error {
 		return nil
 	case user.FieldPassword:
 		m.ClearPassword()
+		return nil
+	case user.FieldSearchableProfile:
+		m.ClearSearchableProfile()
 		return nil
 	case user.FieldSSOCert:
 		m.ClearSSOCert()
@@ -17188,6 +17258,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldPassword:
 		m.ResetPassword()
+		return nil
+	case user.FieldSearchableProfile:
+		m.ResetSearchableProfile()
 		return nil
 	case user.FieldRole:
 		m.ResetRole()

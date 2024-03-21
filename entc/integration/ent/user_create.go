@@ -125,6 +125,20 @@ func (uc *UserCreate) SetNillablePassword(s *string) *UserCreate {
 	return uc
 }
 
+// SetSearchableProfile sets the "searchable_profile" field.
+func (uc *UserCreate) SetSearchableProfile(s string) *UserCreate {
+	uc.mutation.SetSearchableProfile(s)
+	return uc
+}
+
+// SetNillableSearchableProfile sets the "searchable_profile" field if the given value is not nil.
+func (uc *UserCreate) SetNillableSearchableProfile(s *string) *UserCreate {
+	if s != nil {
+		uc.SetSearchableProfile(*s)
+	}
+	return uc
+}
+
 // SetRole sets the "role" field.
 func (uc *UserCreate) SetRole(u user.Role) *UserCreate {
 	uc.mutation.SetRole(u)
@@ -505,6 +519,10 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.Password(); ok {
 		_spec.SetField(user.FieldPassword, field.TypeString, value)
 		_node.Password = value
+	}
+	if value, ok := uc.mutation.SearchableProfile(); ok {
+		_spec.SetField(user.FieldSearchableProfile, field.TypeString, value)
+		_node.SearchableProfile = value
 	}
 	if value, ok := uc.mutation.Role(); ok {
 		_spec.SetField(user.FieldRole, field.TypeEnum, value)
@@ -890,6 +908,24 @@ func (u *UserUpsert) ClearPassword() *UserUpsert {
 	return u
 }
 
+// SetSearchableProfile sets the "searchable_profile" field.
+func (u *UserUpsert) SetSearchableProfile(v string) *UserUpsert {
+	u.Set(user.FieldSearchableProfile, v)
+	return u
+}
+
+// UpdateSearchableProfile sets the "searchable_profile" field to the value that was provided on create.
+func (u *UserUpsert) UpdateSearchableProfile() *UserUpsert {
+	u.SetExcluded(user.FieldSearchableProfile)
+	return u
+}
+
+// ClearSearchableProfile clears the value of the "searchable_profile" field.
+func (u *UserUpsert) ClearSearchableProfile() *UserUpsert {
+	u.SetNull(user.FieldSearchableProfile)
+	return u
+}
+
 // SetRole sets the "role" field.
 func (u *UserUpsert) SetRole(v user.Role) *UserUpsert {
 	u.Set(user.FieldRole, v)
@@ -1154,6 +1190,27 @@ func (u *UserUpsertOne) UpdatePassword() *UserUpsertOne {
 func (u *UserUpsertOne) ClearPassword() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.ClearPassword()
+	})
+}
+
+// SetSearchableProfile sets the "searchable_profile" field.
+func (u *UserUpsertOne) SetSearchableProfile(v string) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetSearchableProfile(v)
+	})
+}
+
+// UpdateSearchableProfile sets the "searchable_profile" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateSearchableProfile() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateSearchableProfile()
+	})
+}
+
+// ClearSearchableProfile clears the value of the "searchable_profile" field.
+func (u *UserUpsertOne) ClearSearchableProfile() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearSearchableProfile()
 	})
 }
 
@@ -1596,6 +1653,27 @@ func (u *UserUpsertBulk) UpdatePassword() *UserUpsertBulk {
 func (u *UserUpsertBulk) ClearPassword() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.ClearPassword()
+	})
+}
+
+// SetSearchableProfile sets the "searchable_profile" field.
+func (u *UserUpsertBulk) SetSearchableProfile(v string) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetSearchableProfile(v)
+	})
+}
+
+// UpdateSearchableProfile sets the "searchable_profile" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateSearchableProfile() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateSearchableProfile()
+	})
+}
+
+// ClearSearchableProfile clears the value of the "searchable_profile" field.
+func (u *UserUpsertBulk) ClearSearchableProfile() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearSearchableProfile()
 	})
 }
 

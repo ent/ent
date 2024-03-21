@@ -122,6 +122,20 @@ func (uc *UserCreate) SetNillablePassword(s *string) *UserCreate {
 	return uc
 }
 
+// SetSearchableProfile sets the "searchable_profile" field.
+func (uc *UserCreate) SetSearchableProfile(s string) *UserCreate {
+	uc.mutation.SetSearchableProfile(s)
+	return uc
+}
+
+// SetNillableSearchableProfile sets the "searchable_profile" field if the given value is not nil.
+func (uc *UserCreate) SetNillableSearchableProfile(s *string) *UserCreate {
+	if s != nil {
+		uc.SetSearchableProfile(*s)
+	}
+	return uc
+}
+
 // SetRole sets the "role" field.
 func (uc *UserCreate) SetRole(u user.Role) *UserCreate {
 	uc.mutation.SetRole(u)
@@ -506,6 +520,9 @@ func (uc *UserCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := uc.mutation.Password(); ok {
 		v.Property(dsl.Single, user.FieldPassword, value)
+	}
+	if value, ok := uc.mutation.SearchableProfile(); ok {
+		v.Property(dsl.Single, user.FieldSearchableProfile, value)
 	}
 	if value, ok := uc.mutation.Role(); ok {
 		v.Property(dsl.Single, user.FieldRole, value)

@@ -189,6 +189,26 @@ func (uu *UserUpdate) ClearPassword() *UserUpdate {
 	return uu
 }
 
+// SetSearchableProfile sets the "searchable_profile" field.
+func (uu *UserUpdate) SetSearchableProfile(s string) *UserUpdate {
+	uu.mutation.SetSearchableProfile(s)
+	return uu
+}
+
+// SetNillableSearchableProfile sets the "searchable_profile" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableSearchableProfile(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetSearchableProfile(*s)
+	}
+	return uu
+}
+
+// ClearSearchableProfile clears the value of the "searchable_profile" field.
+func (uu *UserUpdate) ClearSearchableProfile() *UserUpdate {
+	uu.mutation.ClearSearchableProfile()
+	return uu
+}
+
 // SetRole sets the "role" field.
 func (uu *UserUpdate) SetRole(u user.Role) *UserUpdate {
 	uu.mutation.SetRole(u)
@@ -738,6 +758,9 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 	if value, ok := uu.mutation.Password(); ok {
 		v.Property(dsl.Single, user.FieldPassword, value)
 	}
+	if value, ok := uu.mutation.SearchableProfile(); ok {
+		v.Property(dsl.Single, user.FieldSearchableProfile, value)
+	}
 	if value, ok := uu.mutation.Role(); ok {
 		v.Property(dsl.Single, user.FieldRole, value)
 	}
@@ -768,6 +791,9 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 	}
 	if uu.mutation.PasswordCleared() {
 		properties = append(properties, user.FieldPassword)
+	}
+	if uu.mutation.SearchableProfileCleared() {
+		properties = append(properties, user.FieldSearchableProfile)
 	}
 	if uu.mutation.SSOCertCleared() {
 		properties = append(properties, user.FieldSSOCert)
@@ -1059,6 +1085,26 @@ func (uuo *UserUpdateOne) SetNillablePassword(s *string) *UserUpdateOne {
 // ClearPassword clears the value of the "password" field.
 func (uuo *UserUpdateOne) ClearPassword() *UserUpdateOne {
 	uuo.mutation.ClearPassword()
+	return uuo
+}
+
+// SetSearchableProfile sets the "searchable_profile" field.
+func (uuo *UserUpdateOne) SetSearchableProfile(s string) *UserUpdateOne {
+	uuo.mutation.SetSearchableProfile(s)
+	return uuo
+}
+
+// SetNillableSearchableProfile sets the "searchable_profile" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableSearchableProfile(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetSearchableProfile(*s)
+	}
+	return uuo
+}
+
+// ClearSearchableProfile clears the value of the "searchable_profile" field.
+func (uuo *UserUpdateOne) ClearSearchableProfile() *UserUpdateOne {
+	uuo.mutation.ClearSearchableProfile()
 	return uuo
 }
 
@@ -1629,6 +1675,9 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := uuo.mutation.Password(); ok {
 		v.Property(dsl.Single, user.FieldPassword, value)
 	}
+	if value, ok := uuo.mutation.SearchableProfile(); ok {
+		v.Property(dsl.Single, user.FieldSearchableProfile, value)
+	}
 	if value, ok := uuo.mutation.Role(); ok {
 		v.Property(dsl.Single, user.FieldRole, value)
 	}
@@ -1659,6 +1708,9 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if uuo.mutation.PasswordCleared() {
 		properties = append(properties, user.FieldPassword)
+	}
+	if uuo.mutation.SearchableProfileCleared() {
+		properties = append(properties, user.FieldSearchableProfile)
 	}
 	if uuo.mutation.SSOCertCleared() {
 		properties = append(properties, user.FieldSSOCert)

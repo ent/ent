@@ -192,6 +192,26 @@ func (uu *UserUpdate) ClearPassword() *UserUpdate {
 	return uu
 }
 
+// SetSearchableProfile sets the "searchable_profile" field.
+func (uu *UserUpdate) SetSearchableProfile(s string) *UserUpdate {
+	uu.mutation.SetSearchableProfile(s)
+	return uu
+}
+
+// SetNillableSearchableProfile sets the "searchable_profile" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableSearchableProfile(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetSearchableProfile(*s)
+	}
+	return uu
+}
+
+// ClearSearchableProfile clears the value of the "searchable_profile" field.
+func (uu *UserUpdate) ClearSearchableProfile() *UserUpdate {
+	uu.mutation.ClearSearchableProfile()
+	return uu
+}
+
 // SetRole sets the "role" field.
 func (uu *UserUpdate) SetRole(u user.Role) *UserUpdate {
 	uu.mutation.SetRole(u)
@@ -733,6 +753,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if uu.mutation.PasswordCleared() {
 		_spec.ClearField(user.FieldPassword, field.TypeString)
+	}
+	if value, ok := uu.mutation.SearchableProfile(); ok {
+		_spec.SetField(user.FieldSearchableProfile, field.TypeString, value)
+	}
+	if uu.mutation.SearchableProfileCleared() {
+		_spec.ClearField(user.FieldSearchableProfile, field.TypeString)
 	}
 	if value, ok := uu.mutation.Role(); ok {
 		_spec.SetField(user.FieldRole, field.TypeEnum, value)
@@ -1364,6 +1390,26 @@ func (uuo *UserUpdateOne) ClearPassword() *UserUpdateOne {
 	return uuo
 }
 
+// SetSearchableProfile sets the "searchable_profile" field.
+func (uuo *UserUpdateOne) SetSearchableProfile(s string) *UserUpdateOne {
+	uuo.mutation.SetSearchableProfile(s)
+	return uuo
+}
+
+// SetNillableSearchableProfile sets the "searchable_profile" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableSearchableProfile(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetSearchableProfile(*s)
+	}
+	return uuo
+}
+
+// ClearSearchableProfile clears the value of the "searchable_profile" field.
+func (uuo *UserUpdateOne) ClearSearchableProfile() *UserUpdateOne {
+	uuo.mutation.ClearSearchableProfile()
+	return uuo
+}
+
 // SetRole sets the "role" field.
 func (uuo *UserUpdateOne) SetRole(u user.Role) *UserUpdateOne {
 	uuo.mutation.SetRole(u)
@@ -1935,6 +1981,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if uuo.mutation.PasswordCleared() {
 		_spec.ClearField(user.FieldPassword, field.TypeString)
+	}
+	if value, ok := uuo.mutation.SearchableProfile(); ok {
+		_spec.SetField(user.FieldSearchableProfile, field.TypeString, value)
+	}
+	if uuo.mutation.SearchableProfileCleared() {
+		_spec.ClearField(user.FieldSearchableProfile, field.TypeString)
 	}
 	if value, ok := uuo.mutation.Role(); ok {
 		_spec.SetField(user.FieldRole, field.TypeEnum, value)

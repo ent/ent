@@ -140,6 +140,13 @@ func Password(v string) predicate.User {
 	})
 }
 
+// SearchableProfile applies equality check predicate on the "searchable_profile" field. It's identical to SearchableProfileEQ.
+func SearchableProfile(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSearchableProfile, p.EQ(v))
+	})
+}
+
 // SSOCert applies equality check predicate on the "SSOCert" field. It's identical to SSOCertEQ.
 func SSOCert(v string) predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
@@ -795,6 +802,97 @@ func PasswordIsNil() predicate.User {
 func PasswordNotNil() predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
 		t.HasLabel(Label).Has(FieldPassword)
+	})
+}
+
+// SearchableProfileEQ applies the EQ predicate on the "searchable_profile" field.
+func SearchableProfileEQ(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSearchableProfile, p.EQ(v))
+	})
+}
+
+// SearchableProfileNEQ applies the NEQ predicate on the "searchable_profile" field.
+func SearchableProfileNEQ(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSearchableProfile, p.NEQ(v))
+	})
+}
+
+// SearchableProfileIn applies the In predicate on the "searchable_profile" field.
+func SearchableProfileIn(vs ...string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSearchableProfile, p.Within(vs...))
+	})
+}
+
+// SearchableProfileNotIn applies the NotIn predicate on the "searchable_profile" field.
+func SearchableProfileNotIn(vs ...string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSearchableProfile, p.Without(vs...))
+	})
+}
+
+// SearchableProfileGT applies the GT predicate on the "searchable_profile" field.
+func SearchableProfileGT(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSearchableProfile, p.GT(v))
+	})
+}
+
+// SearchableProfileGTE applies the GTE predicate on the "searchable_profile" field.
+func SearchableProfileGTE(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSearchableProfile, p.GTE(v))
+	})
+}
+
+// SearchableProfileLT applies the LT predicate on the "searchable_profile" field.
+func SearchableProfileLT(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSearchableProfile, p.LT(v))
+	})
+}
+
+// SearchableProfileLTE applies the LTE predicate on the "searchable_profile" field.
+func SearchableProfileLTE(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSearchableProfile, p.LTE(v))
+	})
+}
+
+// SearchableProfileContains applies the Contains predicate on the "searchable_profile" field.
+func SearchableProfileContains(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSearchableProfile, p.Containing(v))
+	})
+}
+
+// SearchableProfileHasPrefix applies the HasPrefix predicate on the "searchable_profile" field.
+func SearchableProfileHasPrefix(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSearchableProfile, p.StartingWith(v))
+	})
+}
+
+// SearchableProfileHasSuffix applies the HasSuffix predicate on the "searchable_profile" field.
+func SearchableProfileHasSuffix(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSearchableProfile, p.EndingWith(v))
+	})
+}
+
+// SearchableProfileIsNil applies the IsNil predicate on the "searchable_profile" field.
+func SearchableProfileIsNil() predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldSearchableProfile)
+	})
+}
+
+// SearchableProfileNotNil applies the NotNil predicate on the "searchable_profile" field.
+func SearchableProfileNotNil() predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldSearchableProfile)
 	})
 }
 
