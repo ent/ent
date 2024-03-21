@@ -4,7 +4,10 @@
 
 package entsql
 
-import "entgo.io/ent/schema"
+import (
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/schema"
+)
 
 // Annotation is a builtin schema annotation for attaching
 // SQL metadata to schema objects for both codegen and runtime.
@@ -303,6 +306,17 @@ func OnDelete(opt ReferenceOption) *Annotation {
 	}
 }
 
+// GeneratedAs specifies the generated expression for a column per dialect.
+func GeneratedAs(expr string) *Annotation {
+	return &Annotation{
+		GeneratedExprs: map[string]GeneratedExpr{
+			dialect.Postgres: {Expr: expr, Type: "STORED"},
+			dialect.MySQL:    {Expr: expr, Type: "STORED"},
+			dialect.SQLite:   {Expr: expr, Type: "STORED"},
+		},
+	}
+}
+
 // Merge implements the schema.Merger interface.
 func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	var ant Annotation
@@ -359,6 +373,14 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	}
 	if c := ant.Check; c != "" {
 		a.Check = c
+	}
+	if exprs := ant.GeneratedExprs; len(exprs) > 0 {
+		if a.GeneratedExprs == nil {
+			a.GeneratedExprs = make(map[string]GeneratedExpr)
+		}
+		for dialect, expr := range exprs {
+			a.GeneratedExprs[dialect] = expr
+		}
 	}
 	if checks := ant.Checks; len(checks) > 0 {
 		if a.Checks == nil {
