@@ -45,7 +45,6 @@ func (User) Fields() []ent.Field {
 			Optional().
 			Sensitive(),
 		field.String("searchable_profile").
-			Optional().
 			Annotations(entsql.GeneratedAs("tsvector(...)")),
 		field.Enum("role").
 			Values("user", "admin", "free-user", "test user").

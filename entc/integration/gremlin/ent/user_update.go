@@ -203,12 +203,6 @@ func (uu *UserUpdate) SetNillableSearchableProfile(s *string) *UserUpdate {
 	return uu
 }
 
-// ClearSearchableProfile clears the value of the "searchable_profile" field.
-func (uu *UserUpdate) ClearSearchableProfile() *UserUpdate {
-	uu.mutation.ClearSearchableProfile()
-	return uu
-}
-
 // SetRole sets the "role" field.
 func (uu *UserUpdate) SetRole(u user.Role) *UserUpdate {
 	uu.mutation.SetRole(u)
@@ -792,9 +786,6 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 	if uu.mutation.PasswordCleared() {
 		properties = append(properties, user.FieldPassword)
 	}
-	if uu.mutation.SearchableProfileCleared() {
-		properties = append(properties, user.FieldSearchableProfile)
-	}
 	if uu.mutation.SSOCertCleared() {
 		properties = append(properties, user.FieldSSOCert)
 	}
@@ -1099,12 +1090,6 @@ func (uuo *UserUpdateOne) SetNillableSearchableProfile(s *string) *UserUpdateOne
 	if s != nil {
 		uuo.SetSearchableProfile(*s)
 	}
-	return uuo
-}
-
-// ClearSearchableProfile clears the value of the "searchable_profile" field.
-func (uuo *UserUpdateOne) ClearSearchableProfile() *UserUpdateOne {
-	uuo.mutation.ClearSearchableProfile()
 	return uuo
 }
 
@@ -1708,9 +1693,6 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if uuo.mutation.PasswordCleared() {
 		properties = append(properties, user.FieldPassword)
-	}
-	if uuo.mutation.SearchableProfileCleared() {
-		properties = append(properties, user.FieldSearchableProfile)
 	}
 	if uuo.mutation.SSOCertCleared() {
 		properties = append(properties, user.FieldSSOCert)

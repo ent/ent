@@ -687,16 +687,6 @@ func SearchableProfileHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldSearchableProfile, v))
 }
 
-// SearchableProfileIsNil applies the IsNil predicate on the "searchable_profile" field.
-func SearchableProfileIsNil() predicate.User {
-	return predicate.User(sql.FieldIsNull(FieldSearchableProfile))
-}
-
-// SearchableProfileNotNil applies the NotNil predicate on the "searchable_profile" field.
-func SearchableProfileNotNil() predicate.User {
-	return predicate.User(sql.FieldNotNull(FieldSearchableProfile))
-}
-
 // SearchableProfileEqualFold applies the EqualFold predicate on the "searchable_profile" field.
 func SearchableProfileEqualFold(v string) predicate.User {
 	return predicate.User(sql.FieldEqualFold(FieldSearchableProfile, v))

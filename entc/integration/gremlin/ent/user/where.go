@@ -882,20 +882,6 @@ func SearchableProfileHasSuffix(v string) predicate.User {
 	})
 }
 
-// SearchableProfileIsNil applies the IsNil predicate on the "searchable_profile" field.
-func SearchableProfileIsNil() predicate.User {
-	return predicate.User(func(t *dsl.Traversal) {
-		t.HasLabel(Label).HasNot(FieldSearchableProfile)
-	})
-}
-
-// SearchableProfileNotNil applies the NotNil predicate on the "searchable_profile" field.
-func SearchableProfileNotNil() predicate.User {
-	return predicate.User(func(t *dsl.Traversal) {
-		t.HasLabel(Label).Has(FieldSearchableProfile)
-	})
-}
-
 // RoleEQ applies the EQ predicate on the "role" field.
 func RoleEQ(v Role) predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {

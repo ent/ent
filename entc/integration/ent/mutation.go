@@ -16109,22 +16109,9 @@ func (m *UserMutation) OldSearchableProfile(ctx context.Context) (v string, err 
 	return oldValue.SearchableProfile, nil
 }
 
-// ClearSearchableProfile clears the value of the "searchable_profile" field.
-func (m *UserMutation) ClearSearchableProfile() {
-	m.searchable_profile = nil
-	m.clearedFields[user.FieldSearchableProfile] = struct{}{}
-}
-
-// SearchableProfileCleared returns if the "searchable_profile" field was cleared in this mutation.
-func (m *UserMutation) SearchableProfileCleared() bool {
-	_, ok := m.clearedFields[user.FieldSearchableProfile]
-	return ok
-}
-
 // ResetSearchableProfile resets all changes to the "searchable_profile" field.
 func (m *UserMutation) ResetSearchableProfile() {
 	m.searchable_profile = nil
-	delete(m.clearedFields, user.FieldSearchableProfile)
 }
 
 // SetRole sets the "role" field.
@@ -17179,9 +17166,6 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldPassword) {
 		fields = append(fields, user.FieldPassword)
 	}
-	if m.FieldCleared(user.FieldSearchableProfile) {
-		fields = append(fields, user.FieldSearchableProfile)
-	}
 	if m.FieldCleared(user.FieldSSOCert) {
 		fields = append(fields, user.FieldSSOCert)
 	}
@@ -17216,9 +17200,6 @@ func (m *UserMutation) ClearField(name string) error {
 		return nil
 	case user.FieldPassword:
 		m.ClearPassword()
-		return nil
-	case user.FieldSearchableProfile:
-		m.ClearSearchableProfile()
 		return nil
 	case user.FieldSSOCert:
 		m.ClearSSOCert()

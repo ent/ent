@@ -128,14 +128,6 @@ func (uc *UserCreate) SetSearchableProfile(s string) *UserCreate {
 	return uc
 }
 
-// SetNillableSearchableProfile sets the "searchable_profile" field if the given value is not nil.
-func (uc *UserCreate) SetNillableSearchableProfile(s *string) *UserCreate {
-	if s != nil {
-		uc.SetSearchableProfile(*s)
-	}
-	return uc
-}
-
 // SetRole sets the "role" field.
 func (uc *UserCreate) SetRole(u user.Role) *UserCreate {
 	uc.mutation.SetRole(u)
@@ -441,6 +433,9 @@ func (uc *UserCreate) check() error {
 	}
 	if _, ok := uc.mutation.Last(); !ok {
 		return &ValidationError{Name: "last", err: errors.New(`ent: missing required field "User.last"`)}
+	}
+	if _, ok := uc.mutation.SearchableProfile(); !ok {
+		return &ValidationError{Name: "searchable_profile", err: errors.New(`ent: missing required field "User.searchable_profile"`)}
 	}
 	if _, ok := uc.mutation.Role(); !ok {
 		return &ValidationError{Name: "role", err: errors.New(`ent: missing required field "User.role"`)}
