@@ -237,6 +237,8 @@ func (e *state) evalBinary(expr *entql.BinaryExpr) *sql.Predicate {
 				})
 			}
 
+			// if no arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
 			if len(vs) == 0 {
 				return sql.False()
 			}
