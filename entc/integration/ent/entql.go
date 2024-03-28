@@ -394,18 +394,19 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "User",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			user.FieldOptionalInt: {Type: field.TypeInt, Column: user.FieldOptionalInt},
-			user.FieldAge:         {Type: field.TypeInt, Column: user.FieldAge},
-			user.FieldName:        {Type: field.TypeString, Column: user.FieldName},
-			user.FieldLast:        {Type: field.TypeString, Column: user.FieldLast},
-			user.FieldNickname:    {Type: field.TypeString, Column: user.FieldNickname},
-			user.FieldAddress:     {Type: field.TypeString, Column: user.FieldAddress},
-			user.FieldPhone:       {Type: field.TypeString, Column: user.FieldPhone},
-			user.FieldPassword:    {Type: field.TypeString, Column: user.FieldPassword},
-			user.FieldRole:        {Type: field.TypeEnum, Column: user.FieldRole},
-			user.FieldEmployment:  {Type: field.TypeEnum, Column: user.FieldEmployment},
-			user.FieldSSOCert:     {Type: field.TypeString, Column: user.FieldSSOCert},
-			user.FieldFilesCount:  {Type: field.TypeInt, Column: user.FieldFilesCount},
+			user.FieldOptionalInt:       {Type: field.TypeInt, Column: user.FieldOptionalInt},
+			user.FieldAge:               {Type: field.TypeInt, Column: user.FieldAge},
+			user.FieldName:              {Type: field.TypeString, Column: user.FieldName},
+			user.FieldLast:              {Type: field.TypeString, Column: user.FieldLast},
+			user.FieldNickname:          {Type: field.TypeString, Column: user.FieldNickname},
+			user.FieldAddress:           {Type: field.TypeString, Column: user.FieldAddress},
+			user.FieldPhone:             {Type: field.TypeString, Column: user.FieldPhone},
+			user.FieldPassword:          {Type: field.TypeString, Column: user.FieldPassword},
+			user.FieldSearchableProfile: {Type: field.TypeString, Column: user.FieldSearchableProfile},
+			user.FieldRole:              {Type: field.TypeEnum, Column: user.FieldRole},
+			user.FieldEmployment:        {Type: field.TypeEnum, Column: user.FieldEmployment},
+			user.FieldSSOCert:           {Type: field.TypeString, Column: user.FieldSSOCert},
+			user.FieldFilesCount:        {Type: field.TypeInt, Column: user.FieldFilesCount},
 		},
 	}
 	graph.MustAddE(
@@ -2348,6 +2349,11 @@ func (f *UserFilter) WherePhone(p entql.StringP) {
 // WherePassword applies the entql string predicate on the password field.
 func (f *UserFilter) WherePassword(p entql.StringP) {
 	f.Where(p.Field(user.FieldPassword))
+}
+
+// WhereSearchableProfile applies the entql string predicate on the searchable_profile field.
+func (f *UserFilter) WhereSearchableProfile(p entql.StringP) {
+	f.Where(p.Field(user.FieldSearchableProfile))
 }
 
 // WhereRole applies the entql string predicate on the role field.
