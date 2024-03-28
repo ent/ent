@@ -47,7 +47,7 @@ func (User) Fields() []ent.Field {
 ## Custom Table Schema
 
 Using the [Atlas](https://atlasgo.io) migration engine, an Ent schema can be defined and managed across multiple
-database schemas. Check out the [multi-schema doc](multischema-migrations) for more information.
+database schemas. Check out the [multi-schema doc](multischema-migrations.mdx) for more information.
 
 ## Foreign Keys Configuration
 

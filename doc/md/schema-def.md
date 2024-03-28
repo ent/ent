@@ -70,4 +70,4 @@ If you are used to the definition of relations over edges, that's fine.
 The modeling is the same. You can model with `ent` whatever you can model
 with other traditional ORMs.
 There are many examples in this website that can help you get started
-in the [Edges](schema-edges) section.
+in the [Edges](schema-edges.mdx) section.

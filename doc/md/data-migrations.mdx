@@ -14,7 +14,7 @@ migrations and integrate them into your regular schema migrations workflow.
 
 ### Migration Types
 
-Ent currently supports two types of migrations, [versioned migration](versioned-migrations.mdx) and [declarative migration](migrate)
+Ent currently supports two types of migrations, [versioned migration](versioned-migrations.mdx) and [declarative migration](migrate.md)
 (also known as automatic migration). Data migrations can be executed in both types of migrations.
 
 ## Versioned Migrations
@@ -267,7 +267,7 @@ until the data migration file achieves the desired result.
 
 ## Automatic Migrations
 
-In the declarative workflow, data migrations are implemented using Diff or Apply [Hooks](migrate#atlas-diff-and-apply-hooks).
+In the declarative workflow, data migrations are implemented using Diff or Apply [Hooks](migrate.md#atlas-diff-and-apply-hooks).
 This is because, unlike the versioned option, migrations of this type do not hold a name or a version when they are applied.
 Therefore, when a data is written using hooks, the type of the `schema.Change` must be checked before its
 execution to ensure the data migration was not applied more than once.
