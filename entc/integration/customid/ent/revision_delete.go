@@ -43,6 +43,11 @@ func (rd *RevisionDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the RevisionMutation object of the builder.
+func (rd *RevisionDelete) Mutation() *RevisionMutation {
+	return rd.mutation
+}
+
 func (rd *RevisionDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(revision.Table, sqlgraph.NewFieldSpec(revision.FieldID, field.TypeString))
 	if ps := rd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (rdo *RevisionDeleteOne) ExecX(ctx context.Context) {
 	if err := rdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the RevisionMutation object of the builder.
+func (rdo *RevisionDeleteOne) Mutation() *RevisionMutation {
+	return rdo.rd.mutation
 }

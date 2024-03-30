@@ -43,6 +43,11 @@ func (pd *ProcessDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the ProcessMutation object of the builder.
+func (pd *ProcessDelete) Mutation() *ProcessMutation {
+	return pd.mutation
+}
+
 func (pd *ProcessDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(process.Table, sqlgraph.NewFieldSpec(process.FieldID, field.TypeInt))
 	if ps := pd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (pdo *ProcessDeleteOne) ExecX(ctx context.Context) {
 	if err := pdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the ProcessMutation object of the builder.
+func (pdo *ProcessDeleteOne) Mutation() *ProcessMutation {
+	return pdo.pd.mutation
 }

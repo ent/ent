@@ -44,6 +44,11 @@ func (ftd *FieldTypeDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the FieldTypeMutation object of the builder.
+func (ftd *FieldTypeDelete) Mutation() *FieldTypeMutation {
+	return ftd.mutation
+}
+
 func (ftd *FieldTypeDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := ftd.gremlin().Query()
@@ -91,4 +96,9 @@ func (ftdo *FieldTypeDeleteOne) ExecX(ctx context.Context) {
 	if err := ftdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the FieldTypeMutation object of the builder.
+func (ftdo *FieldTypeDeleteOne) Mutation() *FieldTypeMutation {
+	return ftdo.ftd.mutation
 }

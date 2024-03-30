@@ -43,6 +43,11 @@ func (cd *CarDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the CarMutation object of the builder.
+func (cd *CarDelete) Mutation() *CarMutation {
+	return cd.mutation
+}
+
 func (cd *CarDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(car.Table, sqlgraph.NewFieldSpec(car.FieldID, field.TypeInt))
 	if ps := cd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (cdo *CarDeleteOne) ExecX(ctx context.Context) {
 	if err := cdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the CarMutation object of the builder.
+func (cdo *CarDeleteOne) Mutation() *CarMutation {
+	return cdo.cd.mutation
 }

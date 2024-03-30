@@ -42,6 +42,11 @@ func (tld *TweetLikeDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the TweetLikeMutation object of the builder.
+func (tld *TweetLikeDelete) Mutation() *TweetLikeMutation {
+	return tld.mutation
+}
+
 func (tld *TweetLikeDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(tweetlike.Table, nil)
 	if ps := tld.mutation.predicates; len(ps) > 0 {
@@ -88,4 +93,9 @@ func (tldo *TweetLikeDeleteOne) ExecX(ctx context.Context) {
 	if err := tldo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the TweetLikeMutation object of the builder.
+func (tldo *TweetLikeDeleteOne) Mutation() *TweetLikeMutation {
+	return tldo.tld.mutation
 }

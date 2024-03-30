@@ -43,6 +43,11 @@ func (gd *GroupDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the GroupMutation object of the builder.
+func (gd *GroupDelete) Mutation() *GroupMutation {
+	return gd.mutation
+}
+
 func (gd *GroupDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(group.Table, sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt))
 	if ps := gd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (gdo *GroupDeleteOne) ExecX(ctx context.Context) {
 	if err := gdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the GroupMutation object of the builder.
+func (gdo *GroupDeleteOne) Mutation() *GroupMutation {
+	return gdo.gd.mutation
 }

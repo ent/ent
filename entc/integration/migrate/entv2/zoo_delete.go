@@ -43,6 +43,11 @@ func (zd *ZooDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the ZooMutation object of the builder.
+func (zd *ZooDelete) Mutation() *ZooMutation {
+	return zd.mutation
+}
+
 func (zd *ZooDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(zoo.Table, sqlgraph.NewFieldSpec(zoo.FieldID, field.TypeInt))
 	if ps := zd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (zdo *ZooDeleteOne) ExecX(ctx context.Context) {
 	if err := zdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the ZooMutation object of the builder.
+func (zdo *ZooDeleteOne) Mutation() *ZooMutation {
+	return zdo.zd.mutation
 }

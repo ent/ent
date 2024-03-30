@@ -44,6 +44,11 @@ func (ud *UserDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the UserMutation object of the builder.
+func (ud *UserDelete) Mutation() *UserMutation {
+	return ud.mutation
+}
+
 func (ud *UserDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := ud.gremlin().Query()
@@ -91,4 +96,9 @@ func (udo *UserDeleteOne) ExecX(ctx context.Context) {
 	if err := udo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the UserMutation object of the builder.
+func (udo *UserDeleteOne) Mutation() *UserMutation {
+	return udo.ud.mutation
 }

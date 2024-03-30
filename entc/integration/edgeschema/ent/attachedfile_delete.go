@@ -43,6 +43,11 @@ func (afd *AttachedFileDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the AttachedFileMutation object of the builder.
+func (afd *AttachedFileDelete) Mutation() *AttachedFileMutation {
+	return afd.mutation
+}
+
 func (afd *AttachedFileDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(attachedfile.Table, sqlgraph.NewFieldSpec(attachedfile.FieldID, field.TypeInt))
 	if ps := afd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (afdo *AttachedFileDeleteOne) ExecX(ctx context.Context) {
 	if err := afdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the AttachedFileMutation object of the builder.
+func (afdo *AttachedFileDeleteOne) Mutation() *AttachedFileMutation {
+	return afdo.afd.mutation
 }

@@ -43,6 +43,11 @@ func (td *TaskDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the TaskMutation object of the builder.
+func (td *TaskDelete) Mutation() *TaskMutation {
+	return td.mutation
+}
+
 func (td *TaskDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(task.Table, sqlgraph.NewFieldSpec(task.FieldID, field.TypeInt))
 	if ps := td.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (tdo *TaskDeleteOne) ExecX(ctx context.Context) {
 	if err := tdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the TaskMutation object of the builder.
+func (tdo *TaskDeleteOne) Mutation() *TaskMutation {
+	return tdo.td.mutation
 }

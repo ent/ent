@@ -43,6 +43,11 @@ func (md *MetadataDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the MetadataMutation object of the builder.
+func (md *MetadataDelete) Mutation() *MetadataMutation {
+	return md.mutation
+}
+
 func (md *MetadataDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(metadata.Table, sqlgraph.NewFieldSpec(metadata.FieldID, field.TypeInt))
 	if ps := md.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (mdo *MetadataDeleteOne) ExecX(ctx context.Context) {
 	if err := mdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the MetadataMutation object of the builder.
+func (mdo *MetadataDeleteOne) Mutation() *MetadataMutation {
+	return mdo.md.mutation
 }

@@ -43,6 +43,11 @@ func (td *TokenDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the TokenMutation object of the builder.
+func (td *TokenDelete) Mutation() *TokenMutation {
+	return td.mutation
+}
+
 func (td *TokenDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(token.Table, sqlgraph.NewFieldSpec(token.FieldID, field.TypeOther))
 	if ps := td.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (tdo *TokenDeleteOne) ExecX(ctx context.Context) {
 	if err := tdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the TokenMutation object of the builder.
+func (tdo *TokenDeleteOne) Mutation() *TokenMutation {
+	return tdo.td.mutation
 }

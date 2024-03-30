@@ -43,6 +43,11 @@ func (pd *PCDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the PCMutation object of the builder.
+func (pd *PCDelete) Mutation() *PCMutation {
+	return pd.mutation
+}
+
 func (pd *PCDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(pc.Table, sqlgraph.NewFieldSpec(pc.FieldID, field.TypeInt))
 	if ps := pd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (pdo *PCDeleteOne) ExecX(ctx context.Context) {
 	if err := pdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the PCMutation object of the builder.
+func (pdo *PCDeleteOne) Mutation() *PCMutation {
+	return pdo.pd.mutation
 }

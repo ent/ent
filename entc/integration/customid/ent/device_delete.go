@@ -43,6 +43,11 @@ func (dd *DeviceDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the DeviceMutation object of the builder.
+func (dd *DeviceDelete) Mutation() *DeviceMutation {
+	return dd.mutation
+}
+
 func (dd *DeviceDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(device.Table, sqlgraph.NewFieldSpec(device.FieldID, field.TypeBytes))
 	if ps := dd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (ddo *DeviceDeleteOne) ExecX(ctx context.Context) {
 	if err := ddo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the DeviceMutation object of the builder.
+func (ddo *DeviceDeleteOne) Mutation() *DeviceMutation {
+	return ddo.dd.mutation
 }

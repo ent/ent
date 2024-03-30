@@ -42,6 +42,11 @@ func (rud *RoleUserDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the RoleUserMutation object of the builder.
+func (rud *RoleUserDelete) Mutation() *RoleUserMutation {
+	return rud.mutation
+}
+
 func (rud *RoleUserDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(roleuser.Table, nil)
 	if ps := rud.mutation.predicates; len(ps) > 0 {
@@ -88,4 +93,9 @@ func (rudo *RoleUserDeleteOne) ExecX(ctx context.Context) {
 	if err := rudo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the RoleUserMutation object of the builder.
+func (rudo *RoleUserDeleteOne) Mutation() *RoleUserMutation {
+	return rudo.rud.mutation
 }

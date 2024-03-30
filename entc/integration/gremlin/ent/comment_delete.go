@@ -44,6 +44,11 @@ func (cd *CommentDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the CommentMutation object of the builder.
+func (cd *CommentDelete) Mutation() *CommentMutation {
+	return cd.mutation
+}
+
 func (cd *CommentDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := cd.gremlin().Query()
@@ -91,4 +96,9 @@ func (cdo *CommentDeleteOne) ExecX(ctx context.Context) {
 	if err := cdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the CommentMutation object of the builder.
+func (cdo *CommentDeleteOne) Mutation() *CommentMutation {
+	return cdo.cd.mutation
 }

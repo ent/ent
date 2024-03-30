@@ -44,6 +44,11 @@ func (gd *GoodsDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the GoodsMutation object of the builder.
+func (gd *GoodsDelete) Mutation() *GoodsMutation {
+	return gd.mutation
+}
+
 func (gd *GoodsDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := gd.gremlin().Query()
@@ -91,4 +96,9 @@ func (gdo *GoodsDeleteOne) ExecX(ctx context.Context) {
 	if err := gdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the GoodsMutation object of the builder.
+func (gdo *GoodsDeleteOne) Mutation() *GoodsMutation {
+	return gdo.gd.mutation
 }
