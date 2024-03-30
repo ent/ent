@@ -49,6 +49,11 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) int {
 	return {{ $n }}
 }
 
+// Mutation returns the {{ $.MutationName }} object of the builder.
+func ({{ $receiver }} *{{ $builder }}) Mutation() *{{ $.MutationName }} {
+	return {{ $receiver }}.mutation
+}
+
 {{ with extend $ "Receiver" $receiver "Builder" $builder }}
 	{{ $tmpl := printf "dialect/%s/delete" $.Storage }}
 	{{ xtemplate $tmpl . }}
@@ -93,6 +98,11 @@ func ({{ $oneReceiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 	if err := {{ $oneReceiver }}.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the {{ $.MutationName }} object of the builder.
+func ({{ $oneReceiver }} *{{ $onebuilder }}) Mutation() *{{ $.MutationName }} {
+	return {{ $oneReceiver }}.{{ $mutation }}
 }
 
 {{ end }}
