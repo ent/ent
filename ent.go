@@ -476,6 +476,20 @@ const (
 // Is reports whether o is match the given operation.
 func (i Op) Is(o Op) bool { return i&o != 0 }
 
+// List of query operations used by the codegen.
+const (
+	OpQueryFirst   = "First"
+	OpQueryFirstID = "FirstID"
+	OpQueryOnly    = "Only"
+	OpQueryOnlyID  = "OnlyID"
+	OpQueryAll     = "All"
+	OpQueryIDs     = "IDs"
+	OpQueryCount   = "Count"
+	OpQueryExist   = "Exist"
+	OpQueryGroupBy = "GroupBy"
+	OpQuerySelect  = "Select"
+)
+
 type (
 	// QueryContext contains additional information about
 	// the context in which the query is executed.
