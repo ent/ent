@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -166,7 +167,7 @@ func (gq *GroupQuery) QueryInfo() *GroupInfoQuery {
 // First returns the first Group entity from the query.
 // Returns a *NotFoundError when no Group was found.
 func (gq *GroupQuery) First(ctx context.Context) (*Group, error) {
-	nodes, err := gq.Limit(1).All(setContextOp(ctx, gq.ctx, "First"))
+	nodes, err := gq.Limit(1).All(setContextOp(ctx, gq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +190,7 @@ func (gq *GroupQuery) FirstX(ctx context.Context) *Group {
 // Returns a *NotFoundError when no Group ID was found.
 func (gq *GroupQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = gq.Limit(1).IDs(setContextOp(ctx, gq.ctx, "FirstID")); err != nil {
+	if ids, err = gq.Limit(1).IDs(setContextOp(ctx, gq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -212,7 +213,7 @@ func (gq *GroupQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Group entity is found.
 // Returns a *NotFoundError when no Group entities are found.
 func (gq *GroupQuery) Only(ctx context.Context) (*Group, error) {
-	nodes, err := gq.Limit(2).All(setContextOp(ctx, gq.ctx, "Only"))
+	nodes, err := gq.Limit(2).All(setContextOp(ctx, gq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -240,7 +241,7 @@ func (gq *GroupQuery) OnlyX(ctx context.Context) *Group {
 // Returns a *NotFoundError when no entities are found.
 func (gq *GroupQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = gq.Limit(2).IDs(setContextOp(ctx, gq.ctx, "OnlyID")); err != nil {
+	if ids, err = gq.Limit(2).IDs(setContextOp(ctx, gq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -265,7 +266,7 @@ func (gq *GroupQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Groups.
 func (gq *GroupQuery) All(ctx context.Context) ([]*Group, error) {
-	ctx = setContextOp(ctx, gq.ctx, "All")
+	ctx = setContextOp(ctx, gq.ctx, ent.OpQueryAll)
 	if err := gq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -287,7 +288,7 @@ func (gq *GroupQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if gq.ctx.Unique == nil && gq.path != nil {
 		gq.Unique(true)
 	}
-	ctx = setContextOp(ctx, gq.ctx, "IDs")
+	ctx = setContextOp(ctx, gq.ctx, ent.OpQueryIDs)
 	if err = gq.Select(group.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -305,7 +306,7 @@ func (gq *GroupQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (gq *GroupQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, gq.ctx, "Count")
+	ctx = setContextOp(ctx, gq.ctx, ent.OpQueryCount)
 	if err := gq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -323,7 +324,7 @@ func (gq *GroupQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (gq *GroupQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, gq.ctx, "Exist")
+	ctx = setContextOp(ctx, gq.ctx, ent.OpQueryExist)
 	switch _, err := gq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -904,7 +905,7 @@ func (ggb *GroupGroupBy) Aggregate(fns ...AggregateFunc) *GroupGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ggb *GroupGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ggb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, ggb.build.ctx, ent.OpQueryGroupBy)
 	if err := ggb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -952,7 +953,7 @@ func (gs *GroupSelect) Aggregate(fns ...AggregateFunc) *GroupSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (gs *GroupSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, gs.ctx, "Select")
+	ctx = setContextOp(ctx, gs.ctx, ent.OpQuerySelect)
 	if err := gs.prepareQuery(ctx); err != nil {
 		return err
 	}

@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/o2o2types/ent/card"
@@ -89,7 +90,7 @@ func (uq *UserQuery) QueryCard() *CardQuery {
 // First returns the first User entity from the query.
 // Returns a *NotFoundError when no User was found.
 func (uq *UserQuery) First(ctx context.Context) (*User, error) {
-	nodes, err := uq.Limit(1).All(setContextOp(ctx, uq.ctx, "First"))
+	nodes, err := uq.Limit(1).All(setContextOp(ctx, uq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +113,7 @@ func (uq *UserQuery) FirstX(ctx context.Context) *User {
 // Returns a *NotFoundError when no User ID was found.
 func (uq *UserQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = uq.Limit(1).IDs(setContextOp(ctx, uq.ctx, "FirstID")); err != nil {
+	if ids, err = uq.Limit(1).IDs(setContextOp(ctx, uq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -135,7 +136,7 @@ func (uq *UserQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one User entity is found.
 // Returns a *NotFoundError when no User entities are found.
 func (uq *UserQuery) Only(ctx context.Context) (*User, error) {
-	nodes, err := uq.Limit(2).All(setContextOp(ctx, uq.ctx, "Only"))
+	nodes, err := uq.Limit(2).All(setContextOp(ctx, uq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +164,7 @@ func (uq *UserQuery) OnlyX(ctx context.Context) *User {
 // Returns a *NotFoundError when no entities are found.
 func (uq *UserQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = uq.Limit(2).IDs(setContextOp(ctx, uq.ctx, "OnlyID")); err != nil {
+	if ids, err = uq.Limit(2).IDs(setContextOp(ctx, uq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -188,7 +189,7 @@ func (uq *UserQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Users.
 func (uq *UserQuery) All(ctx context.Context) ([]*User, error) {
-	ctx = setContextOp(ctx, uq.ctx, "All")
+	ctx = setContextOp(ctx, uq.ctx, ent.OpQueryAll)
 	if err := uq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -210,7 +211,7 @@ func (uq *UserQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if uq.ctx.Unique == nil && uq.path != nil {
 		uq.Unique(true)
 	}
-	ctx = setContextOp(ctx, uq.ctx, "IDs")
+	ctx = setContextOp(ctx, uq.ctx, ent.OpQueryIDs)
 	if err = uq.Select(user.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -228,7 +229,7 @@ func (uq *UserQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (uq *UserQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, uq.ctx, "Count")
+	ctx = setContextOp(ctx, uq.ctx, ent.OpQueryCount)
 	if err := uq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -246,7 +247,7 @@ func (uq *UserQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (uq *UserQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, uq.ctx, "Exist")
+	ctx = setContextOp(ctx, uq.ctx, ent.OpQueryExist)
 	switch _, err := uq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -529,7 +530,7 @@ func (ugb *UserGroupBy) Aggregate(fns ...AggregateFunc) *UserGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ugb *UserGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ugb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, ugb.build.ctx, ent.OpQueryGroupBy)
 	if err := ugb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -577,7 +578,7 @@ func (us *UserSelect) Aggregate(fns ...AggregateFunc) *UserSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (us *UserSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, us.ctx, "Select")
+	ctx = setContextOp(ctx, us.ctx, ent.OpQuerySelect)
 	if err := us.prepareQuery(ctx); err != nil {
 		return err
 	}

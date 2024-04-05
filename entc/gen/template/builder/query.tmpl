@@ -93,7 +93,7 @@ func ({{ $receiver }} *{{ $builder }}) Order(o ...{{ $.Package }}.OrderOption) *
 // First returns the first {{ $.Name }} entity from the query. 
 // Returns a *NotFoundError when no {{ $.Name }} was found.
 func ({{ $receiver }} *{{ $builder }}) First(ctx context.Context) (*{{ $.Name }}, error) {
-	nodes, err := {{ $receiver }}.Limit(1).All(setContextOp(ctx, {{ $receiver }}.ctx, "First"))
+	nodes, err := {{ $receiver }}.Limit(1).All(setContextOp(ctx, {{ $receiver }}.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ func ({{ $receiver }} *{{ $builder }}) FirstX(ctx context.Context) *{{ $.Name }}
 	// Returns a *NotFoundError when no {{ $.Name }} ID was found.
 	func ({{ $receiver }} *{{ $builder }}) FirstID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
 		var ids []{{ $.ID.Type }}
-		if ids, err = {{ $receiver }}.Limit(1).IDs(setContextOp(ctx, {{ $receiver }}.ctx, "FirstID")); err != nil {
+		if ids, err = {{ $receiver }}.Limit(1).IDs(setContextOp(ctx, {{ $receiver }}.ctx, ent.OpQueryFirstID)); err != nil {
 			return
 		}
 		if len(ids) == 0 {
@@ -141,7 +141,7 @@ func ({{ $receiver }} *{{ $builder }}) FirstX(ctx context.Context) *{{ $.Name }}
 // Returns a *NotSingularError when more than one {{ $.Name }} entity is found.
 // Returns a *NotFoundError when no {{ $.Name }} entities are found.
 func ({{ $receiver }} *{{ $builder }}) Only(ctx context.Context) (*{{ $.Name }}, error) {
-	nodes, err := {{ $receiver }}.Limit(2).All(setContextOp(ctx, {{ $receiver }}.ctx, "Only"))
+	nodes, err := {{ $receiver }}.Limit(2).All(setContextOp(ctx, {{ $receiver }}.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -170,7 +170,7 @@ func ({{ $receiver }} *{{ $builder }}) OnlyX(ctx context.Context) *{{ $.Name }} 
 	// Returns a *NotFoundError when no entities are found.
 	func ({{ $receiver }} *{{ $builder }}) OnlyID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
 		var ids []{{ $.ID.Type }}
-		if ids, err = {{ $receiver }}.Limit(2).IDs(setContextOp(ctx, {{ $receiver }}.ctx, "OnlyID")); err != nil {
+		if ids, err = {{ $receiver }}.Limit(2).IDs(setContextOp(ctx, {{ $receiver }}.ctx, ent.OpQueryOnlyID)); err != nil {
 			return
 		}
 		switch len(ids) {
@@ -196,7 +196,7 @@ func ({{ $receiver }} *{{ $builder }}) OnlyX(ctx context.Context) *{{ $.Name }} 
 
 // All executes the query and returns a list of {{ plural $.Name }}.
 func ({{ $receiver }} *{{ $builder }}) All(ctx context.Context) ([]*{{ $.Name }}, error) {
-	ctx = setContextOp(ctx, {{ $receiver }}.ctx, "All")
+	ctx = setContextOp(ctx, {{ $receiver }}.ctx, ent.OpQueryAll)
 	if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -220,7 +220,7 @@ func ({{ $receiver }} *{{ $builder }}) AllX(ctx context.Context) []*{{ $.Name }}
 		if {{ $receiver }}.ctx.Unique == nil && {{ $receiver }}.path != nil {
 			{{ $receiver }}.Unique(true)
 		}
-		ctx = setContextOp(ctx, {{ $receiver }}.ctx, "IDs")
+		ctx = setContextOp(ctx, {{ $receiver }}.ctx, ent.OpQueryIDs)
 		if err = {{ $receiver }}.Select({{ $.Package }}.FieldID).Scan(ctx, &ids); err != nil {
 			return nil, err
 		}
@@ -239,7 +239,7 @@ func ({{ $receiver }} *{{ $builder }}) AllX(ctx context.Context) []*{{ $.Name }}
 
 // Count returns the count of the given query.
 func ({{ $receiver }} *{{ $builder }}) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, {{ $receiver }}.ctx, "Count")
+	ctx = setContextOp(ctx, {{ $receiver }}.ctx, ent.OpQueryCount)
 	if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -257,7 +257,7 @@ func ({{ $receiver }} *{{ $builder }}) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func ({{ $receiver }} *{{ $builder }}) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, {{ $receiver }}.ctx, "Exist")
+	ctx = setContextOp(ctx, {{ $receiver }}.ctx, ent.OpQueryExist)
 	switch _, err := {{ $receiver }}.First{{ if $.HasOneFieldID }}ID{{ end }}(ctx);{
 	case IsNotFound(err):
 		return false, nil
@@ -441,7 +441,7 @@ func ({{ $groupReceiver }} *{{ $groupBuilder }}) Aggregate(fns ...AggregateFunc)
 
 // Scan applies the selector query and scans the result into the given value.
 func ({{ $groupReceiver }} *{{ $groupBuilder }}) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, {{ $groupReceiver }}.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, {{ $groupReceiver }}.build.ctx, ent.OpQueryGroupBy)
 	if err := {{ $groupReceiver }}.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -471,7 +471,7 @@ func ({{ $selectReceiver }} *{{ $selectBuilder }}) Aggregate(fns ...AggregateFun
 
 // Scan applies the selector query and scans the result into the given value.
 func ({{ $selectReceiver }} *{{ $selectBuilder }}) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, {{ $selectReceiver }}.ctx, "Select")
+	ctx = setContextOp(ctx, {{ $selectReceiver }}.ctx, ent.OpQuerySelect)
 	if err := {{ $selectReceiver }}.prepareQuery(ctx); err != nil {
 		return err
 	}

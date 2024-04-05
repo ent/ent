@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
@@ -112,7 +113,7 @@ func (ugq *UserGroupQuery) QueryGroup() *GroupQuery {
 // First returns the first UserGroup entity from the query.
 // Returns a *NotFoundError when no UserGroup was found.
 func (ugq *UserGroupQuery) First(ctx context.Context) (*UserGroup, error) {
-	nodes, err := ugq.Limit(1).All(setContextOp(ctx, ugq.ctx, "First"))
+	nodes, err := ugq.Limit(1).All(setContextOp(ctx, ugq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +136,7 @@ func (ugq *UserGroupQuery) FirstX(ctx context.Context) *UserGroup {
 // Returns a *NotFoundError when no UserGroup ID was found.
 func (ugq *UserGroupQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = ugq.Limit(1).IDs(setContextOp(ctx, ugq.ctx, "FirstID")); err != nil {
+	if ids, err = ugq.Limit(1).IDs(setContextOp(ctx, ugq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -158,7 +159,7 @@ func (ugq *UserGroupQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one UserGroup entity is found.
 // Returns a *NotFoundError when no UserGroup entities are found.
 func (ugq *UserGroupQuery) Only(ctx context.Context) (*UserGroup, error) {
-	nodes, err := ugq.Limit(2).All(setContextOp(ctx, ugq.ctx, "Only"))
+	nodes, err := ugq.Limit(2).All(setContextOp(ctx, ugq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +187,7 @@ func (ugq *UserGroupQuery) OnlyX(ctx context.Context) *UserGroup {
 // Returns a *NotFoundError when no entities are found.
 func (ugq *UserGroupQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = ugq.Limit(2).IDs(setContextOp(ctx, ugq.ctx, "OnlyID")); err != nil {
+	if ids, err = ugq.Limit(2).IDs(setContextOp(ctx, ugq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -211,7 +212,7 @@ func (ugq *UserGroupQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of UserGroups.
 func (ugq *UserGroupQuery) All(ctx context.Context) ([]*UserGroup, error) {
-	ctx = setContextOp(ctx, ugq.ctx, "All")
+	ctx = setContextOp(ctx, ugq.ctx, ent.OpQueryAll)
 	if err := ugq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -233,7 +234,7 @@ func (ugq *UserGroupQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if ugq.ctx.Unique == nil && ugq.path != nil {
 		ugq.Unique(true)
 	}
-	ctx = setContextOp(ctx, ugq.ctx, "IDs")
+	ctx = setContextOp(ctx, ugq.ctx, ent.OpQueryIDs)
 	if err = ugq.Select(usergroup.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -251,7 +252,7 @@ func (ugq *UserGroupQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (ugq *UserGroupQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, ugq.ctx, "Count")
+	ctx = setContextOp(ctx, ugq.ctx, ent.OpQueryCount)
 	if err := ugq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -269,7 +270,7 @@ func (ugq *UserGroupQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (ugq *UserGroupQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, ugq.ctx, "Exist")
+	ctx = setContextOp(ctx, ugq.ctx, ent.OpQueryExist)
 	switch _, err := ugq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -607,7 +608,7 @@ func (uggb *UserGroupGroupBy) Aggregate(fns ...AggregateFunc) *UserGroupGroupBy 
 
 // Scan applies the selector query and scans the result into the given value.
 func (uggb *UserGroupGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, uggb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, uggb.build.ctx, ent.OpQueryGroupBy)
 	if err := uggb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -655,7 +656,7 @@ func (ugs *UserGroupSelect) Aggregate(fns ...AggregateFunc) *UserGroupSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ugs *UserGroupSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ugs.ctx, "Select")
+	ctx = setContextOp(ctx, ugs.ctx, ent.OpQuerySelect)
 	if err := ugs.prepareQuery(ctx); err != nil {
 		return err
 	}

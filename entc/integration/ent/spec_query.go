@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -92,7 +93,7 @@ func (sq *SpecQuery) QueryCard() *CardQuery {
 // First returns the first Spec entity from the query.
 // Returns a *NotFoundError when no Spec was found.
 func (sq *SpecQuery) First(ctx context.Context) (*Spec, error) {
-	nodes, err := sq.Limit(1).All(setContextOp(ctx, sq.ctx, "First"))
+	nodes, err := sq.Limit(1).All(setContextOp(ctx, sq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +116,7 @@ func (sq *SpecQuery) FirstX(ctx context.Context) *Spec {
 // Returns a *NotFoundError when no Spec ID was found.
 func (sq *SpecQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = sq.Limit(1).IDs(setContextOp(ctx, sq.ctx, "FirstID")); err != nil {
+	if ids, err = sq.Limit(1).IDs(setContextOp(ctx, sq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -138,7 +139,7 @@ func (sq *SpecQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Spec entity is found.
 // Returns a *NotFoundError when no Spec entities are found.
 func (sq *SpecQuery) Only(ctx context.Context) (*Spec, error) {
-	nodes, err := sq.Limit(2).All(setContextOp(ctx, sq.ctx, "Only"))
+	nodes, err := sq.Limit(2).All(setContextOp(ctx, sq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +167,7 @@ func (sq *SpecQuery) OnlyX(ctx context.Context) *Spec {
 // Returns a *NotFoundError when no entities are found.
 func (sq *SpecQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = sq.Limit(2).IDs(setContextOp(ctx, sq.ctx, "OnlyID")); err != nil {
+	if ids, err = sq.Limit(2).IDs(setContextOp(ctx, sq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -191,7 +192,7 @@ func (sq *SpecQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Specs.
 func (sq *SpecQuery) All(ctx context.Context) ([]*Spec, error) {
-	ctx = setContextOp(ctx, sq.ctx, "All")
+	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryAll)
 	if err := sq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -213,7 +214,7 @@ func (sq *SpecQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if sq.ctx.Unique == nil && sq.path != nil {
 		sq.Unique(true)
 	}
-	ctx = setContextOp(ctx, sq.ctx, "IDs")
+	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryIDs)
 	if err = sq.Select(spec.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -231,7 +232,7 @@ func (sq *SpecQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (sq *SpecQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, sq.ctx, "Count")
+	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryCount)
 	if err := sq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -249,7 +250,7 @@ func (sq *SpecQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (sq *SpecQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, sq.ctx, "Exist")
+	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryExist)
 	switch _, err := sq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -606,7 +607,7 @@ func (sgb *SpecGroupBy) Aggregate(fns ...AggregateFunc) *SpecGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (sgb *SpecGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, sgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, sgb.build.ctx, ent.OpQueryGroupBy)
 	if err := sgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -654,7 +655,7 @@ func (ss *SpecSelect) Aggregate(fns ...AggregateFunc) *SpecSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ss *SpecSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ss.ctx, "Select")
+	ctx = setContextOp(ctx, ss.ctx, ent.OpQuerySelect)
 	if err := ss.prepareQuery(ctx); err != nil {
 		return err
 	}

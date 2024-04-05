@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
@@ -112,7 +113,7 @@ func (utq *UserTweetQuery) QueryTweet() *TweetQuery {
 // First returns the first UserTweet entity from the query.
 // Returns a *NotFoundError when no UserTweet was found.
 func (utq *UserTweetQuery) First(ctx context.Context) (*UserTweet, error) {
-	nodes, err := utq.Limit(1).All(setContextOp(ctx, utq.ctx, "First"))
+	nodes, err := utq.Limit(1).All(setContextOp(ctx, utq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +136,7 @@ func (utq *UserTweetQuery) FirstX(ctx context.Context) *UserTweet {
 // Returns a *NotFoundError when no UserTweet ID was found.
 func (utq *UserTweetQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = utq.Limit(1).IDs(setContextOp(ctx, utq.ctx, "FirstID")); err != nil {
+	if ids, err = utq.Limit(1).IDs(setContextOp(ctx, utq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -158,7 +159,7 @@ func (utq *UserTweetQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one UserTweet entity is found.
 // Returns a *NotFoundError when no UserTweet entities are found.
 func (utq *UserTweetQuery) Only(ctx context.Context) (*UserTweet, error) {
-	nodes, err := utq.Limit(2).All(setContextOp(ctx, utq.ctx, "Only"))
+	nodes, err := utq.Limit(2).All(setContextOp(ctx, utq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +187,7 @@ func (utq *UserTweetQuery) OnlyX(ctx context.Context) *UserTweet {
 // Returns a *NotFoundError when no entities are found.
 func (utq *UserTweetQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = utq.Limit(2).IDs(setContextOp(ctx, utq.ctx, "OnlyID")); err != nil {
+	if ids, err = utq.Limit(2).IDs(setContextOp(ctx, utq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -211,7 +212,7 @@ func (utq *UserTweetQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of UserTweets.
 func (utq *UserTweetQuery) All(ctx context.Context) ([]*UserTweet, error) {
-	ctx = setContextOp(ctx, utq.ctx, "All")
+	ctx = setContextOp(ctx, utq.ctx, ent.OpQueryAll)
 	if err := utq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -233,7 +234,7 @@ func (utq *UserTweetQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if utq.ctx.Unique == nil && utq.path != nil {
 		utq.Unique(true)
 	}
-	ctx = setContextOp(ctx, utq.ctx, "IDs")
+	ctx = setContextOp(ctx, utq.ctx, ent.OpQueryIDs)
 	if err = utq.Select(usertweet.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -251,7 +252,7 @@ func (utq *UserTweetQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (utq *UserTweetQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, utq.ctx, "Count")
+	ctx = setContextOp(ctx, utq.ctx, ent.OpQueryCount)
 	if err := utq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -269,7 +270,7 @@ func (utq *UserTweetQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (utq *UserTweetQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, utq.ctx, "Exist")
+	ctx = setContextOp(ctx, utq.ctx, ent.OpQueryExist)
 	switch _, err := utq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -607,7 +608,7 @@ func (utgb *UserTweetGroupBy) Aggregate(fns ...AggregateFunc) *UserTweetGroupBy 
 
 // Scan applies the selector query and scans the result into the given value.
 func (utgb *UserTweetGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, utgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, utgb.build.ctx, ent.OpQueryGroupBy)
 	if err := utgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -655,7 +656,7 @@ func (uts *UserTweetSelect) Aggregate(fns ...AggregateFunc) *UserTweetSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (uts *UserTweetSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, uts.ctx, "Select")
+	ctx = setContextOp(ctx, uts.ctx, ent.OpQuerySelect)
 	if err := uts.prepareQuery(ctx); err != nil {
 		return err
 	}

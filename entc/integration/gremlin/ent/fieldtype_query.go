@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
@@ -65,7 +66,7 @@ func (ftq *FieldTypeQuery) Order(o ...fieldtype.OrderOption) *FieldTypeQuery {
 // First returns the first FieldType entity from the query.
 // Returns a *NotFoundError when no FieldType was found.
 func (ftq *FieldTypeQuery) First(ctx context.Context) (*FieldType, error) {
-	nodes, err := ftq.Limit(1).All(setContextOp(ctx, ftq.ctx, "First"))
+	nodes, err := ftq.Limit(1).All(setContextOp(ctx, ftq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +89,7 @@ func (ftq *FieldTypeQuery) FirstX(ctx context.Context) *FieldType {
 // Returns a *NotFoundError when no FieldType ID was found.
 func (ftq *FieldTypeQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = ftq.Limit(1).IDs(setContextOp(ctx, ftq.ctx, "FirstID")); err != nil {
+	if ids, err = ftq.Limit(1).IDs(setContextOp(ctx, ftq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -111,7 +112,7 @@ func (ftq *FieldTypeQuery) FirstIDX(ctx context.Context) string {
 // Returns a *NotSingularError when more than one FieldType entity is found.
 // Returns a *NotFoundError when no FieldType entities are found.
 func (ftq *FieldTypeQuery) Only(ctx context.Context) (*FieldType, error) {
-	nodes, err := ftq.Limit(2).All(setContextOp(ctx, ftq.ctx, "Only"))
+	nodes, err := ftq.Limit(2).All(setContextOp(ctx, ftq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +140,7 @@ func (ftq *FieldTypeQuery) OnlyX(ctx context.Context) *FieldType {
 // Returns a *NotFoundError when no entities are found.
 func (ftq *FieldTypeQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = ftq.Limit(2).IDs(setContextOp(ctx, ftq.ctx, "OnlyID")); err != nil {
+	if ids, err = ftq.Limit(2).IDs(setContextOp(ctx, ftq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -164,7 +165,7 @@ func (ftq *FieldTypeQuery) OnlyIDX(ctx context.Context) string {
 
 // All executes the query and returns a list of FieldTypes.
 func (ftq *FieldTypeQuery) All(ctx context.Context) ([]*FieldType, error) {
-	ctx = setContextOp(ctx, ftq.ctx, "All")
+	ctx = setContextOp(ctx, ftq.ctx, ent.OpQueryAll)
 	if err := ftq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -186,7 +187,7 @@ func (ftq *FieldTypeQuery) IDs(ctx context.Context) (ids []string, err error) {
 	if ftq.ctx.Unique == nil && ftq.path != nil {
 		ftq.Unique(true)
 	}
-	ctx = setContextOp(ctx, ftq.ctx, "IDs")
+	ctx = setContextOp(ctx, ftq.ctx, ent.OpQueryIDs)
 	if err = ftq.Select(fieldtype.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -204,7 +205,7 @@ func (ftq *FieldTypeQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (ftq *FieldTypeQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, ftq.ctx, "Count")
+	ctx = setContextOp(ctx, ftq.ctx, ent.OpQueryCount)
 	if err := ftq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -222,7 +223,7 @@ func (ftq *FieldTypeQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (ftq *FieldTypeQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, ftq.ctx, "Exist")
+	ctx = setContextOp(ctx, ftq.ctx, ent.OpQueryExist)
 	switch _, err := ftq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -406,7 +407,7 @@ func (ftgb *FieldTypeGroupBy) Aggregate(fns ...AggregateFunc) *FieldTypeGroupBy 
 
 // Scan applies the selector query and scans the result into the given value.
 func (ftgb *FieldTypeGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ftgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, ftgb.build.ctx, ent.OpQueryGroupBy)
 	if err := ftgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -461,7 +462,7 @@ func (fts *FieldTypeSelect) Aggregate(fns ...AggregateFunc) *FieldTypeSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (fts *FieldTypeSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, fts.ctx, "Select")
+	ctx = setContextOp(ctx, fts.ctx, ent.OpQuerySelect)
 	if err := fts.prepareQuery(ctx); err != nil {
 		return err
 	}

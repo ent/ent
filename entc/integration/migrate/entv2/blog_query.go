@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/blog"
@@ -89,7 +90,7 @@ func (bq *BlogQuery) QueryAdmins() *UserQuery {
 // First returns the first Blog entity from the query.
 // Returns a *NotFoundError when no Blog was found.
 func (bq *BlogQuery) First(ctx context.Context) (*Blog, error) {
-	nodes, err := bq.Limit(1).All(setContextOp(ctx, bq.ctx, "First"))
+	nodes, err := bq.Limit(1).All(setContextOp(ctx, bq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +113,7 @@ func (bq *BlogQuery) FirstX(ctx context.Context) *Blog {
 // Returns a *NotFoundError when no Blog ID was found.
 func (bq *BlogQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = bq.Limit(1).IDs(setContextOp(ctx, bq.ctx, "FirstID")); err != nil {
+	if ids, err = bq.Limit(1).IDs(setContextOp(ctx, bq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -135,7 +136,7 @@ func (bq *BlogQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Blog entity is found.
 // Returns a *NotFoundError when no Blog entities are found.
 func (bq *BlogQuery) Only(ctx context.Context) (*Blog, error) {
-	nodes, err := bq.Limit(2).All(setContextOp(ctx, bq.ctx, "Only"))
+	nodes, err := bq.Limit(2).All(setContextOp(ctx, bq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +164,7 @@ func (bq *BlogQuery) OnlyX(ctx context.Context) *Blog {
 // Returns a *NotFoundError when no entities are found.
 func (bq *BlogQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = bq.Limit(2).IDs(setContextOp(ctx, bq.ctx, "OnlyID")); err != nil {
+	if ids, err = bq.Limit(2).IDs(setContextOp(ctx, bq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -188,7 +189,7 @@ func (bq *BlogQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Blogs.
 func (bq *BlogQuery) All(ctx context.Context) ([]*Blog, error) {
-	ctx = setContextOp(ctx, bq.ctx, "All")
+	ctx = setContextOp(ctx, bq.ctx, ent.OpQueryAll)
 	if err := bq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -210,7 +211,7 @@ func (bq *BlogQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if bq.ctx.Unique == nil && bq.path != nil {
 		bq.Unique(true)
 	}
-	ctx = setContextOp(ctx, bq.ctx, "IDs")
+	ctx = setContextOp(ctx, bq.ctx, ent.OpQueryIDs)
 	if err = bq.Select(blog.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -228,7 +229,7 @@ func (bq *BlogQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (bq *BlogQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, bq.ctx, "Count")
+	ctx = setContextOp(ctx, bq.ctx, ent.OpQueryCount)
 	if err := bq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -246,7 +247,7 @@ func (bq *BlogQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (bq *BlogQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, bq.ctx, "Exist")
+	ctx = setContextOp(ctx, bq.ctx, ent.OpQueryExist)
 	switch _, err := bq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -533,7 +534,7 @@ func (bgb *BlogGroupBy) Aggregate(fns ...AggregateFunc) *BlogGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (bgb *BlogGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, bgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, bgb.build.ctx, ent.OpQueryGroupBy)
 	if err := bgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -581,7 +582,7 @@ func (bs *BlogSelect) Aggregate(fns ...AggregateFunc) *BlogSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (bs *BlogSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, bs.ctx, "Select")
+	ctx = setContextOp(ctx, bs.ctx, ent.OpQuerySelect)
 	if err := bs.prepareQuery(ctx); err != nil {
 		return err
 	}

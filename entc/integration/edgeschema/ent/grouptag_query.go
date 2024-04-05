@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
@@ -112,7 +113,7 @@ func (gtq *GroupTagQuery) QueryGroup() *GroupQuery {
 // First returns the first GroupTag entity from the query.
 // Returns a *NotFoundError when no GroupTag was found.
 func (gtq *GroupTagQuery) First(ctx context.Context) (*GroupTag, error) {
-	nodes, err := gtq.Limit(1).All(setContextOp(ctx, gtq.ctx, "First"))
+	nodes, err := gtq.Limit(1).All(setContextOp(ctx, gtq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +136,7 @@ func (gtq *GroupTagQuery) FirstX(ctx context.Context) *GroupTag {
 // Returns a *NotFoundError when no GroupTag ID was found.
 func (gtq *GroupTagQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = gtq.Limit(1).IDs(setContextOp(ctx, gtq.ctx, "FirstID")); err != nil {
+	if ids, err = gtq.Limit(1).IDs(setContextOp(ctx, gtq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -158,7 +159,7 @@ func (gtq *GroupTagQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one GroupTag entity is found.
 // Returns a *NotFoundError when no GroupTag entities are found.
 func (gtq *GroupTagQuery) Only(ctx context.Context) (*GroupTag, error) {
-	nodes, err := gtq.Limit(2).All(setContextOp(ctx, gtq.ctx, "Only"))
+	nodes, err := gtq.Limit(2).All(setContextOp(ctx, gtq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +187,7 @@ func (gtq *GroupTagQuery) OnlyX(ctx context.Context) *GroupTag {
 // Returns a *NotFoundError when no entities are found.
 func (gtq *GroupTagQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = gtq.Limit(2).IDs(setContextOp(ctx, gtq.ctx, "OnlyID")); err != nil {
+	if ids, err = gtq.Limit(2).IDs(setContextOp(ctx, gtq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -211,7 +212,7 @@ func (gtq *GroupTagQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of GroupTags.
 func (gtq *GroupTagQuery) All(ctx context.Context) ([]*GroupTag, error) {
-	ctx = setContextOp(ctx, gtq.ctx, "All")
+	ctx = setContextOp(ctx, gtq.ctx, ent.OpQueryAll)
 	if err := gtq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -233,7 +234,7 @@ func (gtq *GroupTagQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if gtq.ctx.Unique == nil && gtq.path != nil {
 		gtq.Unique(true)
 	}
-	ctx = setContextOp(ctx, gtq.ctx, "IDs")
+	ctx = setContextOp(ctx, gtq.ctx, ent.OpQueryIDs)
 	if err = gtq.Select(grouptag.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -251,7 +252,7 @@ func (gtq *GroupTagQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (gtq *GroupTagQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, gtq.ctx, "Count")
+	ctx = setContextOp(ctx, gtq.ctx, ent.OpQueryCount)
 	if err := gtq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -269,7 +270,7 @@ func (gtq *GroupTagQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (gtq *GroupTagQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, gtq.ctx, "Exist")
+	ctx = setContextOp(ctx, gtq.ctx, ent.OpQueryExist)
 	switch _, err := gtq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -607,7 +608,7 @@ func (gtgb *GroupTagGroupBy) Aggregate(fns ...AggregateFunc) *GroupTagGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (gtgb *GroupTagGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, gtgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, gtgb.build.ctx, ent.OpQueryGroupBy)
 	if err := gtgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -655,7 +656,7 @@ func (gts *GroupTagSelect) Aggregate(fns ...AggregateFunc) *GroupTagSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (gts *GroupTagSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, gts.ctx, "Select")
+	ctx = setContextOp(ctx, gts.ctx, ent.OpQuerySelect)
 	if err := gts.prepareQuery(ctx); err != nil {
 		return err
 	}
