@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -66,7 +67,7 @@ func (evsq *ExValueScanQuery) Order(o ...exvaluescan.OrderOption) *ExValueScanQu
 // First returns the first ExValueScan entity from the query.
 // Returns a *NotFoundError when no ExValueScan was found.
 func (evsq *ExValueScanQuery) First(ctx context.Context) (*ExValueScan, error) {
-	nodes, err := evsq.Limit(1).All(setContextOp(ctx, evsq.ctx, "First"))
+	nodes, err := evsq.Limit(1).All(setContextOp(ctx, evsq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +90,7 @@ func (evsq *ExValueScanQuery) FirstX(ctx context.Context) *ExValueScan {
 // Returns a *NotFoundError when no ExValueScan ID was found.
 func (evsq *ExValueScanQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = evsq.Limit(1).IDs(setContextOp(ctx, evsq.ctx, "FirstID")); err != nil {
+	if ids, err = evsq.Limit(1).IDs(setContextOp(ctx, evsq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -112,7 +113,7 @@ func (evsq *ExValueScanQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one ExValueScan entity is found.
 // Returns a *NotFoundError when no ExValueScan entities are found.
 func (evsq *ExValueScanQuery) Only(ctx context.Context) (*ExValueScan, error) {
-	nodes, err := evsq.Limit(2).All(setContextOp(ctx, evsq.ctx, "Only"))
+	nodes, err := evsq.Limit(2).All(setContextOp(ctx, evsq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +141,7 @@ func (evsq *ExValueScanQuery) OnlyX(ctx context.Context) *ExValueScan {
 // Returns a *NotFoundError when no entities are found.
 func (evsq *ExValueScanQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = evsq.Limit(2).IDs(setContextOp(ctx, evsq.ctx, "OnlyID")); err != nil {
+	if ids, err = evsq.Limit(2).IDs(setContextOp(ctx, evsq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -165,7 +166,7 @@ func (evsq *ExValueScanQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of ExValueScans.
 func (evsq *ExValueScanQuery) All(ctx context.Context) ([]*ExValueScan, error) {
-	ctx = setContextOp(ctx, evsq.ctx, "All")
+	ctx = setContextOp(ctx, evsq.ctx, ent.OpQueryAll)
 	if err := evsq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -187,7 +188,7 @@ func (evsq *ExValueScanQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if evsq.ctx.Unique == nil && evsq.path != nil {
 		evsq.Unique(true)
 	}
-	ctx = setContextOp(ctx, evsq.ctx, "IDs")
+	ctx = setContextOp(ctx, evsq.ctx, ent.OpQueryIDs)
 	if err = evsq.Select(exvaluescan.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -205,7 +206,7 @@ func (evsq *ExValueScanQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (evsq *ExValueScanQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, evsq.ctx, "Count")
+	ctx = setContextOp(ctx, evsq.ctx, ent.OpQueryCount)
 	if err := evsq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -223,7 +224,7 @@ func (evsq *ExValueScanQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (evsq *ExValueScanQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, evsq.ctx, "Exist")
+	ctx = setContextOp(ctx, evsq.ctx, ent.OpQueryExist)
 	switch _, err := evsq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -496,7 +497,7 @@ func (evsgb *ExValueScanGroupBy) Aggregate(fns ...AggregateFunc) *ExValueScanGro
 
 // Scan applies the selector query and scans the result into the given value.
 func (evsgb *ExValueScanGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, evsgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, evsgb.build.ctx, ent.OpQueryGroupBy)
 	if err := evsgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -544,7 +545,7 @@ func (evss *ExValueScanSelect) Aggregate(fns ...AggregateFunc) *ExValueScanSelec
 
 // Scan applies the selector query and scans the result into the given value.
 func (evss *ExValueScanSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, evss.ctx, "Select")
+	ctx = setContextOp(ctx, evss.ctx, ent.OpQuerySelect)
 	if err := evss.prepareQuery(ctx); err != nil {
 		return err
 	}

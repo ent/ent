@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
@@ -64,7 +65,7 @@ func (zq *ZooQuery) Order(o ...zoo.OrderOption) *ZooQuery {
 // First returns the first Zoo entity from the query.
 // Returns a *NotFoundError when no Zoo was found.
 func (zq *ZooQuery) First(ctx context.Context) (*Zoo, error) {
-	nodes, err := zq.Limit(1).All(setContextOp(ctx, zq.ctx, "First"))
+	nodes, err := zq.Limit(1).All(setContextOp(ctx, zq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +88,7 @@ func (zq *ZooQuery) FirstX(ctx context.Context) *Zoo {
 // Returns a *NotFoundError when no Zoo ID was found.
 func (zq *ZooQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = zq.Limit(1).IDs(setContextOp(ctx, zq.ctx, "FirstID")); err != nil {
+	if ids, err = zq.Limit(1).IDs(setContextOp(ctx, zq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -110,7 +111,7 @@ func (zq *ZooQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Zoo entity is found.
 // Returns a *NotFoundError when no Zoo entities are found.
 func (zq *ZooQuery) Only(ctx context.Context) (*Zoo, error) {
-	nodes, err := zq.Limit(2).All(setContextOp(ctx, zq.ctx, "Only"))
+	nodes, err := zq.Limit(2).All(setContextOp(ctx, zq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +139,7 @@ func (zq *ZooQuery) OnlyX(ctx context.Context) *Zoo {
 // Returns a *NotFoundError when no entities are found.
 func (zq *ZooQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = zq.Limit(2).IDs(setContextOp(ctx, zq.ctx, "OnlyID")); err != nil {
+	if ids, err = zq.Limit(2).IDs(setContextOp(ctx, zq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -163,7 +164,7 @@ func (zq *ZooQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Zoos.
 func (zq *ZooQuery) All(ctx context.Context) ([]*Zoo, error) {
-	ctx = setContextOp(ctx, zq.ctx, "All")
+	ctx = setContextOp(ctx, zq.ctx, ent.OpQueryAll)
 	if err := zq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -185,7 +186,7 @@ func (zq *ZooQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if zq.ctx.Unique == nil && zq.path != nil {
 		zq.Unique(true)
 	}
-	ctx = setContextOp(ctx, zq.ctx, "IDs")
+	ctx = setContextOp(ctx, zq.ctx, ent.OpQueryIDs)
 	if err = zq.Select(zoo.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -203,7 +204,7 @@ func (zq *ZooQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (zq *ZooQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, zq.ctx, "Count")
+	ctx = setContextOp(ctx, zq.ctx, ent.OpQueryCount)
 	if err := zq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -221,7 +222,7 @@ func (zq *ZooQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (zq *ZooQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, zq.ctx, "Exist")
+	ctx = setContextOp(ctx, zq.ctx, ent.OpQueryExist)
 	switch _, err := zq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -431,7 +432,7 @@ func (zgb *ZooGroupBy) Aggregate(fns ...AggregateFunc) *ZooGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (zgb *ZooGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, zgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, zgb.build.ctx, ent.OpQueryGroupBy)
 	if err := zgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -479,7 +480,7 @@ func (zs *ZooSelect) Aggregate(fns ...AggregateFunc) *ZooSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (zs *ZooSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, zs.ctx, "Select")
+	ctx = setContextOp(ctx, zs.ctx, ent.OpQuerySelect)
 	if err := zs.prepareQuery(ctx); err != nil {
 		return err
 	}
