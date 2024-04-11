@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -66,7 +67,7 @@ func (bq *BuilderQuery) Order(o ...builder.OrderOption) *BuilderQuery {
 // First returns the first Builder entity from the query.
 // Returns a *NotFoundError when no Builder was found.
 func (bq *BuilderQuery) First(ctx context.Context) (*Builder, error) {
-	nodes, err := bq.Limit(1).All(setContextOp(ctx, bq.ctx, "First"))
+	nodes, err := bq.Limit(1).All(setContextOp(ctx, bq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +90,7 @@ func (bq *BuilderQuery) FirstX(ctx context.Context) *Builder {
 // Returns a *NotFoundError when no Builder ID was found.
 func (bq *BuilderQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = bq.Limit(1).IDs(setContextOp(ctx, bq.ctx, "FirstID")); err != nil {
+	if ids, err = bq.Limit(1).IDs(setContextOp(ctx, bq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -112,7 +113,7 @@ func (bq *BuilderQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Builder entity is found.
 // Returns a *NotFoundError when no Builder entities are found.
 func (bq *BuilderQuery) Only(ctx context.Context) (*Builder, error) {
-	nodes, err := bq.Limit(2).All(setContextOp(ctx, bq.ctx, "Only"))
+	nodes, err := bq.Limit(2).All(setContextOp(ctx, bq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +141,7 @@ func (bq *BuilderQuery) OnlyX(ctx context.Context) *Builder {
 // Returns a *NotFoundError when no entities are found.
 func (bq *BuilderQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = bq.Limit(2).IDs(setContextOp(ctx, bq.ctx, "OnlyID")); err != nil {
+	if ids, err = bq.Limit(2).IDs(setContextOp(ctx, bq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -165,7 +166,7 @@ func (bq *BuilderQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Builders.
 func (bq *BuilderQuery) All(ctx context.Context) ([]*Builder, error) {
-	ctx = setContextOp(ctx, bq.ctx, "All")
+	ctx = setContextOp(ctx, bq.ctx, ent.OpQueryAll)
 	if err := bq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -187,7 +188,7 @@ func (bq *BuilderQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if bq.ctx.Unique == nil && bq.path != nil {
 		bq.Unique(true)
 	}
-	ctx = setContextOp(ctx, bq.ctx, "IDs")
+	ctx = setContextOp(ctx, bq.ctx, ent.OpQueryIDs)
 	if err = bq.Select(builder.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -205,7 +206,7 @@ func (bq *BuilderQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (bq *BuilderQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, bq.ctx, "Count")
+	ctx = setContextOp(ctx, bq.ctx, ent.OpQueryCount)
 	if err := bq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -223,7 +224,7 @@ func (bq *BuilderQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (bq *BuilderQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, bq.ctx, "Exist")
+	ctx = setContextOp(ctx, bq.ctx, ent.OpQueryExist)
 	switch _, err := bq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -474,7 +475,7 @@ func (bgb *BuilderGroupBy) Aggregate(fns ...AggregateFunc) *BuilderGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (bgb *BuilderGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, bgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, bgb.build.ctx, ent.OpQueryGroupBy)
 	if err := bgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -522,7 +523,7 @@ func (bs *BuilderSelect) Aggregate(fns ...AggregateFunc) *BuilderSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (bs *BuilderSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, bs.ctx, "Select")
+	ctx = setContextOp(ctx, bs.ctx, ent.OpQuerySelect)
 	if err := bs.prepareQuery(ctx); err != nil {
 		return err
 	}

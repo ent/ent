@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv1/conversion"
@@ -64,7 +65,7 @@ func (cq *ConversionQuery) Order(o ...conversion.OrderOption) *ConversionQuery {
 // First returns the first Conversion entity from the query.
 // Returns a *NotFoundError when no Conversion was found.
 func (cq *ConversionQuery) First(ctx context.Context) (*Conversion, error) {
-	nodes, err := cq.Limit(1).All(setContextOp(ctx, cq.ctx, "First"))
+	nodes, err := cq.Limit(1).All(setContextOp(ctx, cq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +88,7 @@ func (cq *ConversionQuery) FirstX(ctx context.Context) *Conversion {
 // Returns a *NotFoundError when no Conversion ID was found.
 func (cq *ConversionQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = cq.Limit(1).IDs(setContextOp(ctx, cq.ctx, "FirstID")); err != nil {
+	if ids, err = cq.Limit(1).IDs(setContextOp(ctx, cq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -110,7 +111,7 @@ func (cq *ConversionQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Conversion entity is found.
 // Returns a *NotFoundError when no Conversion entities are found.
 func (cq *ConversionQuery) Only(ctx context.Context) (*Conversion, error) {
-	nodes, err := cq.Limit(2).All(setContextOp(ctx, cq.ctx, "Only"))
+	nodes, err := cq.Limit(2).All(setContextOp(ctx, cq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +139,7 @@ func (cq *ConversionQuery) OnlyX(ctx context.Context) *Conversion {
 // Returns a *NotFoundError when no entities are found.
 func (cq *ConversionQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = cq.Limit(2).IDs(setContextOp(ctx, cq.ctx, "OnlyID")); err != nil {
+	if ids, err = cq.Limit(2).IDs(setContextOp(ctx, cq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -163,7 +164,7 @@ func (cq *ConversionQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Conversions.
 func (cq *ConversionQuery) All(ctx context.Context) ([]*Conversion, error) {
-	ctx = setContextOp(ctx, cq.ctx, "All")
+	ctx = setContextOp(ctx, cq.ctx, ent.OpQueryAll)
 	if err := cq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -185,7 +186,7 @@ func (cq *ConversionQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if cq.ctx.Unique == nil && cq.path != nil {
 		cq.Unique(true)
 	}
-	ctx = setContextOp(ctx, cq.ctx, "IDs")
+	ctx = setContextOp(ctx, cq.ctx, ent.OpQueryIDs)
 	if err = cq.Select(conversion.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -203,7 +204,7 @@ func (cq *ConversionQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (cq *ConversionQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, cq.ctx, "Count")
+	ctx = setContextOp(ctx, cq.ctx, ent.OpQueryCount)
 	if err := cq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -221,7 +222,7 @@ func (cq *ConversionQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (cq *ConversionQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, cq.ctx, "Exist")
+	ctx = setContextOp(ctx, cq.ctx, ent.OpQueryExist)
 	switch _, err := cq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -453,7 +454,7 @@ func (cgb *ConversionGroupBy) Aggregate(fns ...AggregateFunc) *ConversionGroupBy
 
 // Scan applies the selector query and scans the result into the given value.
 func (cgb *ConversionGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, cgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, cgb.build.ctx, ent.OpQueryGroupBy)
 	if err := cgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -501,7 +502,7 @@ func (cs *ConversionSelect) Aggregate(fns ...AggregateFunc) *ConversionSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (cs *ConversionSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, cs.ctx, "Select")
+	ctx = setContextOp(ctx, cs.ctx, ent.OpQuerySelect)
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}

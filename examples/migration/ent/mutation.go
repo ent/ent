@@ -48,6 +48,7 @@ type CardMutation struct {
 	op              Op
 	typ             string
 	id              *int
+	_type           *string
 	number_hash     *string
 	cvv_hash        *string
 	expires_at      *time.Time
@@ -161,6 +162,42 @@ func (m *CardMutation) IDs(ctx context.Context) ([]int, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetType sets the "type" field.
+func (m *CardMutation) SetType(s string) {
+	m._type = &s
+}
+
+// GetType returns the value of the "type" field in the mutation.
+func (m *CardMutation) GetType() (r string, exists bool) {
+	v := m._type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldType returns the old "type" field's value of the Card entity.
+// If the Card object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CardMutation) OldType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldType: %w", err)
+	}
+	return oldValue.Type, nil
+}
+
+// ResetType resets all changes to the "type" field.
+func (m *CardMutation) ResetType() {
+	m._type = nil
 }
 
 // SetNumberHash sets the "number_hash" field.
@@ -435,7 +472,10 @@ func (m *CardMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CardMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
+	if m._type != nil {
+		fields = append(fields, card.FieldType)
+	}
 	if m.number_hash != nil {
 		fields = append(fields, card.FieldNumberHash)
 	}
@@ -456,6 +496,8 @@ func (m *CardMutation) Fields() []string {
 // schema.
 func (m *CardMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case card.FieldType:
+		return m.GetType()
 	case card.FieldNumberHash:
 		return m.NumberHash()
 	case card.FieldCvvHash:
@@ -473,6 +515,8 @@ func (m *CardMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *CardMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case card.FieldType:
+		return m.OldType(ctx)
 	case card.FieldNumberHash:
 		return m.OldNumberHash(ctx)
 	case card.FieldCvvHash:
@@ -490,6 +534,13 @@ func (m *CardMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *CardMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case card.FieldType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetType(v)
+		return nil
 	case card.FieldNumberHash:
 		v, ok := value.(string)
 		if !ok {
@@ -579,6 +630,9 @@ func (m *CardMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *CardMutation) ResetField(name string) error {
 	switch name {
+	case card.FieldType:
+		m.ResetType()
+		return nil
 	case card.FieldNumberHash:
 		m.ResetNumberHash()
 		return nil

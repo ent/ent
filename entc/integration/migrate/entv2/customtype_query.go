@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/customtype"
@@ -64,7 +65,7 @@ func (ctq *CustomTypeQuery) Order(o ...customtype.OrderOption) *CustomTypeQuery 
 // First returns the first CustomType entity from the query.
 // Returns a *NotFoundError when no CustomType was found.
 func (ctq *CustomTypeQuery) First(ctx context.Context) (*CustomType, error) {
-	nodes, err := ctq.Limit(1).All(setContextOp(ctx, ctq.ctx, "First"))
+	nodes, err := ctq.Limit(1).All(setContextOp(ctx, ctq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +88,7 @@ func (ctq *CustomTypeQuery) FirstX(ctx context.Context) *CustomType {
 // Returns a *NotFoundError when no CustomType ID was found.
 func (ctq *CustomTypeQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = ctq.Limit(1).IDs(setContextOp(ctx, ctq.ctx, "FirstID")); err != nil {
+	if ids, err = ctq.Limit(1).IDs(setContextOp(ctx, ctq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -110,7 +111,7 @@ func (ctq *CustomTypeQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one CustomType entity is found.
 // Returns a *NotFoundError when no CustomType entities are found.
 func (ctq *CustomTypeQuery) Only(ctx context.Context) (*CustomType, error) {
-	nodes, err := ctq.Limit(2).All(setContextOp(ctx, ctq.ctx, "Only"))
+	nodes, err := ctq.Limit(2).All(setContextOp(ctx, ctq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +139,7 @@ func (ctq *CustomTypeQuery) OnlyX(ctx context.Context) *CustomType {
 // Returns a *NotFoundError when no entities are found.
 func (ctq *CustomTypeQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = ctq.Limit(2).IDs(setContextOp(ctx, ctq.ctx, "OnlyID")); err != nil {
+	if ids, err = ctq.Limit(2).IDs(setContextOp(ctx, ctq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -163,7 +164,7 @@ func (ctq *CustomTypeQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of CustomTypes.
 func (ctq *CustomTypeQuery) All(ctx context.Context) ([]*CustomType, error) {
-	ctx = setContextOp(ctx, ctq.ctx, "All")
+	ctx = setContextOp(ctx, ctq.ctx, ent.OpQueryAll)
 	if err := ctq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -185,7 +186,7 @@ func (ctq *CustomTypeQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if ctq.ctx.Unique == nil && ctq.path != nil {
 		ctq.Unique(true)
 	}
-	ctx = setContextOp(ctx, ctq.ctx, "IDs")
+	ctx = setContextOp(ctx, ctq.ctx, ent.OpQueryIDs)
 	if err = ctq.Select(customtype.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -203,7 +204,7 @@ func (ctq *CustomTypeQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (ctq *CustomTypeQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, ctq.ctx, "Count")
+	ctx = setContextOp(ctx, ctq.ctx, ent.OpQueryCount)
 	if err := ctq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -221,7 +222,7 @@ func (ctq *CustomTypeQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (ctq *CustomTypeQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, ctq.ctx, "Exist")
+	ctx = setContextOp(ctx, ctq.ctx, ent.OpQueryExist)
 	switch _, err := ctq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -453,7 +454,7 @@ func (ctgb *CustomTypeGroupBy) Aggregate(fns ...AggregateFunc) *CustomTypeGroupB
 
 // Scan applies the selector query and scans the result into the given value.
 func (ctgb *CustomTypeGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ctgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, ctgb.build.ctx, ent.OpQueryGroupBy)
 	if err := ctgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -501,7 +502,7 @@ func (cts *CustomTypeSelect) Aggregate(fns ...AggregateFunc) *CustomTypeSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (cts *CustomTypeSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, cts.ctx, "Select")
+	ctx = setContextOp(ctx, cts.ctx, ent.OpQuerySelect)
 	if err := cts.prepareQuery(ctx); err != nil {
 		return err
 	}

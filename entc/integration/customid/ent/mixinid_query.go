@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
@@ -65,7 +66,7 @@ func (miq *MixinIDQuery) Order(o ...mixinid.OrderOption) *MixinIDQuery {
 // First returns the first MixinID entity from the query.
 // Returns a *NotFoundError when no MixinID was found.
 func (miq *MixinIDQuery) First(ctx context.Context) (*MixinID, error) {
-	nodes, err := miq.Limit(1).All(setContextOp(ctx, miq.ctx, "First"))
+	nodes, err := miq.Limit(1).All(setContextOp(ctx, miq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +89,7 @@ func (miq *MixinIDQuery) FirstX(ctx context.Context) *MixinID {
 // Returns a *NotFoundError when no MixinID ID was found.
 func (miq *MixinIDQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = miq.Limit(1).IDs(setContextOp(ctx, miq.ctx, "FirstID")); err != nil {
+	if ids, err = miq.Limit(1).IDs(setContextOp(ctx, miq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -111,7 +112,7 @@ func (miq *MixinIDQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one MixinID entity is found.
 // Returns a *NotFoundError when no MixinID entities are found.
 func (miq *MixinIDQuery) Only(ctx context.Context) (*MixinID, error) {
-	nodes, err := miq.Limit(2).All(setContextOp(ctx, miq.ctx, "Only"))
+	nodes, err := miq.Limit(2).All(setContextOp(ctx, miq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +140,7 @@ func (miq *MixinIDQuery) OnlyX(ctx context.Context) *MixinID {
 // Returns a *NotFoundError when no entities are found.
 func (miq *MixinIDQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = miq.Limit(2).IDs(setContextOp(ctx, miq.ctx, "OnlyID")); err != nil {
+	if ids, err = miq.Limit(2).IDs(setContextOp(ctx, miq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -164,7 +165,7 @@ func (miq *MixinIDQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of MixinIDs.
 func (miq *MixinIDQuery) All(ctx context.Context) ([]*MixinID, error) {
-	ctx = setContextOp(ctx, miq.ctx, "All")
+	ctx = setContextOp(ctx, miq.ctx, ent.OpQueryAll)
 	if err := miq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -186,7 +187,7 @@ func (miq *MixinIDQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if miq.ctx.Unique == nil && miq.path != nil {
 		miq.Unique(true)
 	}
-	ctx = setContextOp(ctx, miq.ctx, "IDs")
+	ctx = setContextOp(ctx, miq.ctx, ent.OpQueryIDs)
 	if err = miq.Select(mixinid.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -204,7 +205,7 @@ func (miq *MixinIDQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (miq *MixinIDQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, miq.ctx, "Count")
+	ctx = setContextOp(ctx, miq.ctx, ent.OpQueryCount)
 	if err := miq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -222,7 +223,7 @@ func (miq *MixinIDQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (miq *MixinIDQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, miq.ctx, "Exist")
+	ctx = setContextOp(ctx, miq.ctx, ent.OpQueryExist)
 	switch _, err := miq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -454,7 +455,7 @@ func (migb *MixinIDGroupBy) Aggregate(fns ...AggregateFunc) *MixinIDGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (migb *MixinIDGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, migb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, migb.build.ctx, ent.OpQueryGroupBy)
 	if err := migb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -502,7 +503,7 @@ func (mis *MixinIDSelect) Aggregate(fns ...AggregateFunc) *MixinIDSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (mis *MixinIDSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, mis.ctx, "Select")
+	ctx = setContextOp(ctx, mis.ctx, ent.OpQuerySelect)
 	if err := mis.prepareQuery(ctx); err != nil {
 		return err
 	}

@@ -16,6 +16,8 @@ const (
 	Label = "card"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldType holds the string denoting the type field in the database.
+	FieldType = "type"
 	// FieldNumberHash holds the string denoting the number_hash field in the database.
 	FieldNumberHash = "number_hash"
 	// FieldCvvHash holds the string denoting the cvv_hash field in the database.
@@ -49,6 +51,7 @@ const (
 // Columns holds all SQL columns for card fields.
 var Columns = []string{
 	FieldID,
+	FieldType,
 	FieldNumberHash,
 	FieldCvvHash,
 	FieldExpiresAt,
@@ -66,6 +69,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultType holds the default value on creation for the "type" field.
+	DefaultType string
 	// DefaultOwnerID holds the default value on creation for the "owner_id" field.
 	DefaultOwnerID int
 )
@@ -76,6 +81,11 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByType orders the results by the type field.
+func ByType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldType, opts...).ToFunc()
 }
 
 // ByNumberHash orders the results by the number_hash field.

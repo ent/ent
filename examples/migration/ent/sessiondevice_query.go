@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/migration/ent/predicate"
@@ -90,7 +91,7 @@ func (sdq *SessionDeviceQuery) QuerySessions() *SessionQuery {
 // First returns the first SessionDevice entity from the query.
 // Returns a *NotFoundError when no SessionDevice was found.
 func (sdq *SessionDeviceQuery) First(ctx context.Context) (*SessionDevice, error) {
-	nodes, err := sdq.Limit(1).All(setContextOp(ctx, sdq.ctx, "First"))
+	nodes, err := sdq.Limit(1).All(setContextOp(ctx, sdq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +114,7 @@ func (sdq *SessionDeviceQuery) FirstX(ctx context.Context) *SessionDevice {
 // Returns a *NotFoundError when no SessionDevice ID was found.
 func (sdq *SessionDeviceQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = sdq.Limit(1).IDs(setContextOp(ctx, sdq.ctx, "FirstID")); err != nil {
+	if ids, err = sdq.Limit(1).IDs(setContextOp(ctx, sdq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -136,7 +137,7 @@ func (sdq *SessionDeviceQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one SessionDevice entity is found.
 // Returns a *NotFoundError when no SessionDevice entities are found.
 func (sdq *SessionDeviceQuery) Only(ctx context.Context) (*SessionDevice, error) {
-	nodes, err := sdq.Limit(2).All(setContextOp(ctx, sdq.ctx, "Only"))
+	nodes, err := sdq.Limit(2).All(setContextOp(ctx, sdq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +165,7 @@ func (sdq *SessionDeviceQuery) OnlyX(ctx context.Context) *SessionDevice {
 // Returns a *NotFoundError when no entities are found.
 func (sdq *SessionDeviceQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = sdq.Limit(2).IDs(setContextOp(ctx, sdq.ctx, "OnlyID")); err != nil {
+	if ids, err = sdq.Limit(2).IDs(setContextOp(ctx, sdq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -189,7 +190,7 @@ func (sdq *SessionDeviceQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of SessionDevices.
 func (sdq *SessionDeviceQuery) All(ctx context.Context) ([]*SessionDevice, error) {
-	ctx = setContextOp(ctx, sdq.ctx, "All")
+	ctx = setContextOp(ctx, sdq.ctx, ent.OpQueryAll)
 	if err := sdq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -211,7 +212,7 @@ func (sdq *SessionDeviceQuery) IDs(ctx context.Context) (ids []uuid.UUID, err er
 	if sdq.ctx.Unique == nil && sdq.path != nil {
 		sdq.Unique(true)
 	}
-	ctx = setContextOp(ctx, sdq.ctx, "IDs")
+	ctx = setContextOp(ctx, sdq.ctx, ent.OpQueryIDs)
 	if err = sdq.Select(sessiondevice.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -229,7 +230,7 @@ func (sdq *SessionDeviceQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (sdq *SessionDeviceQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, sdq.ctx, "Count")
+	ctx = setContextOp(ctx, sdq.ctx, ent.OpQueryCount)
 	if err := sdq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -247,7 +248,7 @@ func (sdq *SessionDeviceQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (sdq *SessionDeviceQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, sdq.ctx, "Exist")
+	ctx = setContextOp(ctx, sdq.ctx, ent.OpQueryExist)
 	switch _, err := sdq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -533,7 +534,7 @@ func (sdgb *SessionDeviceGroupBy) Aggregate(fns ...AggregateFunc) *SessionDevice
 
 // Scan applies the selector query and scans the result into the given value.
 func (sdgb *SessionDeviceGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, sdgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, sdgb.build.ctx, ent.OpQueryGroupBy)
 	if err := sdgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -581,7 +582,7 @@ func (sds *SessionDeviceSelect) Aggregate(fns ...AggregateFunc) *SessionDeviceSe
 
 // Scan applies the selector query and scans the result into the given value.
 func (sds *SessionDeviceSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, sds.ctx, "Select")
+	ctx = setContextOp(ctx, sds.ctx, ent.OpQuerySelect)
 	if err := sds.prepareQuery(ctx); err != nil {
 		return err
 	}

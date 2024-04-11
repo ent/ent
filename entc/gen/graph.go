@@ -820,7 +820,7 @@ func fkSymbols(e *Edge, c1, c2 *schema.Column) (string, string) {
 	return s1, s2
 }
 
-// ensureUniqueNames ensures constraint names are unique.
+// ensureUniqueFKs ensures constraint names are unique.
 func ensureUniqueFKs(tables map[string]*schema.Table) error {
 	fks := make(map[string]*schema.Table)
 	for _, t := range tables {

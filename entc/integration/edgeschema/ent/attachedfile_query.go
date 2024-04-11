@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/attachedfile"
@@ -112,7 +113,7 @@ func (afq *AttachedFileQuery) QueryProc() *ProcessQuery {
 // First returns the first AttachedFile entity from the query.
 // Returns a *NotFoundError when no AttachedFile was found.
 func (afq *AttachedFileQuery) First(ctx context.Context) (*AttachedFile, error) {
-	nodes, err := afq.Limit(1).All(setContextOp(ctx, afq.ctx, "First"))
+	nodes, err := afq.Limit(1).All(setContextOp(ctx, afq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +136,7 @@ func (afq *AttachedFileQuery) FirstX(ctx context.Context) *AttachedFile {
 // Returns a *NotFoundError when no AttachedFile ID was found.
 func (afq *AttachedFileQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = afq.Limit(1).IDs(setContextOp(ctx, afq.ctx, "FirstID")); err != nil {
+	if ids, err = afq.Limit(1).IDs(setContextOp(ctx, afq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -158,7 +159,7 @@ func (afq *AttachedFileQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one AttachedFile entity is found.
 // Returns a *NotFoundError when no AttachedFile entities are found.
 func (afq *AttachedFileQuery) Only(ctx context.Context) (*AttachedFile, error) {
-	nodes, err := afq.Limit(2).All(setContextOp(ctx, afq.ctx, "Only"))
+	nodes, err := afq.Limit(2).All(setContextOp(ctx, afq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +187,7 @@ func (afq *AttachedFileQuery) OnlyX(ctx context.Context) *AttachedFile {
 // Returns a *NotFoundError when no entities are found.
 func (afq *AttachedFileQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = afq.Limit(2).IDs(setContextOp(ctx, afq.ctx, "OnlyID")); err != nil {
+	if ids, err = afq.Limit(2).IDs(setContextOp(ctx, afq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -211,7 +212,7 @@ func (afq *AttachedFileQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of AttachedFiles.
 func (afq *AttachedFileQuery) All(ctx context.Context) ([]*AttachedFile, error) {
-	ctx = setContextOp(ctx, afq.ctx, "All")
+	ctx = setContextOp(ctx, afq.ctx, ent.OpQueryAll)
 	if err := afq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -233,7 +234,7 @@ func (afq *AttachedFileQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if afq.ctx.Unique == nil && afq.path != nil {
 		afq.Unique(true)
 	}
-	ctx = setContextOp(ctx, afq.ctx, "IDs")
+	ctx = setContextOp(ctx, afq.ctx, ent.OpQueryIDs)
 	if err = afq.Select(attachedfile.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -251,7 +252,7 @@ func (afq *AttachedFileQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (afq *AttachedFileQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, afq.ctx, "Count")
+	ctx = setContextOp(ctx, afq.ctx, ent.OpQueryCount)
 	if err := afq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -269,7 +270,7 @@ func (afq *AttachedFileQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (afq *AttachedFileQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, afq.ctx, "Exist")
+	ctx = setContextOp(ctx, afq.ctx, ent.OpQueryExist)
 	switch _, err := afq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -607,7 +608,7 @@ func (afgb *AttachedFileGroupBy) Aggregate(fns ...AggregateFunc) *AttachedFileGr
 
 // Scan applies the selector query and scans the result into the given value.
 func (afgb *AttachedFileGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, afgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, afgb.build.ctx, ent.OpQueryGroupBy)
 	if err := afgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -655,7 +656,7 @@ func (afs *AttachedFileSelect) Aggregate(fns ...AggregateFunc) *AttachedFileSele
 
 // Scan applies the selector query and scans the result into the given value.
 func (afs *AttachedFileSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, afs.ctx, "Select")
+	ctx = setContextOp(ctx, afs.ctx, ent.OpQuerySelect)
 	if err := afs.prepareQuery(ctx); err != nil {
 		return err
 	}

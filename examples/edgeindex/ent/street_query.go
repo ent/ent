@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/edgeindex/ent/city"
@@ -89,7 +90,7 @@ func (sq *StreetQuery) QueryCity() *CityQuery {
 // First returns the first Street entity from the query.
 // Returns a *NotFoundError when no Street was found.
 func (sq *StreetQuery) First(ctx context.Context) (*Street, error) {
-	nodes, err := sq.Limit(1).All(setContextOp(ctx, sq.ctx, "First"))
+	nodes, err := sq.Limit(1).All(setContextOp(ctx, sq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +113,7 @@ func (sq *StreetQuery) FirstX(ctx context.Context) *Street {
 // Returns a *NotFoundError when no Street ID was found.
 func (sq *StreetQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = sq.Limit(1).IDs(setContextOp(ctx, sq.ctx, "FirstID")); err != nil {
+	if ids, err = sq.Limit(1).IDs(setContextOp(ctx, sq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -135,7 +136,7 @@ func (sq *StreetQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Street entity is found.
 // Returns a *NotFoundError when no Street entities are found.
 func (sq *StreetQuery) Only(ctx context.Context) (*Street, error) {
-	nodes, err := sq.Limit(2).All(setContextOp(ctx, sq.ctx, "Only"))
+	nodes, err := sq.Limit(2).All(setContextOp(ctx, sq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +164,7 @@ func (sq *StreetQuery) OnlyX(ctx context.Context) *Street {
 // Returns a *NotFoundError when no entities are found.
 func (sq *StreetQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = sq.Limit(2).IDs(setContextOp(ctx, sq.ctx, "OnlyID")); err != nil {
+	if ids, err = sq.Limit(2).IDs(setContextOp(ctx, sq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -188,7 +189,7 @@ func (sq *StreetQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Streets.
 func (sq *StreetQuery) All(ctx context.Context) ([]*Street, error) {
-	ctx = setContextOp(ctx, sq.ctx, "All")
+	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryAll)
 	if err := sq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -210,7 +211,7 @@ func (sq *StreetQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if sq.ctx.Unique == nil && sq.path != nil {
 		sq.Unique(true)
 	}
-	ctx = setContextOp(ctx, sq.ctx, "IDs")
+	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryIDs)
 	if err = sq.Select(street.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -228,7 +229,7 @@ func (sq *StreetQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (sq *StreetQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, sq.ctx, "Count")
+	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryCount)
 	if err := sq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -246,7 +247,7 @@ func (sq *StreetQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (sq *StreetQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, sq.ctx, "Exist")
+	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryExist)
 	switch _, err := sq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -540,7 +541,7 @@ func (sgb *StreetGroupBy) Aggregate(fns ...AggregateFunc) *StreetGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (sgb *StreetGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, sgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, sgb.build.ctx, ent.OpQueryGroupBy)
 	if err := sgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -588,7 +589,7 @@ func (ss *StreetSelect) Aggregate(fns ...AggregateFunc) *StreetSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ss *StreetSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ss.ctx, "Select")
+	ctx = setContextOp(ctx, ss.ctx, ent.OpQuerySelect)
 	if err := ss.prepareQuery(ctx); err != nil {
 		return err
 	}

@@ -26,6 +26,20 @@ type CardCreate struct {
 	hooks    []Hook
 }
 
+// SetType sets the "type" field.
+func (cc *CardCreate) SetType(s string) *CardCreate {
+	cc.mutation.SetType(s)
+	return cc
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (cc *CardCreate) SetNillableType(s *string) *CardCreate {
+	if s != nil {
+		cc.SetType(*s)
+	}
+	return cc
+}
+
 // SetNumberHash sets the "number_hash" field.
 func (cc *CardCreate) SetNumberHash(s string) *CardCreate {
 	cc.mutation.SetNumberHash(s)
@@ -121,6 +135,10 @@ func (cc *CardCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (cc *CardCreate) defaults() {
+	if _, ok := cc.mutation.GetType(); !ok {
+		v := card.DefaultType
+		cc.mutation.SetType(v)
+	}
 	if _, ok := cc.mutation.OwnerID(); !ok {
 		v := card.DefaultOwnerID
 		cc.mutation.SetOwnerID(v)
@@ -129,6 +147,9 @@ func (cc *CardCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (cc *CardCreate) check() error {
+	if _, ok := cc.mutation.GetType(); !ok {
+		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "Card.type"`)}
+	}
 	if _, ok := cc.mutation.NumberHash(); !ok {
 		return &ValidationError{Name: "number_hash", err: errors.New(`ent: missing required field "Card.number_hash"`)}
 	}
@@ -167,6 +188,10 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 		_node = &Card{config: cc.config}
 		_spec = sqlgraph.NewCreateSpec(card.Table, sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt))
 	)
+	if value, ok := cc.mutation.GetType(); ok {
+		_spec.SetField(card.FieldType, field.TypeString, value)
+		_node.Type = value
+	}
 	if value, ok := cc.mutation.NumberHash(); ok {
 		_spec.SetField(card.FieldNumberHash, field.TypeString, value)
 		_node.NumberHash = value

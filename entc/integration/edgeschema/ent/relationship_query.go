@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
@@ -135,7 +136,7 @@ func (rq *RelationshipQuery) QueryInfo() *RelationshipInfoQuery {
 // First returns the first Relationship entity from the query.
 // Returns a *NotFoundError when no Relationship was found.
 func (rq *RelationshipQuery) First(ctx context.Context) (*Relationship, error) {
-	nodes, err := rq.Limit(1).All(setContextOp(ctx, rq.ctx, "First"))
+	nodes, err := rq.Limit(1).All(setContextOp(ctx, rq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +159,7 @@ func (rq *RelationshipQuery) FirstX(ctx context.Context) *Relationship {
 // Returns a *NotSingularError when more than one Relationship entity is found.
 // Returns a *NotFoundError when no Relationship entities are found.
 func (rq *RelationshipQuery) Only(ctx context.Context) (*Relationship, error) {
-	nodes, err := rq.Limit(2).All(setContextOp(ctx, rq.ctx, "Only"))
+	nodes, err := rq.Limit(2).All(setContextOp(ctx, rq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -183,7 +184,7 @@ func (rq *RelationshipQuery) OnlyX(ctx context.Context) *Relationship {
 
 // All executes the query and returns a list of Relationships.
 func (rq *RelationshipQuery) All(ctx context.Context) ([]*Relationship, error) {
-	ctx = setContextOp(ctx, rq.ctx, "All")
+	ctx = setContextOp(ctx, rq.ctx, ent.OpQueryAll)
 	if err := rq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -202,7 +203,7 @@ func (rq *RelationshipQuery) AllX(ctx context.Context) []*Relationship {
 
 // Count returns the count of the given query.
 func (rq *RelationshipQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, rq.ctx, "Count")
+	ctx = setContextOp(ctx, rq.ctx, ent.OpQueryCount)
 	if err := rq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -220,7 +221,7 @@ func (rq *RelationshipQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (rq *RelationshipQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, rq.ctx, "Exist")
+	ctx = setContextOp(ctx, rq.ctx, ent.OpQueryExist)
 	switch _, err := rq.First(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -610,7 +611,7 @@ func (rgb *RelationshipGroupBy) Aggregate(fns ...AggregateFunc) *RelationshipGro
 
 // Scan applies the selector query and scans the result into the given value.
 func (rgb *RelationshipGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, rgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, rgb.build.ctx, ent.OpQueryGroupBy)
 	if err := rgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -658,7 +659,7 @@ func (rs *RelationshipSelect) Aggregate(fns ...AggregateFunc) *RelationshipSelec
 
 // Scan applies the selector query and scans the result into the given value.
 func (rs *RelationshipSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, rs.ctx, "Select")
+	ctx = setContextOp(ctx, rs.ctx, ent.OpQuerySelect)
 	if err := rs.prepareQuery(ctx); err != nil {
 		return err
 	}

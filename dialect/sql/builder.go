@@ -3835,7 +3835,7 @@ func (b *Builder) unquote(s string) string {
 	return s
 }
 
-// isIdent reports if the given string is a qualified identifier.
+// isQualified reports if the given string is a qualified identifier.
 func (b *Builder) isQualified(s string) bool {
 	ident, pg := b.isIdent(s), b.postgres()
 	return !ident && len(s) > 2 && strings.ContainsRune(s[1:len(s)-1], '.') || // <qualifier>.<column>

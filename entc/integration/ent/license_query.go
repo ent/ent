@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -66,7 +67,7 @@ func (lq *LicenseQuery) Order(o ...license.OrderOption) *LicenseQuery {
 // First returns the first License entity from the query.
 // Returns a *NotFoundError when no License was found.
 func (lq *LicenseQuery) First(ctx context.Context) (*License, error) {
-	nodes, err := lq.Limit(1).All(setContextOp(ctx, lq.ctx, "First"))
+	nodes, err := lq.Limit(1).All(setContextOp(ctx, lq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +90,7 @@ func (lq *LicenseQuery) FirstX(ctx context.Context) *License {
 // Returns a *NotFoundError when no License ID was found.
 func (lq *LicenseQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = lq.Limit(1).IDs(setContextOp(ctx, lq.ctx, "FirstID")); err != nil {
+	if ids, err = lq.Limit(1).IDs(setContextOp(ctx, lq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -112,7 +113,7 @@ func (lq *LicenseQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one License entity is found.
 // Returns a *NotFoundError when no License entities are found.
 func (lq *LicenseQuery) Only(ctx context.Context) (*License, error) {
-	nodes, err := lq.Limit(2).All(setContextOp(ctx, lq.ctx, "Only"))
+	nodes, err := lq.Limit(2).All(setContextOp(ctx, lq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +141,7 @@ func (lq *LicenseQuery) OnlyX(ctx context.Context) *License {
 // Returns a *NotFoundError when no entities are found.
 func (lq *LicenseQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = lq.Limit(2).IDs(setContextOp(ctx, lq.ctx, "OnlyID")); err != nil {
+	if ids, err = lq.Limit(2).IDs(setContextOp(ctx, lq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -165,7 +166,7 @@ func (lq *LicenseQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Licenses.
 func (lq *LicenseQuery) All(ctx context.Context) ([]*License, error) {
-	ctx = setContextOp(ctx, lq.ctx, "All")
+	ctx = setContextOp(ctx, lq.ctx, ent.OpQueryAll)
 	if err := lq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -187,7 +188,7 @@ func (lq *LicenseQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if lq.ctx.Unique == nil && lq.path != nil {
 		lq.Unique(true)
 	}
-	ctx = setContextOp(ctx, lq.ctx, "IDs")
+	ctx = setContextOp(ctx, lq.ctx, ent.OpQueryIDs)
 	if err = lq.Select(license.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -205,7 +206,7 @@ func (lq *LicenseQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (lq *LicenseQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, lq.ctx, "Count")
+	ctx = setContextOp(ctx, lq.ctx, ent.OpQueryCount)
 	if err := lq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -223,7 +224,7 @@ func (lq *LicenseQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (lq *LicenseQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, lq.ctx, "Exist")
+	ctx = setContextOp(ctx, lq.ctx, ent.OpQueryExist)
 	switch _, err := lq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -496,7 +497,7 @@ func (lgb *LicenseGroupBy) Aggregate(fns ...AggregateFunc) *LicenseGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (lgb *LicenseGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, lgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, lgb.build.ctx, ent.OpQueryGroupBy)
 	if err := lgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -544,7 +545,7 @@ func (ls *LicenseSelect) Aggregate(fns ...AggregateFunc) *LicenseSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ls *LicenseSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ls.ctx, "Select")
+	ctx = setContextOp(ctx, ls.ctx, ent.OpQuerySelect)
 	if err := ls.prepareQuery(ctx); err != nil {
 		return err
 	}
