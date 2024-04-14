@@ -28,8 +28,11 @@ func (User) Fields() []ent.Field {
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("posts", Post.Type).
-			Annotations(entsql.Annotation{
-				OnDelete: entsql.Cascade,
-			}),
+			Annotations(
+				entsql.Annotation{
+					OnDelete: entsql.Cascade,
+					OnUpdate: entsql.Cascade,
+				},
+			),
 	}
 }
