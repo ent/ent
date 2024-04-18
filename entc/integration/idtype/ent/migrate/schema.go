@@ -28,6 +28,7 @@ var (
 				Symbol:     "users_users_spouse",
 				Columns:    []*schema.Column{UsersColumns[2]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnUpdate:   schema.SetNull,
 				OnDelete:   schema.SetNull,
 			},
 		},

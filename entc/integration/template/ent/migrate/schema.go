@@ -40,6 +40,7 @@ var (
 				Symbol:     "pets_users_pets",
 				Columns:    []*schema.Column{PetsColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnUpdate:   schema.SetNull,
 				OnDelete:   schema.SetNull,
 			},
 		},
