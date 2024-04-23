@@ -168,10 +168,14 @@ We are now ready to import our MySQL schema to Ent!
 We will do it with the following command:
 > This command will import all tables in our schema, you can also limit to specific tables using `-tables` flag.
 
+### MySQL
 ```shell
-go run ariga.io/entimport/cmd/entimport -dialect mysql -dsn "root:pass@tcp(localhost:3306)/entimport"
+go run ariga.io/entimport/cmd/entimport -dsn "mysql://root:pass@tcp(localhost:3306)/entimport"
 ```
-
+### PostgreSQL
+```shell
+go run ariga.io/entimport/cmd/entimport -dsn "postgres://user:pass@host:port/dbname"
+```
 Like many unix tools, `entimport` doesn't print anything on a successful run. To verify that it ran properly, we will
 check the file system, and more specifically `ent/schema` directory.
 
