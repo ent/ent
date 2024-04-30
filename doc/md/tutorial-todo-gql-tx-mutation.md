@@ -64,6 +64,34 @@ srv.Use(entgql.Transactioner{
 })
 ```
 
+## Skip Operations
+
+By default, `entgql.Transactioner` wraps all mutations within a transaction. However, there are mutations or operations
+that don't require database access or need special handling. In these cases, you can instruct `entgql.Transactioner` to
+skip the transaction by setting a custom `SkipTxFunc` function or using one of the built-in ones.
+
+```go title="cmd/todo/main.go" {4,10,16-18}
+srv.Use(entgql.Transactioner{
+	TxOpener: client,
+	// Skip the given operation names from running under a transaction.
+	SkipTxFunc: entgql.SkipOperations("operation1", "operation2"),
+})
+
+srv.Use(entgql.Transactioner{
+	TxOpener: client,
+	// Skip if the operation has a mutation field with the given names.
+	SkipTxFunc: entgql.SkipIfHasFields("field1", "field2"),
+})
+
+srv.Use(entgql.Transactioner{
+	TxOpener: client,
+	// Custom skip function.
+	SkipTxFunc: func(*ast.OperationDefinition) bool {
+	    // ...
+    },
+})
+```
+
 ---
 
 Great! With a few lines of code, our application now supports automatic transactional mutations. Please continue to the
