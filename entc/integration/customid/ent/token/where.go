@@ -103,9 +103,19 @@ func BodyLTE(v string) predicate.Token {
 	return predicate.Token(sql.FieldLTE(FieldBody, v))
 }
 
+// BodyEqualFold applies the EqualFold predicate on the "body" field.
+func BodyEqualFold(v string) predicate.Token {
+	return predicate.Token(sql.FieldEqualFold(FieldBody, v))
+}
+
 // BodyContains applies the Contains predicate on the "body" field.
 func BodyContains(v string) predicate.Token {
 	return predicate.Token(sql.FieldContains(FieldBody, v))
+}
+
+// BodyContainsFold applies the ContainsFold predicate on the "body" field.
+func BodyContainsFold(v string) predicate.Token {
+	return predicate.Token(sql.FieldContainsFold(FieldBody, v))
 }
 
 // BodyHasPrefix applies the HasPrefix predicate on the "body" field.
@@ -116,16 +126,6 @@ func BodyHasPrefix(v string) predicate.Token {
 // BodyHasSuffix applies the HasSuffix predicate on the "body" field.
 func BodyHasSuffix(v string) predicate.Token {
 	return predicate.Token(sql.FieldHasSuffix(FieldBody, v))
-}
-
-// BodyEqualFold applies the EqualFold predicate on the "body" field.
-func BodyEqualFold(v string) predicate.Token {
-	return predicate.Token(sql.FieldEqualFold(FieldBody, v))
-}
-
-// BodyContainsFold applies the ContainsFold predicate on the "body" field.
-func BodyContainsFold(v string) predicate.Token {
-	return predicate.Token(sql.FieldContainsFold(FieldBody, v))
 }
 
 // HasAccount applies the HasEdge predicate on the "account" edge.

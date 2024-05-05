@@ -101,9 +101,19 @@ func NameLTE(v string) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldName, v))
 }
 
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldName, v))
+}
+
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.User {
 	return predicate.User(sql.FieldContains(FieldName, v))
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldName, v))
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
@@ -124,16 +134,6 @@ func NameIsNil() predicate.User {
 // NameNotNil applies the NotNil predicate on the "name" field.
 func NameNotNil() predicate.User {
 	return predicate.User(sql.FieldNotNull(FieldName))
-}
-
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldName, v))
-}
-
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldName, v))
 }
 
 // LabelEQ applies the EQ predicate on the "label" field.
@@ -176,9 +176,19 @@ func LabelLTE(v string) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldLabel, v))
 }
 
+// LabelEqualFold applies the EqualFold predicate on the "label" field.
+func LabelEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldLabel, v))
+}
+
 // LabelContains applies the Contains predicate on the "label" field.
 func LabelContains(v string) predicate.User {
 	return predicate.User(sql.FieldContains(FieldLabel, v))
+}
+
+// LabelContainsFold applies the ContainsFold predicate on the "label" field.
+func LabelContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldLabel, v))
 }
 
 // LabelHasPrefix applies the HasPrefix predicate on the "label" field.
@@ -199,16 +209,6 @@ func LabelIsNil() predicate.User {
 // LabelNotNil applies the NotNil predicate on the "label" field.
 func LabelNotNil() predicate.User {
 	return predicate.User(sql.FieldNotNull(FieldLabel))
-}
-
-// LabelEqualFold applies the EqualFold predicate on the "label" field.
-func LabelEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldLabel, v))
-}
-
-// LabelContainsFold applies the ContainsFold predicate on the "label" field.
-func LabelContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldLabel, v))
 }
 
 // And groups predicates with the AND operator between them.

@@ -2168,10 +2168,24 @@ func TextLTE(v string) predicate.FieldType {
 	})
 }
 
+// TextEqualFold applies the EqualFold predicate on the "text" field.
+func TextEqualFold(v string) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldText, p.EqualFold(v))
+	})
+}
+
 // TextContains applies the Contains predicate on the "text" field.
 func TextContains(v string) predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldText, p.Containing(v))
+	})
+}
+
+// TextContainsFold applies the ContainsFold predicate on the "text" field.
+func TextContainsFold(v string) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldText, p.ContainsFold(v))
 	})
 }
 
@@ -2539,11 +2553,27 @@ func MACLTE(v schema.MAC) predicate.FieldType {
 	})
 }
 
+// MACEqualFold applies the EqualFold predicate on the "mac" field.
+func MACEqualFold(v schema.MAC) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldMAC, p.EqualFold(vc))
+	})
+}
+
 // MACContains applies the Contains predicate on the "mac" field.
 func MACContains(v schema.MAC) predicate.FieldType {
 	vc := v.String()
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldMAC, p.Containing(vc))
+	})
+}
+
+// MACContainsFold applies the ContainsFold predicate on the "mac" field.
+func MACContainsFold(v schema.MAC) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldMAC, p.ContainsFold(vc))
 	})
 }
 
@@ -2703,10 +2733,24 @@ func PasswordLTE(v string) predicate.FieldType {
 	})
 }
 
+// PasswordEqualFold applies the EqualFold predicate on the "password" field.
+func PasswordEqualFold(v string) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldPassword, p.EqualFold(v))
+	})
+}
+
 // PasswordContains applies the Contains predicate on the "password" field.
 func PasswordContains(v string) predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldPassword, p.Containing(v))
+	})
+}
+
+// PasswordContainsFold applies the ContainsFold predicate on the "password" field.
+func PasswordContainsFold(v string) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldPassword, p.ContainsFold(v))
 	})
 }
 
@@ -2794,11 +2838,27 @@ func StringScannerLTE(v schema.StringScanner) predicate.FieldType {
 	})
 }
 
+// StringScannerEqualFold applies the EqualFold predicate on the "string_scanner" field.
+func StringScannerEqualFold(v schema.StringScanner) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStringScanner, p.EqualFold(vc))
+	})
+}
+
 // StringScannerContains applies the Contains predicate on the "string_scanner" field.
 func StringScannerContains(v schema.StringScanner) predicate.FieldType {
 	vc := string(v)
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldStringScanner, p.Containing(vc))
+	})
+}
+
+// StringScannerContainsFold applies the ContainsFold predicate on the "string_scanner" field.
+func StringScannerContainsFold(v schema.StringScanner) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStringScanner, p.ContainsFold(vc))
 	})
 }
 
@@ -2986,11 +3046,27 @@ func DirLTE(v http.Dir) predicate.FieldType {
 	})
 }
 
+// DirEqualFold applies the EqualFold predicate on the "dir" field.
+func DirEqualFold(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDir, p.EqualFold(vc))
+	})
+}
+
 // DirContains applies the Contains predicate on the "dir" field.
 func DirContains(v http.Dir) predicate.FieldType {
 	vc := string(v)
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldDir, p.Containing(vc))
+	})
+}
+
+// DirContainsFold applies the ContainsFold predicate on the "dir" field.
+func DirContainsFold(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDir, p.ContainsFold(vc))
 	})
 }
 
@@ -3080,11 +3156,27 @@ func NdirLTE(v http.Dir) predicate.FieldType {
 	})
 }
 
+// NdirEqualFold applies the EqualFold predicate on the "ndir" field.
+func NdirEqualFold(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNdir, p.EqualFold(vc))
+	})
+}
+
 // NdirContains applies the Contains predicate on the "ndir" field.
 func NdirContains(v http.Dir) predicate.FieldType {
 	vc := string(v)
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNdir, p.Containing(vc))
+	})
+}
+
+// NdirContainsFold applies the ContainsFold predicate on the "ndir" field.
+func NdirContainsFold(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNdir, p.ContainsFold(vc))
 	})
 }
 
@@ -3174,11 +3266,27 @@ func StrLTE(v sql.NullString) predicate.FieldType {
 	})
 }
 
+// StrEqualFold applies the EqualFold predicate on the "str" field.
+func StrEqualFold(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStr, p.EqualFold(vc))
+	})
+}
+
 // StrContains applies the Contains predicate on the "str" field.
 func StrContains(v sql.NullString) predicate.FieldType {
 	vc := v.String
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldStr, p.Containing(vc))
+	})
+}
+
+// StrContainsFold applies the ContainsFold predicate on the "str" field.
+func StrContainsFold(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStr, p.ContainsFold(vc))
 	})
 }
 
@@ -3268,11 +3376,27 @@ func NullStrLTE(v *sql.NullString) predicate.FieldType {
 	})
 }
 
+// NullStrEqualFold applies the EqualFold predicate on the "null_str" field.
+func NullStrEqualFold(v *sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNullStr, p.EqualFold(vc))
+	})
+}
+
 // NullStrContains applies the Contains predicate on the "null_str" field.
 func NullStrContains(v *sql.NullString) predicate.FieldType {
 	vc := v.String
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNullStr, p.Containing(vc))
+	})
+}
+
+// NullStrContainsFold applies the ContainsFold predicate on the "null_str" field.
+func NullStrContainsFold(v *sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNullStr, p.ContainsFold(vc))
 	})
 }
 
@@ -3362,11 +3486,27 @@ func LinkLTE(v schema.Link) predicate.FieldType {
 	})
 }
 
+// LinkEqualFold applies the EqualFold predicate on the "link" field.
+func LinkEqualFold(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldLink, p.EqualFold(vc))
+	})
+}
+
 // LinkContains applies the Contains predicate on the "link" field.
 func LinkContains(v schema.Link) predicate.FieldType {
 	vc := v.String()
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldLink, p.Containing(vc))
+	})
+}
+
+// LinkContainsFold applies the ContainsFold predicate on the "link" field.
+func LinkContainsFold(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldLink, p.ContainsFold(vc))
 	})
 }
 
@@ -3456,11 +3596,27 @@ func NullLinkLTE(v *schema.Link) predicate.FieldType {
 	})
 }
 
+// NullLinkEqualFold applies the EqualFold predicate on the "null_link" field.
+func NullLinkEqualFold(v *schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNullLink, p.EqualFold(vc))
+	})
+}
+
 // NullLinkContains applies the Contains predicate on the "null_link" field.
 func NullLinkContains(v *schema.Link) predicate.FieldType {
 	vc := v.String()
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNullLink, p.Containing(vc))
+	})
+}
+
+// NullLinkContainsFold applies the ContainsFold predicate on the "null_link" field.
+func NullLinkContainsFold(v *schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNullLink, p.ContainsFold(vc))
 	})
 }
 
@@ -4852,11 +5008,27 @@ func VstringLTE(v schema.VString) predicate.FieldType {
 	})
 }
 
+// VstringEqualFold applies the EqualFold predicate on the "vstring" field.
+func VstringEqualFold(v schema.VString) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldVstring, p.EqualFold(vc))
+	})
+}
+
 // VstringContains applies the Contains predicate on the "vstring" field.
 func VstringContains(v schema.VString) predicate.FieldType {
 	vc := string(v)
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldVstring, p.Containing(vc))
+	})
+}
+
+// VstringContainsFold applies the ContainsFold predicate on the "vstring" field.
+func VstringContainsFold(v schema.VString) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldVstring, p.ContainsFold(vc))
 	})
 }
 

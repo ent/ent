@@ -159,9 +159,19 @@ func NameLTE(v string) predicate.Pet {
 	return predicate.Pet(sql.FieldLTE(FieldName, v))
 }
 
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldEqualFold(FieldName, v))
+}
+
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.Pet {
 	return predicate.Pet(sql.FieldContains(FieldName, v))
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldContainsFold(FieldName, v))
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
@@ -182,16 +192,6 @@ func NameIsNil() predicate.Pet {
 // NameNotNil applies the NotNil predicate on the "name" field.
 func NameNotNil() predicate.Pet {
 	return predicate.Pet(sql.FieldNotNull(FieldName))
-}
-
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.Pet {
-	return predicate.Pet(sql.FieldEqualFold(FieldName, v))
-}
-
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.Pet {
-	return predicate.Pet(sql.FieldContainsFold(FieldName, v))
 }
 
 // HasOwner applies the HasEdge predicate on the "owner" edge.

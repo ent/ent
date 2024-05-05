@@ -166,6 +166,16 @@ func BinaryLTE(v *url.URL) predicate.ExValueScan {
 	return predicate.ExValueScanOrErr(sql.FieldLTE(FieldBinary, vc), err)
 }
 
+// BinaryEqualFold applies the EqualFold predicate on the "binary" field.
+func BinaryEqualFold(v *url.URL) predicate.ExValueScan {
+	vc, err := ValueScanner.Binary.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("binary value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(sql.FieldEqualFold(FieldBinary, vcs), err)
+}
+
 // BinaryContains applies the Contains predicate on the "binary" field.
 func BinaryContains(v *url.URL) predicate.ExValueScan {
 	vc, err := ValueScanner.Binary.Value(v)
@@ -174,6 +184,16 @@ func BinaryContains(v *url.URL) predicate.ExValueScan {
 		err = fmt.Errorf("binary value is not a string: %T", vc)
 	}
 	return predicate.ExValueScanOrErr(sql.FieldContains(FieldBinary, vcs), err)
+}
+
+// BinaryContainsFold applies the ContainsFold predicate on the "binary" field.
+func BinaryContainsFold(v *url.URL) predicate.ExValueScan {
+	vc, err := ValueScanner.Binary.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("binary value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(sql.FieldContainsFold(FieldBinary, vcs), err)
 }
 
 // BinaryHasPrefix applies the HasPrefix predicate on the "binary" field.
@@ -194,26 +214,6 @@ func BinaryHasSuffix(v *url.URL) predicate.ExValueScan {
 		err = fmt.Errorf("binary value is not a string: %T", vc)
 	}
 	return predicate.ExValueScanOrErr(sql.FieldHasSuffix(FieldBinary, vcs), err)
-}
-
-// BinaryEqualFold applies the EqualFold predicate on the "binary" field.
-func BinaryEqualFold(v *url.URL) predicate.ExValueScan {
-	vc, err := ValueScanner.Binary.Value(v)
-	vcs, ok := vc.(string)
-	if err == nil && !ok {
-		err = fmt.Errorf("binary value is not a string: %T", vc)
-	}
-	return predicate.ExValueScanOrErr(sql.FieldEqualFold(FieldBinary, vcs), err)
-}
-
-// BinaryContainsFold applies the ContainsFold predicate on the "binary" field.
-func BinaryContainsFold(v *url.URL) predicate.ExValueScan {
-	vc, err := ValueScanner.Binary.Value(v)
-	vcs, ok := vc.(string)
-	if err == nil && !ok {
-		err = fmt.Errorf("binary value is not a string: %T", vc)
-	}
-	return predicate.ExValueScanOrErr(sql.FieldContainsFold(FieldBinary, vcs), err)
 }
 
 // BinaryOptionalEQ applies the EQ predicate on the "binary_optional" field.
@@ -280,6 +280,16 @@ func BinaryOptionalLTE(v *url.URL) predicate.ExValueScan {
 	return predicate.ExValueScanOrErr(sql.FieldLTE(FieldBinaryOptional, vc), err)
 }
 
+// BinaryOptionalEqualFold applies the EqualFold predicate on the "binary_optional" field.
+func BinaryOptionalEqualFold(v *url.URL) predicate.ExValueScan {
+	vc, err := ValueScanner.BinaryOptional.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("binary_optional value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(sql.FieldEqualFold(FieldBinaryOptional, vcs), err)
+}
+
 // BinaryOptionalContains applies the Contains predicate on the "binary_optional" field.
 func BinaryOptionalContains(v *url.URL) predicate.ExValueScan {
 	vc, err := ValueScanner.BinaryOptional.Value(v)
@@ -288,6 +298,16 @@ func BinaryOptionalContains(v *url.URL) predicate.ExValueScan {
 		err = fmt.Errorf("binary_optional value is not a string: %T", vc)
 	}
 	return predicate.ExValueScanOrErr(sql.FieldContains(FieldBinaryOptional, vcs), err)
+}
+
+// BinaryOptionalContainsFold applies the ContainsFold predicate on the "binary_optional" field.
+func BinaryOptionalContainsFold(v *url.URL) predicate.ExValueScan {
+	vc, err := ValueScanner.BinaryOptional.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("binary_optional value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(sql.FieldContainsFold(FieldBinaryOptional, vcs), err)
 }
 
 // BinaryOptionalHasPrefix applies the HasPrefix predicate on the "binary_optional" field.
@@ -318,26 +338,6 @@ func BinaryOptionalIsNil() predicate.ExValueScan {
 // BinaryOptionalNotNil applies the NotNil predicate on the "binary_optional" field.
 func BinaryOptionalNotNil() predicate.ExValueScan {
 	return predicate.ExValueScan(sql.FieldNotNull(FieldBinaryOptional))
-}
-
-// BinaryOptionalEqualFold applies the EqualFold predicate on the "binary_optional" field.
-func BinaryOptionalEqualFold(v *url.URL) predicate.ExValueScan {
-	vc, err := ValueScanner.BinaryOptional.Value(v)
-	vcs, ok := vc.(string)
-	if err == nil && !ok {
-		err = fmt.Errorf("binary_optional value is not a string: %T", vc)
-	}
-	return predicate.ExValueScanOrErr(sql.FieldEqualFold(FieldBinaryOptional, vcs), err)
-}
-
-// BinaryOptionalContainsFold applies the ContainsFold predicate on the "binary_optional" field.
-func BinaryOptionalContainsFold(v *url.URL) predicate.ExValueScan {
-	vc, err := ValueScanner.BinaryOptional.Value(v)
-	vcs, ok := vc.(string)
-	if err == nil && !ok {
-		err = fmt.Errorf("binary_optional value is not a string: %T", vc)
-	}
-	return predicate.ExValueScanOrErr(sql.FieldContainsFold(FieldBinaryOptional, vcs), err)
 }
 
 // TextEQ applies the EQ predicate on the "text" field.
@@ -404,6 +404,16 @@ func TextLTE(v *big.Int) predicate.ExValueScan {
 	return predicate.ExValueScanOrErr(sql.FieldLTE(FieldText, vc), err)
 }
 
+// TextEqualFold applies the EqualFold predicate on the "text" field.
+func TextEqualFold(v *big.Int) predicate.ExValueScan {
+	vc, err := ValueScanner.Text.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("text value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(sql.FieldEqualFold(FieldText, vcs), err)
+}
+
 // TextContains applies the Contains predicate on the "text" field.
 func TextContains(v *big.Int) predicate.ExValueScan {
 	vc, err := ValueScanner.Text.Value(v)
@@ -412,6 +422,16 @@ func TextContains(v *big.Int) predicate.ExValueScan {
 		err = fmt.Errorf("text value is not a string: %T", vc)
 	}
 	return predicate.ExValueScanOrErr(sql.FieldContains(FieldText, vcs), err)
+}
+
+// TextContainsFold applies the ContainsFold predicate on the "text" field.
+func TextContainsFold(v *big.Int) predicate.ExValueScan {
+	vc, err := ValueScanner.Text.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("text value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(sql.FieldContainsFold(FieldText, vcs), err)
 }
 
 // TextHasPrefix applies the HasPrefix predicate on the "text" field.
@@ -432,26 +452,6 @@ func TextHasSuffix(v *big.Int) predicate.ExValueScan {
 		err = fmt.Errorf("text value is not a string: %T", vc)
 	}
 	return predicate.ExValueScanOrErr(sql.FieldHasSuffix(FieldText, vcs), err)
-}
-
-// TextEqualFold applies the EqualFold predicate on the "text" field.
-func TextEqualFold(v *big.Int) predicate.ExValueScan {
-	vc, err := ValueScanner.Text.Value(v)
-	vcs, ok := vc.(string)
-	if err == nil && !ok {
-		err = fmt.Errorf("text value is not a string: %T", vc)
-	}
-	return predicate.ExValueScanOrErr(sql.FieldEqualFold(FieldText, vcs), err)
-}
-
-// TextContainsFold applies the ContainsFold predicate on the "text" field.
-func TextContainsFold(v *big.Int) predicate.ExValueScan {
-	vc, err := ValueScanner.Text.Value(v)
-	vcs, ok := vc.(string)
-	if err == nil && !ok {
-		err = fmt.Errorf("text value is not a string: %T", vc)
-	}
-	return predicate.ExValueScanOrErr(sql.FieldContainsFold(FieldText, vcs), err)
 }
 
 // TextOptionalEQ applies the EQ predicate on the "text_optional" field.
@@ -518,6 +518,16 @@ func TextOptionalLTE(v *big.Int) predicate.ExValueScan {
 	return predicate.ExValueScanOrErr(sql.FieldLTE(FieldTextOptional, vc), err)
 }
 
+// TextOptionalEqualFold applies the EqualFold predicate on the "text_optional" field.
+func TextOptionalEqualFold(v *big.Int) predicate.ExValueScan {
+	vc, err := ValueScanner.TextOptional.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("text_optional value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(sql.FieldEqualFold(FieldTextOptional, vcs), err)
+}
+
 // TextOptionalContains applies the Contains predicate on the "text_optional" field.
 func TextOptionalContains(v *big.Int) predicate.ExValueScan {
 	vc, err := ValueScanner.TextOptional.Value(v)
@@ -526,6 +536,16 @@ func TextOptionalContains(v *big.Int) predicate.ExValueScan {
 		err = fmt.Errorf("text_optional value is not a string: %T", vc)
 	}
 	return predicate.ExValueScanOrErr(sql.FieldContains(FieldTextOptional, vcs), err)
+}
+
+// TextOptionalContainsFold applies the ContainsFold predicate on the "text_optional" field.
+func TextOptionalContainsFold(v *big.Int) predicate.ExValueScan {
+	vc, err := ValueScanner.TextOptional.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("text_optional value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(sql.FieldContainsFold(FieldTextOptional, vcs), err)
 }
 
 // TextOptionalHasPrefix applies the HasPrefix predicate on the "text_optional" field.
@@ -556,26 +576,6 @@ func TextOptionalIsNil() predicate.ExValueScan {
 // TextOptionalNotNil applies the NotNil predicate on the "text_optional" field.
 func TextOptionalNotNil() predicate.ExValueScan {
 	return predicate.ExValueScan(sql.FieldNotNull(FieldTextOptional))
-}
-
-// TextOptionalEqualFold applies the EqualFold predicate on the "text_optional" field.
-func TextOptionalEqualFold(v *big.Int) predicate.ExValueScan {
-	vc, err := ValueScanner.TextOptional.Value(v)
-	vcs, ok := vc.(string)
-	if err == nil && !ok {
-		err = fmt.Errorf("text_optional value is not a string: %T", vc)
-	}
-	return predicate.ExValueScanOrErr(sql.FieldEqualFold(FieldTextOptional, vcs), err)
-}
-
-// TextOptionalContainsFold applies the ContainsFold predicate on the "text_optional" field.
-func TextOptionalContainsFold(v *big.Int) predicate.ExValueScan {
-	vc, err := ValueScanner.TextOptional.Value(v)
-	vcs, ok := vc.(string)
-	if err == nil && !ok {
-		err = fmt.Errorf("text_optional value is not a string: %T", vc)
-	}
-	return predicate.ExValueScanOrErr(sql.FieldContainsFold(FieldTextOptional, vcs), err)
 }
 
 // Base64EQ applies the EQ predicate on the "base64" field.
@@ -642,6 +642,16 @@ func Base64LTE(v string) predicate.ExValueScan {
 	return predicate.ExValueScanOrErr(sql.FieldLTE(FieldBase64, vc), err)
 }
 
+// Base64EqualFold applies the EqualFold predicate on the "base64" field.
+func Base64EqualFold(v string) predicate.ExValueScan {
+	vc, err := ValueScanner.Base64.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("base64 value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(sql.FieldEqualFold(FieldBase64, vcs), err)
+}
+
 // Base64Contains applies the Contains predicate on the "base64" field.
 func Base64Contains(v string) predicate.ExValueScan {
 	vc, err := ValueScanner.Base64.Value(v)
@@ -650,6 +660,16 @@ func Base64Contains(v string) predicate.ExValueScan {
 		err = fmt.Errorf("base64 value is not a string: %T", vc)
 	}
 	return predicate.ExValueScanOrErr(sql.FieldContains(FieldBase64, vcs), err)
+}
+
+// Base64ContainsFold applies the ContainsFold predicate on the "base64" field.
+func Base64ContainsFold(v string) predicate.ExValueScan {
+	vc, err := ValueScanner.Base64.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("base64 value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(sql.FieldContainsFold(FieldBase64, vcs), err)
 }
 
 // Base64HasPrefix applies the HasPrefix predicate on the "base64" field.
@@ -670,26 +690,6 @@ func Base64HasSuffix(v string) predicate.ExValueScan {
 		err = fmt.Errorf("base64 value is not a string: %T", vc)
 	}
 	return predicate.ExValueScanOrErr(sql.FieldHasSuffix(FieldBase64, vcs), err)
-}
-
-// Base64EqualFold applies the EqualFold predicate on the "base64" field.
-func Base64EqualFold(v string) predicate.ExValueScan {
-	vc, err := ValueScanner.Base64.Value(v)
-	vcs, ok := vc.(string)
-	if err == nil && !ok {
-		err = fmt.Errorf("base64 value is not a string: %T", vc)
-	}
-	return predicate.ExValueScanOrErr(sql.FieldEqualFold(FieldBase64, vcs), err)
-}
-
-// Base64ContainsFold applies the ContainsFold predicate on the "base64" field.
-func Base64ContainsFold(v string) predicate.ExValueScan {
-	vc, err := ValueScanner.Base64.Value(v)
-	vcs, ok := vc.(string)
-	if err == nil && !ok {
-		err = fmt.Errorf("base64 value is not a string: %T", vc)
-	}
-	return predicate.ExValueScanOrErr(sql.FieldContainsFold(FieldBase64, vcs), err)
 }
 
 // CustomEQ applies the EQ predicate on the "custom" field.
@@ -756,6 +756,16 @@ func CustomLTE(v string) predicate.ExValueScan {
 	return predicate.ExValueScanOrErr(sql.FieldLTE(FieldCustom, vc), err)
 }
 
+// CustomEqualFold applies the EqualFold predicate on the "custom" field.
+func CustomEqualFold(v string) predicate.ExValueScan {
+	vc, err := ValueScanner.Custom.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("custom value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(sql.FieldEqualFold(FieldCustom, vcs), err)
+}
+
 // CustomContains applies the Contains predicate on the "custom" field.
 func CustomContains(v string) predicate.ExValueScan {
 	vc, err := ValueScanner.Custom.Value(v)
@@ -764,6 +774,16 @@ func CustomContains(v string) predicate.ExValueScan {
 		err = fmt.Errorf("custom value is not a string: %T", vc)
 	}
 	return predicate.ExValueScanOrErr(sql.FieldContains(FieldCustom, vcs), err)
+}
+
+// CustomContainsFold applies the ContainsFold predicate on the "custom" field.
+func CustomContainsFold(v string) predicate.ExValueScan {
+	vc, err := ValueScanner.Custom.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("custom value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(sql.FieldContainsFold(FieldCustom, vcs), err)
 }
 
 // CustomHasPrefix applies the HasPrefix predicate on the "custom" field.
@@ -784,26 +804,6 @@ func CustomHasSuffix(v string) predicate.ExValueScan {
 		err = fmt.Errorf("custom value is not a string: %T", vc)
 	}
 	return predicate.ExValueScanOrErr(sql.FieldHasSuffix(FieldCustom, vcs), err)
-}
-
-// CustomEqualFold applies the EqualFold predicate on the "custom" field.
-func CustomEqualFold(v string) predicate.ExValueScan {
-	vc, err := ValueScanner.Custom.Value(v)
-	vcs, ok := vc.(string)
-	if err == nil && !ok {
-		err = fmt.Errorf("custom value is not a string: %T", vc)
-	}
-	return predicate.ExValueScanOrErr(sql.FieldEqualFold(FieldCustom, vcs), err)
-}
-
-// CustomContainsFold applies the ContainsFold predicate on the "custom" field.
-func CustomContainsFold(v string) predicate.ExValueScan {
-	vc, err := ValueScanner.Custom.Value(v)
-	vcs, ok := vc.(string)
-	if err == nil && !ok {
-		err = fmt.Errorf("custom value is not a string: %T", vc)
-	}
-	return predicate.ExValueScanOrErr(sql.FieldContainsFold(FieldCustom, vcs), err)
 }
 
 // CustomOptionalEQ applies the EQ predicate on the "custom_optional" field.
@@ -870,6 +870,16 @@ func CustomOptionalLTE(v string) predicate.ExValueScan {
 	return predicate.ExValueScanOrErr(sql.FieldLTE(FieldCustomOptional, vc), err)
 }
 
+// CustomOptionalEqualFold applies the EqualFold predicate on the "custom_optional" field.
+func CustomOptionalEqualFold(v string) predicate.ExValueScan {
+	vc, err := ValueScanner.CustomOptional.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("custom_optional value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(sql.FieldEqualFold(FieldCustomOptional, vcs), err)
+}
+
 // CustomOptionalContains applies the Contains predicate on the "custom_optional" field.
 func CustomOptionalContains(v string) predicate.ExValueScan {
 	vc, err := ValueScanner.CustomOptional.Value(v)
@@ -878,6 +888,16 @@ func CustomOptionalContains(v string) predicate.ExValueScan {
 		err = fmt.Errorf("custom_optional value is not a string: %T", vc)
 	}
 	return predicate.ExValueScanOrErr(sql.FieldContains(FieldCustomOptional, vcs), err)
+}
+
+// CustomOptionalContainsFold applies the ContainsFold predicate on the "custom_optional" field.
+func CustomOptionalContainsFold(v string) predicate.ExValueScan {
+	vc, err := ValueScanner.CustomOptional.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("custom_optional value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(sql.FieldContainsFold(FieldCustomOptional, vcs), err)
 }
 
 // CustomOptionalHasPrefix applies the HasPrefix predicate on the "custom_optional" field.
@@ -908,26 +928,6 @@ func CustomOptionalIsNil() predicate.ExValueScan {
 // CustomOptionalNotNil applies the NotNil predicate on the "custom_optional" field.
 func CustomOptionalNotNil() predicate.ExValueScan {
 	return predicate.ExValueScan(sql.FieldNotNull(FieldCustomOptional))
-}
-
-// CustomOptionalEqualFold applies the EqualFold predicate on the "custom_optional" field.
-func CustomOptionalEqualFold(v string) predicate.ExValueScan {
-	vc, err := ValueScanner.CustomOptional.Value(v)
-	vcs, ok := vc.(string)
-	if err == nil && !ok {
-		err = fmt.Errorf("custom_optional value is not a string: %T", vc)
-	}
-	return predicate.ExValueScanOrErr(sql.FieldEqualFold(FieldCustomOptional, vcs), err)
-}
-
-// CustomOptionalContainsFold applies the ContainsFold predicate on the "custom_optional" field.
-func CustomOptionalContainsFold(v string) predicate.ExValueScan {
-	vc, err := ValueScanner.CustomOptional.Value(v)
-	vcs, ok := vc.(string)
-	if err == nil && !ok {
-		err = fmt.Errorf("custom_optional value is not a string: %T", vc)
-	}
-	return predicate.ExValueScanOrErr(sql.FieldContainsFold(FieldCustomOptional, vcs), err)
 }
 
 // And groups predicates with the AND operator between them.

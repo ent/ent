@@ -101,9 +101,19 @@ func NumberLTE(v string) predicate.Card {
 	return predicate.Card(sql.FieldLTE(FieldNumber, v))
 }
 
+// NumberEqualFold applies the EqualFold predicate on the "number" field.
+func NumberEqualFold(v string) predicate.Card {
+	return predicate.Card(sql.FieldEqualFold(FieldNumber, v))
+}
+
 // NumberContains applies the Contains predicate on the "number" field.
 func NumberContains(v string) predicate.Card {
 	return predicate.Card(sql.FieldContains(FieldNumber, v))
+}
+
+// NumberContainsFold applies the ContainsFold predicate on the "number" field.
+func NumberContainsFold(v string) predicate.Card {
+	return predicate.Card(sql.FieldContainsFold(FieldNumber, v))
 }
 
 // NumberHasPrefix applies the HasPrefix predicate on the "number" field.
@@ -114,16 +124,6 @@ func NumberHasPrefix(v string) predicate.Card {
 // NumberHasSuffix applies the HasSuffix predicate on the "number" field.
 func NumberHasSuffix(v string) predicate.Card {
 	return predicate.Card(sql.FieldHasSuffix(FieldNumber, v))
-}
-
-// NumberEqualFold applies the EqualFold predicate on the "number" field.
-func NumberEqualFold(v string) predicate.Card {
-	return predicate.Card(sql.FieldEqualFold(FieldNumber, v))
-}
-
-// NumberContainsFold applies the ContainsFold predicate on the "number" field.
-func NumberContainsFold(v string) predicate.Card {
-	return predicate.Card(sql.FieldContainsFold(FieldNumber, v))
 }
 
 // And groups predicates with the AND operator between them.

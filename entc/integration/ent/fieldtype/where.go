@@ -1549,9 +1549,19 @@ func TextLTE(v string) predicate.FieldType {
 	return predicate.FieldType(sql.FieldLTE(FieldText, v))
 }
 
+// TextEqualFold applies the EqualFold predicate on the "text" field.
+func TextEqualFold(v string) predicate.FieldType {
+	return predicate.FieldType(sql.FieldEqualFold(FieldText, v))
+}
+
 // TextContains applies the Contains predicate on the "text" field.
 func TextContains(v string) predicate.FieldType {
 	return predicate.FieldType(sql.FieldContains(FieldText, v))
+}
+
+// TextContainsFold applies the ContainsFold predicate on the "text" field.
+func TextContainsFold(v string) predicate.FieldType {
+	return predicate.FieldType(sql.FieldContainsFold(FieldText, v))
 }
 
 // TextHasPrefix applies the HasPrefix predicate on the "text" field.
@@ -1572,16 +1582,6 @@ func TextIsNil() predicate.FieldType {
 // TextNotNil applies the NotNil predicate on the "text" field.
 func TextNotNil() predicate.FieldType {
 	return predicate.FieldType(sql.FieldNotNull(FieldText))
-}
-
-// TextEqualFold applies the EqualFold predicate on the "text" field.
-func TextEqualFold(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEqualFold(FieldText, v))
-}
-
-// TextContainsFold applies the ContainsFold predicate on the "text" field.
-func TextContainsFold(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldContainsFold(FieldText, v))
 }
 
 // DatetimeEQ applies the EQ predicate on the "datetime" field.
@@ -1824,10 +1824,22 @@ func MACLTE(v schema.MAC) predicate.FieldType {
 	return predicate.FieldType(sql.FieldLTE(FieldMAC, v))
 }
 
+// MACEqualFold applies the EqualFold predicate on the "mac" field.
+func MACEqualFold(v schema.MAC) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(sql.FieldEqualFold(FieldMAC, vc))
+}
+
 // MACContains applies the Contains predicate on the "mac" field.
 func MACContains(v schema.MAC) predicate.FieldType {
 	vc := v.String()
 	return predicate.FieldType(sql.FieldContains(FieldMAC, vc))
+}
+
+// MACContainsFold applies the ContainsFold predicate on the "mac" field.
+func MACContainsFold(v schema.MAC) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(sql.FieldContainsFold(FieldMAC, vc))
 }
 
 // MACHasPrefix applies the HasPrefix predicate on the "mac" field.
@@ -1850,18 +1862,6 @@ func MACIsNil() predicate.FieldType {
 // MACNotNil applies the NotNil predicate on the "mac" field.
 func MACNotNil() predicate.FieldType {
 	return predicate.FieldType(sql.FieldNotNull(FieldMAC))
-}
-
-// MACEqualFold applies the EqualFold predicate on the "mac" field.
-func MACEqualFold(v schema.MAC) predicate.FieldType {
-	vc := v.String()
-	return predicate.FieldType(sql.FieldEqualFold(FieldMAC, vc))
-}
-
-// MACContainsFold applies the ContainsFold predicate on the "mac" field.
-func MACContainsFold(v schema.MAC) predicate.FieldType {
-	vc := v.String()
-	return predicate.FieldType(sql.FieldContainsFold(FieldMAC, vc))
 }
 
 // StringArrayEQ applies the EQ predicate on the "string_array" field.
@@ -1954,9 +1954,19 @@ func PasswordLTE(v string) predicate.FieldType {
 	return predicate.FieldType(sql.FieldLTE(FieldPassword, v))
 }
 
+// PasswordEqualFold applies the EqualFold predicate on the "password" field.
+func PasswordEqualFold(v string) predicate.FieldType {
+	return predicate.FieldType(sql.FieldEqualFold(FieldPassword, v))
+}
+
 // PasswordContains applies the Contains predicate on the "password" field.
 func PasswordContains(v string) predicate.FieldType {
 	return predicate.FieldType(sql.FieldContains(FieldPassword, v))
+}
+
+// PasswordContainsFold applies the ContainsFold predicate on the "password" field.
+func PasswordContainsFold(v string) predicate.FieldType {
+	return predicate.FieldType(sql.FieldContainsFold(FieldPassword, v))
 }
 
 // PasswordHasPrefix applies the HasPrefix predicate on the "password" field.
@@ -1977,16 +1987,6 @@ func PasswordIsNil() predicate.FieldType {
 // PasswordNotNil applies the NotNil predicate on the "password" field.
 func PasswordNotNil() predicate.FieldType {
 	return predicate.FieldType(sql.FieldNotNull(FieldPassword))
-}
-
-// PasswordEqualFold applies the EqualFold predicate on the "password" field.
-func PasswordEqualFold(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEqualFold(FieldPassword, v))
-}
-
-// PasswordContainsFold applies the ContainsFold predicate on the "password" field.
-func PasswordContainsFold(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldContainsFold(FieldPassword, v))
 }
 
 // StringScannerEQ applies the EQ predicate on the "string_scanner" field.
@@ -2029,10 +2029,22 @@ func StringScannerLTE(v schema.StringScanner) predicate.FieldType {
 	return predicate.FieldType(sql.FieldLTE(FieldStringScanner, v))
 }
 
+// StringScannerEqualFold applies the EqualFold predicate on the "string_scanner" field.
+func StringScannerEqualFold(v schema.StringScanner) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(sql.FieldEqualFold(FieldStringScanner, vc))
+}
+
 // StringScannerContains applies the Contains predicate on the "string_scanner" field.
 func StringScannerContains(v schema.StringScanner) predicate.FieldType {
 	vc := string(v)
 	return predicate.FieldType(sql.FieldContains(FieldStringScanner, vc))
+}
+
+// StringScannerContainsFold applies the ContainsFold predicate on the "string_scanner" field.
+func StringScannerContainsFold(v schema.StringScanner) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(sql.FieldContainsFold(FieldStringScanner, vc))
 }
 
 // StringScannerHasPrefix applies the HasPrefix predicate on the "string_scanner" field.
@@ -2055,18 +2067,6 @@ func StringScannerIsNil() predicate.FieldType {
 // StringScannerNotNil applies the NotNil predicate on the "string_scanner" field.
 func StringScannerNotNil() predicate.FieldType {
 	return predicate.FieldType(sql.FieldNotNull(FieldStringScanner))
-}
-
-// StringScannerEqualFold applies the EqualFold predicate on the "string_scanner" field.
-func StringScannerEqualFold(v schema.StringScanner) predicate.FieldType {
-	vc := string(v)
-	return predicate.FieldType(sql.FieldEqualFold(FieldStringScanner, vc))
-}
-
-// StringScannerContainsFold applies the ContainsFold predicate on the "string_scanner" field.
-func StringScannerContainsFold(v schema.StringScanner) predicate.FieldType {
-	vc := string(v)
-	return predicate.FieldType(sql.FieldContainsFold(FieldStringScanner, vc))
 }
 
 // DurationEQ applies the EQ predicate on the "duration" field.
@@ -2187,10 +2187,22 @@ func DirLTE(v http.Dir) predicate.FieldType {
 	return predicate.FieldType(sql.FieldLTE(FieldDir, vc))
 }
 
+// DirEqualFold applies the EqualFold predicate on the "dir" field.
+func DirEqualFold(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(sql.FieldEqualFold(FieldDir, vc))
+}
+
 // DirContains applies the Contains predicate on the "dir" field.
 func DirContains(v http.Dir) predicate.FieldType {
 	vc := string(v)
 	return predicate.FieldType(sql.FieldContains(FieldDir, vc))
+}
+
+// DirContainsFold applies the ContainsFold predicate on the "dir" field.
+func DirContainsFold(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(sql.FieldContainsFold(FieldDir, vc))
 }
 
 // DirHasPrefix applies the HasPrefix predicate on the "dir" field.
@@ -2203,18 +2215,6 @@ func DirHasPrefix(v http.Dir) predicate.FieldType {
 func DirHasSuffix(v http.Dir) predicate.FieldType {
 	vc := string(v)
 	return predicate.FieldType(sql.FieldHasSuffix(FieldDir, vc))
-}
-
-// DirEqualFold applies the EqualFold predicate on the "dir" field.
-func DirEqualFold(v http.Dir) predicate.FieldType {
-	vc := string(v)
-	return predicate.FieldType(sql.FieldEqualFold(FieldDir, vc))
-}
-
-// DirContainsFold applies the ContainsFold predicate on the "dir" field.
-func DirContainsFold(v http.Dir) predicate.FieldType {
-	vc := string(v)
-	return predicate.FieldType(sql.FieldContainsFold(FieldDir, vc))
 }
 
 // NdirEQ applies the EQ predicate on the "ndir" field.
@@ -2271,10 +2271,22 @@ func NdirLTE(v http.Dir) predicate.FieldType {
 	return predicate.FieldType(sql.FieldLTE(FieldNdir, vc))
 }
 
+// NdirEqualFold applies the EqualFold predicate on the "ndir" field.
+func NdirEqualFold(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(sql.FieldEqualFold(FieldNdir, vc))
+}
+
 // NdirContains applies the Contains predicate on the "ndir" field.
 func NdirContains(v http.Dir) predicate.FieldType {
 	vc := string(v)
 	return predicate.FieldType(sql.FieldContains(FieldNdir, vc))
+}
+
+// NdirContainsFold applies the ContainsFold predicate on the "ndir" field.
+func NdirContainsFold(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(sql.FieldContainsFold(FieldNdir, vc))
 }
 
 // NdirHasPrefix applies the HasPrefix predicate on the "ndir" field.
@@ -2297,18 +2309,6 @@ func NdirIsNil() predicate.FieldType {
 // NdirNotNil applies the NotNil predicate on the "ndir" field.
 func NdirNotNil() predicate.FieldType {
 	return predicate.FieldType(sql.FieldNotNull(FieldNdir))
-}
-
-// NdirEqualFold applies the EqualFold predicate on the "ndir" field.
-func NdirEqualFold(v http.Dir) predicate.FieldType {
-	vc := string(v)
-	return predicate.FieldType(sql.FieldEqualFold(FieldNdir, vc))
-}
-
-// NdirContainsFold applies the ContainsFold predicate on the "ndir" field.
-func NdirContainsFold(v http.Dir) predicate.FieldType {
-	vc := string(v)
-	return predicate.FieldType(sql.FieldContainsFold(FieldNdir, vc))
 }
 
 // StrEQ applies the EQ predicate on the "str" field.
@@ -2351,10 +2351,22 @@ func StrLTE(v sql.NullString) predicate.FieldType {
 	return predicate.FieldType(sql.FieldLTE(FieldStr, v))
 }
 
+// StrEqualFold applies the EqualFold predicate on the "str" field.
+func StrEqualFold(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(sql.FieldEqualFold(FieldStr, vc))
+}
+
 // StrContains applies the Contains predicate on the "str" field.
 func StrContains(v sql.NullString) predicate.FieldType {
 	vc := v.String
 	return predicate.FieldType(sql.FieldContains(FieldStr, vc))
+}
+
+// StrContainsFold applies the ContainsFold predicate on the "str" field.
+func StrContainsFold(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(sql.FieldContainsFold(FieldStr, vc))
 }
 
 // StrHasPrefix applies the HasPrefix predicate on the "str" field.
@@ -2377,18 +2389,6 @@ func StrIsNil() predicate.FieldType {
 // StrNotNil applies the NotNil predicate on the "str" field.
 func StrNotNil() predicate.FieldType {
 	return predicate.FieldType(sql.FieldNotNull(FieldStr))
-}
-
-// StrEqualFold applies the EqualFold predicate on the "str" field.
-func StrEqualFold(v sql.NullString) predicate.FieldType {
-	vc := v.String
-	return predicate.FieldType(sql.FieldEqualFold(FieldStr, vc))
-}
-
-// StrContainsFold applies the ContainsFold predicate on the "str" field.
-func StrContainsFold(v sql.NullString) predicate.FieldType {
-	vc := v.String
-	return predicate.FieldType(sql.FieldContainsFold(FieldStr, vc))
 }
 
 // NullStrEQ applies the EQ predicate on the "null_str" field.
@@ -2431,10 +2431,22 @@ func NullStrLTE(v *sql.NullString) predicate.FieldType {
 	return predicate.FieldType(sql.FieldLTE(FieldNullStr, v))
 }
 
+// NullStrEqualFold applies the EqualFold predicate on the "null_str" field.
+func NullStrEqualFold(v *sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(sql.FieldEqualFold(FieldNullStr, vc))
+}
+
 // NullStrContains applies the Contains predicate on the "null_str" field.
 func NullStrContains(v *sql.NullString) predicate.FieldType {
 	vc := v.String
 	return predicate.FieldType(sql.FieldContains(FieldNullStr, vc))
+}
+
+// NullStrContainsFold applies the ContainsFold predicate on the "null_str" field.
+func NullStrContainsFold(v *sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(sql.FieldContainsFold(FieldNullStr, vc))
 }
 
 // NullStrHasPrefix applies the HasPrefix predicate on the "null_str" field.
@@ -2457,18 +2469,6 @@ func NullStrIsNil() predicate.FieldType {
 // NullStrNotNil applies the NotNil predicate on the "null_str" field.
 func NullStrNotNil() predicate.FieldType {
 	return predicate.FieldType(sql.FieldNotNull(FieldNullStr))
-}
-
-// NullStrEqualFold applies the EqualFold predicate on the "null_str" field.
-func NullStrEqualFold(v *sql.NullString) predicate.FieldType {
-	vc := v.String
-	return predicate.FieldType(sql.FieldEqualFold(FieldNullStr, vc))
-}
-
-// NullStrContainsFold applies the ContainsFold predicate on the "null_str" field.
-func NullStrContainsFold(v *sql.NullString) predicate.FieldType {
-	vc := v.String
-	return predicate.FieldType(sql.FieldContainsFold(FieldNullStr, vc))
 }
 
 // LinkEQ applies the EQ predicate on the "link" field.
@@ -2511,10 +2511,22 @@ func LinkLTE(v schema.Link) predicate.FieldType {
 	return predicate.FieldType(sql.FieldLTE(FieldLink, v))
 }
 
+// LinkEqualFold applies the EqualFold predicate on the "link" field.
+func LinkEqualFold(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(sql.FieldEqualFold(FieldLink, vc))
+}
+
 // LinkContains applies the Contains predicate on the "link" field.
 func LinkContains(v schema.Link) predicate.FieldType {
 	vc := v.String()
 	return predicate.FieldType(sql.FieldContains(FieldLink, vc))
+}
+
+// LinkContainsFold applies the ContainsFold predicate on the "link" field.
+func LinkContainsFold(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(sql.FieldContainsFold(FieldLink, vc))
 }
 
 // LinkHasPrefix applies the HasPrefix predicate on the "link" field.
@@ -2537,18 +2549,6 @@ func LinkIsNil() predicate.FieldType {
 // LinkNotNil applies the NotNil predicate on the "link" field.
 func LinkNotNil() predicate.FieldType {
 	return predicate.FieldType(sql.FieldNotNull(FieldLink))
-}
-
-// LinkEqualFold applies the EqualFold predicate on the "link" field.
-func LinkEqualFold(v schema.Link) predicate.FieldType {
-	vc := v.String()
-	return predicate.FieldType(sql.FieldEqualFold(FieldLink, vc))
-}
-
-// LinkContainsFold applies the ContainsFold predicate on the "link" field.
-func LinkContainsFold(v schema.Link) predicate.FieldType {
-	vc := v.String()
-	return predicate.FieldType(sql.FieldContainsFold(FieldLink, vc))
 }
 
 // NullLinkEQ applies the EQ predicate on the "null_link" field.
@@ -2591,10 +2591,22 @@ func NullLinkLTE(v *schema.Link) predicate.FieldType {
 	return predicate.FieldType(sql.FieldLTE(FieldNullLink, v))
 }
 
+// NullLinkEqualFold applies the EqualFold predicate on the "null_link" field.
+func NullLinkEqualFold(v *schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(sql.FieldEqualFold(FieldNullLink, vc))
+}
+
 // NullLinkContains applies the Contains predicate on the "null_link" field.
 func NullLinkContains(v *schema.Link) predicate.FieldType {
 	vc := v.String()
 	return predicate.FieldType(sql.FieldContains(FieldNullLink, vc))
+}
+
+// NullLinkContainsFold applies the ContainsFold predicate on the "null_link" field.
+func NullLinkContainsFold(v *schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(sql.FieldContainsFold(FieldNullLink, vc))
 }
 
 // NullLinkHasPrefix applies the HasPrefix predicate on the "null_link" field.
@@ -2617,18 +2629,6 @@ func NullLinkIsNil() predicate.FieldType {
 // NullLinkNotNil applies the NotNil predicate on the "null_link" field.
 func NullLinkNotNil() predicate.FieldType {
 	return predicate.FieldType(sql.FieldNotNull(FieldNullLink))
-}
-
-// NullLinkEqualFold applies the EqualFold predicate on the "null_link" field.
-func NullLinkEqualFold(v *schema.Link) predicate.FieldType {
-	vc := v.String()
-	return predicate.FieldType(sql.FieldEqualFold(FieldNullLink, vc))
-}
-
-// NullLinkContainsFold applies the ContainsFold predicate on the "null_link" field.
-func NullLinkContainsFold(v *schema.Link) predicate.FieldType {
-	vc := v.String()
-	return predicate.FieldType(sql.FieldContainsFold(FieldNullLink, vc))
 }
 
 // ActiveEQ applies the EQ predicate on the "active" field.
@@ -3629,10 +3629,22 @@ func VstringLTE(v schema.VString) predicate.FieldType {
 	return predicate.FieldType(sql.FieldLTE(FieldVstring, v))
 }
 
+// VstringEqualFold applies the EqualFold predicate on the "vstring" field.
+func VstringEqualFold(v schema.VString) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(sql.FieldEqualFold(FieldVstring, vc))
+}
+
 // VstringContains applies the Contains predicate on the "vstring" field.
 func VstringContains(v schema.VString) predicate.FieldType {
 	vc := string(v)
 	return predicate.FieldType(sql.FieldContains(FieldVstring, vc))
+}
+
+// VstringContainsFold applies the ContainsFold predicate on the "vstring" field.
+func VstringContainsFold(v schema.VString) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(sql.FieldContainsFold(FieldVstring, vc))
 }
 
 // VstringHasPrefix applies the HasPrefix predicate on the "vstring" field.
@@ -3645,18 +3657,6 @@ func VstringHasPrefix(v schema.VString) predicate.FieldType {
 func VstringHasSuffix(v schema.VString) predicate.FieldType {
 	vc := string(v)
 	return predicate.FieldType(sql.FieldHasSuffix(FieldVstring, vc))
-}
-
-// VstringEqualFold applies the EqualFold predicate on the "vstring" field.
-func VstringEqualFold(v schema.VString) predicate.FieldType {
-	vc := string(v)
-	return predicate.FieldType(sql.FieldEqualFold(FieldVstring, vc))
-}
-
-// VstringContainsFold applies the ContainsFold predicate on the "vstring" field.
-func VstringContainsFold(v schema.VString) predicate.FieldType {
-	vc := string(v)
-	return predicate.FieldType(sql.FieldContainsFold(FieldVstring, vc))
 }
 
 // TripleEQ applies the EQ predicate on the "triple" field.

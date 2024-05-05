@@ -101,9 +101,19 @@ func NameLTE(v string) predicate.Tenant {
 	return predicate.Tenant(sql.FieldLTE(FieldName, v))
 }
 
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.Tenant {
+	return predicate.Tenant(sql.FieldEqualFold(FieldName, v))
+}
+
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.Tenant {
 	return predicate.Tenant(sql.FieldContains(FieldName, v))
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.Tenant {
+	return predicate.Tenant(sql.FieldContainsFold(FieldName, v))
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
@@ -114,16 +124,6 @@ func NameHasPrefix(v string) predicate.Tenant {
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.Tenant {
 	return predicate.Tenant(sql.FieldHasSuffix(FieldName, v))
-}
-
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.Tenant {
-	return predicate.Tenant(sql.FieldEqualFold(FieldName, v))
-}
-
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.Tenant {
-	return predicate.Tenant(sql.FieldContainsFold(FieldName, v))
 }
 
 // And groups predicates with the AND operator between them.

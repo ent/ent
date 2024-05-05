@@ -234,9 +234,19 @@ func NameLTE(v string) predicate.Task {
 	return predicate.Task(sql.FieldLTE(FieldName, v))
 }
 
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.Task {
+	return predicate.Task(sql.FieldEqualFold(FieldName, v))
+}
+
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.Task {
 	return predicate.Task(sql.FieldContains(FieldName, v))
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.Task {
+	return predicate.Task(sql.FieldContainsFold(FieldName, v))
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
@@ -257,16 +267,6 @@ func NameIsNil() predicate.Task {
 // NameNotNil applies the NotNil predicate on the "name" field.
 func NameNotNil() predicate.Task {
 	return predicate.Task(sql.FieldNotNull(FieldName))
-}
-
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldEqualFold(FieldName, v))
-}
-
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldContainsFold(FieldName, v))
 }
 
 // OwnerEQ applies the EQ predicate on the "owner" field.
@@ -309,9 +309,19 @@ func OwnerLTE(v string) predicate.Task {
 	return predicate.Task(sql.FieldLTE(FieldOwner, v))
 }
 
+// OwnerEqualFold applies the EqualFold predicate on the "owner" field.
+func OwnerEqualFold(v string) predicate.Task {
+	return predicate.Task(sql.FieldEqualFold(FieldOwner, v))
+}
+
 // OwnerContains applies the Contains predicate on the "owner" field.
 func OwnerContains(v string) predicate.Task {
 	return predicate.Task(sql.FieldContains(FieldOwner, v))
+}
+
+// OwnerContainsFold applies the ContainsFold predicate on the "owner" field.
+func OwnerContainsFold(v string) predicate.Task {
+	return predicate.Task(sql.FieldContainsFold(FieldOwner, v))
 }
 
 // OwnerHasPrefix applies the HasPrefix predicate on the "owner" field.
@@ -332,16 +342,6 @@ func OwnerIsNil() predicate.Task {
 // OwnerNotNil applies the NotNil predicate on the "owner" field.
 func OwnerNotNil() predicate.Task {
 	return predicate.Task(sql.FieldNotNull(FieldOwner))
-}
-
-// OwnerEqualFold applies the EqualFold predicate on the "owner" field.
-func OwnerEqualFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldEqualFold(FieldOwner, v))
-}
-
-// OwnerContainsFold applies the ContainsFold predicate on the "owner" field.
-func OwnerContainsFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldContainsFold(FieldOwner, v))
 }
 
 // OrderEQ applies the EQ predicate on the "order" field.
@@ -484,9 +484,19 @@ func OpLTE(v string) predicate.Task {
 	return predicate.Task(sql.FieldLTE(FieldOp, v))
 }
 
+// OpEqualFold applies the EqualFold predicate on the "op" field.
+func OpEqualFold(v string) predicate.Task {
+	return predicate.Task(sql.FieldEqualFold(FieldOp, v))
+}
+
 // OpContains applies the Contains predicate on the "op" field.
 func OpContains(v string) predicate.Task {
 	return predicate.Task(sql.FieldContains(FieldOp, v))
+}
+
+// OpContainsFold applies the ContainsFold predicate on the "op" field.
+func OpContainsFold(v string) predicate.Task {
+	return predicate.Task(sql.FieldContainsFold(FieldOp, v))
 }
 
 // OpHasPrefix applies the HasPrefix predicate on the "op" field.
@@ -497,16 +507,6 @@ func OpHasPrefix(v string) predicate.Task {
 // OpHasSuffix applies the HasSuffix predicate on the "op" field.
 func OpHasSuffix(v string) predicate.Task {
 	return predicate.Task(sql.FieldHasSuffix(FieldOp, v))
-}
-
-// OpEqualFold applies the EqualFold predicate on the "op" field.
-func OpEqualFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldEqualFold(FieldOp, v))
-}
-
-// OpContainsFold applies the ContainsFold predicate on the "op" field.
-func OpContainsFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldContainsFold(FieldOp, v))
 }
 
 // And groups predicates with the AND operator between them.

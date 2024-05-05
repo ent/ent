@@ -154,10 +154,24 @@ func DescLTE(v string) predicate.GroupInfo {
 	})
 }
 
+// DescEqualFold applies the EqualFold predicate on the "desc" field.
+func DescEqualFold(v string) predicate.GroupInfo {
+	return predicate.GroupInfo(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDesc, p.EqualFold(v))
+	})
+}
+
 // DescContains applies the Contains predicate on the "desc" field.
 func DescContains(v string) predicate.GroupInfo {
 	return predicate.GroupInfo(func(t *dsl.Traversal) {
 		t.Has(Label, FieldDesc, p.Containing(v))
+	})
+}
+
+// DescContainsFold applies the ContainsFold predicate on the "desc" field.
+func DescContainsFold(v string) predicate.GroupInfo {
+	return predicate.GroupInfo(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDesc, p.ContainsFold(v))
 	})
 }
 

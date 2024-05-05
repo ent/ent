@@ -57,7 +57,7 @@ or run `go generate ./ent`. The `generate.go` file holds the `go run command`:
 ```go
 package ent
 
-//go:generate go run entc.go
+//go:generate go run -mod=mod entc.go
 ```
 
 The `generate.go` file is preferred if you have many `generate` pragmas in your project.

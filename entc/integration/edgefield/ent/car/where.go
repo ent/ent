@@ -103,9 +103,19 @@ func NumberLTE(v string) predicate.Car {
 	return predicate.Car(sql.FieldLTE(FieldNumber, v))
 }
 
+// NumberEqualFold applies the EqualFold predicate on the "number" field.
+func NumberEqualFold(v string) predicate.Car {
+	return predicate.Car(sql.FieldEqualFold(FieldNumber, v))
+}
+
 // NumberContains applies the Contains predicate on the "number" field.
 func NumberContains(v string) predicate.Car {
 	return predicate.Car(sql.FieldContains(FieldNumber, v))
+}
+
+// NumberContainsFold applies the ContainsFold predicate on the "number" field.
+func NumberContainsFold(v string) predicate.Car {
+	return predicate.Car(sql.FieldContainsFold(FieldNumber, v))
 }
 
 // NumberHasPrefix applies the HasPrefix predicate on the "number" field.
@@ -126,16 +136,6 @@ func NumberIsNil() predicate.Car {
 // NumberNotNil applies the NotNil predicate on the "number" field.
 func NumberNotNil() predicate.Car {
 	return predicate.Car(sql.FieldNotNull(FieldNumber))
-}
-
-// NumberEqualFold applies the EqualFold predicate on the "number" field.
-func NumberEqualFold(v string) predicate.Car {
-	return predicate.Car(sql.FieldEqualFold(FieldNumber, v))
-}
-
-// NumberContainsFold applies the ContainsFold predicate on the "number" field.
-func NumberContainsFold(v string) predicate.Car {
-	return predicate.Car(sql.FieldContainsFold(FieldNumber, v))
 }
 
 // HasRentals applies the HasEdge predicate on the "rentals" edge.

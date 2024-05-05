@@ -147,10 +147,24 @@ func NameLTE(v string) predicate.FileType {
 	})
 }
 
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.FileType {
+	return predicate.FileType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.EqualFold(v))
+	})
+}
+
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.FileType {
 	return predicate.FileType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldName, p.Containing(v))
+	})
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.FileType {
+	return predicate.FileType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.ContainsFold(v))
 	})
 }
 

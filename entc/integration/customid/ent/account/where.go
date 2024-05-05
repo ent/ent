@@ -103,9 +103,19 @@ func EmailLTE(v string) predicate.Account {
 	return predicate.Account(sql.FieldLTE(FieldEmail, v))
 }
 
+// EmailEqualFold applies the EqualFold predicate on the "email" field.
+func EmailEqualFold(v string) predicate.Account {
+	return predicate.Account(sql.FieldEqualFold(FieldEmail, v))
+}
+
 // EmailContains applies the Contains predicate on the "email" field.
 func EmailContains(v string) predicate.Account {
 	return predicate.Account(sql.FieldContains(FieldEmail, v))
+}
+
+// EmailContainsFold applies the ContainsFold predicate on the "email" field.
+func EmailContainsFold(v string) predicate.Account {
+	return predicate.Account(sql.FieldContainsFold(FieldEmail, v))
 }
 
 // EmailHasPrefix applies the HasPrefix predicate on the "email" field.
@@ -116,16 +126,6 @@ func EmailHasPrefix(v string) predicate.Account {
 // EmailHasSuffix applies the HasSuffix predicate on the "email" field.
 func EmailHasSuffix(v string) predicate.Account {
 	return predicate.Account(sql.FieldHasSuffix(FieldEmail, v))
-}
-
-// EmailEqualFold applies the EqualFold predicate on the "email" field.
-func EmailEqualFold(v string) predicate.Account {
-	return predicate.Account(sql.FieldEqualFold(FieldEmail, v))
-}
-
-// EmailContainsFold applies the ContainsFold predicate on the "email" field.
-func EmailContainsFold(v string) predicate.Account {
-	return predicate.Account(sql.FieldContainsFold(FieldEmail, v))
 }
 
 // HasToken applies the HasEdge predicate on the "token" edge.

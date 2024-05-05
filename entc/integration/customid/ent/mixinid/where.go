@@ -107,9 +107,19 @@ func SomeFieldLTE(v string) predicate.MixinID {
 	return predicate.MixinID(sql.FieldLTE(FieldSomeField, v))
 }
 
+// SomeFieldEqualFold applies the EqualFold predicate on the "some_field" field.
+func SomeFieldEqualFold(v string) predicate.MixinID {
+	return predicate.MixinID(sql.FieldEqualFold(FieldSomeField, v))
+}
+
 // SomeFieldContains applies the Contains predicate on the "some_field" field.
 func SomeFieldContains(v string) predicate.MixinID {
 	return predicate.MixinID(sql.FieldContains(FieldSomeField, v))
+}
+
+// SomeFieldContainsFold applies the ContainsFold predicate on the "some_field" field.
+func SomeFieldContainsFold(v string) predicate.MixinID {
+	return predicate.MixinID(sql.FieldContainsFold(FieldSomeField, v))
 }
 
 // SomeFieldHasPrefix applies the HasPrefix predicate on the "some_field" field.
@@ -120,16 +130,6 @@ func SomeFieldHasPrefix(v string) predicate.MixinID {
 // SomeFieldHasSuffix applies the HasSuffix predicate on the "some_field" field.
 func SomeFieldHasSuffix(v string) predicate.MixinID {
 	return predicate.MixinID(sql.FieldHasSuffix(FieldSomeField, v))
-}
-
-// SomeFieldEqualFold applies the EqualFold predicate on the "some_field" field.
-func SomeFieldEqualFold(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldEqualFold(FieldSomeField, v))
-}
-
-// SomeFieldContainsFold applies the ContainsFold predicate on the "some_field" field.
-func SomeFieldContainsFold(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldContainsFold(FieldSomeField, v))
 }
 
 // MixinFieldEQ applies the EQ predicate on the "mixin_field" field.
@@ -172,9 +172,19 @@ func MixinFieldLTE(v string) predicate.MixinID {
 	return predicate.MixinID(sql.FieldLTE(FieldMixinField, v))
 }
 
+// MixinFieldEqualFold applies the EqualFold predicate on the "mixin_field" field.
+func MixinFieldEqualFold(v string) predicate.MixinID {
+	return predicate.MixinID(sql.FieldEqualFold(FieldMixinField, v))
+}
+
 // MixinFieldContains applies the Contains predicate on the "mixin_field" field.
 func MixinFieldContains(v string) predicate.MixinID {
 	return predicate.MixinID(sql.FieldContains(FieldMixinField, v))
+}
+
+// MixinFieldContainsFold applies the ContainsFold predicate on the "mixin_field" field.
+func MixinFieldContainsFold(v string) predicate.MixinID {
+	return predicate.MixinID(sql.FieldContainsFold(FieldMixinField, v))
 }
 
 // MixinFieldHasPrefix applies the HasPrefix predicate on the "mixin_field" field.
@@ -185,16 +195,6 @@ func MixinFieldHasPrefix(v string) predicate.MixinID {
 // MixinFieldHasSuffix applies the HasSuffix predicate on the "mixin_field" field.
 func MixinFieldHasSuffix(v string) predicate.MixinID {
 	return predicate.MixinID(sql.FieldHasSuffix(FieldMixinField, v))
-}
-
-// MixinFieldEqualFold applies the EqualFold predicate on the "mixin_field" field.
-func MixinFieldEqualFold(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldEqualFold(FieldMixinField, v))
-}
-
-// MixinFieldContainsFold applies the ContainsFold predicate on the "mixin_field" field.
-func MixinFieldContainsFold(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldContainsFold(FieldMixinField, v))
 }
 
 // And groups predicates with the AND operator between them.

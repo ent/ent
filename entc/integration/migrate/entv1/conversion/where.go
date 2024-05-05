@@ -141,9 +141,19 @@ func NameLTE(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldLTE(FieldName, v))
 }
 
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldEqualFold(FieldName, v))
+}
+
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldContains(FieldName, v))
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldContainsFold(FieldName, v))
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
@@ -164,16 +174,6 @@ func NameIsNil() predicate.Conversion {
 // NameNotNil applies the NotNil predicate on the "name" field.
 func NameNotNil() predicate.Conversion {
 	return predicate.Conversion(sql.FieldNotNull(FieldName))
-}
-
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEqualFold(FieldName, v))
-}
-
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContainsFold(FieldName, v))
 }
 
 // Int8ToStringEQ applies the EQ predicate on the "int8_to_string" field.

@@ -102,9 +102,19 @@ func TextLTE(v string) predicate.Tweet {
 	return predicate.Tweet(sql.FieldLTE(FieldText, v))
 }
 
+// TextEqualFold applies the EqualFold predicate on the "text" field.
+func TextEqualFold(v string) predicate.Tweet {
+	return predicate.Tweet(sql.FieldEqualFold(FieldText, v))
+}
+
 // TextContains applies the Contains predicate on the "text" field.
 func TextContains(v string) predicate.Tweet {
 	return predicate.Tweet(sql.FieldContains(FieldText, v))
+}
+
+// TextContainsFold applies the ContainsFold predicate on the "text" field.
+func TextContainsFold(v string) predicate.Tweet {
+	return predicate.Tweet(sql.FieldContainsFold(FieldText, v))
 }
 
 // TextHasPrefix applies the HasPrefix predicate on the "text" field.
@@ -115,16 +125,6 @@ func TextHasPrefix(v string) predicate.Tweet {
 // TextHasSuffix applies the HasSuffix predicate on the "text" field.
 func TextHasSuffix(v string) predicate.Tweet {
 	return predicate.Tweet(sql.FieldHasSuffix(FieldText, v))
-}
-
-// TextEqualFold applies the EqualFold predicate on the "text" field.
-func TextEqualFold(v string) predicate.Tweet {
-	return predicate.Tweet(sql.FieldEqualFold(FieldText, v))
-}
-
-// TextContainsFold applies the ContainsFold predicate on the "text" field.
-func TextContainsFold(v string) predicate.Tweet {
-	return predicate.Tweet(sql.FieldContainsFold(FieldText, v))
 }
 
 // HasLikedUsers applies the HasEdge predicate on the "liked_users" edge.

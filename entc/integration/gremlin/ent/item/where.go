@@ -147,10 +147,24 @@ func TextLTE(v string) predicate.Item {
 	})
 }
 
+// TextEqualFold applies the EqualFold predicate on the "text" field.
+func TextEqualFold(v string) predicate.Item {
+	return predicate.Item(func(t *dsl.Traversal) {
+		t.Has(Label, FieldText, p.EqualFold(v))
+	})
+}
+
 // TextContains applies the Contains predicate on the "text" field.
 func TextContains(v string) predicate.Item {
 	return predicate.Item(func(t *dsl.Traversal) {
 		t.Has(Label, FieldText, p.Containing(v))
+	})
+}
+
+// TextContainsFold applies the ContainsFold predicate on the "text" field.
+func TextContainsFold(v string) predicate.Item {
+	return predicate.Item(func(t *dsl.Traversal) {
+		t.Has(Label, FieldText, p.ContainsFold(v))
 	})
 }
 

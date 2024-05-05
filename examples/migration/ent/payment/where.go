@@ -239,9 +239,19 @@ func DescriptionLTE(v string) predicate.Payment {
 	return predicate.Payment(sql.FieldLTE(FieldDescription, v))
 }
 
+// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
+func DescriptionEqualFold(v string) predicate.Payment {
+	return predicate.Payment(sql.FieldEqualFold(FieldDescription, v))
+}
+
 // DescriptionContains applies the Contains predicate on the "description" field.
 func DescriptionContains(v string) predicate.Payment {
 	return predicate.Payment(sql.FieldContains(FieldDescription, v))
+}
+
+// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
+func DescriptionContainsFold(v string) predicate.Payment {
+	return predicate.Payment(sql.FieldContainsFold(FieldDescription, v))
 }
 
 // DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
@@ -252,16 +262,6 @@ func DescriptionHasPrefix(v string) predicate.Payment {
 // DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
 func DescriptionHasSuffix(v string) predicate.Payment {
 	return predicate.Payment(sql.FieldHasSuffix(FieldDescription, v))
-}
-
-// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
-func DescriptionEqualFold(v string) predicate.Payment {
-	return predicate.Payment(sql.FieldEqualFold(FieldDescription, v))
-}
-
-// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
-func DescriptionContainsFold(v string) predicate.Payment {
-	return predicate.Payment(sql.FieldContainsFold(FieldDescription, v))
 }
 
 // StatusEQ applies the EQ predicate on the "status" field.

@@ -141,9 +141,19 @@ func NameLTE(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldLTE(FieldName, v))
 }
 
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldEqualFold(FieldName, v))
+}
+
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldContains(FieldName, v))
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldContainsFold(FieldName, v))
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
@@ -164,16 +174,6 @@ func NameIsNil() predicate.Conversion {
 // NameNotNil applies the NotNil predicate on the "name" field.
 func NameNotNil() predicate.Conversion {
 	return predicate.Conversion(sql.FieldNotNull(FieldName))
-}
-
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEqualFold(FieldName, v))
-}
-
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContainsFold(FieldName, v))
 }
 
 // Int8ToStringEQ applies the EQ predicate on the "int8_to_string" field.
@@ -216,9 +216,19 @@ func Int8ToStringLTE(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldLTE(FieldInt8ToString, v))
 }
 
+// Int8ToStringEqualFold applies the EqualFold predicate on the "int8_to_string" field.
+func Int8ToStringEqualFold(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldEqualFold(FieldInt8ToString, v))
+}
+
 // Int8ToStringContains applies the Contains predicate on the "int8_to_string" field.
 func Int8ToStringContains(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldContains(FieldInt8ToString, v))
+}
+
+// Int8ToStringContainsFold applies the ContainsFold predicate on the "int8_to_string" field.
+func Int8ToStringContainsFold(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldContainsFold(FieldInt8ToString, v))
 }
 
 // Int8ToStringHasPrefix applies the HasPrefix predicate on the "int8_to_string" field.
@@ -239,16 +249,6 @@ func Int8ToStringIsNil() predicate.Conversion {
 // Int8ToStringNotNil applies the NotNil predicate on the "int8_to_string" field.
 func Int8ToStringNotNil() predicate.Conversion {
 	return predicate.Conversion(sql.FieldNotNull(FieldInt8ToString))
-}
-
-// Int8ToStringEqualFold applies the EqualFold predicate on the "int8_to_string" field.
-func Int8ToStringEqualFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEqualFold(FieldInt8ToString, v))
-}
-
-// Int8ToStringContainsFold applies the ContainsFold predicate on the "int8_to_string" field.
-func Int8ToStringContainsFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContainsFold(FieldInt8ToString, v))
 }
 
 // Uint8ToStringEQ applies the EQ predicate on the "uint8_to_string" field.
@@ -291,9 +291,19 @@ func Uint8ToStringLTE(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldLTE(FieldUint8ToString, v))
 }
 
+// Uint8ToStringEqualFold applies the EqualFold predicate on the "uint8_to_string" field.
+func Uint8ToStringEqualFold(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldEqualFold(FieldUint8ToString, v))
+}
+
 // Uint8ToStringContains applies the Contains predicate on the "uint8_to_string" field.
 func Uint8ToStringContains(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldContains(FieldUint8ToString, v))
+}
+
+// Uint8ToStringContainsFold applies the ContainsFold predicate on the "uint8_to_string" field.
+func Uint8ToStringContainsFold(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldContainsFold(FieldUint8ToString, v))
 }
 
 // Uint8ToStringHasPrefix applies the HasPrefix predicate on the "uint8_to_string" field.
@@ -314,16 +324,6 @@ func Uint8ToStringIsNil() predicate.Conversion {
 // Uint8ToStringNotNil applies the NotNil predicate on the "uint8_to_string" field.
 func Uint8ToStringNotNil() predicate.Conversion {
 	return predicate.Conversion(sql.FieldNotNull(FieldUint8ToString))
-}
-
-// Uint8ToStringEqualFold applies the EqualFold predicate on the "uint8_to_string" field.
-func Uint8ToStringEqualFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEqualFold(FieldUint8ToString, v))
-}
-
-// Uint8ToStringContainsFold applies the ContainsFold predicate on the "uint8_to_string" field.
-func Uint8ToStringContainsFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContainsFold(FieldUint8ToString, v))
 }
 
 // Int16ToStringEQ applies the EQ predicate on the "int16_to_string" field.
@@ -366,9 +366,19 @@ func Int16ToStringLTE(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldLTE(FieldInt16ToString, v))
 }
 
+// Int16ToStringEqualFold applies the EqualFold predicate on the "int16_to_string" field.
+func Int16ToStringEqualFold(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldEqualFold(FieldInt16ToString, v))
+}
+
 // Int16ToStringContains applies the Contains predicate on the "int16_to_string" field.
 func Int16ToStringContains(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldContains(FieldInt16ToString, v))
+}
+
+// Int16ToStringContainsFold applies the ContainsFold predicate on the "int16_to_string" field.
+func Int16ToStringContainsFold(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldContainsFold(FieldInt16ToString, v))
 }
 
 // Int16ToStringHasPrefix applies the HasPrefix predicate on the "int16_to_string" field.
@@ -389,16 +399,6 @@ func Int16ToStringIsNil() predicate.Conversion {
 // Int16ToStringNotNil applies the NotNil predicate on the "int16_to_string" field.
 func Int16ToStringNotNil() predicate.Conversion {
 	return predicate.Conversion(sql.FieldNotNull(FieldInt16ToString))
-}
-
-// Int16ToStringEqualFold applies the EqualFold predicate on the "int16_to_string" field.
-func Int16ToStringEqualFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEqualFold(FieldInt16ToString, v))
-}
-
-// Int16ToStringContainsFold applies the ContainsFold predicate on the "int16_to_string" field.
-func Int16ToStringContainsFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContainsFold(FieldInt16ToString, v))
 }
 
 // Uint16ToStringEQ applies the EQ predicate on the "uint16_to_string" field.
@@ -441,9 +441,19 @@ func Uint16ToStringLTE(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldLTE(FieldUint16ToString, v))
 }
 
+// Uint16ToStringEqualFold applies the EqualFold predicate on the "uint16_to_string" field.
+func Uint16ToStringEqualFold(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldEqualFold(FieldUint16ToString, v))
+}
+
 // Uint16ToStringContains applies the Contains predicate on the "uint16_to_string" field.
 func Uint16ToStringContains(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldContains(FieldUint16ToString, v))
+}
+
+// Uint16ToStringContainsFold applies the ContainsFold predicate on the "uint16_to_string" field.
+func Uint16ToStringContainsFold(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldContainsFold(FieldUint16ToString, v))
 }
 
 // Uint16ToStringHasPrefix applies the HasPrefix predicate on the "uint16_to_string" field.
@@ -464,16 +474,6 @@ func Uint16ToStringIsNil() predicate.Conversion {
 // Uint16ToStringNotNil applies the NotNil predicate on the "uint16_to_string" field.
 func Uint16ToStringNotNil() predicate.Conversion {
 	return predicate.Conversion(sql.FieldNotNull(FieldUint16ToString))
-}
-
-// Uint16ToStringEqualFold applies the EqualFold predicate on the "uint16_to_string" field.
-func Uint16ToStringEqualFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEqualFold(FieldUint16ToString, v))
-}
-
-// Uint16ToStringContainsFold applies the ContainsFold predicate on the "uint16_to_string" field.
-func Uint16ToStringContainsFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContainsFold(FieldUint16ToString, v))
 }
 
 // Int32ToStringEQ applies the EQ predicate on the "int32_to_string" field.
@@ -516,9 +516,19 @@ func Int32ToStringLTE(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldLTE(FieldInt32ToString, v))
 }
 
+// Int32ToStringEqualFold applies the EqualFold predicate on the "int32_to_string" field.
+func Int32ToStringEqualFold(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldEqualFold(FieldInt32ToString, v))
+}
+
 // Int32ToStringContains applies the Contains predicate on the "int32_to_string" field.
 func Int32ToStringContains(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldContains(FieldInt32ToString, v))
+}
+
+// Int32ToStringContainsFold applies the ContainsFold predicate on the "int32_to_string" field.
+func Int32ToStringContainsFold(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldContainsFold(FieldInt32ToString, v))
 }
 
 // Int32ToStringHasPrefix applies the HasPrefix predicate on the "int32_to_string" field.
@@ -539,16 +549,6 @@ func Int32ToStringIsNil() predicate.Conversion {
 // Int32ToStringNotNil applies the NotNil predicate on the "int32_to_string" field.
 func Int32ToStringNotNil() predicate.Conversion {
 	return predicate.Conversion(sql.FieldNotNull(FieldInt32ToString))
-}
-
-// Int32ToStringEqualFold applies the EqualFold predicate on the "int32_to_string" field.
-func Int32ToStringEqualFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEqualFold(FieldInt32ToString, v))
-}
-
-// Int32ToStringContainsFold applies the ContainsFold predicate on the "int32_to_string" field.
-func Int32ToStringContainsFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContainsFold(FieldInt32ToString, v))
 }
 
 // Uint32ToStringEQ applies the EQ predicate on the "uint32_to_string" field.
@@ -591,9 +591,19 @@ func Uint32ToStringLTE(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldLTE(FieldUint32ToString, v))
 }
 
+// Uint32ToStringEqualFold applies the EqualFold predicate on the "uint32_to_string" field.
+func Uint32ToStringEqualFold(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldEqualFold(FieldUint32ToString, v))
+}
+
 // Uint32ToStringContains applies the Contains predicate on the "uint32_to_string" field.
 func Uint32ToStringContains(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldContains(FieldUint32ToString, v))
+}
+
+// Uint32ToStringContainsFold applies the ContainsFold predicate on the "uint32_to_string" field.
+func Uint32ToStringContainsFold(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldContainsFold(FieldUint32ToString, v))
 }
 
 // Uint32ToStringHasPrefix applies the HasPrefix predicate on the "uint32_to_string" field.
@@ -614,16 +624,6 @@ func Uint32ToStringIsNil() predicate.Conversion {
 // Uint32ToStringNotNil applies the NotNil predicate on the "uint32_to_string" field.
 func Uint32ToStringNotNil() predicate.Conversion {
 	return predicate.Conversion(sql.FieldNotNull(FieldUint32ToString))
-}
-
-// Uint32ToStringEqualFold applies the EqualFold predicate on the "uint32_to_string" field.
-func Uint32ToStringEqualFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEqualFold(FieldUint32ToString, v))
-}
-
-// Uint32ToStringContainsFold applies the ContainsFold predicate on the "uint32_to_string" field.
-func Uint32ToStringContainsFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContainsFold(FieldUint32ToString, v))
 }
 
 // Int64ToStringEQ applies the EQ predicate on the "int64_to_string" field.
@@ -666,9 +666,19 @@ func Int64ToStringLTE(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldLTE(FieldInt64ToString, v))
 }
 
+// Int64ToStringEqualFold applies the EqualFold predicate on the "int64_to_string" field.
+func Int64ToStringEqualFold(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldEqualFold(FieldInt64ToString, v))
+}
+
 // Int64ToStringContains applies the Contains predicate on the "int64_to_string" field.
 func Int64ToStringContains(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldContains(FieldInt64ToString, v))
+}
+
+// Int64ToStringContainsFold applies the ContainsFold predicate on the "int64_to_string" field.
+func Int64ToStringContainsFold(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldContainsFold(FieldInt64ToString, v))
 }
 
 // Int64ToStringHasPrefix applies the HasPrefix predicate on the "int64_to_string" field.
@@ -689,16 +699,6 @@ func Int64ToStringIsNil() predicate.Conversion {
 // Int64ToStringNotNil applies the NotNil predicate on the "int64_to_string" field.
 func Int64ToStringNotNil() predicate.Conversion {
 	return predicate.Conversion(sql.FieldNotNull(FieldInt64ToString))
-}
-
-// Int64ToStringEqualFold applies the EqualFold predicate on the "int64_to_string" field.
-func Int64ToStringEqualFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEqualFold(FieldInt64ToString, v))
-}
-
-// Int64ToStringContainsFold applies the ContainsFold predicate on the "int64_to_string" field.
-func Int64ToStringContainsFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContainsFold(FieldInt64ToString, v))
 }
 
 // Uint64ToStringEQ applies the EQ predicate on the "uint64_to_string" field.
@@ -741,9 +741,19 @@ func Uint64ToStringLTE(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldLTE(FieldUint64ToString, v))
 }
 
+// Uint64ToStringEqualFold applies the EqualFold predicate on the "uint64_to_string" field.
+func Uint64ToStringEqualFold(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldEqualFold(FieldUint64ToString, v))
+}
+
 // Uint64ToStringContains applies the Contains predicate on the "uint64_to_string" field.
 func Uint64ToStringContains(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldContains(FieldUint64ToString, v))
+}
+
+// Uint64ToStringContainsFold applies the ContainsFold predicate on the "uint64_to_string" field.
+func Uint64ToStringContainsFold(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldContainsFold(FieldUint64ToString, v))
 }
 
 // Uint64ToStringHasPrefix applies the HasPrefix predicate on the "uint64_to_string" field.
@@ -764,16 +774,6 @@ func Uint64ToStringIsNil() predicate.Conversion {
 // Uint64ToStringNotNil applies the NotNil predicate on the "uint64_to_string" field.
 func Uint64ToStringNotNil() predicate.Conversion {
 	return predicate.Conversion(sql.FieldNotNull(FieldUint64ToString))
-}
-
-// Uint64ToStringEqualFold applies the EqualFold predicate on the "uint64_to_string" field.
-func Uint64ToStringEqualFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEqualFold(FieldUint64ToString, v))
-}
-
-// Uint64ToStringContainsFold applies the ContainsFold predicate on the "uint64_to_string" field.
-func Uint64ToStringContainsFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContainsFold(FieldUint64ToString, v))
 }
 
 // And groups predicates with the AND operator between them.

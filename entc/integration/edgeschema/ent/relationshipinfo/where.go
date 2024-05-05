@@ -101,9 +101,19 @@ func TextLTE(v string) predicate.RelationshipInfo {
 	return predicate.RelationshipInfo(sql.FieldLTE(FieldText, v))
 }
 
+// TextEqualFold applies the EqualFold predicate on the "text" field.
+func TextEqualFold(v string) predicate.RelationshipInfo {
+	return predicate.RelationshipInfo(sql.FieldEqualFold(FieldText, v))
+}
+
 // TextContains applies the Contains predicate on the "text" field.
 func TextContains(v string) predicate.RelationshipInfo {
 	return predicate.RelationshipInfo(sql.FieldContains(FieldText, v))
+}
+
+// TextContainsFold applies the ContainsFold predicate on the "text" field.
+func TextContainsFold(v string) predicate.RelationshipInfo {
+	return predicate.RelationshipInfo(sql.FieldContainsFold(FieldText, v))
 }
 
 // TextHasPrefix applies the HasPrefix predicate on the "text" field.
@@ -114,16 +124,6 @@ func TextHasPrefix(v string) predicate.RelationshipInfo {
 // TextHasSuffix applies the HasSuffix predicate on the "text" field.
 func TextHasSuffix(v string) predicate.RelationshipInfo {
 	return predicate.RelationshipInfo(sql.FieldHasSuffix(FieldText, v))
-}
-
-// TextEqualFold applies the EqualFold predicate on the "text" field.
-func TextEqualFold(v string) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(sql.FieldEqualFold(FieldText, v))
-}
-
-// TextContainsFold applies the ContainsFold predicate on the "text" field.
-func TextContainsFold(v string) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(sql.FieldContainsFold(FieldText, v))
 }
 
 // And groups predicates with the AND operator between them.

@@ -232,10 +232,24 @@ func NameLTE(v string) predicate.Pet {
 	})
 }
 
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.EqualFold(v))
+	})
+}
+
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.Pet {
 	return predicate.Pet(func(t *dsl.Traversal) {
 		t.Has(Label, FieldName, p.Containing(v))
+	})
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.ContainsFold(v))
 	})
 }
 
@@ -379,10 +393,24 @@ func NicknameLTE(v string) predicate.Pet {
 	})
 }
 
+// NicknameEqualFold applies the EqualFold predicate on the "nickname" field.
+func NicknameEqualFold(v string) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNickname, p.EqualFold(v))
+	})
+}
+
 // NicknameContains applies the Contains predicate on the "nickname" field.
 func NicknameContains(v string) predicate.Pet {
 	return predicate.Pet(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNickname, p.Containing(v))
+	})
+}
+
+// NicknameContainsFold applies the ContainsFold predicate on the "nickname" field.
+func NicknameContainsFold(v string) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNickname, p.ContainsFold(v))
 	})
 }
 

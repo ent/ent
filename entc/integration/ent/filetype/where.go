@@ -102,9 +102,19 @@ func NameLTE(v string) predicate.FileType {
 	return predicate.FileType(sql.FieldLTE(FieldName, v))
 }
 
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.FileType {
+	return predicate.FileType(sql.FieldEqualFold(FieldName, v))
+}
+
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.FileType {
 	return predicate.FileType(sql.FieldContains(FieldName, v))
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.FileType {
+	return predicate.FileType(sql.FieldContainsFold(FieldName, v))
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
@@ -115,16 +125,6 @@ func NameHasPrefix(v string) predicate.FileType {
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.FileType {
 	return predicate.FileType(sql.FieldHasSuffix(FieldName, v))
-}
-
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.FileType {
-	return predicate.FileType(sql.FieldEqualFold(FieldName, v))
-}
-
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.FileType {
-	return predicate.FileType(sql.FieldContainsFold(FieldName, v))
 }
 
 // TypeEQ applies the EQ predicate on the "type" field.

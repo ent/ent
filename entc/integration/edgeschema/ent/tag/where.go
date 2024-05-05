@@ -102,9 +102,19 @@ func ValueLTE(v string) predicate.Tag {
 	return predicate.Tag(sql.FieldLTE(FieldValue, v))
 }
 
+// ValueEqualFold applies the EqualFold predicate on the "value" field.
+func ValueEqualFold(v string) predicate.Tag {
+	return predicate.Tag(sql.FieldEqualFold(FieldValue, v))
+}
+
 // ValueContains applies the Contains predicate on the "value" field.
 func ValueContains(v string) predicate.Tag {
 	return predicate.Tag(sql.FieldContains(FieldValue, v))
+}
+
+// ValueContainsFold applies the ContainsFold predicate on the "value" field.
+func ValueContainsFold(v string) predicate.Tag {
+	return predicate.Tag(sql.FieldContainsFold(FieldValue, v))
 }
 
 // ValueHasPrefix applies the HasPrefix predicate on the "value" field.
@@ -115,16 +125,6 @@ func ValueHasPrefix(v string) predicate.Tag {
 // ValueHasSuffix applies the HasSuffix predicate on the "value" field.
 func ValueHasSuffix(v string) predicate.Tag {
 	return predicate.Tag(sql.FieldHasSuffix(FieldValue, v))
-}
-
-// ValueEqualFold applies the EqualFold predicate on the "value" field.
-func ValueEqualFold(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldEqualFold(FieldValue, v))
-}
-
-// ValueContainsFold applies the ContainsFold predicate on the "value" field.
-func ValueContainsFold(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldContainsFold(FieldValue, v))
 }
 
 // HasTweets applies the HasEdge predicate on the "tweets" edge.

@@ -103,9 +103,19 @@ func TextLTE(v string) predicate.Doc {
 	return predicate.Doc(sql.FieldLTE(FieldText, v))
 }
 
+// TextEqualFold applies the EqualFold predicate on the "text" field.
+func TextEqualFold(v string) predicate.Doc {
+	return predicate.Doc(sql.FieldEqualFold(FieldText, v))
+}
+
 // TextContains applies the Contains predicate on the "text" field.
 func TextContains(v string) predicate.Doc {
 	return predicate.Doc(sql.FieldContains(FieldText, v))
+}
+
+// TextContainsFold applies the ContainsFold predicate on the "text" field.
+func TextContainsFold(v string) predicate.Doc {
+	return predicate.Doc(sql.FieldContainsFold(FieldText, v))
 }
 
 // TextHasPrefix applies the HasPrefix predicate on the "text" field.
@@ -126,16 +136,6 @@ func TextIsNil() predicate.Doc {
 // TextNotNil applies the NotNil predicate on the "text" field.
 func TextNotNil() predicate.Doc {
 	return predicate.Doc(sql.FieldNotNull(FieldText))
-}
-
-// TextEqualFold applies the EqualFold predicate on the "text" field.
-func TextEqualFold(v string) predicate.Doc {
-	return predicate.Doc(sql.FieldEqualFold(FieldText, v))
-}
-
-// TextContainsFold applies the ContainsFold predicate on the "text" field.
-func TextContainsFold(v string) predicate.Doc {
-	return predicate.Doc(sql.FieldContainsFold(FieldText, v))
 }
 
 // HasParent applies the HasEdge predicate on the "parent" edge.

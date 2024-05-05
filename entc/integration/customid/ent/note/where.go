@@ -103,9 +103,19 @@ func TextLTE(v string) predicate.Note {
 	return predicate.Note(sql.FieldLTE(FieldText, v))
 }
 
+// TextEqualFold applies the EqualFold predicate on the "text" field.
+func TextEqualFold(v string) predicate.Note {
+	return predicate.Note(sql.FieldEqualFold(FieldText, v))
+}
+
 // TextContains applies the Contains predicate on the "text" field.
 func TextContains(v string) predicate.Note {
 	return predicate.Note(sql.FieldContains(FieldText, v))
+}
+
+// TextContainsFold applies the ContainsFold predicate on the "text" field.
+func TextContainsFold(v string) predicate.Note {
+	return predicate.Note(sql.FieldContainsFold(FieldText, v))
 }
 
 // TextHasPrefix applies the HasPrefix predicate on the "text" field.
@@ -126,16 +136,6 @@ func TextIsNil() predicate.Note {
 // TextNotNil applies the NotNil predicate on the "text" field.
 func TextNotNil() predicate.Note {
 	return predicate.Note(sql.FieldNotNull(FieldText))
-}
-
-// TextEqualFold applies the EqualFold predicate on the "text" field.
-func TextEqualFold(v string) predicate.Note {
-	return predicate.Note(sql.FieldEqualFold(FieldText, v))
-}
-
-// TextContainsFold applies the ContainsFold predicate on the "text" field.
-func TextContainsFold(v string) predicate.Note {
-	return predicate.Note(sql.FieldContainsFold(FieldText, v))
 }
 
 // HasParent applies the HasEdge predicate on the "parent" edge.

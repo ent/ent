@@ -163,9 +163,19 @@ func NameLTE(v string) predicate.Pet {
 	return predicate.Pet(sql.FieldLTE(FieldName, v))
 }
 
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldEqualFold(FieldName, v))
+}
+
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.Pet {
 	return predicate.Pet(sql.FieldContains(FieldName, v))
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldContainsFold(FieldName, v))
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
@@ -176,16 +186,6 @@ func NameHasPrefix(v string) predicate.Pet {
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.Pet {
 	return predicate.Pet(sql.FieldHasSuffix(FieldName, v))
-}
-
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.Pet {
-	return predicate.Pet(sql.FieldEqualFold(FieldName, v))
-}
-
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.Pet {
-	return predicate.Pet(sql.FieldContainsFold(FieldName, v))
 }
 
 // UUIDEQ applies the EQ predicate on the "uuid" field.
@@ -278,9 +278,19 @@ func NicknameLTE(v string) predicate.Pet {
 	return predicate.Pet(sql.FieldLTE(FieldNickname, v))
 }
 
+// NicknameEqualFold applies the EqualFold predicate on the "nickname" field.
+func NicknameEqualFold(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldEqualFold(FieldNickname, v))
+}
+
 // NicknameContains applies the Contains predicate on the "nickname" field.
 func NicknameContains(v string) predicate.Pet {
 	return predicate.Pet(sql.FieldContains(FieldNickname, v))
+}
+
+// NicknameContainsFold applies the ContainsFold predicate on the "nickname" field.
+func NicknameContainsFold(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldContainsFold(FieldNickname, v))
 }
 
 // NicknameHasPrefix applies the HasPrefix predicate on the "nickname" field.
@@ -301,16 +311,6 @@ func NicknameIsNil() predicate.Pet {
 // NicknameNotNil applies the NotNil predicate on the "nickname" field.
 func NicknameNotNil() predicate.Pet {
 	return predicate.Pet(sql.FieldNotNull(FieldNickname))
-}
-
-// NicknameEqualFold applies the EqualFold predicate on the "nickname" field.
-func NicknameEqualFold(v string) predicate.Pet {
-	return predicate.Pet(sql.FieldEqualFold(FieldNickname, v))
-}
-
-// NicknameContainsFold applies the ContainsFold predicate on the "nickname" field.
-func NicknameContainsFold(v string) predicate.Pet {
-	return predicate.Pet(sql.FieldContainsFold(FieldNickname, v))
 }
 
 // TrainedEQ applies the EQ predicate on the "trained" field.

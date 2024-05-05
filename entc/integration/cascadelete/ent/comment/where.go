@@ -107,9 +107,19 @@ func TextLTE(v string) predicate.Comment {
 	return predicate.Comment(sql.FieldLTE(FieldText, v))
 }
 
+// TextEqualFold applies the EqualFold predicate on the "text" field.
+func TextEqualFold(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldEqualFold(FieldText, v))
+}
+
 // TextContains applies the Contains predicate on the "text" field.
 func TextContains(v string) predicate.Comment {
 	return predicate.Comment(sql.FieldContains(FieldText, v))
+}
+
+// TextContainsFold applies the ContainsFold predicate on the "text" field.
+func TextContainsFold(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldContainsFold(FieldText, v))
 }
 
 // TextHasPrefix applies the HasPrefix predicate on the "text" field.
@@ -120,16 +130,6 @@ func TextHasPrefix(v string) predicate.Comment {
 // TextHasSuffix applies the HasSuffix predicate on the "text" field.
 func TextHasSuffix(v string) predicate.Comment {
 	return predicate.Comment(sql.FieldHasSuffix(FieldText, v))
-}
-
-// TextEqualFold applies the EqualFold predicate on the "text" field.
-func TextEqualFold(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldEqualFold(FieldText, v))
-}
-
-// TextContainsFold applies the ContainsFold predicate on the "text" field.
-func TextContainsFold(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldContainsFold(FieldText, v))
 }
 
 // PostIDEQ applies the EQ predicate on the "post_id" field.

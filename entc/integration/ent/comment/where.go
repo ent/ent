@@ -246,9 +246,19 @@ func TableLTE(v string) predicate.Comment {
 	return predicate.Comment(sql.FieldLTE(FieldTable, v))
 }
 
+// TableEqualFold applies the EqualFold predicate on the "table" field.
+func TableEqualFold(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldEqualFold(FieldTable, v))
+}
+
 // TableContains applies the Contains predicate on the "table" field.
 func TableContains(v string) predicate.Comment {
 	return predicate.Comment(sql.FieldContains(FieldTable, v))
+}
+
+// TableContainsFold applies the ContainsFold predicate on the "table" field.
+func TableContainsFold(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldContainsFold(FieldTable, v))
 }
 
 // TableHasPrefix applies the HasPrefix predicate on the "table" field.
@@ -269,16 +279,6 @@ func TableIsNil() predicate.Comment {
 // TableNotNil applies the NotNil predicate on the "table" field.
 func TableNotNil() predicate.Comment {
 	return predicate.Comment(sql.FieldNotNull(FieldTable))
-}
-
-// TableEqualFold applies the EqualFold predicate on the "table" field.
-func TableEqualFold(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldEqualFold(FieldTable, v))
-}
-
-// TableContainsFold applies the ContainsFold predicate on the "table" field.
-func TableContainsFold(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldContainsFold(FieldTable, v))
 }
 
 // DirIsNil applies the IsNil predicate on the "dir" field.
@@ -331,9 +331,19 @@ func ClientLTE(v string) predicate.Comment {
 	return predicate.Comment(sql.FieldLTE(FieldClient, v))
 }
 
+// ClientEqualFold applies the EqualFold predicate on the "client" field.
+func ClientEqualFold(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldEqualFold(FieldClient, v))
+}
+
 // ClientContains applies the Contains predicate on the "client" field.
 func ClientContains(v string) predicate.Comment {
 	return predicate.Comment(sql.FieldContains(FieldClient, v))
+}
+
+// ClientContainsFold applies the ContainsFold predicate on the "client" field.
+func ClientContainsFold(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldContainsFold(FieldClient, v))
 }
 
 // ClientHasPrefix applies the HasPrefix predicate on the "client" field.
@@ -354,16 +364,6 @@ func ClientIsNil() predicate.Comment {
 // ClientNotNil applies the NotNil predicate on the "client" field.
 func ClientNotNil() predicate.Comment {
 	return predicate.Comment(sql.FieldNotNull(FieldClient))
-}
-
-// ClientEqualFold applies the EqualFold predicate on the "client" field.
-func ClientEqualFold(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldEqualFold(FieldClient, v))
-}
-
-// ClientContainsFold applies the ContainsFold predicate on the "client" field.
-func ClientContainsFold(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldContainsFold(FieldClient, v))
 }
 
 // And groups predicates with the AND operator between them.

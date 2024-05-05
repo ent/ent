@@ -107,9 +107,19 @@ func DescLTE(v string) predicate.GroupInfo {
 	return predicate.GroupInfo(sql.FieldLTE(FieldDesc, v))
 }
 
+// DescEqualFold applies the EqualFold predicate on the "desc" field.
+func DescEqualFold(v string) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldEqualFold(FieldDesc, v))
+}
+
 // DescContains applies the Contains predicate on the "desc" field.
 func DescContains(v string) predicate.GroupInfo {
 	return predicate.GroupInfo(sql.FieldContains(FieldDesc, v))
+}
+
+// DescContainsFold applies the ContainsFold predicate on the "desc" field.
+func DescContainsFold(v string) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldContainsFold(FieldDesc, v))
 }
 
 // DescHasPrefix applies the HasPrefix predicate on the "desc" field.
@@ -120,16 +130,6 @@ func DescHasPrefix(v string) predicate.GroupInfo {
 // DescHasSuffix applies the HasSuffix predicate on the "desc" field.
 func DescHasSuffix(v string) predicate.GroupInfo {
 	return predicate.GroupInfo(sql.FieldHasSuffix(FieldDesc, v))
-}
-
-// DescEqualFold applies the EqualFold predicate on the "desc" field.
-func DescEqualFold(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldEqualFold(FieldDesc, v))
-}
-
-// DescContainsFold applies the ContainsFold predicate on the "desc" field.
-func DescContainsFold(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldContainsFold(FieldDesc, v))
 }
 
 // MaxUsersEQ applies the EQ predicate on the "max_users" field.

@@ -111,9 +111,19 @@ func TextLTE(v string) predicate.Item {
 	return predicate.Item(sql.FieldLTE(FieldText, v))
 }
 
+// TextEqualFold applies the EqualFold predicate on the "text" field.
+func TextEqualFold(v string) predicate.Item {
+	return predicate.Item(sql.FieldEqualFold(FieldText, v))
+}
+
 // TextContains applies the Contains predicate on the "text" field.
 func TextContains(v string) predicate.Item {
 	return predicate.Item(sql.FieldContains(FieldText, v))
+}
+
+// TextContainsFold applies the ContainsFold predicate on the "text" field.
+func TextContainsFold(v string) predicate.Item {
+	return predicate.Item(sql.FieldContainsFold(FieldText, v))
 }
 
 // TextHasPrefix applies the HasPrefix predicate on the "text" field.
@@ -134,16 +144,6 @@ func TextIsNil() predicate.Item {
 // TextNotNil applies the NotNil predicate on the "text" field.
 func TextNotNil() predicate.Item {
 	return predicate.Item(sql.FieldNotNull(FieldText))
-}
-
-// TextEqualFold applies the EqualFold predicate on the "text" field.
-func TextEqualFold(v string) predicate.Item {
-	return predicate.Item(sql.FieldEqualFold(FieldText, v))
-}
-
-// TextContainsFold applies the ContainsFold predicate on the "text" field.
-func TextContainsFold(v string) predicate.Item {
-	return predicate.Item(sql.FieldContainsFold(FieldText, v))
 }
 
 // And groups predicates with the AND operator between them.

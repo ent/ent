@@ -124,9 +124,19 @@ func TypeLTE(v string) predicate.Card {
 	return predicate.Card(sql.FieldLTE(FieldType, v))
 }
 
+// TypeEqualFold applies the EqualFold predicate on the "type" field.
+func TypeEqualFold(v string) predicate.Card {
+	return predicate.Card(sql.FieldEqualFold(FieldType, v))
+}
+
 // TypeContains applies the Contains predicate on the "type" field.
 func TypeContains(v string) predicate.Card {
 	return predicate.Card(sql.FieldContains(FieldType, v))
+}
+
+// TypeContainsFold applies the ContainsFold predicate on the "type" field.
+func TypeContainsFold(v string) predicate.Card {
+	return predicate.Card(sql.FieldContainsFold(FieldType, v))
 }
 
 // TypeHasPrefix applies the HasPrefix predicate on the "type" field.
@@ -137,16 +147,6 @@ func TypeHasPrefix(v string) predicate.Card {
 // TypeHasSuffix applies the HasSuffix predicate on the "type" field.
 func TypeHasSuffix(v string) predicate.Card {
 	return predicate.Card(sql.FieldHasSuffix(FieldType, v))
-}
-
-// TypeEqualFold applies the EqualFold predicate on the "type" field.
-func TypeEqualFold(v string) predicate.Card {
-	return predicate.Card(sql.FieldEqualFold(FieldType, v))
-}
-
-// TypeContainsFold applies the ContainsFold predicate on the "type" field.
-func TypeContainsFold(v string) predicate.Card {
-	return predicate.Card(sql.FieldContainsFold(FieldType, v))
 }
 
 // NumberHashEQ applies the EQ predicate on the "number_hash" field.
@@ -189,9 +189,19 @@ func NumberHashLTE(v string) predicate.Card {
 	return predicate.Card(sql.FieldLTE(FieldNumberHash, v))
 }
 
+// NumberHashEqualFold applies the EqualFold predicate on the "number_hash" field.
+func NumberHashEqualFold(v string) predicate.Card {
+	return predicate.Card(sql.FieldEqualFold(FieldNumberHash, v))
+}
+
 // NumberHashContains applies the Contains predicate on the "number_hash" field.
 func NumberHashContains(v string) predicate.Card {
 	return predicate.Card(sql.FieldContains(FieldNumberHash, v))
+}
+
+// NumberHashContainsFold applies the ContainsFold predicate on the "number_hash" field.
+func NumberHashContainsFold(v string) predicate.Card {
+	return predicate.Card(sql.FieldContainsFold(FieldNumberHash, v))
 }
 
 // NumberHashHasPrefix applies the HasPrefix predicate on the "number_hash" field.
@@ -202,16 +212,6 @@ func NumberHashHasPrefix(v string) predicate.Card {
 // NumberHashHasSuffix applies the HasSuffix predicate on the "number_hash" field.
 func NumberHashHasSuffix(v string) predicate.Card {
 	return predicate.Card(sql.FieldHasSuffix(FieldNumberHash, v))
-}
-
-// NumberHashEqualFold applies the EqualFold predicate on the "number_hash" field.
-func NumberHashEqualFold(v string) predicate.Card {
-	return predicate.Card(sql.FieldEqualFold(FieldNumberHash, v))
-}
-
-// NumberHashContainsFold applies the ContainsFold predicate on the "number_hash" field.
-func NumberHashContainsFold(v string) predicate.Card {
-	return predicate.Card(sql.FieldContainsFold(FieldNumberHash, v))
 }
 
 // CvvHashEQ applies the EQ predicate on the "cvv_hash" field.
@@ -254,9 +254,19 @@ func CvvHashLTE(v string) predicate.Card {
 	return predicate.Card(sql.FieldLTE(FieldCvvHash, v))
 }
 
+// CvvHashEqualFold applies the EqualFold predicate on the "cvv_hash" field.
+func CvvHashEqualFold(v string) predicate.Card {
+	return predicate.Card(sql.FieldEqualFold(FieldCvvHash, v))
+}
+
 // CvvHashContains applies the Contains predicate on the "cvv_hash" field.
 func CvvHashContains(v string) predicate.Card {
 	return predicate.Card(sql.FieldContains(FieldCvvHash, v))
+}
+
+// CvvHashContainsFold applies the ContainsFold predicate on the "cvv_hash" field.
+func CvvHashContainsFold(v string) predicate.Card {
+	return predicate.Card(sql.FieldContainsFold(FieldCvvHash, v))
 }
 
 // CvvHashHasPrefix applies the HasPrefix predicate on the "cvv_hash" field.
@@ -267,16 +277,6 @@ func CvvHashHasPrefix(v string) predicate.Card {
 // CvvHashHasSuffix applies the HasSuffix predicate on the "cvv_hash" field.
 func CvvHashHasSuffix(v string) predicate.Card {
 	return predicate.Card(sql.FieldHasSuffix(FieldCvvHash, v))
-}
-
-// CvvHashEqualFold applies the EqualFold predicate on the "cvv_hash" field.
-func CvvHashEqualFold(v string) predicate.Card {
-	return predicate.Card(sql.FieldEqualFold(FieldCvvHash, v))
-}
-
-// CvvHashContainsFold applies the ContainsFold predicate on the "cvv_hash" field.
-func CvvHashContainsFold(v string) predicate.Card {
-	return predicate.Card(sql.FieldContainsFold(FieldCvvHash, v))
 }
 
 // ExpiresAtEQ applies the EQ predicate on the "expires_at" field.

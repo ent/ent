@@ -247,10 +247,24 @@ func TypeLTE(v string) predicate.Group {
 	})
 }
 
+// TypeEqualFold applies the EqualFold predicate on the "type" field.
+func TypeEqualFold(v string) predicate.Group {
+	return predicate.Group(func(t *dsl.Traversal) {
+		t.Has(Label, FieldType, p.EqualFold(v))
+	})
+}
+
 // TypeContains applies the Contains predicate on the "type" field.
 func TypeContains(v string) predicate.Group {
 	return predicate.Group(func(t *dsl.Traversal) {
 		t.Has(Label, FieldType, p.Containing(v))
+	})
+}
+
+// TypeContainsFold applies the ContainsFold predicate on the "type" field.
+func TypeContainsFold(v string) predicate.Group {
+	return predicate.Group(func(t *dsl.Traversal) {
+		t.Has(Label, FieldType, p.ContainsFold(v))
 	})
 }
 
@@ -408,10 +422,24 @@ func NameLTE(v string) predicate.Group {
 	})
 }
 
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.Group {
+	return predicate.Group(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.EqualFold(v))
+	})
+}
+
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.Group {
 	return predicate.Group(func(t *dsl.Traversal) {
 		t.Has(Label, FieldName, p.Containing(v))
+	})
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.Group {
+	return predicate.Group(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.ContainsFold(v))
 	})
 }
 

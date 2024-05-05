@@ -231,10 +231,24 @@ func NameLTE(v string) predicate.File {
 	})
 }
 
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.EqualFold(v))
+	})
+}
+
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.File {
 	return predicate.File(func(t *dsl.Traversal) {
 		t.Has(Label, FieldName, p.Containing(v))
+	})
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.ContainsFold(v))
 	})
 }
 
@@ -308,10 +322,24 @@ func UserLTE(v string) predicate.File {
 	})
 }
 
+// UserEqualFold applies the EqualFold predicate on the "user" field.
+func UserEqualFold(v string) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUser, p.EqualFold(v))
+	})
+}
+
 // UserContains applies the Contains predicate on the "user" field.
 func UserContains(v string) predicate.File {
 	return predicate.File(func(t *dsl.Traversal) {
 		t.Has(Label, FieldUser, p.Containing(v))
+	})
+}
+
+// UserContainsFold applies the ContainsFold predicate on the "user" field.
+func UserContainsFold(v string) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUser, p.ContainsFold(v))
 	})
 }
 
@@ -399,10 +427,24 @@ func GroupLTE(v string) predicate.File {
 	})
 }
 
+// GroupEqualFold applies the EqualFold predicate on the "group" field.
+func GroupEqualFold(v string) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldGroup, p.EqualFold(v))
+	})
+}
+
 // GroupContains applies the Contains predicate on the "group" field.
 func GroupContains(v string) predicate.File {
 	return predicate.File(func(t *dsl.Traversal) {
 		t.Has(Label, FieldGroup, p.Containing(v))
+	})
+}
+
+// GroupContainsFold applies the ContainsFold predicate on the "group" field.
+func GroupContainsFold(v string) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldGroup, p.ContainsFold(v))
 	})
 }
 

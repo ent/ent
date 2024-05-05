@@ -113,9 +113,19 @@ func CustomLTE(v string) predicate.CustomType {
 	return predicate.CustomType(sql.FieldLTE(FieldCustom, v))
 }
 
+// CustomEqualFold applies the EqualFold predicate on the "custom" field.
+func CustomEqualFold(v string) predicate.CustomType {
+	return predicate.CustomType(sql.FieldEqualFold(FieldCustom, v))
+}
+
 // CustomContains applies the Contains predicate on the "custom" field.
 func CustomContains(v string) predicate.CustomType {
 	return predicate.CustomType(sql.FieldContains(FieldCustom, v))
+}
+
+// CustomContainsFold applies the ContainsFold predicate on the "custom" field.
+func CustomContainsFold(v string) predicate.CustomType {
+	return predicate.CustomType(sql.FieldContainsFold(FieldCustom, v))
 }
 
 // CustomHasPrefix applies the HasPrefix predicate on the "custom" field.
@@ -136,16 +146,6 @@ func CustomIsNil() predicate.CustomType {
 // CustomNotNil applies the NotNil predicate on the "custom" field.
 func CustomNotNil() predicate.CustomType {
 	return predicate.CustomType(sql.FieldNotNull(FieldCustom))
-}
-
-// CustomEqualFold applies the EqualFold predicate on the "custom" field.
-func CustomEqualFold(v string) predicate.CustomType {
-	return predicate.CustomType(sql.FieldEqualFold(FieldCustom, v))
-}
-
-// CustomContainsFold applies the ContainsFold predicate on the "custom" field.
-func CustomContainsFold(v string) predicate.CustomType {
-	return predicate.CustomType(sql.FieldContainsFold(FieldCustom, v))
 }
 
 // Tz0EQ applies the EQ predicate on the "tz0" field.

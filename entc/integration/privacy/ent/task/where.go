@@ -113,9 +113,19 @@ func TitleLTE(v string) predicate.Task {
 	return predicate.Task(sql.FieldLTE(FieldTitle, v))
 }
 
+// TitleEqualFold applies the EqualFold predicate on the "title" field.
+func TitleEqualFold(v string) predicate.Task {
+	return predicate.Task(sql.FieldEqualFold(FieldTitle, v))
+}
+
 // TitleContains applies the Contains predicate on the "title" field.
 func TitleContains(v string) predicate.Task {
 	return predicate.Task(sql.FieldContains(FieldTitle, v))
+}
+
+// TitleContainsFold applies the ContainsFold predicate on the "title" field.
+func TitleContainsFold(v string) predicate.Task {
+	return predicate.Task(sql.FieldContainsFold(FieldTitle, v))
 }
 
 // TitleHasPrefix applies the HasPrefix predicate on the "title" field.
@@ -126,16 +136,6 @@ func TitleHasPrefix(v string) predicate.Task {
 // TitleHasSuffix applies the HasSuffix predicate on the "title" field.
 func TitleHasSuffix(v string) predicate.Task {
 	return predicate.Task(sql.FieldHasSuffix(FieldTitle, v))
-}
-
-// TitleEqualFold applies the EqualFold predicate on the "title" field.
-func TitleEqualFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldEqualFold(FieldTitle, v))
-}
-
-// TitleContainsFold applies the ContainsFold predicate on the "title" field.
-func TitleContainsFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldContainsFold(FieldTitle, v))
 }
 
 // DescriptionEQ applies the EQ predicate on the "description" field.
@@ -178,9 +178,19 @@ func DescriptionLTE(v string) predicate.Task {
 	return predicate.Task(sql.FieldLTE(FieldDescription, v))
 }
 
+// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
+func DescriptionEqualFold(v string) predicate.Task {
+	return predicate.Task(sql.FieldEqualFold(FieldDescription, v))
+}
+
 // DescriptionContains applies the Contains predicate on the "description" field.
 func DescriptionContains(v string) predicate.Task {
 	return predicate.Task(sql.FieldContains(FieldDescription, v))
+}
+
+// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
+func DescriptionContainsFold(v string) predicate.Task {
+	return predicate.Task(sql.FieldContainsFold(FieldDescription, v))
 }
 
 // DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
@@ -201,16 +211,6 @@ func DescriptionIsNil() predicate.Task {
 // DescriptionNotNil applies the NotNil predicate on the "description" field.
 func DescriptionNotNil() predicate.Task {
 	return predicate.Task(sql.FieldNotNull(FieldDescription))
-}
-
-// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
-func DescriptionEqualFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldEqualFold(FieldDescription, v))
-}
-
-// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
-func DescriptionContainsFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldContainsFold(FieldDescription, v))
 }
 
 // StatusEQ applies the EQ predicate on the "status" field.

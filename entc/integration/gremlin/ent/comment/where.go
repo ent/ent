@@ -350,10 +350,24 @@ func TableLTE(v string) predicate.Comment {
 	})
 }
 
+// TableEqualFold applies the EqualFold predicate on the "table" field.
+func TableEqualFold(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldTable, p.EqualFold(v))
+	})
+}
+
 // TableContains applies the Contains predicate on the "table" field.
 func TableContains(v string) predicate.Comment {
 	return predicate.Comment(func(t *dsl.Traversal) {
 		t.Has(Label, FieldTable, p.Containing(v))
+	})
+}
+
+// TableContainsFold applies the ContainsFold predicate on the "table" field.
+func TableContainsFold(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldTable, p.ContainsFold(v))
 	})
 }
 
@@ -455,10 +469,24 @@ func ClientLTE(v string) predicate.Comment {
 	})
 }
 
+// ClientEqualFold applies the EqualFold predicate on the "client" field.
+func ClientEqualFold(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldClient, p.EqualFold(v))
+	})
+}
+
 // ClientContains applies the Contains predicate on the "client" field.
 func ClientContains(v string) predicate.Comment {
 	return predicate.Comment(func(t *dsl.Traversal) {
 		t.Has(Label, FieldClient, p.Containing(v))
+	})
+}
+
+// ClientContainsFold applies the ContainsFold predicate on the "client" field.
+func ClientContainsFold(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldClient, p.ContainsFold(v))
 	})
 }
 

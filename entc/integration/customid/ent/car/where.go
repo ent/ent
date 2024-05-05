@@ -212,9 +212,19 @@ func ModelLTE(v string) predicate.Car {
 	return predicate.Car(sql.FieldLTE(FieldModel, v))
 }
 
+// ModelEqualFold applies the EqualFold predicate on the "model" field.
+func ModelEqualFold(v string) predicate.Car {
+	return predicate.Car(sql.FieldEqualFold(FieldModel, v))
+}
+
 // ModelContains applies the Contains predicate on the "model" field.
 func ModelContains(v string) predicate.Car {
 	return predicate.Car(sql.FieldContains(FieldModel, v))
+}
+
+// ModelContainsFold applies the ContainsFold predicate on the "model" field.
+func ModelContainsFold(v string) predicate.Car {
+	return predicate.Car(sql.FieldContainsFold(FieldModel, v))
 }
 
 // ModelHasPrefix applies the HasPrefix predicate on the "model" field.
@@ -225,16 +235,6 @@ func ModelHasPrefix(v string) predicate.Car {
 // ModelHasSuffix applies the HasSuffix predicate on the "model" field.
 func ModelHasSuffix(v string) predicate.Car {
 	return predicate.Car(sql.FieldHasSuffix(FieldModel, v))
-}
-
-// ModelEqualFold applies the EqualFold predicate on the "model" field.
-func ModelEqualFold(v string) predicate.Car {
-	return predicate.Car(sql.FieldEqualFold(FieldModel, v))
-}
-
-// ModelContainsFold applies the ContainsFold predicate on the "model" field.
-func ModelContainsFold(v string) predicate.Car {
-	return predicate.Car(sql.FieldContainsFold(FieldModel, v))
 }
 
 // HasOwner applies the HasEdge predicate on the "owner" edge.

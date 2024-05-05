@@ -174,9 +174,19 @@ func TypeLTE(v string) predicate.Group {
 	return predicate.Group(sql.FieldLTE(FieldType, v))
 }
 
+// TypeEqualFold applies the EqualFold predicate on the "type" field.
+func TypeEqualFold(v string) predicate.Group {
+	return predicate.Group(sql.FieldEqualFold(FieldType, v))
+}
+
 // TypeContains applies the Contains predicate on the "type" field.
 func TypeContains(v string) predicate.Group {
 	return predicate.Group(sql.FieldContains(FieldType, v))
+}
+
+// TypeContainsFold applies the ContainsFold predicate on the "type" field.
+func TypeContainsFold(v string) predicate.Group {
+	return predicate.Group(sql.FieldContainsFold(FieldType, v))
 }
 
 // TypeHasPrefix applies the HasPrefix predicate on the "type" field.
@@ -197,16 +207,6 @@ func TypeIsNil() predicate.Group {
 // TypeNotNil applies the NotNil predicate on the "type" field.
 func TypeNotNil() predicate.Group {
 	return predicate.Group(sql.FieldNotNull(FieldType))
-}
-
-// TypeEqualFold applies the EqualFold predicate on the "type" field.
-func TypeEqualFold(v string) predicate.Group {
-	return predicate.Group(sql.FieldEqualFold(FieldType, v))
-}
-
-// TypeContainsFold applies the ContainsFold predicate on the "type" field.
-func TypeContainsFold(v string) predicate.Group {
-	return predicate.Group(sql.FieldContainsFold(FieldType, v))
 }
 
 // MaxUsersEQ applies the EQ predicate on the "max_users" field.
@@ -299,9 +299,19 @@ func NameLTE(v string) predicate.Group {
 	return predicate.Group(sql.FieldLTE(FieldName, v))
 }
 
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.Group {
+	return predicate.Group(sql.FieldEqualFold(FieldName, v))
+}
+
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.Group {
 	return predicate.Group(sql.FieldContains(FieldName, v))
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.Group {
+	return predicate.Group(sql.FieldContainsFold(FieldName, v))
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
@@ -312,16 +322,6 @@ func NameHasPrefix(v string) predicate.Group {
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.Group {
 	return predicate.Group(sql.FieldHasSuffix(FieldName, v))
-}
-
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.Group {
-	return predicate.Group(sql.FieldEqualFold(FieldName, v))
-}
-
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.Group {
-	return predicate.Group(sql.FieldContainsFold(FieldName, v))
 }
 
 // HasFiles applies the HasEdge predicate on the "files" edge.

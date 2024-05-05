@@ -224,6 +224,18 @@ func BinaryLTE(v *url.URL) predicate.ExValueScan {
 	}, err)
 }
 
+// BinaryEqualFold applies the EqualFold predicate on the "binary" field.
+func BinaryEqualFold(v *url.URL) predicate.ExValueScan {
+	vc, err := ValueScanner.Binary.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("binary value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBinary, p.EqualFold(vcs))
+	}, err)
+}
+
 // BinaryContains applies the Contains predicate on the "binary" field.
 func BinaryContains(v *url.URL) predicate.ExValueScan {
 	vc, err := ValueScanner.Binary.Value(v)
@@ -233,6 +245,18 @@ func BinaryContains(v *url.URL) predicate.ExValueScan {
 	}
 	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
 		t.Has(Label, FieldBinary, p.Containing(vcs))
+	}, err)
+}
+
+// BinaryContainsFold applies the ContainsFold predicate on the "binary" field.
+func BinaryContainsFold(v *url.URL) predicate.ExValueScan {
+	vc, err := ValueScanner.Binary.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("binary value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBinary, p.ContainsFold(vcs))
 	}, err)
 }
 
@@ -340,6 +364,18 @@ func BinaryOptionalLTE(v *url.URL) predicate.ExValueScan {
 	}, err)
 }
 
+// BinaryOptionalEqualFold applies the EqualFold predicate on the "binary_optional" field.
+func BinaryOptionalEqualFold(v *url.URL) predicate.ExValueScan {
+	vc, err := ValueScanner.BinaryOptional.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("binary_optional value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBinaryOptional, p.EqualFold(vcs))
+	}, err)
+}
+
 // BinaryOptionalContains applies the Contains predicate on the "binary_optional" field.
 func BinaryOptionalContains(v *url.URL) predicate.ExValueScan {
 	vc, err := ValueScanner.BinaryOptional.Value(v)
@@ -349,6 +385,18 @@ func BinaryOptionalContains(v *url.URL) predicate.ExValueScan {
 	}
 	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
 		t.Has(Label, FieldBinaryOptional, p.Containing(vcs))
+	}, err)
+}
+
+// BinaryOptionalContainsFold applies the ContainsFold predicate on the "binary_optional" field.
+func BinaryOptionalContainsFold(v *url.URL) predicate.ExValueScan {
+	vc, err := ValueScanner.BinaryOptional.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("binary_optional value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBinaryOptional, p.ContainsFold(vcs))
 	}, err)
 }
 
@@ -470,6 +518,18 @@ func TextLTE(v *big.Int) predicate.ExValueScan {
 	}, err)
 }
 
+// TextEqualFold applies the EqualFold predicate on the "text" field.
+func TextEqualFold(v *big.Int) predicate.ExValueScan {
+	vc, err := ValueScanner.Text.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("text value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
+		t.Has(Label, FieldText, p.EqualFold(vcs))
+	}, err)
+}
+
 // TextContains applies the Contains predicate on the "text" field.
 func TextContains(v *big.Int) predicate.ExValueScan {
 	vc, err := ValueScanner.Text.Value(v)
@@ -479,6 +539,18 @@ func TextContains(v *big.Int) predicate.ExValueScan {
 	}
 	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
 		t.Has(Label, FieldText, p.Containing(vcs))
+	}, err)
+}
+
+// TextContainsFold applies the ContainsFold predicate on the "text" field.
+func TextContainsFold(v *big.Int) predicate.ExValueScan {
+	vc, err := ValueScanner.Text.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("text value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
+		t.Has(Label, FieldText, p.ContainsFold(vcs))
 	}, err)
 }
 
@@ -586,6 +658,18 @@ func TextOptionalLTE(v *big.Int) predicate.ExValueScan {
 	}, err)
 }
 
+// TextOptionalEqualFold applies the EqualFold predicate on the "text_optional" field.
+func TextOptionalEqualFold(v *big.Int) predicate.ExValueScan {
+	vc, err := ValueScanner.TextOptional.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("text_optional value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
+		t.Has(Label, FieldTextOptional, p.EqualFold(vcs))
+	}, err)
+}
+
 // TextOptionalContains applies the Contains predicate on the "text_optional" field.
 func TextOptionalContains(v *big.Int) predicate.ExValueScan {
 	vc, err := ValueScanner.TextOptional.Value(v)
@@ -595,6 +679,18 @@ func TextOptionalContains(v *big.Int) predicate.ExValueScan {
 	}
 	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
 		t.Has(Label, FieldTextOptional, p.Containing(vcs))
+	}, err)
+}
+
+// TextOptionalContainsFold applies the ContainsFold predicate on the "text_optional" field.
+func TextOptionalContainsFold(v *big.Int) predicate.ExValueScan {
+	vc, err := ValueScanner.TextOptional.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("text_optional value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
+		t.Has(Label, FieldTextOptional, p.ContainsFold(vcs))
 	}, err)
 }
 
@@ -716,6 +812,18 @@ func Base64LTE(v string) predicate.ExValueScan {
 	}, err)
 }
 
+// Base64EqualFold applies the EqualFold predicate on the "base64" field.
+func Base64EqualFold(v string) predicate.ExValueScan {
+	vc, err := ValueScanner.Base64.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("base64 value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBase64, p.EqualFold(vcs))
+	}, err)
+}
+
 // Base64Contains applies the Contains predicate on the "base64" field.
 func Base64Contains(v string) predicate.ExValueScan {
 	vc, err := ValueScanner.Base64.Value(v)
@@ -725,6 +833,18 @@ func Base64Contains(v string) predicate.ExValueScan {
 	}
 	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
 		t.Has(Label, FieldBase64, p.Containing(vcs))
+	}, err)
+}
+
+// Base64ContainsFold applies the ContainsFold predicate on the "base64" field.
+func Base64ContainsFold(v string) predicate.ExValueScan {
+	vc, err := ValueScanner.Base64.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("base64 value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBase64, p.ContainsFold(vcs))
 	}, err)
 }
 
@@ -832,6 +952,18 @@ func CustomLTE(v string) predicate.ExValueScan {
 	}, err)
 }
 
+// CustomEqualFold applies the EqualFold predicate on the "custom" field.
+func CustomEqualFold(v string) predicate.ExValueScan {
+	vc, err := ValueScanner.Custom.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("custom value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCustom, p.EqualFold(vcs))
+	}, err)
+}
+
 // CustomContains applies the Contains predicate on the "custom" field.
 func CustomContains(v string) predicate.ExValueScan {
 	vc, err := ValueScanner.Custom.Value(v)
@@ -841,6 +973,18 @@ func CustomContains(v string) predicate.ExValueScan {
 	}
 	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
 		t.Has(Label, FieldCustom, p.Containing(vcs))
+	}, err)
+}
+
+// CustomContainsFold applies the ContainsFold predicate on the "custom" field.
+func CustomContainsFold(v string) predicate.ExValueScan {
+	vc, err := ValueScanner.Custom.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("custom value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCustom, p.ContainsFold(vcs))
 	}, err)
 }
 
@@ -948,6 +1092,18 @@ func CustomOptionalLTE(v string) predicate.ExValueScan {
 	}, err)
 }
 
+// CustomOptionalEqualFold applies the EqualFold predicate on the "custom_optional" field.
+func CustomOptionalEqualFold(v string) predicate.ExValueScan {
+	vc, err := ValueScanner.CustomOptional.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("custom_optional value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCustomOptional, p.EqualFold(vcs))
+	}, err)
+}
+
 // CustomOptionalContains applies the Contains predicate on the "custom_optional" field.
 func CustomOptionalContains(v string) predicate.ExValueScan {
 	vc, err := ValueScanner.CustomOptional.Value(v)
@@ -957,6 +1113,18 @@ func CustomOptionalContains(v string) predicate.ExValueScan {
 	}
 	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
 		t.Has(Label, FieldCustomOptional, p.Containing(vcs))
+	}, err)
+}
+
+// CustomOptionalContainsFold applies the ContainsFold predicate on the "custom_optional" field.
+func CustomOptionalContainsFold(v string) predicate.ExValueScan {
+	vc, err := ValueScanner.CustomOptional.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("custom_optional value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCustomOptional, p.ContainsFold(vcs))
 	}, err)
 }
 

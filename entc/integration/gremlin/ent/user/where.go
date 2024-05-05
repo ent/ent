@@ -336,10 +336,24 @@ func NameLTE(v string) predicate.User {
 	})
 }
 
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.EqualFold(v))
+	})
+}
+
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldName, p.Containing(v))
+	})
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.ContainsFold(v))
 	})
 }
 
@@ -413,10 +427,24 @@ func LastLTE(v string) predicate.User {
 	})
 }
 
+// LastEqualFold applies the EqualFold predicate on the "last" field.
+func LastEqualFold(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldLast, p.EqualFold(v))
+	})
+}
+
 // LastContains applies the Contains predicate on the "last" field.
 func LastContains(v string) predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldLast, p.Containing(v))
+	})
+}
+
+// LastContainsFold applies the ContainsFold predicate on the "last" field.
+func LastContainsFold(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldLast, p.ContainsFold(v))
 	})
 }
 
@@ -490,10 +518,24 @@ func NicknameLTE(v string) predicate.User {
 	})
 }
 
+// NicknameEqualFold applies the EqualFold predicate on the "nickname" field.
+func NicknameEqualFold(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNickname, p.EqualFold(v))
+	})
+}
+
 // NicknameContains applies the Contains predicate on the "nickname" field.
 func NicknameContains(v string) predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNickname, p.Containing(v))
+	})
+}
+
+// NicknameContainsFold applies the ContainsFold predicate on the "nickname" field.
+func NicknameContainsFold(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNickname, p.ContainsFold(v))
 	})
 }
 
@@ -581,10 +623,24 @@ func AddressLTE(v string) predicate.User {
 	})
 }
 
+// AddressEqualFold applies the EqualFold predicate on the "address" field.
+func AddressEqualFold(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.EqualFold(v))
+	})
+}
+
 // AddressContains applies the Contains predicate on the "address" field.
 func AddressContains(v string) predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldAddress, p.Containing(v))
+	})
+}
+
+// AddressContainsFold applies the ContainsFold predicate on the "address" field.
+func AddressContainsFold(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.ContainsFold(v))
 	})
 }
 
@@ -672,10 +728,24 @@ func PhoneLTE(v string) predicate.User {
 	})
 }
 
+// PhoneEqualFold applies the EqualFold predicate on the "phone" field.
+func PhoneEqualFold(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldPhone, p.EqualFold(v))
+	})
+}
+
 // PhoneContains applies the Contains predicate on the "phone" field.
 func PhoneContains(v string) predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldPhone, p.Containing(v))
+	})
+}
+
+// PhoneContainsFold applies the ContainsFold predicate on the "phone" field.
+func PhoneContainsFold(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldPhone, p.ContainsFold(v))
 	})
 }
 
@@ -763,10 +833,24 @@ func PasswordLTE(v string) predicate.User {
 	})
 }
 
+// PasswordEqualFold applies the EqualFold predicate on the "password" field.
+func PasswordEqualFold(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldPassword, p.EqualFold(v))
+	})
+}
+
 // PasswordContains applies the Contains predicate on the "password" field.
 func PasswordContains(v string) predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldPassword, p.Containing(v))
+	})
+}
+
+// PasswordContainsFold applies the ContainsFold predicate on the "password" field.
+func PasswordContainsFold(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldPassword, p.ContainsFold(v))
 	})
 }
 
@@ -910,10 +994,24 @@ func SSOCertLTE(v string) predicate.User {
 	})
 }
 
+// SSOCertEqualFold applies the EqualFold predicate on the "SSOCert" field.
+func SSOCertEqualFold(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSSOCert, p.EqualFold(v))
+	})
+}
+
 // SSOCertContains applies the Contains predicate on the "SSOCert" field.
 func SSOCertContains(v string) predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldSSOCert, p.Containing(v))
+	})
+}
+
+// SSOCertContainsFold applies the ContainsFold predicate on the "SSOCert" field.
+func SSOCertContainsFold(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSSOCert, p.ContainsFold(v))
 	})
 }
 

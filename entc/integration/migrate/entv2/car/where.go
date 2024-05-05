@@ -102,9 +102,19 @@ func NameLTE(v string) predicate.Car {
 	return predicate.Car(sql.FieldLTE(FieldName, v))
 }
 
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.Car {
+	return predicate.Car(sql.FieldEqualFold(FieldName, v))
+}
+
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.Car {
 	return predicate.Car(sql.FieldContains(FieldName, v))
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.Car {
+	return predicate.Car(sql.FieldContainsFold(FieldName, v))
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
@@ -125,16 +135,6 @@ func NameIsNil() predicate.Car {
 // NameNotNil applies the NotNil predicate on the "name" field.
 func NameNotNil() predicate.Car {
 	return predicate.Car(sql.FieldNotNull(FieldName))
-}
-
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.Car {
-	return predicate.Car(sql.FieldEqualFold(FieldName, v))
-}
-
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.Car {
-	return predicate.Car(sql.FieldContainsFold(FieldName, v))
 }
 
 // HasOwner applies the HasEdge predicate on the "owner" edge.

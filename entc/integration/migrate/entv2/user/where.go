@@ -184,9 +184,19 @@ func MixedStringLTE(v string) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldMixedString, v))
 }
 
+// MixedStringEqualFold applies the EqualFold predicate on the "mixed_string" field.
+func MixedStringEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldMixedString, v))
+}
+
 // MixedStringContains applies the Contains predicate on the "mixed_string" field.
 func MixedStringContains(v string) predicate.User {
 	return predicate.User(sql.FieldContains(FieldMixedString, v))
+}
+
+// MixedStringContainsFold applies the ContainsFold predicate on the "mixed_string" field.
+func MixedStringContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldMixedString, v))
 }
 
 // MixedStringHasPrefix applies the HasPrefix predicate on the "mixed_string" field.
@@ -197,16 +207,6 @@ func MixedStringHasPrefix(v string) predicate.User {
 // MixedStringHasSuffix applies the HasSuffix predicate on the "mixed_string" field.
 func MixedStringHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldMixedString, v))
-}
-
-// MixedStringEqualFold applies the EqualFold predicate on the "mixed_string" field.
-func MixedStringEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldMixedString, v))
-}
-
-// MixedStringContainsFold applies the ContainsFold predicate on the "mixed_string" field.
-func MixedStringContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldMixedString, v))
 }
 
 // MixedEnumEQ applies the EQ predicate on the "mixed_enum" field.
@@ -319,9 +319,19 @@ func NameLTE(v string) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldName, v))
 }
 
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldName, v))
+}
+
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.User {
 	return predicate.User(sql.FieldContains(FieldName, v))
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldName, v))
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
@@ -332,16 +342,6 @@ func NameHasPrefix(v string) predicate.User {
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldName, v))
-}
-
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldName, v))
-}
-
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldName, v))
 }
 
 // DescriptionEQ applies the EQ predicate on the "description" field.
@@ -384,9 +384,19 @@ func DescriptionLTE(v string) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldDescription, v))
 }
 
+// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
+func DescriptionEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldDescription, v))
+}
+
 // DescriptionContains applies the Contains predicate on the "description" field.
 func DescriptionContains(v string) predicate.User {
 	return predicate.User(sql.FieldContains(FieldDescription, v))
+}
+
+// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
+func DescriptionContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldDescription, v))
 }
 
 // DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
@@ -407,16 +417,6 @@ func DescriptionIsNil() predicate.User {
 // DescriptionNotNil applies the NotNil predicate on the "description" field.
 func DescriptionNotNil() predicate.User {
 	return predicate.User(sql.FieldNotNull(FieldDescription))
-}
-
-// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
-func DescriptionEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldDescription, v))
-}
-
-// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
-func DescriptionContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldDescription, v))
 }
 
 // NicknameEQ applies the EQ predicate on the "nickname" field.
@@ -459,9 +459,19 @@ func NicknameLTE(v string) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldNickname, v))
 }
 
+// NicknameEqualFold applies the EqualFold predicate on the "nickname" field.
+func NicknameEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldNickname, v))
+}
+
 // NicknameContains applies the Contains predicate on the "nickname" field.
 func NicknameContains(v string) predicate.User {
 	return predicate.User(sql.FieldContains(FieldNickname, v))
+}
+
+// NicknameContainsFold applies the ContainsFold predicate on the "nickname" field.
+func NicknameContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldNickname, v))
 }
 
 // NicknameHasPrefix applies the HasPrefix predicate on the "nickname" field.
@@ -472,16 +482,6 @@ func NicknameHasPrefix(v string) predicate.User {
 // NicknameHasSuffix applies the HasSuffix predicate on the "nickname" field.
 func NicknameHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldNickname, v))
-}
-
-// NicknameEqualFold applies the EqualFold predicate on the "nickname" field.
-func NicknameEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldNickname, v))
-}
-
-// NicknameContainsFold applies the ContainsFold predicate on the "nickname" field.
-func NicknameContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldNickname, v))
 }
 
 // PhoneEQ applies the EQ predicate on the "phone" field.
@@ -524,9 +524,19 @@ func PhoneLTE(v string) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldPhone, v))
 }
 
+// PhoneEqualFold applies the EqualFold predicate on the "phone" field.
+func PhoneEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldPhone, v))
+}
+
 // PhoneContains applies the Contains predicate on the "phone" field.
 func PhoneContains(v string) predicate.User {
 	return predicate.User(sql.FieldContains(FieldPhone, v))
+}
+
+// PhoneContainsFold applies the ContainsFold predicate on the "phone" field.
+func PhoneContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldPhone, v))
 }
 
 // PhoneHasPrefix applies the HasPrefix predicate on the "phone" field.
@@ -537,16 +547,6 @@ func PhoneHasPrefix(v string) predicate.User {
 // PhoneHasSuffix applies the HasSuffix predicate on the "phone" field.
 func PhoneHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldPhone, v))
-}
-
-// PhoneEqualFold applies the EqualFold predicate on the "phone" field.
-func PhoneEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldPhone, v))
-}
-
-// PhoneContainsFold applies the ContainsFold predicate on the "phone" field.
-func PhoneContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldPhone, v))
 }
 
 // BufferEQ applies the EQ predicate on the "buffer" field.
@@ -639,9 +639,19 @@ func TitleLTE(v string) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldTitle, v))
 }
 
+// TitleEqualFold applies the EqualFold predicate on the "title" field.
+func TitleEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldTitle, v))
+}
+
 // TitleContains applies the Contains predicate on the "title" field.
 func TitleContains(v string) predicate.User {
 	return predicate.User(sql.FieldContains(FieldTitle, v))
+}
+
+// TitleContainsFold applies the ContainsFold predicate on the "title" field.
+func TitleContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldTitle, v))
 }
 
 // TitleHasPrefix applies the HasPrefix predicate on the "title" field.
@@ -652,16 +662,6 @@ func TitleHasPrefix(v string) predicate.User {
 // TitleHasSuffix applies the HasSuffix predicate on the "title" field.
 func TitleHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldTitle, v))
-}
-
-// TitleEqualFold applies the EqualFold predicate on the "title" field.
-func TitleEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldTitle, v))
-}
-
-// TitleContainsFold applies the ContainsFold predicate on the "title" field.
-func TitleContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldTitle, v))
 }
 
 // NewNameEQ applies the EQ predicate on the "new_name" field.
@@ -704,9 +704,19 @@ func NewNameLTE(v string) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldNewName, v))
 }
 
+// NewNameEqualFold applies the EqualFold predicate on the "new_name" field.
+func NewNameEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldNewName, v))
+}
+
 // NewNameContains applies the Contains predicate on the "new_name" field.
 func NewNameContains(v string) predicate.User {
 	return predicate.User(sql.FieldContains(FieldNewName, v))
+}
+
+// NewNameContainsFold applies the ContainsFold predicate on the "new_name" field.
+func NewNameContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldNewName, v))
 }
 
 // NewNameHasPrefix applies the HasPrefix predicate on the "new_name" field.
@@ -727,16 +737,6 @@ func NewNameIsNil() predicate.User {
 // NewNameNotNil applies the NotNil predicate on the "new_name" field.
 func NewNameNotNil() predicate.User {
 	return predicate.User(sql.FieldNotNull(FieldNewName))
-}
-
-// NewNameEqualFold applies the EqualFold predicate on the "new_name" field.
-func NewNameEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldNewName, v))
-}
-
-// NewNameContainsFold applies the ContainsFold predicate on the "new_name" field.
-func NewNameContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldNewName, v))
 }
 
 // NewTokenEQ applies the EQ predicate on the "new_token" field.
@@ -779,9 +779,19 @@ func NewTokenLTE(v string) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldNewToken, v))
 }
 
+// NewTokenEqualFold applies the EqualFold predicate on the "new_token" field.
+func NewTokenEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldNewToken, v))
+}
+
 // NewTokenContains applies the Contains predicate on the "new_token" field.
 func NewTokenContains(v string) predicate.User {
 	return predicate.User(sql.FieldContains(FieldNewToken, v))
+}
+
+// NewTokenContainsFold applies the ContainsFold predicate on the "new_token" field.
+func NewTokenContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldNewToken, v))
 }
 
 // NewTokenHasPrefix applies the HasPrefix predicate on the "new_token" field.
@@ -792,16 +802,6 @@ func NewTokenHasPrefix(v string) predicate.User {
 // NewTokenHasSuffix applies the HasSuffix predicate on the "new_token" field.
 func NewTokenHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldNewToken, v))
-}
-
-// NewTokenEqualFold applies the EqualFold predicate on the "new_token" field.
-func NewTokenEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldNewToken, v))
-}
-
-// NewTokenContainsFold applies the ContainsFold predicate on the "new_token" field.
-func NewTokenContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldNewToken, v))
 }
 
 // BlobEQ applies the EQ predicate on the "blob" field.
@@ -954,9 +954,19 @@ func WorkplaceLTE(v string) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldWorkplace, v))
 }
 
+// WorkplaceEqualFold applies the EqualFold predicate on the "workplace" field.
+func WorkplaceEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldWorkplace, v))
+}
+
 // WorkplaceContains applies the Contains predicate on the "workplace" field.
 func WorkplaceContains(v string) predicate.User {
 	return predicate.User(sql.FieldContains(FieldWorkplace, v))
+}
+
+// WorkplaceContainsFold applies the ContainsFold predicate on the "workplace" field.
+func WorkplaceContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldWorkplace, v))
 }
 
 // WorkplaceHasPrefix applies the HasPrefix predicate on the "workplace" field.
@@ -977,16 +987,6 @@ func WorkplaceIsNil() predicate.User {
 // WorkplaceNotNil applies the NotNil predicate on the "workplace" field.
 func WorkplaceNotNil() predicate.User {
 	return predicate.User(sql.FieldNotNull(FieldWorkplace))
-}
-
-// WorkplaceEqualFold applies the EqualFold predicate on the "workplace" field.
-func WorkplaceEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldWorkplace, v))
-}
-
-// WorkplaceContainsFold applies the ContainsFold predicate on the "workplace" field.
-func WorkplaceContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldWorkplace, v))
 }
 
 // RolesIsNil applies the IsNil predicate on the "roles" field.
@@ -1039,9 +1039,19 @@ func DefaultExprLTE(v string) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldDefaultExpr, v))
 }
 
+// DefaultExprEqualFold applies the EqualFold predicate on the "default_expr" field.
+func DefaultExprEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldDefaultExpr, v))
+}
+
 // DefaultExprContains applies the Contains predicate on the "default_expr" field.
 func DefaultExprContains(v string) predicate.User {
 	return predicate.User(sql.FieldContains(FieldDefaultExpr, v))
+}
+
+// DefaultExprContainsFold applies the ContainsFold predicate on the "default_expr" field.
+func DefaultExprContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldDefaultExpr, v))
 }
 
 // DefaultExprHasPrefix applies the HasPrefix predicate on the "default_expr" field.
@@ -1062,16 +1072,6 @@ func DefaultExprIsNil() predicate.User {
 // DefaultExprNotNil applies the NotNil predicate on the "default_expr" field.
 func DefaultExprNotNil() predicate.User {
 	return predicate.User(sql.FieldNotNull(FieldDefaultExpr))
-}
-
-// DefaultExprEqualFold applies the EqualFold predicate on the "default_expr" field.
-func DefaultExprEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldDefaultExpr, v))
-}
-
-// DefaultExprContainsFold applies the ContainsFold predicate on the "default_expr" field.
-func DefaultExprContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldDefaultExpr, v))
 }
 
 // DefaultExprsEQ applies the EQ predicate on the "default_exprs" field.
@@ -1114,9 +1114,19 @@ func DefaultExprsLTE(v string) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldDefaultExprs, v))
 }
 
+// DefaultExprsEqualFold applies the EqualFold predicate on the "default_exprs" field.
+func DefaultExprsEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldDefaultExprs, v))
+}
+
 // DefaultExprsContains applies the Contains predicate on the "default_exprs" field.
 func DefaultExprsContains(v string) predicate.User {
 	return predicate.User(sql.FieldContains(FieldDefaultExprs, v))
+}
+
+// DefaultExprsContainsFold applies the ContainsFold predicate on the "default_exprs" field.
+func DefaultExprsContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldDefaultExprs, v))
 }
 
 // DefaultExprsHasPrefix applies the HasPrefix predicate on the "default_exprs" field.
@@ -1137,16 +1147,6 @@ func DefaultExprsIsNil() predicate.User {
 // DefaultExprsNotNil applies the NotNil predicate on the "default_exprs" field.
 func DefaultExprsNotNil() predicate.User {
 	return predicate.User(sql.FieldNotNull(FieldDefaultExprs))
-}
-
-// DefaultExprsEqualFold applies the EqualFold predicate on the "default_exprs" field.
-func DefaultExprsEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldDefaultExprs, v))
-}
-
-// DefaultExprsContainsFold applies the ContainsFold predicate on the "default_exprs" field.
-func DefaultExprsContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldDefaultExprs, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -1229,9 +1229,19 @@ func DropOptionalLTE(v string) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldDropOptional, v))
 }
 
+// DropOptionalEqualFold applies the EqualFold predicate on the "drop_optional" field.
+func DropOptionalEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldDropOptional, v))
+}
+
 // DropOptionalContains applies the Contains predicate on the "drop_optional" field.
 func DropOptionalContains(v string) predicate.User {
 	return predicate.User(sql.FieldContains(FieldDropOptional, v))
+}
+
+// DropOptionalContainsFold applies the ContainsFold predicate on the "drop_optional" field.
+func DropOptionalContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldDropOptional, v))
 }
 
 // DropOptionalHasPrefix applies the HasPrefix predicate on the "drop_optional" field.
@@ -1242,16 +1252,6 @@ func DropOptionalHasPrefix(v string) predicate.User {
 // DropOptionalHasSuffix applies the HasSuffix predicate on the "drop_optional" field.
 func DropOptionalHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldDropOptional, v))
-}
-
-// DropOptionalEqualFold applies the EqualFold predicate on the "drop_optional" field.
-func DropOptionalEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldDropOptional, v))
-}
-
-// DropOptionalContainsFold applies the ContainsFold predicate on the "drop_optional" field.
-func DropOptionalContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldDropOptional, v))
 }
 
 // HasCar applies the HasEdge predicate on the "car" edge.

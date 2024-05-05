@@ -326,10 +326,24 @@ func NameLTE(v string) predicate.Task {
 	})
 }
 
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.EqualFold(v))
+	})
+}
+
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.Task {
 	return predicate.Task(func(t *dsl.Traversal) {
 		t.Has(Label, FieldName, p.Containing(v))
+	})
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.ContainsFold(v))
 	})
 }
 
@@ -417,10 +431,24 @@ func OwnerLTE(v string) predicate.Task {
 	})
 }
 
+// OwnerEqualFold applies the EqualFold predicate on the "owner" field.
+func OwnerEqualFold(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOwner, p.EqualFold(v))
+	})
+}
+
 // OwnerContains applies the Contains predicate on the "owner" field.
 func OwnerContains(v string) predicate.Task {
 	return predicate.Task(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOwner, p.Containing(v))
+	})
+}
+
+// OwnerContainsFold applies the ContainsFold predicate on the "owner" field.
+func OwnerContainsFold(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOwner, p.ContainsFold(v))
 	})
 }
 
@@ -648,10 +676,24 @@ func OpLTE(v string) predicate.Task {
 	})
 }
 
+// OpEqualFold applies the EqualFold predicate on the "op" field.
+func OpEqualFold(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOp, p.EqualFold(v))
+	})
+}
+
 // OpContains applies the Contains predicate on the "op" field.
 func OpContains(v string) predicate.Task {
 	return predicate.Task(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOp, p.Containing(v))
+	})
+}
+
+// OpContainsFold applies the ContainsFold predicate on the "op" field.
+func OpContainsFold(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOp, p.ContainsFold(v))
 	})
 }
 

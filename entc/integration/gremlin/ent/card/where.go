@@ -345,10 +345,24 @@ func NumberLTE(v string) predicate.Card {
 	})
 }
 
+// NumberEqualFold applies the EqualFold predicate on the "number" field.
+func NumberEqualFold(v string) predicate.Card {
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNumber, p.EqualFold(v))
+	})
+}
+
 // NumberContains applies the Contains predicate on the "number" field.
 func NumberContains(v string) predicate.Card {
 	return predicate.Card(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNumber, p.Containing(v))
+	})
+}
+
+// NumberContainsFold applies the ContainsFold predicate on the "number" field.
+func NumberContainsFold(v string) predicate.Card {
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNumber, p.ContainsFold(v))
 	})
 }
 
@@ -422,10 +436,24 @@ func NameLTE(v string) predicate.Card {
 	})
 }
 
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.Card {
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.EqualFold(v))
+	})
+}
+
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.Card {
 	return predicate.Card(func(t *dsl.Traversal) {
 		t.Has(Label, FieldName, p.Containing(v))
+	})
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.Card {
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.ContainsFold(v))
 	})
 }
 

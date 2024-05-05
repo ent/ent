@@ -162,9 +162,19 @@ func NameLTE(v string) predicate.File {
 	return predicate.File(sql.FieldLTE(FieldName, v))
 }
 
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.File {
+	return predicate.File(sql.FieldEqualFold(FieldName, v))
+}
+
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.File {
 	return predicate.File(sql.FieldContains(FieldName, v))
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.File {
+	return predicate.File(sql.FieldContainsFold(FieldName, v))
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
@@ -175,16 +185,6 @@ func NameHasPrefix(v string) predicate.File {
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.File {
 	return predicate.File(sql.FieldHasSuffix(FieldName, v))
-}
-
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.File {
-	return predicate.File(sql.FieldEqualFold(FieldName, v))
-}
-
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.File {
-	return predicate.File(sql.FieldContainsFold(FieldName, v))
 }
 
 // UserEQ applies the EQ predicate on the "user" field.
@@ -227,9 +227,19 @@ func UserLTE(v string) predicate.File {
 	return predicate.File(sql.FieldLTE(FieldUser, v))
 }
 
+// UserEqualFold applies the EqualFold predicate on the "user" field.
+func UserEqualFold(v string) predicate.File {
+	return predicate.File(sql.FieldEqualFold(FieldUser, v))
+}
+
 // UserContains applies the Contains predicate on the "user" field.
 func UserContains(v string) predicate.File {
 	return predicate.File(sql.FieldContains(FieldUser, v))
+}
+
+// UserContainsFold applies the ContainsFold predicate on the "user" field.
+func UserContainsFold(v string) predicate.File {
+	return predicate.File(sql.FieldContainsFold(FieldUser, v))
 }
 
 // UserHasPrefix applies the HasPrefix predicate on the "user" field.
@@ -250,16 +260,6 @@ func UserIsNil() predicate.File {
 // UserNotNil applies the NotNil predicate on the "user" field.
 func UserNotNil() predicate.File {
 	return predicate.File(sql.FieldNotNull(FieldUser))
-}
-
-// UserEqualFold applies the EqualFold predicate on the "user" field.
-func UserEqualFold(v string) predicate.File {
-	return predicate.File(sql.FieldEqualFold(FieldUser, v))
-}
-
-// UserContainsFold applies the ContainsFold predicate on the "user" field.
-func UserContainsFold(v string) predicate.File {
-	return predicate.File(sql.FieldContainsFold(FieldUser, v))
 }
 
 // GroupEQ applies the EQ predicate on the "group" field.
@@ -302,9 +302,19 @@ func GroupLTE(v string) predicate.File {
 	return predicate.File(sql.FieldLTE(FieldGroup, v))
 }
 
+// GroupEqualFold applies the EqualFold predicate on the "group" field.
+func GroupEqualFold(v string) predicate.File {
+	return predicate.File(sql.FieldEqualFold(FieldGroup, v))
+}
+
 // GroupContains applies the Contains predicate on the "group" field.
 func GroupContains(v string) predicate.File {
 	return predicate.File(sql.FieldContains(FieldGroup, v))
+}
+
+// GroupContainsFold applies the ContainsFold predicate on the "group" field.
+func GroupContainsFold(v string) predicate.File {
+	return predicate.File(sql.FieldContainsFold(FieldGroup, v))
 }
 
 // GroupHasPrefix applies the HasPrefix predicate on the "group" field.
@@ -325,16 +335,6 @@ func GroupIsNil() predicate.File {
 // GroupNotNil applies the NotNil predicate on the "group" field.
 func GroupNotNil() predicate.File {
 	return predicate.File(sql.FieldNotNull(FieldGroup))
-}
-
-// GroupEqualFold applies the EqualFold predicate on the "group" field.
-func GroupEqualFold(v string) predicate.File {
-	return predicate.File(sql.FieldEqualFold(FieldGroup, v))
-}
-
-// GroupContainsFold applies the ContainsFold predicate on the "group" field.
-func GroupContainsFold(v string) predicate.File {
-	return predicate.File(sql.FieldContainsFold(FieldGroup, v))
 }
 
 // OpEQ applies the EQ predicate on the "op" field.

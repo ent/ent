@@ -111,9 +111,19 @@ func SourceLTE(v string) predicate.Media {
 	return predicate.Media(sql.FieldLTE(FieldSource, v))
 }
 
+// SourceEqualFold applies the EqualFold predicate on the "source" field.
+func SourceEqualFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldEqualFold(FieldSource, v))
+}
+
 // SourceContains applies the Contains predicate on the "source" field.
 func SourceContains(v string) predicate.Media {
 	return predicate.Media(sql.FieldContains(FieldSource, v))
+}
+
+// SourceContainsFold applies the ContainsFold predicate on the "source" field.
+func SourceContainsFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldContainsFold(FieldSource, v))
 }
 
 // SourceHasPrefix applies the HasPrefix predicate on the "source" field.
@@ -134,16 +144,6 @@ func SourceIsNil() predicate.Media {
 // SourceNotNil applies the NotNil predicate on the "source" field.
 func SourceNotNil() predicate.Media {
 	return predicate.Media(sql.FieldNotNull(FieldSource))
-}
-
-// SourceEqualFold applies the EqualFold predicate on the "source" field.
-func SourceEqualFold(v string) predicate.Media {
-	return predicate.Media(sql.FieldEqualFold(FieldSource, v))
-}
-
-// SourceContainsFold applies the ContainsFold predicate on the "source" field.
-func SourceContainsFold(v string) predicate.Media {
-	return predicate.Media(sql.FieldContainsFold(FieldSource, v))
 }
 
 // SourceURIEQ applies the EQ predicate on the "source_uri" field.
@@ -186,9 +186,19 @@ func SourceURILTE(v string) predicate.Media {
 	return predicate.Media(sql.FieldLTE(FieldSourceURI, v))
 }
 
+// SourceURIEqualFold applies the EqualFold predicate on the "source_uri" field.
+func SourceURIEqualFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldEqualFold(FieldSourceURI, v))
+}
+
 // SourceURIContains applies the Contains predicate on the "source_uri" field.
 func SourceURIContains(v string) predicate.Media {
 	return predicate.Media(sql.FieldContains(FieldSourceURI, v))
+}
+
+// SourceURIContainsFold applies the ContainsFold predicate on the "source_uri" field.
+func SourceURIContainsFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldContainsFold(FieldSourceURI, v))
 }
 
 // SourceURIHasPrefix applies the HasPrefix predicate on the "source_uri" field.
@@ -209,16 +219,6 @@ func SourceURIIsNil() predicate.Media {
 // SourceURINotNil applies the NotNil predicate on the "source_uri" field.
 func SourceURINotNil() predicate.Media {
 	return predicate.Media(sql.FieldNotNull(FieldSourceURI))
-}
-
-// SourceURIEqualFold applies the EqualFold predicate on the "source_uri" field.
-func SourceURIEqualFold(v string) predicate.Media {
-	return predicate.Media(sql.FieldEqualFold(FieldSourceURI, v))
-}
-
-// SourceURIContainsFold applies the ContainsFold predicate on the "source_uri" field.
-func SourceURIContainsFold(v string) predicate.Media {
-	return predicate.Media(sql.FieldContainsFold(FieldSourceURI, v))
 }
 
 // TextEQ applies the EQ predicate on the "text" field.
@@ -261,9 +261,19 @@ func TextLTE(v string) predicate.Media {
 	return predicate.Media(sql.FieldLTE(FieldText, v))
 }
 
+// TextEqualFold applies the EqualFold predicate on the "text" field.
+func TextEqualFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldEqualFold(FieldText, v))
+}
+
 // TextContains applies the Contains predicate on the "text" field.
 func TextContains(v string) predicate.Media {
 	return predicate.Media(sql.FieldContains(FieldText, v))
+}
+
+// TextContainsFold applies the ContainsFold predicate on the "text" field.
+func TextContainsFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldContainsFold(FieldText, v))
 }
 
 // TextHasPrefix applies the HasPrefix predicate on the "text" field.
@@ -284,16 +294,6 @@ func TextIsNil() predicate.Media {
 // TextNotNil applies the NotNil predicate on the "text" field.
 func TextNotNil() predicate.Media {
 	return predicate.Media(sql.FieldNotNull(FieldText))
-}
-
-// TextEqualFold applies the EqualFold predicate on the "text" field.
-func TextEqualFold(v string) predicate.Media {
-	return predicate.Media(sql.FieldEqualFold(FieldText, v))
-}
-
-// TextContainsFold applies the ContainsFold predicate on the "text" field.
-func TextContainsFold(v string) predicate.Media {
-	return predicate.Media(sql.FieldContainsFold(FieldText, v))
 }
 
 // And groups predicates with the AND operator between them.

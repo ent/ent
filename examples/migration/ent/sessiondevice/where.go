@@ -125,9 +125,19 @@ func IPAddressLTE(v string) predicate.SessionDevice {
 	return predicate.SessionDevice(sql.FieldLTE(FieldIPAddress, v))
 }
 
+// IPAddressEqualFold applies the EqualFold predicate on the "ip_address" field.
+func IPAddressEqualFold(v string) predicate.SessionDevice {
+	return predicate.SessionDevice(sql.FieldEqualFold(FieldIPAddress, v))
+}
+
 // IPAddressContains applies the Contains predicate on the "ip_address" field.
 func IPAddressContains(v string) predicate.SessionDevice {
 	return predicate.SessionDevice(sql.FieldContains(FieldIPAddress, v))
+}
+
+// IPAddressContainsFold applies the ContainsFold predicate on the "ip_address" field.
+func IPAddressContainsFold(v string) predicate.SessionDevice {
+	return predicate.SessionDevice(sql.FieldContainsFold(FieldIPAddress, v))
 }
 
 // IPAddressHasPrefix applies the HasPrefix predicate on the "ip_address" field.
@@ -138,16 +148,6 @@ func IPAddressHasPrefix(v string) predicate.SessionDevice {
 // IPAddressHasSuffix applies the HasSuffix predicate on the "ip_address" field.
 func IPAddressHasSuffix(v string) predicate.SessionDevice {
 	return predicate.SessionDevice(sql.FieldHasSuffix(FieldIPAddress, v))
-}
-
-// IPAddressEqualFold applies the EqualFold predicate on the "ip_address" field.
-func IPAddressEqualFold(v string) predicate.SessionDevice {
-	return predicate.SessionDevice(sql.FieldEqualFold(FieldIPAddress, v))
-}
-
-// IPAddressContainsFold applies the ContainsFold predicate on the "ip_address" field.
-func IPAddressContainsFold(v string) predicate.SessionDevice {
-	return predicate.SessionDevice(sql.FieldContainsFold(FieldIPAddress, v))
 }
 
 // UserAgentEQ applies the EQ predicate on the "user_agent" field.
@@ -190,9 +190,19 @@ func UserAgentLTE(v string) predicate.SessionDevice {
 	return predicate.SessionDevice(sql.FieldLTE(FieldUserAgent, v))
 }
 
+// UserAgentEqualFold applies the EqualFold predicate on the "user_agent" field.
+func UserAgentEqualFold(v string) predicate.SessionDevice {
+	return predicate.SessionDevice(sql.FieldEqualFold(FieldUserAgent, v))
+}
+
 // UserAgentContains applies the Contains predicate on the "user_agent" field.
 func UserAgentContains(v string) predicate.SessionDevice {
 	return predicate.SessionDevice(sql.FieldContains(FieldUserAgent, v))
+}
+
+// UserAgentContainsFold applies the ContainsFold predicate on the "user_agent" field.
+func UserAgentContainsFold(v string) predicate.SessionDevice {
+	return predicate.SessionDevice(sql.FieldContainsFold(FieldUserAgent, v))
 }
 
 // UserAgentHasPrefix applies the HasPrefix predicate on the "user_agent" field.
@@ -203,16 +213,6 @@ func UserAgentHasPrefix(v string) predicate.SessionDevice {
 // UserAgentHasSuffix applies the HasSuffix predicate on the "user_agent" field.
 func UserAgentHasSuffix(v string) predicate.SessionDevice {
 	return predicate.SessionDevice(sql.FieldHasSuffix(FieldUserAgent, v))
-}
-
-// UserAgentEqualFold applies the EqualFold predicate on the "user_agent" field.
-func UserAgentEqualFold(v string) predicate.SessionDevice {
-	return predicate.SessionDevice(sql.FieldEqualFold(FieldUserAgent, v))
-}
-
-// UserAgentContainsFold applies the ContainsFold predicate on the "user_agent" field.
-func UserAgentContainsFold(v string) predicate.SessionDevice {
-	return predicate.SessionDevice(sql.FieldContainsFold(FieldUserAgent, v))
 }
 
 // LocationEQ applies the EQ predicate on the "location" field.
@@ -255,9 +255,19 @@ func LocationLTE(v string) predicate.SessionDevice {
 	return predicate.SessionDevice(sql.FieldLTE(FieldLocation, v))
 }
 
+// LocationEqualFold applies the EqualFold predicate on the "location" field.
+func LocationEqualFold(v string) predicate.SessionDevice {
+	return predicate.SessionDevice(sql.FieldEqualFold(FieldLocation, v))
+}
+
 // LocationContains applies the Contains predicate on the "location" field.
 func LocationContains(v string) predicate.SessionDevice {
 	return predicate.SessionDevice(sql.FieldContains(FieldLocation, v))
+}
+
+// LocationContainsFold applies the ContainsFold predicate on the "location" field.
+func LocationContainsFold(v string) predicate.SessionDevice {
+	return predicate.SessionDevice(sql.FieldContainsFold(FieldLocation, v))
 }
 
 // LocationHasPrefix applies the HasPrefix predicate on the "location" field.
@@ -268,16 +278,6 @@ func LocationHasPrefix(v string) predicate.SessionDevice {
 // LocationHasSuffix applies the HasSuffix predicate on the "location" field.
 func LocationHasSuffix(v string) predicate.SessionDevice {
 	return predicate.SessionDevice(sql.FieldHasSuffix(FieldLocation, v))
-}
-
-// LocationEqualFold applies the EqualFold predicate on the "location" field.
-func LocationEqualFold(v string) predicate.SessionDevice {
-	return predicate.SessionDevice(sql.FieldEqualFold(FieldLocation, v))
-}
-
-// LocationContainsFold applies the ContainsFold predicate on the "location" field.
-func LocationContainsFold(v string) predicate.SessionDevice {
-	return predicate.SessionDevice(sql.FieldContainsFold(FieldLocation, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

@@ -225,9 +225,19 @@ func TokenLTE(v string) predicate.Session {
 	return predicate.Session(sql.FieldLTE(FieldToken, v))
 }
 
+// TokenEqualFold applies the EqualFold predicate on the "token" field.
+func TokenEqualFold(v string) predicate.Session {
+	return predicate.Session(sql.FieldEqualFold(FieldToken, v))
+}
+
 // TokenContains applies the Contains predicate on the "token" field.
 func TokenContains(v string) predicate.Session {
 	return predicate.Session(sql.FieldContains(FieldToken, v))
+}
+
+// TokenContainsFold applies the ContainsFold predicate on the "token" field.
+func TokenContainsFold(v string) predicate.Session {
+	return predicate.Session(sql.FieldContainsFold(FieldToken, v))
 }
 
 // TokenHasPrefix applies the HasPrefix predicate on the "token" field.
@@ -248,16 +258,6 @@ func TokenIsNil() predicate.Session {
 // TokenNotNil applies the NotNil predicate on the "token" field.
 func TokenNotNil() predicate.Session {
 	return predicate.Session(sql.FieldNotNull(FieldToken))
-}
-
-// TokenEqualFold applies the EqualFold predicate on the "token" field.
-func TokenEqualFold(v string) predicate.Session {
-	return predicate.Session(sql.FieldEqualFold(FieldToken, v))
-}
-
-// TokenContainsFold applies the ContainsFold predicate on the "token" field.
-func TokenContainsFold(v string) predicate.Session {
-	return predicate.Session(sql.FieldContainsFold(FieldToken, v))
 }
 
 // MethodIsNil applies the IsNil predicate on the "method" field.
