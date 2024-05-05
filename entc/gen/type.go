@@ -13,6 +13,7 @@ import (
 	"go/types"
 	"path"
 	"reflect"
+	"slices"
 	"sort"
 	"strings"
 	"unicode"
@@ -1854,7 +1855,11 @@ func (f Field) enums(lf *load.Field) ([]Enum, error) {
 func (f *Field) Ops() []Op {
 	ops := fieldOps(f)
 	if (f.Name != "id" || !f.HasGoType()) && f.cfg != nil && f.cfg.Storage.Ops != nil {
-		ops = append(ops, f.cfg.Storage.Ops(f)...)
+		for _, op := range f.cfg.Storage.Ops(f) {
+			if !slices.Contains(ops, op) {
+				ops = append(ops, op)
+			}
+		}
 	}
 	return ops
 }

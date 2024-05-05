@@ -67,6 +67,6 @@ var (
 	boolOps     = []Op{EQ, NEQ}
 	enumOps     = append(boolOps, In, NotIn)
 	numericOps  = append(enumOps, GT, GTE, LT, LTE)
-	stringOps   = append(numericOps, Contains, HasPrefix, HasSuffix)
+	stringOps   = append(numericOps, EqualFold, Contains, ContainsFold, HasPrefix, HasSuffix)
 	nillableOps = []Op{IsNil, NotNil}
 )
