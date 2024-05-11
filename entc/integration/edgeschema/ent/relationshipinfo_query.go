@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
@@ -64,7 +65,7 @@ func (riq *RelationshipInfoQuery) Order(o ...relationshipinfo.OrderOption) *Rela
 // First returns the first RelationshipInfo entity from the query.
 // Returns a *NotFoundError when no RelationshipInfo was found.
 func (riq *RelationshipInfoQuery) First(ctx context.Context) (*RelationshipInfo, error) {
-	nodes, err := riq.Limit(1).All(setContextOp(ctx, riq.ctx, "First"))
+	nodes, err := riq.Limit(1).All(setContextOp(ctx, riq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +88,7 @@ func (riq *RelationshipInfoQuery) FirstX(ctx context.Context) *RelationshipInfo 
 // Returns a *NotFoundError when no RelationshipInfo ID was found.
 func (riq *RelationshipInfoQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = riq.Limit(1).IDs(setContextOp(ctx, riq.ctx, "FirstID")); err != nil {
+	if ids, err = riq.Limit(1).IDs(setContextOp(ctx, riq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -110,7 +111,7 @@ func (riq *RelationshipInfoQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one RelationshipInfo entity is found.
 // Returns a *NotFoundError when no RelationshipInfo entities are found.
 func (riq *RelationshipInfoQuery) Only(ctx context.Context) (*RelationshipInfo, error) {
-	nodes, err := riq.Limit(2).All(setContextOp(ctx, riq.ctx, "Only"))
+	nodes, err := riq.Limit(2).All(setContextOp(ctx, riq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +139,7 @@ func (riq *RelationshipInfoQuery) OnlyX(ctx context.Context) *RelationshipInfo {
 // Returns a *NotFoundError when no entities are found.
 func (riq *RelationshipInfoQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = riq.Limit(2).IDs(setContextOp(ctx, riq.ctx, "OnlyID")); err != nil {
+	if ids, err = riq.Limit(2).IDs(setContextOp(ctx, riq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -163,7 +164,7 @@ func (riq *RelationshipInfoQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of RelationshipInfos.
 func (riq *RelationshipInfoQuery) All(ctx context.Context) ([]*RelationshipInfo, error) {
-	ctx = setContextOp(ctx, riq.ctx, "All")
+	ctx = setContextOp(ctx, riq.ctx, ent.OpQueryAll)
 	if err := riq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -185,7 +186,7 @@ func (riq *RelationshipInfoQuery) IDs(ctx context.Context) (ids []int, err error
 	if riq.ctx.Unique == nil && riq.path != nil {
 		riq.Unique(true)
 	}
-	ctx = setContextOp(ctx, riq.ctx, "IDs")
+	ctx = setContextOp(ctx, riq.ctx, ent.OpQueryIDs)
 	if err = riq.Select(relationshipinfo.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -203,7 +204,7 @@ func (riq *RelationshipInfoQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (riq *RelationshipInfoQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, riq.ctx, "Count")
+	ctx = setContextOp(ctx, riq.ctx, ent.OpQueryCount)
 	if err := riq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -221,7 +222,7 @@ func (riq *RelationshipInfoQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (riq *RelationshipInfoQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, riq.ctx, "Exist")
+	ctx = setContextOp(ctx, riq.ctx, ent.OpQueryExist)
 	switch _, err := riq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -453,7 +454,7 @@ func (rigb *RelationshipInfoGroupBy) Aggregate(fns ...AggregateFunc) *Relationsh
 
 // Scan applies the selector query and scans the result into the given value.
 func (rigb *RelationshipInfoGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, rigb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, rigb.build.ctx, ent.OpQueryGroupBy)
 	if err := rigb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -501,7 +502,7 @@ func (ris *RelationshipInfoSelect) Aggregate(fns ...AggregateFunc) *Relationship
 
 // Scan applies the selector query and scans the result into the given value.
 func (ris *RelationshipInfoSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ris.ctx, "Select")
+	ctx = setContextOp(ctx, ris.ctx, ent.OpQuerySelect)
 	if err := ris.prepareQuery(ctx); err != nil {
 		return err
 	}

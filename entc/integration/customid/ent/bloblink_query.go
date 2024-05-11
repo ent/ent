@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/blob"
@@ -111,7 +112,7 @@ func (blq *BlobLinkQuery) QueryLink() *BlobQuery {
 // First returns the first BlobLink entity from the query.
 // Returns a *NotFoundError when no BlobLink was found.
 func (blq *BlobLinkQuery) First(ctx context.Context) (*BlobLink, error) {
-	nodes, err := blq.Limit(1).All(setContextOp(ctx, blq.ctx, "First"))
+	nodes, err := blq.Limit(1).All(setContextOp(ctx, blq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +135,7 @@ func (blq *BlobLinkQuery) FirstX(ctx context.Context) *BlobLink {
 // Returns a *NotSingularError when more than one BlobLink entity is found.
 // Returns a *NotFoundError when no BlobLink entities are found.
 func (blq *BlobLinkQuery) Only(ctx context.Context) (*BlobLink, error) {
-	nodes, err := blq.Limit(2).All(setContextOp(ctx, blq.ctx, "Only"))
+	nodes, err := blq.Limit(2).All(setContextOp(ctx, blq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +160,7 @@ func (blq *BlobLinkQuery) OnlyX(ctx context.Context) *BlobLink {
 
 // All executes the query and returns a list of BlobLinks.
 func (blq *BlobLinkQuery) All(ctx context.Context) ([]*BlobLink, error) {
-	ctx = setContextOp(ctx, blq.ctx, "All")
+	ctx = setContextOp(ctx, blq.ctx, ent.OpQueryAll)
 	if err := blq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -178,7 +179,7 @@ func (blq *BlobLinkQuery) AllX(ctx context.Context) []*BlobLink {
 
 // Count returns the count of the given query.
 func (blq *BlobLinkQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, blq.ctx, "Count")
+	ctx = setContextOp(ctx, blq.ctx, ent.OpQueryCount)
 	if err := blq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -196,7 +197,7 @@ func (blq *BlobLinkQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (blq *BlobLinkQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, blq.ctx, "Exist")
+	ctx = setContextOp(ctx, blq.ctx, ent.OpQueryExist)
 	switch _, err := blq.First(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -529,7 +530,7 @@ func (blgb *BlobLinkGroupBy) Aggregate(fns ...AggregateFunc) *BlobLinkGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (blgb *BlobLinkGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, blgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, blgb.build.ctx, ent.OpQueryGroupBy)
 	if err := blgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -577,7 +578,7 @@ func (bls *BlobLinkSelect) Aggregate(fns ...AggregateFunc) *BlobLinkSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (bls *BlobLinkSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, bls.ctx, "Select")
+	ctx = setContextOp(ctx, bls.ctx, ent.OpQuerySelect)
 	if err := bls.prepareQuery(ctx); err != nil {
 		return err
 	}

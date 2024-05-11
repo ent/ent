@@ -754,7 +754,7 @@ func (t *Type) setupFKs() error {
 	return nil
 }
 
-// setupEdgeField check the field-edge validity and configures it and its foreign-key.
+// setupFieldEdge check the field-edge validity and configures it and its foreign-key.
 func (t *Type) setupFieldEdge(fk *ForeignKey, fkOwner *Edge, fkName string) error {
 	tf, ok := t.fields[fkName]
 	if !ok {
@@ -1513,7 +1513,7 @@ func (f Field) ScanTypeField(rec string) string {
 	return expr
 }
 
-// standardSQLType reports if the field is one of the standard SQL types.
+// standardNullType reports if the field is one of the standard SQL types.
 func (f Field) standardNullType() bool {
 	for _, t := range []reflect.Type{
 		nullBoolType,

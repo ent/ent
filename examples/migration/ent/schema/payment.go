@@ -25,7 +25,7 @@ func (Payment) Fields() []ent.Field {
 		field.Float("amount").
 			Positive(),
 		field.Enum("currency").
-			Values("USD", "EUR", "ILS"),
+			Values("USD", "EUR", "VND", "ILS"),
 		field.Time("time"),
 		field.String("description"),
 		field.Enum("status").
