@@ -1208,7 +1208,7 @@ var mutMethods = func() map[string]bool {
 // with the mutation methods, prefix the method with "Get".
 func (f Field) MutationGet() string {
 	name := pascal(f.Name)
-	if mutMethods[name] {
+	if mutMethods[name] || (name == "SetID" && f.typ.ID.UserDefined) {
 		name = "Get" + name
 	}
 	return name
