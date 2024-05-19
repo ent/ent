@@ -116,10 +116,10 @@ func (ruc *RoleUserCreate) check() error {
 	if _, ok := ruc.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "RoleUser.user_id"`)}
 	}
-	if _, ok := ruc.mutation.RoleID(); !ok {
+	if len(ruc.mutation.RoleIDs()) == 0 {
 		return &ValidationError{Name: "role", err: errors.New(`ent: missing required edge "RoleUser.role"`)}
 	}
-	if _, ok := ruc.mutation.UserID(); !ok {
+	if len(ruc.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "RoleUser.user"`)}
 	}
 	return nil

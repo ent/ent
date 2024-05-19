@@ -8746,6 +8746,8 @@ type FileMutation struct {
 	op            Op
 	typ           string
 	id            *string
+	set_id        *int
+	addset_id     *int
 	size          *int
 	addsize       *int
 	name          *string
@@ -8863,6 +8865,76 @@ func (m *FileMutation) IDs(ctx context.Context) ([]string, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetSetID sets the "set_id" field.
+func (m *FileMutation) SetSetID(i int) {
+	m.set_id = &i
+	m.addset_id = nil
+}
+
+// SetID returns the value of the "set_id" field in the mutation.
+func (m *FileMutation) SetID() (r int, exists bool) {
+	v := m.set_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSetID returns the old "set_id" field's value of the File entity.
+// If the File object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FileMutation) OldSetID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSetID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSetID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSetID: %w", err)
+	}
+	return oldValue.SetID, nil
+}
+
+// AddSetID adds i to the "set_id" field.
+func (m *FileMutation) AddSetID(i int) {
+	if m.addset_id != nil {
+		*m.addset_id += i
+	} else {
+		m.addset_id = &i
+	}
+}
+
+// AddedSetID returns the value that was added to the "set_id" field in this mutation.
+func (m *FileMutation) AddedSetID() (r int, exists bool) {
+	v := m.addset_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearSetID clears the value of the "set_id" field.
+func (m *FileMutation) ClearSetID() {
+	m.set_id = nil
+	m.addset_id = nil
+	m.clearedFields[file.FieldSetID] = struct{}{}
+}
+
+// SetIDCleared returns if the "set_id" field was cleared in this mutation.
+func (m *FileMutation) SetIDCleared() bool {
+	_, ok := m.clearedFields[file.FieldSetID]
+	return ok
+}
+
+// ResetSetID resets all changes to the "set_id" field.
+func (m *FileMutation) ResetSetID() {
+	m.set_id = nil
+	m.addset_id = nil
+	delete(m.clearedFields, file.FieldSetID)
 }
 
 // SetSize sets the "size" field.
@@ -9340,7 +9412,10 @@ func (m *FileMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FileMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
+	if m.set_id != nil {
+		fields = append(fields, file.FieldSetID)
+	}
 	if m.size != nil {
 		fields = append(fields, file.FieldSize)
 	}
@@ -9367,6 +9442,8 @@ func (m *FileMutation) Fields() []string {
 // schema.
 func (m *FileMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case file.FieldSetID:
+		return m.SetID()
 	case file.FieldSize:
 		return m.Size()
 	case file.FieldName:
@@ -9388,6 +9465,8 @@ func (m *FileMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *FileMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case file.FieldSetID:
+		return m.OldSetID(ctx)
 	case file.FieldSize:
 		return m.OldSize(ctx)
 	case file.FieldName:
@@ -9409,6 +9488,13 @@ func (m *FileMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *FileMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case file.FieldSetID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSetID(v)
+		return nil
 	case file.FieldSize:
 		v, ok := value.(int)
 		if !ok {
@@ -9459,6 +9545,9 @@ func (m *FileMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *FileMutation) AddedFields() []string {
 	var fields []string
+	if m.addset_id != nil {
+		fields = append(fields, file.FieldSetID)
+	}
 	if m.addsize != nil {
 		fields = append(fields, file.FieldSize)
 	}
@@ -9473,6 +9562,8 @@ func (m *FileMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *FileMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
+	case file.FieldSetID:
+		return m.AddedSetID()
 	case file.FieldSize:
 		return m.AddedSize()
 	case file.FieldFieldID:
@@ -9486,6 +9577,13 @@ func (m *FileMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *FileMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case file.FieldSetID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSetID(v)
+		return nil
 	case file.FieldSize:
 		v, ok := value.(int)
 		if !ok {
@@ -9508,6 +9606,9 @@ func (m *FileMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *FileMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(file.FieldSetID) {
+		fields = append(fields, file.FieldSetID)
+	}
 	if m.FieldCleared(file.FieldUser) {
 		fields = append(fields, file.FieldUser)
 	}
@@ -9534,6 +9635,9 @@ func (m *FileMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *FileMutation) ClearField(name string) error {
 	switch name {
+	case file.FieldSetID:
+		m.ClearSetID()
+		return nil
 	case file.FieldUser:
 		m.ClearUser()
 		return nil
@@ -9554,6 +9658,9 @@ func (m *FileMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *FileMutation) ResetField(name string) error {
 	switch name {
+	case file.FieldSetID:
+		m.ResetSetID()
+		return nil
 	case file.FieldSize:
 		m.ResetSize()
 		return nil

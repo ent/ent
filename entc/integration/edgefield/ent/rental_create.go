@@ -115,10 +115,10 @@ func (rc *RentalCreate) check() error {
 	if _, ok := rc.mutation.CarID(); !ok {
 		return &ValidationError{Name: "car_id", err: errors.New(`ent: missing required field "Rental.car_id"`)}
 	}
-	if _, ok := rc.mutation.UserID(); !ok {
+	if len(rc.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Rental.user"`)}
 	}
-	if _, ok := rc.mutation.CarID(); !ok {
+	if len(rc.mutation.CarIDs()) == 0 {
 		return &ValidationError{Name: "car", err: errors.New(`ent: missing required edge "Rental.car"`)}
 	}
 	return nil

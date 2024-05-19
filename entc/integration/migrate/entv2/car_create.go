@@ -83,7 +83,7 @@ func (cc *CarCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (cc *CarCreate) check() error {
-	if _, ok := cc.mutation.OwnerID(); !ok {
+	if len(cc.mutation.OwnerIDs()) == 0 {
 		return &ValidationError{Name: "owner", err: errors.New(`entv2: missing required edge "Car.owner"`)}
 	}
 	return nil

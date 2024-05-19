@@ -81,7 +81,7 @@ func (cc *CommentCreate) check() error {
 	if _, ok := cc.mutation.PostID(); !ok {
 		return &ValidationError{Name: "post_id", err: errors.New(`ent: missing required field "Comment.post_id"`)}
 	}
-	if _, ok := cc.mutation.PostID(); !ok {
+	if len(cc.mutation.PostIDs()) == 0 {
 		return &ValidationError{Name: "post", err: errors.New(`ent: missing required edge "Comment.post"`)}
 	}
 	return nil

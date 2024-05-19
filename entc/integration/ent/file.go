@@ -22,6 +22,8 @@ type File struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// SetID holds the value of the "set_id" field.
+	SetID int `json:"set_id,omitempty"`
 	// Size holds the value of the "size" field.
 	Size int `json:"size,omitempty"`
 	// Name holds the value of the "name" field.
@@ -95,7 +97,7 @@ func (*File) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case file.FieldOp:
 			values[i] = new(sql.NullBool)
-		case file.FieldID, file.FieldSize, file.FieldFieldID:
+		case file.FieldID, file.FieldSetID, file.FieldSize, file.FieldFieldID:
 			values[i] = new(sql.NullInt64)
 		case file.FieldName, file.FieldUser, file.FieldGroup:
 			values[i] = new(sql.NullString)
@@ -126,6 +128,12 @@ func (f *File) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			f.ID = int(value.Int64)
+		case file.FieldSetID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field set_id", values[i])
+			} else if value.Valid {
+				f.SetID = int(value.Int64)
+			}
 		case file.FieldSize:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field size", values[i])
@@ -235,6 +243,9 @@ func (f *File) String() string {
 	var builder strings.Builder
 	builder.WriteString("File(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", f.ID))
+	builder.WriteString("set_id=")
+	builder.WriteString(fmt.Sprintf("%v", f.SetID))
+	builder.WriteString(", ")
 	builder.WriteString("size=")
 	builder.WriteString(fmt.Sprintf("%v", f.Size))
 	builder.WriteString(", ")

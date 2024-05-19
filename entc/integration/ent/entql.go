@@ -207,6 +207,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "File",
 		Fields: map[string]*sqlgraph.FieldSpec{
+			file.FieldSetID:   {Type: field.TypeInt, Column: file.FieldSetID},
 			file.FieldSize:    {Type: field.TypeInt, Column: file.FieldSize},
 			file.FieldName:    {Type: field.TypeString, Column: file.FieldName},
 			file.FieldUser:    {Type: field.TypeString, Column: file.FieldUser},
@@ -1462,6 +1463,11 @@ func (f *FileFilter) Where(p entql.P) {
 // WhereID applies the entql int predicate on the id field.
 func (f *FileFilter) WhereID(p entql.IntP) {
 	f.Where(p.Field(file.FieldID))
+}
+
+// WhereSetID applies the entql int predicate on the set_id field.
+func (f *FileFilter) WhereSetID(p entql.IntP) {
+	f.Where(p.Field(file.FieldSetID))
 }
 
 // WhereSize applies the entql int predicate on the size field.

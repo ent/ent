@@ -116,10 +116,10 @@ func (blc *BlobLinkCreate) check() error {
 	if _, ok := blc.mutation.LinkID(); !ok {
 		return &ValidationError{Name: "link_id", err: errors.New(`ent: missing required field "BlobLink.link_id"`)}
 	}
-	if _, ok := blc.mutation.BlobID(); !ok {
+	if len(blc.mutation.BlobIDs()) == 0 {
 		return &ValidationError{Name: "blob", err: errors.New(`ent: missing required edge "BlobLink.blob"`)}
 	}
-	if _, ok := blc.mutation.LinkID(); !ok {
+	if len(blc.mutation.LinkIDs()) == 0 {
 		return &ValidationError{Name: "link", err: errors.New(`ent: missing required edge "BlobLink.link"`)}
 	}
 	return nil

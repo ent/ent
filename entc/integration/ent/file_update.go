@@ -35,6 +35,33 @@ func (fu *FileUpdate) Where(ps ...predicate.File) *FileUpdate {
 	return fu
 }
 
+// SetSetID sets the "set_id" field.
+func (fu *FileUpdate) SetSetID(i int) *FileUpdate {
+	fu.mutation.ResetSetID()
+	fu.mutation.SetSetID(i)
+	return fu
+}
+
+// SetNillableSetID sets the "set_id" field if the given value is not nil.
+func (fu *FileUpdate) SetNillableSetID(i *int) *FileUpdate {
+	if i != nil {
+		fu.SetSetID(*i)
+	}
+	return fu
+}
+
+// AddSetID adds i to the "set_id" field.
+func (fu *FileUpdate) AddSetID(i int) *FileUpdate {
+	fu.mutation.AddSetID(i)
+	return fu
+}
+
+// ClearSetID clears the value of the "set_id" field.
+func (fu *FileUpdate) ClearSetID() *FileUpdate {
+	fu.mutation.ClearSetID()
+	return fu
+}
+
 // SetSize sets the "size" field.
 func (fu *FileUpdate) SetSize(i int) *FileUpdate {
 	fu.mutation.ResetSize()
@@ -277,6 +304,11 @@ func (fu *FileUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (fu *FileUpdate) check() error {
+	if v, ok := fu.mutation.SetID(); ok {
+		if err := file.SetIDValidator(v); err != nil {
+			return &ValidationError{Name: "set_id", err: fmt.Errorf(`ent: validator failed for field "File.set_id": %w`, err)}
+		}
+	}
 	if v, ok := fu.mutation.Size(); ok {
 		if err := file.SizeValidator(v); err != nil {
 			return &ValidationError{Name: "size", err: fmt.Errorf(`ent: validator failed for field "File.size": %w`, err)}
@@ -302,6 +334,15 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := fu.mutation.SetID(); ok {
+		_spec.SetField(file.FieldSetID, field.TypeInt, value)
+	}
+	if value, ok := fu.mutation.AddedSetID(); ok {
+		_spec.AddField(file.FieldSetID, field.TypeInt, value)
+	}
+	if fu.mutation.SetIDCleared() {
+		_spec.ClearField(file.FieldSetID, field.TypeInt)
 	}
 	if value, ok := fu.mutation.Size(); ok {
 		_spec.SetField(file.FieldSize, field.TypeInt, value)
@@ -462,6 +503,33 @@ type FileUpdateOne struct {
 	hooks     []Hook
 	mutation  *FileMutation
 	modifiers []func(*sql.UpdateBuilder)
+}
+
+// SetSetID sets the "set_id" field.
+func (fuo *FileUpdateOne) SetSetID(i int) *FileUpdateOne {
+	fuo.mutation.ResetSetID()
+	fuo.mutation.SetSetID(i)
+	return fuo
+}
+
+// SetNillableSetID sets the "set_id" field if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableSetID(i *int) *FileUpdateOne {
+	if i != nil {
+		fuo.SetSetID(*i)
+	}
+	return fuo
+}
+
+// AddSetID adds i to the "set_id" field.
+func (fuo *FileUpdateOne) AddSetID(i int) *FileUpdateOne {
+	fuo.mutation.AddSetID(i)
+	return fuo
+}
+
+// ClearSetID clears the value of the "set_id" field.
+func (fuo *FileUpdateOne) ClearSetID() *FileUpdateOne {
+	fuo.mutation.ClearSetID()
+	return fuo
 }
 
 // SetSize sets the "size" field.
@@ -719,6 +787,11 @@ func (fuo *FileUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (fuo *FileUpdateOne) check() error {
+	if v, ok := fuo.mutation.SetID(); ok {
+		if err := file.SetIDValidator(v); err != nil {
+			return &ValidationError{Name: "set_id", err: fmt.Errorf(`ent: validator failed for field "File.set_id": %w`, err)}
+		}
+	}
 	if v, ok := fuo.mutation.Size(); ok {
 		if err := file.SizeValidator(v); err != nil {
 			return &ValidationError{Name: "size", err: fmt.Errorf(`ent: validator failed for field "File.size": %w`, err)}
@@ -761,6 +834,15 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := fuo.mutation.SetID(); ok {
+		_spec.SetField(file.FieldSetID, field.TypeInt, value)
+	}
+	if value, ok := fuo.mutation.AddedSetID(); ok {
+		_spec.AddField(file.FieldSetID, field.TypeInt, value)
+	}
+	if fuo.mutation.SetIDCleared() {
+		_spec.ClearField(file.FieldSetID, field.TypeInt)
 	}
 	if value, ok := fuo.mutation.Size(); ok {
 		_spec.SetField(file.FieldSize, field.TypeInt, value)

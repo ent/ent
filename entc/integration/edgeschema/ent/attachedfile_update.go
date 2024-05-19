@@ -138,10 +138,10 @@ func (afu *AttachedFileUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (afu *AttachedFileUpdate) check() error {
-	if _, ok := afu.mutation.FiID(); afu.mutation.FiCleared() && !ok {
+	if afu.mutation.FiCleared() && len(afu.mutation.FiIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "AttachedFile.fi"`)
 	}
-	if _, ok := afu.mutation.ProcID(); afu.mutation.ProcCleared() && !ok {
+	if afu.mutation.ProcCleared() && len(afu.mutation.ProcIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "AttachedFile.proc"`)
 	}
 	return nil
@@ -357,10 +357,10 @@ func (afuo *AttachedFileUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (afuo *AttachedFileUpdateOne) check() error {
-	if _, ok := afuo.mutation.FiID(); afuo.mutation.FiCleared() && !ok {
+	if afuo.mutation.FiCleared() && len(afuo.mutation.FiIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "AttachedFile.fi"`)
 	}
-	if _, ok := afuo.mutation.ProcID(); afuo.mutation.ProcCleared() && !ok {
+	if afuo.mutation.ProcCleared() && len(afuo.mutation.ProcIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "AttachedFile.proc"`)
 	}
 	return nil

@@ -116,10 +116,10 @@ func (utc *UserTweetCreate) check() error {
 	if _, ok := utc.mutation.TweetID(); !ok {
 		return &ValidationError{Name: "tweet_id", err: errors.New(`ent: missing required field "UserTweet.tweet_id"`)}
 	}
-	if _, ok := utc.mutation.UserID(); !ok {
+	if len(utc.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "UserTweet.user"`)}
 	}
-	if _, ok := utc.mutation.TweetID(); !ok {
+	if len(utc.mutation.TweetIDs()) == 0 {
 		return &ValidationError{Name: "tweet", err: errors.New(`ent: missing required edge "UserTweet.tweet"`)}
 	}
 	return nil

@@ -126,7 +126,7 @@ func (pu *PetUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (pu *PetUpdate) check() error {
-	if _, ok := pu.mutation.OwnerID(); pu.mutation.OwnerCleared() && !ok {
+	if pu.mutation.OwnerCleared() && len(pu.mutation.OwnerIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Pet.owner"`)
 	}
 	return nil
@@ -309,7 +309,7 @@ func (puo *PetUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (puo *PetUpdateOne) check() error {
-	if _, ok := puo.mutation.OwnerID(); puo.mutation.OwnerCleared() && !ok {
+	if puo.mutation.OwnerCleared() && len(puo.mutation.OwnerIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Pet.owner"`)
 	}
 	return nil

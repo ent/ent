@@ -16,6 +16,8 @@ const (
 	Label = "file"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldSetID holds the string denoting the set_id field in the database.
+	FieldSetID = "set_id"
 	// FieldSize holds the string denoting the size field in the database.
 	FieldSize = "fsize"
 	// FieldName holds the string denoting the name field in the database.
@@ -62,6 +64,7 @@ const (
 // Columns holds all SQL columns for file fields.
 var Columns = []string{
 	FieldID,
+	FieldSetID,
 	FieldSize,
 	FieldName,
 	FieldUser,
@@ -94,6 +97,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// SetIDValidator is a validator for the "set_id" field. It is called by the builders before save.
+	SetIDValidator func(int) error
 	// DefaultSize holds the default value on creation for the "size" field.
 	DefaultSize int
 	// SizeValidator is a validator for the "size" field. It is called by the builders before save.
@@ -106,6 +111,11 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// BySetID orders the results by the set_id field.
+func BySetID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSetID, opts...).ToFunc()
 }
 
 // BySize orders the results by the size field.

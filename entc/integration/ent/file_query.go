@@ -379,12 +379,12 @@ func (fq *FileQuery) WithField(opts ...func(*FieldTypeQuery)) *FileQuery {
 // Example:
 //
 //	var v []struct {
-//		Size int `json:"size,omitempty"`
+//		SetID int `json:"set_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.File.Query().
-//		GroupBy(file.FieldSize).
+//		GroupBy(file.FieldSetID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
@@ -402,11 +402,11 @@ func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Size int `json:"size,omitempty"`
+//		SetID int `json:"set_id,omitempty"`
 //	}
 //
 //	client.File.Query().
-//		Select(file.FieldSize).
+//		Select(file.FieldSetID).
 //		Scan(ctx, &v)
 func (fq *FileQuery) Select(fields ...string) *FileSelect {
 	fq.ctx.Fields = append(fq.ctx.Fields, fields...)

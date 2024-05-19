@@ -116,10 +116,10 @@ func (ugc *UserGroupCreate) check() error {
 	if _, ok := ugc.mutation.GroupID(); !ok {
 		return &ValidationError{Name: "group_id", err: errors.New(`ent: missing required field "UserGroup.group_id"`)}
 	}
-	if _, ok := ugc.mutation.UserID(); !ok {
+	if len(ugc.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "UserGroup.user"`)}
 	}
-	if _, ok := ugc.mutation.GroupID(); !ok {
+	if len(ugc.mutation.GroupIDs()) == 0 {
 		return &ValidationError{Name: "group", err: errors.New(`ent: missing required edge "UserGroup.group"`)}
 	}
 	return nil

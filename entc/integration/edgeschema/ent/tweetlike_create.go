@@ -122,10 +122,10 @@ func (tlc *TweetLikeCreate) check() error {
 	if _, ok := tlc.mutation.TweetID(); !ok {
 		return &ValidationError{Name: "tweet_id", err: errors.New(`ent: missing required field "TweetLike.tweet_id"`)}
 	}
-	if _, ok := tlc.mutation.TweetID(); !ok {
+	if len(tlc.mutation.TweetIDs()) == 0 {
 		return &ValidationError{Name: "tweet", err: errors.New(`ent: missing required edge "TweetLike.tweet"`)}
 	}
-	if _, ok := tlc.mutation.UserID(); !ok {
+	if len(tlc.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "TweetLike.user"`)}
 	}
 	return nil

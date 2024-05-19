@@ -105,7 +105,7 @@ func (cu *CommentUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (cu *CommentUpdate) check() error {
-	if _, ok := cu.mutation.PostID(); cu.mutation.PostCleared() && !ok {
+	if cu.mutation.PostCleared() && len(cu.mutation.PostIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Comment.post"`)
 	}
 	return nil
@@ -261,7 +261,7 @@ func (cuo *CommentUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (cuo *CommentUpdateOne) check() error {
-	if _, ok := cuo.mutation.PostID(); cuo.mutation.PostCleared() && !ok {
+	if cuo.mutation.PostCleared() && len(cuo.mutation.PostIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Comment.post"`)
 	}
 	return nil

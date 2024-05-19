@@ -132,10 +132,10 @@ func (blu *BlobLinkUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (blu *BlobLinkUpdate) check() error {
-	if _, ok := blu.mutation.BlobID(); blu.mutation.BlobCleared() && !ok {
+	if blu.mutation.BlobCleared() && len(blu.mutation.BlobIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "BlobLink.blob"`)
 	}
-	if _, ok := blu.mutation.LinkID(); blu.mutation.LinkCleared() && !ok {
+	if blu.mutation.LinkCleared() && len(blu.mutation.LinkIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "BlobLink.link"`)
 	}
 	return nil
@@ -345,10 +345,10 @@ func (bluo *BlobLinkUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (bluo *BlobLinkUpdateOne) check() error {
-	if _, ok := bluo.mutation.BlobID(); bluo.mutation.BlobCleared() && !ok {
+	if bluo.mutation.BlobCleared() && len(bluo.mutation.BlobIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "BlobLink.blob"`)
 	}
-	if _, ok := bluo.mutation.LinkID(); bluo.mutation.LinkCleared() && !ok {
+	if bluo.mutation.LinkCleared() && len(bluo.mutation.LinkIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "BlobLink.link"`)
 	}
 	return nil
