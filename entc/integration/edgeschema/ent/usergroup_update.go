@@ -132,10 +132,10 @@ func (ugu *UserGroupUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (ugu *UserGroupUpdate) check() error {
-	if _, ok := ugu.mutation.UserID(); ugu.mutation.UserCleared() && !ok {
+	if ugu.mutation.UserCleared() && len(ugu.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserGroup.user"`)
 	}
-	if _, ok := ugu.mutation.GroupID(); ugu.mutation.GroupCleared() && !ok {
+	if ugu.mutation.GroupCleared() && len(ugu.mutation.GroupIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserGroup.group"`)
 	}
 	return nil
@@ -345,10 +345,10 @@ func (uguo *UserGroupUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (uguo *UserGroupUpdateOne) check() error {
-	if _, ok := uguo.mutation.UserID(); uguo.mutation.UserCleared() && !ok {
+	if uguo.mutation.UserCleared() && len(uguo.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserGroup.user"`)
 	}
-	if _, ok := uguo.mutation.GroupID(); uguo.mutation.GroupCleared() && !ok {
+	if uguo.mutation.GroupCleared() && len(uguo.mutation.GroupIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserGroup.group"`)
 	}
 	return nil

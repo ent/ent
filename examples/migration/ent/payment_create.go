@@ -133,7 +133,7 @@ func (pc *PaymentCreate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Payment.status": %w`, err)}
 		}
 	}
-	if _, ok := pc.mutation.CardID(); !ok {
+	if len(pc.mutation.CardIDs()) == 0 {
 		return &ValidationError{Name: "card", err: errors.New(`ent: missing required edge "Payment.card"`)}
 	}
 	return nil

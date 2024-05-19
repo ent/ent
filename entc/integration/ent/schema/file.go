@@ -30,6 +30,9 @@ func (File) Annotations() []schema.Annotation {
 // Fields of the File.
 func (File) Fields() []ent.Field {
 	return []ent.Field{
+		field.Int("set_id").
+			Max(10).
+			Optional(),
 		field.Int("size").
 			StorageKey("fsize").
 			Default(math.MaxInt32).

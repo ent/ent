@@ -112,7 +112,7 @@ func (cu *CardUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (cu *CardUpdate) check() error {
-	if _, ok := cu.mutation.OwnerID(); cu.mutation.OwnerCleared() && !ok {
+	if cu.mutation.OwnerCleared() && len(cu.mutation.OwnerIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Card.owner"`)
 	}
 	return nil
@@ -277,7 +277,7 @@ func (cuo *CardUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (cuo *CardUpdateOne) check() error {
-	if _, ok := cuo.mutation.OwnerID(); cuo.mutation.OwnerCleared() && !ok {
+	if cuo.mutation.OwnerCleared() && len(cuo.mutation.OwnerIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Card.owner"`)
 	}
 	return nil

@@ -80,10 +80,10 @@ func (ru *RentalUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (ru *RentalUpdate) check() error {
-	if _, ok := ru.mutation.UserID(); ru.mutation.UserCleared() && !ok {
+	if ru.mutation.UserCleared() && len(ru.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Rental.user"`)
 	}
-	if _, ok := ru.mutation.CarID(); ru.mutation.CarCleared() && !ok {
+	if ru.mutation.CarCleared() && len(ru.mutation.CarIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Rental.car"`)
 	}
 	return nil
@@ -185,10 +185,10 @@ func (ruo *RentalUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (ruo *RentalUpdateOne) check() error {
-	if _, ok := ruo.mutation.UserID(); ruo.mutation.UserCleared() && !ok {
+	if ruo.mutation.UserCleared() && len(ruo.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Rental.user"`)
 	}
-	if _, ok := ruo.mutation.CarID(); ruo.mutation.CarCleared() && !ok {
+	if ruo.mutation.CarCleared() && len(ruo.mutation.CarIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Rental.car"`)
 	}
 	return nil

@@ -123,7 +123,7 @@ func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "User.name"`)}
 	}
-	if _, ok := uc.mutation.TenantID(); !ok {
+	if len(uc.mutation.TenantIDs()) == 0 {
 		return &ValidationError{Name: "tenant", err: errors.New(`ent: missing required edge "User.tenant"`)}
 	}
 	return nil

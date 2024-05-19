@@ -132,10 +132,10 @@ func (utu *UserTweetUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (utu *UserTweetUpdate) check() error {
-	if _, ok := utu.mutation.UserID(); utu.mutation.UserCleared() && !ok {
+	if utu.mutation.UserCleared() && len(utu.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserTweet.user"`)
 	}
-	if _, ok := utu.mutation.TweetID(); utu.mutation.TweetCleared() && !ok {
+	if utu.mutation.TweetCleared() && len(utu.mutation.TweetIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserTweet.tweet"`)
 	}
 	return nil
@@ -345,10 +345,10 @@ func (utuo *UserTweetUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (utuo *UserTweetUpdateOne) check() error {
-	if _, ok := utuo.mutation.UserID(); utuo.mutation.UserCleared() && !ok {
+	if utuo.mutation.UserCleared() && len(utuo.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserTweet.user"`)
 	}
-	if _, ok := utuo.mutation.TweetID(); utuo.mutation.TweetCleared() && !ok {
+	if utuo.mutation.TweetCleared() && len(utuo.mutation.TweetIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserTweet.tweet"`)
 	}
 	return nil

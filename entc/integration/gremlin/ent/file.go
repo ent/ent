@@ -20,6 +20,8 @@ type File struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
+	// SetID holds the value of the "set_id" field.
+	SetID int `json:"set_id,omitempty"`
 	// Size holds the value of the "size" field.
 	Size int `json:"size,omitempty"`
 	// Name holds the value of the "name" field.
@@ -89,6 +91,7 @@ func (f *File) FromResponse(res *gremlin.Response) error {
 	}
 	var scanf struct {
 		ID      string  `json:"id,omitempty"`
+		SetID   int     `json:"set_id,omitempty"`
 		Size    int     `json:"fsize,omitempty"`
 		Name    string  `json:"name,omitempty"`
 		User    *string `json:"user,omitempty"`
@@ -100,6 +103,7 @@ func (f *File) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	f.ID = scanf.ID
+	f.SetID = scanf.SetID
 	f.Size = scanf.Size
 	f.Name = scanf.Name
 	f.User = scanf.User
@@ -147,6 +151,9 @@ func (f *File) String() string {
 	var builder strings.Builder
 	builder.WriteString("File(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", f.ID))
+	builder.WriteString("set_id=")
+	builder.WriteString(fmt.Sprintf("%v", f.SetID))
+	builder.WriteString(", ")
 	builder.WriteString("size=")
 	builder.WriteString(fmt.Sprintf("%v", f.Size))
 	builder.WriteString(", ")
@@ -181,6 +188,7 @@ func (f *Files) FromResponse(res *gremlin.Response) error {
 	}
 	var scanf []struct {
 		ID      string  `json:"id,omitempty"`
+		SetID   int     `json:"set_id,omitempty"`
 		Size    int     `json:"fsize,omitempty"`
 		Name    string  `json:"name,omitempty"`
 		User    *string `json:"user,omitempty"`
@@ -193,6 +201,7 @@ func (f *Files) FromResponse(res *gremlin.Response) error {
 	}
 	for _, v := range scanf {
 		node := &File{ID: v.ID}
+		node.SetID = v.SetID
 		node.Size = v.Size
 		node.Name = v.Name
 		node.User = v.User

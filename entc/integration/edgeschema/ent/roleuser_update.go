@@ -132,10 +132,10 @@ func (ruu *RoleUserUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (ruu *RoleUserUpdate) check() error {
-	if _, ok := ruu.mutation.RoleID(); ruu.mutation.RoleCleared() && !ok {
+	if ruu.mutation.RoleCleared() && len(ruu.mutation.RoleIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "RoleUser.role"`)
 	}
-	if _, ok := ruu.mutation.UserID(); ruu.mutation.UserCleared() && !ok {
+	if ruu.mutation.UserCleared() && len(ruu.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "RoleUser.user"`)
 	}
 	return nil
@@ -345,10 +345,10 @@ func (ruuo *RoleUserUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (ruuo *RoleUserUpdateOne) check() error {
-	if _, ok := ruuo.mutation.RoleID(); ruuo.mutation.RoleCleared() && !ok {
+	if ruuo.mutation.RoleCleared() && len(ruuo.mutation.RoleIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "RoleUser.role"`)
 	}
-	if _, ok := ruuo.mutation.UserID(); ruuo.mutation.UserCleared() && !ok {
+	if ruuo.mutation.UserCleared() && len(ruuo.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "RoleUser.user"`)
 	}
 	return nil

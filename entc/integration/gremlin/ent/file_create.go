@@ -28,6 +28,20 @@ type FileCreate struct {
 	hooks    []Hook
 }
 
+// SetSetID sets the "set_id" field.
+func (fc *FileCreate) SetSetID(i int) *FileCreate {
+	fc.mutation.SetSetID(i)
+	return fc
+}
+
+// SetNillableSetID sets the "set_id" field if the given value is not nil.
+func (fc *FileCreate) SetNillableSetID(i *int) *FileCreate {
+	if i != nil {
+		fc.SetSetID(*i)
+	}
+	return fc
+}
+
 // SetSize sets the "size" field.
 func (fc *FileCreate) SetSize(i int) *FileCreate {
 	fc.mutation.SetSize(i)
@@ -200,6 +214,11 @@ func (fc *FileCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (fc *FileCreate) check() error {
+	if v, ok := fc.mutation.SetID(); ok {
+		if err := file.SetIDValidator(v); err != nil {
+			return &ValidationError{Name: "set_id", err: fmt.Errorf(`ent: validator failed for field "File.set_id": %w`, err)}
+		}
+	}
 	if _, ok := fc.mutation.Size(); !ok {
 		return &ValidationError{Name: "size", err: errors.New(`ent: missing required field "File.size"`)}
 	}
@@ -242,6 +261,9 @@ func (fc *FileCreate) gremlin() *dsl.Traversal {
 	}
 	constraints := make([]*constraint, 0, 1)
 	v := g.AddV(file.Label)
+	if value, ok := fc.mutation.SetID(); ok {
+		v.Property(dsl.Single, file.FieldSetID, value)
+	}
 	if value, ok := fc.mutation.Size(); ok {
 		v.Property(dsl.Single, file.FieldSize, value)
 	}

@@ -175,8 +175,12 @@ func init() {
 	fieldtype.DefaultTriple = fieldtypeDescTriple.Default.(func() schema.Triple)
 	fileFields := schema.File{}.Fields()
 	_ = fileFields
+	// fileDescSetID is the schema descriptor for set_id field.
+	fileDescSetID := fileFields[0].Descriptor()
+	// file.SetIDValidator is a validator for the "set_id" field. It is called by the builders before save.
+	file.SetIDValidator = fileDescSetID.Validators[0].(func(int) error)
 	// fileDescSize is the schema descriptor for size field.
-	fileDescSize := fileFields[0].Descriptor()
+	fileDescSize := fileFields[1].Descriptor()
 	// file.DefaultSize holds the default value on creation for the size field.
 	file.DefaultSize = fileDescSize.Default.(int)
 	// file.SizeValidator is a validator for the "size" field. It is called by the builders before save.

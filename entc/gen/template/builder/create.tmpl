@@ -127,11 +127,7 @@ func ({{ $receiver }} *{{ $builder }}) check() error {
 	{{- end }}
 	{{- range $e := $.EdgesWithID }}
 		{{- if not $e.Optional }}
-			{{- if $e.Unique }}
-				if _, ok := {{ $mutation }}.{{ $e.StructField }}ID(); !ok {
-			{{- else }}
-				if len({{ $mutation }}.{{ $e.StructField }}IDs()) == 0 {
-			{{- end }}
+			if len({{ $mutation }}.{{ $e.StructField }}IDs()) == 0 {
 				return &ValidationError{Name: "{{ $e.Name }}", err: errors.New(`{{ $pkg }}: missing required edge "{{ $.Name }}.{{ $e.Name }}"`)}
 			}
 		{{- end }}

@@ -89,10 +89,10 @@ func (gtc *GroupTagCreate) check() error {
 	if _, ok := gtc.mutation.GroupID(); !ok {
 		return &ValidationError{Name: "group_id", err: errors.New(`ent: missing required field "GroupTag.group_id"`)}
 	}
-	if _, ok := gtc.mutation.TagID(); !ok {
+	if len(gtc.mutation.TagIDs()) == 0 {
 		return &ValidationError{Name: "tag", err: errors.New(`ent: missing required edge "GroupTag.tag"`)}
 	}
-	if _, ok := gtc.mutation.GroupID(); !ok {
+	if len(gtc.mutation.GroupIDs()) == 0 {
 		return &ValidationError{Name: "group", err: errors.New(`ent: missing required edge "GroupTag.group"`)}
 	}
 	return nil

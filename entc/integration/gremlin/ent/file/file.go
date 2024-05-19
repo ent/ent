@@ -15,6 +15,8 @@ const (
 	Label = "file"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldSetID holds the string denoting the set_id field in the database.
+	FieldSetID = "set_id"
 	// FieldSize holds the string denoting the size field in the database.
 	FieldSize = "fsize"
 	// FieldName holds the string denoting the name field in the database.
@@ -42,6 +44,8 @@ const (
 )
 
 var (
+	// SetIDValidator is a validator for the "set_id" field. It is called by the builders before save.
+	SetIDValidator func(int) error
 	// DefaultSize holds the default value on creation for the "size" field.
 	DefaultSize int
 	// SizeValidator is a validator for the "size" field. It is called by the builders before save.
