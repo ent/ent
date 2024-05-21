@@ -22,6 +22,8 @@ type ExValueScan struct {
 	ID string `json:"id,omitempty"`
 	// Binary holds the value of the "binary" field.
 	Binary *url.URL `json:"binary,omitempty"`
+	// BinaryBytes holds the value of the "binary_bytes" field.
+	BinaryBytes *url.URL `json:"binary_bytes,omitempty"`
 	// BinaryOptional holds the value of the "binary_optional" field.
 	BinaryOptional *url.URL `json:"binary_optional,omitempty"`
 	// Text holds the value of the "text" field.
@@ -45,6 +47,7 @@ func (evs *ExValueScan) FromResponse(res *gremlin.Response) error {
 	var scanevs struct {
 		ID             string   `json:"id,omitempty"`
 		Binary         *url.URL `json:"binary,omitempty"`
+		BinaryBytes    *url.URL `json:"binary_bytes,omitempty"`
 		BinaryOptional *url.URL `json:"binary_optional,omitempty"`
 		Text           *big.Int `json:"text,omitempty"`
 		TextOptional   *big.Int `json:"text_optional,omitempty"`
@@ -57,6 +60,7 @@ func (evs *ExValueScan) FromResponse(res *gremlin.Response) error {
 	}
 	evs.ID = scanevs.ID
 	evs.Binary = scanevs.Binary
+	evs.BinaryBytes = scanevs.BinaryBytes
 	evs.BinaryOptional = scanevs.BinaryOptional
 	evs.Text = scanevs.Text
 	evs.TextOptional = scanevs.TextOptional
@@ -92,6 +96,9 @@ func (evs *ExValueScan) String() string {
 	builder.WriteString("binary=")
 	builder.WriteString(fmt.Sprintf("%v", evs.Binary))
 	builder.WriteString(", ")
+	builder.WriteString("binary_bytes=")
+	builder.WriteString(fmt.Sprintf("%v", evs.BinaryBytes))
+	builder.WriteString(", ")
 	builder.WriteString("binary_optional=")
 	builder.WriteString(fmt.Sprintf("%v", evs.BinaryOptional))
 	builder.WriteString(", ")
@@ -125,6 +132,7 @@ func (evs *ExValueScans) FromResponse(res *gremlin.Response) error {
 	var scanevs []struct {
 		ID             string   `json:"id,omitempty"`
 		Binary         *url.URL `json:"binary,omitempty"`
+		BinaryBytes    *url.URL `json:"binary_bytes,omitempty"`
 		BinaryOptional *url.URL `json:"binary_optional,omitempty"`
 		Text           *big.Int `json:"text,omitempty"`
 		TextOptional   *big.Int `json:"text_optional,omitempty"`
@@ -138,6 +146,7 @@ func (evs *ExValueScans) FromResponse(res *gremlin.Response) error {
 	for _, v := range scanevs {
 		node := &ExValueScan{ID: v.ID}
 		node.Binary = v.Binary
+		node.BinaryBytes = v.BinaryBytes
 		node.BinaryOptional = v.BinaryOptional
 		node.Text = v.Text
 		node.TextOptional = v.TextOptional

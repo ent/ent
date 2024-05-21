@@ -40,6 +40,12 @@ func (evsu *ExValueScanUpdate) SetBinary(u *url.URL) *ExValueScanUpdate {
 	return evsu
 }
 
+// SetBinaryBytes sets the "binary_bytes" field.
+func (evsu *ExValueScanUpdate) SetBinaryBytes(u *url.URL) *ExValueScanUpdate {
+	evsu.mutation.SetBinaryBytes(u)
+	return evsu
+}
+
 // SetBinaryOptional sets the "binary_optional" field.
 func (evsu *ExValueScanUpdate) SetBinaryOptional(u *url.URL) *ExValueScanUpdate {
 	evsu.mutation.SetBinaryOptional(u)
@@ -172,6 +178,13 @@ func (evsu *ExValueScanUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.SetField(exvaluescan.FieldBinary, field.TypeString, vv)
 	}
+	if value, ok := evsu.mutation.BinaryBytes(); ok {
+		vv, err := exvaluescan.ValueScanner.BinaryBytes.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.SetField(exvaluescan.FieldBinaryBytes, field.TypeBytes, vv)
+	}
 	if value, ok := evsu.mutation.BinaryOptional(); ok {
 		vv, err := exvaluescan.ValueScanner.BinaryOptional.Value(value)
 		if err != nil {
@@ -248,6 +261,12 @@ type ExValueScanUpdateOne struct {
 // SetBinary sets the "binary" field.
 func (evsuo *ExValueScanUpdateOne) SetBinary(u *url.URL) *ExValueScanUpdateOne {
 	evsuo.mutation.SetBinary(u)
+	return evsuo
+}
+
+// SetBinaryBytes sets the "binary_bytes" field.
+func (evsuo *ExValueScanUpdateOne) SetBinaryBytes(u *url.URL) *ExValueScanUpdateOne {
+	evsuo.mutation.SetBinaryBytes(u)
 	return evsuo
 }
 
@@ -412,6 +431,13 @@ func (evsuo *ExValueScanUpdateOne) sqlSave(ctx context.Context) (_node *ExValueS
 			return nil, err
 		}
 		_spec.SetField(exvaluescan.FieldBinary, field.TypeString, vv)
+	}
+	if value, ok := evsuo.mutation.BinaryBytes(); ok {
+		vv, err := exvaluescan.ValueScanner.BinaryBytes.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.SetField(exvaluescan.FieldBinaryBytes, field.TypeBytes, vv)
 	}
 	if value, ok := evsuo.mutation.BinaryOptional(); ok {
 		vv, err := exvaluescan.ValueScanner.BinaryOptional.Value(value)

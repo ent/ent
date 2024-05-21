@@ -691,6 +691,15 @@ func (b *bytesBuilder) GoType(typ any) *bytesBuilder {
 	return b
 }
 
+// ValueScanner provides an external value scanner for the given GoType.
+// Using this option allow users to use field types that do not implement
+// the sql.Scanner and driver.Valuer interfaces, such as slices and maps
+// or types exist in external packages (e.g., url.URL).
+func (b *bytesBuilder) ValueScanner(vs any) *bytesBuilder {
+	b.desc.ValueScanner = vs
+	return b
+}
+
 // Annotations adds a list of annotations to the field object to be used by
 // codegen extensions.
 func (b *bytesBuilder) Annotations(annotations ...schema.Annotation) *bytesBuilder {
