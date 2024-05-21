@@ -94,6 +94,7 @@ var (
 	ExValueScansColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "binary", Type: field.TypeString},
+		{Name: "binary_bytes", Type: field.TypeBytes},
 		{Name: "binary_optional", Type: field.TypeString, Nullable: true},
 		{Name: "text", Type: field.TypeString},
 		{Name: "text_optional", Type: field.TypeString, Nullable: true},

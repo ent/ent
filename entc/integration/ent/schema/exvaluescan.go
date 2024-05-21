@@ -29,6 +29,9 @@ func (ExValueScan) Fields() []ent.Field {
 		field.String("binary").
 			GoType(&url.URL{}).
 			ValueScanner(field.BinaryValueScanner[*url.URL]{}),
+		field.Bytes("binary_bytes").
+			GoType(&url.URL{}).
+			ValueScanner(field.BinaryValueScanner[*url.URL]{}),
 		field.String("binary_optional").
 			Optional().
 			GoType(&url.URL{}).

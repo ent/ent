@@ -110,6 +110,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Type: "ExValueScan",
 		Fields: map[string]*sqlgraph.FieldSpec{
 			exvaluescan.FieldBinary:         {Type: field.TypeString, Column: exvaluescan.FieldBinary},
+			exvaluescan.FieldBinaryBytes:    {Type: field.TypeBytes, Column: exvaluescan.FieldBinaryBytes},
 			exvaluescan.FieldBinaryOptional: {Type: field.TypeString, Column: exvaluescan.FieldBinaryOptional},
 			exvaluescan.FieldText:           {Type: field.TypeString, Column: exvaluescan.FieldText},
 			exvaluescan.FieldTextOptional:   {Type: field.TypeString, Column: exvaluescan.FieldTextOptional},
@@ -1028,6 +1029,11 @@ func (f *ExValueScanFilter) WhereID(p entql.IntP) {
 // WhereBinary applies the entql string predicate on the binary field.
 func (f *ExValueScanFilter) WhereBinary(p entql.StringP) {
 	f.Where(p.Field(exvaluescan.FieldBinary))
+}
+
+// WhereBinaryBytes applies the entql []byte predicate on the binary_bytes field.
+func (f *ExValueScanFilter) WhereBinaryBytes(p entql.BytesP) {
+	f.Where(p.Field(exvaluescan.FieldBinaryBytes))
 }
 
 // WhereBinaryOptional applies the entql string predicate on the binary_optional field.

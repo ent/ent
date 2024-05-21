@@ -2137,6 +2137,7 @@ type ExValueScanMutation struct {
 	typ             string
 	id              *int
 	binary          **url.URL
+	binary_bytes    **url.URL
 	binary_optional **url.URL
 	text            **big.Int
 	text_optional   **big.Int
@@ -2281,6 +2282,42 @@ func (m *ExValueScanMutation) OldBinary(ctx context.Context) (v *url.URL, err er
 // ResetBinary resets all changes to the "binary" field.
 func (m *ExValueScanMutation) ResetBinary() {
 	m.binary = nil
+}
+
+// SetBinaryBytes sets the "binary_bytes" field.
+func (m *ExValueScanMutation) SetBinaryBytes(u *url.URL) {
+	m.binary_bytes = &u
+}
+
+// BinaryBytes returns the value of the "binary_bytes" field in the mutation.
+func (m *ExValueScanMutation) BinaryBytes() (r *url.URL, exists bool) {
+	v := m.binary_bytes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBinaryBytes returns the old "binary_bytes" field's value of the ExValueScan entity.
+// If the ExValueScan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ExValueScanMutation) OldBinaryBytes(ctx context.Context) (v *url.URL, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBinaryBytes is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBinaryBytes requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBinaryBytes: %w", err)
+	}
+	return oldValue.BinaryBytes, nil
+}
+
+// ResetBinaryBytes resets all changes to the "binary_bytes" field.
+func (m *ExValueScanMutation) ResetBinaryBytes() {
+	m.binary_bytes = nil
 }
 
 // SetBinaryOptional sets the "binary_optional" field.
@@ -2572,9 +2609,12 @@ func (m *ExValueScanMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ExValueScanMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m.binary != nil {
 		fields = append(fields, exvaluescan.FieldBinary)
+	}
+	if m.binary_bytes != nil {
+		fields = append(fields, exvaluescan.FieldBinaryBytes)
 	}
 	if m.binary_optional != nil {
 		fields = append(fields, exvaluescan.FieldBinaryOptional)
@@ -2604,6 +2644,8 @@ func (m *ExValueScanMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case exvaluescan.FieldBinary:
 		return m.Binary()
+	case exvaluescan.FieldBinaryBytes:
+		return m.BinaryBytes()
 	case exvaluescan.FieldBinaryOptional:
 		return m.BinaryOptional()
 	case exvaluescan.FieldText:
@@ -2627,6 +2669,8 @@ func (m *ExValueScanMutation) OldField(ctx context.Context, name string) (ent.Va
 	switch name {
 	case exvaluescan.FieldBinary:
 		return m.OldBinary(ctx)
+	case exvaluescan.FieldBinaryBytes:
+		return m.OldBinaryBytes(ctx)
 	case exvaluescan.FieldBinaryOptional:
 		return m.OldBinaryOptional(ctx)
 	case exvaluescan.FieldText:
@@ -2654,6 +2698,13 @@ func (m *ExValueScanMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetBinary(v)
+		return nil
+	case exvaluescan.FieldBinaryBytes:
+		v, ok := value.(*url.URL)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBinaryBytes(v)
 		return nil
 	case exvaluescan.FieldBinaryOptional:
 		v, ok := value.(*url.URL)
@@ -2769,6 +2820,9 @@ func (m *ExValueScanMutation) ResetField(name string) error {
 	switch name {
 	case exvaluescan.FieldBinary:
 		m.ResetBinary()
+		return nil
+	case exvaluescan.FieldBinaryBytes:
+		m.ResetBinaryBytes()
 		return nil
 	case exvaluescan.FieldBinaryOptional:
 		m.ResetBinaryOptional()

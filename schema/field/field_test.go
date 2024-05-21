@@ -8,6 +8,7 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -287,6 +288,58 @@ func TestBytes_DefaultFunc(t *testing.T) {
 
 	fd = field.Bytes("ip").GoType(net.IP("127.0.0.1")).DefaultFunc(net.IP("127.0.0.1")).Descriptor()
 	assert.EqualError(t, fd.Err, `field.Bytes("ip").DefaultFunc expects func but got slice`)
+}
+
+type nullBytes []byte
+
+func (b *nullBytes) Scan(v any) error {
+	if v == nil {
+		return nil
+	}
+	switch v := v.(type) {
+	case []byte:
+		*b = v
+		return nil
+	case string:
+		*b = []byte(v)
+		return nil
+	default:
+		return errors.New("unexpected type")
+	}
+}
+
+func (b nullBytes) Value() (driver.Value, error) { return b, nil }
+
+func TestBytes_ValueScanner(t *testing.T) {
+	fd := field.Bytes("dir").
+		ValueScanner(field.ValueScannerFunc[[]byte, *nullBytes]{
+			V: func(s []byte) (driver.Value, error) {
+				return []byte(hex.EncodeToString(s)), nil
+			},
+			S: func(ns *nullBytes) ([]byte, error) {
+				if ns == nil {
+					return nil, nil
+				}
+				b, err := hex.DecodeString(string(*ns))
+				if err != nil {
+					return nil, err
+				}
+				return b, nil
+			},
+		}).Descriptor()
+	require.NoError(t, fd.Err)
+	require.NotNil(t, fd.ValueScanner)
+	_, ok := fd.ValueScanner.(field.ValueScannerFunc[[]byte, *nullBytes])
+	require.True(t, ok)
+
+	fd = field.Bytes("url").
+		GoType(&url.URL{}).
+		ValueScanner(field.BinaryValueScanner[*url.URL]{}).
+		Descriptor()
+	require.NoError(t, fd.Err)
+	require.NotNil(t, fd.ValueScanner)
+	_, ok = fd.ValueScanner.(field.TypeValueScanner[*url.URL])
+	require.True(t, ok)
 }
 
 func TestString_DefaultFunc(t *testing.T) {
