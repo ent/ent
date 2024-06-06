@@ -136,10 +136,10 @@ func (ttc *TweetTagCreate) check() error {
 	if _, ok := ttc.mutation.TweetID(); !ok {
 		return &ValidationError{Name: "tweet_id", err: errors.New(`ent: missing required field "TweetTag.tweet_id"`)}
 	}
-	if _, ok := ttc.mutation.TagID(); !ok {
+	if len(ttc.mutation.TagIDs()) == 0 {
 		return &ValidationError{Name: "tag", err: errors.New(`ent: missing required edge "TweetTag.tag"`)}
 	}
-	if _, ok := ttc.mutation.TweetID(); !ok {
+	if len(ttc.mutation.TweetIDs()) == 0 {
 		return &ValidationError{Name: "tweet", err: errors.New(`ent: missing required edge "TweetTag.tweet"`)}
 	}
 	return nil

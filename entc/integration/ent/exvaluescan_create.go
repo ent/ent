@@ -33,6 +33,12 @@ func (evsc *ExValueScanCreate) SetBinary(u *url.URL) *ExValueScanCreate {
 	return evsc
 }
 
+// SetBinaryBytes sets the "binary_bytes" field.
+func (evsc *ExValueScanCreate) SetBinaryBytes(u *url.URL) *ExValueScanCreate {
+	evsc.mutation.SetBinaryBytes(u)
+	return evsc
+}
+
 // SetBinaryOptional sets the "binary_optional" field.
 func (evsc *ExValueScanCreate) SetBinaryOptional(u *url.URL) *ExValueScanCreate {
 	evsc.mutation.SetBinaryOptional(u)
@@ -114,6 +120,9 @@ func (evsc *ExValueScanCreate) check() error {
 	if _, ok := evsc.mutation.Binary(); !ok {
 		return &ValidationError{Name: "binary", err: errors.New(`ent: missing required field "ExValueScan.binary"`)}
 	}
+	if _, ok := evsc.mutation.BinaryBytes(); !ok {
+		return &ValidationError{Name: "binary_bytes", err: errors.New(`ent: missing required field "ExValueScan.binary_bytes"`)}
+	}
 	if _, ok := evsc.mutation.Text(); !ok {
 		return &ValidationError{Name: "text", err: errors.New(`ent: missing required field "ExValueScan.text"`)}
 	}
@@ -160,6 +169,14 @@ func (evsc *ExValueScanCreate) createSpec() (*ExValueScan, *sqlgraph.CreateSpec,
 		}
 		_spec.SetField(exvaluescan.FieldBinary, field.TypeString, vv)
 		_node.Binary = value
+	}
+	if value, ok := evsc.mutation.BinaryBytes(); ok {
+		vv, err := exvaluescan.ValueScanner.BinaryBytes.Value(value)
+		if err != nil {
+			return nil, nil, err
+		}
+		_spec.SetField(exvaluescan.FieldBinaryBytes, field.TypeBytes, vv)
+		_node.BinaryBytes = value
 	}
 	if value, ok := evsc.mutation.BinaryOptional(); ok {
 		vv, err := exvaluescan.ValueScanner.BinaryOptional.Value(value)
@@ -270,6 +287,18 @@ func (u *ExValueScanUpsert) SetBinary(v *url.URL) *ExValueScanUpsert {
 // UpdateBinary sets the "binary" field to the value that was provided on create.
 func (u *ExValueScanUpsert) UpdateBinary() *ExValueScanUpsert {
 	u.SetExcluded(exvaluescan.FieldBinary)
+	return u
+}
+
+// SetBinaryBytes sets the "binary_bytes" field.
+func (u *ExValueScanUpsert) SetBinaryBytes(v *url.URL) *ExValueScanUpsert {
+	u.Set(exvaluescan.FieldBinaryBytes, v)
+	return u
+}
+
+// UpdateBinaryBytes sets the "binary_bytes" field to the value that was provided on create.
+func (u *ExValueScanUpsert) UpdateBinaryBytes() *ExValueScanUpsert {
+	u.SetExcluded(exvaluescan.FieldBinaryBytes)
 	return u
 }
 
@@ -414,6 +443,20 @@ func (u *ExValueScanUpsertOne) SetBinary(v *url.URL) *ExValueScanUpsertOne {
 func (u *ExValueScanUpsertOne) UpdateBinary() *ExValueScanUpsertOne {
 	return u.Update(func(s *ExValueScanUpsert) {
 		s.UpdateBinary()
+	})
+}
+
+// SetBinaryBytes sets the "binary_bytes" field.
+func (u *ExValueScanUpsertOne) SetBinaryBytes(v *url.URL) *ExValueScanUpsertOne {
+	return u.Update(func(s *ExValueScanUpsert) {
+		s.SetBinaryBytes(v)
+	})
+}
+
+// UpdateBinaryBytes sets the "binary_bytes" field to the value that was provided on create.
+func (u *ExValueScanUpsertOne) UpdateBinaryBytes() *ExValueScanUpsertOne {
+	return u.Update(func(s *ExValueScanUpsert) {
+		s.UpdateBinaryBytes()
 	})
 }
 
@@ -739,6 +782,20 @@ func (u *ExValueScanUpsertBulk) SetBinary(v *url.URL) *ExValueScanUpsertBulk {
 func (u *ExValueScanUpsertBulk) UpdateBinary() *ExValueScanUpsertBulk {
 	return u.Update(func(s *ExValueScanUpsert) {
 		s.UpdateBinary()
+	})
+}
+
+// SetBinaryBytes sets the "binary_bytes" field.
+func (u *ExValueScanUpsertBulk) SetBinaryBytes(v *url.URL) *ExValueScanUpsertBulk {
+	return u.Update(func(s *ExValueScanUpsert) {
+		s.SetBinaryBytes(v)
+	})
+}
+
+// UpdateBinaryBytes sets the "binary_bytes" field to the value that was provided on create.
+func (u *ExValueScanUpsertBulk) UpdateBinaryBytes() *ExValueScanUpsertBulk {
+	return u.Update(func(s *ExValueScanUpsert) {
+		s.UpdateBinaryBytes()
 	})
 }
 

@@ -137,10 +137,10 @@ func (rc *RelationshipCreate) check() error {
 	if _, ok := rc.mutation.RelativeID(); !ok {
 		return &ValidationError{Name: "relative_id", err: errors.New(`ent: missing required field "Relationship.relative_id"`)}
 	}
-	if _, ok := rc.mutation.UserID(); !ok {
+	if len(rc.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Relationship.user"`)}
 	}
-	if _, ok := rc.mutation.RelativeID(); !ok {
+	if len(rc.mutation.RelativeIDs()) == 0 {
 		return &ValidationError{Name: "relative", err: errors.New(`ent: missing required edge "Relationship.relative"`)}
 	}
 	return nil

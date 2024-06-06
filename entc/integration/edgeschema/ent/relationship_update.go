@@ -169,10 +169,10 @@ func (ru *RelationshipUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (ru *RelationshipUpdate) check() error {
-	if _, ok := ru.mutation.UserID(); ru.mutation.UserCleared() && !ok {
+	if ru.mutation.UserCleared() && len(ru.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Relationship.user"`)
 	}
-	if _, ok := ru.mutation.RelativeID(); ru.mutation.RelativeCleared() && !ok {
+	if ru.mutation.RelativeCleared() && len(ru.mutation.RelativeIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Relationship.relative"`)
 	}
 	return nil
@@ -452,10 +452,10 @@ func (ruo *RelationshipUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (ruo *RelationshipUpdateOne) check() error {
-	if _, ok := ruo.mutation.UserID(); ruo.mutation.UserCleared() && !ok {
+	if ruo.mutation.UserCleared() && len(ruo.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Relationship.user"`)
 	}
-	if _, ok := ruo.mutation.RelativeID(); ruo.mutation.RelativeCleared() && !ok {
+	if ruo.mutation.RelativeCleared() && len(ruo.mutation.RelativeIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Relationship.relative"`)
 	}
 	return nil

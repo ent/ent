@@ -24,6 +24,8 @@ type ExValueScan struct {
 	ID int `json:"id,omitempty"`
 	// Binary holds the value of the "binary" field.
 	Binary *url.URL `json:"binary,omitempty"`
+	// BinaryBytes holds the value of the "binary_bytes" field.
+	BinaryBytes *url.URL `json:"binary_bytes,omitempty"`
 	// BinaryOptional holds the value of the "binary_optional" field.
 	BinaryOptional *url.URL `json:"binary_optional,omitempty"`
 	// Text holds the value of the "text" field.
@@ -48,6 +50,8 @@ func (*ExValueScan) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case exvaluescan.FieldBinary:
 			values[i] = exvaluescan.ValueScanner.Binary.ScanValue()
+		case exvaluescan.FieldBinaryBytes:
+			values[i] = exvaluescan.ValueScanner.BinaryBytes.ScanValue()
 		case exvaluescan.FieldBinaryOptional:
 			values[i] = exvaluescan.ValueScanner.BinaryOptional.ScanValue()
 		case exvaluescan.FieldText:
@@ -86,6 +90,12 @@ func (evs *ExValueScan) assignValues(columns []string, values []any) error {
 				return err
 			} else {
 				evs.Binary = value
+			}
+		case exvaluescan.FieldBinaryBytes:
+			if value, err := exvaluescan.ValueScanner.BinaryBytes.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				evs.BinaryBytes = value
 			}
 		case exvaluescan.FieldBinaryOptional:
 			if value, err := exvaluescan.ValueScanner.BinaryOptional.FromValue(values[i]); err != nil {
@@ -161,6 +171,9 @@ func (evs *ExValueScan) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", evs.ID))
 	builder.WriteString("binary=")
 	builder.WriteString(fmt.Sprintf("%v", evs.Binary))
+	builder.WriteString(", ")
+	builder.WriteString("binary_bytes=")
+	builder.WriteString(fmt.Sprintf("%v", evs.BinaryBytes))
 	builder.WriteString(", ")
 	builder.WriteString("binary_optional=")
 	builder.WriteString(fmt.Sprintf("%v", evs.BinaryOptional))

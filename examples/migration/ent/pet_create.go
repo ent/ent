@@ -149,10 +149,10 @@ func (pc *PetCreate) check() error {
 	if _, ok := pc.mutation.OwnerID(); !ok {
 		return &ValidationError{Name: "owner_id", err: errors.New(`ent: missing required field "Pet.owner_id"`)}
 	}
-	if _, ok := pc.mutation.BestFriendID(); !ok {
+	if len(pc.mutation.BestFriendIDs()) == 0 {
 		return &ValidationError{Name: "best_friend", err: errors.New(`ent: missing required edge "Pet.best_friend"`)}
 	}
-	if _, ok := pc.mutation.OwnerID(); !ok {
+	if len(pc.mutation.OwnerIDs()) == 0 {
 		return &ValidationError{Name: "owner", err: errors.New(`ent: missing required edge "Pet.owner"`)}
 	}
 	return nil

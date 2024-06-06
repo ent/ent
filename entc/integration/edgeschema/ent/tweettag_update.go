@@ -132,10 +132,10 @@ func (ttu *TweetTagUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (ttu *TweetTagUpdate) check() error {
-	if _, ok := ttu.mutation.TagID(); ttu.mutation.TagCleared() && !ok {
+	if ttu.mutation.TagCleared() && len(ttu.mutation.TagIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "TweetTag.tag"`)
 	}
-	if _, ok := ttu.mutation.TweetID(); ttu.mutation.TweetCleared() && !ok {
+	if ttu.mutation.TweetCleared() && len(ttu.mutation.TweetIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "TweetTag.tweet"`)
 	}
 	return nil
@@ -345,10 +345,10 @@ func (ttuo *TweetTagUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (ttuo *TweetTagUpdateOne) check() error {
-	if _, ok := ttuo.mutation.TagID(); ttuo.mutation.TagCleared() && !ok {
+	if ttuo.mutation.TagCleared() && len(ttuo.mutation.TagIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "TweetTag.tag"`)
 	}
-	if _, ok := ttuo.mutation.TweetID(); ttuo.mutation.TweetCleared() && !ok {
+	if ttuo.mutation.TweetCleared() && len(ttuo.mutation.TweetIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "TweetTag.tweet"`)
 	}
 	return nil

@@ -136,7 +136,7 @@ func TestGraph_EvalP(t *testing.T) {
 		{
 			s:         sql.Dialect(dialect.Postgres).Select().From(sql.Table("users")),
 			p:         entql.HasEdgeWith("pets", entql.Or(entql.FieldEQ("name", "pedro"), entql.FieldEQ("name", "xabi"))),
-			wantQuery: `SELECT * FROM "users" WHERE "users"."uid" IN (SELECT "pets"."owner_id" FROM "pets" WHERE "pets"."name" = $1 OR "pets"."name" = $2)`,
+			wantQuery: `SELECT * FROM "users" WHERE EXISTS (SELECT "pets"."owner_id" FROM "pets" WHERE "users"."uid" = "pets"."owner_id" AND ("pets"."name" = $1 OR "pets"."name" = $2))`,
 			wantArgs:  []any{"pedro", "xabi"},
 		},
 		{
@@ -155,7 +155,7 @@ func TestGraph_EvalP(t *testing.T) {
 			p: entql.HasEdgeWith("pets", entql.FieldEQ("name", "pedro"), WrapFunc(func(s *sql.Selector) {
 				s.Where(sql.EQ("owner_id", 10))
 			})),
-			wantQuery: `SELECT * FROM "users" WHERE "active" AND "users"."uid" IN (SELECT "pets"."owner_id" FROM "pets" WHERE "pets"."name" = $1 AND "owner_id" = $2)`,
+			wantQuery: `SELECT * FROM "users" WHERE "active" AND EXISTS (SELECT "pets"."owner_id" FROM "pets" WHERE ("users"."uid" = "pets"."owner_id" AND "pets"."name" = $1) AND "owner_id" = $2)`,
 			wantArgs:  []any{"pedro", 10},
 		},
 	}

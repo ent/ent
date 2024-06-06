@@ -21,6 +21,8 @@ const (
 	FieldID = "id"
 	// FieldBinary holds the string denoting the binary field in the database.
 	FieldBinary = "binary"
+	// FieldBinaryBytes holds the string denoting the binary_bytes field in the database.
+	FieldBinaryBytes = "binary_bytes"
 	// FieldBinaryOptional holds the string denoting the binary_optional field in the database.
 	FieldBinaryOptional = "binary_optional"
 	// FieldText holds the string denoting the text field in the database.
@@ -41,6 +43,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldBinary,
+	FieldBinaryBytes,
 	FieldBinaryOptional,
 	FieldText,
 	FieldTextOptional,
@@ -63,6 +66,7 @@ var (
 	// ValueScanner of all ExValueScan fields.
 	ValueScanner struct {
 		Binary         field.TypeValueScanner[*url.URL]
+		BinaryBytes    field.TypeValueScanner[*url.URL]
 		BinaryOptional field.TypeValueScanner[*url.URL]
 		Text           field.TypeValueScanner[*big.Int]
 		TextOptional   field.TypeValueScanner[*big.Int]

@@ -110,6 +110,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Type: "ExValueScan",
 		Fields: map[string]*sqlgraph.FieldSpec{
 			exvaluescan.FieldBinary:         {Type: field.TypeString, Column: exvaluescan.FieldBinary},
+			exvaluescan.FieldBinaryBytes:    {Type: field.TypeBytes, Column: exvaluescan.FieldBinaryBytes},
 			exvaluescan.FieldBinaryOptional: {Type: field.TypeString, Column: exvaluescan.FieldBinaryOptional},
 			exvaluescan.FieldText:           {Type: field.TypeString, Column: exvaluescan.FieldText},
 			exvaluescan.FieldTextOptional:   {Type: field.TypeString, Column: exvaluescan.FieldTextOptional},
@@ -207,6 +208,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "File",
 		Fields: map[string]*sqlgraph.FieldSpec{
+			file.FieldSetID:   {Type: field.TypeInt, Column: file.FieldSetID},
 			file.FieldSize:    {Type: field.TypeInt, Column: file.FieldSize},
 			file.FieldName:    {Type: field.TypeString, Column: file.FieldName},
 			file.FieldUser:    {Type: field.TypeString, Column: file.FieldUser},
@@ -1029,6 +1031,11 @@ func (f *ExValueScanFilter) WhereBinary(p entql.StringP) {
 	f.Where(p.Field(exvaluescan.FieldBinary))
 }
 
+// WhereBinaryBytes applies the entql []byte predicate on the binary_bytes field.
+func (f *ExValueScanFilter) WhereBinaryBytes(p entql.BytesP) {
+	f.Where(p.Field(exvaluescan.FieldBinaryBytes))
+}
+
 // WhereBinaryOptional applies the entql string predicate on the binary_optional field.
 func (f *ExValueScanFilter) WhereBinaryOptional(p entql.StringP) {
 	f.Where(p.Field(exvaluescan.FieldBinaryOptional))
@@ -1462,6 +1469,11 @@ func (f *FileFilter) Where(p entql.P) {
 // WhereID applies the entql int predicate on the id field.
 func (f *FileFilter) WhereID(p entql.IntP) {
 	f.Where(p.Field(file.FieldID))
+}
+
+// WhereSetID applies the entql int predicate on the set_id field.
+func (f *FileFilter) WhereSetID(p entql.IntP) {
+	f.Where(p.Field(file.FieldSetID))
 }
 
 // WhereSize applies the entql int predicate on the size field.

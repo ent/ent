@@ -84,6 +84,13 @@ func IDLTE(id string) predicate.File {
 	})
 }
 
+// SetID applies equality check predicate on the "set_id" field. It's identical to SetIDEQ.
+func SetID(v int) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSetID, p.EQ(v))
+	})
+}
+
 // Size applies equality check predicate on the "size" field. It's identical to SizeEQ.
 func Size(v int) predicate.File {
 	return predicate.File(func(t *dsl.Traversal) {
@@ -116,6 +123,76 @@ func Group(v string) predicate.File {
 func Op(v bool) predicate.File {
 	return predicate.File(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOp, p.EQ(v))
+	})
+}
+
+// SetIDEQ applies the EQ predicate on the "set_id" field.
+func SetIDEQ(v int) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSetID, p.EQ(v))
+	})
+}
+
+// SetIDNEQ applies the NEQ predicate on the "set_id" field.
+func SetIDNEQ(v int) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSetID, p.NEQ(v))
+	})
+}
+
+// SetIDIn applies the In predicate on the "set_id" field.
+func SetIDIn(vs ...int) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSetID, p.Within(vs...))
+	})
+}
+
+// SetIDNotIn applies the NotIn predicate on the "set_id" field.
+func SetIDNotIn(vs ...int) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSetID, p.Without(vs...))
+	})
+}
+
+// SetIDGT applies the GT predicate on the "set_id" field.
+func SetIDGT(v int) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSetID, p.GT(v))
+	})
+}
+
+// SetIDGTE applies the GTE predicate on the "set_id" field.
+func SetIDGTE(v int) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSetID, p.GTE(v))
+	})
+}
+
+// SetIDLT applies the LT predicate on the "set_id" field.
+func SetIDLT(v int) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSetID, p.LT(v))
+	})
+}
+
+// SetIDLTE applies the LTE predicate on the "set_id" field.
+func SetIDLTE(v int) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSetID, p.LTE(v))
+	})
+}
+
+// SetIDIsNil applies the IsNil predicate on the "set_id" field.
+func SetIDIsNil() predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldSetID)
+	})
+}
+
+// SetIDNotNil applies the NotNil predicate on the "set_id" field.
+func SetIDNotNil() predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldSetID)
 	})
 }
 

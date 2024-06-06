@@ -117,10 +117,10 @@ func (gtu *GroupTagUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (gtu *GroupTagUpdate) check() error {
-	if _, ok := gtu.mutation.TagID(); gtu.mutation.TagCleared() && !ok {
+	if gtu.mutation.TagCleared() && len(gtu.mutation.TagIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "GroupTag.tag"`)
 	}
-	if _, ok := gtu.mutation.GroupID(); gtu.mutation.GroupCleared() && !ok {
+	if gtu.mutation.GroupCleared() && len(gtu.mutation.GroupIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "GroupTag.group"`)
 	}
 	return nil
@@ -313,10 +313,10 @@ func (gtuo *GroupTagUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (gtuo *GroupTagUpdateOne) check() error {
-	if _, ok := gtuo.mutation.TagID(); gtuo.mutation.TagCleared() && !ok {
+	if gtuo.mutation.TagCleared() && len(gtuo.mutation.TagIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "GroupTag.tag"`)
 	}
-	if _, ok := gtuo.mutation.GroupID(); gtuo.mutation.GroupCleared() && !ok {
+	if gtuo.mutation.GroupCleared() && len(gtuo.mutation.GroupIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "GroupTag.group"`)
 	}
 	return nil

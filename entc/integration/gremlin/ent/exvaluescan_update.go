@@ -39,6 +39,12 @@ func (evsu *ExValueScanUpdate) SetBinary(u *url.URL) *ExValueScanUpdate {
 	return evsu
 }
 
+// SetBinaryBytes sets the "binary_bytes" field.
+func (evsu *ExValueScanUpdate) SetBinaryBytes(u *url.URL) *ExValueScanUpdate {
+	evsu.mutation.SetBinaryBytes(u)
+	return evsu
+}
+
 // SetBinaryOptional sets the "binary_optional" field.
 func (evsu *ExValueScanUpdate) SetBinaryOptional(u *url.URL) *ExValueScanUpdate {
 	evsu.mutation.SetBinaryOptional(u)
@@ -173,6 +179,9 @@ func (evsu *ExValueScanUpdate) gremlin() *dsl.Traversal {
 	if value, ok := evsu.mutation.Binary(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldBinary, value)
 	}
+	if value, ok := evsu.mutation.BinaryBytes(); ok {
+		v.Property(dsl.Single, exvaluescan.FieldBinaryBytes, value)
+	}
 	if value, ok := evsu.mutation.BinaryOptional(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldBinaryOptional, value)
 	}
@@ -220,6 +229,12 @@ type ExValueScanUpdateOne struct {
 // SetBinary sets the "binary" field.
 func (evsuo *ExValueScanUpdateOne) SetBinary(u *url.URL) *ExValueScanUpdateOne {
 	evsuo.mutation.SetBinary(u)
+	return evsuo
+}
+
+// SetBinaryBytes sets the "binary_bytes" field.
+func (evsuo *ExValueScanUpdateOne) SetBinaryBytes(u *url.URL) *ExValueScanUpdateOne {
+	evsuo.mutation.SetBinaryBytes(u)
 	return evsuo
 }
 
@@ -374,6 +389,9 @@ func (evsuo *ExValueScanUpdateOne) gremlin(id string) *dsl.Traversal {
 	)
 	if value, ok := evsuo.mutation.Binary(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldBinary, value)
+	}
+	if value, ok := evsuo.mutation.BinaryBytes(); ok {
+		v.Property(dsl.Single, exvaluescan.FieldBinaryBytes, value)
 	}
 	if value, ok := evsuo.mutation.BinaryOptional(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldBinaryOptional, value)

@@ -655,7 +655,7 @@ func TestHasNeighborsWith(t *testing.T) {
 			predicate: func(s *sql.Selector) {
 				s.Where(sql.EQ("expired", false))
 			},
-			wantQuery: `SELECT * FROM "users" WHERE "users"."id" IN (SELECT "cards"."owner_id" FROM "cards" WHERE NOT "expired")`,
+			wantQuery: `SELECT * FROM "users" WHERE EXISTS (SELECT "cards"."owner_id" FROM "cards" WHERE "users"."id" = "cards"."owner_id" AND NOT "expired")`,
 		},
 		{
 			name: "O2O/inverse",
@@ -668,7 +668,7 @@ func TestHasNeighborsWith(t *testing.T) {
 			predicate: func(s *sql.Selector) {
 				s.Where(sql.EQ("name", "a8m"))
 			},
-			wantQuery: `SELECT * FROM "cards" WHERE "cards"."owner_id" IN (SELECT "users"."id" FROM "users" WHERE "name" = $1)`,
+			wantQuery: `SELECT * FROM "cards" WHERE EXISTS (SELECT "users"."id" FROM "users" WHERE "cards"."owner_id" = "users"."id" AND "name" = $1)`,
 			wantArgs:  []any{"a8m"},
 		},
 		{
@@ -684,7 +684,7 @@ func TestHasNeighborsWith(t *testing.T) {
 			predicate: func(s *sql.Selector) {
 				s.Where(sql.EQ("name", "pedro"))
 			},
-			wantQuery: `SELECT * FROM "users" WHERE "last_name" = $1 AND "users"."id" IN (SELECT "pets"."owner_id" FROM "pets" WHERE "name" = $2)`,
+			wantQuery: `SELECT * FROM "users" WHERE "last_name" = $1 AND EXISTS (SELECT "pets"."owner_id" FROM "pets" WHERE "users"."id" = "pets"."owner_id" AND "name" = $2)`,
 			wantArgs:  []any{"mashraki", "pedro"},
 		},
 		{
@@ -700,7 +700,7 @@ func TestHasNeighborsWith(t *testing.T) {
 			predicate: func(s *sql.Selector) {
 				s.Where(sql.EQ("last_name", "mashraki"))
 			},
-			wantQuery: `SELECT * FROM "pets" WHERE "name" = $1 AND "pets"."owner_id" IN (SELECT "users"."id" FROM "users" WHERE "last_name" = $2)`,
+			wantQuery: `SELECT * FROM "pets" WHERE "name" = $1 AND EXISTS (SELECT "users"."id" FROM "users" WHERE "pets"."owner_id" = "users"."id" AND "last_name" = $2)`,
 			wantArgs:  []any{"pedro", "mashraki"},
 		},
 		{
@@ -778,7 +778,7 @@ WHERE "groups"."id" IN
 			predicate: func(s *sql.Selector) {
 				s.Where(sql.EQ("expired", false))
 			},
-			wantQuery: `SELECT * FROM "s1"."users" WHERE "s1"."users"."id" IN (SELECT "s2"."cards"."owner_id" FROM "s2"."cards" WHERE NOT "expired")`,
+			wantQuery: `SELECT * FROM "s1"."users" WHERE EXISTS (SELECT "s2"."cards"."owner_id" FROM "s2"."cards" WHERE "s1"."users"."id" = "s2"."cards"."owner_id" AND NOT "expired")`,
 		},
 		{
 			name: "schema/O2M",
@@ -797,7 +797,7 @@ WHERE "groups"."id" IN
 			predicate: func(s *sql.Selector) {
 				s.Where(sql.EQ("name", "pedro"))
 			},
-			wantQuery: `SELECT * FROM "s1"."users" WHERE "last_name" = $1 AND "s1"."users"."id" IN (SELECT "s2"."pets"."owner_id" FROM "s2"."pets" WHERE "name" = $2)`,
+			wantQuery: `SELECT * FROM "s1"."users" WHERE "last_name" = $1 AND EXISTS (SELECT "s2"."pets"."owner_id" FROM "s2"."pets" WHERE "s1"."users"."id" = "s2"."pets"."owner_id" AND "name" = $2)`,
 			wantArgs:  []any{"mashraki", "pedro"},
 		},
 		{
@@ -838,7 +838,7 @@ WHERE "s1"."users"."id" IN
 			predicate: func(s *sql.Selector) {
 				s.Where(sql.EQ("name", "pedro"))
 			},
-			wantQuery: `SELECT * FROM (SELECT * FROM "users") AS "users" WHERE "last_name" = $1 AND "users"."id" IN (SELECT "pets"."owner_id" FROM "pets" WHERE "name" = $2)`,
+			wantQuery: `SELECT * FROM (SELECT * FROM "users") AS "users" WHERE "last_name" = $1 AND EXISTS (SELECT "pets"."owner_id" FROM "pets" WHERE "users"."id" = "pets"."owner_id" AND "name" = $2)`,
 			wantArgs:  []any{"mashraki", "pedro"},
 		},
 		{
@@ -854,7 +854,7 @@ WHERE "s1"."users"."id" IN
 			predicate: func(s *sql.Selector) {
 				s.Where(sql.EQ("last_name", "mashraki"))
 			},
-			wantQuery: `SELECT * FROM (SELECT * FROM "pets") AS "pets" WHERE "name" = $1 AND "pets"."owner_id" IN (SELECT "users"."id" FROM "users" WHERE "last_name" = $2)`,
+			wantQuery: `SELECT * FROM (SELECT * FROM "pets") AS "pets" WHERE "name" = $1 AND EXISTS (SELECT "users"."id" FROM "users" WHERE "pets"."owner_id" = "users"."id" AND "last_name" = $2)`,
 			wantArgs:  []any{"pedro", "mashraki"},
 		},
 		{

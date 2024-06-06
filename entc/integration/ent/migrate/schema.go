@@ -94,6 +94,7 @@ var (
 	ExValueScansColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "binary", Type: field.TypeString},
+		{Name: "binary_bytes", Type: field.TypeBytes},
 		{Name: "binary_optional", Type: field.TypeString, Nullable: true},
 		{Name: "text", Type: field.TypeString},
 		{Name: "text_optional", Type: field.TypeString, Nullable: true},
@@ -194,6 +195,7 @@ var (
 	// FilesColumns holds the columns for the "files" table.
 	FilesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "set_id", Type: field.TypeInt, Nullable: true},
 		{Name: "fsize", Type: field.TypeInt, Default: 2147483647},
 		{Name: "name", Type: field.TypeString},
 		{Name: "user", Type: field.TypeString, Nullable: true},
@@ -212,19 +214,19 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "files_file_types_files",
-				Columns:    []*schema.Column{FilesColumns[7]},
+				Columns:    []*schema.Column{FilesColumns[8]},
 				RefColumns: []*schema.Column{FileTypesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "files_groups_files",
-				Columns:    []*schema.Column{FilesColumns[8]},
+				Columns:    []*schema.Column{FilesColumns[9]},
 				RefColumns: []*schema.Column{GroupsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "files_users_files",
-				Columns:    []*schema.Column{FilesColumns[9]},
+				Columns:    []*schema.Column{FilesColumns[10]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -233,27 +235,27 @@ var (
 			{
 				Name:    "file_name_size",
 				Unique:  false,
-				Columns: []*schema.Column{FilesColumns[2], FilesColumns[1]},
+				Columns: []*schema.Column{FilesColumns[3], FilesColumns[2]},
 			},
 			{
 				Name:    "file_name_user",
 				Unique:  true,
-				Columns: []*schema.Column{FilesColumns[2], FilesColumns[3]},
+				Columns: []*schema.Column{FilesColumns[3], FilesColumns[4]},
 			},
 			{
 				Name:    "file_user_files_file_type_files",
 				Unique:  false,
-				Columns: []*schema.Column{FilesColumns[9], FilesColumns[7]},
+				Columns: []*schema.Column{FilesColumns[10], FilesColumns[8]},
 			},
 			{
 				Name:    "file_name_user_files_file_type_files",
 				Unique:  true,
-				Columns: []*schema.Column{FilesColumns[2], FilesColumns[9], FilesColumns[7]},
+				Columns: []*schema.Column{FilesColumns[3], FilesColumns[10], FilesColumns[8]},
 			},
 			{
 				Name:    "file_name_user_files",
 				Unique:  false,
-				Columns: []*schema.Column{FilesColumns[2], FilesColumns[9]},
+				Columns: []*schema.Column{FilesColumns[3], FilesColumns[10]},
 			},
 		},
 	}
