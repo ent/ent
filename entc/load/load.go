@@ -42,6 +42,9 @@ type (
 		// ent.Schema package.
 		PkgPath string
 
+		// PkgName is the package name of the loaded ent.Schema package.
+		PkgName string
+
 		// Module defines the module information for
 		// the user schema package if exists.
 		Module *packages.Module
@@ -155,7 +158,11 @@ func (c *Config) load() (*SchemaSpec, error) {
 		c.Names = names
 	}
 	sort.Strings(c.Names)
-	return &SchemaSpec{PkgPath: pkg.PkgPath, Module: pkg.Module}, nil
+	return &SchemaSpec{
+		PkgPath: pkg.PkgPath,
+		PkgName: pkg.Name,
+		Module:  pkg.Module,
+	}, nil
 }
 
 func (c *Config) loadError(perr packages.Error) (err error) {

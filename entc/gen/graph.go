@@ -34,6 +34,10 @@ type (
 		// For example, "<project>/ent/schema".
 		Schema string
 
+		// SchemaPackageNames holds the Go package names for the user
+		// ent/schema.
+		SchemaPackageName string
+
 		// Target defines the filepath for the target directory that
 		// holds the generated code. For example, "./project/ent".
 		//
@@ -951,6 +955,30 @@ func (g *Graph) templates() (*Template, []GraphTemplate) {
 		external = append(external, f.GraphTemplates...)
 	}
 	return templates, external
+}
+
+// SchemaPackageAlias returns the package alias fro the schema package.
+// If the package name is the same as the schema name, it returns an empty string.
+func (c Config) SchemaPackageAlias() string {
+	base := c.SchemaPackageBase()
+	if base == c.SchemaPackageName {
+		return ""
+	}
+	return base
+}
+
+// SchemaPackageBase returns the base name of the schema package.
+func (c Config) SchemaPackageBase() string {
+	base := filepath.Base(c.Schema)
+	// We don't want to generate a dot import for the schema package.
+	if base == "." {
+		return ""
+	}
+	// Specifically look for a collision with the "ent" package:
+	if base == "ent" {
+		return "entschema"
+	}
+	return base
 }
 
 // ModuleInfo returns the entgo.io/ent version.
