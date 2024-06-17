@@ -97,6 +97,11 @@ func Password(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldPassword, v))
 }
 
+// SearchableProfile applies equality check predicate on the "searchable_profile" field. It's identical to SearchableProfileEQ.
+func SearchableProfile(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldSearchableProfile, v))
+}
+
 // SSOCert applies equality check predicate on the "SSOCert" field. It's identical to SSOCertEQ.
 func SSOCert(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldSSOCert, v))
@@ -625,6 +630,71 @@ func PasswordEqualFold(v string) predicate.User {
 // PasswordContainsFold applies the ContainsFold predicate on the "password" field.
 func PasswordContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldPassword, v))
+}
+
+// SearchableProfileEQ applies the EQ predicate on the "searchable_profile" field.
+func SearchableProfileEQ(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldSearchableProfile, v))
+}
+
+// SearchableProfileNEQ applies the NEQ predicate on the "searchable_profile" field.
+func SearchableProfileNEQ(v string) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldSearchableProfile, v))
+}
+
+// SearchableProfileIn applies the In predicate on the "searchable_profile" field.
+func SearchableProfileIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldIn(FieldSearchableProfile, vs...))
+}
+
+// SearchableProfileNotIn applies the NotIn predicate on the "searchable_profile" field.
+func SearchableProfileNotIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldSearchableProfile, vs...))
+}
+
+// SearchableProfileGT applies the GT predicate on the "searchable_profile" field.
+func SearchableProfileGT(v string) predicate.User {
+	return predicate.User(sql.FieldGT(FieldSearchableProfile, v))
+}
+
+// SearchableProfileGTE applies the GTE predicate on the "searchable_profile" field.
+func SearchableProfileGTE(v string) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldSearchableProfile, v))
+}
+
+// SearchableProfileLT applies the LT predicate on the "searchable_profile" field.
+func SearchableProfileLT(v string) predicate.User {
+	return predicate.User(sql.FieldLT(FieldSearchableProfile, v))
+}
+
+// SearchableProfileLTE applies the LTE predicate on the "searchable_profile" field.
+func SearchableProfileLTE(v string) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldSearchableProfile, v))
+}
+
+// SearchableProfileContains applies the Contains predicate on the "searchable_profile" field.
+func SearchableProfileContains(v string) predicate.User {
+	return predicate.User(sql.FieldContains(FieldSearchableProfile, v))
+}
+
+// SearchableProfileHasPrefix applies the HasPrefix predicate on the "searchable_profile" field.
+func SearchableProfileHasPrefix(v string) predicate.User {
+	return predicate.User(sql.FieldHasPrefix(FieldSearchableProfile, v))
+}
+
+// SearchableProfileHasSuffix applies the HasSuffix predicate on the "searchable_profile" field.
+func SearchableProfileHasSuffix(v string) predicate.User {
+	return predicate.User(sql.FieldHasSuffix(FieldSearchableProfile, v))
+}
+
+// SearchableProfileEqualFold applies the EqualFold predicate on the "searchable_profile" field.
+func SearchableProfileEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldSearchableProfile, v))
+}
+
+// SearchableProfileContainsFold applies the ContainsFold predicate on the "searchable_profile" field.
+func SearchableProfileContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldSearchableProfile, v))
 }
 
 // RoleEQ applies the EQ predicate on the "role" field.

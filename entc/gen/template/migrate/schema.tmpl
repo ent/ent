@@ -39,6 +39,7 @@ var (
 				{{- with $c.Comment }} Comment: "{{ $c.Comment }}",{{ end }}
 				{{- with $c.Attr }} Attr: "{{ . }}",{{ end }}
 				{{- with $c.Enums }} Enums: []string{ {{ range $e := . }}"{{ $e }}",{{ end }} },{{ end }}
+				{{- with $c.GeneratedExprs }} GeneratedExprs: map[string]schema.GeneratedExpr{ {{ range $k, $v := $c.GeneratedExprs }} "{{ $k }}": { Expr: "{{ $v.Expr }}", Type: "{{ $v.Type }}" },{{ end }} },{{ end }}
 				{{- if not (isNil $c.Default) -}}
 					{{- $t := printf "%T" $c.Default -}}
 					{{- if eq $t "schema.Expr" -}}

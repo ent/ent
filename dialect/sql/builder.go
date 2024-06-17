@@ -57,7 +57,7 @@ func (c *ColumnBuilder) Type(t string) *ColumnBuilder {
 	return c
 }
 
-// Attr sets an extra attribute for the column, like UNIQUE or AUTO_INCREMENT.
+// Attr sets an extra attribute for the column, like UNIQUE, AUTO_INCREMENT or GENERATED.
 func (c *ColumnBuilder) Attr(attr string) *ColumnBuilder {
 	if c.attr != "" && attr != "" {
 		c.attr += " "

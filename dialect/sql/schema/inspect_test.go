@@ -151,43 +151,43 @@ func TestInspector_Tables(t *testing.T) {
 							AddRow("pets").
 							AddRow("groups").
 							AddRow("user_groups"))
-					mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length" FROM "information_schema"."columns" WHERE "table_schema" = $1 AND "table_name" = $2`)).
+					mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length", "generation_expression" FROM "information_schema"."columns" WHERE "table_schema" = $1 AND "table_name" = $2`)).
 						WithArgs("public", "users").
-						WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length"}).
-							AddRow("id", "bigint", "NO", "NULL", "int8", nil, nil, nil).
-							AddRow("name", "character", "YES", "NULL", "bpchar", nil, nil, nil).
-							AddRow("text", "text", "YES", "NULL", "text", nil, nil, nil).
-							AddRow("uuid", "uuid", "YES", "NULL", "uuid", nil, nil, nil).
-							AddRow("price", "numeric", "NO", "NULL", "numeric", "6", "4", nil).
-							AddRow("bank_id", "character", "NO", "NULL", "bpchar", nil, nil, 20))
+						WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length", "generation_expression"}).
+							AddRow("id", "bigint", "NO", "NULL", "int8", nil, nil, nil, nil).
+							AddRow("name", "character", "YES", "NULL", "bpchar", nil, nil, nil, nil).
+							AddRow("text", "text", "YES", "NULL", "text", nil, nil, nil, nil).
+							AddRow("uuid", "uuid", "YES", "NULL", "uuid", nil, nil, nil, nil).
+							AddRow("price", "numeric", "NO", "NULL", "numeric", "6", "4", nil, nil).
+							AddRow("bank_id", "character", "NO", "NULL", "bpchar", nil, nil, 20, nil))
 					mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "$1", "users"))).
 						WithArgs("public").
 						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
 							AddRow("users_pkey", "id", "t", "t", 0))
-					mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length" FROM "information_schema"."columns" WHERE "table_schema" = $1 AND "table_name" = $2`)).
+					mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length", "generation_expression" FROM "information_schema"."columns" WHERE "table_schema" = $1 AND "table_name" = $2`)).
 						WithArgs("public", "pets").
-						WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length"}).
-							AddRow("id", "bigint", "NO", "NULL", "int8", nil, nil, nil).
-							AddRow("name", "character", "YES", "NULL", "bpchar", nil, nil, nil).
-							AddRow("user_pets", "bigint", "YES", "NULL", "int8", nil, nil, nil))
+						WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length", "generation_expression"}).
+							AddRow("id", "bigint", "NO", "NULL", "int8", nil, nil, nil, nil).
+							AddRow("name", "character", "YES", "NULL", "bpchar", nil, nil, nil, nil).
+							AddRow("user_pets", "bigint", "YES", "NULL", "int8", nil, nil, nil, nil))
 					mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "$1", "pets"))).
 						WithArgs("public").
 						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
 							AddRow("pets_pkey", "id", "t", "t", 0))
-					mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length" FROM "information_schema"."columns" WHERE "table_schema" = $1 AND "table_name" = $2`)).
+					mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length", "generation_expression" FROM "information_schema"."columns" WHERE "table_schema" = $1 AND "table_name" = $2`)).
 						WithArgs("public", "groups").
-						WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length"}).
-							AddRow("id", "bigint", "NO", "NULL", "int8", nil, nil, nil).
-							AddRow("name", "character", "NO", "NULL", "bpchar", nil, nil, nil))
+						WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length", "generation_expression"}).
+							AddRow("id", "bigint", "NO", "NULL", "int8", nil, nil, nil, nil).
+							AddRow("name", "character", "NO", "NULL", "bpchar", nil, nil, nil, nil))
 					mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "$1", "groups"))).
 						WithArgs("public").
 						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
 							AddRow("groups_pkey", "id", "t", "t", 0))
-					mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length" FROM "information_schema"."columns" WHERE "table_schema" = $1 AND "table_name" = $2`)).
+					mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length", "generation_expression" FROM "information_schema"."columns" WHERE "table_schema" = $1 AND "table_name" = $2`)).
 						WithArgs("public", "user_groups").
-						WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length"}).
-							AddRow("user_id", "bigint", "NO", "NULL", "int8", nil, nil, nil).
-							AddRow("group_id", "bigint", "NO", "NULL", "int8", nil, nil, nil))
+						WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length", "generation_expression"}).
+							AddRow("user_id", "bigint", "NO", "NULL", "int8", nil, nil, nil, nil).
+							AddRow("group_id", "bigint", "NO", "NULL", "int8", nil, nil, nil, nil))
 					mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "$1", "user_groups"))).
 						WithArgs("public").
 						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}))
