@@ -10,8 +10,8 @@ import (
 	"context"
 
 	"entgo.io/ent/entc/integration/privacy/ent"
-	"entgo.io/ent/entql"
 
+	"entgo.io/ent/entql"
 	"entgo.io/ent/privacy"
 )
 

@@ -28,6 +28,7 @@ import (
 	"entgo.io/ent/entc/integration/gremlin/ent/pet"
 	enttask "entgo.io/ent/entc/integration/gremlin/ent/task"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
+
 	"entgo.io/ent/schema/field"
 )
 

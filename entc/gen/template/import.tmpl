@@ -29,6 +29,7 @@ import (
 	{{- end }}
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
+	"entgo.io/ent/schema/field"
 	{{- with $.Storage }}
 		{{- range $import := .Imports }}
 			"{{ $import }}"

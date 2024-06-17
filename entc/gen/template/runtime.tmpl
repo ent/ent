@@ -68,6 +68,9 @@ backwards-compatibility with previous versions of ent.
 {{/* register schema handlers to type packages */}}
 {{ define "runtime/register" }}
 import (
+	"time"
+	"context"
+
 	{{- with $.Config.Schema }}
 		"{{ . }}"
 	{{- end }}
@@ -79,6 +82,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/privacy"
+	"entgo.io/ent/schema/field"
 )
 
 
