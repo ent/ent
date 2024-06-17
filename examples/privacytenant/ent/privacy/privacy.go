@@ -9,9 +9,9 @@ package privacy
 import (
 	"context"
 
-	"entgo.io/ent/entql"
 	"entgo.io/ent/examples/privacytenant/ent"
 
+	"entgo.io/ent/entql"
 	"entgo.io/ent/privacy"
 )
 

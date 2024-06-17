@@ -28,6 +28,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/schema/task"
 	enttask "entgo.io/ent/entc/integration/ent/task"
 	"entgo.io/ent/entc/integration/ent/user"
+
 	"entgo.io/ent/schema/field"
 )
 

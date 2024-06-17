@@ -52,6 +52,7 @@ func (c *Client) init() {
 {{ $deps := list }}{{ with $.Config.Annotations }}{{ $deps = $.Config.Annotations.Dependencies }}{{ end }}
 
 import (
+	"context"
 	"log"
 
 	"{{ $.Config.Package }}/migrate"
