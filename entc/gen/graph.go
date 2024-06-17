@@ -14,6 +14,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"runtime/debug"
 	"strconv"
 	"strings"
@@ -23,6 +24,7 @@ import (
 	"entgo.io/ent/entc/load"
 	"entgo.io/ent/schema/field"
 
+	"golang.org/x/sync/errgroup"
 	"golang.org/x/tools/imports"
 )
 
@@ -1102,16 +1104,22 @@ func (a assets) write() error {
 
 // format runs "goimports" on all assets.
 func (a assets) format() error {
+	var wg errgroup.Group
+	wg.SetLimit(runtime.GOMAXPROCS(0))
 	for path, content := range a.files {
-		src, err := imports.Process(path, content, nil)
-		if err != nil {
-			return fmt.Errorf("format file %s: %w", path, err)
-		}
-		if err := os.WriteFile(path, src, 0644); err != nil {
-			return fmt.Errorf("write file %s: %w", path, err)
-		}
+		path, content := path, content
+		wg.Go(func() error {
+			src, err := imports.Process(path, content, nil)
+			if err != nil {
+				return fmt.Errorf("format file %s: %w", path, err)
+			}
+			if err := os.WriteFile(path, src, 0644); err != nil {
+				return fmt.Errorf("write file %s: %w", path, err)
+			}
+			return nil
+		})
 	}
-	return nil
+	return wg.Wait()
 }
 
 // expect panics if the condition is false.
