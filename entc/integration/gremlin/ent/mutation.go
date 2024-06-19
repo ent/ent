@@ -24,17 +24,21 @@ import (
 	"entgo.io/ent/entc/integration/ent/schema"
 	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
 	"entgo.io/ent/entc/integration/ent/schema/task"
+	"entgo.io/ent/entc/integration/gremlin/ent/api"
+	"entgo.io/ent/entc/integration/gremlin/ent/builder"
 	"entgo.io/ent/entc/integration/gremlin/ent/card"
 	"entgo.io/ent/entc/integration/gremlin/ent/comment"
 	"entgo.io/ent/entc/integration/gremlin/ent/exvaluescan"
 	"entgo.io/ent/entc/integration/gremlin/ent/fieldtype"
 	"entgo.io/ent/entc/integration/gremlin/ent/file"
 	"entgo.io/ent/entc/integration/gremlin/ent/filetype"
+	"entgo.io/ent/entc/integration/gremlin/ent/goods"
 	"entgo.io/ent/entc/integration/gremlin/ent/group"
 	"entgo.io/ent/entc/integration/gremlin/ent/groupinfo"
 	"entgo.io/ent/entc/integration/gremlin/ent/item"
 	"entgo.io/ent/entc/integration/gremlin/ent/license"
 	"entgo.io/ent/entc/integration/gremlin/ent/node"
+	"entgo.io/ent/entc/integration/gremlin/ent/pc"
 	"entgo.io/ent/entc/integration/gremlin/ent/pet"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 	"entgo.io/ent/entc/integration/gremlin/ent/spec"
@@ -172,7 +176,10 @@ func (m *APIMutation) IDs(ctx context.Context) ([]string, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, api.ID(id))
+			return m.Client().Api.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []string{id}, nil
 		}
 		fallthrough
@@ -436,7 +443,10 @@ func (m *BuilderMutation) IDs(ctx context.Context) ([]string, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, builder.ID(id))
+			return m.Client().Builder.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []string{id}, nil
 		}
 		fallthrough
@@ -711,7 +721,10 @@ func (m *CardMutation) IDs(ctx context.Context) ([]string, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, card.ID(id))
+			return m.Client().Card.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []string{id}, nil
 		}
 		fallthrough
@@ -1461,7 +1474,10 @@ func (m *CommentMutation) IDs(ctx context.Context) ([]string, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, comment.ID(id))
+			return m.Client().Comment.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []string{id}, nil
 		}
 		fallthrough
@@ -2238,7 +2254,10 @@ func (m *ExValueScanMutation) IDs(ctx context.Context) ([]string, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, exvaluescan.ID(id))
+			return m.Client().ExValueScan.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []string{id}, nil
 		}
 		fallthrough
@@ -3091,7 +3110,10 @@ func (m *FieldTypeMutation) IDs(ctx context.Context) ([]string, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, fieldtype.ID(id))
+			return m.Client().FieldType.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []string{id}, nil
 		}
 		fallthrough
@@ -8910,7 +8932,10 @@ func (m *FileMutation) IDs(ctx context.Context) ([]string, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, file.ID(id))
+			return m.Client().File.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []string{id}, nil
 		}
 		fallthrough
@@ -9962,7 +9987,10 @@ func (m *FileTypeMutation) IDs(ctx context.Context) ([]string, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, filetype.ID(id))
+			return m.Client().FileType.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []string{id}, nil
 		}
 		fallthrough
@@ -10483,7 +10511,10 @@ func (m *GoodsMutation) IDs(ctx context.Context) ([]string, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, goods.ID(id))
+			return m.Client().Goods.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []string{id}, nil
 		}
 		fallthrough
@@ -10764,7 +10795,10 @@ func (m *GroupMutation) IDs(ctx context.Context) ([]string, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, group.ID(id))
+			return m.Client().Group.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []string{id}, nil
 		}
 		fallthrough
@@ -11691,7 +11725,10 @@ func (m *GroupInfoMutation) IDs(ctx context.Context) ([]string, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, groupinfo.ID(id))
+			return m.Client().GroupInfo.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []string{id}, nil
 		}
 		fallthrough
@@ -12201,7 +12238,10 @@ func (m *ItemMutation) IDs(ctx context.Context) ([]string, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, item.ID(id))
+			return m.Client().Item.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []string{id}, nil
 		}
 		fallthrough
@@ -12556,7 +12596,10 @@ func (m *LicenseMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, license.ID(id))
+			return m.Client().License.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []int{id}, nil
 		}
 		fallthrough
@@ -12941,7 +12984,10 @@ func (m *NodeMutation) IDs(ctx context.Context) ([]string, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, node.ID(id))
+			return m.Client().Node.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []string{id}, nil
 		}
 		fallthrough
@@ -13518,7 +13564,10 @@ func (m *PCMutation) IDs(ctx context.Context) ([]string, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, pc.ID(id))
+			return m.Client().PC.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []string{id}, nil
 		}
 		fallthrough
@@ -13792,7 +13841,10 @@ func (m *PetMutation) IDs(ctx context.Context) ([]string, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, pet.ID(id))
+			return m.Client().Pet.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []string{id}, nil
 		}
 		fallthrough
@@ -14530,7 +14582,10 @@ func (m *SpecMutation) IDs(ctx context.Context) ([]string, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, spec.ID(id))
+			return m.Client().Spec.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []string{id}, nil
 		}
 		fallthrough
@@ -14895,7 +14950,10 @@ func (m *TaskMutation) IDs(ctx context.Context) ([]string, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, enttask.ID(id))
+			return m.Client().Task.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []string{id}, nil
 		}
 		fallthrough
@@ -15834,7 +15892,10 @@ func (m *UserMutation) IDs(ctx context.Context) ([]string, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, user.ID(id))
+			return m.Client().User.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []string{id}, nil
 		}
 		fallthrough
