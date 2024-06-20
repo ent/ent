@@ -10,6 +10,7 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -89,7 +90,9 @@ func DebugWithContext(d Driver, logger func(context.Context, ...any)) Driver {
 
 // Exec logs its params and calls the underlying driver Exec method.
 func (d *DebugDriver) Exec(ctx context.Context, query string, args, v any) error {
-	d.log(ctx, fmt.Sprintf("driver.Exec: query=%v args=%v", query, args))
+	defer func(start time.Time) {
+		d.log(ctx, fmt.Sprintf("driver.Exec: query=%v args=%v time=%v", query, args, time.Since(start)))
+	}(time.Now())
 	return d.Driver.Exec(ctx, query, args, v)
 }
 
@@ -101,13 +104,17 @@ func (d *DebugDriver) ExecContext(ctx context.Context, query string, args ...any
 	if !ok {
 		return nil, fmt.Errorf("Driver.ExecContext is not supported")
 	}
-	d.log(ctx, fmt.Sprintf("driver.ExecContext: query=%v args=%v", query, args))
+	defer func(start time.Time) {
+		d.log(ctx, fmt.Sprintf("driver.ExecContext: query=%v args=%v time=%v", query, args, time.Since(start)))
+	}(time.Now())
 	return drv.ExecContext(ctx, query, args...)
 }
 
 // Query logs its params and calls the underlying driver Query method.
 func (d *DebugDriver) Query(ctx context.Context, query string, args, v any) error {
-	d.log(ctx, fmt.Sprintf("driver.Query: query=%v args=%v", query, args))
+	defer func(start time.Time) {
+		d.log(ctx, fmt.Sprintf("driver.Query: query=%v args=%v time=%v", query, args, time.Since(start)))
+	}(time.Now())
 	return d.Driver.Query(ctx, query, args, v)
 }
 
@@ -119,7 +126,9 @@ func (d *DebugDriver) QueryContext(ctx context.Context, query string, args ...an
 	if !ok {
 		return nil, fmt.Errorf("Driver.QueryContext is not supported")
 	}
-	d.log(ctx, fmt.Sprintf("driver.QueryContext: query=%v args=%v", query, args))
+	defer func(start time.Time) {
+		d.log(ctx, fmt.Sprintf("driver.QueryContext: query=%v args=%v time=%v", query, args, time.Since(start)))
+	}(time.Now())
 	return drv.QueryContext(ctx, query, args...)
 }
 
@@ -161,7 +170,10 @@ type DebugTx struct {
 
 // Exec logs its params and calls the underlying transaction Exec method.
 func (d *DebugTx) Exec(ctx context.Context, query string, args, v any) error {
-	d.log(ctx, fmt.Sprintf("Tx(%s).Exec: query=%v args=%v", d.id, query, args))
+	defer func() {}()
+	defer func(start time.Time) {
+		d.log(ctx, fmt.Sprintf("Tx(%s).Exec: query=%v args=%v time=%v", d.id, query, args, time.Since(start)))
+	}(time.Now())
 	return d.Tx.Exec(ctx, query, args, v)
 }
 
@@ -173,13 +185,17 @@ func (d *DebugTx) ExecContext(ctx context.Context, query string, args ...any) (s
 	if !ok {
 		return nil, fmt.Errorf("Tx.ExecContext is not supported")
 	}
-	d.log(ctx, fmt.Sprintf("Tx(%s).ExecContext: query=%v args=%v", d.id, query, args))
+	defer func(start time.Time) {
+		d.log(ctx, fmt.Sprintf("Tx(%s).ExecContext: query=%v args=%v time=%v", d.id, query, args, time.Since(start)))
+	}(time.Now())
 	return drv.ExecContext(ctx, query, args...)
 }
 
 // Query logs its params and calls the underlying transaction Query method.
 func (d *DebugTx) Query(ctx context.Context, query string, args, v any) error {
-	d.log(ctx, fmt.Sprintf("Tx(%s).Query: query=%v args=%v", d.id, query, args))
+	defer func(start time.Time) {
+		d.log(ctx, fmt.Sprintf("Tx(%s).Query: query=%v args=%v time=%v", d.id, query, args, time.Since(start)))
+	}(time.Now())
 	return d.Tx.Query(ctx, query, args, v)
 }
 
@@ -191,7 +207,9 @@ func (d *DebugTx) QueryContext(ctx context.Context, query string, args ...any) (
 	if !ok {
 		return nil, fmt.Errorf("Tx.QueryContext is not supported")
 	}
-	d.log(ctx, fmt.Sprintf("Tx(%s).QueryContext: query=%v args=%v", d.id, query, args))
+	defer func(start time.Time) {
+		d.log(ctx, fmt.Sprintf("Tx(%s).QueryContext: query=%v args=%v time=%v", d.id, query, args, time.Since(start)))
+	}(time.Now())
 	return drv.QueryContext(ctx, query, args...)
 }
 
