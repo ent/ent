@@ -170,7 +170,6 @@ type DebugTx struct {
 
 // Exec logs its params and calls the underlying transaction Exec method.
 func (d *DebugTx) Exec(ctx context.Context, query string, args, v any) error {
-	defer func() {}()
 	defer func(start time.Time) {
 		d.log(ctx, fmt.Sprintf("Tx(%s).Exec: query=%v args=%v time=%v", d.id, query, args, time.Since(start)))
 	}(time.Now())
