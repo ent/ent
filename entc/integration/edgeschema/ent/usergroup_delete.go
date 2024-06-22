@@ -43,6 +43,11 @@ func (ugd *UserGroupDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the UserGroupMutation object of the builder.
+func (ugd *UserGroupDelete) Mutation() *UserGroupMutation {
+	return ugd.mutation
+}
+
 func (ugd *UserGroupDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(usergroup.Table, sqlgraph.NewFieldSpec(usergroup.FieldID, field.TypeInt))
 	if ps := ugd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (ugdo *UserGroupDeleteOne) ExecX(ctx context.Context) {
 	if err := ugdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the UserGroupMutation object of the builder.
+func (ugdo *UserGroupDeleteOne) Mutation() *UserGroupMutation {
+	return ugdo.ugd.mutation
 }

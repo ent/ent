@@ -42,6 +42,11 @@ func (bld *BlobLinkDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the BlobLinkMutation object of the builder.
+func (bld *BlobLinkDelete) Mutation() *BlobLinkMutation {
+	return bld.mutation
+}
+
 func (bld *BlobLinkDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(bloblink.Table, nil)
 	if ps := bld.mutation.predicates; len(ps) > 0 {
@@ -88,4 +93,9 @@ func (bldo *BlobLinkDeleteOne) ExecX(ctx context.Context) {
 	if err := bldo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the BlobLinkMutation object of the builder.
+func (bldo *BlobLinkDeleteOne) Mutation() *BlobLinkMutation {
+	return bldo.bld.mutation
 }
