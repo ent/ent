@@ -32,6 +32,7 @@ var (
 				Symbol:     "tasks_users_tasks",
 				Columns:    []*schema.Column{TasksColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnUpdate:   schema.SetNull,
 				OnDelete:   schema.SetNull,
 			},
 		},
