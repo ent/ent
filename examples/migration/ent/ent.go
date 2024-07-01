@@ -408,6 +408,53 @@ func (s *selector) IntX(ctx context.Context) int {
 	return v
 }
 
+// Int64s returns list of int64s from a selector. It is only allowed when selecting one field.
+func (s *selector) Int64s(ctx context.Context) ([]int64, error) {
+	if len(*s.flds) > 1 {
+		return nil, errors.New("ent: Int64s is not achievable when selecting more than 1 field")
+	}
+	var v []int64
+	if err := s.scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// Int64sX is like Int64s, but panics if an error occurs.
+func (s *selector) Int64sX(ctx context.Context) []int64 {
+	v, err := s.Int64s(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int64 returns a single int64 from a selector. It is only allowed when selecting one field.
+func (s *selector) Int64(ctx context.Context) (_ int64, err error) {
+	var v []int64
+	if v, err = s.Int64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{s.label}
+	default:
+		err = fmt.Errorf("ent: Int64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Int64X is like Int64, but panics if an error occurs.
+func (s *selector) Int64X(ctx context.Context) int64 {
+	v, err := s.Int64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
 func (s *selector) Float64s(ctx context.Context) ([]float64, error) {
 	if len(*s.flds) > 1 {
