@@ -13,7 +13,12 @@ in the LICENSE file in the root directory of this source tree.
 {{ end }}
 
 import (
+	"fmt"
+	"context"
+
+	"entgo.io/ent/dialect/sql"
 	"{{ $.Config.Package }}"
+	"{{ $.Config.Package }}/predicate"
 	{{- range $n := $.Nodes }}
 		{{ $n.PackageAlias }} "{{ $n.Config.Package }}/{{ $n.PackageDir }}"
 	{{- end }}

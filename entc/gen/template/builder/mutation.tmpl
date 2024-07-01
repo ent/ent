@@ -15,11 +15,14 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
+
 	{{- range $n := $.Nodes }}
 		{{ $n.PackageAlias }} "{{ $.Config.Package }}/{{ $n.PackageDir }}"
 		{{- template "import/types" $n }}
 	{{- end }}
 	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
 )
 
 const (

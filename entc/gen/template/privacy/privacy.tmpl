@@ -13,9 +13,12 @@ in the LICENSE file in the root directory of this source tree.
 {{ end }}
 
 import (
+	"context"
+
 	"{{ $.Config.Package }}"
 
 	"entgo.io/ent/privacy"
+	"entgo.io/ent/entql"
 )
 
 {{ $pkg := base $.Config.Package }}
