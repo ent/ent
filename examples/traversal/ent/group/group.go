@@ -104,6 +104,7 @@ func ByAdminField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newAdminStep(), sql.OrderByField(field, opts...))
 	}
 }
+
 func newUsersStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),

@@ -79,6 +79,7 @@ func ByRentals(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newRentalsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
 func newRentalsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),

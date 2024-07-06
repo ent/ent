@@ -81,6 +81,7 @@ func ByToken(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newTokenStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
 func newTokenStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),

@@ -99,6 +99,7 @@ func ByLinkField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newLinkStep(), sql.OrderByField(field, opts...))
 	}
 }
+
 func newBlobStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, BlobColumn),

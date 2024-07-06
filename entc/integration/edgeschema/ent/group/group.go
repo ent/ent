@@ -152,6 +152,7 @@ func ByGroupTags(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newGroupTagsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
 func newUsersStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),

@@ -136,7 +136,7 @@ func ValidColumn(column string) bool {
 			}
 		{{- end }}
 	{{- end }}
-	{{- range $e := $.Edges }}
+	{{ range $e := $.Edges }}
 		func new{{ pascal $e.Name }}Step() *sqlgraph.Step {
 			return sqlgraph.NewStep(
 				{{- if $.HasCompositeID }}

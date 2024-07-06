@@ -73,6 +73,7 @@ func ByStreets(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newStreetsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
 func newStreetsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),

@@ -153,6 +153,7 @@ func BySpec(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newSpecStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
 func newOwnerStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),

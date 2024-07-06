@@ -194,6 +194,7 @@ func ByTweetTags(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newTweetTagsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
 func newLikedUsersStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
