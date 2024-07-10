@@ -38,27 +38,29 @@ type Position struct {
 
 // Field represents an ent.Field that was loaded from a complied user package.
 type Field struct {
-	Name          string                  `json:"name,omitempty"`
-	Info          *field.TypeInfo         `json:"type,omitempty"`
-	ValueScanner  bool                    `json:"value_scanner,omitempty"`
-	Tag           string                  `json:"tag,omitempty"`
-	Size          *int64                  `json:"size,omitempty"`
-	Enums         []struct{ N, V string } `json:"enums,omitempty"`
-	Unique        bool                    `json:"unique,omitempty"`
-	Nillable      bool                    `json:"nillable,omitempty"`
-	Optional      bool                    `json:"optional,omitempty"`
-	Default       bool                    `json:"default,omitempty"`
-	DefaultValue  any                     `json:"default_value,omitempty"`
-	DefaultKind   reflect.Kind            `json:"default_kind,omitempty"`
-	UpdateDefault bool                    `json:"update_default,omitempty"`
-	Immutable     bool                    `json:"immutable,omitempty"`
-	Validators    int                     `json:"validators,omitempty"`
-	StorageKey    string                  `json:"storage_key,omitempty"`
-	Position      *Position               `json:"position,omitempty"`
-	Sensitive     bool                    `json:"sensitive,omitempty"`
-	SchemaType    map[string]string       `json:"schema_type,omitempty"`
-	Annotations   map[string]any          `json:"annotations,omitempty"`
-	Comment       string                  `json:"comment,omitempty"`
+	Name             string                  `json:"name,omitempty"`
+	Info             *field.TypeInfo         `json:"type,omitempty"`
+	ValueScanner     bool                    `json:"value_scanner,omitempty"`
+	Tag              string                  `json:"tag,omitempty"`
+	Size             *int64                  `json:"size,omitempty"`
+	Enums            []struct{ N, V string } `json:"enums,omitempty"`
+	Unique           bool                    `json:"unique,omitempty"`
+	Nillable         bool                    `json:"nillable,omitempty"`
+	Optional         bool                    `json:"optional,omitempty"`
+	Default          bool                    `json:"default,omitempty"`
+	DefaultValue     any                     `json:"default_value,omitempty"`
+	DefaultKind      reflect.Kind            `json:"default_kind,omitempty"`
+	UpdateDefault    bool                    `json:"update_default,omitempty"`
+	Immutable        bool                    `json:"immutable,omitempty"`
+	Validators       int                     `json:"validators,omitempty"`
+	StorageKey       string                  `json:"storage_key,omitempty"`
+	Position         *Position               `json:"position,omitempty"`
+	Sensitive        bool                    `json:"sensitive,omitempty"`
+	SchemaType       map[string]string       `json:"schema_type,omitempty"`
+	Annotations      map[string]any          `json:"annotations,omitempty"`
+	Comment          string                  `json:"comment,omitempty"`
+	Deprecated       bool                    `json:"deprecated,omitempty"`
+	DeprecatedReason string                  `json:"deprecated_reason,omitempty"`
 }
 
 // Edge represents an ent.Edge that was loaded from a complied user package.
@@ -121,23 +123,25 @@ func NewField(fd *field.Descriptor) (*Field, error) {
 		return nil, fmt.Errorf("field %q: %v", fd.Name, fd.Err)
 	}
 	sf := &Field{
-		Name:          fd.Name,
-		Info:          fd.Info,
-		ValueScanner:  fd.ValueScanner != nil,
-		Tag:           fd.Tag,
-		Enums:         fd.Enums,
-		Unique:        fd.Unique,
-		Nillable:      fd.Nillable,
-		Optional:      fd.Optional,
-		Default:       fd.Default != nil,
-		UpdateDefault: fd.UpdateDefault != nil,
-		Immutable:     fd.Immutable,
-		StorageKey:    fd.StorageKey,
-		Validators:    len(fd.Validators),
-		Sensitive:     fd.Sensitive,
-		SchemaType:    fd.SchemaType,
-		Annotations:   make(map[string]any),
-		Comment:       fd.Comment,
+		Name:             fd.Name,
+		Info:             fd.Info,
+		ValueScanner:     fd.ValueScanner != nil,
+		Tag:              fd.Tag,
+		Enums:            fd.Enums,
+		Unique:           fd.Unique,
+		Nillable:         fd.Nillable,
+		Optional:         fd.Optional,
+		Default:          fd.Default != nil,
+		UpdateDefault:    fd.UpdateDefault != nil,
+		Immutable:        fd.Immutable,
+		StorageKey:       fd.StorageKey,
+		Validators:       len(fd.Validators),
+		Sensitive:        fd.Sensitive,
+		SchemaType:       fd.SchemaType,
+		Annotations:      make(map[string]any),
+		Comment:          fd.Comment,
+		Deprecated:       fd.Deprecated,
+		DeprecatedReason: fd.DeprecatedReason,
 	}
 	for _, at := range fd.Annotations {
 		sf.addAnnotation(at)

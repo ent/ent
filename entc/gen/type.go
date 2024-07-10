@@ -1361,6 +1361,17 @@ func (f Field) IsEnum() bool { return f.Type != nil && f.Type.Type == field.Type
 // that was referenced by one of the edges.
 func (f Field) IsEdgeField() bool { return f.fk != nil }
 
+// IsDeprecated returns true if the field is deprecated.
+func (f Field) IsDeprecated() bool { return f.def != nil && f.def.Deprecated }
+
+// DeprecationReason returns the deprecation reason of the field.
+func (f Field) DeprecationReason() string {
+	if f.def != nil {
+		return f.def.DeprecatedReason
+	}
+	return ""
+}
+
 // Edge returns the edge this field is point to.
 func (f Field) Edge() (*Edge, error) {
 	if !f.IsEdgeField() {
@@ -1423,6 +1434,17 @@ func (t Type) HasValueScanner() bool {
 		}
 	}
 	return false
+}
+
+// DeprecatedFields returns all deprecated fields of the type.
+func (t Type) DeprecatedFields() []*Field {
+	fs := make([]*Field, 0, len(t.Fields))
+	for _, f := range t.Fields {
+		if f.IsDeprecated() {
+			fs = append(fs, f)
+		}
+	}
+	return fs
 }
 
 // HasValueScanner indicates if the field has (an external) ValueScanner.

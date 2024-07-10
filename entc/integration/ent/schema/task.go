@@ -32,7 +32,8 @@ func (Task) Fields() []ent.Field {
 			Immutable().
 			Nillable(),
 		field.String("name").
-			Optional(),
+			Optional().
+			Deprecated(),
 		field.String("owner").
 			Optional(),
 		field.Int("order").
