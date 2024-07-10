@@ -702,6 +702,22 @@ func (User) Fields() []ent.Field {
 }
 ```
 
+## Deprecated Fields
+
+The `Deprecated` method can be used to mark a field as deprecated. Deprecated fields are not
+selected by default in queries, and their struct fields are annotated as `Deprecated` in the
+generated code.
+
+```go
+// Fields of the user.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name").
+			Deprecated("use `full_name` instead"),
+	}
+}
+```
+
 ## Storage Key
 
 Custom storage name can be configured using the `StorageKey` method.

@@ -218,6 +218,10 @@ type {{ $slice }} []*{{ $.Name }}
 	{{- else }}
 		// {{ $.StructField }} holds the value of the "{{ $.Name }}" field.
 	{{- end }}
+	{{- if $.IsDeprecated }}
+		//
+		// Deprecated: {{ with $.DeprecationReason }}{{ . }}{{ else }}Field "{{ $.Name }}" was marked as deprecated in the schema.{{ end }}
+	{{- end }}
 {{- end }}
 
 {{/* A template for setting the edge comment. */}}

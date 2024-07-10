@@ -10,6 +10,7 @@ package field
 import (
 	"errors"
 	"reflect"
+	"strings"
 
 	"entgo.io/ent/schema"
 )
@@ -228,6 +229,17 @@ func (b *{{ $builder }}) Annotations(annotations ...schema.Annotation) *{{ $buil
 	return b
 }
 
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *{{ $builder }}) Deprecated(reason ...string) *{{ $builder }} {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *{{ $builder }}) Descriptor() *Descriptor {
 	if b.desc.Default != nil || b.desc.UpdateDefault != nil {
@@ -406,6 +418,17 @@ func (b *{{ $builder }}) ValueScanner(vs any) *{{ $builder }} {
 //
 func (b *{{ $builder }}) Annotations(annotations ...schema.Annotation) *{{ $builder }} {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *{{ $builder }}) Deprecated(reason ...string) *{{ $builder }} {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
 	return b
 }
 

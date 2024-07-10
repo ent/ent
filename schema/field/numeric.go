@@ -9,6 +9,7 @@ package field
 import (
 	"errors"
 	"reflect"
+	"strings"
 
 	"entgo.io/ent/schema"
 )
@@ -289,6 +290,17 @@ func (b *intBuilder) Annotations(annotations ...schema.Annotation) *intBuilder {
 	return b
 }
 
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *intBuilder) Deprecated(reason ...string) *intBuilder {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *intBuilder) Descriptor() *Descriptor {
 	if b.desc.Default != nil || b.desc.UpdateDefault != nil {
@@ -463,6 +475,17 @@ func (b *uintBuilder) ValueScanner(vs any) *uintBuilder {
 //		Annotations(entgql.OrderField("UINT"))
 func (b *uintBuilder) Annotations(annotations ...schema.Annotation) *uintBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *uintBuilder) Deprecated(reason ...string) *uintBuilder {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
 	return b
 }
 
@@ -653,6 +676,17 @@ func (b *int8Builder) Annotations(annotations ...schema.Annotation) *int8Builder
 	return b
 }
 
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *int8Builder) Deprecated(reason ...string) *int8Builder {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int8Builder) Descriptor() *Descriptor {
 	if b.desc.Default != nil || b.desc.UpdateDefault != nil {
@@ -837,6 +871,17 @@ func (b *int16Builder) ValueScanner(vs any) *int16Builder {
 //		Annotations(entgql.OrderField("INT16"))
 func (b *int16Builder) Annotations(annotations ...schema.Annotation) *int16Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *int16Builder) Deprecated(reason ...string) *int16Builder {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
 	return b
 }
 
@@ -1027,6 +1072,17 @@ func (b *int32Builder) Annotations(annotations ...schema.Annotation) *int32Build
 	return b
 }
 
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *int32Builder) Deprecated(reason ...string) *int32Builder {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int32Builder) Descriptor() *Descriptor {
 	if b.desc.Default != nil || b.desc.UpdateDefault != nil {
@@ -1214,6 +1270,17 @@ func (b *int64Builder) Annotations(annotations ...schema.Annotation) *int64Build
 	return b
 }
 
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *int64Builder) Deprecated(reason ...string) *int64Builder {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int64Builder) Descriptor() *Descriptor {
 	if b.desc.Default != nil || b.desc.UpdateDefault != nil {
@@ -1388,6 +1455,17 @@ func (b *uint8Builder) ValueScanner(vs any) *uint8Builder {
 //		Annotations(entgql.OrderField("UINT8"))
 func (b *uint8Builder) Annotations(annotations ...schema.Annotation) *uint8Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *uint8Builder) Deprecated(reason ...string) *uint8Builder {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
 	return b
 }
 
@@ -1568,6 +1646,17 @@ func (b *uint16Builder) Annotations(annotations ...schema.Annotation) *uint16Bui
 	return b
 }
 
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *uint16Builder) Deprecated(reason ...string) *uint16Builder {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uint16Builder) Descriptor() *Descriptor {
 	if b.desc.Default != nil || b.desc.UpdateDefault != nil {
@@ -1745,6 +1834,17 @@ func (b *uint32Builder) Annotations(annotations ...schema.Annotation) *uint32Bui
 	return b
 }
 
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *uint32Builder) Deprecated(reason ...string) *uint32Builder {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uint32Builder) Descriptor() *Descriptor {
 	if b.desc.Default != nil || b.desc.UpdateDefault != nil {
@@ -1919,6 +2019,17 @@ func (b *uint64Builder) ValueScanner(vs any) *uint64Builder {
 //		Annotations(entgql.OrderField("UINT64"))
 func (b *uint64Builder) Annotations(annotations ...schema.Annotation) *uint64Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *uint64Builder) Deprecated(reason ...string) *uint64Builder {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
 	return b
 }
 
@@ -2100,6 +2211,17 @@ func (b *float64Builder) Annotations(annotations ...schema.Annotation) *float64B
 	return b
 }
 
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *float64Builder) Deprecated(reason ...string) *float64Builder {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *float64Builder) Descriptor() *Descriptor {
 	b.desc.checkGoType(float64Type)
@@ -2259,6 +2381,17 @@ func (b *float32Builder) ValueScanner(vs any) *float32Builder {
 //		Annotations(entgql.OrderField("FLOAT32"))
 func (b *float32Builder) Annotations(annotations ...schema.Annotation) *float32Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *float32Builder) Deprecated(reason ...string) *float32Builder {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
 	return b
 }
 
