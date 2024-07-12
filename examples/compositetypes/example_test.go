@@ -24,7 +24,7 @@ func TestCompositeTypes(t *testing.T) {
 		t.Skip()
 	}
 	ctx := context.Background()
-	client, err := ent.Open(dialect.Postgres, "postgres://postgres:pass@:5429/dev?search_path=public&sslmode=disable")
+	client, err := ent.Open(dialect.Postgres, os.Getenv("DB_URL"))
 	if err != nil {
 		log.Fatalln(err)
 	}
