@@ -48,8 +48,9 @@ module.exports = {
           type: 'category',
           label: 'External Objects',
           items: [
-            {type: 'doc', id: 'migration/domain', label: 'Domain Types'},
             {type: 'doc', id: 'migration/composite', label: 'Composite Types'},
+            {type: 'doc', id: 'migration/domain', label: 'Domain Types'},
+            {type: 'doc', id: 'migration/enum', label: 'Enum Types'},
           ],
           collapsed: false,
         },
