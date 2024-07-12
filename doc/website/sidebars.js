@@ -49,6 +49,7 @@ module.exports = {
           label: 'External Objects',
           items: [
             {type: 'doc', id: 'migration/domain', label: 'Domain Types'},
+            {type: 'doc', id: 'migration/composite', label: 'Composite Types'},
           ],
           collapsed: false,
         },
