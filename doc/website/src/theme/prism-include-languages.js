@@ -74,5 +74,7 @@ export default function(Prism) {
       lookbehind: true
     }
   });
-
+  window.Prism = Prism;
+  require(`prismjs/components/prism-hcl`)
+  delete window.Prism;
 }
