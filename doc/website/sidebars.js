@@ -44,6 +44,14 @@ module.exports = {
       label: 'Migration',
       items: [
         'versioned-migrations',
+        {
+          type: 'category',
+          label: 'External Objects',
+          items: [
+            {type: 'doc', id: 'migration/domain', label: 'Domain Types'},
+          ],
+          collapsed: false,
+        },
         'multischema-migrations',
         'migrate',
         'data-migrations',
