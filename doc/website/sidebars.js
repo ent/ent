@@ -51,6 +51,7 @@ module.exports = {
             {type: 'doc', id: 'migration/composite', label: 'Composite Types'},
             {type: 'doc', id: 'migration/domain', label: 'Domain Types'},
             {type: 'doc', id: 'migration/enum', label: 'Enum Types'},
+            {type: 'doc', id: 'migration/trigger', label: 'Triggers'},
           ],
           collapsed: false,
         },
