@@ -10,18 +10,21 @@ Row-level security (RLS) in PostgreSQL enables tables to implement policies that
 according to the user's role, enhancing the basic SQL-standard privileges provided by `GRANT`.
 
 Once activated, every standard access to the table has to adhere to these policies. If no policies are defined on the table,
-it defaults to a deny-all, meaning no rows can be seen or mutated. These policies can be tailored to specific commands,
+it defaults to a deny-all rule, meaning no rows can be seen or mutated. These policies can be tailored to specific commands,
 roles, or both, allowing for detailed management of who can access or change data.
 
 This guide explains how to attach Row-Level Security (RLS) Policies to your Ent types (objects) and configure the schema
 migration to manage both the RLS and the Ent schema as a single migration unit using Atlas.
 
 :::info [Atlas Pro Feature](https://atlasgo.io/features#pro-plan)
+
 Atlas support for [Row-Level Security Policies](https://atlasgo.io/atlas-schema/hcl#row-level-security-policy) used in
 this guide is available exclusively to Pro users. To use this feature, run:
+
 ```
 atlas login
 ```
+
 :::
 
 ## Install Atlas
