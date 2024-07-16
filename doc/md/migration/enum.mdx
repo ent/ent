@@ -62,7 +62,7 @@ CREATE TYPE status AS ENUM ('active', 'inactive', 'pending');
 ```hcl title="schema.hcl"
 schema "public" {}
 
-composite "status" {
+enum "status" {
   schema = schema.public
   values = ["active", "inactive", "pending"]
 }
