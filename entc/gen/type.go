@@ -1592,6 +1592,15 @@ func (f Field) Column() *schema.Column {
 			x[k] = schema.Expr(v)
 		}
 		c.Default = x
+	case len(ant.GeneratedExprs) > 0:
+		x := make(map[string]schema.GeneratedExpr)
+		for k, v := range ant.GeneratedExprs {
+			if k == dialect.Postgres {
+				c.Nullable = false
+			}
+			x[k] = schema.GeneratedExpr(v)
+		}
+		c.GeneratedExprs = x
 	}
 	// Override the collation defined in the
 	// schema if it was provided by an annotation.

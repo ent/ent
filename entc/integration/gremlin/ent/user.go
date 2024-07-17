@@ -37,6 +37,8 @@ type User struct {
 	Phone string `json:"phone,omitempty"`
 	// Password holds the value of the "password" field.
 	Password string `graphql:"-" json:"-"`
+	// SearchableProfile holds the value of the "searchable_profile" field.
+	SearchableProfile string `json:"searchable_profile,omitempty"`
 	// Role holds the value of the "role" field.
 	Role user.Role `json:"role,omitempty"`
 	// Employment holds the value of the "employment" field.
@@ -193,19 +195,20 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanu struct {
-		ID          string          `json:"id,omitempty"`
-		OptionalInt int             `json:"optional_int,omitempty"`
-		Age         int             `json:"age,omitempty"`
-		Name        string          `json:"name,omitempty"`
-		Last        string          `json:"last,omitempty"`
-		Nickname    string          `json:"nickname,omitempty"`
-		Address     string          `json:"address,omitempty"`
-		Phone       string          `json:"phone,omitempty"`
-		Password    string          `json:"password,omitempty"`
-		Role        user.Role       `json:"role,omitempty"`
-		Employment  user.Employment `json:"employment,omitempty"`
-		SSOCert     string          `json:"sso_cert,omitempty"`
-		FilesCount  int             `json:"files_count,omitempty"`
+		ID                string          `json:"id,omitempty"`
+		OptionalInt       int             `json:"optional_int,omitempty"`
+		Age               int             `json:"age,omitempty"`
+		Name              string          `json:"name,omitempty"`
+		Last              string          `json:"last,omitempty"`
+		Nickname          string          `json:"nickname,omitempty"`
+		Address           string          `json:"address,omitempty"`
+		Phone             string          `json:"phone,omitempty"`
+		Password          string          `json:"password,omitempty"`
+		SearchableProfile string          `json:"searchable_profile,omitempty"`
+		Role              user.Role       `json:"role,omitempty"`
+		Employment        user.Employment `json:"employment,omitempty"`
+		SSOCert           string          `json:"sso_cert,omitempty"`
+		FilesCount        int             `json:"files_count,omitempty"`
 	}
 	if err := vmap.Decode(&scanu); err != nil {
 		return err
@@ -219,6 +222,7 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 	u.Address = scanu.Address
 	u.Phone = scanu.Phone
 	u.Password = scanu.Password
+	u.SearchableProfile = scanu.SearchableProfile
 	u.Role = scanu.Role
 	u.Employment = scanu.Employment
 	u.SSOCert = scanu.SSOCert
@@ -327,6 +331,9 @@ func (u *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("password=<sensitive>")
 	builder.WriteString(", ")
+	builder.WriteString("searchable_profile=")
+	builder.WriteString(u.SearchableProfile)
+	builder.WriteString(", ")
 	builder.WriteString("role=")
 	builder.WriteString(fmt.Sprintf("%v", u.Role))
 	builder.WriteString(", ")
@@ -352,19 +359,20 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanu []struct {
-		ID          string          `json:"id,omitempty"`
-		OptionalInt int             `json:"optional_int,omitempty"`
-		Age         int             `json:"age,omitempty"`
-		Name        string          `json:"name,omitempty"`
-		Last        string          `json:"last,omitempty"`
-		Nickname    string          `json:"nickname,omitempty"`
-		Address     string          `json:"address,omitempty"`
-		Phone       string          `json:"phone,omitempty"`
-		Password    string          `json:"password,omitempty"`
-		Role        user.Role       `json:"role,omitempty"`
-		Employment  user.Employment `json:"employment,omitempty"`
-		SSOCert     string          `json:"sso_cert,omitempty"`
-		FilesCount  int             `json:"files_count,omitempty"`
+		ID                string          `json:"id,omitempty"`
+		OptionalInt       int             `json:"optional_int,omitempty"`
+		Age               int             `json:"age,omitempty"`
+		Name              string          `json:"name,omitempty"`
+		Last              string          `json:"last,omitempty"`
+		Nickname          string          `json:"nickname,omitempty"`
+		Address           string          `json:"address,omitempty"`
+		Phone             string          `json:"phone,omitempty"`
+		Password          string          `json:"password,omitempty"`
+		SearchableProfile string          `json:"searchable_profile,omitempty"`
+		Role              user.Role       `json:"role,omitempty"`
+		Employment        user.Employment `json:"employment,omitempty"`
+		SSOCert           string          `json:"sso_cert,omitempty"`
+		FilesCount        int             `json:"files_count,omitempty"`
 	}
 	if err := vmap.Decode(&scanu); err != nil {
 		return err
@@ -379,6 +387,7 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 		node.Address = v.Address
 		node.Phone = v.Phone
 		node.Password = v.Password
+		node.SearchableProfile = v.SearchableProfile
 		node.Role = v.Role
 		node.Employment = v.Employment
 		node.SSOCert = v.SSOCert

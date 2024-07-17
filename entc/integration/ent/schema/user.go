@@ -6,6 +6,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/mixin"
@@ -43,6 +44,8 @@ func (User) Fields() []ent.Field {
 		field.String("password").
 			Optional().
 			Sensitive(),
+		field.String("searchable_profile").
+			Annotations(entsql.GeneratedAs("tsvector(...)")),
 		field.Enum("role").
 			Values("user", "admin", "free-user", "test user").
 			Default("user"),

@@ -11,6 +11,8 @@ import (
 	"reflect"
 	"testing"
 
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/entc/load"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -234,6 +236,25 @@ func TestNewGraphThroughInvalidRel(t *testing.T) {
 		},
 	})
 	require.EqualError(t, err, `entc/gen: resolving edges: edge T1.groups Through("groups_edge", T2.Type) is allowed only on M2M edges, but got: "O2O"`)
+}
+
+func TestGeneratedAnnotation(t *testing.T) {
+	graph, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, &load.Schema{
+		Name: "T1",
+		Fields: []*load.Field{
+			{
+				Name: "name", Info: &field.TypeInfo{Type: field.TypeString},
+				Annotations: dict("EntSQL", entsql.Annotation{GeneratedExprs: map[string]entsql.GeneratedExpr{dialect.Postgres: {Expr: "tsvector(...)"}}}),
+			},
+		},
+	})
+	require.NoError(t, err)
+	require.Len(t, graph.Nodes, 1)
+	tables, _ := graph.Tables()
+	require.Len(t, tables, 1)
+	require.Len(t, tables[0].Columns, 2)
+	require.NotNil(t, tables[0].Columns[1].GeneratedExprs)
+	require.Equal(t, "tsvector(...)", tables[0].Columns[1].GeneratedExprs[dialect.Postgres].Expr)
 }
 
 func TestNewGraphThroughDuplicates(t *testing.T) {

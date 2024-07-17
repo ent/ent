@@ -122,6 +122,12 @@ func (uc *UserCreate) SetNillablePassword(s *string) *UserCreate {
 	return uc
 }
 
+// SetSearchableProfile sets the "searchable_profile" field.
+func (uc *UserCreate) SetSearchableProfile(s string) *UserCreate {
+	uc.mutation.SetSearchableProfile(s)
+	return uc
+}
+
 // SetRole sets the "role" field.
 func (uc *UserCreate) SetRole(u user.Role) *UserCreate {
 	uc.mutation.SetRole(u)
@@ -428,6 +434,9 @@ func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.Last(); !ok {
 		return &ValidationError{Name: "last", err: errors.New(`ent: missing required field "User.last"`)}
 	}
+	if _, ok := uc.mutation.SearchableProfile(); !ok {
+		return &ValidationError{Name: "searchable_profile", err: errors.New(`ent: missing required field "User.searchable_profile"`)}
+	}
 	if _, ok := uc.mutation.Role(); !ok {
 		return &ValidationError{Name: "role", err: errors.New(`ent: missing required field "User.role"`)}
 	}
@@ -506,6 +515,9 @@ func (uc *UserCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := uc.mutation.Password(); ok {
 		v.Property(dsl.Single, user.FieldPassword, value)
+	}
+	if value, ok := uc.mutation.SearchableProfile(); ok {
+		v.Property(dsl.Single, user.FieldSearchableProfile, value)
 	}
 	if value, ok := uc.mutation.Role(); ok {
 		v.Property(dsl.Single, user.FieldRole, value)

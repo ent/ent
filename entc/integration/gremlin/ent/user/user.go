@@ -33,6 +33,8 @@ const (
 	FieldPhone = "phone"
 	// FieldPassword holds the string denoting the password field in the database.
 	FieldPassword = "password"
+	// FieldSearchableProfile holds the string denoting the searchable_profile field in the database.
+	FieldSearchableProfile = "searchable_profile"
 	// FieldRole holds the string denoting the role field in the database.
 	FieldRole = "role"
 	// FieldEmployment holds the string denoting the employment field in the database.

@@ -34,6 +34,8 @@ const (
 	FieldPhone = "phone"
 	// FieldPassword holds the string denoting the password field in the database.
 	FieldPassword = "password"
+	// FieldSearchableProfile holds the string denoting the searchable_profile field in the database.
+	FieldSearchableProfile = "searchable_profile"
 	// FieldRole holds the string denoting the role field in the database.
 	FieldRole = "role"
 	// FieldEmployment holds the string denoting the employment field in the database.
@@ -130,6 +132,7 @@ var Columns = []string{
 	FieldAddress,
 	FieldPhone,
 	FieldPassword,
+	FieldSearchableProfile,
 	FieldRole,
 	FieldEmployment,
 	FieldSSOCert,
@@ -284,6 +287,11 @@ func ByPhone(opts ...sql.OrderTermOption) OrderOption {
 // ByPassword orders the results by the password field.
 func ByPassword(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPassword, opts...).ToFunc()
+}
+
+// BySearchableProfile orders the results by the searchable_profile field.
+func BySearchableProfile(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSearchableProfile, opts...).ToFunc()
 }
 
 // ByRole orders the results by the role field.
