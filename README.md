@@ -31,6 +31,9 @@ The documentation for developing and using ent is available at: https://entgo.io
 
 For discussion and support, [open an issue](https://github.com/ent/ent/issues/new/choose) or join our [channel](https://gophers.slack.com/archives/C01FMSQDT53) in the gophers Slack.
 
+## About the Project
+The `ent` project was inspired by Ent, an entity framework used internally at Meta (Facebook). It was created by [a8m](https://github.com/a8m) and [alexsn](https://github.com/alexsn) from the [Facebook Connectivity][fbc] team. These days, it is developed and maintained by the [Atlas](https://github.com/ariga/atlas) team, and the roadmap for its v1 release is described [here](https://github.com/ent/ent/issues/46).
+
 ## Join the ent Community
 Building `ent` would not have been possible without the collective work of our entire community. We maintain a [contributors page](doc/md/contributors.md)
 which lists the contributors to this `ent`. 
@@ -39,15 +42,6 @@ In order to contribute to `ent`, see the [CONTRIBUTING](CONTRIBUTING.md) file fo
 If your company or your product is using `ent`, please let us know by adding yourself to the [ent users page](https://github.com/ent/ent/wiki/ent-users).
 
 For updates, follow us on Twitter at https://twitter.com/entgo_io
-
-
-
-## About the Project
-The `ent` project was inspired by Ent, an entity framework we use internally. It is developed and maintained
-by [a8m](https://github.com/a8m) and [alexsn](https://github.com/alexsn)
-from the [Facebook Connectivity][fbc] team. It is used by multiple teams and projects in production,
-and the roadmap for its v1 release is described [here](https://github.com/ent/ent/issues/46).
-Read more about the motivation of the project [here](https://entgo.io/blog/2019/10/03/introducing-ent).
 
 ## License
 ent is licensed under Apache 2.0 as found in the [LICENSE file](LICENSE).
