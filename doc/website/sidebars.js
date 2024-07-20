@@ -52,7 +52,7 @@ module.exports = {
             {type: 'doc', id: 'migration/domain', label: 'Domain Types'},
             {type: 'doc', id: 'migration/enum', label: 'Enum Types'},
             {type: 'doc', id: 'migration/extension', label: 'Extensions'},
-            {type: 'doc', id: 'migration/function-indexes', label: 'Functional Indexes'},
+            {type: 'doc', id: 'migration/functional-indexes', label: 'Functional Indexes'},
             {type: 'doc', id: 'migration/rls', label: 'Row-Level Security'},
             {type: 'doc', id: 'migration/trigger', label: 'Triggers'},
           ],
