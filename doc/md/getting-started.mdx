@@ -66,14 +66,6 @@ func (User) Edges() []ent.Edge {
 Add 2 fields to the `User` schema:
 
 ```go title="entdemo/ent/schema/user.go"
-
-package schema
-
-import (
-	"entgo.io/ent"
-	"entgo.io/ent/schema/field"
-)
-
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
@@ -242,15 +234,6 @@ func CreateUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 and additional information about storage elements (column names, primary keys, etc).
 
 ```go title="entdemo/start.go"
-package main
-
-import (
-	"log"
-
-	"entdemo/ent"
-	"entdemo/ent/user"
-)
-
 func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	u, err := client.User.
 		Query().
@@ -308,7 +291,6 @@ can **have 1 or more** cars, but a car **has only one** owner (one-to-many relat
 Let's add the `"cars"` edge to the `User` schema, and run `go generate ./ent`:
 
 ```go title="entdemo/ent/schema/user.go"
-
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
@@ -320,13 +302,6 @@ func (User) Edges() []ent.Edge {
 We continue our example by creating 2 cars and adding them to a user.
 
 ```go title="entdemo/start.go"
-
-import (
-	"entdemo/ent"
-	"entdemo/ent/car"
-	"entdemo/ent/user"
-)
-
 func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	// Create a new car with model "Tesla".
 	tesla, err := client.Car.
@@ -363,18 +338,10 @@ func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	log.Println("user was created: ", a8m)
 	return a8m, nil
 }
-
 ```
 But what about querying the `cars` edge (relation)? Here's how we do it:
 
 ```go title="entdemo/start.go"
-import (
-	"log"
-
-	"entdemo/ent"
-	"entdemo/ent/car"
-)
-
 func QueryCars(ctx context.Context, a8m *ent.User) error {
 	cars, err := a8m.QueryCars().All(ctx)
 	if err != nil {
@@ -425,14 +392,6 @@ func (Car) Edges() []ent.Edge {
 We'll continue the user/cars example above by querying the inverse edge.
 
 ```go title="entdemo/start.go"
-import (
-	"fmt"
-	"log"
-
-	"entdemo/ent"
-	"entdemo/ent/user"
-)
-
 func QueryCarUsers(ctx context.Context, a8m *ent.User) error {
 	cars, err := a8m.QueryCars().All(ctx)
 	if err != nil {
@@ -635,13 +594,6 @@ Now when we have a graph with data, we can run a few queries on it:
 1. Get all user's cars within the group named "GitHub":
 
 	```go title="entdemo/start.go"
-	import (
-		"log"
-		
-		"entdemo/ent"
-		"entdemo/ent/group"
-	)
-
 	func QueryGithub(ctx context.Context, client *ent.Client) error {
 		cars, err := client.Group.
 			Query().
@@ -661,13 +613,6 @@ Now when we have a graph with data, we can run a few queries on it:
 2. Change the query above, so that the source of the traversal is the user *Ariel*:
    
 	```go title="entdemo/start.go"
-	import (
-		"log"
-		
-		"entdemo/ent"
-		"entdemo/ent/car"
-	)
-
 	func QueryArielCars(ctx context.Context, client *ent.Client) error {
 		// Get "Ariel" from previous steps.
 		a8m := client.User.
@@ -699,13 +644,6 @@ Now when we have a graph with data, we can run a few queries on it:
 3. Get all groups that have users (query with a look-aside predicate):
 
 	```go title="entdemo/start.go"
-	import (
-		"log"
-		
-		"entdemo/ent"
-		"entdemo/ent/group"
-	)
-
 	func QueryGroupWithUsers(ctx context.Context, client *ent.Client) error {
     	groups, err := client.Group.
     		Query().
