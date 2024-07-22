@@ -283,7 +283,7 @@ CREATE INDEX "users_phone" ON "users" ("phone" bpchar_pattern_ops)
 
 The Ent schema supports defining indexes on fields and edges (foreign-keys), but there is no API for defining index
 parts as expressions, such as function calls. If you are using [Atlas](https://atlasgo.io/docs) for managing schema
-migrations, you can define functional indexes as described in [this guide](/migration/functional-indexes).
+migrations, you can define functional indexes as described in [this guide](/docs/migration/functional-indexes).
 
 ## Storage Key
 
