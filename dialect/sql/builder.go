@@ -2187,6 +2187,15 @@ type Selector struct {
 	lock      *LockOptions
 }
 
+// New returns a new Selector with the same dialect and context.
+func (s *Selector) New() *Selector {
+	c := Dialect(s.dialect).Select()
+	if s.ctx != nil {
+		c = c.WithContext(s.ctx)
+	}
+	return c
+}
+
 // WithContext sets the context into the *Selector.
 func (s *Selector) WithContext(ctx context.Context) *Selector {
 	if ctx == nil {
@@ -2238,6 +2247,11 @@ func (s *Selector) Select(columns ...string) *Selector {
 		s.selection[i] = selection{c: columns[i]}
 	}
 	return s
+}
+
+// SelectDistinct selects distinct columns.
+func (s *Selector) SelectDistinct(columns ...string) *Selector {
+	return s.Select(columns...).Distinct()
 }
 
 // AppendSelect appends additional columns to the SELECT statement.
@@ -2626,6 +2640,10 @@ const (
 
 // Union appends the UNION (DISTINCT) clause to the query.
 func (s *Selector) Union(t TableView) *Selector {
+	if s1, ok := t.(*Selector); ok && s == s1 {
+		s.AddError(errors.New("self UNION is not supported. Create a clone or a new selector instead"))
+		return s
+	}
 	s.setOps = append(s.setOps, setOp{
 		Type:      setOpTypeUnion,
 		TableView: t,

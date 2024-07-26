@@ -19,6 +19,7 @@ import (
 // Schema represents an ent.Schema that was loaded from a complied user package.
 type Schema struct {
 	Name         string         `json:"name,omitempty"`
+	View         bool           `json:"view,omitempty"`
 	Config       ent.Config     `json:"config,omitempty"`
 	Edges        []*Edge        `json:"edges,omitempty"`
 	Fields       []*Field       `json:"fields,omitempty"`
@@ -186,11 +187,15 @@ func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 		Name:        indirect(reflect.TypeOf(schema)).Name(),
 		Annotations: make(map[string]any),
 	}
+	_, s.View = schema.(ent.Viewer)
 	if err := s.loadMixin(schema); err != nil {
 		return nil, fmt.Errorf("schema %q: %w", s.Name, err)
 	}
 	// Schema annotations override mixed-in annotations.
 	for _, at := range schema.Annotations() {
+		if e, ok := at.(interface{ Err() error }); ok && e.Err() != nil {
+			return nil, fmt.Errorf("schema %q: %w", s.Name, e.Err())
+		}
 		s.addAnnotation(at)
 	}
 	if err := s.loadFields(schema); err != nil {

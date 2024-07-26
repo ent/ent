@@ -39,7 +39,7 @@ const (
 	{{- end }}
 )
 
-{{ range $n := $.Nodes }}
+{{ range $n := $.MutableNodes }}
 
 {{ $mutation := $n.MutationName }}
 // {{ $mutation }} represents an operation that mutates the {{ $n.Name }} nodes in the graph.

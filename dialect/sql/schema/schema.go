@@ -38,6 +38,7 @@ type Table struct {
 	ForeignKeys []*ForeignKey
 	Annotation  *entsql.Annotation
 	Comment     string
+	View        bool // Indicate the table is a view.
 }
 
 // NewTable returns a new table with the given name.
@@ -46,6 +47,13 @@ func NewTable(name string) *Table {
 		Name:    name,
 		columns: make(map[string]*Column),
 	}
+}
+
+// NewView returns a new view with the given name.
+func NewView(name string) *Table {
+	t := NewTable(name)
+	t.View = true
+	return t
 }
 
 // SetComment sets the table comment.
