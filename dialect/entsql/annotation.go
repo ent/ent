@@ -149,6 +149,15 @@ type Annotation struct {
 	//	}
 	//
 	Checks map[string]string `json:"checks,omitempty"`
+
+	// Skip indicates that the field or the schema is skipped/ignored during
+	// migration (e.g., defined externally).
+	//
+	//	entsql.Annotation{
+	//		Skip: true,
+	//	}
+	//
+	Skip bool `json:"skip,omitempty"`
 }
 
 // Name describes the annotation name.
@@ -215,6 +224,12 @@ func Checks(c map[string]string) *Annotation {
 	return &Annotation{
 		Checks: c,
 	}
+}
+
+// Skip indicates that the field or the schema is skipped/ignored during
+// migration (e.g., defined externally).
+func Skip() *Annotation {
+	return &Annotation{Skip: true}
 }
 
 // Default specifies a literal default value of a column. Note that using
@@ -357,6 +372,9 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 		for name, check := range checks {
 			a.Checks[name] = check
 		}
+	}
+	if ant.Skip {
+		a.Skip = true
 	}
 	return a
 }
