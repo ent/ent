@@ -623,11 +623,17 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 		if n.HasOneFieldID() {
 			table.AddPrimary(n.ID.PK())
 		}
-		ant := n.EntSQL()
-		if ant != nil {
+		switch ant := n.EntSQL(); {
+		case ant == nil:
+		case ant.Skip:
+			continue
+		default:
 			table.SetAnnotation(ant).SetSchema(ant.Schema)
 		}
 		for _, f := range n.Fields {
+			if a := f.EntSQL(); a != nil && a.Skip {
+				continue
+			}
 			if !f.IsEdgeField() {
 				table.AddColumn(f.Column())
 			}
