@@ -19,7 +19,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestTriggersTypes(t *testing.T) {
+func TestTriggers(t *testing.T) {
 	if os.Getenv("CI") != "" {
 		t.Skip()
 	}

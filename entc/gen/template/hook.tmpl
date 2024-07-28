@@ -16,7 +16,7 @@ import "{{ $.Config.Package }}"
 
 {{ $pkg := base $.Config.Package }}
 
-{{ range $n := $.Nodes }}
+{{ range $n := $.MutableNodes }}
 	{{ $name := print $n.Name "Func" }}
 	{{ $type := printf "*%s.%s" $pkg $n.MutationName }}
 

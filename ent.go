@@ -123,7 +123,8 @@ type (
 	//	}
 	//
 	// Deprecated: the Config object predates the schema.Annotation method and it
-	// is planned be removed in v0.5.0. New code should use Annotations instead.
+	// is planned to be removed in future versions. New code should use Annotations
+	// instead.
 	//
 	//	func (T) Annotations() []schema.Annotation {
 	//		return []schema.Annotation{
@@ -209,6 +210,20 @@ type (
 	Schema struct {
 		Interface
 	}
+
+	// A View only schema describes an entity that all its operations
+	// are limited to read-only. For example, a database view.
+	//
+	// Users that wants to define a view schema should embed the View
+	// struct in their schema as follows:
+	//
+	//	type V struct {
+	//		ent.View
+	//	}
+	//
+	View struct {
+		Schema
+	}
 )
 
 // Fields of the schema.
@@ -237,6 +252,13 @@ func (Schema) Policy() Policy { return nil }
 
 // Annotations of the schema.
 func (Schema) Annotations() []schema.Annotation { return nil }
+
+// Viewer is an interface that wraps the view method.
+// Implemented by the View struct.
+type Viewer interface{ view() }
+
+// view is a dummy method to distinguish between Schema and View.
+func (View) view() {}
 
 type (
 	// Value represents a dynamic value returned by mutations or queries.
