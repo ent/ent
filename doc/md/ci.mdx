@@ -146,7 +146,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: pass
           MYSQL_DATABASE: test
         ports:
-          - 3306:3306
+          - "3306:3306"
         options: >-
           --health-cmd "mysqladmin ping -ppass"
           --health-interval 10s
@@ -155,14 +155,15 @@ jobs:
           --health-retries 10
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3.0.1
+      - uses: actions/checkout@v3
+      - uses: ariga/setup-atlas@v0
         with:
-          fetch-depth: 0 # Mandatory unless "latest" is set below.
-      - uses: ariga/atlas-action@v0
+          cloud-token: ${{ secrets.ATLAS_CLOUD_TOKEN }}
+      - uses: ariga/atlas-action/migrate/lint@v1
         with:
-          dir: ent/migrate/migrations
-          dir-format: golang-migrate # Or: atlas, goose, dbmate
-          dev-url: mysql://root:pass@localhost:3306/test
+          dir: 'file://ent/migrate/migrations'
+          dir-name: 'my-project' # The name of the project in Atlas Cloud
+          dev-url: "mysql://root:pass@localhost:3306/dev"
 ```
 
 </TabItem>
@@ -183,30 +184,31 @@ on:
 jobs:
   lint:
     services:
-      # Spin up a maria:10.7 container to be used as the dev-database for analysis.
-      maria:
-        image: mariadb:10.7
+      # Spin up a maria:11 container to be used as the dev-database for analysis.
+      mariadb:
+        image: mariadb:11
         env:
-          MYSQL_DATABASE: test
+          MYSQL_DATABASE: dev
           MYSQL_ROOT_PASSWORD: pass
         ports:
-          - 3306:3306
+          - "3306:3306"
         options: >-
-          --health-cmd "mysqladmin ping -ppass"
+          --health-cmd "healthcheck.sh --su-mysql --connect --innodb_initialized"
           --health-interval 10s
           --health-start-period 10s
           --health-timeout 5s
           --health-retries 10
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3.0.1
+      - uses: actions/checkout@v3
+      - uses: ariga/setup-atlas@v0
         with:
-          fetch-depth: 0 # Mandatory unless "latest" is set below.
-      - uses: ariga/atlas-action@v0
+          cloud-token: ${{ secrets.ATLAS_CLOUD_TOKEN }}
+      - uses: ariga/atlas-action/migrate/lint@v1
         with:
-          dir: ent/migrate/migrations
-          dir-format: golang-migrate # Or: atlas, goose, dbmate
-          dev-url: maria://root:pass@localhost:3306/test
+          dir: 'file://ent/migrate/migrations'
+          dir-name: 'my-project' # The name of the project in Atlas Cloud
+          dev-url: "maria://root:pass@localhost:3306/dev"
 ```
 
 </TabItem>
@@ -227,29 +229,31 @@ on:
 jobs:
   lint:
     services:
-      # Spin up a postgres:10 container to be used as the dev-database for analysis.
+      # Spin up a postgres:15 container to be used as the dev-database for analysis.
       postgres:
-        image: postgres:10
+        image: postgres:15
         env:
-          POSTGRES_DB: test
+          POSTGRES_DB: dev
           POSTGRES_PASSWORD: pass
         ports:
           - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
+          --health-start-period 10s
           --health-timeout 5s
           --health-retries 5
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3.0.1
+      - uses: actions/checkout@v3
+      - uses: ariga/setup-atlas@v0
         with:
-          fetch-depth: 0 # Mandatory unless "latest" is set below.
-      - uses: ariga/atlas-action@v0
+          cloud-token: ${{ secrets.ATLAS_CLOUD_TOKEN }}
+      - uses: ariga/atlas-action/migrate/lint@v1
         with:
-          dir: ent/migrate/migrations
-          dir-format: golang-migrate # Or: atlas, goose, dbmate
-          dev-url: postgres://postgres:pass@localhost:5432/test?sslmode=disable
+          dir: 'file://ent/migrate/migrations'
+          dir-name: 'my-project' # The name of the project in Atlas Cloud
+          dev-url: postgres://postgres:pass@localhost:5432/dev?sslmode=disable
 ```
 
 </TabItem>
@@ -271,14 +275,15 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3.0.1
+      - uses: actions/checkout@v3
+      - uses: ariga/setup-atlas@v0
         with:
-          fetch-depth: 0 # Mandatory unless "latest" is set below.
-      - uses: ariga/atlas-action@v0
+          cloud-token: ${{ secrets.ATLAS_CLOUD_TOKEN }}
+      - uses: ariga/atlas-action/migrate/lint@v1
         with:
-          dir: ent/migrate/migrations
-          dir-format: golang-migrate # Or: atlas, goose, dbmate
-          dev-url: sqlite://./dev.db?_fk=1
+          dir: 'file://ent/migrate/migrations'
+          dir-name: 'my-project' # The name of the project in Atlas Cloud
+          dev-url: sqlite://file?mode=memory&_fk=1
 ```
 
 </TabItem>
