@@ -1,0 +1,426 @@
+---
+id: schema-views
+title: Views
+slug: /schema-views
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+Ent supports working with database views. Unlike regular Ent types (schemas), which are usually backed by tables, views
+act as "virtual tables" and their data results from a query. The following examples demonstrate how to define a `VIEW`
+in Ent. For more details on the different options, follow the rest of the guide.
+
+<Tabs>
+<TabItem value="Builder Definition">
+
+```go title="ent/schema/user.go"
+// CleanUser represents a user without its PII field.
+type CleanUser struct {
+	ent.View
+}
+
+// Annotations of the CleanUser.
+func (CleanUser) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.ViewFor(dialect.Postgres, func(s *sql.Selector) {
+			s.Select("name", "public_info").From(sql.Table("users"))
+		}),
+	}
+}
+
+// Fields of the CleanUser.
+func (CleanUser) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name"),
+		field.String("public_info"),
+	}
+}
+```
+</TabItem>
+<TabItem value="Raw Definition">
+
+```go title="ent/schema/user.go"
+// CleanUser represents a user without its PII field.
+type CleanUser struct {
+	ent.View
+}
+
+// Annotations of the CleanUser.
+func (CleanUser) Annotations() []schema.Annotation {
+    return []schema.Annotation{
+        // Alternatively, you can use raw definitions to define the view.
+        // But note, this definition is skipped if the ViewFor annotation
+        // is defined for the dialect we generated migration to (Postgres).
+        entsql.View(`SELECT name, public_info FROM users`),
+    }
+}
+
+// Fields of the CleanUser.
+func (CleanUser) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name"),
+		field.String("public_info"),
+	}
+}
+```
+</TabItem>
+<TabItem value="External Definition">
+
+```go title="ent/schema/user.go"
+// CleanUser represents a user without its PII field.
+type CleanUser struct {
+	ent.View
+}
+
+// View definition is specified in a separate file (`schema.sql`),
+// and loaded using Atlas' `composite_schema` data-source.
+
+// Fields of the CleanUser.
+func (CleanUser) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name"),
+		field.String("public_info"),
+	}
+}
+```
+</TabItem>
+</Tabs>
+
+:::info key differences between tables and views
+- Views are read-only, and therefore, no mutation builders are generated for them. If you want to define insertable/updatable
+  views, define them as regular schemas and follow the guide below to configure their migrations.
+- Unlike `ent.Schema`, `ent.View` does not have a default `ID` field. If you want to include an `id` field in your view,
+  you can explicitly define it as a field.
+- Hooks cannot be registered on views, as they are read-only.
+- Atlas provides built-in support for Ent views, for both versioned migrations and testing. However, if you are not
+  using Atlas and want to use views, you need to manage their migrations manually since Ent does not offer schema
+  migrations for them.
+:::
+
+## Introduction
+
+Views defined in the `ent/schema` package embed the `ent.View` type instead of the `ent.Schema` type. Besides fields,
+they can have edges, interceptors, and annotations to enable additional integrations. For example:
+
+```go title="ent/schema/user.go"
+// CleanUser represents a user without its PII field.
+type CleanUser struct {
+	ent.View
+}
+
+// Fields of the CleanUser.
+func (CleanUser) Fields() []ent.Field {
+	return []ent.Field{
+		// Note, unlike real schemas (tables, defined with ent.Schema),
+		// the "id" field should be defined manually if needed.
+		field.Int("id"),
+		field.String("name"),
+		field.String("public_info"),
+	}
+}
+```
+
+Once defined, you can run `go generate ./ent` to create the assets needed to interact with this view. For example:
+
+```go
+client.CleanUser.Query().OnlyX(ctx)
+```
+
+Note, the `Create`/`Update`/`Delete` builders are not generated for `ent.View`s.
+
+## Migration and Testing
+
+After defining the view schema, we need to inform Ent (and Atlas) about the SQL query that defines this view. If not
+configured, running an Ent query, such as the one defined above, will fail because there is no table named `clean_users`.
+
+:::note Atlas Guide
+The rest of the document, assumes you use Ent with [Atlas Pro](https://atlasgo.io/features#pro-plan), as Ent does not have
+migration support for views or other database objects besides tables and relationships. However, using Atlas or its Pro
+subscription <u>is not mandatory</u>. Ent does not require a specific migration engine, and as long as the view exists in the
+database, the client should be able to query it.
+:::
+
+To configure our view definition (`AS SELECT ...`), we have two options:
+1. Define it within the `ent/schema` in Go code.
+2. Keep the `ent/schema` independent of the view definition and create it externally. Either manually or automatically
+   using Atlas.
+
+Let's explore both options:
+
+### Go Definition
+
+This example demonstrates how to define an `ent.View` with its SQL definition (`AS ...`) specified in the Ent schema.
+
+The main advantage of this approach is that the `CREATE VIEW` correctness is checked during migration, not during queries.
+For example, if one of the `ent.Field`s is defined in your `ent/schema` does not exist in your SQL definition, PostgreSQL
+will return the following error:
+
+```text
+// highlight-next-line-error-message
+create "clean_users" view: pq: CREATE VIEW specifies more column names than columns
+```
+
+Here's an example of a view defined along with its fields and its `SELECT` query:
+
+<Tabs>
+<TabItem value="Builder Definition">
+
+Using the `entsql.ViewFor` API, you can use a dialect-aware builder to define the view. Note that you can have multiple
+view definitions for different dialects, and Atlas will use the one that matches the dialect of the migration.
+
+```go title="ent/schema/user.go"
+// CleanUser represents a user without its PII field.
+type CleanUser struct {
+	ent.View
+}
+
+// Annotations of the CleanUser.
+func (CleanUser) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.ViewFor(dialect.Postgres, func(s *sql.Selector) {
+			s.Select("id", "name", "public_info").From(sql.Table("users"))
+		}),
+	}
+}
+
+// Fields of the CleanUser.
+func (CleanUser) Fields() []ent.Field {
+	return []ent.Field{
+		// Note, unlike real schemas (tables, defined with ent.Schema),
+		// the "id" field should be defined manually if needed.
+		field.Int("id"),
+		field.String("name"),
+		field.String("public_info"),
+	}
+}
+```
+</TabItem>
+<TabItem value="Raw Definition">
+
+Alternatively, you can use raw definitions to define the view. But note, this definition is skipped if the `ViewFor`
+annotation is defined for the dialect we generated migration to (Postgres in this case).
+
+```go title="ent/schema/user.go"
+// CleanUser represents a user without its PII field.
+type CleanUser struct {
+	ent.View
+}
+
+// Annotations of the CleanUser.
+func (CleanUser) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+        entsql.View(`SELECT id, name, public_info FROM users`),
+	}
+}
+
+// Fields of the CleanUser.
+func (CleanUser) Fields() []ent.Field {
+	return []ent.Field{
+		// Note, unlike real schemas (tables, defined with ent.Schema),
+		// the "id" field should be defined manually if needed.
+		field.Int("id"),
+		field.String("name"),
+		field.String("public_info"),
+	}
+}
+```
+</TabItem>
+</Tabs>
+
+Let's simplify our configuration by creating an `atlas.hcl` file with the necessary parameters. We will use this config
+file in the [usage](#usage) section below:
+
+```hcl title="atlas.hcl"
+env "local" {
+  src = "ent://ent/schema"
+  dev = "docker://postgres/16/dev?search_path=public"
+}
+```
+
+The full example exists in [Ent repository](https://github.com/ent/ent/tree/master/examples/viewschema).
+
+### External Definition
+
+This example demonstrates how to define an `ent.View`, but keeps its definition in a separate file (`schema.sql`) or
+create manually in the database.
+
+```go title="ent/schema/user.go"
+// CleanUser represents a user without its PII field.
+type CleanUser struct {
+	ent.View
+}
+
+// Fields of the CleanUser.
+func (CleanUser) Fields() []ent.Field {
+	return []ent.Field{
+		field.Int("id"),
+		field.String("name"),
+		field.String("public_info"),
+	}
+}
+```
+
+After defining the view schema in Ent, the SQL `CREATE VIEW` definition needs to be configured (or created) separately
+to ensure it exists in the database when queried by the Ent runtime.
+
+For this example, we will use Atlas' `composite_schema` data source to build a schema graph from our `ent/schema`
+package and an SQL file describing this view. Let's create a file named `schema.sql` and paste the view definition in it:
+
+```sql title="schema.sql"
+-- Create "clean_users" view
+CREATE VIEW "clean_users" ("id", "name", "public_info") AS SELECT id,
+    name,
+    public_info
+   FROM users;
+```
+
+Next, we create an `atlas.hcl` config file with a `composite_schema` that includes both our `ent/schema` and the
+`schema.sql` file:
+
+```hcl title="atlas.hcl"
+data "composite_schema" "app" {
+  # Load the ent schema first with all its tables.
+  schema "public" {
+    url = "ent://ent/schema"
+  }
+  # Then, load the views defined in the schema.sql file.
+  schema "public" {
+    url = "file://schema.sql"
+  }
+}
+
+env "local" {
+  src = data.composite_schema.app.url
+  dev = "docker://postgres/15/dev?search_path=public"
+}
+```
+
+The full example exists in [Ent repository](https://github.com/ent/ent/tree/master/examples/viewcomposite).
+
+## Usage
+
+After setting up our schema, we can get its representation using the `atlas schema inspect` command, generate migrations for
+it, apply them to a database, and more. Below are a few commands to get you started with Atlas:
+
+#### Inspect the Schema
+
+The `atlas schema inspect` command is commonly used to inspect databases. However, we can also use it to inspect our
+`ent/schema` and print the SQL representation of it:
+
+```shell
+atlas schema inspect \
+  --env local \
+  --url env://src \
+  --format '{{ sql . }}'
+```
+
+The command above prints the following SQL. Note, the `clean_users` view is defined in the schema after the `users` table:
+
+```sql
+-- Create "users" table
+CREATE TABLE "users" ("id" bigint NOT NULL GENERATED BY DEFAULT AS IDENTITY, "name" character varying NOT NULL, "public_info" character varying NOT NULL, "private_info" character varying NOT NULL, PRIMARY KEY ("id"));
+-- Create "clean_users" view
+CREATE VIEW "clean_users" ("id", "name", "public_info") AS SELECT id,
+    name,
+    public_info
+   FROM users;
+```
+
+#### Generate Migrations For the Schema
+
+To generate a migration for the schema, run the following command:
+
+```shell
+atlas migrate diff \
+  --env local
+```
+
+Note that a new migration file is created with the following content:
+
+```sql title="migrations/20240712090543.sql"
+-- Create "users" table
+CREATE TABLE "users" ("id" bigint NOT NULL GENERATED BY DEFAULT AS IDENTITY, "name" character varying NOT NULL, "public_info" character varying NOT NULL, "private_info" character varying NOT NULL, PRIMARY KEY ("id"));
+-- Create "clean_users" view
+CREATE VIEW "clean_users" ("id", "name", "public_info") AS SELECT id,
+    name,
+    public_info
+   FROM users;
+```
+
+#### Apply the Migrations
+
+To apply the migration generated above to a database, run the following command:
+
+```
+atlas migrate apply \
+  --env local \
+  --url "postgres://postgres:pass@localhost:5432/database?search_path=public&sslmode=disable"
+```
+
+:::info Apply the Schema Directly on the Database
+
+Sometimes, there is a need to apply the schema directly to the database without generating a migration file. For example,
+when experimenting with schema changes, spinning up a database for testing, etc. In such cases, you can use the command
+below to apply the schema directly to the database:
+
+```shell
+atlas schema apply \
+  --env local \
+  --url "postgres://postgres:pass@localhost:5432/database?search_path=public&sslmode=disable"
+```
+
+Or, when writing tests, you can use the [Atlas Go SDK](https://github.com/ariga/atlas-go-sdk) to align the schema with
+the database before running assertions:
+
+```go
+ac, err := atlasexec.NewClient(".", "atlas")
+if err != nil {
+	log.Fatalf("failed to initialize client: %w", err)
+}
+// Automatically update the database with the desired schema.
+// Another option, is to use 'migrate apply' or 'schema apply' manually.
+if _, err := ac.SchemaApply(ctx, &atlasexec.SchemaApplyParams{
+	Env: "local",
+	URL: "postgres://postgres:pass@localhost:5432/database?search_path=public&sslmode=disable",
+}); err != nil {
+    log.Fatalf("failed to apply schema changes: %w", err)
+}
+// Run assertions.
+u1 := client.User.Create().SetName("a8m").SetPrivateInfo("secret").SetPublicInfo("public").SaveX(ctx)
+v1 := client.CleanUser.Query().OnlyX(ctx)
+require.Equal(t, u1.ID, v1.ID)
+require.Equal(t, u1.Name, v1.Name)
+require.Equal(t, u1.PublicInfo, v1.PublicInfo)
+```
+:::
+
+## Insertable/Updatable Views
+
+If you want to define an [insertable/updatable view](https://dev.mysql.com/doc/refman/8.4/en/view-updatability.html),
+set it as regular type (`ent.Schema`) and add the `entsql.Skip()` annotation to it to prevent Ent from generating
+the `CREATE TABLE` statement for this view. Then, define the view in the database as described in the
+[external definition](#external-definition) section above.
+
+```go title="ent/schema/user.go"
+// CleanUser represents a user without its PII field.
+type CleanUser struct {
+    ent.Schema
+}
+
+// Annotations of the CleanUser.
+func (CleanUser) Annotations() []schema.Annotation {
+    return []schema.Annotation{
+        entsql.Skip(),
+    }
+}
+
+// Fields of the CleanUser.
+func (CleanUser) Fields() []ent.Field {
+    return []ent.Field{
+        field.Int("id"),
+        field.String("name"),
+        field.String("public_info"),
+    }
+}
+```

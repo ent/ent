@@ -16,6 +16,7 @@ module.exports = {
         'schema-fields',
         'schema-edges',
         'schema-indexes',
+        'schema-views',
         'schema-mixin',
         'schema-annotations',
       ],
