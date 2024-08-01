@@ -2001,13 +2001,38 @@ func (c *batchCreator) insertLastIDs(ctx context.Context, tx dialect.ExecQuerier
 		if err != nil {
 			return err
 		}
+
+		increment, err := getIncrement(ctx, tx)
+		if err != nil {
+			return err
+		}
+
 		// Assume the ID field is AUTO_INCREMENT
 		// if its type is numeric.
 		for i := 0; int64(i) < affected && i < len(c.Nodes); i++ {
-			c.Nodes[i].ID.Value = id + int64(i)
+			c.Nodes[i].ID.Value = id + int64(i*increment)
 		}
 	}
 	return nil
+}
+
+func getIncrement(ctx context.Context, tx dialect.ExecQuerier) (int, error) {
+	var rows sql.Rows
+	if err := tx.Query(ctx, "SELECT @@auto_increment_increment", []any{}, &rows); err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+
+	if !rows.Next() {
+		return 0, fmt.Errorf("no auto_increment_increment")
+	}
+
+	var increment int
+	if err := rows.Scan(&increment); err != nil {
+		return 0, err
+	}
+
+	return increment, nil
 }
 
 // rollback calls to tx.Rollback and wraps the given error with the rollback error if occurred.
