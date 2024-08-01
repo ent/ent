@@ -34,8 +34,11 @@ func (Post) Edges() []ent.Edge {
 			Field("author_id").
 			Unique(),
 		edge.To("comments", Comment.Type).
-			Annotations(entsql.Annotation{
-				OnDelete: entsql.Cascade,
-			}),
+			Annotations(
+				entsql.Annotation{
+					OnDelete: entsql.Cascade,
+					OnUpdate: entsql.Cascade,
+				},
+			),
 	}
 }
