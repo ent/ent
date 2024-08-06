@@ -44,6 +44,11 @@ func (gid *GroupInfoDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the GroupInfoMutation object of the builder.
+func (gid *GroupInfoDelete) Mutation() *GroupInfoMutation {
+	return gid.mutation
+}
+
 func (gid *GroupInfoDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := gid.gremlin().Query()
@@ -91,4 +96,9 @@ func (gido *GroupInfoDeleteOne) ExecX(ctx context.Context) {
 	if err := gido.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the GroupInfoMutation object of the builder.
+func (gido *GroupInfoDeleteOne) Mutation() *GroupInfoMutation {
+	return gido.gid.mutation
 }

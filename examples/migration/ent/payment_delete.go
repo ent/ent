@@ -43,6 +43,11 @@ func (pd *PaymentDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the PaymentMutation object of the builder.
+func (pd *PaymentDelete) Mutation() *PaymentMutation {
+	return pd.mutation
+}
+
 func (pd *PaymentDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(payment.Table, sqlgraph.NewFieldSpec(payment.FieldID, field.TypeInt))
 	if ps := pd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (pdo *PaymentDeleteOne) ExecX(ctx context.Context) {
 	if err := pdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the PaymentMutation object of the builder.
+func (pdo *PaymentDeleteOne) Mutation() *PaymentMutation {
+	return pdo.pd.mutation
 }

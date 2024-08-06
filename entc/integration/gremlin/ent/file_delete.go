@@ -44,6 +44,11 @@ func (fd *FileDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the FileMutation object of the builder.
+func (fd *FileDelete) Mutation() *FileMutation {
+	return fd.mutation
+}
+
 func (fd *FileDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := fd.gremlin().Query()
@@ -91,4 +96,9 @@ func (fdo *FileDeleteOne) ExecX(ctx context.Context) {
 	if err := fdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the FileMutation object of the builder.
+func (fdo *FileDeleteOne) Mutation() *FileMutation {
+	return fdo.fd.mutation
 }
