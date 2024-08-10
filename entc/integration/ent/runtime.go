@@ -26,8 +26,12 @@ import (
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/schema"
 	"entgo.io/ent/entc/integration/ent/schema/task"
+	"entgo.io/ent/entc/integration/ent/student"
+	"entgo.io/ent/entc/integration/ent/subject"
+	"entgo.io/ent/entc/integration/ent/subjectstudent"
 	enttask "entgo.io/ent/entc/integration/ent/task"
 	"entgo.io/ent/entc/integration/ent/user"
+	"github.com/google/uuid"
 
 	"entgo.io/ent/schema/field"
 )
@@ -288,6 +292,24 @@ func init() {
 	petDescTrained := petFields[4].Descriptor()
 	// pet.DefaultTrained holds the default value on creation for the trained field.
 	pet.DefaultTrained = petDescTrained.Default.(bool)
+	studentFields := schema.Student{}.Fields()
+	_ = studentFields
+	// studentDescID is the schema descriptor for id field.
+	studentDescID := studentFields[0].Descriptor()
+	// student.DefaultID holds the default value on creation for the id field.
+	student.DefaultID = studentDescID.Default.(func() uuid.UUID)
+	subjectFields := schema.Subject{}.Fields()
+	_ = subjectFields
+	// subjectDescID is the schema descriptor for id field.
+	subjectDescID := subjectFields[0].Descriptor()
+	// subject.DefaultID holds the default value on creation for the id field.
+	subject.DefaultID = subjectDescID.Default.(func() uuid.UUID)
+	subjectstudentFields := schema.SubjectStudent{}.Fields()
+	_ = subjectstudentFields
+	// subjectstudentDescID is the schema descriptor for id field.
+	subjectstudentDescID := subjectstudentFields[0].Descriptor()
+	// subjectstudent.DefaultID holds the default value on creation for the id field.
+	subjectstudent.DefaultID = subjectstudentDescID.Default.(func() uuid.UUID)
 	enttaskFields := schema.Task{}.Fields()
 	_ = enttaskFields
 	// enttaskDescPriority is the schema descriptor for priority field.

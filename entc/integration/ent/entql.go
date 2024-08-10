@@ -25,6 +25,9 @@ import (
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/spec"
+	"entgo.io/ent/entc/integration/ent/student"
+	"entgo.io/ent/entc/integration/ent/subject"
+	"entgo.io/ent/entc/integration/ent/subjectstudent"
 	enttask "entgo.io/ent/entc/integration/ent/task"
 	"entgo.io/ent/entc/integration/ent/user"
 
@@ -36,7 +39,7 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 19)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 22)}
 	graph.Nodes[0] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   api.Table,
@@ -366,6 +369,50 @@ var schemaGraph = func() *sqlgraph.Schema {
 	}
 	graph.Nodes[17] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
+			Table:   student.Table,
+			Columns: student.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeUUID,
+				Column: student.FieldID,
+			},
+		},
+		Type: "Student",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			student.FieldName: {Type: field.TypeString, Column: student.FieldName},
+		},
+	}
+	graph.Nodes[18] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table:   subject.Table,
+			Columns: subject.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeUUID,
+				Column: subject.FieldID,
+			},
+		},
+		Type: "Subject",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			subject.FieldName: {Type: field.TypeString, Column: subject.FieldName},
+		},
+	}
+	graph.Nodes[19] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table:   subjectstudent.Table,
+			Columns: subjectstudent.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeUUID,
+				Column: subjectstudent.FieldID,
+			},
+		},
+		Type: "SubjectStudent",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			subjectstudent.FieldNote:      {Type: field.TypeString, Column: subjectstudent.FieldNote},
+			subjectstudent.FieldSubjectID: {Type: field.TypeUUID, Column: subjectstudent.FieldSubjectID},
+			subjectstudent.FieldStudentID: {Type: field.TypeUUID, Column: subjectstudent.FieldStudentID},
+		},
+	}
+	graph.Nodes[20] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
 			Table:   enttask.Table,
 			Columns: enttask.Columns,
 			ID: &sqlgraph.FieldSpec{
@@ -385,7 +432,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			enttask.FieldOp:          {Type: field.TypeString, Column: enttask.FieldOp},
 		},
 	}
-	graph.Nodes[18] = &sqlgraph.Node{
+	graph.Nodes[21] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
@@ -601,6 +648,78 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		"Spec",
 		"Card",
+	)
+	graph.MustAddE(
+		"subjects",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   student.SubjectsTable,
+			Columns: student.SubjectsPrimaryKey,
+			Bidi:    false,
+		},
+		"Student",
+		"Subject",
+	)
+	graph.MustAddE(
+		"subject_students",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   student.SubjectStudentsTable,
+			Columns: []string{student.SubjectStudentsColumn},
+			Bidi:    false,
+		},
+		"Student",
+		"SubjectStudent",
+	)
+	graph.MustAddE(
+		"students",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   subject.StudentsTable,
+			Columns: subject.StudentsPrimaryKey,
+			Bidi:    false,
+		},
+		"Subject",
+		"Student",
+	)
+	graph.MustAddE(
+		"subject_students",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   subject.SubjectStudentsTable,
+			Columns: []string{subject.SubjectStudentsColumn},
+			Bidi:    false,
+		},
+		"Subject",
+		"SubjectStudent",
+	)
+	graph.MustAddE(
+		"subject",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   subjectstudent.SubjectTable,
+			Columns: []string{subjectstudent.SubjectColumn},
+			Bidi:    false,
+		},
+		"SubjectStudent",
+		"Subject",
+	)
+	graph.MustAddE(
+		"student",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   subjectstudent.StudentTable,
+			Columns: []string{subjectstudent.StudentColumn},
+			Bidi:    false,
+		},
+		"SubjectStudent",
+		"Student",
 	)
 	graph.MustAddE(
 		"card",
@@ -2203,6 +2322,235 @@ func (f *SpecFilter) WhereHasCardWith(preds ...predicate.Card) {
 }
 
 // addPredicate implements the predicateAdder interface.
+func (sq *StudentQuery) addPredicate(pred func(s *sql.Selector)) {
+	sq.predicates = append(sq.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the StudentQuery builder.
+func (sq *StudentQuery) Filter() *StudentFilter {
+	return &StudentFilter{config: sq.config, predicateAdder: sq}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *StudentMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the StudentMutation builder.
+func (m *StudentMutation) Filter() *StudentFilter {
+	return &StudentFilter{config: m.config, predicateAdder: m}
+}
+
+// StudentFilter provides a generic filtering capability at runtime for StudentQuery.
+type StudentFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *StudentFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[17].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql [16]byte predicate on the id field.
+func (f *StudentFilter) WhereID(p entql.ValueP) {
+	f.Where(p.Field(student.FieldID))
+}
+
+// WhereName applies the entql string predicate on the name field.
+func (f *StudentFilter) WhereName(p entql.StringP) {
+	f.Where(p.Field(student.FieldName))
+}
+
+// WhereHasSubjects applies a predicate to check if query has an edge subjects.
+func (f *StudentFilter) WhereHasSubjects() {
+	f.Where(entql.HasEdge("subjects"))
+}
+
+// WhereHasSubjectsWith applies a predicate to check if query has an edge subjects with a given conditions (other predicates).
+func (f *StudentFilter) WhereHasSubjectsWith(preds ...predicate.Subject) {
+	f.Where(entql.HasEdgeWith("subjects", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// WhereHasSubjectStudents applies a predicate to check if query has an edge subject_students.
+func (f *StudentFilter) WhereHasSubjectStudents() {
+	f.Where(entql.HasEdge("subject_students"))
+}
+
+// WhereHasSubjectStudentsWith applies a predicate to check if query has an edge subject_students with a given conditions (other predicates).
+func (f *StudentFilter) WhereHasSubjectStudentsWith(preds ...predicate.SubjectStudent) {
+	f.Where(entql.HasEdgeWith("subject_students", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// addPredicate implements the predicateAdder interface.
+func (sq *SubjectQuery) addPredicate(pred func(s *sql.Selector)) {
+	sq.predicates = append(sq.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the SubjectQuery builder.
+func (sq *SubjectQuery) Filter() *SubjectFilter {
+	return &SubjectFilter{config: sq.config, predicateAdder: sq}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *SubjectMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the SubjectMutation builder.
+func (m *SubjectMutation) Filter() *SubjectFilter {
+	return &SubjectFilter{config: m.config, predicateAdder: m}
+}
+
+// SubjectFilter provides a generic filtering capability at runtime for SubjectQuery.
+type SubjectFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *SubjectFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[18].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql [16]byte predicate on the id field.
+func (f *SubjectFilter) WhereID(p entql.ValueP) {
+	f.Where(p.Field(subject.FieldID))
+}
+
+// WhereName applies the entql string predicate on the name field.
+func (f *SubjectFilter) WhereName(p entql.StringP) {
+	f.Where(p.Field(subject.FieldName))
+}
+
+// WhereHasStudents applies a predicate to check if query has an edge students.
+func (f *SubjectFilter) WhereHasStudents() {
+	f.Where(entql.HasEdge("students"))
+}
+
+// WhereHasStudentsWith applies a predicate to check if query has an edge students with a given conditions (other predicates).
+func (f *SubjectFilter) WhereHasStudentsWith(preds ...predicate.Student) {
+	f.Where(entql.HasEdgeWith("students", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// WhereHasSubjectStudents applies a predicate to check if query has an edge subject_students.
+func (f *SubjectFilter) WhereHasSubjectStudents() {
+	f.Where(entql.HasEdge("subject_students"))
+}
+
+// WhereHasSubjectStudentsWith applies a predicate to check if query has an edge subject_students with a given conditions (other predicates).
+func (f *SubjectFilter) WhereHasSubjectStudentsWith(preds ...predicate.SubjectStudent) {
+	f.Where(entql.HasEdgeWith("subject_students", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// addPredicate implements the predicateAdder interface.
+func (ssq *SubjectStudentQuery) addPredicate(pred func(s *sql.Selector)) {
+	ssq.predicates = append(ssq.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the SubjectStudentQuery builder.
+func (ssq *SubjectStudentQuery) Filter() *SubjectStudentFilter {
+	return &SubjectStudentFilter{config: ssq.config, predicateAdder: ssq}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *SubjectStudentMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the SubjectStudentMutation builder.
+func (m *SubjectStudentMutation) Filter() *SubjectStudentFilter {
+	return &SubjectStudentFilter{config: m.config, predicateAdder: m}
+}
+
+// SubjectStudentFilter provides a generic filtering capability at runtime for SubjectStudentQuery.
+type SubjectStudentFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *SubjectStudentFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[19].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql [16]byte predicate on the id field.
+func (f *SubjectStudentFilter) WhereID(p entql.ValueP) {
+	f.Where(p.Field(subjectstudent.FieldID))
+}
+
+// WhereNote applies the entql string predicate on the note field.
+func (f *SubjectStudentFilter) WhereNote(p entql.StringP) {
+	f.Where(p.Field(subjectstudent.FieldNote))
+}
+
+// WhereSubjectID applies the entql [16]byte predicate on the subject_id field.
+func (f *SubjectStudentFilter) WhereSubjectID(p entql.ValueP) {
+	f.Where(p.Field(subjectstudent.FieldSubjectID))
+}
+
+// WhereStudentID applies the entql [16]byte predicate on the student_id field.
+func (f *SubjectStudentFilter) WhereStudentID(p entql.ValueP) {
+	f.Where(p.Field(subjectstudent.FieldStudentID))
+}
+
+// WhereHasSubject applies a predicate to check if query has an edge subject.
+func (f *SubjectStudentFilter) WhereHasSubject() {
+	f.Where(entql.HasEdge("subject"))
+}
+
+// WhereHasSubjectWith applies a predicate to check if query has an edge subject with a given conditions (other predicates).
+func (f *SubjectStudentFilter) WhereHasSubjectWith(preds ...predicate.Subject) {
+	f.Where(entql.HasEdgeWith("subject", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// WhereHasStudent applies a predicate to check if query has an edge student.
+func (f *SubjectStudentFilter) WhereHasStudent() {
+	f.Where(entql.HasEdge("student"))
+}
+
+// WhereHasStudentWith applies a predicate to check if query has an edge student with a given conditions (other predicates).
+func (f *SubjectStudentFilter) WhereHasStudentWith(preds ...predicate.Student) {
+	f.Where(entql.HasEdgeWith("student", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// addPredicate implements the predicateAdder interface.
 func (tq *TaskQuery) addPredicate(pred func(s *sql.Selector)) {
 	tq.predicates = append(tq.predicates, pred)
 }
@@ -2231,7 +2579,7 @@ type TaskFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TaskFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[17].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[20].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -2311,7 +2659,7 @@ type UserFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[18].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[21].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})

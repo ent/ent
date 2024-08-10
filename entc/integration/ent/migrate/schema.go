@@ -425,6 +425,62 @@ var (
 		Columns:    SpecsColumns,
 		PrimaryKey: []*schema.Column{SpecsColumns[0]},
 	}
+	// StudentsColumns holds the columns for the "students" table.
+	StudentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString},
+	}
+	// StudentsTable holds the schema information for the "students" table.
+	StudentsTable = &schema.Table{
+		Name:       "students",
+		Columns:    StudentsColumns,
+		PrimaryKey: []*schema.Column{StudentsColumns[0]},
+	}
+	// SubjectsColumns holds the columns for the "subjects" table.
+	SubjectsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString},
+	}
+	// SubjectsTable holds the schema information for the "subjects" table.
+	SubjectsTable = &schema.Table{
+		Name:       "subjects",
+		Columns:    SubjectsColumns,
+		PrimaryKey: []*schema.Column{SubjectsColumns[0]},
+	}
+	// SubjectStudentsColumns holds the columns for the "subject_students" table.
+	SubjectStudentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "note", Type: field.TypeString, Nullable: true},
+		{Name: "subject_id", Type: field.TypeUUID},
+		{Name: "student_id", Type: field.TypeUUID},
+	}
+	// SubjectStudentsTable holds the schema information for the "subject_students" table.
+	SubjectStudentsTable = &schema.Table{
+		Name:       "subject_students",
+		Columns:    SubjectStudentsColumns,
+		PrimaryKey: []*schema.Column{SubjectStudentsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "subject_students_subjects_subject",
+				Columns:    []*schema.Column{SubjectStudentsColumns[2]},
+				RefColumns: []*schema.Column{SubjectsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "subject_students_students_student",
+				Columns:    []*schema.Column{SubjectStudentsColumns[3]},
+				RefColumns: []*schema.Column{StudentsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "subjectstudent_subject_id_student_id",
+				Unique:  true,
+				Columns: []*schema.Column{SubjectStudentsColumns[2], SubjectStudentsColumns[3]},
+			},
+		},
+	}
 	// TasksColumns holds the columns for the "tasks" table.
 	TasksColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -614,6 +670,9 @@ var (
 		PcsTable,
 		PetTable,
 		SpecsTable,
+		StudentsTable,
+		SubjectsTable,
+		SubjectStudentsTable,
 		TasksTable,
 		UsersTable,
 		SpecCardTable,
@@ -636,6 +695,8 @@ func init() {
 	PetTable.Annotation = &entsql.Annotation{
 		Table: "pet",
 	}
+	SubjectStudentsTable.ForeignKeys[0].RefTable = SubjectsTable
+	SubjectStudentsTable.ForeignKeys[1].RefTable = StudentsTable
 	UsersTable.ForeignKeys[0].RefTable = GroupsTable
 	UsersTable.ForeignKeys[1].RefTable = UsersTable
 	UsersTable.ForeignKeys[2].RefTable = UsersTable

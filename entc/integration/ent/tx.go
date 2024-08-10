@@ -52,6 +52,12 @@ type Tx struct {
 	Pet *PetClient
 	// Spec is the client for interacting with the Spec builders.
 	Spec *SpecClient
+	// Student is the client for interacting with the Student builders.
+	Student *StudentClient
+	// Subject is the client for interacting with the Subject builders.
+	Subject *SubjectClient
+	// SubjectStudent is the client for interacting with the SubjectStudent builders.
+	SubjectStudent *SubjectStudentClient
 	// Task is the client for interacting with the Task builders.
 	Task *TaskClient
 	// User is the client for interacting with the User builders.
@@ -204,6 +210,9 @@ func (tx *Tx) init() {
 	tx.PC = NewPCClient(tx.config)
 	tx.Pet = NewPetClient(tx.config)
 	tx.Spec = NewSpecClient(tx.config)
+	tx.Student = NewStudentClient(tx.config)
+	tx.Subject = NewSubjectClient(tx.config)
+	tx.SubjectStudent = NewSubjectStudentClient(tx.config)
 	tx.Task = NewTaskClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
