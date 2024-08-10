@@ -523,9 +523,7 @@ func (cq *CardQuery) loadSpec(ctx context.Context, query *SpecQuery, nodes []*Ca
 		joinT := sql.Table(card.SpecTable)
 		s.Join(joinT).On(s.C(spec.FieldID), joinT.C(card.SpecPrimaryKey[0]))
 		s.Where(sql.InValues(joinT.C(card.SpecPrimaryKey[1]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(card.SpecPrimaryKey[1]))
-		s.AppendSelect(columns...)
+		s.PrependSelect(joinT.C(card.SpecPrimaryKey[1]))
 		s.SetDistinct(false)
 	})
 	if err := query.prepareQuery(ctx); err != nil {
