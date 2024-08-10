@@ -1694,18 +1694,16 @@ func (g *graph) clearM2MEdges(ctx context.Context, ids []driver.Value, edges Edg
 
 func (g *graph) addM2MEdges(ctx context.Context, ids []driver.Value, edges EdgeSpecs) error {
 	// Insert all M2M edges from the same type at once.
-	// The EdgeSpec is the same for all members in a group.
+	// The EdgeSpec columns are the same for all members in a group.
 	tables := edges.GroupTable()
 	for _, table := range edgeKeys(tables) {
 		var (
 			edges   = tables[table]
 			columns = edges[0].Columns
-			values  = make([]any, 0, len(edges[0].Target.Fields))
 		)
 		// Additional fields, such as edge-schema fields. Note, we use the first index,
 		// because Ent generates the same spec fields for all edges from the same type.
 		for _, f := range edges[0].Target.Fields {
-			values = append(values, f.Value)
 			columns = append(columns, f.Column)
 		}
 		insert := g.builder.Insert(table).Columns(columns...)
@@ -1715,6 +1713,12 @@ func (g *graph) addM2MEdges(ctx context.Context, ids []driver.Value, edges EdgeS
 			insert.Schema(edges[0].Schema)
 		}
 		for _, edge := range edges {
+			// The EdgeSpec values might not the same for all members in a group.
+			values := make([]any, 0, len(edge.Target.Fields))
+			for _, f := range edge.Target.Fields {
+				values = append(values, f.Value)
+			}
+
 			pk1, pk2 := ids, edge.Target.Nodes
 			if edge.Inverse {
 				pk1, pk2 = pk2, pk1
