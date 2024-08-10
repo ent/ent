@@ -135,9 +135,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 				{{- $fk1idx := 1 }}{{- $fk2idx := 0 }}{{ if $e.IsInverse }}{{ $fk1idx = 0 }}{{ $fk2idx = 1 }}{{ end }}
 				s.Join(joinT).On(s.C({{ $edgeid }}), joinT.C({{ $.Package }}.{{ $e.PKConstant }}[{{ $fk1idx }}]))
 				s.Where(sql.InValues(joinT.C({{ $.Package }}.{{ $e.PKConstant }}[{{ $fk2idx }}]), edgeIDs...))
-				columns := s.SelectedColumns()
-				s.Select(joinT.C({{ $.Package }}.{{ $e.PKConstant }}[{{ $fk2idx }}]))
-				s.AppendSelect(columns...)
+				s.PrependSelect(joinT.C({{ $.Package }}.{{ $e.PKConstant }}[{{ $fk2idx }}]))
 				s.SetDistinct(false)
 			})
 			if err := query.prepareQuery(ctx); err != nil {
