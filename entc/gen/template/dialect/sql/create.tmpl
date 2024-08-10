@@ -97,7 +97,10 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 	{{- end }}
 	{{- range $e := $.EdgesWithID }}
 		if nodes := {{ $mutation }}.{{ $e.StructField }}IDs(); len(nodes) > 0 {
-			{{- with extend $ "Edge" $e "Nodes" true "Zero" "nil" }}
+			{{- /* Recompute defaults for every through edge */}}
+		  {{- if $e.Through }}for _, node := range nodes { {{end}}
+		  {{- $hasThrough := ne $e.Through nil}}
+			{{- with extend $ "Edge" $e "Nodes" (not $hasThrough) "Zero" "nil" "Through" ($hasThrough)}}
 				{{ template "dialect/sql/defedge" . }}{{/* defined in sql/update.tmpl */}}
 			{{- end }}
 			{{- if $e.OwnFK }}
@@ -105,6 +108,7 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 				_node.{{ $fk.StructField }} = {{ if $fk.Field.NillableValue }}&{{ end }}nodes[0]
 			{{- end }}
 			_spec.Edges = append(_spec.Edges, edge)
+		  {{- if $e.Through }}}{{end}}
 		}
 	{{- end }}
 	return _node, _spec{{ if $.HasValueScanner }}, nil{{ end }}
