@@ -2254,16 +2254,6 @@ func (s *Selector) SelectDistinct(columns ...string) *Selector {
 	return s.Select(columns...).Distinct()
 }
 
-// SelectExpr changes the columns selection of the SELECT statement
-// with custom list of expressions.
-func (s *Selector) SelectExpr(exprs ...Querier) *Selector {
-	s.selection = make([]selection, len(exprs))
-	for i := range exprs {
-		s.selection[i] = selection{x: exprs[i]}
-	}
-	return s
-}
-
 // AppendSelect appends additional columns to the SELECT statement.
 func (s *Selector) AppendSelect(columns ...string) *Selector {
 	for i := range columns {
@@ -2275,6 +2265,24 @@ func (s *Selector) AppendSelect(columns ...string) *Selector {
 // AppendSelectAs appends additional column to the SELECT statement with the given alias.
 func (s *Selector) AppendSelectAs(column, as string) *Selector {
 	s.selection = append(s.selection, selection{c: column, as: as})
+	return s
+}
+
+// PrependSelect prepends additional columns to the SELECT statement.
+func (s *Selector) PrependSelect(columns ...string) *Selector {
+	for i := range columns {
+		s.selection = append([]selection{{c: columns[i]}}, s.selection...)
+	}
+	return s
+}
+
+// SelectExpr changes the columns selection of the SELECT statement
+// with custom list of expressions.
+func (s *Selector) SelectExpr(exprs ...Querier) *Selector {
+	s.selection = make([]selection, len(exprs))
+	for i := range exprs {
+		s.selection[i] = selection{x: exprs[i]}
+	}
 	return s
 }
 
@@ -2298,40 +2306,6 @@ func (s *Selector) AppendSelectExprAs(expr Querier, as string) *Selector {
 		x:  x,
 		as: as,
 	})
-	return s
-}
-
-// PrependSelect prepends additional columns to the SELECT statement.
-func (s *Selector) PrependSelect(columns ...string) *Selector {
-	for i := range columns {
-		s.selection = append([]selection{{c: columns[i]}}, s.selection...)
-	}
-	return s
-}
-
-// PrependSelectAs prepends an additional column to the SELECT statement with the given alias.
-func (s *Selector) PrependSelectAs(column, as string) *Selector {
-	s.selection = append([]selection{{c: column, as: as}}, s.selection...)
-	return s
-}
-
-// PrependSelectExpr prepends additional expressions to the SELECT statement.
-func (s *Selector) PrependSelectExpr(exprs ...Querier) *Selector {
-	for i := range exprs {
-		s.selection = append([]selection{{x: exprs[i]}}, s.selection...)
-	}
-	return s
-}
-
-// PrependSelectExprAs prepends additional expressions to the SELECT statement with the given name.
-func (s *Selector) PrependSelectExprAs(expr Querier, as string) *Selector {
-	x := expr
-	if _, ok := expr.(*raw); !ok {
-		x = ExprFunc(func(b *Builder) {
-			b.S("(").Join(expr).S(")")
-		})
-	}
-	s.selection = append([]selection{{x: x, as: as}}, s.selection...)
 	return s
 }
 
