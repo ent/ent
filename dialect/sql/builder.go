@@ -3575,7 +3575,7 @@ func (b *Builder) Err() error {
 		}
 		br.WriteString(b.errs[i].Error())
 	}
-	return fmt.Errorf(br.String())
+	return errors.New(br.String())
 }
 
 // An Op represents an operator.
