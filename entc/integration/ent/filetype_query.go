@@ -284,8 +284,9 @@ func (ftq *FileTypeQuery) Clone() *FileTypeQuery {
 		predicates: append([]predicate.FileType{}, ftq.predicates...),
 		withFiles:  ftq.withFiles.Clone(),
 		// clone intermediate query.
-		sql:  ftq.sql.Clone(),
-		path: ftq.path,
+		sql:       ftq.sql.Clone(),
+		path:      ftq.path,
+		modifiers: append([]func(*sql.Selector){}, ftq.modifiers...),
 	}
 }
 

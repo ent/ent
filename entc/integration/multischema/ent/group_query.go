@@ -286,8 +286,9 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		predicates: append([]predicate.Group{}, gq.predicates...),
 		withUsers:  gq.withUsers.Clone(),
 		// clone intermediate query.
-		sql:  gq.sql.Clone(),
-		path: gq.path,
+		sql:       gq.sql.Clone(),
+		path:      gq.path,
+		modifiers: append([]func(*sql.Selector){}, gq.modifiers...),
 	}
 }
 

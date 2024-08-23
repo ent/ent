@@ -257,8 +257,9 @@ func (evsq *ExValueScanQuery) Clone() *ExValueScanQuery {
 		inters:     append([]Interceptor{}, evsq.inters...),
 		predicates: append([]predicate.ExValueScan{}, evsq.predicates...),
 		// clone intermediate query.
-		sql:  evsq.sql.Clone(),
-		path: evsq.path,
+		sql:       evsq.sql.Clone(),
+		path:      evsq.path,
+		modifiers: append([]func(*sql.Selector){}, evsq.modifiers...),
 	}
 }
 

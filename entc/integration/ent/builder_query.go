@@ -257,8 +257,9 @@ func (bq *BuilderQuery) Clone() *BuilderQuery {
 		inters:     append([]Interceptor{}, bq.inters...),
 		predicates: append([]predicate.Builder{}, bq.predicates...),
 		// clone intermediate query.
-		sql:  bq.sql.Clone(),
-		path: bq.path,
+		sql:       bq.sql.Clone(),
+		path:      bq.path,
+		modifiers: append([]func(*sql.Selector){}, bq.modifiers...),
 	}
 }
 

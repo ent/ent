@@ -284,8 +284,9 @@ func (sq *SpecQuery) Clone() *SpecQuery {
 		predicates: append([]predicate.Spec{}, sq.predicates...),
 		withCard:   sq.withCard.Clone(),
 		// clone intermediate query.
-		sql:  sq.sql.Clone(),
-		path: sq.path,
+		sql:       sq.sql.Clone(),
+		path:      sq.path,
+		modifiers: append([]func(*sql.Selector){}, sq.modifiers...),
 	}
 }
 
