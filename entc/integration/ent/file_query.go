@@ -335,8 +335,9 @@ func (fq *FileQuery) Clone() *FileQuery {
 		withType:   fq.withType.Clone(),
 		withField:  fq.withField.Clone(),
 		// clone intermediate query.
-		sql:  fq.sql.Clone(),
-		path: fq.path,
+		sql:       fq.sql.Clone(),
+		path:      fq.path,
+		modifiers: append([]func(*sql.Selector){}, fq.modifiers...),
 	}
 }
 
