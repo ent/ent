@@ -702,6 +702,22 @@ func (User) Fields() []ent.Field {
 }
 ```
 
+## Deprecated Fields
+
+The `Deprecated` method can be used to mark a field as deprecated. Deprecated fields are not
+selected by default in queries, and their struct fields are annotated as `Deprecated` in the
+generated code.
+
+```go
+// Fields of the user.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name").
+			Deprecated("use `full_name` instead"),
+	}
+}
+```
+
 ## Storage Key
 
 Custom storage name can be configured using the `StorageKey` method.
@@ -838,7 +854,13 @@ func (User) Fields() []ent.Field {
 }
 ```
 
-When a custom [`GoType`](#go-type) is being used, it is must be convertible to the basic `string` type or it needs to implement the [ValueScanner](https://pkg.go.dev/entgo.io/ent/schema/field#ValueScanner) interface. 
+:::info [Using PostgreSQL Native Enum Types](/docs/migration/enum-types)
+By default, Ent uses simple string types to represent the enum values in **PostgreSQL and SQLite**. However, in some
+cases, you may want to use the native enum types provided by the database. Follow the [enum migration guide](/docs/migration/enum-types)
+for more info.
+:::
+
+When a custom [`GoType`](#go-type) is being used, it must be convertible to the basic `string` type or it needs to implement the [ValueScanner](https://pkg.go.dev/entgo.io/ent/schema/field#ValueScanner) interface.
 
 The [EnumValues](https://pkg.go.dev/entgo.io/ent/schema/field#EnumValues) interface is also required by the custom Go type to tell Ent what are the permitted values of the enum. 
 

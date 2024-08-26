@@ -224,13 +224,13 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	{{- if lt (len $.Nodes) 6 }}
-		{{- range $n := $.Nodes }}
+		{{- range $n := $.MutableNodes }}
 			c.{{ $n.Name }}.Use(hooks...)
 		{{- end }}
 	{{- /* Use a for-loop for setting hooks in case there are too many nodes. */}}
 	{{- else }}
 		{{- $hooks := slist }}
-		{{- range $n := $.Nodes }}{{ $hooks = append $hooks (printf "c.%s," $n.Name) }}{{ end }}
+		{{- range $n := $.MutableNodes }}{{ $hooks = append $hooks (printf "c.%s," $n.Name) }}{{ end }}
 		for _, n := range []interface{ Use(...Hook) }{
 			{{ joinWords $hooks 80 }}
 		}{
@@ -268,7 +268,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
-	{{- range $n := $.Nodes }}
+	{{- range $n := $.MutableNodes }}
 		case *{{ $n.MutationName }}:
 			return c.{{ $n.Name }}.mutate(ctx, m)
 	{{- end }}
@@ -291,11 +291,13 @@ func New{{ $client }}(c config) *{{ $client }} {
 	return &{{ $client }}{config: c}
 }
 
+{{- if not $n.IsView }}
 // Use adds a list of mutation hooks to the hooks stack.
 // A call to `Use(f, g, h)` equals to `{{ $n.Package }}.Hooks(f(g(h())))`.
 func (c *{{ $client }}) Use(hooks ...Hook) {
 	c.hooks.{{ $n.Name }} = append(c.hooks.{{ $n.Name }}, hooks...)
 }
+{{- end }}
 
 // Intercept adds a list of query interceptors to the interceptors stack.
 // A call to `Intercept(f, g, h)` equals to `{{ $n.Package }}.Intercept(f(g(h())))`.
@@ -303,6 +305,7 @@ func (c *{{ $client }}) Intercept(interceptors ...Interceptor) {
 	c.inters.{{ $n.Name }} = append(c.inters.{{ $n.Name }}, interceptors...)
 }
 
+{{- if not $n.IsView }}
 // Create returns a builder for creating a {{ $n.Name }} entity.
 func (c *{{ $client }}) Create() *{{ $n.CreateName }} {
 	mutation := new{{ $n.MutationName }}(c.config, OpCreate)
@@ -378,6 +381,7 @@ func (c *{{ $client }}) Delete() *{{ $n.DeleteName }} {
 		return &{{ $n.DeleteOneName }}{ {{ $builder }} }
 	}
 {{ end }}
+{{- end }} {{/* End of if not IsView. */}}
 
 // Query returns a query builder for {{ $n.Name }}.
 func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
@@ -434,6 +438,7 @@ func (c *{{ $client }}) {{ $func }}({{ $arg }} *{{ $n.Name }}) *{{ $builder }} {
 }
 {{ end }}
 
+{{- if not $n.IsView }}
 // Hooks returns the client hooks.
 func (c *{{ $client }}) Hooks() []Hook {
 	{{- if or $n.NumHooks $n.NumPolicy }}
@@ -443,6 +448,7 @@ func (c *{{ $client }}) Hooks() []Hook {
 		return c.hooks.{{ $n.Name }}
 	{{- end }}
 }
+{{- end }}
 
 // Interceptors returns the client interceptors.
 func (c *{{ $client }}) Interceptors() []Interceptor {
@@ -454,6 +460,7 @@ func (c *{{ $client }}) Interceptors() []Interceptor {
 	{{- end }}
 }
 
+{{ if not $n.IsView }}
 func (c *{{ $client }}) mutate(ctx context.Context, m *{{ $n.MutationName }}) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
@@ -469,6 +476,7 @@ func (c *{{ $client }}) mutate(ctx context.Context, m *{{ $n.MutationName }}) (V
 	}
 }
 {{ end }}
+{{- end }}
 
 // hooks and interceptors per client, for fast access.
 type (
@@ -477,10 +485,10 @@ type (
 	{{- $inters := slist }}
 	{{- range $i, $n := $.Nodes }}
 		{{- if eq $i $leni }}
-			{{- $hooks = append $hooks (printf "%s []ent.Hook" $n.Name) }}
+			{{ if not $n.IsView }}{{- $hooks = append $hooks (printf "%s []ent.Hook" $n.Name) }}{{ end }}
 			{{- $inters = append $inters (printf "%s []ent.Interceptor" $n.Name) }}
 		{{- else }}
-			{{- $hooks = append $hooks (print $n.Name ",") }}
+			{{ if not $n.IsView }}{{- $hooks = append $hooks (print $n.Name ",") }}{{ end }}
 			{{- $inters = append $inters (print $n.Name ",") }}
 		{{- end }}
 	{{- end }}

@@ -257,8 +257,9 @@ func (lq *LicenseQuery) Clone() *LicenseQuery {
 		inters:     append([]Interceptor{}, lq.inters...),
 		predicates: append([]predicate.License{}, lq.predicates...),
 		// clone intermediate query.
-		sql:  lq.sql.Clone(),
-		path: lq.path,
+		sql:       lq.sql.Clone(),
+		path:      lq.path,
+		modifiers: append([]func(*sql.Selector){}, lq.modifiers...),
 	}
 }
 

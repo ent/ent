@@ -361,8 +361,9 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		withUsers:   gq.withUsers.Clone(),
 		withInfo:    gq.withInfo.Clone(),
 		// clone intermediate query.
-		sql:  gq.sql.Clone(),
-		path: gq.path,
+		sql:       gq.sql.Clone(),
+		path:      gq.path,
+		modifiers: append([]func(*sql.Selector){}, gq.modifiers...),
 	}
 }
 

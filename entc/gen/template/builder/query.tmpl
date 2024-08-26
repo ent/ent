@@ -304,6 +304,9 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 		{{ $.Storage }}: {{ $receiver }}.{{ $.Storage }}.Clone(),
 		path: {{ $receiver }}.path,
 		modifiers: {{ $receiver }}.modifiers,
+		{{- if $.FeatureEnabled "sql/modifier" }}
+			modifiers: append([]func(*sql.Selector){}, {{ $receiver }}.modifiers...),
+		{{- end }}
 	}
 }
 

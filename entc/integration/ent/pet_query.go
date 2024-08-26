@@ -307,8 +307,9 @@ func (pq *PetQuery) Clone() *PetQuery {
 		withTeam:   pq.withTeam.Clone(),
 		withOwner:  pq.withOwner.Clone(),
 		// clone intermediate query.
-		sql:  pq.sql.Clone(),
-		path: pq.path,
+		sql:       pq.sql.Clone(),
+		path:      pq.path,
+		modifiers: append([]func(*sql.Selector){}, pq.modifiers...),
 	}
 }
 

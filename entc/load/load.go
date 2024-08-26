@@ -344,7 +344,7 @@ func gocmd(command, target string, buildFlags []string) (string, error) {
 	cmd.Stderr = stderr
 	cmd.Stdout = stdout
 	if err := cmd.Run(); err != nil {
-		return "", errors.New(stderr.String())
+		return "", errors.New(strings.TrimSpace(stderr.String()))
 	}
 	return stdout.String(), nil
 }

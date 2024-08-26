@@ -423,8 +423,9 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withFollowing:   uq.withFollowing.Clone(),
 		withFriendships: uq.withFriendships.Clone(),
 		// clone intermediate query.
-		sql:  uq.sql.Clone(),
-		path: uq.path,
+		sql:       uq.sql.Clone(),
+		path:      uq.path,
+		modifiers: append([]func(*sql.Selector){}, uq.modifiers...),
 	}
 }
 
