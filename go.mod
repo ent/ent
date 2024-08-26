@@ -7,7 +7,7 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/go-openapi/inflect v0.19.0
 	github.com/google/uuid v1.3.0
-	github.com/gorilla/websocket v1.5.0
+	github.com/gorilla/websocket v1.5.3
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/json-iterator/go v1.1.12
 	github.com/mattn/go-sqlite3 v1.14.16
