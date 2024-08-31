@@ -403,7 +403,7 @@ func QueryCarUsers(ctx context.Context, a8m *ent.User) error {
 		if err != nil {
 			return fmt.Errorf("failed querying car %q owner: %w", c.Model, err)
 		}
-		log.Printf("car %q owner: %q\n", c.Model, owner.Name)
+		log.Printf("car %q owner: %q\n", c.Model, *(owner.Name))
 	}
 	return nil
 }
