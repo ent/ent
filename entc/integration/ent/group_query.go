@@ -652,9 +652,7 @@ func (gq *GroupQuery) loadUsers(ctx context.Context, query *UserQuery, nodes []*
 		joinT := sql.Table(group.UsersTable)
 		s.Join(joinT).On(s.C(user.FieldID), joinT.C(group.UsersPrimaryKey[0]))
 		s.Where(sql.InValues(joinT.C(group.UsersPrimaryKey[1]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(group.UsersPrimaryKey[1]))
-		s.AppendSelect(columns...)
+		s.PrependSelect(joinT.C(group.UsersPrimaryKey[1]))
 		s.SetDistinct(false)
 	})
 	if err := query.prepareQuery(ctx); err != nil {

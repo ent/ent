@@ -168,6 +168,7 @@ var (
 		OrderByEdgeCount,
 		OrderByEdgeTerms,
 		OrderByFluent,
+		QueryM2MWithAdditionalFields,
 	}
 )
 
@@ -2868,6 +2869,36 @@ func OrderByEdgeTerms(t *testing.T, client *ent.Client) {
 			IDsX(ctx)
 		require.Equal(t, tt.ids, ids)
 	}
+}
+
+func QueryM2MWithAdditionalFields(t *testing.T, client *ent.Client) {
+	require := require.New(t)
+
+	ctx := context.Background()
+	usr := client.User.Create().SetName("foo").SetAge(20).SaveX(ctx)
+	client.User.Query().OnlyX(ctx)
+
+	inf := client.GroupInfo.Create().SetDesc("desc").SaveX(ctx)
+	client.Group.Create().SetName("Github").SetExpire(time.Now()).AddUsers(usr).SetInfo(inf).SaveX(ctx)
+	client.Group.Query().OnlyX(ctx)
+
+	const key = "computed_value"
+	users := client.User.Query().WithGroups(func(query *ent.GroupQuery) {
+		query.Where(func(selector *sql.Selector) {
+			selector.AppendSelectExprAs(sql.Expr("min(3, 5)"), key)
+		})
+	}).AllX(ctx)
+
+	require.Equal(len(users), 1)
+	for _, u := range users {
+		require.Equal(len(u.Edges.Groups), 1)
+		for _, g := range u.Edges.Groups {
+			v, err := g.Value(key)
+			require.NoError(err)
+			require.Equal(v, int64(3))
+		}
+	}
+
 }
 
 func skip(t *testing.T, names ...string) {

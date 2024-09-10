@@ -414,9 +414,7 @@ func (sq *SpecQuery) loadCard(ctx context.Context, query *CardQuery, nodes []*Sp
 		joinT := sql.Table(spec.CardTable)
 		s.Join(joinT).On(s.C(card.FieldID), joinT.C(spec.CardPrimaryKey[1]))
 		s.Where(sql.InValues(joinT.C(spec.CardPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(spec.CardPrimaryKey[0]))
-		s.AppendSelect(columns...)
+		s.PrependSelect(joinT.C(spec.CardPrimaryKey[0]))
 		s.SetDistinct(false)
 	})
 	if err := query.prepareQuery(ctx); err != nil {

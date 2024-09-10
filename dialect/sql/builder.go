@@ -2268,6 +2268,14 @@ func (s *Selector) AppendSelectAs(column, as string) *Selector {
 	return s
 }
 
+// PrependSelect prepends additional columns to the SELECT statement.
+func (s *Selector) PrependSelect(columns ...string) *Selector {
+	for i := range columns {
+		s.selection = append([]selection{{c: columns[i]}}, s.selection...)
+	}
+	return s
+}
+
 // SelectExpr changes the columns selection of the SELECT statement
 // with custom list of expressions.
 func (s *Selector) SelectExpr(exprs ...Querier) *Selector {

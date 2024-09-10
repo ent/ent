@@ -1051,9 +1051,7 @@ func (uq *UserQuery) loadGroups(ctx context.Context, query *GroupQuery, nodes []
 		joinT := sql.Table(user.GroupsTable)
 		s.Join(joinT).On(s.C(group.FieldID), joinT.C(user.GroupsPrimaryKey[1]))
 		s.Where(sql.InValues(joinT.C(user.GroupsPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(user.GroupsPrimaryKey[0]))
-		s.AppendSelect(columns...)
+		s.PrependSelect(joinT.C(user.GroupsPrimaryKey[0]))
 		s.SetDistinct(false)
 	})
 	if err := query.prepareQuery(ctx); err != nil {
@@ -1112,9 +1110,7 @@ func (uq *UserQuery) loadFriends(ctx context.Context, query *UserQuery, nodes []
 		joinT := sql.Table(user.FriendsTable)
 		s.Join(joinT).On(s.C(user.FieldID), joinT.C(user.FriendsPrimaryKey[1]))
 		s.Where(sql.InValues(joinT.C(user.FriendsPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(user.FriendsPrimaryKey[0]))
-		s.AppendSelect(columns...)
+		s.PrependSelect(joinT.C(user.FriendsPrimaryKey[0]))
 		s.SetDistinct(false)
 	})
 	if err := query.prepareQuery(ctx); err != nil {
@@ -1173,9 +1169,7 @@ func (uq *UserQuery) loadFollowers(ctx context.Context, query *UserQuery, nodes 
 		joinT := sql.Table(user.FollowersTable)
 		s.Join(joinT).On(s.C(user.FieldID), joinT.C(user.FollowersPrimaryKey[0]))
 		s.Where(sql.InValues(joinT.C(user.FollowersPrimaryKey[1]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(user.FollowersPrimaryKey[1]))
-		s.AppendSelect(columns...)
+		s.PrependSelect(joinT.C(user.FollowersPrimaryKey[1]))
 		s.SetDistinct(false)
 	})
 	if err := query.prepareQuery(ctx); err != nil {
@@ -1234,9 +1228,7 @@ func (uq *UserQuery) loadFollowing(ctx context.Context, query *UserQuery, nodes 
 		joinT := sql.Table(user.FollowingTable)
 		s.Join(joinT).On(s.C(user.FieldID), joinT.C(user.FollowingPrimaryKey[1]))
 		s.Where(sql.InValues(joinT.C(user.FollowingPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(user.FollowingPrimaryKey[0]))
-		s.AppendSelect(columns...)
+		s.PrependSelect(joinT.C(user.FollowingPrimaryKey[0]))
 		s.SetDistinct(false)
 	})
 	if err := query.prepareQuery(ctx); err != nil {
