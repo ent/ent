@@ -72,6 +72,15 @@ type Pet func(*sql.Selector)
 // Spec is the predicate function for spec builders.
 type Spec func(*sql.Selector)
 
+// Student is the predicate function for student builders.
+type Student func(*sql.Selector)
+
+// Subject is the predicate function for subject builders.
+type Subject func(*sql.Selector)
+
+// SubjectStudent is the predicate function for subjectstudent builders.
+type SubjectStudent func(*sql.Selector)
+
 // Task is the predicate function for enttask builders.
 type Task func(*sql.Selector)
 

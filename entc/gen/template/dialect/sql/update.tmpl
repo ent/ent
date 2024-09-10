@@ -150,10 +150,14 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			}
 		{{- end }}
 		if nodes := {{ $mutation }}.{{ $e.StructField }}IDs(); len(nodes) > 0 {
-			{{- with extend $ "Edge" $e "Nodes" true "Zero" $zero }}
+	    {{- /* Recompute defaults for every through edge */}}
+		  {{- if $e.Through }}for _, node := range nodes { {{end}}
+		  {{- $hasThrough := ne $e.Through nil}}
+			{{- with extend $ "Edge" $e "Nodes" (not $hasThrough) "Zero" $zero "Through" ($hasThrough) }}
 				{{ template "dialect/sql/defedge" . }}
 			{{- end }}
 			_spec.Edges.Add = append(_spec.Edges.Add, edge)
+		  {{- if $e.Through }}}{{end}}
 		}
 	{{- end }}
 	{{- /* Allow mutating the sqlgraph.UpdateSpec by ent extensions or user templates.*/}}
@@ -207,6 +211,9 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+	{{- end }}
+	{{- with $.Scope.Through }}
+		edge.Target.Nodes = append(edge.Target.Nodes, node)
 	{{- end }}
 	{{- with $e.Through }}
 		{{- if .HasDefault }}

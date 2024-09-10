@@ -168,6 +168,7 @@ var (
 		OrderByEdgeCount,
 		OrderByEdgeTerms,
 		OrderByFluent,
+		InsertBulkM2MAdd,
 	}
 )
 
@@ -2868,6 +2869,31 @@ func OrderByEdgeTerms(t *testing.T, client *ent.Client) {
 			IDsX(ctx)
 		require.Equal(t, tt.ids, ids)
 	}
+}
+
+func InsertBulkM2MAdd(t *testing.T, client *ent.Client) {
+	require := require.New(t)
+	ctx := context.Background()
+
+	steve := client.Student.Create().SetName("Steve").SaveX(ctx)
+	bob := client.Student.Create().SetName("Bob").SaveX(ctx)
+	will := client.Student.Create().SetName("Will").SaveX(ctx)
+
+	math := client.Subject.Create().SetName("Math").
+		AddStudents(steve, bob).
+		SaveX(ctx)
+	require.Equal(math.QueryStudents().CountX(ctx), 2)
+
+	math.Update().
+		ClearStudents().
+		SaveX(ctx)
+	require.Equal(math.QueryStudents().CountX(ctx), 0)
+
+	math.Update().
+		AddStudents(steve, bob, will).
+		SaveX(ctx)
+	require.Equal(math.QueryStudents().CountX(ctx), 3)
+
 }
 
 func skip(t *testing.T, names ...string) {
