@@ -683,6 +683,7 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 				owner.AddForeignKey(&schema.ForeignKey{
 					RefTable:   ref,
 					OnDelete:   deleteAction(e, column),
+					OnUpdate:   updateAction(e, column),
 					Columns:    []*schema.Column{column},
 					RefColumns: []*schema.Column{ref.PrimaryKey[0]},
 					Symbol:     fkSymbol(e, owner, ref),
@@ -699,6 +700,7 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 				owner.AddForeignKey(&schema.ForeignKey{
 					RefTable:   ref,
 					OnDelete:   deleteAction(e, column),
+					OnUpdate:   updateAction(e, column),
 					Columns:    []*schema.Column{column},
 					RefColumns: []*schema.Column{ref.PrimaryKey[0]},
 					Symbol:     fkSymbol(e, owner, ref),
@@ -899,6 +901,18 @@ func deleteAction(e *Edge, c *schema.Column) schema.ReferenceOption {
 	}
 	if ant := e.EntSQL(); ant != nil && ant.OnDelete != "" {
 		action = schema.ReferenceOption(ant.OnDelete)
+	}
+	return action
+}
+
+// updateAction returns the referential action for UPDATE operations of the given edge.
+func updateAction(e *Edge, c *schema.Column) schema.ReferenceOption {
+	action := schema.NoAction
+	if c.Nullable {
+		action = schema.SetNull
+	}
+	if ant := e.EntSQL(); ant != nil && ant.OnUpdate != "" {
+		action = schema.ReferenceOption(ant.OnUpdate)
 	}
 	return action
 }

@@ -138,6 +138,18 @@ type Annotation struct {
 	//
 	OnDelete ReferenceOption `json:"on_delete,omitempty"`
 
+	// OnUpdate specifies a custom referential action for UPDATE operations on parent
+	// table that has matching rows in the child table.
+	//
+	// For example, in order to update rows from the parent table and automatically update
+	// their matching rows in the child table, pass the following annotation:
+	//
+	//	entsql.Annotation{
+	//		OnUpdate: entsql.Cascade,
+	//	}
+	//
+	OnUpdate ReferenceOption `json:"on_update,omitempty"`
+
 	// Check allows injecting custom "DDL" for setting an unnamed "CHECK" clause in "CREATE TABLE".
 	//
 	//	entsql.Annotation{
@@ -364,6 +376,23 @@ func OnDelete(opt ReferenceOption) *Annotation {
 	}
 }
 
+// OnUpdate specifies a custom referential action for UPDATE operations on parent
+// table that has matching rows in the child table.
+//
+// For example, in order to update rows from the parent table and automatically update
+// their matching rows in the child table, pass the following annotation:
+//
+//	func (T) Annotations() []schema.Annotation {
+//		return []schema.Annotation{
+//			entsql.OnUpdate(entsql.Cascade),
+//		}
+//	}
+func OnUpdate(opt ReferenceOption) *Annotation {
+	return &Annotation{
+		OnUpdate: opt,
+	}
+}
+
 // Merge implements the schema.Merger interface.
 func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	var ant Annotation
@@ -417,6 +446,9 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	}
 	if od := ant.OnDelete; od != "" {
 		a.OnDelete = od
+	}
+	if ou := ant.OnUpdate; ou != "" {
+		a.OnUpdate = ou
 	}
 	if c := ant.Check; c != "" {
 		a.Check = c
