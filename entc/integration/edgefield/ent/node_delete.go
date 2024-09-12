@@ -43,6 +43,11 @@ func (nd *NodeDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the NodeMutation object of the builder.
+func (nd *NodeDelete) Mutation() *NodeMutation {
+	return nd.mutation
+}
+
 func (nd *NodeDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(node.Table, sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt))
 	if ps := nd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (ndo *NodeDeleteOne) ExecX(ctx context.Context) {
 	if err := ndo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the NodeMutation object of the builder.
+func (ndo *NodeDeleteOne) Mutation() *NodeMutation {
+	return ndo.nd.mutation
 }

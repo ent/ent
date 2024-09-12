@@ -43,6 +43,11 @@ func (cd *ConversionDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the ConversionMutation object of the builder.
+func (cd *ConversionDelete) Mutation() *ConversionMutation {
+	return cd.mutation
+}
+
 func (cd *ConversionDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(conversion.Table, sqlgraph.NewFieldSpec(conversion.FieldID, field.TypeInt))
 	if ps := cd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (cdo *ConversionDeleteOne) ExecX(ctx context.Context) {
 	if err := cdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the ConversionMutation object of the builder.
+func (cdo *ConversionDeleteOne) Mutation() *ConversionMutation {
+	return cdo.cd.mutation
 }

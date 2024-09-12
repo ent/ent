@@ -44,6 +44,11 @@ func (ld *LicenseDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the LicenseMutation object of the builder.
+func (ld *LicenseDelete) Mutation() *LicenseMutation {
+	return ld.mutation
+}
+
 func (ld *LicenseDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := ld.gremlin().Query()
@@ -91,4 +96,9 @@ func (ldo *LicenseDeleteOne) ExecX(ctx context.Context) {
 	if err := ldo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the LicenseMutation object of the builder.
+func (ldo *LicenseDeleteOne) Mutation() *LicenseMutation {
+	return ldo.ld.mutation
 }

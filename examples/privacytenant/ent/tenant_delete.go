@@ -43,6 +43,11 @@ func (td *TenantDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the TenantMutation object of the builder.
+func (td *TenantDelete) Mutation() *TenantMutation {
+	return td.mutation
+}
+
 func (td *TenantDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(tenant.Table, sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt))
 	if ps := td.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (tdo *TenantDeleteOne) ExecX(ctx context.Context) {
 	if err := tdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the TenantMutation object of the builder.
+func (tdo *TenantDeleteOne) Mutation() *TenantMutation {
+	return tdo.td.mutation
 }

@@ -43,6 +43,11 @@ func (cd *CityDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the CityMutation object of the builder.
+func (cd *CityDelete) Mutation() *CityMutation {
+	return cd.mutation
+}
+
 func (cd *CityDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(city.Table, sqlgraph.NewFieldSpec(city.FieldID, field.TypeInt))
 	if ps := cd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (cdo *CityDeleteOne) ExecX(ctx context.Context) {
 	if err := cdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the CityMutation object of the builder.
+func (cdo *CityDeleteOne) Mutation() *CityMutation {
+	return cdo.cd.mutation
 }

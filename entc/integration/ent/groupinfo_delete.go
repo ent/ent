@@ -43,6 +43,11 @@ func (gid *GroupInfoDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the GroupInfoMutation object of the builder.
+func (gid *GroupInfoDelete) Mutation() *GroupInfoMutation {
+	return gid.mutation
+}
+
 func (gid *GroupInfoDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(groupinfo.Table, sqlgraph.NewFieldSpec(groupinfo.FieldID, field.TypeInt))
 	if ps := gid.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (gido *GroupInfoDeleteOne) ExecX(ctx context.Context) {
 	if err := gido.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the GroupInfoMutation object of the builder.
+func (gido *GroupInfoDeleteOne) Mutation() *GroupInfoMutation {
+	return gido.gid.mutation
 }
