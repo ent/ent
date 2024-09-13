@@ -19,7 +19,7 @@ jobs:
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ariga/atlas-sync-action@v0
         with:
           dir: 'examples/migration/ent/migrate/migrations'
@@ -47,7 +47,7 @@ jobs:
           --health-retries 10
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3.0.1
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Mandatory unless "latest" is set below.
       - uses: ariga/atlas-action@v0
