@@ -5,7 +5,7 @@ go 1.23
 replace entgo.io/ent => ../
 
 require (
-	ariga.io/atlas v0.21.2-0.20240418081819-02b3f6239b04
+	ariga.io/atlas v0.27.1-0.20240912191503-92195304dbe1
 	ariga.io/atlas-go-sdk v0.5.6
 	entgo.io/ent v0.0.0-00010101000000-000000000000
 	github.com/google/uuid v1.3.0
@@ -27,7 +27,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.18.1 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/zclconf/go-cty v1.14.1 // indirect
+	github.com/zclconf/go-cty v1.14.4 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/crypto v0.3.0 // indirect
 	golang.org/x/mod v0.20.0 // indirect
