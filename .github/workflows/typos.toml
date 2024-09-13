@@ -7,6 +7,9 @@ nd = "nd"
 ons = "ons"
 ser = "ser"
 ue = "ue"
+udo = "udo"
+leafs = "leafs"
+hax = "hax"
 [files]
 extend-exclude = []
 
