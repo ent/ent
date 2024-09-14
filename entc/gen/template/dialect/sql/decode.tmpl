@@ -129,7 +129,7 @@ func ({{ $receiver }} *{{ $.Name }}) {{ $.ValueName }}(name string) (ent.Value, 
 		if value, ok := values[{{ $i }}].(*{{ $f.ScanType }}); !ok {
 			return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[{{ $i }}])
 		} else if value != nil && len(*value) > 0 {
-			decoder := json.NewDecoder(bytes.NewBuffer(*value))
+			decoder := json.NewDecoder(bytes.NewReader(*value))
 			decoder.UseNumber()
 			if err := decoder.Decode(&{{ $ret }}.{{ $field }}); err != nil {
 				return fmt.Errorf("unmarshal field {{ $f.Name }}: %w", err)
