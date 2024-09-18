@@ -62,6 +62,11 @@ You must call `Unwrap()` if you are querying edges off of a created entity after
 
 The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/traversal).
 
+:::warning Note
+Calling `Unwrap()` on a non-transactional entity (i.e., after a transaction has been committed or rolled back) will
+cause a panic.
+:::
+
 ## Transactional Client
 
 Sometimes, you have an existing code that already works with `*ent.Client`, and you want to change it (or wrap it)
