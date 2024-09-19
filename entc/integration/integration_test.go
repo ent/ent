@@ -1599,6 +1599,15 @@ func UniqueConstraint(t *testing.T, client *ent.Client) {
 	require.Error(err)
 	err = cm1.Update().SetUniqueFloat(math.E).Exec(ctx)
 	require.Error(err)
+
+	t.Log("unique constraint on time fields")
+	now := time.Now()
+	client.File.Create().SetName("a").SetSize(10).SetCreateTime(now).ExecX(ctx)
+	err = client.File.Create().SetName("b").SetSize(20).SetCreateTime(now).Exec(ctx)
+	require.Error(err)
+	require.True(ent.IsConstraintError(err))
+	now = now.Add(time.Second)
+	client.File.Create().SetName("b").SetSize(20).SetCreateTime(now).ExecX(ctx)
 }
 
 type mocker struct{ mock.Mock }

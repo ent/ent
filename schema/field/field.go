@@ -477,6 +477,12 @@ func (b *timeBuilder) Deprecated(reason ...string) *timeBuilder {
 	return b
 }
 
+// Unique makes the field unique within all vertices of this type.
+func (b *timeBuilder) Unique() *timeBuilder {
+	b.desc.Unique = true
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *timeBuilder) Descriptor() *Descriptor {
 	if b.desc.Default != nil {
