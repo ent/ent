@@ -149,6 +149,27 @@ SELECT DISTINCT `todos`.`id`, `todos`.`text`, `todos`.`created_at`, `todos`.`sta
 If you're having trouble running this example, go to the [first section](#clone-the-code-optional), clone the code
 and run the example.
 
+## Field Mappings
+
+The [`entgql.MapsTo`](https://pkg.go.dev/entgo.io/contrib/entgql#MapsTo) allows you to add a custom field/edge mapping
+between the Ent schema and the GraphQL schema. This is useful when you want to expose a field or edge with a different
+name(s) in the GraphQL schema. For example:
+
+```go
+// One to one mapping.
+field.Int("priority").
+	Annotations(
+		entgql.OrderField("PRIORITY_ORDER"),
+		entgql.MapsTo("priorityOrder"),
+	)
+
+// Multiple GraphQL fields can map to the same Ent field.
+field.Int("category_id").
+	Annotations(
+		entgql.MapsTo("categoryID", "category_id", "categoryX"),
+	)
+```
+
 ---
 
 Well done! By using automatic field collection for our Ent schema definition, we were able to greatly improve the
