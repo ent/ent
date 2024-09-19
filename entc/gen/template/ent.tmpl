@@ -111,7 +111,6 @@ func ({{ $receiver }} *{{ $.Name }}) Update() *{{ $.UpdateOneName }} {
 
 // Unwrap unwraps the {{ $.Name }} entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-// Unwrap will panic if {{ $.Name }} is not a transactional entity.
 func ({{ $receiver }} *{{ $.Name }}) Unwrap() *{{ $.Name }} {
 	_tx, ok := {{ $receiver }}.config.driver.(*txDriver)
 	if !ok {
