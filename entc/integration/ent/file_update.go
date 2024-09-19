@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -181,6 +182,26 @@ func (fu *FileUpdate) AddFieldID(i int) *FileUpdate {
 // ClearFieldID clears the value of the "field_id" field.
 func (fu *FileUpdate) ClearFieldID() *FileUpdate {
 	fu.mutation.ClearFieldID()
+	return fu
+}
+
+// SetCreateTime sets the "create_time" field.
+func (fu *FileUpdate) SetCreateTime(t time.Time) *FileUpdate {
+	fu.mutation.SetCreateTime(t)
+	return fu
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (fu *FileUpdate) SetNillableCreateTime(t *time.Time) *FileUpdate {
+	if t != nil {
+		fu.SetCreateTime(*t)
+	}
+	return fu
+}
+
+// ClearCreateTime clears the value of the "create_time" field.
+func (fu *FileUpdate) ClearCreateTime() *FileUpdate {
+	fu.mutation.ClearCreateTime()
 	return fu
 }
 
@@ -379,6 +400,12 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if fu.mutation.FieldIDCleared() {
 		_spec.ClearField(file.FieldFieldID, field.TypeInt)
+	}
+	if value, ok := fu.mutation.CreateTime(); ok {
+		_spec.SetField(file.FieldCreateTime, field.TypeTime, value)
+	}
+	if fu.mutation.CreateTimeCleared() {
+		_spec.ClearField(file.FieldCreateTime, field.TypeTime)
 	}
 	if fu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -654,6 +681,26 @@ func (fuo *FileUpdateOne) ClearFieldID() *FileUpdateOne {
 	return fuo
 }
 
+// SetCreateTime sets the "create_time" field.
+func (fuo *FileUpdateOne) SetCreateTime(t time.Time) *FileUpdateOne {
+	fuo.mutation.SetCreateTime(t)
+	return fuo
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableCreateTime(t *time.Time) *FileUpdateOne {
+	if t != nil {
+		fuo.SetCreateTime(*t)
+	}
+	return fuo
+}
+
+// ClearCreateTime clears the value of the "create_time" field.
+func (fuo *FileUpdateOne) ClearCreateTime() *FileUpdateOne {
+	fuo.mutation.ClearCreateTime()
+	return fuo
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (fuo *FileUpdateOne) SetOwnerID(id int) *FileUpdateOne {
 	fuo.mutation.SetOwnerID(id)
@@ -879,6 +926,12 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 	}
 	if fuo.mutation.FieldIDCleared() {
 		_spec.ClearField(file.FieldFieldID, field.TypeInt)
+	}
+	if value, ok := fuo.mutation.CreateTime(); ok {
+		_spec.SetField(file.FieldCreateTime, field.TypeTime, value)
+	}
+	if fuo.mutation.CreateTimeCleared() {
+		_spec.ClearField(file.FieldCreateTime, field.TypeTime)
 	}
 	if fuo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -11,5 +11,5 @@ udo = "udo"
 leafs = "leafs"
 hax = "hax"
 [files]
-extend-exclude = []
+extend-exclude = [go.mod]
 

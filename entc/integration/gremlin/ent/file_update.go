@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -184,6 +185,26 @@ func (fu *FileUpdate) ClearFieldID() *FileUpdate {
 	return fu
 }
 
+// SetCreateTime sets the "create_time" field.
+func (fu *FileUpdate) SetCreateTime(t time.Time) *FileUpdate {
+	fu.mutation.SetCreateTime(t)
+	return fu
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (fu *FileUpdate) SetNillableCreateTime(t *time.Time) *FileUpdate {
+	if t != nil {
+		fu.SetCreateTime(*t)
+	}
+	return fu
+}
+
+// ClearCreateTime clears the value of the "create_time" field.
+func (fu *FileUpdate) ClearCreateTime() *FileUpdate {
+	fu.mutation.ClearCreateTime()
+	return fu
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (fu *FileUpdate) SetOwnerID(id string) *FileUpdate {
 	fu.mutation.SetOwnerID(id)
@@ -338,7 +359,7 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
 	}
-	constraints := make([]*constraint, 0, 1)
+	constraints := make([]*constraint, 0, 2)
 	v := g.V().HasLabel(file.Label)
 	for _, p := range fu.mutation.predicates {
 		p(v)
@@ -379,6 +400,13 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 	if value, ok := fu.mutation.AddedFieldID(); ok {
 		v.Property(dsl.Single, file.FieldFieldID, __.Union(__.Values(file.FieldFieldID), __.Constant(value)).Sum())
 	}
+	if value, ok := fu.mutation.CreateTime(); ok {
+		constraints = append(constraints, &constraint{
+			pred: g.V().Has(file.Label, file.FieldCreateTime, value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(file.Label, file.FieldCreateTime, value)),
+		})
+		v.Property(dsl.Single, file.FieldCreateTime, value)
+	}
 	var properties []any
 	if fu.mutation.SetIDCleared() {
 		properties = append(properties, file.FieldSetID)
@@ -394,6 +422,9 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 	}
 	if fu.mutation.FieldIDCleared() {
 		properties = append(properties, file.FieldFieldID)
+	}
+	if fu.mutation.CreateTimeCleared() {
+		properties = append(properties, file.FieldCreateTime)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -595,6 +626,26 @@ func (fuo *FileUpdateOne) ClearFieldID() *FileUpdateOne {
 	return fuo
 }
 
+// SetCreateTime sets the "create_time" field.
+func (fuo *FileUpdateOne) SetCreateTime(t time.Time) *FileUpdateOne {
+	fuo.mutation.SetCreateTime(t)
+	return fuo
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableCreateTime(t *time.Time) *FileUpdateOne {
+	if t != nil {
+		fuo.SetCreateTime(*t)
+	}
+	return fuo
+}
+
+// ClearCreateTime clears the value of the "create_time" field.
+func (fuo *FileUpdateOne) ClearCreateTime() *FileUpdateOne {
+	fuo.mutation.ClearCreateTime()
+	return fuo
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (fuo *FileUpdateOne) SetOwnerID(id string) *FileUpdateOne {
 	fuo.mutation.SetOwnerID(id)
@@ -770,7 +821,7 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
 	}
-	constraints := make([]*constraint, 0, 1)
+	constraints := make([]*constraint, 0, 2)
 	v := g.V(id)
 	var (
 		rv = v.Clone()
@@ -808,6 +859,13 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := fuo.mutation.AddedFieldID(); ok {
 		v.Property(dsl.Single, file.FieldFieldID, __.Union(__.Values(file.FieldFieldID), __.Constant(value)).Sum())
 	}
+	if value, ok := fuo.mutation.CreateTime(); ok {
+		constraints = append(constraints, &constraint{
+			pred: g.V().Has(file.Label, file.FieldCreateTime, value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(file.Label, file.FieldCreateTime, value)),
+		})
+		v.Property(dsl.Single, file.FieldCreateTime, value)
+	}
 	var properties []any
 	if fuo.mutation.SetIDCleared() {
 		properties = append(properties, file.FieldSetID)
@@ -823,6 +881,9 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if fuo.mutation.FieldIDCleared() {
 		properties = append(properties, file.FieldFieldID)
+	}
+	if fuo.mutation.CreateTimeCleared() {
+		properties = append(properties, file.FieldCreateTime)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())

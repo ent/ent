@@ -49,6 +49,9 @@ func (File) Fields() []ent.Field {
 		// as it conflicts with the "FieldID" constant.
 		field.Int("field_id").
 			Optional(),
+		field.Time("create_time").
+			Optional().
+			Unique(),
 	}
 }
 

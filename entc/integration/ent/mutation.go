@@ -8809,6 +8809,7 @@ type FileMutation struct {
 	_op           *bool
 	field_id      *int
 	addfield_id   *int
+	create_time   *time.Time
 	clearedFields map[string]struct{}
 	owner         *int
 	clearedowner  bool
@@ -9299,6 +9300,55 @@ func (m *FileMutation) ResetFieldID() {
 	delete(m.clearedFields, file.FieldFieldID)
 }
 
+// SetCreateTime sets the "create_time" field.
+func (m *FileMutation) SetCreateTime(t time.Time) {
+	m.create_time = &t
+}
+
+// CreateTime returns the value of the "create_time" field in the mutation.
+func (m *FileMutation) CreateTime() (r time.Time, exists bool) {
+	v := m.create_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreateTime returns the old "create_time" field's value of the File entity.
+// If the File object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FileMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreateTime: %w", err)
+	}
+	return oldValue.CreateTime, nil
+}
+
+// ClearCreateTime clears the value of the "create_time" field.
+func (m *FileMutation) ClearCreateTime() {
+	m.create_time = nil
+	m.clearedFields[file.FieldCreateTime] = struct{}{}
+}
+
+// CreateTimeCleared returns if the "create_time" field was cleared in this mutation.
+func (m *FileMutation) CreateTimeCleared() bool {
+	_, ok := m.clearedFields[file.FieldCreateTime]
+	return ok
+}
+
+// ResetCreateTime resets all changes to the "create_time" field.
+func (m *FileMutation) ResetCreateTime() {
+	m.create_time = nil
+	delete(m.clearedFields, file.FieldCreateTime)
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by id.
 func (m *FileMutation) SetOwnerID(id int) {
 	m.owner = &id
@@ -9465,7 +9515,7 @@ func (m *FileMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FileMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m.set_id != nil {
 		fields = append(fields, file.FieldSetID)
 	}
@@ -9486,6 +9536,9 @@ func (m *FileMutation) Fields() []string {
 	}
 	if m.field_id != nil {
 		fields = append(fields, file.FieldFieldID)
+	}
+	if m.create_time != nil {
+		fields = append(fields, file.FieldCreateTime)
 	}
 	return fields
 }
@@ -9509,6 +9562,8 @@ func (m *FileMutation) Field(name string) (ent.Value, bool) {
 		return m.GetOp()
 	case file.FieldFieldID:
 		return m.FieldID()
+	case file.FieldCreateTime:
+		return m.CreateTime()
 	}
 	return nil, false
 }
@@ -9532,6 +9587,8 @@ func (m *FileMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldOp(ctx)
 	case file.FieldFieldID:
 		return m.OldFieldID(ctx)
+	case file.FieldCreateTime:
+		return m.OldCreateTime(ctx)
 	}
 	return nil, fmt.Errorf("unknown File field %s", name)
 }
@@ -9589,6 +9646,13 @@ func (m *FileMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetFieldID(v)
+		return nil
+	case file.FieldCreateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreateTime(v)
 		return nil
 	}
 	return fmt.Errorf("unknown File field %s", name)
@@ -9674,6 +9738,9 @@ func (m *FileMutation) ClearedFields() []string {
 	if m.FieldCleared(file.FieldFieldID) {
 		fields = append(fields, file.FieldFieldID)
 	}
+	if m.FieldCleared(file.FieldCreateTime) {
+		fields = append(fields, file.FieldCreateTime)
+	}
 	return fields
 }
 
@@ -9703,6 +9770,9 @@ func (m *FileMutation) ClearField(name string) error {
 	case file.FieldFieldID:
 		m.ClearFieldID()
 		return nil
+	case file.FieldCreateTime:
+		m.ClearCreateTime()
+		return nil
 	}
 	return fmt.Errorf("unknown File nullable field %s", name)
 }
@@ -9731,6 +9801,9 @@ func (m *FileMutation) ResetField(name string) error {
 		return nil
 	case file.FieldFieldID:
 		m.ResetFieldID()
+		return nil
+	case file.FieldCreateTime:
+		m.ResetCreateTime()
 		return nil
 	}
 	return fmt.Errorf("unknown File field %s", name)

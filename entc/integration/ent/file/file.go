@@ -30,6 +30,8 @@ const (
 	FieldOp = "op"
 	// FieldFieldID holds the string denoting the field_id field in the database.
 	FieldFieldID = "field_id"
+	// FieldCreateTime holds the string denoting the create_time field in the database.
+	FieldCreateTime = "create_time"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
 	// EdgeType holds the string denoting the type edge name in mutations.
@@ -71,6 +73,7 @@ var Columns = []string{
 	FieldGroup,
 	FieldOp,
 	FieldFieldID,
+	FieldCreateTime,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "files"
@@ -146,6 +149,11 @@ func ByOp(opts ...sql.OrderTermOption) OrderOption {
 // ByFieldID orders the results by the field_id field.
 func ByFieldID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldFieldID, opts...).ToFunc()
+}
+
+// ByCreateTime orders the results by the create_time field.
+func ByCreateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreateTime, opts...).ToFunc()
 }
 
 // ByOwnerField orders the results by owner field.
