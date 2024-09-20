@@ -481,15 +481,23 @@ func (c *{{ $client }}) mutate(ctx context.Context, m *{{ $n.MutationName }}) (V
 // hooks and interceptors per client, for fast access.
 type (
 	{{- $leni := len $.Nodes | add -1 }}
-	{{- $hooks := slist }}
+	{{- $hookNodes := list }}
 	{{- $inters := slist }}
 	{{- range $i, $n := $.Nodes }}
+		{{ if not $n.IsView }}{{- $hookNodes = append $hookNodes $n }}{{ end }}
 		{{- if eq $i $leni }}
-			{{ if not $n.IsView }}{{- $hooks = append $hooks (printf "%s []ent.Hook" $n.Name) }}{{ end }}
 			{{- $inters = append $inters (printf "%s []ent.Interceptor" $n.Name) }}
 		{{- else }}
-			{{ if not $n.IsView }}{{- $hooks = append $hooks (print $n.Name ",") }}{{ end }}
 			{{- $inters = append $inters (print $n.Name ",") }}
+		{{- end }}
+	{{- end }}
+	{{- $leni = len $hookNodes | add -1 }}
+	{{- $hooks := slist }}
+	{{- range $i, $n := $hookNodes }}
+		{{- if eq $i $leni }}
+			{{- $hooks = append $hooks (printf "%s []ent.Hook" $n.Name) }}
+		{{- else }}
+			{{- $hooks = append $hooks (printf "%s," $n.Name) }}
 		{{- end }}
 	{{- end }}
 	hooks struct {
