@@ -139,6 +139,7 @@ func ByBlobLinks(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newBlobLinksStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
 func newParentStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
