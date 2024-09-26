@@ -10,25 +10,13 @@ on:
       - 'doc/**'
 
 jobs:
-  typos-check:
-    name: Spell Check with Typos
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Actions Repository
-        uses: actions/checkout@v3
-      - name: Check spelling with custom config file
-        uses: crate-ci/typos@v1.13.10
-        with:
-          config: .github/workflows/typos.toml
-
-
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version-file: './go.mod'
       - name: Run linters
         uses: golangci/golangci-lint-action@v5
         with:
@@ -38,9 +26,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go: ['1.21', '1.22']
+        go: ['1.22', '1.23']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go }}
@@ -72,10 +60,10 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version-file: './go.mod'
       - uses: actions/cache@v4
         with:
           path: ~/go/pkg/mod
@@ -263,10 +251,10 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version-file: './go.mod'
       - uses: actions/cache@v4
         with:
           path: ~/go/pkg/mod
@@ -441,12 +429,12 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version-file: './go.mod'
       - uses: actions/cache@v4
         with:
           path: ~/go/pkg/mod

@@ -29,6 +29,7 @@ type (
 	// each Type object of the graph.
 	TypeTemplate struct {
 		Name           string             // template name.
+		Cond           func(*Type) bool   // condition to apply the template.
 		Format         func(*Type) string // file name format.
 		ExtendPatterns []string           // extend patterns.
 	}
@@ -47,6 +48,7 @@ var (
 	Templates = []TypeTemplate{
 		{
 			Name:   "create",
+			Cond:   notView,
 			Format: pkgf("%s_create.go"),
 			ExtendPatterns: []string{
 				"dialect/*/create/fields/additional/*",
@@ -55,10 +57,12 @@ var (
 		},
 		{
 			Name:   "update",
+			Cond:   notView,
 			Format: pkgf("%s_update.go"),
 		},
 		{
 			Name:   "delete",
+			Cond:   notView,
 			Format: pkgf("%s_delete.go"),
 		},
 		{
@@ -222,6 +226,9 @@ var (
 		"field":   "entgo.io/ent/schema/field",
 	}
 )
+
+// notView reports if the given type is not a view.
+func notView(t *Type) bool { return !t.IsView() }
 
 func initTemplates() {
 	templates = MustParse(NewTemplate("templates").

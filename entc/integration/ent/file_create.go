@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -114,6 +115,20 @@ func (fc *FileCreate) SetFieldID(i int) *FileCreate {
 func (fc *FileCreate) SetNillableFieldID(i *int) *FileCreate {
 	if i != nil {
 		fc.SetFieldID(*i)
+	}
+	return fc
+}
+
+// SetCreateTime sets the "create_time" field.
+func (fc *FileCreate) SetCreateTime(t time.Time) *FileCreate {
+	fc.mutation.SetCreateTime(t)
+	return fc
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (fc *FileCreate) SetNillableCreateTime(t *time.Time) *FileCreate {
+	if t != nil {
+		fc.SetCreateTime(*t)
 	}
 	return fc
 }
@@ -284,6 +299,10 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 	if value, ok := fc.mutation.FieldID(); ok {
 		_spec.SetField(file.FieldFieldID, field.TypeInt, value)
 		_node.FieldID = value
+	}
+	if value, ok := fc.mutation.CreateTime(); ok {
+		_spec.SetField(file.FieldCreateTime, field.TypeTime, value)
+		_node.CreateTime = value
 	}
 	if nodes := fc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -519,6 +538,24 @@ func (u *FileUpsert) ClearFieldID() *FileUpsert {
 	return u
 }
 
+// SetCreateTime sets the "create_time" field.
+func (u *FileUpsert) SetCreateTime(v time.Time) *FileUpsert {
+	u.Set(file.FieldCreateTime, v)
+	return u
+}
+
+// UpdateCreateTime sets the "create_time" field to the value that was provided on create.
+func (u *FileUpsert) UpdateCreateTime() *FileUpsert {
+	u.SetExcluded(file.FieldCreateTime)
+	return u
+}
+
+// ClearCreateTime clears the value of the "create_time" field.
+func (u *FileUpsert) ClearCreateTime() *FileUpsert {
+	u.SetNull(file.FieldCreateTime)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -710,6 +747,27 @@ func (u *FileUpsertOne) UpdateFieldID() *FileUpsertOne {
 func (u *FileUpsertOne) ClearFieldID() *FileUpsertOne {
 	return u.Update(func(s *FileUpsert) {
 		s.ClearFieldID()
+	})
+}
+
+// SetCreateTime sets the "create_time" field.
+func (u *FileUpsertOne) SetCreateTime(v time.Time) *FileUpsertOne {
+	return u.Update(func(s *FileUpsert) {
+		s.SetCreateTime(v)
+	})
+}
+
+// UpdateCreateTime sets the "create_time" field to the value that was provided on create.
+func (u *FileUpsertOne) UpdateCreateTime() *FileUpsertOne {
+	return u.Update(func(s *FileUpsert) {
+		s.UpdateCreateTime()
+	})
+}
+
+// ClearCreateTime clears the value of the "create_time" field.
+func (u *FileUpsertOne) ClearCreateTime() *FileUpsertOne {
+	return u.Update(func(s *FileUpsert) {
+		s.ClearCreateTime()
 	})
 }
 
@@ -1068,6 +1126,27 @@ func (u *FileUpsertBulk) UpdateFieldID() *FileUpsertBulk {
 func (u *FileUpsertBulk) ClearFieldID() *FileUpsertBulk {
 	return u.Update(func(s *FileUpsert) {
 		s.ClearFieldID()
+	})
+}
+
+// SetCreateTime sets the "create_time" field.
+func (u *FileUpsertBulk) SetCreateTime(v time.Time) *FileUpsertBulk {
+	return u.Update(func(s *FileUpsert) {
+		s.SetCreateTime(v)
+	})
+}
+
+// UpdateCreateTime sets the "create_time" field to the value that was provided on create.
+func (u *FileUpsertBulk) UpdateCreateTime() *FileUpsertBulk {
+	return u.Update(func(s *FileUpsert) {
+		s.UpdateCreateTime()
+	})
+}
+
+// ClearCreateTime clears the value of the "create_time" field.
+func (u *FileUpsertBulk) ClearCreateTime() *FileUpsertBulk {
+	return u.Update(func(s *FileUpsert) {
+		s.ClearCreateTime()
 	})
 }
 

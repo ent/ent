@@ -1,0 +1,276 @@
+---
+title: Using Database Triggers in Ent Schema
+id: trigger
+slug: triggers
+---
+
+import InstallationInstructions from '../components/_installation_instructions.mdx';
+
+Triggers are useful tools in relational databases that allow you to execute custom code when specific events occur on a
+table. For instance, triggers can automatically populate the audit log table whenever a new mutation is applied to a different table.
+This way we ensure that all changes (including those made by other applications) are meticulously recorded, enabling the enforcement
+on the database-level and reducing the need for additional code in the applications.
+
+This guide explains how to attach triggers to your Ent types (objects) and configure the schema migration to manage
+both the triggers and the Ent schema as a single migration unit using Atlas.
+
+:::info [Atlas Pro Feature](https://atlasgo.io/features#pro-plan)
+Atlas support for [Triggers](https://atlasgo.io/atlas-schema/hcl#trigger) used in this guide is available exclusively
+to Pro users. To use this feature, run:
+```
+atlas login
+```
+:::
+
+## Install Atlas
+
+<InstallationInstructions />
+
+## Login to Atlas
+
+```shell
+$ atlas login a8m
+//highlight-next-line-info
+You are now connected to "a8m" on Atlas Cloud.
+```
+
+## Composite Schema
+
+An `ent/schema` package is mostly used for defining Ent types (objects), their fields, edges and logic. Table triggers
+or any other database native objects do not have representation in Ent models. A trigger function can be defined once,
+and used in multiple triggers in different tables.
+
+In order to extend our PostgreSQL schema to include both our Ent types and their triggers, we configure Atlas to
+read the state of the schema from a [Composite Schema](https://atlasgo.io/atlas-schema/projects#data-source-composite_schema)
+data source. Follow the steps below to configure this for your project:
+
+1\. Let's define a simple schema with two types (tables): `users` and `user_audit_logs`:
+
+```go title="ent/schema/user.go"
+// User holds the schema definition for the User entity.
+type User struct {
+	ent.Schema
+}
+
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name"),
+	}
+}
+
+// UserAuditLog holds the schema definition for the UserAuditLog entity.
+type UserAuditLog struct {
+	ent.Schema
+}
+
+// Fields of the UserAuditLog.
+func (UserAuditLog) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("operation_type"),
+		field.String("operation_time"),
+		field.String("old_value").
+			Optional(),
+		field.String("new_value").
+			Optional(),
+	}
+}
+```
+
+Now, suppose we want to log every change to the `users` table and save it in the `user_audit_logs` table.
+To achieve this, we need to create a trigger function on `INSERT`, `UPDATE` and `DELETE` operations and attach it to
+the `users` table.
+
+2\. Next step, we define a trigger function ( `audit_users_changes`) and attach it to the `users` table using the `CREATE TRIGGER` commands:
+
+```sql title="schema.sql" {23,26,29}
+-- Function to audit changes in the users table.
+CREATE OR REPLACE FUNCTION audit_users_changes()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (TG_OP = 'INSERT') THEN
+        INSERT INTO user_audit_logs(operation_type, operation_time, new_value)
+        VALUES (TG_OP, CURRENT_TIMESTAMP, row_to_json(NEW));
+        RETURN NEW;
+    ELSIF (TG_OP = 'UPDATE') THEN
+        INSERT INTO user_audit_logs(operation_type, operation_time, old_value, new_value)
+        VALUES (TG_OP, CURRENT_TIMESTAMP, row_to_json(OLD), row_to_json(NEW));
+        RETURN NEW;
+    ELSIF (TG_OP = 'DELETE') THEN
+        INSERT INTO user_audit_logs(operation_type, operation_time, old_value)
+        VALUES (TG_OP, CURRENT_TIMESTAMP, row_to_json(OLD));
+        RETURN OLD;
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger for INSERT operations.
+CREATE TRIGGER users_insert_audit AFTER INSERT ON users FOR EACH ROW EXECUTE FUNCTION audit_users_changes();
+
+-- Trigger for UPDATE operations.
+CREATE TRIGGER users_update_audit AFTER UPDATE ON users FOR EACH ROW EXECUTE FUNCTION audit_users_changes();
+
+-- Trigger for DELETE operations.
+CREATE TRIGGER users_delete_audit AFTER DELETE ON users FOR EACH ROW EXECUTE FUNCTION audit_users_changes();
+```
+
+
+3\. Lastly, we create a simple `atlas.hcl` config file with a `composite_schema` that includes both our Ent schema and
+the custom triggers defined in `schema.sql`:
+
+```hcl title="atlas.hcl"
+data "composite_schema" "app" {
+  # Load the ent schema first with all tables.
+  schema "public" {
+    url = "ent://ent/schema"
+  }
+  # Then, load the triggers schema.
+  schema "public" {
+    url = "file://schema.sql"
+  }
+}
+
+env "local" {
+  src = data.composite_schema.app.url
+  dev = "docker://postgres/15/dev?search_path=public"
+}
+```
+
+## Usage
+
+After setting up our composite schema, we can get its representation using the `atlas schema inspect` command, generate
+schema migrations for it, apply them to a database, and more. Below are a few commands to get you started with Atlas:
+
+#### Inspect the Schema
+
+The `atlas schema inspect` command is commonly used to inspect databases. However, we can also use it to inspect our
+`composite_schema` and print the SQL representation of it:
+
+```shell
+atlas schema inspect \
+  --env local \
+  --url env://src \
+  --format '{{ sql . }}'
+```
+
+The command above prints the following SQL. Note, the `audit_users_changes` function and the triggers are defined after
+the `users` and `user_audit_logs` tables:
+
+```sql
+-- Create "user_audit_logs" table
+CREATE TABLE "user_audit_logs" ("id" bigint NOT NULL GENERATED BY DEFAULT AS IDENTITY, "operation_type" character varying NOT NULL, "operation_time" character varying NOT NULL, "old_value" character varying NULL, "new_value" character varying NULL, PRIMARY KEY ("id"));
+-- Create "users" table
+CREATE TABLE "users" ("id" bigint NOT NULL GENERATED BY DEFAULT AS IDENTITY, "name" character varying NOT NULL, PRIMARY KEY ("id"));
+-- Create "audit_users_changes" function
+CREATE FUNCTION "audit_users_changes" () RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+    IF (TG_OP = 'INSERT') THEN
+        INSERT INTO user_audit_logs(operation_type, operation_time, new_value)
+        VALUES (TG_OP, CURRENT_TIMESTAMP, row_to_json(NEW));
+        RETURN NEW;
+    ELSIF (TG_OP = 'UPDATE') THEN
+        INSERT INTO user_audit_logs(operation_type, operation_time, old_value, new_value)
+        VALUES (TG_OP, CURRENT_TIMESTAMP, row_to_json(OLD), row_to_json(NEW));
+        RETURN NEW;
+    ELSIF (TG_OP = 'DELETE') THEN
+        INSERT INTO user_audit_logs(operation_type, operation_time, old_value)
+        VALUES (TG_OP, CURRENT_TIMESTAMP, row_to_json(OLD));
+        RETURN OLD;
+    END IF;
+    RETURN NULL;
+END;
+$$;
+-- Create trigger "users_delete_audit"
+CREATE TRIGGER "users_delete_audit" AFTER DELETE ON "users" FOR EACH ROW EXECUTE FUNCTION "audit_users_changes"();
+-- Create trigger "users_insert_audit"
+CREATE TRIGGER "users_insert_audit" AFTER INSERT ON "users" FOR EACH ROW EXECUTE FUNCTION "audit_users_changes"();
+-- Create trigger "users_update_audit"
+CREATE TRIGGER "users_update_audit" AFTER UPDATE ON "users" FOR EACH ROW EXECUTE FUNCTION "audit_users_changes"();
+```
+
+#### Generate Migrations For the Schema
+
+To generate a migration for the schema, run the following command:
+
+```shell
+atlas migrate diff \
+  --env local
+```
+
+Note that a new migration file is created with the following content:
+
+```sql title="migrations/20240712090543.sql"
+-- Create "user_audit_logs" table
+CREATE TABLE "user_audit_logs" ("id" bigint NOT NULL GENERATED BY DEFAULT AS IDENTITY, "operation_type" character varying NOT NULL, "operation_time" character varying NOT NULL, "old_value" character varying NULL, "new_value" character varying NULL, PRIMARY KEY ("id"));
+-- Create "users" table
+CREATE TABLE "users" ("id" bigint NOT NULL GENERATED BY DEFAULT AS IDENTITY, "name" character varying NOT NULL, PRIMARY KEY ("id"));
+-- Create "audit_users_changes" function
+CREATE FUNCTION "audit_users_changes" () RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+    IF (TG_OP = 'INSERT') THEN
+        INSERT INTO user_audit_logs(operation_type, operation_time, new_value)
+        VALUES (TG_OP, CURRENT_TIMESTAMP, row_to_json(NEW));
+        RETURN NEW;
+    ELSIF (TG_OP = 'UPDATE') THEN
+        INSERT INTO user_audit_logs(operation_type, operation_time, old_value, new_value)
+        VALUES (TG_OP, CURRENT_TIMESTAMP, row_to_json(OLD), row_to_json(NEW));
+        RETURN NEW;
+    ELSIF (TG_OP = 'DELETE') THEN
+        INSERT INTO user_audit_logs(operation_type, operation_time, old_value)
+        VALUES (TG_OP, CURRENT_TIMESTAMP, row_to_json(OLD));
+        RETURN OLD;
+    END IF;
+    RETURN NULL;
+END;
+$$;
+-- Create trigger "users_delete_audit"
+CREATE TRIGGER "users_delete_audit" AFTER DELETE ON "users" FOR EACH ROW EXECUTE FUNCTION "audit_users_changes"();
+-- Create trigger "users_insert_audit"
+CREATE TRIGGER "users_insert_audit" AFTER INSERT ON "users" FOR EACH ROW EXECUTE FUNCTION "audit_users_changes"();
+-- Create trigger "users_update_audit"
+CREATE TRIGGER "users_update_audit" AFTER UPDATE ON "users" FOR EACH ROW EXECUTE FUNCTION "audit_users_changes"();
+```
+
+#### Apply the Migrations
+
+To apply the migration generated above to a database, run the following command:
+
+```
+atlas migrate apply \
+  --env local \
+  --url "postgres://postgres:pass@localhost:5432/database?search_path=public&sslmode=disable"
+```
+
+:::info Apply the Schema Directly on the Database
+
+Sometimes, there is a need to apply the schema directly to the database without generating a migration file. For example,
+when experimenting with schema changes, spinning up a database for testing, etc. In such cases, you can use the command
+below to apply the schema directly to the database:
+
+```shell
+atlas schema apply \
+  --env local \
+  --url "postgres://postgres:pass@localhost:5432/database?search_path=public&sslmode=disable"
+```
+
+Or, using the [Atlas Go SDK](https://github.com/ariga/atlas-go-sdk):
+
+```go
+ac, err := atlasexec.NewClient(".", "atlas")
+if err != nil {
+	log.Fatalf("failed to initialize client: %w", err)
+}
+// Automatically update the database with the desired schema.
+// Another option, is to use 'migrate apply' or 'schema apply' manually.
+if _, err := ac.SchemaApply(ctx, &atlasexec.SchemaApplyParams{
+	Env: "local",
+	URL: "postgres://postgres:pass@localhost:5432/database?search_path=public&sslmode=disable",
+}); err != nil {
+    log.Fatalf("failed to apply schema changes: %w", err)
+}
+```
+
+:::
+
+The code for this guide can be found in [GitHub](https://github.com/ent/ent/tree/master/examples/triggers).

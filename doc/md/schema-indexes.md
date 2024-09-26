@@ -279,11 +279,16 @@ CREATE INDEX "users_nickname" ON "users" ("nickname") WHERE "active"
 CREATE INDEX "users_phone" ON "users" ("phone" bpchar_pattern_ops)
 ```
 
+## Functional Indexes
+
+The Ent schema supports defining indexes on fields and edges (foreign-keys), but there is no API for defining index
+parts as expressions, such as function calls. If you are using [Atlas](https://atlasgo.io/docs) for managing schema
+migrations, you can define functional indexes as described in [this guide](/docs/migration/functional-indexes).
 
 ## Storage Key
 
 Like Fields, custom index name can be configured using the `StorageKey` method.
-It's mapped to a index name in SQL dialects.
+It's mapped to an index name in SQL dialects.
 
 ```go
 func (User) Indexes() []ent.Index {

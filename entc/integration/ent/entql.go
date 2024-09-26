@@ -208,13 +208,14 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "File",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			file.FieldSetID:   {Type: field.TypeInt, Column: file.FieldSetID},
-			file.FieldSize:    {Type: field.TypeInt, Column: file.FieldSize},
-			file.FieldName:    {Type: field.TypeString, Column: file.FieldName},
-			file.FieldUser:    {Type: field.TypeString, Column: file.FieldUser},
-			file.FieldGroup:   {Type: field.TypeString, Column: file.FieldGroup},
-			file.FieldOp:      {Type: field.TypeBool, Column: file.FieldOp},
-			file.FieldFieldID: {Type: field.TypeInt, Column: file.FieldFieldID},
+			file.FieldSetID:      {Type: field.TypeInt, Column: file.FieldSetID},
+			file.FieldSize:       {Type: field.TypeInt, Column: file.FieldSize},
+			file.FieldName:       {Type: field.TypeString, Column: file.FieldName},
+			file.FieldUser:       {Type: field.TypeString, Column: file.FieldUser},
+			file.FieldGroup:      {Type: field.TypeString, Column: file.FieldGroup},
+			file.FieldOp:         {Type: field.TypeBool, Column: file.FieldOp},
+			file.FieldFieldID:    {Type: field.TypeInt, Column: file.FieldFieldID},
+			file.FieldCreateTime: {Type: field.TypeTime, Column: file.FieldCreateTime},
 		},
 	}
 	graph.Nodes[7] = &sqlgraph.Node{
@@ -1504,6 +1505,11 @@ func (f *FileFilter) WhereOp(p entql.BoolP) {
 // WhereFieldID applies the entql int predicate on the field_id field.
 func (f *FileFilter) WhereFieldID(p entql.IntP) {
 	f.Where(p.Field(file.FieldFieldID))
+}
+
+// WhereCreateTime applies the entql time.Time predicate on the create_time field.
+func (f *FileFilter) WhereCreateTime(p entql.TimeP) {
+	f.Where(p.Field(file.FieldCreateTime))
 }
 
 // WhereHasOwner applies a predicate to check if query has an edge owner.

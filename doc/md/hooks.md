@@ -18,10 +18,13 @@ There are 5 types of mutations:
 - `Delete` - Delete all nodes that match a predicate.
 
 Each generated node type has its own type of mutation. For example, all [`User` builders](crud.mdx#create-an-entity), share
-the same generated `UserMutation` object.
+the same generated `UserMutation` object. However, all builder types implement the generic <a target="_blank" href="https://pkg.go.dev/entgo.io/ent?tab=doc#Mutation">`ent.Mutation`</a> interface.
 
-However, all builder types implement the generic <a target="_blank" href="https://pkg.go.dev/entgo.io/ent?tab=doc#Mutation">`ent.Mutation`</a> interface.
- 
+:::info Support For Database Triggers
+Unlike database triggers, hooks are executed at the application level, not the database level. If you need to execute
+specific logic on the database level, use database triggers as explained in the [schema migration guide](/docs/migration/triggers).
+:::
+
 ## Hooks
 
 Hooks are functions that get an <a target="_blank" href="https://pkg.go.dev/entgo.io/ent?tab=doc#Mutator">`ent.Mutator`</a> and return a mutator back.

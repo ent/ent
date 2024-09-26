@@ -184,23 +184,20 @@ func main() {
 }
 ```
 
-### Popular Extensions
-
-- **[elk (discontinued)](https://github.com/masseelch/elk)**  
-  `elk` is an extension that generates RESTful API endpoints from Ent schemas. The extension generates HTTP CRUD
-  handlers from the Ent schema, as well as an OpenAPI JSON file. By using it, you can easily build a RESTful HTTP server
-  for your application. Please note, that `elk` has been discontinued in favor of `entoas`. An implementation generator
-  is in the works.   
-  Read [this blog post](https://entgo.io/blog/2021/07/29/generate-a-fully-working-go-crud-http-api-with-ent) on how to
-  work with `elk`, and [this blog post](https://entgo.io/blog/2021/09/10/openapi-generator) on how to generate
-  an [OpenAPI Specification](https://swagger.io/resources/open-api/).
+### Community Extensions
 
 - **[entoas](https://github.com/ent/contrib/tree/master/entoas)**
   `entoas` is an extension that originates from `elk` and was ported into its own extension and is now the official
   generator for and opinionated OpenAPI Specification document. You can use this to rapidly develop and document a
   RESTful HTTP server. There will be a new extension released soon providing a generated implementation integrating for
   the document provided by `entoas` using `ent`.
-  
+
+- **[entrest](https://github.com/lrstanley/entrest)**
+  `entrest` is an alternative to `entoas`(+ `ogent`) and `elk` (before it was discontinued). entrest generates a compliant,
+  efficient, and feature-complete OpenAPI specification from your Ent schema, along with a functional RESTful API server
+  implementation. The highlight features include: toggleable pagination, advanced filtering/querying capabilities, sorting
+  (even through relationships), eager-loading edges, and a bunch more.
+
 - **[entgql](https://github.com/ent/contrib/tree/master/entgql)**  
   This extension helps users build [GraphQL](https://graphql.org/) servers from Ent schemas. `entgql` integrates
   with [gqlgen](https://github.com/99designs/gqlgen), a popular, schema-first Go library for building GraphQL servers.
@@ -217,9 +214,19 @@ func main() {
   you can read [this blog post](https://entgo.io/blog/2021/03/18/generating-a-grpc-server-with-ent),
   or [this blog post](https://entgo.io/blog/2021/06/28/gprc-ready-for-use/) discussing more `entproto` features.
 
-- **[entviz](https://github.com/hedwigz/entviz)**  
+- **[elk (discontinued)](https://github.com/masseelch/elk)**  
+  `elk` is an extension that generates RESTful API endpoints from Ent schemas. The extension generates HTTP CRUD
+  handlers from the Ent schema, as well as an OpenAPI JSON file. By using it, you can easily build a RESTful HTTP server
+  for your application. **Please note, that `elk` has been discontinued in favor of `entoas`**. An implementation generator
+  is in the works.
+  Read [this blog post](https://entgo.io/blog/2021/07/29/generate-a-fully-working-go-crud-http-api-with-ent) on how to
+  work with `elk`, and [this blog post](https://entgo.io/blog/2021/09/10/openapi-generator) on how to generate
+  an [OpenAPI Specification](https://swagger.io/resources/open-api/).
+
+- **[entviz (discontinued)](https://github.com/hedwigz/entviz)**  
   `entviz` is an extension that generates visual diagrams from Ent schemas. These diagrams visualize the schema in a web
   browser, and stay updated as we continue coding. `entviz` can be configured in such a way that every time we
   regenerate the schema, the diagram is automatically updated, making it easy to view the changes being made.  
   Learn how to integrate `entviz` in your project
-  in [this blog post](https://entgo.io/blog/2021/08/26/visualizing-your-data-graph-using-entviz).
+  in [this blog post](https://entgo.io/blog/2021/08/26/visualizing-your-data-graph-using-entviz). **This extension has been
+  archived by the maintainer as of 2023-09-16**.

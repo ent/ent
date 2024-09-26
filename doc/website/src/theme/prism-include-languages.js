@@ -8,6 +8,7 @@
  * @format
  */
 
+import ExecutionEnvironment from '@docusaurus/ExecutionEnvironment';
 
 export default function(Prism) {
   Prism.languages.gotemplate = {
@@ -74,5 +75,9 @@ export default function(Prism) {
       lookbehind: true
     }
   });
-
+  if (ExecutionEnvironment.canUseDOM) {
+    window.Prism = Prism;
+    require(`prismjs/components/prism-hcl`)
+    delete window.Prism;
+  }
 }

@@ -213,16 +213,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 		idType = defaultIDType
 	}
 	typ := &Type{
-		Config: c,
-		ID: &Field{
-			cfg:  c,
-			Name: "id",
-			def: &load.Field{
-				Name: "id",
-			},
-			Type:      idType,
-			StructTag: structTag("id", ""),
-		},
+		Config:      c,
 		schema:      schema,
 		Name:        schema.Name,
 		Annotations: schema.Annotations,
@@ -230,7 +221,18 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 		fields:      make(map[string]*Field, len(schema.Fields)),
 		foreignKeys: make(map[string]struct{}),
 	}
-	typ.ID.typ = typ
+	if !typ.IsView() {
+		typ.ID = &Field{
+			cfg:  c,
+			typ:  typ,
+			Name: "id",
+			def: &load.Field{
+				Name: "id",
+			},
+			Type:      idType,
+			StructTag: structTag("id", ""),
+		}
+	}
 	if err := ValidSchemaName(typ.Name); err != nil {
 		return nil, err
 	}
@@ -257,7 +259,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 			return nil, err
 		}
 		// User defined id field.
-		if tf.Name == typ.ID.Name {
+		if typ.ID != nil && tf.Name == typ.ID.Name {
 			switch {
 			case tf.Optional:
 				return nil, errors.New("id field cannot be optional")
@@ -273,6 +275,11 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 	return typ, nil
 }
 
+// IsView indicates if the type (schema) is a view.
+func (t Type) IsView() bool {
+	return t.schema != nil && t.schema.View
+}
+
 // IsEdgeSchema indicates if the type (schema) is used as an edge-schema.
 // i.e. is being used by an edge (or its inverse) with edge.Through modifier.
 func (t Type) IsEdgeSchema() bool {
@@ -286,7 +293,7 @@ func (t Type) HasCompositeID() bool {
 
 // HasOneFieldID indicates if the type has an ID with one field (not composite).
 func (t Type) HasOneFieldID() bool {
-	return !t.HasCompositeID()
+	return !t.HasCompositeID() && t.ID != nil
 }
 
 // Label returns Gremlin label name of the node/type.
@@ -1361,6 +1368,17 @@ func (f Field) IsEnum() bool { return f.Type != nil && f.Type.Type == field.Type
 // that was referenced by one of the edges.
 func (f Field) IsEdgeField() bool { return f.fk != nil }
 
+// IsDeprecated returns true if the field is deprecated.
+func (f Field) IsDeprecated() bool { return f.def != nil && f.def.Deprecated }
+
+// DeprecationReason returns the deprecation reason of the field.
+func (f Field) DeprecationReason() string {
+	if f.def != nil {
+		return f.def.DeprecatedReason
+	}
+	return ""
+}
+
 // Edge returns the edge this field is point to.
 func (f Field) Edge() (*Edge, error) {
 	if !f.IsEdgeField() {
@@ -1423,6 +1441,17 @@ func (t Type) HasValueScanner() bool {
 		}
 	}
 	return false
+}
+
+// DeprecatedFields returns all deprecated fields of the type.
+func (t Type) DeprecatedFields() []*Field {
+	fs := make([]*Field, 0, len(t.Fields))
+	for _, f := range t.Fields {
+		if f.IsDeprecated() {
+			fs = append(fs, f)
+		}
+	}
+	return fs
 }
 
 // HasValueScanner indicates if the field has (an external) ValueScanner.

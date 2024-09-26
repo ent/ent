@@ -257,8 +257,9 @@ func (pq *PCQuery) Clone() *PCQuery {
 		inters:     append([]Interceptor{}, pq.inters...),
 		predicates: append([]predicate.PC{}, pq.predicates...),
 		// clone intermediate query.
-		sql:  pq.sql.Clone(),
-		path: pq.path,
+		sql:       pq.sql.Clone(),
+		path:      pq.path,
+		modifiers: append([]func(*sql.Selector){}, pq.modifiers...),
 	}
 }
 

@@ -56,7 +56,7 @@ func queryFilter(q {{ $pkg }}.Query) (Filter, error) {
 
 func mutationFilter(m {{ $pkg }}.Mutation) (Filter, error) {
 	switch m := m.(type) {
-	{{- range $n := $.Nodes }}
+	{{- range $n := $.MutableNodes }}
 		case *{{ $pkg }}.{{ $n.MutationName }}:
 			return m.Filter(), nil
 	{{- end }}

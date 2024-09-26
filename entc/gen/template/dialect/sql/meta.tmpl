@@ -49,7 +49,9 @@ in the LICENSE file in the root directory of this source tree.
 			{{ $.ID.Constant }},
 		{{- end }}
 		{{- range $f := $.Fields }}
-			{{ $f.Constant }},
+			{{- if not $f.IsDeprecated }}
+				{{ $f.Constant }},
+			{{- end }}
 		{{- end }}
 	}
 	{{/* If any of the edges owns a foreign-key */}}
@@ -88,6 +90,13 @@ func ValidColumn(column string) bool {
 	{{- with $.UnexportedForeignKeys }}
 		for i := range ForeignKeys {
 			if column == ForeignKeys[i] {
+				return true
+			}
+		}
+	{{- end }}
+	{{- with $.DeprecatedFields }}
+		for _, f := range [...]string{ {{- range . }}{{ .Constant }},{{ end }} } {
+			if column == f {
 				return true
 			}
 		}

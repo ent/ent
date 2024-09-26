@@ -874,12 +874,14 @@ func ExecQuery(t *testing.T, client *ent.Client) {
 func NillableRequired(t *testing.T, client *ent.Client) {
 	require := require.New(t)
 	ctx := context.Background()
-	client.Task.Create().ExecX(ctx)
+	client.Task.Create().SetName("Name").ExecX(ctx)
 	tk := client.Task.Query().OnlyX(ctx)
+	require.Empty(tk.Name, "Name is not selected by default")
 	require.NotNil(tk.CreatedAt, "field value should be populated by default by the database")
 	require.False(reflect.ValueOf(tk.Update()).MethodByName("SetNillableCreatedAt").IsValid(), "immutable-nillable should not have SetNillable setter on update")
-	tk = client.Task.Query().Select(enttask.FieldID, enttask.FieldPriority).OnlyX(ctx)
+	tk = client.Task.Query().Select(enttask.FieldID, enttask.FieldPriority, enttask.FieldName).OnlyX(ctx)
 	require.Nil(tk.CreatedAt, "field should not be populated when it is not selected")
+	require.Equal("Name", tk.Name, "Name should be populated when selected manually")
 }
 
 func Predicate(t *testing.T, client *ent.Client) {
@@ -1597,6 +1599,15 @@ func UniqueConstraint(t *testing.T, client *ent.Client) {
 	require.Error(err)
 	err = cm1.Update().SetUniqueFloat(math.E).Exec(ctx)
 	require.Error(err)
+
+	t.Log("unique constraint on time fields")
+	now := time.Now()
+	client.File.Create().SetName("a").SetSize(10).SetCreateTime(now).ExecX(ctx)
+	err = client.File.Create().SetName("b").SetSize(20).SetCreateTime(now).Exec(ctx)
+	require.Error(err)
+	require.True(ent.IsConstraintError(err))
+	now = now.Add(time.Second)
+	client.File.Create().SetName("b").SetSize(20).SetCreateTime(now).ExecX(ctx)
 }
 
 type mocker struct{ mock.Mock }

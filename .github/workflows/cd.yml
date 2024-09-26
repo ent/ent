@@ -13,10 +13,10 @@ jobs:
     name: docs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 16.14
       - name: Install Dependencies
@@ -31,15 +31,17 @@ jobs:
         working-directory: doc/website
         run: yarn build
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2.0.0
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-central-1
       - name: Deploy Docs
         working-directory: doc/website/build
-        run: aws s3 sync . s3://entgoio --delete --exclude "images/*"
+        run: |-
+          aws s3 sync . s3://entgoio --delete --exclude "images/*"
       - name: Invalidate Cache
+        run: |-
+          aws cloudfront create-invalidation --distribution-id $CDN_DISTRIBUTION_ID --paths "/*" | jq -M "del(.Location)"
         env:
           CDN_DISTRIBUTION_ID: ${{ secrets.CDN_DISTRIBUTION_ID }}
-        run: aws cloudfront create-invalidation --distribution-id $CDN_DISTRIBUTION_ID --paths "/*" | jq -M "del(.Location)"

@@ -104,6 +104,6 @@ func (ext decodeExtension) DecorateDecoder(typ reflect2.Type, dec jsoniter.ValDe
 	case reflect.Map:
 		return ext.DecoratorOfMap(dec)
 	default:
-		return ext.DecoderOfError("graphson: unsupported type: " + typ.String())
+		return ext.DecoderOfError("graphson: unsupported type: %s", typ.String())
 	}
 }

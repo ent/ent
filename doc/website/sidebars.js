@@ -16,6 +16,7 @@ module.exports = {
         'schema-fields',
         'schema-edges',
         'schema-indexes',
+        'schema-views',
         'schema-mixin',
         'schema-annotations',
       ],
@@ -44,6 +45,20 @@ module.exports = {
       label: 'Migration',
       items: [
         'versioned-migrations',
+        {
+          type: 'category',
+          label: 'External Objects',
+          items: [
+            {type: 'doc', id: 'migration/composite', label: 'Composite Types'},
+            {type: 'doc', id: 'migration/domain', label: 'Domain Types'},
+            {type: 'doc', id: 'migration/enum', label: 'Enum Types'},
+            {type: 'doc', id: 'migration/extension', label: 'Extensions'},
+            {type: 'doc', id: 'migration/functional-indexes', label: 'Functional Indexes'},
+            {type: 'doc', id: 'migration/rls', label: 'Row-Level Security'},
+            {type: 'doc', id: 'migration/trigger', label: 'Triggers'},
+          ],
+          collapsed: false,
+        },
         'multischema-migrations',
         'migrate',
         'data-migrations',
