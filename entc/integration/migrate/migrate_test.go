@@ -721,7 +721,7 @@ func TableComment(t *testing.T, drv *sql.Driver, query string) {
 	comment, err := sql.ScanString(rows)
 	require.NoError(t, err)
 	require.NoError(t, rows.Close())
-	require.Equal(t, "Comment that appears in both the schema and the generated code", comment)
+	require.Equal(t, "Comment that appears in both the schema and the generated code\nComment can span multiple lines", comment)
 }
 
 func ColumnComments(t *testing.T, drv *sql.Driver, query string) {
@@ -735,7 +735,7 @@ func ColumnComments(t *testing.T, drv *sql.Driver, query string) {
 	require.Equal(t, media.FieldSourceURI, n2c[2].Name)
 	require.Empty(t, n2c[2].Comment, "source_uri is disabled using annotation")
 	require.Equal(t, media.FieldText, n2c[3].Name)
-	require.Equal(t, "media text", n2c[3].Comment)
+	require.Equal(t, "media text\nComment can span multiple lines", n2c[3].Comment)
 }
 
 func DefaultExpr(t *testing.T, drv *sql.Driver, query string, expected1, expected2 string) {
