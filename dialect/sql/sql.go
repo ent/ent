@@ -156,6 +156,13 @@ func FieldHasPrefix(name string, prefix string) func(*Selector) {
 	}
 }
 
+// FieldHasPrefixFold returns a raw predicate to check if the field has the given prefix with case-folding
+func FieldHasPrefixFold(name string, prefix string) func(*Selector) {
+	return func(s *Selector) {
+		s.Where(HasPrefixFold(s.C(name), prefix))
+	}
+}
+
 // FieldHasSuffix returns a raw predicate to check if the field has the given suffix.
 func FieldHasSuffix(name string, suffix string) func(*Selector) {
 	return func(s *Selector) {

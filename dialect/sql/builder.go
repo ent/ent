@@ -1716,6 +1716,17 @@ func (p *Predicate) escapedLike(col, left, right, word string) *Predicate {
 	})
 }
 
+func (p *Predicate) escapedILike(col, left, right, word string) *Predicate {
+	return p.Append(func(b *Builder) {
+		w, escaped := escape(word)
+		b.Ident(col).WriteOp(OpILike)
+		b.Arg(left + w + right)
+		if p.dialect == dialect.SQLite && escaped {
+			p.WriteString(" ESCAPE ").Arg("\\")
+		}
+	})
+}
+
 // HasPrefix is a helper predicate that checks prefix using the LIKE predicate.
 func HasPrefix(col, prefix string) *Predicate {
 	return P().HasPrefix(col, prefix)
@@ -1724,6 +1735,16 @@ func HasPrefix(col, prefix string) *Predicate {
 // HasPrefix is a helper predicate that checks prefix using the LIKE predicate.
 func (p *Predicate) HasPrefix(col, prefix string) *Predicate {
 	return p.escapedLike(col, "", "%", prefix)
+}
+
+// HasPrefixFold is a helper predicate that checks prefix using the ILIKE predicate.
+func HasPrefixFold(col, prefix string) *Predicate {
+	return P().HasPrefixFold(col, prefix)
+}
+
+// HasPrefixFold is a helper predicate that checks prefix using the ILIKE predicate.
+func (p *Predicate) HasPrefixFold(col, prefix string) *Predicate {
+	return p.escapedILike(col, "", "%", prefix)
 }
 
 // ColumnsHasPrefix appends a new predicate that checks if the given column begins with the other column (prefix).
@@ -3592,6 +3613,7 @@ const (
 	OpIn                // IN
 	OpNotIn             // NOT IN
 	OpLike              // LIKE
+	OpILike             // ILIKE
 	OpIsNull            // IS NULL
 	OpNotNull           // IS NOT NULL
 	OpAdd               // +
@@ -3611,6 +3633,7 @@ var ops = [...]string{
 	OpIn:      "IN",
 	OpNotIn:   "NOT IN",
 	OpLike:    "LIKE",
+	OpILike:   "ILIKE",
 	OpIsNull:  "IS NULL",
 	OpNotNull: "IS NOT NULL",
 	OpAdd:     "+",
@@ -3623,7 +3646,7 @@ var ops = [...]string{
 // WriteOp writes an operator to the builder.
 func (b *Builder) WriteOp(op Op) *Builder {
 	switch {
-	case op >= OpEQ && op <= OpLike || op >= OpAdd && op <= OpMod:
+	case op >= OpEQ && op <= OpILike || op >= OpAdd && op <= OpMod:
 		b.Pad().WriteString(ops[op]).Pad()
 	case op == OpIsNull || op == OpNotNull:
 		b.Pad().WriteString(ops[op])

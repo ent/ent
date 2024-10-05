@@ -336,6 +336,24 @@ func TestFieldHasPrefix(t *testing.T) {
 	})
 }
 
+func TestFieldHasPrefixFold(t *testing.T) {
+	p := FieldHasPrefixFold("name", "a8m")
+	t.Run("MySQL", func(t *testing.T) {
+		s := Dialect(dialect.MySQL).Select("*").From(Table("users"))
+		p(s)
+		query, args := s.Query()
+		require.Equal(t, "SELECT * FROM `users` WHERE `users`.`name` ILIKE ?", query)
+		require.Equal(t, []any{"a8m%"}, args)
+	})
+	t.Run("PostgreSQL", func(t *testing.T) {
+		s := Dialect(dialect.Postgres).Select("*").From(Table("users"))
+		p(s)
+		query, args := s.Query()
+		require.Equal(t, `SELECT * FROM "users" WHERE "users"."name" ILIKE $1`, query)
+		require.Equal(t, []any{"a8m%"}, args)
+	})
+}
+
 func TestFieldHasSuffix(t *testing.T) {
 	p := FieldHasSuffix("name", "a8m")
 	t.Run("MySQL", func(t *testing.T) {
