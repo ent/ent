@@ -161,6 +161,7 @@ func scanType(typ reflect.Type, columns []string) (*rowScan, error) {
 }
 
 var (
+	timeType     = reflect.TypeOf(time.Time{})
 	scannerType  = reflect.TypeOf((*sql.Scanner)(nil)).Elem()
 	nullJSONType = reflect.TypeOf((*nullJSON)(nil)).Elem()
 )
@@ -352,7 +353,7 @@ func ScanTypeOf(rows *Rows, i int) any {
 		rt = rt.Elem()
 	}
 	// Handle NULL values.
-	switch rt.Kind() {
+	switch k := rt.Kind(); k {
 	case reflect.Bool:
 		rt = reflect.TypeOf(sql.NullBool{})
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
@@ -362,6 +363,10 @@ func ScanTypeOf(rows *Rows, i int) any {
 		rt = reflect.TypeOf(sql.NullFloat64{})
 	case reflect.String:
 		rt = reflect.TypeOf(sql.NullString{})
+	default:
+		if k == reflect.Struct && rt == timeType {
+			rt = reflect.TypeOf(sql.NullTime{})
+		}
 	}
 	return reflect.New(rt).Interface()
 }

@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -120,6 +121,26 @@ func (pu *PetUpdate) SetNillableTrained(b *bool) *PetUpdate {
 	if b != nil {
 		pu.SetTrained(*b)
 	}
+	return pu
+}
+
+// SetOptionalTime sets the "optional_time" field.
+func (pu *PetUpdate) SetOptionalTime(t time.Time) *PetUpdate {
+	pu.mutation.SetOptionalTime(t)
+	return pu
+}
+
+// SetNillableOptionalTime sets the "optional_time" field if the given value is not nil.
+func (pu *PetUpdate) SetNillableOptionalTime(t *time.Time) *PetUpdate {
+	if t != nil {
+		pu.SetOptionalTime(*t)
+	}
+	return pu
+}
+
+// ClearOptionalTime clears the value of the "optional_time" field.
+func (pu *PetUpdate) ClearOptionalTime() *PetUpdate {
+	pu.mutation.ClearOptionalTime()
 	return pu
 }
 
@@ -243,6 +264,12 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := pu.mutation.Trained(); ok {
 		_spec.SetField(pet.FieldTrained, field.TypeBool, value)
+	}
+	if value, ok := pu.mutation.OptionalTime(); ok {
+		_spec.SetField(pet.FieldOptionalTime, field.TypeTime, value)
+	}
+	if pu.mutation.OptionalTimeCleared() {
+		_spec.ClearField(pet.FieldOptionalTime, field.TypeTime)
 	}
 	if pu.mutation.TeamCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -413,6 +440,26 @@ func (puo *PetUpdateOne) SetNillableTrained(b *bool) *PetUpdateOne {
 	return puo
 }
 
+// SetOptionalTime sets the "optional_time" field.
+func (puo *PetUpdateOne) SetOptionalTime(t time.Time) *PetUpdateOne {
+	puo.mutation.SetOptionalTime(t)
+	return puo
+}
+
+// SetNillableOptionalTime sets the "optional_time" field if the given value is not nil.
+func (puo *PetUpdateOne) SetNillableOptionalTime(t *time.Time) *PetUpdateOne {
+	if t != nil {
+		puo.SetOptionalTime(*t)
+	}
+	return puo
+}
+
+// ClearOptionalTime clears the value of the "optional_time" field.
+func (puo *PetUpdateOne) ClearOptionalTime() *PetUpdateOne {
+	puo.mutation.ClearOptionalTime()
+	return puo
+}
+
 // SetTeamID sets the "team" edge to the User entity by ID.
 func (puo *PetUpdateOne) SetTeamID(id int) *PetUpdateOne {
 	puo.mutation.SetTeamID(id)
@@ -563,6 +610,12 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 	}
 	if value, ok := puo.mutation.Trained(); ok {
 		_spec.SetField(pet.FieldTrained, field.TypeBool, value)
+	}
+	if value, ok := puo.mutation.OptionalTime(); ok {
+		_spec.SetField(pet.FieldOptionalTime, field.TypeTime, value)
+	}
+	if puo.mutation.OptionalTimeCleared() {
+		_spec.ClearField(pet.FieldOptionalTime, field.TypeTime)
 	}
 	if puo.mutation.TeamCleared() {
 		edge := &sqlgraph.EdgeSpec{

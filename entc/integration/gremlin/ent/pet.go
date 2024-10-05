@@ -9,6 +9,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
@@ -30,6 +31,8 @@ type Pet struct {
 	Nickname string `json:"nickname,omitempty"`
 	// Trained holds the value of the "trained" field.
 	Trained bool `json:"trained,omitempty"`
+	// OptionalTime holds the value of the "optional_time" field.
+	OptionalTime time.Time `json:"optional_time,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PetQuery when eager-loading is set.
 	Edges PetEdges `json:"edges"`
@@ -75,12 +78,13 @@ func (pe *Pet) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanpe struct {
-		ID       string    `json:"id,omitempty"`
-		Age      float64   `json:"age,omitempty"`
-		Name     string    `json:"name,omitempty"`
-		UUID     uuid.UUID `json:"uuid,omitempty"`
-		Nickname string    `json:"nickname,omitempty"`
-		Trained  bool      `json:"trained,omitempty"`
+		ID           string    `json:"id,omitempty"`
+		Age          float64   `json:"age,omitempty"`
+		Name         string    `json:"name,omitempty"`
+		UUID         uuid.UUID `json:"uuid,omitempty"`
+		Nickname     string    `json:"nickname,omitempty"`
+		Trained      bool      `json:"trained,omitempty"`
+		OptionalTime int64     `json:"optional_time,omitempty"`
 	}
 	if err := vmap.Decode(&scanpe); err != nil {
 		return err
@@ -91,6 +95,7 @@ func (pe *Pet) FromResponse(res *gremlin.Response) error {
 	pe.UUID = scanpe.UUID
 	pe.Nickname = scanpe.Nickname
 	pe.Trained = scanpe.Trained
+	pe.OptionalTime = time.Unix(0, scanpe.OptionalTime)
 	return nil
 }
 
@@ -141,6 +146,9 @@ func (pe *Pet) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("trained=")
 	builder.WriteString(fmt.Sprintf("%v", pe.Trained))
+	builder.WriteString(", ")
+	builder.WriteString("optional_time=")
+	builder.WriteString(pe.OptionalTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -155,12 +163,13 @@ func (pe *Pets) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanpe []struct {
-		ID       string    `json:"id,omitempty"`
-		Age      float64   `json:"age,omitempty"`
-		Name     string    `json:"name,omitempty"`
-		UUID     uuid.UUID `json:"uuid,omitempty"`
-		Nickname string    `json:"nickname,omitempty"`
-		Trained  bool      `json:"trained,omitempty"`
+		ID           string    `json:"id,omitempty"`
+		Age          float64   `json:"age,omitempty"`
+		Name         string    `json:"name,omitempty"`
+		UUID         uuid.UUID `json:"uuid,omitempty"`
+		Nickname     string    `json:"nickname,omitempty"`
+		Trained      bool      `json:"trained,omitempty"`
+		OptionalTime int64     `json:"optional_time,omitempty"`
 	}
 	if err := vmap.Decode(&scanpe); err != nil {
 		return err
@@ -172,6 +181,7 @@ func (pe *Pets) FromResponse(res *gremlin.Response) error {
 		node.UUID = v.UUID
 		node.Nickname = v.Nickname
 		node.Trained = v.Trained
+		node.OptionalTime = time.Unix(0, v.OptionalTime)
 		*pe = append(*pe, node)
 	}
 	return nil

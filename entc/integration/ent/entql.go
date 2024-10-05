@@ -346,11 +346,12 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "Pet",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			pet.FieldAge:      {Type: field.TypeFloat64, Column: pet.FieldAge},
-			pet.FieldName:     {Type: field.TypeString, Column: pet.FieldName},
-			pet.FieldUUID:     {Type: field.TypeUUID, Column: pet.FieldUUID},
-			pet.FieldNickname: {Type: field.TypeString, Column: pet.FieldNickname},
-			pet.FieldTrained:  {Type: field.TypeBool, Column: pet.FieldTrained},
+			pet.FieldAge:          {Type: field.TypeFloat64, Column: pet.FieldAge},
+			pet.FieldName:         {Type: field.TypeString, Column: pet.FieldName},
+			pet.FieldUUID:         {Type: field.TypeUUID, Column: pet.FieldUUID},
+			pet.FieldNickname:     {Type: field.TypeString, Column: pet.FieldNickname},
+			pet.FieldTrained:      {Type: field.TypeBool, Column: pet.FieldTrained},
+			pet.FieldOptionalTime: {Type: field.TypeTime, Column: pet.FieldOptionalTime},
 		},
 	}
 	graph.Nodes[16] = &sqlgraph.Node{
@@ -2124,6 +2125,11 @@ func (f *PetFilter) WhereNickname(p entql.StringP) {
 // WhereTrained applies the entql bool predicate on the trained field.
 func (f *PetFilter) WhereTrained(p entql.BoolP) {
 	f.Where(p.Field(pet.FieldTrained))
+}
+
+// WhereOptionalTime applies the entql time.Time predicate on the optional_time field.
+func (f *PetFilter) WhereOptionalTime(p entql.TimeP) {
+	f.Where(p.Field(pet.FieldOptionalTime))
 }
 
 // WhereHasTeam applies a predicate to check if query has an edge team.

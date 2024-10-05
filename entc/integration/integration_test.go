@@ -781,16 +781,38 @@ func Select(t *testing.T, client *ent.Client) {
 	require.True(allUpper(), "at names must be upper-cased")
 
 	// Select and scan dynamic values.
-	const as = "name_length"
+	const (
+		as1 = "name_length"
+		as2 = "another_name"
+	)
 	pets = client.Pet.Query().
 		Modify(func(s *sql.Selector) {
-			s.AppendSelectAs("LENGTH(name)", as)
+			s.AppendSelectAs("LENGTH(name)", as1)
+			s.AppendSelectAs("optional_time", as2)
 		}).
 		AllX(ctx)
 	for _, p := range pets {
-		n, err := p.Value(as)
+		n, err := p.Value(as1)
 		require.NoError(err)
 		require.EqualValues(len(p.Name), n)
+		v, err := p.Value(as2)
+		require.NoError(err)
+		require.Nil(v)
+	}
+
+	// Update and scan.
+	require.NoError(client.Pet.Update().SetOptionalTime(time.Now()).Exec(ctx))
+	pets = client.Pet.Query().
+		Modify(func(s *sql.Selector) {
+			s.AppendSelectAs("optional_time", as2)
+		}).
+		AllX(ctx)
+	for _, p := range pets {
+		v, err := p.Value(as2)
+		require.NoError(err)
+		tv, ok := v.(time.Time)
+		require.True(ok)
+		require.True(!tv.IsZero())
 	}
 
 	// Order by random value should compile a valid query.

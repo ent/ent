@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"errors"
+	"time"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -85,6 +86,20 @@ func (pc *PetCreate) SetTrained(b bool) *PetCreate {
 func (pc *PetCreate) SetNillableTrained(b *bool) *PetCreate {
 	if b != nil {
 		pc.SetTrained(*b)
+	}
+	return pc
+}
+
+// SetOptionalTime sets the "optional_time" field.
+func (pc *PetCreate) SetOptionalTime(t time.Time) *PetCreate {
+	pc.mutation.SetOptionalTime(t)
+	return pc
+}
+
+// SetNillableOptionalTime sets the "optional_time" field if the given value is not nil.
+func (pc *PetCreate) SetNillableOptionalTime(t *time.Time) *PetCreate {
+	if t != nil {
+		pc.SetOptionalTime(*t)
 	}
 	return pc
 }
@@ -228,6 +243,9 @@ func (pc *PetCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := pc.mutation.Trained(); ok {
 		v.Property(dsl.Single, pet.FieldTrained, value)
+	}
+	if value, ok := pc.mutation.OptionalTime(); ok {
+		v.Property(dsl.Single, pet.FieldOptionalTime, value)
 	}
 	for _, id := range pc.mutation.TeamIDs() {
 		v.AddE(user.TeamLabel).From(g.V(id)).InV()

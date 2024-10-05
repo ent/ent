@@ -26,6 +26,8 @@ const (
 	FieldNickname = "nickname"
 	// FieldTrained holds the string denoting the trained field in the database.
 	FieldTrained = "trained"
+	// FieldOptionalTime holds the string denoting the optional_time field in the database.
+	FieldOptionalTime = "optional_time"
 	// EdgeTeam holds the string denoting the team edge name in mutations.
 	EdgeTeam = "team"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
@@ -56,6 +58,7 @@ var Columns = []string{
 	FieldUUID,
 	FieldNickname,
 	FieldTrained,
+	FieldOptionalTime,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "pet"
@@ -118,6 +121,11 @@ func ByNickname(opts ...sql.OrderTermOption) OrderOption {
 // ByTrained orders the results by the trained field.
 func ByTrained(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTrained, opts...).ToFunc()
+}
+
+// ByOptionalTime orders the results by the optional_time field.
+func ByOptionalTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOptionalTime, opts...).ToFunc()
 }
 
 // ByTeamField orders the results by team field.
