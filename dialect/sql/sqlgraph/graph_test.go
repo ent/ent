@@ -2450,7 +2450,6 @@ func TestQueryNodesSchema(t *testing.T) {
 			AddRow(1, 10, nil, nil, nil).
 			AddRow(2, 20, "", 0, 0).
 			AddRow(3, 30, "a8m", 1, 1))
-
 	var (
 		users []*user
 		spec  = &QuerySpec{

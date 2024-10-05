@@ -13767,6 +13767,7 @@ type PetMutation struct {
 	uuid          *uuid.UUID
 	nickname      *string
 	trained       *bool
+	optional_time *time.Time
 	clearedFields map[string]struct{}
 	team          *int
 	clearedteam   bool
@@ -14101,6 +14102,55 @@ func (m *PetMutation) ResetTrained() {
 	m.trained = nil
 }
 
+// SetOptionalTime sets the "optional_time" field.
+func (m *PetMutation) SetOptionalTime(t time.Time) {
+	m.optional_time = &t
+}
+
+// OptionalTime returns the value of the "optional_time" field in the mutation.
+func (m *PetMutation) OptionalTime() (r time.Time, exists bool) {
+	v := m.optional_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOptionalTime returns the old "optional_time" field's value of the Pet entity.
+// If the Pet object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PetMutation) OldOptionalTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOptionalTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOptionalTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOptionalTime: %w", err)
+	}
+	return oldValue.OptionalTime, nil
+}
+
+// ClearOptionalTime clears the value of the "optional_time" field.
+func (m *PetMutation) ClearOptionalTime() {
+	m.optional_time = nil
+	m.clearedFields[pet.FieldOptionalTime] = struct{}{}
+}
+
+// OptionalTimeCleared returns if the "optional_time" field was cleared in this mutation.
+func (m *PetMutation) OptionalTimeCleared() bool {
+	_, ok := m.clearedFields[pet.FieldOptionalTime]
+	return ok
+}
+
+// ResetOptionalTime resets all changes to the "optional_time" field.
+func (m *PetMutation) ResetOptionalTime() {
+	m.optional_time = nil
+	delete(m.clearedFields, pet.FieldOptionalTime)
+}
+
 // SetTeamID sets the "team" edge to the User entity by id.
 func (m *PetMutation) SetTeamID(id int) {
 	m.team = &id
@@ -14213,7 +14263,7 @@ func (m *PetMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PetMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.age != nil {
 		fields = append(fields, pet.FieldAge)
 	}
@@ -14228,6 +14278,9 @@ func (m *PetMutation) Fields() []string {
 	}
 	if m.trained != nil {
 		fields = append(fields, pet.FieldTrained)
+	}
+	if m.optional_time != nil {
+		fields = append(fields, pet.FieldOptionalTime)
 	}
 	return fields
 }
@@ -14247,6 +14300,8 @@ func (m *PetMutation) Field(name string) (ent.Value, bool) {
 		return m.Nickname()
 	case pet.FieldTrained:
 		return m.Trained()
+	case pet.FieldOptionalTime:
+		return m.OptionalTime()
 	}
 	return nil, false
 }
@@ -14266,6 +14321,8 @@ func (m *PetMutation) OldField(ctx context.Context, name string) (ent.Value, err
 		return m.OldNickname(ctx)
 	case pet.FieldTrained:
 		return m.OldTrained(ctx)
+	case pet.FieldOptionalTime:
+		return m.OldOptionalTime(ctx)
 	}
 	return nil, fmt.Errorf("unknown Pet field %s", name)
 }
@@ -14309,6 +14366,13 @@ func (m *PetMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTrained(v)
+		return nil
+	case pet.FieldOptionalTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOptionalTime(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Pet field %s", name)
@@ -14361,6 +14425,9 @@ func (m *PetMutation) ClearedFields() []string {
 	if m.FieldCleared(pet.FieldNickname) {
 		fields = append(fields, pet.FieldNickname)
 	}
+	if m.FieldCleared(pet.FieldOptionalTime) {
+		fields = append(fields, pet.FieldOptionalTime)
+	}
 	return fields
 }
 
@@ -14380,6 +14447,9 @@ func (m *PetMutation) ClearField(name string) error {
 		return nil
 	case pet.FieldNickname:
 		m.ClearNickname()
+		return nil
+	case pet.FieldOptionalTime:
+		m.ClearOptionalTime()
 		return nil
 	}
 	return fmt.Errorf("unknown Pet nullable field %s", name)
@@ -14403,6 +14473,9 @@ func (m *PetMutation) ResetField(name string) error {
 		return nil
 	case pet.FieldTrained:
 		m.ResetTrained()
+		return nil
+	case pet.FieldOptionalTime:
+		m.ResetOptionalTime()
 		return nil
 	}
 	return fmt.Errorf("unknown Pet field %s", name)

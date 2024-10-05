@@ -9,6 +9,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -32,6 +33,8 @@ type Pet struct {
 	Nickname string `json:"nickname,omitempty"`
 	// Trained holds the value of the "trained" field.
 	Trained bool `json:"trained,omitempty"`
+	// OptionalTime holds the value of the "optional_time" field.
+	OptionalTime time.Time `json:"optional_time,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PetQuery when eager-loading is set.
 	Edges        PetEdges `json:"edges"`
@@ -86,6 +89,8 @@ func (*Pet) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case pet.FieldName, pet.FieldNickname:
 			values[i] = new(sql.NullString)
+		case pet.FieldOptionalTime:
+			values[i] = new(sql.NullTime)
 		case pet.FieldUUID:
 			values[i] = new(uuid.UUID)
 		case pet.ForeignKeys[0]: // user_pets
@@ -142,6 +147,12 @@ func (pe *Pet) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field trained", values[i])
 			} else if value.Valid {
 				pe.Trained = value.Bool
+			}
+		case pet.FieldOptionalTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field optional_time", values[i])
+			} else if value.Valid {
+				pe.OptionalTime = value.Time
 			}
 		case pet.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -217,6 +228,9 @@ func (pe *Pet) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("trained=")
 	builder.WriteString(fmt.Sprintf("%v", pe.Trained))
+	builder.WriteString(", ")
+	builder.WriteString("optional_time=")
+	builder.WriteString(pe.OptionalTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

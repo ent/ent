@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"errors"
+	"time"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -120,6 +121,26 @@ func (pu *PetUpdate) SetNillableTrained(b *bool) *PetUpdate {
 	if b != nil {
 		pu.SetTrained(*b)
 	}
+	return pu
+}
+
+// SetOptionalTime sets the "optional_time" field.
+func (pu *PetUpdate) SetOptionalTime(t time.Time) *PetUpdate {
+	pu.mutation.SetOptionalTime(t)
+	return pu
+}
+
+// SetNillableOptionalTime sets the "optional_time" field if the given value is not nil.
+func (pu *PetUpdate) SetNillableOptionalTime(t *time.Time) *PetUpdate {
+	if t != nil {
+		pu.SetOptionalTime(*t)
+	}
+	return pu
+}
+
+// ClearOptionalTime clears the value of the "optional_time" field.
+func (pu *PetUpdate) ClearOptionalTime() *PetUpdate {
+	pu.mutation.ClearOptionalTime()
 	return pu
 }
 
@@ -252,12 +273,18 @@ func (pu *PetUpdate) gremlin() *dsl.Traversal {
 	if value, ok := pu.mutation.Trained(); ok {
 		v.Property(dsl.Single, pet.FieldTrained, value)
 	}
+	if value, ok := pu.mutation.OptionalTime(); ok {
+		v.Property(dsl.Single, pet.FieldOptionalTime, value)
+	}
 	var properties []any
 	if pu.mutation.UUIDCleared() {
 		properties = append(properties, pet.FieldUUID)
 	}
 	if pu.mutation.NicknameCleared() {
 		properties = append(properties, pet.FieldNickname)
+	}
+	if pu.mutation.OptionalTimeCleared() {
+		properties = append(properties, pet.FieldOptionalTime)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -389,6 +416,26 @@ func (puo *PetUpdateOne) SetNillableTrained(b *bool) *PetUpdateOne {
 	if b != nil {
 		puo.SetTrained(*b)
 	}
+	return puo
+}
+
+// SetOptionalTime sets the "optional_time" field.
+func (puo *PetUpdateOne) SetOptionalTime(t time.Time) *PetUpdateOne {
+	puo.mutation.SetOptionalTime(t)
+	return puo
+}
+
+// SetNillableOptionalTime sets the "optional_time" field if the given value is not nil.
+func (puo *PetUpdateOne) SetNillableOptionalTime(t *time.Time) *PetUpdateOne {
+	if t != nil {
+		puo.SetOptionalTime(*t)
+	}
+	return puo
+}
+
+// ClearOptionalTime clears the value of the "optional_time" field.
+func (puo *PetUpdateOne) ClearOptionalTime() *PetUpdateOne {
+	puo.mutation.ClearOptionalTime()
 	return puo
 }
 
@@ -539,12 +586,18 @@ func (puo *PetUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := puo.mutation.Trained(); ok {
 		v.Property(dsl.Single, pet.FieldTrained, value)
 	}
+	if value, ok := puo.mutation.OptionalTime(); ok {
+		v.Property(dsl.Single, pet.FieldOptionalTime, value)
+	}
 	var properties []any
 	if puo.mutation.UUIDCleared() {
 		properties = append(properties, pet.FieldUUID)
 	}
 	if puo.mutation.NicknameCleared() {
 		properties = append(properties, pet.FieldNickname)
+	}
+	if puo.mutation.OptionalTimeCleared() {
+		properties = append(properties, pet.FieldOptionalTime)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())

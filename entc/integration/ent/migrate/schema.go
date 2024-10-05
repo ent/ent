@@ -381,6 +381,7 @@ var (
 		{Name: "uuid", Type: field.TypeUUID, Nullable: true},
 		{Name: "nickname", Type: field.TypeString, Nullable: true},
 		{Name: "trained", Type: field.TypeBool, Default: false},
+		{Name: "optional_time", Type: field.TypeTime, Nullable: true},
 		{Name: "user_pets", Type: field.TypeInt, Nullable: true},
 		{Name: "user_team", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
@@ -392,13 +393,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "pet_users_pets",
-				Columns:    []*schema.Column{PetColumns[6]},
+				Columns:    []*schema.Column{PetColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "pet_users_team",
-				Columns:    []*schema.Column{PetColumns[7]},
+				Columns:    []*schema.Column{PetColumns[8]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -407,7 +408,7 @@ var (
 			{
 				Name:    "pet_name_user_pets",
 				Unique:  false,
-				Columns: []*schema.Column{PetColumns[2], PetColumns[6]},
+				Columns: []*schema.Column{PetColumns[2], PetColumns[7]},
 			},
 			{
 				Name:    "pet_nickname",
