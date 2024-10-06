@@ -525,7 +525,7 @@ func TestBuilder(t *testing.T) {
 			input: Update("users").
 				Set("name", "foo").
 				Where(And(HasPrefixFold("nickname", "a8m"), Contains("lastname", "mash"))),
-			wantQuery: "UPDATE `users` SET `name` = ? WHERE `nickname` ILIKE ? AND `lastname` LIKE ?",
+			wantQuery: "UPDATE `users` SET `name` = ? WHERE LOWER(`nickname`) LIKE ? AND `lastname` LIKE ?",
 			wantArgs:  []any{"foo", "a8m%", "%mash%"},
 		},
 		{
@@ -540,7 +540,7 @@ func TestBuilder(t *testing.T) {
 			input: Update("users").
 				Add("age", 1).
 				Where(HasPrefixFold("nickname", "a8m")),
-			wantQuery: "UPDATE `users` SET `age` = COALESCE(`users`.`age`, 0) + ? WHERE `nickname` ILIKE ?",
+			wantQuery: "UPDATE `users` SET `age` = COALESCE(`users`.`age`, 0) + ? WHERE LOWER(`nickname`) LIKE ?",
 			wantArgs:  []any{1, "a8m%"},
 		},
 		{
@@ -548,7 +548,7 @@ func TestBuilder(t *testing.T) {
 				Set("age", 1).
 				Add("age", 2).
 				Where(HasPrefixFold("nickname", "a8m")),
-			wantQuery: "UPDATE `users` SET `age` = ?, `age` = COALESCE(`users`.`age`, 0) + ? WHERE `nickname` ILIKE ?",
+			wantQuery: "UPDATE `users` SET `age` = ?, `age` = COALESCE(`users`.`age`, 0) + ? WHERE LOWER(`nickname`) LIKE ?",
 			wantArgs:  []any{1, 2, "a8m%"},
 		},
 		{
@@ -556,7 +556,7 @@ func TestBuilder(t *testing.T) {
 				Add("age", 2).
 				Set("age", 1).
 				Where(HasPrefixFold("nickname", "a8m")),
-			wantQuery: "UPDATE `users` SET `age` = ? WHERE `nickname` ILIKE ?",
+			wantQuery: "UPDATE `users` SET `age` = ? WHERE LOWER(`nickname`) LIKE ?",
 			wantArgs:  []any{1, "a8m%"},
 		},
 		{
@@ -579,7 +579,7 @@ func TestBuilder(t *testing.T) {
 			input: Update("users").
 				Add("age", 1).
 				Where(HasSuffixFold("nickname", "a8m")),
-			wantQuery: "UPDATE `users` SET `age` = COALESCE(`users`.`age`, 0) + ? WHERE `nickname` ILIKE ?",
+			wantQuery: "UPDATE `users` SET `age` = COALESCE(`users`.`age`, 0) + ? WHERE LOWER(`nickname`) LIKE ?",
 			wantArgs:  []any{1, "%a8m"},
 		},
 		{
@@ -587,7 +587,7 @@ func TestBuilder(t *testing.T) {
 				Set("age", 1).
 				Add("age", 2).
 				Where(HasSuffixFold("nickname", "a8m")),
-			wantQuery: "UPDATE `users` SET `age` = ?, `age` = COALESCE(`users`.`age`, 0) + ? WHERE `nickname` ILIKE ?",
+			wantQuery: "UPDATE `users` SET `age` = ?, `age` = COALESCE(`users`.`age`, 0) + ? WHERE LOWER(`nickname`) LIKE ?",
 			wantArgs:  []any{1, 2, "%a8m"},
 		},
 		{
@@ -595,7 +595,7 @@ func TestBuilder(t *testing.T) {
 				Add("age", 2).
 				Set("age", 1).
 				Where(HasSuffixFold("nickname", "a8m")),
-			wantQuery: "UPDATE `users` SET `age` = ? WHERE `nickname` ILIKE ?",
+			wantQuery: "UPDATE `users` SET `age` = ? WHERE LOWER(`nickname`) LIKE ?",
 			wantArgs:  []any{1, "%a8m"},
 		},
 		{

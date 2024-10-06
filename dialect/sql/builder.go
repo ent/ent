@@ -1716,13 +1716,28 @@ func (p *Predicate) escapedLike(col, left, right, word string) *Predicate {
 	})
 }
 
-func (p *Predicate) escapedILike(col, left, right, word string) *Predicate {
+// ContainsFold is a helper predicate that applies the LIKE predicate with case-folding.
+func (p *Predicate) escapedLikeFold(col, left, substr, right string) *Predicate {
 	return p.Append(func(b *Builder) {
-		w, escaped := escape(word)
-		b.Ident(col).WriteOp(OpILike)
-		b.Arg(left + w + right)
-		if p.dialect == dialect.SQLite && escaped {
-			p.WriteString(" ESCAPE ").Arg("\\")
+		w, escaped := escape(substr)
+		switch b.dialect {
+		case dialect.MySQL:
+			// We assume the CHARACTER SET is configured to utf8mb4,
+			// because this how it is defined in dialect/sql/schema.
+			b.Ident(col).WriteString(" COLLATE utf8mb4_general_ci LIKE ")
+			b.Arg(left + strings.ToLower(w) + right)
+		case dialect.Postgres:
+			b.Ident(col).WriteString(" ILIKE ")
+			b.Arg(left + strings.ToLower(w) + right)
+		default: // SQLite.
+			var f Func
+			f.SetDialect(b.dialect)
+			f.Lower(col)
+			b.WriteString(f.String()).WriteString(" LIKE ")
+			b.Arg(left + strings.ToLower(w) + right)
+			if escaped {
+				p.WriteString(" ESCAPE ").Arg("\\")
+			}
 		}
 	})
 }
@@ -1744,7 +1759,7 @@ func HasPrefixFold(col, prefix string) *Predicate {
 
 // HasPrefixFold is a helper predicate that checks prefix using the ILIKE predicate.
 func (p *Predicate) HasPrefixFold(col, prefix string) *Predicate {
-	return p.escapedILike(col, "", "%", prefix)
+	return p.escapedLikeFold(col, "", prefix, "%")
 }
 
 // ColumnsHasPrefix appends a new predicate that checks if the given column begins with the other column (prefix).
@@ -1786,7 +1801,7 @@ func HasSuffixFold(col, suffix string) *Predicate { return P().HasSuffixFold(col
 
 // HasSuffixFold is a helper predicate that checks suffix using the ILIKE predicate.
 func (p *Predicate) HasSuffixFold(col, suffix string) *Predicate {
-	return p.escapedILike(col, "%", "", suffix)
+	return p.escapedLikeFold(col, "%", suffix, "")
 }
 
 // EqualFold is a helper predicate that applies the "=" predicate with case-folding.
@@ -1829,28 +1844,7 @@ func ContainsFold(col, sub string) *Predicate { return P().ContainsFold(col, sub
 
 // ContainsFold is a helper predicate that applies the LIKE predicate with case-folding.
 func (p *Predicate) ContainsFold(col, substr string) *Predicate {
-	return p.Append(func(b *Builder) {
-		w, escaped := escape(substr)
-		switch b.dialect {
-		case dialect.MySQL:
-			// We assume the CHARACTER SET is configured to utf8mb4,
-			// because this how it is defined in dialect/sql/schema.
-			b.Ident(col).WriteString(" COLLATE utf8mb4_general_ci LIKE ")
-			b.Arg("%" + strings.ToLower(w) + "%")
-		case dialect.Postgres:
-			b.Ident(col).WriteString(" ILIKE ")
-			b.Arg("%" + strings.ToLower(w) + "%")
-		default: // SQLite.
-			var f Func
-			f.SetDialect(b.dialect)
-			f.Lower(col)
-			b.WriteString(f.String()).WriteString(" LIKE ")
-			b.Arg("%" + strings.ToLower(w) + "%")
-			if escaped {
-				p.WriteString(" ESCAPE ").Arg("\\")
-			}
-		}
-	})
+	return p.escapedLikeFold(col, "%", substr, "%")
 }
 
 // CompositeGT returns a composite ">" predicate
@@ -3621,7 +3615,6 @@ const (
 	OpIn                // IN
 	OpNotIn             // NOT IN
 	OpLike              // LIKE
-	OpILike             // ILIKE
 	OpIsNull            // IS NULL
 	OpNotNull           // IS NOT NULL
 	OpAdd               // +
@@ -3641,7 +3634,6 @@ var ops = [...]string{
 	OpIn:      "IN",
 	OpNotIn:   "NOT IN",
 	OpLike:    "LIKE",
-	OpILike:   "ILIKE",
 	OpIsNull:  "IS NULL",
 	OpNotNull: "IS NOT NULL",
 	OpAdd:     "+",
@@ -3654,7 +3646,7 @@ var ops = [...]string{
 // WriteOp writes an operator to the builder.
 func (b *Builder) WriteOp(op Op) *Builder {
 	switch {
-	case op >= OpEQ && op <= OpILike || op >= OpAdd && op <= OpMod:
+	case op >= OpEQ && op <= OpLike || op >= OpAdd && op <= OpMod:
 		b.Pad().WriteString(ops[op]).Pad()
 	case op == OpIsNull || op == OpNotNull:
 		b.Pad().WriteString(ops[op])
