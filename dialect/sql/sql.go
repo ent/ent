@@ -170,6 +170,13 @@ func FieldHasSuffix(name string, suffix string) func(*Selector) {
 	}
 }
 
+// FieldHasSuffixFold returns a raw predicate to check if the field has the given suffix with case-folding
+func FieldHasSuffixFold(name string, suffix string) func(*Selector) {
+	return func(s *Selector) {
+		s.Where(HasSuffixFold(s.C(name), suffix))
+	}
+}
+
 // FieldContains returns a raw predicate to check if the field contains the given substring.
 func FieldContains(name string, substr string) func(*Selector) {
 	return func(s *Selector) {

@@ -1781,6 +1781,14 @@ func (p *Predicate) HasSuffix(col, suffix string) *Predicate {
 	return p.escapedLike(col, "%", "", suffix)
 }
 
+// HasSuffixFold is a helper predicate that checks suffix using the ILIKE predicate.
+func HasSuffixFold(col, suffix string) *Predicate { return P().HasSuffixFold(col, suffix) }
+
+// HasSuffixFold is a helper predicate that checks suffix using the ILIKE predicate.
+func (p *Predicate) HasSuffixFold(col, suffix string) *Predicate {
+	return p.escapedILike(col, "%", "", suffix)
+}
+
 // EqualFold is a helper predicate that applies the "=" predicate with case-folding.
 func EqualFold(col, sub string) *Predicate { return P().EqualFold(col, sub) }
 

@@ -372,6 +372,24 @@ func TestFieldHasSuffix(t *testing.T) {
 	})
 }
 
+func TestFieldHasSuffixFold(t *testing.T) {
+	p := FieldHasSuffixFold("name", "a8m")
+	t.Run("MySQL", func(t *testing.T) {
+		s := Dialect(dialect.MySQL).Select("*").From(Table("users"))
+		p(s)
+		query, args := s.Query()
+		require.Equal(t, "SELECT * FROM `users` WHERE `users`.`name` ILIKE ?", query)
+		require.Equal(t, []any{"%a8m"}, args)
+	})
+	t.Run("PostgreSQL", func(t *testing.T) {
+		s := Dialect(dialect.Postgres).Select("*").From(Table("users"))
+		p(s)
+		query, args := s.Query()
+		require.Equal(t, `SELECT * FROM "users" WHERE "users"."name" ILIKE $1`, query)
+		require.Equal(t, []any{"%a8m"}, args)
+	})
+}
+
 func TestFieldContains(t *testing.T) {
 	p := FieldContains("name", "a8m")
 	t.Run("MySQL", func(t *testing.T) {
