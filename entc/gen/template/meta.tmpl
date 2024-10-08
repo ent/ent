@@ -35,6 +35,13 @@ const (
 	{{- xtemplate $tmpl $ }}
 )
 
+func GetTable(newTable string) string {
+	if newTable != "" {
+		return newTable
+	}
+	return Table
+}
+
 {{ $tmpl = printf "dialect/%s/meta/variables" $.Storage }}
 {{ if hasTemplate $tmpl }}
 	{{ xtemplate $tmpl $ }}
