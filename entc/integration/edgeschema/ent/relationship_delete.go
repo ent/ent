@@ -42,6 +42,11 @@ func (rd *RelationshipDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the RelationshipMutation object of the builder.
+func (rd *RelationshipDelete) Mutation() *RelationshipMutation {
+	return rd.mutation
+}
+
 func (rd *RelationshipDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(relationship.Table, nil)
 	if ps := rd.mutation.predicates; len(ps) > 0 {
@@ -88,4 +93,9 @@ func (rdo *RelationshipDeleteOne) ExecX(ctx context.Context) {
 	if err := rdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the RelationshipMutation object of the builder.
+func (rdo *RelationshipDeleteOne) Mutation() *RelationshipMutation {
+	return rdo.rd.mutation
 }
