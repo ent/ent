@@ -118,7 +118,7 @@ const (
 		{{ end }}
 	{{ else }}
 		{{/* Omit the package name from the type. */}}
-		{{ $enum = trimPackage $f.Type.String $.Package }}
+		{{ $enum = trimPackage $f.Type.String $.PackageDir }}
 		// {{ $enum }} defines the type for the "{{ $f.Name }}" enum field.
 		type {{ $enum }} string
 
