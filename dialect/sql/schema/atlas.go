@@ -202,7 +202,7 @@ func (a *Atlas) NamedDiff(ctx context.Context, name string, tables ...*Table) er
 func (a *Atlas) cleanSchema(ctx context.Context, name string, err0 error) (err error) {
 	defer func() {
 		if err0 != nil {
-			err = fmt.Errorf("%v: %w", err0, err)
+			err = errors.Join(err, err0)
 		}
 	}()
 	s, err := a.atDriver.InspectSchema(ctx, name, nil)
