@@ -201,7 +201,10 @@ func (a *Atlas) NamedDiff(ctx context.Context, name string, tables ...*Table) er
 
 func (a *Atlas) cleanSchema(ctx context.Context, name string, err0 error) (err error) {
 	defer func() {
-		if err0 != nil {
+		switch {
+		case err == nil:
+			err = err0
+		case err != nil && err0 != nil:
 			err = fmt.Errorf("%v: %w", err0, err)
 		}
 	}()
