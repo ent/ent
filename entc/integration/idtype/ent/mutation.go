@@ -138,7 +138,10 @@ func (m *UserMutation) IDs(ctx context.Context) ([]uint64, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, user.ID(id))
+			return m.Client().User.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []uint64{id}, nil
 		}
 		fallthrough
