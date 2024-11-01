@@ -1847,6 +1847,33 @@ func (p *Predicate) ContainsFold(col, substr string) *Predicate {
 	return p.escapedLikeFold(col, "%", substr, "%")
 }
 
+// Regex is a helper predicate that checks a pattern using the REGEX predicate.
+func Regex(col, pattern string) *Predicate { return P().Regex(col, pattern) }
+
+// Regex is a helper predicate that applies the REGEX predicate.
+func (p *Predicate) Regex(col, pattern string) *Predicate {
+	return p.Append(func(b *Builder) {
+		w, escaped := escape(pattern)
+		switch b.dialect {
+		case dialect.MySQL:
+			b.Ident(col).WriteString(" REGEXP ")
+			b.Arg(w)
+		case dialect.Postgres:
+			b.Ident(col).WriteString(" ~ ")
+			b.Arg(w)
+		default: // SQLite.
+			var f Func
+			f.SetDialect(b.dialect)
+			f.Ident(col)
+			b.WriteString(f.String()).WriteString(" REGEXP ")
+			b.Arg(w)
+			if escaped {
+				p.WriteString(" ESCAPE ").Arg("\\")
+			}
+		}
+	})
+}
+
 // CompositeGT returns a composite ">" predicate
 func CompositeGT(columns []string, args ...any) *Predicate {
 	return P().CompositeGT(columns, args...)

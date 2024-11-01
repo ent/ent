@@ -123,6 +123,11 @@ func NameHasSuffix(v string) predicate.Pet {
 	return predicate.Pet(sql.FieldHasSuffix(FieldName, v))
 }
 
+// NameRegex applies the Regex predicate on the "name" field.
+func NameRegex(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldRegex(FieldName, v))
+}
+
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.Pet {
 	return predicate.Pet(sql.FieldEqualFold(FieldName, v))

@@ -116,6 +116,11 @@ func NameHasSuffix(v string) predicate.Group {
 	return predicate.Group(sql.FieldHasSuffix(FieldName, v))
 }
 
+// NameRegex applies the Regex predicate on the "name" field.
+func NameRegex(v string) predicate.Group {
+	return predicate.Group(sql.FieldRegex(FieldName, v))
+}
+
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.Group {
 	return predicate.Group(sql.FieldEqualFold(FieldName, v))

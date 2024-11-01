@@ -189,6 +189,11 @@ func TypeHasSuffix(v string) predicate.Group {
 	return predicate.Group(sql.FieldHasSuffix(FieldType, v))
 }
 
+// TypeRegex applies the Regex predicate on the "type" field.
+func TypeRegex(v string) predicate.Group {
+	return predicate.Group(sql.FieldRegex(FieldType, v))
+}
+
 // TypeIsNil applies the IsNil predicate on the "type" field.
 func TypeIsNil() predicate.Group {
 	return predicate.Group(sql.FieldIsNull(FieldType))
@@ -312,6 +317,11 @@ func NameHasPrefix(v string) predicate.Group {
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.Group {
 	return predicate.Group(sql.FieldHasSuffix(FieldName, v))
+}
+
+// NameRegex applies the Regex predicate on the "name" field.
+func NameRegex(v string) predicate.Group {
+	return predicate.Group(sql.FieldRegex(FieldName, v))
 }
 
 // NameEqualFold applies the EqualFold predicate on the "name" field.

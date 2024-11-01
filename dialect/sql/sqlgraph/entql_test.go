@@ -158,6 +158,19 @@ func TestGraph_EvalP(t *testing.T) {
 			wantQuery: `SELECT * FROM "users" WHERE "active" AND EXISTS (SELECT "pets"."owner_id" FROM "pets" WHERE ("users"."uid" = "pets"."owner_id" AND "pets"."name" = $1) AND "owner_id" = $2)`,
 			wantArgs:  []any{"pedro", 10},
 		},
+		{
+			s:         sql.Dialect(dialect.Postgres).Select().From(sql.Table("users")),
+			p:         entql.Regex("name", "^user[0-9]+$"),
+			wantQuery: `SELECT * FROM "users" WHERE "users"."name" ~ $1`,
+			wantArgs:  []any{"^user[0-9]+$"},
+		},
+		{
+			s: sql.Dialect(dialect.Postgres).Select().From(sql.Table("users")).
+				Where(sql.EQ("status", "active")),
+			p:         entql.And(entql.Regex("name", "^pedro$"), entql.Regex("name", "^xabi$")),
+			wantQuery: `SELECT * FROM "users" WHERE "status" = $1 AND ("users"."name" ~ $2 AND "users"."name" ~ $3)`,
+			wantArgs:  []any{"active", "^pedro$", "^xabi$"},
+		},
 	}
 	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {

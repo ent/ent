@@ -174,6 +174,11 @@ func NameHasSuffix(v string) predicate.Pet {
 	return predicate.Pet(sql.FieldHasSuffix(FieldName, v))
 }
 
+// NameRegex applies the Regex predicate on the "name" field.
+func NameRegex(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldRegex(FieldName, v))
+}
+
 // NameIsNil applies the IsNil predicate on the "name" field.
 func NameIsNil() predicate.Pet {
 	return predicate.Pet(sql.FieldIsNull(FieldName))

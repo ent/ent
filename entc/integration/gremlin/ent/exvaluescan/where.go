@@ -260,6 +260,18 @@ func BinaryHasSuffix(v *url.URL) predicate.ExValueScan {
 	}, err)
 }
 
+// BinaryRegex applies the Regex predicate on the "binary" field.
+func BinaryRegex(v *url.URL) predicate.ExValueScan {
+	vc, err := ValueScanner.Binary.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("binary value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBinary, p.Regex(vcs))
+	}, err)
+}
+
 // BinaryOptionalEQ applies the EQ predicate on the "binary_optional" field.
 func BinaryOptionalEQ(v *url.URL) predicate.ExValueScan {
 	vc, err := ValueScanner.BinaryOptional.Value(v)
@@ -373,6 +385,18 @@ func BinaryOptionalHasSuffix(v *url.URL) predicate.ExValueScan {
 	}
 	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
 		t.Has(Label, FieldBinaryOptional, p.EndingWith(vcs))
+	}, err)
+}
+
+// BinaryOptionalRegex applies the Regex predicate on the "binary_optional" field.
+func BinaryOptionalRegex(v *url.URL) predicate.ExValueScan {
+	vc, err := ValueScanner.BinaryOptional.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("binary_optional value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBinaryOptional, p.Regex(vcs))
 	}, err)
 }
 
@@ -506,6 +530,18 @@ func TextHasSuffix(v *big.Int) predicate.ExValueScan {
 	}, err)
 }
 
+// TextRegex applies the Regex predicate on the "text" field.
+func TextRegex(v *big.Int) predicate.ExValueScan {
+	vc, err := ValueScanner.Text.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("text value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
+		t.Has(Label, FieldText, p.Regex(vcs))
+	}, err)
+}
+
 // TextOptionalEQ applies the EQ predicate on the "text_optional" field.
 func TextOptionalEQ(v *big.Int) predicate.ExValueScan {
 	vc, err := ValueScanner.TextOptional.Value(v)
@@ -619,6 +655,18 @@ func TextOptionalHasSuffix(v *big.Int) predicate.ExValueScan {
 	}
 	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
 		t.Has(Label, FieldTextOptional, p.EndingWith(vcs))
+	}, err)
+}
+
+// TextOptionalRegex applies the Regex predicate on the "text_optional" field.
+func TextOptionalRegex(v *big.Int) predicate.ExValueScan {
+	vc, err := ValueScanner.TextOptional.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("text_optional value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
+		t.Has(Label, FieldTextOptional, p.Regex(vcs))
 	}, err)
 }
 
@@ -752,6 +800,18 @@ func Base64HasSuffix(v string) predicate.ExValueScan {
 	}, err)
 }
 
+// Base64Regex applies the Regex predicate on the "base64" field.
+func Base64Regex(v string) predicate.ExValueScan {
+	vc, err := ValueScanner.Base64.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("base64 value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBase64, p.Regex(vcs))
+	}, err)
+}
+
 // CustomEQ applies the EQ predicate on the "custom" field.
 func CustomEQ(v string) predicate.ExValueScan {
 	vc, err := ValueScanner.Custom.Value(v)
@@ -868,6 +928,18 @@ func CustomHasSuffix(v string) predicate.ExValueScan {
 	}, err)
 }
 
+// CustomRegex applies the Regex predicate on the "custom" field.
+func CustomRegex(v string) predicate.ExValueScan {
+	vc, err := ValueScanner.Custom.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("custom value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCustom, p.Regex(vcs))
+	}, err)
+}
+
 // CustomOptionalEQ applies the EQ predicate on the "custom_optional" field.
 func CustomOptionalEQ(v string) predicate.ExValueScan {
 	vc, err := ValueScanner.CustomOptional.Value(v)
@@ -981,6 +1053,18 @@ func CustomOptionalHasSuffix(v string) predicate.ExValueScan {
 	}
 	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
 		t.Has(Label, FieldCustomOptional, p.EndingWith(vcs))
+	}, err)
+}
+
+// CustomOptionalRegex applies the Regex predicate on the "custom_optional" field.
+func CustomOptionalRegex(v string) predicate.ExValueScan {
+	vc, err := ValueScanner.CustomOptional.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("custom_optional value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCustomOptional, p.Regex(vcs))
 	}, err)
 }
 

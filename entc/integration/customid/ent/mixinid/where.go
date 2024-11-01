@@ -122,6 +122,11 @@ func SomeFieldHasSuffix(v string) predicate.MixinID {
 	return predicate.MixinID(sql.FieldHasSuffix(FieldSomeField, v))
 }
 
+// SomeFieldRegex applies the Regex predicate on the "some_field" field.
+func SomeFieldRegex(v string) predicate.MixinID {
+	return predicate.MixinID(sql.FieldRegex(FieldSomeField, v))
+}
+
 // SomeFieldEqualFold applies the EqualFold predicate on the "some_field" field.
 func SomeFieldEqualFold(v string) predicate.MixinID {
 	return predicate.MixinID(sql.FieldEqualFold(FieldSomeField, v))
@@ -185,6 +190,11 @@ func MixinFieldHasPrefix(v string) predicate.MixinID {
 // MixinFieldHasSuffix applies the HasSuffix predicate on the "mixin_field" field.
 func MixinFieldHasSuffix(v string) predicate.MixinID {
 	return predicate.MixinID(sql.FieldHasSuffix(FieldMixinField, v))
+}
+
+// MixinFieldRegex applies the Regex predicate on the "mixin_field" field.
+func MixinFieldRegex(v string) predicate.MixinID {
+	return predicate.MixinID(sql.FieldRegex(FieldMixinField, v))
 }
 
 // MixinFieldEqualFold applies the EqualFold predicate on the "mixin_field" field.
