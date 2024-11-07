@@ -2122,6 +2122,17 @@ func (b *float64Builder) DefaultFunc(fn any) *float64Builder {
 	return b
 }
 
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Float64("float64").
+//		Default(0).
+//		UpdateDefault(GenNumber),
+func (b *float64Builder) UpdateDefault(fn any) *float64Builder {
+	b.desc.UpdateDefault = fn
+	return b
+}
+
 // Nillable indicates that this field is a nillable.
 // Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *float64Builder) Nillable() *float64Builder {
@@ -2302,6 +2313,17 @@ func (b *float32Builder) Default(i float32) *float32Builder {
 // of the field on creation.
 func (b *float32Builder) DefaultFunc(fn any) *float32Builder {
 	b.desc.Default = fn
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Float32("float32").
+//		Default(0).
+//		UpdateDefault(GenNumber),
+func (b *float32Builder) UpdateDefault(fn any) *float32Builder {
+	b.desc.UpdateDefault = fn
 	return b
 }
 

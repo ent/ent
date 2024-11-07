@@ -167,14 +167,18 @@ func TestFloat_DefaultFunc(t *testing.T) {
 	fd = field.Float("weight").DefaultFunc(f1).Descriptor()
 	assert.Error(t, fd.Err, "`var _ float = f1()` should fail")
 
-	f2 := func() int { return 1000 }
-	fd = field.Int("weight").GoType(CustomFloat(0)).DefaultFunc(f2).Descriptor()
+	f2 := func() float64 { return 1000 }
+	fd = field.Float("weight").GoType(CustomFloat(0)).DefaultFunc(f2).Descriptor()
 	assert.Error(t, fd.Err, "`var _ CustomFloat = f2()` should fail")
 
-	fd = field.Int("weight").DefaultFunc(f2).UpdateDefault(f2).Descriptor()
+	fd = field.Float("weight").DefaultFunc(f2).UpdateDefault(f2).Descriptor()
 	assert.NoError(t, fd.Err)
 	assert.NotNil(t, fd.Default)
 	assert.NotNil(t, fd.UpdateDefault)
+
+	f3 := func() float64 { return 1.2 }
+	fd = field.Float("weight").DefaultFunc(f3).Descriptor()
+	assert.NoError(t, fd.Err)
 }
 
 func TestBool(t *testing.T) {
