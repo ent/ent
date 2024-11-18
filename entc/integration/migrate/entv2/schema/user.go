@@ -180,6 +180,9 @@ func (User) Indexes() []ent.Index {
 			Annotations(
 				entsql.OpClassColumn("phone", "bpchar_pattern_ops"),
 			),
+		// For PostgreSQL, users can define unique indexes with nulls not distinct.
+		index.Fields("nickname", "phone").
+			Unique().Annotations(entsql.NullsNotDistinct()),
 	}
 }
 

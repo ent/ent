@@ -14,6 +14,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -93,7 +94,7 @@ func TestMySQL(t *testing.T) {
 }
 
 func TestPostgres(t *testing.T) {
-	for version, port := range map[string]int{"10": 5430, "11": 5431, "12": 5432, "13": 5433, "14": 5434} {
+	for version, port := range map[string]int{"10": 5430, "11": 5431, "12": 5432, "13": 5433, "14": 5434, "15": 5435} {
 		t.Run(version, func(t *testing.T) {
 			dsn := fmt.Sprintf("host=localhost port=%d user=postgres password=pass sslmode=disable", port)
 			root, err := sql.Open(dialect.Postgres, dsn)
@@ -148,6 +149,10 @@ func TestPostgres(t *testing.T) {
 				IncludeColumns(t, drv)
 			}
 			SerialType(t, clientv2)
+			if !slices.Contains([]string{"10", "11", "12", "13", "14"}, version) {
+				// version >= 15
+				IndexNullsNotDistinct(t, drv, "select indexdef from pg_indexes where indexname=$1", "CREATE UNIQUE INDEX user_nickname_phone ON public.users USING btree (nickname, phone) NULLS NOT DISTINCT")
+			}
 			vdrv, err := sql.Open(dialect.Postgres, dsn+" dbname=versioned_migrate")
 			require.NoError(t, err, "connecting to versioned migrate database")
 			defer vdrv.Close()
@@ -790,6 +795,15 @@ func SerialType(t *testing.T, c *entv2.Client) {
 
 func PartialIndexes(t *testing.T, drv *sql.Driver, query, def string) {
 	rows, err := drv.QueryContext(context.Background(), query, "user_phone")
+	require.NoError(t, err)
+	d, err := sql.ScanString(rows)
+	require.NoError(t, err)
+	require.NoError(t, rows.Close())
+	require.Equal(t, d, def)
+}
+
+func IndexNullsNotDistinct(t *testing.T, drv *sql.Driver, query, def string) {
+	rows, err := drv.QueryContext(context.Background(), query, "user_nickname_phone")
 	require.NoError(t, err)
 	d, err := sql.ScanString(rows)
 	require.NoError(t, err)

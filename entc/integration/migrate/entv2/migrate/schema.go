@@ -239,6 +239,14 @@ var (
 					},
 				},
 			},
+			{
+				Name:    "user_nickname_phone",
+				Unique:  true,
+				Columns: []*schema.Column{UsersColumns[7], UsersColumns[8]},
+				Annotation: &entsql.IndexAnnotation{
+					NullsNotDistinct: true,
+				},
+			},
 		},
 	}
 	// ZoosColumns holds the columns for the "zoos" table.
