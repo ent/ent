@@ -150,6 +150,7 @@ var (
 		{Name: "name", Type: field.TypeString, Size: 2147483647},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "nickname", Type: field.TypeString, Size: 255},
+		{Name: "username", Type: field.TypeString, Nullable: true, Size: 50},
 		{Name: "phone", Type: field.TypeString, Default: "unknown"},
 		{Name: "buffer", Type: field.TypeBytes, Nullable: true},
 		{Name: "title", Type: field.TypeString, Default: "SWE"},
@@ -174,7 +175,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "users_blogs_admins",
-				Columns:    []*schema.Column{UsersColumns[22]},
+				Columns:    []*schema.Column{UsersColumns[23]},
 				RefColumns: []*schema.Column{BlogsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -191,7 +192,7 @@ var (
 			{
 				Name:    "user_phone_age",
 				Unique:  true,
-				Columns: []*schema.Column{UsersColumns[8], UsersColumns[4]},
+				Columns: []*schema.Column{UsersColumns[9], UsersColumns[4]},
 			},
 			{
 				Name:    "user_age",
@@ -214,7 +215,7 @@ var (
 			{
 				Name:    "user_workplace",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[16]},
+				Columns: []*schema.Column{UsersColumns[17]},
 				Annotation: &entsql.IndexAnnotation{
 					IncludeColumns: []string{
 						UsersColumns[7].Name,
@@ -224,7 +225,7 @@ var (
 			{
 				Name:    "user_phone",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[8]},
+				Columns: []*schema.Column{UsersColumns[9]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "active AND \"phone\" <> ''",
 				},
@@ -232,17 +233,17 @@ var (
 			{
 				Name:    "user_age_phone",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[4], UsersColumns[8]},
+				Columns: []*schema.Column{UsersColumns[4], UsersColumns[9]},
 				Annotation: &entsql.IndexAnnotation{
 					OpClassColumns: map[string]string{
-						UsersColumns[8].Name: "bpchar_pattern_ops",
+						UsersColumns[9].Name: "bpchar_pattern_ops",
 					},
 				},
 			},
 			{
-				Name:    "user_nickname_phone",
+				Name:    "user_username",
 				Unique:  true,
-				Columns: []*schema.Column{UsersColumns[7], UsersColumns[8]},
+				Columns: []*schema.Column{UsersColumns[8]},
 				Annotation: &entsql.IndexAnnotation{
 					NullsNotDistinct: true,
 				},

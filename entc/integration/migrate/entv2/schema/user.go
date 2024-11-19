@@ -63,6 +63,9 @@ func (User) Fields() []ent.Field {
 		// changing nickname from unique no non-unique.
 		field.String("nickname").
 			MaxLen(255),
+		field.String("username").
+			Optional().
+			MaxLen(50), // specify a max length of 50 for `ERROR 1071 (42000)` in MySQL5.6.
 		// adding new columns (must be either optional, or with a default value).
 		field.String("phone").
 			Default("unknown"),
@@ -181,7 +184,7 @@ func (User) Indexes() []ent.Index {
 				entsql.OpClassColumn("phone", "bpchar_pattern_ops"),
 			),
 		// For PostgreSQL, users can define unique indexes with nulls not distinct.
-		index.Fields("nickname", "phone").
+		index.Fields("username").
 			Unique().Annotations(entsql.NullsNotDistinct()),
 	}
 }

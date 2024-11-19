@@ -837,11 +837,11 @@ func (d *Postgres) atIndex(idx1 *Index, t2 *schema.Table, idx2 *schema.Index) er
 		}
 		idx2.AddAttrs(&postgres.IndexInclude{Columns: columns})
 	}
-	if compareVersions(d.version, "15.0.0") >= 0 && idx1.Unique && idx1.Annotation != nil && idx1.Annotation.NullsNotDistinct {
-		idx2.AddAttrs(&postgres.IndexNullsDistinct{V: !idx1.Annotation.NullsNotDistinct})
-	}
 	if idx1.Annotation != nil && idx1.Annotation.Where != "" {
 		idx2.AddAttrs(&postgres.IndexPredicate{P: idx1.Annotation.Where})
+	}
+	if compareVersions(d.version, "15.0.0") >= 0 && idx1.Unique && idx1.Annotation != nil && idx1.Annotation.NullsNotDistinct {
+		idx2.AddAttrs(&postgres.IndexNullsDistinct{V: !idx1.Annotation.NullsNotDistinct})
 	}
 	return nil
 }

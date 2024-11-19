@@ -66,7 +66,7 @@ func TestMySQL(t *testing.T) {
 
 			clientv1 := entv1.NewClient(entv1.Driver(drv))
 			clientv2 := entv2.NewClient(entv2.Driver(drv))
-			V1ToV2(t, drv.Dialect(), clientv1, clientv2)
+			V1ToV2(t, drv.Dialect(), version, clientv1, clientv2)
 			if version == "8" {
 				CheckConstraint(t, clientv2)
 				DefaultExpr(t, drv, "SELECT column_default FROM information_schema.columns WHERE table_schema = 'migrate' AND table_name = 'users' AND column_name = ?", "lower(_utf8mb4\\'hello\\')", "to_base64(_utf8mb4\\'ent\\')")
@@ -117,7 +117,7 @@ func TestPostgres(t *testing.T) {
 			clientv1 := entv1.NewClient(entv1.Driver(drv))
 			clientv2 := entv2.NewClient(entv2.Driver(drv))
 			V1ToV2(
-				t, drv.Dialect(), clientv1, clientv2,
+				t, drv.Dialect(), version, clientv1, clientv2,
 				// A diff hook to ensure foreign-keys that point to
 				// serial columns are configured to integer types.
 				func(next schema.Differ) schema.Differ {
@@ -151,7 +151,7 @@ func TestPostgres(t *testing.T) {
 			SerialType(t, clientv2)
 			if !slices.Contains([]string{"10", "11", "12", "13", "14"}, version) {
 				// version >= 15
-				IndexNullsNotDistinct(t, drv, "select indexdef from pg_indexes where indexname=$1", "CREATE UNIQUE INDEX user_nickname_phone ON public.users USING btree (nickname, phone) NULLS NOT DISTINCT")
+				IndexNullsNotDistinct(t, drv, "select indexdef from pg_indexes where indexname=$1", "CREATE UNIQUE INDEX user_username ON public.users USING btree (username) NULLS NOT DISTINCT")
 			}
 			vdrv, err := sql.Open(dialect.Postgres, dsn+" dbname=versioned_migrate")
 			require.NoError(t, err, "connecting to versioned migrate database")
@@ -219,8 +219,8 @@ func TestSQLite(t *testing.T) {
 		),
 	)
 
-	SanityV2(t, drv.Dialect(), client)
-	u := client.User.Create().SetAge(1).SetName("x").SetNickname("x'").SetPhone("y").SaveX(ctx)
+	SanityV2(t, drv.Dialect(), "", client)
+	u := client.User.Create().SetAge(1).SetName("x").SetNickname("x'").SetUsername("x").SetPhone("y").SaveX(ctx)
 	idRange(t, client.Blog.Create().SetOid(1).SaveX(ctx).ID, 0, 1<<32)
 	idRange(t, client.Car.Create().SetOwner(u).SaveX(ctx).ID, 1<<32-1, 2<<32)
 	idRange(t, client.Conversion.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
@@ -454,7 +454,7 @@ func Versioned(t *testing.T, drv sql.ExecQuerier, devURL string, client *version
 	require.Equal(t, string(f1), string(f2))
 }
 
-func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv2.Client, hooks ...schema.DiffHook) {
+func V1ToV2(t *testing.T, dialect, version string, clientv1 *entv1.Client, clientv2 *entv2.Client, hooks ...schema.DiffHook) {
 	ctx := context.Background()
 
 	// Run migration and execute queries on v1.
@@ -472,10 +472,10 @@ func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv
 	// Run migration and execute queries on v2.
 	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithDiffHook(append(hooks, renameTokenColumn)...), schema.WithApplyHook(fillNulls(dialect))))
 	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true)), "should not create additional resources on multiple runs")
-	SanityV2(t, dialect, clientv2)
+	SanityV2(t, dialect, version, clientv2)
 	clientv2.Conversion.CreateBulk(clientv2.Conversion.Create(), clientv2.Conversion.Create(), clientv2.Conversion.Create()).ExecX(ctx)
 
-	u := clientv2.User.Create().SetAge(1).SetName("foo").SetNickname("nick_foo").SetPhone("phone").SaveX(ctx)
+	u := clientv2.User.Create().SetAge(1).SetName("foo").SetNickname("nick_foo").SetUsername("user_v2").SetPhone("phone").SaveX(ctx)
 	idRange(t, clientv2.Car.Create().SetOwner(u).SaveX(ctx).ID, 0, 1<<32)
 	idRange(t, clientv2.Conversion.Create().SaveX(ctx).ID, 1<<32-1, 2<<32)
 	// Since "users" created in the migration of v1, it will occupy the range of 1<<32-1 ... 2<<32-1,
@@ -496,7 +496,7 @@ func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv
 
 func SanityV1(t *testing.T, dbdialect string, client *entv1.Client) {
 	ctx := context.Background()
-	u := client.User.Create().SetAge(1).SetName("foo").SetNickname("nick_foo").SetRenamed("renamed").SaveX(ctx)
+	u := client.User.Create().SetAge(1).SetName("foo").SetNickname("nick_foo").SetUsername("user_v1_1").SetRenamed("renamed").SaveX(ctx)
 	require.EqualValues(t, 1, u.Age)
 	require.Equal(t, "foo", u.Name)
 
@@ -504,7 +504,7 @@ func SanityV1(t *testing.T, dbdialect string, client *entv1.Client) {
 	require.Error(t, err, "name is limited to 10 chars")
 
 	// Unique index on (name, address).
-	client.User.Create().SetAge(3).SetName("foo").SetNickname("nick_foo_2").SetAddress("tlv").SetState(userv1.StateLoggedIn).SaveX(ctx)
+	client.User.Create().SetAge(3).SetName("foo").SetNickname("nick_foo_2").SetUsername("user_v1_2").SetAddress("tlv").SetState(userv1.StateLoggedIn).SaveX(ctx)
 	err = client.User.Create().SetAge(4).SetName("foo").SetAddress("tlv").Exec(ctx)
 	require.Error(t, err)
 
@@ -515,7 +515,7 @@ func SanityV1(t *testing.T, dbdialect string, client *entv1.Client) {
 	require.True(t, strings.Contains(t.Name(), "Postgres") || err != nil, "blob should be limited on SQLite and MySQL")
 
 	// Invalid enum value.
-	err = client.User.Create().SetAge(1).SetName("bar").SetNickname("nick_bar").SetState("unknown").Exec(ctx)
+	err = client.User.Create().SetAge(1).SetName("bar").SetNickname("nick_bar").SetUsername("user_bar").SetState("unknown").Exec(ctx)
 	require.Error(t, err)
 
 	// Conversions
@@ -565,7 +565,7 @@ func SanityV1(t *testing.T, dbdialect string, client *entv1.Client) {
 	creator.SaveX(ctx)
 }
 
-func SanityV2(t *testing.T, dbdialect string, client *entv2.Client) {
+func SanityV2(t *testing.T, dbdialect, version string, client *entv2.Client) {
 	ctx := context.Background()
 	for _, u := range client.User.Query().AllX(ctx) {
 		require.NotEmpty(t, u.NewToken, "old_token column should be renamed to new_token")
@@ -577,7 +577,7 @@ func SanityV2(t *testing.T, dbdialect string, client *entv2.Client) {
 			require.False(t, users[i].CreatedAt.IsZero(), "default 'CURRENT_TIMESTAMP' should fill previous rows")
 		}
 	}
-	u := client.User.Create().SetAge(1).SetName("bar").SetNickname("nick_bar").SetPhone("100").SetBuffer([]byte("{}")).SetState(user.StateLoggedOut).SaveX(ctx)
+	u := client.User.Create().SetAge(1).SetName("bar").SetNickname("nick_bar").SetUsername("user_bar").SetPhone("100").SetBuffer([]byte("{}")).SetState(user.StateLoggedOut).SaveX(ctx)
 	require.Equal(t, 1, u.Age)
 	require.Equal(t, "bar", u.Name)
 	require.Equal(t, []byte("{}"), u.Buffer)
@@ -590,11 +590,11 @@ func SanityV2(t *testing.T, dbdialect string, client *entv2.Client) {
 	u = u.Update().SetState(user.StateOnline).SaveX(ctx)
 	require.Equal(t, user.StateOnline, u.State)
 
-	err = client.User.Create().SetAge(1).SetName("foobarbazqux").SetNickname("nick_bar").SetPhone("200").Exec(ctx)
+	err = client.User.Create().SetAge(1).SetName("foobarbazqux").SetNickname("nick_bar").SetUsername("user_bar_2").SetPhone("200").Exec(ctx)
 	require.NoError(t, err, "name is not limited to 10 chars and nickname is not unique")
 
 	// New unique index was added to (age, phone).
-	err = client.User.Create().SetAge(1).SetName("foo").SetPhone("200").SetNickname("nick_bar").Exec(ctx)
+	err = client.User.Create().SetAge(1).SetName("foo").SetPhone("200").SetNickname("nick_bar").SetUsername("user_bar_3").Exec(ctx)
 	require.Error(t, err)
 	require.True(t, entv2.IsConstraintError(err))
 
@@ -609,6 +609,17 @@ func SanityV2(t *testing.T, dbdialect string, client *entv2.Client) {
 	u, err = u.Update().SetBlob(make([]byte, 256)).SetState(user.StateLoggedOut).Save(ctx)
 	require.NoError(t, err, "data type blob was extended in v2")
 	require.Equal(t, make([]byte, 256), u.Blob)
+
+	// NULLS NOT DISTINCT unique index was added to (username) only if postgres version >= 15.
+	err = client.User.Create().SetAge(1).SetName("bar").SetNickname("nick_bar").SetPhone("300").SetNillableUsername(nil).Exec(ctx)
+	require.NoError(t, err, "username is not required")
+	err = client.User.Create().SetAge(1).SetName("bar").SetNickname("nick_bar").SetPhone("400").SetNillableUsername(nil).Exec(ctx)
+	if dbdialect == dialect.Postgres && !slices.Contains([]string{"10", "11", "12", "13", "14"}, version) {
+		// version >= 15
+		require.Error(t, err)
+	} else {
+		require.NoError(t, err, "username is not unique")
+	}
 
 	if dbdialect != dialect.SQLite {
 		// Conversions
@@ -679,7 +690,7 @@ func NicknameSearch(t *testing.T, client *entv2.Client) {
 func EqualFold(t *testing.T, client *entv2.Client) {
 	ctx := context.Background()
 	t.Log("testing equal-fold on sql specific dialects")
-	client.User.Create().SetAge(37).SetName("Alex").SetNickname("alexsn").SetPhone("123456789").SaveX(ctx)
+	client.User.Create().SetAge(37).SetName("Alex").SetNickname("alexsn").SetUsername("alexsn").SetPhone("123456789").SaveX(ctx)
 	require.False(t, client.User.Query().Where(user.NameEQ("alex")).ExistX(ctx))
 	require.True(t, client.User.Query().Where(user.NameEqualFold("alex")).ExistX(ctx))
 }
@@ -687,7 +698,7 @@ func EqualFold(t *testing.T, client *entv2.Client) {
 func ContainsFold(t *testing.T, client *entv2.Client) {
 	ctx := context.Background()
 	t.Log("testing contains-fold on sql specific dialects")
-	client.User.Create().SetAge(30).SetName("Mashraki").SetNickname("a8m").SetPhone("102030").SaveX(ctx)
+	client.User.Create().SetAge(30).SetName("Mashraki").SetNickname("a8m").SetUsername("a8m").SetPhone("102030").SaveX(ctx)
 	require.Zero(t, client.User.Query().Where(user.NameContains("mash")).CountX(ctx))
 	require.Equal(t, 1, client.User.Query().Where(user.NameContainsFold("mash")).CountX(ctx))
 	require.Equal(t, 1, client.User.Query().Where(user.NameContainsFold("Raki")).CountX(ctx))
@@ -803,7 +814,7 @@ func PartialIndexes(t *testing.T, drv *sql.Driver, query, def string) {
 }
 
 func IndexNullsNotDistinct(t *testing.T, drv *sql.Driver, query, def string) {
-	rows, err := drv.QueryContext(context.Background(), query, "user_nickname_phone")
+	rows, err := drv.QueryContext(context.Background(), query, "user_username")
 	require.NoError(t, err)
 	d, err := sql.ScanString(rows)
 	require.NoError(t, err)

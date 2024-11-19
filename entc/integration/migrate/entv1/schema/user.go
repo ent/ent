@@ -31,6 +31,8 @@ func (User) Fields() []ent.Field {
 			Optional(),
 		field.String("nickname").
 			Unique(),
+		field.String("username").
+			Optional(),
 		field.String("address").
 			Optional(),
 		field.String("renamed").
