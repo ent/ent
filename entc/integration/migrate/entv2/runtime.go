@@ -34,32 +34,36 @@ func init() {
 	userDescNickname := userFields[5].Descriptor()
 	// user.NicknameValidator is a validator for the "nickname" field. It is called by the builders before save.
 	user.NicknameValidator = userDescNickname.Validators[0].(func(string) error)
+	// userDescUsername is the schema descriptor for username field.
+	userDescUsername := userFields[6].Descriptor()
+	// user.UsernameValidator is a validator for the "username" field. It is called by the builders before save.
+	user.UsernameValidator = userDescUsername.Validators[0].(func(string) error)
 	// userDescPhone is the schema descriptor for phone field.
-	userDescPhone := userFields[6].Descriptor()
+	userDescPhone := userFields[7].Descriptor()
 	// user.DefaultPhone holds the default value on creation for the phone field.
 	user.DefaultPhone = userDescPhone.Default.(string)
 	// userDescBuffer is the schema descriptor for buffer field.
-	userDescBuffer := userFields[7].Descriptor()
+	userDescBuffer := userFields[8].Descriptor()
 	// user.DefaultBuffer holds the default value on creation for the buffer field.
 	user.DefaultBuffer = userDescBuffer.Default.(func() []byte)
 	// userDescTitle is the schema descriptor for title field.
-	userDescTitle := userFields[8].Descriptor()
+	userDescTitle := userFields[9].Descriptor()
 	// user.DefaultTitle holds the default value on creation for the title field.
 	user.DefaultTitle = userDescTitle.Default.(string)
 	// userDescNewToken is the schema descriptor for new_token field.
-	userDescNewToken := userFields[10].Descriptor()
+	userDescNewToken := userFields[11].Descriptor()
 	// user.DefaultNewToken holds the default value on creation for the new_token field.
 	user.DefaultNewToken = userDescNewToken.Default.(func() string)
 	// userDescBlob is the schema descriptor for blob field.
-	userDescBlob := userFields[11].Descriptor()
+	userDescBlob := userFields[12].Descriptor()
 	// user.BlobValidator is a validator for the "blob" field. It is called by the builders before save.
 	user.BlobValidator = userDescBlob.Validators[0].(func([]byte) error)
 	// userDescCreatedAt is the schema descriptor for created_at field.
-	userDescCreatedAt := userFields[18].Descriptor()
+	userDescCreatedAt := userFields[19].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
 	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
 	// userDescDropOptional is the schema descriptor for drop_optional field.
-	userDescDropOptional := userFields[19].Descriptor()
+	userDescDropOptional := userFields[20].Descriptor()
 	// user.DefaultDropOptional holds the default value on creation for the drop_optional field.
 	user.DefaultDropOptional = userDescDropOptional.Default.(func() string)
 }
