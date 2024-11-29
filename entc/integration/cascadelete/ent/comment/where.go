@@ -122,6 +122,11 @@ func TextHasSuffix(v string) predicate.Comment {
 	return predicate.Comment(sql.FieldHasSuffix(FieldText, v))
 }
 
+// TextRegex applies the Regex predicate on the "text" field.
+func TextRegex(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldRegex(FieldText, v))
+}
+
 // TextEqualFold applies the EqualFold predicate on the "text" field.
 func TextEqualFold(v string) predicate.Comment {
 	return predicate.Comment(sql.FieldEqualFold(FieldText, v))

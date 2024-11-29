@@ -166,6 +166,11 @@ func NameHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldName, v))
 }
 
+// NameRegex applies the Regex predicate on the "name" field.
+func NameRegex(v string) predicate.User {
+	return predicate.User(sql.FieldRegex(FieldName, v))
+}
+
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.User {
 	return predicate.User(sql.FieldEqualFold(FieldName, v))
@@ -229,6 +234,11 @@ func AddressHasPrefix(v string) predicate.User {
 // AddressHasSuffix applies the HasSuffix predicate on the "address" field.
 func AddressHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldAddress, v))
+}
+
+// AddressRegex applies the Regex predicate on the "address" field.
+func AddressRegex(v string) predicate.User {
+	return predicate.User(sql.FieldRegex(FieldAddress, v))
 }
 
 // AddressIsNil applies the IsNil predicate on the "address" field.
