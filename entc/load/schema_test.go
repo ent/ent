@@ -306,6 +306,10 @@ func (WithDefaults) Fields() []ent.Field {
 			Default(0),
 		field.JSON("dirs", []http.Dir{}).
 			Default([]http.Dir{"/tmp"}),
+		field.Float("float_default_func").
+			DefaultFunc(func() float64 {
+				return math.Pi
+			}),
 	}
 }
 
@@ -337,6 +341,7 @@ func TestMarshalDefaults(t *testing.T) {
 	require.Equal(t, schema.Fields[5].DefaultKind, reflect.Func)
 	require.True(t, schema.Fields[6].Default)
 	require.True(t, schema.Fields[7].Default)
+	require.Equal(t, schema.Fields[8].DefaultKind, reflect.Func)
 }
 
 type TimeMixin struct {

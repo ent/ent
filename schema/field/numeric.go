@@ -2115,6 +2115,24 @@ func (b *float64Builder) Default(i float64) *float64Builder {
 	return b
 }
 
+// DefaultFunc sets the function that is applied to set the default value
+// of the field on creation.
+func (b *float64Builder) DefaultFunc(fn any) *float64Builder {
+	b.desc.Default = fn
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Float64("float64").
+//		Default(0).
+//		UpdateDefault(GenNumber),
+func (b *float64Builder) UpdateDefault(fn any) *float64Builder {
+	b.desc.UpdateDefault = fn
+	return b
+}
+
 // Nillable indicates that this field is a nillable.
 // Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *float64Builder) Nillable() *float64Builder {
@@ -2224,6 +2242,9 @@ func (b *float64Builder) Deprecated(reason ...string) *float64Builder {
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *float64Builder) Descriptor() *Descriptor {
+	if b.desc.Default != nil || b.desc.UpdateDefault != nil {
+		b.desc.checkDefaultFunc(float64Type)
+	}
 	b.desc.checkGoType(float64Type)
 	return b.desc
 }
@@ -2285,6 +2306,24 @@ func (b *float32Builder) Negative() *float32Builder {
 // Default sets the default value of the field.
 func (b *float32Builder) Default(i float32) *float32Builder {
 	b.desc.Default = i
+	return b
+}
+
+// DefaultFunc sets the function that is applied to set the default value
+// of the field on creation.
+func (b *float32Builder) DefaultFunc(fn any) *float32Builder {
+	b.desc.Default = fn
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Float32("float32").
+//		Default(0).
+//		UpdateDefault(GenNumber),
+func (b *float32Builder) UpdateDefault(fn any) *float32Builder {
+	b.desc.UpdateDefault = fn
 	return b
 }
 
@@ -2397,6 +2436,9 @@ func (b *float32Builder) Deprecated(reason ...string) *float32Builder {
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *float32Builder) Descriptor() *Descriptor {
+	if b.desc.Default != nil || b.desc.UpdateDefault != nil {
+		b.desc.checkDefaultFunc(float32Type)
+	}
 	b.desc.checkGoType(float32Type)
 	return b.desc
 }
