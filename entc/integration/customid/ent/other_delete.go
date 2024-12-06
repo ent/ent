@@ -43,6 +43,11 @@ func (od *OtherDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the OtherMutation object of the builder.
+func (od *OtherDelete) Mutation() *OtherMutation {
+	return od.mutation
+}
+
 func (od *OtherDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(other.Table, sqlgraph.NewFieldSpec(other.FieldID, field.TypeOther))
 	if ps := od.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (odo *OtherDeleteOne) ExecX(ctx context.Context) {
 	if err := odo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the OtherMutation object of the builder.
+func (odo *OtherDeleteOne) Mutation() *OtherMutation {
+	return odo.od.mutation
 }

@@ -43,6 +43,11 @@ func (ttd *TweetTagDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the TweetTagMutation object of the builder.
+func (ttd *TweetTagDelete) Mutation() *TweetTagMutation {
+	return ttd.mutation
+}
+
 func (ttd *TweetTagDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(tweettag.Table, sqlgraph.NewFieldSpec(tweettag.FieldID, field.TypeUUID))
 	if ps := ttd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (ttdo *TweetTagDeleteOne) ExecX(ctx context.Context) {
 	if err := ttdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the TweetTagMutation object of the builder.
+func (ttdo *TweetTagDeleteOne) Mutation() *TweetTagMutation {
+	return ttdo.ttd.mutation
 }

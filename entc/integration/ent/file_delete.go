@@ -43,6 +43,11 @@ func (fd *FileDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the FileMutation object of the builder.
+func (fd *FileDelete) Mutation() *FileMutation {
+	return fd.mutation
+}
+
 func (fd *FileDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(file.Table, sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt))
 	if ps := fd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (fdo *FileDeleteOne) ExecX(ctx context.Context) {
 	if err := fdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the FileMutation object of the builder.
+func (fdo *FileDeleteOne) Mutation() *FileMutation {
+	return fdo.fd.mutation
 }

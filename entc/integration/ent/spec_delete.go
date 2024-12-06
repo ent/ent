@@ -43,6 +43,11 @@ func (sd *SpecDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the SpecMutation object of the builder.
+func (sd *SpecDelete) Mutation() *SpecMutation {
+	return sd.mutation
+}
+
 func (sd *SpecDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(spec.Table, sqlgraph.NewFieldSpec(spec.FieldID, field.TypeInt))
 	if ps := sd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (sdo *SpecDeleteOne) ExecX(ctx context.Context) {
 	if err := sdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the SpecMutation object of the builder.
+func (sdo *SpecDeleteOne) Mutation() *SpecMutation {
+	return sdo.sd.mutation
 }
