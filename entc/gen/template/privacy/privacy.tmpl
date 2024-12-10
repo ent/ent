@@ -130,19 +130,21 @@ func DenyMutationOperationRule(op {{ $pkg }}.Op) MutationRule {
 		return Denyf("{{ $pkg }}/privacy: unexpected query type %T, expect {{ $type }}", q)
 	}
 
-	{{ $name = print $n.Name "MutationRuleFunc" }}
-	{{ $type = printf "*%s.%s" $pkg $n.MutationName }}
-	// The {{ $name }} type is an adapter to allow the use of ordinary
-	// functions as a mutation rule.
-	type {{ $name }} func(context.Context, {{ $type }}) error
+	{{ if not $n.IsView }}
+		{{ $name = print $n.Name "MutationRuleFunc" }}
+		{{ $type = printf "*%s.%s" $pkg $n.MutationName }}
+		// The {{ $name }} type is an adapter to allow the use of ordinary
+		// functions as a mutation rule.
+		type {{ $name }} func(context.Context, {{ $type }}) error
 
-	// EvalMutation calls f(ctx, m).
-	func (f {{ $name }}) EvalMutation(ctx context.Context, m {{ $pkg }}.Mutation) error {
-		if m, ok := m.({{ $type }}); ok {
-			return f(ctx, m)
+		// EvalMutation calls f(ctx, m).
+		func (f {{ $name }}) EvalMutation(ctx context.Context, m {{ $pkg }}.Mutation) error {
+			if m, ok := m.({{ $type }}); ok {
+				return f(ctx, m)
+			}
+			return Denyf("{{ $pkg }}/privacy: unexpected mutation type %T, expect {{ $type }}", m)
 		}
-		return Denyf("{{ $pkg }}/privacy: unexpected mutation type %T, expect {{ $type }}", m)
-	}
+	{{- end }}
 {{- end }}
 
 {{- if $.FeatureEnabled "entql" }}
