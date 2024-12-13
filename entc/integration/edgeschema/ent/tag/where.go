@@ -117,6 +117,11 @@ func ValueHasSuffix(v string) predicate.Tag {
 	return predicate.Tag(sql.FieldHasSuffix(FieldValue, v))
 }
 
+// ValueRegex applies the Regex predicate on the "value" field.
+func ValueRegex(v string) predicate.Tag {
+	return predicate.Tag(sql.FieldRegex(FieldValue, v))
+}
+
 // ValueEqualFold applies the EqualFold predicate on the "value" field.
 func ValueEqualFold(v string) predicate.Tag {
 	return predicate.Tag(sql.FieldEqualFold(FieldValue, v))
