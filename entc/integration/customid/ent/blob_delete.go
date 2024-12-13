@@ -43,6 +43,11 @@ func (bd *BlobDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the BlobMutation object of the builder.
+func (bd *BlobDelete) Mutation() *BlobMutation {
+	return bd.mutation
+}
+
 func (bd *BlobDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(blob.Table, sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID))
 	if ps := bd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (bdo *BlobDeleteOne) ExecX(ctx context.Context) {
 	if err := bdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the BlobMutation object of the builder.
+func (bdo *BlobDeleteOne) Mutation() *BlobMutation {
+	return bdo.bd.mutation
 }

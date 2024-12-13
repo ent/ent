@@ -43,6 +43,11 @@ func (ld *LicenseDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the LicenseMutation object of the builder.
+func (ld *LicenseDelete) Mutation() *LicenseMutation {
+	return ld.mutation
+}
+
 func (ld *LicenseDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(license.Table, sqlgraph.NewFieldSpec(license.FieldID, field.TypeInt))
 	if ps := ld.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (ldo *LicenseDeleteOne) ExecX(ctx context.Context) {
 	if err := ldo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the LicenseMutation object of the builder.
+func (ldo *LicenseDeleteOne) Mutation() *LicenseMutation {
+	return ldo.ld.mutation
 }

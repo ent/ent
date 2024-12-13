@@ -43,6 +43,11 @@ func (ld *LinkDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the LinkMutation object of the builder.
+func (ld *LinkDelete) Mutation() *LinkMutation {
+	return ld.mutation
+}
+
 func (ld *LinkDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(link.Table, sqlgraph.NewFieldSpec(link.FieldID, field.TypeUUID))
 	if ps := ld.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (ldo *LinkDeleteOne) ExecX(ctx context.Context) {
 	if err := ldo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the LinkMutation object of the builder.
+func (ldo *LinkDeleteOne) Mutation() *LinkMutation {
+	return ldo.ld.mutation
 }
