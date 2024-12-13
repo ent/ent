@@ -99,15 +99,17 @@ type predicateAdder interface {
 		return &{{ $filter }}{config: {{ $receiver }}.config, predicateAdder: {{ $receiver}} }
 	}
 
-	// addPredicate implements the predicateAdder interface.
-	func (m *{{ $mutation }}) addPredicate(pred func(s *sql.Selector)) {
-		m.predicates = append(m.predicates, pred)
-	}
+	{{- if not $n.IsView }}
+    	// addPredicate implements the predicateAdder interface.
+    	func (m *{{ $mutation }}) addPredicate(pred func(s *sql.Selector)) {
+    		m.predicates = append(m.predicates, pred)
+    	}
 
-	// Filter returns an entql.Where implementation to apply filters on the {{ $mutation }} builder.
-	func (m *{{ $mutation }}) Filter() *{{ $filter }} {
-		return &{{ $filter }}{config: m.config, predicateAdder: m}
-	}
+    	// Filter returns an entql.Where implementation to apply filters on the {{ $mutation }} builder.
+    	func (m *{{ $mutation }}) Filter() *{{ $filter }} {
+    		return &{{ $filter }}{config: m.config, predicateAdder: m}
+    	}
+	{{- end }}
 
 	// {{ $filter }} provides a generic filtering capability at runtime for {{ $builder }}.
 	type {{ $filter }} struct {
