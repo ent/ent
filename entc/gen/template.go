@@ -206,7 +206,7 @@ var (
 		"query/additional/*",
 		"privacy/additional/*",
 		"privacy/additional/*/*",
-		"mutation/model/fields/*",
+		"mutation/fields/*",
 	}
 	// templates holds the Go templates for the code generation.
 	templates *Template
