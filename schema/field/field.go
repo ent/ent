@@ -804,6 +804,12 @@ func (b *jsonBuilder) Immutable() *jsonBuilder {
 	return b
 }
 
+// Immutable indicates that this field cannot be updated.
+func (b *jsonBuilder) Nillable() *jsonBuilder {
+	b.desc.Nillable = true
+	return b
+}
+
 // Comment sets the comment of the field.
 func (b *jsonBuilder) Comment(c string) *jsonBuilder {
 	b.desc.Comment = c
