@@ -43,6 +43,11 @@ func (ad *AccountDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the AccountMutation object of the builder.
+func (ad *AccountDelete) Mutation() *AccountMutation {
+	return ad.mutation
+}
+
 func (ad *AccountDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(account.Table, sqlgraph.NewFieldSpec(account.FieldID, field.TypeOther))
 	if ps := ad.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (ado *AccountDeleteOne) ExecX(ctx context.Context) {
 	if err := ado.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the AccountMutation object of the builder.
+func (ado *AccountDeleteOne) Mutation() *AccountMutation {
+	return ado.ad.mutation
 }

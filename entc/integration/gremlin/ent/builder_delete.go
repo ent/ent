@@ -44,6 +44,11 @@ func (bd *BuilderDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the BuilderMutation object of the builder.
+func (bd *BuilderDelete) Mutation() *BuilderMutation {
+	return bd.mutation
+}
+
 func (bd *BuilderDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := bd.gremlin().Query()
@@ -91,4 +96,9 @@ func (bdo *BuilderDeleteOne) ExecX(ctx context.Context) {
 	if err := bdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the BuilderMutation object of the builder.
+func (bdo *BuilderDeleteOne) Mutation() *BuilderMutation {
+	return bdo.bd.mutation
 }

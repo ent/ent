@@ -43,6 +43,11 @@ func (cd *CommentDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the CommentMutation object of the builder.
+func (cd *CommentDelete) Mutation() *CommentMutation {
+	return cd.mutation
+}
+
 func (cd *CommentDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(comment.Table, sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt))
 	if ps := cd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (cdo *CommentDeleteOne) ExecX(ctx context.Context) {
 	if err := cdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the CommentMutation object of the builder.
+func (cdo *CommentDeleteOne) Mutation() *CommentMutation {
+	return cdo.cd.mutation
 }

@@ -43,6 +43,11 @@ func (evsd *ExValueScanDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the ExValueScanMutation object of the builder.
+func (evsd *ExValueScanDelete) Mutation() *ExValueScanMutation {
+	return evsd.mutation
+}
+
 func (evsd *ExValueScanDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(exvaluescan.Table, sqlgraph.NewFieldSpec(exvaluescan.FieldID, field.TypeInt))
 	if ps := evsd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (evsdo *ExValueScanDeleteOne) ExecX(ctx context.Context) {
 	if err := evsdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the ExValueScanMutation object of the builder.
+func (evsdo *ExValueScanDeleteOne) Mutation() *ExValueScanMutation {
+	return evsdo.evsd.mutation
 }
