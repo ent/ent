@@ -804,7 +804,8 @@ func (b *jsonBuilder) Immutable() *jsonBuilder {
 	return b
 }
 
-// Immutable indicates that this field cannot be updated.
+// Nillable indicates that this field is a nillable.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *jsonBuilder) Nillable() *jsonBuilder {
 	b.desc.Nillable = true
 	return b
