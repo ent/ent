@@ -2293,6 +2293,7 @@ var (
 		"Max",
 		"Mean",
 		"Min",
+		"Schema",
 		"Sum",
 		"Policy",
 		"Query",
