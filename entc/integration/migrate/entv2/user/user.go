@@ -33,6 +33,8 @@ const (
 	FieldDescription = "description"
 	// FieldNickname holds the string denoting the nickname field in the database.
 	FieldNickname = "nickname"
+	// FieldUsername holds the string denoting the username field in the database.
+	FieldUsername = "username"
 	// FieldPhone holds the string denoting the phone field in the database.
 	FieldPhone = "phone"
 	// FieldBuffer holds the string denoting the buffer field in the database.
@@ -101,6 +103,7 @@ var Columns = []string{
 	FieldName,
 	FieldDescription,
 	FieldNickname,
+	FieldUsername,
 	FieldPhone,
 	FieldBuffer,
 	FieldTitle,
@@ -151,6 +154,8 @@ var (
 	DefaultActive bool
 	// NicknameValidator is a validator for the "nickname" field. It is called by the builders before save.
 	NicknameValidator func(string) error
+	// UsernameValidator is a validator for the "username" field. It is called by the builders before save.
+	UsernameValidator func(string) error
 	// DefaultPhone holds the default value on creation for the "phone" field.
 	DefaultPhone string
 	// DefaultBuffer holds the default value on creation for the "buffer" field.
@@ -284,6 +289,11 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 // ByNickname orders the results by the nickname field.
 func ByNickname(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNickname, opts...).ToFunc()
+}
+
+// ByUsername orders the results by the username field.
+func ByUsername(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUsername, opts...).ToFunc()
 }
 
 // ByPhone orders the results by the phone field.
