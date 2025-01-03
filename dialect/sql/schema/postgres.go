@@ -24,8 +24,9 @@ import (
 // Postgres is a postgres migration driver.
 type Postgres struct {
 	dialect.Driver
-	schema  string
-	version string
+	schema     string
+	version    string
+	symbolFunc func(string) string
 }
 
 // init loads the Postgres version from the database for later use in the migration process.
@@ -750,14 +751,19 @@ func (d *Postgres) atTypeC(c1 *Column, c2 *schema.Column) error {
 
 func (d *Postgres) atUniqueC(t1 *Table, c1 *Column, t2 *schema.Table, c2 *schema.Column) {
 	// For UNIQUE columns, PostgreSQL creates an implicit index named
-	// "<table>_<column>_key<i>".
+	// "<table>_<column>_key<i>" which will be shorten by symbol function when over limits.
+	idxName := fmt.Sprintf("%s_%s_key", t1.Name, c1.Name)
+	if d.symbolFunc != nil {
+		idxName = d.symbolFunc(idxName)
+	}
+
 	for _, idx := range t1.Indexes {
 		// Index also defined explicitly, and will be added in atIndexes.
-		if idx.Unique && d.atImplicitIndexName(idx, t1, c1) {
+		if idx.Unique && (d.atImplicitIndexName(idx, t1, c1) || idx.Name == idxName) {
 			return
 		}
 	}
-	t2.AddIndexes(schema.NewUniqueIndex(fmt.Sprintf("%s_%s_key", t1.Name, c1.Name)).AddColumns(c2))
+	t2.AddIndexes(schema.NewUniqueIndex(idxName).AddColumns(c2))
 }
 
 func (d *Postgres) atImplicitIndexName(idx *Index, t1 *Table, c1 *Column) bool {
