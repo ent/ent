@@ -664,6 +664,18 @@ func (a *Atlas) create(ctx context.Context, tables ...*Table) (err error) {
 	if err := a.sqlDialect.init(ctx); err != nil {
 		return err
 	}
+	a.atDriver, err = a.sqlDialect.atOpen(a.sqlDialect)
+	if err != nil {
+		return err
+	}
+	defer func() { a.atDriver = nil }()
+	plan, err := a.planInspect(ctx, a.sqlDialect, "changes", tables)
+	if err != nil {
+		return fmt.Errorf("sql/schema: %w", err)
+	}
+	if len(plan.Changes) == 0 {
+		return nil
+	}
 	// Open a transaction for backwards compatibility,
 	// even if the migration is not transactional.
 	tx, err := a.sqlDialect.Tx(ctx)
@@ -674,34 +686,23 @@ func (a *Atlas) create(ctx context.Context, tables ...*Table) (err error) {
 	if err != nil {
 		return err
 	}
-	defer func() { a.atDriver = nil }()
-	if err := func() error {
-		plan, err := a.planInspect(ctx, tx, "changes", tables)
-		if err != nil {
-			return err
-		}
-		// Apply plan (changes).
-		var applier Applier = ApplyFunc(func(ctx context.Context, tx dialect.ExecQuerier, plan *migrate.Plan) error {
-			for _, c := range plan.Changes {
-				if err := tx.Exec(ctx, c.Cmd, c.Args, nil); err != nil {
-					if c.Comment != "" {
-						err = fmt.Errorf("%s: %w", c.Comment, err)
-					}
-					return err
+	// Apply plan (changes).
+	var applier Applier = ApplyFunc(func(ctx context.Context, tx dialect.ExecQuerier, plan *migrate.Plan) error {
+		for _, c := range plan.Changes {
+			if err := tx.Exec(ctx, c.Cmd, c.Args, nil); err != nil {
+				if c.Comment != "" {
+					err = fmt.Errorf("%s: %w", c.Comment, err)
 				}
+				return err
 			}
-			return nil
-		})
-		for i := len(a.applyHook) - 1; i >= 0; i-- {
-			applier = a.applyHook[i](applier)
 		}
-		return applier.Apply(ctx, tx, plan)
-	}(); err != nil {
-		err = fmt.Errorf("sql/schema: %w", err)
-		if rerr := tx.Rollback(); rerr != nil {
-			err = fmt.Errorf("%w: %v", err, rerr)
-		}
-		return err
+		return nil
+	})
+	for i := len(a.applyHook) - 1; i >= 0; i-- {
+		applier = a.applyHook[i](applier)
+	}
+	if err = applier.Apply(ctx, tx, plan); err != nil {
+		return errors.Join(fmt.Errorf("sql/schema: %w", err), tx.Rollback())
 	}
 	return tx.Commit()
 }
