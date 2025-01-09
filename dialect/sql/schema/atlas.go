@@ -896,12 +896,19 @@ func (a *Atlas) tables(tables []*Table) ([]*schema.Table, error) {
 			at.SetComment(et.Comment)
 		}
 		a.sqlDialect.atTable(et, at)
-		if a.universalID && et.Name != TypeTable && len(et.PrimaryKey) == 1 {
+		// universalID is the old implementation of the global unique id, relying on a table in the database.
+		// The new implementation is based on annotations attached to the schema. Only one can be enabled.
+		switch {
+		case a.universalID && et.Annotation != nil && et.Annotation.IncrementStart != nil:
+			return nil, errors.New("sql/schema: universal id and increment start annotation are mutually exclusive")
+		case a.universalID && et.Name != TypeTable && len(et.PrimaryKey) == 1:
 			r, err := a.pkRange(et)
 			if err != nil {
 				return nil, err
 			}
 			a.sqlDialect.atIncrementT(at, r)
+		case et.Annotation != nil && et.Annotation.IncrementStart != nil:
+			a.sqlDialect.atIncrementT(at, *et.Annotation.IncrementStart)
 		}
 		if err := a.aColumns(et, at); err != nil {
 			return nil, err
