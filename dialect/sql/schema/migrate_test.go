@@ -16,8 +16,10 @@ import (
 
 	"ariga.io/atlas/sql/migrate"
 	"ariga.io/atlas/sql/schema"
+	"ariga.io/atlas/sql/sqlite"
 	"ariga.io/atlas/sql/sqltool"
 	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
 
@@ -416,18 +418,25 @@ func TestAtlas_StateReader(t *testing.T) {
 	realm, err := m.StateReader(&Table{
 		Name: "users",
 		Columns: []*Column{
+			{Name: "id", Type: field.TypeInt64, Increment: true},
 			{Name: "name", Type: field.TypeString},
 			{Name: "active", Type: field.TypeBool},
+		},
+		Annotation: &entsql.Annotation{
+			IncrementStart: func(i int64) *int64 { return &i }(100),
 		},
 	}).ReadState(context.Background())
 	require.NoError(t, err)
 	require.NotNil(t, realm)
 	require.Len(t, realm.Schemas, 1)
 	require.Len(t, realm.Schemas[0].Tables, 1)
-	require.Equal(t, realm.Schemas[0].Tables[0].Name, "users")
+	require.Equal(t, "users", realm.Schemas[0].Tables[0].Name)
+	require.Equal(t, []schema.Attr{&sqlite.AutoIncrement{Seq: 100}}, realm.Schemas[0].Tables[0].Attrs)
 	require.Equal(t,
 		realm.Schemas[0].Tables[0].Columns,
 		[]*schema.Column{
+			schema.NewIntColumn("id", "integer").
+				AddAttrs(&sqlite.AutoIncrement{}),
 			schema.NewStringColumn("name", "text"),
 			schema.NewBoolColumn("active", "bool"),
 		},
