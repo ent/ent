@@ -241,6 +241,23 @@ func TestSQLite(t *testing.T) {
 	require.NoError(t, err)
 	defer vdrv.Close()
 	Versioned(t, vdrv, "sqlite3://file?mode=memory&cache=shared&_fk=1", versioned.NewClient(versioned.Driver(vdrv)))
+
+	// In case there are no changes, no transaction should be opened and foreign keys should not be touched.
+	fkdrv, err := sql.Open("sqlite3", "file:fk_ent?mode=memory&cache=shared&_fk=1")
+	require.NoError(t, err)
+	defer fkdrv.Close()
+	fkclient := entv1.NewClient(entv1.Driver(fkdrv), entv1.Log(func(a ...any) {
+		s := a[0].(string)
+		switch {
+		case strings.HasPrefix(s, "driver.Tx"):
+			t.Errorf("unexpected transaction, %q", s)
+		case strings.HasPrefix(s, "driver.Exec") && strings.Contains(s, "PRAGMA foreign_keys"):
+			t.Errorf("unexpected foreign keys pragma: %q", s)
+		}
+	}))
+	require.NoError(t, fkclient.Schema.Create(ctx))
+	// Apply again has no changes -> there should not be any pragma changes and no transaction to be opened.
+	require.NoError(t, fkclient.Debug().Schema.Create(ctx))
 }
 
 // https://github.com/ent/ent/issues/2954
