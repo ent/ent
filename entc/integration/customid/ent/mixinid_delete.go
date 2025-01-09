@@ -43,6 +43,11 @@ func (mid *MixinIDDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the MixinIDMutation object of the builder.
+func (mid *MixinIDDelete) Mutation() *MixinIDMutation {
+	return mid.mutation
+}
+
 func (mid *MixinIDDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(mixinid.Table, sqlgraph.NewFieldSpec(mixinid.FieldID, field.TypeUUID))
 	if ps := mid.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (mido *MixinIDDeleteOne) ExecX(ctx context.Context) {
 	if err := mido.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the MixinIDMutation object of the builder.
+func (mido *MixinIDDeleteOne) Mutation() *MixinIDMutation {
+	return mido.mid.mutation
 }

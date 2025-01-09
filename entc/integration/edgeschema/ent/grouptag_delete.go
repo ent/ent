@@ -43,6 +43,11 @@ func (gtd *GroupTagDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the GroupTagMutation object of the builder.
+func (gtd *GroupTagDelete) Mutation() *GroupTagMutation {
+	return gtd.mutation
+}
+
 func (gtd *GroupTagDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(grouptag.Table, sqlgraph.NewFieldSpec(grouptag.FieldID, field.TypeInt))
 	if ps := gtd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (gtdo *GroupTagDeleteOne) ExecX(ctx context.Context) {
 	if err := gtdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the GroupTagMutation object of the builder.
+func (gtdo *GroupTagDeleteOne) Mutation() *GroupTagMutation {
+	return gtdo.gtd.mutation
 }

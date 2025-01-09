@@ -43,6 +43,11 @@ func (ftd *FieldTypeDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the FieldTypeMutation object of the builder.
+func (ftd *FieldTypeDelete) Mutation() *FieldTypeMutation {
+	return ftd.mutation
+}
+
 func (ftd *FieldTypeDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(fieldtype.Table, sqlgraph.NewFieldSpec(fieldtype.FieldID, field.TypeInt))
 	if ps := ftd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (ftdo *FieldTypeDeleteOne) ExecX(ctx context.Context) {
 	if err := ftdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the FieldTypeMutation object of the builder.
+func (ftdo *FieldTypeDeleteOne) Mutation() *FieldTypeMutation {
+	return ftdo.ftd.mutation
 }
