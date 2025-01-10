@@ -2189,6 +2189,13 @@ func TextHasSuffix(v string) predicate.FieldType {
 	})
 }
 
+// TextRegex applies the Regex predicate on the "text" field.
+func TextRegex(v string) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldText, p.Regex(v))
+	})
+}
+
 // TextIsNil applies the IsNil predicate on the "text" field.
 func TextIsNil() predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
@@ -2563,6 +2570,14 @@ func MACHasSuffix(v schema.MAC) predicate.FieldType {
 	})
 }
 
+// MACRegex applies the Regex predicate on the "mac" field.
+func MACRegex(v schema.MAC) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldMAC, p.Regex(vc))
+	})
+}
+
 // MACIsNil applies the IsNil predicate on the "mac" field.
 func MACIsNil() predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
@@ -2724,6 +2739,13 @@ func PasswordHasSuffix(v string) predicate.FieldType {
 	})
 }
 
+// PasswordRegex applies the Regex predicate on the "password" field.
+func PasswordRegex(v string) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldPassword, p.Regex(v))
+	})
+}
+
 // PasswordIsNil applies the IsNil predicate on the "password" field.
 func PasswordIsNil() predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
@@ -2815,6 +2837,14 @@ func StringScannerHasSuffix(v schema.StringScanner) predicate.FieldType {
 	vc := string(v)
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldStringScanner, p.EndingWith(vc))
+	})
+}
+
+// StringScannerRegex applies the Regex predicate on the "string_scanner" field.
+func StringScannerRegex(v schema.StringScanner) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStringScanner, p.Regex(vc))
 	})
 }
 
@@ -3010,6 +3040,14 @@ func DirHasSuffix(v http.Dir) predicate.FieldType {
 	})
 }
 
+// DirRegex applies the Regex predicate on the "dir" field.
+func DirRegex(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDir, p.Regex(vc))
+	})
+}
+
 // NdirEQ applies the EQ predicate on the "ndir" field.
 func NdirEQ(v http.Dir) predicate.FieldType {
 	vc := string(v)
@@ -3101,6 +3139,14 @@ func NdirHasSuffix(v http.Dir) predicate.FieldType {
 	vc := string(v)
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNdir, p.EndingWith(vc))
+	})
+}
+
+// NdirRegex applies the Regex predicate on the "ndir" field.
+func NdirRegex(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNdir, p.Regex(vc))
 	})
 }
 
@@ -3198,6 +3244,14 @@ func StrHasSuffix(v sql.NullString) predicate.FieldType {
 	})
 }
 
+// StrRegex applies the Regex predicate on the "str" field.
+func StrRegex(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStr, p.Regex(vc))
+	})
+}
+
 // StrIsNil applies the IsNil predicate on the "str" field.
 func StrIsNil() predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
@@ -3289,6 +3343,14 @@ func NullStrHasSuffix(v *sql.NullString) predicate.FieldType {
 	vc := v.String
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNullStr, p.EndingWith(vc))
+	})
+}
+
+// NullStrRegex applies the Regex predicate on the "null_str" field.
+func NullStrRegex(v *sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNullStr, p.Regex(vc))
 	})
 }
 
@@ -3386,6 +3448,14 @@ func LinkHasSuffix(v schema.Link) predicate.FieldType {
 	})
 }
 
+// LinkRegex applies the Regex predicate on the "link" field.
+func LinkRegex(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldLink, p.Regex(vc))
+	})
+}
+
 // LinkIsNil applies the IsNil predicate on the "link" field.
 func LinkIsNil() predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
@@ -3477,6 +3547,14 @@ func NullLinkHasSuffix(v *schema.Link) predicate.FieldType {
 	vc := v.String()
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNullLink, p.EndingWith(vc))
+	})
+}
+
+// NullLinkRegex applies the Regex predicate on the "null_link" field.
+func NullLinkRegex(v *schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNullLink, p.Regex(vc))
 	})
 }
 
@@ -4873,6 +4951,14 @@ func VstringHasSuffix(v schema.VString) predicate.FieldType {
 	vc := string(v)
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldVstring, p.EndingWith(vc))
+	})
+}
+
+// VstringRegex applies the Regex predicate on the "vstring" field.
+func VstringRegex(v schema.VString) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldVstring, p.Regex(vc))
 	})
 }
 
