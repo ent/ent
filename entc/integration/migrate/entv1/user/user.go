@@ -26,6 +26,8 @@ const (
 	FieldDescription = "description"
 	// FieldNickname holds the string denoting the nickname field in the database.
 	FieldNickname = "nickname"
+	// FieldUsername holds the string denoting the username field in the database.
+	FieldUsername = "username"
 	// FieldAddress holds the string denoting the address field in the database.
 	FieldAddress = "address"
 	// FieldRenamed holds the string denoting the renamed field in the database.
@@ -82,6 +84,7 @@ var Columns = []string{
 	FieldName,
 	FieldDescription,
 	FieldNickname,
+	FieldUsername,
 	FieldAddress,
 	FieldRenamed,
 	FieldOldToken,
@@ -177,6 +180,11 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 // ByNickname orders the results by the nickname field.
 func ByNickname(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNickname, opts...).ToFunc()
+}
+
+// ByUsername orders the results by the username field.
+func ByUsername(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUsername, opts...).ToFunc()
 }
 
 // ByAddress orders the results by the address field.
