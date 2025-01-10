@@ -144,6 +144,21 @@ var (
 		Description: "Allows users to work with versioned migrations / migration files",
 	}
 
+	FeatureGlobalID = Feature{
+		Name:        "sql/globalid",
+		Stage:       Experimental,
+		Default:     false,
+		Description: "Ensures all nodes have a unique global identifier", GraphTemplates: []GraphTemplate{
+			{
+				Name:   "internal/globalid",
+				Format: "internal/globalid.go",
+			},
+		},
+		cleanup: func(c *Config) error {
+			return remove(filepath.Join(c.Target, "internal"), "globalid.go")
+		},
+	}
+
 	// AllFeatures holds a list of all feature-flags.
 	AllFeatures = []Feature{
 		FeaturePrivacy,
@@ -158,6 +173,7 @@ var (
 		FeatureExecQuery,
 		FeatureUpsert,
 		FeatureVersionedMigration,
+		FeatureGlobalID,
 	}
 	// allFeatures includes all public and private features.
 	allFeatures = append(AllFeatures, featureMultiSchema)

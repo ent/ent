@@ -626,21 +626,75 @@ var (
 )
 
 func init() {
+	ApisTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(4294967396),
+	}
+	BuildersTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(8589934692),
+	}
 	CardsTable.ForeignKeys[0].RefTable = UsersTable
+	CardsTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(12884901988),
+	}
+	CommentsTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(17179869284),
+	}
+	ExValueScansTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(21474836580),
+	}
 	FieldTypesTable.ForeignKeys[0].RefTable = FilesTable
+	FieldTypesTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(25769803876),
+	}
 	FilesTable.ForeignKeys[0].RefTable = FileTypesTable
 	FilesTable.ForeignKeys[1].RefTable = GroupsTable
 	FilesTable.ForeignKeys[2].RefTable = UsersTable
+	FilesTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(30064771172),
+	}
+	FileTypesTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(34359738468),
+	}
+	GoodsTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(38654705764),
+	}
 	GroupsTable.ForeignKeys[0].RefTable = GroupInfosTable
+	GroupsTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(42949673060),
+	}
+	GroupInfosTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(47244640356),
+	}
+	ItemsTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(51539607652),
+	}
+	LicensesTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(55834574948),
+	}
 	NodesTable.ForeignKeys[0].RefTable = NodesTable
+	NodesTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(60129542244),
+	}
+	PcsTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(64424509540),
+	}
 	PetTable.ForeignKeys[0].RefTable = UsersTable
 	PetTable.ForeignKeys[1].RefTable = UsersTable
 	PetTable.Annotation = &entsql.Annotation{
 		Table: "pet",
 	}
+	SpecsTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(73014444132),
+	}
+	TasksTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(77309411428),
+	}
 	UsersTable.ForeignKeys[0].RefTable = GroupsTable
 	UsersTable.ForeignKeys[1].RefTable = UsersTable
 	UsersTable.ForeignKeys[2].RefTable = UsersTable
+	UsersTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(100),
+	}
 	SpecCardTable.ForeignKeys[0].RefTable = SpecsTable
 	SpecCardTable.ForeignKeys[1].RefTable = CardsTable
 	UserGroupsTable.ForeignKeys[0].RefTable = UsersTable
