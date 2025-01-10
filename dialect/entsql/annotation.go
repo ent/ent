@@ -375,6 +375,21 @@ func OnDelete(opt ReferenceOption) *Annotation {
 	}
 }
 
+// IncrementStart specifies the starting value for auto-increment columns.
+//
+// For example, in order to define the starting value for auto-increment to be 100:
+//
+//	func (T) Annotations() []schema.Annotation {
+//		return []schema.Annotation{
+//			entsql.IncrementStart(100),
+//		}
+//	}
+func IncrementStart(i int64) *Annotation {
+	return &Annotation{
+		IncrementStart: &i,
+	}
+}
+
 // Merge implements the schema.Merger interface.
 func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	var ant Annotation
