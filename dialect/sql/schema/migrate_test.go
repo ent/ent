@@ -28,53 +28,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestMigrateHookOmitTable(t *testing.T) {
-	db, mk, err := sqlmock.New()
-	require.NoError(t, err)
-
-	tables := []*Table{{Name: "users"}, {Name: "pets"}}
-	mock := mysqlMock{mk}
-	mock.start("5.7.23")
-	mock.tableExists("pets", false)
-	mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `pets`() CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
-		WillReturnResult(sqlmock.NewResult(0, 1))
-	mock.ExpectCommit()
-
-	m, err := NewMigrate(sql.OpenDB("mysql", db), WithHooks(func(next Creator) Creator {
-		return CreateFunc(func(ctx context.Context, tables ...*Table) error {
-			return next.Create(ctx, tables[1])
-		})
-	}), WithAtlas(false))
-	require.NoError(t, err)
-	err = m.Create(context.Background(), tables...)
-	require.NoError(t, err)
-}
-
-func TestMigrateHookAddTable(t *testing.T) {
-	db, mk, err := sqlmock.New()
-	require.NoError(t, err)
-
-	tables := []*Table{{Name: "users"}}
-	mock := mysqlMock{mk}
-	mock.start("5.7.23")
-	mock.tableExists("users", false)
-	mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`() CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
-		WillReturnResult(sqlmock.NewResult(0, 1))
-	mock.tableExists("pets", false)
-	mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `pets`() CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
-		WillReturnResult(sqlmock.NewResult(0, 1))
-	mock.ExpectCommit()
-
-	m, err := NewMigrate(sql.OpenDB("mysql", db), WithHooks(func(next Creator) Creator {
-		return CreateFunc(func(ctx context.Context, tables ...*Table) error {
-			return next.Create(ctx, tables[0], &Table{Name: "pets"})
-		})
-	}), WithAtlas(false))
-	require.NoError(t, err)
-	err = m.Create(context.Background(), tables...)
-	require.NoError(t, err)
-}
-
 func TestMigrate_Formatter(t *testing.T) {
 	db, _, err := sqlmock.New()
 	require.NoError(t, err)

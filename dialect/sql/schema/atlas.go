@@ -29,10 +29,6 @@ type Atlas struct {
 	atDriver   migrate.Driver
 	sqlDialect sqlDialect
 
-	legacy      bool // if the legacy migration engine instead of Atlas should be used
-	withFixture bool // deprecated: with fks rename fixture
-	sum         bool // deprecated: sum file generation will be required
-
 	indent          string // plan indentation
 	errNoPlan       bool   // no plan error enabled
 	universalID     bool   // global unique ids
@@ -67,7 +63,7 @@ func Diff(ctx context.Context, u, name string, tables []*Table, opts ...MigrateO
 
 // NewMigrate creates a new Atlas form the given dialect.Driver.
 func NewMigrate(drv dialect.Driver, opts ...MigrateOption) (*Atlas, error) {
-	a := &Atlas{driver: drv, withForeignKeys: true, mode: ModeInspect, sum: true}
+	a := &Atlas{driver: drv, withForeignKeys: true, mode: ModeInspect}
 	for _, opt := range opts {
 		opt(a)
 	}
@@ -84,7 +80,7 @@ func NewMigrateURL(u string, opts ...MigrateOption) (*Atlas, error) {
 	if err != nil {
 		return nil, err
 	}
-	a := &Atlas{url: parsed, withForeignKeys: true, mode: ModeInspect, sum: true}
+	a := &Atlas{url: parsed, withForeignKeys: true, mode: ModeInspect}
 	for _, opt := range opts {
 		opt(a)
 	}
@@ -106,13 +102,6 @@ func NewMigrateURL(u string, opts ...MigrateOption) (*Atlas, error) {
 func (a *Atlas) Create(ctx context.Context, tables ...*Table) (err error) {
 	a.setupTables(tables)
 	var creator Creator = CreateFunc(a.create)
-	if a.legacy {
-		m, err := a.legacyMigrate()
-		if err != nil {
-			return err
-		}
-		creator = CreateFunc(m.create)
-	}
 	for i := len(a.hooks) - 1; i >= 0; i-- {
 		creator = a.hooks[i](creator)
 	}
@@ -132,13 +121,9 @@ func (a *Atlas) NamedDiff(ctx context.Context, name string, tables ...*Table) er
 		return errors.New("no migration directory given")
 	}
 	opts := []migrate.PlannerOption{migrate.WithFormatter(a.fmt)}
-	if a.sum {
-		// Validate the migration directory before proceeding.
-		if err := migrate.Validate(a.dir); err != nil {
-			return fmt.Errorf("validating migration directory: %w", err)
-		}
-	} else {
-		opts = append(opts, migrate.DisableChecksum())
+	// Validate the migration directory before proceeding.
+	if err := migrate.Validate(a.dir); err != nil {
+		return fmt.Errorf("validating migration directory: %w", err)
 	}
 	a.setupTables(tables)
 	// Set up connections.
@@ -488,18 +473,6 @@ func WithApplyHook(hooks ...ApplyHook) MigrateOption {
 	}
 }
 
-// WithAtlas is an opt-out option for v0.11 indicating the migration
-// should be executed using the deprecated legacy engine.
-// Note, in future versions, this option is going to be removed
-// and the Atlas (https://atlasgo.io) based migration engine should be used.
-//
-// Deprecated: The legacy engine will be removed.
-func WithAtlas(b bool) MigrateOption {
-	return func(a *Atlas) {
-		a.legacy = !b
-	}
-}
-
 // WithDir sets the atlas migration directory to use to store migration files.
 func WithDir(dir migrate.Dir) MigrateOption {
 	return func(a *Atlas) {
@@ -519,22 +492,6 @@ func WithFormatter(fmt migrate.Formatter) MigrateOption {
 func WithDialect(d string) MigrateOption {
 	return func(a *Atlas) {
 		a.dialect = d
-	}
-}
-
-// WithSumFile instructs atlas to generate a migration directory integrity sum file.
-//
-// Deprecated: generating the sum file is now opt-out. This method will be removed in future versions.
-func WithSumFile() MigrateOption {
-	return func(a *Atlas) {}
-}
-
-// DisableChecksum instructs atlas to skip migration directory integrity sum file generation.
-//
-// Deprecated: generating the sum file will no longer be optional in future versions.
-func DisableChecksum() MigrateOption {
-	return func(a *Atlas) {
-		a.sum = false
 	}
 }
 
@@ -626,15 +583,9 @@ func (a *Atlas) init() error {
 			a.fmt = sqltool.GolangMigrateFormatter
 		}
 	}
-	if a.mode == ModeReplay {
-		// ModeReplay requires a migration directory.
-		if a.dir == nil {
-			return errors.New("sql/schema: WithMigrationMode(ModeReplay) requires versioned migrations: WithDir()")
-		}
-		// ModeReplay requires sum file generation.
-		if !a.sum {
-			return errors.New("sql/schema: WithMigrationMode(ModeReplay) requires migration directory integrity file")
-		}
+	// ModeReplay requires a migration directory.
+	if a.mode == ModeReplay && a.dir == nil {
+		return errors.New("sql/schema: WithMigrationMode(ModeReplay) requires versioned migrations: WithDir()")
 	}
 	return nil
 }
@@ -1236,32 +1187,6 @@ func (r *diffDriver) SchemaDiff(from, to *schema.Schema, opts ...schema.DiffOpti
 		d = r.hooks[i](d)
 	}
 	return d.Diff(from, to)
-}
-
-// legacyMigrate returns a configured legacy migration engine (before Atlas) to keep backwards compatibility.
-//
-// Deprecated: Will be removed alongside legacy migration support.
-func (a *Atlas) legacyMigrate() (*Migrate, error) {
-	m := &Migrate{
-		universalID:     a.universalID,
-		dropColumns:     a.dropColumns,
-		dropIndexes:     a.dropIndexes,
-		withFixture:     a.withFixture,
-		withForeignKeys: a.withForeignKeys,
-		hooks:           a.hooks,
-		atlas:           a,
-	}
-	switch a.dialect {
-	case dialect.MySQL:
-		m.sqlDialect = &MySQL{Driver: a.driver}
-	case dialect.SQLite:
-		m.sqlDialect = &SQLite{Driver: a.driver, WithForeignKeys: a.withForeignKeys}
-	case dialect.Postgres:
-		m.sqlDialect = &Postgres{Driver: a.driver}
-	default:
-		return nil, fmt.Errorf("sql/schema: unsupported dialect %q", a.dialect)
-	}
-	return m, nil
 }
 
 // removeAttr is a temporary patch due to compiler errors we get by using the generic

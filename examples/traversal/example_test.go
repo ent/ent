@@ -9,8 +9,6 @@ import (
 	"fmt"
 	"log"
 
-	"entgo.io/ent/dialect/sql/schema"
-
 	"entgo.io/ent/examples/traversal/ent"
 	"entgo.io/ent/examples/traversal/ent/group"
 	"entgo.io/ent/examples/traversal/ent/pet"
@@ -27,7 +25,7 @@ func Example_Traversal() {
 	defer client.Close()
 	ctx := context.Background()
 	// Run the auto migration tool.
-	if err := client.Schema.Create(ctx, schema.WithAtlas(true)); err != nil {
+	if err := client.Schema.Create(ctx); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
 	if err := Gen(ctx, client); err != nil {
@@ -120,7 +118,7 @@ func Gen(ctx context.Context, client *ent.Client) error {
 func Traverse(ctx context.Context, client *ent.Client) error {
 	owner, err := client.Group. // GroupClient.
 					Query().                     // Query builder.
-					Where(group.Name("Github")). // Filter only Github group (only 1).
+					Where(group.Name("Github")). // Filter only GitHub group (only 1).
 					QueryAdmin().                // Getting Dan.
 					QueryFriends().              // Getting Dan's friends: [Ariel].
 					QueryPets().                 // Their pets: [Pedro, Xabi].
