@@ -22,7 +22,6 @@ func TestIncrementStartAnnotation(t *testing.T) {
 				Name:        "T1",
 				Annotations: gen.Annotations{a.Name(): a},
 			},
-			{Name: "T2"},
 		}
 		c = &gen.Config{
 			Package: "entc/gen",
@@ -45,7 +44,7 @@ func TestIncrementStartAnnotation(t *testing.T) {
 	require.NotNil(t, g)
 
 	// Duplicated increment starting values are not allowed.
-	s = append(s, &load.Schema{
+	s = append(s, &load.Schema{Name: "T2"}, &load.Schema{
 		Name:        "T3",
 		Annotations: gen.Annotations{a.Name(): &entsql.Annotation{IncrementStart: p(1 << 32)}},
 	})
