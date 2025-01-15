@@ -16,8 +16,10 @@ import (
 
 	"ariga.io/atlas/sql/migrate"
 	"ariga.io/atlas/sql/schema"
+	"ariga.io/atlas/sql/sqlite"
 	"ariga.io/atlas/sql/sqltool"
 	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
 
@@ -25,53 +27,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
 )
-
-func TestMigrateHookOmitTable(t *testing.T) {
-	db, mk, err := sqlmock.New()
-	require.NoError(t, err)
-
-	tables := []*Table{{Name: "users"}, {Name: "pets"}}
-	mock := mysqlMock{mk}
-	mock.start("5.7.23")
-	mock.tableExists("pets", false)
-	mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `pets`() CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
-		WillReturnResult(sqlmock.NewResult(0, 1))
-	mock.ExpectCommit()
-
-	m, err := NewMigrate(sql.OpenDB("mysql", db), WithHooks(func(next Creator) Creator {
-		return CreateFunc(func(ctx context.Context, tables ...*Table) error {
-			return next.Create(ctx, tables[1])
-		})
-	}), WithAtlas(false))
-	require.NoError(t, err)
-	err = m.Create(context.Background(), tables...)
-	require.NoError(t, err)
-}
-
-func TestMigrateHookAddTable(t *testing.T) {
-	db, mk, err := sqlmock.New()
-	require.NoError(t, err)
-
-	tables := []*Table{{Name: "users"}}
-	mock := mysqlMock{mk}
-	mock.start("5.7.23")
-	mock.tableExists("users", false)
-	mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`() CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
-		WillReturnResult(sqlmock.NewResult(0, 1))
-	mock.tableExists("pets", false)
-	mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `pets`() CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
-		WillReturnResult(sqlmock.NewResult(0, 1))
-	mock.ExpectCommit()
-
-	m, err := NewMigrate(sql.OpenDB("mysql", db), WithHooks(func(next Creator) Creator {
-		return CreateFunc(func(ctx context.Context, tables ...*Table) error {
-			return next.Create(ctx, tables[0], &Table{Name: "pets"})
-		})
-	}), WithAtlas(false))
-	require.NoError(t, err)
-	err = m.Create(context.Background(), tables...)
-	require.NoError(t, err)
-}
 
 func TestMigrate_Formatter(t *testing.T) {
 	db, _, err := sqlmock.New()
@@ -416,18 +371,25 @@ func TestAtlas_StateReader(t *testing.T) {
 	realm, err := m.StateReader(&Table{
 		Name: "users",
 		Columns: []*Column{
+			{Name: "id", Type: field.TypeInt64, Increment: true},
 			{Name: "name", Type: field.TypeString},
 			{Name: "active", Type: field.TypeBool},
+		},
+		Annotation: &entsql.Annotation{
+			IncrementStart: func(i int64) *int64 { return &i }(100),
 		},
 	}).ReadState(context.Background())
 	require.NoError(t, err)
 	require.NotNil(t, realm)
 	require.Len(t, realm.Schemas, 1)
 	require.Len(t, realm.Schemas[0].Tables, 1)
-	require.Equal(t, realm.Schemas[0].Tables[0].Name, "users")
+	require.Equal(t, "users", realm.Schemas[0].Tables[0].Name)
+	require.Equal(t, []schema.Attr{&sqlite.AutoIncrement{Seq: 100}}, realm.Schemas[0].Tables[0].Attrs)
 	require.Equal(t,
 		realm.Schemas[0].Tables[0].Columns,
 		[]*schema.Column{
+			schema.NewIntColumn("id", "integer").
+				AddAttrs(&sqlite.AutoIncrement{}),
 			schema.NewStringColumn("name", "text"),
 			schema.NewBoolColumn("active", "bool"),
 		},

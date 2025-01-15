@@ -10,6 +10,7 @@ package field
 import (
 	"errors"
 	"reflect"
+	"strings"
 
 	"entgo.io/ent/schema"
 )
@@ -228,6 +229,17 @@ func (b *{{ $builder }}) Annotations(annotations ...schema.Annotation) *{{ $buil
 	return b
 }
 
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *{{ $builder }}) Deprecated(reason ...string) *{{ $builder }} {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *{{ $builder }}) Descriptor() *Descriptor {
 	if b.desc.Default != nil || b.desc.UpdateDefault != nil {
@@ -305,6 +317,25 @@ func (b *{{ $builder }}) Negative() *{{ $builder }} {
 // Default sets the default value of the field.
 func (b *{{ $builder }}) Default(i {{ $t }}) *{{ $builder }} {
 	b.desc.Default = i
+	return b
+}
+
+// DefaultFunc sets the function that is applied to set the default value
+// of the field on creation.
+func (b *{{ $builder }}) DefaultFunc(fn any) *{{ $builder }} {
+	b.desc.Default = fn
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.{{ title $t.String }}("{{$t.String}}").
+//		Default(0).
+//		UpdateDefault(GenNumber),
+//
+func (b *{{ $builder }}) UpdateDefault(fn any) *{{ $builder }} {
+	b.desc.UpdateDefault = fn
 	return b
 }
 
@@ -409,8 +440,22 @@ func (b *{{ $builder }}) Annotations(annotations ...schema.Annotation) *{{ $buil
 	return b
 }
 
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *{{ $builder }}) Deprecated(reason ...string) *{{ $builder }} {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *{{ $builder }}) Descriptor() *Descriptor {
+	if b.desc.Default != nil || b.desc.UpdateDefault != nil {
+		b.desc.checkDefaultFunc({{ $t }}Type)
+	}
 	b.desc.checkGoType({{ $t }}Type)
 	return b.desc
 }

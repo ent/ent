@@ -4,7 +4,13 @@
 
 package entsql
 
-import "entgo.io/ent/schema"
+import (
+	"errors"
+	"fmt"
+
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/schema"
+)
 
 // Annotation is a builtin schema annotation for attaching
 // SQL metadata to schema objects for both codegen and runtime.
@@ -120,6 +126,17 @@ type Annotation struct {
 	//
 	Incremental *bool `json:"incremental,omitempty"`
 
+	// IncrementStart defines the auto-incremental start value of a column. For example:
+	//
+	//  incrementStart := 100
+	//  entsql.Annotation{
+	//      IncrementStart: &incrementStart,
+	//  }
+	//
+	// By default, this value is nil defaulting to whatever the database settings are.
+	//
+	IncrementStart *int64 `json:"increment_start,omitempty"`
+
 	// OnDelete specifies a custom referential action for DELETE operations on parent
 	// table that has matching rows in the child table.
 	//
@@ -149,6 +166,36 @@ type Annotation struct {
 	//	}
 	//
 	Checks map[string]string `json:"checks,omitempty"`
+
+	// Skip indicates that the field or the schema is skipped/ignored during
+	// migration (e.g., defined externally).
+	//
+	//	entsql.Annotation{
+	//		Skip: true,
+	//	}
+	//
+	Skip bool `json:"skip,omitempty"`
+
+	// ViewAs allows defining a view for the schema. For example:
+	//
+	//	entsql.Annotation{
+	//		View: "SELECT name FROM users",
+	//	}
+	ViewAs string `json:"view_as,omitempty"`
+
+	// ViewFor allows defining a view for the schema per dialect. For example:
+	//
+	//	entsql.Annotation{
+	//		ViewFor: map[string]string{
+	//			dialect.MySQL:    "...",
+	//			dialect.Postgres: "...",
+	//		},
+	//	}
+	ViewFor map[string]string `json:"view_for,omitempty"`
+
+	// error occurs during annotation build. This field is not
+	// serialized to JSON and used only by the codegen loader.
+	err error
 }
 
 // Name describes the annotation name.
@@ -214,6 +261,41 @@ func Check(c string) *Annotation {
 func Checks(c map[string]string) *Annotation {
 	return &Annotation{
 		Checks: c,
+	}
+}
+
+// Skip indicates that the field or the schema is skipped/ignored during
+// migration (e.g., defined externally).
+func Skip() *Annotation {
+	return &Annotation{Skip: true}
+}
+
+// View specifies the definition of a view.
+func View(as string) *Annotation {
+	return &Annotation{ViewAs: as}
+}
+
+// ViewFor specifies the definition of a view.
+func ViewFor(dialect string, as func(*sql.Selector)) *Annotation {
+	b := sql.Dialect(dialect).Select()
+	as(b)
+	switch q, args := b.Query(); {
+	case len(args) > 0:
+		return &Annotation{
+			err: fmt.Errorf("entsql: view query should not contain arguments. got: %d", len(args)),
+		}
+	case q == "":
+		return &Annotation{
+			err: errors.New("entsql: view query is empty"),
+		}
+	case b.Err() != nil:
+		return &Annotation{
+			err: b.Err(),
+		}
+	default:
+		return &Annotation{
+			ViewFor: map[string]string{dialect: q},
+		}
 	}
 }
 
@@ -293,6 +375,21 @@ func OnDelete(opt ReferenceOption) *Annotation {
 	}
 }
 
+// IncrementStart specifies the starting value for auto-increment columns.
+//
+// For example, in order to define the starting value for auto-increment to be 100:
+//
+//	func (T) Annotations() []schema.Annotation {
+//		return []schema.Annotation{
+//			entsql.IncrementStart(100),
+//		}
+//	}
+func IncrementStart(i int64) *Annotation {
+	return &Annotation{
+		IncrementStart: &i,
+	}
+}
+
 // Merge implements the schema.Merger interface.
 func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	var ant Annotation
@@ -344,6 +441,9 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	if i := ant.Incremental; i != nil {
 		a.Incremental = i
 	}
+	if i := ant.IncrementStart; i != nil {
+		a.IncrementStart = i
+	}
 	if od := ant.OnDelete; od != "" {
 		a.OnDelete = od
 	}
@@ -358,7 +458,29 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 			a.Checks[name] = check
 		}
 	}
+	if ant.Skip {
+		a.Skip = true
+	}
+	if v := ant.ViewAs; v != "" {
+		a.ViewAs = v
+	}
+	if vf := ant.ViewFor; len(vf) > 0 {
+		if a.ViewFor == nil {
+			a.ViewFor = make(map[string]string)
+		}
+		for dialect, view := range vf {
+			a.ViewFor[dialect] = view
+		}
+	}
+	if ant.err != nil {
+		a.err = errors.Join(a.err, ant.err)
+	}
 	return a
+}
+
+// Err returns the error that occurred during annotation build, if any.
+func (a Annotation) Err() error {
+	return a.err
 }
 
 var _ interface {

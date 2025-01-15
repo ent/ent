@@ -122,10 +122,10 @@ func (afc *AttachedFileCreate) check() error {
 	if _, ok := afc.mutation.ProcID(); !ok {
 		return &ValidationError{Name: "proc_id", err: errors.New(`ent: missing required field "AttachedFile.proc_id"`)}
 	}
-	if _, ok := afc.mutation.FiID(); !ok {
+	if len(afc.mutation.FiIDs()) == 0 {
 		return &ValidationError{Name: "fi", err: errors.New(`ent: missing required edge "AttachedFile.fi"`)}
 	}
-	if _, ok := afc.mutation.ProcID(); !ok {
+	if len(afc.mutation.ProcIDs()) == 0 {
 		return &ValidationError{Name: "proc", err: errors.New(`ent: missing required edge "AttachedFile.proc"`)}
 	}
 	return nil

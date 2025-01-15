@@ -9,6 +9,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/entc/integration/gremlin/ent/filetype"
@@ -20,6 +21,8 @@ type File struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
+	// SetID holds the value of the "set_id" field.
+	SetID int `json:"set_id,omitempty"`
 	// Size holds the value of the "size" field.
 	Size int `json:"size,omitempty"`
 	// Name holds the value of the "name" field.
@@ -32,6 +35,8 @@ type File struct {
 	Op bool `json:"op,omitempty"`
 	// FieldID holds the value of the "field_id" field.
 	FieldID int `json:"field_id,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FileQuery when eager-loading is set.
 	Edges FileEdges `json:"file_edges"`
@@ -88,24 +93,28 @@ func (f *File) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanf struct {
-		ID      string  `json:"id,omitempty"`
-		Size    int     `json:"fsize,omitempty"`
-		Name    string  `json:"name,omitempty"`
-		User    *string `json:"user,omitempty"`
-		Group   string  `json:"group,omitempty"`
-		Op      bool    `json:"op,omitempty"`
-		FieldID int     `json:"field_id,omitempty"`
+		ID         string  `json:"id,omitempty"`
+		SetID      int     `json:"set_id,omitempty"`
+		Size       int     `json:"fsize,omitempty"`
+		Name       string  `json:"name,omitempty"`
+		User       *string `json:"user,omitempty"`
+		Group      string  `json:"group,omitempty"`
+		Op         bool    `json:"op,omitempty"`
+		FieldID    int     `json:"field_id,omitempty"`
+		CreateTime int64   `json:"create_time,omitempty"`
 	}
 	if err := vmap.Decode(&scanf); err != nil {
 		return err
 	}
 	f.ID = scanf.ID
+	f.SetID = scanf.SetID
 	f.Size = scanf.Size
 	f.Name = scanf.Name
 	f.User = scanf.User
 	f.Group = scanf.Group
 	f.Op = scanf.Op
 	f.FieldID = scanf.FieldID
+	f.CreateTime = time.Unix(0, scanf.CreateTime)
 	return nil
 }
 
@@ -147,6 +156,9 @@ func (f *File) String() string {
 	var builder strings.Builder
 	builder.WriteString("File(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", f.ID))
+	builder.WriteString("set_id=")
+	builder.WriteString(fmt.Sprintf("%v", f.SetID))
+	builder.WriteString(", ")
 	builder.WriteString("size=")
 	builder.WriteString(fmt.Sprintf("%v", f.Size))
 	builder.WriteString(", ")
@@ -166,6 +178,9 @@ func (f *File) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("field_id=")
 	builder.WriteString(fmt.Sprintf("%v", f.FieldID))
+	builder.WriteString(", ")
+	builder.WriteString("create_time=")
+	builder.WriteString(f.CreateTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -180,25 +195,29 @@ func (f *Files) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanf []struct {
-		ID      string  `json:"id,omitempty"`
-		Size    int     `json:"fsize,omitempty"`
-		Name    string  `json:"name,omitempty"`
-		User    *string `json:"user,omitempty"`
-		Group   string  `json:"group,omitempty"`
-		Op      bool    `json:"op,omitempty"`
-		FieldID int     `json:"field_id,omitempty"`
+		ID         string  `json:"id,omitempty"`
+		SetID      int     `json:"set_id,omitempty"`
+		Size       int     `json:"fsize,omitempty"`
+		Name       string  `json:"name,omitempty"`
+		User       *string `json:"user,omitempty"`
+		Group      string  `json:"group,omitempty"`
+		Op         bool    `json:"op,omitempty"`
+		FieldID    int     `json:"field_id,omitempty"`
+		CreateTime int64   `json:"create_time,omitempty"`
 	}
 	if err := vmap.Decode(&scanf); err != nil {
 		return err
 	}
 	for _, v := range scanf {
 		node := &File{ID: v.ID}
+		node.SetID = v.SetID
 		node.Size = v.Size
 		node.Name = v.Name
 		node.User = v.User
 		node.Group = v.Group
 		node.Op = v.Op
 		node.FieldID = v.FieldID
+		node.CreateTime = time.Unix(0, v.CreateTime)
 		*f = append(*f, node)
 	}
 	return nil

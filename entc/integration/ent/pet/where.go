@@ -7,6 +7,8 @@
 package pet
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
@@ -81,6 +83,11 @@ func Nickname(v string) predicate.Pet {
 // Trained applies equality check predicate on the "trained" field. It's identical to TrainedEQ.
 func Trained(v bool) predicate.Pet {
 	return predicate.Pet(sql.FieldEQ(FieldTrained, v))
+}
+
+// OptionalTime applies equality check predicate on the "optional_time" field. It's identical to OptionalTimeEQ.
+func OptionalTime(v time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldEQ(FieldOptionalTime, v))
 }
 
 // AgeEQ applies the EQ predicate on the "age" field.
@@ -321,6 +328,56 @@ func TrainedEQ(v bool) predicate.Pet {
 // TrainedNEQ applies the NEQ predicate on the "trained" field.
 func TrainedNEQ(v bool) predicate.Pet {
 	return predicate.Pet(sql.FieldNEQ(FieldTrained, v))
+}
+
+// OptionalTimeEQ applies the EQ predicate on the "optional_time" field.
+func OptionalTimeEQ(v time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldEQ(FieldOptionalTime, v))
+}
+
+// OptionalTimeNEQ applies the NEQ predicate on the "optional_time" field.
+func OptionalTimeNEQ(v time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldNEQ(FieldOptionalTime, v))
+}
+
+// OptionalTimeIn applies the In predicate on the "optional_time" field.
+func OptionalTimeIn(vs ...time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldIn(FieldOptionalTime, vs...))
+}
+
+// OptionalTimeNotIn applies the NotIn predicate on the "optional_time" field.
+func OptionalTimeNotIn(vs ...time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldNotIn(FieldOptionalTime, vs...))
+}
+
+// OptionalTimeGT applies the GT predicate on the "optional_time" field.
+func OptionalTimeGT(v time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldGT(FieldOptionalTime, v))
+}
+
+// OptionalTimeGTE applies the GTE predicate on the "optional_time" field.
+func OptionalTimeGTE(v time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldGTE(FieldOptionalTime, v))
+}
+
+// OptionalTimeLT applies the LT predicate on the "optional_time" field.
+func OptionalTimeLT(v time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldLT(FieldOptionalTime, v))
+}
+
+// OptionalTimeLTE applies the LTE predicate on the "optional_time" field.
+func OptionalTimeLTE(v time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldLTE(FieldOptionalTime, v))
+}
+
+// OptionalTimeIsNil applies the IsNil predicate on the "optional_time" field.
+func OptionalTimeIsNil() predicate.Pet {
+	return predicate.Pet(sql.FieldIsNull(FieldOptionalTime))
+}
+
+// OptionalTimeNotNil applies the NotNil predicate on the "optional_time" field.
+func OptionalTimeNotNil() predicate.Pet {
+	return predicate.Pet(sql.FieldNotNull(FieldOptionalTime))
 }
 
 // HasTeam applies the HasEdge predicate on the "team" edge.

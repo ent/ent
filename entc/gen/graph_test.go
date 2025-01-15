@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"testing"
 
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/entc/load"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -424,9 +425,8 @@ func TestGraph_Gen(t *testing.T) {
 				{Name: "t1", Type: "T1", Unique: true},
 			},
 		},
-		{
-			Name: "T2",
-		},
+		{Name: "T2"},
+		{Name: "T3"},
 	}
 	graph, err := NewGraph(&Config{
 		Package:   "entc/gen",
@@ -439,6 +439,13 @@ func TestGraph_Gen(t *testing.T) {
 	require.NoError(err)
 	require.NotNil(graph)
 	require.NoError(graph.Gen())
+	// Ensure globalid feature added annotations.
+	a := IncrementStarts{"t1s": 0, "t2s": 1 << 32, "t3s": 2 << 32}
+	require.Equal(a, graph.Annotations[a.Name()])
+	ant := &entsql.Annotation{}
+	for i, n := range graph.Nodes {
+		require.Equal(int64(i)<<32, *n.Annotations[ant.Name()].(*entsql.Annotation).IncrementStart)
+	}
 	// Ensure graph files were generated.
 	for _, name := range []string{"ent", "client"} {
 		_, err := os.Stat(fmt.Sprintf("%s/%s.go", target, name))
@@ -461,6 +468,9 @@ func TestGraph_Gen(t *testing.T) {
 	require.NoError(err)
 	_, err = os.Stat(filepath.Join(target, "internal", "schemaconfig.go"))
 	require.NoError(err)
+	c, err := os.ReadFile(filepath.Join(target, "internal", "globalid.go"))
+	require.NoError(err)
+	require.Contains(string(c), fmt.Sprintf(`"{\"t1s\":0,\"t2s\":%d,\"t3s\":%d}"`, 1<<32, 2<<32))
 	// Rerun codegen with only one feature-flag.
 	graph.Features = []Feature{FeatureSnapshot}
 	require.NoError(graph.Gen())
@@ -468,6 +478,8 @@ func TestGraph_Gen(t *testing.T) {
 	_, err = os.Stat(filepath.Join(target, "internal", "schema.go"))
 	require.NoError(err)
 	_, err = os.Stat(filepath.Join(target, "internal", "schemaconfig.go"))
+	require.True(os.IsNotExist(err))
+	_, err = os.Stat(filepath.Join(target, "internal", "globalid.go"))
 	require.True(os.IsNotExist(err))
 	// Rerun codegen without any feature-flags.
 	graph.Features = nil

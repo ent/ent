@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -26,6 +27,20 @@ type FileCreate struct {
 	mutation *FileMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
+}
+
+// SetSetID sets the "set_id" field.
+func (fc *FileCreate) SetSetID(i int) *FileCreate {
+	fc.mutation.SetSetID(i)
+	return fc
+}
+
+// SetNillableSetID sets the "set_id" field if the given value is not nil.
+func (fc *FileCreate) SetNillableSetID(i *int) *FileCreate {
+	if i != nil {
+		fc.SetSetID(*i)
+	}
+	return fc
 }
 
 // SetSize sets the "size" field.
@@ -100,6 +115,20 @@ func (fc *FileCreate) SetFieldID(i int) *FileCreate {
 func (fc *FileCreate) SetNillableFieldID(i *int) *FileCreate {
 	if i != nil {
 		fc.SetFieldID(*i)
+	}
+	return fc
+}
+
+// SetCreateTime sets the "create_time" field.
+func (fc *FileCreate) SetCreateTime(t time.Time) *FileCreate {
+	fc.mutation.SetCreateTime(t)
+	return fc
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (fc *FileCreate) SetNillableCreateTime(t *time.Time) *FileCreate {
+	if t != nil {
+		fc.SetCreateTime(*t)
 	}
 	return fc
 }
@@ -200,6 +229,11 @@ func (fc *FileCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (fc *FileCreate) check() error {
+	if v, ok := fc.mutation.SetID(); ok {
+		if err := file.SetIDValidator(v); err != nil {
+			return &ValidationError{Name: "set_id", err: fmt.Errorf(`ent: validator failed for field "File.set_id": %w`, err)}
+		}
+	}
 	if _, ok := fc.mutation.Size(); !ok {
 		return &ValidationError{Name: "size", err: errors.New(`ent: missing required field "File.size"`)}
 	}
@@ -238,6 +272,10 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(file.Table, sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = fc.conflict
+	if value, ok := fc.mutation.SetID(); ok {
+		_spec.SetField(file.FieldSetID, field.TypeInt, value)
+		_node.SetID = value
+	}
 	if value, ok := fc.mutation.Size(); ok {
 		_spec.SetField(file.FieldSize, field.TypeInt, value)
 		_node.Size = value
@@ -261,6 +299,10 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 	if value, ok := fc.mutation.FieldID(); ok {
 		_spec.SetField(file.FieldFieldID, field.TypeInt, value)
 		_node.FieldID = value
+	}
+	if value, ok := fc.mutation.CreateTime(); ok {
+		_spec.SetField(file.FieldCreateTime, field.TypeTime, value)
+		_node.CreateTime = value
 	}
 	if nodes := fc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -319,7 +361,7 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.File.Create().
-//		SetSize(v).
+//		SetSetID(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -328,7 +370,7 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.FileUpsert) {
-//			SetSize(v+v).
+//			SetSetID(v+v).
 //		}).
 //		Exec(ctx)
 func (fc *FileCreate) OnConflict(opts ...sql.ConflictOption) *FileUpsertOne {
@@ -363,6 +405,30 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetSetID sets the "set_id" field.
+func (u *FileUpsert) SetSetID(v int) *FileUpsert {
+	u.Set(file.FieldSetID, v)
+	return u
+}
+
+// UpdateSetID sets the "set_id" field to the value that was provided on create.
+func (u *FileUpsert) UpdateSetID() *FileUpsert {
+	u.SetExcluded(file.FieldSetID)
+	return u
+}
+
+// AddSetID adds v to the "set_id" field.
+func (u *FileUpsert) AddSetID(v int) *FileUpsert {
+	u.Add(file.FieldSetID, v)
+	return u
+}
+
+// ClearSetID clears the value of the "set_id" field.
+func (u *FileUpsert) ClearSetID() *FileUpsert {
+	u.SetNull(file.FieldSetID)
+	return u
+}
 
 // SetSize sets the "size" field.
 func (u *FileUpsert) SetSize(v int) *FileUpsert {
@@ -472,6 +538,24 @@ func (u *FileUpsert) ClearFieldID() *FileUpsert {
 	return u
 }
 
+// SetCreateTime sets the "create_time" field.
+func (u *FileUpsert) SetCreateTime(v time.Time) *FileUpsert {
+	u.Set(file.FieldCreateTime, v)
+	return u
+}
+
+// UpdateCreateTime sets the "create_time" field to the value that was provided on create.
+func (u *FileUpsert) UpdateCreateTime() *FileUpsert {
+	u.SetExcluded(file.FieldCreateTime)
+	return u
+}
+
+// ClearCreateTime clears the value of the "create_time" field.
+func (u *FileUpsert) ClearCreateTime() *FileUpsert {
+	u.SetNull(file.FieldCreateTime)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -510,6 +594,34 @@ func (u *FileUpsertOne) Update(set func(*FileUpsert)) *FileUpsertOne {
 		set(&FileUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetSetID sets the "set_id" field.
+func (u *FileUpsertOne) SetSetID(v int) *FileUpsertOne {
+	return u.Update(func(s *FileUpsert) {
+		s.SetSetID(v)
+	})
+}
+
+// AddSetID adds v to the "set_id" field.
+func (u *FileUpsertOne) AddSetID(v int) *FileUpsertOne {
+	return u.Update(func(s *FileUpsert) {
+		s.AddSetID(v)
+	})
+}
+
+// UpdateSetID sets the "set_id" field to the value that was provided on create.
+func (u *FileUpsertOne) UpdateSetID() *FileUpsertOne {
+	return u.Update(func(s *FileUpsert) {
+		s.UpdateSetID()
+	})
+}
+
+// ClearSetID clears the value of the "set_id" field.
+func (u *FileUpsertOne) ClearSetID() *FileUpsertOne {
+	return u.Update(func(s *FileUpsert) {
+		s.ClearSetID()
+	})
 }
 
 // SetSize sets the "size" field.
@@ -635,6 +747,27 @@ func (u *FileUpsertOne) UpdateFieldID() *FileUpsertOne {
 func (u *FileUpsertOne) ClearFieldID() *FileUpsertOne {
 	return u.Update(func(s *FileUpsert) {
 		s.ClearFieldID()
+	})
+}
+
+// SetCreateTime sets the "create_time" field.
+func (u *FileUpsertOne) SetCreateTime(v time.Time) *FileUpsertOne {
+	return u.Update(func(s *FileUpsert) {
+		s.SetCreateTime(v)
+	})
+}
+
+// UpdateCreateTime sets the "create_time" field to the value that was provided on create.
+func (u *FileUpsertOne) UpdateCreateTime() *FileUpsertOne {
+	return u.Update(func(s *FileUpsert) {
+		s.UpdateCreateTime()
+	})
+}
+
+// ClearCreateTime clears the value of the "create_time" field.
+func (u *FileUpsertOne) ClearCreateTime() *FileUpsertOne {
+	return u.Update(func(s *FileUpsert) {
+		s.ClearCreateTime()
 	})
 }
 
@@ -773,7 +906,7 @@ func (fcb *FileCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.FileUpsert) {
-//			SetSize(v+v).
+//			SetSetID(v+v).
 //		}).
 //		Exec(ctx)
 func (fcb *FileCreateBulk) OnConflict(opts ...sql.ConflictOption) *FileUpsertBulk {
@@ -840,6 +973,34 @@ func (u *FileUpsertBulk) Update(set func(*FileUpsert)) *FileUpsertBulk {
 		set(&FileUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetSetID sets the "set_id" field.
+func (u *FileUpsertBulk) SetSetID(v int) *FileUpsertBulk {
+	return u.Update(func(s *FileUpsert) {
+		s.SetSetID(v)
+	})
+}
+
+// AddSetID adds v to the "set_id" field.
+func (u *FileUpsertBulk) AddSetID(v int) *FileUpsertBulk {
+	return u.Update(func(s *FileUpsert) {
+		s.AddSetID(v)
+	})
+}
+
+// UpdateSetID sets the "set_id" field to the value that was provided on create.
+func (u *FileUpsertBulk) UpdateSetID() *FileUpsertBulk {
+	return u.Update(func(s *FileUpsert) {
+		s.UpdateSetID()
+	})
+}
+
+// ClearSetID clears the value of the "set_id" field.
+func (u *FileUpsertBulk) ClearSetID() *FileUpsertBulk {
+	return u.Update(func(s *FileUpsert) {
+		s.ClearSetID()
+	})
 }
 
 // SetSize sets the "size" field.
@@ -965,6 +1126,27 @@ func (u *FileUpsertBulk) UpdateFieldID() *FileUpsertBulk {
 func (u *FileUpsertBulk) ClearFieldID() *FileUpsertBulk {
 	return u.Update(func(s *FileUpsert) {
 		s.ClearFieldID()
+	})
+}
+
+// SetCreateTime sets the "create_time" field.
+func (u *FileUpsertBulk) SetCreateTime(v time.Time) *FileUpsertBulk {
+	return u.Update(func(s *FileUpsert) {
+		s.SetCreateTime(v)
+	})
+}
+
+// UpdateCreateTime sets the "create_time" field to the value that was provided on create.
+func (u *FileUpsertBulk) UpdateCreateTime() *FileUpsertBulk {
+	return u.Update(func(s *FileUpsert) {
+		s.UpdateCreateTime()
+	})
+}
+
+// ClearCreateTime clears the value of the "create_time" field.
+func (u *FileUpsertBulk) ClearCreateTime() *FileUpsertBulk {
+	return u.Update(func(s *FileUpsert) {
+		s.ClearCreateTime()
 	})
 }
 

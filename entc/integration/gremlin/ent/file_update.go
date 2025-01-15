@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -32,6 +33,33 @@ type FileUpdate struct {
 // Where appends a list predicates to the FileUpdate builder.
 func (fu *FileUpdate) Where(ps ...predicate.File) *FileUpdate {
 	fu.mutation.Where(ps...)
+	return fu
+}
+
+// SetSetID sets the "set_id" field.
+func (fu *FileUpdate) SetSetID(i int) *FileUpdate {
+	fu.mutation.ResetSetID()
+	fu.mutation.SetSetID(i)
+	return fu
+}
+
+// SetNillableSetID sets the "set_id" field if the given value is not nil.
+func (fu *FileUpdate) SetNillableSetID(i *int) *FileUpdate {
+	if i != nil {
+		fu.SetSetID(*i)
+	}
+	return fu
+}
+
+// AddSetID adds i to the "set_id" field.
+func (fu *FileUpdate) AddSetID(i int) *FileUpdate {
+	fu.mutation.AddSetID(i)
+	return fu
+}
+
+// ClearSetID clears the value of the "set_id" field.
+func (fu *FileUpdate) ClearSetID() *FileUpdate {
+	fu.mutation.ClearSetID()
 	return fu
 }
 
@@ -157,6 +185,26 @@ func (fu *FileUpdate) ClearFieldID() *FileUpdate {
 	return fu
 }
 
+// SetCreateTime sets the "create_time" field.
+func (fu *FileUpdate) SetCreateTime(t time.Time) *FileUpdate {
+	fu.mutation.SetCreateTime(t)
+	return fu
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (fu *FileUpdate) SetNillableCreateTime(t *time.Time) *FileUpdate {
+	if t != nil {
+		fu.SetCreateTime(*t)
+	}
+	return fu
+}
+
+// ClearCreateTime clears the value of the "create_time" field.
+func (fu *FileUpdate) ClearCreateTime() *FileUpdate {
+	fu.mutation.ClearCreateTime()
+	return fu
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (fu *FileUpdate) SetOwnerID(id string) *FileUpdate {
 	fu.mutation.SetOwnerID(id)
@@ -277,6 +325,11 @@ func (fu *FileUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (fu *FileUpdate) check() error {
+	if v, ok := fu.mutation.SetID(); ok {
+		if err := file.SetIDValidator(v); err != nil {
+			return &ValidationError{Name: "set_id", err: fmt.Errorf(`ent: validator failed for field "File.set_id": %w`, err)}
+		}
+	}
 	if v, ok := fu.mutation.Size(); ok {
 		if err := file.SizeValidator(v); err != nil {
 			return &ValidationError{Name: "size", err: fmt.Errorf(`ent: validator failed for field "File.size": %w`, err)}
@@ -306,7 +359,7 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
 	}
-	constraints := make([]*constraint, 0, 1)
+	constraints := make([]*constraint, 0, 2)
 	v := g.V().HasLabel(file.Label)
 	for _, p := range fu.mutation.predicates {
 		p(v)
@@ -317,6 +370,12 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
+	if value, ok := fu.mutation.SetID(); ok {
+		v.Property(dsl.Single, file.FieldSetID, value)
+	}
+	if value, ok := fu.mutation.AddedSetID(); ok {
+		v.Property(dsl.Single, file.FieldSetID, __.Union(__.Values(file.FieldSetID), __.Constant(value)).Sum())
+	}
 	if value, ok := fu.mutation.Size(); ok {
 		v.Property(dsl.Single, file.FieldSize, value)
 	}
@@ -341,7 +400,17 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 	if value, ok := fu.mutation.AddedFieldID(); ok {
 		v.Property(dsl.Single, file.FieldFieldID, __.Union(__.Values(file.FieldFieldID), __.Constant(value)).Sum())
 	}
+	if value, ok := fu.mutation.CreateTime(); ok {
+		constraints = append(constraints, &constraint{
+			pred: g.V().Has(file.Label, file.FieldCreateTime, value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(file.Label, file.FieldCreateTime, value)),
+		})
+		v.Property(dsl.Single, file.FieldCreateTime, value)
+	}
 	var properties []any
+	if fu.mutation.SetIDCleared() {
+		properties = append(properties, file.FieldSetID)
+	}
 	if fu.mutation.UserCleared() {
 		properties = append(properties, file.FieldUser)
 	}
@@ -353,6 +422,9 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 	}
 	if fu.mutation.FieldIDCleared() {
 		properties = append(properties, file.FieldFieldID)
+	}
+	if fu.mutation.CreateTimeCleared() {
+		properties = append(properties, file.FieldCreateTime)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -403,6 +475,33 @@ type FileUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *FileMutation
+}
+
+// SetSetID sets the "set_id" field.
+func (fuo *FileUpdateOne) SetSetID(i int) *FileUpdateOne {
+	fuo.mutation.ResetSetID()
+	fuo.mutation.SetSetID(i)
+	return fuo
+}
+
+// SetNillableSetID sets the "set_id" field if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableSetID(i *int) *FileUpdateOne {
+	if i != nil {
+		fuo.SetSetID(*i)
+	}
+	return fuo
+}
+
+// AddSetID adds i to the "set_id" field.
+func (fuo *FileUpdateOne) AddSetID(i int) *FileUpdateOne {
+	fuo.mutation.AddSetID(i)
+	return fuo
+}
+
+// ClearSetID clears the value of the "set_id" field.
+func (fuo *FileUpdateOne) ClearSetID() *FileUpdateOne {
+	fuo.mutation.ClearSetID()
+	return fuo
 }
 
 // SetSize sets the "size" field.
@@ -524,6 +623,26 @@ func (fuo *FileUpdateOne) AddFieldID(i int) *FileUpdateOne {
 // ClearFieldID clears the value of the "field_id" field.
 func (fuo *FileUpdateOne) ClearFieldID() *FileUpdateOne {
 	fuo.mutation.ClearFieldID()
+	return fuo
+}
+
+// SetCreateTime sets the "create_time" field.
+func (fuo *FileUpdateOne) SetCreateTime(t time.Time) *FileUpdateOne {
+	fuo.mutation.SetCreateTime(t)
+	return fuo
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableCreateTime(t *time.Time) *FileUpdateOne {
+	if t != nil {
+		fuo.SetCreateTime(*t)
+	}
+	return fuo
+}
+
+// ClearCreateTime clears the value of the "create_time" field.
+func (fuo *FileUpdateOne) ClearCreateTime() *FileUpdateOne {
+	fuo.mutation.ClearCreateTime()
 	return fuo
 }
 
@@ -660,6 +779,11 @@ func (fuo *FileUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (fuo *FileUpdateOne) check() error {
+	if v, ok := fuo.mutation.SetID(); ok {
+		if err := file.SetIDValidator(v); err != nil {
+			return &ValidationError{Name: "set_id", err: fmt.Errorf(`ent: validator failed for field "File.set_id": %w`, err)}
+		}
+	}
 	if v, ok := fuo.mutation.Size(); ok {
 		if err := file.SizeValidator(v); err != nil {
 			return &ValidationError{Name: "size", err: fmt.Errorf(`ent: validator failed for field "File.size": %w`, err)}
@@ -697,7 +821,7 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
 	}
-	constraints := make([]*constraint, 0, 1)
+	constraints := make([]*constraint, 0, 2)
 	v := g.V(id)
 	var (
 		rv = v.Clone()
@@ -705,6 +829,12 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
+	if value, ok := fuo.mutation.SetID(); ok {
+		v.Property(dsl.Single, file.FieldSetID, value)
+	}
+	if value, ok := fuo.mutation.AddedSetID(); ok {
+		v.Property(dsl.Single, file.FieldSetID, __.Union(__.Values(file.FieldSetID), __.Constant(value)).Sum())
+	}
 	if value, ok := fuo.mutation.Size(); ok {
 		v.Property(dsl.Single, file.FieldSize, value)
 	}
@@ -729,7 +859,17 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := fuo.mutation.AddedFieldID(); ok {
 		v.Property(dsl.Single, file.FieldFieldID, __.Union(__.Values(file.FieldFieldID), __.Constant(value)).Sum())
 	}
+	if value, ok := fuo.mutation.CreateTime(); ok {
+		constraints = append(constraints, &constraint{
+			pred: g.V().Has(file.Label, file.FieldCreateTime, value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(file.Label, file.FieldCreateTime, value)),
+		})
+		v.Property(dsl.Single, file.FieldCreateTime, value)
+	}
 	var properties []any
+	if fuo.mutation.SetIDCleared() {
+		properties = append(properties, file.FieldSetID)
+	}
 	if fuo.mutation.UserCleared() {
 		properties = append(properties, file.FieldUser)
 	}
@@ -741,6 +881,9 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if fuo.mutation.FieldIDCleared() {
 		properties = append(properties, file.FieldFieldID)
+	}
+	if fuo.mutation.CreateTimeCleared() {
+		properties = append(properties, file.FieldCreateTime)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())

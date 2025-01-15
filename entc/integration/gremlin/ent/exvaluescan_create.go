@@ -31,6 +31,12 @@ func (evsc *ExValueScanCreate) SetBinary(u *url.URL) *ExValueScanCreate {
 	return evsc
 }
 
+// SetBinaryBytes sets the "binary_bytes" field.
+func (evsc *ExValueScanCreate) SetBinaryBytes(u *url.URL) *ExValueScanCreate {
+	evsc.mutation.SetBinaryBytes(u)
+	return evsc
+}
+
 // SetBinaryOptional sets the "binary_optional" field.
 func (evsc *ExValueScanCreate) SetBinaryOptional(u *url.URL) *ExValueScanCreate {
 	evsc.mutation.SetBinaryOptional(u)
@@ -112,6 +118,9 @@ func (evsc *ExValueScanCreate) check() error {
 	if _, ok := evsc.mutation.Binary(); !ok {
 		return &ValidationError{Name: "binary", err: errors.New(`ent: missing required field "ExValueScan.binary"`)}
 	}
+	if _, ok := evsc.mutation.BinaryBytes(); !ok {
+		return &ValidationError{Name: "binary_bytes", err: errors.New(`ent: missing required field "ExValueScan.binary_bytes"`)}
+	}
 	if _, ok := evsc.mutation.Text(); !ok {
 		return &ValidationError{Name: "text", err: errors.New(`ent: missing required field "ExValueScan.text"`)}
 	}
@@ -149,6 +158,9 @@ func (evsc *ExValueScanCreate) gremlin() *dsl.Traversal {
 	v := g.AddV(exvaluescan.Label)
 	if value, ok := evsc.mutation.Binary(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldBinary, value)
+	}
+	if value, ok := evsc.mutation.BinaryBytes(); ok {
+		v.Property(dsl.Single, exvaluescan.FieldBinaryBytes, value)
 	}
 	if value, ok := evsc.mutation.BinaryOptional(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldBinaryOptional, value)

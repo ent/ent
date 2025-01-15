@@ -88,7 +88,7 @@ func (cc *CardCreate) check() error {
 	if _, ok := cc.mutation.Number(); !ok {
 		return &ValidationError{Name: "number", err: errors.New(`ent: missing required field "Card.number"`)}
 	}
-	if _, ok := cc.mutation.OwnerID(); !ok {
+	if len(cc.mutation.OwnerIDs()) == 0 {
 		return &ValidationError{Name: "owner", err: errors.New(`ent: missing required edge "Card.owner"`)}
 	}
 	return nil

@@ -135,7 +135,7 @@ func (uu *UserUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (uu *UserUpdate) check() error {
-	if _, ok := uu.mutation.TenantID(); uu.mutation.TenantCleared() && !ok {
+	if uu.mutation.TenantCleared() && len(uu.mutation.TenantIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "User.tenant"`)
 	}
 	return nil
@@ -347,7 +347,7 @@ func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (uuo *UserUpdateOne) check() error {
-	if _, ok := uuo.mutation.TenantID(); uuo.mutation.TenantCleared() && !ok {
+	if uuo.mutation.TenantCleared() && len(uuo.mutation.TenantIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "User.tenant"`)
 	}
 	return nil

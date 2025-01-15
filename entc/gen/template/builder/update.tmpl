@@ -269,7 +269,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 		{{- end }}
 		{{- range $e := $.Edges }}
 			{{- if and $e.Unique (not $e.Optional) }}
-				if _, ok := {{ $mutation }}.{{ $e.StructField }}ID(); {{ $mutation }}.{{ $e.StructField }}Cleared() && !ok {
+				if {{ $mutation }}.{{ $e.StructField }}Cleared() && len({{ $mutation }}.{{ $e.StructField }}IDs()) > 0 {
 					return errors.New(`{{ $pkg }}: clearing a required unique edge "{{ $.Name }}.{{ $e.Name }}"`)
 				}
 			{{- end }}

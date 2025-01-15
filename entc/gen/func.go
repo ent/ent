@@ -6,6 +6,7 @@ package gen
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"go/token"
@@ -47,6 +48,7 @@ var (
 		"indexOf":       indexOf,
 		"join":          join,
 		"joinWords":     joinWords,
+		"json":          jsonString,
 		"isNil":         isNil,
 		"lower":         strings.ToLower,
 		"upper":         strings.ToUpper,
@@ -528,4 +530,13 @@ func list[T any](v ...T) []T {
 // fail unconditionally returns an empty string and an error with the specified text.
 func fail(msg string) (string, error) {
 	return "", errors.New(msg)
+}
+
+// jsonString returns a json encoded value as string.
+func jsonString(v any) (string, error) {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return "", nil
+	}
+	return string(b), nil
 }

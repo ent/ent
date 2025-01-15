@@ -299,18 +299,56 @@ func HasNeighborsWith(q *sql.Selector, s *Step, pred func(*sql.Selector)) {
 		q.Where(sql.In(q.C(s.From.Column), join))
 	case s.FromEdgeOwner():
 		to := builder.Table(s.To.Table).Schema(s.To.Schema)
+		// Avoid ambiguity in case both source
+		// and edge tables are the same.
+		if s.To.Table == q.TableName() {
+			to.As(fmt.Sprintf("%s_edge", s.To.Table))
+			// Choose the alias name until we do not
+			// have a collision. Limit to 5 iterations.
+			for i := 1; i <= 5; i++ {
+				if to.C("c") != q.C("c") {
+					break
+				}
+				to.As(fmt.Sprintf("%s_edge_%d", s.To.Table, i))
+			}
+		}
 		matches := builder.Select(to.C(s.To.Column)).
 			From(to)
 		matches.WithContext(q.Context())
+		matches.Where(
+			sql.ColumnsEQ(
+				q.C(s.Edge.Columns[0]),
+				to.C(s.To.Column),
+			),
+		)
 		pred(matches)
-		q.Where(sql.In(q.C(s.Edge.Columns[0]), matches))
+		q.Where(sql.Exists(matches))
 	case s.ToEdgeOwner():
 		to := builder.Table(s.Edge.Table).Schema(s.Edge.Schema)
+		// Avoid ambiguity in case both source
+		// and edge tables are the same.
+		if s.Edge.Table == q.TableName() {
+			to.As(fmt.Sprintf("%s_edge", s.Edge.Table))
+			// Choose the alias name until we do not
+			// have a collision. Limit to 5 iterations.
+			for i := 1; i <= 5; i++ {
+				if to.C("c") != q.C("c") {
+					break
+				}
+				to.As(fmt.Sprintf("%s_edge_%d", s.Edge.Table, i))
+			}
+		}
 		matches := builder.Select(to.C(s.Edge.Columns[0])).
 			From(to)
 		matches.WithContext(q.Context())
+		matches.Where(
+			sql.ColumnsEQ(
+				q.C(s.From.Column),
+				to.C(s.Edge.Columns[0]),
+			),
+		)
 		pred(matches)
-		q.Where(sql.In(q.C(s.From.Column), matches))
+		q.Where(sql.Exists(matches))
 	}
 }
 

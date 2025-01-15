@@ -14,6 +14,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"runtime/debug"
 	"strconv"
 	"strings"
@@ -23,6 +24,7 @@ import (
 	"entgo.io/ent/entc/load"
 	"entgo.io/ent/schema/field"
 
+	"golang.org/x/sync/errgroup"
 	"golang.org/x/tools/imports"
 )
 
@@ -179,7 +181,23 @@ func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 	if c.Storage != nil && c.Storage.Init != nil {
 		check(c.Storage.Init(g), "storage driver init")
 	}
+	if enabled, _ := g.Config.FeatureEnabled(FeatureGlobalID.Name); enabled {
+		if err := IncrementStartAnnotation(g); err != nil {
+			return nil, err
+		}
+	}
 	return
+}
+
+// MutableNodes returns the list of nodes that are mutable. i.e., not views.
+func (g *Graph) MutableNodes() []*Type {
+	nodes := make([]*Type, 0, len(g.Nodes))
+	for _, n := range g.Nodes {
+		if !n.IsView() {
+			nodes = append(nodes, n)
+		}
+	}
+	return nodes
 }
 
 // defaultIDType holds the default value for IDType.
@@ -230,6 +248,9 @@ func generate(g *Graph) error {
 	for _, n := range g.Nodes {
 		assets.addDir(filepath.Join(g.Config.Target, n.PackageDir()))
 		for _, tmpl := range Templates {
+			if tmpl.Cond != nil && !tmpl.Cond(n) {
+				continue
+			}
 			b := bytes.NewBuffer(nil)
 			if err := templates.ExecuteTemplate(b, tmpl.Name, n); err != nil {
 				return fmt.Errorf("execute template %q: %w", tmpl.Name, err)
@@ -615,17 +636,23 @@ func (g *Graph) edgeSchemas() error {
 // Tables returns the schema definitions of SQL tables for the graph.
 func (g *Graph) Tables() (all []*schema.Table, err error) {
 	tables := make(map[string]*schema.Table)
-	for _, n := range g.Nodes {
+	for _, n := range g.MutableNodes() {
 		table := schema.NewTable(n.Table()).
 			SetComment(n.sqlComment())
 		if n.HasOneFieldID() {
 			table.AddPrimary(n.ID.PK())
 		}
-		ant := n.EntSQL()
-		if ant != nil {
+		switch ant := n.EntSQL(); {
+		case ant == nil:
+		case ant.Skip:
+			continue
+		default:
 			table.SetAnnotation(ant).SetSchema(ant.Schema)
 		}
 		for _, f := range n.Fields {
+			if a := f.EntSQL(); a != nil && a.Skip {
+				continue
+			}
 			if !f.IsEdgeField() {
 				table.AddColumn(f.Column())
 			}
@@ -752,6 +779,32 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 	}
 	if err := ensureUniqueFKs(tables); err != nil {
 		return nil, err
+	}
+	return
+}
+
+// Views returns all schema views
+func (g *Graph) Views() (views []*schema.Table, err error) {
+	for _, n := range g.Nodes {
+		if !n.IsView() {
+			continue
+		}
+		view := schema.NewView(n.Table()).
+			SetComment(n.sqlComment())
+		switch ant := n.EntSQL(); {
+		case ant == nil:
+		case ant.Skip:
+			continue
+		default:
+			view.SetAnnotation(ant).SetSchema(ant.Schema)
+		}
+		for _, f := range n.Fields {
+			if a := f.EntSQL(); a != nil && a.Skip {
+				continue
+			}
+			view.AddColumn(f.Column())
+		}
+		views = append(views, view)
 	}
 	return
 }
@@ -1102,16 +1155,22 @@ func (a assets) write() error {
 
 // format runs "goimports" on all assets.
 func (a assets) format() error {
+	var wg errgroup.Group
+	wg.SetLimit(runtime.GOMAXPROCS(0))
 	for path, content := range a.files {
-		src, err := imports.Process(path, content, nil)
-		if err != nil {
-			return fmt.Errorf("format file %s: %w", path, err)
-		}
-		if err := os.WriteFile(path, src, 0644); err != nil {
-			return fmt.Errorf("write file %s: %w", path, err)
-		}
+		path, content := path, content
+		wg.Go(func() error {
+			src, err := imports.Process(path, content, nil)
+			if err != nil {
+				return fmt.Errorf("format file %s: %w", path, err)
+			}
+			if err := os.WriteFile(path, src, 0644); err != nil {
+				return fmt.Errorf("write file %s: %w", path, err)
+			}
+			return nil
+		})
 	}
-	return nil
+	return wg.Wait()
 }
 
 // expect panics if the condition is false.

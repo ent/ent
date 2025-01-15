@@ -134,10 +134,10 @@ func (fc *FriendshipCreate) check() error {
 	if _, ok := fc.mutation.FriendID(); !ok {
 		return &ValidationError{Name: "friend_id", err: errors.New(`ent: missing required field "Friendship.friend_id"`)}
 	}
-	if _, ok := fc.mutation.UserID(); !ok {
+	if len(fc.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Friendship.user"`)}
 	}
-	if _, ok := fc.mutation.FriendID(); !ok {
+	if len(fc.mutation.FriendIDs()) == 0 {
 		return &ValidationError{Name: "friend", err: errors.New(`ent: missing required edge "Friendship.friend"`)}
 	}
 	return nil

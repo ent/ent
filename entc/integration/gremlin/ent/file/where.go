@@ -7,6 +7,8 @@
 package file
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
@@ -84,6 +86,13 @@ func IDLTE(id string) predicate.File {
 	})
 }
 
+// SetID applies equality check predicate on the "set_id" field. It's identical to SetIDEQ.
+func SetID(v int) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSetID, p.EQ(v))
+	})
+}
+
 // Size applies equality check predicate on the "size" field. It's identical to SizeEQ.
 func Size(v int) predicate.File {
 	return predicate.File(func(t *dsl.Traversal) {
@@ -116,6 +125,83 @@ func Group(v string) predicate.File {
 func Op(v bool) predicate.File {
 	return predicate.File(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOp, p.EQ(v))
+	})
+}
+
+// CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
+func CreateTime(v time.Time) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreateTime, p.EQ(v))
+	})
+}
+
+// SetIDEQ applies the EQ predicate on the "set_id" field.
+func SetIDEQ(v int) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSetID, p.EQ(v))
+	})
+}
+
+// SetIDNEQ applies the NEQ predicate on the "set_id" field.
+func SetIDNEQ(v int) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSetID, p.NEQ(v))
+	})
+}
+
+// SetIDIn applies the In predicate on the "set_id" field.
+func SetIDIn(vs ...int) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSetID, p.Within(vs...))
+	})
+}
+
+// SetIDNotIn applies the NotIn predicate on the "set_id" field.
+func SetIDNotIn(vs ...int) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSetID, p.Without(vs...))
+	})
+}
+
+// SetIDGT applies the GT predicate on the "set_id" field.
+func SetIDGT(v int) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSetID, p.GT(v))
+	})
+}
+
+// SetIDGTE applies the GTE predicate on the "set_id" field.
+func SetIDGTE(v int) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSetID, p.GTE(v))
+	})
+}
+
+// SetIDLT applies the LT predicate on the "set_id" field.
+func SetIDLT(v int) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSetID, p.LT(v))
+	})
+}
+
+// SetIDLTE applies the LTE predicate on the "set_id" field.
+func SetIDLTE(v int) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSetID, p.LTE(v))
+	})
+}
+
+// SetIDIsNil applies the IsNil predicate on the "set_id" field.
+func SetIDIsNil() predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldSetID)
+	})
+}
+
+// SetIDNotNil applies the NotNil predicate on the "set_id" field.
+func SetIDNotNil() predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldSetID)
 	})
 }
 
@@ -529,6 +615,76 @@ func FieldIDIsNil() predicate.File {
 func FieldIDNotNil() predicate.File {
 	return predicate.File(func(t *dsl.Traversal) {
 		t.HasLabel(Label).Has(FieldFieldID)
+	})
+}
+
+// CreateTimeEQ applies the EQ predicate on the "create_time" field.
+func CreateTimeEQ(v time.Time) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreateTime, p.EQ(v))
+	})
+}
+
+// CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
+func CreateTimeNEQ(v time.Time) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreateTime, p.NEQ(v))
+	})
+}
+
+// CreateTimeIn applies the In predicate on the "create_time" field.
+func CreateTimeIn(vs ...time.Time) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreateTime, p.Within(vs...))
+	})
+}
+
+// CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
+func CreateTimeNotIn(vs ...time.Time) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreateTime, p.Without(vs...))
+	})
+}
+
+// CreateTimeGT applies the GT predicate on the "create_time" field.
+func CreateTimeGT(v time.Time) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreateTime, p.GT(v))
+	})
+}
+
+// CreateTimeGTE applies the GTE predicate on the "create_time" field.
+func CreateTimeGTE(v time.Time) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreateTime, p.GTE(v))
+	})
+}
+
+// CreateTimeLT applies the LT predicate on the "create_time" field.
+func CreateTimeLT(v time.Time) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreateTime, p.LT(v))
+	})
+}
+
+// CreateTimeLTE applies the LTE predicate on the "create_time" field.
+func CreateTimeLTE(v time.Time) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldCreateTime, p.LTE(v))
+	})
+}
+
+// CreateTimeIsNil applies the IsNil predicate on the "create_time" field.
+func CreateTimeIsNil() predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldCreateTime)
+	})
+}
+
+// CreateTimeNotNil applies the NotNil predicate on the "create_time" field.
+func CreateTimeNotNil() predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldCreateTime)
 	})
 }
 

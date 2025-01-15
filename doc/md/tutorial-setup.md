@@ -25,7 +25,7 @@ go mod init todo
 Run the following Go commands to install Ent, and tell it to initialize the project structure along with a `Todo` schema.
 
 ```console
-go get -d entgo.io/ent/cmd/ent
+go get entgo.io/ent/cmd/ent
 ```
 
 ```console

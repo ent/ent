@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -85,6 +86,20 @@ func (pc *PetCreate) SetTrained(b bool) *PetCreate {
 func (pc *PetCreate) SetNillableTrained(b *bool) *PetCreate {
 	if b != nil {
 		pc.SetTrained(*b)
+	}
+	return pc
+}
+
+// SetOptionalTime sets the "optional_time" field.
+func (pc *PetCreate) SetOptionalTime(t time.Time) *PetCreate {
+	pc.mutation.SetOptionalTime(t)
+	return pc
+}
+
+// SetNillableOptionalTime sets the "optional_time" field if the given value is not nil.
+func (pc *PetCreate) SetNillableOptionalTime(t *time.Time) *PetCreate {
+	if t != nil {
+		pc.SetOptionalTime(*t)
 	}
 	return pc
 }
@@ -229,6 +244,10 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 	if value, ok := pc.mutation.Trained(); ok {
 		_spec.SetField(pet.FieldTrained, field.TypeBool, value)
 		_node.Trained = value
+	}
+	if value, ok := pc.mutation.OptionalTime(); ok {
+		_spec.SetField(pet.FieldOptionalTime, field.TypeTime, value)
+		_node.OptionalTime = value
 	}
 	if nodes := pc.mutation.TeamIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -394,6 +413,24 @@ func (u *PetUpsert) UpdateTrained() *PetUpsert {
 	return u
 }
 
+// SetOptionalTime sets the "optional_time" field.
+func (u *PetUpsert) SetOptionalTime(v time.Time) *PetUpsert {
+	u.Set(pet.FieldOptionalTime, v)
+	return u
+}
+
+// UpdateOptionalTime sets the "optional_time" field to the value that was provided on create.
+func (u *PetUpsert) UpdateOptionalTime() *PetUpsert {
+	u.SetExcluded(pet.FieldOptionalTime)
+	return u
+}
+
+// ClearOptionalTime clears the value of the "optional_time" field.
+func (u *PetUpsert) ClearOptionalTime() *PetUpsert {
+	u.SetNull(pet.FieldOptionalTime)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -522,6 +559,27 @@ func (u *PetUpsertOne) SetTrained(v bool) *PetUpsertOne {
 func (u *PetUpsertOne) UpdateTrained() *PetUpsertOne {
 	return u.Update(func(s *PetUpsert) {
 		s.UpdateTrained()
+	})
+}
+
+// SetOptionalTime sets the "optional_time" field.
+func (u *PetUpsertOne) SetOptionalTime(v time.Time) *PetUpsertOne {
+	return u.Update(func(s *PetUpsert) {
+		s.SetOptionalTime(v)
+	})
+}
+
+// UpdateOptionalTime sets the "optional_time" field to the value that was provided on create.
+func (u *PetUpsertOne) UpdateOptionalTime() *PetUpsertOne {
+	return u.Update(func(s *PetUpsert) {
+		s.UpdateOptionalTime()
+	})
+}
+
+// ClearOptionalTime clears the value of the "optional_time" field.
+func (u *PetUpsertOne) ClearOptionalTime() *PetUpsertOne {
+	return u.Update(func(s *PetUpsert) {
+		s.ClearOptionalTime()
 	})
 }
 
@@ -817,6 +875,27 @@ func (u *PetUpsertBulk) SetTrained(v bool) *PetUpsertBulk {
 func (u *PetUpsertBulk) UpdateTrained() *PetUpsertBulk {
 	return u.Update(func(s *PetUpsert) {
 		s.UpdateTrained()
+	})
+}
+
+// SetOptionalTime sets the "optional_time" field.
+func (u *PetUpsertBulk) SetOptionalTime(v time.Time) *PetUpsertBulk {
+	return u.Update(func(s *PetUpsert) {
+		s.SetOptionalTime(v)
+	})
+}
+
+// UpdateOptionalTime sets the "optional_time" field to the value that was provided on create.
+func (u *PetUpsertBulk) UpdateOptionalTime() *PetUpsertBulk {
+	return u.Update(func(s *PetUpsert) {
+		s.UpdateOptionalTime()
+	})
+}
+
+// ClearOptionalTime clears the value of the "optional_time" field.
+func (u *PetUpsertBulk) ClearOptionalTime() *PetUpsertBulk {
+	return u.Update(func(s *PetUpsert) {
+		s.ClearOptionalTime()
 	})
 }
 

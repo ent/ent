@@ -17,7 +17,9 @@ import (
 	"net"
 	"net/url"
 	"reflect"
+	"regexp"
 	"runtime"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -781,16 +783,38 @@ func Select(t *testing.T, client *ent.Client) {
 	require.True(allUpper(), "at names must be upper-cased")
 
 	// Select and scan dynamic values.
-	const as = "name_length"
+	const (
+		as1 = "name_length"
+		as2 = "another_name"
+	)
 	pets = client.Pet.Query().
 		Modify(func(s *sql.Selector) {
-			s.AppendSelectAs("LENGTH(name)", as)
+			s.AppendSelectAs("LENGTH(name)", as1)
+			s.AppendSelectAs("optional_time", as2)
 		}).
 		AllX(ctx)
 	for _, p := range pets {
-		n, err := p.Value(as)
+		n, err := p.Value(as1)
 		require.NoError(err)
 		require.EqualValues(len(p.Name), n)
+		v, err := p.Value(as2)
+		require.NoError(err)
+		require.Nil(v)
+	}
+
+	// Update and scan.
+	require.NoError(client.Pet.Update().SetOptionalTime(time.Now()).Exec(ctx))
+	pets = client.Pet.Query().
+		Modify(func(s *sql.Selector) {
+			s.AppendSelectAs("optional_time", as2)
+		}).
+		AllX(ctx)
+	for _, p := range pets {
+		v, err := p.Value(as2)
+		require.NoError(err)
+		tv, ok := v.(time.Time)
+		require.True(ok)
+		require.True(!tv.IsZero())
 	}
 
 	// Order by random value should compile a valid query.
@@ -874,12 +898,14 @@ func ExecQuery(t *testing.T, client *ent.Client) {
 func NillableRequired(t *testing.T, client *ent.Client) {
 	require := require.New(t)
 	ctx := context.Background()
-	client.Task.Create().ExecX(ctx)
+	client.Task.Create().SetName("Name").ExecX(ctx)
 	tk := client.Task.Query().OnlyX(ctx)
+	require.Empty(tk.Name, "Name is not selected by default")
 	require.NotNil(tk.CreatedAt, "field value should be populated by default by the database")
 	require.False(reflect.ValueOf(tk.Update()).MethodByName("SetNillableCreatedAt").IsValid(), "immutable-nillable should not have SetNillable setter on update")
-	tk = client.Task.Query().Select(enttask.FieldID, enttask.FieldPriority).OnlyX(ctx)
+	tk = client.Task.Query().Select(enttask.FieldID, enttask.FieldPriority, enttask.FieldName).OnlyX(ctx)
 	require.Nil(tk.CreatedAt, "field should not be populated when it is not selected")
+	require.Equal("Name", tk.Name, "Name should be populated when selected manually")
 }
 
 func Predicate(t *testing.T, client *ent.Client) {
@@ -1597,6 +1623,15 @@ func UniqueConstraint(t *testing.T, client *ent.Client) {
 	require.Error(err)
 	err = cm1.Update().SetUniqueFloat(math.E).Exec(ctx)
 	require.Error(err)
+
+	t.Log("unique constraint on time fields")
+	now := time.Now()
+	client.File.Create().SetName("a").SetSize(10).SetCreateTime(now).ExecX(ctx)
+	err = client.File.Create().SetName("b").SetSize(20).SetCreateTime(now).Exec(ctx)
+	require.Error(err)
+	require.True(ent.IsConstraintError(err))
+	now = now.Add(time.Second)
+	client.File.Create().SetName("b").SetSize(20).SetCreateTime(now).ExecX(ctx)
 }
 
 type mocker struct{ mock.Mock }
@@ -2097,18 +2132,23 @@ func (f writerFunc) Write(p []byte) (int, error) { return f(p) }
 func NoSchemaChanges(t *testing.T, client *ent.Client) {
 	w := writerFunc(func(p []byte) (int, error) {
 		stmt := strings.Trim(string(p), "\n;")
-		ok := []string{"BEGIN", "COMMIT"}
-		if strings.Contains(t.Name(), "SQLite") {
-			ok = append(ok, "PRAGMA foreign_keys = off", "PRAGMA foreign_keys = on")
+		ok := []*regexp.Regexp{
+			regexp.MustCompile("^BEGIN$"),
+			regexp.MustCompile("^COMMIT$"),
 		}
-		if !func() bool {
-			for _, s := range ok {
-				if s == stmt {
-					return true
-				}
-			}
-			return false
-		}() {
+		switch {
+		case strings.Contains(t.Name(), "SQLite"):
+			ok = append(ok, regexp.MustCompile("^PRAGMA foreign_keys = (off|on)$"))
+		case strings.Contains(t.Name(), "MySQL"), strings.Contains(t.Name(), "Maria"):
+			ok = append(ok, regexp.MustCompile("^ALTER TABLE `\\w+` AUTO_INCREMENT \\d+$"))
+		}
+		if !slices.ContainsFunc(ok, func(re *regexp.Regexp) bool {
+			return re.MatchString(stmt)
+		}) {
+			// MySQL 5.6 + 5.7, and MariaDB 10.x store auto-increment counter in memory. In cases the server is
+			// restarted, and there are no rows, the counter is reset. Atlas "fixes" this by setting the auto-increment
+			// value in those cases. Therefore, statements following the pattern
+			// "ALTER TABLE `<table>` AUTO_INCREMENT = <value>" are allowed.
 			t.Errorf("expect no statement to execute. got: %q", stmt)
 		}
 		return len(p), nil
@@ -2377,10 +2417,11 @@ func ExtValueScan(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	u, err := url.Parse("https://entgo.io")
 	require.NoError(t, err)
-	check := func(ex *ent.ExValueScan, i *big.Int, u, b64, custom string) {
+	check := func(ex *ent.ExValueScan, i *big.Int, u, b64, custom string, ub *url.URL) {
 		for _, e := range []*ent.ExValueScan{ex, client.ExValueScan.GetX(ctx, ex.ID)} {
 			require.Equal(t, i, e.Text)
 			require.Equal(t, u, e.Binary.String())
+			require.Equal(t, ub, e.BinaryBytes)
 			require.Equal(t, b64, e.Base64)
 			require.Equal(t, custom, e.Custom)
 		}
@@ -2388,31 +2429,42 @@ func ExtValueScan(t *testing.T, client *ent.Client) {
 	ex := client.ExValueScan.Create().
 		SetText(big.NewInt(10)).
 		SetBinary(u).
+		SetBinaryBytes(u).
 		SetBase64("a8m").
 		SetCustom("atlasgo.io").
 		SaveX(ctx)
-	check(ex, big.NewInt(10), u.String(), "a8m", "atlasgo.io")
+	check(ex, big.NewInt(10), u.String(), "a8m", "atlasgo.io", u)
 
 	// Ensure the database values store as expected.
 	var raw []struct {
-		Text   string
-		Binary string
-		Base64 string
-		Custom string
+		Text        string
+		Binary      string
+		BinaryBytes []byte `sql:"binary_bytes"`
+		Base64      string
+		Custom      string
 	}
 	client.ExValueScan.Query().
-		Select(exvaluescan.FieldText, exvaluescan.FieldBinary, exvaluescan.FieldBase64, exvaluescan.FieldCustom).
+		Select(
+			exvaluescan.FieldText,
+			exvaluescan.FieldBinary,
+			exvaluescan.FieldBinaryBytes,
+			exvaluescan.FieldBase64,
+			exvaluescan.FieldCustom,
+		).
 		ScanX(ctx, &raw)
 	require.Len(t, raw, 1)
 	require.Equal(t, "10", raw[0].Text)
 	require.Equal(t, u.String(), raw[0].Binary)
+	ub, err := u.MarshalBinary()
+	require.NoError(t, err)
+	require.Equal(t, ub, raw[0].BinaryBytes)
 	require.Equal(t, base64.StdEncoding.EncodeToString([]byte(ex.Base64)), raw[0].Base64)
 	require.Equal(t, "0x:"+hex.EncodeToString([]byte(ex.Custom)), raw[0].Custom)
 
 	// Update the values and ensure they are updated as expected.
 	u.Path = "/docs"
-	ex = ex.Update().SetBinary(u).SetText(big.NewInt(20)).SetBase64("m8a").SetCustom("entgo.io").SaveX(ctx)
-	check(ex, big.NewInt(20), u.String(), "m8a", "entgo.io")
+	ex = ex.Update().SetBinary(u).SetBinaryBytes(u).SetText(big.NewInt(20)).SetBase64("m8a").SetCustom("entgo.io").SaveX(ctx)
+	check(ex, big.NewInt(20), u.String(), "m8a", "entgo.io", u)
 
 	// Check predicates.
 	require.True(t, client.ExValueScan.Query().Where(exvaluescan.Text(big.NewInt(20))).ExistX(ctx))

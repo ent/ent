@@ -103,7 +103,7 @@ func (tu *TokenUpdate) check() error {
 			return &ValidationError{Name: "body", err: fmt.Errorf(`ent: validator failed for field "Token.body": %w`, err)}
 		}
 	}
-	if _, ok := tu.mutation.AccountID(); tu.mutation.AccountCleared() && !ok {
+	if tu.mutation.AccountCleared() && len(tu.mutation.AccountIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Token.account"`)
 	}
 	return nil
@@ -256,7 +256,7 @@ func (tuo *TokenUpdateOne) check() error {
 			return &ValidationError{Name: "body", err: fmt.Errorf(`ent: validator failed for field "Token.body": %w`, err)}
 		}
 	}
-	if _, ok := tuo.mutation.AccountID(); tuo.mutation.AccountCleared() && !ok {
+	if tuo.mutation.AccountCleared() && len(tuo.mutation.AccountIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Token.account"`)
 	}
 	return nil

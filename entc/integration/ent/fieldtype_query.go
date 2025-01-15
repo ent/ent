@@ -258,8 +258,9 @@ func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 		inters:     append([]Interceptor{}, ftq.inters...),
 		predicates: append([]predicate.FieldType{}, ftq.predicates...),
 		// clone intermediate query.
-		sql:  ftq.sql.Clone(),
-		path: ftq.path,
+		sql:       ftq.sql.Clone(),
+		path:      ftq.path,
+		modifiers: append([]func(*sql.Selector){}, ftq.modifiers...),
 	}
 }
 

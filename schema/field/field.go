@@ -351,6 +351,17 @@ func (b *stringBuilder) Annotations(annotations ...schema.Annotation) *stringBui
 	return b
 }
 
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *stringBuilder) Deprecated(reason ...string) *stringBuilder {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *stringBuilder) Descriptor() *Descriptor {
 	if b.desc.Default != nil {
@@ -455,6 +466,23 @@ func (b *timeBuilder) Annotations(annotations ...schema.Annotation) *timeBuilder
 	return b
 }
 
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *timeBuilder) Deprecated(reason ...string) *timeBuilder {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
+	return b
+}
+
+// Unique makes the field unique within all vertices of this type.
+func (b *timeBuilder) Unique() *timeBuilder {
+	b.desc.Unique = true
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *timeBuilder) Descriptor() *Descriptor {
 	if b.desc.Default != nil {
@@ -548,6 +576,17 @@ func (b *boolBuilder) GoType(typ any) *boolBuilder {
 //		)
 func (b *boolBuilder) Annotations(annotations ...schema.Annotation) *boolBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *boolBuilder) Deprecated(reason ...string) *boolBuilder {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
 	return b
 }
 
@@ -691,6 +730,15 @@ func (b *bytesBuilder) GoType(typ any) *bytesBuilder {
 	return b
 }
 
+// ValueScanner provides an external value scanner for the given GoType.
+// Using this option allow users to use field types that do not implement
+// the sql.Scanner and driver.Valuer interfaces, such as slices and maps
+// or types exist in external packages (e.g., url.URL).
+func (b *bytesBuilder) ValueScanner(vs any) *bytesBuilder {
+	b.desc.ValueScanner = vs
+	return b
+}
+
 // Annotations adds a list of annotations to the field object to be used by
 // codegen extensions.
 func (b *bytesBuilder) Annotations(annotations ...schema.Annotation) *bytesBuilder {
@@ -708,6 +756,17 @@ func (b *bytesBuilder) Annotations(annotations ...schema.Annotation) *bytesBuild
 //		})
 func (b *bytesBuilder) SchemaType(types map[string]string) *bytesBuilder {
 	b.desc.SchemaType = types
+	return b
+}
+
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *bytesBuilder) Deprecated(reason ...string) *bytesBuilder {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
 	return b
 }
 
@@ -804,6 +863,14 @@ func (b *jsonBuilder) Default(v any) *jsonBuilder {
 	return b
 }
 
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *jsonBuilder) Deprecated(reason ...string) *jsonBuilder {
+	b.desc.Deprecated = true
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *jsonBuilder) Descriptor() *Descriptor {
 	return b.desc
@@ -889,6 +956,17 @@ func (b *sliceBuilder[T]) Annotations(annotations ...schema.Annotation) *sliceBu
 //		Default([]string{"a8m", "masseelch"})
 func (b *sliceBuilder[T]) Default(v []T) *sliceBuilder[T] {
 	b.desc.Default = v
+	return b
+}
+
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *sliceBuilder[T]) Deprecated(reason ...string) *sliceBuilder[T] {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
 	return b
 }
 
@@ -1049,6 +1127,17 @@ func (b *enumBuilder) GoType(ev EnumValues) *enumBuilder {
 	return b
 }
 
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *enumBuilder) Deprecated(reason ...string) *enumBuilder {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *enumBuilder) Descriptor() *Descriptor {
 	if b.desc.Info.RType != nil {
@@ -1148,6 +1237,17 @@ func (b *uuidBuilder) SchemaType(types map[string]string) *uuidBuilder {
 //		)
 func (b *uuidBuilder) Annotations(annotations ...schema.Annotation) *uuidBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *uuidBuilder) Deprecated(reason ...string) *uuidBuilder {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
 	return b
 }
 
@@ -1271,6 +1371,17 @@ func (b *otherBuilder) Annotations(annotations ...schema.Annotation) *otherBuild
 	return b
 }
 
+// Deprecated marks the field as deprecated. Deprecated fields are not
+// selected by default in queries, and their struct fields are annotated
+// with `deprecated` in the generated code.
+func (b *otherBuilder) Deprecated(reason ...string) *otherBuilder {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *otherBuilder) Descriptor() *Descriptor {
 	b.desc.checkGoType(valueScannerType)
@@ -1282,25 +1393,27 @@ func (b *otherBuilder) Descriptor() *Descriptor {
 
 // A Descriptor for field configuration.
 type Descriptor struct {
-	Tag           string                  // struct tag.
-	Size          int                     // varchar size.
-	Name          string                  // field name.
-	Info          *TypeInfo               // field type info.
-	ValueScanner  any                     // custom field codec.
-	Unique        bool                    // unique index of field.
-	Nillable      bool                    // nillable struct field.
-	Optional      bool                    // nullable field in database.
-	Immutable     bool                    // create only field.
-	Default       any                     // default value on create.
-	UpdateDefault any                     // default value on update.
-	Validators    []any                   // validator functions.
-	StorageKey    string                  // sql column or gremlin property.
-	Enums         []struct{ N, V string } // enum values.
-	Sensitive     bool                    // sensitive info string field.
-	SchemaType    map[string]string       // override the schema type.
-	Annotations   []schema.Annotation     // field annotations.
-	Comment       string                  // field comment.
-	Err           error
+	Tag              string                  // struct tag.
+	Size             int                     // varchar size.
+	Name             string                  // field name.
+	Info             *TypeInfo               // field type info.
+	ValueScanner     any                     // custom field codec.
+	Unique           bool                    // unique index of field.
+	Nillable         bool                    // nillable struct field.
+	Optional         bool                    // nullable field in database.
+	Immutable        bool                    // create only field.
+	Default          any                     // default value on create.
+	UpdateDefault    any                     // default value on update.
+	Validators       []any                   // validator functions.
+	StorageKey       string                  // sql column or gremlin property.
+	Enums            []struct{ N, V string } // enum values.
+	Sensitive        bool                    // sensitive info string field.
+	SchemaType       map[string]string       // override the schema type.
+	Annotations      []schema.Annotation     // field annotations.
+	Comment          string                  // field comment.
+	Deprecated       bool                    // mark the field as deprecated.
+	DeprecatedReason string                  // deprecation reason.
+	Err              error
 }
 
 func (d *Descriptor) goType(typ any) {

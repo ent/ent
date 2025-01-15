@@ -103,7 +103,7 @@ func (cu *CarUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (cu *CarUpdate) check() error {
-	if _, ok := cu.mutation.OwnerID(); cu.mutation.OwnerCleared() && !ok {
+	if cu.mutation.OwnerCleared() && len(cu.mutation.OwnerIDs()) > 0 {
 		return errors.New(`entv2: clearing a required unique edge "Car.owner"`)
 	}
 	return nil
@@ -260,7 +260,7 @@ func (cuo *CarUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (cuo *CarUpdateOne) check() error {
-	if _, ok := cuo.mutation.OwnerID(); cuo.mutation.OwnerCleared() && !ok {
+	if cuo.mutation.OwnerCleared() && len(cuo.mutation.OwnerIDs()) > 0 {
 		return errors.New(`entv2: clearing a required unique edge "Car.owner"`)
 	}
 	return nil

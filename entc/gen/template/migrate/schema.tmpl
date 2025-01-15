@@ -221,6 +221,9 @@ func init() {
 				{{- with $ant.Check }}
 					Check: {{ quote . }},
 				{{- end }}
+				{{- with $ant.IncrementStart }}
+					IncrementStart: func(i int64) *int64 { return &i }({{ . }}),
+				{{- end }}
 			}
 			{{- with $ant.Incremental }}
 				{{ $table }}.Annotation.Incremental = new(bool)

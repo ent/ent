@@ -2153,6 +2153,7 @@ type ExValueScanMutation struct {
 	typ             string
 	id              *int
 	binary          **url.URL
+	binary_bytes    **url.URL
 	binary_optional **url.URL
 	text            **big.Int
 	text_optional   **big.Int
@@ -2300,6 +2301,42 @@ func (m *ExValueScanMutation) OldBinary(ctx context.Context) (v *url.URL, err er
 // ResetBinary resets all changes to the "binary" field.
 func (m *ExValueScanMutation) ResetBinary() {
 	m.binary = nil
+}
+
+// SetBinaryBytes sets the "binary_bytes" field.
+func (m *ExValueScanMutation) SetBinaryBytes(u *url.URL) {
+	m.binary_bytes = &u
+}
+
+// BinaryBytes returns the value of the "binary_bytes" field in the mutation.
+func (m *ExValueScanMutation) BinaryBytes() (r *url.URL, exists bool) {
+	v := m.binary_bytes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBinaryBytes returns the old "binary_bytes" field's value of the ExValueScan entity.
+// If the ExValueScan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ExValueScanMutation) OldBinaryBytes(ctx context.Context) (v *url.URL, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBinaryBytes is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBinaryBytes requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBinaryBytes: %w", err)
+	}
+	return oldValue.BinaryBytes, nil
+}
+
+// ResetBinaryBytes resets all changes to the "binary_bytes" field.
+func (m *ExValueScanMutation) ResetBinaryBytes() {
+	m.binary_bytes = nil
 }
 
 // SetBinaryOptional sets the "binary_optional" field.
@@ -2591,9 +2628,12 @@ func (m *ExValueScanMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ExValueScanMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m.binary != nil {
 		fields = append(fields, exvaluescan.FieldBinary)
+	}
+	if m.binary_bytes != nil {
+		fields = append(fields, exvaluescan.FieldBinaryBytes)
 	}
 	if m.binary_optional != nil {
 		fields = append(fields, exvaluescan.FieldBinaryOptional)
@@ -2623,6 +2663,8 @@ func (m *ExValueScanMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case exvaluescan.FieldBinary:
 		return m.Binary()
+	case exvaluescan.FieldBinaryBytes:
+		return m.BinaryBytes()
 	case exvaluescan.FieldBinaryOptional:
 		return m.BinaryOptional()
 	case exvaluescan.FieldText:
@@ -2646,6 +2688,8 @@ func (m *ExValueScanMutation) OldField(ctx context.Context, name string) (ent.Va
 	switch name {
 	case exvaluescan.FieldBinary:
 		return m.OldBinary(ctx)
+	case exvaluescan.FieldBinaryBytes:
+		return m.OldBinaryBytes(ctx)
 	case exvaluescan.FieldBinaryOptional:
 		return m.OldBinaryOptional(ctx)
 	case exvaluescan.FieldText:
@@ -2673,6 +2717,13 @@ func (m *ExValueScanMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetBinary(v)
+		return nil
+	case exvaluescan.FieldBinaryBytes:
+		v, ok := value.(*url.URL)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBinaryBytes(v)
 		return nil
 	case exvaluescan.FieldBinaryOptional:
 		v, ok := value.(*url.URL)
@@ -2788,6 +2839,9 @@ func (m *ExValueScanMutation) ResetField(name string) error {
 	switch name {
 	case exvaluescan.FieldBinary:
 		m.ResetBinary()
+		return nil
+	case exvaluescan.FieldBinaryBytes:
+		m.ResetBinaryBytes()
 		return nil
 	case exvaluescan.FieldBinaryOptional:
 		m.ResetBinaryOptional()
@@ -8767,6 +8821,8 @@ type FileMutation struct {
 	op            Op
 	typ           string
 	id            *int
+	set_id        *int
+	addset_id     *int
 	size          *int
 	addsize       *int
 	name          *string
@@ -8775,6 +8831,7 @@ type FileMutation struct {
 	_op           *bool
 	field_id      *int
 	addfield_id   *int
+	create_time   *time.Time
 	clearedFields map[string]struct{}
 	owner         *int
 	clearedowner  bool
@@ -8887,6 +8944,76 @@ func (m *FileMutation) IDs(ctx context.Context) ([]int, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetSetID sets the "set_id" field.
+func (m *FileMutation) SetSetID(i int) {
+	m.set_id = &i
+	m.addset_id = nil
+}
+
+// SetID returns the value of the "set_id" field in the mutation.
+func (m *FileMutation) SetID() (r int, exists bool) {
+	v := m.set_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSetID returns the old "set_id" field's value of the File entity.
+// If the File object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FileMutation) OldSetID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSetID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSetID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSetID: %w", err)
+	}
+	return oldValue.SetID, nil
+}
+
+// AddSetID adds i to the "set_id" field.
+func (m *FileMutation) AddSetID(i int) {
+	if m.addset_id != nil {
+		*m.addset_id += i
+	} else {
+		m.addset_id = &i
+	}
+}
+
+// AddedSetID returns the value that was added to the "set_id" field in this mutation.
+func (m *FileMutation) AddedSetID() (r int, exists bool) {
+	v := m.addset_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearSetID clears the value of the "set_id" field.
+func (m *FileMutation) ClearSetID() {
+	m.set_id = nil
+	m.addset_id = nil
+	m.clearedFields[file.FieldSetID] = struct{}{}
+}
+
+// SetIDCleared returns if the "set_id" field was cleared in this mutation.
+func (m *FileMutation) SetIDCleared() bool {
+	_, ok := m.clearedFields[file.FieldSetID]
+	return ok
+}
+
+// ResetSetID resets all changes to the "set_id" field.
+func (m *FileMutation) ResetSetID() {
+	m.set_id = nil
+	m.addset_id = nil
+	delete(m.clearedFields, file.FieldSetID)
 }
 
 // SetSize sets the "size" field.
@@ -9198,6 +9325,55 @@ func (m *FileMutation) ResetFieldID() {
 	delete(m.clearedFields, file.FieldFieldID)
 }
 
+// SetCreateTime sets the "create_time" field.
+func (m *FileMutation) SetCreateTime(t time.Time) {
+	m.create_time = &t
+}
+
+// CreateTime returns the value of the "create_time" field in the mutation.
+func (m *FileMutation) CreateTime() (r time.Time, exists bool) {
+	v := m.create_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreateTime returns the old "create_time" field's value of the File entity.
+// If the File object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FileMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreateTime: %w", err)
+	}
+	return oldValue.CreateTime, nil
+}
+
+// ClearCreateTime clears the value of the "create_time" field.
+func (m *FileMutation) ClearCreateTime() {
+	m.create_time = nil
+	m.clearedFields[file.FieldCreateTime] = struct{}{}
+}
+
+// CreateTimeCleared returns if the "create_time" field was cleared in this mutation.
+func (m *FileMutation) CreateTimeCleared() bool {
+	_, ok := m.clearedFields[file.FieldCreateTime]
+	return ok
+}
+
+// ResetCreateTime resets all changes to the "create_time" field.
+func (m *FileMutation) ResetCreateTime() {
+	m.create_time = nil
+	delete(m.clearedFields, file.FieldCreateTime)
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by id.
 func (m *FileMutation) SetOwnerID(id int) {
 	m.owner = &id
@@ -9364,7 +9540,10 @@ func (m *FileMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FileMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 8)
+	if m.set_id != nil {
+		fields = append(fields, file.FieldSetID)
+	}
 	if m.size != nil {
 		fields = append(fields, file.FieldSize)
 	}
@@ -9383,6 +9562,9 @@ func (m *FileMutation) Fields() []string {
 	if m.field_id != nil {
 		fields = append(fields, file.FieldFieldID)
 	}
+	if m.create_time != nil {
+		fields = append(fields, file.FieldCreateTime)
+	}
 	return fields
 }
 
@@ -9391,6 +9573,8 @@ func (m *FileMutation) Fields() []string {
 // schema.
 func (m *FileMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case file.FieldSetID:
+		return m.SetID()
 	case file.FieldSize:
 		return m.Size()
 	case file.FieldName:
@@ -9403,6 +9587,8 @@ func (m *FileMutation) Field(name string) (ent.Value, bool) {
 		return m.GetOp()
 	case file.FieldFieldID:
 		return m.FieldID()
+	case file.FieldCreateTime:
+		return m.CreateTime()
 	}
 	return nil, false
 }
@@ -9412,6 +9598,8 @@ func (m *FileMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *FileMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case file.FieldSetID:
+		return m.OldSetID(ctx)
 	case file.FieldSize:
 		return m.OldSize(ctx)
 	case file.FieldName:
@@ -9424,6 +9612,8 @@ func (m *FileMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldOp(ctx)
 	case file.FieldFieldID:
 		return m.OldFieldID(ctx)
+	case file.FieldCreateTime:
+		return m.OldCreateTime(ctx)
 	}
 	return nil, fmt.Errorf("unknown File field %s", name)
 }
@@ -9433,6 +9623,13 @@ func (m *FileMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *FileMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case file.FieldSetID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSetID(v)
+		return nil
 	case file.FieldSize:
 		v, ok := value.(int)
 		if !ok {
@@ -9475,6 +9672,13 @@ func (m *FileMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetFieldID(v)
 		return nil
+	case file.FieldCreateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreateTime(v)
+		return nil
 	}
 	return fmt.Errorf("unknown File field %s", name)
 }
@@ -9483,6 +9687,9 @@ func (m *FileMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *FileMutation) AddedFields() []string {
 	var fields []string
+	if m.addset_id != nil {
+		fields = append(fields, file.FieldSetID)
+	}
 	if m.addsize != nil {
 		fields = append(fields, file.FieldSize)
 	}
@@ -9497,6 +9704,8 @@ func (m *FileMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *FileMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
+	case file.FieldSetID:
+		return m.AddedSetID()
 	case file.FieldSize:
 		return m.AddedSize()
 	case file.FieldFieldID:
@@ -9510,6 +9719,13 @@ func (m *FileMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *FileMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case file.FieldSetID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSetID(v)
+		return nil
 	case file.FieldSize:
 		v, ok := value.(int)
 		if !ok {
@@ -9532,6 +9748,9 @@ func (m *FileMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *FileMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(file.FieldSetID) {
+		fields = append(fields, file.FieldSetID)
+	}
 	if m.FieldCleared(file.FieldUser) {
 		fields = append(fields, file.FieldUser)
 	}
@@ -9543,6 +9762,9 @@ func (m *FileMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(file.FieldFieldID) {
 		fields = append(fields, file.FieldFieldID)
+	}
+	if m.FieldCleared(file.FieldCreateTime) {
+		fields = append(fields, file.FieldCreateTime)
 	}
 	return fields
 }
@@ -9558,6 +9780,9 @@ func (m *FileMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *FileMutation) ClearField(name string) error {
 	switch name {
+	case file.FieldSetID:
+		m.ClearSetID()
+		return nil
 	case file.FieldUser:
 		m.ClearUser()
 		return nil
@@ -9570,6 +9795,9 @@ func (m *FileMutation) ClearField(name string) error {
 	case file.FieldFieldID:
 		m.ClearFieldID()
 		return nil
+	case file.FieldCreateTime:
+		m.ClearCreateTime()
+		return nil
 	}
 	return fmt.Errorf("unknown File nullable field %s", name)
 }
@@ -9578,6 +9806,9 @@ func (m *FileMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *FileMutation) ResetField(name string) error {
 	switch name {
+	case file.FieldSetID:
+		m.ResetSetID()
+		return nil
 	case file.FieldSize:
 		m.ResetSize()
 		return nil
@@ -9595,6 +9826,9 @@ func (m *FileMutation) ResetField(name string) error {
 		return nil
 	case file.FieldFieldID:
 		m.ResetFieldID()
+		return nil
+	case file.FieldCreateTime:
+		m.ResetCreateTime()
 		return nil
 	}
 	return fmt.Errorf("unknown File field %s", name)
@@ -13582,6 +13816,7 @@ type PetMutation struct {
 	uuid          *uuid.UUID
 	nickname      *string
 	trained       *bool
+	optional_time *time.Time
 	clearedFields map[string]struct{}
 	team          *int
 	clearedteam   bool
@@ -13919,6 +14154,55 @@ func (m *PetMutation) ResetTrained() {
 	m.trained = nil
 }
 
+// SetOptionalTime sets the "optional_time" field.
+func (m *PetMutation) SetOptionalTime(t time.Time) {
+	m.optional_time = &t
+}
+
+// OptionalTime returns the value of the "optional_time" field in the mutation.
+func (m *PetMutation) OptionalTime() (r time.Time, exists bool) {
+	v := m.optional_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOptionalTime returns the old "optional_time" field's value of the Pet entity.
+// If the Pet object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PetMutation) OldOptionalTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOptionalTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOptionalTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOptionalTime: %w", err)
+	}
+	return oldValue.OptionalTime, nil
+}
+
+// ClearOptionalTime clears the value of the "optional_time" field.
+func (m *PetMutation) ClearOptionalTime() {
+	m.optional_time = nil
+	m.clearedFields[pet.FieldOptionalTime] = struct{}{}
+}
+
+// OptionalTimeCleared returns if the "optional_time" field was cleared in this mutation.
+func (m *PetMutation) OptionalTimeCleared() bool {
+	_, ok := m.clearedFields[pet.FieldOptionalTime]
+	return ok
+}
+
+// ResetOptionalTime resets all changes to the "optional_time" field.
+func (m *PetMutation) ResetOptionalTime() {
+	m.optional_time = nil
+	delete(m.clearedFields, pet.FieldOptionalTime)
+}
+
 // SetTeamID sets the "team" edge to the User entity by id.
 func (m *PetMutation) SetTeamID(id int) {
 	m.team = &id
@@ -14031,7 +14315,7 @@ func (m *PetMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PetMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.age != nil {
 		fields = append(fields, pet.FieldAge)
 	}
@@ -14046,6 +14330,9 @@ func (m *PetMutation) Fields() []string {
 	}
 	if m.trained != nil {
 		fields = append(fields, pet.FieldTrained)
+	}
+	if m.optional_time != nil {
+		fields = append(fields, pet.FieldOptionalTime)
 	}
 	return fields
 }
@@ -14065,6 +14352,8 @@ func (m *PetMutation) Field(name string) (ent.Value, bool) {
 		return m.Nickname()
 	case pet.FieldTrained:
 		return m.Trained()
+	case pet.FieldOptionalTime:
+		return m.OptionalTime()
 	}
 	return nil, false
 }
@@ -14084,6 +14373,8 @@ func (m *PetMutation) OldField(ctx context.Context, name string) (ent.Value, err
 		return m.OldNickname(ctx)
 	case pet.FieldTrained:
 		return m.OldTrained(ctx)
+	case pet.FieldOptionalTime:
+		return m.OldOptionalTime(ctx)
 	}
 	return nil, fmt.Errorf("unknown Pet field %s", name)
 }
@@ -14127,6 +14418,13 @@ func (m *PetMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTrained(v)
+		return nil
+	case pet.FieldOptionalTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOptionalTime(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Pet field %s", name)
@@ -14179,6 +14477,9 @@ func (m *PetMutation) ClearedFields() []string {
 	if m.FieldCleared(pet.FieldNickname) {
 		fields = append(fields, pet.FieldNickname)
 	}
+	if m.FieldCleared(pet.FieldOptionalTime) {
+		fields = append(fields, pet.FieldOptionalTime)
+	}
 	return fields
 }
 
@@ -14198,6 +14499,9 @@ func (m *PetMutation) ClearField(name string) error {
 		return nil
 	case pet.FieldNickname:
 		m.ClearNickname()
+		return nil
+	case pet.FieldOptionalTime:
+		m.ClearOptionalTime()
 		return nil
 	}
 	return fmt.Errorf("unknown Pet nullable field %s", name)
@@ -14221,6 +14525,9 @@ func (m *PetMutation) ResetField(name string) error {
 		return nil
 	case pet.FieldTrained:
 		m.ResetTrained()
+		return nil
+	case pet.FieldOptionalTime:
+		m.ResetOptionalTime()
 		return nil
 	}
 	return fmt.Errorf("unknown Pet field %s", name)

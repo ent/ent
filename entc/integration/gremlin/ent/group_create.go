@@ -209,7 +209,7 @@ func (gc *GroupCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Group.name": %w`, err)}
 		}
 	}
-	if _, ok := gc.mutation.InfoID(); !ok {
+	if len(gc.mutation.InfoIDs()) == 0 {
 		return &ValidationError{Name: "info", err: errors.New(`ent: missing required edge "Group.info"`)}
 	}
 	return nil

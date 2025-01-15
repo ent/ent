@@ -93,6 +93,6 @@ func (ext encodeExtension) DecorateEncoder(typ reflect2.Type, enc jsoniter.ValEn
 	case reflect.Map:
 		return ext.DecoratorOfMap(enc)
 	default:
-		return ext.EncoderOfError("graphson: unsupported type: " + typ.String())
+		return ext.EncoderOfError("graphson: unsupported type: %s", typ.String())
 	}
 }

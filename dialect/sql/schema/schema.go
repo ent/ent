@@ -7,7 +7,6 @@ package schema
 
 import (
 	"fmt"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -38,6 +37,7 @@ type Table struct {
 	ForeignKeys []*ForeignKey
 	Annotation  *entsql.Annotation
 	Comment     string
+	View        bool // Indicate the table is a view.
 }
 
 // NewTable returns a new table with the given name.
@@ -46,6 +46,13 @@ func NewTable(name string) *Table {
 		Name:    name,
 		columns: make(map[string]*Column),
 	}
+}
+
+// NewView returns a new view with the given name.
+func NewView(name string) *Table {
+	t := NewTable(name)
+	t.View = true
+	return t
 }
 
 // SetComment sets the table comment.
@@ -174,30 +181,6 @@ func (t *Table) index(name string) (*Index, bool) {
 	}
 	if ok && c.Unique {
 		return &Index{Name: name, Unique: c.Unique, Columns: []*Column{c}, columns: []string{c.Name}}, true
-	}
-	return nil, false
-}
-
-// hasIndex reports if the table has at least one index that matches the given names.
-func (t *Table) hasIndex(names ...string) bool {
-	for i := range names {
-		if names[i] == "" {
-			continue
-		}
-		if _, ok := t.index(names[i]); ok {
-			return true
-		}
-	}
-	return false
-}
-
-// fk returns a table foreign-key by its symbol.
-// faster than map lookup for most cases.
-func (t *Table) fk(symbol string) (*ForeignKey, bool) {
-	for _, fk := range t.ForeignKeys {
-		if fk.Symbol == symbol {
-			return fk, true
-		}
 	}
 	return nil, false
 }
@@ -409,27 +392,6 @@ func (c *Column) ScanDefault(value string) error {
 	return nil
 }
 
-// defaultValue adds the `DEFAULT` attribute to the column.
-// Note that, in SQLite if a NOT NULL constraint is specified,
-// then the column must have a default value which not NULL.
-func (c *Column) defaultValue(b *sql.ColumnBuilder) {
-	if c.Default == nil || !c.supportDefault() {
-		return
-	}
-	// Has default and the database supports adding this default.
-	attr := fmt.Sprint(c.Default)
-	switch v := c.Default.(type) {
-	case bool:
-		attr = strconv.FormatBool(v)
-	case string:
-		if t := c.Type; t != field.TypeUUID && t != field.TypeTime {
-			// Escape single quote by replacing each with 2.
-			attr = fmt.Sprintf("'%s'", strings.ReplaceAll(v, "'", "''"))
-		}
-	}
-	b.Attr("DEFAULT " + attr)
-}
-
 // supportDefault reports if the column type supports default value.
 func (c Column) supportDefault() bool {
 	switch t := c.Type; t {
@@ -440,25 +402,6 @@ func (c Column) supportDefault() bool {
 	default:
 		return t.Numeric()
 	}
-}
-
-// unique adds the `UNIQUE` attribute if the column is a unique type.
-// it is exist in a different function to share the common declaration
-// between the two dialects.
-func (c *Column) unique(b *sql.ColumnBuilder) {
-	if c.Unique {
-		b.Attr("UNIQUE")
-	}
-}
-
-// nullable adds the `NULL`/`NOT NULL` attribute to the column if it exists in
-// a different function to share the common declaration between the two dialects.
-func (c *Column) nullable(b *sql.ColumnBuilder) {
-	attr := Null
-	if !c.Nullable {
-		attr = "NOT " + attr
-	}
-	b.Attr(attr)
 }
 
 // scanTypeOr returns the scanning type or the given value.
@@ -477,24 +420,6 @@ type ForeignKey struct {
 	RefColumns []*Column       // referenced columns.
 	OnUpdate   ReferenceOption // action on update.
 	OnDelete   ReferenceOption // action on delete.
-}
-
-func (fk ForeignKey) column(name string) (*Column, bool) {
-	for _, c := range fk.Columns {
-		if c.Name == name {
-			return c, true
-		}
-	}
-	return nil, false
-}
-
-func (fk ForeignKey) refColumn(name string) (*Column, bool) {
-	for _, c := range fk.RefColumns {
-		if c.Name == name {
-			return c, true
-		}
-	}
-	return nil, false
 }
 
 // DSL returns a default DSL query for a foreign-key.
@@ -543,7 +468,6 @@ type Index struct {
 	Columns    []*Column               // actual table columns.
 	Annotation *entsql.IndexAnnotation // index annotation.
 	columns    []string                // columns loaded from query scan.
-	primary    bool                    // primary key index.
 	realname   string                  // real name in the database (Postgres only).
 }
 
@@ -563,32 +487,6 @@ func (i *Index) Builder(table string) *sql.IndexBuilder {
 func (i *Index) DropBuilder(table string) *sql.DropIndexBuilder {
 	idx := sql.DropIndex(i.Name).Table(table)
 	return idx
-}
-
-// sameAs reports if the index has the same properties
-// as the given index (except the name).
-func (i *Index) sameAs(idx *Index) bool {
-	if i.Unique != idx.Unique || len(i.Columns) != len(idx.Columns) {
-		return false
-	}
-	for j, c := range i.Columns {
-		if c.Name != idx.Columns[j].Name {
-			return false
-		}
-	}
-	return true
-}
-
-// columnNames returns the names of the columns of the index.
-func (i *Index) columnNames() []string {
-	if len(i.columns) > 0 {
-		return i.columns
-	}
-	columns := make([]string, 0, len(i.Columns))
-	for _, c := range i.Columns {
-		columns = append(columns, c.Name)
-	}
-	return columns
 }
 
 // Indexes used for scanning all sql.Rows into a list of indexes, because
@@ -665,33 +563,16 @@ func compare(v1, v2 int) int {
 	return 1
 }
 
-// addChecks appends the CHECK clauses from the entsql.Annotation.
-func addChecks(t *sql.TableBuilder, ant *entsql.Annotation) {
-	if check := ant.Check; check != "" {
-		t.Checks(func(b *sql.Builder) {
-			b.WriteString("CHECK " + checkExpr(check))
-		})
+func indexType(idx *Index, d string) (string, bool) {
+	ant := idx.Annotation
+	if ant == nil {
+		return "", false
 	}
-	if checks := ant.Checks; len(ant.Checks) > 0 {
-		names := make([]string, 0, len(checks))
-		for name := range checks {
-			names = append(names, name)
-		}
-		sort.Strings(names)
-		for _, name := range names {
-			name := name
-			t.Checks(func(b *sql.Builder) {
-				b.WriteString("CONSTRAINT ").Ident(name).WriteString(" CHECK " + checkExpr(checks[name]))
-			})
-		}
+	if ant.Types != nil && ant.Types[d] != "" {
+		return ant.Types[d], true
 	}
-}
-
-// checkExpr formats the CHECK expression.
-func checkExpr(expr string) string {
-	expr = strings.TrimSpace(expr)
-	if !strings.HasPrefix(expr, "(") && !strings.HasSuffix(expr, ")") {
-		expr = "(" + expr + ")"
+	if ant.Type != "" {
+		return ant.Type, true
 	}
-	return expr
+	return "", false
 }

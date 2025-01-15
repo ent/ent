@@ -184,7 +184,7 @@ func (pu *PaymentUpdate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Payment.status": %w`, err)}
 		}
 	}
-	if _, ok := pu.mutation.CardID(); pu.mutation.CardCleared() && !ok {
+	if pu.mutation.CardCleared() && len(pu.mutation.CardIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Payment.card"`)
 	}
 	return nil
@@ -433,7 +433,7 @@ func (puo *PaymentUpdateOne) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Payment.status": %w`, err)}
 		}
 	}
-	if _, ok := puo.mutation.CardID(); puo.mutation.CardCleared() && !ok {
+	if puo.mutation.CardCleared() && len(puo.mutation.CardIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Payment.card"`)
 	}
 	return nil

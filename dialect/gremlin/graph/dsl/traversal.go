@@ -5,6 +5,7 @@
 package dsl
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -74,7 +75,7 @@ func (t *Traversal) Err() error {
 		}
 		br.WriteString(t.errs[i].Error())
 	}
-	return fmt.Errorf(br.String())
+	return errors.New(br.String())
 }
 
 // V step is usually used to start a traversal but it may also be used mid-traversal.

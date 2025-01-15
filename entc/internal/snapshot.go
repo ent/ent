@@ -129,7 +129,7 @@ func merge(local, other *gen.Snapshot) {
 		switch match, ok := locals[schema.Name]; {
 		case !ok:
 			local.Schemas = append(local.Schemas, schema)
-		case ok:
+		default:
 			mergeSchema(match, schema)
 		}
 	}
@@ -167,7 +167,7 @@ func mergeSchema(local, other *load.Schema) {
 		switch match, ok := fields[f.Name]; {
 		case !ok:
 			local.Fields = append(local.Fields, f)
-		case ok:
+		default:
 			mergeField(match, f)
 		}
 	}
@@ -179,7 +179,7 @@ func mergeSchema(local, other *load.Schema) {
 		switch match, ok := edges[e.Name]; {
 		case !ok:
 			local.Edges = append(local.Edges, e)
-		case ok:
+		default:
 			mergeEdge(match, e)
 		}
 	}

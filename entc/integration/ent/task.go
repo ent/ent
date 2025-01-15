@@ -30,6 +30,8 @@ type Task struct {
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt *time.Time `json:"created_at,omitempty"`
 	// Name holds the value of the "name" field.
+	//
+	// Deprecated: Field "name" was marked as deprecated in the schema.
 	Name string `json:"name,omitempty"`
 	// Owner holds the value of the "owner" field.
 	Owner string `json:"owner,omitempty"`

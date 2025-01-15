@@ -100,12 +100,14 @@ type {{ $edgesType }} struct {
 	}
 {{ end }}
 
+{{- if not $.IsView }}
 // Update returns a builder for updating this {{ $.Name }}.
 // Note that you need to call {{ $.Name }}.Unwrap() before calling this method if this {{ $.Name }}
 // was returned from a transaction, and the transaction was committed or rolled back.
 func ({{ $receiver }} *{{ $.Name }}) Update() *{{ $.UpdateOneName }} {
 	return New{{ $.ClientName }}({{ $receiver }}.config).UpdateOne({{ $receiver }})
 }
+{{- end }}
 
 // Unwrap unwraps the {{ $.Name }} entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
@@ -217,6 +219,10 @@ type {{ $slice }} []*{{ $.Name }}
 		{{- end }}
 	{{- else }}
 		// {{ $.StructField }} holds the value of the "{{ $.Name }}" field.
+	{{- end }}
+	{{- if $.IsDeprecated }}
+		//
+		// Deprecated: {{ with $.DeprecationReason }}{{ . }}{{ else }}Field "{{ $.Name }}" was marked as deprecated in the schema.{{ end }}
 	{{- end }}
 {{- end }}
 

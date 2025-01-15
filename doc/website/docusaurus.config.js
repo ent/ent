@@ -94,7 +94,7 @@ const config = {
   ],
   "themeConfig": {
     prism: {
-      additionalLanguages: ['gotemplate', 'protobuf'],
+      additionalLanguages: ['gotemplate', 'protobuf', "hcl"],
       magicComments: [
         {
           className: 'theme-code-block-highlighted-line',

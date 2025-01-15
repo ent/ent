@@ -298,7 +298,7 @@ func (gu *GroupUpdate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Group.name": %w`, err)}
 		}
 	}
-	if _, ok := gu.mutation.InfoID(); gu.mutation.InfoCleared() && !ok {
+	if gu.mutation.InfoCleared() && len(gu.mutation.InfoIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Group.info"`)
 	}
 	return nil
@@ -699,7 +699,7 @@ func (guo *GroupUpdateOne) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Group.name": %w`, err)}
 		}
 	}
-	if _, ok := guo.mutation.InfoID(); guo.mutation.InfoCleared() && !ok {
+	if guo.mutation.InfoCleared() && len(guo.mutation.InfoIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Group.info"`)
 	}
 	return nil

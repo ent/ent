@@ -94,6 +94,7 @@ var (
 	ExValueScansColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "binary", Type: field.TypeString},
+		{Name: "binary_bytes", Type: field.TypeBytes},
 		{Name: "binary_optional", Type: field.TypeString, Nullable: true},
 		{Name: "text", Type: field.TypeString},
 		{Name: "text_optional", Type: field.TypeString, Nullable: true},
@@ -194,12 +195,14 @@ var (
 	// FilesColumns holds the columns for the "files" table.
 	FilesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "set_id", Type: field.TypeInt, Nullable: true},
 		{Name: "fsize", Type: field.TypeInt, Default: 2147483647},
 		{Name: "name", Type: field.TypeString},
 		{Name: "user", Type: field.TypeString, Nullable: true},
 		{Name: "group", Type: field.TypeString, Nullable: true},
 		{Name: "op", Type: field.TypeBool, Nullable: true},
 		{Name: "field_id", Type: field.TypeInt, Nullable: true},
+		{Name: "create_time", Type: field.TypeTime, Unique: true, Nullable: true},
 		{Name: "file_type_files", Type: field.TypeInt, Nullable: true},
 		{Name: "group_files", Type: field.TypeInt, Nullable: true},
 		{Name: "user_files", Type: field.TypeInt, Nullable: true},
@@ -212,19 +215,19 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "files_file_types_files",
-				Columns:    []*schema.Column{FilesColumns[7]},
+				Columns:    []*schema.Column{FilesColumns[9]},
 				RefColumns: []*schema.Column{FileTypesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "files_groups_files",
-				Columns:    []*schema.Column{FilesColumns[8]},
+				Columns:    []*schema.Column{FilesColumns[10]},
 				RefColumns: []*schema.Column{GroupsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "files_users_files",
-				Columns:    []*schema.Column{FilesColumns[9]},
+				Columns:    []*schema.Column{FilesColumns[11]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -233,27 +236,27 @@ var (
 			{
 				Name:    "file_name_size",
 				Unique:  false,
-				Columns: []*schema.Column{FilesColumns[2], FilesColumns[1]},
+				Columns: []*schema.Column{FilesColumns[3], FilesColumns[2]},
 			},
 			{
 				Name:    "file_name_user",
 				Unique:  true,
-				Columns: []*schema.Column{FilesColumns[2], FilesColumns[3]},
+				Columns: []*schema.Column{FilesColumns[3], FilesColumns[4]},
 			},
 			{
 				Name:    "file_user_files_file_type_files",
 				Unique:  false,
-				Columns: []*schema.Column{FilesColumns[9], FilesColumns[7]},
+				Columns: []*schema.Column{FilesColumns[11], FilesColumns[9]},
 			},
 			{
 				Name:    "file_name_user_files_file_type_files",
 				Unique:  true,
-				Columns: []*schema.Column{FilesColumns[2], FilesColumns[9], FilesColumns[7]},
+				Columns: []*schema.Column{FilesColumns[3], FilesColumns[11], FilesColumns[9]},
 			},
 			{
 				Name:    "file_name_user_files",
 				Unique:  false,
-				Columns: []*schema.Column{FilesColumns[2], FilesColumns[9]},
+				Columns: []*schema.Column{FilesColumns[3], FilesColumns[11]},
 			},
 		},
 	}
@@ -378,6 +381,7 @@ var (
 		{Name: "uuid", Type: field.TypeUUID, Nullable: true},
 		{Name: "nickname", Type: field.TypeString, Nullable: true},
 		{Name: "trained", Type: field.TypeBool, Default: false},
+		{Name: "optional_time", Type: field.TypeTime, Nullable: true},
 		{Name: "user_pets", Type: field.TypeInt, Nullable: true},
 		{Name: "user_team", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
@@ -389,13 +393,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "pet_users_pets",
-				Columns:    []*schema.Column{PetColumns[6]},
+				Columns:    []*schema.Column{PetColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "pet_users_team",
-				Columns:    []*schema.Column{PetColumns[7]},
+				Columns:    []*schema.Column{PetColumns[8]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -404,7 +408,7 @@ var (
 			{
 				Name:    "pet_name_user_pets",
 				Unique:  false,
-				Columns: []*schema.Column{PetColumns[2], PetColumns[6]},
+				Columns: []*schema.Column{PetColumns[2], PetColumns[7]},
 			},
 			{
 				Name:    "pet_nickname",
@@ -622,21 +626,75 @@ var (
 )
 
 func init() {
+	ApisTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(12884901888),
+	}
+	BuildersTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(17179869184),
+	}
 	CardsTable.ForeignKeys[0].RefTable = UsersTable
+	CardsTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(21474836480),
+	}
+	CommentsTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(25769803776),
+	}
+	ExValueScansTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(30064771072),
+	}
 	FieldTypesTable.ForeignKeys[0].RefTable = FilesTable
+	FieldTypesTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(34359738368),
+	}
 	FilesTable.ForeignKeys[0].RefTable = FileTypesTable
 	FilesTable.ForeignKeys[1].RefTable = GroupsTable
 	FilesTable.ForeignKeys[2].RefTable = UsersTable
+	FilesTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(38654705664),
+	}
+	FileTypesTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(42949672960),
+	}
+	GoodsTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(47244640256),
+	}
 	GroupsTable.ForeignKeys[0].RefTable = GroupInfosTable
+	GroupsTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(51539607552),
+	}
+	GroupInfosTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(55834574848),
+	}
+	ItemsTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(60129542144),
+	}
+	LicensesTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(64424509440),
+	}
 	NodesTable.ForeignKeys[0].RefTable = NodesTable
+	NodesTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(68719476736),
+	}
+	PcsTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(73014444032),
+	}
 	PetTable.ForeignKeys[0].RefTable = UsersTable
 	PetTable.ForeignKeys[1].RefTable = UsersTable
 	PetTable.Annotation = &entsql.Annotation{
 		Table: "pet",
 	}
+	SpecsTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(81604378624),
+	}
+	TasksTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(85899345920),
+	}
 	UsersTable.ForeignKeys[0].RefTable = GroupsTable
 	UsersTable.ForeignKeys[1].RefTable = UsersTable
 	UsersTable.ForeignKeys[2].RefTable = UsersTable
+	UsersTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int64) *int64 { return &i }(8589934592),
+	}
 	SpecCardTable.ForeignKeys[0].RefTable = SpecsTable
 	SpecCardTable.ForeignKeys[1].RefTable = CardsTable
 	UserGroupsTable.ForeignKeys[0].RefTable = UsersTable

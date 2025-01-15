@@ -116,7 +116,7 @@ func (gu *GroupUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (gu *GroupUpdate) check() error {
-	if _, ok := gu.mutation.TenantID(); gu.mutation.TenantCleared() && !ok {
+	if gu.mutation.TenantCleared() && len(gu.mutation.TenantIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Group.tenant"`)
 	}
 	return nil
@@ -299,7 +299,7 @@ func (guo *GroupUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (guo *GroupUpdateOne) check() error {
-	if _, ok := guo.mutation.TenantID(); guo.mutation.TenantCleared() && !ok {
+	if guo.mutation.TenantCleared() && len(guo.mutation.TenantIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Group.tenant"`)
 	}
 	return nil

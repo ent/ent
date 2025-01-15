@@ -7,6 +7,8 @@
 package file
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
@@ -57,6 +59,11 @@ func IDLTE(id int) predicate.File {
 	return predicate.File(sql.FieldLTE(FieldID, id))
 }
 
+// SetID applies equality check predicate on the "set_id" field. It's identical to SetIDEQ.
+func SetID(v int) predicate.File {
+	return predicate.File(sql.FieldEQ(FieldSetID, v))
+}
+
 // Size applies equality check predicate on the "size" field. It's identical to SizeEQ.
 func Size(v int) predicate.File {
 	return predicate.File(sql.FieldEQ(FieldSize, v))
@@ -80,6 +87,61 @@ func Group(v string) predicate.File {
 // Op applies equality check predicate on the "op" field. It's identical to OpEQ.
 func Op(v bool) predicate.File {
 	return predicate.File(sql.FieldEQ(FieldOp, v))
+}
+
+// CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
+func CreateTime(v time.Time) predicate.File {
+	return predicate.File(sql.FieldEQ(FieldCreateTime, v))
+}
+
+// SetIDEQ applies the EQ predicate on the "set_id" field.
+func SetIDEQ(v int) predicate.File {
+	return predicate.File(sql.FieldEQ(FieldSetID, v))
+}
+
+// SetIDNEQ applies the NEQ predicate on the "set_id" field.
+func SetIDNEQ(v int) predicate.File {
+	return predicate.File(sql.FieldNEQ(FieldSetID, v))
+}
+
+// SetIDIn applies the In predicate on the "set_id" field.
+func SetIDIn(vs ...int) predicate.File {
+	return predicate.File(sql.FieldIn(FieldSetID, vs...))
+}
+
+// SetIDNotIn applies the NotIn predicate on the "set_id" field.
+func SetIDNotIn(vs ...int) predicate.File {
+	return predicate.File(sql.FieldNotIn(FieldSetID, vs...))
+}
+
+// SetIDGT applies the GT predicate on the "set_id" field.
+func SetIDGT(v int) predicate.File {
+	return predicate.File(sql.FieldGT(FieldSetID, v))
+}
+
+// SetIDGTE applies the GTE predicate on the "set_id" field.
+func SetIDGTE(v int) predicate.File {
+	return predicate.File(sql.FieldGTE(FieldSetID, v))
+}
+
+// SetIDLT applies the LT predicate on the "set_id" field.
+func SetIDLT(v int) predicate.File {
+	return predicate.File(sql.FieldLT(FieldSetID, v))
+}
+
+// SetIDLTE applies the LTE predicate on the "set_id" field.
+func SetIDLTE(v int) predicate.File {
+	return predicate.File(sql.FieldLTE(FieldSetID, v))
+}
+
+// SetIDIsNil applies the IsNil predicate on the "set_id" field.
+func SetIDIsNil() predicate.File {
+	return predicate.File(sql.FieldIsNull(FieldSetID))
+}
+
+// SetIDNotNil applies the NotNil predicate on the "set_id" field.
+func SetIDNotNil() predicate.File {
+	return predicate.File(sql.FieldNotNull(FieldSetID))
 }
 
 // SizeEQ applies the EQ predicate on the "size" field.
@@ -405,6 +467,56 @@ func FieldIDIsNil() predicate.File {
 // FieldIDNotNil applies the NotNil predicate on the "field_id" field.
 func FieldIDNotNil() predicate.File {
 	return predicate.File(sql.FieldNotNull(FieldFieldID))
+}
+
+// CreateTimeEQ applies the EQ predicate on the "create_time" field.
+func CreateTimeEQ(v time.Time) predicate.File {
+	return predicate.File(sql.FieldEQ(FieldCreateTime, v))
+}
+
+// CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
+func CreateTimeNEQ(v time.Time) predicate.File {
+	return predicate.File(sql.FieldNEQ(FieldCreateTime, v))
+}
+
+// CreateTimeIn applies the In predicate on the "create_time" field.
+func CreateTimeIn(vs ...time.Time) predicate.File {
+	return predicate.File(sql.FieldIn(FieldCreateTime, vs...))
+}
+
+// CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
+func CreateTimeNotIn(vs ...time.Time) predicate.File {
+	return predicate.File(sql.FieldNotIn(FieldCreateTime, vs...))
+}
+
+// CreateTimeGT applies the GT predicate on the "create_time" field.
+func CreateTimeGT(v time.Time) predicate.File {
+	return predicate.File(sql.FieldGT(FieldCreateTime, v))
+}
+
+// CreateTimeGTE applies the GTE predicate on the "create_time" field.
+func CreateTimeGTE(v time.Time) predicate.File {
+	return predicate.File(sql.FieldGTE(FieldCreateTime, v))
+}
+
+// CreateTimeLT applies the LT predicate on the "create_time" field.
+func CreateTimeLT(v time.Time) predicate.File {
+	return predicate.File(sql.FieldLT(FieldCreateTime, v))
+}
+
+// CreateTimeLTE applies the LTE predicate on the "create_time" field.
+func CreateTimeLTE(v time.Time) predicate.File {
+	return predicate.File(sql.FieldLTE(FieldCreateTime, v))
+}
+
+// CreateTimeIsNil applies the IsNil predicate on the "create_time" field.
+func CreateTimeIsNil() predicate.File {
+	return predicate.File(sql.FieldIsNull(FieldCreateTime))
+}
+
+// CreateTimeNotNil applies the NotNil predicate on the "create_time" field.
+func CreateTimeNotNil() predicate.File {
+	return predicate.File(sql.FieldNotNull(FieldCreateTime))
 }
 
 // HasOwner applies the HasEdge predicate on the "owner" edge.

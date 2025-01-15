@@ -16,6 +16,8 @@ const (
 	Label = "file"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldSetID holds the string denoting the set_id field in the database.
+	FieldSetID = "set_id"
 	// FieldSize holds the string denoting the size field in the database.
 	FieldSize = "fsize"
 	// FieldName holds the string denoting the name field in the database.
@@ -28,6 +30,8 @@ const (
 	FieldOp = "op"
 	// FieldFieldID holds the string denoting the field_id field in the database.
 	FieldFieldID = "field_id"
+	// FieldCreateTime holds the string denoting the create_time field in the database.
+	FieldCreateTime = "create_time"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
 	// EdgeType holds the string denoting the type edge name in mutations.
@@ -62,12 +66,14 @@ const (
 // Columns holds all SQL columns for file fields.
 var Columns = []string{
 	FieldID,
+	FieldSetID,
 	FieldSize,
 	FieldName,
 	FieldUser,
 	FieldGroup,
 	FieldOp,
 	FieldFieldID,
+	FieldCreateTime,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "files"
@@ -94,6 +100,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// SetIDValidator is a validator for the "set_id" field. It is called by the builders before save.
+	SetIDValidator func(int) error
 	// DefaultSize holds the default value on creation for the "size" field.
 	DefaultSize int
 	// SizeValidator is a validator for the "size" field. It is called by the builders before save.
@@ -106,6 +114,11 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// BySetID orders the results by the set_id field.
+func BySetID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSetID, opts...).ToFunc()
 }
 
 // BySize orders the results by the size field.
@@ -136,6 +149,11 @@ func ByOp(opts ...sql.OrderTermOption) OrderOption {
 // ByFieldID orders the results by the field_id field.
 func ByFieldID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldFieldID, opts...).ToFunc()
+}
+
+// ByCreateTime orders the results by the create_time field.
+func ByCreateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreateTime, opts...).ToFunc()
 }
 
 // ByOwnerField orders the results by owner field.

@@ -110,6 +110,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Type: "ExValueScan",
 		Fields: map[string]*sqlgraph.FieldSpec{
 			exvaluescan.FieldBinary:         {Type: field.TypeString, Column: exvaluescan.FieldBinary},
+			exvaluescan.FieldBinaryBytes:    {Type: field.TypeBytes, Column: exvaluescan.FieldBinaryBytes},
 			exvaluescan.FieldBinaryOptional: {Type: field.TypeString, Column: exvaluescan.FieldBinaryOptional},
 			exvaluescan.FieldText:           {Type: field.TypeString, Column: exvaluescan.FieldText},
 			exvaluescan.FieldTextOptional:   {Type: field.TypeString, Column: exvaluescan.FieldTextOptional},
@@ -207,12 +208,14 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "File",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			file.FieldSize:    {Type: field.TypeInt, Column: file.FieldSize},
-			file.FieldName:    {Type: field.TypeString, Column: file.FieldName},
-			file.FieldUser:    {Type: field.TypeString, Column: file.FieldUser},
-			file.FieldGroup:   {Type: field.TypeString, Column: file.FieldGroup},
-			file.FieldOp:      {Type: field.TypeBool, Column: file.FieldOp},
-			file.FieldFieldID: {Type: field.TypeInt, Column: file.FieldFieldID},
+			file.FieldSetID:      {Type: field.TypeInt, Column: file.FieldSetID},
+			file.FieldSize:       {Type: field.TypeInt, Column: file.FieldSize},
+			file.FieldName:       {Type: field.TypeString, Column: file.FieldName},
+			file.FieldUser:       {Type: field.TypeString, Column: file.FieldUser},
+			file.FieldGroup:      {Type: field.TypeString, Column: file.FieldGroup},
+			file.FieldOp:         {Type: field.TypeBool, Column: file.FieldOp},
+			file.FieldFieldID:    {Type: field.TypeInt, Column: file.FieldFieldID},
+			file.FieldCreateTime: {Type: field.TypeTime, Column: file.FieldCreateTime},
 		},
 	}
 	graph.Nodes[7] = &sqlgraph.Node{
@@ -343,11 +346,12 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "Pet",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			pet.FieldAge:      {Type: field.TypeFloat64, Column: pet.FieldAge},
-			pet.FieldName:     {Type: field.TypeString, Column: pet.FieldName},
-			pet.FieldUUID:     {Type: field.TypeUUID, Column: pet.FieldUUID},
-			pet.FieldNickname: {Type: field.TypeString, Column: pet.FieldNickname},
-			pet.FieldTrained:  {Type: field.TypeBool, Column: pet.FieldTrained},
+			pet.FieldAge:          {Type: field.TypeFloat64, Column: pet.FieldAge},
+			pet.FieldName:         {Type: field.TypeString, Column: pet.FieldName},
+			pet.FieldUUID:         {Type: field.TypeUUID, Column: pet.FieldUUID},
+			pet.FieldNickname:     {Type: field.TypeString, Column: pet.FieldNickname},
+			pet.FieldTrained:      {Type: field.TypeBool, Column: pet.FieldTrained},
+			pet.FieldOptionalTime: {Type: field.TypeTime, Column: pet.FieldOptionalTime},
 		},
 	}
 	graph.Nodes[16] = &sqlgraph.Node{
@@ -1029,6 +1033,11 @@ func (f *ExValueScanFilter) WhereBinary(p entql.StringP) {
 	f.Where(p.Field(exvaluescan.FieldBinary))
 }
 
+// WhereBinaryBytes applies the entql []byte predicate on the binary_bytes field.
+func (f *ExValueScanFilter) WhereBinaryBytes(p entql.BytesP) {
+	f.Where(p.Field(exvaluescan.FieldBinaryBytes))
+}
+
 // WhereBinaryOptional applies the entql string predicate on the binary_optional field.
 func (f *ExValueScanFilter) WhereBinaryOptional(p entql.StringP) {
 	f.Where(p.Field(exvaluescan.FieldBinaryOptional))
@@ -1464,6 +1473,11 @@ func (f *FileFilter) WhereID(p entql.IntP) {
 	f.Where(p.Field(file.FieldID))
 }
 
+// WhereSetID applies the entql int predicate on the set_id field.
+func (f *FileFilter) WhereSetID(p entql.IntP) {
+	f.Where(p.Field(file.FieldSetID))
+}
+
 // WhereSize applies the entql int predicate on the size field.
 func (f *FileFilter) WhereSize(p entql.IntP) {
 	f.Where(p.Field(file.FieldSize))
@@ -1492,6 +1506,11 @@ func (f *FileFilter) WhereOp(p entql.BoolP) {
 // WhereFieldID applies the entql int predicate on the field_id field.
 func (f *FileFilter) WhereFieldID(p entql.IntP) {
 	f.Where(p.Field(file.FieldFieldID))
+}
+
+// WhereCreateTime applies the entql time.Time predicate on the create_time field.
+func (f *FileFilter) WhereCreateTime(p entql.TimeP) {
+	f.Where(p.Field(file.FieldCreateTime))
 }
 
 // WhereHasOwner applies a predicate to check if query has an edge owner.
@@ -2106,6 +2125,11 @@ func (f *PetFilter) WhereNickname(p entql.StringP) {
 // WhereTrained applies the entql bool predicate on the trained field.
 func (f *PetFilter) WhereTrained(p entql.BoolP) {
 	f.Where(p.Field(pet.FieldTrained))
+}
+
+// WhereOptionalTime applies the entql time.Time predicate on the optional_time field.
+func (f *PetFilter) WhereOptionalTime(p entql.TimeP) {
+	f.Where(p.Field(pet.FieldOptionalTime))
 }
 
 // WhereHasTeam applies a predicate to check if query has an edge team.

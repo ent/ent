@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -26,6 +27,20 @@ type FileCreate struct {
 	config
 	mutation *FileMutation
 	hooks    []Hook
+}
+
+// SetSetID sets the "set_id" field.
+func (fc *FileCreate) SetSetID(i int) *FileCreate {
+	fc.mutation.SetSetID(i)
+	return fc
+}
+
+// SetNillableSetID sets the "set_id" field if the given value is not nil.
+func (fc *FileCreate) SetNillableSetID(i *int) *FileCreate {
+	if i != nil {
+		fc.SetSetID(*i)
+	}
+	return fc
 }
 
 // SetSize sets the "size" field.
@@ -100,6 +115,20 @@ func (fc *FileCreate) SetFieldID(i int) *FileCreate {
 func (fc *FileCreate) SetNillableFieldID(i *int) *FileCreate {
 	if i != nil {
 		fc.SetFieldID(*i)
+	}
+	return fc
+}
+
+// SetCreateTime sets the "create_time" field.
+func (fc *FileCreate) SetCreateTime(t time.Time) *FileCreate {
+	fc.mutation.SetCreateTime(t)
+	return fc
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (fc *FileCreate) SetNillableCreateTime(t *time.Time) *FileCreate {
+	if t != nil {
+		fc.SetCreateTime(*t)
 	}
 	return fc
 }
@@ -200,6 +229,11 @@ func (fc *FileCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (fc *FileCreate) check() error {
+	if v, ok := fc.mutation.SetID(); ok {
+		if err := file.SetIDValidator(v); err != nil {
+			return &ValidationError{Name: "set_id", err: fmt.Errorf(`ent: validator failed for field "File.set_id": %w`, err)}
+		}
+	}
 	if _, ok := fc.mutation.Size(); !ok {
 		return &ValidationError{Name: "size", err: errors.New(`ent: missing required field "File.size"`)}
 	}
@@ -240,8 +274,11 @@ func (fc *FileCreate) gremlin() *dsl.Traversal {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
 	}
-	constraints := make([]*constraint, 0, 1)
+	constraints := make([]*constraint, 0, 2)
 	v := g.AddV(file.Label)
+	if value, ok := fc.mutation.SetID(); ok {
+		v.Property(dsl.Single, file.FieldSetID, value)
+	}
 	if value, ok := fc.mutation.Size(); ok {
 		v.Property(dsl.Single, file.FieldSize, value)
 	}
@@ -259,6 +296,13 @@ func (fc *FileCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := fc.mutation.FieldID(); ok {
 		v.Property(dsl.Single, file.FieldFieldID, value)
+	}
+	if value, ok := fc.mutation.CreateTime(); ok {
+		constraints = append(constraints, &constraint{
+			pred: g.V().Has(file.Label, file.FieldCreateTime, value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(file.Label, file.FieldCreateTime, value)),
+		})
+		v.Property(dsl.Single, file.FieldCreateTime, value)
 	}
 	for _, id := range fc.mutation.OwnerIDs() {
 		v.AddE(user.FilesLabel).From(g.V(id)).InV()

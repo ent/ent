@@ -8,6 +8,7 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -156,6 +157,30 @@ func TestFloat(t *testing.T) {
 	assert.Error(t, fd.Err)
 }
 
+func TestFloat_DefaultFunc(t *testing.T) {
+	type CustomFloat float64
+
+	f1 := func() CustomFloat { return 1.2 }
+	fd := field.Float("weight").DefaultFunc(f1).GoType(CustomFloat(0.)).Descriptor()
+	assert.NoError(t, fd.Err)
+
+	fd = field.Float("weight").DefaultFunc(f1).Descriptor()
+	assert.Error(t, fd.Err, "`var _ float = f1()` should fail")
+
+	f2 := func() float64 { return 1000 }
+	fd = field.Float("weight").GoType(CustomFloat(0)).DefaultFunc(f2).Descriptor()
+	assert.Error(t, fd.Err, "`var _ CustomFloat = f2()` should fail")
+
+	fd = field.Float("weight").DefaultFunc(f2).UpdateDefault(f2).Descriptor()
+	assert.NoError(t, fd.Err)
+	assert.NotNil(t, fd.Default)
+	assert.NotNil(t, fd.UpdateDefault)
+
+	f3 := func() float64 { return 1.2 }
+	fd = field.Float("weight").DefaultFunc(f3).Descriptor()
+	assert.NoError(t, fd.Err)
+}
+
 func TestBool(t *testing.T) {
 	fd := field.Bool("active").Default(true).Comment("comment").Immutable().Descriptor()
 	assert.Equal(t, "active", fd.Name)
@@ -287,6 +312,58 @@ func TestBytes_DefaultFunc(t *testing.T) {
 
 	fd = field.Bytes("ip").GoType(net.IP("127.0.0.1")).DefaultFunc(net.IP("127.0.0.1")).Descriptor()
 	assert.EqualError(t, fd.Err, `field.Bytes("ip").DefaultFunc expects func but got slice`)
+}
+
+type nullBytes []byte
+
+func (b *nullBytes) Scan(v any) error {
+	if v == nil {
+		return nil
+	}
+	switch v := v.(type) {
+	case []byte:
+		*b = v
+		return nil
+	case string:
+		*b = []byte(v)
+		return nil
+	default:
+		return errors.New("unexpected type")
+	}
+}
+
+func (b nullBytes) Value() (driver.Value, error) { return b, nil }
+
+func TestBytes_ValueScanner(t *testing.T) {
+	fd := field.Bytes("dir").
+		ValueScanner(field.ValueScannerFunc[[]byte, *nullBytes]{
+			V: func(s []byte) (driver.Value, error) {
+				return []byte(hex.EncodeToString(s)), nil
+			},
+			S: func(ns *nullBytes) ([]byte, error) {
+				if ns == nil {
+					return nil, nil
+				}
+				b, err := hex.DecodeString(string(*ns))
+				if err != nil {
+					return nil, err
+				}
+				return b, nil
+			},
+		}).Descriptor()
+	require.NoError(t, fd.Err)
+	require.NotNil(t, fd.ValueScanner)
+	_, ok := fd.ValueScanner.(field.ValueScannerFunc[[]byte, *nullBytes])
+	require.True(t, ok)
+
+	fd = field.Bytes("url").
+		GoType(&url.URL{}).
+		ValueScanner(field.BinaryValueScanner[*url.URL]{}).
+		Descriptor()
+	require.NoError(t, fd.Err)
+	require.NotNil(t, fd.ValueScanner)
+	_, ok = fd.ValueScanner.(field.TypeValueScanner[*url.URL])
+	require.True(t, ok)
 }
 
 func TestString_DefaultFunc(t *testing.T) {
