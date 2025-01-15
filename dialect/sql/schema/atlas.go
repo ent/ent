@@ -525,6 +525,7 @@ func (a *Atlas) StateReader(tables ...*Table) migrate.StateReaderFunc {
 			}
 			a.sqlDialect = drv
 		}
+		a.setupTables(tables)
 		ts, err := a.tables(tables)
 		if err != nil {
 			return nil, err
