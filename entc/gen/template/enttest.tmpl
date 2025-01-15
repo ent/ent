@@ -25,6 +25,7 @@ import (
 	{{ if $.SupportMigrate }}
 		"{{ $.Config.Package }}/migrate"
 		"entgo.io/ent/dialect/sql/schema"
+		"ariga.io/entcache"
 	{{ end }}
 )
 
@@ -102,7 +103,7 @@ func NewClient(t TestingT, opts ...Option) *{{ $pkg }}.Client {
 			t.Error(err)
 			t.FailNow()
 		}
-		if err := migrate.Create(context.Background(), c.Schema, tables, o.migrateOpts...); err != nil {
+		if err := migrate.Create(entcache.Skip(context.Background()), c.Schema, tables, o.migrateOpts...); err != nil {
 			t.Error(err)
 			t.FailNow()
 		}
