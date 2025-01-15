@@ -9,6 +9,7 @@ import (
 	// required by schema hooks.
 	_ "entgo.io/ent/examples/triggers/ent/runtime"
 
+	"ariga.io/entcache"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/examples/triggers/ent/migrate"
 )
@@ -77,7 +78,7 @@ func migrateSchema(t TestingT, c *ent.Client, o *options) {
 		t.Error(err)
 		t.FailNow()
 	}
-	if err := migrate.Create(context.Background(), c.Schema, tables, o.migrateOpts...); err != nil {
+	if err := migrate.Create(entcache.Skip(context.Background()), c.Schema, tables, o.migrateOpts...); err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
