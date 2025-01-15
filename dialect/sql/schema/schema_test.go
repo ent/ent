@@ -5,8 +5,12 @@
 package schema
 
 import (
+	"context"
+	"fmt"
 	"testing"
 
+	"ariga.io/atlas/sql/migrate"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/field"
 
@@ -148,4 +152,77 @@ func TestCopyTables(t *testing.T) {
 	copyT, err := CopyTables(tables)
 	require.NoError(t, err)
 	require.Equal(t, tables, copyT)
+}
+
+func TestDump(t *testing.T) {
+	users := &Table{
+		Name: "users",
+		Columns: []*Column{
+			{Name: "id", Type: field.TypeInt},
+			{Name: "name", Type: field.TypeString},
+			{Name: "spouse_id", Type: field.TypeInt},
+		},
+	}
+	users.PrimaryKey = users.Columns[:1]
+	users.Indexes = append(users.Indexes, &Index{
+		Name:    "name",
+		Columns: users.Columns[1:2],
+	})
+	users.AddForeignKey(&ForeignKey{
+		Columns:    users.Columns[2:],
+		RefTable:   users,
+		RefColumns: users.Columns[:1],
+		OnUpdate:   SetDefault,
+	})
+	users.SetAnnotation(&entsql.Annotation{Table: "Users"})
+	pets := &Table{
+		Name: "pets",
+		Columns: []*Column{
+			{Name: "id", Type: field.TypeInt},
+			{Name: "name", Type: field.TypeString},
+			{Name: "fur_color", Type: field.TypeEnum, Enums: []string{"black", "white"}},
+			{Name: "owner_id", Type: field.TypeInt},
+		},
+	}
+	pets.Indexes = append(pets.Indexes, &Index{
+		Name:       "name",
+		Unique:     true,
+		Columns:    pets.Columns[1:2],
+		Annotation: entsql.Desc(),
+	})
+	pets.AddForeignKey(&ForeignKey{
+		Columns:    pets.Columns[3:],
+		RefTable:   users,
+		RefColumns: users.Columns[:1],
+		OnDelete:   SetDefault,
+	})
+	tables = []*Table{users, pets}
+
+	my := func(length int) string {
+		return fmt.Sprintf("-- Create \"users\" table\nCREATE TABLE `users` (`id` bigint NOT NULL, `name` varchar(%d) NOT NULL, `spouse_id` bigint NOT NULL, PRIMARY KEY (`id`), INDEX `name` (`name`), FOREIGN KEY (`spouse_id`) REFERENCES `users` (`id`) ON UPDATE SET DEFAULT) CHARSET utf8mb4 COLLATE utf8mb4_bin;\n-- Create \"pets\" table\nCREATE TABLE `pets` (`id` bigint NOT NULL, `name` varchar(%d) NOT NULL, `fur_color` enum('black','white') NOT NULL, `owner_id` bigint NOT NULL, UNIQUE INDEX `name` (`name` DESC), FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`) ON DELETE SET DEFAULT) CHARSET utf8mb4 COLLATE utf8mb4_bin;\n", length, length)
+	}
+
+	pg := "-- Create \"users\" table\nCREATE TABLE \"users\" (\"id\" bigint NOT NULL, \"name\" character varying NOT NULL, \"spouse_id\" bigint NOT NULL, PRIMARY KEY (\"id\"), FOREIGN KEY (\"spouse_id\") REFERENCES \"users\" (\"id\") ON UPDATE SET DEFAULT);\n-- Create index \"name\" to table: \"users\"\nCREATE INDEX \"name\" ON \"users\" (\"name\");\n-- Create \"pets\" table\nCREATE TABLE \"pets\" (\"id\" bigint NOT NULL, \"name\" character varying NOT NULL, \"fur_color\" character varying NOT NULL, \"owner_id\" bigint NOT NULL, FOREIGN KEY (\"owner_id\") REFERENCES \"users\" (\"id\") ON DELETE SET DEFAULT);\n-- Create index \"name\" to table: \"pets\"\nCREATE UNIQUE INDEX \"name\" ON \"pets\" (\"name\" DESC);\n"
+
+	for _, tt := range []struct{ dialect, version, expected string }{
+		{
+			dialect.SQLite, "",
+			"-- Create \"users\" table\nCREATE TABLE `users` (`id` integer NOT NULL, `name` text NOT NULL, `spouse_id` integer NOT NULL, PRIMARY KEY (`id`), FOREIGN KEY (`spouse_id`) REFERENCES `users` (`id`) ON UPDATE SET DEFAULT);\n-- Create index \"name\" to table: \"users\"\nCREATE INDEX `name` ON `users` (`name`);\n-- Create \"pets\" table\nCREATE TABLE `pets` (`id` integer NOT NULL, `name` text NOT NULL, `fur_color` text NOT NULL, `owner_id` integer NOT NULL, FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`) ON DELETE SET DEFAULT);\n-- Create index \"name\" to table: \"pets\"\nCREATE UNIQUE INDEX `name` ON `pets` (`name` DESC);\n",
+		},
+		{dialect.MySQL, "5.6", my(191)},
+		{dialect.MySQL, "5.7", my(255)},
+		{dialect.MySQL, "8", my(255)},
+		{dialect.Postgres, "12", pg},
+		{dialect.Postgres, "13", pg},
+		{dialect.Postgres, "14", pg},
+		{dialect.Postgres, "15", pg},
+	} {
+		t.Run(fmt.Sprintf("%s:%s", tt.dialect, tt.version), func(t *testing.T) {
+			ac, err := Dump(context.Background(), tt.dialect, tt.version, tables, func(o *migrate.PlanOptions) {
+				o.Indent = ""
+			})
+			require.NoError(t, err)
+			require.Equal(t, tt.expected, ac)
+		})
+	}
 }

@@ -6,10 +6,18 @@
 package schema
 
 import (
+	"context"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
+	"ariga.io/atlas/sql/migrate"
+	"ariga.io/atlas/sql/mysql"
+	"ariga.io/atlas/sql/postgres"
+	"ariga.io/atlas/sql/schema"
+	"ariga.io/atlas/sql/sqlite"
+	entdialect "entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
@@ -575,4 +583,64 @@ func indexType(idx *Index, d string) (string, bool) {
 		return ant.Type, true
 	}
 	return "", false
+}
+
+type driver struct {
+	sqlDialect
+	schema.Differ
+	migrate.PlanApplier
+}
+
+var drivers = func(v string) map[string]driver {
+	return map[string]driver{
+		entdialect.SQLite: {
+			&SQLite{WithForeignKeys: true},
+			sqlite.DefaultDiff,
+			sqlite.DefaultPlan,
+		},
+		entdialect.MySQL: {
+			&MySQL{version: v},
+			mysql.DefaultDiff,
+			mysql.DefaultPlan,
+		},
+		entdialect.Postgres: {
+			&Postgres{version: v},
+			postgres.DefaultDiff,
+			postgres.DefaultPlan,
+		},
+	}
+}
+
+// Dump the schema DDL for the given tables.
+func Dump(ctx context.Context, dialect, version string, tables []*Table, opts ...migrate.PlanOption) (string, error) {
+	opts = append([]migrate.PlanOption{func(o *migrate.PlanOptions) {
+		o.Mode = migrate.PlanModeDump
+		o.Indent = "  "
+	}}, opts...)
+	d, ok := drivers(version)[dialect]
+	if !ok {
+		return "", fmt.Errorf("unsupported dialect %q", dialect)
+	}
+	r, err := (&Atlas{sqlDialect: d}).StateReader(tables...).ReadState(ctx)
+	if err != nil {
+		return "", err
+	}
+	var c schema.Changes
+	if slices.ContainsFunc(tables, func(t *Table) bool { return t.Schema != "" }) {
+		c, err = d.RealmDiff(&schema.Realm{}, r)
+	} else {
+		c, err = d.SchemaDiff(&schema.Schema{}, r.Schemas[0])
+	}
+	if err != nil {
+		return "", err
+	}
+	p, err := d.PlanChanges(ctx, "dump", c, opts...)
+	if err != nil {
+		return "", err
+	}
+	f, err := migrate.DefaultFormatter.FormatFile(p)
+	if err != nil {
+		return "", err
+	}
+	return string(f.Bytes()), nil
 }
