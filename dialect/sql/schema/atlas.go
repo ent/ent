@@ -852,7 +852,7 @@ func (a *Atlas) tables(tables []*Table) ([]*schema.Table, error) {
 		// The new implementation is based on annotations attached to the schema. Only one can be enabled.
 		switch {
 		case a.universalID && et.Annotation != nil && et.Annotation.IncrementStart != nil:
-			return nil, errors.New("sql/schema: universal id and increment start annotation are mutually exclusive")
+			return nil, errors.New("universal id and increment start annotation are mutually exclusive")
 		case a.universalID && et.Name != TypeTable && len(et.PrimaryKey) == 1:
 			r, err := a.pkRange(et)
 			if err != nil {
