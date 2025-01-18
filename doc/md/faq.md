@@ -22,7 +22,6 @@ sidebar_label: FAQ
 [How to add `CHECK` constraints to table?](#how-to-add-check-constraints-to-table)  
 [How to define a custom precision numeric field?](#how-to-define-a-custom-precision-numeric-field)  
 [How to configure two or more `DB` to separate read and write?](#how-to-configure-two-or-more-db-to-separate-read-and-write)  
-[How to change the character set and/or collation of a MySQL table?](#how-to-change-the-character-set-andor-collation-of-a-mysql-table)    
 [How to configure `json.Marshal` to inline the `edges` keys in the top level object?](#how-to-configure-jsonmarshal-to-inline-the-edges-keys-in-the-top-level-object)
 
 ## Answers
@@ -766,25 +765,6 @@ func (d *multiDriver) Close() error {
 
 func (d *multiDriver) Dialect() string {
 	return d.r.Dialect()
-}
-```
-
-#### How to change the character set and/or collation of a MySQL table?
-
-By default for MySQL the character set `utf8mb4` is used and the collation of `utf8mb4_bin`.
-However if you'd like to change the schema's character set and/or collation you need to use an annotation.
-
-Here's an example where we set the character set to `ascii` and the collation to `ascii_general_ci`.
-
-```go
-// Annotations of the Entity.
-func (Entity) Annotations() []schema.Annotation {
-	return []schema.Annotation{
-		entsql.Annotation{
-			Charset:   "ascii",
-			Collation: "ascii_general_ci",
-		},
-	}
 }
 ```
 
