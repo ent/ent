@@ -29,7 +29,7 @@ For proper installation using [Go modules], visit [entgo.io website][entgo insta
 ## Docs and Support
 The documentation for developing and using ent is available at: https://entgo.io
 
-For discussion and support, [open an issue](https://github.com/ent/ent/issues/new/choose) or join our [channel](https://gophers.slack.com/archives/C01FMSQDT53) in the gophers Slack.
+For discussion and support, [open an issue](https://github.com/ent/ent/issues/new/choose) or join our [Discord server](https://discord.gg/qZmPgTE6RX).
 
 ## Developed and Sponsored by the [Atlas](https://atlasgo.io) Team
 
