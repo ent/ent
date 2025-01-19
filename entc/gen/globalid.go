@@ -121,6 +121,25 @@ func (IncrementStarts) Name() string {
 	return "IncrementStarts"
 }
 
+// WriteToDisk writes the increment starts to the disk.
+func (i IncrementStarts) WriteToDisk(target string) error {
+	initTemplates()
+	p := rangesFilePath(target)
+	if err := os.MkdirAll(filepath.Dir(p), 0755); err != nil {
+		return err
+	}
+	f, err := os.Create(p)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return templates.Lookup("internal/globalid").
+		Execute(f, &Config{
+			Target:      target,
+			Annotations: Annotations{"IncrementStarts": i},
+		})
+}
+
 func rangesFilePath(dir string) string {
 	return filepath.Join(dir, "internal", "globalid.go")
 }
