@@ -120,7 +120,7 @@ func (a *Atlas) NamedDiff(ctx context.Context, name string, tables ...*Table) er
 	if a.dir == nil {
 		return errors.New("no migration directory given")
 	}
-	opts := []migrate.PlannerOption{migrate.WithFormatter(a.fmt)}
+	opts := []migrate.PlannerOption{migrate.PlanFormat(a.fmt)}
 	// Validate the migration directory before proceeding.
 	if err := migrate.Validate(a.dir); err != nil {
 		return fmt.Errorf("validating migration directory: %w", err)
