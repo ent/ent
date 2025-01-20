@@ -22,5 +22,5 @@ func main() {
 		base.InitCmd(),
 		base.SchemaCmd(),
 	)
-	_ = cmd.Execute()
+	cobra.CheckErr(cmd.Execute())
 }
