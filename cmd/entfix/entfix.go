@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"os/signal"
 	"strings"
@@ -19,11 +18,6 @@ import (
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/entc/gen"
 	"github.com/alecthomas/kong"
-)
-
-var (
-	out io.Writer = os.Stdout
-	in  io.Reader = os.Stdin
 )
 
 type (
@@ -61,8 +55,7 @@ func main() {
 }
 
 func (cmd *GlobalID) Run(ctx context.Context) error {
-	fmt.Fprint(out,
-		`IMPORTANT INFORMATION
+	fmt.Print(`IMPORTANT INFORMATION
 
   'entfix globalid' will convert the allocated id ranges for your nodes from the 
   database stored 'ent_types' table to the new static configuration on the ent 
@@ -77,11 +70,11 @@ func (cmd *GlobalID) Run(ctx context.Context) error {
   Only 'yes' will be accepted to approve.
 
   Enter a value: `)
-	switch c, err := bufio.NewReader(in).ReadString('\n'); {
+	switch c, err := bufio.NewReader(os.Stdin).ReadString('\n'); {
 	case err != nil:
 		return err
 	case strings.TrimSpace(c) != "yes":
-		fmt.Fprintln(out, "\nAborted.")
+		fmt.Println("\nAborted.")
 		return nil
 	}
 	db, err := sql.Open(cmd.Dialect, cmd.DSN)
@@ -108,6 +101,6 @@ func (cmd *GlobalID) Run(ctx context.Context) error {
 	if err := is.WriteToDisk(cmd.Path); err != nil {
 		return err
 	}
-	fmt.Fprintln(out, "\nSuccess! Please run code generation to complete the process.")
+	fmt.Println("\nSuccess! Please run code generation to complete the process.")
 	return nil
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"database/sql"
 	"fmt"
@@ -20,11 +19,15 @@ import (
 )
 
 func TestEntfix(t *testing.T) {
-	var (
-		ctx = context.Background()
-		buf = new(bytes.Buffer)
-	)
-	out = buf
+	ctx := context.Background()
+	stdout, err := os.CreateTemp(t.TempDir(), "")
+	require.NoError(t, err)
+	oldStdout := os.Stdout
+	os.Stdout = stdout
+	t.Cleanup(func() {
+		os.Stdout = oldStdout
+		require.NoError(t, stdout.Close())
+	})
 
 	cli := &GlobalID{
 		Dialect: dialect.SQLite,
@@ -33,10 +36,12 @@ func TestEntfix(t *testing.T) {
 	}
 
 	// Prints details, requires confirmation.
-	in = strings.NewReader("no\n")
+	os.Stdin = mockStdin(t, "no\n")
 	require.NoError(t, cli.Run(ctx))
-	require.True(t, strings.HasPrefix(buf.String(), "IMPORTANT INFORMATION\n\n"))
-	require.True(t, strings.HasSuffix(buf.String(), "Aborted.\n"))
+	buf, err := os.ReadFile(stdout.Name())
+	require.NoError(t, err)
+	require.True(t, strings.HasPrefix(string(buf), "IMPORTANT INFORMATION\n\n"))
+	require.True(t, strings.HasSuffix(string(buf), "Aborted.\n"))
 	f, err := os.Open(cli.Path)
 	require.NoError(t, err)
 	t.Cleanup(func() { require.NoError(t, f.Close()) })
@@ -54,13 +59,31 @@ func TestEntfix(t *testing.T) {
 	_, err = db.ExecContext(ctx, fmt.Sprintf("INSERT INTO %s (type) VALUES ('z'), ('y'), ('a'), ('b')", schema.TypeTable))
 	require.NoError(t, err)
 
-	in = strings.NewReader("yes\n")
+	os.Stdin = mockStdin(t, "yes\n")
 	require.NoError(t, cli.Run(ctx))
-	require.True(t, strings.HasSuffix(buf.String(), "Success! Please run code generation to complete the process.\n"))
+	buf, err = os.ReadFile(stdout.Name())
+	require.NoError(t, err)
+	require.True(t, strings.HasSuffix(string(buf), "Success! Please run code generation to complete the process.\n"))
 	c, err := os.ReadFile(filepath.Join(cli.Path, "internal", "globalid.go"))
 	require.NoError(t, err)
 	require.Contains(t,
 		string(c),
 		fmt.Sprintf(`const IncrementStarts = "{\"a\":%d,\"b\":%d,\"y\":%d,\"z\":%d}"`, 2<<32, 3<<32, 1<<32, 0),
 	)
+}
+
+func mockStdin(t *testing.T, content string) *os.File {
+	t.Helper()
+	stdin, err := os.CreateTemp(t.TempDir(), "")
+	require.NoError(t, err)
+	_, err = stdin.WriteString(content)
+	require.NoError(t, err)
+	_, err = stdin.Seek(0, 0)
+	require.NoError(t, err)
+	oldStdin := os.Stdin
+	t.Cleanup(func() {
+		os.Stdin = oldStdin
+		require.NoError(t, stdin.Close())
+	})
+	return stdin
 }
