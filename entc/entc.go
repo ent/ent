@@ -37,6 +37,9 @@ func LoadGraph(schemaPath string, cfg *gen.Config) (*gen.Graph, error) {
 		// before the schema package (`<project>/ent/schema`).
 		cfg.Package = path.Dir(spec.PkgPath)
 	}
+	if err := defaultTarget(schemaPath, cfg); err != nil {
+		return nil, err
+	}
 	return gen.NewGraph(cfg, spec.Schemas...)
 }
 
@@ -52,14 +55,8 @@ func LoadGraph(schemaPath string, cfg *gen.Config) (*gen.Graph, error) {
 //		IDType: &field.TypeInfo{Type: field.TypeInt},
 //	})
 func Generate(schemaPath string, cfg *gen.Config, options ...Option) error {
-	if cfg.Target == "" {
-		abs, err := filepath.Abs(schemaPath)
-		if err != nil {
-			return err
-		}
-		// default target-path for codegen is one dir above
-		// the schema.
-		cfg.Target = filepath.Dir(abs)
+	if err := defaultTarget(schemaPath, cfg); err != nil {
+		return err
 	}
 	for _, opt := range options {
 		if err := opt(cfg); err != nil {
@@ -406,4 +403,18 @@ func indirect(t reflect.Type) reflect.Type {
 		t = t.Elem()
 	}
 	return t
+}
+
+// defaultTarget computes and sets the default target-path for codegen (one level above schema-path).
+func defaultTarget(schemaPath string, cfg *gen.Config) error {
+	if cfg.Target != "" {
+		return nil
+	}
+	abs, err := filepath.Abs(schemaPath)
+	if err != nil {
+		return err
+	}
+	// Default target-path for codegen is one dir above the schema.
+	cfg.Target = filepath.Dir(abs)
+	return nil
 }

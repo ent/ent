@@ -51,4 +51,12 @@ func TestIncrementStartAnnotation(t *testing.T) {
 	g, err = gen.NewGraph(c, s...)
 	require.ErrorContains(t, err, "duplicated increment start value 4294967296 for types")
 	require.Nil(t, g)
+
+	// Respects existing increment starting values loaded from file.
+	c.Target = t.TempDir()
+	is := gen.IncrementStarts{"bs": 0, "as": 1 << 32, "cs": 2 << 32}
+	require.NoError(t, is.WriteToDisk(c.Target))
+	g, err = gen.NewGraph(c, &load.Schema{Name: "A"}, &load.Schema{Name: "B"}, &load.Schema{Name: "C"})
+	require.NoError(t, err)
+	require.Equal(t, is, g.Annotations[is.Name()])
 }
