@@ -627,56 +627,56 @@ var (
 
 func init() {
 	ApisTable.Annotation = &entsql.Annotation{
-		IncrementStart: func(i int64) *int64 { return &i }(12884901888),
+		IncrementStart: func(i int) *int { return &i }(12884901888),
 	}
 	BuildersTable.Annotation = &entsql.Annotation{
-		IncrementStart: func(i int64) *int64 { return &i }(17179869184),
+		IncrementStart: func(i int) *int { return &i }(17179869184),
 	}
 	CardsTable.ForeignKeys[0].RefTable = UsersTable
 	CardsTable.Annotation = &entsql.Annotation{
-		IncrementStart: func(i int64) *int64 { return &i }(21474836480),
+		IncrementStart: func(i int) *int { return &i }(21474836480),
 	}
 	CommentsTable.Annotation = &entsql.Annotation{
-		IncrementStart: func(i int64) *int64 { return &i }(25769803776),
+		IncrementStart: func(i int) *int { return &i }(25769803776),
 	}
 	ExValueScansTable.Annotation = &entsql.Annotation{
-		IncrementStart: func(i int64) *int64 { return &i }(30064771072),
+		IncrementStart: func(i int) *int { return &i }(30064771072),
 	}
 	FieldTypesTable.ForeignKeys[0].RefTable = FilesTable
 	FieldTypesTable.Annotation = &entsql.Annotation{
-		IncrementStart: func(i int64) *int64 { return &i }(34359738368),
+		IncrementStart: func(i int) *int { return &i }(34359738368),
 	}
 	FilesTable.ForeignKeys[0].RefTable = FileTypesTable
 	FilesTable.ForeignKeys[1].RefTable = GroupsTable
 	FilesTable.ForeignKeys[2].RefTable = UsersTable
 	FilesTable.Annotation = &entsql.Annotation{
-		IncrementStart: func(i int64) *int64 { return &i }(38654705664),
+		IncrementStart: func(i int) *int { return &i }(38654705664),
 	}
 	FileTypesTable.Annotation = &entsql.Annotation{
-		IncrementStart: func(i int64) *int64 { return &i }(42949672960),
+		IncrementStart: func(i int) *int { return &i }(42949672960),
 	}
 	GoodsTable.Annotation = &entsql.Annotation{
-		IncrementStart: func(i int64) *int64 { return &i }(47244640256),
+		IncrementStart: func(i int) *int { return &i }(47244640256),
 	}
 	GroupsTable.ForeignKeys[0].RefTable = GroupInfosTable
 	GroupsTable.Annotation = &entsql.Annotation{
-		IncrementStart: func(i int64) *int64 { return &i }(51539607552),
+		IncrementStart: func(i int) *int { return &i }(51539607552),
 	}
 	GroupInfosTable.Annotation = &entsql.Annotation{
-		IncrementStart: func(i int64) *int64 { return &i }(55834574848),
+		IncrementStart: func(i int) *int { return &i }(55834574848),
 	}
 	ItemsTable.Annotation = &entsql.Annotation{
-		IncrementStart: func(i int64) *int64 { return &i }(60129542144),
+		IncrementStart: func(i int) *int { return &i }(60129542144),
 	}
 	LicensesTable.Annotation = &entsql.Annotation{
-		IncrementStart: func(i int64) *int64 { return &i }(64424509440),
+		IncrementStart: func(i int) *int { return &i }(64424509440),
 	}
 	NodesTable.ForeignKeys[0].RefTable = NodesTable
 	NodesTable.Annotation = &entsql.Annotation{
-		IncrementStart: func(i int64) *int64 { return &i }(68719476736),
+		IncrementStart: func(i int) *int { return &i }(68719476736),
 	}
 	PcsTable.Annotation = &entsql.Annotation{
-		IncrementStart: func(i int64) *int64 { return &i }(73014444032),
+		IncrementStart: func(i int) *int { return &i }(73014444032),
 	}
 	PetTable.ForeignKeys[0].RefTable = UsersTable
 	PetTable.ForeignKeys[1].RefTable = UsersTable
@@ -684,16 +684,16 @@ func init() {
 		Table: "pet",
 	}
 	SpecsTable.Annotation = &entsql.Annotation{
-		IncrementStart: func(i int64) *int64 { return &i }(81604378624),
+		IncrementStart: func(i int) *int { return &i }(81604378624),
 	}
 	TasksTable.Annotation = &entsql.Annotation{
-		IncrementStart: func(i int64) *int64 { return &i }(85899345920),
+		IncrementStart: func(i int) *int { return &i }(85899345920),
 	}
 	UsersTable.ForeignKeys[0].RefTable = GroupsTable
 	UsersTable.ForeignKeys[1].RefTable = UsersTable
 	UsersTable.ForeignKeys[2].RefTable = UsersTable
 	UsersTable.Annotation = &entsql.Annotation{
-		IncrementStart: func(i int64) *int64 { return &i }(8589934592),
+		IncrementStart: func(i int) *int { return &i }(8589934592),
 	}
 	SpecCardTable.ForeignKeys[0].RefTable = SpecsTable
 	SpecCardTable.ForeignKeys[1].RefTable = CardsTable

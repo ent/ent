@@ -408,9 +408,7 @@ func TestEnsureCorrectFK(t *testing.T) {
 
 func TestGraph_Gen(t *testing.T) {
 	require := require.New(t)
-	target := filepath.Join(os.TempDir(), "ent")
-	require.NoError(os.MkdirAll(target, os.ModePerm), "creating tmpdir")
-	defer os.RemoveAll(target)
+	target := filepath.Join(t.TempDir(), "ent")
 	external := MustParse(NewTemplate("external").Parse("package external"))
 	skipped := MustParse(NewTemplate("skipped").SkipIf(func(*Graph) bool { return true }).Parse("package external"))
 	schemas := []*load.Schema{
@@ -444,7 +442,7 @@ func TestGraph_Gen(t *testing.T) {
 	require.Equal(a, graph.Annotations[a.Name()])
 	ant := &entsql.Annotation{}
 	for i, n := range graph.Nodes {
-		require.Equal(int64(i)<<32, *n.Annotations[ant.Name()].(*entsql.Annotation).IncrementStart)
+		require.Equal(i<<32, *n.Annotations[ant.Name()].(*entsql.Annotation).IncrementStart)
 	}
 	// Ensure graph files were generated.
 	for _, name := range []string{"ent", "client"} {

@@ -376,7 +376,7 @@ func TestAtlas_StateReader(t *testing.T) {
 			{Name: "active", Type: field.TypeBool},
 		},
 		Annotation: &entsql.Annotation{
-			IncrementStart: func(i int64) *int64 { return &i }(100),
+			IncrementStart: func(i int) *int { return &i }(100),
 		},
 	}).ReadState(context.Background())
 	require.NoError(t, err)

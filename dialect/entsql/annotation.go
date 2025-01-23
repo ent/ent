@@ -135,7 +135,7 @@ type Annotation struct {
 	//
 	// By default, this value is nil defaulting to whatever the database settings are.
 	//
-	IncrementStart *int64 `json:"increment_start,omitempty"`
+	IncrementStart *int `json:"increment_start,omitempty"`
 
 	// OnDelete specifies a custom referential action for DELETE operations on parent
 	// table that has matching rows in the child table.
@@ -384,7 +384,7 @@ func OnDelete(opt ReferenceOption) *Annotation {
 //			entsql.IncrementStart(100),
 //		}
 //	}
-func IncrementStart(i int64) *Annotation {
+func IncrementStart(i int) *Annotation {
 	return &Annotation{
 		IncrementStart: &i,
 	}

@@ -383,7 +383,7 @@ func generate(schemaPath string, cfg *gen.Config) error {
 }
 
 func mayRecover(err error, schemaPath string, cfg *gen.Config) error {
-	if enabled, _ := cfg.FeatureEnabled(gen.FeatureSnapshot.Name); !enabled {
+	if ok, _ := cfg.FeatureEnabled(gen.FeatureSnapshot.Name); !ok {
 		return err
 	}
 	if !errors.As(err, &packages.Error{}) && !internal.IsBuildError(err) {
@@ -394,6 +394,14 @@ func mayRecover(err error, schemaPath string, cfg *gen.Config) error {
 		return fmt.Errorf("schema failure: %w", err)
 	}
 	target := filepath.Join(cfg.Target, "internal/schema.go")
+	if ok, _ := cfg.FeatureEnabled(gen.FeatureGlobalID.Name); ok {
+		if internal.CheckDir(gen.IncrementStartsFilePath(target)) != nil {
+			// Resolve the conflict by accepting the remote version of the file.
+			if err := gen.ResolveIncrementStartsConflict(cfg.Target); err != nil {
+				return err
+			}
+		}
+	}
 	return (&internal.Snapshot{Path: target, Config: cfg}).Restore()
 }
 

@@ -860,7 +860,7 @@ func (a *Atlas) tables(tables []*Table) ([]*schema.Table, error) {
 			}
 			a.sqlDialect.atIncrementT(at, r)
 		case et.Annotation != nil && et.Annotation.IncrementStart != nil:
-			a.sqlDialect.atIncrementT(at, *et.Annotation.IncrementStart)
+			a.sqlDialect.atIncrementT(at, int64(*et.Annotation.IncrementStart))
 		}
 		if err := a.aColumns(et, at); err != nil {
 			return nil, err
