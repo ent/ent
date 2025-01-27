@@ -11,7 +11,6 @@ import (
 	"reflect"
 	"testing"
 
-	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/entc/load"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -440,9 +439,8 @@ func TestGraph_Gen(t *testing.T) {
 	// Ensure globalid feature added annotations.
 	a := IncrementStarts{"t1s": 0, "t2s": 1 << 32, "t3s": 2 << 32}
 	require.Equal(a, graph.Annotations[a.Name()])
-	ant := &entsql.Annotation{}
 	for i, n := range graph.Nodes {
-		require.Equal(i<<32, *n.Annotations[ant.Name()].(*entsql.Annotation).IncrementStart)
+		require.Equal(i<<32, *n.EntSQL().IncrementStart)
 	}
 	// Ensure graph files were generated.
 	for _, name := range []string{"ent", "client"} {
