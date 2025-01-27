@@ -681,7 +681,8 @@ func init() {
 	PetTable.ForeignKeys[0].RefTable = UsersTable
 	PetTable.ForeignKeys[1].RefTable = UsersTable
 	PetTable.Annotation = &entsql.Annotation{
-		Table: "pet",
+		Table:          "pet",
+		IncrementStart: func(i int) *int { return &i }(77309411328),
 	}
 	SpecsTable.Annotation = &entsql.Annotation{
 		IncrementStart: func(i int) *int { return &i }(81604378624),

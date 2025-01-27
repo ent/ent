@@ -26,7 +26,7 @@ func TestIncrementStartAnnotation(t *testing.T) {
 		s = []*load.Schema{
 			{
 				Name:        "T1",
-				Annotations: gen.Annotations{a.Name(): a},
+				Annotations: map[string]any{a.Name(): must(gen.ToMap(a))},
 			},
 		}
 		c = &gen.Config{
@@ -44,7 +44,8 @@ func TestIncrementStartAnnotation(t *testing.T) {
 	g, err = gen.NewGraph(c, s...)
 	require.EqualError(t, err, "unexpected increment start value 100 for type t1s, expected multiple of 4294967296 (1<<32)")
 	require.Nil(t, g)
-	a.IncrementStart = p(1 << 32)
+	a = &entsql.Annotation{IncrementStart: p(1 << 32)}
+	s[0].Annotations[a.Name()] = must(gen.ToMap(a))
 	g, err = gen.NewGraph(c, s...)
 	require.NoError(t, err)
 	require.NotNil(t, g)
@@ -52,7 +53,7 @@ func TestIncrementStartAnnotation(t *testing.T) {
 	// Duplicated increment starting values are not allowed.
 	s = append(s, &load.Schema{Name: "T2"}, &load.Schema{
 		Name:        "T3",
-		Annotations: gen.Annotations{a.Name(): &entsql.Annotation{IncrementStart: p(1 << 32)}},
+		Annotations: map[string]any{a.Name(): must(gen.ToMap(a))},
 	})
 	g, err = gen.NewGraph(c, s...)
 	require.ErrorContains(t, err, "duplicated increment start value 4294967296 for types")
@@ -110,6 +111,13 @@ const IncrementStarts = %s
 		gen.IncrementStarts{"bs": 0, "as": 1 << 32, "cs": 3 << 32, "ds": 2 << 32},
 		g.Annotations[(&gen.IncrementStarts{}).Name()],
 	)
+}
+
+func must[T any](t T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return t
 }
 
 func marshal(t *testing.T, v any) string {

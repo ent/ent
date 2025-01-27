@@ -76,13 +76,9 @@ func IncrementStartAnnotation(g *Graph) error {
 		lastIdx = -1
 	)
 	for _, n := range g.Nodes {
-		if n.Annotations == nil {
-			n.Annotations = make(Annotations)
-		}
 		a := n.EntSQL()
 		if a == nil {
 			a = &entsql.Annotation{}
-			n.Annotations[a.Name()] = a
 		}
 		switch v, ok := r[n.Table()]; {
 		case a.IncrementStart != nil:
@@ -98,13 +94,18 @@ func IncrementStartAnnotation(g *Graph) error {
 		if v, ok := r[n.Table()]; ok {
 			lastIdx = max(lastIdx, v/(1<<32-1))
 		}
+		if err := setAnnotation(n, a); err != nil {
+			return err
+		}
 	}
 	// Compute new ranges and write them back to the file.
 	for i, n := range need {
 		r[n.Table()] = (lastIdx + i + 1) << 32
 		a := n.EntSQL()
 		a.IncrementStart = func(i int) *int { return &i }(r[n.Table()]) // copy to not override previous values
-		n.Annotations[a.Name()] = a
+		if err := setAnnotation(n, a); err != nil {
+			return err
+		}
 	}
 	// Ensure increment ranges are exactly of size 1<<32 with no overlaps.
 	d := make(map[int]string)
@@ -183,4 +184,25 @@ func ResolveIncrementStartsConflict(dir string) error {
 		}
 	}
 	return os.WriteFile(p, bytes.Join(fixed, []byte("\n")), fi.Mode())
+}
+
+func ToMap(a *entsql.Annotation) (map[string]any, error) {
+	buf, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	m := make(map[string]any)
+	if err = json.Unmarshal(buf, &m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func setAnnotation(n *Type, a *entsql.Annotation) error {
+	m, err := ToMap(a)
+	if err != nil {
+		return err
+	}
+	n.Annotations.Set(a.Name(), m)
+	return nil
 }
