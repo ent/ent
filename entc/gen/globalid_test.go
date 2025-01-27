@@ -97,8 +97,8 @@ const IncrementStarts = %s
 	require.NoError(t, os.WriteFile(p, []byte(cflct), 0644))
 
 	// Expect an error when there is a file conflict.
-	// g, err := gen.NewGraph(c, s...)
-	// require.Error(t, err)
+	_, err := gen.NewGraph(c, s...)
+	require.Error(t, err)
 	// Conflict is resolved to "accept theirs".
 	require.NoError(t, gen.ResolveIncrementStartsConflict(c.Target))
 	require.NoError(t, internal.CheckDir(filepath.Dir(p)))
