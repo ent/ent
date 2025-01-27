@@ -33,6 +33,15 @@ func IncrementStartAnnotation(g *Graph) error {
 	case err != nil:
 		return err
 	default:
+		if ok, _ := g.FeatureEnabled(FeatureSnapshot.Name); ok {
+			if err = ResolveIncrementStartsConflict(g.Target); err != nil {
+				return err
+			}
+			buf, err = os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+		}
 		var (
 			matches = make([][]byte, 0, 2)
 			lines   = bytes.Split(buf, []byte("\n"))
@@ -158,16 +167,16 @@ func ResolveIncrementStartsConflict(dir string) error {
 		return err
 	}
 	var (
-		fixed   [][]byte
-		skipped bool
+		fixed             [][]byte
+		conflict, skipped bool
+		lines             = bytes.Split(c, []byte("\n"))
 	)
-	lines := bytes.Split(c, []byte("\n"))
 	for _, l := range lines {
 		switch {
-		case bytes.HasPrefix(l, []byte("<<<<<<<")),
-			bytes.HasPrefix(l, []byte("=======")),
-			bytes.HasPrefix(l, []byte(">>>>>>>")):
-		case bytes.HasPrefix(l, []byte(incrementIdent)) && !skipped:
+		case bytes.HasPrefix(l, []byte("<<<<<<<")):
+			conflict = true
+		case bytes.HasPrefix(l, []byte("=======")), bytes.HasPrefix(l, []byte(">>>>>>>")):
+		case bytes.HasPrefix(l, []byte(incrementIdent)) && conflict && !skipped:
 			skipped = true
 		default:
 			fixed = append(fixed, l)
