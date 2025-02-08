@@ -558,10 +558,10 @@ func (t Type) NumConstraint() int {
 func (t Type) MutableFields() []*Field {
 	fields := make([]*Field, 0, len(t.Fields))
 	for _, f := range t.Fields {
-		if f.Immutable || f.Computed {
+		if f.Immutable {
 			continue
 		}
-		if e, err := f.Edge(); err == nil && (e.Immutable || e.Computed) {
+		if e, err := f.Edge(); err == nil && e.Immutable {
 			continue
 		}
 		fields = append(fields, f)
@@ -573,7 +573,7 @@ func (t Type) MutableFields() []*Field {
 func (t Type) ImmutableFields() []*Field {
 	fields := make([]*Field, 0, len(t.Fields))
 	for _, f := range t.Fields {
-		if f.Immutable || f.Computed {
+		if f.Immutable {
 			fields = append(fields, f)
 		}
 	}
