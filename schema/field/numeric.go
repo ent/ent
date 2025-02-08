@@ -221,6 +221,12 @@ func (b *intBuilder) Immutable() *intBuilder {
 	return b
 }
 
+// Computed indicates that this field cannot be created or updated.
+func (b *intBuilder) Computed() *intBuilder {
+	b.desc.Computed = true
+	return b
+}
+
 // StructTag sets the struct tag of the field.
 func (b *intBuilder) StructTag(s string) *intBuilder {
 	b.desc.Tag = s
@@ -406,6 +412,12 @@ func (b *uintBuilder) Optional() *uintBuilder {
 // Immutable indicates that this field cannot be updated.
 func (b *uintBuilder) Immutable() *uintBuilder {
 	b.desc.Immutable = true
+	return b
+}
+
+// Computed indicates that this field cannot be created or updated.
+func (b *uintBuilder) Computed() *uintBuilder {
+	b.desc.Computed = true
 	return b
 }
 
@@ -607,6 +619,12 @@ func (b *int8Builder) Immutable() *int8Builder {
 	return b
 }
 
+// Computed indicates that this field cannot be created or updated.
+func (b *int8Builder) Computed() *int8Builder {
+	b.desc.Computed = true
+	return b
+}
+
 // StructTag sets the struct tag of the field.
 func (b *int8Builder) StructTag(s string) *int8Builder {
 	b.desc.Tag = s
@@ -802,6 +820,12 @@ func (b *int16Builder) Optional() *int16Builder {
 // Immutable indicates that this field cannot be updated.
 func (b *int16Builder) Immutable() *int16Builder {
 	b.desc.Immutable = true
+	return b
+}
+
+// Computed indicates that this field cannot be created or updated.
+func (b *int16Builder) Computed() *int16Builder {
+	b.desc.Computed = true
 	return b
 }
 
@@ -1003,6 +1027,12 @@ func (b *int32Builder) Immutable() *int32Builder {
 	return b
 }
 
+// Computed indicates that this field cannot be created or updated.
+func (b *int32Builder) Computed() *int32Builder {
+	b.desc.Computed = true
+	return b
+}
+
 // StructTag sets the struct tag of the field.
 func (b *int32Builder) StructTag(s string) *int32Builder {
 	b.desc.Tag = s
@@ -1201,6 +1231,12 @@ func (b *int64Builder) Immutable() *int64Builder {
 	return b
 }
 
+// Computed indicates that this field cannot be created or updated.
+func (b *int64Builder) Computed() *int64Builder {
+	b.desc.Computed = true
+	return b
+}
+
 // StructTag sets the struct tag of the field.
 func (b *int64Builder) StructTag(s string) *int64Builder {
 	b.desc.Tag = s
@@ -1386,6 +1422,12 @@ func (b *uint8Builder) Optional() *uint8Builder {
 // Immutable indicates that this field cannot be updated.
 func (b *uint8Builder) Immutable() *uint8Builder {
 	b.desc.Immutable = true
+	return b
+}
+
+// Computed indicates that this field cannot be created or updated.
+func (b *uint8Builder) Computed() *uint8Builder {
+	b.desc.Computed = true
 	return b
 }
 
@@ -1577,6 +1619,12 @@ func (b *uint16Builder) Immutable() *uint16Builder {
 	return b
 }
 
+// Computed indicates that this field cannot be created or updated.
+func (b *uint16Builder) Computed() *uint16Builder {
+	b.desc.Computed = true
+	return b
+}
+
 // StructTag sets the struct tag of the field.
 func (b *uint16Builder) StructTag(s string) *uint16Builder {
 	b.desc.Tag = s
@@ -1765,6 +1813,12 @@ func (b *uint32Builder) Immutable() *uint32Builder {
 	return b
 }
 
+// Computed indicates that this field cannot be created or updated.
+func (b *uint32Builder) Computed() *uint32Builder {
+	b.desc.Computed = true
+	return b
+}
+
 // StructTag sets the struct tag of the field.
 func (b *uint32Builder) StructTag(s string) *uint32Builder {
 	b.desc.Tag = s
@@ -1950,6 +2004,12 @@ func (b *uint64Builder) Optional() *uint64Builder {
 // Immutable indicates that this field cannot be updated.
 func (b *uint64Builder) Immutable() *uint64Builder {
 	b.desc.Immutable = true
+	return b
+}
+
+// Computed indicates that this field cannot be created or updated.
+func (b *uint64Builder) Computed() *uint64Builder {
+	b.desc.Computed = true
 	return b
 }
 
@@ -2159,6 +2219,12 @@ func (b *float64Builder) Immutable() *float64Builder {
 	return b
 }
 
+// Computed indicates that this field cannot be created or updated.
+func (b *float64Builder) Computed() *float64Builder {
+	b.desc.Computed = true
+	return b
+}
+
 // StructTag sets the struct tag of the field.
 func (b *float64Builder) StructTag(s string) *float64Builder {
 	b.desc.Tag = s
@@ -2350,6 +2416,12 @@ func (b *float32Builder) Optional() *float32Builder {
 // Immutable indicates that this field cannot be updated.
 func (b *float32Builder) Immutable() *float32Builder {
 	b.desc.Immutable = true
+	return b
+}
+
+// Computed indicates that this field cannot be created or updated.
+func (b *float32Builder) Computed() *float32Builder {
+	b.desc.Computed = true
 	return b
 }
 

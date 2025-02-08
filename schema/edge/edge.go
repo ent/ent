@@ -23,6 +23,7 @@ type Descriptor struct {
 	Inverse     bool                   // inverse edge.
 	Required    bool                   // required on creation.
 	Immutable   bool                   // create only edge.
+	Computed    bool                   // query only edge
 	StorageKey  *StorageKey            // optional storage-key configuration.
 	Annotations []schema.Annotation    // edge annotations.
 	Comment     string                 // edge comment.
@@ -67,6 +68,12 @@ func (b *assocBuilder) Required() *assocBuilder {
 // Immutable indicates that this edge cannot be updated.
 func (b *assocBuilder) Immutable() *assocBuilder {
 	b.desc.Immutable = true
+	return b
+}
+
+// Computed indicates that this edge cannot be created or updated.
+func (b *assocBuilder) Computed() *assocBuilder {
+	b.desc.Computed = true
 	return b
 }
 
@@ -166,6 +173,12 @@ func (b *inverseBuilder) Required() *inverseBuilder {
 // Immutable indicates that this edge cannot be updated.
 func (b *inverseBuilder) Immutable() *inverseBuilder {
 	b.desc.Immutable = true
+	return b
+}
+
+// Computed indicates that this edge cannot be created or updated.
+func (b *inverseBuilder) Computed() *inverseBuilder {
+	b.desc.Computed = true
 	return b
 }
 

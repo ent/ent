@@ -53,6 +53,7 @@ type Field struct {
 	DefaultKind      reflect.Kind            `json:"default_kind,omitempty"`
 	UpdateDefault    bool                    `json:"update_default,omitempty"`
 	Immutable        bool                    `json:"immutable,omitempty"`
+	Computed         bool                    `json:"computed,omitempty"`
 	Validators       int                     `json:"validators,omitempty"`
 	StorageKey       string                  `json:"storage_key,omitempty"`
 	Position         *Position               `json:"position,omitempty"`
@@ -77,6 +78,7 @@ type Edge struct {
 	Inverse     bool                   `json:"inverse,omitempty"`
 	Required    bool                   `json:"required,omitempty"`
 	Immutable   bool                   `json:"immutable,omitempty"`
+	Computed    bool                   `json:"computed,omitempty"`
 	StorageKey  *edge.StorageKey       `json:"storage_key,omitempty"`
 	Annotations map[string]any         `json:"annotations,omitempty"`
 	Comment     string                 `json:"comment,omitempty"`

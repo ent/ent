@@ -88,6 +88,8 @@ type (
 		UpdateDefault bool
 		// Immutable indicates is this field cannot be updated.
 		Immutable bool
+		// Computed indicates is this field cannot be created or updated.
+		Computed bool
 		// StructTag of the field. default to "json".
 		StructTag string
 		// Validators holds the number of validators the field have.
@@ -115,6 +117,8 @@ type (
 		Optional bool
 		// Immutable indicates is this edge cannot be updated.
 		Immutable bool
+		// Computed indicates is this edge cannot be created or updated.
+		Computed bool
 		// Unique indicates if this edge is a unique edge.
 		Unique bool
 		// Inverse holds the name of the reference edge declared in the schema.
@@ -250,6 +254,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 			Default:       f.Default,
 			UpdateDefault: f.UpdateDefault,
 			Immutable:     f.Immutable,
+			Computed:      f.Computed,
 			StructTag:     structTag(f.Name, f.Tag),
 			Validators:    f.Validators,
 			UserDefined:   true,

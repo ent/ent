@@ -109,6 +109,7 @@ type (
 )
 
 {{ range $f := $.MutableFields }}
+  {{- if $f.Computed }}{{continue}}{{ end }}
 	{{ $func := print "Set" $f.StructField }}
 	// {{ $func }} sets the "{{ $f.Name }}" field.
 	func (u *{{ $upsertSet }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsertSet }} {

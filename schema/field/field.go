@@ -286,6 +286,12 @@ func (b *stringBuilder) Immutable() *stringBuilder {
 	return b
 }
 
+// Computed indicates that this field cannot be created or updated.
+func (b *stringBuilder) Computed() *stringBuilder {
+	b.desc.Computed = true
+	return b
+}
+
 // Comment sets the comment of the field.
 func (b *stringBuilder) Comment(c string) *stringBuilder {
 	b.desc.Comment = c
@@ -394,6 +400,13 @@ func (b *timeBuilder) Optional() *timeBuilder {
 // i.e., no setters will be generated for the entity updaters (one and many).
 func (b *timeBuilder) Immutable() *timeBuilder {
 	b.desc.Immutable = true
+	return b
+}
+
+// Computed fields are fields that can't be set in the creation of the entity or update.
+// i.e., no setters will be generated for the entity create or updater (one and many).
+func (b *timeBuilder) Computed() *timeBuilder {
+	b.desc.Computed = true
 	return b
 }
 
@@ -536,6 +549,12 @@ func (b *boolBuilder) Immutable() *boolBuilder {
 	return b
 }
 
+// Computed indicates that this field cannot be created or updated.
+func (b *boolBuilder) Computed() *boolBuilder {
+	b.desc.Computed = true
+	return b
+}
+
 // Comment sets the comment of the field.
 func (b *boolBuilder) Comment(c string) *boolBuilder {
 	b.desc.Comment = c
@@ -650,6 +669,12 @@ func (b *bytesBuilder) Unique() *bytesBuilder {
 // Immutable indicates that this field cannot be updated.
 func (b *bytesBuilder) Immutable() *bytesBuilder {
 	b.desc.Immutable = true
+	return b
+}
+
+// Computed indicates that this field cannot be created or updated.
+func (b *bytesBuilder) Computed() *bytesBuilder {
+	b.desc.Computed = true
 	return b
 }
 
@@ -804,6 +829,12 @@ func (b *jsonBuilder) Immutable() *jsonBuilder {
 	return b
 }
 
+// Computed indicates that this field cannot be created or updated.
+func (b *jsonBuilder) Computed() *jsonBuilder {
+	b.desc.Computed = true
+	return b
+}
+
 // Comment sets the comment of the field.
 func (b *jsonBuilder) Comment(c string) *jsonBuilder {
 	b.desc.Comment = c
@@ -909,6 +940,12 @@ func (b *sliceBuilder[T]) Optional() *sliceBuilder[T] {
 // Immutable indicates that this field cannot be updated.
 func (b *sliceBuilder[T]) Immutable() *sliceBuilder[T] {
 	b.desc.Immutable = true
+	return b
+}
+
+// Computed indicates that this field cannot be created or updated.
+func (b *sliceBuilder[T]) Computed() *sliceBuilder[T] {
+	b.desc.Computed = true
 	return b
 }
 
@@ -1066,6 +1103,12 @@ func (b *enumBuilder) Immutable() *enumBuilder {
 	return b
 }
 
+// Computed indicates that this field cannot be created or updated.
+func (b *enumBuilder) Computed() *enumBuilder {
+	b.desc.Computed = true
+	return b
+}
+
 // Comment sets the comment of the field.
 func (b *enumBuilder) Comment(c string) *enumBuilder {
 	b.desc.Comment = c
@@ -1186,6 +1229,12 @@ func (b *uuidBuilder) Unique() *uuidBuilder {
 // Immutable indicates that this field cannot be updated.
 func (b *uuidBuilder) Immutable() *uuidBuilder {
 	b.desc.Immutable = true
+	return b
+}
+
+// Computed indicates that this field cannot be created or updated.
+func (b *uuidBuilder) Computed() *uuidBuilder {
+	b.desc.Computed = true
 	return b
 }
 
@@ -1323,6 +1372,12 @@ func (b *otherBuilder) Immutable() *otherBuilder {
 	return b
 }
 
+// Computed indicates that this field cannot be created or updated.
+func (b *otherBuilder) Computed() *otherBuilder {
+	b.desc.Computed = true
+	return b
+}
+
 // Comment sets the comment of the field.
 func (b *otherBuilder) Comment(c string) *otherBuilder {
 	b.desc.Comment = c
@@ -1402,6 +1457,7 @@ type Descriptor struct {
 	Nillable         bool                    // nillable struct field.
 	Optional         bool                    // nullable field in database.
 	Immutable        bool                    // create only field.
+	Computed         bool                    // filed cannot be created or updated, computed internally
 	Default          any                     // default value on create.
 	UpdateDefault    any                     // default value on update.
 	Validators       []any                   // validator functions.

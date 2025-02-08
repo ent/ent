@@ -156,6 +156,12 @@ func (b *{{ $builder }}) Immutable() *{{ $builder }} {
 	return b
 }
 
+// Computed indicates that this field cannot be created or updated.
+func (b *{{ $builder }}) Computed() *{{ $builder }} {
+	b.desc.Computed = true
+	return b
+}
+
 // StructTag sets the struct tag of the field.
 func (b *{{ $builder }}) StructTag(s string) *{{ $builder }} {
 	b.desc.Tag = s

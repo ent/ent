@@ -29,6 +29,7 @@ func TestPrinter_Print(t *testing.T) {
 							{Name: "name", Type: &field.TypeInfo{Type: field.TypeString}, Validators: 1},
 							{Name: "age", Type: &field.TypeInfo{Type: field.TypeInt}, Nillable: true},
 							{Name: "created_at", Type: &field.TypeInfo{Type: field.TypeTime}, Nillable: true, Immutable: true},
+							{Name: "fingerprint", Type: &field.TypeInfo{Type: field.TypeString}, Nillable: false, Immutable: true, Computed: true},
 						},
 					},
 				},
@@ -42,6 +43,7 @@ User:
 	| name       | string    | false  | false    | false    | false   | false         | false     |           |          1 |         |
 	| age        | int       | false  | false    | true     | false   | false         | false     |           |          0 |         |
 	| created_at | time.Time | false  | false    | true     | false   | false         | true      |           |          0 |         |
+	| fingerprint| string    | false  | false    | false    | false   | false         | true      |           |          0 |         |
 	+------------+-----------+--------+----------+----------+---------+---------------+-----------+-----------+------------+---------+
 	
 `,
