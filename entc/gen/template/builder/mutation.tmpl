@@ -194,6 +194,7 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 {{ end }}
 
 {{ range $f := $n.Fields }}
+  {{- if $f.Computed }}{{continue}}{{ end }}
 	{{ $const := print $n.Package "." $f.Constant }}
 	{{ $p := receiver $f.Type.String }}{{ if eq $p "m" }} {{ $p = "value" }} {{ end }}
 	{{ $func := $f.MutationSet }}

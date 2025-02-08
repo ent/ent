@@ -137,6 +137,7 @@ func NewField(fd *field.Descriptor) (*Field, error) {
 		Default:          fd.Default != nil,
 		UpdateDefault:    fd.UpdateDefault != nil,
 		Immutable:        fd.Immutable,
+		Computed:         fd.Computed,
 		StorageKey:       fd.StorageKey,
 		Validators:       len(fd.Validators),
 		Sensitive:        fd.Sensitive,

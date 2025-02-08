@@ -413,6 +413,7 @@ func (u *{{ $upsertBulk }}) ExecX(ctx context.Context) {
 {{ $upsertSet := $.Scope.UpsertSet }}
 
 {{ range $f := $.MutableFields }}
+    {{- if $f.Computed }}{{continue}}{{ end }}
     {{ $func := print "Set" $f.StructField }}
     // {{ $func }} sets the "{{ $f.Name }}" field.
 	func (u *{{ $upsert }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsert }} {
