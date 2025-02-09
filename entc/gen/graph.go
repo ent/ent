@@ -336,6 +336,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Unique:      e.Unique,
 				Optional:    !e.Required,
 				Immutable:   e.Immutable,
+				Computed:    e.Computed,
 				StructTag:   structTag(e.Name, e.Tag),
 				Annotations: e.Annotations,
 			})
@@ -351,6 +352,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Unique:      e.Unique,
 				Optional:    !e.Required,
 				Immutable:   e.Immutable,
+				Computed:    e.Computed,
 				StructTag:   structTag(e.Name, e.Tag),
 				Annotations: e.Annotations,
 			})
@@ -368,6 +370,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Unique:      e.Unique,
 				Optional:    !e.Required,
 				Immutable:   e.Immutable,
+				Computed:    e.Computed,
 				StructTag:   structTag(e.Name, e.Tag),
 				Annotations: e.Annotations,
 			}
@@ -380,6 +383,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Unique:      ref.Unique,
 				Optional:    !ref.Required,
 				Immutable:   ref.Immutable,
+				Computed:    ref.Computed,
 				StructTag:   structTag(ref.Name, ref.Tag),
 				Annotations: ref.Annotations,
 			}
@@ -1073,10 +1077,10 @@ func PrepareEnv(c *Config) (undo func() error, err error) {
 	if len(fi.Imports) == 0 {
 		return nop, nil
 	}
-	if err := os.WriteFile(path, append([]byte("// +build tools\n"), out...), 0644); err != nil {
+	if err := os.WriteFile(path, append([]byte("// +build tools\n"), out...), 0o644); err != nil {
 		return nil, err
 	}
-	return func() error { return os.WriteFile(path, out, 0644) }, nil
+	return func() error { return os.WriteFile(path, out, 0o644) }, nil
 }
 
 // cleanOldNodes removes all files that were generated
@@ -1146,7 +1150,7 @@ func (a assets) write() error {
 		}
 	}
 	for path, content := range a.files {
-		if err := os.WriteFile(path, content, 0644); err != nil {
+		if err := os.WriteFile(path, content, 0o644); err != nil {
 			return fmt.Errorf("write file %q: %w", path, err)
 		}
 	}
@@ -1164,7 +1168,7 @@ func (a assets) format() error {
 			if err != nil {
 				return fmt.Errorf("format file %s: %w", path, err)
 			}
-			if err := os.WriteFile(path, src, 0644); err != nil {
+			if err := os.WriteFile(path, src, 0o644); err != nil {
 				return fmt.Errorf("write file %s: %w", path, err)
 			}
 			return nil

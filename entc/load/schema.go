@@ -104,6 +104,7 @@ func NewEdge(ed *edge.Descriptor) *Edge {
 		Inverse:     ed.Inverse,
 		Required:    ed.Required,
 		Immutable:   ed.Immutable,
+		Computed:    ed.Computed,
 		RefName:     ed.RefName,
 		Through:     ed.Through,
 		StorageKey:  ed.StorageKey,

@@ -22,7 +22,7 @@ in the LICENSE file in the root directory of this source tree.
 {{- end }}
 
 {{ range $f := $fields }}
-	{{- if $f.Computed }}{{continue}}{{ end }}
+	{{- if and false $f.Computed }}{{continue}}{{ end }}
 
 	{{ $p := receiver $f.Type.String }}{{ if eq $p $receiver }} {{ $p = "value" }} {{ end }}
 	{{ $func := print "Set" $f.StructField }}
