@@ -181,7 +181,7 @@ func GenerateCmd(postRun ...func(*gen.Config)) *cobra.Command {
 				// If the target directory is not inferred from
 				// the schema path, resolve its package path.
 				if cfg.Target != "" {
-					pkgPath, err := PkgPath(DefaultConfig, cfg.Target)
+					pkgPath, err := PkgPath(cfg.Target)
 					if err != nil {
 						log.Fatalln(err)
 					}
@@ -232,7 +232,7 @@ func SchemaCmd() *cobra.Command {
 				// If the target directory is not inferred from
 				// the schema path, resolve its package path.
 				if cfg.Target != "" {
-					pkgPath, err := PkgPath(DefaultConfig, cfg.Target)
+					pkgPath, err := PkgPath(cfg.Target)
 					if err != nil {
 						log.Fatalln(err)
 					}
