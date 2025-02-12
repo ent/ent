@@ -1,4 +1,4 @@
-module entgo.io/entfix
+module entgo.io/ent/cmd/entfix
 
 go 1.23.4
 
