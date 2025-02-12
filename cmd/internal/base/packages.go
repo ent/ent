@@ -10,46 +10,56 @@ import (
 	"path"
 	"path/filepath"
 
-	"golang.org/x/tools/go/packages"
+	"golang.org/x/mod/modfile"
 )
 
-// DefaultConfig for loading Go base.
-var DefaultConfig = &packages.Config{Mode: packages.NeedName}
-
-// PkgPath returns the Go package name for given target path.
-// Even if the existing path is not exist yet in the filesystem.
-//
-// If base.Config is nil, DefaultConfig will be used to load base.
-func PkgPath(config *packages.Config, target string) (string, error) {
-	if config == nil {
-		config = DefaultConfig
+// This was pretty much ripped from https://github.com/golang/go/blob/master/src/cmd/go/internal/modload/init.go#L1581
+func findModuleRoot(dir string) string {
+	if dir == "" {
+		panic("dir not set")
 	}
-	pathCheck, err := filepath.Abs(target)
+	dir = filepath.Clean(dir)
+
+	// Look for enclosing go.mod.
+	for {
+		if fi, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil && !fi.IsDir() {
+			return dir
+		}
+		d := filepath.Dir(dir)
+		if d == dir {
+			break
+		}
+		dir = d
+	}
+	return ""
+}
+
+func PkgPath(target string) (string, error) {
+	targetPath, err := filepath.Abs(target)
 	if err != nil {
 		return "", err
 	}
-	var parts []string
-	if _, err := os.Stat(pathCheck); os.IsNotExist(err) {
-		parts = append(parts, filepath.Base(pathCheck))
-		pathCheck = filepath.Dir(pathCheck)
+
+	modRoot := findModuleRoot(targetPath)
+	if modRoot == "" {
+		return "", fmt.Errorf("go module was not found for: %s", target)
 	}
-	// Try maximum 2 directories above the given
-	// target to find the root package or module.
-	for i := 0; i < 2; i++ {
-		pkgs, err := packages.Load(config, pathCheck)
-		if err != nil {
-			return "", fmt.Errorf("load package info: %w", err)
-		}
-		if len(pkgs) == 0 || len(pkgs[0].Errors) != 0 {
-			parts = append(parts, filepath.Base(pathCheck))
-			pathCheck = filepath.Dir(pathCheck)
-			continue
-		}
-		pkgPath := pkgs[0].PkgPath
-		for j := len(parts) - 1; j >= 0; j-- {
-			pkgPath = path.Join(pkgPath, parts[j])
-		}
-		return pkgPath, nil
+
+	goModPath := filepath.Join(modRoot, "go.mod")
+	data, err := os.ReadFile(goModPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to read %s: %w", goModPath, err)
 	}
-	return "", fmt.Errorf("root package or module was not found for: %s", target)
+
+	modPath := modfile.ModulePath(data)
+	if modPath == "" {
+		return "", fmt.Errorf("failed get module path from %s", goModPath)
+	}
+
+	rel, err := filepath.Rel(modRoot, targetPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to get relative path from module root: %w", err)
+	}
+
+	return path.Join(modPath, rel), nil
 }
