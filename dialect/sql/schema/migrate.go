@@ -57,6 +57,14 @@ func WithErrNoPlan(b bool) MigrateOption {
 	}
 }
 
+// WithSchemaName sets the database schema for the migration.
+// If not set, the CURRENT_SCHEMA() is used.
+func WithSchemaName(ns string) MigrateOption {
+	return func(a *Atlas) {
+		a.schema = ns
+	}
+}
+
 // WithDropColumn sets the columns dropping option to the migration.
 // Defaults to false.
 func WithDropColumn(b bool) MigrateOption {

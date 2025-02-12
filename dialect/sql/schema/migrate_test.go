@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 	"text/template"
@@ -27,6 +28,54 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
 )
+
+func TestMigrate_SchemaName(t *testing.T) {
+	db, mk, err := sqlmock.New()
+	require.NoError(t, err)
+	mk.ExpectQuery(escape("SHOW server_version_num")).
+		WillReturnRows(sqlmock.NewRows([]string{"server_version_num"}).AddRow("130000"))
+	mk.ExpectQuery(escape("SELECT current_setting('server_version_num'), current_setting('default_table_access_method', true), current_setting('crdb_version', true)")).
+		WillReturnRows(sqlmock.NewRows([]string{"current_setting", "current_setting", "current_setting"}).AddRow("130000", "heap", ""))
+	mk.ExpectQuery("SELECT nspname AS schema_name,.+").
+		WithArgs("public"). // Schema "public" param is used.
+		WillReturnRows(sqlmock.NewRows([]string{"schema_name", "comment"}).AddRow("public", "default schema"))
+	mk.ExpectQuery("SELECT t3.oid, t1.table_schema,.+").
+		WillReturnRows(sqlmock.NewRows([]string{}))
+	m, err := NewMigrate(sql.OpenDB("postgres", db), WithSchemaName("public"), WithDiffHook(func(next Differ) Differ {
+		return DiffFunc(func(current, desired *schema.Schema) ([]schema.Change, error) {
+			return nil, nil // Noop.
+		})
+	}))
+	require.NoError(t, err)
+	require.NoError(t, m.Create(context.Background()))
+	require.NoError(t, mk.ExpectationsWereMet())
+
+	// Without schema name the CURRENT_SCHEMA is used.
+	mk.ExpectQuery(escape("SHOW server_version_num")).
+		WillReturnRows(sqlmock.NewRows([]string{"server_version_num"}).AddRow("130000"))
+	mk.ExpectQuery(escape("SELECT current_setting('server_version_num'), current_setting('default_table_access_method', true), current_setting('crdb_version', true)")).
+		WillReturnRows(sqlmock.NewRows([]string{"current_setting", "current_setting", "current_setting"}).AddRow("130000", "heap", ""))
+	mk.ExpectQuery("SELECT nspname AS schema_name,.+CURRENT_SCHEMA().+").
+		WillReturnRows(sqlmock.NewRows([]string{"schema_name", "comment"}).AddRow("public", "default schema"))
+	mk.ExpectQuery("SELECT t3.oid, t1.table_schema,.+").
+		WillReturnRows(sqlmock.NewRows([]string{}))
+	m, err = NewMigrate(sql.OpenDB("postgres", db), WithDiffHook(func(next Differ) Differ {
+		return DiffFunc(func(current, desired *schema.Schema) ([]schema.Change, error) {
+			return nil, nil // Noop.
+		})
+	}))
+	require.NoError(t, err)
+	require.NoError(t, m.Create(context.Background()))
+}
+
+func escape(query string) string {
+	rows := strings.Split(query, "\n")
+	for i := range rows {
+		rows[i] = strings.TrimPrefix(rows[i], " ")
+	}
+	query = strings.Join(rows, " ")
+	return strings.TrimSpace(regexp.QuoteMeta(query)) + "$"
+}
 
 func TestMigrate_Formatter(t *testing.T) {
 	db, _, err := sqlmock.New()
