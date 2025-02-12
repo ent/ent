@@ -30,6 +30,9 @@ type MySQL struct {
 
 // init loads the MySQL version from the database for later use in the migration process.
 func (d *MySQL) init(ctx context.Context) error {
+	if d.version != "" {
+		return nil // already initialized.
+	}
 	rows := &sql.Rows{}
 	if err := d.Query(ctx, "SHOW VARIABLES LIKE 'version'", []any{}, rows); err != nil {
 		return fmt.Errorf("mysql: querying mysql version %w", err)

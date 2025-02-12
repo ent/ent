@@ -29,6 +29,7 @@ type Atlas struct {
 	atDriver   migrate.Driver
 	sqlDialect sqlDialect
 
+	schema          string // schema to use
 	indent          string // plan indentation
 	errNoPlan       bool   // no plan error enabled
 	universalID     bool   // global unique ids
@@ -662,13 +663,15 @@ func (a *Atlas) create(ctx context.Context, tables ...*Table) (err error) {
 // planInspect creates the current state by inspecting the connected database, computing the current state of the Ent schema
 // and proceeds to diff the changes to create a migration plan.
 func (a *Atlas) planInspect(ctx context.Context, conn dialect.ExecQuerier, name string, tables []*Table) (*migrate.Plan, error) {
-	current, err := a.atDriver.InspectSchema(ctx, "", &schema.InspectOptions{
+	current, err := a.atDriver.InspectSchema(ctx, a.schema, &schema.InspectOptions{
 		Tables: func() (t []string) {
 			for i := range tables {
 				t = append(t, tables[i].Name)
 			}
 			return t
 		}(),
+		// Ent supports table-level inspection only.
+		Mode: schema.InspectSchemas | schema.InspectTables,
 	})
 	if err != nil {
 		return nil, err
@@ -692,7 +695,7 @@ func (a *Atlas) planInspect(ctx context.Context, conn dialect.ExecQuerier, name 
 
 func (a *Atlas) planReplay(ctx context.Context, name string, tables []*Table) (*migrate.Plan, error) {
 	// We consider a database clean if there are no tables in the connected schema.
-	s, err := a.atDriver.InspectSchema(ctx, "", nil)
+	s, err := a.atDriver.InspectSchema(ctx, a.schema, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -705,21 +708,21 @@ func (a *Atlas) planReplay(ctx context.Context, name string, tables []*Table) (*
 		return nil, err
 	}
 	if err := ex.ExecuteN(ctx, 0); err != nil && !errors.Is(err, migrate.ErrNoPendingFiles) {
-		return nil, a.cleanSchema(ctx, "", err)
+		return nil, a.cleanSchema(ctx, a.schema, err)
 	}
 	// Inspect the current schema (migration directory).
-	current, err := a.atDriver.InspectSchema(ctx, "", nil)
+	current, err := a.atDriver.InspectSchema(ctx, a.schema, nil)
 	if err != nil {
-		return nil, a.cleanSchema(ctx, "", err)
+		return nil, a.cleanSchema(ctx, a.schema, err)
 	}
 	var types []string
 	if a.universalID {
 		if types, err = a.loadTypes(ctx, a.sqlDialect); err != nil && !errors.Is(err, errTypeTableNotFound) {
-			return nil, a.cleanSchema(ctx, "", err)
+			return nil, a.cleanSchema(ctx, a.schema, err)
 		}
 		a.types = types
 	}
-	if err := a.cleanSchema(ctx, "", nil); err != nil {
+	if err := a.cleanSchema(ctx, a.schema, nil); err != nil {
 		return nil, fmt.Errorf("clean schemas after migration replaying: %w", err)
 	}
 	desired, err := a.tables(tables)
