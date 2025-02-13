@@ -17,7 +17,7 @@ import (
 	"gocloud.dev/secrets/localsecrets"
 )
 
-func Example_EncryptField() {
+func Example_encryptField() {
 	key, err := localsecrets.NewRandomKey()
 	if err != nil {
 		log.Fatalf("failed creating random key: %v", err)
