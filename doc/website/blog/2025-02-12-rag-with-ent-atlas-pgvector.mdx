@@ -681,6 +681,138 @@ And our RAG system responds:
 Amazing! We have successfully built a RAG system using Ent, Atlas, and pgvector.
 We can now ask questions about the documents we loaded into the database and receive context-aware responses.
 
+Here are some more Q&As with our nifty RAG system:
+
+<details>
+<summary>go run ./cmd/entrag ask "how to define order field in entgql"</summary>
+ To define an order field in  entgql , you need to annotate a field in your  Ent
+  schema using the  entgql.Annotation  with the  OrderField . Here's a step-by-
+  step
+  guide on how you can do it:
+
+  1. Choose a Comparable Field: Select the field in your schema that you want to
+  be orderable. This could be a text field, a timestamp, an integer, an enum, etc.
+  2. Annotate the Field: Use the  entgql.OrderField  annotation on the chosen
+  field. The order field name should be uppercase and match its corresponding enum
+  value in the GraphQL schema.
+  3. Update your Schema: Here’s an example of how to annotate your fields in the
+  ent/schema :
+    ```go
+    func (Todo) Fields() []ent.Field {
+        return []ent.Field{
+            field.Text("text").
+                NotEmpty().
+                Annotations(
+                    entgql.OrderField("TEXT"),
+                ),
+            field.Time("created_at").
+                Default(time.Now).
+                Immutable().
+                Annotations(
+                    entgql.OrderField("CREATED_AT"),
+                ),
+            field.Enum("status").
+                NamedValues(
+                    "InProgress", "IN_PROGRESS",
+                    "Completed", "COMPLETED",
+                ).
+                Default("IN_PROGRESS").
+                Annotations(
+                    entgql.OrderField("STATUS"),
+                ),
+            field.Int("priority").
+                Default(0).
+                Annotations(
+                    entgql.OrderField("PRIORITY"),
+                ),
+        }
+    }
+    ```
+  4. Alternatively, Multiple Order Fields: If you want to enable ordering by
+  multiple fields, you can use the  entgql.MultiOrder()  annotation:
+    ```go
+    func (Todo) Annotations() []schema.Annotation {
+        return []schema.Annotation{
+            entgql.MultiOrder(),
+        }
+    }
+    ```
+
+  5. Generate GraphQL Types: Ensure that the GraphQL types match this setup in
+  your GraphQL schema, for example:
+    ```graphql
+    enum OrderDirection {
+      ASC
+      DESC
+    }
+    enum TodoOrderField {
+      CREATED_AT
+      PRIORITY
+      STATUS
+      TEXT
+    }
+    input TodoOrder {
+      direction: OrderDirection!
+      field: TodoOrderField
+    }
+    ```
+
+  6. Add  orderBy  Argument to Queries: Include the  orderBy  parameter in your
+  GraphQL queries to allow clients to sort items:
+    ```graphql
+    type Query {
+      todos(
+        after: Cursor
+        first: Int
+        before: Cursor
+        last: Int
+        orderBy: TodoOrder
+      ): TodoConnection!
+    }
+    ```
+
+  By following these steps, you ensure that your Ent-based application can support
+  sorting in your GraphQL API based on various fields.
+
+
+</details>
+
+<details>
+<summary> go run ./cmd/entrag ask "what's the difference between privacy rules and interceptors" </summary>
+ Privacy rules and interceptors serve different purposes within the Ent
+  framework, each providing distinct functionalities:
+
+1. Privacy Rules:
+* Purpose: Privacy rules are primarily concerned with enforcing access
+control policies for data queries and mutations. They determine whether an
+operation is allowed or denied based on predefined rules.
+* Implementation: They are implemented as part of a privacy policy using the
+ent.Policy  interface which includes  EvalQuery  and  EvalMutation  methods.
+* Operation: Privacy rules evaluate whether specific conditions are met
+before allowing or denying access to the data. They can return decisions
+like  privacy.Allow ,  privacy.Deny , or  privacy.Skip  to control the flow
+of evaluation.
+* Use Case: Ideal for managing access control by ensuring that users can
+only perform certain operations if they meet the specified criteria.
+2. Interceptors:
+* Purpose: Interceptors act as middleware for Ent queries, allowing
+modification and customization of query behaviors. They can be used to
+augment or modify queries during different stages of their lifecycle.
+* Implementation: Implemented as interfaces or using the  ent.InterceptFunc
+adapter. They intercept and potentially modify queries by working on the
+read-path.
+* Operation: Interceptors modify or enhance queries, typically without the
+access control logic inherent in privacy rules. They provide hooks to
+execute custom logic pre and post query execution.
+* Use Case: Suitable for generic transformations or modifications to queries,
+such as adding default filters, query limitations, or logging operations
+without focusing on access control.
+
+
+In summary, while privacy rules focus on access control, interceptors are about
+managing and modifying the query execution process.
+</details>
+
 ### Wrapping up
 
 In this blog post, we explored how to build a RAG system using Ent, Atlas, and pgvector. Special thanks to
