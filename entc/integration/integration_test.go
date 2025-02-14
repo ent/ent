@@ -2242,6 +2242,30 @@ func Mutation(t *testing.T, client *ent.Client) {
 		require.True(t, ent.IsNotFound(err))
 		require.Nil(t, a8m)
 	})
+
+	t.Run("IDs with Predicate", func(t *testing.T) {
+		// Update One
+		ids, err := a8m.Update().Mutation().IDs(ctx)
+		require.NoError(t, err)
+		require.Len(t, ids, 1)
+
+		ids, err = a8m.Update().Where(user.ID(a8m.ID)).Mutation().IDs(ctx)
+		require.NoError(t, err)
+		require.Len(t, ids, 1)
+
+		ids, err = a8m.Update().Where(user.Name(a8m.Name + a8m.Name)).Mutation().IDs(ctx)
+		require.NoError(t, err)
+		require.Empty(t, ids)
+
+		// Update
+		ids, err = client.User.Update().Where(user.ID(a8m.ID)).Mutation().IDs(ctx)
+		require.NoError(t, err)
+		require.Len(t, ids, 1)
+
+		ids, err = client.User.Update().Where(user.Name(a8m.Name + a8m.Name)).Mutation().IDs(ctx)
+		require.NoError(t, err)
+		require.Empty(t, ids)
+	})
 }
 
 // Test templates codegen.
