@@ -128,6 +128,11 @@ func TitleHasSuffix(v string) predicate.Task {
 	return predicate.Task(sql.FieldHasSuffix(FieldTitle, v))
 }
 
+// TitleRegex applies the Regex predicate on the "title" field.
+func TitleRegex(v string) predicate.Task {
+	return predicate.Task(sql.FieldRegex(FieldTitle, v))
+}
+
 // TitleEqualFold applies the EqualFold predicate on the "title" field.
 func TitleEqualFold(v string) predicate.Task {
 	return predicate.Task(sql.FieldEqualFold(FieldTitle, v))
@@ -191,6 +196,11 @@ func DescriptionHasPrefix(v string) predicate.Task {
 // DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
 func DescriptionHasSuffix(v string) predicate.Task {
 	return predicate.Task(sql.FieldHasSuffix(FieldDescription, v))
+}
+
+// DescriptionRegex applies the Regex predicate on the "description" field.
+func DescriptionRegex(v string) predicate.Task {
+	return predicate.Task(sql.FieldRegex(FieldDescription, v))
 }
 
 // DescriptionIsNil applies the IsNil predicate on the "description" field.

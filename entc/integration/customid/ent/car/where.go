@@ -227,6 +227,11 @@ func ModelHasSuffix(v string) predicate.Car {
 	return predicate.Car(sql.FieldHasSuffix(FieldModel, v))
 }
 
+// ModelRegex applies the Regex predicate on the "model" field.
+func ModelRegex(v string) predicate.Car {
+	return predicate.Car(sql.FieldRegex(FieldModel, v))
+}
+
 // ModelEqualFold applies the EqualFold predicate on the "model" field.
 func ModelEqualFold(v string) predicate.Car {
 	return predicate.Car(sql.FieldEqualFold(FieldModel, v))

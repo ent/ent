@@ -141,6 +141,7 @@ var (
 		entql.FuncEqualFold:    sql.EqualFold,
 		entql.FuncHasPrefix:    sql.HasPrefix,
 		entql.FuncHasSuffix:    sql.HasSuffix,
+		entql.FuncRegex:        sql.Regex,
 	}
 	nullFunc = [...]func(string) *sql.Predicate{
 		entql.OpEQ:  sql.IsNull,
@@ -183,7 +184,7 @@ func (e *state) evalExpr(expr entql.Expr) *sql.Predicate {
 		return nary[expr.Op](ps...)
 	case *entql.CallExpr:
 		switch expr.Func {
-		case entql.FuncHasPrefix, entql.FuncHasSuffix, entql.FuncContains, entql.FuncEqualFold, entql.FuncContainsFold:
+		case entql.FuncHasPrefix, entql.FuncHasSuffix, entql.FuncContains, entql.FuncEqualFold, entql.FuncContainsFold, entql.FuncRegex:
 			expect(len(expr.Args) == 2, "invalid number of arguments for %s", expr.Func)
 			f, ok := expr.Args[0].(*entql.Field)
 			expect(ok, "*entql.Field, got %T", expr.Args[0])
