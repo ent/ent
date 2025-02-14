@@ -44,6 +44,11 @@ func (pd *PetDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the PetMutation object of the builder.
+func (pd *PetDelete) Mutation() *PetMutation {
+	return pd.mutation
+}
+
 func (pd *PetDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := pd.gremlin().Query()
@@ -91,4 +96,9 @@ func (pdo *PetDeleteOne) ExecX(ctx context.Context) {
 	if err := pdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the PetMutation object of the builder.
+func (pdo *PetDeleteOne) Mutation() *PetMutation {
+	return pdo.pd.mutation
 }

@@ -43,6 +43,11 @@ func (td *TagDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the TagMutation object of the builder.
+func (td *TagDelete) Mutation() *TagMutation {
+	return td.mutation
+}
+
 func (td *TagDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(tag.Table, sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt))
 	if ps := td.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (tdo *TagDeleteOne) ExecX(ctx context.Context) {
 	if err := tdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the TagMutation object of the builder.
+func (tdo *TagDeleteOne) Mutation() *TagMutation {
+	return tdo.td.mutation
 }
