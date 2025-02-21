@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
+	"text/template"
 
 	"entgo.io/ent/entc/gen"
 	"entgo.io/ent/entc/internal"
@@ -174,18 +175,40 @@ func TemplateFiles(filenames ...string) Option {
 
 // TemplateGlob parses the template definitions from the files identified
 // by the pattern and associates the resulting templates with codegen templates.
-func TemplateGlob(pattern string) Option {
+func TemplateGlob(pattern string, opts ...TemplateOption) Option {
 	return templateOption(func(t *gen.Template) (*gen.Template, error) {
+		for _, opt := range opts {
+			opt(t)
+		}
 		return t.ParseGlob(pattern)
 	})
 }
 
 // TemplateDir parses the template definitions from the files in the directory
 // and associates the resulting templates with codegen templates.
-func TemplateDir(path string) Option {
+func TemplateDir(path string, opts ...TemplateOption) Option {
 	return templateOption(func(t *gen.Template) (*gen.Template, error) {
+		for _, opt := range opts {
+			opt(t)
+		}
 		return t.ParseDir(path)
 	})
+}
+
+type TemplateOption func(*gen.Template) *gen.Template
+
+// TemplateFuncs merges the given funcMap with the template functions.
+func TemplateFuncs(funcMap template.FuncMap) TemplateOption {
+	return func(t *gen.Template) *gen.Template {
+		return t.Funcs(funcMap)
+	}
+}
+
+// TemplateSkipIf allows registering a function to determine if the template needs to be skipped or not.
+func TemplateSkipIf(cond func(*gen.Graph) bool) TemplateOption {
+	return func(t *gen.Template) *gen.Template {
+		return t.SkipIf(cond)
+	}
 }
 
 // Extension describes an Ent code generation extension that
