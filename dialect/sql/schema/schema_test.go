@@ -7,9 +7,9 @@ package schema
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
-	"ariga.io/atlas/sql/migrate"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/field"
@@ -196,18 +196,100 @@ func TestDump(t *testing.T) {
 		RefColumns: users.Columns[:1],
 		OnDelete:   SetDefault,
 	})
-	tables = []*Table{users, pets}
+	petsWithoutFur := &Table{
+		Name:       "pets_without_fur",
+		View:       true,
+		Columns:    append(pets.Columns[:2], pets.Columns[3]),
+		Annotation: entsql.View("SELECT id, name, owner_id FROM pets"),
+	}
+	tables = []*Table{users, pets, petsWithoutFur}
 
 	my := func(length int) string {
-		return fmt.Sprintf("-- Create \"users\" table\nCREATE TABLE `users` (`id` bigint NOT NULL, `name` varchar(%d) NOT NULL, `spouse_id` bigint NOT NULL, PRIMARY KEY (`id`), INDEX `name` (`name`), FOREIGN KEY (`spouse_id`) REFERENCES `users` (`id`) ON UPDATE SET DEFAULT) CHARSET utf8mb4 COLLATE utf8mb4_bin;\n-- Create \"pets\" table\nCREATE TABLE `pets` (`id` bigint NOT NULL, `name` varchar(%d) NOT NULL, `fur_color` enum('black','white') NOT NULL, `owner_id` bigint NOT NULL, UNIQUE INDEX `name` (`name` DESC), FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`) ON DELETE SET DEFAULT) CHARSET utf8mb4 COLLATE utf8mb4_bin;\n", length, length)
+		return fmt.Sprintf(strings.ReplaceAll(`-- Add new schema named "s1"
+CREATE DATABASE $s1$;
+-- Add new schema named "s2"
+CREATE DATABASE $s2$;
+-- Add new schema named "s3"
+CREATE DATABASE $s3$;
+-- Create "users" table
+CREATE TABLE $s1$.$users$ (
+  $id$ bigint NOT NULL,
+  $name$ varchar(%d) NOT NULL,
+  $spouse_id$ bigint NOT NULL,
+  PRIMARY KEY ($id$),
+  INDEX $name$ ($name$),
+  FOREIGN KEY ($spouse_id$) REFERENCES $s1$.$users$ ($id$) ON UPDATE SET DEFAULT
+) CHARSET utf8mb4 COLLATE utf8mb4_bin;
+-- Create "pets" table
+CREATE TABLE $s2$.$pets$ (
+  $id$ bigint NOT NULL,
+  $name$ varchar(%d) NOT NULL,
+  $owner_id$ bigint NOT NULL,
+  $owner_id$ bigint NOT NULL,
+  UNIQUE INDEX $name$ ($name$ DESC),
+  FOREIGN KEY ($owner_id$) REFERENCES $s1$.$users$ ($id$) ON DELETE SET DEFAULT
+) CHARSET utf8mb4 COLLATE utf8mb4_bin;
+-- Add "pets_without_fur" view
+CREATE VIEW $s3$.$pets_without_fur$ ($id$, $name$, $owner_id$) AS SELECT id, name, owner_id FROM pets;
+`, "$", "`"), length, length)
 	}
 
-	pg := "-- Create \"users\" table\nCREATE TABLE \"users\" (\"id\" bigint NOT NULL, \"name\" character varying NOT NULL, \"spouse_id\" bigint NOT NULL, PRIMARY KEY (\"id\"), FOREIGN KEY (\"spouse_id\") REFERENCES \"users\" (\"id\") ON UPDATE SET DEFAULT);\n-- Create index \"name\" to table: \"users\"\nCREATE INDEX \"name\" ON \"users\" (\"name\");\n-- Create \"pets\" table\nCREATE TABLE \"pets\" (\"id\" bigint NOT NULL, \"name\" character varying NOT NULL, \"fur_color\" character varying NOT NULL, \"owner_id\" bigint NOT NULL, FOREIGN KEY (\"owner_id\") REFERENCES \"users\" (\"id\") ON DELETE SET DEFAULT);\n-- Create index \"name\" to table: \"pets\"\nCREATE UNIQUE INDEX \"name\" ON \"pets\" (\"name\" DESC);\n"
+	pg := `-- Add new schema named "s1"
+CREATE SCHEMA "s1";
+-- Add new schema named "s2"
+CREATE SCHEMA "s2";
+-- Add new schema named "s3"
+CREATE SCHEMA "s3";
+-- Create "users" table
+CREATE TABLE "s1"."users" (
+  "id" bigint NOT NULL,
+  "name" character varying NOT NULL,
+  "spouse_id" bigint NOT NULL,
+  PRIMARY KEY ("id"),
+  FOREIGN KEY ("spouse_id") REFERENCES "s1"."users" ("id") ON UPDATE SET DEFAULT
+);
+-- Create index "name" to table: "users"
+CREATE INDEX "name" ON "s1"."users" ("name");
+-- Create "pets" table
+CREATE TABLE "s2"."pets" (
+  "id" bigint NOT NULL,
+  "name" character varying NOT NULL,
+  "owner_id" bigint NOT NULL,
+  "owner_id" bigint NOT NULL,
+  FOREIGN KEY ("owner_id") REFERENCES "s1"."users" ("id") ON DELETE SET DEFAULT
+);
+-- Create index "name" to table: "pets"
+CREATE UNIQUE INDEX "name" ON "s2"."pets" ("name" DESC);
+-- Add "pets_without_fur" view
+CREATE VIEW "s3"."pets_without_fur" ("id", "name", "owner_id") AS SELECT id, name, owner_id FROM pets;
+`
 
 	for _, tt := range []struct{ dialect, version, expected string }{
 		{
 			dialect.SQLite, "",
-			"-- Create \"users\" table\nCREATE TABLE `users` (`id` integer NOT NULL, `name` text NOT NULL, `spouse_id` integer NOT NULL, PRIMARY KEY (`id`), FOREIGN KEY (`spouse_id`) REFERENCES `users` (`id`) ON UPDATE SET DEFAULT);\n-- Create index \"name\" to table: \"users\"\nCREATE INDEX `name` ON `users` (`name`);\n-- Create \"pets\" table\nCREATE TABLE `pets` (`id` integer NOT NULL, `name` text NOT NULL, `fur_color` text NOT NULL, `owner_id` integer NOT NULL, FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`) ON DELETE SET DEFAULT);\n-- Create index \"name\" to table: \"pets\"\nCREATE UNIQUE INDEX `name` ON `pets` (`name` DESC);\n",
+			strings.ReplaceAll(`-- Create "users" table
+CREATE TABLE $users$ (
+  $id$ integer NOT NULL,
+  $name$ text NOT NULL,
+  $spouse_id$ integer NOT NULL,
+  PRIMARY KEY ($id$),
+  FOREIGN KEY ($spouse_id$) REFERENCES $users$ ($id$) ON UPDATE SET DEFAULT
+);
+-- Create index "name" to table: "users"
+CREATE INDEX $name$ ON $users$ ($name$);
+-- Create "pets" table
+CREATE TABLE $pets$ (
+  $id$ integer NOT NULL,
+  $name$ text NOT NULL,
+  $owner_id$ integer NOT NULL,
+  $owner_id$ integer NOT NULL,
+  FOREIGN KEY ($owner_id$) REFERENCES $users$ ($id$) ON DELETE SET DEFAULT
+);
+-- Create index "name" to table: "pets"
+CREATE UNIQUE INDEX $name$ ON $pets$ ($name$ DESC);
+-- Add "pets_without_fur" view
+CREATE VIEW $pets_without_fur$ ($id$, $name$, $owner_id$) AS SELECT id, name, owner_id FROM pets;
+`, "$", "`"),
 		},
 		{dialect.MySQL, "5.6", my(191)},
 		{dialect.MySQL, "5.7", my(255)},
@@ -217,10 +299,17 @@ func TestDump(t *testing.T) {
 		{dialect.Postgres, "14", pg},
 		{dialect.Postgres, "15", pg},
 	} {
-		t.Run(fmt.Sprintf("%s:%s", tt.dialect, tt.version), func(t *testing.T) {
-			ac, err := Dump(context.Background(), tt.dialect, tt.version, tables, func(o *migrate.PlanOptions) {
-				o.Indent = ""
-			})
+		n := tt.dialect
+		if tt.version != "" {
+			n += ":" + tt.version
+		}
+		if tt.dialect != dialect.SQLite {
+			tables[0].Schema = "s1"
+			tables[1].Schema = "s2"
+			tables[2].Schema = "s3"
+		}
+		t.Run(n, func(t *testing.T) {
+			ac, err := Dump(context.Background(), tt.dialect, tt.version, tables)
 			require.NoError(t, err)
 			require.Equal(t, tt.expected, ac)
 		})

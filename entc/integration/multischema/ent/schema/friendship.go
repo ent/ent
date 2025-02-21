@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -52,5 +54,12 @@ func (Friendship) Edges() []ent.Edge {
 func (Friendship) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("created_at"),
+	}
+}
+
+// Annotations of the Friendship.
+func (Friendship) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Schema("db2"),
 	}
 }

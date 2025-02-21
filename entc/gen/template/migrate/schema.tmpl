@@ -205,36 +205,38 @@ func init() {
 			{{ $table }}.ForeignKeys[{{ $i }}].RefTable = {{ pascal $fk.RefTable.Name | printf "%sTable" }}
 		{{- end }}
 		{{- with $ant := $t.Annotation }}
-			{{ $table }}.Annotation = &entsql.Annotation{
-				{{- with $ant.Table }}
-					Table: "{{ . }}",
-				{{- end }}
-				{{- with $ant.Charset }}
-					Charset: "{{ . }}",
-				{{- end }}
-				{{- with $ant.Collation }}
-					Collation: "{{ . }}",
-				{{- end }}
-				{{- with $ant.Options }}
-					Options: {{ quote . }},
-				{{- end }}
-				{{- with $ant.Check }}
-					Check: {{ quote . }},
-				{{- end }}
-				{{- with $ant.IncrementStart }}
-					IncrementStart: func(i int) *int { return &i }({{ . }}),
-				{{- end }}
-			}
-			{{- with $ant.Incremental }}
-				{{ $table }}.Annotation.Incremental = new(bool)
-				*{{ $table }}.Annotation.Incremental = {{ with indirect . }}true{{ else }}false{{ end }}
-			{{- end }}
-			{{- with $keys := keys $ant.Checks }}
-				{{ $table }}.Annotation.Checks = map[string]string{
-					{{- range $k := $keys }}
-						"{{ $k }}": {{ index $ant.Checks $k | quote }},
+			{{- if not (allZero $ant.Table $ant.Charset $ant.Collation $ant.Options $ant.Check $ant.IncrementStart $ant.Incremental $ant.Checks) }}
+				{{ $table }}.Annotation = &entsql.Annotation{
+					{{- with $ant.Table }}
+						Table: "{{ . }}",
+					{{- end }}
+					{{- with $ant.Charset }}
+						Charset: "{{ . }}",
+					{{- end }}
+					{{- with $ant.Collation }}
+						Collation: "{{ . }}",
+					{{- end }}
+					{{- with $ant.Options }}
+						Options: {{ quote . }},
+					{{- end }}
+					{{- with $ant.Check }}
+						Check: {{ quote . }},
+					{{- end }}
+					{{- with $ant.IncrementStart }}
+						IncrementStart: func(i int) *int { return &i }({{ . }}),
 					{{- end }}
 				}
+				{{- with $ant.Incremental }}
+					{{ $table }}.Annotation.Incremental = new(bool)
+					*{{ $table }}.Annotation.Incremental = {{ with indirect . }}true{{ else }}false{{ end }}
+				{{- end }}
+				{{- with $keys := keys $ant.Checks }}
+					{{ $table }}.Annotation.Checks = map[string]string{
+						{{- range $k := $keys }}
+							"{{ $k }}": {{ index $ant.Checks $k | quote }},
+						{{- end }}
+					}
+				{{- end }}
 			{{- end }}
 		{{- end }}
 	{{- end }}

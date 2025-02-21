@@ -74,6 +74,7 @@ var (
 		"slist":         list[string],
 		"fail":          fail,
 		"replace":       strings.ReplaceAll,
+		"allZero":       allZero,
 	}
 	rules    = ruleset()
 	acronyms = make(map[string]struct{})
@@ -539,4 +540,14 @@ func jsonString(v any) (string, error) {
 		return "", nil
 	}
 	return string(b), nil
+}
+
+// allZero reports whether all given values are the zero value of their type.
+func allZero(v ...any) bool {
+	for _, x := range v {
+		if !reflect.ValueOf(x).IsZero() {
+			return false
+		}
+	}
+	return true
 }

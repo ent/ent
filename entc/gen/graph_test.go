@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"testing"
 
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/entc/load"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -376,6 +377,46 @@ func TestAbortDuplicateFK(t *testing.T) {
 	require.NoError(t, err)
 	_, err = g.Tables()
 	require.EqualError(t, err, `duplicate foreign-key symbol "owner_id" found in tables "cars" and "pets"`)
+}
+
+func TestMultiSchemaAnnotation(t *testing.T) {
+	antFn := func(s string) map[string]any {
+		return map[string]any{entsql.Annotation{}.Name(): map[string]string{"schema": s}}
+	}
+	var (
+		user = &load.Schema{
+			Name: "User",
+			Edges: []*load.Edge{
+				{Name: "pets", Type: "Pet"},
+				{Name: "cars", Type: "Car", Annotations: antFn("two")},
+			},
+			Annotations: antFn("one"),
+		}
+		pet = &load.Schema{
+			Name: "Pet",
+			Edges: []*load.Edge{
+				{Name: "owner", Type: "User", RefName: "pets", Inverse: true},
+			},
+			Annotations: antFn("two"),
+		}
+		car = &load.Schema{
+			Name: "Car",
+			Edges: []*load.Edge{
+				{Name: "owner", Type: "User", RefName: "cars", Inverse: true},
+			},
+			Annotations: antFn("two"),
+		}
+	)
+	g, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, user, pet, car)
+	require.NoError(t, err)
+	ts, err := g.Tables()
+	require.NoError(t, err)
+	require.Len(t, ts, 5)
+	require.Equal(t, "one", ts[0].Schema) // user
+	require.Equal(t, "two", ts[1].Schema) // pet
+	require.Equal(t, "two", ts[2].Schema) // car
+	require.Equal(t, "one", ts[3].Schema) // user<>pets join table user lives in owner schema
+	require.Equal(t, "two", ts[4].Schema) // user<>cars edge has annotation and lives in specified schema
 }
 
 func TestEnsureCorrectFK(t *testing.T) {

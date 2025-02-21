@@ -12,7 +12,7 @@ import (
 
 // Pet holds the schema definition for the Pet entity.
 type Pet struct {
-	ent.Schema
+	base
 }
 
 // Fields of the Pet.

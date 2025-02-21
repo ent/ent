@@ -11,6 +11,7 @@ import "context"
 // SchemaConfig represents alternative schema names for all tables
 // that can be passed at runtime.
 type SchemaConfig struct {
+	CleanUser  string // CleanUser table.
 	Friendship string // Friendship table.
 	Group      string // Group table.
 	GroupUsers string // Group-users->User table.

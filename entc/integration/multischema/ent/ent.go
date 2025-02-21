@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/multischema/ent/cleanuser"
 	"entgo.io/ent/entc/integration/multischema/ent/friendship"
 	"entgo.io/ent/entc/integration/multischema/ent/group"
 	"entgo.io/ent/entc/integration/multischema/ent/pet"
@@ -80,6 +81,7 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			cleanuser.Table:  cleanuser.ValidColumn,
 			friendship.Table: friendship.ValidColumn,
 			group.Table:      group.ValidColumn,
 			pet.Table:        pet.ValidColumn,
