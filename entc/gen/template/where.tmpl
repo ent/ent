@@ -77,7 +77,7 @@ in the LICENSE file in the root directory of this source tree.
 		{{ $arg := "v" }}{{ if $op.Variadic }}{{ $arg = "vs" }}{{ end }}
 		{{ $stringOp := eq $op.Name "EqualFold" "Contains" "ContainsFold" "HasPrefix" "HasSuffix" }}
 		{{ $func := print $f.StructField $op.Name }}
-		{{ $type := $f.Type.String }}{{ if $f.IsEnum }}{{ $type = trimPackage $type $.Package }}{{ end }}
+		{{ $type := $f.Type.String }}{{ if $f.IsEnum }}{{ $type = trimPackage $type $.PackageDir }}{{ end }}
 		// {{ $func }} applies the {{ $op.Name }} predicate on the {{ quote $f.Name }} field.
 		func {{ $func }}({{ if not $op.Niladic }}{{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $type }}{{ end }}) predicate.{{ $.Name }} {
 			{{- if and $f.HasValueScanner (or $op.Variadic (not $op.Niladic)) }}
