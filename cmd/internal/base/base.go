@@ -246,7 +246,11 @@ func SchemaCmd() *cobra.Command {
 				if err != nil {
 					log.Fatalln(err)
 				}
-				ddl, err := schema.Dump(cmd.Context(), dlct, version, t)
+				v, err := g.Views()
+				if err != nil {
+					log.Fatalln(err)
+				}
+				ddl, err := schema.Dump(cmd.Context(), dlct, version, append(t, v...))
 				if err != nil {
 					log.Fatalln(err)
 				}
