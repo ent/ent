@@ -70,8 +70,9 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []any
 						{{ template "dialect/sql/decode/field" . }}
 					{{- end }}
 				{{- else }}
-					value, ok := values[{{ $idx }}].(*sql.NullInt64)
-					if !ok {
+				  {{- $ok := "ok" }}{{ if eq $ok $receiver }}{{ $ok = "_ok" }}{{ end -}}
+					value, {{ $ok }} := values[{{ $idx }}].(*sql.NullInt64)
+					if !{{ $ok }} {
 						return fmt.Errorf("unexpected type %T for field id", value)
 					}
 					{{ $receiver }}.ID = {{ $.ID.Type }}(value.Int64)
@@ -91,7 +92,8 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []any
 						{{ template "dialect/sql/decode/field" . }}
 					{{- end }}
 				{{- else }}
-					if value, ok := values[{{ $idx }}].(*sql.NullInt64); !ok {
+				  {{- $ok := "ok" }}{{ if eq $ok $receiver }}{{ $ok = "_ok" }}{{ end -}}
+					if value, {{ $ok }} := values[{{ $idx }}].(*sql.NullInt64); !{{ $ok }} {
 						return fmt.Errorf("unexpected type %T for edge-field {{ $f.Name}}", value)
 					} else if value.Valid {
 						{{ $receiver }}.{{ $fk.StructField }} = new({{ $f.Type }})
@@ -126,7 +128,8 @@ func ({{ $receiver }} *{{ $.Name }}) {{ $.ValueName }}(name string) (ent.Value, 
 			{{ $ret }}.{{ $field }} = value
 		}
 	{{- else if $f.IsJSON -}}
-		if value, ok := values[{{ $i }}].(*{{ $f.ScanType }}); !ok {
+	  {{- $ok := "ok" }}{{ if eq $ok $ret }}{{ $ok = "_ok" }}{{ end -}}
+		if value, {{ $ok }} := values[{{ $i }}].(*{{ $f.ScanType }}); !{{ $ok }} {
 			return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[{{ $i }}])
 		} else if value != nil && len(*value) > 0 {
 			if err := json.Unmarshal(*value, &{{ $ret }}.{{ $field }}); err != nil {
@@ -135,7 +138,8 @@ func ({{ $receiver }} *{{ $.Name }}) {{ $.ValueName }}(name string) (ent.Value, 
 		}
 	{{- else }}
 		{{- $scantype := $f.ScanType -}}
-		if value, ok := values[{{ $i }}].(*{{ $scantype }}); !ok {
+		{{- $ok := "ok" }}{{ if eq $ok $ret }}{{ $ok = "_ok" }}{{ end -}}
+		if value, {{ $ok }} := values[{{ $i }}].(*{{ $scantype }}); !{{ $ok }} {
 			return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[{{ $i }}])
 		{{- if hasPrefix $scantype "sql.Null" }}
 			} else if value.Valid {
