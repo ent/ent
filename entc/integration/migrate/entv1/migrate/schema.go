@@ -69,6 +69,7 @@ var (
 		{Name: "name", Type: field.TypeString, Size: 10},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "nickname", Type: field.TypeString, Unique: true},
+		{Name: "username", Type: field.TypeString, Nullable: true},
 		{Name: "address", Type: field.TypeString, Nullable: true},
 		{Name: "renamed", Type: field.TypeString, Nullable: true},
 		{Name: "old_token", Type: field.TypeString},
@@ -88,13 +89,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "users_users_children",
-				Columns:    []*schema.Column{UsersColumns[13]},
+				Columns:    []*schema.Column{UsersColumns[14]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "users_users_spouse",
-				Columns:    []*schema.Column{UsersColumns[14]},
+				Columns:    []*schema.Column{UsersColumns[15]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -111,7 +112,7 @@ var (
 			{
 				Name:    "user_name_address",
 				Unique:  true,
-				Columns: []*schema.Column{UsersColumns[2], UsersColumns[5]},
+				Columns: []*schema.Column{UsersColumns[2], UsersColumns[6]},
 			},
 		},
 	}
