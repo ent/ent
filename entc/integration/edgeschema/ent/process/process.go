@@ -92,6 +92,7 @@ func ByAttachedFiles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newAttachedFilesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
 func newFilesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
