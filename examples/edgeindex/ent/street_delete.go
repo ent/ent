@@ -43,6 +43,11 @@ func (sd *StreetDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the StreetMutation object of the builder.
+func (sd *StreetDelete) Mutation() *StreetMutation {
+	return sd.mutation
+}
+
 func (sd *StreetDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(street.Table, sqlgraph.NewFieldSpec(street.FieldID, field.TypeInt))
 	if ps := sd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (sdo *StreetDeleteOne) ExecX(ctx context.Context) {
 	if err := sdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the StreetMutation object of the builder.
+func (sdo *StreetDeleteOne) Mutation() *StreetMutation {
+	return sdo.sd.mutation
 }

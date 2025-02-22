@@ -44,6 +44,11 @@ func (cd *CardDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the CardMutation object of the builder.
+func (cd *CardDelete) Mutation() *CardMutation {
+	return cd.mutation
+}
+
 func (cd *CardDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := cd.gremlin().Query()
@@ -91,4 +96,9 @@ func (cdo *CardDeleteOne) ExecX(ctx context.Context) {
 	if err := cdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the CardMutation object of the builder.
+func (cdo *CardDeleteOne) Mutation() *CardMutation {
+	return cdo.cd.mutation
 }

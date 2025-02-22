@@ -43,6 +43,11 @@ func (gd *GoodsDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the GoodsMutation object of the builder.
+func (gd *GoodsDelete) Mutation() *GoodsMutation {
+	return gd.mutation
+}
+
 func (gd *GoodsDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(goods.Table, sqlgraph.NewFieldSpec(goods.FieldID, field.TypeInt))
 	if ps := gd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (gdo *GoodsDeleteOne) ExecX(ctx context.Context) {
 	if err := gdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the GoodsMutation object of the builder.
+func (gdo *GoodsDeleteOne) Mutation() *GoodsMutation {
+	return gdo.gd.mutation
 }

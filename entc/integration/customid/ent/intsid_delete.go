@@ -43,6 +43,11 @@ func (isd *IntSIDDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the IntSIDMutation object of the builder.
+func (isd *IntSIDDelete) Mutation() *IntSIDMutation {
+	return isd.mutation
+}
+
 func (isd *IntSIDDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(intsid.Table, sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64))
 	if ps := isd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (isdo *IntSIDDeleteOne) ExecX(ctx context.Context) {
 	if err := isdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the IntSIDMutation object of the builder.
+func (isdo *IntSIDDeleteOne) Mutation() *IntSIDMutation {
+	return isdo.isd.mutation
 }

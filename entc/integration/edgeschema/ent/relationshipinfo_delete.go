@@ -43,6 +43,11 @@ func (rid *RelationshipInfoDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the RelationshipInfoMutation object of the builder.
+func (rid *RelationshipInfoDelete) Mutation() *RelationshipInfoMutation {
+	return rid.mutation
+}
+
 func (rid *RelationshipInfoDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(relationshipinfo.Table, sqlgraph.NewFieldSpec(relationshipinfo.FieldID, field.TypeInt))
 	if ps := rid.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (rido *RelationshipInfoDeleteOne) ExecX(ctx context.Context) {
 	if err := rido.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the RelationshipInfoMutation object of the builder.
+func (rido *RelationshipInfoDeleteOne) Mutation() *RelationshipInfoMutation {
+	return rido.rid.mutation
 }

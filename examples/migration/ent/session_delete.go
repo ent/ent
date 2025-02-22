@@ -43,6 +43,11 @@ func (sd *SessionDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the SessionMutation object of the builder.
+func (sd *SessionDelete) Mutation() *SessionMutation {
+	return sd.mutation
+}
+
 func (sd *SessionDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(session.Table, sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID))
 	if ps := sd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (sdo *SessionDeleteOne) ExecX(ctx context.Context) {
 	if err := sdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the SessionMutation object of the builder.
+func (sdo *SessionDeleteOne) Mutation() *SessionMutation {
+	return sdo.sd.mutation
 }
