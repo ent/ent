@@ -594,17 +594,26 @@ type driver struct {
 var drivers = func(v string) map[string]driver {
 	return map[string]driver{
 		entdialect.SQLite: {
-			&SQLite{WithForeignKeys: true},
+			&SQLite{
+				WithForeignKeys: true,
+				Driver:          nopDriver{dialect: entdialect.SQLite},
+			},
 			sqlite.DefaultDiff,
 			sqlite.DefaultPlan,
 		},
 		entdialect.MySQL: {
-			&MySQL{version: v},
+			&MySQL{
+				version: v,
+				Driver:  nopDriver{dialect: entdialect.MySQL},
+			},
 			mysql.DefaultDiff,
 			mysql.DefaultPlan,
 		},
 		entdialect.Postgres: {
-			&Postgres{version: v},
+			&Postgres{
+				version: v,
+				Driver:  nopDriver{dialect: entdialect.Postgres},
+			},
 			postgres.DefaultDiff,
 			postgres.DefaultPlan,
 		},
