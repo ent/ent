@@ -1564,6 +1564,11 @@ func TextHasSuffix(v string) predicate.FieldType {
 	return predicate.FieldType(sql.FieldHasSuffix(FieldText, v))
 }
 
+// TextRegex applies the Regex predicate on the "text" field.
+func TextRegex(v string) predicate.FieldType {
+	return predicate.FieldType(sql.FieldRegex(FieldText, v))
+}
+
 // TextIsNil applies the IsNil predicate on the "text" field.
 func TextIsNil() predicate.FieldType {
 	return predicate.FieldType(sql.FieldIsNull(FieldText))
@@ -1842,6 +1847,12 @@ func MACHasSuffix(v schema.MAC) predicate.FieldType {
 	return predicate.FieldType(sql.FieldHasSuffix(FieldMAC, vc))
 }
 
+// MACRegex applies the Regex predicate on the "mac" field.
+func MACRegex(v schema.MAC) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(sql.FieldRegex(FieldMAC, vc))
+}
+
 // MACIsNil applies the IsNil predicate on the "mac" field.
 func MACIsNil() predicate.FieldType {
 	return predicate.FieldType(sql.FieldIsNull(FieldMAC))
@@ -1969,6 +1980,11 @@ func PasswordHasSuffix(v string) predicate.FieldType {
 	return predicate.FieldType(sql.FieldHasSuffix(FieldPassword, v))
 }
 
+// PasswordRegex applies the Regex predicate on the "password" field.
+func PasswordRegex(v string) predicate.FieldType {
+	return predicate.FieldType(sql.FieldRegex(FieldPassword, v))
+}
+
 // PasswordIsNil applies the IsNil predicate on the "password" field.
 func PasswordIsNil() predicate.FieldType {
 	return predicate.FieldType(sql.FieldIsNull(FieldPassword))
@@ -2045,6 +2061,12 @@ func StringScannerHasPrefix(v schema.StringScanner) predicate.FieldType {
 func StringScannerHasSuffix(v schema.StringScanner) predicate.FieldType {
 	vc := string(v)
 	return predicate.FieldType(sql.FieldHasSuffix(FieldStringScanner, vc))
+}
+
+// StringScannerRegex applies the Regex predicate on the "string_scanner" field.
+func StringScannerRegex(v schema.StringScanner) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(sql.FieldRegex(FieldStringScanner, vc))
 }
 
 // StringScannerIsNil applies the IsNil predicate on the "string_scanner" field.
@@ -2205,6 +2227,12 @@ func DirHasSuffix(v http.Dir) predicate.FieldType {
 	return predicate.FieldType(sql.FieldHasSuffix(FieldDir, vc))
 }
 
+// DirRegex applies the Regex predicate on the "dir" field.
+func DirRegex(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(sql.FieldRegex(FieldDir, vc))
+}
+
 // DirEqualFold applies the EqualFold predicate on the "dir" field.
 func DirEqualFold(v http.Dir) predicate.FieldType {
 	vc := string(v)
@@ -2289,6 +2317,12 @@ func NdirHasSuffix(v http.Dir) predicate.FieldType {
 	return predicate.FieldType(sql.FieldHasSuffix(FieldNdir, vc))
 }
 
+// NdirRegex applies the Regex predicate on the "ndir" field.
+func NdirRegex(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(sql.FieldRegex(FieldNdir, vc))
+}
+
 // NdirIsNil applies the IsNil predicate on the "ndir" field.
 func NdirIsNil() predicate.FieldType {
 	return predicate.FieldType(sql.FieldIsNull(FieldNdir))
@@ -2367,6 +2401,12 @@ func StrHasPrefix(v sql.NullString) predicate.FieldType {
 func StrHasSuffix(v sql.NullString) predicate.FieldType {
 	vc := v.String
 	return predicate.FieldType(sql.FieldHasSuffix(FieldStr, vc))
+}
+
+// StrRegex applies the Regex predicate on the "str" field.
+func StrRegex(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(sql.FieldRegex(FieldStr, vc))
 }
 
 // StrIsNil applies the IsNil predicate on the "str" field.
@@ -2449,6 +2489,12 @@ func NullStrHasSuffix(v *sql.NullString) predicate.FieldType {
 	return predicate.FieldType(sql.FieldHasSuffix(FieldNullStr, vc))
 }
 
+// NullStrRegex applies the Regex predicate on the "null_str" field.
+func NullStrRegex(v *sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(sql.FieldRegex(FieldNullStr, vc))
+}
+
 // NullStrIsNil applies the IsNil predicate on the "null_str" field.
 func NullStrIsNil() predicate.FieldType {
 	return predicate.FieldType(sql.FieldIsNull(FieldNullStr))
@@ -2529,6 +2575,12 @@ func LinkHasSuffix(v schema.Link) predicate.FieldType {
 	return predicate.FieldType(sql.FieldHasSuffix(FieldLink, vc))
 }
 
+// LinkRegex applies the Regex predicate on the "link" field.
+func LinkRegex(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(sql.FieldRegex(FieldLink, vc))
+}
+
 // LinkIsNil applies the IsNil predicate on the "link" field.
 func LinkIsNil() predicate.FieldType {
 	return predicate.FieldType(sql.FieldIsNull(FieldLink))
@@ -2607,6 +2659,12 @@ func NullLinkHasPrefix(v *schema.Link) predicate.FieldType {
 func NullLinkHasSuffix(v *schema.Link) predicate.FieldType {
 	vc := v.String()
 	return predicate.FieldType(sql.FieldHasSuffix(FieldNullLink, vc))
+}
+
+// NullLinkRegex applies the Regex predicate on the "null_link" field.
+func NullLinkRegex(v *schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(sql.FieldRegex(FieldNullLink, vc))
 }
 
 // NullLinkIsNil applies the IsNil predicate on the "null_link" field.
@@ -3645,6 +3703,12 @@ func VstringHasPrefix(v schema.VString) predicate.FieldType {
 func VstringHasSuffix(v schema.VString) predicate.FieldType {
 	vc := string(v)
 	return predicate.FieldType(sql.FieldHasSuffix(FieldVstring, vc))
+}
+
+// VstringRegex applies the Regex predicate on the "vstring" field.
+func VstringRegex(v schema.VString) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(sql.FieldRegex(FieldVstring, vc))
 }
 
 // VstringEqualFold applies the EqualFold predicate on the "vstring" field.
