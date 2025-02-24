@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
 
 	"github.com/stretchr/testify/require"
@@ -202,7 +203,15 @@ func TestDump(t *testing.T) {
 		Columns:    append(pets.Columns[:2], pets.Columns[3]),
 		Annotation: entsql.View("SELECT id, name, owner_id FROM pets"),
 	}
-	tables = []*Table{users, pets, petsWithoutFur}
+	petNames := &Table{
+		Name:    "pet_names",
+		View:    true,
+		Columns: pets.Columns[1:1],
+		Annotation: entsql.ViewFor(dialect.Postgres, func(s *sql.Selector) {
+			s.Select("name").From(sql.Table("pets"))
+		}),
+	}
+	tables = []*Table{users, pets, petsWithoutFur, petNames}
 
 	my := func(length int) string {
 		return fmt.Sprintf(strings.ReplaceAll(`-- Add new schema named "s1"
@@ -262,6 +271,8 @@ CREATE TABLE "s2"."pets" (
 CREATE UNIQUE INDEX "name" ON "s2"."pets" ("name" DESC);
 -- Add "pets_without_fur" view
 CREATE VIEW "s3"."pets_without_fur" ("id", "name", "owner_id") AS SELECT id, name, owner_id FROM pets;
+-- Add "pet_names" view
+CREATE VIEW "s3"."pet_names" AS SELECT "name" FROM "pets";
 `
 
 	for _, tt := range []struct{ dialect, version, expected string }{
@@ -307,6 +318,7 @@ CREATE VIEW $pets_without_fur$ ($id$, $name$, $owner_id$) AS SELECT id, name, ow
 			tables[0].Schema = "s1"
 			tables[1].Schema = "s2"
 			tables[2].Schema = "s3"
+			tables[3].Schema = "s3"
 		}
 		t.Run(n, func(t *testing.T) {
 			ac, err := Dump(context.Background(), tt.dialect, tt.version, tables)

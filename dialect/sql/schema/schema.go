@@ -630,7 +630,7 @@ func Dump(ctx context.Context, dialect, version string, tables []*Table, opts ..
 	if !ok {
 		return "", fmt.Errorf("unsupported dialect %q", dialect)
 	}
-	r, err := (&Atlas{sqlDialect: d}).StateReader(tables...).ReadState(ctx)
+	r, err := (&Atlas{sqlDialect: d, dialect: dialect}).StateReader(tables...).ReadState(ctx)
 	if err != nil {
 		return "", err
 	}
