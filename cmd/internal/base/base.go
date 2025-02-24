@@ -212,10 +212,10 @@ func GenerateCmd(postRun ...func(*gen.Config)) *cobra.Command {
 // SchemaCmd returns DDL to use Ent as an Atlas schema loader.
 func SchemaCmd() *cobra.Command {
 	var (
-		cfg           gen.Config
-		dlct, version string
-		features      []string
-		cmd           = &cobra.Command{
+		cfg                 gen.Config
+		dlct, version       string
+		features, buildTags []string
+		cmd                 = &cobra.Command{
 			Use:   "schema [flags] path",
 			Short: "dump the DDL for the schema directory",
 			Example: examples(
@@ -225,9 +225,13 @@ func SchemaCmd() *cobra.Command {
 			),
 			Args: cobra.ExactArgs(1),
 			Run: func(cmd *cobra.Command, path []string) {
-				// Ensure features are set.
-				if err := entc.FeatureNames(features...)(&cfg); err != nil {
-					log.Fatalln(err)
+				for _, o := range []entc.Option{
+					entc.FeatureNames(features...),
+					entc.BuildTags(buildTags...),
+				} {
+					if err := o(&cfg); err != nil {
+						log.Fatalln(err)
+					}
 				}
 				// If the target directory is not inferred from
 				// the schema path, resolve its package path.
@@ -261,6 +265,7 @@ func SchemaCmd() *cobra.Command {
 	cmd.Flags().StringVar(&dlct, "dialect", "", "database dialect to use")
 	cmd.Flags().StringVar(&version, "version", "", "database version to assume")
 	cmd.Flags().StringSliceVarP(&features, "feature", "", nil, "extend codegen with additional features")
+	cmd.Flags().StringSliceVarP(&buildTags, "build-tags", "", nil, "go build tags to use when loading the schema graph")
 	cobra.CheckErr(cmd.MarkFlagRequired("dialect"))
 	return cmd
 }
