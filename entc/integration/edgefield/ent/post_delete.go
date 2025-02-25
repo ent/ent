@@ -43,6 +43,11 @@ func (pd *PostDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the PostMutation object of the builder.
+func (pd *PostDelete) Mutation() *PostMutation {
+	return pd.mutation
+}
+
 func (pd *PostDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(post.Table, sqlgraph.NewFieldSpec(post.FieldID, field.TypeInt))
 	if ps := pd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (pdo *PostDeleteOne) ExecX(ctx context.Context) {
 	if err := pdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the PostMutation object of the builder.
+func (pdo *PostDeleteOne) Mutation() *PostMutation {
+	return pdo.pd.mutation
 }
