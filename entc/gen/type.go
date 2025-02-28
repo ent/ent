@@ -1159,6 +1159,14 @@ func (f Field) BuilderField() string {
 	return builderField(f.Name)
 }
 
+// TypeName returns the type name for the field.
+func (f Field) TypeName() string {
+	if n := f.typ.PackageAlias(); n != "" && f.IsEnum() {
+		return strings.Replace(f.Type.String(), f.typ.PackageDir(), f.typ.PackageAlias(), 1)
+	}
+	return f.Type.String()
+}
+
 // StructField returns the struct member of the field in the model.
 func (f Field) StructField() string {
 	return pascal(f.Name)
@@ -1528,7 +1536,7 @@ func (f Field) ScanTypeField(rec string) string {
 	}
 	switch f.Type.Type {
 	case field.TypeEnum:
-		expr = fmt.Sprintf("%s(%s.String)", f.Type, rec)
+		expr = fmt.Sprintf("%s(%s.String)", f.TypeName(), rec)
 	case field.TypeString, field.TypeBool, field.TypeInt64, field.TypeFloat64:
 		expr = f.goType(fmt.Sprintf("%s.%s", rec, strings.Title(f.Type.Type.String())))
 	case field.TypeTime:
