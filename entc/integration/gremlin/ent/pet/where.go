@@ -7,6 +7,8 @@
 package pet
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
@@ -117,6 +119,13 @@ func Nickname(v string) predicate.Pet {
 func Trained(v bool) predicate.Pet {
 	return predicate.Pet(func(t *dsl.Traversal) {
 		t.Has(Label, FieldTrained, p.EQ(v))
+	})
+}
+
+// OptionalTime applies equality check predicate on the "optional_time" field. It's identical to OptionalTimeEQ.
+func OptionalTime(v time.Time) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalTime, p.EQ(v))
 	})
 }
 
@@ -425,6 +434,76 @@ func TrainedEQ(v bool) predicate.Pet {
 func TrainedNEQ(v bool) predicate.Pet {
 	return predicate.Pet(func(t *dsl.Traversal) {
 		t.Has(Label, FieldTrained, p.NEQ(v))
+	})
+}
+
+// OptionalTimeEQ applies the EQ predicate on the "optional_time" field.
+func OptionalTimeEQ(v time.Time) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalTime, p.EQ(v))
+	})
+}
+
+// OptionalTimeNEQ applies the NEQ predicate on the "optional_time" field.
+func OptionalTimeNEQ(v time.Time) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalTime, p.NEQ(v))
+	})
+}
+
+// OptionalTimeIn applies the In predicate on the "optional_time" field.
+func OptionalTimeIn(vs ...time.Time) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalTime, p.Within(vs...))
+	})
+}
+
+// OptionalTimeNotIn applies the NotIn predicate on the "optional_time" field.
+func OptionalTimeNotIn(vs ...time.Time) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalTime, p.Without(vs...))
+	})
+}
+
+// OptionalTimeGT applies the GT predicate on the "optional_time" field.
+func OptionalTimeGT(v time.Time) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalTime, p.GT(v))
+	})
+}
+
+// OptionalTimeGTE applies the GTE predicate on the "optional_time" field.
+func OptionalTimeGTE(v time.Time) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalTime, p.GTE(v))
+	})
+}
+
+// OptionalTimeLT applies the LT predicate on the "optional_time" field.
+func OptionalTimeLT(v time.Time) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalTime, p.LT(v))
+	})
+}
+
+// OptionalTimeLTE applies the LTE predicate on the "optional_time" field.
+func OptionalTimeLTE(v time.Time) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalTime, p.LTE(v))
+	})
+}
+
+// OptionalTimeIsNil applies the IsNil predicate on the "optional_time" field.
+func OptionalTimeIsNil() predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldOptionalTime)
+	})
+}
+
+// OptionalTimeNotNil applies the NotNil predicate on the "optional_time" field.
+func OptionalTimeNotNil() predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldOptionalTime)
 	})
 }
 

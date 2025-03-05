@@ -126,6 +126,17 @@ type Annotation struct {
 	//
 	Incremental *bool `json:"incremental,omitempty"`
 
+	// IncrementStart defines the auto-incremental start value of a column. For example:
+	//
+	//  incrementStart := 100
+	//  entsql.Annotation{
+	//      IncrementStart: &incrementStart,
+	//  }
+	//
+	// By default, this value is nil defaulting to whatever the database settings are.
+	//
+	IncrementStart *int `json:"increment_start,omitempty"`
+
 	// OnDelete specifies a custom referential action for DELETE operations on parent
 	// table that has matching rows in the child table.
 	//
@@ -364,6 +375,21 @@ func OnDelete(opt ReferenceOption) *Annotation {
 	}
 }
 
+// IncrementStart specifies the starting value for auto-increment columns.
+//
+// For example, in order to define the starting value for auto-increment to be 100:
+//
+//	func (T) Annotations() []schema.Annotation {
+//		return []schema.Annotation{
+//			entsql.IncrementStart(100),
+//		}
+//	}
+func IncrementStart(i int) *Annotation {
+	return &Annotation{
+		IncrementStart: &i,
+	}
+}
+
 // Merge implements the schema.Merger interface.
 func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	var ant Annotation
@@ -414,6 +440,9 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	}
 	if i := ant.Incremental; i != nil {
 		a.Incremental = i
+	}
+	if i := ant.IncrementStart; i != nil {
+		a.IncrementStart = i
 	}
 	if od := ant.OnDelete; od != "" {
 		a.OnDelete = od

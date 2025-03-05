@@ -320,6 +320,25 @@ func (b *{{ $builder }}) Default(i {{ $t }}) *{{ $builder }} {
 	return b
 }
 
+// DefaultFunc sets the function that is applied to set the default value
+// of the field on creation.
+func (b *{{ $builder }}) DefaultFunc(fn any) *{{ $builder }} {
+	b.desc.Default = fn
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.{{ title $t.String }}("{{$t.String}}").
+//		Default(0).
+//		UpdateDefault(GenNumber),
+//
+func (b *{{ $builder }}) UpdateDefault(fn any) *{{ $builder }} {
+	b.desc.UpdateDefault = fn
+	return b
+}
+
 // Nillable indicates that this field is a nillable.
 // Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *{{ $builder }}) Nillable() *{{ $builder }} {
@@ -434,6 +453,9 @@ func (b *{{ $builder }}) Deprecated(reason ...string) *{{ $builder }} {
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *{{ $builder }}) Descriptor() *Descriptor {
+	if b.desc.Default != nil || b.desc.UpdateDefault != nil {
+		b.desc.checkDefaultFunc({{ $t }}Type)
+	}
 	b.desc.checkGoType({{ $t }}Type)
 	return b.desc
 }

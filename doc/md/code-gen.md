@@ -9,7 +9,7 @@ The project comes with a codegen tool called `ent`. In order to install
 `ent` run the following command:
 
 ```bash
-go get -d entgo.io/ent/cmd/ent
+go get entgo.io/ent/cmd/ent
 ``` 
 
 ## Initialize A New Schema
@@ -60,7 +60,7 @@ go mod init <project>
 And then, re-run the following command in order to add `ent` to your `go.mod` file:
 
 ```console
-go get -d entgo.io/ent/cmd/ent
+go get entgo.io/ent/cmd/ent
 ```
 
 Add a `generate.go` file to your project under `<project>/ent`:

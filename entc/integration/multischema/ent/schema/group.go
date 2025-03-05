@@ -6,6 +6,8 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
@@ -27,5 +29,12 @@ func (Group) Fields() []ent.Field {
 func (Group) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("users", User.Type),
+	}
+}
+
+// Annotations of the Group.
+func (Group) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Schema("db2"),
 	}
 }

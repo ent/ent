@@ -25,6 +25,8 @@ const (
 	FieldNickname = "nickname"
 	// FieldTrained holds the string denoting the trained field in the database.
 	FieldTrained = "trained"
+	// FieldOptionalTime holds the string denoting the optional_time field in the database.
+	FieldOptionalTime = "optional_time"
 	// EdgeTeam holds the string denoting the team edge name in mutations.
 	EdgeTeam = "team"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.

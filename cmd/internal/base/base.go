@@ -17,6 +17,7 @@ import (
 	"unicode"
 
 	"entgo.io/ent/cmd/internal/printer"
+	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/entc"
 	"entgo.io/ent/entc/gen"
 	"entgo.io/ent/schema/field"
@@ -205,6 +206,67 @@ func GenerateCmd(postRun ...func(*gen.Config)) *cobra.Command {
 	// The --idtype flag predates the field.<Type>("id") option.
 	// See, https://entgo.io/docs/schema-fields#id-field.
 	cobra.CheckErr(cmd.Flags().MarkHidden("idtype"))
+	return cmd
+}
+
+// SchemaCmd returns DDL to use Ent as an Atlas schema loader.
+func SchemaCmd() *cobra.Command {
+	var (
+		cfg                 gen.Config
+		dlct, version       string
+		features, buildTags []string
+		cmd                 = &cobra.Command{
+			Use:   "schema [flags] path",
+			Short: "dump the DDL for the schema directory",
+			Example: examples(
+				"ent schema ./ent/schema --dialect mysql --version 5.6",
+				"ent schema ./ent/schema --dialect sqlite3",
+				"ent schema github.com/a8m/x --dialect postgres --version 15",
+			),
+			Args: cobra.ExactArgs(1),
+			Run: func(cmd *cobra.Command, path []string) {
+				for _, o := range []entc.Option{
+					entc.FeatureNames(features...),
+					entc.BuildTags(buildTags...),
+				} {
+					if err := o(&cfg); err != nil {
+						log.Fatalln(err)
+					}
+				}
+				// If the target directory is not inferred from
+				// the schema path, resolve its package path.
+				if cfg.Target != "" {
+					pkgPath, err := PkgPath(DefaultConfig, cfg.Target)
+					if err != nil {
+						log.Fatalln(err)
+					}
+					cfg.Package = pkgPath
+				}
+				g, err := entc.LoadGraph(path[0], &cfg)
+				if err != nil {
+					log.Fatalln(err)
+				}
+				t, err := g.Tables()
+				if err != nil {
+					log.Fatalln(err)
+				}
+				v, err := g.Views()
+				if err != nil {
+					log.Fatalln(err)
+				}
+				ddl, err := schema.Dump(cmd.Context(), dlct, version, append(t, v...))
+				if err != nil {
+					log.Fatalln(err)
+				}
+				fmt.Println(ddl)
+			},
+		}
+	)
+	cmd.Flags().StringVar(&dlct, "dialect", "", "database dialect to use")
+	cmd.Flags().StringVar(&version, "version", "", "database version to assume")
+	cmd.Flags().StringSliceVarP(&features, "feature", "", nil, "extend codegen with additional features")
+	cmd.Flags().StringSliceVarP(&buildTags, "build-tags", "", nil, "go build tags to use when loading the schema graph")
+	cobra.CheckErr(cmd.MarkFlagRequired("dialect"))
 	return cmd
 }
 

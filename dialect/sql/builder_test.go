@@ -105,6 +105,31 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `CREATE TABLE IF NOT EXISTS "users"("id" serial, "card_id" int, PRIMARY KEY("id", "name"), FOREIGN KEY("card_id") REFERENCES "cards"("id") ON DELETE SET NULL)`,
 		},
 		{
+			input: CreateView("clean_users").
+				Columns(
+					Column("id").Type("int"),
+					Column("name").Type("varchar(255)"),
+				).
+				As(Select("id", "name").From(Table("users"))),
+			wantQuery: "CREATE VIEW `clean_users` (`id` int, `name` varchar(255)) AS SELECT `id`, `name` FROM `users`",
+		},
+		{
+			input: Dialect(dialect.Postgres).
+				CreateView("clean_users").
+				Columns(
+					Column("id").Type("int"),
+					Column("name").Type("varchar(255)"),
+				).
+				As(Select("id", "name").From(Table("users"))),
+			wantQuery: `CREATE VIEW "clean_users" ("id" int, "name" varchar(255)) AS SELECT "id", "name" FROM "users"`,
+		},
+		{
+			input: CreateView("clean_users").
+				Schema("schema").
+				As(Select("id", "name").From(Table("users"))),
+			wantQuery: "CREATE VIEW `schema`.`clean_users` AS SELECT `id`, `name` FROM `users`",
+		},
+		{
 			input: AlterTable("users").
 				AddColumn(Column("group_id").Type("int").Attr("UNIQUE")).
 				AddForeignKey(ForeignKey().Columns("group_id").
@@ -520,6 +545,91 @@ func TestBuilder(t *testing.T) {
 				Where(HasPrefix("nickname", "a8m")),
 			wantQuery: `UPDATE "users" SET "age" = COALESCE("users"."age", 0) + $1 WHERE "nickname" LIKE $2`,
 			wantArgs:  []any{1, "a8m%"},
+		},
+		{
+			input: Update("users").
+				Set("name", "foo").
+				Where(And(HasPrefixFold("nickname", "a8m"), Contains("lastname", "mash"))),
+			wantQuery: "UPDATE `users` SET `name` = ? WHERE LOWER(`nickname`) LIKE ? AND `lastname` LIKE ?",
+			wantArgs:  []any{"foo", "a8m%", "%mash%"},
+		},
+		{
+			input: Dialect(dialect.Postgres).
+				Update("users").
+				Set("name", "foo").
+				Where(And(HasPrefixFold("nickname", "a8m"), Contains("lastname", "mash"))),
+			wantQuery: `UPDATE "users" SET "name" = $1 WHERE "nickname" ILIKE $2 AND "lastname" LIKE $3`,
+			wantArgs:  []any{"foo", "a8m%", "%mash%"},
+		},
+		{
+			input: Update("users").
+				Add("age", 1).
+				Where(HasPrefixFold("nickname", "a8m")),
+			wantQuery: "UPDATE `users` SET `age` = COALESCE(`users`.`age`, 0) + ? WHERE LOWER(`nickname`) LIKE ?",
+			wantArgs:  []any{1, "a8m%"},
+		},
+		{
+			input: Update("users").
+				Set("age", 1).
+				Add("age", 2).
+				Where(HasPrefixFold("nickname", "a8m")),
+			wantQuery: "UPDATE `users` SET `age` = ?, `age` = COALESCE(`users`.`age`, 0) + ? WHERE LOWER(`nickname`) LIKE ?",
+			wantArgs:  []any{1, 2, "a8m%"},
+		},
+		{
+			input: Update("users").
+				Add("age", 2).
+				Set("age", 1).
+				Where(HasPrefixFold("nickname", "a8m")),
+			wantQuery: "UPDATE `users` SET `age` = ? WHERE LOWER(`nickname`) LIKE ?",
+			wantArgs:  []any{1, "a8m%"},
+		},
+		{
+			input: Dialect(dialect.Postgres).
+				Update("users").
+				Add("age", 1).
+				Where(HasPrefixFold("nickname", "a8m")),
+			wantQuery: `UPDATE "users" SET "age" = COALESCE("users"."age", 0) + $1 WHERE "nickname" ILIKE $2`,
+			wantArgs:  []any{1, "a8m%"},
+		},
+		{
+			input: Dialect(dialect.Postgres).
+				Update("users").
+				Set("name", "foo").
+				Where(And(HasSuffixFold("nickname", "a8m"), Contains("lastname", "mash"))),
+			wantQuery: `UPDATE "users" SET "name" = $1 WHERE "nickname" ILIKE $2 AND "lastname" LIKE $3`,
+			wantArgs:  []any{"foo", "%a8m", "%mash%"},
+		},
+		{
+			input: Update("users").
+				Add("age", 1).
+				Where(HasSuffixFold("nickname", "a8m")),
+			wantQuery: "UPDATE `users` SET `age` = COALESCE(`users`.`age`, 0) + ? WHERE LOWER(`nickname`) LIKE ?",
+			wantArgs:  []any{1, "%a8m"},
+		},
+		{
+			input: Update("users").
+				Set("age", 1).
+				Add("age", 2).
+				Where(HasSuffixFold("nickname", "a8m")),
+			wantQuery: "UPDATE `users` SET `age` = ?, `age` = COALESCE(`users`.`age`, 0) + ? WHERE LOWER(`nickname`) LIKE ?",
+			wantArgs:  []any{1, 2, "%a8m"},
+		},
+		{
+			input: Update("users").
+				Add("age", 2).
+				Set("age", 1).
+				Where(HasSuffixFold("nickname", "a8m")),
+			wantQuery: "UPDATE `users` SET `age` = ? WHERE LOWER(`nickname`) LIKE ?",
+			wantArgs:  []any{1, "%a8m"},
+		},
+		{
+			input: Dialect(dialect.Postgres).
+				Update("users").
+				Add("age", 1).
+				Where(HasSuffixFold("nickname", "a8m")),
+			wantQuery: `UPDATE "users" SET "age" = COALESCE("users"."age", 0) + $1 WHERE "nickname" ILIKE $2`,
+			wantArgs:  []any{1, "%a8m"},
 		},
 		{
 			input: Update("users").

@@ -31,6 +31,7 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
+	TypeCleanUser  = "CleanUser"
 	TypeFriendship = "Friendship"
 	TypeGroup      = "Group"
 	TypePet        = "Pet"

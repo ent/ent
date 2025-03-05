@@ -381,6 +381,7 @@ var (
 		{Name: "uuid", Type: field.TypeUUID, Nullable: true},
 		{Name: "nickname", Type: field.TypeString, Nullable: true},
 		{Name: "trained", Type: field.TypeBool, Default: false},
+		{Name: "optional_time", Type: field.TypeTime, Nullable: true},
 		{Name: "user_pets", Type: field.TypeInt, Nullable: true},
 		{Name: "user_team", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
@@ -392,13 +393,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "pet_users_pets",
-				Columns:    []*schema.Column{PetColumns[6]},
+				Columns:    []*schema.Column{PetColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "pet_users_team",
-				Columns:    []*schema.Column{PetColumns[7]},
+				Columns:    []*schema.Column{PetColumns[8]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -407,7 +408,7 @@ var (
 			{
 				Name:    "pet_name_user_pets",
 				Unique:  false,
-				Columns: []*schema.Column{PetColumns[2], PetColumns[6]},
+				Columns: []*schema.Column{PetColumns[2], PetColumns[7]},
 			},
 			{
 				Name:    "pet_nickname",
@@ -625,21 +626,76 @@ var (
 )
 
 func init() {
+	ApisTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int) *int { return &i }(12884901888),
+	}
+	BuildersTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int) *int { return &i }(17179869184),
+	}
 	CardsTable.ForeignKeys[0].RefTable = UsersTable
+	CardsTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int) *int { return &i }(21474836480),
+	}
+	CommentsTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int) *int { return &i }(25769803776),
+	}
+	ExValueScansTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int) *int { return &i }(30064771072),
+	}
 	FieldTypesTable.ForeignKeys[0].RefTable = FilesTable
+	FieldTypesTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int) *int { return &i }(34359738368),
+	}
 	FilesTable.ForeignKeys[0].RefTable = FileTypesTable
 	FilesTable.ForeignKeys[1].RefTable = GroupsTable
 	FilesTable.ForeignKeys[2].RefTable = UsersTable
+	FilesTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int) *int { return &i }(38654705664),
+	}
+	FileTypesTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int) *int { return &i }(42949672960),
+	}
+	GoodsTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int) *int { return &i }(47244640256),
+	}
 	GroupsTable.ForeignKeys[0].RefTable = GroupInfosTable
+	GroupsTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int) *int { return &i }(51539607552),
+	}
+	GroupInfosTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int) *int { return &i }(55834574848),
+	}
+	ItemsTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int) *int { return &i }(60129542144),
+	}
+	LicensesTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int) *int { return &i }(64424509440),
+	}
 	NodesTable.ForeignKeys[0].RefTable = NodesTable
+	NodesTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int) *int { return &i }(68719476736),
+	}
+	PcsTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int) *int { return &i }(73014444032),
+	}
 	PetTable.ForeignKeys[0].RefTable = UsersTable
 	PetTable.ForeignKeys[1].RefTable = UsersTable
 	PetTable.Annotation = &entsql.Annotation{
-		Table: "pet",
+		Table:          "pet",
+		IncrementStart: func(i int) *int { return &i }(77309411328),
+	}
+	SpecsTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int) *int { return &i }(81604378624),
+	}
+	TasksTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int) *int { return &i }(85899345920),
 	}
 	UsersTable.ForeignKeys[0].RefTable = GroupsTable
 	UsersTable.ForeignKeys[1].RefTable = UsersTable
 	UsersTable.ForeignKeys[2].RefTable = UsersTable
+	UsersTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int) *int { return &i }(8589934592),
+	}
 	SpecCardTable.ForeignKeys[0].RefTable = SpecsTable
 	SpecCardTable.ForeignKeys[1].RefTable = CardsTable
 	UserGroupsTable.ForeignKeys[0].RefTable = UsersTable

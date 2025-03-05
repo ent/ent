@@ -29,7 +29,11 @@ For proper installation using [Go modules], visit [entgo.io website][entgo insta
 ## Docs and Support
 The documentation for developing and using ent is available at: https://entgo.io
 
-For discussion and support, [open an issue](https://github.com/ent/ent/issues/new/choose) or join our [channel](https://gophers.slack.com/archives/C01FMSQDT53) in the gophers Slack.
+For discussion and support, [open an issue](https://github.com/ent/ent/issues/new/choose) or join our [Discord server](https://discord.gg/qZmPgTE6RX).
+
+## Developed and Sponsored by the [Atlas](https://atlasgo.io) Team
+
+[![image](https://github.com/user-attachments/assets/2a35b1b7-325f-4844-a2d7-d450c60de0dc)](https://atlasgo.io?utm_source=ent-readme)
 
 ## About the Project
 The `ent` project was inspired by Ent, an entity framework used internally at Meta (Facebook). It was created by [a8m](https://github.com/a8m) and [alexsn](https://github.com/alexsn) from the [Facebook Connectivity][fbc] team. These days, it is developed and maintained by the [Atlas](https://github.com/ariga/atlas) team, and the roadmap for its v1 release is described [here](https://github.com/ent/ent/issues/46).

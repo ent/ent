@@ -6,6 +6,7 @@ package gen
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"go/token"
@@ -47,6 +48,7 @@ var (
 		"indexOf":       indexOf,
 		"join":          join,
 		"joinWords":     joinWords,
+		"json":          jsonString,
 		"isNil":         isNil,
 		"lower":         strings.ToLower,
 		"upper":         strings.ToUpper,
@@ -72,6 +74,7 @@ var (
 		"slist":         list[string],
 		"fail":          fail,
 		"replace":       strings.ReplaceAll,
+		"allZero":       allZero,
 	}
 	rules    = ruleset()
 	acronyms = make(map[string]struct{})
@@ -528,4 +531,23 @@ func list[T any](v ...T) []T {
 // fail unconditionally returns an empty string and an error with the specified text.
 func fail(msg string) (string, error) {
 	return "", errors.New(msg)
+}
+
+// jsonString returns a json encoded value as string.
+func jsonString(v any) (string, error) {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return "", nil
+	}
+	return string(b), nil
+}
+
+// allZero reports whether all given values are the zero value of their type.
+func allZero(v ...any) bool {
+	for _, x := range v {
+		if !reflect.ValueOf(x).IsZero() {
+			return false
+		}
+	}
+	return true
 }

@@ -19,7 +19,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func Example_CreateTenants() {
+func Example_createTenants() {
 	ctx := context.Background()
 	client := open(ctx)
 	defer client.Close()
@@ -57,7 +57,7 @@ func Example_CreateTenants() {
 	// Tenant(id=2, name=GitLab)
 }
 
-func Example_TenantView() {
+func Example_tenantView() {
 	ctx := context.Background()
 	client := open(ctx)
 	defer client.Close()
@@ -141,7 +141,7 @@ func Example_TenantView() {
 	// 2
 }
 
-func Example_DenyMismatchedTenants() {
+func Example_denyMismatchedTenants() {
 	ctx := context.Background()
 	client := open(ctx)
 	defer client.Close()

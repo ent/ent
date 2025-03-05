@@ -181,6 +181,11 @@ func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 	if c.Storage != nil && c.Storage.Init != nil {
 		check(c.Storage.Init(g), "storage driver init")
 	}
+	if enabled, _ := g.Config.FeatureEnabled(FeatureGlobalID.Name); enabled {
+		if err := IncrementStartAnnotation(g); err != nil {
+			return nil, err
+		}
+	}
 	return
 }
 

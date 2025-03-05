@@ -20,6 +20,7 @@ func main() {
 		base.DescribeCmd(),
 		base.GenerateCmd(),
 		base.InitCmd(),
+		base.SchemaCmd(),
 	)
-	_ = cmd.Execute()
+	cobra.CheckErr(cmd.Execute())
 }

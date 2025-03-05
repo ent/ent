@@ -6,6 +6,8 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/mixin"
@@ -70,6 +72,13 @@ func (User) Edges() []ent.Edge {
 		edge.To("team", Pet.Type).Unique(),
 		edge.To("spouse", User.Type).Unique(),
 		edge.To("parent", User.Type).Unique().From("children"),
+	}
+}
+
+// Annotations of the User.
+func (User) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.IncrementStart(2 << 32),
 	}
 }
 

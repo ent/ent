@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 	"text/template"
@@ -16,8 +17,10 @@ import (
 
 	"ariga.io/atlas/sql/migrate"
 	"ariga.io/atlas/sql/schema"
+	"ariga.io/atlas/sql/sqlite"
 	"ariga.io/atlas/sql/sqltool"
 	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
 
@@ -26,51 +29,52 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestMigrateHookOmitTable(t *testing.T) {
+func TestMigrate_SchemaName(t *testing.T) {
 	db, mk, err := sqlmock.New()
 	require.NoError(t, err)
-
-	tables := []*Table{{Name: "users"}, {Name: "pets"}}
-	mock := mysqlMock{mk}
-	mock.start("5.7.23")
-	mock.tableExists("pets", false)
-	mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `pets`() CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
-		WillReturnResult(sqlmock.NewResult(0, 1))
-	mock.ExpectCommit()
-
-	m, err := NewMigrate(sql.OpenDB("mysql", db), WithHooks(func(next Creator) Creator {
-		return CreateFunc(func(ctx context.Context, tables ...*Table) error {
-			return next.Create(ctx, tables[1])
+	mk.ExpectQuery(escape("SHOW server_version_num")).
+		WillReturnRows(sqlmock.NewRows([]string{"server_version_num"}).AddRow("130000"))
+	mk.ExpectQuery(escape("SELECT current_setting('server_version_num'), current_setting('default_table_access_method', true), current_setting('crdb_version', true)")).
+		WillReturnRows(sqlmock.NewRows([]string{"current_setting", "current_setting", "current_setting"}).AddRow("130000", "heap", ""))
+	mk.ExpectQuery("SELECT nspname AS schema_name,.+").
+		WithArgs("public"). // Schema "public" param is used.
+		WillReturnRows(sqlmock.NewRows([]string{"schema_name", "comment"}).AddRow("public", "default schema"))
+	mk.ExpectQuery("SELECT t3.oid, t1.table_schema,.+").
+		WillReturnRows(sqlmock.NewRows([]string{}))
+	m, err := NewMigrate(sql.OpenDB("postgres", db), WithSchemaName("public"), WithDiffHook(func(next Differ) Differ {
+		return DiffFunc(func(current, desired *schema.Schema) ([]schema.Change, error) {
+			return nil, nil // Noop.
 		})
-	}), WithAtlas(false))
+	}))
 	require.NoError(t, err)
-	err = m.Create(context.Background(), tables...)
+	require.NoError(t, m.Create(context.Background()))
+	require.NoError(t, mk.ExpectationsWereMet())
+
+	// Without schema name the CURRENT_SCHEMA is used.
+	mk.ExpectQuery(escape("SHOW server_version_num")).
+		WillReturnRows(sqlmock.NewRows([]string{"server_version_num"}).AddRow("130000"))
+	mk.ExpectQuery(escape("SELECT current_setting('server_version_num'), current_setting('default_table_access_method', true), current_setting('crdb_version', true)")).
+		WillReturnRows(sqlmock.NewRows([]string{"current_setting", "current_setting", "current_setting"}).AddRow("130000", "heap", ""))
+	mk.ExpectQuery("SELECT nspname AS schema_name,.+CURRENT_SCHEMA().+").
+		WillReturnRows(sqlmock.NewRows([]string{"schema_name", "comment"}).AddRow("public", "default schema"))
+	mk.ExpectQuery("SELECT t3.oid, t1.table_schema,.+").
+		WillReturnRows(sqlmock.NewRows([]string{}))
+	m, err = NewMigrate(sql.OpenDB("postgres", db), WithDiffHook(func(next Differ) Differ {
+		return DiffFunc(func(current, desired *schema.Schema) ([]schema.Change, error) {
+			return nil, nil // Noop.
+		})
+	}))
 	require.NoError(t, err)
+	require.NoError(t, m.Create(context.Background()))
 }
 
-func TestMigrateHookAddTable(t *testing.T) {
-	db, mk, err := sqlmock.New()
-	require.NoError(t, err)
-
-	tables := []*Table{{Name: "users"}}
-	mock := mysqlMock{mk}
-	mock.start("5.7.23")
-	mock.tableExists("users", false)
-	mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`() CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
-		WillReturnResult(sqlmock.NewResult(0, 1))
-	mock.tableExists("pets", false)
-	mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `pets`() CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
-		WillReturnResult(sqlmock.NewResult(0, 1))
-	mock.ExpectCommit()
-
-	m, err := NewMigrate(sql.OpenDB("mysql", db), WithHooks(func(next Creator) Creator {
-		return CreateFunc(func(ctx context.Context, tables ...*Table) error {
-			return next.Create(ctx, tables[0], &Table{Name: "pets"})
-		})
-	}), WithAtlas(false))
-	require.NoError(t, err)
-	err = m.Create(context.Background(), tables...)
-	require.NoError(t, err)
+func escape(query string) string {
+	rows := strings.Split(query, "\n")
+	for i := range rows {
+		rows[i] = strings.TrimPrefix(rows[i], " ")
+	}
+	query = strings.Join(rows, " ")
+	return strings.TrimSpace(regexp.QuoteMeta(query)) + "$"
 }
 
 func TestMigrate_Formatter(t *testing.T) {
@@ -416,18 +420,25 @@ func TestAtlas_StateReader(t *testing.T) {
 	realm, err := m.StateReader(&Table{
 		Name: "users",
 		Columns: []*Column{
+			{Name: "id", Type: field.TypeInt64, Increment: true},
 			{Name: "name", Type: field.TypeString},
 			{Name: "active", Type: field.TypeBool},
+		},
+		Annotation: &entsql.Annotation{
+			IncrementStart: func(i int) *int { return &i }(100),
 		},
 	}).ReadState(context.Background())
 	require.NoError(t, err)
 	require.NotNil(t, realm)
 	require.Len(t, realm.Schemas, 1)
 	require.Len(t, realm.Schemas[0].Tables, 1)
-	require.Equal(t, realm.Schemas[0].Tables[0].Name, "users")
+	require.Equal(t, "users", realm.Schemas[0].Tables[0].Name)
+	require.Equal(t, []schema.Attr{&sqlite.AutoIncrement{Seq: 100}}, realm.Schemas[0].Tables[0].Attrs)
 	require.Equal(t,
 		realm.Schemas[0].Tables[0].Columns,
 		[]*schema.Column{
+			schema.NewIntColumn("id", "integer").
+				AddAttrs(&sqlite.AutoIncrement{}),
 			schema.NewStringColumn("name", "text"),
 			schema.NewBoolColumn("active", "bool"),
 		},

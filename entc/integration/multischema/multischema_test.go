@@ -12,11 +12,10 @@ import (
 	"testing"
 
 	"ariga.io/atlas-go-sdk/atlasexec"
-	atlas "ariga.io/atlas/sql/schema"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/entc/integration/multischema/ent"
-	"entgo.io/ent/entc/integration/multischema/ent/friendship"
 	"entgo.io/ent/entc/integration/multischema/ent/group"
 	"entgo.io/ent/entc/integration/multischema/ent/migrate"
 	"entgo.io/ent/entc/integration/multischema/ent/pet"
@@ -31,16 +30,27 @@ import (
 )
 
 func TestMySQL(t *testing.T) {
-	db, err := sql.Open("mysql", "root:pass@tcp(localhost:3308)/?parseTime=true")
+	db, err := sql.Open("mysql", "root:pass@tcp(localhost:3308)/?parseTime=true&multiStatements=true")
 	require.NoError(t, err)
-	defer db.Close()
 	ctx := context.Background()
-	_, err = db.ExecContext(ctx, "CREATE DATABASE IF NOT EXISTS db1")
-	require.NoError(t, err, "creating database")
-	_, err = db.ExecContext(ctx, "CREATE DATABASE IF NOT EXISTS db2")
-	require.NoError(t, err, "creating database")
-	defer db.ExecContext(ctx, "DROP DATABASE IF EXISTS db1")
-	defer db.ExecContext(ctx, "DROP DATABASE IF EXISTS db2")
+	t.Cleanup(func() {
+		db.ExecContext(ctx, "SET foreign_key_checks = 0")
+		db.ExecContext(ctx, "DROP DATABASE IF EXISTS db1")
+		db.ExecContext(ctx, "DROP DATABASE IF EXISTS db2")
+		db.ExecContext(ctx, "SET foreign_key_checks = 1")
+		db.Close()
+	})
+
+	migrate.PetsTable.Schema = "db1"
+	migrate.UsersTable.Schema = "db1"
+	migrate.GroupsTable.Schema = "db2"
+	migrate.GroupUsersTable.Schema = "db2"
+	migrate.FriendshipsTable.Schema = "db2"
+
+	pl, err := schema.Dump(ctx, dialect.MySQL, "8.0.19", migrate.Tables)
+	require.NoError(t, err)
+	_, err = db.ExecContext(ctx, pl)
+	require.NoError(t, err)
 
 	// Default schema for the connection is db1.
 	db1, err := sql.Open("mysql", "root:pass@tcp(localhost:3308)/db1?parseTime=true")
@@ -63,7 +73,6 @@ func TestMySQL(t *testing.T) {
 		Friendship: "db2",
 	}
 	client := ent.NewClient(ent.Driver(db1), ent.AlternateSchema(cfg))
-	setupSchema(t, client, cfg)
 	pedro := client.Pet.Create().SetName("Pedro").SaveX(ctx)
 	groups := client.Group.CreateBulk(
 		client.Group.Create().SetName("GitHub"),
@@ -254,21 +263,4 @@ func TestVersionedMigration(t *testing.T) {
 	require.Len(t, users[1].Edges.Friends, 1)
 	require.Len(t, users[0].Edges.Friendships, 1)
 	require.Len(t, users[1].Edges.Friendships, 1)
-}
-
-func setupSchema(t *testing.T, client *ent.Client, cfg ent.SchemaConfig) {
-	err := client.Schema.Create(
-		context.Background(),
-		migrate.WithForeignKeys(false),
-		schema.WithDiffHook(func(next schema.Differ) schema.Differ {
-			return schema.DiffFunc(func(current, desired *atlas.Schema) ([]atlas.Change, error) {
-				for tt, s := range map[string]string{group.Table: cfg.Group, group.UsersTable: cfg.GroupUsers, friendship.Table: cfg.Friendship} {
-					t1, ok := desired.Table(tt)
-					require.True(t, ok)
-					t1.SetSchema(atlas.New(s))
-				}
-				return next.Diff(current, desired)
-			})
-		}))
-	require.NoError(t, err)
 }

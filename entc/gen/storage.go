@@ -6,8 +6,9 @@ package gen
 
 import (
 	"fmt"
+	"maps"
 	"reflect"
-	"sort"
+	"slices"
 	"strings"
 
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -175,12 +176,7 @@ func (g *Graph) TableSchemas() ([]string, error) {
 			}
 		}
 	}
-	names := make([]string, 0, len(all))
-	for s := range all {
-		names = append(names, s)
-	}
-	sort.Strings(names)
-	return names, nil
+	return slices.Sorted(maps.Keys(all)), nil
 }
 
 // TableSchema returns the schema name of where the type table resides (intentionally exported).
