@@ -325,5 +325,12 @@ CREATE VIEW $pets_without_fur$ ($id$, $name$, $owner_id$) AS SELECT id, name, ow
 			require.NoError(t, err)
 			require.Equal(t, tt.expected, ac)
 		})
+		t.Run(n+" single schema", func(t *testing.T) {
+			ac, err := Dump(context.Background(), tt.dialect, tt.version, tables[0:1])
+			require.NoError(t, err)
+			if tt.dialect != dialect.SQLite {
+				require.True(t, strings.HasPrefix(ac, "-- Add new schema named \"s1\""), strings.Split(ac, "\n")[0])
+			}
+		})
 	}
 }

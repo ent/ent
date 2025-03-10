@@ -937,10 +937,6 @@ func (a *Atlas) realm(tables []*Table) (*schema.Realm, error) {
 	ss := slices.SortedFunc(maps.Values(sm), func(a, b *schema.Schema) int {
 		return strings.Compare(a.Name, b.Name)
 	})
-	// In case there only is one schema, do not qualify the schema name.
-	if len(ss) == 1 {
-		ss[0].Name = ""
-	}
 	return &schema.Realm{Schemas: ss}, nil
 }
 
