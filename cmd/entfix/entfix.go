@@ -82,7 +82,8 @@ func (cmd *GlobalID) Run(ctx context.Context) error {
 		return err
 	}
 	rows := &sql.Rows{}
-	query, args := sql.Select("type").
+	query, args := sql.Dialect(cmd.Dialect).
+		Select("type").
 		From(sql.Table(schema.TypeTable)).
 		OrderBy(sql.Asc("id")).
 		Query()
