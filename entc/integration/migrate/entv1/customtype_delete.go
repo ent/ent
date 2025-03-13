@@ -43,6 +43,11 @@ func (ctd *CustomTypeDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the CustomTypeMutation object of the builder.
+func (ctd *CustomTypeDelete) Mutation() *CustomTypeMutation {
+	return ctd.mutation
+}
+
 func (ctd *CustomTypeDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(customtype.Table, sqlgraph.NewFieldSpec(customtype.FieldID, field.TypeInt))
 	if ps := ctd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (ctdo *CustomTypeDeleteOne) ExecX(ctx context.Context) {
 	if err := ctdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the CustomTypeMutation object of the builder.
+func (ctdo *CustomTypeDeleteOne) Mutation() *CustomTypeMutation {
+	return ctdo.ctd.mutation
 }

@@ -43,6 +43,11 @@ func (bd *BlogDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the BlogMutation object of the builder.
+func (bd *BlogDelete) Mutation() *BlogMutation {
+	return bd.mutation
+}
+
 func (bd *BlogDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(blog.Table, sqlgraph.NewFieldSpec(blog.FieldID, field.TypeInt))
 	if ps := bd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (bdo *BlogDeleteOne) ExecX(ctx context.Context) {
 	if err := bdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the BlogMutation object of the builder.
+func (bdo *BlogDeleteOne) Mutation() *BlogMutation {
+	return bdo.bd.mutation
 }

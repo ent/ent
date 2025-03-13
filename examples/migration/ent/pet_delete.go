@@ -43,6 +43,11 @@ func (pd *PetDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the PetMutation object of the builder.
+func (pd *PetDelete) Mutation() *PetMutation {
+	return pd.mutation
+}
+
 func (pd *PetDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(pet.Table, sqlgraph.NewFieldSpec(pet.FieldID, field.TypeUUID))
 	if ps := pd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (pdo *PetDeleteOne) ExecX(ctx context.Context) {
 	if err := pdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the PetMutation object of the builder.
+func (pdo *PetDeleteOne) Mutation() *PetMutation {
+	return pdo.pd.mutation
 }

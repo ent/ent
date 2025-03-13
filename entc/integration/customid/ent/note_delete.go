@@ -43,6 +43,11 @@ func (nd *NoteDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the NoteMutation object of the builder.
+func (nd *NoteDelete) Mutation() *NoteMutation {
+	return nd.mutation
+}
+
 func (nd *NoteDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(note.Table, sqlgraph.NewFieldSpec(note.FieldID, field.TypeString))
 	if ps := nd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (ndo *NoteDeleteOne) ExecX(ctx context.Context) {
 	if err := ndo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the NoteMutation object of the builder.
+func (ndo *NoteDeleteOne) Mutation() *NoteMutation {
+	return ndo.nd.mutation
 }

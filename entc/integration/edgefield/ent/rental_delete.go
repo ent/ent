@@ -43,6 +43,11 @@ func (rd *RentalDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the RentalMutation object of the builder.
+func (rd *RentalDelete) Mutation() *RentalMutation {
+	return rd.mutation
+}
+
 func (rd *RentalDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(rental.Table, sqlgraph.NewFieldSpec(rental.FieldID, field.TypeInt))
 	if ps := rd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (rdo *RentalDeleteOne) ExecX(ctx context.Context) {
 	if err := rdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the RentalMutation object of the builder.
+func (rdo *RentalDeleteOne) Mutation() *RentalMutation {
+	return rdo.rd.mutation
 }

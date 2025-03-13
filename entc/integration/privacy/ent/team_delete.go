@@ -43,6 +43,11 @@ func (td *TeamDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the TeamMutation object of the builder.
+func (td *TeamDelete) Mutation() *TeamMutation {
+	return td.mutation
+}
+
 func (td *TeamDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(team.Table, sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt))
 	if ps := td.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (tdo *TeamDeleteOne) ExecX(ctx context.Context) {
 	if err := tdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the TeamMutation object of the builder.
+func (tdo *TeamDeleteOne) Mutation() *TeamMutation {
+	return tdo.td.mutation
 }

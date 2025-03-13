@@ -43,6 +43,11 @@ func (dd *DocDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the DocMutation object of the builder.
+func (dd *DocDelete) Mutation() *DocMutation {
+	return dd.mutation
+}
+
 func (dd *DocDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(doc.Table, sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString))
 	if ps := dd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (ddo *DocDeleteOne) ExecX(ctx context.Context) {
 	if err := ddo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the DocMutation object of the builder.
+func (ddo *DocDeleteOne) Mutation() *DocMutation {
+	return ddo.dd.mutation
 }

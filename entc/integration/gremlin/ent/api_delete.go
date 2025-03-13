@@ -44,6 +44,11 @@ func (ad *APIDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the APIMutation object of the builder.
+func (ad *APIDelete) Mutation() *APIMutation {
+	return ad.mutation
+}
+
 func (ad *APIDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := ad.gremlin().Query()
@@ -91,4 +96,9 @@ func (ado *APIDeleteOne) ExecX(ctx context.Context) {
 	if err := ado.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the APIMutation object of the builder.
+func (ado *APIDeleteOne) Mutation() *APIMutation {
+	return ado.ad.mutation
 }

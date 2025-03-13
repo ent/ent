@@ -44,6 +44,11 @@ func (ftd *FileTypeDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the FileTypeMutation object of the builder.
+func (ftd *FileTypeDelete) Mutation() *FileTypeMutation {
+	return ftd.mutation
+}
+
 func (ftd *FileTypeDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := ftd.gremlin().Query()
@@ -91,4 +96,9 @@ func (ftdo *FileTypeDeleteOne) ExecX(ctx context.Context) {
 	if err := ftdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the FileTypeMutation object of the builder.
+func (ftdo *FileTypeDeleteOne) Mutation() *FileTypeMutation {
+	return ftdo.ftd.mutation
 }

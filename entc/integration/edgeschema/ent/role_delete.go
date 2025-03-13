@@ -43,6 +43,11 @@ func (rd *RoleDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the RoleMutation object of the builder.
+func (rd *RoleDelete) Mutation() *RoleMutation {
+	return rd.mutation
+}
+
 func (rd *RoleDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(role.Table, sqlgraph.NewFieldSpec(role.FieldID, field.TypeInt))
 	if ps := rd.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (rdo *RoleDeleteOne) ExecX(ctx context.Context) {
 	if err := rdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the RoleMutation object of the builder.
+func (rdo *RoleDeleteOne) Mutation() *RoleMutation {
+	return rdo.rd.mutation
 }

@@ -44,6 +44,11 @@ func (pd *PCDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the PCMutation object of the builder.
+func (pd *PCDelete) Mutation() *PCMutation {
+	return pd.mutation
+}
+
 func (pd *PCDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := pd.gremlin().Query()
@@ -91,4 +96,9 @@ func (pdo *PCDeleteOne) ExecX(ctx context.Context) {
 	if err := pdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the PCMutation object of the builder.
+func (pdo *PCDeleteOne) Mutation() *PCMutation {
+	return pdo.pd.mutation
 }

@@ -43,6 +43,11 @@ func (md *MediaDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the MediaMutation object of the builder.
+func (md *MediaDelete) Mutation() *MediaMutation {
+	return md.mutation
+}
+
 func (md *MediaDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(media.Table, sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt))
 	if ps := md.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (mdo *MediaDeleteOne) ExecX(ctx context.Context) {
 	if err := mdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the MediaMutation object of the builder.
+func (mdo *MediaDeleteOne) Mutation() *MediaMutation {
+	return mdo.md.mutation
 }

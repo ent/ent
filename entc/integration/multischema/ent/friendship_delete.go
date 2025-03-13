@@ -44,6 +44,11 @@ func (fd *FriendshipDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the FriendshipMutation object of the builder.
+func (fd *FriendshipDelete) Mutation() *FriendshipMutation {
+	return fd.mutation
+}
+
 func (fd *FriendshipDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(friendship.Table, sqlgraph.NewFieldSpec(friendship.FieldID, field.TypeInt))
 	_spec.Node.Schema = fd.schemaConfig.Friendship
@@ -92,4 +97,9 @@ func (fdo *FriendshipDeleteOne) ExecX(ctx context.Context) {
 	if err := fdo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the FriendshipMutation object of the builder.
+func (fdo *FriendshipDeleteOne) Mutation() *FriendshipMutation {
+	return fdo.fd.mutation
 }

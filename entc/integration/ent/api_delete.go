@@ -43,6 +43,11 @@ func (ad *APIDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Mutation returns the APIMutation object of the builder.
+func (ad *APIDelete) Mutation() *APIMutation {
+	return ad.mutation
+}
+
 func (ad *APIDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(api.Table, sqlgraph.NewFieldSpec(api.FieldID, field.TypeInt))
 	if ps := ad.mutation.predicates; len(ps) > 0 {
@@ -89,4 +94,9 @@ func (ado *APIDeleteOne) ExecX(ctx context.Context) {
 	if err := ado.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// Mutation returns the APIMutation object of the builder.
+func (ado *APIDeleteOne) Mutation() *APIMutation {
+	return ado.ad.mutation
 }
