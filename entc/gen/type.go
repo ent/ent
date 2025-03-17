@@ -823,6 +823,15 @@ func (t Type) QueryName() string {
 	return pascal(t.Name) + "Query"
 }
 
+// QueryReceiver returns the receiver name of the query-builder for this type.
+func (t Type) QueryReceiver() string {
+	r := receiver(t.QueryName())
+	if t.Package() == r {
+		return "_" + r
+	}
+	return r
+}
+
 // FilterName returns the struct name denoting the filter-builder for this type.
 func (t Type) FilterName() string {
 	return pascal(t.Name) + "Filter"

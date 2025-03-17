@@ -85,7 +85,7 @@ type predicateAdder interface {
 
 {{ range $i, $n := $.Nodes }}
 	{{ $builder := $n.QueryName }}
-	{{ $receiver := receiver $builder }}
+	{{ $receiver := $n.QueryReceiver }}
 	{{ $mutation := $n.MutationName }}
 	{{ $filter := print $n.FilterName }}
 

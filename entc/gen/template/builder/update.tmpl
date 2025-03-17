@@ -76,7 +76,7 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
 	}
 }
 
-{{ with extend $ "Receiver" $receiver "Package" $pkg "Builder" $builder }}
+{{ with extend $ "Receiver" $receiver "Builder" $builder "Package" $pkg }}
 	{{ template "update/checks" . }}
 {{ end }}
 
@@ -86,7 +86,7 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
 {{ end }}
 
 {{ $onebuilder := $.UpdateOneName }}
-{{ $receiver = receiver $onebuilder }}
+{{ $receiver = $.UpdateOneReceiver }}
 {{ $mutation = print $receiver ".mutation" }}
 
 // {{ $onebuilder }} is the builder for updating a single {{ $.Name }} entity.
@@ -154,7 +154,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 	}
 }
 
-{{ with extend $ "Receiver" $receiver "Package" $pkg "Builder" $onebuilder }}
+{{ with extend $ "Receiver" $receiver "Builder" $onebuilder "Package" $pkg }}
 	{{ template "update/checks" . }}
 {{ end }}
 
