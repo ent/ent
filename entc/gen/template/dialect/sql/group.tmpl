@@ -8,30 +8,29 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/sql/group" }}
 {{ $builder := pascal $.Scope.Builder }}
-{{ $receiver := receiver $builder }}
 
-func ({{ $receiver }} *{{ $builder }}) sqlScan(ctx context.Context, root *{{ $.QueryName }}, v any) error {
+func (q *{{ $builder }}) sqlScan(ctx context.Context, root *{{ $.QueryName }}, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len({{ $receiver}}.fns))
-	for _, fn := range {{ $receiver }}.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	{{- /* If no columns were selected, the default selection is the fields used for "group-by", and the aggregation functions.*/}}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*{{ $receiver }}.flds) + len({{ $receiver}}.fns))
-		for _, f := range *{{ $receiver }}.flds {
+		columns := make([]string, 0, len(*q.flds) + len(q.fns))
+		for _, f := range *q.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*{{ $receiver }}.flds...)...)
+	selector.GroupBy(selector.Columns(*q.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := {{ $receiver }}.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

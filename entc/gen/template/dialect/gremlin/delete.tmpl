@@ -8,23 +8,20 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/gremlin/delete" }}
 {{ $builder := pascal $.Scope.Builder }}
-{{ $receiver := $.Scope.Receiver }}
-{{ $mutation := print $receiver ".mutation" }}
 
-func ({{ $receiver}} *{{ $builder }}) gremlinExec(ctx context.Context) (int, error) {
+func (d *{{ $builder }}) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := {{ $receiver }}.gremlin().Query()
-	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := d.gremlin().Query()
+	if err := d.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
-	{{ $mutation }}.done = true
+	d.mutation.done = true
 	return res.ReadInt()
 }
 
-
-func ({{ $receiver }} *{{ $builder }}) gremlin() *dsl.Traversal {
+func (d *{{ $builder }}) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel({{ $.Package }}.Label)
-	for _, p := range {{ $mutation }}.predicates {
+	for _, p := range d.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

@@ -8,7 +8,6 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "setter" }}
 {{ $builder := pascal $.Scope.Builder }}
-{{ $receiver := $.Scope.Receiver }}
 {{ $fields := $.Fields }}
 {{ $updater := false }}
 {{ $creator := true }}
@@ -22,16 +21,15 @@ in the LICENSE file in the root directory of this source tree.
 {{- end }}
 
 {{ range $f := $fields }}
-	{{ $p := receiver $f.Type.String }}{{ if eq $p $receiver }} {{ $p = "value" }} {{ end }}
 	{{ $func := print "Set" $f.StructField }}
 	// {{ $func }} sets the "{{ $f.Name }}" field.
-	func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ $f.Type }}) *{{ $builder }} {
+	func (m *{{ $builder }}) {{ $func }}(v {{ $f.Type }}) *{{ $builder }} {
 		{{- /* setting numeric type override previous calls to Add. */}}
 		{{- if and $updater $f.SupportsMutationAdd }}
-			{{ $receiver }}.mutation.{{ $f.MutationReset }}()
+			m.mutation.{{ $f.MutationReset }}()
 		{{- end }}
-		{{ $receiver }}.mutation.{{ $f.MutationSet }}({{ $p }})
-		return {{ $receiver }}
+		m.mutation.{{ $f.MutationSet }}(v)
+		return m
 	}
 
 	{{/* Avoid generating nillable setters for nillable types. */}}
@@ -41,36 +39,36 @@ in the LICENSE file in the root directory of this source tree.
 	{{ $skipNillable := false }}{{ range $fields }}{{ if and (ne .Name $f.Name) (eq .MutationSet $nillableFunc) }}{{ $skipNillable = true }}{{ break }}{{ end }}{{ end }}
 	{{ if and (not $f.Type.Nillable) (not $skipNillable) (or $nillableC $nillableU) }}
 		// {{ $nillableFunc }} sets the "{{ $f.Name }}" field if the given value is not nil.
-		func ({{ $receiver }} *{{ $builder }}) {{ $nillableFunc }}({{ $p }} *{{ $f.Type }}) *{{ $builder }} {
-			if {{ $p }} != nil {
-				{{ $receiver }}.{{ $func }}(*{{ $p }})
+		func (m *{{ $builder }}) {{ $nillableFunc }}(v *{{ $f.Type }}) *{{ $builder }} {
+			if v != nil {
+				m.{{ $func }}(*v)
 			}
-			return {{ $receiver }}
+			return m
 		}
 	{{ end }}
 
 	{{ if and $updater $f.SupportsMutationAdd }}
-		// {{ $f.MutationAdd }} adds {{ $p }} to the "{{ $f.Name }}" field.
-		func ({{ $receiver }} *{{ $builder }}) {{ $f.MutationAdd }}({{ $p }} {{ $f.SignedType }}) *{{ $builder }} {
-			{{ $receiver }}.mutation.{{ $f.MutationAdd }}({{ $p }})
-			return {{ $receiver }}
+		// {{ $f.MutationAdd }} adds value to the "{{ $f.Name }}" field.
+		func (m *{{ $builder }}) {{ $f.MutationAdd }}(v {{ $f.SignedType }}) *{{ $builder }} {
+			m.mutation.{{ $f.MutationAdd }}(v)
+			return m
 		}
 	{{ end }}
 
 	{{ if and $updater $f.SupportsMutationAppend }}
-		// {{ $f.MutationAppend }} appends {{ $p }} to the "{{ $f.Name }}" field.
-		func ({{ $receiver }} *{{ $builder }}) {{ $f.MutationAppend }}({{ $p }} {{ $f.Type }}) *{{ $builder }} {
-			{{ $receiver }}.mutation.{{ $f.MutationAppend }}({{ $p }})
-			return {{ $receiver }}
+		// {{ $f.MutationAppend }} appends value to the "{{ $f.Name }}" field.
+		func (m *{{ $builder }}) {{ $f.MutationAppend }}(v {{ $f.Type }}) *{{ $builder }} {
+			m.mutation.{{ $f.MutationAppend }}(v)
+			return m
 		}
 	{{ end }}
 
 	{{ if and $f.Optional $updater }}
 		{{ $func := print "Clear" $f.StructField }}
 		// {{ $func }} clears the value of the "{{ $f.Name }}" field.
-		func ({{ $receiver }} *{{ $builder }}) {{ $func }}() *{{ $builder }} {
-			{{ $receiver }}.mutation.{{ $func }}()
-			return {{ $receiver }}
+		func (m *{{ $builder }}) {{ $func }}() *{{ $builder }} {
+			m.mutation.{{ $func }}()
+			return m
 		}
 	{{ end }}
 {{ end }}
@@ -85,42 +83,39 @@ in the LICENSE file in the root directory of this source tree.
 	{{ $withSetter := not $e.HasFieldSetter }}
 	{{ if $withSetter }}
 		// {{ $idsFunc }} {{ $op }}s the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity by ID{{ if not $e.Unique }}s{{ end }}.
-		func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }} {{ $e.Type.ID.Type }}) *{{ $builder }} {
-			{{ $receiver }}.mutation.{{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }})
-			return {{ $receiver }}
+		func (m *{{ $builder }}) {{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }} {{ $e.Type.ID.Type }}) *{{ $builder }} {
+			m.mutation.{{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }})
+			return m
 		}
 	{{ end }}
 	{{ if and $e.Unique $e.Optional $withSetter }}
 		{{ $nillableIDsFunc := print "SetNillable" $e.StructField "ID" }}
 		// {{ $nillableIDsFunc }} sets the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity by ID if the given value is not nil.
-		func ({{ $receiver }} *{{ $builder }}) {{ $nillableIDsFunc }}(id *{{ $e.Type.ID.Type }}) *{{ $builder }} {
+		func (m *{{ $builder }}) {{ $nillableIDsFunc }}(id *{{ $e.Type.ID.Type }}) *{{ $builder }} {
 			if id != nil {
-				{{ $receiver}} = {{ $receiver }}.{{ $idsFunc }}(*id)
+				m = m.{{ $idsFunc }}(*id)
 			}
-			return {{ $receiver }}
+			return m
 		}
 	{{ end }}
-	{{ $p := lower (printf "%.1s" $e.Type.Name) }}
-	{{ if eq $p $receiver }} {{ $p = "v" }} {{ end }}
 	{{ $func := print (pascal $op) $e.StructField }}
 	// {{ $func }} {{ $op }}s the "{{ $e.Name }}" edge{{if not $e.Unique}}s{{ end }} to the {{ $e.Type.Name }} entity.
-	func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ if not $e.Unique }}...{{ end }}*{{ $e.Type.Name}}) *{{ $builder }} {
+	func (m *{{ $builder }}) {{ $func }}(v {{ if not $e.Unique }}...{{ end }}*{{ $e.Type.Name}}) *{{ $builder }} {
 		{{ if $e.Unique -}}
-			return {{ $receiver }}.{{ $idsFunc }}({{ $p }}.ID)
+			return m.{{ $idsFunc }}(v.ID)
 		{{- else -}}
-			ids := make([]{{ $e.Type.ID.Type }}, len({{ $p }}))
-			{{ $i := "i" }}{{ if eq $i $p }}{{ $i = "j" }}{{ end -}}
-			for {{ $i }} := range {{ $p }} {
-				ids[{{ $i }}] = {{ $p }}[{{ $i }}].ID
+			ids := make([]{{ $e.Type.ID.Type }}, len(v))
+			for i := range v {
+				ids[i] = v[i].ID
 			}
-			return {{ $receiver }}.{{ $idsFunc }}(ids...)
+			return m.{{ $idsFunc }}(ids...)
 		{{- end }}
 	}
 {{ end }}
 
 // Mutation returns the {{ $.MutationName }} object of the builder.
-func ({{ $receiver }} *{{ $builder }}) Mutation() *{{ $.MutationName }} {
-	return {{ $receiver }}.mutation
+func (m *{{ $builder }}) Mutation() *{{ $.MutationName }} {
+	return m.mutation
 }
 
 {{ end }}

@@ -4,10 +4,9 @@
 {{/* A template for adding the Modify method to the query builder. */}}
 {{ define "dialect/sql/query/additional/modify" }}
     {{ $builder := pascal $.Scope.Builder }}
-    {{ $receiver := receiver $builder }}
-    func ({{ $receiver }} *{{ $builder }}) Modify(modifier func(s *sql.Selector)) *{{ $builder }} {
-        {{ $receiver }}.modifiers = append({{ $receiver }}.modifiers, modifier)
-        return {{ $receiver }}
+    func (q *{{ $builder }}) Modify(modifier func(*sql.Selector)) *{{ $builder }} {
+        q.modifiers = append(q.modifiers, modifier)
+        return q
     }
 {{ end }}
 
@@ -16,15 +15,13 @@
 {{- end }}
 
 {{ define "dialect/sql/query/selector/modify" }}
-    {{- $receiver := pascal $.Scope.Builder | receiver }}
-    for _, m := range {{ $receiver }}.modifiers {
+    for _, m := range q.modifiers {
         m(selector)
     }
 {{- end -}}
 
 {{ define "dialect/sql/query/spec/modify" }}
-    {{- $receiver := pascal $.Scope.Builder | receiver }}
-    if len({{ $receiver }}.modifiers) > 0 {
-        _spec.Modifiers = {{ $receiver }}.modifiers
+    if len(q.modifiers) > 0 {
+        _spec.Modifiers = q.modifiers
     }
 {{- end -}}

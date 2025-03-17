@@ -8,14 +8,13 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/gremlin/query" }}
 {{ $builder := pascal $.Scope.Builder }}
-{{ $receiver := receiver $builder }}
 
-func ({{ $receiver }} *{{ $builder }}) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*{{ $.Name }}, error) {
+func (q *{{ $builder }}) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*{{ $.Name }}, error) {
 	res := &gremlin.Response{}
-	traversal := {{ $receiver }}.gremlinQuery(ctx)
-	if len({{ $receiver }}.ctx.Fields) > 0 {
-		fields := make([]any, len({{ $receiver }}.ctx.Fields))
-		for i, f := range {{ $receiver }}.ctx.Fields {
+	traversal := q.gremlinQuery(ctx)
+	if len(q.ctx.Fields) > 0 {
+		fields := make([]any, len(q.ctx.Fields))
+		for i, f := range q.ctx.Fields {
 			fields[i] = f
 		}
 		traversal.ValueMap(fields...)
@@ -23,43 +22,43 @@ func ({{ $receiver }} *{{ $builder }}) gremlinAll(ctx context.Context, hooks ...
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := q.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
-	var {{ plural $.Receiver }} {{ plural $.Name  }}
-	if err := {{ plural $.Receiver }}.FromResponse(res); err != nil {
+	var results {{ plural $.Name  }}
+	if err := results.FromResponse(res); err != nil {
 		return nil, err
 	}
-	for i := range {{ plural $.Receiver }} {
-		{{ plural $.Receiver }}[i].config = {{ $receiver }}.config
+	for i := range results {
+		results[i].config = q.config
 	}
-	return {{ plural $.Receiver }}, nil
+	return results, nil
 }
 
-func ({{ $receiver }} *{{ $builder }}) gremlinCount(ctx context.Context) (int, error) {
+func (q *{{ $builder }}) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := {{ $receiver }}.gremlinQuery(ctx).Count().Query()
-	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := q.gremlinQuery(ctx).Count().Query()
+	if err := q.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
 }
 
-func ({{ $receiver }} *{{ $builder }}) gremlinQuery(context.Context) *dsl.Traversal {
+func (q *{{ $builder }}) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel({{ $.Package }}.Label)
-	if {{ $receiver }}.gremlin != nil {
-		v = {{ $receiver }}.gremlin.Clone()
+	if q.gremlin != nil {
+		v = q.gremlin.Clone()
 	}
-	for _, p := range {{ $receiver }}.predicates {
+	for _, p := range q.predicates {
 		p(v)
 	}
-	if len({{ $receiver }}.order) > 0 {
+	if len(q.order) > 0 {
 		v.Order()
-		for _, p := range {{ $receiver }}.order {
+		for _, p := range q.order {
 			p(v)
 		}
 	}
-	switch limit, offset := {{ $receiver }}.ctx.Limit, {{ $receiver }}.ctx.Offset; {
+	switch limit, offset := q.ctx.Limit, q.ctx.Offset; {
 	case limit != nil && offset != nil:
 		v.Range(*offset, *offset + *limit)
 	case offset != nil:
@@ -67,7 +66,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinQuery(context.Context) *dsl.Traver
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := {{ $receiver }}.ctx.Unique; unique == nil || *unique {
+	if unique := q.ctx.Unique; unique == nil || *unique {
 		v.Dedup()
 	}
 	return v

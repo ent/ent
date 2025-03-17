@@ -90,13 +90,11 @@ type {{ $edgesType }} struct {
 {{ $tmpl = printf "dialect/%s/decode/one" $.Storage }}
 {{ xtemplate $tmpl $ }}
 
-{{ $receiver := $.Receiver }}
-
 {{ range $e := $.Edges }}
 	{{ $func := print "Query" $e.StructField }}
 	// {{ $func }} queries the "{{ $e.Name }}" edge of the {{ $.Name }} entity.
-	func ({{ $receiver }} *{{ $.Name }}) {{ $func }}() *{{ $e.Type.QueryName }} {
-		return New{{ $.ClientName }}({{ $receiver }}.config).{{ $func }}({{ $receiver }})
+	func (m *{{ $.Name }}) {{ $func }}() *{{ $e.Type.QueryName }} {
+		return New{{ $.ClientName }}(m.config).{{ $func }}(m)
 	}
 {{ end }}
 
@@ -104,20 +102,20 @@ type {{ $edgesType }} struct {
 // Update returns a builder for updating this {{ $.Name }}.
 // Note that you need to call {{ $.Name }}.Unwrap() before calling this method if this {{ $.Name }}
 // was returned from a transaction, and the transaction was committed or rolled back.
-func ({{ $receiver }} *{{ $.Name }}) Update() *{{ $.UpdateOneName }} {
-	return New{{ $.ClientName }}({{ $receiver }}.config).UpdateOne({{ $receiver }})
+func (m *{{ $.Name }}) Update() *{{ $.UpdateOneName }} {
+	return New{{ $.ClientName }}(m.config).UpdateOne(m)
 }
 {{- end }}
 
 // Unwrap unwraps the {{ $.Name }} entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func ({{ $receiver }} *{{ $.Name }}) Unwrap() *{{ $.Name }} {
-	_tx, ok := {{ $receiver }}.config.driver.(*txDriver)
+func (m *{{ $.Name }}) Unwrap() *{{ $.Name }} {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("{{ $pkg }}: {{ $.Name }} is not a transactional entity")
 	}
-	{{ $receiver }}.config.driver = _tx.drv
-	return {{ $receiver }}
+	m.config.driver = _tx.drv
+	return m
 }
 
 {{ template "model/stringer" $ }}
@@ -136,14 +134,12 @@ type {{ $slice }} []*{{ $.Name }}
 
 {{/* A template to generate a fmt.Stringer implementation. */}}
 {{ define "model/stringer" }}
-	{{ $receiver := $.Receiver }}
-
 	// String implements the fmt.Stringer.
-	func ({{ $receiver }} *{{ $.Name }}) String() string {
+	func (m *{{ $.Name }}) String() string {
 		var builder strings.Builder
 		builder.WriteString("{{ $.Name }}(")
 		{{- if $.HasOneFieldID }}
-			builder.WriteString(fmt.Sprintf("id=%v{{ if $.Fields }}, {{ end }}", {{ $receiver }}.ID))
+			builder.WriteString(fmt.Sprintf("id=%v{{ if $.Fields }}, {{ end }}", m.ID))
 		{{- end }}
 		{{- range $i, $f := $.Fields }}
 			{{- if ne $i 0 }}
@@ -152,7 +148,7 @@ type {{ $slice }} []*{{ $.Name }}
 			{{- if $f.Sensitive }}
 				builder.WriteString("{{ $f.Name }}={{ print "<sensitive>" }}")
 			{{- else }}
-				{{- $sf := printf "%s.%s" $receiver $f.StructField }}
+				{{- $sf := printf "m.%s" $f.StructField }}
 				{{- if $f.Nillable }}
 					if v := {{ $sf }}; v != nil {
 						builder.WriteString("{{ $f.Name }}=")

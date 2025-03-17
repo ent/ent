@@ -9,47 +9,44 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/gremlin/update" }}
 {{ $pkg := $.Scope.Package }}
 {{ $builder := pascal $.Scope.Builder }}
-{{ $receiver := $.Scope.Receiver }}
-{{ $mutation := print $receiver ".mutation" }}
 {{ $one := hasSuffix $builder "One" }}
 {{ $zero := 0 }}{{ if $one }}{{ $zero = "nil" }}{{ end }}
 
-func ({{ $receiver }} *{{ $builder }}) gremlinSave(ctx context.Context) ({{- if $one }}*{{ $.Name }}{{ else }}int{{ end }}, error) {
+func (u *{{ $builder }}) gremlinSave(ctx context.Context) ({{- if $one }}*{{ $.Name }}{{ else }}int{{ end }}, error) {
 	{{- if $.HasUpdateCheckers }}
-		if err := {{ $receiver }}.check(); err != nil {
+		if err := u.check(); err != nil {
 			return {{ $zero }}, err
 		}
 	{{- end }}
 	res := &gremlin.Response{}
 	{{- if $one }}
-		id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}()
+		id, ok := u.mutation.{{ $.ID.MutationGet }}()
 		if !ok {
 			return {{ $zero }}, &ValidationError{Name: "{{ $.ID.Name }}", err: errors.New(`{{ $pkg }}: missing "{{ $.Name }}.{{ $.ID.Name }}" for update`)}
 		}
-		query, bindings := {{ $receiver }}.gremlin(id).Query()
+		query, bindings := u.gremlin(id).Query()
 	{{- else }}
-		query, bindings := {{ $receiver }}.gremlin().Query()
+		query, bindings := u.gremlin().Query()
 	{{- end }}
-	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := u.driver.Exec(ctx, query, bindings, res); err != nil {
 		return {{ $zero }}, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return {{ $zero }}, err
 	}
-	{{ $mutation }}.done = true
+	u.mutation.done = true
 	{{- if $one }}
-		{{- $r := $.Receiver }}
-		{{ $r }} := &{{ $.Name }}{config: {{ $receiver }}.config}
-		if err := {{ $r }}.FromResponse(res); err != nil {
+		m := &{{ $.Name }}{config: u.config}
+		if err := m.FromResponse(res); err != nil {
 			return nil, err
 		}
-		return {{ $r }}, nil
+		return m, nil
 	{{- else }}
 		return res.ReadInt()
 	{{- end }}
 }
 
-func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{ end }}) *dsl.Traversal {
+func (u *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{ end }}) *dsl.Traversal {
 	{{- with .NumConstraint }}
 		type constraint struct {
 			pred *dsl.Traversal // constraint predicate.
@@ -63,7 +60,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 	{{- /* general update for N vertices */}}
 	{{- else }}
 		v := g.V().HasLabel({{ $.Package }}.Label)
-		for _, p := range {{ $mutation }}.predicates {
+		for _, p := range u.mutation.predicates {
 			p(v)
 		}
 	{{- end }}
@@ -76,7 +73,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 	)
 	{{- range $f := $.MutationFields }}
 		{{- if or (not $f.Immutable) $f.UpdateDefault }}
-			if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
+			if value, ok := u.mutation.{{ $f.MutationGet }}(); ok {
 				{{- if $f.Unique }}
 					constraints = append(constraints, &constraint{
 						pred: g.V().Has({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, value).Count(),
@@ -86,7 +83,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 				v.Property(dsl.Single, {{ $.Package }}.{{ $f.Constant }}, value)
 			}
 			{{- if $f.SupportsMutationAdd }}
-				if value, ok := {{ $mutation }}.Added{{ $f.StructField }}(); ok {
+				if value, ok := u.mutation.Added{{ $f.StructField }}(); ok {
 					{{- if $f.Unique }}
 						addValue := rv.Clone().Union(__.Values({{ $.Package }}.{{ $f.Constant }}), __.Constant(value)).Sum().Next()
 						constraints = append(constraints, &constraint{
@@ -104,7 +101,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 		var properties []any
 		{{- range $f := $.MutationFields }}
 			{{- if $f.Optional }}
-				if {{ $mutation }}.{{ $f.StructField }}Cleared() {
+				if u.mutation.{{ $f.StructField }}Cleared() {
 					properties = append(properties, {{ $.Package }}.{{ $f.Constant }})
 				}
 			{{- end }}
@@ -122,9 +119,9 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 		{{- end }}
 		{{- /* remove edges */}}
 		{{- if $e.Unique }}
-		if {{ $mutation }}.{{ $e.StructField }}Cleared() {
+		if u.mutation.{{ $e.StructField }}Cleared() {
 		{{- else }}
-		for _, id := range {{ $mutation }}.Removed{{ $e.StructField }}IDs() {
+		for _, id := range u.mutation.Removed{{ $e.StructField }}IDs() {
 		{{- end }}
 		{{- if $e.Bidi }}
 			tr := rv.Clone().BothE({{ $name }}){{ if not $e.Unique }}.Where(__.Or(__.InV().HasID(id), __.OutV().HasID(id))){{ end }}.Drop().Iterate()
@@ -136,7 +133,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 			trs = append(trs, tr)
 		}
 		{{- /* update edges */}}
-		for _, id := range {{ $mutation }}.{{ $e.StructField }}IDs() {
+		for _, id := range u.mutation.{{ $e.StructField }}IDs() {
 		{{- if $e.IsInverse }}
 			v.AddE({{ $name }}).From(g.V(id)).InV()
 		{{- else }}
@@ -162,10 +159,10 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 		}
 	{{- end }}
 	{{- if $one }}
-		if len({{ $receiver }}.fields) > 0 {
-			fields := make([]any, 0, len({{ $receiver }}.fields)+1)
+		if len(u.fields) > 0 {
+			fields := make([]any, 0, len(u.fields)+1)
 			fields = append(fields, true)
-			for _, f := range {{ $receiver }}.fields {
+			for _, f := range u.fields {
 				fields = append(fields, f)
 			}
 			v.ValueMap(fields...)

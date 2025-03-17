@@ -20,32 +20,31 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/sql/model/additional/namedges" }}
     {{- if $.FeatureEnabled "namedges" }}
-        {{ $receiver := $.Receiver }}
         {{- range $e := $.Edges }}
             {{- if not $e.Unique }}
                 {{ $func := print "Named" $e.StructField }}
                 // {{ $func }} returns the {{ $e.StructField }} named value or an error if the edge was not
                 // loaded in eager-loading with this name.
-                func ({{ $receiver }} *{{ $.Name }}) Named{{ $e.StructField }}(name string) ([]*{{ $e.Type.Name }}, error) {
-                    if {{ $receiver }}.Edges.named{{ $e.StructField }} == nil {
+                func (m *{{ $.Name }}) Named{{ $e.StructField }}(name string) ([]*{{ $e.Type.Name }}, error) {
+                    if m.Edges.named{{ $e.StructField }} == nil {
                         return nil, &NotLoadedError{edge: name}
                     }
-                    nodes, ok := {{ $receiver }}.Edges.named{{ $e.StructField }}[name]
+                    nodes, ok := m.Edges.named{{ $e.StructField }}[name]
                     if !ok {
                         return nil, &NotLoadedError{edge: name}
                     }
                     return nodes, nil
                 }
 
-                func ({{ $receiver }} *{{ $.Name }}) appendNamed{{ $e.StructField }}(name string, edges ...*{{ $e.Type.Name }}) {
-                    if {{ $receiver }}.Edges.named{{ $e.StructField }} == nil {
-                        {{ $receiver }}.Edges.named{{ $e.StructField }} = make(map[string][]*{{ $e.Type.Name }})
+                func (m *{{ $.Name }}) appendNamed{{ $e.StructField }}(name string, edges ...*{{ $e.Type.Name }}) {
+                    if m.Edges.named{{ $e.StructField }} == nil {
+                        m.Edges.named{{ $e.StructField }} = make(map[string][]*{{ $e.Type.Name }})
                     }
                     if len(edges) == 0 {
                         {{- /* Prefer empty array over nil to stay consistent with the standard eager-loading API. */}}
-                        {{ $receiver }}.Edges.named{{ $e.StructField }}[name] = []*{{ $e.Type.Name }}{}
+                        m.Edges.named{{ $e.StructField }}[name] = []*{{ $e.Type.Name }}{}
                     } else {
-                        {{ $receiver }}.Edges.named{{ $e.StructField }}[name] = append({{ $receiver }}.Edges.named{{ $e.StructField }}[name], edges...)
+                        m.Edges.named{{ $e.StructField }}[name] = append(m.Edges.named{{ $e.StructField }}[name], edges...)
                     }
                 }
             {{- end }}
@@ -73,16 +72,16 @@ in the LICENSE file in the root directory of this source tree.
                 {{ $func := print "WithNamed" $e.StructField }}
                 // {{ $func }} tells the query-builder to eager-load the nodes that are connected to the "{{ $e.Name }}"
                 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-                func ({{ $receiver }} *{{ $builder }}) {{ $func }}(name string, opts ...func(*{{ $ebuilder }})) *{{ $builder }} {
-                    query := (&{{ $e.Type.ClientName }}{config: {{ $receiver }}.config}).Query()
+                func (m *{{ $builder }}) {{ $func }}(name string, opts ...func(*{{ $ebuilder }})) *{{ $builder }} {
+                    query := (&{{ $e.Type.ClientName }}{config: m.config}).Query()
                     for _, opt := range opts {
                         opt(query)
                     }
-                    if {{ $receiver }}.{{ $e.EagerLoadNamedField }} == nil {
-                        {{ $receiver }}.{{ $e.EagerLoadNamedField }} = make(map[string]*{{ $e.Type.QueryName }})
+                    if m.{{ $e.EagerLoadNamedField }} == nil {
+                        m.{{ $e.EagerLoadNamedField }} = make(map[string]*{{ $e.Type.QueryName }})
                     }
-                    {{ $receiver }}.{{ $e.EagerLoadNamedField }}[name] = query
-                    return {{ $receiver }}
+                    m.{{ $e.EagerLoadNamedField }}[name] = query
+                    return m
                 }
             {{- end }}
         {{- end }}
@@ -93,11 +92,10 @@ in the LICENSE file in the root directory of this source tree.
 {{- define "dialect/sql/query/all/nodes/namedges" }}
     {{- if $.FeatureEnabled "namedges" }}
         {{- $builder := pascal $.Scope.Builder }}
-        {{- $receiver := receiver $builder }}
         {{- range $e := $.Edges }}
             {{- if not $e.Unique }}
-                for name, query := range {{ $receiver }}.{{ $e.EagerLoadNamedField }} {
-                    if err := {{ $receiver }}.load{{ $e.StructField }}(ctx, query, nodes,
+                for name, query := range q.{{ $e.EagerLoadNamedField }} {
+                    if err := q.load{{ $e.StructField }}(ctx, query, nodes,
                         func(n *{{ $.Name }}) { n.appendNamed{{ $e.StructField }}(name) },
                         {{- if and ($.FeatureEnabled "bidiedges") $e.Ref $e.Ref.Unique }}
                             func(n *{{ $.Name }}, e *{{ $e.Type.Name }}){

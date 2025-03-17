@@ -88,7 +88,9 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 {{- end }}
 
 {{- define "dialect/sql/query/spec/ctxschemaconfig" }}
-	{{- template "dialect/sql/spec/ctxschemaconfig" . }}
+	{{- with extend $ "Receiver" "q" }}
+		{{- template "dialect/sql/spec/ctxschemaconfig" . }}
+	{{- end }}
 {{- end }}
 
 {{- define "dialect/sql/query/eagerloading/join/schemaconfig" }}
@@ -99,8 +101,7 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 
 {{- define "dialect/sql/defedge/spec/schemaconfig" }}
 	{{- $e := $.Scope.Edge }}
-	{{- $builder := pascal $.Scope.Builder }}
-	{{- $receiver := receiver $builder }}
+	{{- $receiver := $.Scope.Receiver }}
 	{{- $ident := "edge" }}{{ with $.Scope.Ident }}{{ $ident = . }}{{ end }}
 	{{- if $.FeatureEnabled "sql/schemaconfig" }}
 		{{- $schema := $e.Type.Name }}
@@ -125,8 +126,7 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 
 {{/* A template for injecting the SchemaConfig to the context. Should be executed before other templates. */}}
 {{- define "dialect/sql/spec/ctxschemaconfig" -}}
-	{{- $builder := pascal $.Scope.Builder }}
-	{{- $receiver := receiver $builder }}
+	{{- $receiver := $.Scope.Receiver }}
 	{{- $ident := "_spec.Node" }}{{ with $.Scope.Ident }}{{ $ident = . }}{{ end }}
 	{{- if $.FeatureEnabled "sql/schemaconfig" }}
 		{{ $ident }}.Schema = {{ $receiver }}.schemaConfig.{{ $.Name }}
@@ -137,25 +137,25 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 {{- end -}}
 
 {{- define "dialect/sql/query/selector/ctxschemaconfig" -}}
-	{{- $builder := pascal $.Scope.Builder }}
-	{{- $receiver := receiver $builder }}
 	{{- if $.FeatureEnabled "sql/schemaconfig" }}
-		t1.Schema({{ $receiver }}.schemaConfig.{{ $.Name }})
-		ctx = internal.NewSchemaConfigContext(ctx, {{ $receiver }}.schemaConfig)
+		t1.Schema(q.schemaConfig.{{ $.Name }})
+		ctx = internal.NewSchemaConfigContext(ctx, q.schemaConfig)
 		selector.WithContext(ctx)
 	{{- end }}
 {{- end -}}
 
 {{- define "dialect/sql/query/path/ctxschemaconfig" }}
 	{{- if $.FeatureEnabled "sql/schemaconfig" }}
-		schemaConfig := {{ $.Scope.Receiver }}.schemaConfig
+		{{- $receiver := $.Scope.Receiver }}
+		schemaConfig := {{ $receiver }}.schemaConfig
 		{{- template "dialect/sql/query/step/ctxschemaconfig" . }}
 	{{- end -}}
 {{- end -}}
 
 {{- define "dialect/sql/query/from/ctxschemaconfig" }}
 	{{- if $.FeatureEnabled "sql/schemaconfig" }}
-		schemaConfig := {{ $.Scope.Receiver }}.schemaConfig
+		{{- $receiver := $.Scope.Receiver }}
+		schemaConfig := {{ $receiver }}.schemaConfig
 		{{- template "dialect/sql/query/step/ctxschemaconfig" . }}
 	{{- end -}}
 {{- end -}}
@@ -208,9 +208,9 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 				{{- range $n := $.Nodes }}
 					{{ $n.Name }}: tableSchemas[{{ indexOf $all $n.TableSchema }}],
 					{{- range $e := $n.Edges }}
-			    		{{- if and $e.M2M (not $e.Inverse) (not $e.Through) }}
-				    		{{ $n.Name }}{{ $e.StructField }}: tableSchemas[{{ indexOf $all $e.TableSchema }}],
-			    		{{- end }}
+							{{- if and $e.M2M (not $e.Inverse) (not $e.Through) }}
+								{{ $n.Name }}{{ $e.StructField }}: tableSchemas[{{ indexOf $all $e.TableSchema }}],
+							{{- end }}
 					{{- end }}
 				{{- end }}
 			}

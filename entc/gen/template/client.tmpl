@@ -284,8 +284,6 @@ type {{ $client }} struct {
 	config
 }
 
-{{ $rec := $n.Receiver }}{{ if eq $rec "c" }}{{ $rec = printf "%.2s" $n.Name | lower }}{{ end }}
-
 // New{{ $client }} returns a client for the {{ $n.Name }} from the given config.
 func New{{ $client }}(c config) *{{ $client }} {
 	return &{{ $client }}{config: c}
@@ -340,13 +338,13 @@ func (c *{{ $client }}) Update() *{{ $n.UpdateName }} {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $n.UpdateOneName }} {
+func (c *{{ $client }}) UpdateOne(m *{{ $n.Name }}) *{{ $n.UpdateOneName }} {
 	{{- if $n.HasOneFieldID }}
-		mutation := new{{ $n.MutationName }}(c.config, OpUpdateOne, {{ print "with" $n.Name }}({{ $rec }}))
+		mutation := new{{ $n.MutationName }}(c.config, OpUpdateOne, {{ print "with" $n.Name }}(m))
 	{{- else }}
 		mutation := new{{ $n.MutationName }}(c.config, OpUpdateOne)
 		{{- range $id := $n.EdgeSchema.ID }}
-			mutation.{{ $id.BuilderField }} = &{{ $rec }}.{{ $id.StructField }}
+			mutation.{{ $id.BuilderField }} = &m.{{ $id.StructField }}
 		{{- end }}
 	{{- end }}
 	return &{{ $n.UpdateOneName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
@@ -368,8 +366,8 @@ func (c *{{ $client }}) Delete() *{{ $n.DeleteName }} {
 
 {{ with $n.HasOneFieldID }}
 	// DeleteOne returns a builder for deleting the given entity.
-	func (c *{{ $client }}) DeleteOne({{ $rec }} *{{ $n.Name }}) *{{ $n.DeleteOneName }} {
-		return c.DeleteOneID({{ $rec }}.ID)
+	func (c *{{ $client }}) DeleteOne(m *{{ $n.Name }}) *{{ $n.DeleteOneName }} {
+		return c.DeleteOneID(m.ID)
 	}
 
 	// DeleteOneID returns a builder for deleting the given entity by its id.
@@ -415,14 +413,13 @@ func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
 
 {{ range $e := $n.Edges }}
 {{ $builder := $e.Type.QueryName }}
-{{ $arg := $rec }}{{ if eq $arg "id" }}{{ $arg = "node" }}{{ end }}
 {{ $func := print "Query" (pascal $e.Name) }}
 // Query{{ pascal $e.Name }} queries the {{ $e.Name }} edge of a {{ $n.Name }}.
-func (c *{{ $client }}) {{ $func }}({{ $arg }} *{{ $n.Name }}) *{{ $builder }} {
+func (c *{{ $client }}) {{ $func }}(m *{{ $n.Name }}) *{{ $builder }} {
 	{{- if $n.HasOneFieldID }}
 		query := (&{{ $e.Type.ClientName }}{config: c.config}).Query()
 		query.path = func(context.Context) (fromV {{ $.Storage.Builder }}, _ error) {
-			{{- with extend $n "Receiver" $arg "Edge" $e "Ident" "fromV" }}
+			{{- with extend $n "Receiver" "m" "Edge" $e "Ident" "fromV" }}
 				{{ $tmpl := printf "dialect/%s/query/from" $.Storage }}
 				{{- xtemplate $tmpl . -}}
 			{{- end -}}
@@ -432,7 +429,7 @@ func (c *{{ $client }}) {{ $func }}({{ $arg }} *{{ $n.Name }}) *{{ $builder }} {
 	{{- else }}
 		{{- /* For edge schema, we use the predicate-based approach. */}}
 		return c.Query().
-			Where({{ range $id := $n.EdgeSchema.ID }}{{ $n.Package }}.{{ $id.StructField }}({{ $arg }}.{{ $id.StructField }}),{{ end }}).
+			Where({{ range $id := $n.EdgeSchema.ID }}{{ $n.Package }}.{{ $id.StructField }}(m.{{ $id.StructField }}),{{ end }}).
 			{{ $func }}()
 	{{- end }}
 }

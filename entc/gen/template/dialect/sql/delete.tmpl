@@ -8,10 +8,8 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/sql/delete" }}
 {{ $builder := pascal $.Scope.Builder }}
-{{ $receiver := $.Scope.Receiver }}
-{{ $mutation := print $receiver ".mutation" }}
 
-func ({{ $receiver}} *{{ $builder }}) sqlExec(ctx context.Context) (int, error) {
+func (d *{{ $builder }}) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec({{ $.Package }}.Table, {{ if $.HasOneFieldID }}sqlgraph.NewFieldSpec({{ $.Package }}.{{ $.ID.Constant }}, field.{{ $.ID.Type.ConstName }}){{ else }}nil{{ end }})
 	{{- /* Allow mutating the sqlgraph.DeleteSpec by ent extensions or user templates.*/}}
 	{{- with $tmpls := matchTemplate "dialect/sql/delete/spec/*" }}
@@ -19,18 +17,18 @@ func ({{ $receiver}} *{{ $builder }}) sqlExec(ctx context.Context) (int, error) 
 			{{- xtemplate $tmpl $ }}
 		{{- end }}
 	{{- end }}
-	if ps := {{ $mutation }}.predicates; len(ps) > 0 {
+	if ps := d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, {{ $receiver}}.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	{{ $mutation }}.done = true
+	d.mutation.done = true
 	return affected, err
 }
 

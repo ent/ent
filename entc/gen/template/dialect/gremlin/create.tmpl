@@ -8,33 +8,31 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/gremlin/create" }}
 {{ $builder := pascal $.Scope.Builder }}
-{{ $receiver := $.Scope.Receiver }}
-{{ $mutation := print $receiver ".mutation"  }}
 
-func ({{ $receiver }} *{{ $builder }}) gremlinSave(ctx context.Context) (*{{ $.Name }}, error) {
-	if err := {{ $receiver }}.check(); err != nil {
+func (c *{{ $builder }}) gremlinSave(ctx context.Context) (*{{ $.Name }}, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}
-	query, bindings := {{ $receiver }}.gremlin().Query()
-	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := c.gremlin().Query()
+	if err := c.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	rnode := &{{ $.Name }}{config: {{ $receiver }}.config}
+	rnode := &{{ $.Name }}{config: c.config}
 	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
 	{{- if $.HasOneFieldID }}
-		{{ $mutation }}.{{ $.ID.BuilderField }} = &rnode.{{ $.ID.StructField }}
-		{{ $mutation }}.done = true
+		c.mutation.{{ $.ID.BuilderField }} = &rnode.{{ $.ID.StructField }}
+		c.mutation.done = true
 	{{- end }}
 	return rnode, nil
 }
 
-func ({{ $receiver }} *{{ $builder }}) gremlin() *dsl.Traversal {
+func (c *{{ $builder }}) gremlin() *dsl.Traversal {
 	{{- with .NumConstraint }}
 		type constraint struct {
 			pred *dsl.Traversal // constraint predicate.
@@ -44,12 +42,12 @@ func ({{ $receiver }} *{{ $builder }}) gremlin() *dsl.Traversal {
 	{{- end }}
 	v := g.AddV({{ $.Package }}.Label)
 	{{- if $.ID.UserDefined }}
-		if id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}(); ok {
+		if id, ok := c.mutation.{{ $.ID.MutationGet }}(); ok {
 			v.Property(dsl.ID, id)
 		}
 	{{- end }}
 	{{- range $f := $.MutationFields }}
-		if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
+		if value, ok := c.mutation.{{ $f.MutationGet }}(); ok {
 			{{- if $f.Unique }}
 				constraints = append(constraints, &constraint{
 					pred: g.V().Has({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, value).Count(),
@@ -62,7 +60,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin() *dsl.Traversal {
 	{{- range $e := $.Edges }}
 		{{- $direction := "In" }}
 		{{- $name := printf "%s.%s" $.Package $e.LabelConstant }}
-		for _, id := range {{ $mutation }}.{{ $e.StructField }}IDs() {
+		for _, id := range c.mutation.{{ $e.StructField }}IDs() {
 			{{- if $e.IsInverse }}
 				{{- $direction = "Out" }}
 				{{- $name = printf "%s.%s" $e.Type.Package $e.LabelConstant }}

@@ -26,14 +26,14 @@ in the LICENSE file in the root directory of this source tree.
 {{/* Template for passing the "OnConflict" options to the sqlgraph.CreateSpec. */}}
 {{- define "dialect/sql/create/spec/upsert" }}
 	{{- if $.FeatureEnabled "sql/upsert" }}
-		_spec.OnConflict = {{ $.Scope.Receiver }}.conflict
+		_spec.OnConflict = c.conflict
 	{{- end }}
 {{- end }}
 
 {{/* Template for passing the "OnConflict" options to the sqlgraph.BatchCreateSpec. */}}
 {{- define "dialect/sql/create_bulk/spec/upsert" }}
 	{{- if $.FeatureEnabled "sql/upsert" }}
-		spec.OnConflict = {{ $.Scope.Receiver }}.conflict
+		spec.OnConflict = c.conflict
 	{{- end }}
 {{- end }}
 
@@ -47,7 +47,6 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "helper/upsertone" }}
 {{ $pkg := base $.Config.Package }}
 {{ $builder := pascal $.Scope.Builder }}
-{{ $receiver := $.Scope.Receiver }}
 {{ $upsertOne := print $.Name "UpsertOne" }}
 {{ $upsertSet := print $.Name "Upsert" }}
 
@@ -74,11 +73,9 @@ in the LICENSE file in the root directory of this source tree.
 {{- end }}
 //		Exec(ctx)
 //
-func ({{ $receiver }} *{{ $builder }}) OnConflict(opts ...sql.ConflictOption) *{{ $upsertOne }} {
-	{{ $receiver }}.conflict = opts
-	return &{{ $upsertOne }}{
-		create: {{ $receiver }},
-	}
+func (c *{{ $builder }}) OnConflict(opts ...sql.ConflictOption) *{{ $upsertOne }} {
+	c.conflict = opts
+	return &{{ $upsertOne }}{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -88,11 +85,9 @@ func ({{ $receiver }} *{{ $builder }}) OnConflict(opts ...sql.ConflictOption) *{
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
 //
-func ({{ $receiver }} *{{ $builder }}) OnConflictColumns(columns ...string) *{{ $upsertOne }} {
-	{{ $receiver }}.conflict = append({{ $receiver }}.conflict, sql.ConflictColumns(columns...))
-	return &{{ $upsertOne }}{
-		create: {{ $receiver }},
-	}
+func (c *{{ $builder }}) OnConflictColumns(columns ...string) *{{ $upsertOne }} {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &{{ $upsertOne }}{create: c}
 }
 
 type (
@@ -264,7 +259,6 @@ func (u *{{ $upsertOne }}) ExecX(ctx context.Context) {
 {{ define "helper/upsertbulk" }}
 {{ $pkg := base $.Config.Package }}
 {{ $builder := pascal $.Scope.Builder }}
-{{ $receiver := $.Scope.Receiver }}
 {{ $upsertBulk := print $.Name "UpsertBulk" }}
 {{ $upsertSet := print $.Name "Upsert" }}
 {{ $udfID := false }}{{ if $.HasOneFieldID }}{{ $udfID = $.ID.UserDefined }}{{ end }}
@@ -288,11 +282,9 @@ func (u *{{ $upsertOne }}) ExecX(ctx context.Context) {
 {{- end }}
 //		Exec(ctx)
 //
-func ({{ $receiver }} *{{ $builder }}) OnConflict(opts ...sql.ConflictOption) *{{ $upsertBulk }} {
-	{{ $receiver }}.conflict = opts
-	return &{{ $upsertBulk }}{
-		create: {{ $receiver }},
-	}
+func (c *{{ $builder }}) OnConflict(opts ...sql.ConflictOption) *{{ $upsertBulk }} {
+	c.conflict = opts
+	return &{{ $upsertBulk }}{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -302,11 +294,9 @@ func ({{ $receiver }} *{{ $builder }}) OnConflict(opts ...sql.ConflictOption) *{
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
 //
-func ({{ $receiver }} *{{ $builder }}) OnConflictColumns(columns ...string) *{{ $upsertBulk }} {
-	{{ $receiver }}.conflict = append({{ $receiver }}.conflict, sql.ConflictColumns(columns...))
-	return &{{ $upsertBulk }}{
-		create: {{ $receiver }},
-	}
+func (c *{{ $builder }}) OnConflictColumns(columns ...string) *{{ $upsertBulk }} {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &{{ $upsertBulk }}{create: c}
 }
 
 // {{ $upsertBulk }} is the builder for "upsert"-ing
