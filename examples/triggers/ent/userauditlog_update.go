@@ -22,92 +22,92 @@ type UserAuditLogUpdate struct {
 }
 
 // Where appends a list predicates to the UserAuditLogUpdate builder.
-func (ualu *UserAuditLogUpdate) Where(ps ...predicate.UserAuditLog) *UserAuditLogUpdate {
-	ualu.mutation.Where(ps...)
-	return ualu
+func (_u *UserAuditLogUpdate) Where(ps ...predicate.UserAuditLog) *UserAuditLogUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetOperationType sets the "operation_type" field.
-func (ualu *UserAuditLogUpdate) SetOperationType(s string) *UserAuditLogUpdate {
-	ualu.mutation.SetOperationType(s)
-	return ualu
+func (_u *UserAuditLogUpdate) SetOperationType(s string) *UserAuditLogUpdate {
+	_u.mutation.SetOperationType(s)
+	return _u
 }
 
 // SetNillableOperationType sets the "operation_type" field if the given value is not nil.
-func (ualu *UserAuditLogUpdate) SetNillableOperationType(s *string) *UserAuditLogUpdate {
+func (_u *UserAuditLogUpdate) SetNillableOperationType(s *string) *UserAuditLogUpdate {
 	if s != nil {
-		ualu.SetOperationType(*s)
+		_u.SetOperationType(*s)
 	}
-	return ualu
+	return _u
 }
 
 // SetOperationTime sets the "operation_time" field.
-func (ualu *UserAuditLogUpdate) SetOperationTime(s string) *UserAuditLogUpdate {
-	ualu.mutation.SetOperationTime(s)
-	return ualu
+func (_u *UserAuditLogUpdate) SetOperationTime(s string) *UserAuditLogUpdate {
+	_u.mutation.SetOperationTime(s)
+	return _u
 }
 
 // SetNillableOperationTime sets the "operation_time" field if the given value is not nil.
-func (ualu *UserAuditLogUpdate) SetNillableOperationTime(s *string) *UserAuditLogUpdate {
+func (_u *UserAuditLogUpdate) SetNillableOperationTime(s *string) *UserAuditLogUpdate {
 	if s != nil {
-		ualu.SetOperationTime(*s)
+		_u.SetOperationTime(*s)
 	}
-	return ualu
+	return _u
 }
 
 // SetOldValue sets the "old_value" field.
-func (ualu *UserAuditLogUpdate) SetOldValue(s string) *UserAuditLogUpdate {
-	ualu.mutation.SetOldValue(s)
-	return ualu
+func (_u *UserAuditLogUpdate) SetOldValue(s string) *UserAuditLogUpdate {
+	_u.mutation.SetOldValue(s)
+	return _u
 }
 
 // SetNillableOldValue sets the "old_value" field if the given value is not nil.
-func (ualu *UserAuditLogUpdate) SetNillableOldValue(s *string) *UserAuditLogUpdate {
+func (_u *UserAuditLogUpdate) SetNillableOldValue(s *string) *UserAuditLogUpdate {
 	if s != nil {
-		ualu.SetOldValue(*s)
+		_u.SetOldValue(*s)
 	}
-	return ualu
+	return _u
 }
 
 // ClearOldValue clears the value of the "old_value" field.
-func (ualu *UserAuditLogUpdate) ClearOldValue() *UserAuditLogUpdate {
-	ualu.mutation.ClearOldValue()
-	return ualu
+func (_u *UserAuditLogUpdate) ClearOldValue() *UserAuditLogUpdate {
+	_u.mutation.ClearOldValue()
+	return _u
 }
 
 // SetNewValue sets the "new_value" field.
-func (ualu *UserAuditLogUpdate) SetNewValue(s string) *UserAuditLogUpdate {
-	ualu.mutation.SetNewValue(s)
-	return ualu
+func (_u *UserAuditLogUpdate) SetNewValue(s string) *UserAuditLogUpdate {
+	_u.mutation.SetNewValue(s)
+	return _u
 }
 
 // SetNillableNewValue sets the "new_value" field if the given value is not nil.
-func (ualu *UserAuditLogUpdate) SetNillableNewValue(s *string) *UserAuditLogUpdate {
+func (_u *UserAuditLogUpdate) SetNillableNewValue(s *string) *UserAuditLogUpdate {
 	if s != nil {
-		ualu.SetNewValue(*s)
+		_u.SetNewValue(*s)
 	}
-	return ualu
+	return _u
 }
 
 // ClearNewValue clears the value of the "new_value" field.
-func (ualu *UserAuditLogUpdate) ClearNewValue() *UserAuditLogUpdate {
-	ualu.mutation.ClearNewValue()
-	return ualu
+func (_u *UserAuditLogUpdate) ClearNewValue() *UserAuditLogUpdate {
+	_u.mutation.ClearNewValue()
+	return _u
 }
 
 // Mutation returns the UserAuditLogMutation object of the builder.
-func (ualu *UserAuditLogUpdate) Mutation() *UserAuditLogMutation {
-	return ualu.mutation
+func (_u *UserAuditLogUpdate) Mutation() *UserAuditLogMutation {
+	return _u.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (ualu *UserAuditLogUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, ualu.sqlSave, ualu.mutation, ualu.hooks)
+func (_u *UserAuditLogUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ualu *UserAuditLogUpdate) SaveX(ctx context.Context) int {
-	affected, err := ualu.Save(ctx)
+func (_u *UserAuditLogUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -115,46 +115,46 @@ func (ualu *UserAuditLogUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (ualu *UserAuditLogUpdate) Exec(ctx context.Context) error {
-	_, err := ualu.Save(ctx)
+func (_u *UserAuditLogUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ualu *UserAuditLogUpdate) ExecX(ctx context.Context) {
-	if err := ualu.Exec(ctx); err != nil {
+func (_u *UserAuditLogUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (ualu *UserAuditLogUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *UserAuditLogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(userauditlog.Table, userauditlog.Columns, sqlgraph.NewFieldSpec(userauditlog.FieldID, field.TypeInt))
-	if ps := ualu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := ualu.mutation.OperationType(); ok {
+	if value, ok := _u.mutation.OperationType(); ok {
 		_spec.SetField(userauditlog.FieldOperationType, field.TypeString, value)
 	}
-	if value, ok := ualu.mutation.OperationTime(); ok {
+	if value, ok := _u.mutation.OperationTime(); ok {
 		_spec.SetField(userauditlog.FieldOperationTime, field.TypeString, value)
 	}
-	if value, ok := ualu.mutation.OldValue(); ok {
+	if value, ok := _u.mutation.OldValue(); ok {
 		_spec.SetField(userauditlog.FieldOldValue, field.TypeString, value)
 	}
-	if ualu.mutation.OldValueCleared() {
+	if _u.mutation.OldValueCleared() {
 		_spec.ClearField(userauditlog.FieldOldValue, field.TypeString)
 	}
-	if value, ok := ualu.mutation.NewValue(); ok {
+	if value, ok := _u.mutation.NewValue(); ok {
 		_spec.SetField(userauditlog.FieldNewValue, field.TypeString, value)
 	}
-	if ualu.mutation.NewValueCleared() {
+	if _u.mutation.NewValueCleared() {
 		_spec.ClearField(userauditlog.FieldNewValue, field.TypeString)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, ualu.driver, _spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{userauditlog.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -162,7 +162,7 @@ func (ualu *UserAuditLogUpdate) sqlSave(ctx context.Context) (n int, err error) 
 		}
 		return 0, err
 	}
-	ualu.mutation.done = true
+	_u.mutation.done = true
 	return n, nil
 }
 
@@ -175,99 +175,99 @@ type UserAuditLogUpdateOne struct {
 }
 
 // SetOperationType sets the "operation_type" field.
-func (ualuo *UserAuditLogUpdateOne) SetOperationType(s string) *UserAuditLogUpdateOne {
-	ualuo.mutation.SetOperationType(s)
-	return ualuo
+func (_u *UserAuditLogUpdateOne) SetOperationType(s string) *UserAuditLogUpdateOne {
+	_u.mutation.SetOperationType(s)
+	return _u
 }
 
 // SetNillableOperationType sets the "operation_type" field if the given value is not nil.
-func (ualuo *UserAuditLogUpdateOne) SetNillableOperationType(s *string) *UserAuditLogUpdateOne {
+func (_u *UserAuditLogUpdateOne) SetNillableOperationType(s *string) *UserAuditLogUpdateOne {
 	if s != nil {
-		ualuo.SetOperationType(*s)
+		_u.SetOperationType(*s)
 	}
-	return ualuo
+	return _u
 }
 
 // SetOperationTime sets the "operation_time" field.
-func (ualuo *UserAuditLogUpdateOne) SetOperationTime(s string) *UserAuditLogUpdateOne {
-	ualuo.mutation.SetOperationTime(s)
-	return ualuo
+func (_u *UserAuditLogUpdateOne) SetOperationTime(s string) *UserAuditLogUpdateOne {
+	_u.mutation.SetOperationTime(s)
+	return _u
 }
 
 // SetNillableOperationTime sets the "operation_time" field if the given value is not nil.
-func (ualuo *UserAuditLogUpdateOne) SetNillableOperationTime(s *string) *UserAuditLogUpdateOne {
+func (_u *UserAuditLogUpdateOne) SetNillableOperationTime(s *string) *UserAuditLogUpdateOne {
 	if s != nil {
-		ualuo.SetOperationTime(*s)
+		_u.SetOperationTime(*s)
 	}
-	return ualuo
+	return _u
 }
 
 // SetOldValue sets the "old_value" field.
-func (ualuo *UserAuditLogUpdateOne) SetOldValue(s string) *UserAuditLogUpdateOne {
-	ualuo.mutation.SetOldValue(s)
-	return ualuo
+func (_u *UserAuditLogUpdateOne) SetOldValue(s string) *UserAuditLogUpdateOne {
+	_u.mutation.SetOldValue(s)
+	return _u
 }
 
 // SetNillableOldValue sets the "old_value" field if the given value is not nil.
-func (ualuo *UserAuditLogUpdateOne) SetNillableOldValue(s *string) *UserAuditLogUpdateOne {
+func (_u *UserAuditLogUpdateOne) SetNillableOldValue(s *string) *UserAuditLogUpdateOne {
 	if s != nil {
-		ualuo.SetOldValue(*s)
+		_u.SetOldValue(*s)
 	}
-	return ualuo
+	return _u
 }
 
 // ClearOldValue clears the value of the "old_value" field.
-func (ualuo *UserAuditLogUpdateOne) ClearOldValue() *UserAuditLogUpdateOne {
-	ualuo.mutation.ClearOldValue()
-	return ualuo
+func (_u *UserAuditLogUpdateOne) ClearOldValue() *UserAuditLogUpdateOne {
+	_u.mutation.ClearOldValue()
+	return _u
 }
 
 // SetNewValue sets the "new_value" field.
-func (ualuo *UserAuditLogUpdateOne) SetNewValue(s string) *UserAuditLogUpdateOne {
-	ualuo.mutation.SetNewValue(s)
-	return ualuo
+func (_u *UserAuditLogUpdateOne) SetNewValue(s string) *UserAuditLogUpdateOne {
+	_u.mutation.SetNewValue(s)
+	return _u
 }
 
 // SetNillableNewValue sets the "new_value" field if the given value is not nil.
-func (ualuo *UserAuditLogUpdateOne) SetNillableNewValue(s *string) *UserAuditLogUpdateOne {
+func (_u *UserAuditLogUpdateOne) SetNillableNewValue(s *string) *UserAuditLogUpdateOne {
 	if s != nil {
-		ualuo.SetNewValue(*s)
+		_u.SetNewValue(*s)
 	}
-	return ualuo
+	return _u
 }
 
 // ClearNewValue clears the value of the "new_value" field.
-func (ualuo *UserAuditLogUpdateOne) ClearNewValue() *UserAuditLogUpdateOne {
-	ualuo.mutation.ClearNewValue()
-	return ualuo
+func (_u *UserAuditLogUpdateOne) ClearNewValue() *UserAuditLogUpdateOne {
+	_u.mutation.ClearNewValue()
+	return _u
 }
 
 // Mutation returns the UserAuditLogMutation object of the builder.
-func (ualuo *UserAuditLogUpdateOne) Mutation() *UserAuditLogMutation {
-	return ualuo.mutation
+func (_u *UserAuditLogUpdateOne) Mutation() *UserAuditLogMutation {
+	return _u.mutation
 }
 
 // Where appends a list predicates to the UserAuditLogUpdate builder.
-func (ualuo *UserAuditLogUpdateOne) Where(ps ...predicate.UserAuditLog) *UserAuditLogUpdateOne {
-	ualuo.mutation.Where(ps...)
-	return ualuo
+func (_u *UserAuditLogUpdateOne) Where(ps ...predicate.UserAuditLog) *UserAuditLogUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (ualuo *UserAuditLogUpdateOne) Select(field string, fields ...string) *UserAuditLogUpdateOne {
-	ualuo.fields = append([]string{field}, fields...)
-	return ualuo
+func (_u *UserAuditLogUpdateOne) Select(field string, fields ...string) *UserAuditLogUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated UserAuditLog entity.
-func (ualuo *UserAuditLogUpdateOne) Save(ctx context.Context) (*UserAuditLog, error) {
-	return withHooks(ctx, ualuo.sqlSave, ualuo.mutation, ualuo.hooks)
+func (_u *UserAuditLogUpdateOne) Save(ctx context.Context) (*UserAuditLog, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ualuo *UserAuditLogUpdateOne) SaveX(ctx context.Context) *UserAuditLog {
-	node, err := ualuo.Save(ctx)
+func (_u *UserAuditLogUpdateOne) SaveX(ctx context.Context) *UserAuditLog {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -275,26 +275,26 @@ func (ualuo *UserAuditLogUpdateOne) SaveX(ctx context.Context) *UserAuditLog {
 }
 
 // Exec executes the query on the entity.
-func (ualuo *UserAuditLogUpdateOne) Exec(ctx context.Context) error {
-	_, err := ualuo.Save(ctx)
+func (_u *UserAuditLogUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ualuo *UserAuditLogUpdateOne) ExecX(ctx context.Context) {
-	if err := ualuo.Exec(ctx); err != nil {
+func (_u *UserAuditLogUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (ualuo *UserAuditLogUpdateOne) sqlSave(ctx context.Context) (_node *UserAuditLog, err error) {
+func (_u *UserAuditLogUpdateOne) sqlSave(ctx context.Context) (_node *UserAuditLog, err error) {
 	_spec := sqlgraph.NewUpdateSpec(userauditlog.Table, userauditlog.Columns, sqlgraph.NewFieldSpec(userauditlog.FieldID, field.TypeInt))
-	id, ok := ualuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "UserAuditLog.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := ualuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, userauditlog.FieldID)
 		for _, f := range fields {
@@ -306,35 +306,35 @@ func (ualuo *UserAuditLogUpdateOne) sqlSave(ctx context.Context) (_node *UserAud
 			}
 		}
 	}
-	if ps := ualuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := ualuo.mutation.OperationType(); ok {
+	if value, ok := _u.mutation.OperationType(); ok {
 		_spec.SetField(userauditlog.FieldOperationType, field.TypeString, value)
 	}
-	if value, ok := ualuo.mutation.OperationTime(); ok {
+	if value, ok := _u.mutation.OperationTime(); ok {
 		_spec.SetField(userauditlog.FieldOperationTime, field.TypeString, value)
 	}
-	if value, ok := ualuo.mutation.OldValue(); ok {
+	if value, ok := _u.mutation.OldValue(); ok {
 		_spec.SetField(userauditlog.FieldOldValue, field.TypeString, value)
 	}
-	if ualuo.mutation.OldValueCleared() {
+	if _u.mutation.OldValueCleared() {
 		_spec.ClearField(userauditlog.FieldOldValue, field.TypeString)
 	}
-	if value, ok := ualuo.mutation.NewValue(); ok {
+	if value, ok := _u.mutation.NewValue(); ok {
 		_spec.SetField(userauditlog.FieldNewValue, field.TypeString, value)
 	}
-	if ualuo.mutation.NewValueCleared() {
+	if _u.mutation.NewValueCleared() {
 		_spec.ClearField(userauditlog.FieldNewValue, field.TypeString)
 	}
-	_node = &UserAuditLog{config: ualuo.config}
+	_node = &UserAuditLog{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, ualuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{userauditlog.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -342,6 +342,6 @@ func (ualuo *UserAuditLogUpdateOne) sqlSave(ctx context.Context) (_node *UserAud
 		}
 		return nil, err
 	}
-	ualuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

@@ -35,7 +35,7 @@ func (*PetUserName) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the PetUserName fields.
-func (pun *PetUserName) assignValues(columns []string, values []any) error {
+func (_m *PetUserName) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -45,10 +45,10 @@ func (pun *PetUserName) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				pun.Name = value.String
+				_m.Name = value.String
 			}
 		default:
-			pun.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -56,27 +56,27 @@ func (pun *PetUserName) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the PetUserName.
 // This includes values selected through modifiers, order, etc.
-func (pun *PetUserName) Value(name string) (ent.Value, error) {
-	return pun.selectValues.Get(name)
+func (_m *PetUserName) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // Unwrap unwraps the PetUserName entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (pun *PetUserName) Unwrap() *PetUserName {
-	_tx, ok := pun.config.driver.(*txDriver)
+func (_m *PetUserName) Unwrap() *PetUserName {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: PetUserName is not a transactional entity")
 	}
-	pun.config.driver = _tx.drv
-	return pun
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (pun *PetUserName) String() string {
+func (_m *PetUserName) String() string {
 	var builder strings.Builder
 	builder.WriteString("PetUserName(")
 	builder.WriteString("name=")
-	builder.WriteString(pun.Name)
+	builder.WriteString(_m.Name)
 	builder.WriteByte(')')
 	return builder.String()
 }

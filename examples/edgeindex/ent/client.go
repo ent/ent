@@ -266,8 +266,8 @@ func (c *CityClient) Update() *CityUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *CityClient) UpdateOne(ci *City) *CityUpdateOne {
-	mutation := newCityMutation(c.config, OpUpdateOne, withCity(ci))
+func (c *CityClient) UpdateOne(_m *City) *CityUpdateOne {
+	mutation := newCityMutation(c.config, OpUpdateOne, withCity(_m))
 	return &CityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -284,8 +284,8 @@ func (c *CityClient) Delete() *CityDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *CityClient) DeleteOne(ci *City) *CityDeleteOne {
-	return c.DeleteOneID(ci.ID)
+func (c *CityClient) DeleteOne(_m *City) *CityDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -320,16 +320,16 @@ func (c *CityClient) GetX(ctx context.Context, id int) *City {
 }
 
 // QueryStreets queries the streets edge of a City.
-func (c *CityClient) QueryStreets(ci *City) *StreetQuery {
+func (c *CityClient) QueryStreets(_m *City) *StreetQuery {
 	query := (&StreetClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := ci.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(city.Table, city.FieldID, id),
 			sqlgraph.To(street.Table, street.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, city.StreetsTable, city.StreetsColumn),
 		)
-		fromV = sqlgraph.Neighbors(ci.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -415,8 +415,8 @@ func (c *StreetClient) Update() *StreetUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *StreetClient) UpdateOne(s *Street) *StreetUpdateOne {
-	mutation := newStreetMutation(c.config, OpUpdateOne, withStreet(s))
+func (c *StreetClient) UpdateOne(_m *Street) *StreetUpdateOne {
+	mutation := newStreetMutation(c.config, OpUpdateOne, withStreet(_m))
 	return &StreetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -433,8 +433,8 @@ func (c *StreetClient) Delete() *StreetDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *StreetClient) DeleteOne(s *Street) *StreetDeleteOne {
-	return c.DeleteOneID(s.ID)
+func (c *StreetClient) DeleteOne(_m *Street) *StreetDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -469,16 +469,16 @@ func (c *StreetClient) GetX(ctx context.Context, id int) *Street {
 }
 
 // QueryCity queries the city edge of a Street.
-func (c *StreetClient) QueryCity(s *Street) *CityQuery {
+func (c *StreetClient) QueryCity(_m *Street) *CityQuery {
 	query := (&CityClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := s.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(street.Table, street.FieldID, id),
 			sqlgraph.To(city.Table, city.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, street.CityTable, street.CityColumn),
 		)
-		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query

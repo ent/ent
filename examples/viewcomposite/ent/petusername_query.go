@@ -27,40 +27,40 @@ type PetUserNameQuery struct {
 }
 
 // Where adds a new predicate for the PetUserNameQuery builder.
-func (punq *PetUserNameQuery) Where(ps ...predicate.PetUserName) *PetUserNameQuery {
-	punq.predicates = append(punq.predicates, ps...)
-	return punq
+func (_q *PetUserNameQuery) Where(ps ...predicate.PetUserName) *PetUserNameQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (punq *PetUserNameQuery) Limit(limit int) *PetUserNameQuery {
-	punq.ctx.Limit = &limit
-	return punq
+func (_q *PetUserNameQuery) Limit(limit int) *PetUserNameQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (punq *PetUserNameQuery) Offset(offset int) *PetUserNameQuery {
-	punq.ctx.Offset = &offset
-	return punq
+func (_q *PetUserNameQuery) Offset(offset int) *PetUserNameQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (punq *PetUserNameQuery) Unique(unique bool) *PetUserNameQuery {
-	punq.ctx.Unique = &unique
-	return punq
+func (_q *PetUserNameQuery) Unique(unique bool) *PetUserNameQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (punq *PetUserNameQuery) Order(o ...petusername.OrderOption) *PetUserNameQuery {
-	punq.order = append(punq.order, o...)
-	return punq
+func (_q *PetUserNameQuery) Order(o ...petusername.OrderOption) *PetUserNameQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // First returns the first PetUserName entity from the query.
 // Returns a *NotFoundError when no PetUserName was found.
-func (punq *PetUserNameQuery) First(ctx context.Context) (*PetUserName, error) {
-	nodes, err := punq.Limit(1).All(setContextOp(ctx, punq.ctx, ent.OpQueryFirst))
+func (_q *PetUserNameQuery) First(ctx context.Context) (*PetUserName, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -71,8 +71,8 @@ func (punq *PetUserNameQuery) First(ctx context.Context) (*PetUserName, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (punq *PetUserNameQuery) FirstX(ctx context.Context) *PetUserName {
-	node, err := punq.First(ctx)
+func (_q *PetUserNameQuery) FirstX(ctx context.Context) *PetUserName {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -82,8 +82,8 @@ func (punq *PetUserNameQuery) FirstX(ctx context.Context) *PetUserName {
 // Only returns a single PetUserName entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one PetUserName entity is found.
 // Returns a *NotFoundError when no PetUserName entities are found.
-func (punq *PetUserNameQuery) Only(ctx context.Context) (*PetUserName, error) {
-	nodes, err := punq.Limit(2).All(setContextOp(ctx, punq.ctx, ent.OpQueryOnly))
+func (_q *PetUserNameQuery) Only(ctx context.Context) (*PetUserName, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -98,8 +98,8 @@ func (punq *PetUserNameQuery) Only(ctx context.Context) (*PetUserName, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (punq *PetUserNameQuery) OnlyX(ctx context.Context) *PetUserName {
-	node, err := punq.Only(ctx)
+func (_q *PetUserNameQuery) OnlyX(ctx context.Context) *PetUserName {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -107,18 +107,18 @@ func (punq *PetUserNameQuery) OnlyX(ctx context.Context) *PetUserName {
 }
 
 // All executes the query and returns a list of PetUserNames.
-func (punq *PetUserNameQuery) All(ctx context.Context) ([]*PetUserName, error) {
-	ctx = setContextOp(ctx, punq.ctx, ent.OpQueryAll)
-	if err := punq.prepareQuery(ctx); err != nil {
+func (_q *PetUserNameQuery) All(ctx context.Context) ([]*PetUserName, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*PetUserName, *PetUserNameQuery]()
-	return withInterceptors[[]*PetUserName](ctx, punq, qr, punq.inters)
+	return withInterceptors[[]*PetUserName](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (punq *PetUserNameQuery) AllX(ctx context.Context) []*PetUserName {
-	nodes, err := punq.All(ctx)
+func (_q *PetUserNameQuery) AllX(ctx context.Context) []*PetUserName {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -126,17 +126,17 @@ func (punq *PetUserNameQuery) AllX(ctx context.Context) []*PetUserName {
 }
 
 // Count returns the count of the given query.
-func (punq *PetUserNameQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, punq.ctx, ent.OpQueryCount)
-	if err := punq.prepareQuery(ctx); err != nil {
+func (_q *PetUserNameQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, punq, querierCount[*PetUserNameQuery](), punq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*PetUserNameQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (punq *PetUserNameQuery) CountX(ctx context.Context) int {
-	count, err := punq.Count(ctx)
+func (_q *PetUserNameQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -144,9 +144,9 @@ func (punq *PetUserNameQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (punq *PetUserNameQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, punq.ctx, ent.OpQueryExist)
-	switch _, err := punq.First(ctx); {
+func (_q *PetUserNameQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.First(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -157,8 +157,8 @@ func (punq *PetUserNameQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (punq *PetUserNameQuery) ExistX(ctx context.Context) bool {
-	exist, err := punq.Exist(ctx)
+func (_q *PetUserNameQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -167,19 +167,19 @@ func (punq *PetUserNameQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the PetUserNameQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (punq *PetUserNameQuery) Clone() *PetUserNameQuery {
-	if punq == nil {
+func (_q *PetUserNameQuery) Clone() *PetUserNameQuery {
+	if _q == nil {
 		return nil
 	}
 	return &PetUserNameQuery{
-		config:     punq.config,
-		ctx:        punq.ctx.Clone(),
-		order:      append([]petusername.OrderOption{}, punq.order...),
-		inters:     append([]Interceptor{}, punq.inters...),
-		predicates: append([]predicate.PetUserName{}, punq.predicates...),
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]petusername.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.PetUserName{}, _q.predicates...),
 		// clone intermediate query.
-		sql:  punq.sql.Clone(),
-		path: punq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
@@ -197,10 +197,10 @@ func (punq *PetUserNameQuery) Clone() *PetUserNameQuery {
 //		GroupBy(petusername.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (punq *PetUserNameQuery) GroupBy(field string, fields ...string) *PetUserNameGroupBy {
-	punq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &PetUserNameGroupBy{build: punq}
-	grbuild.flds = &punq.ctx.Fields
+func (_q *PetUserNameQuery) GroupBy(field string, fields ...string) *PetUserNameGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &PetUserNameGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = petusername.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -218,62 +218,62 @@ func (punq *PetUserNameQuery) GroupBy(field string, fields ...string) *PetUserNa
 //	client.PetUserName.Query().
 //		Select(petusername.FieldName).
 //		Scan(ctx, &v)
-func (punq *PetUserNameQuery) Select(fields ...string) *PetUserNameSelect {
-	punq.ctx.Fields = append(punq.ctx.Fields, fields...)
-	sbuild := &PetUserNameSelect{PetUserNameQuery: punq}
+func (_q *PetUserNameQuery) Select(fields ...string) *PetUserNameSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &PetUserNameSelect{PetUserNameQuery: _q}
 	sbuild.label = petusername.Label
-	sbuild.flds, sbuild.scan = &punq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a PetUserNameSelect configured with the given aggregations.
-func (punq *PetUserNameQuery) Aggregate(fns ...AggregateFunc) *PetUserNameSelect {
-	return punq.Select().Aggregate(fns...)
+func (_q *PetUserNameQuery) Aggregate(fns ...AggregateFunc) *PetUserNameSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (punq *PetUserNameQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range punq.inters {
+func (_q *PetUserNameQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, punq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range punq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !petusername.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if punq.path != nil {
-		prev, err := punq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		punq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (punq *PetUserNameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*PetUserName, error) {
+func (_q *PetUserNameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*PetUserName, error) {
 	var (
 		nodes = []*PetUserName{}
-		_spec = punq.querySpec()
+		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*PetUserName).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &PetUserName{config: punq.config}
+		node := &PetUserName{config: _q.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, punq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -282,43 +282,43 @@ func (punq *PetUserNameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	return nodes, nil
 }
 
-func (punq *PetUserNameQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := punq.querySpec()
-	_spec.Node.Columns = punq.ctx.Fields
-	if len(punq.ctx.Fields) > 0 {
-		_spec.Unique = punq.ctx.Unique != nil && *punq.ctx.Unique
+func (_q *PetUserNameQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, punq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (punq *PetUserNameQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *PetUserNameQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(petusername.Table, petusername.Columns, nil)
-	_spec.From = punq.sql
-	if unique := punq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if punq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := punq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		for i := range fields {
 			_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 		}
 	}
-	if ps := punq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := punq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := punq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := punq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -328,33 +328,33 @@ func (punq *PetUserNameQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (punq *PetUserNameQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(punq.driver.Dialect())
+func (_q *PetUserNameQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(petusername.Table)
-	columns := punq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = petusername.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if punq.sql != nil {
-		selector = punq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if punq.ctx.Unique != nil && *punq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range punq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range punq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := punq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := punq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector

@@ -35,44 +35,44 @@ type StreetQuery struct {
 }
 
 // Where adds a new predicate for the StreetQuery builder.
-func (sq *StreetQuery) Where(ps ...predicate.Street) *StreetQuery {
-	sq.predicates = append(sq.predicates, ps...)
-	return sq
+func (_q *StreetQuery) Where(ps ...predicate.Street) *StreetQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (sq *StreetQuery) Limit(limit int) *StreetQuery {
-	sq.ctx.Limit = &limit
-	return sq
+func (_q *StreetQuery) Limit(limit int) *StreetQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (sq *StreetQuery) Offset(offset int) *StreetQuery {
-	sq.ctx.Offset = &offset
-	return sq
+func (_q *StreetQuery) Offset(offset int) *StreetQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (sq *StreetQuery) Unique(unique bool) *StreetQuery {
-	sq.ctx.Unique = &unique
-	return sq
+func (_q *StreetQuery) Unique(unique bool) *StreetQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (sq *StreetQuery) Order(o ...street.OrderOption) *StreetQuery {
-	sq.order = append(sq.order, o...)
-	return sq
+func (_q *StreetQuery) Order(o ...street.OrderOption) *StreetQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QueryCity chains the current query on the "city" edge.
-func (sq *StreetQuery) QueryCity() *CityQuery {
-	query := (&CityClient{config: sq.config}).Query()
+func (_q *StreetQuery) QueryCity() *CityQuery {
+	query := (&CityClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := sq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := sq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -81,7 +81,7 @@ func (sq *StreetQuery) QueryCity() *CityQuery {
 			sqlgraph.To(city.Table, city.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, street.CityTable, street.CityColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -89,8 +89,8 @@ func (sq *StreetQuery) QueryCity() *CityQuery {
 
 // First returns the first Street entity from the query.
 // Returns a *NotFoundError when no Street was found.
-func (sq *StreetQuery) First(ctx context.Context) (*Street, error) {
-	nodes, err := sq.Limit(1).All(setContextOp(ctx, sq.ctx, ent.OpQueryFirst))
+func (_q *StreetQuery) First(ctx context.Context) (*Street, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -101,8 +101,8 @@ func (sq *StreetQuery) First(ctx context.Context) (*Street, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (sq *StreetQuery) FirstX(ctx context.Context) *Street {
-	node, err := sq.First(ctx)
+func (_q *StreetQuery) FirstX(ctx context.Context) *Street {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -111,9 +111,9 @@ func (sq *StreetQuery) FirstX(ctx context.Context) *Street {
 
 // FirstID returns the first Street ID from the query.
 // Returns a *NotFoundError when no Street ID was found.
-func (sq *StreetQuery) FirstID(ctx context.Context) (id int, err error) {
+func (_q *StreetQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = sq.Limit(1).IDs(setContextOp(ctx, sq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -124,8 +124,8 @@ func (sq *StreetQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (sq *StreetQuery) FirstIDX(ctx context.Context) int {
-	id, err := sq.FirstID(ctx)
+func (_q *StreetQuery) FirstIDX(ctx context.Context) int {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -135,8 +135,8 @@ func (sq *StreetQuery) FirstIDX(ctx context.Context) int {
 // Only returns a single Street entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one Street entity is found.
 // Returns a *NotFoundError when no Street entities are found.
-func (sq *StreetQuery) Only(ctx context.Context) (*Street, error) {
-	nodes, err := sq.Limit(2).All(setContextOp(ctx, sq.ctx, ent.OpQueryOnly))
+func (_q *StreetQuery) Only(ctx context.Context) (*Street, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -151,8 +151,8 @@ func (sq *StreetQuery) Only(ctx context.Context) (*Street, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (sq *StreetQuery) OnlyX(ctx context.Context) *Street {
-	node, err := sq.Only(ctx)
+func (_q *StreetQuery) OnlyX(ctx context.Context) *Street {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -162,9 +162,9 @@ func (sq *StreetQuery) OnlyX(ctx context.Context) *Street {
 // OnlyID is like Only, but returns the only Street ID in the query.
 // Returns a *NotSingularError when more than one Street ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (sq *StreetQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (_q *StreetQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = sq.Limit(2).IDs(setContextOp(ctx, sq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -179,8 +179,8 @@ func (sq *StreetQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (sq *StreetQuery) OnlyIDX(ctx context.Context) int {
-	id, err := sq.OnlyID(ctx)
+func (_q *StreetQuery) OnlyIDX(ctx context.Context) int {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -188,18 +188,18 @@ func (sq *StreetQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Streets.
-func (sq *StreetQuery) All(ctx context.Context) ([]*Street, error) {
-	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryAll)
-	if err := sq.prepareQuery(ctx); err != nil {
+func (_q *StreetQuery) All(ctx context.Context) ([]*Street, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*Street, *StreetQuery]()
-	return withInterceptors[[]*Street](ctx, sq, qr, sq.inters)
+	return withInterceptors[[]*Street](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (sq *StreetQuery) AllX(ctx context.Context) []*Street {
-	nodes, err := sq.All(ctx)
+func (_q *StreetQuery) AllX(ctx context.Context) []*Street {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -207,20 +207,20 @@ func (sq *StreetQuery) AllX(ctx context.Context) []*Street {
 }
 
 // IDs executes the query and returns a list of Street IDs.
-func (sq *StreetQuery) IDs(ctx context.Context) (ids []int, err error) {
-	if sq.ctx.Unique == nil && sq.path != nil {
-		sq.Unique(true)
+func (_q *StreetQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryIDs)
-	if err = sq.Select(street.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(street.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (sq *StreetQuery) IDsX(ctx context.Context) []int {
-	ids, err := sq.IDs(ctx)
+func (_q *StreetQuery) IDsX(ctx context.Context) []int {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -228,17 +228,17 @@ func (sq *StreetQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (sq *StreetQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryCount)
-	if err := sq.prepareQuery(ctx); err != nil {
+func (_q *StreetQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, sq, querierCount[*StreetQuery](), sq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*StreetQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (sq *StreetQuery) CountX(ctx context.Context) int {
-	count, err := sq.Count(ctx)
+func (_q *StreetQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -246,9 +246,9 @@ func (sq *StreetQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (sq *StreetQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryExist)
-	switch _, err := sq.FirstID(ctx); {
+func (_q *StreetQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -259,8 +259,8 @@ func (sq *StreetQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (sq *StreetQuery) ExistX(ctx context.Context) bool {
-	exist, err := sq.Exist(ctx)
+func (_q *StreetQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -269,32 +269,32 @@ func (sq *StreetQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the StreetQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (sq *StreetQuery) Clone() *StreetQuery {
-	if sq == nil {
+func (_q *StreetQuery) Clone() *StreetQuery {
+	if _q == nil {
 		return nil
 	}
 	return &StreetQuery{
-		config:     sq.config,
-		ctx:        sq.ctx.Clone(),
-		order:      append([]street.OrderOption{}, sq.order...),
-		inters:     append([]Interceptor{}, sq.inters...),
-		predicates: append([]predicate.Street{}, sq.predicates...),
-		withCity:   sq.withCity.Clone(),
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]street.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.Street{}, _q.predicates...),
+		withCity:   _q.withCity.Clone(),
 		// clone intermediate query.
-		sql:  sq.sql.Clone(),
-		path: sq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
 // WithCity tells the query-builder to eager-load the nodes that are connected to
 // the "city" edge. The optional arguments are used to configure the query builder of the edge.
-func (sq *StreetQuery) WithCity(opts ...func(*CityQuery)) *StreetQuery {
-	query := (&CityClient{config: sq.config}).Query()
+func (_q *StreetQuery) WithCity(opts ...func(*CityQuery)) *StreetQuery {
+	query := (&CityClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	sq.withCity = query
-	return sq
+	_q.withCity = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -311,10 +311,10 @@ func (sq *StreetQuery) WithCity(opts ...func(*CityQuery)) *StreetQuery {
 //		GroupBy(street.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (sq *StreetQuery) GroupBy(field string, fields ...string) *StreetGroupBy {
-	sq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &StreetGroupBy{build: sq}
-	grbuild.flds = &sq.ctx.Fields
+func (_q *StreetQuery) GroupBy(field string, fields ...string) *StreetGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &StreetGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = street.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -332,55 +332,55 @@ func (sq *StreetQuery) GroupBy(field string, fields ...string) *StreetGroupBy {
 //	client.Street.Query().
 //		Select(street.FieldName).
 //		Scan(ctx, &v)
-func (sq *StreetQuery) Select(fields ...string) *StreetSelect {
-	sq.ctx.Fields = append(sq.ctx.Fields, fields...)
-	sbuild := &StreetSelect{StreetQuery: sq}
+func (_q *StreetQuery) Select(fields ...string) *StreetSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &StreetSelect{StreetQuery: _q}
 	sbuild.label = street.Label
-	sbuild.flds, sbuild.scan = &sq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a StreetSelect configured with the given aggregations.
-func (sq *StreetQuery) Aggregate(fns ...AggregateFunc) *StreetSelect {
-	return sq.Select().Aggregate(fns...)
+func (_q *StreetQuery) Aggregate(fns ...AggregateFunc) *StreetSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (sq *StreetQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range sq.inters {
+func (_q *StreetQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, sq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range sq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !street.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if sq.path != nil {
-		prev, err := sq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		sq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (sq *StreetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Street, error) {
+func (_q *StreetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Street, error) {
 	var (
 		nodes       = []*Street{}
-		withFKs     = sq.withFKs
-		_spec       = sq.querySpec()
+		withFKs     = _q.withFKs
+		_spec       = _q.querySpec()
 		loadedTypes = [1]bool{
-			sq.withCity != nil,
+			_q.withCity != nil,
 		}
 	)
-	if sq.withCity != nil {
+	if _q.withCity != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -390,7 +390,7 @@ func (sq *StreetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Stree
 		return (*Street).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Street{config: sq.config}
+		node := &Street{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -398,14 +398,14 @@ func (sq *StreetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Stree
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, sq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := sq.withCity; query != nil {
-		if err := sq.loadCity(ctx, query, nodes, nil,
+	if query := _q.withCity; query != nil {
+		if err := _q.loadCity(ctx, query, nodes, nil,
 			func(n *Street, e *City) { n.Edges.City = e }); err != nil {
 			return nil, err
 		}
@@ -413,7 +413,7 @@ func (sq *StreetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Stree
 	return nodes, nil
 }
 
-func (sq *StreetQuery) loadCity(ctx context.Context, query *CityQuery, nodes []*Street, init func(*Street), assign func(*Street, *City)) error {
+func (_q *StreetQuery) loadCity(ctx context.Context, query *CityQuery, nodes []*Street, init func(*Street), assign func(*Street, *City)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Street)
 	for i := range nodes {
@@ -446,24 +446,24 @@ func (sq *StreetQuery) loadCity(ctx context.Context, query *CityQuery, nodes []*
 	return nil
 }
 
-func (sq *StreetQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := sq.querySpec()
-	_spec.Node.Columns = sq.ctx.Fields
-	if len(sq.ctx.Fields) > 0 {
-		_spec.Unique = sq.ctx.Unique != nil && *sq.ctx.Unique
+func (_q *StreetQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, sq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (sq *StreetQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *StreetQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(street.Table, street.Columns, sqlgraph.NewFieldSpec(street.FieldID, field.TypeInt))
-	_spec.From = sq.sql
-	if unique := sq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if sq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := sq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, street.FieldID)
 		for i := range fields {
@@ -472,20 +472,20 @@ func (sq *StreetQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := sq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := sq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := sq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := sq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -495,33 +495,33 @@ func (sq *StreetQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (sq *StreetQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(sq.driver.Dialect())
+func (_q *StreetQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(street.Table)
-	columns := sq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = street.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if sq.sql != nil {
-		selector = sq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if sq.ctx.Unique != nil && *sq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range sq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range sq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := sq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := sq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector

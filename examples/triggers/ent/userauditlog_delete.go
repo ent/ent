@@ -20,56 +20,56 @@ type UserAuditLogDelete struct {
 }
 
 // Where appends a list predicates to the UserAuditLogDelete builder.
-func (uald *UserAuditLogDelete) Where(ps ...predicate.UserAuditLog) *UserAuditLogDelete {
-	uald.mutation.Where(ps...)
-	return uald
+func (_d *UserAuditLogDelete) Where(ps ...predicate.UserAuditLog) *UserAuditLogDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (uald *UserAuditLogDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, uald.sqlExec, uald.mutation, uald.hooks)
+func (_d *UserAuditLogDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uald *UserAuditLogDelete) ExecX(ctx context.Context) int {
-	n, err := uald.Exec(ctx)
+func (_d *UserAuditLogDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (uald *UserAuditLogDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *UserAuditLogDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(userauditlog.Table, sqlgraph.NewFieldSpec(userauditlog.FieldID, field.TypeInt))
-	if ps := uald.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, uald.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	uald.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // UserAuditLogDeleteOne is the builder for deleting a single UserAuditLog entity.
 type UserAuditLogDeleteOne struct {
-	uald *UserAuditLogDelete
+	_d *UserAuditLogDelete
 }
 
 // Where appends a list predicates to the UserAuditLogDelete builder.
-func (ualdo *UserAuditLogDeleteOne) Where(ps ...predicate.UserAuditLog) *UserAuditLogDeleteOne {
-	ualdo.uald.mutation.Where(ps...)
-	return ualdo
+func (_d *UserAuditLogDeleteOne) Where(ps ...predicate.UserAuditLog) *UserAuditLogDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (ualdo *UserAuditLogDeleteOne) Exec(ctx context.Context) error {
-	n, err := ualdo.uald.Exec(ctx)
+func (_d *UserAuditLogDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -81,8 +81,8 @@ func (ualdo *UserAuditLogDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ualdo *UserAuditLogDeleteOne) ExecX(ctx context.Context) {
-	if err := ualdo.Exec(ctx); err != nil {
+func (_d *UserAuditLogDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

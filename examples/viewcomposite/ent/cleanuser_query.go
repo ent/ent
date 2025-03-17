@@ -27,40 +27,40 @@ type CleanUserQuery struct {
 }
 
 // Where adds a new predicate for the CleanUserQuery builder.
-func (cuq *CleanUserQuery) Where(ps ...predicate.CleanUser) *CleanUserQuery {
-	cuq.predicates = append(cuq.predicates, ps...)
-	return cuq
+func (_q *CleanUserQuery) Where(ps ...predicate.CleanUser) *CleanUserQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (cuq *CleanUserQuery) Limit(limit int) *CleanUserQuery {
-	cuq.ctx.Limit = &limit
-	return cuq
+func (_q *CleanUserQuery) Limit(limit int) *CleanUserQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (cuq *CleanUserQuery) Offset(offset int) *CleanUserQuery {
-	cuq.ctx.Offset = &offset
-	return cuq
+func (_q *CleanUserQuery) Offset(offset int) *CleanUserQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (cuq *CleanUserQuery) Unique(unique bool) *CleanUserQuery {
-	cuq.ctx.Unique = &unique
-	return cuq
+func (_q *CleanUserQuery) Unique(unique bool) *CleanUserQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (cuq *CleanUserQuery) Order(o ...cleanuser.OrderOption) *CleanUserQuery {
-	cuq.order = append(cuq.order, o...)
-	return cuq
+func (_q *CleanUserQuery) Order(o ...cleanuser.OrderOption) *CleanUserQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // First returns the first CleanUser entity from the query.
 // Returns a *NotFoundError when no CleanUser was found.
-func (cuq *CleanUserQuery) First(ctx context.Context) (*CleanUser, error) {
-	nodes, err := cuq.Limit(1).All(setContextOp(ctx, cuq.ctx, ent.OpQueryFirst))
+func (_q *CleanUserQuery) First(ctx context.Context) (*CleanUser, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -71,8 +71,8 @@ func (cuq *CleanUserQuery) First(ctx context.Context) (*CleanUser, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (cuq *CleanUserQuery) FirstX(ctx context.Context) *CleanUser {
-	node, err := cuq.First(ctx)
+func (_q *CleanUserQuery) FirstX(ctx context.Context) *CleanUser {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -82,8 +82,8 @@ func (cuq *CleanUserQuery) FirstX(ctx context.Context) *CleanUser {
 // Only returns a single CleanUser entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one CleanUser entity is found.
 // Returns a *NotFoundError when no CleanUser entities are found.
-func (cuq *CleanUserQuery) Only(ctx context.Context) (*CleanUser, error) {
-	nodes, err := cuq.Limit(2).All(setContextOp(ctx, cuq.ctx, ent.OpQueryOnly))
+func (_q *CleanUserQuery) Only(ctx context.Context) (*CleanUser, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -98,8 +98,8 @@ func (cuq *CleanUserQuery) Only(ctx context.Context) (*CleanUser, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (cuq *CleanUserQuery) OnlyX(ctx context.Context) *CleanUser {
-	node, err := cuq.Only(ctx)
+func (_q *CleanUserQuery) OnlyX(ctx context.Context) *CleanUser {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -107,18 +107,18 @@ func (cuq *CleanUserQuery) OnlyX(ctx context.Context) *CleanUser {
 }
 
 // All executes the query and returns a list of CleanUsers.
-func (cuq *CleanUserQuery) All(ctx context.Context) ([]*CleanUser, error) {
-	ctx = setContextOp(ctx, cuq.ctx, ent.OpQueryAll)
-	if err := cuq.prepareQuery(ctx); err != nil {
+func (_q *CleanUserQuery) All(ctx context.Context) ([]*CleanUser, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*CleanUser, *CleanUserQuery]()
-	return withInterceptors[[]*CleanUser](ctx, cuq, qr, cuq.inters)
+	return withInterceptors[[]*CleanUser](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (cuq *CleanUserQuery) AllX(ctx context.Context) []*CleanUser {
-	nodes, err := cuq.All(ctx)
+func (_q *CleanUserQuery) AllX(ctx context.Context) []*CleanUser {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -126,17 +126,17 @@ func (cuq *CleanUserQuery) AllX(ctx context.Context) []*CleanUser {
 }
 
 // Count returns the count of the given query.
-func (cuq *CleanUserQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, cuq.ctx, ent.OpQueryCount)
-	if err := cuq.prepareQuery(ctx); err != nil {
+func (_q *CleanUserQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, cuq, querierCount[*CleanUserQuery](), cuq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*CleanUserQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (cuq *CleanUserQuery) CountX(ctx context.Context) int {
-	count, err := cuq.Count(ctx)
+func (_q *CleanUserQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -144,9 +144,9 @@ func (cuq *CleanUserQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (cuq *CleanUserQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, cuq.ctx, ent.OpQueryExist)
-	switch _, err := cuq.First(ctx); {
+func (_q *CleanUserQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.First(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -157,8 +157,8 @@ func (cuq *CleanUserQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (cuq *CleanUserQuery) ExistX(ctx context.Context) bool {
-	exist, err := cuq.Exist(ctx)
+func (_q *CleanUserQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -167,19 +167,19 @@ func (cuq *CleanUserQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the CleanUserQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (cuq *CleanUserQuery) Clone() *CleanUserQuery {
-	if cuq == nil {
+func (_q *CleanUserQuery) Clone() *CleanUserQuery {
+	if _q == nil {
 		return nil
 	}
 	return &CleanUserQuery{
-		config:     cuq.config,
-		ctx:        cuq.ctx.Clone(),
-		order:      append([]cleanuser.OrderOption{}, cuq.order...),
-		inters:     append([]Interceptor{}, cuq.inters...),
-		predicates: append([]predicate.CleanUser{}, cuq.predicates...),
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]cleanuser.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.CleanUser{}, _q.predicates...),
 		// clone intermediate query.
-		sql:  cuq.sql.Clone(),
-		path: cuq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
@@ -197,10 +197,10 @@ func (cuq *CleanUserQuery) Clone() *CleanUserQuery {
 //		GroupBy(cleanuser.FieldID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (cuq *CleanUserQuery) GroupBy(field string, fields ...string) *CleanUserGroupBy {
-	cuq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &CleanUserGroupBy{build: cuq}
-	grbuild.flds = &cuq.ctx.Fields
+func (_q *CleanUserQuery) GroupBy(field string, fields ...string) *CleanUserGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &CleanUserGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = cleanuser.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -218,62 +218,62 @@ func (cuq *CleanUserQuery) GroupBy(field string, fields ...string) *CleanUserGro
 //	client.CleanUser.Query().
 //		Select(cleanuser.FieldID).
 //		Scan(ctx, &v)
-func (cuq *CleanUserQuery) Select(fields ...string) *CleanUserSelect {
-	cuq.ctx.Fields = append(cuq.ctx.Fields, fields...)
-	sbuild := &CleanUserSelect{CleanUserQuery: cuq}
+func (_q *CleanUserQuery) Select(fields ...string) *CleanUserSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &CleanUserSelect{CleanUserQuery: _q}
 	sbuild.label = cleanuser.Label
-	sbuild.flds, sbuild.scan = &cuq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a CleanUserSelect configured with the given aggregations.
-func (cuq *CleanUserQuery) Aggregate(fns ...AggregateFunc) *CleanUserSelect {
-	return cuq.Select().Aggregate(fns...)
+func (_q *CleanUserQuery) Aggregate(fns ...AggregateFunc) *CleanUserSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (cuq *CleanUserQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range cuq.inters {
+func (_q *CleanUserQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, cuq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range cuq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !cleanuser.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if cuq.path != nil {
-		prev, err := cuq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		cuq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (cuq *CleanUserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CleanUser, error) {
+func (_q *CleanUserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CleanUser, error) {
 	var (
 		nodes = []*CleanUser{}
-		_spec = cuq.querySpec()
+		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*CleanUser).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &CleanUser{config: cuq.config}
+		node := &CleanUser{config: _q.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, cuq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -282,43 +282,43 @@ func (cuq *CleanUserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*C
 	return nodes, nil
 }
 
-func (cuq *CleanUserQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := cuq.querySpec()
-	_spec.Node.Columns = cuq.ctx.Fields
-	if len(cuq.ctx.Fields) > 0 {
-		_spec.Unique = cuq.ctx.Unique != nil && *cuq.ctx.Unique
+func (_q *CleanUserQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, cuq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (cuq *CleanUserQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *CleanUserQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(cleanuser.Table, cleanuser.Columns, nil)
-	_spec.From = cuq.sql
-	if unique := cuq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if cuq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := cuq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		for i := range fields {
 			_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 		}
 	}
-	if ps := cuq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := cuq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := cuq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := cuq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -328,33 +328,33 @@ func (cuq *CleanUserQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (cuq *CleanUserQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(cuq.driver.Dialect())
+func (_q *CleanUserQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(cleanuser.Table)
-	columns := cuq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = cleanuser.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if cuq.sql != nil {
-		selector = cuq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if cuq.ctx.Unique != nil && *cuq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range cuq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range cuq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := cuq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := cuq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector

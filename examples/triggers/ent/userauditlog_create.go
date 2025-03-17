@@ -20,58 +20,58 @@ type UserAuditLogCreate struct {
 }
 
 // SetOperationType sets the "operation_type" field.
-func (ualc *UserAuditLogCreate) SetOperationType(s string) *UserAuditLogCreate {
-	ualc.mutation.SetOperationType(s)
-	return ualc
+func (_c *UserAuditLogCreate) SetOperationType(s string) *UserAuditLogCreate {
+	_c.mutation.SetOperationType(s)
+	return _c
 }
 
 // SetOperationTime sets the "operation_time" field.
-func (ualc *UserAuditLogCreate) SetOperationTime(s string) *UserAuditLogCreate {
-	ualc.mutation.SetOperationTime(s)
-	return ualc
+func (_c *UserAuditLogCreate) SetOperationTime(s string) *UserAuditLogCreate {
+	_c.mutation.SetOperationTime(s)
+	return _c
 }
 
 // SetOldValue sets the "old_value" field.
-func (ualc *UserAuditLogCreate) SetOldValue(s string) *UserAuditLogCreate {
-	ualc.mutation.SetOldValue(s)
-	return ualc
+func (_c *UserAuditLogCreate) SetOldValue(s string) *UserAuditLogCreate {
+	_c.mutation.SetOldValue(s)
+	return _c
 }
 
 // SetNillableOldValue sets the "old_value" field if the given value is not nil.
-func (ualc *UserAuditLogCreate) SetNillableOldValue(s *string) *UserAuditLogCreate {
+func (_c *UserAuditLogCreate) SetNillableOldValue(s *string) *UserAuditLogCreate {
 	if s != nil {
-		ualc.SetOldValue(*s)
+		_c.SetOldValue(*s)
 	}
-	return ualc
+	return _c
 }
 
 // SetNewValue sets the "new_value" field.
-func (ualc *UserAuditLogCreate) SetNewValue(s string) *UserAuditLogCreate {
-	ualc.mutation.SetNewValue(s)
-	return ualc
+func (_c *UserAuditLogCreate) SetNewValue(s string) *UserAuditLogCreate {
+	_c.mutation.SetNewValue(s)
+	return _c
 }
 
 // SetNillableNewValue sets the "new_value" field if the given value is not nil.
-func (ualc *UserAuditLogCreate) SetNillableNewValue(s *string) *UserAuditLogCreate {
+func (_c *UserAuditLogCreate) SetNillableNewValue(s *string) *UserAuditLogCreate {
 	if s != nil {
-		ualc.SetNewValue(*s)
+		_c.SetNewValue(*s)
 	}
-	return ualc
+	return _c
 }
 
 // Mutation returns the UserAuditLogMutation object of the builder.
-func (ualc *UserAuditLogCreate) Mutation() *UserAuditLogMutation {
-	return ualc.mutation
+func (_c *UserAuditLogCreate) Mutation() *UserAuditLogMutation {
+	return _c.mutation
 }
 
 // Save creates the UserAuditLog in the database.
-func (ualc *UserAuditLogCreate) Save(ctx context.Context) (*UserAuditLog, error) {
-	return withHooks(ctx, ualc.sqlSave, ualc.mutation, ualc.hooks)
+func (_c *UserAuditLogCreate) Save(ctx context.Context) (*UserAuditLog, error) {
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (ualc *UserAuditLogCreate) SaveX(ctx context.Context) *UserAuditLog {
-	v, err := ualc.Save(ctx)
+func (_c *UserAuditLogCreate) SaveX(ctx context.Context) *UserAuditLog {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -79,35 +79,35 @@ func (ualc *UserAuditLogCreate) SaveX(ctx context.Context) *UserAuditLog {
 }
 
 // Exec executes the query.
-func (ualc *UserAuditLogCreate) Exec(ctx context.Context) error {
-	_, err := ualc.Save(ctx)
+func (_c *UserAuditLogCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ualc *UserAuditLogCreate) ExecX(ctx context.Context) {
-	if err := ualc.Exec(ctx); err != nil {
+func (_c *UserAuditLogCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ualc *UserAuditLogCreate) check() error {
-	if _, ok := ualc.mutation.OperationType(); !ok {
+func (_c *UserAuditLogCreate) check() error {
+	if _, ok := _c.mutation.OperationType(); !ok {
 		return &ValidationError{Name: "operation_type", err: errors.New(`ent: missing required field "UserAuditLog.operation_type"`)}
 	}
-	if _, ok := ualc.mutation.OperationTime(); !ok {
+	if _, ok := _c.mutation.OperationTime(); !ok {
 		return &ValidationError{Name: "operation_time", err: errors.New(`ent: missing required field "UserAuditLog.operation_time"`)}
 	}
 	return nil
 }
 
-func (ualc *UserAuditLogCreate) sqlSave(ctx context.Context) (*UserAuditLog, error) {
-	if err := ualc.check(); err != nil {
+func (_c *UserAuditLogCreate) sqlSave(ctx context.Context) (*UserAuditLog, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := ualc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, ualc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -115,29 +115,29 @@ func (ualc *UserAuditLogCreate) sqlSave(ctx context.Context) (*UserAuditLog, err
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	ualc.mutation.id = &_node.ID
-	ualc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (ualc *UserAuditLogCreate) createSpec() (*UserAuditLog, *sqlgraph.CreateSpec) {
+func (_c *UserAuditLogCreate) createSpec() (*UserAuditLog, *sqlgraph.CreateSpec) {
 	var (
-		_node = &UserAuditLog{config: ualc.config}
+		_node = &UserAuditLog{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(userauditlog.Table, sqlgraph.NewFieldSpec(userauditlog.FieldID, field.TypeInt))
 	)
-	if value, ok := ualc.mutation.OperationType(); ok {
+	if value, ok := _c.mutation.OperationType(); ok {
 		_spec.SetField(userauditlog.FieldOperationType, field.TypeString, value)
 		_node.OperationType = value
 	}
-	if value, ok := ualc.mutation.OperationTime(); ok {
+	if value, ok := _c.mutation.OperationTime(); ok {
 		_spec.SetField(userauditlog.FieldOperationTime, field.TypeString, value)
 		_node.OperationTime = value
 	}
-	if value, ok := ualc.mutation.OldValue(); ok {
+	if value, ok := _c.mutation.OldValue(); ok {
 		_spec.SetField(userauditlog.FieldOldValue, field.TypeString, value)
 		_node.OldValue = value
 	}
-	if value, ok := ualc.mutation.NewValue(); ok {
+	if value, ok := _c.mutation.NewValue(); ok {
 		_spec.SetField(userauditlog.FieldNewValue, field.TypeString, value)
 		_node.NewValue = value
 	}
@@ -152,16 +152,16 @@ type UserAuditLogCreateBulk struct {
 }
 
 // Save creates the UserAuditLog entities in the database.
-func (ualcb *UserAuditLogCreateBulk) Save(ctx context.Context) ([]*UserAuditLog, error) {
-	if ualcb.err != nil {
-		return nil, ualcb.err
+func (_c *UserAuditLogCreateBulk) Save(ctx context.Context) ([]*UserAuditLog, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(ualcb.builders))
-	nodes := make([]*UserAuditLog, len(ualcb.builders))
-	mutators := make([]Mutator, len(ualcb.builders))
-	for i := range ualcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*UserAuditLog, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := ualcb.builders[i]
+			builder := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*UserAuditLogMutation)
 				if !ok {
@@ -174,11 +174,11 @@ func (ualcb *UserAuditLogCreateBulk) Save(ctx context.Context) ([]*UserAuditLog,
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, ualcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ualcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -202,7 +202,7 @@ func (ualcb *UserAuditLogCreateBulk) Save(ctx context.Context) ([]*UserAuditLog,
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, ualcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -210,8 +210,8 @@ func (ualcb *UserAuditLogCreateBulk) Save(ctx context.Context) ([]*UserAuditLog,
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ualcb *UserAuditLogCreateBulk) SaveX(ctx context.Context) []*UserAuditLog {
-	v, err := ualcb.Save(ctx)
+func (_c *UserAuditLogCreateBulk) SaveX(ctx context.Context) []*UserAuditLog {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -219,14 +219,14 @@ func (ualcb *UserAuditLogCreateBulk) SaveX(ctx context.Context) []*UserAuditLog 
 }
 
 // Exec executes the query.
-func (ualcb *UserAuditLogCreateBulk) Exec(ctx context.Context) error {
-	_, err := ualcb.Save(ctx)
+func (_c *UserAuditLogCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ualcb *UserAuditLogCreateBulk) ExecX(ctx context.Context) {
-	if err := ualcb.Exec(ctx); err != nil {
+func (_c *UserAuditLogCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

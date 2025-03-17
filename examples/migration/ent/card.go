@@ -89,7 +89,7 @@ func (*Card) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Card fields.
-func (c *Card) assignValues(columns []string, values []any) error {
+func (_m *Card) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -100,39 +100,39 @@ func (c *Card) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			c.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case card.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
-				c.Type = value.String
+				_m.Type = value.String
 			}
 		case card.FieldNumberHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field number_hash", values[i])
 			} else if value.Valid {
-				c.NumberHash = value.String
+				_m.NumberHash = value.String
 			}
 		case card.FieldCvvHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field cvv_hash", values[i])
 			} else if value.Valid {
-				c.CvvHash = value.String
+				_m.CvvHash = value.String
 			}
 		case card.FieldExpiresAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field expires_at", values[i])
 			} else if value.Valid {
-				c.ExpiresAt = value.Time
+				_m.ExpiresAt = value.Time
 			}
 		case card.FieldOwnerID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field owner_id", values[i])
 			} else if value.Valid {
-				c.OwnerID = int(value.Int64)
+				_m.OwnerID = int(value.Int64)
 			}
 		default:
-			c.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -140,57 +140,57 @@ func (c *Card) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Card.
 // This includes values selected through modifiers, order, etc.
-func (c *Card) Value(name string) (ent.Value, error) {
-	return c.selectValues.Get(name)
+func (_m *Card) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryOwner queries the "owner" edge of the Card entity.
-func (c *Card) QueryOwner() *UserQuery {
-	return NewCardClient(c.config).QueryOwner(c)
+func (_m *Card) QueryOwner() *UserQuery {
+	return NewCardClient(_m.config).QueryOwner(_m)
 }
 
 // QueryPayments queries the "payments" edge of the Card entity.
-func (c *Card) QueryPayments() *PaymentQuery {
-	return NewCardClient(c.config).QueryPayments(c)
+func (_m *Card) QueryPayments() *PaymentQuery {
+	return NewCardClient(_m.config).QueryPayments(_m)
 }
 
 // Update returns a builder for updating this Card.
 // Note that you need to call Card.Unwrap() before calling this method if this Card
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (c *Card) Update() *CardUpdateOne {
-	return NewCardClient(c.config).UpdateOne(c)
+func (_m *Card) Update() *CardUpdateOne {
+	return NewCardClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Card entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (c *Card) Unwrap() *Card {
-	_tx, ok := c.config.driver.(*txDriver)
+func (_m *Card) Unwrap() *Card {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Card is not a transactional entity")
 	}
-	c.config.driver = _tx.drv
-	return c
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (c *Card) String() string {
+func (_m *Card) String() string {
 	var builder strings.Builder
 	builder.WriteString("Card(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("type=")
-	builder.WriteString(c.Type)
+	builder.WriteString(_m.Type)
 	builder.WriteString(", ")
 	builder.WriteString("number_hash=")
-	builder.WriteString(c.NumberHash)
+	builder.WriteString(_m.NumberHash)
 	builder.WriteString(", ")
 	builder.WriteString("cvv_hash=")
-	builder.WriteString(c.CvvHash)
+	builder.WriteString(_m.CvvHash)
 	builder.WriteString(", ")
 	builder.WriteString("expires_at=")
-	builder.WriteString(c.ExpiresAt.Format(time.ANSIC))
+	builder.WriteString(_m.ExpiresAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("owner_id=")
-	builder.WriteString(fmt.Sprintf("%v", c.OwnerID))
+	builder.WriteString(fmt.Sprintf("%v", _m.OwnerID))
 	builder.WriteByte(')')
 	return builder.String()
 }

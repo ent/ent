@@ -24,24 +24,24 @@ type CardCreate struct {
 }
 
 // SetNumber sets the "number" field.
-func (cc *CardCreate) SetNumber(s string) *CardCreate {
-	cc.mutation.SetNumber(s)
-	return cc
+func (_c *CardCreate) SetNumber(s string) *CardCreate {
+	_c.mutation.SetNumber(s)
+	return _c
 }
 
 // Mutation returns the CardMutation object of the builder.
-func (cc *CardCreate) Mutation() *CardMutation {
-	return cc.mutation
+func (_c *CardCreate) Mutation() *CardMutation {
+	return _c.mutation
 }
 
 // Save creates the Card in the database.
-func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
-	return withHooks(ctx, cc.sqlSave, cc.mutation, cc.hooks)
+func (_c *CardCreate) Save(ctx context.Context) (*Card, error) {
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (cc *CardCreate) SaveX(ctx context.Context) *Card {
-	v, err := cc.Save(ctx)
+func (_c *CardCreate) SaveX(ctx context.Context) *Card {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -49,32 +49,32 @@ func (cc *CardCreate) SaveX(ctx context.Context) *Card {
 }
 
 // Exec executes the query.
-func (cc *CardCreate) Exec(ctx context.Context) error {
-	_, err := cc.Save(ctx)
+func (_c *CardCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cc *CardCreate) ExecX(ctx context.Context) {
-	if err := cc.Exec(ctx); err != nil {
+func (_c *CardCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (cc *CardCreate) check() error {
-	if _, ok := cc.mutation.Number(); !ok {
+func (_c *CardCreate) check() error {
+	if _, ok := _c.mutation.Number(); !ok {
 		return &ValidationError{Name: "number", err: errors.New(`ent: missing required field "Card.number"`)}
 	}
 	return nil
 }
 
-func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
-	if err := cc.check(); err != nil {
+func (_c *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := cc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -82,17 +82,17 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	cc.mutation.id = &_node.ID
-	cc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
+func (_c *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Card{config: cc.config}
+		_node = &Card{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(card.Table, sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt))
 	)
-	if value, ok := cc.mutation.Number(); ok {
+	if value, ok := _c.mutation.Number(); ok {
 		_spec.SetField(card.FieldNumber, field.TypeString, value)
 		_node.Number = value
 	}
@@ -107,16 +107,16 @@ type CardCreateBulk struct {
 }
 
 // Save creates the Card entities in the database.
-func (ccb *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
-	if ccb.err != nil {
-		return nil, ccb.err
+func (_c *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))
-	nodes := make([]*Card, len(ccb.builders))
-	mutators := make([]Mutator, len(ccb.builders))
-	for i := range ccb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Card, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := ccb.builders[i]
+			builder := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CardMutation)
 				if !ok {
@@ -129,11 +129,11 @@ func (ccb *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, ccb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ccb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -157,7 +157,7 @@ func (ccb *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, ccb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -165,8 +165,8 @@ func (ccb *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ccb *CardCreateBulk) SaveX(ctx context.Context) []*Card {
-	v, err := ccb.Save(ctx)
+func (_c *CardCreateBulk) SaveX(ctx context.Context) []*Card {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -174,14 +174,14 @@ func (ccb *CardCreateBulk) SaveX(ctx context.Context) []*Card {
 }
 
 // Exec executes the query.
-func (ccb *CardCreateBulk) Exec(ctx context.Context) error {
-	_, err := ccb.Save(ctx)
+func (_c *CardCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ccb *CardCreateBulk) ExecX(ctx context.Context) {
-	if err := ccb.Exec(ctx); err != nil {
+func (_c *CardCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
