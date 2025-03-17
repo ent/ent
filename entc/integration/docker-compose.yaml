@@ -138,6 +138,28 @@ services:
     ports:
       - 5435:5432
 
+  postgres16:
+    platform: linux/amd64
+    image: postgres:16
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_PASSWORD: pass
+    healthcheck:
+      test: pg_isready -U postgres
+    ports:
+      - 5436:5432
+
+  postgres17:
+    platform: linux/amd64
+    image: postgres:16
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_PASSWORD: pass
+    healthcheck:
+      test: pg_isready -U postgres
+    ports:
+      - 5437:5432
+
   gremlin:
     platform: linux/amd64
     image: entgo/gremlin-server

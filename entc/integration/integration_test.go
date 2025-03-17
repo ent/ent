@@ -106,7 +106,16 @@ func TestMaria(t *testing.T) {
 }
 
 func TestPostgres(t *testing.T) {
-	for version, port := range map[string]int{"10": 5430, "11": 5431, "12": 5432, "13": 5433, "14": 5434, "15": 5435} {
+	for version, port := range map[string]int{
+		"10": 5430,
+		"11": 5431,
+		"12": 5432,
+		"13": 5433,
+		"14": 5434,
+		"15": 5435,
+		"16": 5436,
+		"17": 5437,
+	} {
 		addr := fmt.Sprintf("host=localhost port=%d user=postgres dbname=test password=pass sslmode=disable", port)
 		t.Run(version, func(t *testing.T) {
 			t.Parallel()
